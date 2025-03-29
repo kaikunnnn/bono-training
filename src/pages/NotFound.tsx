@@ -1,5 +1,8 @@
+
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
+import Layout from "@/components/layout/Layout";
+import { Button } from "@/components/ui/button";
 
 const NotFound = () => {
   const location = useLocation();
@@ -12,15 +15,18 @@ const NotFound = () => {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">404</h1>
-        <p className="text-xl text-gray-600 mb-4">Oops! Page not found</p>
-        <a href="/" className="text-blue-500 hover:text-blue-700 underline">
-          Return to Home
-        </a>
+    <Layout>
+      <div className="container flex flex-col items-center justify-center text-center py-20 md:py-32">
+        <h1 className="text-7xl font-bold mb-6">404</h1>
+        <h2 className="text-2xl font-semibold mb-4">ページが見つかりません</h2>
+        <p className="text-muted-foreground max-w-md mb-8">
+          お探しのページは存在しないか、移動または削除された可能性があります。
+        </p>
+        <Button asChild>
+          <a href="/">ホームに戻る</a>
+        </Button>
       </div>
-    </div>
+    </Layout>
   );
 };
 
