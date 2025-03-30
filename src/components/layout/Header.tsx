@@ -1,34 +1,38 @@
 
-import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { LogOut, LogIn } from 'lucide-react';
 
 const Header = () => {
+  const { user, signOut } = useAuth();
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background">
-      <div className="container flex h-16 items-center">
-        <div className="flex justify-between w-full items-center">
-          <div className="font-semibold text-lg">サービス名</div>
-          <nav className="hidden md:flex items-center gap-6">
-            <a href="#" className="text-sm font-medium hover:underline">
+    <header className="border-b bg-background">
+      <div className="container flex h-16 items-center justify-between">
+        <div className="flex items-center gap-6">
+          <Link to="/" className="font-semibold text-lg">サービス名</Link>
+          <nav className="hidden md:flex gap-6">
+            <Link to="/" className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
               ホーム
-            </a>
-            <a href="#" className="text-sm font-medium hover:underline">
-              機能
-            </a>
-            <a href="#" className="text-sm font-medium hover:underline">
-              料金
-            </a>
-            <a href="#" className="text-sm font-medium hover:underline">
-              お問い合わせ
-            </a>
+            </Link>
+            {/* 認証が必要なページへのリンクはここに追加 */}
           </nav>
-          <div className="hidden md:flex items-center gap-4">
-            <Button variant="outline">ログイン</Button>
-            <Button>新規登録</Button>
-          </div>
-          <Button variant="ghost" size="icon" className="md:hidden">
-            <Menu className="h-5 w-5" />
-          </Button>
+        </div>
+        <div className="flex items-center gap-4">
+          {user ? (
+            <Button variant="ghost" onClick={signOut} size="sm">
+              <LogOut className="h-4 w-4 mr-2" />
+              ログアウト
+            </Button>
+          ) : (
+            <Button asChild variant="default" size="sm">
+              <Link to="/auth">
+                <LogIn className="h-4 w-4 mr-2" />
+                ログイン
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </header>
