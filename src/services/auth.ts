@@ -1,17 +1,20 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { ToastOptions } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
 
 export interface AuthResponse {
   error: Error | null;
   data: any | null;
 }
 
+// トースト関数の型定義を修正
+type ToastFunction = typeof toast;
+
 // サインアップ関数
 export const signUpService = async (
   email: string, 
   password: string,
-  toast: (props: ToastOptions) => void
+  toast: ToastFunction
 ): Promise<AuthResponse> => {
   try {
     // Supabaseの認証APIを使用してサインアップを実行
@@ -83,7 +86,7 @@ export const signUpService = async (
 export const signInService = async (
   email: string, 
   password: string, 
-  toast: (props: ToastOptions) => void
+  toast: ToastFunction
 ): Promise<AuthResponse> => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
@@ -119,7 +122,7 @@ export const signInService = async (
 
 // サインアウト関数
 export const signOutService = async (
-  toast: (props: ToastOptions) => void
+  toast: ToastFunction
 ): Promise<void> => {
   try {
     await supabase.auth.signOut();
@@ -139,7 +142,7 @@ export const signOutService = async (
 // パスワードリセット申請関数
 export const resetPasswordService = async (
   email: string, 
-  toast: (props: ToastOptions) => void
+  toast: ToastFunction
 ): Promise<AuthResponse> => {
   try {
     const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -175,7 +178,7 @@ export const resetPasswordService = async (
 // パスワード更新関数
 export const updatePasswordService = async (
   password: string, 
-  toast: (props: ToastOptions) => void
+  toast: ToastFunction
 ): Promise<AuthResponse> => {
   try {
     const { data, error } = await supabase.auth.updateUser({
