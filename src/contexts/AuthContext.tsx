@@ -66,18 +66,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('サインアップエラー:', error.message);
-        toast({
-          title: "サインアップに失敗しました",
-          description: error.message,
-          variant: "destructive",
-        });
+        
+        // エラーメッセージの内容に基づいて適切なメッセージを表示
+        if (error.message.includes('User already registered')) {
+          toast({
+            title: "サインアップに失敗しました",
+            description: "このメールアドレスはすでに登録されています。ログインしてください。",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "サインアップに失敗しました",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
         return { error, data: null };
       }
 
-      toast({
-        title: "サインアップに成功しました",
-        description: "確認メールを送信しました。メールのリンクをクリックして登録を完了してください。",
-      });
+      // メールアドレスが確認されていない場合
+      if (data?.user && !data.user.email_confirmed_at) {
+        toast({
+          title: "サインアップに成功しました",
+          description: "確認メールを送信しました。メールのリンクをクリックして登録を完了してください。",
+        });
+      } else {
+        toast({
+          title: "サインアップに成功しました",
+          description: "ようこそ！",
+        });
+      }
       return { error: null, data };
     } catch (error: any) {
       console.error('サインアップエラー:', error.message);
