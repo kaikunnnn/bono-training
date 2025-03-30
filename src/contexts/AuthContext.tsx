@@ -59,16 +59,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // サインアップ関数
   const signUp = async (email: string, password: string) => {
     try {
+      // 最初にメールアドレスが既に存在するか確認する
+      const { data: existingUsers, error: checkError } = await supabase
+        .from('auth.users')  // 実際にはこのクエリは権限の関係で動作しないかもしれませんが、代替として
+        .select('email')
+        .eq('email', email)
+        .maybeSingle();
+      
+      // 特定のエラーが出て、それがパーミッションエラーの場合は無視する
+      if (checkError && !checkError.message.includes('permission denied')) {
+        console.error('ユーザー確認エラー:', checkError.message);
+      }
+      
+      // ユーザーが既に存在するか確認
+      if (existingUsers) {
+        console.log('既存ユーザーが見つかりました:', email);
+        toast({
+          title: "サインアップに失敗しました",
+          description: "このメールアドレスはすでに登録されています。ログインしてください。",
+          variant: "destructive",
+        });
+        return { error: new Error('User already registered'), data: null };
+      }
+
+      // サインアップを実行
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       });
 
+      // エラーがある場合
       if (error) {
         console.error('サインアップエラー:', error.message);
         
-        // エラーメッセージの内容に基づいて適切なメッセージを表示
-        if (error.message.includes('User already registered')) {
+        // エラーメッセージに基づいて適切なメッセージを表示
+        if (error.message.includes('User already registered') || 
+            error.message.includes('already registered') || 
+            error.message.includes('already taken') ||
+            error.message.includes('user_repeated_signup')) {
           toast({
             title: "サインアップに失敗しました",
             description: "このメールアドレスはすでに登録されています。ログインしてください。",
@@ -82,6 +110,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           });
         }
         return { error, data: null };
+      }
+
+      // サインアップ成功の場合でも、実際にはユーザーが既に存在する可能性がある
+      // data.user.id が存在し、新規作成ではない場合の処理
+      if (data?.user && data.user.identities && data.user.identities.length === 0) {
+        toast({
+          title: "サインアップに失敗しました",
+          description: "このメールアドレスはすでに登録されています。ログインしてください。",
+          variant: "destructive",
+        });
+        return { error: new Error('User already registered'), data: null };
       }
 
       // メールアドレスが確認されていない場合

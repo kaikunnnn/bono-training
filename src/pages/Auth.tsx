@@ -8,13 +8,16 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Layout from '@/components/layout/Layout';
-import { Mail, Lock, UserPlus, LogIn } from 'lucide-react';
+import { Mail, Lock, UserPlus, LogIn, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [signupError, setSignupError] = useState<string | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,20 +34,30 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSignupError(null);
+    
     if (!email || !password) {
-      toast({
-        title: "入力エラー",
-        description: "メールアドレスとパスワードを入力してください",
-        variant: "destructive",
-      });
+      setSignupError("メールアドレスとパスワードを入力してください");
+      return;
+    }
+
+    if (password.length < 6) {
+      setSignupError("パスワードは6文字以上で設定してください");
       return;
     }
 
     setIsSubmitting(true);
     try {
       const { error } = await signUp(email, password);
-      if (!error) {
-        // 登録成功のメッセージは AuthContext で表示
+      if (error) {
+        // エラーの内容に基づいてエラーメッセージを設定
+        if (error.message.includes('already registered') || 
+            error.message.includes('already taken') ||
+            error.message.includes('User already registered')) {
+          setSignupError("このメールアドレスはすでに登録されています。ログインしてください。");
+        } else {
+          setSignupError(error.message);
+        }
       }
     } finally {
       setIsSubmitting(false);
@@ -53,19 +66,19 @@ const Auth = () => {
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoginError(null);
+    
     if (!email || !password) {
-      toast({
-        title: "入力エラー",
-        description: "メールアドレスとパスワードを入力してください",
-        variant: "destructive",
-      });
+      setLoginError("メールアドレスとパスワードを入力してください");
       return;
     }
 
     setIsSubmitting(true);
     try {
       const { error } = await signIn(email, password);
-      if (!error) {
+      if (error) {
+        setLoginError(error.message);
+      } else {
         navigate(from, { replace: true });
       }
     } finally {
@@ -90,6 +103,12 @@ const Auth = () => {
               </CardHeader>
               <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
+                  {loginError && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{loginError}</AlertDescription>
+                    </Alert>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="login-email">メールアドレス</Label>
                     <div className="relative">
@@ -149,6 +168,12 @@ const Auth = () => {
               </CardHeader>
               <form onSubmit={handleSignUp}>
                 <CardContent className="space-y-4">
+                  {signupError && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>{signupError}</AlertDescription>
+                    </Alert>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="signup-email">メールアドレス</Label>
                     <div className="relative">
