@@ -1,6 +1,4 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
 
 export interface AuthResponse {
   error: Error | null;
@@ -89,6 +87,9 @@ export const signInService = async (
   toast: ToastFunction
 ): Promise<AuthResponse> => {
   try {
+    // デバッグ情報
+    console.log(`ログイン試行: ${email}`);
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -96,11 +97,27 @@ export const signInService = async (
 
     if (error) {
       console.error('サインインエラー:', error.message);
-      toast({
-        title: "ログインに失敗しました",
-        description: error.message,
-        variant: "destructive",
-      });
+      
+      // エラーメッセージをより具体的に
+      if (error.message.includes('Invalid login credentials')) {
+        toast({
+          title: "ログインに失敗しました",
+          description: "メールアドレスまたはパスワードが正しくありません。",
+          variant: "destructive",
+        });
+      } else if (error.message.includes('Email not confirmed')) {
+        toast({
+          title: "ログインに失敗しました",
+          description: "メールアドレスの確認が完了していません。確認メールをご確認ください。",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "ログインに失敗しました",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
       return { error, data: null };
     }
 

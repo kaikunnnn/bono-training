@@ -48,6 +48,7 @@ const Auth = () => {
 
     setIsSubmitting(true);
     try {
+      console.log(`サインアップ試行: ${email}`);
       const { error } = await signUp(email, password);
       if (error) {
         // エラーの内容に基づいてエラーメッセージを設定
@@ -75,9 +76,16 @@ const Auth = () => {
 
     setIsSubmitting(true);
     try {
+      console.log(`サインイン試行: ${email}`);
       const { error } = await signIn(email, password);
       if (error) {
-        setLoginError(error.message);
+        if (error.message.includes('Invalid login credentials')) {
+          setLoginError("メールアドレスまたはパスワードが正しくありません。");
+        } else if (error.message.includes('Email not confirmed')) {
+          setLoginError("メールアドレスの確認が完了していません。確認メールをご確認ください。");
+        } else {
+          setLoginError(error.message);
+        }
       } else {
         navigate(from, { replace: true });
       }
