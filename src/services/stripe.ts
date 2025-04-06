@@ -22,7 +22,7 @@ export const createCheckoutSession = async (
     const { data, error } = await supabase.functions.invoke('create-checkout', {
       body: {
         returnUrl,
-        useTestPrice: isTest || process.env.NODE_ENV !== 'production' 
+        useTestPrice: isTest || import.meta.env.MODE !== 'production' 
       }
     });
     

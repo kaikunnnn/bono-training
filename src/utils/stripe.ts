@@ -10,17 +10,17 @@
  */
 export const getStripePriceId = (isTest?: boolean): string => {
   // 強制的にテスト環境用Price IDを使用する場合
-  if (isTest && process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID) {
-    return process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID;
+  if (isTest && import.meta.env.VITE_STRIPE_TEST_PRICE_ID) {
+    return import.meta.env.VITE_STRIPE_TEST_PRICE_ID;
   }
   
   // 開発環境の場合はテスト用Price IDを使用
-  if (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID) {
-    return process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID;
+  if (import.meta.env.MODE !== 'production' && import.meta.env.VITE_STRIPE_TEST_PRICE_ID) {
+    return import.meta.env.VITE_STRIPE_TEST_PRICE_ID;
   }
   
   // 本番環境または明示的なPrice IDが設定されていない場合は本番用を返す
-  return process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || '';
+  return import.meta.env.VITE_STRIPE_PRICE_ID || '';
 };
 
 /**
