@@ -12,6 +12,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
+import PaidContent from "./pages/PaidContent";
+import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
 
 const queryClient = new QueryClient();
 
@@ -28,8 +30,14 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
-            {/* プライベートルートの例 */}
-            {/* <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} /> */}
+            
+            {/* 有料会員限定コンテンツページ */}
+            <Route path="/paid-only" element={
+              <ProtectedPremiumRoute>
+                <PaidContent />
+              </ProtectedPremiumRoute>
+            } />
+
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

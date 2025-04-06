@@ -1,25 +1,37 @@
 
-import Layout from "@/components/layout/Layout";
-import { Button } from "@/components/ui/button";
+import React from 'react';
+import Layout from '@/components/layout/Layout';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-16 md:py-24 lg:py-32">
-        <div className="flex flex-col items-center justify-center text-center space-y-8">
-          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
-            新しいサービスへようこそ
-          </h1>
-          <p className="max-w-[600px] text-lg text-muted-foreground">
-            このプロジェクトは新しいサービスの基盤として構築されています。
-            詳細な実装を開始する準備ができています。
+      <div className="container py-12">
+        <div className="text-center max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold mb-4">ようこそ</h1>
+          <p className="text-lg text-muted-foreground mb-8">
+            こちらはサブスクリプションサービスのデモページです。
+            ログインして様々な機能をお試しください。
           </p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button size="lg">
-              はじめる
+          
+          <div className="grid gap-4 md:grid-cols-2 max-w-md mx-auto">
+            <Button asChild>
+              <Link to="/auth">ログイン / 登録</Link>
             </Button>
-            <Button variant="outline" size="lg">
-              詳細を見る
+            <Button asChild variant="outline">
+              <Link to="/subscription">サブスクリプション</Link>
+            </Button>
+          </div>
+          
+          <div className="mt-12">
+            <h2 className="text-2xl font-bold mb-4">メンバー限定コンテンツ</h2>
+            <p className="mb-4">
+              以下のリンクからメンバー限定コンテンツにアクセスできます。
+              サブスクリプションがない場合は登録画面が表示されます。
+            </p>
+            <Button asChild variant="secondary">
+              <Link to="/paid-only">プレミアムコンテンツを見る</Link>
             </Button>
           </div>
         </div>
