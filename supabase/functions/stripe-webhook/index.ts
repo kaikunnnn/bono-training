@@ -60,6 +60,7 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log(`処理中のイベント: ${event.type}`);
+    console.log("イベントデータ:", JSON.stringify(event.data.object));
 
     // イベントタイプに基づいて処理
     switch (event.type) {
@@ -82,6 +83,7 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error(`Webhookエラー: ${error.message}`);
+    console.error(error.stack);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
@@ -95,6 +97,7 @@ serve(async (req) => {
  */
 async function handleCheckoutCompleted(stripe: Stripe, supabase: any, session: any) {
   console.log("checkout.session.completedイベントを処理中");
+  console.log("セッション情報:", JSON.stringify(session));
   
   if (session.mode !== "subscription") {
     console.log("サブスクリプションモードではないため、処理をスキップします");
@@ -108,45 +111,87 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, session: a
     return;
   }
 
-  // サブスクリプション詳細を取得
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  const customerId = subscription.customer as string;
-  
-  // カスタマーデータを取得
-  const customer = await stripe.customers.retrieve(customerId);
-  if (customer.deleted) {
-    console.error("顧客が削除されています");
-    return;
-  }
+  try {
+    // サブスクリプション詳細を取得
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    console.log("サブスクリプション詳細:", JSON.stringify(subscription));
+    
+    const customerId = subscription.customer as string;
+    
+    // カスタマーデータを取得
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) {
+      console.error("顧客が削除されています");
+      return;
+    }
 
-  // Supabaseで顧客IDからユーザーIDを検索
-  const { data: customerData, error: customerError } = await supabase
-    .from("stripe_customers")
-    .select("user_id")
-    .eq("stripe_customer_id", customerId)
-    .single();
+    // Supabaseで顧客IDからユーザーIDを検索
+    const { data: customerData, error: customerError } = await supabase
+      .from("stripe_customers")
+      .select("user_id")
+      .eq("stripe_customer_id", customerId)
+      .single();
 
-  if (customerError || !customerData) {
-    console.error("Stripe顧客IDに紐づくユーザーが見つかりません:", customerError);
-    return;
-  }
+    if (customerError) {
+      console.error("Stripe顧客IDに紐づくユーザーが見つかりません:", customerError);
+      // メタデータからユーザーIDを取得することを試みる
+      const userId = session.metadata?.user_id || subscription.metadata?.user_id;
+      if (!userId) {
+        console.error("ユーザーIDが見つかりません");
+        return;
+      }
+      
+      // ユーザーIDとStripe顧客IDの関連付けを作成
+      const { error: insertCustomerError } = await supabase
+        .from("stripe_customers")
+        .insert({
+          user_id: userId,
+          stripe_customer_id: customerId
+        });
+      
+      if (insertCustomerError) {
+        console.error("顧客情報の保存エラー:", insertCustomerError);
+        return;
+      }
+      
+      // サブスクリプション情報を保存
+      const { error: subscriptionError } = await supabase
+        .from("subscriptions")
+        .insert({
+          user_id: userId,
+          stripe_subscription_id: subscriptionId,
+          start_timestamp: new Date(subscription.current_period_start * 1000).toISOString(),
+          end_timestamp: new Date(subscription.current_period_end * 1000).toISOString(),
+        });
 
-  const userId = customerData.user_id;
+      if (subscriptionError) {
+        console.error("サブスクリプション情報の保存エラー:", subscriptionError);
+      } else {
+        console.log("サブスクリプション情報を正常に保存しました");
+      }
+      
+    } else {
+      const userId = customerData.user_id;
+      
+      // サブスクリプション情報をデータベースに保存
+      const { error: subscriptionError } = await supabase
+        .from("subscriptions")
+        .insert({
+          user_id: userId,
+          stripe_subscription_id: subscriptionId,
+          start_timestamp: new Date(subscription.current_period_start * 1000).toISOString(),
+          end_timestamp: new Date(subscription.current_period_end * 1000).toISOString(),
+        });
 
-  // サブスクリプション情報をデータベースに保存
-  const { error: subscriptionError } = await supabase
-    .from("subscriptions")
-    .insert({
-      user_id: userId,
-      stripe_subscription_id: subscriptionId,
-      start_timestamp: new Date(subscription.current_period_start * 1000).toISOString(),
-      end_timestamp: new Date(subscription.current_period_end * 1000).toISOString(),
-    });
-
-  if (subscriptionError) {
-    console.error("サブスクリプション情報の保存エラー:", subscriptionError);
-  } else {
-    console.log("サブスクリプション情報を正常に保存しました");
+      if (subscriptionError) {
+        console.error("サブスクリプション情報の保存エラー:", subscriptionError);
+      } else {
+        console.log("サブスクリプション情報を正常に保存しました");
+      }
+    }
+  } catch (error) {
+    console.error("チェックアウト完了処理エラー:", error.message);
+    console.error(error.stack);
   }
 }
 
@@ -164,22 +209,27 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, invoice: any) {
     return;
   }
 
-  // サブスクリプション詳細を取得
-  const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-  
-  // データベース内のサブスクリプション情報を更新
-  const { error: updateError } = await supabase
-    .from("subscriptions")
-    .update({
-      end_timestamp: new Date(subscription.current_period_end * 1000).toISOString(),
-      stripe_invoice_id: invoice.id,
-    })
-    .eq("stripe_subscription_id", subscriptionId);
+  try {
+    // サブスクリプション詳細を取得
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    
+    // データベース内のサブスクリプション情報を更新
+    const { error: updateError } = await supabase
+      .from("subscriptions")
+      .update({
+        end_timestamp: new Date(subscription.current_period_end * 1000).toISOString(),
+        stripe_invoice_id: invoice.id,
+      })
+      .eq("stripe_subscription_id", subscriptionId);
 
-  if (updateError) {
-    console.error("サブスクリプション情報の更新エラー:", updateError);
-  } else {
-    console.log("サブスクリプション期限を正常に更新しました");
+    if (updateError) {
+      console.error("サブスクリプション情報の更新エラー:", updateError);
+    } else {
+      console.log("サブスクリプション期限を正常に更新しました");
+    }
+  } catch (error) {
+    console.error("請求書支払い完了処理エラー:", error.message);
+    console.error(error.stack);
   }
 }
 
