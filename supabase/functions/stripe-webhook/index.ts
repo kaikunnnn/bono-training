@@ -42,10 +42,11 @@ serve(async (req) => {
       });
     }
 
-    // イベントを検証
+    // イベントを検証 - constructEventAsyncに変更
     let event;
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      // 同期バージョンからasyncバージョンに変更
+      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
     } catch (err) {
       console.error(`Webhook署名検証エラー: ${err.message}`);
       return new Response(JSON.stringify({ error: `Webhook署名検証エラー: ${err.message}` }), {
