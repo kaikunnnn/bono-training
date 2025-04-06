@@ -6,7 +6,7 @@ import { SubscriptionButton } from '@/components/subscription/SubscriptionButton
 import { checkSubscriptionStatus } from '@/services/stripe';
 import { getCurrentPlan } from '@/utils/stripe';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 
 const SubscriptionPage: React.FC = () => {

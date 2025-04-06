@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/components/ui/toast';
+import { useToast } from '@/hooks/use-toast';
 import { createCheckoutSession } from '@/services/stripe';
 import { getCurrentPlan } from '@/utils/stripe';
 
