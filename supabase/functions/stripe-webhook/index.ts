@@ -194,8 +194,6 @@ async function handleSubscriptionDeleted(stripe: Stripe, supabase: any, subscrip
   const subscriptionId = subscription.id;
   
   // データベース内のサブスクリプション情報を更新
-  // 注意: subscriptionsテーブルにis_activeカラムはありませんが、
-  // end_timestampを現在時刻に設定することで期限切れとして扱えます
   const { error: updateError } = await supabase
     .from("subscriptions")
     .update({
