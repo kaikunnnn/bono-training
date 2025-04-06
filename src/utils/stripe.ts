@@ -5,20 +5,21 @@
 
 /**
  * 環境に応じた適切なStripe価格IDを取得する
+ * @param isTest 強制的にテスト環境のPrice IDを使用するかどうか
  * @returns 環境に対応するStripe価格ID
  */
-export const getStripePriceId = (): string => {
-  // テスト環境か本番環境かによって異なるPrice IDを返す
-  // Note: ここでは単純に環境変数を返していますが、将来的には
-  // 複数のプランがある場合や、ユーザー属性による分岐なども
-  // この関数に追加できます
-  
-  // テスト用Price IDがある場合はそれを優先（開発環境など）
-  if (process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID) {
+export const getStripePriceId = (isTest?: boolean): string => {
+  // 強制的にテスト環境用Price IDを使用する場合
+  if (isTest && process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID) {
     return process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID;
   }
   
-  // 本番用Price ID
+  // 開発環境の場合はテスト用Price IDを使用
+  if (process.env.NODE_ENV !== 'production' && process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID) {
+    return process.env.NEXT_PUBLIC_STRIPE_TEST_PRICE_ID;
+  }
+  
+  // 本番環境または明示的なPrice IDが設定されていない場合は本番用を返す
   return process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || '';
 };
 
@@ -37,17 +38,30 @@ export interface PlanInfo {
 
 /**
  * 現在のプラン情報を取得する
- * 将来的に複数プランが存在する場合は、この関数を拡張して
- * プランのリストを返すなどの対応が可能
+ * 環境によって適切なPrice IDを使い分ける
+ * @param isTest 強制的にテスト環境のプラン情報を取得するかどうか
  */
-export const getCurrentPlan = (): PlanInfo => {
+export const getCurrentPlan = (isTest?: boolean): PlanInfo => {
   return {
     id: 'premium',
     name: 'プレミアムプラン',
     description: 'すべての機能が利用可能なプレミアムプラン',
-    priceId: getStripePriceId(),
+    priceId: getStripePriceId(isTest),
     amount: 1980,
     currency: 'jpy',
     interval: 'month'
   };
+};
+
+/**
+ * Checkoutセッション作成時に使用するライン項目を取得する
+ * @param isTest 強制的にテスト環境のPrice IDを使用するかどうか
+ */
+export const getCheckoutLineItems = (isTest?: boolean) => {
+  return [
+    {
+      price: getStripePriceId(isTest),
+      quantity: 1
+    }
+  ];
 };
