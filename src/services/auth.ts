@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { toast as toastFunc } from '@/hooks/use-toast';
 
 export interface AuthResponse {
   error: Error | null;
@@ -6,7 +7,7 @@ export interface AuthResponse {
 }
 
 // トースト関数の型定義を修正
-type ToastFunction = typeof toast;
+type ToastFunction = typeof toastFunc;
 
 // サインアップ関数
 export const signUpService = async (
