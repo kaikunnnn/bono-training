@@ -13,6 +13,7 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
 import PaidContent from "./pages/PaidContent";
+import ContentTest from "./pages/ContentTest";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,9 @@ const App = () => (
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+            
+            {/* コンテンツテストページ */}
+            <Route path="/content-test" element={<ContentTest />} />
             
             {/* 有料会員限定コンテンツページ */}
             <Route path="/paid-only" element={
