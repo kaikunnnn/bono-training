@@ -232,45 +232,60 @@ const ContentBody: React.FC<ContentBodyProps> = ({ content, canViewFree, canView
     const freeVideoUrl = content.freeVideoUrl || content.videoUrl; // freeVideoUrlが設定されていなければvideoUrlを使用
     const premiumVideoUrl = content.videoUrl;
     
+    // サブスクリプション加入者の場合は完全版のみ表示
+    if (canViewPremium) {
+      return (
+        <div className="space-y-4">
+          <div className="aspect-video overflow-hidden rounded-lg border-2 border-primary">
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <div className="text-center">
+                <h3 className="text-lg font-medium">プレミアムコンテンツ</h3>
+                <p className="mt-2 text-sm text-muted-foreground">URL: {premiumVideoUrl}</p>
+                <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
+                  フル動画プレーヤー（サンプル）
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    
+    // 非加入者は無料プレビューとサブスクリプション案内を表示
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         {/* 無料プレビュー動画 */}
-        {canViewFree && (
+        {canViewFree && !isFreeContent && (
           <div className="aspect-video overflow-hidden rounded-lg">
             <div className="flex h-full w-full items-center justify-center bg-muted">
               <div className="text-center">
-                <h3 className="text-lg font-medium">
-                  {isFreeContent ? '動画コンテンツ' : '無料プレビュー'}
-                </h3>
+                <h3 className="text-lg font-medium">無料プレビュー</h3>
                 <p className="mt-2 text-sm text-muted-foreground">URL: {freeVideoUrl}</p>
                 <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
-                  {isFreeContent ? '動画プレーヤー（サンプル）' : '無料プレビュー動画'}
+                  無料プレビュー動画
                 </div>
               </div>
             </div>
           </div>
         )}
         
-        {/* 有料フル動画 - プレミアムアクセス権がある場合のみ表示 */}
-        {!isFreeContent && (
-          <>
-            {canViewPremium ? (
-              <div className="aspect-video overflow-hidden rounded-lg border-2 border-primary">
-                <div className="flex h-full w-full items-center justify-center bg-muted">
-                  <div className="text-center">
-                    <h3 className="text-lg font-medium">プレミアム完全版</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">URL: {premiumVideoUrl}</p>
-                    <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
-                      フル動画プレーヤー（サンプル）
-                    </div>
-                  </div>
+        {/* 無料コンテンツの場合はそのまま表示 */}
+        {isFreeContent && (
+          <div className="aspect-video overflow-hidden rounded-lg">
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <div className="text-center">
+                <h3 className="text-lg font-medium">動画コンテンツ</h3>
+                <p className="mt-2 text-sm text-muted-foreground">URL: {freeVideoUrl}</p>
+                <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
+                  動画プレーヤー（サンプル）
                 </div>
               </div>
-            ) : (
-              <SubscriptionCTA />
-            )}
-          </>
+            </div>
+          </div>
         )}
+        
+        {/* 有料コンテンツの場合はサブスクリプション案内を表示 */}
+        {!isFreeContent && <SubscriptionCTA />}
       </div>
     );
   } 
@@ -281,29 +296,43 @@ const ContentBody: React.FC<ContentBodyProps> = ({ content, canViewFree, canView
     const freeContent = content.freeContent || (isFreeContent ? content.content : '');
     const premiumContent = isFreeContent ? '' : content.content;
     
+    // サブスクリプション加入者の場合は完全版のみ表示
+    if (canViewPremium && !isFreeContent) {
+      return (
+        <div className="space-y-6">
+          <div className="prose max-w-none dark:prose-invert">
+            <h2>プレミアムコンテンツ</h2>
+            <p>{premiumContent}</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // 無料コンテンツの場合はそのまま表示
+    if (isFreeContent) {
+      return (
+        <div className="space-y-6">
+          <div className="prose max-w-none dark:prose-invert">
+            <h2>コンテンツ</h2>
+            <p>{freeContent}</p>
+          </div>
+        </div>
+      );
+    }
+    
+    // 非加入者は無料プレビューとサブスクリプション案内を表示
     return (
       <div className="space-y-6">
         {/* 無料部分 */}
         {canViewFree && freeContent && (
           <div className="prose max-w-none dark:prose-invert">
-            <h2>{isFreeContent ? 'コンテンツ' : '無料プレビュー'}</h2>
+            <h2>無料プレビュー</h2>
             <p>{freeContent}</p>
           </div>
         )}
         
-        {/* 有料部分 */}
-        {!isFreeContent && (
-          <>
-            {canViewPremium ? (
-              <div className="prose max-w-none dark:prose-invert">
-                <h2>プレミアムコンテンツ</h2>
-                <p>{premiumContent}</p>
-              </div>
-            ) : (
-              <SubscriptionCTA />
-            )}
-          </>
-        )}
+        {/* サブスクリプション案内 */}
+        <SubscriptionCTA />
       </div>
     );
   } 
