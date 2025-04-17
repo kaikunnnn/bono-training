@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { ContentItem, ContentFilter } from '@/types/content';
@@ -33,13 +32,11 @@ export const useContent = (filter?: ContentFilter) => {
     const fetchContents = async () => {
       try {
         setLoading(true);
-        // サブスクリプション状態に基づいたフィルター条件
-        const accessLevel = isSubscribed ? 'standard' : 'free';
         
-        // フィルター条件でコンテンツを取得
+        // サブスクリプション状態に関係なくすべてのコンテンツを取得
         const filteredContents = filterContents({
           ...filter,
-          accessLevel
+          // accessLevelのフィルタリングを削除
         });
         
         setContents(filteredContents);
@@ -51,7 +48,6 @@ export const useContent = (filter?: ContentFilter) => {
       }
     };
 
-    // サブスクリプション状態の読み込みが完了したらコンテンツを取得
     if (!subscriptionLoading) {
       fetchContents();
     }
@@ -111,7 +107,7 @@ export const useContent = (filter?: ContentFilter) => {
 };
 
 /**
- * 個別のコンテンツを取得するカスタムフック
+ * 個別のコンテントを取得するカスタムフック
  */
 export const useContentItem = (contentId: string) => {
   const [content, setContent] = useState<ContentItem | null>(null);
