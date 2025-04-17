@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import PrivateRoute from "@/components/auth/PrivateRoute";
+import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -14,7 +16,8 @@ import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
 import PaidContent from "./pages/PaidContent";
 import ContentTest from "./pages/ContentTest";
-import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
+import Content from "./pages/Content";
+import ContentDetail from "./pages/ContentDetail";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +35,10 @@ const App = () => (
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+              
+              {/* コンテンツページ */}
+              <Route path="/content" element={<Content />} />
+              <Route path="/content/:id" element={<ContentDetail />} />
               
               {/* コンテンツテストページ */}
               <Route path="/content-test" element={<ContentTest />} />
