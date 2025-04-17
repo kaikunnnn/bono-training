@@ -1,7 +1,7 @@
 import { ContentItem, ContentCategory, ContentType, ContentAccessLevel, ContentFilter } from '@/types/content';
 
 // モックコンテンツデータ
-const MOCK_CONTENTS: ContentItem[] = [
+export const MOCK_CONTENTS: ContentItem[] = [
   {
     id: "1",
     title: "Figmaの基本操作マスター",
@@ -83,17 +83,14 @@ export const filterContents = (filter: {
   searchQuery?: string;
 }): ContentItem[] => {
   return MOCK_CONTENTS.filter(content => {
-    // カテゴリでフィルタリング
     if (filter.category && !content.categories.includes(filter.category as ContentCategory)) {
       return false;
     }
     
-    // タイプでフィルタリング
     if (filter.type && content.type !== filter.type) {
       return false;
     }
     
-    // 検索クエリでフィルタリング
     if (filter.searchQuery) {
       const query = filter.searchQuery.toLowerCase();
       return (
@@ -112,6 +109,3 @@ export const filterContents = (filter: {
 export const getContentById = (id: string): ContentItem | undefined => {
   return MOCK_CONTENTS.find(content => content.id === id);
 };
-
-// モックコンテンツデータをエクスポート（Edge Functionと同期するため）
-export const MOCK_CONTENTS = MOCK_CONTENTS;

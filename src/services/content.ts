@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItem } from '@/types/content';
 
@@ -14,9 +13,8 @@ export async function getContentById(contentId: string): Promise<{
 }> {
   try {
     const { data, error } = await supabase.functions.invoke('get-content', {
-      body: { id: contentId },
-      method: 'GET',
-      query: { id: contentId }
+      body: JSON.stringify({ id: contentId }),
+      method: 'GET'
     });
 
     if (error) {
