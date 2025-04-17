@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -10,6 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Calendar, Clock, Lock } from 'lucide-react';
 import { format } from 'date-fns';
 import SubscriptionGuard from '@/components/subscription/SubscriptionGuard';
+import VimeoPlayer from '@/components/content/VimeoPlayer';
 
 /**
  * コンテンツ詳細ページ
@@ -17,7 +17,7 @@ import SubscriptionGuard from '@/components/subscription/SubscriptionGuard';
 const ContentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { content, loading, error, getContentVisibility } = useContentItem(id || '');
+  const { content, loading, error, getContentVisibility, isFreePreview } = useContentItem(id || '');
   
   // ローディング状態の表示
   if (loading) {
@@ -147,6 +147,7 @@ const ContentDetail: React.FC = () => {
               content={content} 
               canViewFree={canViewFree} 
               canViewPremium={canViewPremium} 
+              isFreePreview={isFreePreview}
             />
           </div>
           
@@ -220,33 +221,42 @@ interface ContentBodyProps {
   content: any;
   canViewFree: boolean;
   canViewPremium: boolean;
+  isFreePreview?: boolean;
 }
 
-const ContentBody: React.FC<ContentBodyProps> = ({ content, canViewFree, canViewPremium }) => {
+const ContentBody: React.FC<ContentBodyProps> = ({ 
+  content, 
+  canViewFree, 
+  canViewPremium,
+  isFreePreview = false
+}) => {
   // 無料コンテンツまたは有料コンテンツを表示する権限があるかどうか
   const isFreeContent = content.accessLevel === 'free';
 
   // 動画コンテンツの場合
-  if (content.type === 'video' && content.videoUrl) {
+  if (content.type === 'video' && (content.videoUrl || content.freeVideoUrl)) {
     // 無料のプレビュー動画と有料の完全版動画
     const freeVideoUrl = content.freeVideoUrl || content.videoUrl; // freeVideoUrlが設定されていなければvideoUrlを使用
     const premiumVideoUrl = content.videoUrl;
     
     // サブスクリプション加入者の場合は完全版のみ表示
-    if (canViewPremium) {
+    if (canViewPremium && !isFreePreview) {
       return (
         <div className="space-y-4">
           <div className="aspect-video overflow-hidden rounded-lg border-2 border-primary">
-            <div className="flex h-full w-full items-center justify-center bg-muted">
-              <div className="text-center">
-                <h3 className="text-lg font-medium">プレミアムコンテンツ</h3>
-                <p className="mt-2 text-sm text-muted-foreground">URL: {premiumVideoUrl}</p>
-                <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
-                  フル動画プレーヤー（サンプル）
-                </div>
-              </div>
-            </div>
+            {premiumVideoUrl && (
+              <VimeoPlayer
+                vimeoId={premiumVideoUrl}
+                title={content.title}
+                responsive={true}
+              />
+            )}
           </div>
+          {content.description && (
+            <div className="prose max-w-none dark:prose-invert">
+              <p>{content.description}</p>
+            </div>
+          )}
         </div>
       );
     }
@@ -255,32 +265,29 @@ const ContentBody: React.FC<ContentBodyProps> = ({ content, canViewFree, canView
     return (
       <div className="space-y-6">
         {/* 無料プレビュー動画 */}
-        {canViewFree && !isFreeContent && (
-          <div className="aspect-video overflow-hidden rounded-lg">
-            <div className="flex h-full w-full items-center justify-center bg-muted">
-              <div className="text-center">
-                <h3 className="text-lg font-medium">無料プレビュー</h3>
-                <p className="mt-2 text-sm text-muted-foreground">URL: {freeVideoUrl}</p>
-                <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
-                  無料プレビュー動画
-                </div>
-              </div>
+        {canViewFree && !isFreeContent && freeVideoUrl && (
+          <div className="space-y-4">
+            <div className="aspect-video overflow-hidden rounded-lg">
+              <VimeoPlayer
+                vimeoId={freeVideoUrl}
+                title={`${content.title} (プレビュー)`}
+                responsive={true}
+              />
+            </div>
+            <div className="rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
+              これは無料プレビュー版です。完全版を視聴するにはサブスクリプションが必要です。
             </div>
           </div>
         )}
         
         {/* 無料コンテンツの場合はそのまま表示 */}
-        {isFreeContent && (
+        {isFreeContent && freeVideoUrl && (
           <div className="aspect-video overflow-hidden rounded-lg">
-            <div className="flex h-full w-full items-center justify-center bg-muted">
-              <div className="text-center">
-                <h3 className="text-lg font-medium">動画コンテンツ</h3>
-                <p className="mt-2 text-sm text-muted-foreground">URL: {freeVideoUrl}</p>
-                <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
-                  動画プレーヤー（サンプル）
-                </div>
-              </div>
-            </div>
+            <VimeoPlayer
+              vimeoId={freeVideoUrl}
+              title={content.title}
+              responsive={true}
+            />
           </div>
         )}
         
@@ -297,7 +304,7 @@ const ContentBody: React.FC<ContentBodyProps> = ({ content, canViewFree, canView
     const premiumContent = isFreeContent ? '' : content.content;
     
     // サブスクリプション加入者の場合は完全版のみ表示
-    if (canViewPremium && !isFreeContent) {
+    if (canViewPremium && !isFreePreview && !isFreeContent) {
       return (
         <div className="space-y-6">
           <div className="prose max-w-none dark:prose-invert">
@@ -328,6 +335,9 @@ const ContentBody: React.FC<ContentBodyProps> = ({ content, canViewFree, canView
           <div className="prose max-w-none dark:prose-invert">
             <h2>無料プレビュー</h2>
             <p>{freeContent}</p>
+            <div className="rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
+              続きを読むにはサブスクリプションが必要です。
+            </div>
           </div>
         )}
         

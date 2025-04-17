@@ -1,4 +1,3 @@
-
 import { ContentItem, ContentCategory, ContentType, ContentAccessLevel, ContentFilter } from '@/types/content';
 
 // モックコンテンツデータ
@@ -113,3 +112,6 @@ export const filterContents = (filter: {
 export const getContentById = (id: string): ContentItem | undefined => {
   return MOCK_CONTENTS.find(content => content.id === id);
 };
+
+// モックコンテンツデータをエクスポート（Edge Functionと同期するため）
+export const MOCK_CONTENTS = MOCK_CONTENTS;
