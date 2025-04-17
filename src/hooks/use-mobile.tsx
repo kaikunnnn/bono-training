@@ -1,8 +1,10 @@
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
 
-export function useIsMobile() {
+// useIsMobileというエクスポート名をuseMobileに変更して両方提供する
+export function useMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
   React.useEffect(() => {
@@ -17,3 +19,6 @@ export function useIsMobile() {
 
   return !!isMobile
 }
+
+// 後方互換性のために元の名前も維持
+export const useIsMobile = useMobile

@@ -23,7 +23,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import { useMobile } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 /**
  * アプリケーションヘッダーコンポーネント
@@ -31,7 +31,7 @@ import { useMobile } from "@/hooks/use-mobile";
 const Header = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const [isMounted, setIsMounted] = useState(false);
   
   // クライアントサイドレンダリングのためのマウント状態確認
@@ -159,7 +159,7 @@ const Header = () => {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link to="/subscription" legacyBehavior passHref>
+          <Link to="/subscription">
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               プレミアム会員
             </NavigationMenuLink>
