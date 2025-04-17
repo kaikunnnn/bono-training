@@ -17,7 +17,7 @@ import SubscriptionGuard from '@/components/subscription/SubscriptionGuard';
 const ContentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { content, loading, error } = useContentItem(id || '');
+  const { content, loading, error, getContentVisibility } = useContentItem(id || '');
   
   // ローディング状態の表示
   if (loading) {
@@ -55,6 +55,9 @@ const ContentDetail: React.FC = () => {
       </Layout>
     );
   }
+  
+  // コンテンツの可視状態を取得
+  const { canViewFree, canViewPremium } = getContentVisibility();
   
   // 日付のフォーマット
   const formatDate = (dateString: string): string => {
@@ -139,16 +142,12 @@ const ContentDetail: React.FC = () => {
             
             <Separator className="my-6" />
             
-            {/* コンテンツ本体 - サブスクリプション制御付き */}
-            {isFreeContent ? (
-              // 無料コンテンツの場合は直接表示
-              <ContentBody content={content} />
-            ) : (
-              // 有料コンテンツの場合はサブスクリプションガードで囲む
-              <SubscriptionGuard>
-                <ContentBody content={content} />
-              </SubscriptionGuard>
-            )}
+            {/* コンテンツ本体 - アクセス権に基づいて表示 */}
+            <ContentBody 
+              content={content} 
+              canViewFree={canViewFree} 
+              canViewPremium={canViewPremium} 
+            />
           </div>
           
           <div>
@@ -217,30 +216,99 @@ const ContentDetail: React.FC = () => {
 };
 
 // コンテンツ本体コンポーネント
-const ContentBody: React.FC<{ content: any }> = ({ content }) => {
+interface ContentBodyProps {
+  content: any;
+  canViewFree: boolean;
+  canViewPremium: boolean;
+}
+
+const ContentBody: React.FC<ContentBodyProps> = ({ content, canViewFree, canViewPremium }) => {
+  // 無料コンテンツまたは有料コンテンツを表示する権限があるかどうか
+  const isFreeContent = content.accessLevel === 'free';
+
+  // 動画コンテンツの場合
   if (content.type === 'video' && content.videoUrl) {
+    // 無料のプレビュー動画と有料の完全版動画
+    const freeVideoUrl = content.freeVideoUrl || content.videoUrl; // freeVideoUrlが設定されていなければvideoUrlを使用
+    const premiumVideoUrl = content.videoUrl;
+    
     return (
-      <div className="aspect-video overflow-hidden rounded-lg">
-        {/* ここに実際の動画プレーヤーコンポーネントを追加 */}
-        <div className="flex h-full w-full items-center justify-center bg-muted">
-          <div className="text-center">
-            <h3 className="text-lg font-medium">動画コンテンツ</h3>
-            <p className="mt-2 text-sm text-muted-foreground">URL: {content.videoUrl}</p>
-            <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
-              動画プレーヤー（サンプル）
+      <div className="space-y-4">
+        {/* 無料プレビュー動画 */}
+        {canViewFree && (
+          <div className="aspect-video overflow-hidden rounded-lg">
+            <div className="flex h-full w-full items-center justify-center bg-muted">
+              <div className="text-center">
+                <h3 className="text-lg font-medium">
+                  {isFreeContent ? '動画コンテンツ' : '無料プレビュー'}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground">URL: {freeVideoUrl}</p>
+                <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
+                  {isFreeContent ? '動画プレーヤー（サンプル）' : '無料プレビュー動画'}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
+        
+        {/* 有料フル動画 - プレミアムアクセス権がある場合のみ表示 */}
+        {!isFreeContent && (
+          <>
+            {canViewPremium ? (
+              <div className="aspect-video overflow-hidden rounded-lg border-2 border-primary">
+                <div className="flex h-full w-full items-center justify-center bg-muted">
+                  <div className="text-center">
+                    <h3 className="text-lg font-medium">プレミアム完全版</h3>
+                    <p className="mt-2 text-sm text-muted-foreground">URL: {premiumVideoUrl}</p>
+                    <div className="mt-4 rounded bg-primary px-4 py-2 text-primary-foreground">
+                      フル動画プレーヤー（サンプル）
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <SubscriptionCTA />
+            )}
+          </>
+        )}
       </div>
     );
-  } else if (content.content) {
+  } 
+  // 記事コンテンツの場合
+  else if (content.content) {
+    // 無料部分のコンテンツと有料部分のコンテンツを分ける
+    // freeContentがなければcontentを無料コンテンツとして扱う
+    const freeContent = content.freeContent || (isFreeContent ? content.content : '');
+    const premiumContent = isFreeContent ? '' : content.content;
+    
     return (
-      <div className="prose max-w-none dark:prose-invert">
-        {/* ここでMarkdownなどのレンダリングを行う */}
-        <p>{content.content}</p>
+      <div className="space-y-6">
+        {/* 無料部分 */}
+        {canViewFree && freeContent && (
+          <div className="prose max-w-none dark:prose-invert">
+            <h2>{isFreeContent ? 'コンテンツ' : '無料プレビュー'}</h2>
+            <p>{freeContent}</p>
+          </div>
+        )}
+        
+        {/* 有料部分 */}
+        {!isFreeContent && (
+          <>
+            {canViewPremium ? (
+              <div className="prose max-w-none dark:prose-invert">
+                <h2>プレミアムコンテンツ</h2>
+                <p>{premiumContent}</p>
+              </div>
+            ) : (
+              <SubscriptionCTA />
+            )}
+          </>
+        )}
       </div>
     );
-  } else if (content.type === 'course' && content.lessonIds) {
+  } 
+  // コースコンテンツの場合
+  else if (content.type === 'course' && content.lessonIds) {
     return (
       <div className="space-y-4">
         <h2 className="text-2xl font-bold">コース内容</h2>
@@ -273,6 +341,47 @@ const ContentBody: React.FC<{ content: any }> = ({ content }) => {
   return (
     <div className="rounded-lg border p-6 text-center">
       <p className="text-muted-foreground">このコンテンツの表示方法は現在準備中です</p>
+    </div>
+  );
+};
+
+// サブスクリプション購入誘導コンポーネント
+const SubscriptionCTA: React.FC = () => {
+  return (
+    <div className="rounded-lg border-2 border-dashed border-primary/30 p-6">
+      <div className="text-center">
+        <h3 className="text-xl font-medium">プレミアムコンテンツ</h3>
+        <p className="mt-2 text-muted-foreground">
+          このコンテンツの続きを閲覧するには、プレミアムメンバーシップへの登録が必要です。
+        </p>
+        <div className="mt-6 space-y-4">
+          <ul className="mx-auto max-w-xs space-y-2 text-left">
+            <li className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              全てのプレミアムコンテンツへのアクセス
+            </li>
+            <li className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              高品質な学習教材
+            </li>
+            <li className="flex items-center gap-2">
+              <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              コミュニティへの参加
+            </li>
+          </ul>
+          <div className="flex justify-center">
+            <Link to="/subscription">
+              <Button>メンバーシップに登録する</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

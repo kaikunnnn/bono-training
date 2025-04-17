@@ -80,12 +80,33 @@ export const useContent = (filter?: ContentFilter) => {
     return ['free', 'standard'].includes(content.accessLevel);
   };
   
+  /**
+   * コンテンツの可視状態を判定する
+   * @param content コンテンツアイテム
+   * @returns オブジェクト {canViewFree: 無料部分は表示可能か, canViewPremium: 有料部分は表示可能か}
+   */
+  const getContentVisibility = (content: ContentItem) => {
+    // 無料コンテンツの場合は全ての人が全ての部分を閲覧可能
+    if (content.accessLevel === 'free') {
+      return { canViewFree: true, canViewPremium: true };
+    }
+    
+    // 無料部分は誰でも閲覧可能
+    const canViewFree = true;
+    
+    // 有料部分はサブスクリプションを持っている人のみ閲覧可能
+    const canViewPremium = isSubscribed;
+    
+    return { canViewFree, canViewPremium };
+  };
+  
   return {
     contents,
     loading,
     error,
     getContent,
-    canAccessContent
+    canAccessContent,
+    getContentVisibility
   };
 };
 
@@ -110,13 +131,6 @@ export const useContentItem = (contentId: string) => {
           throw new Error('コンテンツが見つかりませんでした');
         }
         
-        // アクセス権限をチェック
-        const hasAccess = isSubscribed || foundContent.accessLevel === 'free';
-        
-        if (!hasAccess) {
-          throw new Error('このコンテンツにアクセスする権限がありません');
-        }
-        
         setContent(foundContent);
         setLoading(false);
       } catch (err) {
@@ -129,5 +143,33 @@ export const useContentItem = (contentId: string) => {
     fetchContent();
   }, [contentId, isSubscribed]);
   
-  return { content, loading, error };
+  /**
+   * コンテンツの可視状態を判定する
+   * @returns オブジェクト {canViewFree: 無料部分は表示可能か, canViewPremium: 有料部分は表示可能か}
+   */
+  const getContentVisibility = () => {
+    if (!content) {
+      return { canViewFree: false, canViewPremium: false };
+    }
+    
+    // 無料コンテンツの場合は全ての人が全ての部分を閲覧可能
+    if (content.accessLevel === 'free') {
+      return { canViewFree: true, canViewPremium: true };
+    }
+    
+    // 無料部分は誰でも閲覧可能
+    const canViewFree = true;
+    
+    // 有料部分はサブスクリプションを持っている人のみ閲覧可能
+    const canViewPremium = isSubscribed;
+    
+    return { canViewFree, canViewPremium };
+  };
+  
+  return { 
+    content, 
+    loading, 
+    error,
+    getContentVisibility 
+  };
 };
