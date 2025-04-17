@@ -4,11 +4,25 @@ import { useSubscription, SubscriptionState } from '@/hooks/useSubscription';
 
 const SubscriptionContext = createContext<SubscriptionState | undefined>(undefined);
 
-export const SubscriptionProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface SubscriptionProviderProps {
+  children: ReactNode;
+  /**
+   * テスト用にSubscription状態を上書きするためのプロパティ
+   */
+  overrideValue?: SubscriptionState;
+}
+
+export const SubscriptionProvider: React.FC<SubscriptionProviderProps> = ({ 
+  children, 
+  overrideValue 
+}) => {
   const subscription = useSubscription();
   
+  // overrideValueが提供された場合はそれを使用し、それ以外の場合は実際のサブスクリプション状態を使用
+  const contextValue = overrideValue || subscription;
+  
   return (
-    <SubscriptionContext.Provider value={subscription}>
+    <SubscriptionContext.Provider value={contextValue}>
       {children}
     </SubscriptionContext.Provider>
   );
