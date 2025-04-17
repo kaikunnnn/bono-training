@@ -16,9 +16,11 @@ export interface ContentItem {
   accessLevel: ContentAccessLevel;
   // 動画コンテンツの場合
   videoUrl?: string;
+  freeVideoUrl?: string; // 無料プレビュー動画URL
   videoDuration?: number; // 秒単位
   // 記事コンテンツの場合
   content?: string;
+  freeContent?: string; // 無料プレビューコンテンツ
   // コースコンテンツの場合
   lessonIds?: string[];
   // 共通メタデータ
