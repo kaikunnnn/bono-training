@@ -48,7 +48,15 @@ export const useSubscription = () => {
       }
     };
 
+    // ユーザー情報が変更されたときにサブスクリプション状態を確認
     checkSubscription();
+
+    // 定期的にサブスクリプション状態を更新（オプション）
+    const intervalId = setInterval(checkSubscription, 60000); // 1分ごとに更新
+
+    return () => {
+      clearInterval(intervalId);
+    };
   }, [user]);
 
   return state;
