@@ -13,9 +13,9 @@ export async function getContentById(contentId: string): Promise<{
   isFreePreview?: boolean;
 }> {
   try {
-    const { data, error } = await supabase.functions.invoke('get-content', {
-      method: 'GET',
-      query: { id: contentId }
+    // 正しい方法でクエリパラメータを渡す - URLを構築
+    const { data, error } = await supabase.functions.invoke(`get-content?id=${contentId}`, {
+      method: 'GET'
     });
 
     if (error) {
