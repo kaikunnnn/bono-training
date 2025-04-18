@@ -13,9 +13,13 @@ export async function getContentById(contentId: string): Promise<{
   isFreePreview?: boolean;
 }> {
   try {
-    // 正しい方法でクエリパラメータを渡す - URLを構築
-    const { data, error } = await supabase.functions.invoke(`get-content?id=${contentId}`, {
-      method: 'GET'
+    // 正しい方法でエッジ関数を呼び出す
+    const { data, error } = await supabase.functions.invoke('get-content', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: { id: contentId }
     });
 
     if (error) {

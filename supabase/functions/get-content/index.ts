@@ -152,9 +152,32 @@ serve(async (req) => {
   }
 
   try {
-    // URLからクエリパラメータを取得
-    const url = new URL(req.url);
-    const contentId = url.searchParams.get('id');
+    let contentId;
+    
+    // リクエストメソッドに基づいてcontentIdを取得する
+    if (req.method === 'GET') {
+      // URLからクエリパラメータを取得する試み
+      const url = new URL(req.url);
+      contentId = url.searchParams.get('id');
+      
+      // クエリパラメータが存在しない場合、リクエストボディからIDを取得
+      if (!contentId) {
+        try {
+          const requestData = await req.json();
+          contentId = requestData.id;
+        } catch (e) {
+          console.error('リクエストボディの解析エラー:', e);
+        }
+      }
+    } else {
+      // その他のメソッドの場合はリクエストボディから取得
+      try {
+        const requestData = await req.json();
+        contentId = requestData.id;
+      } catch (e) {
+        console.error('リクエストボディの解析エラー:', e);
+      }
+    }
 
     if (!contentId) {
       return new Response(
