@@ -13,13 +13,22 @@ export async function getContentById(contentId: string): Promise<{
   isFreePreview?: boolean;
 }> {
   try {
-    // GETリクエストにはクエリパラメータを使用する
+    if (!contentId) {
+      return {
+        content: null,
+        error: new Error('コンテンツIDが指定されていません'),
+      };
+    }
+
+    console.log('Fetching content with ID:', contentId); // IDが正しく渡されているか確認
+
+    // POSTメソッドを使用してJSONボディにIDを送信
     const { data, error } = await supabase.functions.invoke('get-content', {
-      method: 'POST',  // POSTメソッドを使用
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: { id: contentId }  // ボディとしてIDを送信
+      body: JSON.stringify({ id: contentId }) // 必ずJSONとして文字列化する
     });
 
     if (error) {

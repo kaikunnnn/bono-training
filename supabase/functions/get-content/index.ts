@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -152,31 +151,33 @@ serve(async (req) => {
   }
 
   try {
+    // リクエストボディからIDを取得
     let contentId;
+    let requestData;
     
-    // リクエストメソッドに基づいてcontentIdを取得する
-    if (req.method === 'GET') {
-      // URLからクエリパラメータを取得する試み
-      const url = new URL(req.url);
-      contentId = url.searchParams.get('id');
-      
-      // クエリパラメータが存在しない場合、リクエストボディからIDを取得
-      if (!contentId) {
+    try {
+      // リクエストボディからJSONデータを取得
+      const requestText = await req.text();
+      console.log('Request body text:', requestText); // デバッグ用
+
+      if (requestText) {
         try {
-          const requestData = await req.json();
+          requestData = JSON.parse(requestText);
           contentId = requestData.id;
-        } catch (e) {
-          console.error('リクエストボディの解析エラー:', e);
+          console.log('Parsed content ID from body:', contentId); // デバッグ用
+        } catch (parseError) {
+          console.error('JSON解析エラー:', parseError);
         }
       }
-    } else {
-      // その他のメソッドの場合はリクエストボディから取得
-      try {
-        const requestData = await req.json();
-        contentId = requestData.id;
-      } catch (e) {
-        console.error('リクエストボディの解析エラー:', e);
-      }
+    } catch (e) {
+      console.error('リクエストボディの取得エラー:', e);
+    }
+    
+    // ボディからIDが取得できなかった場合はURLクエリパラメータもチェック
+    if (!contentId) {
+      const url = new URL(req.url);
+      contentId = url.searchParams.get('id');
+      console.log('Using URL query param for ID:', contentId); // デバッグ用
     }
 
     if (!contentId) {
