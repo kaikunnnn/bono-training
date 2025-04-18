@@ -14,8 +14,8 @@ export async function getContentById(contentId: string): Promise<{
 }> {
   try {
     const { data, error } = await supabase.functions.invoke('get-content', {
-      body: JSON.stringify({ id: contentId }),
-      method: 'GET'
+      method: 'GET',
+      query: { id: contentId }
     });
 
     if (error) {

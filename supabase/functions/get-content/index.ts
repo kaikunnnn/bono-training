@@ -152,9 +152,16 @@ serve(async (req) => {
   }
 
   try {
-    // リクエストパラメータを取得
+    // URLからクエリパラメータを取得
     const url = new URL(req.url);
     const contentId = url.searchParams.get('id');
+
+    if (!contentId) {
+      return new Response(
+        JSON.stringify({ error: 'Bad Request', message: 'コンテンツIDが指定されていません' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
     
     // Supabase クライアントを初期化
     const supabaseAdmin = createClient(
