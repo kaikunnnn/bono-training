@@ -14,22 +14,21 @@ export async function getContentById(contentId: string): Promise<{
 }> {
   try {
     if (!contentId) {
+      console.error('コンテンツID未指定エラー');
       return {
         content: null,
         error: new Error('コンテンツIDが指定されていません'),
       };
     }
 
-    console.log('Fetching content with ID:', contentId); // IDが正しく渡されているか確認
+    console.log('リクエスト開始 - コンテンツID:', contentId);
 
-    // POSTメソッドを使用してJSONボディにIDを送信
     const { data, error } = await supabase.functions.invoke('get-content', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ id: contentId }) // 必ずJSONとして文字列化する
+      body: { id: contentId }, // JSON.stringifyは不要、supabaseクライアントが自動的に処理します
     });
+
+    console.log('レスポンス:', { data, error });
 
     if (error) {
       console.error('コンテンツ取得エラー:', error);
@@ -49,18 +48,20 @@ export async function getContentById(contentId: string): Promise<{
     }
 
     if (data.error) {
+      console.error('データエラー:', data.error);
       return {
         content: null,
         error: new Error(data.message || 'コンテンツの取得に失敗しました'),
       };
     }
 
+    console.log('コンテンツ取得成功:', data.content);
     return {
       content: data.content as ContentItem,
       error: null
     };
   } catch (err) {
-    console.error('コンテンツ取得エラー:', err);
+    console.error('予期せぬエラー:', err);
     return {
       content: null,
       error: err instanceof Error ? err : new Error('不明なエラーが発生しました'),

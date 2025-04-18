@@ -151,42 +151,54 @@ serve(async (req) => {
   }
 
   try {
-    // リクエストボディからIDを取得
-    let contentId;
-    let requestData;
-    
-    try {
-      // リクエストボディからJSONデータを取得
-      const requestText = await req.text();
-      console.log('Request body text:', requestText); // デバッグ用
+    console.log('リクエスト受信:', {
+      method: req.method,
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries())
+    });
 
-      if (requestText) {
-        try {
-          requestData = JSON.parse(requestText);
-          contentId = requestData.id;
-          console.log('Parsed content ID from body:', contentId); // デバッグ用
-        } catch (parseError) {
-          console.error('JSON解析エラー:', parseError);
-        }
+    let contentId: string | null = null;
+
+    if (req.method === 'POST') {
+      try {
+        const body = await req.json();
+        console.log('リクエストボディ:', body);
+        contentId = body.id;
+      } catch (e) {
+        console.error('リクエストボディ解析エラー:', e);
+        return new Response(
+          JSON.stringify({ 
+            error: true, 
+            message: 'リクエストボディの解析に失敗しました'
+          }),
+          { 
+            status: 400, 
+            headers: { 
+              ...corsHeaders,
+              'Content-Type': 'application/json'
+            } 
+          }
+        );
       }
-    } catch (e) {
-      console.error('リクエストボディの取得エラー:', e);
-    }
-    
-    // ボディからIDが取得できなかった場合はURLクエリパラメータもチェック
-    if (!contentId) {
-      const url = new URL(req.url);
-      contentId = url.searchParams.get('id');
-      console.log('Using URL query param for ID:', contentId); // デバッグ用
     }
 
     if (!contentId) {
+      console.error('コンテンツID未指定');
       return new Response(
-        JSON.stringify({ error: 'Bad Request', message: 'コンテンツIDが指定されていません' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: true, 
+          message: 'コンテンツIDが指定されていません'
+        }),
+        { 
+          status: 400, 
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
       );
     }
-    
+
     // Supabase クライアントを初期化
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -243,9 +255,19 @@ serve(async (req) => {
     const content = MOCK_CONTENTS.find(c => c.id === contentId);
     
     if (!content) {
+      console.error('コンテンツが見つかりません:', contentId);
       return new Response(
-        JSON.stringify({ error: 'Not Found', message: 'コンテンツが見つかりませんでした' }),
-        { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        JSON.stringify({ 
+          error: true, 
+          message: 'コンテンツが見つかりませんでした'
+        }),
+        { 
+          status: 404, 
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
       );
     }
     
@@ -276,10 +298,19 @@ serve(async (req) => {
     );
     
   } catch (error) {
-    console.error('コンテンツ取得エラー:', error);
+    console.error('サーバーエラー:', error);
     return new Response(
-      JSON.stringify({ error: 'Internal Server Error', message: 'サーバー内部エラーが発生しました' }),
-      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      JSON.stringify({ 
+        error: true, 
+        message: 'サーバー内部エラーが発生しました'
+      }),
+      { 
+        status: 500, 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     );
   }
 });
