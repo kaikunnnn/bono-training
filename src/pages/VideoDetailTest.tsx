@@ -75,7 +75,7 @@ const VideoDetailTest = () => {
 
         <div className="mb-8 overflow-hidden rounded-lg">
           <VimeoPlayer
-            videoUrl={isFreePreview ? content.freeVideoUrl || '' : content.videoUrl || ''}
+            vimeoId={isFreePreview ? content.freeVideoUrl || '' : content.videoUrl || ''}
             title={content.title}
           />
         </div>
