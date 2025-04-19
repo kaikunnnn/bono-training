@@ -245,7 +245,10 @@ serve(async (req) => {
       logDebug('認証エラー詳細:', userError);
       return new Response(
         JSON.stringify({ error: true, message: 'ユーザー情報の取得に失敗しました' }),
-        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { 
+          status: 200, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
       );
     }
 
@@ -260,7 +263,7 @@ serve(async (req) => {
       if (!content) {
         return new Response(
           JSON.stringify({ error: true, message: 'コンテンツが見つかりませんでした' }),
-          { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
@@ -275,17 +278,17 @@ serve(async (req) => {
         logDebug('非ログインユーザーが有料コンテンツにアクセス試行');
         return new Response(
           JSON.stringify({ 
-            error: true, 
+            error: false, 
             message: 'このコンテンツはログインが必要です',
             content: {
               ...content,
               // 有料コンテンツの場合、無料部分のみを返す
               videoUrl: content.freeVideoUrl || null,
               content: content.freeContent || null,
-              isFreePreview: true,
-            }
+            },
+            isFreePreview: true
           }),
-          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
@@ -307,7 +310,7 @@ serve(async (req) => {
           message: 'コンテンツが見つかりませんでした'
         }),
         { 
-          status: 404, 
+          status: 200, 
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json'
@@ -330,17 +333,17 @@ serve(async (req) => {
       logDebug('アクセス拒否: 無料プレビューコンテンツを返却');
       return new Response(
         JSON.stringify({ 
-          error: true, 
+          error: false,
           message: 'このコンテンツにアクセスするには、サブスクリプションが必要です',
           content: {
             ...content,
             // 有料コンテンツの場合、無料部分のみを返す
             videoUrl: content.freeVideoUrl || null,
             content: content.freeContent || null,
-            isFreePreview: true,
-          }
+          },
+          isFreePreview: true
         }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
     
@@ -359,7 +362,7 @@ serve(async (req) => {
         message: 'サーバー内部エラーが発生しました'
       }),
       { 
-        status: 500, 
+        status: 200, 
         headers: {
           ...corsHeaders,
           'Content-Type': 'application/json'

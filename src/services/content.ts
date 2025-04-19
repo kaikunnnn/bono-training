@@ -37,7 +37,7 @@ export async function getContentById(contentId: string): Promise<{
 
     console.log('レスポンス:', { data, error });
 
-    // 通常のエラー処理（コンテンツがないなど）
+    // APIからエラーが返された場合（コンテンツがない、サーバーエラーなど）
     if (error && !data?.content) {
       console.error('コンテンツ取得エラー:', error);
       return {
@@ -46,8 +46,8 @@ export async function getContentById(contentId: string): Promise<{
       };
     }
 
-    // エラーステータスだが、無料プレビュー部分が返されているケース
-    if ((error?.message?.includes('403') || data?.error) && data?.content) {
+    // 無料プレビューコンテンツの場合
+    if (data?.isFreePreview && data?.content) {
       console.log('無料プレビューコンテンツを返却:', data.content);
       return {
         content: data.content as ContentItem,
@@ -56,15 +56,7 @@ export async function getContentById(contentId: string): Promise<{
       };
     }
 
-    // APIからエラーが返された場合
-    if (data?.error && !data?.content) {
-      console.error('データエラー:', data.error, data.message);
-      return {
-        content: null,
-        error: new Error(data.message || 'コンテンツの取得に失敗しました'),
-      };
-    }
-
+    // 正常なレスポンス
     console.log('コンテンツ取得成功:', data.content);
     return {
       content: data.content as ContentItem,
