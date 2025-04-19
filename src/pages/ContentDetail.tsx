@@ -9,12 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Calendar, Clock, Lock } from 'lucide-react';
 import { format } from 'date-fns';
-import SubscriptionGuard from '@/components/subscription/SubscriptionGuard';
 import VimeoPlayer from '@/components/content/VimeoPlayer';
 
-/**
- * コンテンツ詳細ページ
- */
 const ContentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -37,7 +33,7 @@ const ContentDetail: React.FC = () => {
     );
   }
 
-  // エラー状態（コンテンツなし）の表示 - 無料プレビューがある場合はこの条件をスキップ
+  // エラー状態の表示
   if (error && !content) {
     return (
       <Layout>
@@ -57,7 +53,7 @@ const ContentDetail: React.FC = () => {
     );
   }
   
-  // コンテンツがない場合（エラーはあるが、無料プレビューもない場合）
+  // コンテンツがない場合
   if (!content) {
     return (
       <Layout>
@@ -76,7 +72,7 @@ const ContentDetail: React.FC = () => {
       </Layout>
     );
   }
-  
+
   // コンテンツの可視状態を取得
   const { canViewFree, canViewPremium } = getContentVisibility();
   
@@ -103,10 +99,7 @@ const ContentDetail: React.FC = () => {
     
     return `${minutes}分`;
   };
-  
-  // 無料コンテンツかどうかを判定
-  const isFreeContent = content.accessLevel === 'free';
-  
+
   return (
     <Layout>
       <div className="container py-8">
@@ -196,13 +189,71 @@ const ContentDetail: React.FC = () => {
             <Separator className="my-6" />
             
             {/* コンテンツ本体 - アクセス権に基づいて表示 */}
-            <ContentBody 
-              content={content} 
-              canViewFree={canViewFree} 
-              canViewPremium={canViewPremium} 
-              isFreePreview={isFreePreview}
-              error={error}
-            />
+            {content.type === 'video' && (
+              <div className="space-y-6">
+                {/* 有料コンテンツの場合 */}
+                {canViewPremium && !isFreePreview && (
+                  <div className="space-y-4">
+                    <div className="aspect-video overflow-hidden rounded-lg border-2 border-primary">
+                      <VimeoPlayer
+                        vimeoId={content.videoUrl || ''}
+                        title={content.title}
+                        responsive={true}
+                      />
+                    </div>
+                    {content.content && (
+                      <div className="prose max-w-none dark:prose-invert">
+                        <div dangerouslySetInnerHTML={{ __html: content.content }} />
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* 無料プレビューまたは非会員の場合 */}
+                {(!canViewPremium || isFreePreview) && (
+                  <div className="space-y-6">
+                    {canViewFree && content.freeVideoUrl && (
+                      <div className="space-y-4">
+                        <div className="aspect-video overflow-hidden rounded-lg">
+                          <VimeoPlayer
+                            vimeoId={content.freeVideoUrl}
+                            title={`${content.title} (プレビュー)`}
+                            responsive={true}
+                          />
+                        </div>
+                        <div className="rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
+                          これは無料プレビュー版です。完全版を視聴するにはサブスクリプションが必要です。
+                        </div>
+                      </div>
+                    )}
+                    
+                    {canViewFree && content.freeContent && (
+                      <div className="prose max-w-none dark:prose-invert">
+                        <div dangerouslySetInnerHTML={{ __html: content.freeContent }} />
+                        <div className="mt-4 rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
+                          続きを読むにはサブスクリプションが必要です。
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* サブスクリプション案内 */}
+                    <div className="rounded-lg border-2 border-dashed border-primary/30 p-6">
+                      <div className="text-center">
+                        <h3 className="text-xl font-medium">プレミアムコンテンツ</h3>
+                        <p className="mt-2 text-muted-foreground">
+                          このコンテンツの続きを閲覧するには、プレミアムメンバーシップへの登録が必要です。
+                        </p>
+                        <div className="mt-6">
+                          <Link to="/subscription">
+                            <Button>メンバーシップに登録する</Button>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           
           <div>
@@ -267,219 +318,6 @@ const ContentDetail: React.FC = () => {
         </div>
       </div>
     </Layout>
-  );
-};
-
-// コンテンツ本体コンポーネント
-interface ContentBodyProps {
-  content: any;
-  canViewFree: boolean;
-  canViewPremium: boolean;
-  isFreePreview?: boolean;
-  error?: Error | null;
-}
-
-const ContentBody: React.FC<ContentBodyProps> = ({ 
-  content, 
-  canViewFree, 
-  canViewPremium,
-  isFreePreview = false,
-  error = null
-}) => {
-  // 無料コンテンツまたは有料コンテンツを表示する権限があるかどうか
-  const isFreeContent = content.accessLevel === 'free';
-
-  // 動画コンテンツの場合
-  if (content.type === 'video' && (content.videoUrl || content.freeVideoUrl)) {
-    // 無料のプレビュー動画と有料の完全版動画
-    const freeVideoUrl = content.freeVideoUrl || content.videoUrl; // freeVideoUrlが設定されていなければvideoUrlを使用
-    const premiumVideoUrl = content.videoUrl;
-    
-    // サブスクリプション加入者の場合は完全版のみ表示
-    if (canViewPremium && !isFreePreview) {
-      return (
-        <div className="space-y-4">
-          <div className="aspect-video overflow-hidden rounded-lg border-2 border-primary">
-            {premiumVideoUrl && (
-              <VimeoPlayer
-                vimeoId={premiumVideoUrl}
-                title={content.title}
-                responsive={true}
-              />
-            )}
-          </div>
-          {content.description && (
-            <div className="prose max-w-none dark:prose-invert">
-              <p>{content.description}</p>
-            </div>
-          )}
-        </div>
-      );
-    }
-    
-    // 非加入者または無料プレビューの場合
-    return (
-      <div className="space-y-6">
-        {/* 無料プレビュー動画 - 無料コンテンツでない場合に表示 */}
-        {canViewFree && (isFreePreview || !isFreeContent) && freeVideoUrl && (
-          <div className="space-y-4">
-            <div className="aspect-video overflow-hidden rounded-lg">
-              <VimeoPlayer
-                vimeoId={freeVideoUrl}
-                title={`${content.title} (プレビュー)`}
-                responsive={true}
-              />
-            </div>
-            {!isFreeContent && (
-              <div className="rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
-                これは無料プレビュー版です。完全版を視聴するにはサブスクリプションが必要です。
-              </div>
-            )}
-          </div>
-        )}
-        
-        {/* 無料コンテンツの場合はそのまま表示 */}
-        {isFreeContent && freeVideoUrl && (
-          <div className="aspect-video overflow-hidden rounded-lg">
-            <VimeoPlayer
-              vimeoId={freeVideoUrl}
-              title={content.title}
-              responsive={true}
-            />
-          </div>
-        )}
-        
-        {/* 有料コンテンツの場合はサブスクリプション案内を表示 */}
-        {!isFreeContent && !canViewPremium && <SubscriptionCTA error={error} />}
-      </div>
-    );
-  } 
-  // 記事コンテンツの場合
-  else if (content.content) {
-    // 無料部分のコンテンツと有料部分のコンテンツを分ける
-    // freeContentがなければcontentを無料コンテンツとして扱う
-    const freeContent = content.freeContent || (isFreeContent ? content.content : '');
-    const premiumContent = isFreeContent ? '' : content.content;
-    
-    // サブスクリプション加入者の場合は完全版のみ表示
-    if (canViewPremium && !isFreePreview && !isFreeContent) {
-      return (
-        <div className="space-y-6">
-          <div className="prose max-w-none dark:prose-invert">
-            <h2>プレミアムコンテンツ</h2>
-            <p>{premiumContent}</p>
-          </div>
-        </div>
-      );
-    }
-    
-    // 無料コンテンツの場合はそのまま表示
-    if (isFreeContent) {
-      return (
-        <div className="space-y-6">
-          <div className="prose max-w-none dark:prose-invert">
-            <h2>コンテンツ</h2>
-            <p>{freeContent}</p>
-          </div>
-        </div>
-      );
-    }
-    
-    // 非加入者または無料プレビューの場合
-    return (
-      <div className="space-y-6">
-        {/* 無料部分 */}
-        {canViewFree && freeContent && (
-          <div className="prose max-w-none dark:prose-invert">
-            <h2>無料プレビュー</h2>
-            <p>{freeContent}</p>
-            <div className="rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
-              続きを読むにはサブスクリプションが必要です。
-            </div>
-          </div>
-        )}
-        
-        {/* サブスクリプション案内 */}
-        <SubscriptionCTA error={error} />
-      </div>
-    );
-  } 
-  // コースコンテンツの場合
-  else if (content.type === 'course' && content.lessonIds) {
-    return (
-      <div className="space-y-4">
-        <h2 className="text-2xl font-bold">コース内容</h2>
-        <div className="rounded-lg border">
-          <div className="p-4">
-            <p className="text-muted-foreground">このコースには {content.lessonIds.length} のレッスンが含まれています</p>
-          </div>
-          <div className="divide-y">
-            {content.lessonIds.map((lessonId: string, index: number) => (
-              <div key={lessonId} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="font-medium">レッスン {index + 1}</div>
-                    <div className="text-sm text-muted-foreground">ID: {lessonId}</div>
-                  </div>
-                  <Link to={`/content/${lessonId}`}>
-                    <Button variant="outline" size="sm">
-                      表示
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-  
-  return (
-    <div className="rounded-lg border p-6 text-center">
-      <p className="text-muted-foreground">このコンテンツの表示方法は現在準備中です</p>
-    </div>
-  );
-};
-
-// サブスクリプション購入誘導コンポーネント
-const SubscriptionCTA: React.FC<{ error?: Error | null }> = ({ error }) => {
-  return (
-    <div className="rounded-lg border-2 border-dashed border-primary/30 p-6">
-      <div className="text-center">
-        <h3 className="text-xl font-medium">プレミアムコンテンツ</h3>
-        <p className="mt-2 text-muted-foreground">
-          {error ? error.message : 'このコンテンツの続きを閲覧するには、プレミアムメンバーシップへの登録が必要です。'}
-        </p>
-        <div className="mt-6 space-y-4">
-          <ul className="mx-auto max-w-xs space-y-2 text-left">
-            <li className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              全てのプレミアムコンテンツへのアクセス
-            </li>
-            <li className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              高品質な学習教材
-            </li>
-            <li className="flex items-center gap-2">
-              <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              コミュニティへの参加
-            </li>
-          </ul>
-          <div className="flex justify-center">
-            <Link to="/subscription">
-              <Button>メンバーシップに登録する</Button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </div>
   );
 };
 
