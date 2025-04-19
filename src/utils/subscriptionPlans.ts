@@ -1,4 +1,3 @@
-
 export type PlanType = 'standard' | 'growth' | 'community';
 export type PlanDuration = 1 | 3 | 6; // 月単位
 export type ContentAccessType = 'learning' | 'member';
@@ -12,7 +11,7 @@ export interface PlanInfo {
   pricePerMonth: number; // 月額価格（単位: 円）
 }
 
-// コンテンツアクセス権限の設定
+// コンテンツアクセス権限の設定を更新
 export const CONTENT_PERMISSIONS: Record<ContentAccessType, PlanType[]> = {
   learning: ['standard', 'growth'],
   member: ['standard', 'growth', 'community']

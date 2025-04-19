@@ -71,6 +71,32 @@ export const MOCK_CONTENTS: ContentItem[] = [
     createdAt: "2025-04-10T15:00:00Z",
     updatedAt: "2025-04-10T15:00:00Z",
     published: true,
+  },
+  {
+    id: "6", // 新しいlearningコンテンツ
+    title: "プログラミング基礎講座",
+    description: "プログラミングの基本を学ぶコース",
+    type: "course" as ContentType,
+    categories: ["learning"] as ContentCategory[],
+    thumbnailUrl: "/placeholder.svg",
+    accessLevel: "standard" as ContentAccessLevel,
+    content: "プログラミングの基本的な概念と実践的なスキルを学びます。",
+    createdAt: "2025-04-20T10:00:00Z",
+    updatedAt: "2025-04-20T10:00:00Z",
+    published: true,
+  },
+  {
+    id: "7", // 新しいmemberコンテンツ
+    title: "コミュニティ特別ワークショップ",
+    description: "メンバー限定の高度なワークショップ",
+    type: "video" as ContentType,
+    categories: ["member", "learning"] as ContentCategory[],
+    thumbnailUrl: "/placeholder.svg",
+    accessLevel: "community" as ContentAccessLevel,
+    videoUrl: "https://example.com/videos/advanced-workshop",
+    createdAt: "2025-04-20T15:00:00Z",
+    updatedAt: "2025-04-20T15:00:00Z",
+    published: true,
   }
 ];
 
