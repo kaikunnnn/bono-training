@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -97,6 +98,13 @@ const ACCESS_LEVEL_MAPPING = {
   'community': 'member',
 };
 
+/**
+ * デバッグ用ログ出力関数
+ */
+function logDebug(message: string, data?: any) {
+  console.log(`[DEBUG] ${message}`, data ? JSON.stringify(data) : '');
+}
+
 // ユーザープラン情報の取得（本番環境では DB から取得）
 async function getUserPlanInfo(supabase, userId) {
   try {
@@ -109,13 +117,25 @@ async function getUserPlanInfo(supabase, userId) {
 
     if (error) {
       console.error('サブスクリプション情報取得エラー:', error);
+      
+      // デバッグ用：全テーブルからデータ取得を試みる
+      const { data: allSubscriptions, error: fetchError } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .limit(10);
+      
+      logDebug('全サブスクリプションデータ:', allSubscriptions);
+      if (fetchError) logDebug('全データ取得エラー:', fetchError);
+      
       return { planType: null, isActive: false };
     }
 
     if (!data) {
+      logDebug('該当ユーザーのサブスクリプションデータなし:', { userId });
       return { planType: null, isActive: false };
     }
 
+    logDebug('取得したサブスクリプション情報:', data);
     return {
       planType: data.plan_type,
       isActive: data.is_active,
@@ -128,19 +148,27 @@ async function getUserPlanInfo(supabase, userId) {
 
 // コンテンツへのアクセス権限があるかチェック
 function hasAccessToContent(userPlan, contentAccessLevel) {
+  logDebug('アクセス権限チェック:', { userPlan, contentAccessLevel });
+  
   // サブスクリプションがアクティブでない場合、無料コンテンツのみアクセス可能
   if (!userPlan.isActive || !userPlan.planType) {
-    return contentAccessLevel === 'free';
+    const hasAccess = contentAccessLevel === 'free';
+    logDebug(`非アクティブサブスクリプション: ${hasAccess ? 'アクセス可' : 'アクセス不可'}`);
+    return hasAccess;
   }
 
   // アクセスレベルをコンテンツタイプに変換
   const contentType = ACCESS_LEVEL_MAPPING[contentAccessLevel] || 'free';
+  logDebug('コンテンツタイプマッピング:', { contentAccessLevel, contentType });
   
   // コンテンツタイプに対応するプラン一覧を取得
   const allowedPlans = CONTENT_PERMISSIONS[contentType] || [];
+  logDebug('許可プラン一覧:', { contentType, allowedPlans });
   
   // ユーザーのプランがアクセス可能かチェック
-  return allowedPlans.includes(userPlan.planType);
+  const hasAccess = allowedPlans.includes(userPlan.planType);
+  logDebug(`アクセス判定結果: ${hasAccess ? 'アクセス可' : 'アクセス不可'}`);
+  return hasAccess;
 }
 
 // メインハンドラー
@@ -151,7 +179,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('リクエスト受信:', {
+    logDebug('リクエスト受信:', {
       method: req.method,
       url: req.url,
       headers: Object.fromEntries(req.headers.entries())
@@ -162,7 +190,7 @@ serve(async (req) => {
     if (req.method === 'POST') {
       try {
         const body = await req.json();
-        console.log('リクエストボディ:', body);
+        logDebug('リクエストボディ:', body);
         contentId = body.id;
       } catch (e) {
         console.error('リクエストボディ解析エラー:', e);
@@ -214,13 +242,15 @@ serve(async (req) => {
 
     if (userError) {
       console.error('ユーザー取得エラー:', userError);
+      logDebug('認証エラー詳細:', userError);
       return new Response(
-        JSON.stringify({ error: 'Unauthorized', message: 'ユーザー情報の取得に失敗しました' }),
+        JSON.stringify({ error: true, message: 'ユーザー情報の取得に失敗しました' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     if (!user) {
+      logDebug('非ログインユーザーアクセス');
       // 非ログインユーザーも無料コンテンツにはアクセス可能
       const userPlan = { planType: null, isActive: false };
       
@@ -229,27 +259,42 @@ serve(async (req) => {
       
       if (!content) {
         return new Response(
-          JSON.stringify({ error: 'Not Found', message: 'コンテンツが見つかりませんでした' }),
+          JSON.stringify({ error: true, message: 'コンテンツが見つかりませんでした' }),
           { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       // 無料コンテンツの場合のみアクセス許可
       if (content.accessLevel === 'free') {
+        logDebug('非ログインユーザーに無料コンテンツを配信');
         return new Response(
           JSON.stringify({ content }),
           { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } else {
+        logDebug('非ログインユーザーが有料コンテンツにアクセス試行');
         return new Response(
-          JSON.stringify({ error: 'Forbidden', message: 'このコンテンツはログインが必要です' }),
+          JSON.stringify({ 
+            error: true, 
+            message: 'このコンテンツはログインが必要です',
+            content: {
+              ...content,
+              // 有料コンテンツの場合、無料部分のみを返す
+              videoUrl: content.freeVideoUrl || null,
+              content: content.freeContent || null,
+              isFreePreview: true,
+            }
+          }),
           { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
     }
 
+    logDebug('認証済みユーザーアクセス:', { userId: user.id, email: user.email });
+    
     // ユーザーのプラン情報を取得
     const userPlan = await getUserPlanInfo(supabaseAdmin, user.id);
+    logDebug('ユーザープラン情報:', userPlan);
     
     // コンテンツデータを取得
     const content = MOCK_CONTENTS.find(c => c.id === contentId);
@@ -273,11 +318,19 @@ serve(async (req) => {
     
     // コンテンツへのアクセス権限をチェック
     const hasAccess = hasAccessToContent(userPlan, content.accessLevel);
+    logDebug('コンテンツアクセス判定:', { 
+      contentId, 
+      contentAccessLevel: content.accessLevel, 
+      userPlanType: userPlan.planType,
+      isActive: userPlan.isActive,
+      hasAccess 
+    });
     
     if (!hasAccess) {
+      logDebug('アクセス拒否: 無料プレビューコンテンツを返却');
       return new Response(
         JSON.stringify({ 
-          error: 'Forbidden', 
+          error: true, 
           message: 'このコンテンツにアクセスするには、サブスクリプションが必要です',
           content: {
             ...content,
@@ -292,6 +345,7 @@ serve(async (req) => {
     }
     
     // アクセス権限があれば、コンテンツ全体を返す
+    logDebug('アクセス許可: フルコンテンツを返却');
     return new Response(
       JSON.stringify({ content }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

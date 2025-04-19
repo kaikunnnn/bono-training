@@ -23,9 +23,16 @@ export async function getContentById(contentId: string): Promise<{
 
     console.log('リクエスト開始 - コンテンツID:', contentId);
 
+    // ユーザーの認証状態を確認
+    const { data: { session } } = await supabase.auth.getSession();
+    const isAuthenticated = !!session?.user;
+    
+    console.log('認証状態:', isAuthenticated ? '認証済み' : '未認証');
+
+    // Supabase Edge Functionを呼び出してコンテンツを取得
     const { data, error } = await supabase.functions.invoke('get-content', {
       method: 'POST',
-      body: { id: contentId }, // JSON.stringifyは不要、supabaseクライアントが自動的に処理します
+      body: { id: contentId },
     });
 
     console.log('レスポンス:', { data, error });
@@ -40,6 +47,7 @@ export async function getContentById(contentId: string): Promise<{
 
     // エラーステータスの場合でもコンテンツの無料プレビュー部分を返す場合がある
     if (data.error && data.content) {
+      console.log('無料プレビューコンテンツを返却:', data.content);
       return {
         content: data.content as ContentItem,
         error: new Error(data.message || 'このコンテンツにアクセスするには、サブスクリプションが必要です'),
@@ -47,8 +55,9 @@ export async function getContentById(contentId: string): Promise<{
       };
     }
 
+    // APIからエラーが返された場合
     if (data.error) {
-      console.error('データエラー:', data.error);
+      console.error('データエラー:', data.error, data.message);
       return {
         content: null,
         error: new Error(data.message || 'コンテンツの取得に失敗しました'),

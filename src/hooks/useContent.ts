@@ -148,17 +148,26 @@ export const useContentItem = (contentId: string) => {
     const fetchContent = async () => {
       try {
         setLoading(true);
+        console.log(`コンテンツ${contentId}の取得を開始...`);
         
         // API経由でコンテンツを取得
         const { content: fetchedContent, error: fetchError, isFreePreview: fetchedIsFreePreview } = await getContentByIdFromApi(contentId);
         
         if (fetchError) {
+          console.error('コンテンツ取得エラー:', fetchError);
           throw fetchError;
         }
         
         if (!fetchedContent) {
+          console.error('コンテンツが見つかりませんでした:', contentId);
           throw new Error('コンテンツが見つかりませんでした');
         }
+        
+        console.log('コンテンツ取得成功:', {
+          contentId, 
+          title: fetchedContent.title,
+          isFreePreview: fetchedIsFreePreview
+        });
         
         setContent(fetchedContent);
         setIsFreePreview(fetchedIsFreePreview || false);
@@ -170,7 +179,9 @@ export const useContentItem = (contentId: string) => {
       }
     };
     
-    fetchContent();
+    if (contentId) {
+      fetchContent();
+    }
   }, [contentId, isSubscribed, planType]);
   
   /**
@@ -184,11 +195,13 @@ export const useContentItem = (contentId: string) => {
     
     // API経由で取得したコンテンツの場合、isFreePreviewフラグで判定
     if (isFreePreview) {
+      console.log('無料プレビューモードで表示:', { contentId, title: content.title });
       return { canViewFree: true, canViewPremium: false };
     }
     
     // 無料コンテンツの場合は全ての人が全ての部分を閲覧可能
     if (content.accessLevel === 'free') {
+      console.log('無料コンテンツのため全表示:', { contentId, title: content.title });
       return { canViewFree: true, canViewPremium: true };
     }
     
@@ -200,6 +213,7 @@ export const useContentItem = (contentId: string) => {
     let canViewPremium = false;
     
     if (isSubscribed && planType) {
+      console.log('サブスクリプション情報:', { isSubscribed, planType });
       if (planType === 'community') {
         // コミュニティプランは全てのコンテンツにアクセス可能
         canViewPremium = true;
@@ -211,6 +225,13 @@ export const useContentItem = (contentId: string) => {
         canViewPremium = ['free', 'standard'].includes(content.accessLevel);
       }
     }
+    
+    console.log('コンテンツ表示判定結果:', { 
+      contentId, 
+      title: content.title,
+      canViewFree,
+      canViewPremium
+    });
     
     return { canViewFree, canViewPremium };
   };
