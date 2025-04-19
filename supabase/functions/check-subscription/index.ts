@@ -1,7 +1,7 @@
 
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders, logDebug, createSupabaseClients, createStripeClient } from "./utils.ts";
 import { SubscriptionService } from "./subscription-service.ts";
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 serve(async (req) => {
   // CORSプリフライトリクエストの処理
@@ -47,33 +47,21 @@ serve(async (req) => {
     }
     
     logDebug("ユーザー取得成功", { userId: user.id, email: user.email });
+
+    // データベースからの購読情報を優先チェック
+    const dbSubscription = await subscriptionService.getUserSubscription(user.id);
     
-    // デバッグ用：現在のuser_subscriptionsテーブルの内容を確認
-    const { data: existingSubs, error: existingSubsError } = await supabaseAdmin
-      .from("user_subscriptions")
-      .select("*")
-      .eq("user_id", user.id);
-      
-    logDebug("既存サブスクリプション情報", { 
-      data: existingSubs, 
-      error: existingSubsError 
-    });
-    
-    // Stripeキーがなければテストモードとして扱う
-    if (!stripe) {
-      const { data: updateData, error: updateError } = await subscriptionService
-        .updateSubscriptionStatus(user.id, true, "standard");
-      
-      logDebug("テスト用サブスクリプション情報を更新", { 
-        data: updateData, 
-        error: updateError 
+    // データベースに購読情報がある場合はそれを信頼する
+    if (dbSubscription) {
+      logDebug("データベースの購読情報を返却", { 
+        isActive: dbSubscription.is_active,
+        planType: dbSubscription.plan_type
       });
       
       return new Response(
-        JSON.stringify({ 
-          subscribed: true, 
-          planType: "standard",
-          testMode: true
+        JSON.stringify({
+          subscribed: dbSubscription.is_active,
+          planType: dbSubscription.plan_type
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -82,73 +70,113 @@ serve(async (req) => {
       );
     }
     
-    // アクティブなサブスクリプションを検索
-    const subscriptions = await stripe.subscriptions.list({
-      customer: user.id,
-      status: "active",
-      expand: ["data.items.data.price"],
-      limit: 1,
-    });
-
-    const hasActiveSubscription = subscriptions.data.length > 0;
-    let planType = null;
-    
-    if (hasActiveSubscription) {
-      const subscription = subscriptions.data[0];
-      const price = await subscriptionService.getPlanInfo(subscription);
-      if (price && price.unit_amount) {
-        planType = subscriptionService.determinePlanType(price.unit_amount);
-        logDebug("プラン判定", { amount: price.unit_amount, planType });
-        
+    // Stripeからの情報取得を試みる
+    try {
+      if (!stripe) {
+        // Stripeが利用できない場合はデフォルトプランを設定
         await subscriptionService.updateSubscriptionStatus(
-          user.id, 
-          true, 
+          user.id,
+          true,
+          "standard"
+        );
+        
+        return new Response(
+          JSON.stringify({ 
+            subscribed: true, 
+            planType: "standard",
+            testMode: true
+          }),
+          {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+            status: 200,
+          }
+        );
+      }
+      
+      // Stripeの購読情報を取得
+      const subscriptions = await stripe.subscriptions.list({
+        customer: user.id,
+        status: "active",
+        expand: ["data.items.data.price"],
+        limit: 1,
+      });
+
+      const hasActiveSubscription = subscriptions.data.length > 0;
+      let planType = null;
+      
+      if (hasActiveSubscription) {
+        const subscription = subscriptions.data[0];
+        const price = await subscriptionService.getPlanInfo(subscription);
+        if (price && price.unit_amount) {
+          planType = subscriptionService.determinePlanType(price.unit_amount);
+          logDebug("プラン判定", { amount: price.unit_amount, planType });
+        }
+        
+        // データベースを更新
+        await subscriptionService.updateSubscriptionStatus(
+          user.id,
+          true,
           planType,
           subscription.id
         );
+      } else {
+        logDebug("アクティブなサブスクリプションなし");
+        
+        // 非アクティブとして更新
+        await subscriptionService.updateSubscriptionStatus(
+          user.id,
+          false,
+          planType
+        );
       }
-    } else {
-      logDebug("アクティブなサブスクリプションなし");
+
+      return new Response(
+        JSON.stringify({ 
+          subscribed: hasActiveSubscription, 
+          planType 
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    } catch (stripeError) {
+      logDebug("Stripeエラー", { error: stripeError });
       
+      // Stripeでエラーが発生した場合は、デフォルトの標準プランを設定
       await subscriptionService.updateSubscriptionStatus(
         user.id,
-        false,
-        planType
+        true,
+        "standard"
+      );
+      
+      return new Response(
+        JSON.stringify({ 
+          subscribed: true,
+          planType: "standard",
+          error: "Stripeとの同期に失敗しましたが、標準プランとして処理します"
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
       );
     }
     
-    // 最終的なデータを確認
-    const { data: finalSubscriptionData, error: finalError } = await supabaseAdmin
-      .from("user_subscriptions")
-      .select("*")
-      .eq("user_id", user.id)
-      .single();
-      
-    logDebug("最終サブスクリプションデータ", { 
-      data: finalSubscriptionData, 
-      error: finalError 
-    });
-    
-    return new Response(
-      JSON.stringify({ 
-        subscribed: hasActiveSubscription, 
-        planType,
-        dbData: finalSubscriptionData
-      }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
   } catch (error) {
-    console.error("購読状態確認エラー:", error);
+    console.error("サーバーエラー:", error);
     logDebug("予期せぬエラー", { error });
     
     return new Response(
-      JSON.stringify({ error: error.message || "購読状態確認中にエラーが発生しました", subscribed: false, planType: null }),
+      JSON.stringify({ 
+        error: true,
+        message: "サーバー内部エラーが発生しました",
+        subscribed: false,
+        planType: null
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 500,
+        status: 200, // エラー時も200を返してクライアントで処理
       }
     );
   }

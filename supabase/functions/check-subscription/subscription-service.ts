@@ -11,6 +11,35 @@ export class SubscriptionService {
   ) {}
 
   /**
+   * ユーザーの購読情報を取得
+   */
+  async getUserSubscription(userId: string): Promise<UserSubscription | null> {
+    try {
+      const { data, error } = await this.supabaseAdmin
+        .from("user_subscriptions")
+        .select("*")
+        .eq("user_id", userId)
+        .single();
+
+      if (error) {
+        logDebug("データベースからの購読情報取得エラー", error);
+        return null;
+      }
+
+      if (!data) {
+        logDebug("購読情報が見つかりません", { userId });
+        return null;
+      }
+
+      logDebug("データベースから購読情報を取得", data);
+      return data;
+    } catch (err) {
+      logDebug("予期せぬエラー - getUserSubscription", err);
+      return null;
+    }
+  }
+
+  /**
    * サブスクリプション情報を更新
    */
   async updateSubscriptionStatus(
@@ -53,27 +82,73 @@ export class SubscriptionService {
   /**
    * Stripeサブスクリプション情報を取得
    */
-  async getStripeSubscription(): Promise<StripeSubscriptionInfo | null> {
-    if (!this.stripe) return null;
+  async getStripeSubscription(userId: string): Promise<StripeSubscriptionInfo | null> {
+    if (!this.stripe) {
+      logDebug("Stripeクライアントが設定されていません");
+      return null;
+    }
 
-    const subscriptions = await this.stripe.subscriptions.list({
-      status: "active",
-      expand: ["data.customer", "data.items.data.price"],
-      limit: 1,
-    });
-    
-    logDebug("Stripeサブスクリプション検索結果", { 
-      count: subscriptions.data.length,
-    });
-    
-    if (subscriptions.data.length === 0) return null;
+    try {
+      // 最初にデータベースの購読情報をチェック
+      const dbSubscription = await this.getUserSubscription(userId);
+      if (dbSubscription?.is_active) {
+        logDebug("データベースからアクティブな購読情報を検出", dbSubscription);
+        return {
+          id: dbSubscription.stripe_subscription_id || '',
+          status: 'active',
+          current_period_end: 0 // この値は現在使用されていない
+        };
+      }
 
-    const subscription = subscriptions.data[0];
-    return {
-      id: subscription.id,
-      status: subscription.status,
-      current_period_end: subscription.current_period_end
-    };
+      // ユーザーのStripe顧客情報を検索
+      const customers = await this.stripe.customers.list({ 
+        email: userId,
+        limit: 1 
+      });
+
+      if (customers.data.length === 0) {
+        logDebug("Stripe顧客情報が見つかりません", { userId });
+        return null;
+      }
+
+      const customerId = customers.data[0].id;
+      const subscriptions = await this.stripe.subscriptions.list({
+        customer: customerId,
+        status: "active",
+        expand: ["data.items.data.price"],
+        limit: 1,
+      });
+      
+      if (subscriptions.data.length === 0) {
+        logDebug("アクティブなサブスクリプションが見つかりません", { customerId });
+        return null;
+      }
+
+      const subscription = subscriptions.data[0];
+      logDebug("Stripeサブスクリプション検索結果", { 
+        id: subscription.id,
+        status: subscription.status,
+        customerId
+      });
+
+      return {
+        id: subscription.id,
+        status: subscription.status,
+        current_period_end: subscription.current_period_end
+      };
+    } catch (error) {
+      logDebug("Stripeサブスクリプション取得エラー", error);
+      // Stripeのエラーが発生しても、データベースの情報を信頼する
+      const dbSubscription = await this.getUserSubscription(userId);
+      if (dbSubscription?.is_active) {
+        return {
+          id: dbSubscription.stripe_subscription_id || '',
+          status: 'active',
+          current_period_end: 0
+        };
+      }
+      return null;
+    }
   }
 
   /**
