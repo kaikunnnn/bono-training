@@ -1,14 +1,13 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// CORS ヘッダーの設定
+// CORSヘッダーの設定
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// モックコンテンツデータ（本番環境では CMS から取得）
+// モックコンテンツデータ（本番環境ではCMSから取得）
 const MOCK_CONTENTS = [
   {
     id: "1",
@@ -80,6 +79,38 @@ const MOCK_CONTENTS = [
     createdAt: "2025-04-10T15:00:00Z",
     updatedAt: "2025-04-10T15:00:00Z",
     published: true,
+  },
+  {
+    id: "ui-basic-01",
+    title: "レイアウトの考え方",
+    description: "UIデザインの基本となるレイアウトの考え方について解説します",
+    type: "video",
+    categories: ["ui-design", "learning"],
+    thumbnailUrl: "/placeholder.svg",
+    accessLevel: "free",
+    videoUrl: "https://player.vimeo.com/video/76979871",
+    videoDuration: 1800,
+    content: "<p>UIデザインの基本となるレイアウトの考え方について、実例を交えながら詳しく解説していきます。</p>",
+    createdAt: "2025-04-01T10:00:00Z",
+    updatedAt: "2025-04-01T10:00:00Z",
+    published: true
+  },
+  {
+    id: "ui-basic-02",
+    title: "カラー設計の基本",
+    description: "効果的なカラースキームの作り方とカラーシステムの構築方法",
+    type: "video",
+    categories: ["ui-design", "learning"],
+    thumbnailUrl: "/placeholder.svg",
+    accessLevel: "standard",
+    videoUrl: "https://player.vimeo.com/video/783455051",
+    freeVideoUrl: "https://player.vimeo.com/video/783455051?h=afd34abcd1",
+    videoDuration: 2400,
+    content: "<p>カラー設計の基本から応用まで、実践的な知識を解説します。</p>",
+    freeContent: "<p>カラー設計の基本につい���、導入部分を解説します。より詳しい内容は会員限定です。</p>",
+    createdAt: "2025-04-03T14:30:00Z",
+    updatedAt: "2025-04-03T14:30:00Z",
+    published: true
   }
 ];
 
