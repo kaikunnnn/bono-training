@@ -83,11 +83,18 @@ serve(async (req) => {
     }
     
     // アクティブなサブスクリプションを検索
-    const subscription = await subscriptionService.getStripeSubscription();
-    const hasActiveSubscription = !!subscription;
+    const subscriptions = await stripe.subscriptions.list({
+      customer: user.id,
+      status: "active",
+      expand: ["data.items.data.price"],
+      limit: 1,
+    });
+
+    const hasActiveSubscription = subscriptions.data.length > 0;
     let planType = null;
     
-    if (hasActiveSubscription && subscription) {
+    if (hasActiveSubscription) {
+      const subscription = subscriptions.data[0];
       const price = await subscriptionService.getPlanInfo(subscription);
       if (price && price.unit_amount) {
         planType = subscriptionService.determinePlanType(price.unit_amount);

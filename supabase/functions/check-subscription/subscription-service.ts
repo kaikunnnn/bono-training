@@ -58,7 +58,7 @@ export class SubscriptionService {
 
     const subscriptions = await this.stripe.subscriptions.list({
       status: "active",
-      expand: ["data.customer"],
+      expand: ["data.customer", "data.items.data.price"],
       limit: 1,
     });
     
@@ -79,8 +79,8 @@ export class SubscriptionService {
   /**
    * プラン情報を取得
    */
-  async getPlanInfo(subscription: StripeSubscriptionInfo) {
-    if (!this.stripe) return null;
+  async getPlanInfo(subscription: Stripe.Subscription): Promise<Stripe.Price | null> {
+    if (!this.stripe || !subscription.items.data[0]?.price) return null;
 
     logDebug("アクティブなサブスクリプション", { 
       id: subscription.id,
@@ -88,11 +88,10 @@ export class SubscriptionService {
       currentPeriodEnd: new Date(subscription.current_period_end * 1000)
     });
     
-    const priceId = subscription.id;
-    const price = await this.stripe.prices.retrieve(priceId);
+    const price = subscription.items.data[0].price;
     
     logDebug("価格情報", { 
-      priceId,
+      priceId: price.id,
       amount: price.unit_amount,
       currency: price.currency,
       interval: price.recurring?.interval
