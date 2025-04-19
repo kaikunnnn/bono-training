@@ -85,19 +85,18 @@ serve(async (req) => {
       logDebug("Stripe APIキーが設定されていません");
       
       // Stripeキーがない場合はテスト用の値を設定
-      // user_subscriptionsテーブルを直接更新
-      const { data: insertData, error: insertError } = await supabaseAdmin
+      const { data: updateData, error: updateError } = await supabaseAdmin
         .from("user_subscriptions")
-        .upsert({
-          user_id: user.id,
-          is_active: true, // テスト用に有効に設定
-          plan_type: "standard", // テスト用にstandard
+        .update({
+          is_active: true,
+          plan_type: "standard",
           updated_at: new Date().toISOString()
-        }, { onConflict: "user_id" });
+        })
+        .eq("user_id", user.id);
         
-      logDebug("テスト用サブスクリプション情報を挿入", { 
-        data: insertData, 
-        error: insertError 
+      logDebug("テスト用サブスクリプション情報を更新", { 
+        data: updateData, 
+        error: updateError 
       });
       
       return new Response(
@@ -117,48 +116,11 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    // DBからユーザーのStripe Customer IDを検索
-    const { data: customerData, error: customerError } = await supabaseClient
-      .from("stripe_customers")
-      .select("stripe_customer_id")
-      .eq("user_id", user.id)
-      .single();
-    
-    if (customerError || !customerData) {
-      logDebug("Stripe顧客情報なし", { error: customerError });
-      
-      // Stripe顧客情報が存在しない場合、テスト用のデータを作成
-      const { data: insertData, error: insertError } = await supabaseAdmin
-        .from("user_subscriptions")
-        .upsert({
-          user_id: user.id,
-          is_active: true, // テスト用に有効に設定
-          plan_type: "standard", // テスト用にstandard
-          updated_at: new Date().toISOString()
-        }, { onConflict: "user_id" });
-        
-      logDebug("テスト用サブスクリプション情報を挿入", { 
-        data: insertData, 
-        error: insertError 
-      });
-      
-      return new Response(
-        JSON.stringify({ 
-          subscribed: true, 
-          planType: "standard",
-          testMode: true
-        }),
-        {
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-          status: 200,
-        }
-      );
-    }
-    
     // アクティブなサブスクリプションを検索
     const subscriptions = await stripe.subscriptions.list({
-      customer: customerData.stripe_customer_id,
+      customer: null,
       status: "active",
+      expand: ["data.customer"],
       limit: 1,
     });
     
@@ -179,69 +141,62 @@ serve(async (req) => {
         currentPeriodEnd: new Date(subscription.current_period_end * 1000)
       });
       
-      // プラン情報を取得（例：価格IDからプランタイプを判断）
+      // プラン情報を取得
       const priceId = subscription.items.data[0].price.id;
+      const price = await stripe.prices.retrieve(priceId);
+      const amount = price.unit_amount || 0;
       
-      // ここでプラン情報を判断するロジックを実装（例：Stripeの価格IDからプランタイプを決定）
-      try {
-        const price = await stripe.prices.retrieve(priceId);
-        const amount = price.unit_amount || 0;
-        
-        logDebug("価格情報", { 
-          priceId,
-          amount,
-          currency: price.currency,
-          interval: price.recurring?.interval
-        });
-        
-        // 金額に基づいてプランを判断（例）
-        if (amount <= 1000) {
-          planType = "standard";
-        } else if (amount <= 2000) {
-          planType = "growth";
-        } else {
-          planType = "community";
-        }
-        
-        logDebug("プラン判定", { amount, planType });
-        
-        // user_subscriptionsテーブルを更新
-        const { error: subscriptionUpdateError } = await supabaseAdmin
-          .from("user_subscriptions")
-          .upsert({
-            user_id: user.id,
-            is_active: true,
-            plan_type: planType,
-            stripe_subscription_id: subscription.id,
-            updated_at: new Date().toISOString()
-          }, { onConflict: "user_id" });
+      logDebug("価格情報", { 
+        priceId,
+        amount,
+        currency: price.currency,
+        interval: price.recurring?.interval
+      });
+      
+      // 金額に基づいてプランを判断
+      if (amount <= 1000) {
+        planType = "standard";
+      } else if (amount <= 2000) {
+        planType = "growth";
+      } else {
+        planType = "community";
+      }
+      
+      logDebug("プラン判定", { amount, planType });
+      
+      // user_subscriptionsテーブルを更新
+      const { data: updateData, error: updateError } = await supabaseAdmin
+        .from("user_subscriptions")
+        .update({
+          is_active: true,
+          plan_type: planType,
+          stripe_subscription_id: subscription.id,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", user.id);
           
-        if (subscriptionUpdateError) {
-          console.error("サブスクリプション情報の更新エラー:", subscriptionUpdateError);
-          logDebug("サブスクリプション情報更新エラー", subscriptionUpdateError);
-        } else {
-          logDebug("サブスクリプション情報更新成功");
-        }
-      } catch (error) {
-        console.error("プラン情報の取得エラー:", error);
-        logDebug("プラン情報取得エラー", { error });
+      if (updateError) {
+        console.error("サブスクリプション情報の更新エラー:", updateError);
+        logDebug("サブスクリプション情報更新エラー", updateError);
+      } else {
+        logDebug("サブスクリプション情報更新成功");
       }
     } else {
       logDebug("アクティブなサブスクリプションなし");
       
       // アクティブなサブスクリプションがない場合、状態を更新
-      const { error: subscriptionUpdateError } = await supabaseAdmin
+      const { data: updateData, error: updateError } = await supabaseAdmin
         .from("user_subscriptions")
-        .upsert({
-          user_id: user.id,
+        .update({
           is_active: false,
           plan_type: planType,
           updated_at: new Date().toISOString()
-        }, { onConflict: "user_id" });
+        })
+        .eq("user_id", user.id);
         
-      if (subscriptionUpdateError) {
-        console.error("サブスクリプション情報の更新エラー:", subscriptionUpdateError);
-        logDebug("サブスクリプション情報更新エラー", subscriptionUpdateError);
+      if (updateError) {
+        console.error("サブスクリプション情報の更新エラー:", updateError);
+        logDebug("サブスクリプション情報更新エラー", updateError);
       } else {
         logDebug("サブスクリプション情報更新成功");
       }
