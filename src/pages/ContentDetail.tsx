@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -35,14 +36,34 @@ const ContentDetail: React.FC = () => {
       </Layout>
     );
   }
-  
-  // エラー状態の表示
-  if (error || !content) {
+
+  // エラー状態（コンテンツなし）の表示 - 無料プレビューがある場合はこの条件をスキップ
+  if (error && !content) {
     return (
       <Layout>
         <div className="container py-8">
           <div className="rounded-lg border border-destructive p-6 text-center">
             <p className="text-destructive">{error?.message || 'コンテンツが見つかりませんでした'}</p>
+            <Button 
+              variant="outline" 
+              className="mt-4"
+              onClick={() => navigate('/content')}
+            >
+              コンテンツ一覧に戻る
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+  
+  // コンテンツがない場合（エラーはあるが、無料プレビューもない場合）
+  if (!content) {
+    return (
+      <Layout>
+        <div className="container py-8">
+          <div className="rounded-lg border border-destructive p-6 text-center">
+            <p className="text-destructive">コンテンツが見つかりませんでした</p>
             <Button 
               variant="outline" 
               className="mt-4"
@@ -101,6 +122,38 @@ const ContentDetail: React.FC = () => {
           </Button>
         </div>
         
+        {/* 無料プレビューの場合に表示する通知 */}
+        {isFreePreview && (
+          <div className="mb-4 rounded-md bg-amber-50 dark:bg-amber-950 p-4 border-l-4 border-amber-500">
+            <div className="flex items-start">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-amber-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                  無料プレビュー
+                </h3>
+                <div className="mt-2 text-sm text-amber-700 dark:text-amber-400">
+                  <p>
+                    これは無料プレビュー版です。全てのコンテンツを閲覧するには、サブスクリプションが必要です。
+                  </p>
+                </div>
+                <div className="mt-4">
+                  <div className="-mx-2 -my-1.5 flex">
+                    <Link to="/subscription">
+                      <Button variant="outline" size="sm" className="bg-amber-50 text-amber-800 border-amber-500 hover:bg-amber-100 dark:bg-amber-900 dark:text-amber-300 dark:hover:bg-amber-800">
+                        サブスクリプションを購入する
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="lg:col-span-2">
             <div className="mb-4 space-y-2">
@@ -148,6 +201,7 @@ const ContentDetail: React.FC = () => {
               canViewFree={canViewFree} 
               canViewPremium={canViewPremium} 
               isFreePreview={isFreePreview}
+              error={error}
             />
           </div>
           
@@ -222,13 +276,15 @@ interface ContentBodyProps {
   canViewFree: boolean;
   canViewPremium: boolean;
   isFreePreview?: boolean;
+  error?: Error | null;
 }
 
 const ContentBody: React.FC<ContentBodyProps> = ({ 
   content, 
   canViewFree, 
   canViewPremium,
-  isFreePreview = false
+  isFreePreview = false,
+  error = null
 }) => {
   // 無料コンテンツまたは有料コンテンツを表示する権限があるかどうか
   const isFreeContent = content.accessLevel === 'free';
@@ -261,11 +317,11 @@ const ContentBody: React.FC<ContentBodyProps> = ({
       );
     }
     
-    // 非加入者は無料プレビューとサブスクリプション案内を表示
+    // 非加入者または無料プレビューの場合
     return (
       <div className="space-y-6">
-        {/* 無料プレビュー動画 */}
-        {canViewFree && !isFreeContent && freeVideoUrl && (
+        {/* 無料プレビュー動画 - 無料コンテンツでない場合に表示 */}
+        {canViewFree && (isFreePreview || !isFreeContent) && freeVideoUrl && (
           <div className="space-y-4">
             <div className="aspect-video overflow-hidden rounded-lg">
               <VimeoPlayer
@@ -274,9 +330,11 @@ const ContentBody: React.FC<ContentBodyProps> = ({
                 responsive={true}
               />
             </div>
-            <div className="rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
-              これは無料プレビュー版です。完全版を視聴するにはサブスクリプションが必要です。
-            </div>
+            {!isFreeContent && (
+              <div className="rounded-md bg-muted p-2 text-center text-sm text-muted-foreground">
+                これは無料プレビュー版です。完全版を視聴するにはサブスクリプションが必要です。
+              </div>
+            )}
           </div>
         )}
         
@@ -292,7 +350,7 @@ const ContentBody: React.FC<ContentBodyProps> = ({
         )}
         
         {/* 有料コンテンツの場合はサブスクリプション案内を表示 */}
-        {!isFreeContent && <SubscriptionCTA />}
+        {!isFreeContent && !canViewPremium && <SubscriptionCTA error={error} />}
       </div>
     );
   } 
@@ -327,7 +385,7 @@ const ContentBody: React.FC<ContentBodyProps> = ({
       );
     }
     
-    // 非加入者は無料プレビューとサブスクリプション案内を表示
+    // 非加入者または無料プレビューの場合
     return (
       <div className="space-y-6">
         {/* 無料部分 */}
@@ -342,7 +400,7 @@ const ContentBody: React.FC<ContentBodyProps> = ({
         )}
         
         {/* サブスクリプション案内 */}
-        <SubscriptionCTA />
+        <SubscriptionCTA error={error} />
       </div>
     );
   } 
@@ -385,13 +443,13 @@ const ContentBody: React.FC<ContentBodyProps> = ({
 };
 
 // サブスクリプション購入誘導コンポーネント
-const SubscriptionCTA: React.FC = () => {
+const SubscriptionCTA: React.FC<{ error?: Error | null }> = ({ error }) => {
   return (
     <div className="rounded-lg border-2 border-dashed border-primary/30 p-6">
       <div className="text-center">
         <h3 className="text-xl font-medium">プレミアムコンテンツ</h3>
         <p className="mt-2 text-muted-foreground">
-          このコンテンツの続きを閲覧するには、プレミアムメンバーシップへの登録が必要です。
+          {error ? error.message : 'このコンテンツの続きを閲覧するには、プレミアムメンバーシップへの登録が必要です。'}
         </p>
         <div className="mt-6 space-y-4">
           <ul className="mx-auto max-w-xs space-y-2 text-left">

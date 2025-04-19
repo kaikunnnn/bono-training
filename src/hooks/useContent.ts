@@ -153,7 +153,23 @@ export const useContentItem = (contentId: string) => {
         // API経由でコンテンツを取得
         const { content: fetchedContent, error: fetchError, isFreePreview: fetchedIsFreePreview } = await getContentByIdFromApi(contentId);
         
-        if (fetchError) {
+        // エラーがある場合でも、無料プレビューコンテンツが提供されているかチェック
+        if (fetchError && fetchedContent) {
+          console.log('403エラーだが無料プレビューコンテンツあり:', {
+            contentId, 
+            title: fetchedContent.title,
+            isFreePreview: fetchedIsFreePreview
+          });
+          
+          setContent(fetchedContent);
+          setIsFreePreview(true);
+          setError(fetchError); // エラーは保持するが、コンテンツも表示
+          setLoading(false);
+          return;
+        }
+        
+        // 通常のエラー（コンテンツなし）
+        if (fetchError && !fetchedContent) {
           console.error('コンテンツ取得エラー:', fetchError);
           throw fetchError;
         }
@@ -171,10 +187,13 @@ export const useContentItem = (contentId: string) => {
         
         setContent(fetchedContent);
         setIsFreePreview(fetchedIsFreePreview || false);
+        setError(null); // エラーをクリア
         setLoading(false);
       } catch (err) {
         console.error('コンテンツの取得中にエラーが発生しました:', err);
         setError(err instanceof Error ? err : new Error('コンテンツの取得に失敗しました'));
+        setContent(null); // エラー時はコンテンツをクリア
+        setIsFreePreview(false);
         setLoading(false);
       }
     };

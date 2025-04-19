@@ -15,6 +15,11 @@ export class SubscriptionService {
    */
   async getUserSubscription(userId: string): Promise<UserSubscription | null> {
     try {
+      if (!userId) {
+        logDebug("無効なユーザーID", { userId });
+        return null;
+      }
+
       const { data, error } = await this.supabaseAdmin
         .from("user_subscriptions")
         .select("*")
@@ -48,23 +53,33 @@ export class SubscriptionService {
     planType: string | null,
     stripeSubscriptionId?: string
   ) {
-    const { data: updateData, error: updateError } = await this.supabaseAdmin
-      .from("user_subscriptions")
-      .update({
-        is_active: isActive,
-        plan_type: planType,
-        stripe_subscription_id: stripeSubscriptionId,
-        updated_at: new Date().toISOString()
-      })
-      .eq("user_id", userId);
-      
-    if (updateError) {
-      logDebug("サブスクリプション情報更新エラー", updateError);
-    } else {
-      logDebug("サブスクリプション情報更新成功");
+    if (!userId) {
+      logDebug("無効なユーザーID - 更新スキップ", { userId });
+      return { data: null, error: new Error("無効なユーザーID") };
     }
-    
-    return { data: updateData, error: updateError };
+
+    try {
+      const { data: updateData, error: updateError } = await this.supabaseAdmin
+        .from("user_subscriptions")
+        .update({
+          is_active: isActive,
+          plan_type: planType,
+          stripe_subscription_id: stripeSubscriptionId,
+          updated_at: new Date().toISOString()
+        })
+        .eq("user_id", userId);
+        
+      if (updateError) {
+        logDebug("サブスクリプション情報更新エラー", updateError);
+      } else {
+        logDebug("サブスクリプション情報更新成功", { userId, isActive, planType });
+      }
+      
+      return { data: updateData, error: updateError };
+    } catch (err) {
+      logDebug("予期せぬエラー - updateSubscriptionStatus", err);
+      return { data: null, error: err instanceof Error ? err : new Error('不明なエラー') };
+    }
   }
 
   /**
@@ -88,6 +103,11 @@ export class SubscriptionService {
       return null;
     }
 
+    if (!userId) {
+      logDebug("無効なユーザーID", { userId });
+      return null;
+    }
+
     try {
       // 最初にデータベースの購読情報をチェック
       const dbSubscription = await this.getUserSubscription(userId);
@@ -101,41 +121,46 @@ export class SubscriptionService {
       }
 
       // ユーザーのStripe顧客情報を検索
-      const customers = await this.stripe.customers.list({ 
-        email: userId,
-        limit: 1 
-      });
+      try {
+        const customers = await this.stripe.customers.list({ 
+          email: userId,
+          limit: 1 
+        });
 
-      if (customers.data.length === 0) {
-        logDebug("Stripe顧客情報が見つかりません", { userId });
+        if (customers.data.length === 0) {
+          logDebug("Stripe顧客情報が見つかりません", { userId });
+          return null;
+        }
+
+        const customerId = customers.data[0].id;
+        const subscriptions = await this.stripe.subscriptions.list({
+          customer: customerId,
+          status: "active",
+          expand: ["data.items.data.price"],
+          limit: 1,
+        });
+        
+        if (subscriptions.data.length === 0) {
+          logDebug("アクティブなサブスクリプションが見つかりません", { customerId });
+          return null;
+        }
+
+        const subscription = subscriptions.data[0];
+        logDebug("Stripeサブスクリプション検索結果", { 
+          id: subscription.id,
+          status: subscription.status,
+          customerId
+        });
+
+        return {
+          id: subscription.id,
+          status: subscription.status,
+          current_period_end: subscription.current_period_end
+        };
+      } catch (stripeErr) {
+        logDebug("Stripeサブスクリプション検索エラー", stripeErr);
         return null;
       }
-
-      const customerId = customers.data[0].id;
-      const subscriptions = await this.stripe.subscriptions.list({
-        customer: customerId,
-        status: "active",
-        expand: ["data.items.data.price"],
-        limit: 1,
-      });
-      
-      if (subscriptions.data.length === 0) {
-        logDebug("アクティブなサブスクリプションが見つかりません", { customerId });
-        return null;
-      }
-
-      const subscription = subscriptions.data[0];
-      logDebug("Stripeサブスクリプション検索結果", { 
-        id: subscription.id,
-        status: subscription.status,
-        customerId
-      });
-
-      return {
-        id: subscription.id,
-        status: subscription.status,
-        current_period_end: subscription.current_period_end
-      };
     } catch (error) {
       logDebug("Stripeサブスクリプション取得エラー", error);
       // Stripeのエラーが発生しても、データベースの情報を信頼する
