@@ -1,17 +1,19 @@
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import VimeoPlayer from '@/components/content/VimeoPlayer';
 import { Button } from '@/components/ui/button';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { getContentById } from '@/services/content';
+import { getContentById as getMockContentById } from '@/data/mockContent';
 import { ContentItem } from '@/types/content';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const VideoDetailTest = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [content, setContent] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFreePreview, setIsFreePreview] = useState(false);
@@ -23,16 +25,35 @@ const VideoDetailTest = () => {
       
       try {
         setLoading(true);
+        // API経由でコンテンツを取得
         const { content: fetchedContent, error, isFreePreview } = await getContentById(id);
         
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-
+        // コンテンツが取得できた場合はそれを使用
         if (fetchedContent) {
           setContent(fetchedContent);
           setIsFreePreview(isFreePreview || false);
+          if (error) {
+            toast.info(error.message);
+          }
+          setLoading(false);
+          return;
+        }
+        
+        // APIでの取得に失敗した場合、モックデータからの取得を試みる
+        if (error) {
+          console.log('APIによるコンテンツ取得失敗、モックデータから取得を試みます:', id);
+          const mockContent = getMockContentById(id);
+          
+          if (mockContent) {
+            console.log('モックデータからコンテンツを取得しました:', mockContent.title);
+            setContent(mockContent);
+            setIsFreePreview(!isSubscribed && mockContent.accessLevel !== 'free');
+            setLoading(false);
+            return;
+          }
+          
+          // モックデータからも取得できなかった場合
+          toast.error(error.message || 'コンテンツの取得に失敗しました');
         }
       } catch (err) {
         toast.error('コンテンツの取得に失敗しました');
@@ -43,7 +64,7 @@ const VideoDetailTest = () => {
     };
 
     fetchContent();
-  }, [id]);
+  }, [id, isSubscribed]);
 
   if (loading) {
     return (
@@ -60,6 +81,13 @@ const VideoDetailTest = () => {
       <Layout>
         <div className="container py-8">
           <h1 className="text-2xl font-bold">コンテンツが見つかりません</h1>
+          <Button 
+            variant="outline" 
+            className="mt-4"
+            onClick={() => navigate('/')}
+          >
+            トップページに戻る
+          </Button>
         </div>
       </Layout>
     );

@@ -1,40 +1,55 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useContentItem } from '@/hooks/useContent';
+import { getContentById as getMockContentById } from '@/data/mockContent';
+import { ContentItem } from '@/types/content';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Calendar, Clock, Lock } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Lock, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import VimeoPlayer from '@/components/content/VimeoPlayer';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 
 const ContentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { content, loading, error, getContentVisibility, isFreePreview } = useContentItem(id || '');
+  const { content: apiContent, loading, error, getContentVisibility, isFreePreview } = useContentItem(id || '');
+  const [content, setContent] = useState<ContentItem | null>(null);
+  const [localIsFreePreview, setLocalIsFreePreview] = useState(false);
+  const { isSubscribed, planType } = useSubscriptionContext();
+
+  useEffect(() => {
+    if (apiContent) {
+      setContent(apiContent);
+      setLocalIsFreePreview(isFreePreview || false);
+    } else if (error && id) {
+      console.log('APIによるコンテンツ取得失敗、モックデータから取得を試みます:', id);
+      const mockContent = getMockContentById(id);
+      
+      if (mockContent) {
+        console.log('モックデータからコンテンツを取得しました:', mockContent.title);
+        setContent(mockContent);
+        setLocalIsFreePreview(!isSubscribed && mockContent.accessLevel !== 'free');
+      }
+    }
+  }, [apiContent, error, id, isFreePreview, isSubscribed]);
   
-  // ローディング状態の表示
   if (loading) {
     return (
       <Layout>
         <div className="container py-8">
-          <div className="animate-pulse space-y-4">
-            <div className="h-8 w-3/4 rounded bg-muted"></div>
-            <div className="h-4 w-1/2 rounded bg-muted"></div>
-            <div className="aspect-video rounded bg-muted"></div>
-            <div className="h-4 rounded bg-muted"></div>
-            <div className="h-4 w-3/4 rounded bg-muted"></div>
+          <div className="flex justify-center items-center min-h-[50vh]">
+            <Loader2 className="h-8 w-8 animate-spin" />
           </div>
         </div>
       </Layout>
     );
   }
 
-  // エラー状態の表示
-  if (error && !content) {
+  if (!content) {
     return (
       <Layout>
         <div className="container py-8">
@@ -52,31 +67,18 @@ const ContentDetail: React.FC = () => {
       </Layout>
     );
   }
-  
-  // コンテンツがない場合
-  if (!content) {
-    return (
-      <Layout>
-        <div className="container py-8">
-          <div className="rounded-lg border border-destructive p-6 text-center">
-            <p className="text-destructive">コンテンツが見つかりませんでした</p>
-            <Button 
-              variant="outline" 
-              className="mt-4"
-              onClick={() => navigate('/content')}
-            >
-              コンテンツ一覧に戻る
-            </Button>
-          </div>
-        </div>
-      </Layout>
-    );
-  }
 
-  // コンテンツの可視状態を取得
-  const { canViewFree, canViewPremium } = getContentVisibility();
+  const { canViewFree, canViewPremium } = getContentVisibility ? 
+    getContentVisibility() : 
+    { 
+      canViewFree: true, 
+      canViewPremium: content.accessLevel === 'free' || (isSubscribed && (
+        planType === 'community' || 
+        (planType === 'growth' && content.accessLevel !== 'community') ||
+        (planType === 'standard' && ['free', 'standard'].includes(content.accessLevel))
+      ))
+    };
   
-  // 日付のフォーマット
   const formatDate = (dateString: string): string => {
     try {
       return format(new Date(dateString), 'yyyy年MM月dd日');
@@ -85,7 +87,6 @@ const ContentDetail: React.FC = () => {
     }
   };
   
-  // 動画の長さを表示用にフォーマット
   const formatDuration = (seconds?: number): string => {
     if (!seconds) return '不明';
     
@@ -115,8 +116,7 @@ const ContentDetail: React.FC = () => {
           </Button>
         </div>
         
-        {/* 無料プレビューの場合に表示する通知 */}
-        {isFreePreview && (
+        {localIsFreePreview && (
           <div className="mb-4 rounded-md bg-amber-50 dark:bg-amber-950 p-4 border-l-4 border-amber-500">
             <div className="flex items-start">
               <div className="flex-shrink-0">
@@ -188,11 +188,9 @@ const ContentDetail: React.FC = () => {
             
             <Separator className="my-6" />
             
-            {/* コンテンツ本体 - アクセス権に基づいて表示 */}
             {content.type === 'video' && (
               <div className="space-y-6">
-                {/* 有料コンテンツの場合 */}
-                {canViewPremium && !isFreePreview && (
+                {canViewPremium && !localIsFreePreview && (
                   <div className="space-y-4">
                     <div className="aspect-video overflow-hidden rounded-lg border-2 border-primary">
                       <VimeoPlayer
@@ -209,8 +207,7 @@ const ContentDetail: React.FC = () => {
                   </div>
                 )}
                 
-                {/* 無料プレビューまたは非会員の場合 */}
-                {(!canViewPremium || isFreePreview) && (
+                {(!canViewPremium || localIsFreePreview) && (
                   <div className="space-y-6">
                     {canViewFree && content.freeVideoUrl && (
                       <div className="space-y-4">
@@ -236,7 +233,6 @@ const ContentDetail: React.FC = () => {
                       </div>
                     )}
                     
-                    {/* サブスクリプション案内 */}
                     <div className="rounded-lg border-2 border-dashed border-primary/30 p-6">
                       <div className="text-center">
                         <h3 className="text-xl font-medium">プレミアムコンテンツ</h3>

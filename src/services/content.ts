@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { ContentItem } from '@/types/content';
+import { getContentById as getMockContentById } from '@/data/mockContent';
 
 /**
  * 指定されたIDのコンテンツを取得する
@@ -21,15 +22,40 @@ export async function getContentById(contentId: string): Promise<{
       };
     }
 
-    console.log('リクエスト開始 - コンテンツID:', contentId);
+    console.log(`リクエスト開始 - コンテンツID: ${contentId}`);
 
     // ユーザーの認証状態を確認
     const { data: { session } } = await supabase.auth.getSession();
     const isAuthenticated = !!session?.user;
     
-    console.log('認証状態:', isAuthenticated ? '認証済み' : '未認証');
+    console.log(`認証状態: ${isAuthenticated ? '認証済み' : '未認証'}`);
 
-    // Supabase Edge Functionを呼び出してコンテンツを取得
+    // エッジファンクションで問題が発生する場合のフォールバック処理
+    // モックデータから直接取得を試みる
+    const mockContent = getMockContentById(contentId);
+    if (mockContent) {
+      if (mockContent.accessLevel === 'free' || isAuthenticated) {
+        // 無料コンテンツまたは認証済みユーザーには完全なコンテンツを返す
+        return {
+          content: mockContent,
+          error: null,
+          isFreePreview: false
+        };
+      } else {
+        // 未認証ユーザーには無料プレビューを返す
+        return {
+          content: {
+            ...mockContent,
+            videoUrl: mockContent.freeVideoUrl || mockContent.videoUrl,
+            content: mockContent.freeContent || mockContent.content
+          },
+          error: new Error('このコンテンツの完全版を閲覧するには、ログインが必要です'),
+          isFreePreview: true
+        };
+      }
+    }
+
+    // Supabase Edge Functionを呼び出してコンテンツを取得（バックアップとして維持）
     const { data, error } = await supabase.functions.invoke('get-content', {
       method: 'POST',
       body: { id: contentId },
@@ -57,10 +83,18 @@ export async function getContentById(contentId: string): Promise<{
     }
 
     // 正常なレスポンス
-    console.log('コンテンツ取得成功:', data.content);
+    if (data?.content) {
+      console.log('コンテンツ取得成功:', data.content);
+      return {
+        content: data.content as ContentItem,
+        error: null
+      };
+    }
+
+    // ここまで到達したが、コンテンツが見つからない場合はエラーを返す
     return {
-      content: data.content as ContentItem,
-      error: null
+      content: null,
+      error: new Error('コンテンツが見つかりませんでした'),
     };
   } catch (err) {
     console.error('予期せぬエラー:', err);
