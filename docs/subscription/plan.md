@@ -1,3 +1,4 @@
+
 # サービスで提供する有料プランの定義
 
 ## 目的
@@ -21,27 +22,43 @@ NEXT_PUBLIC_STRIPE_TEST_PRICE_ID=price_1Qit9MKUVUnt8GtyoXFzn2Ui
 STRIPE_SECRET_KEY=sk_test_51HDQT3KUVUnt8GtyBvbE1xjTcOZUDnXQBSoYyiSpaf5OIRDftnZZfeIsRGuSqHseAS6uhBFGNsfJ96kCyYgdgYSy00sDvQHQMO
 ```
 
-## 実装タスク
+## コンテンツアクセスの仕組み
 
-- Checkout セッション作成 API で process.env.NEXT_PUBLIC_STRIPE_PRICE_ID を参照
-- 環境（開発・本番）によって、Price ID を使い分けられるようにするロジックを追加
-- Checkout セッションの line_items に適切な Price ID を設定する
-- 今後複数プランができた場合に備え、Price ID の管理を共通ユーティリティに切り出してもよい
+### プラン区分
 
-## プラン
+サブスクリプションは以下の2つの大きな区分で管理されます：
 
-#### 出しワケの仕組み
+1. **学習コンテンツ（Learning）**
+   - アクセス可能なプラン: `standard`, `growth`
+   - 基本的な学習コンテンツにアクセスできます
 
-learning: ['standard','growth'],
-member: ['standard','growth','community']
+2. **メンバー限定コンテンツ（Member）**
+   - アクセス可能なプラン: `standard`, `growth`, `community`
+   - より高度または専門的なコンテンツにアクセスできます
 
-#### プランの種類と値段
+### プランの階層
+
+- `free`: すべての無料コンテンツにアクセス可能
+- `standard`: 学習コンテンツと一部のメンバー限定コンテンツ
+- `growth`: すべての学習コンテンツとほぼすべてのメンバー限定コンテンツ
+- `community`: すべてのコンテンツにアクセス可能
+
+### アクセス制御の基本ルール
+
+1. 無料ユーザーは無料コンテンツのみ閲覧可能
+2. サブスクリプション保持者は、そのプランに応じたコンテンツにアクセス可能
+3. 上位プランは下位プランのコンテンツもすべて閲覧可能
+
+## プラン詳細
+
+### 価格設定
 
 - standard: 4000 円
 - growth: 9800 円
-- community 1480 円
+- community: 1480 円
 
 ## 補足
 
 - STRIPE_SECRET_KEY はサーバー側でのみ利用（Webhook や Checkout API）
-- NEXT*PUBLIC*〜はフロントで参照する場合用。セキュリティの観点で秘密情報を含まないよう注意する
+- NEXT_PUBLIC_〜はフロントで参照する場合用。セキュリティの観点で秘密情報を含まないよう注意する
+
