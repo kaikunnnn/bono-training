@@ -58,6 +58,20 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, isAccessible = true 
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  // アクセスレベルを表示用にフォーマット
+  const getAccessLevelLabel = (accessLevel: string): string => {
+    switch (accessLevel) {
+      case 'free':
+        return '';
+      case 'learning':
+        return '学習コンテンツ';
+      case 'member':
+        return 'メンバー限定';
+      default:
+        return accessLevel;
+    }
+  };
+
   return (
     <Card className={`overflow-hidden ${!isAccessible ? 'opacity-70' : ''}`}>
       <div className="relative aspect-video overflow-hidden bg-muted">
@@ -97,9 +111,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, isAccessible = true 
           
           {content.accessLevel !== 'free' && (
             <Badge variant="secondary">
-              {content.accessLevel === 'standard' ? 'スタンダード' : 
-              content.accessLevel === 'growth' ? 'グロース' : 
-              content.accessLevel === 'community' ? 'コミュニティ' : ''}
+              {getAccessLevelLabel(content.accessLevel)}
             </Badge>
           )}
         </div>

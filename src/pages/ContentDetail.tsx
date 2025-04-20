@@ -12,6 +12,7 @@ import { ArrowLeft, Calendar, Clock, Lock, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import VimeoPlayer from '@/components/content/VimeoPlayer';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { CONTENT_PERMISSIONS } from '@/utils/subscriptionPlans';
 
 const ContentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -73,9 +74,9 @@ const ContentDetail: React.FC = () => {
     { 
       canViewFree: true, 
       canViewPremium: content.accessLevel === 'free' || (isSubscribed && (
-        planType === 'community' || 
-        (planType === 'growth' && content.accessLevel !== 'community') ||
-        (planType === 'standard' && ['free', 'standard'].includes(content.accessLevel))
+        (planType && CONTENT_PERMISSIONS.member.includes(planType) && content.accessLevel === 'member') ||
+        (planType && CONTENT_PERMISSIONS.learning.includes(planType) && content.accessLevel === 'learning') ||
+        content.accessLevel === 'free'
       ))
     };
   
@@ -99,6 +100,19 @@ const ContentDetail: React.FC = () => {
     }
     
     return `${minutes}分`;
+  };
+
+  const getAccessLevelLabel = (accessLevel: string): string => {
+    switch (accessLevel) {
+      case 'free':
+        return '無料';
+      case 'learning':
+        return '学習コンテンツ';
+      case 'member':
+        return 'メンバー限定';
+      default:
+        return accessLevel;
+    }
   };
 
   return (
@@ -287,12 +301,7 @@ const ContentDetail: React.FC = () => {
                     <dt className="text-sm font-medium text-muted-foreground">アクセスレベル</dt>
                     <dd className="mt-1 flex items-center gap-2">
                       {content.accessLevel !== 'free' && <Lock className="h-4 w-4" />}
-                      <span>
-                        {content.accessLevel === 'free' ? '無料' :
-                        content.accessLevel === 'standard' ? 'スタンダード' :
-                        content.accessLevel === 'growth' ? 'グロース' :
-                        content.accessLevel === 'community' ? 'コミュニティ' : content.accessLevel}
-                      </span>
+                      <span>{getAccessLevelLabel(content.accessLevel)}</span>
                     </dd>
                   </div>
                   

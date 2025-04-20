@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import ContentCard from './ContentCard';
 import { ContentItem } from '@/types/content';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { CONTENT_PERMISSIONS } from '@/utils/subscriptionPlans';
 
 interface ContentListProps {
   contents: ContentItem[];
@@ -20,7 +21,7 @@ const ContentList: React.FC<ContentListProps> = ({
   loading = false, 
   error = null 
 }) => {
-  const { isSubscribed } = useSubscriptionContext();
+  const { isSubscribed, planType } = useSubscriptionContext();
   
   // ローディング状態の表示
   if (loading) {
@@ -64,9 +65,14 @@ const ContentList: React.FC<ContentListProps> = ({
     if (content.accessLevel === 'free') return true;
     if (!isSubscribed) return false;
     
-    // ここで将来的にはプランタイプによる詳細なアクセス制御を実装
-    // 現在はサブスクリプションがあれば標準コンテンツまでアクセス可能とする
-    return content.accessLevel === 'standard';
+    // プランタイプに基づいたアクセス制御
+    if (content.accessLevel === 'learning') {
+      return CONTENT_PERMISSIONS.learning.includes(planType || '');
+    } else if (content.accessLevel === 'member') {
+      return CONTENT_PERMISSIONS.member.includes(planType || '');
+    }
+    
+    return false;
   };
   
   return (
