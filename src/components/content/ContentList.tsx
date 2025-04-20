@@ -65,11 +65,14 @@ const ContentList: React.FC<ContentListProps> = ({
     if (content.accessLevel === 'free') return true;
     if (!isSubscribed) return false;
     
+    // planTypeがnullまたは空文字列の場合は、アクセス不可
+    if (!planType) return false;
+    
     // プランタイプに基づいたアクセス制御
     if (content.accessLevel === 'learning') {
-      return CONTENT_PERMISSIONS.learning.includes(planType || '');
+      return CONTENT_PERMISSIONS.learning.includes(planType);
     } else if (content.accessLevel === 'member') {
-      return CONTENT_PERMISSIONS.member.includes(planType || '');
+      return CONTENT_PERMISSIONS.member.includes(planType);
     }
     
     return false;
