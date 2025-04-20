@@ -1,24 +1,16 @@
-
 import { useState, useEffect } from 'react';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { ContentItem, ContentFilter } from '@/types/content';
 import { filterContents, getContentById as getMockContentById } from '@/data/mockContent';
 import { getContentById as getContentByIdFromApi } from '@/services/content';
-import { PlanType } from '@/utils/subscriptionPlans';
+import { PlanType, CONTENT_PERMISSIONS } from '@/utils/subscriptionPlans';
 
 /**
  * ユーザーのプランタイプからアクセスレベルを取得する
  */
 const getPlanAccessLevel = (planType: PlanType | null, isActive: boolean): string => {
   if (!isActive || !planType) return 'free';
-  
-  const planAccessMap: Record<PlanType, string> = {
-    'standard': 'standard',
-    'growth': 'growth',
-    'community': 'community',
-  };
-  
-  return planAccessMap[planType] || 'free';
+  return planType;
 };
 
 /**
@@ -69,21 +61,23 @@ export const useContent = (filter?: ContentFilter) => {
     const content = getMockContentById(contentId);
     if (!content) return false;
     
-    // サブスクリプションがない場合、無料コンテンツのみアクセス可能
-    if (!isSubscribed) {
-      return content.accessLevel === 'free';
+    // 無料コンテンツは誰でもアクセス可能
+    if (content.accessLevel === 'free') {
+      return true;
     }
     
-    // プランタイプに基づいてアクセス権限を判定
-    if (planType === 'community') {
-      // コミュニティプランは全てのコンテンツにアクセス可能
-      return true;
-    } else if (planType === 'growth') {
-      // グロースプランはコミュニティ限定以外のコンテンツにアクセス可能
-      return content.accessLevel !== 'community';
-    } else if (planType === 'standard') {
-      // スタンダードプランは標準以下のアクセスレベルコンテンツにアクセス可能
-      return ['free', 'standard'].includes(content.accessLevel);
+    // サブスクリプションがない場合、無料コンテンツのみアクセス可能
+    if (!isSubscribed || !planType) {
+      return false;
+    }
+    
+    // content.accessLevelに基づいてアクセス権限をチェック
+    if (content.accessLevel === 'learning') {
+      // learning コンテンツへのアクセス権限チェック
+      return CONTENT_PERMISSIONS.learning.includes(planType);
+    } else if (content.accessLevel === 'member') {
+      // member コンテンツへのアクセス権限チェ��ク
+      return CONTENT_PERMISSIONS.member.includes(planType);
     }
     
     // デフォルトでは無料コンテンツのみアクセス可能
@@ -105,19 +99,13 @@ export const useContent = (filter?: ContentFilter) => {
     const canViewFree = true;
     
     // 有料部分はサブスクリプションを持っている人のみ閲覧可能
-    // さらにプランタイプに基づいて判定
     let canViewPremium = false;
     
     if (isSubscribed && planType) {
-      if (planType === 'community') {
-        // コミュニティプランは全てのコンテンツにアクセス可能
-        canViewPremium = true;
-      } else if (planType === 'growth') {
-        // グロースプランはコミュニティ限定以外のコンテンツにアクセス可能
-        canViewPremium = content.accessLevel !== 'community';
-      } else if (planType === 'standard') {
-        // スタンダードプランは標準以下のアクセスレベルコンテンツにアクセス可能
-        canViewPremium = ['free', 'standard'].includes(content.accessLevel);
+      if (content.accessLevel === 'learning') {
+        canViewPremium = CONTENT_PERMISSIONS.learning.includes(planType);
+      } else if (content.accessLevel === 'member') {
+        canViewPremium = CONTENT_PERMISSIONS.member.includes(planType);
       }
     }
     
@@ -233,15 +221,11 @@ export const useContentItem = (contentId: string) => {
     
     if (isSubscribed && planType) {
       console.log('サブスクリプション情報:', { isSubscribed, planType });
-      if (planType === 'community') {
-        // コミュニティプランは全てのコンテンツにアクセス可能
-        canViewPremium = true;
-      } else if (planType === 'growth') {
-        // グロースプランはコミュニティ限定以外のコンテンツにアクセス可能
-        canViewPremium = content.accessLevel !== 'community';
-      } else if (planType === 'standard') {
-        // スタンダードプランは標準以下のアクセスレベルコンテンツにアクセス可能
-        canViewPremium = ['free', 'standard'].includes(content.accessLevel);
+      
+      if (content.accessLevel === 'learning') {
+        canViewPremium = CONTENT_PERMISSIONS.learning.includes(planType);
+      } else if (content.accessLevel === 'member') {
+        canViewPremium = CONTENT_PERMISSIONS.member.includes(planType);
       }
     }
     

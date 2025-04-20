@@ -1,3 +1,4 @@
+
 import { ContentItem, ContentCategory, ContentType, ContentAccessLevel } from '@/types/content';
 
 export const MOCK_CONTENTS: ContentItem[] = [
@@ -23,7 +24,7 @@ export const MOCK_CONTENTS: ContentItem[] = [
     type: "video",
     categories: ["ui-design"],
     thumbnailUrl: "/placeholder.svg",
-    accessLevel: "standard",
+    accessLevel: "learning",
     videoUrl: "https://player.vimeo.com/video/783455051",
     freeVideoUrl: "https://player.vimeo.com/video/783455051?h=afd34abcd1",
     videoDuration: 2400,
@@ -40,7 +41,7 @@ export const MOCK_CONTENTS: ContentItem[] = [
     type: "video",
     categories: ["ui-design"],
     thumbnailUrl: "/placeholder.svg",
-    accessLevel: "community",
+    accessLevel: "member",
     videoUrl: "https://player.vimeo.com/video/783455052",
     freeVideoUrl: "https://player.vimeo.com/video/783455052?h=afd34abcd2",
     videoDuration: 3600,

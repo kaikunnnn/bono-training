@@ -8,14 +8,6 @@ const CONTENT_PERMISSIONS = {
   free: ['free', 'standard', 'growth', 'community'], // 無料コンテンツは全てのプランで閲覧可能
 };
 
-// アクセスレベルとコンテンツタイプのマッピング
-const ACCESS_LEVEL_MAPPING = {
-  'free': 'free',
-  'standard': 'learning',
-  'growth': 'learning',
-  'community': 'member',
-};
-
 /**
  * ユーザープラン情報の取得（本番環境では DB から取得）
  */
@@ -61,13 +53,9 @@ export function hasAccessToContent(userPlan: { planType: string | null, isActive
     return hasAccess;
   }
 
-  // アクセスレベルをコンテンツタイプに変換
-  const contentType = ACCESS_LEVEL_MAPPING[contentAccessLevel] || 'free';
-  console.log('コンテンツタイプマッピング:', { contentAccessLevel, contentType });
-  
   // コンテンツタイプに対応するプラン一覧を取得
-  const allowedPlans = CONTENT_PERMISSIONS[contentType] || [];
-  console.log('許可プラン一覧:', { contentType, allowedPlans });
+  const allowedPlans = CONTENT_PERMISSIONS[contentAccessLevel] || [];
+  console.log('許可プラン一覧:', { contentAccessLevel, allowedPlans });
   
   // ユーザーのプランがアクセス可能かチェック
   const hasAccess = allowedPlans.includes(userPlan.planType);

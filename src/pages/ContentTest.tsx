@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -159,7 +158,7 @@ const ContentTest: React.FC = () => {
                     <CardHeader>
                       <CardTitle>メンバー限定コンテンツ（Member）</CardTitle>
                       <CardDescription>
-                        このコンテンツを閲覧するには Standard, Growth または Community プランが必要です
+                        このコンテンツを閲覧するには Growth または Community プランが必要です
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -169,7 +168,7 @@ const ContentTest: React.FC = () => {
                             <h3 className="text-lg font-medium text-purple-800 mb-2">アクセス成功！</h3>
                             <p className="text-purple-700">
                               あなたは「メンバー限定コンテンツ」へのアクセス権を持っています。
-                              このコンテンツはStandard, GrowthまたはCommunityプランユーザーのみが閲覧できます。
+                              このコンテンツはGrowthまたはCommunityプランユーザーのみが閲覧できます。
                             </p>
                           </div>
                           

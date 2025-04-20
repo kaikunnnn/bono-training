@@ -12,10 +12,10 @@ export interface PlanInfo {
   pricePerMonth: number; // 月額価格（単位: 円）
 }
 
-// コンテンツアクセス権限の設定を更新
+// コンテンツアクセス権限の設定
 export const CONTENT_PERMISSIONS: Record<ContentAccessType, PlanType[]> = {
-  learning: ['standard', 'growth'],
-  member: ['standard', 'growth', 'community']
+  learning: ['standard', 'growth', 'community'],
+  member: ['growth', 'community']
 };
 
 // 利用可能なプラン定義

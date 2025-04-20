@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -10,6 +9,7 @@ import { getContentById as getMockContentById } from '@/data/mockContent';
 import { ContentItem } from '@/types/content';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { CONTENT_PERMISSIONS } from '@/utils/subscriptionPlans';
 
 const VideoDetailTest = () => {
   const { id } = useParams();
@@ -17,7 +17,7 @@ const VideoDetailTest = () => {
   const [content, setContent] = useState<ContentItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [isFreePreview, setIsFreePreview] = useState(false);
-  const { isSubscribed } = useSubscriptionContext();
+  const { isSubscribed, planType } = useSubscriptionContext();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -46,8 +46,15 @@ const VideoDetailTest = () => {
           
           if (mockContent) {
             console.log('モックデータからコンテンツを取得しました:', mockContent.title);
+            
+            // 閲覧制限の判定
+            const canViewPremium = mockContent.accessLevel === 'free' || 
+              (isSubscribed && planType && 
+                ((mockContent.accessLevel === 'learning' && CONTENT_PERMISSIONS.learning.includes(planType)) || 
+                 (mockContent.accessLevel === 'member' && CONTENT_PERMISSIONS.member.includes(planType))));
+            
             setContent(mockContent);
-            setIsFreePreview(!isSubscribed && mockContent.accessLevel !== 'free');
+            setIsFreePreview(!canViewPremium);
             setLoading(false);
             return;
           }
@@ -64,7 +71,7 @@ const VideoDetailTest = () => {
     };
 
     fetchContent();
-  }, [id, isSubscribed]);
+  }, [id, isSubscribed, planType]);
 
   if (loading) {
     return (

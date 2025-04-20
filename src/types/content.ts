@@ -1,7 +1,7 @@
 
 export type ContentType = 'video' | 'article' | 'tutorial' | 'course';
 export type ContentCategory = 'figma' | 'ui-design' | 'ux-design' | 'learning' | 'member';
-export type ContentAccessLevel = 'free' | 'standard' | 'growth' | 'community';
+export type ContentAccessLevel = 'free' | 'learning' | 'member';
 
 /**
  * コンテンツのメタデータを定義するインターフェース
