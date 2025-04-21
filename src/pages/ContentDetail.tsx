@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -77,7 +78,7 @@ const ContentDetail: React.FC = () => {
       canViewPremium: content.accessLevel === 'free' || (isSubscribed && (
         (planType && CONTENT_PERMISSIONS.member.includes(planType) && content.accessLevel === 'member') ||
         (planType && CONTENT_PERMISSIONS.learning.includes(planType) && content.accessLevel === 'learning') ||
-        content.accessLevel === 'free'
+        (content.accessLevel === 'free')
       ))
     };
   
