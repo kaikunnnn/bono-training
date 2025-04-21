@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import VimeoPlayer from '@/components/content/VimeoPlayer';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { CONTENT_PERMISSIONS } from '@/utils/subscriptionPlans';
+import { toast } from 'sonner';
 
 const ContentDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
