@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
@@ -75,12 +74,23 @@ const ContentDetail: React.FC = () => {
     getContentVisibility() : 
     { 
       canViewFree: true, 
-      canViewPremium: content?.accessLevel === 'free' || (isSubscribed && (
-        // コンテンツのアクセスレベルに応じて適切なプラン権限をチェック
-        content?.accessLevel === 'free' || 
-        (planType && content?.accessLevel === 'member' && CONTENT_PERMISSIONS.member.includes(planType)) ||
-        (planType && content?.accessLevel === 'learning' && CONTENT_PERMISSIONS.learning.includes(planType))
-      ))
+      canViewPremium: (() => {
+        if (content.accessLevel === 'free') {
+          return true;
+        }
+        
+        if (!isSubscribed || !planType) {
+          return false;
+        }
+        
+        if (content.accessLevel === 'member') {
+          return CONTENT_PERMISSIONS.member.includes(planType);
+        } else if (content.accessLevel === 'learning') {
+          return CONTENT_PERMISSIONS.learning.includes(planType);
+        }
+        
+        return false;
+      })()
     };
   
   const formatDate = (dateString: string): string => {
