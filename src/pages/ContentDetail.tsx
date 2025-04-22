@@ -75,10 +75,11 @@ const ContentDetail: React.FC = () => {
     getContentVisibility() : 
     { 
       canViewFree: true, 
-      canViewPremium: content.accessLevel === 'free' || (isSubscribed && (
-        (planType && CONTENT_PERMISSIONS.member.includes(planType) && content.accessLevel === 'member') ||
-        (planType && CONTENT_PERMISSIONS.learning.includes(planType) && content.accessLevel === 'learning') ||
-        (content.accessLevel === 'free')
+      canViewPremium: content?.accessLevel === 'free' || (isSubscribed && (
+        // コンテンツのアクセスレベルに応じて適切なプラン権限をチェック
+        content?.accessLevel === 'free' || 
+        (planType && content?.accessLevel === 'member' && CONTENT_PERMISSIONS.member.includes(planType)) ||
+        (planType && content?.accessLevel === 'learning' && CONTENT_PERMISSIONS.learning.includes(planType))
       ))
     };
   
