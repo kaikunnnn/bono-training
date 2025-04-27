@@ -5,7 +5,7 @@ import { Tables } from '@/integrations/supabase/types';
 import { Lock, CheckCircle2 } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { ContentGuard } from '@/components/subscription/ContentGuard';
+import ContentGuard from '@/components/subscription/ContentGuard';
 import { cn } from '@/lib/utils';
 
 interface TaskListProps {
