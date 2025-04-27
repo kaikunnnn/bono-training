@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +15,6 @@ import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
 import PaidContent from "./pages/PaidContent";
-import ContentTest from "./pages/ContentTest";
 import Content from "./pages/Content";
 import ContentDetail from "./pages/ContentDetail";
 import VideoDetailTest from "./pages/VideoDetailTest";
