@@ -20,7 +20,30 @@ const mockTrainings = [
     thumbnailImage: 'https://example.com/todo-thumb.jpg',
     isFree: true
   },
-  // ... 他のトレーニングデータ
+  {
+    id: '2',
+    slug: 'weather-app',
+    title: '天気アプリUIをデザイン',
+    description: 'データビジュアライゼーションとレイアウトの実践',
+    type: 'challenge',
+    difficulty: '中級',
+    tags: ['データビジュアライゼーション'],
+    backgroundImage: 'https://example.com/weather-bg.jpg',
+    thumbnailImage: 'https://example.com/weather-thumb.jpg',
+    isFree: false
+  },
+  {
+    id: '3',
+    slug: 'dashboard-design',
+    title: 'ダッシュボードを作ろう',
+    description: '複雑なインターフェースの設計と配置を学ぶ',
+    type: 'challenge',
+    difficulty: '難しい',
+    tags: ['複合UI'],
+    backgroundImage: 'https://example.com/dashboard-bg.jpg',
+    thumbnailImage: 'https://example.com/dashboard-thumb.jpg',
+    isFree: false
+  }
 ] as Training[];
 
 const TrainingHome: React.FC = () => {
