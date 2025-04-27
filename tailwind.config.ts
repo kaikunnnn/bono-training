@@ -65,7 +65,9 @@ const config = {
         },
         'training': {
           DEFAULT: '#FF9900',
-          'background': '#FFF9F3'
+          'background': '#FFF9F4',
+          'dark': '#0D221D',
+          'text': '#1D382F',
         }
       },
       borderRadius: {
@@ -98,6 +100,12 @@ const config = {
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out'
+      },
+      fontFamily: {
+        futura: ['Futura', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+        'noto-sans': ['Noto Sans', 'sans-serif'],
+        'rounded-mplus': ['Rounded Mplus 1c', 'sans-serif'],
       }
     }
   },
