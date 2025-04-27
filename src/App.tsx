@@ -8,6 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
+import { useState } from "react";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
@@ -21,45 +22,47 @@ import VideoDetailTest from "./pages/VideoDetailTest";
 import TrainingHome from "./pages/Training";
 import TrainingDetail from "./pages/TrainingDetail";
 
-const queryClient = new QueryClient();
+const App = () => {
+  const [queryClient] = useState(() => new QueryClient());
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <SubscriptionProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              
-              <Route path="/training" element={<TrainingHome />} />
-              <Route path="/training/:slug" element={<TrainingDetail />} />
-              
-              <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
-              
-              <Route path="/content" element={<Content />} />
-              <Route path="/content/:id" element={<ContentDetail />} />
-              
-              <Route path="/video-detail-test/:id" element={<VideoDetailTest />} />
-              
-              <Route path="/paid-only" element={
-                <ProtectedPremiumRoute>
-                  <PaidContent />
-                </ProtectedPremiumRoute>
-              } />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+                <Route path="/reset-password" element={<ResetPassword />} />
+                
+                <Route path="/training" element={<TrainingHome />} />
+                <Route path="/training/:slug" element={<TrainingDetail />} />
+                
+                <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+                
+                <Route path="/content" element={<Content />} />
+                <Route path="/content/:id" element={<ContentDetail />} />
+                
+                <Route path="/video-detail-test/:id" element={<VideoDetailTest />} />
+                
+                <Route path="/paid-only" element={
+                  <ProtectedPremiumRoute>
+                    <PaidContent />
+                  </ProtectedPremiumRoute>
+                } />
 
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
-        </SubscriptionProvider>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </SubscriptionProvider>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
