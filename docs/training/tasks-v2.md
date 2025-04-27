@@ -1,202 +1,252 @@
-````markdown
-# Task 1 ── Supabase に「Training 用テーブル」を作る
+# Task 1 ── Supabase にテーブルを作成し、サンプルデータを挿入する
 
 > **ゴール**  
-> Supabase の管理画面で SQL を 1 回実行し、  
-> ❶ `training` ❷ `task` ❸ `user_progress` の 3 テーブル  
-> と、既存 `subscriptions` テーブルへの列追加を完了させる。  
-> これが **/training ページの“土台データ”** になります。
+> トレーニングとお題のメタデータを管理するためのテーブルを作成し、サンプルデータを挿入します。
+> コンテンツ自体は Markdown ファイルで管理し、メタデータのみを Supabase で管理します。
 
----
+## 🗒 やること（かんたん要約）
 
-## 🗒 やること（超かんたん要約）
+1. **training テーブル**を作成
 
-1. Supabase の **SQL Editor** を開く
-2. ここに貼ってある **青い SQL** をまるごとコピー → 画面にペースト
-3. **Run** ボタンを押して実行
-4. 左メニュー「Table Editor」を開き、3 つの新しいテーブルが見えたら OK
+   - `id`, `slug`, `title`, `description`, `type`, `difficulty`, `tags`, `created_at`
+   - `type` は `'challenge'` または `'skill'`
+   - `difficulty` は `'easy'`, `'normal'`, `'hard'`
 
----
+2. **task テーブル**を作成
 
-## 1️⃣ 事前に用意するもの
+   - `id`, `training_id`, `slug`, `title`, `order_index`, `is_premium`, `preview_sec`, `video_full`, `video_preview`, `created_at`
+   - `training_id` は `training` テーブルの外部キー
+   - `is_premium` は有料コンテンツかどうか
+   - `preview_sec` はプレビュー動画の長さ（秒）
 
-| 項目                      | メモ                                               |
-| ------------------------- | -------------------------------------------------- |
-| Supabase プロジェクト URL | 例 `https://abcde.supabase.co`                     |
-| Supabase ログイン権限     | オーナー or 開発者ロールであれば十分               |
-| このページの SQL          | 下の **`-- ▼▼▼`** から **`-- ▲▲▲`** まで全部コピー |
+3. **user_progress テーブル**を作成
 
----
+   - `user_id`, `task_id`, `status`, `completed_at`
+   - `status` は `'done'`, `'todo'`, `'in-progress'`
+   - `user_id` と `task_id` の組み合わせでユニーク
 
-## 2️⃣ 実行手順（クリック操作だけで完了）
+4. **subscriptions テーブル**に `plan_members` 列を追加
+   - 既存の `plan_pro` 列と同様に、メンバーシップの有無を管理
 
-1. **Supabase Dashboard にログイン**
-2. 左メニュー **「SQL Editor」** を選ぶ → 右上 **「New Query」**
-3. クエリエディタが開いたら、下記 SQL を貼り付け
-4. 画面右上の **緑色 Run ▶︎** をクリック
-5. 「Run completed successfully」のメッセージを確認
-6. 左メニュー **「Table Editor」** → **「public」** スキーマを開く
-   - `training`, `task`, `user_progress` が増えていれば成功
-   - 既存 `subscriptions` に `plan_members` 列が追加されていることも確認
-
----
-
-## 3️⃣ コピペ用 SQL
+## 1️⃣ training テーブル作成
 
 ```sql
--- ▼▼▼ ここからコピー ▼▼▼
--- ① training  (チャレンジ／スキルのメタ)
-create table if not exists public.training (
-  id            uuid primary key default gen_random_uuid(),
-  slug          text unique not null,
-  title         text not null,
+create table public.training (
+  id            uuid        primary key default gen_random_uuid(),
+  slug          text        unique not null,
+  title         text        not null,
   description   text,
-  type          text check (type in ('challenge','skill')),
-  difficulty    text check (difficulty in ('easy','normal','hard')),
-  tags          text[] default '{}',
+  type          text        check (type in ('challenge','skill')),
+  difficulty    text        check (difficulty in ('easy','normal','hard')),
+  tags          text[]      default '{}',
   created_at    timestamptz default now()
 );
+```
 
--- ② task  (個別お題のメタ)
-create table if not exists public.task (
-  id            uuid primary key default gen_random_uuid(),
-  training_id   uuid references public.training (id) on delete cascade,
-  slug          text not null,
-  title         text not null,
-  order_index   int  not null,
-  is_premium    boolean default false,
-  preview_sec   int  default 30,
+## 2️⃣ task テーブル作成
+
+```sql
+create table public.task (
+  id            uuid        primary key default gen_random_uuid(),
+  training_id   uuid        references public.training (id) on delete cascade,
+  slug          text        not null,
+  title         text        not null,
+  order_index   int         not null,
+  is_premium    boolean     default false,
+  preview_sec   int         default 30,
   video_full    text,
   video_preview text,
   created_at    timestamptz default now(),
   unique (training_id, slug)
 );
+```
 
--- ③ user_progress  (完了チェック)
-create table if not exists public.user_progress (
-  user_id      uuid references auth.users (id) on delete cascade,
-  task_id      uuid references public.task  (id) on delete cascade,
-  status       text check (status in ('done','todo','in-progress')) default 'todo',
+## 3️⃣ user_progress テーブル作成
+
+```sql
+create table public.user_progress (
+  user_id     uuid    references auth.users (id) on delete cascade,
+  task_id     uuid    references public.task  (id) on delete cascade,
+  status      text    check (status in ('done','todo','in-progress')) default 'todo',
   completed_at timestamptz,
   primary key (user_id, task_id)
 );
-
--- ④ subscriptions に members フラグを追加
-alter table public.subscriptions
-  add column if not exists plan_members boolean default false;
--- ▲▲▲ ここまでコピー ▲▲▲
 ```
-````
 
-> **ヒント**  
-> `if not exists` を付けているので、うっかり 2 回実行してもエラーになりません。
+## 4️⃣ subscriptions テーブルに plan_members 列を追加
 
----
+```sql
+alter table public.subscriptions
+  add column plan_members boolean default false;
+```
 
-## 4️⃣ 完了確認チェックリスト
+## 5️⃣ サンプルデータの挿入
 
-- [ ] Table Editor に **training / task / user_progress** が表示される
-- [ ] `subscriptions` テーブルの Columns に **plan_members (boolean)** が追加されている
-- [ ] エラーが出ず “SUCCESS” と表示された
+```sql
+-- training テーブルにサンプルデータを挿入
+insert into public.training (slug, title, description, type, difficulty, tags)
+values
+  ('ui-todo', 'UI Todo', 'Todo アプリで UI デザインを筋トレ', 'challenge', 'normal', array['ui', 'figma']),
+  ('react-basics', 'React 基礎', 'React の基礎を学ぶ', 'skill', 'easy', array['react', 'javascript']);
+
+-- task テーブルにサンプルデータを挿入
+insert into public.task (training_id, slug, title, order_index, is_premium, preview_sec)
+select
+  id as training_id,
+  'build-home-ui' as slug,
+  'ホーム画面をつくる' as title,
+  1 as order_index,
+  false as is_premium,
+  30 as preview_sec
+from public.training
+where slug = 'ui-todo';
+
+insert into public.task (training_id, slug, title, order_index, is_premium, preview_sec)
+select
+  id as training_id,
+  'add-todo-flow' as slug,
+  'Todo 追加フロー' as title,
+  2 as order_index,
+  true as is_premium,
+  30 as preview_sec
+from public.training
+where slug = 'ui-todo';
+
+-- テスト用ユーザープログレスデータの挿入
+insert into public.user_progress (user_id, task_id, status, completed_at)
+select
+  '00000000-0000-0000-0000-000000000000' as user_id,  -- テストユーザーID
+  id as task_id,
+  'done' as status,
+  now() as completed_at
+from public.task
+where slug = 'build-home-ui';
+```
+
+## 6️⃣ 動作確認
+
+1. Supabase ダッシュボード → SQL Editor → 新しいクエリに上記を貼り付け → 実行
+2. GUI で「Tables」に反映されれば完了
+3. サンプルデータが正しく挿入されているか確認
+
+## ✅ 完了の目安
+
+- [ ] 4 つのテーブルが正しく作成されている
+- [ ] サンプルデータが正しく挿入されている
+- [ ] 外部キー制約が正しく設定されている
+- [ ] `plan_members` 列が `subscriptions` テーブルに追加されている
 
 🟢 **全部 OK → Task 1 完了！**  
-次は **Task 2（サンプルデータ投入）** へ進んでください。
+次は **Task 2（サンプルデータの挿入と UI 表示の確認）** に進んでください。
 
 ---
 
-# Task 2 ── 「UI Todo」サンプルデータを入れて画面で確認する
+# Task 2 ── サンプルデータの挿入と UI 表示の確認
 
 > **ゴール**  
-> 実際に 1 件のトレーニングと 3 つのお題(Task)を登録し、  
-> ブラウザで `/training` を開いたときに「UI Todo」がカード表示される状態にする。  
-> これにより **一覧画面や詳細画面をリアルデータで動作確認** できます。
-
----
+> トレーニングとタスクのサンプルデータを挿入し、UI での表示を確認します。
+> これにより、データベースと UI の連携が正しく機能していることを確認します。
 
 ## 🗒 やること（かんたん要約）
 
-1. Supabase の **SQL Editor** を開く
-2. 下の **青い INSERT 文** をコピー → ペースト → Run
-3. 「Table Editor」で行が増えたか確認
-4. `/training` ページをリロード → UI Todo が見えれば完了
+1. **サンプルデータの挿入**
 
----
+   - トレーニングデータ（UI Todo, React 基礎）
+   - タスクデータ（ホーム画面作成, Todo 追加フロー）
+   - ユーザープログレスデータ（テスト用）
 
-## 1️⃣ 事前に決める “お試し値”
+2. **UI 表示の確認**
+   - トレーニング一覧ページ
+   - タスク詳細ページ
+   - 進捗バーの表示
+   - プレミアムコンテンツの制限表示
 
-| テーブル        | 入力内容 (例)                                     | 意味                         |
-| --------------- | ------------------------------------------------- | ---------------------------- |
-| `training`      | slug=`ui-todo`, title=`UI Todo`, type=`challenge` | トレーニングの親情報         |
-| `task`          | 3 行（ホーム画面／追加フロー／状態管理）          | 個別お題                     |
-| `user_progress` | 今回は **空のまま**                               | チェック機能は Task 7 で実装 |
-
----
-
-## 2️⃣ 実行手順（クリック操作だけ）
-
-1. **Dashboard → SQL Editor → New Query**
-2. 下記 SQL を貼り付け
-3. **Run ▶︎** をクリック
-4. メッセージが `SUCCESS` になったら OK
-5. **Table Editor** → `public.training` を開く
-   - 1 行 (`ui-todo`) が入っていれば成功
-6. **Table Editor** → `public.task` を開く
-   - 3 行 (`build-home-ui`, …) が入っていれば成功
-7. (オプション) `public.subscriptions` で自分のユーザー行を開き、`plan_members` を **true** にしておくと、有料お題も全開でテストできます。
-
----
-
-## 3️⃣ コピペ用 SQL
+## 1️⃣ サンプルデータの挿入
 
 ```sql
--- ▼▼▼ Training 1 件 ----------
-insert into public.training
-(id, slug, title, description, type, difficulty, tags)
-values (
-  gen_random_uuid(),
-  'ui-todo',
-  'UI Todo',
-  'Todo アプリで UI デザインを筋トレ',
-  'challenge',
-  'normal',
-  array['ui','figma']
-);
-
--- ▲▲ training.id を取得（GUIでコピーでもOK） ▼▼
-with src as (
-  select id from public.training where slug='ui-todo'
-)
-insert into public.task
-(id, training_id, slug, title, order_index, is_premium, preview_sec)
+-- トレーニングデータの挿入
+insert into public.training (slug, title, description, type, difficulty, tags)
 values
-  (gen_random_uuid(), (select id from src), 'build-home-ui',   'ホーム画面をつくる',       1, false, 30),
-  (gen_random_uuid(), (select id from src), 'add-todo-flow',   'Todo 追加フロー',          2, true,  30),
-  (gen_random_uuid(), (select id from src), 'state-management','状態管理を実装する',       3, true,  30);
--- ▲▲▲ ここまでコピー ▲▲▲
+  ('ui-todo', 'UI Todo', 'Todo アプリで UI デザインを筋トレ', 'challenge', 'normal', array['ui', 'figma']),
+  ('react-basics', 'React 基礎', 'React の基礎を学ぶ', 'skill', 'easy', array['react', 'javascript']);
+
+-- タスクデータの挿入
+insert into public.task (training_id, slug, title, order_index, is_premium, preview_sec)
+select
+  id as training_id,
+  'build-home-ui' as slug,
+  'ホーム画面をつくる' as title,
+  1 as order_index,
+  false as is_premium,
+  30 as preview_sec
+from public.training
+where slug = 'ui-todo';
+
+insert into public.task (training_id, slug, title, order_index, is_premium, preview_sec)
+select
+  id as training_id,
+  'add-todo-flow' as slug,
+  'Todo 追加フロー' as title,
+  2 as order_index,
+  true as is_premium,
+  30 as preview_sec
+from public.training
+where slug = 'ui-todo';
+
+-- テスト用ユーザープログレスデータの挿入
+insert into public.user_progress (user_id, task_id, status, completed_at)
+select
+  '00000000-0000-0000-0000-000000000000' as user_id,  -- テストユーザーID
+  id as task_id,
+  'done' as status,
+  now() as completed_at
+from public.task
+where slug = 'build-home-ui';
 ```
 
-> **ポイント**  
-> 2 回目以降に同じスクリプトを流すと slug が重複するので、既にある場合は `delete from training where slug='ui-todo';` で一度消してから実行してください。
+## 2️⃣ UI 表示の確認
 
----
+### トレーニング一覧ページ
 
-## 4️⃣ 完了確認チェックリスト
+1. `/training` にアクセス
+2. 以下の要素を確認：
+   - トレーニングカードが 2 つ表示されている
+   - 各カードにタイトル、説明、難易度が表示されている
+   - タグが正しく表示されている
 
-- [ ] Table Editor → `training` に **UI Todo** が 1 行入った
-- [ ] Table Editor → `task` に **3 行** 入った (`order_index = 1,2,3`)
-- [ ] ブラウザで `http://localhost:5173/training` を開くとカードが表示される
-- [ ] 有料お題のカードには 🔒 マーク（または Lock アイコン）が付いている
+### タスク詳細ページ
+
+1. `/training/ui-todo/build-home-ui` にアクセス
+2. 以下の要素を確認：
+   - タスクのタイトルと説明が表示されている
+   - 進捗バーが表示されている（50%）
+   - チェックボックスが機能している
+
+### プレミアムコンテンツ
+
+1. `/training/ui-todo/add-todo-flow` にアクセス
+2. 以下の要素を確認：
+   - プレビュー部分まで表示されている
+   - プレミアムバナーが表示されている
+   - ログインしていない場合はログイン誘導が表示される
+
+## ✅ 完了の目安
+
+- [ ] サンプルデータが正しく挿入されている
+- [ ] トレーニング一覧ページが正しく表示される
+- [ ] タスク詳細ページが正しく表示される
+- [ ] 進捗バーが正しく計算・表示される
+- [ ] プレミアムコンテンツの制限が正しく機能する
 
 🟢 **全部 OK → Task 2 完了！**  
-次は **Task 3（Training 用レイアウト作成）** に進んでください。
+次は **Task 3（トレーニング専用レイアウトの作成）** に進んでください。
 
 ---
 
-# Task 3 ── 「Training 専用レイアウト」を作って“別サイトっぽい”見た目にする
+# Task 3 ── 「Training 専用レイアウト」を作って"別サイトっぽい"見た目にする
 
-> **ゴール**  
-> `/training` 以下だけヘッダー・色・フォントが切り替わり、  
-> “オレンジ × 丸み” のブランディングで **独立サイトのように見える** 状態をつくる。  
+> **ゴール** > `/training` 以下だけヘッダー・色・フォントが切り替わり、
+> "オレンジ × 丸み" のブランディングで **独立サイトのように見える** 状態をつくる。
 > (ログイン状態・課金判定は既存と共通のまま)
 
 ---
@@ -225,7 +275,7 @@ apps/
         [trainingSlug]/[taskSlug].tsx
 ```
 
-> _“モノレポ” で分ける場合の例。既存アプリ内に `/training` ルートを追加する形でも可。_
+> _"モノレポ" で分ける場合の例。既存アプリ内に `/training` ルートを追加する形でも可。_
 
 ---
 
@@ -256,7 +306,7 @@ module.exports = {
 };
 ```
 
-_非エンジニア向けメモ: 上記は “オレンジ基調・大きめ角丸” を Tailwind に教える設定。_
+_非エンジニア向けメモ: 上記は "オレンジ基調・大きめ角丸" を Tailwind に教える設定。_
 
 ---
 
@@ -351,16 +401,15 @@ app/
 - [ ] ログイン状態（右上のアバター or サインインボタン）は共通で表示
 - [ ] コンソールにエラーが出ていない / ビルドが通る
 
-🟢 **全部 OK → Task 3 完了！**  
+🟢 **全部 OK → Task 3 完了！**
 次は **Task 4（Training 一覧ページのカード＆タグフィルタ）** に進んでください。
 
 ---
 
 # Task 4 ── 「Training 一覧ページ」を作り、タグで絞り込めるようにする
 
-> **ゴール**  
-> `/training` を開くと **カード形式の一覧** が表示され、  
-> 画面上部のタグボタンで「UI だけ」「UX だけ」のように **リアルタイムで絞り込み** できる状態にする。  
+> **ゴール** > `/training` を開くと **カード形式の一覧** が表示され、
+> 画面上部のタグボタンで「UI だけ」「UX だけ」のように **リアルタイムで絞り込み** できる状態にする。
 > （タップ／クリックだけで完了。検索窓は後回し）
 
 ---
@@ -368,7 +417,7 @@ app/
 ## 🗒 やること（かんたん要約）
 
 1. Supabase から **training テーブルを全部読む API** を用意
-2. “カード” UI コンポーネントを作ってグリッド表示
+2. "カード" UI コンポーネントを作ってグリッド表示
 3. **タグボタン** を並べ、押すと URL に `?tag=ui` が付く
 4. そのクエリを見て一覧をフィルタリングする
 
@@ -404,7 +453,7 @@ export async function getTrainingIndex() {
 }
 ```
 
-_非エンジニア向けメモ: “training” 表の行を全部読み出す小さな関数です。_
+_非エンジニア向けメモ: "training" 表の行を全部読み出す小さな関数です。_
 
 ---
 
@@ -535,21 +584,20 @@ export default function TrainingHome() {
 - [ ] ブラウザの戻るボタンでフィルタ状態が戻る
 - [ ] ページ再読込しても URL の `?tag=` が有効で同じ絞り込みになる
 
-🟢 **全部 OK → Task 4 完了！**  
+🟢 **全部 OK → Task 4 完了！**
 次は **Task 5（Training 詳細ページ／進捗バー）** に進んでください。
 
 ---
 
 # Task 5 ── 「Training 詳細ページ」を実装し、進捗バーを表示する
 
-> **ゴール**  
-> `/training/ui-todo` のような **トレーニング詳細ページ**を作り、
+> **ゴール** > `/training/ui-todo` のような **トレーニング詳細ページ**を作り、
 >
 > - トレーニングの概要（タイトル・説明など）
 > - お題(Task) 一覧をステップ順で表示
-> - どれだけ終わったか 0–100% の **進捗バー**  
->   が見えるようにする。  
->   “完了 ✅” チェックをまだ付けなくても **計算式が動く** ところまで仕上げる。  
+> - どれだけ終わったか 0–100% の **進捗バー**
+>   が見えるようにする。
+>   "完了 ✅" チェックをまだ付けなくても **計算式が動く** ところまで仕上げる。
 >   （チェック保存 API は Task 7 で実装）
 
 ---
@@ -720,7 +768,7 @@ export default function TrainingDetail() {
    - 説明テキスト
    - 進捗バー 0%
    - お題 3 件が順番どおり並ぶ
-3. お題カードをクリック → `/training/ui-todo/build-home-ui` へ遷移（404 でなければ OK）。  
+3. お題カードをクリック → `/training/ui-todo/build-home-ui` へ遷移（404 でなければ OK）。
    (Task ページは Task 6 で実装)
 
 ---
@@ -732,18 +780,17 @@ export default function TrainingDetail() {
 - [ ] お題リストがリンクになりクリックでページ遷移
 - [ ] URL を変えると別のトレーニングも同様に表示（複数データを入れた場合）
 
-🟢 **全部 OK → Task 5 完了！**  
+🟢 **全部 OK → Task 5 完了！**
 次は **Task 6（Task ページ & 有料ゲート）** に進んでください。
 
 ---
 
 # Task 6 （動画なし版）── お題ページ + 有料ゲート
 
-> **ゴール**  
-> `/training/ui-todo/build-home-ui` を開くと
+> **ゴール** > `/training/ui-todo/build-home-ui` を開くと
 >
 > - **無料お題**: 本文全文を表示
-> - **有料お題**: `<!--more-->` コメントより後を隠し、“ここから先はメンバー限定” バナーを挿入  
+> - **有料お題**: `<!--more-->` コメントより後を隠し、"ここから先はメンバー限定" バナーを挿入
 >   が実装される。進捗保存は Task 7 で追加予定。
 
 ---
@@ -812,7 +859,7 @@ export default function MdxPreview({
 }
 ```
 
-> **簡易版** のため「MDX を文字列に変換 → `<!--more-->` で split」方式。  
+> **簡易版** のため「MDX を文字列に変換 → `<!--more-->` で split」方式。
 > build 時に remark-plugin で前半だけ抽出する方法でも OK です。
 
 ---
@@ -912,20 +959,19 @@ is_premium: true
 - [ ] 無料お題は誰でも全文表示
 - [ ] コンソールに MDX import エラーや undefined がない
 
-🟢 **全部 OK → Task 6 完了！**  
+🟢 **全部 OK → Task 6 完了！**
 次は **Task 7（進捗保存 API & チェックボックス）** へ進んでください！
 
 ---
 
-````markdown
-# Task 7 ── “完了チェック” を保存できるようにする
+# Task 7 ── "完了チェック" を保存できるようにする
 
 > **ゴール**
 >
 > - お題ページに **✅ チェックボックス** を追加
 > - 押すと Supabase の `user_progress` テーブルに **保存／解除**
-> - トレーニング詳細ページの **進捗バーがリアルタイム更新**  
->   まで動かす。  
+> - トレーニング詳細ページの **進捗バーがリアルタイム更新**
+>   まで動かす。
 >   （RLS ＝行レベルセキュリティも設定し、他人のデータは読めない）
 
 ---
@@ -956,7 +1002,6 @@ await supabase.from("user_progress").upsert({
 });
 return res.json({ ok: true });
 ```
-````
 
 ### `GET /api/training/progress?trainingId=…`
 
@@ -1043,7 +1088,7 @@ const doneCount = progress.filter((p) => p.status === "done").length;
 <ProgressBar done={doneCount} total={tasks.length} />;
 ```
 
-> **シンプル運用**なら “Task ページから戻るたびにリロード” でも OK。  
+> **シンプル運用**なら "Task ページから戻るたびにリロード" でも OK。  
 > 後で Context + useEffect で自動反映に改良できます。
 
 ---
@@ -1054,7 +1099,7 @@ const doneCount = progress.filter((p) => p.status === "done").length;
 2. **完了にする → 戻る** とバーが 0%→25% … と伸びる
 3. Supabase Table Editor で `user_progress` に行が入り、`user_id` が自分の ID
 4. 別アカウントでは他人の行が見えない（RLS 有効）
-5. 未ログインでチェックを押すと “ログイン画面へ誘導” などが出る（既存 AuthGuard を再利用）
+5. 未ログインでチェックを押すと "ログイン画面へ誘導" などが出る（既存 AuthGuard を再利用）
 
 ---
 
@@ -1070,7 +1115,6 @@ const doneCount = progress.filter((p) => p.status === "done").length;
 
 ---
 
-````markdown
 # Task 8 ── 既存のサブスクリプション判定に **`plan_members`** を追加し、有料お題を開放する
 
 > **ゴール**  
@@ -1104,187 +1148,6 @@ if (session.mode === "subscription" && session.customer) {
     .eq("stripe_customer_id", session.customer.toString());
 }
 ```
-````
-
-> _既に Pro フラグ (`plan_pro`) を更新している処理に **1 行追加**するだけで済みます。_
-
----
-
-## 2️⃣ 既存判定ロジックに `plan_members` を加える
-
-例：`useSubscription()` Hook がある場合
-
-```ts
-export function useSubscription() {
-  const { session } = useAuth();
-  const sub = session?.user?.subscription ?? {}; // { pro: true/false, members: true/false }
-
-  return {
-    isPro: !!sub.pro,
-    isMember: !!sub.members, // ★ 追加
-  };
-}
-```
-
-_もし JWT に `subscription` オブジェクトが入っていない場合は、  
-`supabase.rpc('get_subscription')` のようなサーバー関数で取得しても OK。_
-
----
-
-## 3️⃣ Task ページのロック判定を差し替え
-
-```tsx
-const { isMember } = useSubscription(); // 既存 Hook に置き換え
-const locked = task.is_premium && !isMember;
-```
-
-> Pro 判定と切り分けたい場合は
->
-> ```tsx
-> const locked = task.is_premium && !(isPro || isMember);
-> ```
->
-> のように OR 条件にしてもよいです。
-
----
-
-## 4️⃣ UI 文言 & GateBanner の見直し
-
-- **GateBanner.tsx**
-  - 「メンバー登録して全文を読む」→ 既存プラン名 (例: “Pro メンバーになる”) に合わせる
-- **/pricing**
-  - プラン比較表に「Training 有料お題の全文アクセス ✔︎」を追加
-  - 料金は変えない前提（同一プランで開放）
-
----
-
-## 5️⃣ 動作確認チェックリスト
-
-1. Stripe **Test モード** で決済 → webhook で `plan_members=true` になったか確認
-2. 無料状態で有料お題を開く → GateBanner が表示
-3. 決済後に再読込 → GateBanner が消え全文表示
-4. 既存の Pro コンテンツ（Course 有料部分）が問題なく見られることを再確認
-5. 既存無料ユーザー → Training 有料お題はロックされたまま
-
----
-
-## ✅ 完了の目安
-
-- [ ] Webhook で `plan_members` が確実に書き込まれる
-- [ ] Hook / 判定ロジックに `isMember` が追加され、UI が連動
-- [ ] マーケページ（/pricing）の文言更新
-- [ ] 既存 Pro 機能にリグレッションがない
-
-🟢 **全部 OK → Task 8 完了！**  
-次は **Task 9（GA4 イベント計測 & QA）** に進んでください。
-
-````markdown
-# Task 9 ── GA4 イベント計測を追加し、品質チェック（QA）を行う
-
-> **ゴール**
->
-> 1. BONO Training の主要アクションを **Google Analytics 4** に送信
->    - お題ページ閲覧 / 完了チェック / シェア など
-> 2. **レスポンシブ・パフォーマンス・アクセシビリティ** を最終確認し、  
->    本番リリースに耐える品質を確保する。
-
----
-
-## 🗒 やること（かんたん要約）
-
-| Part  | 内容                                                                       |
-| ----- | -------------------------------------------------------------------------- |
-| **A** | GA4 でプロパティを作成し、既存 gtag スニペットに「Training」イベントを追加 |
-| **B** | ✅ チェック時・GateBanner クリック時などに `gtag('event', …)` を仕込む     |
-| **C** | Lighthouse／手動テストでモバイル・PC 表示崩れ、速度、A11y をチェック       |
-| **D** | リリース前チェックリスト（404, pricing 更新、課金テスト etc.）を完了       |
-
----
-
-## A. GA4 セットアップ
-
-1. **GA4 プロパティ**（既存サイトと同じで可）
-2. 管理 → **カスタム定義**
-   - 追加: `training_slug`, `task_slug`, `membership` (boolean)
-3. **gtag スニペット確認**
-   - 既に `<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXX"></script>` が入っていれば OK
-   - 無い場合は `apps/web/index.html` の `<head>` に挿入
-
----
-
-## B. イベント実装
-
-| イベント名      | 発生タイミング                           | パラメータ                                 |
-| --------------- | ---------------------------------------- | ------------------------------------------ |
-| `view_training` | `/training/:slug` ページロード           | `training_slug`                            |
-| `view_task`     | `/training/:training/:task` ページロード | `training_slug`, `task_slug`, `membership` |
-| `complete_task` | ✅ チェックを ON にした瞬間              | `training_slug`, `task_slug`               |
-| `share_task`    | シェアボタン押下                         | `task_slug`, `platform`                    |
-| `upgrade_click` | GateBanner の CTA クリック               | `task_slug`                                |
-
-### 実装例（React）
-
-```ts
-import { useEffect } from "react";
-import { gtag } from "@/lib/ga";           // ラッパー関数
-
-// Task Page: ページ閲覧
-useEffect(()=>{
-  gtag("event", "view_task", {
-    training_slug: training.slug,
-    task_slug: task.slug,
-    membership: isMember,
-  });
-}, [training.slug, task.slug]);
-
-// チェックボックス
-async function toggle() {
-  ...
-  if (newDone) gtag("event", "complete_task", { training_slug, task_slug });
-}
-```
-````
-
-> **非エンジニア向けメモ:** ここで言う `gtag` は `window.gtag` をラップした関数。イベントを送るだけなので 1 行で完了します。
-
----
-
-## C. Lighthouse & 手動 QA
-
-| 項目              | 基準値 / 確認方法                                    |
-| ----------------- | ---------------------------------------------------- |
-| **Performance**   | Lighthouse モバイルスコア ≥ **80**                   |
-| **PWA**           | `installable`、`service-worker` OK、スコア ≥ **90**  |
-| **Accessibility** | ARIA ラベル・対比比率・キーボード操作確認            |
-| **レスポンシブ**  | 360 px〜1920 px でレイアウト崩れがない               |
-| **404 / 500**     | ありえそうな typo URL が Training 404 にリダイレクト |
-| **課金テスト**    | Stripe Test Card で購入 → GateBanner が消える        |
-| **RLS テスト**    | 別ユーザーが他人の `user_progress` 行を取得できない  |
-
----
-
-## D. リリース前チェックリスト
-
-- [ ] `/pricing` に「Training 有料お題　 ✔︎」が記載
-- [ ] sitemap.xml に `/training` と `/training/tags/*` を追加
-- [ ] Robots TXT で `/training` を block していない
-- [ ] Cloudflare / Vercel のキャッシュルールに `/training/*` を含めた
-- [ ] Apple / Android アイコンに Training テーマ色 (#FF9900) を追加
-- [ ] コンソール Warnings / Errors が 0
-
----
-
-## ✅ 完了の目安
-
-- [ ] GA4 リアルタイムで `view_task`, `complete_task` が受信される
-- [ ] Lighthouse レポートで Perf ≥ 80 / PWA ≥ 90 / A11y ≥ 90
-- [ ] モバイル・PC 両方で UI 崩れなし
-- [ ] Stripe Test 決済後に有料お題が全文表示
-- [ ] Check list 全項目に ✅
-
-🟢 **全部 OK → Task 9 完了！**  
-これで **/training サブアプリ MVP** の開発フェーズは終了です。  
-リリース後は GA4 の数値を見ながら改善サイクルに移行しましょう。
 
 ```
 
