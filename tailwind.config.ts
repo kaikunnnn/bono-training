@@ -102,8 +102,8 @@ const config = {
         'accordion-up': 'accordion-up 0.2s ease-out'
       },
       fontFamily: {
-        futura: ['Futura', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
+        'futura': ['Futura', 'sans-serif'],
+        'inter': ['Inter', 'sans-serif'],
         'noto-sans': ['Noto Sans', 'sans-serif'],
         'rounded-mplus': ['Rounded Mplus 1c', 'sans-serif'],
       }
