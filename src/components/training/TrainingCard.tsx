@@ -17,16 +17,33 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
     >
       <div className="w-full flex flex-col">
         {/* カードの上部 */}
-        <div className="relative h-[499.554px] flex flex-col justify-center items-center px-6 pt-16 pb-8 rounded-[320px_320px_32px_32px] border-2 border-[#374151] bg-[#FAFBF8]">
+        <div className="relative h-[499.554px] flex flex-col justify-center items-center px-0 pt-16 pb-8 rounded-[320px_320px_32px_32px] border-2 border-[#374151] bg-[#FAFBF8] overflow-hidden">
+          {/* 背景画像（ブラー効果付き） */}
           {training.thumbnailImage && (
-            <div className="relative w-[342px] h-[294px]">
+            <div className="absolute inset-0 w-[957px] h-[638px] flex justify-center items-center">
+              <img
+                src={training.thumbnailImage}
+                alt=""
+                className="w-full h-full object-cover filter blur-[8.89px]"
+                style={{
+                  position: 'absolute',
+                  right: '-252.199px',
+                  bottom: '-73.446px'
+                }}
+              />
+            </div>
+          )}
+
+          {/* メインのサムネイル画像 */}
+          <div className="relative w-[342.161px] h-[293.827px] flex justify-center items-center">
+            {training.thumbnailImage && (
               <img
                 src={training.thumbnailImage}
                 alt={training.title}
                 className="w-full h-full object-cover"
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* カードの下部コンテンツ */}
