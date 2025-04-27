@@ -9,7 +9,7 @@ interface TrainingLayoutProps {
 
 const TrainingLayout = ({ children, className }: TrainingLayoutProps) => {
   return (
-    <div className={cn("min-h-screen flex flex-col bg-gradient-to-[260deg] from-white to-[#F7F8F4]", className)}>
+    <div className={cn("min-h-screen flex flex-col bg-[#FCFCFC]", className)}>
       <main className="flex-1">
         <div className="mx-auto max-w-[1670px] w-full">
           {children}
