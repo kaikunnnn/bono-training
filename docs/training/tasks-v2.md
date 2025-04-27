@@ -408,6 +408,9 @@ app/
 
 # Task 4 ── 「Training 一覧ページ」を作り、タグで絞り込めるようにする
 
+必要ないためオッケー！実装は大丈夫
+
+<!--
 > **ゴール** > `/training` を開くと **カード形式の一覧** が表示され、
 > 画面上部のタグボタンで「UI だけ」「UX だけ」のように **リアルタイムで絞り込み** できる状態にする。
 > （タップ／クリックだけで完了。検索窓は後回し）
@@ -585,59 +588,62 @@ export default function TrainingHome() {
 - [ ] ページ再読込しても URL の `?tag=` が有効で同じ絞り込みになる
 
 🟢 **全部 OK → Task 4 完了！**
-次は **Task 5（Training 詳細ページ／進捗バー）** に進んでください。
+次は **Task 5（Training 詳細ページ／進捗バー）** に進んでください。 -->
 
 ---
 
-# Task 5 ── 「Training 詳細ページ」を実装し、進捗バーを表示する
+```markdown
+# Task 5 ── 「Training 詳細ページ」を実装し、進捗バー＋有料表示を行う
 
-> **ゴール** > `/training/ui-todo` のような **トレーニング詳細ページ**を作り、
+> **ゴール**  
+> `/training/<trainingSlug>` にアクセスすると
 >
-> - トレーニングの概要（タイトル・説明など）
-> - お題(Task) 一覧をステップ順で表示
-> - どれだけ終わったか 0–100% の **進捗バー**
->   が見えるようにする。
->   "完了 ✅" チェックをまだ付けなくても **計算式が動く** ところまで仕上げる。
->   （チェック保存 API は Task 7 で実装）
+> 1. **トレーニング概要**（タイトル・説明・難易度・タグ）
+> 2. **お題(Task) 一覧** を順番 (`order_index`) で表示し  
+>      • 無料お題 → “FREE” バッジ  
+>      • 有料お題 → 🔒 バッジ（※無料ユーザーだけに表示）
+> 3. **進捗バー**：完了数 ÷ 全タスク数 × 100 %  
+>    が見えるようにする。  
+>    ※進捗保存は Task 7 で実装するため、ここでは常に 0 % 表示で OK。
 
 ---
 
 ## 🗒 やること（かんたん要約）
 
-1. **トレーニング 1 件** と **そのお題リスト** を Supabase から取得
-2. ページ上部にタイトル・説明・難易度バッジを表示
-3. お題リストを **順番 (order_index)** で並べリンク化
-4. 進捗バー =「完了数 ÷ 全タスク数 ×100」を横棒で描画
-   > 今回は progress 表がまだ空なので常に 0 % になる
+1. Supabase から **training 1 件 + task 一覧** を取得
+2. 上部にタイトル・説明・難易度を表示
+3. Task 一覧をリンク化し、無料／有料バッジを付ける
+4. 進捗バーを 0–100 % で描画（いまは 0 %）
 
 ---
 
 ## 1️⃣ 必要ファイル
+```
 
-```
 apps/training/src/
-  api/
-    getTrainingDetail.ts      ← NEW
-  components/
-    ProgressBar.tsx           ← NEW
-    TaskList.tsx              ← NEW
-  routes/
-    [trainingSlug]/index.tsx  ← ← ← 実装対象
-```
+api/
+getTrainingDetail.ts # NEW
+components/
+ProgressBar.tsx # NEW
+TaskList.tsx # NEW
+routes/
+[trainingSlug]/index.tsx # NEW
+
+````
 
 ---
 
-## 2️⃣ API：トレーニング + タスク取得
+## 2️⃣ API ── `getTrainingDetail.ts`
 
 ```ts
-// getTrainingDetail.ts
+import { supabase } from "@/lib/supabaseClient";
+
 export async function getTrainingDetail(slug: string) {
-  const { data: training, error } = await supabase
+  const { data: training } = await supabase
     .from("training")
     .select("id,slug,title,description,difficulty,tags")
     .eq("slug", slug)
     .single();
-  if (error) throw error;
 
   const { data: tasks } = await supabase
     .from("task")
@@ -647,14 +653,13 @@ export async function getTrainingDetail(slug: string) {
 
   return { training, tasks };
 }
-```
+````
 
 ---
 
-## 3️⃣ ProgressBar コンポーネント
+## 3️⃣ `ProgressBar.tsx`
 
 ```tsx
-// ProgressBar.tsx
 export default function ProgressBar({
   done,
   total,
@@ -662,28 +667,28 @@ export default function ProgressBar({
   done: number;
   total: number;
 }) {
-  const percent = total === 0 ? 0 : Math.round((done / total) * 100);
+  const pct = total === 0 ? 0 : Math.round((done / total) * 100);
   return (
-    <div>
+    <>
       <div className="h-2 bg-gray-200 rounded">
         <div
           className="h-full bg-brand rounded transition-all"
-          style={{ width: `${percent}%` }}
+          style={{ width: `${pct}%` }}
         />
       </div>
-      <p className="text-sm mt-1 text-gray-600">{percent}% 完了</p>
-    </div>
+      <p className="mt-1 text-sm text-gray-600">{pct}% 完了</p>
+    </>
   );
 }
 ```
 
 ---
 
-## 4️⃣ TaskList コンポーネント
+## 4️⃣ `TaskList.tsx`
 
 ```tsx
-// TaskList.tsx
 import { Link } from "react-router-dom";
+import { useSubscription } from "@/lib/useSubscription"; // 既存: plan_pro / plan_members を返す
 
 export default function TaskList({
   tasks,
@@ -692,6 +697,8 @@ export default function TaskList({
   tasks: any[];
   baseSlug: string;
 }) {
+  const { isMember } = useSubscription(); // plan_members 判定
+
   return (
     <ol className="space-y-3">
       {tasks.map((t) => (
@@ -702,8 +709,12 @@ export default function TaskList({
           >
             <div className="flex items-center gap-2">
               <span className="font-semibold">{t.title}</span>
-              {t.is_premium && (
-                <span className="text-brand text-xs">🔒 有料</span>
+
+              {/* バッジ表示ルール */}
+              {t.is_premium ? (
+                !isMember && <span className="text-brand text-xs">🔒 有料</span>
+              ) : (
+                <span className="text-gray-400 text-xs">FREE</span>
               )}
             </div>
           </Link>
@@ -716,7 +727,7 @@ export default function TaskList({
 
 ---
 
-## 5️⃣ ルートページ (`routes/[trainingSlug]/index.tsx`)
+## 5️⃣ ルートページ ── `[trainingSlug]/index.tsx`
 
 ```tsx
 import { useParams } from "react-router-dom";
@@ -734,12 +745,12 @@ export default function TrainingDetail() {
   }, [trainingSlug]);
 
   if (!data) return <p>Loading...</p>;
-
   const { training, tasks } = data;
-  const doneCount = 0; // Task7でDBから取得して置き換える
+
+  const doneCount = 0; // Task7 で DB と連動させる
   return (
     <section className="space-y-8">
-      {/* ヘッダー */}
+      {/* 概要 */}
       <header>
         <h2 className="text-3xl font-bold">{training.title}</h2>
         <p className="mt-2 text-gray-700">{training.description}</p>
@@ -748,10 +759,10 @@ export default function TrainingDetail() {
         </span>
       </header>
 
-      {/* 進捗バー */}
+      {/* 進捗 */}
       <ProgressBar done={doneCount} total={tasks.length} />
 
-      {/* タスク一覧 */}
+      {/* お題一覧 */}
       <TaskList tasks={tasks} baseSlug={`/training/${training.slug}`} />
     </section>
   );
@@ -760,28 +771,28 @@ export default function TrainingDetail() {
 
 ---
 
-## 6️⃣ 動作確認ステップ
+## 6️⃣ 動作確認
 
 1. `pnpm dev` を起動
 2. ブラウザで `http://localhost:5173/training/ui-todo` を開く
-   - タイトル「UI Todo」
-   - 説明テキスト
-   - 進捗バー 0%
-   - お題 3 件が順番どおり並ぶ
-3. お題カードをクリック → `/training/ui-todo/build-home-ui` へ遷移（404 でなければ OK）。
-   (Task ページは Task 6 で実装)
+   - タイトル・説明・難易度が表示
+   - 進捗バー 0 %
+   - お題 3 件が **FREE / 🔒** バッジ付きで並ぶ
+3. ログイン中で `plan_members=true` のユーザーで確認
+   - 🔒 バッジが消えて FREE/有料区別が無くなる (会員なら全部開放)
 
 ---
 
 ## ✅ 完了の目安
 
-- [ ] 詳細ページに概要・難易度バッジ・タグが表示
-- [ ] 進捗バーが見える (今は 0%)
-- [ ] お題リストがリンクになりクリックでページ遷移
-- [ ] URL を変えると別のトレーニングも同様に表示（複数データを入れた場合）
+- [ ] 概要・難易度・タグが表示される
+- [ ] 進捗バーが描画（いまは常に 0 %）
+- [ ] 無料ユーザー：有料お題に 🔒 バッジが付く
+- [ ] メンバー：🔒 が付かない
+- [ ] お題カードをクリックで Task ページへ遷移
 
-🟢 **全部 OK → Task 5 完了！**
-次は **Task 6（Task ページ & 有料ゲート）** に進んでください。
+🟢 **全部 OK → Task 5 完了！**  
+次は **Task 6（Task ページ ＋ 有料ゲート／動画なし版）** に進んでください。
 
 ---
 
