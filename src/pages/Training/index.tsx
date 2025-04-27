@@ -4,6 +4,7 @@ import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import TrainingHero from '@/components/training/TrainingHero';
 import TrainingGrid from '@/components/training/TrainingGrid';
+import { Training } from '@/types/training';
 
 // 一時的なモックデータ
 const mockTrainings = [
