@@ -10,7 +10,10 @@ const TrainingHeader = () => {
     <header className="flex flex-col items-end w-full">
       {/* Top bar */}
       <div className="w-full px-6">
-        <div className="flex items-center bg-[#0D0F18] border border-white/[0.08] rounded-b-[10px] pl-3 pr-2 py-1">
+        <Link 
+          to="/"
+          className="inline-flex items-center bg-[#0D0F18] border border-white/[0.08] rounded-b-[10px] pl-3 pr-2 py-1"
+        >
           <span className="font-['Futura'] text-[10.5px] font-bold tracking-[0.75px] text-white">
             BONO
           </span>
@@ -27,63 +30,63 @@ const TrainingHeader = () => {
               fill="white"
             />
           </svg>
-        </div>
+        </Link>
       </div>
 
       {/* Main header */}
       <div className="flex justify-between items-center w-full h-20 px-5">
-        {/* Left side - How to play */}
-        <div className="hidden md:flex items-center gap-4">
-          <div className="h-16 px-2">
-            <Link 
-              to="/training/guide"
-              className="flex items-center justify-center px-4 py-3 rounded-full border-2 border-[#0D221D] font-['Rounded_Mplus_1c'] text-sm font-bold"
-            >
+        {/* Left block */}
+        <div className="flex-1 flex items-center justify-start">
+          <Link 
+            to="/training/guide"
+            className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+          >
+            <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
               遊び方
-            </Link>
-          </div>
+            </span>
+          </Link>
         </div>
 
         {/* Center - Logo */}
-        <div className="flex flex-col items-center gap-[2px]">
+        <Link to="/training" className="flex flex-col items-center gap-[2px]">
           <span className="font-['Futura'] text-xl font-bold tracking-[1px]">
             BONO
           </span>
           <span className="font-['Futura'] text-[8px] font-bold tracking-[1px] text-[#666666]">
             TRAINING
           </span>
-        </div>
+        </Link>
 
-        {/* Right side - Auth buttons */}
-        <div className="hidden md:flex items-center gap-4">
+        {/* Right block */}
+        <div className="flex-1 flex items-center justify-end gap-4">
           {!user ? (
             <>
-              <div className="h-16 px-2">
-                <Link
-                  to="/auth"
-                  className="flex items-center justify-center px-4 py-3 rounded-full border-2 border-[#0D221D] font-['Rounded_Mplus_1c'] text-sm font-bold"
-                >
+              <Link
+                to="/auth"
+                className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+              >
+                <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
                   ログイン
-                </Link>
-              </div>
-              <div className="h-16 px-2">
-                <Link
-                  to="/auth?mode=signup"
-                  className="flex items-center justify-center px-4 py-3 rounded-full border-2 border-[#0D221D] font-['Rounded_Mplus_1c'] text-sm font-bold"
-                >
+                </span>
+              </Link>
+              <Link
+                to="/auth?mode=signup"
+                className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+              >
+                <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
                   はじめる
-                </Link>
-              </div>
+                </span>
+              </Link>
             </>
           ) : (
-            <div className="h-16 px-2">
-              <Link
-                to="/training/dashboard"
-                className="flex items-center justify-center px-4 py-3 rounded-full border-2 border-[#0D221D] font-['Rounded_Mplus_1c'] text-sm font-bold"
-              >
+            <Link
+              to="/training/dashboard"
+              className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+            >
+              <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
                 マイページ
-              </Link>
-            </div>
+              </span>
+            </Link>
           )}
         </div>
       </div>
