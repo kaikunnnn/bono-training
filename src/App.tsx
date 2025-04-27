@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,9 +18,8 @@ import ContentTest from "./pages/ContentTest";
 import Content from "./pages/Content";
 import ContentDetail from "./pages/ContentDetail";
 import VideoDetailTest from "./pages/VideoDetailTest";
-
-// 新しくTraining関連のページをインポート
 import TrainingHome from "./pages/Training";
+import TrainingDetail from "./pages/TrainingDetail";
 
 const queryClient = new QueryClient();
 
@@ -39,26 +37,22 @@ const App = () => (
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               
-              {/* Training関連のルーティング */}
               <Route path="/training" element={<TrainingHome />} />
+              <Route path="/training/:slug" element={<TrainingDetail />} />
               
               <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
               
-              {/* コンテンツページ */}
               <Route path="/content" element={<Content />} />
               <Route path="/content/:id" element={<ContentDetail />} />
               
-              {/* テストページ */}
               <Route path="/video-detail-test/:id" element={<VideoDetailTest />} />
               
-              {/* 有料会員限定コンテンツページ */}
               <Route path="/paid-only" element={
                 <ProtectedPremiumRoute>
                   <PaidContent />
                 </ProtectedPremiumRoute>
               } />
 
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
