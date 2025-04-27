@@ -7,29 +7,31 @@ const TrainingHeader = () => {
   const { user } = useAuth();
 
   return (
-    <div className="flex flex-col items-end w-full bg-white">
+    <header className="flex flex-col items-end w-full">
       {/* Top bar */}
-      <div className="flex items-center px-3 py-1 rounded-b-[10px] border border-white/[0.08] bg-[#0D0F18]">
-        <span className="font-['Futura'] text-[10.5px] font-bold text-white tracking-[0.75px]">
-          BONO
-        </span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="arrow-icon"
-        >
-          <path
-            d="M5.99935 3.3335V4.66683H10.3927L2.66602 12.3935L3.60602 13.3335L11.3327 5.60683V10.0002H12.666V3.3335H5.99935Z"
-            fill="white"
-          />
-        </svg>
+      <div className="w-full px-6">
+        <div className="flex items-center bg-[#0D0F18] border border-white/[0.08] rounded-b-[10px] pl-3 pr-2 py-1">
+          <span className="font-['Futura'] text-[10.5px] font-bold tracking-[0.75px] text-white">
+            BONO
+          </span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            className="ml-1"
+          >
+            <path
+              d="M5.99935 3.3335V4.66683H10.3927L2.66602 12.3935L3.60602 13.3335L11.3327 5.60683V10.0002H12.666V3.3335H5.99935Z"
+              fill="white"
+            />
+          </svg>
+        </div>
       </div>
 
       {/* Main header */}
-      <div className="flex justify-between items-center w-full h-20 px-5 md:flex-row md:items-center">
+      <div className="flex justify-between items-center w-full h-20 px-5">
         {/* Left side - How to play */}
         <div className="hidden md:flex items-center gap-4">
           <div className="h-16 px-2">
@@ -43,11 +45,11 @@ const TrainingHeader = () => {
         </div>
 
         {/* Center - Logo */}
-        <div className="flex flex-col items-center relative">
-          <span className="font-['Futura'] text-xl font-bold tracking-wider text-black">
+        <div className="flex flex-col items-center gap-[2px]">
+          <span className="font-['Futura'] text-xl font-bold tracking-[1px]">
             BONO
           </span>
-          <span className="font-['Futura'] text-[8px] font-bold tracking-wider text-[#666]">
+          <span className="font-['Futura'] text-[8px] font-bold tracking-[1px] text-[#666666]">
             TRAINING
           </span>
         </div>
@@ -85,7 +87,7 @@ const TrainingHeader = () => {
           )}
         </div>
       </div>
-    </div>
+    </header>
   );
 };
 
