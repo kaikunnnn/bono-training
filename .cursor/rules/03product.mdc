@@ -1,0 +1,271 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+[overview.md](mdc:docs/overview.md)
+[feature.md](mdc:docs/feature.md)
+
+# プロダクト概要
+
+---
+
+## 学習コンテンツ
+
+### 学習コンテンツの関係性
+
+- **Course**: 複数 LessonSeries を順番に学び、最終的に ◯◯ スキルを取得
+- **LessonSeries**: テーマ別に Content を束ねた学習単位
+- **Content**: 記事 + メイン動画。最小サイズ
+
+### Course → LessonSeries → Content
+
+- Home → Course → LessonSeries → Content
+
+### アクセス制御（無料 / 有料の出し分け）
+
+- 有料フラグ Content 単位で保持
+- 無料ユーザーが有料 Content にアクセスした場合
+  - 記事本文：途中で “ここから先は有料” バナーを表示
+  - 動画　　：無料アカウントにはその Content の無料用の動画を表示、有料アカウントには有料用の動画を表示。
+
+※それぞれの一覧ページが存在する
+
+---
+
+## アカウントプロフィールページでの機能
+
+- サブスクリプションプランの確認
+- サブスクリプションプランの変更
+- 支払いクレジットカードの変更
+- ***
+
+---
+
+
+# 主要機能
+
+## 🔐 会員登録・ログイン 認証系 PBI
+
+### ✅ 1. ユーザー登録（サインアップ）
+
+- **目的**: ユーザーがメールアドレスとパスワードで会員登録できるようにする
+- **内容**:
+  - メールアドレスとパスワードの入力フォーム
+  - 登録ボタン
+  - Supabase の API と連携
+  - 登録後、認証メールを送信
+
+---
+
+### ✅ 2. メールアドレス認証
+
+- **目的**: メールアドレスの所有確認を行い、未認証ユーザーのアクセスを制限する
+- **内容**:
+  - Supabase のメールリンクによる確認機能を有効化
+  - 認証前はログイン・サービス利用不可の制御
+  - 認証済みでない場合のメッセージ表示
+
+---
+
+### ✅ 3. ログイン
+
+- **目的**: 登録済みのメールアドレスとパスワードでログインできるようにする
+- **内容**:
+  - ログインフォーム（メール＋パスワード）
+  - Supabase の API と連携
+  - エラー処理（無効な認証情報、未認証アドレスなど）
+
+---
+
+### ✅ 4. ログアウト
+
+- **目的**: ログイン状態を解除し、セッションをクリアする
+- **内容**:
+  - ログアウトボタン
+  - Supabase の API と連携
+  - ログアウト後、ログイン画面にリダイレクト
+
+---
+
+### ✅ 5. パスワード再設定
+
+- **目的**: パスワードを忘れたユーザーが再設定できるようにする
+- **内容**:
+  - パスワードリセット申請フォーム（メールアドレス入力）
+  - Supabase の API と連携
+  - リセット用メールリンクからの再設定ページ作成
+  - 新しいパスワード設定後のログイン案内
+
+---
+
+### 🔧 技術的設定項目（必要に応じて分解）
+
+- Supabase プロジェクトのセットアップ（Auth 有効化、メール設定）
+- RLS（Row Level Security）の確認（今はまだ必要なし）
+- メールテンプレートのカスタマイズ（任意）
+- 認証後のリダイレクト処理
+
+---
+
+### ✨ UI/UX ポイント（実装者用の補足）
+
+- ログイン状態をグローバルに管理（React Context や SWR など）
+- ユーザーに対するフィードバックメッセージ（成功・失敗通知）
+
+---
+
+## □ 有料 or 無料アカウントのコンテンツアクセスの仕組み
+
+### プラン区分
+
+サブスクリプションは以下の 2 つの大きな区分で管理されます：
+
+#### 1.学習コンテンツ（Learning）
+
+- アクセス可能なプラン: `standard`, `growth`
+- 基本的な学習コンテンツにアクセスできます
+
+#### 2. メンバー限定コンテンツ（Member）
+
+- アクセス可能なプラン: `standard`, `growth`, `community`
+- より高度または専門的なコンテンツにアクセスできます
+
+### プランの階層
+
+- `free`: すべての無料コンテンツにアクセス可能
+- `standard`: 学習コンテンツと一部のメンバー限定コンテンツ
+- `growth`: すべての学習コンテンツとほぼすべてのメンバー限定コンテンツ
+- `community`: すべてのコンテンツにアクセス可能
+
+### アクセス制御の基本ルール
+
+1. 無料ユーザーは無料コンテンツのみ閲覧可能
+2. サブスクリプション保持者は、そのプランに応じたコンテンツにアクセス可能
+3. 上位プランは下位プランのコンテンツもすべて閲覧可能
+
+### 価格設定
+
+- standard: 4000 円
+- growth: 9800 円
+- community: 1480 円
+
+---
+
+## サブスクリプション機能の実装
+
+### 1 サービスで提供する有料プランの定義
+
+#### 目的
+
+Stripe 上で提供する有料プラン（Product と Price）を 1 種類に統一し、Checkout セッションの作成時に正しい Price ID を参照できるようにする。
+
+#### 要件
+
+- Stripe 上では、すでに以下の Price が作成されている。これらはテスト用の priceID になる。
+- `standard`:
+  - 1 ヶ月：price_1OIiOUKUVUnt8GtyOfXEoEvW
+  - 3 ヶ月：price_1OIiPpKUVUnt8Gty0OH3Pyip
+- `growth`
+  - 1 ヶ月：price_1OIiMRKUVUnt8GtyMGSJIH8H
+  - 3 ヶ月：price_1OIiMRKUVUnt8GtyttXJ71Hz
+- `community`
+  - １ヶ月：price_1RI4ClKUVUnt8GtygLpincko
+- Checkout セッション作成時に、環境によって適切な Price ID を使い分ける
+
+#### 環境変数（すでに設定済み）
+
+```
+env
+コピーする編集する
+NEXT_PUBLIC_STRIPE_PRICE_ID=price_1QisOmKUVUnt8Gty3x1P7GyW
+NEXT_PUBLIC_STRIPE_TEST_PRICE_ID=price_1Qit9MKUVUnt8GtyoXFzn2Ui
+STRIPE_SECRET_KEY=sk_test_51HDQT3KUVUnt8GtyBvbE1xjTcOZUDnXQBSoYyiSpaf5OIRDftnZZfeIsRGuSqHseAS6uhBFGNsfJ96kCyYgdgYSy00sDvQHQMO
+
+```
+
+#### 実装タスク
+
+- Checkout セッション作成 API で`process.env.NEXT_PUBLIC_STRIPE_PRICE_ID`を参照
+- 環境（開発・本番）によって、Price ID を使い分けられるようにするロジックを追加
+- Checkout セッションの`line_items`に適切な Price ID を設定する
+- 今後複数プランができた場合に備え、Price ID の管理を共通ユーティリティに切り出してもよい
+
+#### 補足
+
+- `STRIPE_SECRET_KEY`はサーバー側でのみ利用（Webhook や Checkout API）
+- `NEXT_PUBLIC_〜`はフロントで参照する場合用。セキュリティの観点で秘密情報を含まないよう注意する
+
+### 2 Checkout セッション作成 API の実装
+
+#### 目的
+
+ユーザーが Stripe Checkout を通じてメンバーシップを購入できるようにする。
+
+#### 要件
+
+- Stripe の`checkout.sessions.create()`を呼び出す API を作成する
+- `stripe_customer_id`を Supabase の DB から取得する
+- 存在しない場合は Stripe で Customer を作成し、DB に保存する
+- セッション作成時に`price_id`, `success_url`, `cancel_url`を指定する
+
+#### 実装タスク
+
+- `user_id`から`stripe_customer_id`を検索
+- Stripe で Customer を作成（必要に応じて）
+- Checkout セッションを作成してフロントに URL を返す API を用意
+- API の認証・エラー処理を実装
+
+### 3 Webhook エンドポイントの実装
+
+**目的**
+
+Stripe からのイベントを受け取り、DB に Subscription 情報を反映させる。
+
+**要件**
+
+- 以下のイベントに対応する：
+  - `checkout.session.completed`
+  - `invoice.paid`
+  - `customer.subscription.deleted`
+- `subscriptions`テーブルの`is_active`や期限情報を更新する
+
+**実装タスク**
+
+- Stripe Webhook の署名検証を含むエンドポイントを実装
+- 各イベントごとに DB の`subscriptions`テーブルを更新
+- 該当ユーザーの`stripe_customer_id`や`stripe_subscription_id`を取得して紐付け
+
+### 4 保護された動画ページの認可制御
+
+#### 2025.04.06 仕様の状態
+
+**目的**
+
+有効なサブスクリプションを持つユーザーだけが動画を閲覧できるようにする。
+
+**要件**
+
+- `checkSubscriptionStatus` が `ture` のユーザーだけ動画を閲覧可能にする
+- 非会員には「メンバー登録を促す画面」を表示する
+
+**実装タスク**
+
+- メンバーシップ状態取得 API をクライアントから呼び出す
+- ステータスに応じて再生画面と登録画面を切り替える
+- 複数のページで共通で横展開しやすい機構にしてください
+
+### 5 カード情報変更、サブスクリプション解約
+
+- 「アカウントページ」を作成して以下の内容を Stripe Checkout の仕組みを使って実装
+  - カード情報変更
+    - StripeCheckout の仕組みを変更できる
+  - サブスクリプション情報の確認
+    - サイト上でも現在のプラン名を所得して表示
+    - 詳細は StripeCheckout を使って外部ページで確認できる
+  - サブスクリプションの変更
+    - プランの変更
+      - StripeCheckout の仕組みを使ってプランの変更が可能
+      - プライシングのページでも、「変更(update)」できるようにはしたい
+    - 解約
+      - StripeCheckout の仕組みを使ってプランをキャンセル

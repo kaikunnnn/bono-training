@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { getCheckoutLineItems } from '@/utils/stripe';
+import { PlanType } from '@/utils/subscriptionPlans';
 
 /**
  * Stripeチェックアウトセッションを作成する
@@ -42,14 +43,15 @@ export const createCheckoutSession = async (
  * 購読状態を確認する
  */
 export const checkSubscriptionStatus = async (): Promise<{ 
-  isSubscribed: boolean; 
+  isSubscribed: boolean;
+  planType: PlanType | null;
   error: Error | null;
 }> => {
   try {
     // ユーザーが認証済みか確認
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      return { isSubscribed: false, error: null };
+      return { isSubscribed: false, planType: null, error: null };
     }
     
     // Supabase Edge Functionを呼び出して購読状態を確認
@@ -60,9 +62,13 @@ export const checkSubscriptionStatus = async (): Promise<{
       throw new Error('購読状態の確認に失敗しました。');
     }
     
-    return { isSubscribed: data.subscribed, error: null };
+    return { 
+      isSubscribed: data.subscribed, 
+      planType: data.planType || null,
+      error: null 
+    };
   } catch (error) {
     console.error('購読状態確認エラー:', error);
-    return { isSubscribed: false, error: error as Error };
+    return { isSubscribed: false, planType: null, error: error as Error };
   }
 };

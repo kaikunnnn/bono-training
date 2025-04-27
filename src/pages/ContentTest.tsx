@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import ContentGuard from '@/components/subscription/ContentGuard';
 import { PlanType, UserPlanInfo } from '@/utils/subscriptionPlans';
+import { SubscriptionProvider } from '@/contexts/SubscriptionContext';
 
 const ContentTest: React.FC = () => {
   // ユーザープラン情報の状態管理（実際はサーバーから取得する）
@@ -32,6 +32,14 @@ const ContentTest: React.FC = () => {
       ...userPlan,
       isActive: !userPlan.isActive
     });
+  };
+
+  // テスト用にSubscriptionContextの値をオーバーライドする
+  const mockSubscriptionValue = {
+    isSubscribed: userPlan.isActive,
+    planType: userPlan.planType,
+    loading: false,
+    error: null
   };
 
   return (
@@ -99,86 +107,89 @@ const ContentTest: React.FC = () => {
           
           {/* 右カラム: コンテンツ表示エリア */}
           <div className="md:col-span-2">
-            <Tabs defaultValue="learning">
-              <TabsList className="mb-4">
-                <TabsTrigger value="learning">学習コンテンツ</TabsTrigger>
-                <TabsTrigger value="member">メンバー限定コンテンツ</TabsTrigger>
-              </TabsList>
-              
-              {/* 学習コンテンツタブ */}
-              <TabsContent value="learning">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>学習コンテンツ（Learning）</CardTitle>
-                    <CardDescription>
-                      このコンテンツを閲覧するには Standard または Growth プランが必要です
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ContentGuard contentType="learning" userPlan={userPlan}>
-                      <div className="space-y-4">
-                        <div className="p-4 bg-green-50 border border-green-200 rounded-md">
-                          <h3 className="text-lg font-medium text-green-800 mb-2">アクセス成功！</h3>
-                          <p className="text-green-700">
-                            あなたは「学習コンテンツ」へのアクセス権を持っています。
-                            このコンテンツはStandardまたはGrowthプランユーザーのみが閲覧できます。
-                          </p>
-                        </div>
-                        
-                        <Separator />
-                        
+            {/* テスト用にSubscriptionProviderで値をオーバーライド */}
+            <SubscriptionProvider overrideValue={mockSubscriptionValue}>
+              <Tabs defaultValue="learning">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="learning">学習コンテンツ</TabsTrigger>
+                  <TabsTrigger value="member">メンバー限定コンテンツ</TabsTrigger>
+                </TabsList>
+                
+                {/* 学習コンテンツタブ */}
+                <TabsContent value="learning">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>学習コンテンツ（Learning）</CardTitle>
+                      <CardDescription>
+                        このコンテンツを閲覧するには Standard または Growth プランが必要です
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ContentGuard contentType="learning">
                         <div className="space-y-4">
-                          <h3 className="font-medium">学習コンテンツの例</h3>
-                          <p>ここに学習コンテンツが表示されます。例えば、チュートリアル、ガイド、レッスンなど。</p>
-                          <ul className="list-disc pl-5 space-y-1">
-                            <li>基本的なプログラミングの概念</li>
-                            <li>アプリケーション開発のベストプラクティス</li>
-                            <li>コード最適化テクニック</li>
-                          </ul>
+                          <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+                            <h3 className="text-lg font-medium text-green-800 mb-2">アクセス成功！</h3>
+                            <p className="text-green-700">
+                              あなたは「学習コンテンツ」へのアクセス権を持っています。
+                              このコンテンツはStandardまたはGrowthプランユーザーのみが閲覧できます。
+                            </p>
+                          </div>
+                          
+                          <Separator />
+                          
+                          <div className="space-y-4">
+                            <h3 className="font-medium">学習コンテンツの例</h3>
+                            <p>ここに学習コンテンツが表示されます。例えば、チュートリアル、ガイド、レッスンなど。</p>
+                            <ul className="list-disc pl-5 space-y-1">
+                              <li>基本的なプログラミングの概念</li>
+                              <li>アプリケーション開発のベストプラクティス</li>
+                              <li>コード最適化テクニック</li>
+                            </ul>
+                          </div>
                         </div>
-                      </div>
-                    </ContentGuard>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-              
-              {/* メンバー限定コンテンツタブ */}
-              <TabsContent value="member">
-                <Card>
-                  <CardHeader>
-                    <CardTitle>メンバー限定コンテンツ（Member）</CardTitle>
-                    <CardDescription>
-                      このコンテンツを閲覧するには Standard, Growth または Community プランが必要です
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ContentGuard contentType="member" userPlan={userPlan}>
-                      <div className="space-y-4">
-                        <div className="p-4 bg-purple-50 border border-purple-200 rounded-md">
-                          <h3 className="text-lg font-medium text-purple-800 mb-2">アクセス成功！</h3>
-                          <p className="text-purple-700">
-                            あなたは「メンバー限定コンテンツ」へのアクセス権を持っています。
-                            このコンテンツはStandard, GrowthまたはCommunityプランユーザーのみが閲覧できます。
-                          </p>
-                        </div>
-                        
-                        <Separator />
-                        
+                      </ContentGuard>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+                
+                {/* メンバー限定コンテンツタブ */}
+                <TabsContent value="member">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>メンバー限定コンテンツ（Member）</CardTitle>
+                      <CardDescription>
+                        このコンテンツを閲覧するには Growth または Community プランが必要です
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ContentGuard contentType="member">
                         <div className="space-y-4">
-                          <h3 className="font-medium">メンバー限定コンテンツの例</h3>
-                          <p>ここにメンバー限定コンテンツが表示されます。例えば、プレミアムチュートリアル、特別なリソース、コミュニティツールなど。</p>
-                          <ul className="list-disc pl-5 space-y-1">
-                            <li>プレミアムビデオコンテンツ</li>
-                            <li>会員限定ディスカッション</li>
-                            <li>高度なプロジェクトテンプレート</li>
-                          </ul>
+                          <div className="p-4 bg-purple-50 border border-purple-200 rounded-md">
+                            <h3 className="text-lg font-medium text-purple-800 mb-2">アクセス成功！</h3>
+                            <p className="text-purple-700">
+                              あなたは「メンバー限定コンテンツ」へのアクセス権を持っています。
+                              このコンテンツはGrowthまたはCommunityプランユーザーのみが閲覧できます。
+                            </p>
+                          </div>
+                          
+                          <Separator />
+                          
+                          <div className="space-y-4">
+                            <h3 className="font-medium">メンバー限定コンテンツの例</h3>
+                            <p>ここにメンバー限定コンテンツが表示されます。例えば、プレミアムチュートリアル、特別なリソース、コミュニティツールなど。</p>
+                            <ul className="list-disc pl-5 space-y-1">
+                              <li>プレミアムビデオコンテンツ</li>
+                              <li>会員限定ディスカッション</li>
+                              <li>高度なプロジェクトテンプレート</li>
+                            </ul>
+                          </div>
                         </div>
-                      </div>
-                    </ContentGuard>
-                  </CardContent>
-                </Card>
-              </TabsContent>
-            </Tabs>
+                      </ContentGuard>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </SubscriptionProvider>
           </div>
         </div>
       </div>

@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import SubscriptionButton from '@/components/subscription/SubscriptionButton';
-import { ContentAccessType, hasAccessToContent, UserPlanInfo } from '@/utils/subscriptionPlans';
+import { ContentAccessType, hasAccessToContent } from '@/utils/subscriptionPlans';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 
 interface ContentGuardProps {
   children: ReactNode;
@@ -12,10 +13,6 @@ interface ContentGuardProps {
    * コンテンツタイプ（'learning' または 'member'）
    */
   contentType: ContentAccessType;
-  /**
-   * ユーザーのプラン情報
-   */
-  userPlan: UserPlanInfo;
   /**
    * アクセス拒否時のリダイレクト先
    * 指定がない場合はその場でサブスクリプション登録画面を表示
@@ -38,13 +35,19 @@ interface ContentGuardProps {
 const ContentGuard: React.FC<ContentGuardProps> = ({
   children,
   contentType,
-  userPlan,
   redirectTo,
   fallbackComponent,
   confirmMessage
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isSubscribed, planType } = useSubscriptionContext();
+  
+  // サブスクリプション情報からユーザープラン情報を作成
+  const userPlan = {
+    planType,
+    isActive: isSubscribed,
+  };
   
   // コンテンツへのアクセス権があるかチェック
   const hasAccess = hasAccessToContent(userPlan, contentType);

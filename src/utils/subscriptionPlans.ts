@@ -14,8 +14,8 @@ export interface PlanInfo {
 
 // コンテンツアクセス権限の設定
 export const CONTENT_PERMISSIONS: Record<ContentAccessType, PlanType[]> = {
-  learning: ['standard', 'growth'],
-  member: ['standard', 'growth', 'community']
+  learning: ['standard', 'growth', 'community'],
+  member: ['growth', 'community']
 };
 
 // 利用可能なプラン定義
@@ -25,42 +25,42 @@ export const AVAILABLE_PLANS: PlanInfo[] = [
     duration: 1,
     displayName: 'スタンダード（1ヶ月）',
     description: '基本的な機能が利用できる標準プラン（1ヶ月）',
-    pricePerMonth: 980
+    pricePerMonth: 4000
   },
   {
     type: 'standard',
     duration: 3,
     displayName: 'スタンダード（3ヶ月）',
     description: '基本的な機能が利用できる標準プラン（3ヶ月）',
-    pricePerMonth: 880 // 3ヶ月契約で月額割引
+    pricePerMonth: 3800 // 3ヶ月契約で月額割引
   },
   {
     type: 'growth',
     duration: 1,
     displayName: 'グロース（1ヶ月）',
     description: '成長のための追加機能が利用できるプラン（1ヶ月）',
-    pricePerMonth: 1980
+    pricePerMonth: 9800
   },
   {
     type: 'growth',
     duration: 3,
     displayName: 'グロース（3ヶ月）',
     description: '成長のための追加機能が利用できるプラン（3ヶ月）',
-    pricePerMonth: 1780 // 3ヶ月契約で月額割引
+    pricePerMonth: 9300 // 3ヶ月契約で月額割引
   },
   {
     type: 'community',
     duration: 1,
     displayName: 'コミュニティ（1ヶ月）',
     description: 'コミュニティ機能を含む全機能が利用できるプラン（1ヶ月）',
-    pricePerMonth: 2980
+    pricePerMonth: 1480
   },
   {
     type: 'community',
     duration: 6,
     displayName: 'コミュニティ（6ヶ月）',
     description: 'コミュニティ機能を含む全機能が利用できるプラン（6ヶ月）',
-    pricePerMonth: 2580 // 6ヶ月契約で月額割引
+    pricePerMonth: 1280 // 6ヶ月契約で月額割引
   }
 ];
 
