@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -19,6 +20,9 @@ import Content from "./pages/Content";
 import ContentDetail from "./pages/ContentDetail";
 import VideoDetailTest from "./pages/VideoDetailTest";
 
+// 新しくTraining関連のページをインポート
+import TrainingHome from "./pages/Training";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -34,6 +38,10 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              
+              {/* Training関連のルーティング */}
+              <Route path="/training" element={<TrainingHome />} />
+              
               <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
               
               {/* コンテンツページ */}
