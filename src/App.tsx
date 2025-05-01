@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { SubscriptionProvider } from "@/contexts/SubscriptionProvider";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
 import { useState } from "react";
@@ -21,6 +21,7 @@ import ContentDetail from "./pages/ContentDetail";
 import VideoDetailTest from "./pages/VideoDetailTest";
 import TrainingHome from "./pages/Training";
 import TrainingDetail from "./pages/TrainingDetail";
+import TaskDetail from "./pages/Training/TaskDetail";
 
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
@@ -41,6 +42,7 @@ const App = () => {
                 
                 <Route path="/training" element={<TrainingHome />} />
                 <Route path="/training/:slug" element={<TrainingDetail />} />
+                <Route path="/training/:slug/:taskSlug" element={<TaskDetail />} />
                 
                 <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
                 
