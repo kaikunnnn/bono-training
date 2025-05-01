@@ -80,7 +80,7 @@ const TaskDetail: React.FC = () => {
     }
   };
   
-  // コンソールログでサブスクリプション状態を確認
+  // サブスクリプション状態をコンソールログに出力（デバッグ用）
   console.log('TaskDetail - サブスクリプション状態:', isSubscribed);
   
   return (
@@ -98,7 +98,7 @@ const TaskDetail: React.FC = () => {
             mdxContent={mdxContent}
             progress={progress}
             onProgressUpdate={handleProgressUpdate}
-            isPremium={task.is_premium || false}
+            isPremium={task.is_premium}
             isSubscribed={isSubscribed}
           />
         ) : (
