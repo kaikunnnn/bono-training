@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tables } from '@/integrations/supabase/types';
@@ -21,6 +20,8 @@ interface TaskDetailProps {
   progress?: { status?: string; completed_at?: string | null } | null;
   className?: string;
   onProgressUpdate?: () => void;
+  isPremium?: boolean; // 追加: タスクがプレミアムかどうか
+  isSubscribed?: boolean; // 追加: ユーザーが購読しているかどうか
 }
 
 /**
@@ -32,10 +33,12 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   mdxContent,
   progress,
   className,
-  onProgressUpdate
+  onProgressUpdate,
+  isPremium = false, // デフォルト値を設定
+  isSubscribed = false // デフォルト値を設定
 }) => {
   const { user } = useAuth();
-  const { isSubscribed } = useSubscriptionContext();
+  const { isSubscribed: subscriptionContextIsSubscribed } = useSubscriptionContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isCompleting, setIsCompleting] = useState(false);
@@ -133,7 +136,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
             {training.difficulty || '初級'}
           </Badge>
           
-          {task.is_premium && (
+          {isPremium && (
             <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-600 text-xs">
               プレミアム
             </Badge>
@@ -143,7 +146,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
 
       {/* 動画プレーヤー */}
       <div className="mb-10">
-        {task.is_premium && !isSubscribed ? (
+        {isPremium && !subscriptionContextIsSubscribed ? (
           <>
             <div className="relative">
               <VimeoPlayer
@@ -170,7 +173,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
       <div className="prose prose-lg prose-slate max-w-none">
         <MdxPreview
           content={mdxContent}
-          isPremium={task.is_premium}
+          isPremium={isPremium}
           isSubscribed={isSubscribed}
           previewLength={1000}
         />
