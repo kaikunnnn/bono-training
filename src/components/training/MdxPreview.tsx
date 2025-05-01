@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
+import PremiumContentBanner from './PremiumContentBanner';
 
 interface MdxPreviewProps {
   content: string;
@@ -24,6 +25,10 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
 }) => {
   const [displayContent, setDisplayContent] = useState(content);
   
+  // コンソールログでプロップを確認
+  console.log('MdxPreview - isPremium:', isPremium);
+  console.log('MdxPreview - isSubscribed:', isSubscribed);
+  
   useEffect(() => {
     // プレミアムコンテンツかつサブスクライブしていない場合はプレビュー表示
     if (isPremium && !isSubscribed && content.length > previewLength) {
@@ -38,18 +43,7 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
       <ReactMarkdown>{displayContent}</ReactMarkdown>
       
       {isPremium && !isSubscribed && (
-        <div className="mt-6 bg-amber-50 border border-amber-200 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-amber-800">ここから先はプレミアムコンテンツです</h3>
-          <p className="text-amber-700 mt-2">
-            続きを閲覧するには、プレミアムプランへのアップグレードが必要です。
-          </p>
-          <button 
-            className="mt-4 bg-amber-500 hover:bg-amber-600 text-white px-4 py-2 rounded-md transition-colors"
-            onClick={() => window.location.href = '/subscription'}
-          >
-            プレミアムプランに登録する
-          </button>
-        </div>
+        <PremiumContentBanner className="mt-6" />
       )}
     </div>
   );

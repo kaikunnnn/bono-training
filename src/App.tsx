@@ -23,6 +23,9 @@ import TrainingHome from "./pages/Training";
 import TrainingDetail from "./pages/TrainingDetail";
 import TaskDetail from "./pages/Training/TaskDetail";
 
+// コンソールログでインポートの確認
+console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
+
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
 

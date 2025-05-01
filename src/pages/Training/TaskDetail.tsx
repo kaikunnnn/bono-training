@@ -7,6 +7,7 @@ import { loadMdxContent } from '@/utils/mdxLoader';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskDetailComponent from '@/components/training/TaskDetail';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
@@ -16,6 +17,7 @@ import { Loader2 } from 'lucide-react';
 const TaskDetail: React.FC = () => {
   const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
   const { user } = useAuth();
+  const { isSubscribed } = useSubscriptionContext();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -78,6 +80,9 @@ const TaskDetail: React.FC = () => {
     }
   };
   
+  // コンソールログでサブスクリプション状態を確認
+  console.log('TaskDetail - サブスクリプション状態:', isSubscribed);
+  
   return (
     <TrainingLayout>
       <div className="container py-8">
@@ -93,6 +98,8 @@ const TaskDetail: React.FC = () => {
             mdxContent={mdxContent}
             progress={progress}
             onProgressUpdate={handleProgressUpdate}
+            isPremium={task.is_premium || false}
+            isSubscribed={isSubscribed}
           />
         ) : (
           <div className="text-center py-20">
