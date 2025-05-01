@@ -45,13 +45,14 @@ export const createCheckoutSession = async (
 export const checkSubscriptionStatus = async (): Promise<{ 
   isSubscribed: boolean;
   planType: PlanType | null;
+  planMembers: boolean; // トレーニングメンバーシップの有無を追加
   error: Error | null;
 }> => {
   try {
     // ユーザーが認証済みか確認
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      return { isSubscribed: false, planType: null, error: null };
+      return { isSubscribed: false, planType: null, planMembers: false, error: null };
     }
     
     // Supabase Edge Functionを呼び出して購読状態を確認
@@ -65,10 +66,11 @@ export const checkSubscriptionStatus = async (): Promise<{
     return { 
       isSubscribed: data.subscribed, 
       planType: data.planType || null,
+      planMembers: data.planMembers || false,
       error: null 
     };
   } catch (error) {
     console.error('購読状態確認エラー:', error);
-    return { isSubscribed: false, planType: null, error: error as Error };
+    return { isSubscribed: false, planType: null, planMembers: false, error: error as Error };
   }
 };

@@ -7,6 +7,8 @@ import { PlanType } from '@/utils/subscriptionPlans';
 export interface SubscriptionState {
   isSubscribed: boolean;
   planType: PlanType | null;
+  // トレーニングメンバーシップの有無を表すフラグを追加
+  planMembers: boolean;
   loading: boolean;
   error: Error | null;
 }
@@ -16,6 +18,7 @@ export const useSubscription = () => {
   const [state, setState] = useState<SubscriptionState>({
     isSubscribed: false,
     planType: null,
+    planMembers: false,
     loading: true,
     error: null
   });
@@ -23,17 +26,24 @@ export const useSubscription = () => {
   useEffect(() => {
     const checkSubscription = async () => {
       if (!user) {
-        setState({ isSubscribed: false, planType: null, loading: false, error: null });
+        setState({ 
+          isSubscribed: false, 
+          planType: null, 
+          planMembers: false,
+          loading: false, 
+          error: null 
+        });
         return;
       }
 
       try {
-        const { isSubscribed, planType, error } = await checkSubscriptionStatus();
+        const { isSubscribed, planType, planMembers, error } = await checkSubscriptionStatus();
         if (error) throw error;
         
         setState({
           isSubscribed,
           planType,
+          planMembers: planMembers || false,
           loading: false,
           error: null
         });
@@ -42,6 +52,7 @@ export const useSubscription = () => {
         setState({
           isSubscribed: false,
           planType: null,
+          planMembers: false,
           loading: false,
           error: error instanceof Error ? error : new Error('不明なエラーが発生しました')
         });

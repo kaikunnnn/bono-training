@@ -51,6 +51,7 @@ export class SubscriptionService {
     userId: string,
     isActive: boolean,
     planType: string | null,
+    planMembers: boolean = false, // デフォルトはfalse
     stripeSubscriptionId?: string
   ) {
     if (!userId) {
@@ -64,6 +65,7 @@ export class SubscriptionService {
         .update({
           is_active: isActive,
           plan_type: planType,
+          plan_members: planMembers, // トレーニングコンテンツアクセス権限を追加
           stripe_subscription_id: stripeSubscriptionId,
           updated_at: new Date().toISOString()
         })
@@ -72,7 +74,7 @@ export class SubscriptionService {
       if (updateError) {
         logDebug("サブスクリプション情報更新エラー", updateError);
       } else {
-        logDebug("サブスクリプション情報更新成功", { userId, isActive, planType });
+        logDebug("サブスクリプション情報更新成功", { userId, isActive, planType, planMembers });
       }
       
       return { data: updateData, error: updateError };
@@ -83,15 +85,22 @@ export class SubscriptionService {
   }
 
   /**
-   * プランタイプを判定
+   * プランタイプとメンバーシップ権限を判定
+   * @param amount 金額
+   * @returns [プランタイプ, トレーニングアクセス権限]
    */
-  determinePlanType(amount: number): string {
-    if (amount <= 1000) {
-      return "standard";
-    } else if (amount <= 2000) {
-      return "growth";
+  determinePlanInfo(amount: number): [string, boolean] {
+    // 価格に応じてプランタイプとトレーニングアクセス権限を決定
+    if (amount <= 1500) {
+      // 安価なプラン: メンバーシップのみ、トレーニングはなし
+      return ["community", false]; 
+    } else if (amount <= 4000) {
+      // 標準的なプラン: 標準プラン、トレーニングなし
+      return ["standard", false];
+    } else {
+      // 上級プラン: 成長プラン、トレーニングあり
+      return ["growth", true];
     }
-    return "community";
   }
 
   /**

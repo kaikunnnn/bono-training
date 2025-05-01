@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tables } from '@/integrations/supabase/types';
@@ -20,8 +21,8 @@ interface TaskDetailProps {
   progress?: { status?: string; completed_at?: string | null } | null;
   className?: string;
   onProgressUpdate?: () => void;
-  isPremium?: boolean; // 追加: タスクがプレミアムかどうか
-  isSubscribed?: boolean; // 追加: ユーザーが購読しているかどうか
+  isPremium?: boolean;
+  isSubscribed?: boolean;
 }
 
 /**
@@ -34,15 +35,19 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   progress,
   className,
   onProgressUpdate,
-  isPremium = false, // デフォルト値を設定
-  isSubscribed = false // デフォルト値を設定
+  isPremium = false,
+  isSubscribed = false
 }) => {
   const { user } = useAuth();
-  const { isSubscribed: subscriptionContextIsSubscribed } = useSubscriptionContext();
+  const { isSubscribed: contextIsSubscribed, planMembers } = useSubscriptionContext();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isCompleting, setIsCompleting] = useState(false);
   const isCompleted = progress?.status === 'done';
+
+  // プレミアムコンテンツへのアクセス権があるかどうかを判定
+  // トレーニングメンバーシップ（planMembers）を持っているかチェック
+  const hasPremiumAccess = contextIsSubscribed && planMembers;
 
   const handleComplete = async () => {
     if (!user) {
@@ -138,7 +143,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
           
           {isPremium && (
             <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-600 text-xs">
-              プレミアム
+              メンバー限定
             </Badge>
           )}
         </div>
@@ -146,7 +151,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
 
       {/* 動画プレーヤー */}
       <div className="mb-10">
-        {isPremium && !subscriptionContextIsSubscribed ? (
+        {isPremium && !hasPremiumAccess ? (
           <>
             <div className="relative">
               <VimeoPlayer
@@ -174,7 +179,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
         <MdxPreview
           content={mdxContent}
           isPremium={isPremium}
-          isSubscribed={isSubscribed}
+          isSubscribed={hasPremiumAccess}
           previewLength={1000}
         />
       </div>

@@ -30,7 +30,7 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
   console.log('MdxPreview - isSubscribed:', isSubscribed);
   
   useEffect(() => {
-    // プレミアムコンテンツかつサブスクライブしていない場合はプレビュー表示
+    // プレミアムコンテンツかつメンバーシップ登録していない場合はプレビュー表示
     if (isPremium && !isSubscribed && content.length > previewLength) {
       setDisplayContent(content.substring(0, previewLength) + '...');
     } else {

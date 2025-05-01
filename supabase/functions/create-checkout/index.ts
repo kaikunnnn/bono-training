@@ -16,7 +16,7 @@ serve(async (req) => {
 
   try {
     // リクエストボディを解析
-    const { returnUrl, useTestPrice = false } = await req.json();
+    const { returnUrl, useTestPrice = false, planType = 'standard' } = await req.json();
     
     if (!returnUrl) {
       throw new Error("リダイレクトURLが指定されていません");
@@ -86,10 +86,42 @@ serve(async (req) => {
       console.log(`既存のStripe顧客ID ${stripeCustomerId} を使用します`);
     }
 
-    // 環境に応じたPrice IDを選択
-    const priceId = useTestPrice 
-      ? Deno.env.get("STRIPE_TEST_PRICE_ID") 
-      : Deno.env.get("STRIPE_PRICE_ID");
+    // プランタイプに応じたPrice IDを選択
+    let priceId: string | undefined;
+    
+    // テスト環境と本番環境で異なるPrice IDを使用
+    if (useTestPrice) {
+      // テスト環境のPrice ID
+      switch(planType) {
+        case 'community':
+          priceId = Deno.env.get("STRIPE_TEST_COMMUNITY_PRICE_ID");
+          break;
+        case 'growth':
+          priceId = Deno.env.get("STRIPE_TEST_GROWTH_PRICE_ID");
+          break;
+        case 'standard':
+        default:
+          priceId = Deno.env.get("STRIPE_TEST_STANDARD_PRICE_ID");
+      }
+    } else {
+      // 本番環境のPrice ID
+      switch(planType) {
+        case 'community':
+          priceId = Deno.env.get("STRIPE_COMMUNITY_PRICE_ID");
+          break;
+        case 'growth':
+          priceId = Deno.env.get("STRIPE_GROWTH_PRICE_ID");
+          break;
+        case 'standard':
+        default:
+          priceId = Deno.env.get("STRIPE_STANDARD_PRICE_ID");
+      }
+    }
+    
+    // Price IDがなければデフォルトを使用
+    priceId = priceId || (useTestPrice 
+      ? Deno.env.get("STRIPE_TEST_PRICE_ID")
+      : Deno.env.get("STRIPE_PRICE_ID"));
     
     if (!priceId) {
       throw new Error("Stripe Price IDが設定されていません");
@@ -110,6 +142,7 @@ serve(async (req) => {
       cancel_url: returnUrl,
       metadata: {
         user_id: user.id,
+        plan_type: planType
       }
     });
 

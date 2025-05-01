@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 
 /**
@@ -42,12 +43,12 @@ export const getTrainingDetail = async (slug: string) => {
       throw trainingError;
     }
 
-    // タスク情報を取得
+    // タスク情報を取得 - order_indexで並べ替え (修正: orderからorder_indexに変更)
     const { data: taskData, error: taskError } = await supabase
       .from('task')
       .select('*')
       .eq('training_id', trainingData.id)
-      .order('order', { ascending: true });
+      .order('order_index', { ascending: true });
 
     if (taskError) {
       console.error('タスク情報取得エラー:', taskError);

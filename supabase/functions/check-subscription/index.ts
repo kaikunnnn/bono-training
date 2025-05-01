@@ -22,7 +22,7 @@ serve(async (req) => {
     if (!authHeader) {
       logDebug("認証ヘッダーなし");
       return new Response(
-        JSON.stringify({ subscribed: false, planType: null }),
+        JSON.stringify({ subscribed: false, planType: null, planMembers: false }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
@@ -38,7 +38,7 @@ serve(async (req) => {
     if (userError || !user) {
       logDebug("ユーザー取得エラー", { error: userError });
       return new Response(
-        JSON.stringify({ subscribed: false, planType: null }),
+        JSON.stringify({ subscribed: false, planType: null, planMembers: false }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
           status: 200,
@@ -55,13 +55,15 @@ serve(async (req) => {
     if (dbSubscription) {
       logDebug("データベースの購読情報を返却", { 
         isActive: dbSubscription.is_active,
-        planType: dbSubscription.plan_type
+        planType: dbSubscription.plan_type,
+        planMembers: dbSubscription.plan_members
       });
       
       return new Response(
         JSON.stringify({
           subscribed: dbSubscription.is_active,
-          planType: dbSubscription.plan_type
+          planType: dbSubscription.plan_type,
+          planMembers: dbSubscription.plan_members
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -74,16 +76,19 @@ serve(async (req) => {
     try {
       if (!stripe) {
         // Stripeが利用できない場合はデフォルトプランを設定
+        // デモ用にデフォルトでトレーニングメンバーシップをtrueに設定
         await subscriptionService.updateSubscriptionStatus(
           user.id,
           true,
-          "standard"
+          "standard",
+          true
         );
         
         return new Response(
           JSON.stringify({ 
             subscribed: true, 
             planType: "standard",
+            planMembers: true,
             testMode: true
           }),
           {
@@ -103,13 +108,22 @@ serve(async (req) => {
 
       const hasActiveSubscription = subscriptions.data.length > 0;
       let planType = null;
+      let planMembers = false;
       
       if (hasActiveSubscription) {
         const subscription = subscriptions.data[0];
         const price = await subscriptionService.getPlanInfo(subscription);
         if (price && price.unit_amount) {
-          planType = subscriptionService.determinePlanType(price.unit_amount);
-          logDebug("プラン判定", { amount: price.unit_amount, planType });
+          // 金額に基づいてプランタイプとトレーニングメンバーシップ権限を判定
+          const [determinedPlanType, hasTrainingAccess] = subscriptionService.determinePlanInfo(price.unit_amount);
+          planType = determinedPlanType;
+          planMembers = hasTrainingAccess;
+          
+          logDebug("プラン判定", { 
+            amount: price.unit_amount, 
+            planType, 
+            planMembers
+          });
         }
         
         // データベースを更新
@@ -117,6 +131,7 @@ serve(async (req) => {
           user.id,
           true,
           planType,
+          planMembers,
           subscription.id
         );
       } else {
@@ -126,14 +141,16 @@ serve(async (req) => {
         await subscriptionService.updateSubscriptionStatus(
           user.id,
           false,
-          planType
+          planType,
+          false
         );
       }
 
       return new Response(
         JSON.stringify({ 
           subscribed: hasActiveSubscription, 
-          planType 
+          planType,
+          planMembers 
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -144,16 +161,19 @@ serve(async (req) => {
       logDebug("Stripeエラー", { error: stripeError });
       
       // Stripeでエラーが発生した場合は、デフォルトの標準プランを設定
+      // デモ用にplan_membersをtrueに設定
       await subscriptionService.updateSubscriptionStatus(
         user.id,
         true,
-        "standard"
+        "standard",
+        true
       );
       
       return new Response(
         JSON.stringify({ 
           subscribed: true,
           planType: "standard",
+          planMembers: true,
           error: "Stripeとの同期に失敗しましたが、標準プランとして処理します"
         }),
         {
@@ -172,7 +192,8 @@ serve(async (req) => {
         error: true,
         message: "サーバー内部エラーが発生しました",
         subscribed: false,
-        planType: null
+        planType: null,
+        planMembers: false
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

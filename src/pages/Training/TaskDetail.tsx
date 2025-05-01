@@ -17,7 +17,7 @@ import { Loader2 } from 'lucide-react';
 const TaskDetail: React.FC = () => {
   const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
   const { user } = useAuth();
-  const { isSubscribed } = useSubscriptionContext();
+  const { isSubscribed, planMembers } = useSubscriptionContext();
   const { toast } = useToast();
   const navigate = useNavigate();
   
@@ -82,6 +82,7 @@ const TaskDetail: React.FC = () => {
   
   // サブスクリプション状態をコンソールログに出力（デバッグ用）
   console.log('TaskDetail - サブスクリプション状態:', isSubscribed);
+  console.log('TaskDetail - メンバーシップ状態:', planMembers);
   
   return (
     <TrainingLayout>
@@ -99,7 +100,7 @@ const TaskDetail: React.FC = () => {
             progress={progress}
             onProgressUpdate={handleProgressUpdate}
             isPremium={task.is_premium}
-            isSubscribed={isSubscribed}
+            isSubscribed={planMembers && isSubscribed}
           />
         ) : (
           <div className="text-center py-20">
