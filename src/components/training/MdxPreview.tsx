@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import PremiumContentBanner from './PremiumContentBanner';
+import { Badge } from '@/components/ui/badge';
+import { Lock } from 'lucide-react';
 
 interface MdxPreviewProps {
   content: string;
@@ -44,7 +46,7 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
         previewContent = content.substring(0, lastParagraphEnd);
       }
       
-      setDisplayContent(previewContent + '\n\n...');
+      setDisplayContent(previewContent);
     } else {
       setDisplayContent(content);
     }
@@ -52,6 +54,30 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
 
   return (
     <div className={cn('mdx-preview', className)}>
+      {/* プレミアムコンテンツの場合、バッジを表示 */}
+      {isPremium && (
+        <div className="mb-4">
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "inline-flex items-center gap-1 py-1 px-2",
+              isSubscribed 
+                ? "bg-green-50 text-green-700 border-green-300" 
+                : "bg-amber-50 text-amber-700 border-amber-300"
+            )}
+          >
+            {isSubscribed ? (
+              <>メンバー特典</>
+            ) : (
+              <>
+                <Lock className="w-3 h-3" />
+                メンバー限定
+              </>
+            )}
+          </Badge>
+        </div>
+      )}
+      
       <div className="prose prose-lg prose-slate max-w-none dark:prose-invert">
         <ReactMarkdown>{displayContent}</ReactMarkdown>
       </div>

@@ -1,7 +1,7 @@
 
 export type PlanType = 'standard' | 'growth' | 'community';
 export type PlanDuration = 1 | 3 | 6; // 月単位
-export type ContentAccessType = 'learning' | 'member';
+export type ContentAccessType = 'learning' | 'member' | 'training';
 
 // プランの情報
 export interface PlanInfo {
@@ -15,7 +15,8 @@ export interface PlanInfo {
 // コンテンツアクセス権限の設定
 export const CONTENT_PERMISSIONS: Record<ContentAccessType, PlanType[]> = {
   learning: ['standard', 'growth', 'community'],
-  member: ['growth', 'community']
+  member: ['growth', 'community'],
+  training: ['growth'] // トレーニングコンテンツは成長プランのみでアクセス可能
 };
 
 // 利用可能なプラン定義
@@ -86,4 +87,38 @@ export function hasAccessToContent(userPlan: UserPlanInfo, contentType: ContentA
   // プランタイプに対応するコンテンツアクセス権限があるかチェック
   const allowedPlans = CONTENT_PERMISSIONS[contentType];
   return allowedPlans.includes(userPlan.planType);
+}
+
+/**
+ * プランがトレーニングコンテンツへのアクセス権限を持っているかチェックする
+ * @param planType プランタイプ
+ * @returns トレーニングアクセス権限があればtrue
+ */
+export function hasTrainingAccess(planType: PlanType | null): boolean {
+  if (!planType) return false;
+  return CONTENT_PERMISSIONS.training.includes(planType);
+}
+
+/**
+ * プランの特典一覧を取得する
+ * @param planType プランタイプ
+ * @returns 特典の配列
+ */
+export function getPlanBenefits(planType: PlanType | null): string[] {
+  const benefits = [
+    '基本的な学習コンテンツへのアクセス'
+  ];
+  
+  if (!planType) return [];
+  
+  if (planType === 'growth' || planType === 'community') {
+    benefits.push('メンバー限定コンテンツへのアクセス');
+  }
+  
+  if (planType === 'growth') {
+    benefits.push('トレーニングプログラムへの参加');
+    benefits.push('実践的なスキルを身につけるハンズオン');
+  }
+  
+  return benefits;
 }

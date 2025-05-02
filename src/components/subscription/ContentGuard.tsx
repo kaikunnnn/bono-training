@@ -3,14 +3,16 @@ import React, { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import SubscriptionButton from '@/components/subscription/SubscriptionButton';
-import { ContentAccessType, hasAccessToContent } from '@/utils/subscriptionPlans';
+import { Button } from '@/components/ui/button';
+import { ContentAccessType, hasAccessToContent, UserPlanInfo } from '@/utils/subscriptionPlans';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { Star, Lock } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ContentGuardProps {
   children: ReactNode;
   /**
-   * コンテンツタイプ（'learning' または 'member'）
+   * コンテンツタイプ（'learning', 'member', 'training'）
    */
   contentType: ContentAccessType;
   /**
@@ -27,6 +29,10 @@ interface ContentGuardProps {
    * 指定がない場合は直接リダイレクト
    */
   confirmMessage?: string;
+  /**
+   * コンテンツ説明（プレミアムバナーに表示）
+   */
+  contentDescription?: string;
 }
 
 /**
@@ -37,14 +43,15 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
   contentType,
   redirectTo,
   fallbackComponent,
-  confirmMessage
+  confirmMessage,
+  contentDescription
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isSubscribed, planType } = useSubscriptionContext();
   
   // サブスクリプション情報からユーザープラン情報を作成
-  const userPlan = {
+  const userPlan: UserPlanInfo = {
     planType,
     isActive: isSubscribed,
   };
@@ -90,12 +97,11 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
           <CardContent className="space-y-4">
             <p>{confirmMessage}</p>
             <div className="flex space-x-4">
-              <button
-                className="flex-1 px-4 py-2 border border-gray-300 rounded hover:bg-gray-100"
+              <Button
                 onClick={handleRedirect}
               >
                 プラン選択へ
-              </button>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -121,38 +127,94 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
       <CardHeader>
         <CardTitle className="text-center">プランのアップグレードが必要です</CardTitle>
         <CardDescription className="text-center">
-          {contentType === 'learning' ? 'この学習コンテンツ' : 'このメンバー限定コンテンツ'}を閲覧するには、
-          プランのアップグレードが必要です。
+          {getContentTypeDescription(contentType, contentDescription)}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="space-y-2">
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              {contentType === 'learning' ? '全ての学習コンテンツへのアクセス' : '全てのメンバー限定コンテンツへのアクセス'}
-            </div>
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              追加機能の利用
-            </div>
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              プレミアムサポート
-            </div>
+            <FeatureList contentType={contentType} />
           </div>
 
-          <SubscriptionButton returnUrl={window.location.href} label="プランをアップグレードする" />
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button 
+              className="bg-amber-500 hover:bg-amber-600 text-white flex-grow" 
+              asChild
+            >
+              <Link to="/subscription">メンバーに登録する</Link>
+            </Button>
+            
+            <Button variant="outline" asChild className="flex-grow">
+              <Link to="/pricing">料金プランを見る</Link>
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
   );
 };
+
+// コンテンツタイプに応じた説明を返す
+function getContentTypeDescription(contentType: ContentAccessType, customDescription?: string): string {
+  if (customDescription) return customDescription;
+  
+  switch (contentType) {
+    case 'learning':
+      return 'この学習コンテンツを閲覧するには、プランのアップグレードが必要です。';
+    case 'member':
+      return 'このメンバー限定コンテンツを閲覧するには、プランのアップグレードが必要です。';
+    case 'training':
+      return 'このトレーニングプログラムに参加するには、グロースプランへのアップグレードが必要です。';
+    default:
+      return 'このコンテンツを閲覧するには、プランのアップグレードが必要です。';
+  }
+}
+
+// コンテンツタイプに応じた機能リストを表示
+function FeatureList({ contentType }: { contentType: ContentAccessType }) {
+  const features = getFeaturesByContentType(contentType);
+  
+  return (
+    <>
+      {features.map((feature, index) => (
+        <div key={index} className="flex items-center">
+          <Star className="h-5 w-5 text-amber-500 mr-2" />
+          {feature}
+        </div>
+      ))}
+    </>
+  );
+}
+
+// コンテンツタイプに応じた機能リストを返す
+function getFeaturesByContentType(contentType: ContentAccessType): string[] {
+  switch (contentType) {
+    case 'learning':
+      return [
+        '全ての学習コンテンツへのアクセス',
+        '追加コンテンツの利用',
+        'プレミアムサポート'
+      ];
+    case 'member':
+      return [
+        '全てのメンバー限定コンテンツへのアクセス',
+        '追加機能の利用',
+        'コミュニティへの参加'
+      ];
+    case 'training':
+      return [
+        '全てのトレーニングプログラムへのアクセス',
+        '実践的なスキル習得カリキュラム',
+        'ハンズオンでの技術習得',
+        'プロジェクト例と解説'
+      ];
+    default:
+      return [
+        'プレミアムコンテンツへのアクセス',
+        '追加機能の利用',
+        'プレミアムサポート'
+      ];
+  }
+}
 
 export default ContentGuard;
