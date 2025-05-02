@@ -1,16 +1,12 @@
 
-import React, { ReactNode } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { ContentAccessType, hasAccessToContent, UserPlanInfo } from '@/utils/subscriptionPlans';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { Star, Lock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import FallbackContent from './FallbackContent';
 
 interface ContentGuardProps {
-  children: ReactNode;
+  children: React.ReactNode;
   /**
    * コンテンツタイプ（'learning', 'member', 'training'）
    */
@@ -47,7 +43,6 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
   contentDescription
 }) => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { isSubscribed, planType } = useSubscriptionContext();
   
   // サブスクリプション情報からユーザープラン情報を作成
@@ -79,40 +74,27 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
     
     // 即時リダイレクト（確認メッセージがない場合）
     if (!confirmMessage) {
-      React.useEffect(() => {
+      useEffect(() => {
         handleRedirect();
       }, []);
-    }
-    
-    // 確認メッセージがある場合は表示
-    if (confirmMessage) {
+      
+      // リダイレクト中の表示
       return (
-        <Card className="max-w-md mx-auto my-8">
-          <CardHeader>
-            <CardTitle className="text-center">アクセス制限</CardTitle>
-            <CardDescription className="text-center">
-              このコンテンツを閲覧するには、より上位のプランが必要です。
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p>{confirmMessage}</p>
-            <div className="flex space-x-4">
-              <Button
-                onClick={handleRedirect}
-              >
-                プラン選択へ
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex justify-center items-center p-12">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
       );
     }
     
-    // リダイレクト中の表示
+    // 確認メッセージがある場合は表示
     return (
-      <div className="flex justify-center items-center p-12">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-      </div>
+      <FallbackContent 
+        contentType={contentType}
+        contentDescription={contentDescription}
+        confirmMessage={confirmMessage}
+        redirectTo={redirectTo}
+        onRedirect={handleRedirect}
+      />
     );
   }
   
@@ -123,98 +105,11 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
   
   // デフォルトのサブスクリプション促進画面
   return (
-    <Card className="max-w-md mx-auto my-8">
-      <CardHeader>
-        <CardTitle className="text-center">プランのアップグレードが必要です</CardTitle>
-        <CardDescription className="text-center">
-          {getContentTypeDescription(contentType, contentDescription)}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <FeatureList contentType={contentType} />
-          </div>
-
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button 
-              className="bg-amber-500 hover:bg-amber-600 text-white flex-grow" 
-              asChild
-            >
-              <Link to="/subscription">メンバーに登録する</Link>
-            </Button>
-            
-            <Button variant="outline" asChild className="flex-grow">
-              <Link to="/pricing">料金プランを見る</Link>
-            </Button>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+    <FallbackContent 
+      contentType={contentType}
+      contentDescription={contentDescription}
+    />
   );
 };
-
-// コンテンツタイプに応じた説明を返す
-function getContentTypeDescription(contentType: ContentAccessType, customDescription?: string): string {
-  if (customDescription) return customDescription;
-  
-  switch (contentType) {
-    case 'learning':
-      return 'この学習コンテンツを閲覧するには、プランのアップグレードが必要です。';
-    case 'member':
-      return 'このメンバー限定コンテンツを閲覧するには、プランのアップグレードが必要です。';
-    case 'training':
-      return 'このトレーニングプログラムに参加するには、グロースプランへのアップグレードが必要です。';
-    default:
-      return 'このコンテンツを閲覧するには、プランのアップグレードが必要です。';
-  }
-}
-
-// コンテンツタイプに応じた機能リストを表示
-function FeatureList({ contentType }: { contentType: ContentAccessType }) {
-  const features = getFeaturesByContentType(contentType);
-  
-  return (
-    <>
-      {features.map((feature, index) => (
-        <div key={index} className="flex items-center">
-          <Star className="h-5 w-5 text-amber-500 mr-2" />
-          {feature}
-        </div>
-      ))}
-    </>
-  );
-}
-
-// コンテンツタイプに応じた機能リストを返す
-function getFeaturesByContentType(contentType: ContentAccessType): string[] {
-  switch (contentType) {
-    case 'learning':
-      return [
-        '全ての学習コンテンツへのアクセス',
-        '追加コンテンツの利用',
-        'プレミアムサポート'
-      ];
-    case 'member':
-      return [
-        '全てのメンバー限定コンテンツへのアクセス',
-        '追加機能の利用',
-        'コミュニティへの参加'
-      ];
-    case 'training':
-      return [
-        '全てのトレーニングプログラムへのアクセス',
-        '実践的なスキル習得カリキュラム',
-        'ハンズオンでの技術習得',
-        'プロジェクト例と解説'
-      ];
-    default:
-      return [
-        'プレミアムコンテンツへのアクセス',
-        '追加機能の利用',
-        'プレミアムサポート'
-      ];
-  }
-}
 
 export default ContentGuard;
