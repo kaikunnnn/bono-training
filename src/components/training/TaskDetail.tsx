@@ -46,8 +46,17 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   const isCompleted = progress?.status === 'done';
 
   // プレミアムコンテンツへのアクセス権があるかどうかを判定
-  // トレーニングメンバーシップ（planMembers）を持っているかチェック
+  // plan_members=true の場合にのみプレミアムコンテンツにアクセス可能
   const hasPremiumAccess = contextIsSubscribed && planMembers;
+
+  // デバッグ用ログ
+  console.log('TaskDetail - コンテンツアクセス状態:', { 
+    isPremium, 
+    isSubscribed: contextIsSubscribed,
+    planMembers,
+    hasPremiumAccess,
+    taskTitle: task.title
+  });
 
   const handleComplete = async () => {
     if (!user) {
@@ -142,8 +151,13 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
           </Badge>
           
           {isPremium && (
-            <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-600 text-xs">
-              メンバー限定
+            <Badge variant={hasPremiumAccess ? "outline" : "outline"} className={cn(
+              "text-xs",
+              hasPremiumAccess 
+                ? "border-green-300 bg-green-50 text-green-600" 
+                : "border-amber-300 bg-amber-50 text-amber-600"
+            )}>
+              {hasPremiumAccess ? "メンバー特典" : "メンバー限定"}
             </Badge>
           )}
         </div>
@@ -160,7 +174,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
                 className="rounded-lg overflow-hidden shadow-lg"
               />
               <div className="absolute bottom-4 right-4">
-                <Badge className="bg-amber-500">プレビュー {task.preview_sec}秒</Badge>
+                <Badge className="bg-amber-500">プレビュー {task.preview_sec || 30}秒</Badge>
               </div>
             </div>
             <PremiumContentBanner className="mt-4" onSubscribe={handleSubscribe} />

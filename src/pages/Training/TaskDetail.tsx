@@ -13,6 +13,8 @@ import { Loader2 } from 'lucide-react';
 
 /**
  * タスク詳細ページ
+ * トレーニングのタスク（お題）詳細を表示し、
+ * メンバーシップステータスに基づいてコンテンツアクセスを制御する
  */
 const TaskDetail: React.FC = () => {
   const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
@@ -27,6 +29,7 @@ const TaskDetail: React.FC = () => {
   const [mdxContent, setMdxContent] = useState<string>('');
   const [progress, setProgress] = useState<{ status?: string; completed_at?: string | null } | null>(null);
   
+  // コンポーネントマウント時やパラメータ変更時にタスク情報をロード
   useEffect(() => {
     const loadTaskData = async () => {
       try {
@@ -80,9 +83,15 @@ const TaskDetail: React.FC = () => {
     }
   };
   
-  // サブスクリプション状態をコンソールログに出力（デバッグ用）
-  console.log('TaskDetail - サブスクリプション状態:', isSubscribed);
-  console.log('TaskDetail - メンバーシップ状態:', planMembers);
+  // サブスクリプション状態をコンソールログに出力
+  console.log('TaskDetail - サブスクリプション状態:', { 
+    isSubscribed, 
+    planMembers,
+    hasPremiumAccess: isSubscribed && planMembers
+  });
+  
+  // メンバーシップステータス判定
+  const hasPremiumAccess = isSubscribed && planMembers;
   
   return (
     <TrainingLayout>
@@ -100,7 +109,7 @@ const TaskDetail: React.FC = () => {
             progress={progress}
             onProgressUpdate={handleProgressUpdate}
             isPremium={task.is_premium}
-            isSubscribed={planMembers && isSubscribed}
+            isSubscribed={hasPremiumAccess}
           />
         ) : (
           <div className="text-center py-20">

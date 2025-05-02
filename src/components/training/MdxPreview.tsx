@@ -25,25 +25,44 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
 }) => {
   const [displayContent, setDisplayContent] = useState(content);
   
-  // コンソールログでプロップを確認
-  console.log('MdxPreview - isPremium:', isPremium);
-  console.log('MdxPreview - isSubscribed:', isSubscribed);
+  // デバッグ用ログ
+  console.log('MdxPreview - アクセス状態:', { 
+    isPremium, 
+    isSubscribed,
+    contentLength: content.length,
+    previewLength
+  });
   
   useEffect(() => {
     // プレミアムコンテンツかつメンバーシップ登録していない場合はプレビュー表示
     if (isPremium && !isSubscribed && content.length > previewLength) {
-      setDisplayContent(content.substring(0, previewLength) + '...');
+      let previewContent = content.substring(0, previewLength);
+      
+      // 段落の終わりで切れるようにする
+      const lastParagraphEnd = previewContent.lastIndexOf('\n\n');
+      if (lastParagraphEnd > previewLength * 0.7) { // 少なくともプレビューの70%は表示する
+        previewContent = content.substring(0, lastParagraphEnd);
+      }
+      
+      setDisplayContent(previewContent + '\n\n...');
     } else {
       setDisplayContent(content);
     }
   }, [content, isPremium, isSubscribed, previewLength]);
 
   return (
-    <div className={cn('mdx-preview prose dark:prose-invert max-w-none', className)}>
-      <ReactMarkdown>{displayContent}</ReactMarkdown>
+    <div className={cn('mdx-preview', className)}>
+      <div className="prose prose-lg prose-slate max-w-none dark:prose-invert">
+        <ReactMarkdown>{displayContent}</ReactMarkdown>
+      </div>
       
+      {/* プレミアムコンテンツかつサブスクリプションがない場合に登録バナーを表示 */}
       {isPremium && !isSubscribed && (
-        <PremiumContentBanner className="mt-6" />
+        <div className="relative mt-6">
+          {/* コンテンツが切れたことを視覚的に示す装飾 */}
+          <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
+          <PremiumContentBanner />
+        </div>
       )}
     </div>
   );
