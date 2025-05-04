@@ -19,7 +19,7 @@ const TrainingHeader = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/auth");
+    navigate("/training/login");
   };
 
   return (
@@ -78,7 +78,7 @@ const TrainingHeader = () => {
           {!user ? (
             <>
               <Link
-                to="/auth"
+                to="/training/login"
                 className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
               >
                 <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">

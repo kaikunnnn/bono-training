@@ -25,6 +25,7 @@ import TrainingDetail from "./pages/TrainingDetail";
 import TaskDetail from "./pages/Training/TaskDetail";
 import TrainingPlan from "./pages/Training/Plan";
 import TrainingAbout from "./pages/Training/About";
+import TrainingLogin from "./pages/Training/Login";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -47,6 +48,7 @@ const App = () => {
                 <Route path="/reset-password" element={<ResetPassword />} />
                 
                 <Route path="/training" element={<TrainingHome />} />
+                <Route path="/training/login" element={<TrainingLogin />} />
                 <Route path="/training/:slug" element={<TrainingDetail />} />
                 <Route path="/training/:slug/:taskSlug" element={<TaskDetail />} />
                 <Route path="/training/plan" element={<TrainingPlan />} />
