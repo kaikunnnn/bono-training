@@ -4,10 +4,8 @@ import { useParams, Link } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TaskList from '@/components/training/TaskList';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Lock } from 'lucide-react';
 import { getTrainingDetail } from '@/services/training';
 import { TrainingDetailData, Task } from '@/types/training';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
@@ -87,7 +85,7 @@ const TrainingDetail = () => {
     <TrainingLayout>
       <TrainingHeader />
       <div className="container py-8">
-        <div className="space-y-6">
+        <div className="space-y-8">
           <div>
             <h1 className="text-3xl font-bold">{trainingData.title}</h1>
             {trainingData.description && (
@@ -112,59 +110,37 @@ const TrainingDetail = () => {
             ))}
           </div>
           
-          {/* 有料コンテンツを含み、かつメンバーシップを持っていない場合に警告表示 */}
-          {trainingData.has_premium_content && !hasMemberAccess && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
-              <Lock className="text-amber-500 mt-1 flex-shrink-0" />
-              <div>
-                <h3 className="font-medium text-amber-800">メンバー限定コンテンツを含みます</h3>
-                <p className="text-amber-700 text-sm mt-1">
-                  このトレーニングには有料のタスクが含まれています。すべてのコンテンツにアクセスするには
-                  メンバーシップへの登録が必要です。
-                </p>
-                <div className="mt-3">
-                  <Button asChild size="sm">
-                    <Link to="/training/plan">メンバーシップ登録</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* タスク一覧（常に表示） */}
+          <section className="space-y-6 pt-4">
+            <h2 className="text-2xl font-bold">タスク一覧</h2>
+            <TaskList tasks={processedTasks} trainingSlug={slug || ''} />
+          </section>
           
-          <Tabs defaultValue="tasks" className="mt-8">
-            <TabsList>
-              <TabsTrigger value="tasks">タスク一覧</TabsTrigger>
-              <TabsTrigger value="details">詳細情報</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="tasks" className="mt-6">
-              <TaskList tasks={processedTasks} trainingSlug={slug || ''} />
-            </TabsContent>
-            
-            <TabsContent value="details" className="mt-6">
-              <div className="prose max-w-none">
-                <h3>トレーニングの目標</h3>
-                <p>このトレーニングを通じて以下のスキルを習得できます：</p>
-                <ul>
-                  {trainingData.skills?.map((skill, index) => (
-                    <li key={index}>{skill}</li>
-                  )) || (
-                    <li>実践的なスキルの習得</li>
-                  )}
-                </ul>
-                
-                <h3>前提知識</h3>
-                <p>このトレーニングには以下の知識が役立ちます：</p>
-                <ul>
-                  {trainingData.prerequisites?.map((prereq, index) => (
-                    <li key={index}>{prereq}</li>
-                  )) || (
-                    <li>基本的なデザインの知識</li>
-                  )}
-                </ul>
-              </div>
-            </TabsContent>
-          </Tabs>
+          {/* 詳細情報（常に表示） */}
+          <section className="space-y-6 pt-4">
+            <h2 className="text-2xl font-bold">詳細情報</h2>
+            <div className="prose max-w-none">
+              <h3>トレーニングの目標</h3>
+              <p>このトレーニングを通じて以下のスキルを習得できます：</p>
+              <ul>
+                {trainingData.skills?.map((skill, index) => (
+                  <li key={index}>{skill}</li>
+                )) || (
+                  <li>実践的なスキルの習得</li>
+                )}
+              </ul>
+              
+              <h3>前提知識</h3>
+              <p>このトレーニングには以下の知識が役立ちます：</p>
+              <ul>
+                {trainingData.prerequisites?.map((prereq, index) => (
+                  <li key={index}>{prereq}</li>
+                )) || (
+                  <li>基本的なデザインの知識</li>
+                )}
+              </ul>
+            </div>
+          </section>
         </div>
       </div>
     </TrainingLayout>

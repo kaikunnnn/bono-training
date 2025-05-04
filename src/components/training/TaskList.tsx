@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Tables } from '@/integrations/supabase/types';
 import { Lock, CheckCircle2 } from 'lucide-react';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { cn } from '@/lib/utils';
@@ -21,7 +20,6 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSl
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-bold mb-6">タスク一覧</h2>
       <div className="grid gap-4">
         {tasks.map((task) => {
           const taskProgress = progressMap[task.id];
@@ -43,8 +41,8 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSl
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold">{task.title}</h3>
                     {task.is_premium && (
-                      <div className="flex items-center gap-1 text-sm text-gray-500">
-                        <Lock className="w-4 h-4" />
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
+                        <Lock className="w-3 h-3" />
                         <span>プレミアム</span>
                       </div>
                     )}
