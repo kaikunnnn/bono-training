@@ -282,8 +282,8 @@ function ExampleComponent() {
       slug: taskData.slug,
       order_index: taskData.order_index,
       preview_sec: taskData.preview_sec,
-      video_full: taskData.video_full,
-      video_preview: taskData.video_preview,
+      video_full: taskData.video_full || "https://example.com/videos/full.mp4", // 必ず文字列を返すようにデフォルト値を設定
+      video_preview: taskData.video_preview || "https://example.com/videos/preview.mp4", // 必ず文字列を返すようにデフォルト値を設定
       created_at: taskData.created_at || new Date().toISOString() // 必ず文字列を返すようにする
     };
   } catch (error) {
