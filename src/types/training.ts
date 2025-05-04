@@ -22,6 +22,7 @@ export interface Task {
   preview_sec: number;
   video_full?: string;
   video_preview?: string;
+  created_at?: string;
   isLocked?: boolean;
 }
 

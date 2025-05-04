@@ -5,11 +5,12 @@ import { Tables } from '@/integrations/supabase/types';
 import { Lock, CheckCircle2 } from 'lucide-react';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { cn } from '@/lib/utils';
+import { Task } from '@/types/training';
 
 interface TaskListProps {
-  tasks: Tables<'task'>[];
+  tasks: Task[];
   progressMap?: Record<string, { status: string, completed_at: string | null }>;
-  trainingSlug?: string; // trainingSlug プロパティを追加
+  trainingSlug?: string;
 }
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSlug }) => {

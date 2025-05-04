@@ -9,7 +9,7 @@ import TaskList from '@/components/training/TaskList';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Lock } from 'lucide-react';
 import { getTrainingDetail } from '@/services/training';
-import { TrainingDetailData } from '@/types/training';
+import { TrainingDetailData, Task } from '@/types/training';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 
 const TrainingDetail = () => {
@@ -135,7 +135,7 @@ const TrainingDetail = () => {
             </TabsList>
             
             <TabsContent value="tasks" className="mt-6">
-              <TaskList tasks={processedTasks} trainingSlug={slug || ''} />
+              <TaskList tasks={trainingData.tasks} trainingSlug={slug || ''} />
             </TabsContent>
             
             <TabsContent value="details" className="mt-6">
