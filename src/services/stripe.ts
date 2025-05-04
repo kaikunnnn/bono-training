@@ -6,10 +6,12 @@ import { PlanType } from '@/utils/subscriptionPlans';
 /**
  * Stripeチェックアウトセッションを作成する
  * @param returnUrl チェックアウト完了後のリダイレクトURL
+ * @param planType プランタイプ（standard, growth, communityなど）
  * @param isTest 強制的にテスト環境のPrice IDを使用するかどうか
  */
 export const createCheckoutSession = async (
   returnUrl: string,
+  planType: PlanType = 'standard',
   isTest?: boolean
 ): Promise<{ url: string | null; error: Error | null }> => {
   try {
@@ -19,10 +21,13 @@ export const createCheckoutSession = async (
       throw new Error('認証されていません。ログインしてください。');
     }
     
+    console.log(`Checkout開始: プラン=${planType}, 環境=${isTest ? 'テスト' : '本番'}`);
+    
     // Supabase Edge Functionを呼び出してCheckoutセッションを作成
     const { data, error } = await supabase.functions.invoke('create-checkout', {
       body: {
         returnUrl,
+        planType,
         useTestPrice: isTest || import.meta.env.MODE !== 'production' 
       }
     });
@@ -31,6 +36,8 @@ export const createCheckoutSession = async (
       console.error('Checkoutセッション作成エラー:', error);
       throw new Error('決済処理の準備に失敗しました。');
     }
+    
+    console.log('Checkoutセッション作成成功:', data.url);
     
     return { url: data.url, error: null };
   } catch (error) {
@@ -62,6 +69,8 @@ export const checkSubscriptionStatus = async (): Promise<{
       console.error('購読状態確認エラー:', error);
       throw new Error('購読状態の確認に失敗しました。');
     }
+    
+    console.log('購読状態確認結果:', data);
     
     return { 
       isSubscribed: data.subscribed, 

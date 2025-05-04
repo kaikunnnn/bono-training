@@ -35,6 +35,11 @@ const PlanCard: React.FC<PlanCardProps> = ({
 }) => {
   const planBenefits = getPlanBenefits(id as PlanType);
   
+  const handleClick = () => {
+    // 明示的にPlanTypeとして渡す
+    onSubscribe(id as PlanType);
+  };
+  
   return (
     <Card 
       className={`
@@ -75,9 +80,9 @@ const PlanCard: React.FC<PlanCardProps> = ({
             <Button 
               className={`w-full ${recommended ? 'bg-primary' : ''}`}
               disabled={isLoading || isCurrentPlan}
-              onClick={() => onSubscribe(id as PlanType)}
+              onClick={handleClick}
             >
-              {isCurrentPlan ? '現在のプラン' : '選択する'}
+              {isLoading ? '処理中...' : isCurrentPlan ? '現在のプラン' : '選択する'}
             </Button>
           </div>
         </div>

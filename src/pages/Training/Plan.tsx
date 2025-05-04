@@ -34,10 +34,15 @@ const TrainingPlan: React.FC = () => {
   const handleSubscribe = async (selectedPlanType: PlanType) => {
     setIsLoading(true);
     try {
+      console.log(`プラン ${selectedPlanType} のチェックアウト開始`);
+      
       // チェックアウト後に戻るURLを指定
       const returnUrl = window.location.origin + '/profile';
       
-      const { url, error } = await createCheckoutSession(returnUrl);
+      const { url, error } = await createCheckoutSession(
+        returnUrl,
+        selectedPlanType
+      );
       
       if (error) {
         throw error;

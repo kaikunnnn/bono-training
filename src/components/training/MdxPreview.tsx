@@ -1,93 +1,66 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
-import { cn } from '@/lib/utils';
-import PremiumContentBanner from './PremiumContentBanner';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
+import PremiumContentBanner from './PremiumContentBanner';
+import { cn } from '@/lib/utils';
 
 interface MdxPreviewProps {
   content: string;
   isPremium?: boolean;
   isSubscribed?: boolean;
-  className?: string;
   previewLength?: number;
+  className?: string;
 }
 
-/**
- * MDXコンテンツを表示するコンポーネント
- * プレミアムコンテンツの場合、サブスクリプション状態に応じて表示を制限
- */
 const MdxPreview: React.FC<MdxPreviewProps> = ({
   content,
   isPremium = false,
-  isSubscribed = false,
-  className = '',
-  previewLength = 500
+  isSubscribed = false, 
+  previewLength = 500,
+  className
 }) => {
-  const [displayContent, setDisplayContent] = useState(content);
+  const navigate = useNavigate();
+  const [showingPreview, setShowingPreview] = useState(isPremium && !isSubscribed);
   
-  // デバッグ用ログ
-  console.log('MdxPreview - アクセス状態:', { 
-    isPremium, 
-    isSubscribed,
-    contentLength: content.length,
-    previewLength
-  });
+  // プレミアムコンテンツかつサブスクリプションがない場合、プレビューのみ表示
+  const displayContent = showingPreview 
+    ? content.substring(0, previewLength) + '...' 
+    : content;
   
-  useEffect(() => {
-    // プレミアムコンテンツかつメンバーシップ登録していない場合はプレビュー表示
-    if (isPremium && !isSubscribed && content.length > previewLength) {
-      let previewContent = content.substring(0, previewLength);
-      
-      // 段落の終わりで切れるようにする
-      const lastParagraphEnd = previewContent.lastIndexOf('\n\n');
-      if (lastParagraphEnd > previewLength * 0.7) { // 少なくともプレビューの70%は表示する
-        previewContent = content.substring(0, lastParagraphEnd);
-      }
-      
-      setDisplayContent(previewContent);
-    } else {
-      setDisplayContent(content);
-    }
-  }, [content, isPremium, isSubscribed, previewLength]);
-
+  const handleSubscribe = () => {
+    navigate('/training/plan');
+  };
+  
   return (
-    <div className={cn('mdx-preview', className)}>
-      {/* プレミアムコンテンツの場合、バッジを表示 */}
-      {isPremium && (
-        <div className="mb-4">
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "inline-flex items-center gap-1 py-1 px-2",
-              isSubscribed 
-                ? "bg-green-50 text-green-700 border-green-300" 
-                : "bg-amber-50 text-amber-700 border-amber-300"
-            )}
-          >
-            {isSubscribed ? (
-              <>メンバー特典</>
-            ) : (
-              <>
-                <Lock className="w-3 h-3" />
-                メンバー限定
-              </>
-            )}
-          </Badge>
-        </div>
-      )}
+    <div className={cn('prose max-w-none dark:prose-invert', className)}>
+      <ReactMarkdown>{displayContent}</ReactMarkdown>
       
-      <div className="prose prose-lg prose-slate max-w-none dark:prose-invert">
-        <ReactMarkdown>{displayContent}</ReactMarkdown>
-      </div>
-      
-      {/* プレミアムコンテンツかつサブスクリプションがない場合に登録バナーを表示 */}
       {isPremium && !isSubscribed && (
-        <div className="relative mt-6">
-          {/* コンテンツが切れたことを視覚的に示す装飾 */}
-          <div className="absolute -top-16 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
-          <PremiumContentBanner />
+        <div className="mt-8">
+          <div className="border-t border-gray-200 pt-6">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start space-x-3">
+              <Lock className="text-amber-500 mt-1" />
+              <div>
+                <h3 className="font-medium text-amber-800">続きはメンバー限定です</h3>
+                <p className="text-sm text-amber-700 mt-1">
+                  このコンテンツの続きはメンバーシップに登録することで閲覧できます。
+                  BONOトレーニングのすべてのコンテンツにアクセスして、実践的なスキルを身につけましょう。
+                </p>
+                <div className="mt-4">
+                  <Button 
+                    onClick={handleSubscribe}
+                    size="sm"
+                    className="bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    メンバーシップに登録する
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </div>
