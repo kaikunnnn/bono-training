@@ -1,6 +1,9 @@
+
 /**
  * トレーニングデータを取得する
  */
+import { Training, TrainingDetailData, Task, TaskDetailData } from '@/types/training';
+
 export async function getTrainingList() {
   // TODO: Supabaseからデータを取得する
   return [
