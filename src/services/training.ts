@@ -1,216 +1,137 @@
-
-import { supabase } from '@/integrations/supabase/client';
-import { TaskDetailData, TrainingDetailData } from '@/types/training';
+/**
+ * トレーニングデータを取得する
+ */
+export async function getTrainingList() {
+  // TODO: Supabaseからデータを取得する
+  return [
+    {
+      id: '1',
+      slug: 'react-basic',
+      title: 'Reactの基礎',
+      description: 'Reactの基礎を学ぶ',
+      type: 'skill',
+      difficulty: '初級',
+      tags: ['React', 'JavaScript'],
+      backgroundImage: 'https://source.unsplash.com/random/800x400',
+      thumbnailImage: 'https://source.unsplash.com/random/200x100',
+      isFree: true,
+    },
+    {
+      id: '2',
+      slug: 'nextjs-basic',
+      title: 'Next.jsの基礎',
+      description: 'Next.jsの基礎を学ぶ',
+      type: 'skill',
+      difficulty: '初級',
+      tags: ['Next.js', 'React', 'JavaScript'],
+      backgroundImage: 'https://source.unsplash.com/random/800x400',
+      thumbnailImage: 'https://source.unsplash.com/random/200x100',
+      isFree: false,
+    },
+    {
+      id: '3',
+      slug: 'typescript-basic',
+      title: 'TypeScriptの基礎',
+      description: 'TypeScriptの基礎を学ぶ',
+      type: 'skill',
+      difficulty: '初級',
+      tags: ['TypeScript', 'JavaScript'],
+      backgroundImage: 'https://source.unsplash.com/random/800x400',
+      thumbnailImage: 'https://source.unsplash.com/random/200x100',
+      isFree: false,
+    },
+  ];
+}
 
 /**
- * トレーニング一覧を取得する
- * @returns トレーニングデータ
+ * トレーニング詳細データを取得する
  */
-export const getTrainingList = async () => {
-  try {
-    const { data, error } = await supabase
-      .from('training')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('トレーニングデータ取得エラー:', error);
-      throw error;
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('トレーニングデータ取得エラー:', error);
-    return [];
-  }
-};
-
-/**
- * トレーニング詳細を取得する
- * @param slug スラッグ
- * @returns トレーニング詳細データとタスクデータ
- */
-export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
-  try {
-    // トレーニング情報を取得
-    const { data: trainingData, error: trainingError } = await supabase
-      .from('training')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-
-    if (trainingError) {
-      console.error('トレーニング情報取得エラー:', trainingError);
-      throw trainingError;
-    }
-
-    // タスク情報を取得 - order_indexで並べ替え
-    const { data: taskData, error: taskError } = await supabase
-      .from('task')
-      .select('*')
-      .eq('training_id', trainingData.id)
-      .order('order_index', { ascending: true });
-
-    if (taskError) {
-      console.error('タスク情報取得エラー:', taskError);
-      throw taskError;
-    }
-
-    // プレミアムコンテンツがあるかチェック
-    const hasPremiumContent = taskData.some(task => task.is_premium);
-
-    return {
-      ...trainingData,
-      tasks: taskData,
-      has_premium_content: hasPremiumContent
-    };
-  } catch (error) {
-    console.error('トレーニング詳細取得エラー:', error);
-    throw error;
-  }
-};
-
-/**
- * トレーニングのタスク詳細を取得する
- * @param trainingSlug トレーニングのスラッグ
- * @param taskSlug タスクのスラッグ
- * @returns タスク詳細情報
- */
-export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string): Promise<TaskDetailData> => {
-  try {
-    // トレーニング情報を取得
-    const { data: trainingData, error: trainingError } = await supabase
-      .from('training')
-      .select('*')
-      .eq('slug', trainingSlug)
-      .single();
-
-    if (trainingError) {
-      console.error('トレーニング情報取得エラー:', trainingError);
-      throw trainingError;
-    }
-
-    // タスク情報を取得
-    const { data: taskData, error: taskError } = await supabase
-      .from('task')
-      .select('*')
-      .eq('training_id', trainingData.id)
-      .eq('slug', taskSlug)
-      .single();
-
-    if (taskError) {
-      console.error('タスク情報取得エラー:', taskError);
-      throw taskError;
-    }
-
-    // 同じトレーニングの次のタスクを取得
-    const { data: nextTaskData } = await supabase
-      .from('task')
-      .select('slug')
-      .eq('training_id', trainingData.id)
-      .gt('order_index', taskData.order_index)
-      .order('order_index', { ascending: true })
-      .limit(1)
-      .single();
-
-    // コンテンツを取得 (実際のMDXデータはファイルから読み込む想定)
-    // サンプルデータとしてダミーコンテンツを返す
-    const content = `
-# ${taskData.title}
-
-このトレーニングタスクでは、${taskData.title}について学びます。
-
-## 目標
-- 基本的な概念を理解する
-- 実践的なスキルを身につける
-- プロジェクトに応用する方法を学ぶ
-
-## 手順
-1. 動画を視聴する
-2. 実践演習を行う
-3. 成果物を作成する
-    `;
-
-    return {
-      id: taskData.id,
-      title: taskData.title,
-      content,
-      is_premium: taskData.is_premium,
-      video_url: taskData.video_full,
-      preview_video_url: taskData.video_preview,
-      next_task: nextTaskData?.slug
-    };
-  } catch (error) {
-    console.error('タスク詳細取得エラー:', error);
-    throw error;
-  }
-};
-
-/**
- * ユーザーのタスク進捗状況を取得する
- * @param userId ユーザーID
- * @param taskId タスクID
- * @returns 進捗状況
- */
-export const getTaskProgress = async (userId: string, taskId: string) => {
-  if (!userId) return null;
-  
-  try {
-    const { data, error } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('task_id', taskId)
-      .maybeSingle();
-
-    if (error) {
-      console.error('タスク進捗取得エラー:', error);
-      throw error;
-    }
-
-    return data;
-  } catch (error) {
-    console.error('タスク進捗取得エラー:', error);
-    return null;
-  }
-};
+export async function getTrainingDetail(slug: string) {
+  // TODO: Supabaseからデータを取得する
+  return {
+    id: '1',
+    slug: 'react-basic',
+    title: 'Reactの基礎',
+    description: 'Reactの基礎を学ぶ',
+    type: 'skill',
+    difficulty: '初級',
+    tags: ['React', 'JavaScript'],
+    tasks: [
+      {
+        id: '1',
+        training_id: '1',
+        slug: 'react-basic-1',
+        title: 'Reactの基礎1',
+        order_index: 1,
+        is_premium: false,
+        preview_sec: 30,
+      },
+      {
+        id: '2',
+        training_id: '1',
+        slug: 'react-basic-2',
+        title: 'Reactの基礎2',
+        order_index: 2,
+        is_premium: true,
+        preview_sec: 30,
+      },
+      {
+        id: '3',
+        training_id: '1',
+        slug: 'react-basic-3',
+        title: 'Reactの基礎3',
+        order_index: 3,
+        is_premium: true,
+        preview_sec: 30,
+      },
+    ],
+    skills: ['React', 'JavaScript', 'JSX'],
+    prerequisites: ['HTML', 'CSS', 'JavaScript'],
+    has_premium_content: true,
+  };
+}
 
 /**
  * タスクの進捗状況を更新する
- * @param userId ユーザーID
- * @param taskId タスクID
- * @param status 進捗状態
- * @returns 更新結果
  */
-export const updateTaskProgress = async (userId: string, taskId: string, status: 'todo' | 'in-progress' | 'done') => {
-  if (!userId) return { error: new Error('ユーザーIDが必要です') };
-  
+export async function updateTaskProgress(userId: string, taskId: string, status: string) {
+  // TODO: Supabaseにデータを保存する
+  console.log(`userId: ${userId}, taskId: ${taskId}, status: ${status}`);
+  return { data: { userId, taskId, status }, error: null };
+}
+
+/**
+ * トレーニングタスクの詳細情報を取得する
+ */
+export async function getTrainingTaskDetail(
+  trainingSlug: string,
+  taskSlug: string
+): Promise<TaskDetailData> {
   try {
-    const now = new Date().toISOString();
-    const completed_at = status === 'done' ? now : null;
+    // 本来はAPIからデータを取得するが、現段階ではモックデータを返す
+    // TODO: Supabase APIからデータを取得する実装に置き換える
+    return {
+      id: `task-${taskSlug}`,
+      title: `${taskSlug}のタイトル`,
+      content: `
+# ${taskSlug}のコンテンツ
 
-    const { data, error } = await supabase
-      .from('user_progress')
-      .upsert(
-        {
-          user_id: userId,
-          task_id: taskId,
-          status,
-          completed_at
-        },
-        {
-          onConflict: 'user_id,task_id'
-        }
-      );
+これはサンプルコンテンツです。実際のコンテンツはAPIから取得します。
 
-    if (error) {
-      console.error('タスク進捗更新エラー:', error);
-      return { error };
-    }
+## 主要なポイント
 
-    return { data };
+- ポイント1
+- ポイント2
+- ポイント3
+
+詳細な説明はここに記載されます。`,
+      is_premium: taskSlug.includes('premium'),
+      video_url: "https://example.com/videos/full.mp4",
+      preview_video_url: "https://example.com/videos/preview.mp4",
+      next_task: null
+    };
   } catch (error) {
-    console.error('タスク進捗更新エラー:', error);
-    return { error: error instanceof Error ? error : new Error('不明なエラー') };
+    console.error("タスク詳細データの取得に失敗しました:", error);
+    throw error;
   }
-};
+}

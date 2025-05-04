@@ -39,12 +39,15 @@ const TrainingDetail = () => {
   // メンバーシップアクセス権があるか確認
   const hasMemberAccess = isSubscribed && planMembers;
   
-  // 各タスクにアクセス権限情報を追加
-  const processedTasks = trainingData?.tasks?.map(task => ({
-    ...task,
-    // 有料タスクの場合、メンバーシップを持っていればアクセス可能
-    isLocked: task.is_premium && !hasMemberAccess
-  })) || [];
+  // タスクにアクセス権限情報を追加した配列を作成
+  const processedTasks = React.useMemo(() => {
+    if (!trainingData?.tasks) return [];
+    
+    return trainingData.tasks.map(task => ({
+      ...task,
+      isLocked: task.is_premium && !hasMemberAccess
+    }));
+  }, [trainingData?.tasks, hasMemberAccess]);
   
   if (loading) {
     return (
@@ -135,7 +138,7 @@ const TrainingDetail = () => {
             </TabsList>
             
             <TabsContent value="tasks" className="mt-6">
-              <TaskList tasks={trainingData.tasks} trainingSlug={slug || ''} />
+              <TaskList tasks={processedTasks} trainingSlug={slug || ''} />
             </TabsContent>
             
             <TabsContent value="details" className="mt-6">
