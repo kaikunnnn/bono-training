@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { TaskDetailData, TrainingDetailData } from '@/types/training';
 
 /**
  * トレーニング一覧を取得する
@@ -29,7 +30,7 @@ export const getTrainingList = async () => {
  * @param slug スラッグ
  * @returns トレーニング詳細データとタスクデータ
  */
-export const getTrainingDetail = async (slug: string) => {
+export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
   try {
     // トレーニング情報を取得
     const { data: trainingData, error: trainingError } = await supabase
@@ -43,7 +44,7 @@ export const getTrainingDetail = async (slug: string) => {
       throw trainingError;
     }
 
-    // タスク情報を取得 - order_indexで並べ替え (修正: orderからorder_indexに変更)
+    // タスク情報を取得 - order_indexで並べ替え
     const { data: taskData, error: taskError } = await supabase
       .from('task')
       .select('*')
@@ -55,9 +56,13 @@ export const getTrainingDetail = async (slug: string) => {
       throw taskError;
     }
 
+    // プレミアムコンテンツがあるかチェック
+    const hasPremiumContent = taskData.some(task => task.is_premium);
+
     return {
-      training: trainingData,
-      tasks: taskData
+      ...trainingData,
+      tasks: taskData,
+      has_premium_content: hasPremiumContent
     };
   } catch (error) {
     console.error('トレーニング詳細取得エラー:', error);
@@ -69,9 +74,9 @@ export const getTrainingDetail = async (slug: string) => {
  * トレーニングのタスク詳細を取得する
  * @param trainingSlug トレーニングのスラッグ
  * @param taskSlug タスクのスラッグ
- * @returns タスク詳細情報と関連するトレーニング情報
+ * @returns タスク詳細情報
  */
-export const getTaskDetail = async (trainingSlug: string, taskSlug: string) => {
+export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string): Promise<TaskDetailData> => {
   try {
     // トレーニング情報を取得
     const { data: trainingData, error: trainingError } = await supabase
@@ -98,9 +103,42 @@ export const getTaskDetail = async (trainingSlug: string, taskSlug: string) => {
       throw taskError;
     }
 
+    // 同じトレーニングの次のタスクを取得
+    const { data: nextTaskData } = await supabase
+      .from('task')
+      .select('slug')
+      .eq('training_id', trainingData.id)
+      .gt('order_index', taskData.order_index)
+      .order('order_index', { ascending: true })
+      .limit(1)
+      .single();
+
+    // コンテンツを取得 (実際のMDXデータはファイルから読み込む想定)
+    // サンプルデータとしてダミーコンテンツを返す
+    const content = `
+# ${taskData.title}
+
+このトレーニングタスクでは、${taskData.title}について学びます。
+
+## 目標
+- 基本的な概念を理解する
+- 実践的なスキルを身につける
+- プロジェクトに応用する方法を学ぶ
+
+## 手順
+1. 動画を視聴する
+2. 実践演習を行う
+3. 成果物を作成する
+    `;
+
     return {
-      task: taskData,
-      training: trainingData
+      id: taskData.id,
+      title: taskData.title,
+      content,
+      is_premium: taskData.is_premium,
+      video_url: taskData.video_full,
+      preview_video_url: taskData.video_preview,
+      next_task: nextTaskData?.slug
     };
   } catch (error) {
     console.error('タスク詳細取得エラー:', error);

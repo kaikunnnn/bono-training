@@ -20,7 +20,6 @@ const TaskDetail = () => {
       setLoading(true);
       try {
         if (slug && taskSlug) {
-          // ダミーデータで応答するように設定されたモックサービス
           const data = await getTrainingTaskDetail(slug, taskSlug);
           setTaskData(data);
         }

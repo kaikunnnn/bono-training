@@ -3,18 +3,20 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Tables } from '@/integrations/supabase/types';
 import { Lock, CheckCircle2 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { cn } from '@/lib/utils';
 
 interface TaskListProps {
   tasks: Tables<'task'>[];
   progressMap?: Record<string, { status: string, completed_at: string | null }>;
+  trainingSlug?: string; // trainingSlug プロパティを追加
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {} }) => {
-  const { slug } = useParams<{ slug: string }>();
+const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSlug }) => {
   const { isSubscribed } = useSubscriptionContext();
+  
+  // trainingSlug が指定されていない場合は URL から取得する
+  const slug = trainingSlug || '';
 
   return (
     <div className="space-y-4">
