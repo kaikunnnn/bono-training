@@ -19,6 +19,7 @@ import PaidContent from "./pages/PaidContent";
 import Content from "./pages/Content";
 import ContentDetail from "./pages/ContentDetail";
 import VideoDetailTest from "./pages/VideoDetailTest";
+import Profile from "./pages/Profile";
 import TrainingHome from "./pages/Training";
 import TrainingDetail from "./pages/TrainingDetail";
 import TaskDetail from "./pages/Training/TaskDetail";
@@ -48,6 +49,7 @@ const App = () => {
                 <Route path="/training/:slug/:taskSlug" element={<TaskDetail />} />
                 
                 <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+                <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
                 
                 <Route path="/content" element={<Content />} />
                 <Route path="/content/:id" element={<ContentDetail />} />
