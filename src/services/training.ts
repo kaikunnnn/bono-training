@@ -284,7 +284,7 @@ function ExampleComponent() {
       preview_sec: taskData.preview_sec,
       video_full: taskData.video_full,
       video_preview: taskData.video_preview,
-      created_at: taskData.created_at || new Date().toISOString()
+      created_at: taskData.created_at || new Date().toISOString() // 必ず文字列を返すようにする
     };
   } catch (error) {
     console.error("タスク詳細データの取得に失敗しました:", error);

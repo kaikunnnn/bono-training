@@ -31,6 +31,7 @@ export interface TaskDetailData extends Task {
   video_url?: string;
   preview_video_url?: string;
   next_task?: string;
+  created_at: string; // created_atを必須プロパティに変更
 }
 
 export interface TrainingDetailData {
