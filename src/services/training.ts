@@ -1,4 +1,3 @@
-
 /**
  * トレーニングデータを取得する
  */
@@ -21,11 +20,17 @@ export async function getTrainingList(): Promise<Training[]> {
       throw error;
     }
     
-    // 画像URLがない場合はダミー画像を設定
+    // データを型に合わせて変換
     return data.map(item => ({
-      ...item,
-      backgroundImage: item.backgroundImage || 'https://source.unsplash.com/random/800x400',
-      thumbnailImage: item.thumbnailImage || 'https://source.unsplash.com/random/200x100',
+      id: item.id,
+      slug: item.slug,
+      title: item.title,
+      description: item.description || '',
+      type: (item.type as 'challenge' | 'skill') || 'challenge', // 型を明示的に変換
+      difficulty: item.difficulty || '',
+      tags: item.tags || [],
+      backgroundImage: 'https://source.unsplash.com/random/800x400', // 固定値を設定
+      thumbnailImage: 'https://source.unsplash.com/random/200x100', // 固定値を設定
       isFree: !item.tags?.includes('premium')
     }));
   } catch (error) {
@@ -271,7 +276,15 @@ function ExampleComponent() {
       is_premium: taskData.is_premium,
       video_url: taskData.video_full || "https://example.com/videos/full.mp4",
       preview_video_url: taskData.video_preview || "https://example.com/videos/preview.mp4",
-      next_task: nextTaskData ? nextTaskData.slug : null
+      next_task: nextTaskData ? nextTaskData.slug : null,
+      // TaskDetailData型をTaskとの互換性を保つための追加プロパティ
+      training_id: taskData.training_id,
+      slug: taskData.slug,
+      order_index: taskData.order_index,
+      preview_sec: taskData.preview_sec,
+      video_full: taskData.video_full,
+      video_preview: taskData.video_preview,
+      created_at: taskData.created_at || new Date().toISOString()
     };
   } catch (error) {
     console.error("タスク詳細データの取得に失敗しました:", error);
@@ -313,9 +326,9 @@ export async function getUserTaskProgress(userId: string, trainingId: string) {
       return acc;
     }, {});
     
-    return { progressMap, completedCount: progress.filter(p => p.status === 'done').length };
+    return { data: progress, error: null, progressMap, completedCount: progress.filter(p => p.status === 'done').length };
   } catch (error) {
     console.error('タスク進捗状況の取得に失敗しました:', error);
-    return { progressMap: {}, completedCount: 0 };
+    return { data: [], error, progressMap: {}, completedCount: 0 };
   }
 }

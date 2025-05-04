@@ -26,11 +26,8 @@ export interface Task {
   isLocked?: boolean;
 }
 
-export interface TaskDetailData {
-  id: string;
-  title: string;
+export interface TaskDetailData extends Task {
   content: string;
-  is_premium: boolean;
   video_url?: string;
   preview_video_url?: string;
   next_task?: string;

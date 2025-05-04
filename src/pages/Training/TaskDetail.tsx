@@ -39,9 +39,9 @@ const TaskDetailPage = () => {
           if (user) {
             try {
               // 現在のタスクの進捗状況を取得
-              const { data, error } = await getUserTaskProgress(user.id, trainingDetailData.id);
-              if (!error && data) {
-                setProgress(data);
+              const progressData = await getUserTaskProgress(user.id, trainingDetailData.id);
+              if (!progressData.error) {
+                setProgress(progressData);
               }
             } catch (progressError) {
               console.error('進捗状況の取得に失敗しました:', progressError);
@@ -83,9 +83,9 @@ const TaskDetailPage = () => {
     if (!user || !trainingData?.id) return;
     
     try {
-      const { data, error } = await getUserTaskProgress(user.id, trainingData.id);
-      if (!error && data) {
-        setProgress(data);
+      const progressData = await getUserTaskProgress(user.id, trainingData.id);
+      if (!progressData.error) {
+        setProgress(progressData);
       }
     } catch (error) {
       console.error('進捗状況の更新に失敗しました:', error);
