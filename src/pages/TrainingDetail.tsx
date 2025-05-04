@@ -1,148 +1,168 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
-import { Loader2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
+import { useParams, Link } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
+import TrainingHeader from '@/components/training/TrainingHeader';
+import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TaskList from '@/components/training/TaskList';
-import { Tables } from '@/integrations/supabase/types';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Lock } from 'lucide-react';
 import { getTrainingDetail } from '@/services/training';
-import { supabase } from '@/integrations/supabase/client';
+import { TrainingDetailData } from '@/types/training';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 
 const TrainingDetail = () => {
   const { slug } = useParams<{ slug: string }>();
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-  const [training, setTraining] = useState<Tables<'training'> | null>(null);
-  const [tasks, setTasks] = useState<Tables<'task'>[]>([]);
-  const [progressMap, setProgressMap] = useState<Record<string, { status: string, completed_at: string | null }>>({});
+  const [loading, setLoading] = useState(true);
+  const [trainingData, setTrainingData] = useState<TrainingDetailData | null>(null);
+  const { isSubscribed, planMembers } = useSubscriptionContext();
   
   useEffect(() => {
-    const fetchTrainingDetail = async () => {
-      if (!slug) {
-        setError(new Error('トレーニングIDが指定されていません'));
-        return;
-      }
-      
+    const fetchTrainingData = async () => {
+      setLoading(true);
       try {
-        setIsLoading(true);
-        const { training, tasks } = await getTrainingDetail(slug);
-        setTraining(training);
-        setTasks(tasks);
-        
-        // ユーザーがログインしている場合、進捗情報を取得
-        if (user) {
-          const taskIds = tasks.map(task => task.id);
-          const { data: progressData, error: progressError } = await supabase
-            .from('user_progress')
-            .select('*')
-            .eq('user_id', user.id)
-            .in('task_id', taskIds);
-            
-          if (progressError) {
-            console.error('進捗情報取得エラー:', progressError);
-          } else if (progressData) {
-            // タスクIDごとの進捗情報をマップ化
-            const newProgressMap: Record<string, { status: string, completed_at: string | null }> = {};
-            progressData.forEach(progress => {
-              newProgressMap[progress.task_id] = {
-                status: progress.status || 'todo',
-                completed_at: progress.completed_at
-              };
-            });
-            setProgressMap(newProgressMap);
-          }
+        if (slug) {
+          const data = await getTrainingDetail(slug);
+          setTrainingData(data);
         }
-      } catch (err) {
-        console.error('トレーニング詳細取得エラー:', err);
-        const error = err instanceof Error ? err : new Error('不明なエラーが発生しました');
-        setError(error);
-        toast({
-          title: 'エラーが発生しました',
-          description: error.message,
-          variant: 'destructive',
-        });
+      } catch (error) {
+        console.error("トレーニングデータの取得中にエラーが発生しました:", error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
-    fetchTrainingDetail();
-  }, [slug, user, toast]);
+    fetchTrainingData();
+  }, [slug]);
   
-  if (isLoading) {
+  // メンバーシップアクセス権があるか確認
+  const hasMemberAccess = isSubscribed && planMembers;
+  
+  // 各タスクにアクセス権限情報を追加
+  const processedTasks = trainingData?.tasks?.map(task => ({
+    ...task,
+    // 有料タスクの場合、メンバーシップを持っていればアクセス可能
+    isLocked: task.is_premium && !hasMemberAccess
+  })) || [];
+  
+  if (loading) {
     return (
       <TrainingLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2">読み込み中...</span>
+        <TrainingHeader />
+        <div className="container py-8">
+          <Skeleton className="h-16 w-3/4 mb-6" />
+          <Skeleton className="h-24 w-full mb-8" />
+          <div className="grid gap-4">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-20 w-full" />
+            ))}
+          </div>
         </div>
       </TrainingLayout>
     );
   }
   
-  if (error || !training) {
+  if (!trainingData) {
     return (
       <TrainingLayout>
-        <div className="container py-16 text-center">
-          <h2 className="text-2xl font-bold mb-4">トレーニングが見つかりません</h2>
-          <p className="mb-6">指定されたトレーニングは存在しないか、アクセスできない可能性があります。</p>
-          <button 
-            className="text-primary hover:underline"
-            onClick={() => navigate('/training')}
-          >
-            トレーニング一覧に戻る
-          </button>
+        <TrainingHeader />
+        <div className="container py-8 text-center">
+          <h2 className="text-2xl font-bold mb-4">トレーニングが見つかりませんでした</h2>
+          <p className="text-muted-foreground mb-8">
+            指定されたトレーニングは存在しないか、アクセスできません。
+          </p>
+          <Button asChild>
+            <Link to="/training">トレーニング一覧へ戻る</Link>
+          </Button>
         </div>
       </TrainingLayout>
     );
   }
-  
-  // 完了タスク数の計算
-  const completedTaskCount = Object.values(progressMap).filter(progress => progress.status === 'done').length;
-  const totalTaskCount = tasks.length;
-  const completionRate = totalTaskCount > 0 ? Math.round((completedTaskCount / totalTaskCount) * 100) : 0;
   
   return (
     <TrainingLayout>
+      <TrainingHeader />
       <div className="container py-8">
-        {/* トレーニングヘッダー */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold mb-2">{training.title}</h1>
-          <p className="text-gray-600 mb-4">{training.description}</p>
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-bold">{trainingData.title}</h1>
+            {trainingData.description && (
+              <p className="mt-2 text-lg text-gray-600">{trainingData.description}</p>
+            )}
+          </div>
           
-          {/* 進捗バー */}
-          {user && tasks.length > 0 && (
-            <div className="mt-6">
-              <div className="flex justify-between mb-2 text-sm">
-                <span>進捗状況</span>
-                <span>{completedTaskCount}/{totalTaskCount} タスク完了 ({completionRate}%)</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
-                <div 
-                  className="bg-green-500 h-2.5 rounded-full" 
-                  style={{ width: `${completionRate}%` }}
-                ></div>
+          <div className="flex items-center flex-wrap gap-3">
+            {trainingData.difficulty && (
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-50 text-blue-800">
+                難易度: {trainingData.difficulty}
+              </span>
+            )}
+            
+            {trainingData.tags?.map((tag, index) => (
+              <span 
+                key={index} 
+                className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+          
+          {/* 有料コンテンツを含み、かつメンバーシップを持っていない場合に警告表示 */}
+          {trainingData.has_premium_content && !hasMemberAccess && (
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+              <Lock className="text-amber-500 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="font-medium text-amber-800">メンバー限定コンテンツを含みます</h3>
+                <p className="text-amber-700 text-sm mt-1">
+                  このトレーニングには有料のタスクが含まれています。すべてのコンテンツにアクセスするには
+                  メンバーシップへの登録が必要です。
+                </p>
+                <div className="mt-3">
+                  <Button asChild size="sm">
+                    <Link to="/training/plan">メンバーシップ登録</Link>
+                  </Button>
+                </div>
               </div>
             </div>
           )}
+          
+          <Tabs defaultValue="tasks" className="mt-8">
+            <TabsList>
+              <TabsTrigger value="tasks">タスク一覧</TabsTrigger>
+              <TabsTrigger value="details">詳細情報</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="tasks" className="mt-6">
+              <TaskList tasks={processedTasks} trainingSlug={slug || ''} />
+            </TabsContent>
+            
+            <TabsContent value="details" className="mt-6">
+              <div className="prose max-w-none">
+                <h3>トレーニングの目標</h3>
+                <p>このトレーニングを通じて以下のスキルを習得できます：</p>
+                <ul>
+                  {trainingData.skills?.map((skill, index) => (
+                    <li key={index}>{skill}</li>
+                  )) || (
+                    <li>実践的なスキルの習得</li>
+                  )}
+                </ul>
+                
+                <h3>前提知識</h3>
+                <p>このトレーニングには以下の知識が役立ちます：</p>
+                <ul>
+                  {trainingData.prerequisites?.map((prereq, index) => (
+                    <li key={index}>{prereq}</li>
+                  )) || (
+                    <li>基本的なデザインの知識</li>
+                  )}
+                </ul>
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
-        
-        {/* タスク一覧 */}
-        {tasks.length > 0 ? (
-          <TaskList tasks={tasks} progressMap={progressMap} />
-        ) : (
-          <div className="text-center py-12">
-            <h3 className="text-xl font-medium mb-2">タスクがありません</h3>
-            <p className="text-gray-600">このトレーニングにはまだタスクが登録されていません。</p>
-          </div>
-        )}
       </div>
     </TrainingLayout>
   );

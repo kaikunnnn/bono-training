@@ -1,128 +1,108 @@
 
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Tables } from '@/integrations/supabase/types';
-import { getTaskDetail, getTaskProgress } from '@/services/training';
-import { loadMdxContent } from '@/utils/mdxLoader';
+import { useParams } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
-import TaskDetailComponent from '@/components/training/TaskDetail';
-import { useAuth } from '@/contexts/AuthContext';
-import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import TrainingHeader from '@/components/training/TrainingHeader';
+import TaskContent from '@/components/training/TaskContent';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { getTrainingTaskDetail } from '@/services/training';
+import { TaskDetailData } from '@/types/training';
 
-/**
- * タスク詳細ページ
- * トレーニングのタスク（お題）詳細を表示し、
- * メンバーシップステータスに基づいてコンテンツアクセスを制御する
- */
-const TaskDetail: React.FC = () => {
+const TaskDetail = () => {
   const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
-  const { user } = useAuth();
-  const { isSubscribed, planMembers } = useSubscriptionContext();
-  const { toast } = useToast();
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [taskData, setTaskData] = useState<TaskDetailData | null>(null);
   
-  const [isLoading, setIsLoading] = useState(true);
-  const [task, setTask] = useState<Tables<'task'> | null>(null);
-  const [training, setTraining] = useState<Tables<'training'> | null>(null);
-  const [mdxContent, setMdxContent] = useState<string>('');
-  const [progress, setProgress] = useState<{ status?: string; completed_at?: string | null } | null>(null);
-  
-  // コンポーネントマウント時やパラメータ変更時にタスク情報をロード
   useEffect(() => {
-    const loadTaskData = async () => {
+    const fetchTaskData = async () => {
+      setLoading(true);
       try {
-        if (!slug || !taskSlug) {
-          toast({
-            title: "エラーが発生しました",
-            description: "タスク情報が見つかりません。",
-            variant: "destructive"
-          });
-          navigate('/training');
-          return;
-        }
-        
-        setIsLoading(true);
-        
-        // タスク詳細情報を取得
-        const { task: taskData, training: trainingData } = await getTaskDetail(slug, taskSlug);
-        setTask(taskData);
-        setTraining(trainingData);
-        
-        // MDXコンテンツを読み込む
-        const content = await loadMdxContent(slug, taskSlug);
-        setMdxContent(content);
-        
-        // ユーザーがログインしている場合、進捗情報を取得
-        if (user) {
-          const progressData = await getTaskProgress(user.id, taskData.id);
-          setProgress(progressData);
+        if (slug && taskSlug) {
+          // ダミーデータで応答するように設定されたモックサービス
+          const data = await getTrainingTaskDetail(slug, taskSlug);
+          setTaskData(data);
         }
       } catch (error) {
-        console.error('タスク詳細の読み込みに失敗しました:', error);
-        toast({
-          title: "エラーが発生しました",
-          description: "タスク情報の読み込みに失敗しました。",
-          variant: "destructive"
-        });
-        navigate(`/training/${slug}`);
+        console.error("タスクデータの取得中にエラーが発生しました:", error);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
     
-    loadTaskData();
-  }, [slug, taskSlug, user, navigate, toast]);
+    fetchTaskData();
+  }, [slug, taskSlug]);
   
-  // 進捗情報が更新された場合に再読み込み
-  const handleProgressUpdate = async () => {
-    if (user && task) {
-      const progressData = await getTaskProgress(user.id, task.id);
-      setProgress(progressData);
-    }
-  };
+  if (loading) {
+    return (
+      <TrainingLayout>
+        <TrainingHeader />
+        <div className="container py-8">
+          <div className="space-y-8">
+            <Skeleton className="h-12 w-2/3" />
+            <Skeleton className="h-[300px] w-full" />
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-5/6" />
+              <Skeleton className="h-4 w-4/6" />
+            </div>
+          </div>
+        </div>
+      </TrainingLayout>
+    );
+  }
   
-  // サブスクリプション状態をコンソールログに出力
-  console.log('TaskDetail - サブスクリプション状態:', { 
-    isSubscribed, 
-    planMembers,
-    hasPremiumAccess: isSubscribed && planMembers
-  });
-  
-  // メンバーシップステータス判定
-  const hasPremiumAccess = isSubscribed && planMembers;
+  if (!taskData) {
+    return (
+      <TrainingLayout>
+        <TrainingHeader />
+        <div className="container py-8">
+          <div className="text-center py-12">
+            <h2 className="text-2xl font-bold mb-4">タスクが見つかりませんでした</h2>
+            <p className="text-muted-foreground mb-8">
+              指定されたタスクは存在しないか、アクセスできません。
+            </p>
+            <Button onClick={() => window.history.back()}>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              戻る
+            </Button>
+          </div>
+        </div>
+      </TrainingLayout>
+    );
+  }
   
   return (
     <TrainingLayout>
+      <TrainingHeader />
       <div className="container py-8">
-        {isLoading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <span className="ml-2">読み込み中...</span>
-          </div>
-        ) : task && training ? (
-          <TaskDetailComponent
-            task={task}
-            training={training}
-            mdxContent={mdxContent}
-            progress={progress}
-            onProgressUpdate={handleProgressUpdate}
-            isPremium={task.is_premium}
-            isSubscribed={hasPremiumAccess}
-          />
-        ) : (
-          <div className="text-center py-20">
-            <h2 className="text-2xl font-bold mb-2">タスクが見つかりません</h2>
-            <p className="mb-4">指定されたタスクは存在しないか、削除された可能性があります。</p>
-            <button 
-              className="text-primary hover:underline"
-              onClick={() => navigate(`/training/${slug}`)}
+        <TaskContent
+          title={taskData.title}
+          content={taskData.content}
+          isPremium={taskData.is_premium}
+          videoUrl={taskData.video_url}
+          previewVideoUrl={taskData.preview_video_url}
+        />
+        
+        <div className="mt-12 flex justify-between">
+          <Button 
+            variant="outline" 
+            onClick={() => window.history.back()}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            トレーニング一覧へ戻る
+          </Button>
+          
+          {taskData.next_task && (
+            <Button 
+              onClick={() => window.location.href = `/training/${slug}/${taskData.next_task}`}
             >
-              トレーニング一覧に戻る
-            </button>
-          </div>
-        )}
+              次のタスクへ進む
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
     </TrainingLayout>
   );
