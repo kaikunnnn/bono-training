@@ -1,10 +1,26 @@
 
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger 
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ChevronDown } from "lucide-react";
 
 const TrainingHeader = () => {
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/auth");
+  };
 
   return (
     <header className="flex flex-col items-end w-full">
@@ -38,7 +54,7 @@ const TrainingHeader = () => {
         {/* Left block */}
         <div className="flex-1 flex items-center justify-start">
           <Link 
-            to="/training/guide"
+            to="/training/about"
             className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
           >
             <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
@@ -70,7 +86,7 @@ const TrainingHeader = () => {
                 </span>
               </Link>
               <Link
-                to="/auth?mode=signup"
+                to="/training/plan"
                 className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
               >
                 <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
@@ -79,14 +95,35 @@ const TrainingHeader = () => {
               </Link>
             </>
           ) : (
-            <Link
-              to="/training/dashboard"
-              className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
-                マイページ
-              </span>
-            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="flex items-center gap-2">
+                  {user.email ? (
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback>
+                        {user.email.charAt(0).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                  ) : (
+                    <span>アカウント</span>
+                  )}
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
+                  アカウント情報
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/training/plan')}>
+                  プランを確認・変更
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleSignOut}>
+                  ログアウト
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           )}
         </div>
       </div>
