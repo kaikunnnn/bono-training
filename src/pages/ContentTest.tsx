@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,13 +35,16 @@ const ContentTest: React.FC = () => {
   };
 
   // テスト用にSubscriptionContextの値をオーバーライドする
-  // ここに planMembers プロパティを追加して、エラーを解決
   const mockSubscriptionValue = {
     isSubscribed: userPlan.isActive,
     planType: userPlan.planType,
     planMembers: userPlan.planType === 'growth' || userPlan.planType === 'community', // growthプランとcommunityプランは planMembers をtrueに設定
     loading: false,
-    error: null
+    error: null,
+    refresh: async () => {
+      console.log('Mock refresh called');
+      // 実際の更新処理は行わない（モックのため）
+    }
   };
 
   return (
