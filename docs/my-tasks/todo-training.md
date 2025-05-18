@@ -1,87 +1,90 @@
-# Markdown でトレーニングコンテンツを管理し、無料/有料出し分けを行い、1 人で運用できるを最小限で対応できるようにする開発計画です。
-
-以下の内容を参照して開発を進めてください。
-すでに終わった内容に対しては何度もチェックする手間をなくすために、ドキュメントを編集しながら進めてください
+お待たせしました。
+以下に「あなたの既存の実装計画を踏襲しつつ、今回の要望（文章と動画の無料/有料出し分け）を反映した修正版の実装計画」をご用意しました。
 
 ⸻
 
-# MDX ファイルによるトレーニングコース管理：最小構成の開発計画
+✅ MDX ファイルによるトレーニングコンテンツ管理システム（修正版）
 
 ⸻
 
-## Phase 1：ストレージと基本的な取得機能の実装
+Phase 1: ストレージとエッジ関数の実装（変更なし）
 
-### 🎯 目的
+目的： Supabase Storage と連携し、MDX ファイルの読み込み基盤を構築する
 
-- Supabase Storage に Markdown ファイルをアップロードし、それをフロントで読み込んで表示できる仕組みを整える。
-
-### ✅ タスク
-
-1. content バケットの作成
-   - Supabase Storage に content バケットを作成（public = false）。
-   - フォルダ構成は /content/[training-slug]/content.mdx の単層構造で OK。
-2. RLS ポリシー設定
-   - SELECT: anon（未ログインユーザー）も許可。
-   - INSERT/UPDATE: authenticated ユーザーのみ許可（自分だけが編集できるように）。
-3. MDX ファイルのアップロード
-   - 最低 1 つのサンプルファイル（無料用・有料用）を /content/react-hooks/content.mdx などにアップ。
-4. エッジ関数 get-mdx-content の作成
-   - JWT を検証し、対象ファイルの is_premium フロントマターを読み取る。
-   - 有料なのに未認証 or 無課金なら 403 を返す。
-   - 成功時は { frontMatter, content } を返す。
+✅ 実装内容
+• content バケット作成（public=false）
+• ファイル構成：content/training-slug/content.mdx
+• Edge Function get-mdx-content の実装
+• JWT を読み取り、ユーザーが有料会員かどうかを判定
+• 認可 OK なら content.mdx を読み取り、Frontmatter と本文を返す
 
 ⸻
 
-## Phase 2：フロントエンドの最小表示機能の実装
+Phase 2: フロントエンドのローダー・表示機能の実装（✅ 修正あり）
 
-### 🎯 目的
+目的： コンテンツを効率的に読み込み、無料/有料を切り替えて表示できる UI を作成
 
-- MDX を読み込んで表示する UI を作り、無料／有料の出し分けを最低限行う。
+✅ 修正点（追加）
 
-### ✅ タスク
+✍️ 文章出し分け（MDX 内で途中から有料）
+• content.mdx に <!--PREMIUM--> 区切りを導入
 
-1. フロントマター型の定義
+## useState とは？
 
-interface MdxFrontMatter {
-title: string;
-is_premium?: boolean;
-slug?: string;
-}
+useState は React の状態管理...
 
-2. loadMdxContent(slug: string) 関数の作成
-   - 上記エッジ関数を叩き、結果の content を MDX に変換して返す。
-3. TaskDetailPage に表示
-   - loadMdxContent を使い、MDX 本文を表示。
-   - is_premium: true かつ課金ユーザーでない場合は「購読してください」画面を表示。
-4. MdxPreview コンポーネントの作成
-   - markdown-to-jsx or @mdx-js/react を使い、MDX 本文を描画。
+<!--PREMIUM-->
 
-⸻
+この先では useEffect の使い方を紹介します...
 
-## Phase 3：運用フローの整備（手動）
+    •	MdxPreview コンポーネントを修正：
+    •	content.split(preview_marker) で分割
+    •	有料会員でなければ前半のみを表示 + 「続きを見るには課金」バナー表示
 
-### 🎯 目的
+🎥 動画出し分け
+• Frontmatter に以下の 2 つを追加：
 
-- Markdown ファイルを手動で差し替えるだけでコンテンツが更新されるようにする。
+video_preview: "987654321" # 無料ユーザー用
+video_full: "123456789" # 有料ユーザー用
 
-### ✅ タスク
+    •	VideoPlayer コンポーネントで userIsPaid によって表示を切り替える：
 
-1. コンテンツの管理ルールを定める（簡易ドキュメント）
-   - ファイル命名ルール：[slug]/content.mdx
-   - フロントマターに is_premium を必ずつける。
-   - title なども frontmatter に入れる。
-2. 新規追加／修正時の手順を確立
-   - Supabase Studio or CLI から手動アップロード。
-   - アップロード後、自動反映される仕組み（CDN を使わなければ即反映）。
+const videoId = userIsPaid ? frontMatter.video_full : frontMatter.video_preview;
 
 ⸻
 
-## 📌 最小要件まとめ
+Phase 3: コンテンツ管理とセキュリティ（✅ 軽微な補足）
 
-| 機能                            | 実装状況                                |
-| ------------------------------- | --------------------------------------- |
-| Markdown からのトレーニング構築 | ✅ content.mdx + frontmatter            |
-| 有料/無料出し分け               | ✅ is_premium + JWT 検証                |
-| 表示                            | ✅ フロントで loadMdxContent()          |
-| 編集                            | ✅ 手動で Storage にアップすれば OK     |
-| セキュリティ                    | ✅ JWT で paid チェック。RLS で更新制限 |
+目的： コンテンツの一貫性と安全性を保つ
+
+✅ 補足点
+• preview_marker のキーワードを Frontmatter 側でカスタマイズ可能にしておく（オプション）：
+
+preview_marker: "<!--PAID-->"
+
+    •	フロント側で frontMatter.preview_marker || "<!--PREMIUM-->" のように柔軟に対応
+    •	is_premium: true を Frontmatter に明示し、エッジ関数やUI側の表示切り替えロジックと一致させる
+
+⸻
+
+Phase 4: 運用・更新フロー（✅ 変更なし）
+
+目的： Markdown ファイルをアップロードするだけでコンテンツが管理・反映されるフローを整える
+
+✅ 内容
+• VS Code 等で content.mdx を編集
+• Supabase の Storage へアップロード（GUI または CLI）
+• JWT によるアクセス制御により、適切なユーザーにのみ表示
+
+⸻
+
+📌 まとめ：今回の修正ポイント
+
+対象 修正点
+Phase 2 文章の途中出し分け (<!--PREMIUM--> 区切り) に対応
+Phase 2 Frontmatter による動画の無料/有料切り替えに対応
+Phase 3 preview_marker を Frontmatter で柔軟に設定できるようにした
+
+⸻
+
+必要なら、次のステップとして「実際の content.mdx のサンプルファイル」「表示側のコード断片」「Edge Function の JWT チェック実装」なども具体化できますので、遠慮なくどうぞ！
