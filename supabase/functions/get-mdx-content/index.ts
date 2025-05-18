@@ -138,36 +138,6 @@ async function checkUserMemberSubscription(supabase, user) {
   }
 }
 
-// プレミアムコンテンツのプレビュー用に本文を制限する関数
-function processContentForFreeUser(content: string, frontmatter: any) {
-  if (!content) return '';
-  
-  // <!--PREMIUM--> マーカー（または設定されたカスタムマーカー）で分割
-  const previewMarker = frontmatter.preview_marker || '<!--PREMIUM-->';
-  const contentParts = content.split(previewMarker);
-  
-  if (contentParts.length > 1) {
-    // マーカーが存在する場合は、マーカー前のコンテンツのみ返す
-    return contentParts[0];
-  }
-  
-  // マーカーがない場合は、文字数制限でプレビューを作成
-  const previewLength = frontmatter.preview_sec 
-    ? Number(frontmatter.preview_sec) * 10 // 秒数に応じて文字数を調整
-    : 1000; // デフォルトは1000文字
-  
-  if (content.length <= previewLength) return content;
-  
-  // ある程度の文脈を保持するために段落や見出しで区切る
-  const paragraphBreak = content.indexOf('\n\n', previewLength - 100);
-  if (paragraphBreak !== -1 && paragraphBreak < previewLength + 200) {
-    return content.substring(0, paragraphBreak) + '\n\n...';
-  }
-  
-  // 段落の区切りがない場合は文字数で切る
-  return content.substring(0, previewLength) + '...';
-}
-
 // MDXコンテンツ取得ハンドラ
 const handleGetMdxContent = async (req: Request): Promise<Response> => {
   try {
@@ -254,7 +224,6 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     
     // プレミアムコンテンツで非認証ユーザーまたは非サブスクライバーの場合プレビュー表示
     let isFreePreview = false;
-    let processedContent = mdxContent.content;
     
     if (isPremium) {
       // 会員ステータスの確認
@@ -272,7 +241,7 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     
     return new Response(
       JSON.stringify({ 
-        content: processedContent,
+        content: mdxContent.content,
         frontmatter: mdxContent.frontmatter,
         isFreePreview
       }),

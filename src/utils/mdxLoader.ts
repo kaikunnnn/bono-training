@@ -13,6 +13,7 @@ export interface MdxContent {
     video_full?: string;
     video_preview?: string;
     preview_sec?: number;
+    preview_marker?: string;
     [key: string]: any;
   };
   isFreePreview?: boolean;
@@ -74,32 +75,18 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
     console.error('MDXコンテンツ読み込みエラー:', error);
     
     // エラー時はフォールバックのダミーデータを返す
-    const frontmatter = {
-      title: `${taskSlug} タスク`,
-      order_index: 1,
-      is_premium: taskSlug.includes('premium'),
-      video_full: taskSlug.includes('premium') ? "845235300" : "845235294",
-      video_preview: "845235294",
-      preview_sec: 30
+    return {
+      content: `# ${taskSlug} タスク\n\n${trainingSlug}の基本的な概念を学びます。\n\nエラーが発生したため、デモコンテンツを表示しています。`,
+      frontmatter: {
+        title: `${taskSlug} タスク`,
+        order_index: 1,
+        is_premium: taskSlug.includes('premium'),
+        video_full: taskSlug.includes('premium') ? "845235300" : "845235294",
+        video_preview: "845235294",
+        preview_sec: 30
+      },
+      isFreePreview: false
     };
-    
-    const content = `
-# ${taskSlug} タスク
-
-## 目的
-
-このタスクでは、${trainingSlug}の基本的な概念を学びます。
-
-## 手順
-
-1. まずは基本的な構造を理解しましょう
-2. 次に実践的な例を見ていきます
-3. 最後に自分で実装してみましょう
-
-**注意**: エラーが発生したためデモコンテンツを表示しています。
-`;
-
-    return { content, frontmatter, isFreePreview: false };
   }
 };
 
@@ -127,35 +114,25 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
       throw new Error('メタデータが取得できませんでした');
     }
     
-    // 戻り値にtasksがなければ空配列を設定
-    const trainingData = data as TrainingMeta;
-    if (withTasks && !trainingData.tasks) {
-      trainingData.tasks = [];
-    }
-    
-    return trainingData;
+    return data as TrainingMeta;
   } catch (error) {
     console.error('トレーニングメタデータ読み込みエラー:', error);
     
     // エラー時はフォールバックのダミーデータを返す
-    const result: TrainingMeta = {
+    return {
       title: `${trainingSlug} トレーニング`,
       description: `${trainingSlug}の基本的な概念と実践的な使い方を学びます。`,
       type: "skill",
       difficulty: "初級",
       tags: ["React", "JavaScript", "フロントエンド"],
       slug: trainingSlug,
-      thumbnailImage: 'https://source.unsplash.com/random/200x100'
-    };
-    
-    if (withTasks) {
-      result.tasks = [
+      thumbnailImage: 'https://source.unsplash.com/random/200x100',
+      tasks: withTasks ? [
         {
           slug: "introduction",
           title: "はじめに",
           is_premium: false,
           order_index: 1,
-          content: "はじめに関するコンテンツです。",
           next_task: "advanced",
           prev_task: null
         },
@@ -164,14 +141,11 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
           title: "応用編",
           is_premium: true,
           order_index: 2,
-          content: "応用編のコンテンツです。",
           next_task: null,
           prev_task: "introduction"
         }
-      ];
-    }
-    
-    return result;
+      ] : []
+    };
   }
 };
 
@@ -207,8 +181,7 @@ export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
         type: "skill",
         difficulty: "初級",
         tags: ["React", "JavaScript", "フロントエンド"],
-        thumbnailImage: 'https://source.unsplash.com/random/200x100',
-        tasks: []  // 空の配列を明示的に設定
+        thumbnailImage: 'https://source.unsplash.com/random/200x100'
       }
     ];
   }

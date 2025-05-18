@@ -18,6 +18,10 @@ interface MdxPreviewProps {
   className?: string;
 }
 
+/**
+ * MDXコンテンツプレビューコンポーネント
+ * プレミアム（有料）コンテンツの場合は、未登録ユーザーにはプレビュー部分のみ表示
+ */
 const MdxPreview: React.FC<MdxPreviewProps> = ({
   content,
   isPremium = false,
@@ -54,7 +58,7 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
   };
   
   return (
-    <div className={cn('prose max-w-none dark:prose-invert', className)}>
+    <div className={cn('prose prose-slate max-w-none dark:prose-invert', className)}>
       <ReactMarkdown 
         remarkPlugins={[remarkGfm]} 
         rehypePlugins={[rehypeHighlight]}
@@ -63,9 +67,9 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
           a: ({node, ...props}) => (
             <a className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer" {...props} />
           ),
-          code: ({className, children, ...props}) => {
+          code: ({node, children, className, ...props}) => {
             const match = /language-(\w+)/.exec(className || '');
-            const isInline = !match && (props as any).inline;
+            const isInline = !match && props.inline;
             
             if (isInline) {
               return (
