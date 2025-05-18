@@ -7,7 +7,6 @@ import { getTrainingTaskDetail, getTrainingDetail, getUserTaskProgress } from '@
 import { TaskDetailData } from '@/types/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { loadMdxContent } from '@/utils/mdxLoader';
 import TaskDetail from '@/components/training/TaskDetail';
 import TaskDetailSkeleton from './TaskDetailSkeleton';
 import TaskDetailError from './TaskDetailError';
@@ -32,41 +31,14 @@ const TaskDetailPage = () => {
           const trainingDetailData = await getTrainingDetail(slug);
           setTrainingData(trainingDetailData);
           
-          // タスク詳細データを取得
+          // タスク詳細データを取得（すでにMDXコンテンツと統合されたデータ）
           const taskDetailData = await getTrainingTaskDetail(slug, taskSlug);
           
-          // MDXコンテンツを取得
-          let content = '';
-          try {
-            const mdxData = await loadMdxContent(slug, taskSlug);
-            content = mdxData.content || '';
-            setMdxContent(content);
-          } catch (mdxError) {
-            console.warn('MDXコンテンツの取得に失敗しました:', mdxError);
-            content = taskDetailData.content || 'コンテンツを読み込めませんでした。';
-            setMdxContent(content);
-          }
+          // MDXコンテンツをUIで表示するために別途保持
+          setMdxContent(taskDetailData.content || '');
           
-          // タスクデータをTaskDetailData型に適合させる
-          const fullTaskData: TaskDetailData = {
-            id: taskDetailData.id || '',
-            slug: taskDetailData.slug || '',
-            title: taskDetailData.title || '',
-            order_index: taskDetailData.order_index || 0,
-            is_premium: taskDetailData.is_premium || false,
-            preview_sec: taskDetailData.preview_sec || 30,
-            content: content, // contentを明示的に設定
-            created_at: taskDetailData.created_at || null,
-            video_full: taskDetailData.video_full || null,
-            video_preview: taskDetailData.video_preview || null,
-            training_id: taskDetailData.training_id || '',
-            trainingTitle: taskDetailData.trainingTitle || '',
-            trainingSlug: taskDetailData.trainingSlug || slug,
-            next_task: taskDetailData.next_task || null, // next_taskを明示的に設定
-            prev_task: taskDetailData.prev_task || null  // prev_taskを明示的に設定
-          };
-          
-          setTaskData(fullTaskData);
+          // タスクデータをセット
+          setTaskData(taskDetailData as TaskDetailData);
           
           // ユーザーがログインしている場合は進捗状況を取得
           if (user) {
@@ -135,7 +107,7 @@ const TaskDetailPage = () => {
         <TaskDetail
           task={taskData}
           training={trainingData}
-          mdxContent={mdxContent || taskData.content}
+          mdxContent={mdxContent}
           progress={progress?.progressMap?.[taskData.id]}
           onProgressUpdate={handleProgressUpdate}
           isPremium={taskData.is_premium || false}
@@ -144,7 +116,7 @@ const TaskDetailPage = () => {
 
         <TaskNavigation 
           trainingSlug={slug || ''} 
-          nextTaskSlug={taskData.next_task || null}
+          nextTaskSlug={taskData.next_task}
         />
       </div>
     </TrainingLayout>

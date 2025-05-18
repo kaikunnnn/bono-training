@@ -32,7 +32,7 @@ const TrainingDetail = () => {
             type: data.type || 'challenge', 
             difficulty: data.difficulty || '初級', 
             tags: Array.isArray(data.tags) ? data.tags : [],
-            // tasksプロパティが存在しない場合は空配列を設定
+            // tasksプロパティが存在しない場合は空配列を必ず設定
             tasks: Array.isArray(data.tasks) ? data.tasks : []
           };
           
@@ -53,7 +53,8 @@ const TrainingDetail = () => {
   
   // タスクにアクセス権限情報を追加した配列を作成
   const processedTasks = React.useMemo(() => {
-    if (!trainingData?.tasks) return [];
+    // trainingDataがnullまたはtrainingData.tasksが配列でない場合は空配列を返す
+    if (!trainingData?.tasks || !Array.isArray(trainingData.tasks)) return [];
     
     return trainingData.tasks.map(task => ({
       ...task,

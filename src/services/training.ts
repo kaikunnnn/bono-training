@@ -155,6 +155,9 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
       throw new Error('トレーニングが見つかりません');
     }
     
+    let baseTaskData;
+    let mdxContent = null;
+    
     // トレーニングIDがUUID形式かどうかで処理を分ける
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(training.id);
     
@@ -168,11 +171,7 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
         .single();
 
       if (error) throw error;
-      return {
-        ...data,
-        trainingTitle: training.title,
-        trainingSlug: trainingSlug
-      };
+      baseTaskData = data;
     } else {
       // Storageからタスク詳細を取得
       const trainingData = await loadTrainingMeta(trainingSlug, true);
@@ -189,19 +188,42 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
         const prevTask = taskIndex > 0 ? trainingData.tasks[taskIndex - 1].slug : null;
         const nextTask = taskIndex < trainingData.tasks.length - 1 ? trainingData.tasks[taskIndex + 1].slug : null;
         
-        return {
+        baseTaskData = {
           id: `${trainingSlug}-task-${taskIndex}`,
           training_id: training.id,
           ...task,
-          trainingTitle: training.title,
-          trainingSlug,
           prev_task: prevTask,
           next_task: nextTask
         };
+      } else {
+        throw new Error('タスクが見つかりません');
       }
-      
-      throw new Error('タスクが見つかりません');
     }
+    
+    // MDXコンテンツを取得（可能な場合）
+    try {
+      const mdxData = await loadMdxContent(trainingSlug, taskSlug);
+      mdxContent = mdxData.content || '';
+    } catch (error) {
+      console.warn('MDXコンテンツの取得に失敗しました:', error);
+      mdxContent = baseTaskData.content || ''; // 既存のcontentをフォールバックとして使用
+    }
+    
+    // ベースとなるタスクデータとMDXコンテンツを統合
+    const mergedTaskData = {
+      ...baseTaskData,
+      content: mdxContent || baseTaskData.content || '',
+      trainingTitle: training.title,
+      trainingSlug: trainingSlug,
+      // 必須プロパティの存在を確保
+      next_task: baseTaskData.next_task || null,
+      prev_task: baseTaskData.prev_task || null,
+      created_at: baseTaskData.created_at || null,
+      video_full: baseTaskData.video_full || null,
+      video_preview: baseTaskData.video_preview || null
+    };
+    
+    return mergedTaskData;
   } catch (error) {
     console.error('タスク詳細取得エラー:', error);
     throw error;

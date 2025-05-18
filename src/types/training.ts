@@ -29,20 +29,25 @@ export interface Task {
   prev_task?: string | null;
 }
 
-export interface TaskDetailData extends Task {
+// TaskDetailDataはTaskを拡張し、必須プロパティを明示的に定義
+export interface TaskDetailData {
+  id: string;
+  training_id: string;
+  slug: string;
+  title: string;
+  order_index: number;
+  is_premium: boolean | null;
+  preview_sec: number | null;
   content: string; // 必須プロパティとして定義
-  video_url?: string;
-  preview_video_url?: string;
+  video_full: string | null;
+  video_preview: string | null;
+  created_at: string | null;
   next_task: string | null; // 必須プロパティとして定義
   prev_task: string | null; // 必須プロパティとして定義
   trainingTitle: string;
   trainingSlug: string;
-  // TypeScriptエラーを防ぐためにnullable型を明示的に定義
-  created_at: string | null;
-  video_full: string | null;
-  video_preview: string | null;
-  preview_sec: number | null;
-  training_id: string;
+  video_url?: string;
+  preview_video_url?: string;
 }
 
 export interface TrainingDetailData {
