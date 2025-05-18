@@ -1,6 +1,6 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { loadTrainingMeta } from "@/utils/mdxLoader";
+import { loadMdxContent } from "@/utils/mdxLoader";
 
 /**
  * トレーニング一覧を取得
@@ -65,7 +65,7 @@ async function loadAllTrainingMetaFromStorage() {
 /**
  * トレーニング詳細情報を取得
  */
-export const getTrainingDetail = async (slug: string) => {
+export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
   try {
     // まずSupabaseから検索
     const { data: supabaseData, error } = await supabase
@@ -74,16 +74,20 @@ export const getTrainingDetail = async (slug: string) => {
       .eq('slug', slug)
       .single();
 
+    let training;
+    
     if (error) {
       if (error.code === 'PGRST116') { // データが見つからない場合
         // ストレージから検索
         try {
           const storageData = await loadTrainingMeta(slug);
           if (storageData) {
-            return {
+            training = {
               id: `storage-${slug}`,
               ...storageData
             };
+          } else {
+            throw new Error('トレーニングが見つかりません');
           }
         } catch (storageError) {
           console.error('ストレージからのメタデータ取得エラー:', storageError);
@@ -92,9 +96,30 @@ export const getTrainingDetail = async (slug: string) => {
       } else {
         throw error;
       }
+    } else {
+      training = supabaseData;
     }
 
-    return supabaseData;
+    // タスク一覧を取得
+    const tasks = await getTrainingTasks(training.id);
+    
+    // TrainingDetailData形式に整形して返す
+    const trainingDetailData: TrainingDetailData = {
+      id: training.id,
+      slug: training.slug,
+      title: training.title || '',
+      description: training.description || '',
+      type: training.type || 'challenge',
+      difficulty: training.difficulty || '初級',
+      tags: Array.isArray(training.tags) ? training.tags : [],
+      tasks: tasks || [], // 必ず配列を設定
+      skills: training.skills || [],
+      prerequisites: training.prerequisites || [],
+      has_premium_content: tasks?.some(task => task.is_premium) || false,
+      thumbnailImage: training.thumbnailImage || ''
+    };
+
+    return trainingDetailData;
   } catch (error) {
     console.error('トレーニング詳細取得エラー:', error);
     throw error;
@@ -127,7 +152,7 @@ export const getTrainingTasks = async (trainingId: string) => {
       const trainingData = await loadTrainingMeta(slug, true);
       
       if (trainingData && trainingData.tasks) {
-        // Storageから取得したタスク一覧にIDを付与してDBと同じ形式に整形
+        // Storageから取得したタスク一覧にIDを付与���てDBと同じ形式に整形
         return trainingData.tasks.map((task: any, index: number) => ({
           id: `${slug}-task-${index}`,
           training_id: trainingId,
@@ -146,7 +171,7 @@ export const getTrainingTasks = async (trainingId: string) => {
 /**
  * タスク詳細を取得
  */
-export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string) => {
+export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string): Promise<TaskDetailData> => {
   try {
     // まず、トレーニング詳細を取得
     const training = await getTrainingDetail(trainingSlug);
@@ -156,7 +181,7 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
     }
     
     let baseTaskData;
-    let mdxContent = null;
+    let mdxContent = '';
     
     // トレーニングIDがUUID形式かどうかで処理を分ける
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(training.id);
@@ -209,8 +234,8 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
       mdxContent = baseTaskData.content || ''; // 既存のcontentをフォールバックとして使用
     }
     
-    // ベースとなるタスクデータとMDXコンテンツを統合
-    const mergedTaskData = {
+    // ベースとなるタスクデータとMDXコンテンツを統合し、必要なプロパティがすべて存在することを確保
+    const mergedTaskData: TaskDetailData = {
       ...baseTaskData,
       content: mdxContent || baseTaskData.content || '',
       trainingTitle: training.title,

@@ -50,6 +50,7 @@ export interface TaskDetailData {
   preview_video_url?: string;
 }
 
+// TrainingDetailDataに必須プロパティとしてtasksを定義
 export interface TrainingDetailData {
   id: string;
   slug: string;

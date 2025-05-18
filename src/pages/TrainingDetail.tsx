@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
@@ -22,21 +21,7 @@ const TrainingDetail = () => {
       try {
         if (slug) {
           const data = await getTrainingDetail(slug);
-          
-          // TrainingDetailData型の要件を満たすようにデータを加工
-          const formattedData: TrainingDetailData = {
-            id: data.id || `storage-${slug}`,
-            slug: slug,
-            title: data.title || '',
-            description: data.description || '', 
-            type: data.type || 'challenge', 
-            difficulty: data.difficulty || '初級', 
-            tags: Array.isArray(data.tags) ? data.tags : [],
-            // tasksプロパティが存在しない場合は空配列を必ず設定
-            tasks: Array.isArray(data.tasks) ? data.tasks : []
-          };
-          
-          setTrainingData(formattedData);
+          setTrainingData(data);
         }
       } catch (error) {
         console.error("トレーニングデータの取得中にエラーが発生しました:", error);
