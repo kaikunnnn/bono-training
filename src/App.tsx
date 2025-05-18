@@ -1,79 +1,90 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
-import PrivateRoute from "@/components/auth/PrivateRoute";
-import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
-import { useState } from "react";
-import Index from "./pages/Index";
-import Auth from "./pages/Auth";
-import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import NotFound from "./pages/NotFound";
-import Subscription from "./pages/Subscription";
-import PaidContent from "./pages/PaidContent";
-import Content from "./pages/Content";
-import ContentDetail from "./pages/ContentDetail";
-import VideoDetailTest from "./pages/VideoDetailTest";
-import Profile from "./pages/Profile";
-import TrainingHome from "./pages/Training";
-import TrainingDetail from "./pages/TrainingDetail";
-import TaskDetailPage from './pages/Training/TaskDetailPage';
-import TrainingPlan from "./pages/Training/Plan";
-import TrainingAbout from "./pages/Training/About";
-import TrainingLogin from "./pages/Training/Login";
 
-// コンソールログでインポートの確認
-console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { Toaster } from 'sonner';
+import './App.css';
+
+// Pages
+import Index from './pages/Index';
+import Auth from './pages/Auth';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Content from './pages/Content';
+import ContentDetail from './pages/ContentDetail';
+import ContentTest from './pages/ContentTest';
+import VideoDetailTest from './pages/VideoDetailTest';
+import PaidContent from './pages/PaidContent';
+import Subscription from './pages/Subscription';
+import NotFound from './pages/NotFound';
+
+// Context Providers
+import { AuthContextProvider } from './contexts/AuthContext';
+import { SubscriptionContextProvider } from './contexts/SubscriptionContext';
+
+// Components
+import PrivateRoute from './components/auth/PrivateRoute';
+import ProtectedPremiumRoute from './components/subscription/ProtectedPremiumRoute';
+import Profile from './pages/Profile';
+import TrainingIndex from './pages/Training';
+import TrainingDetail from './pages/TrainingDetail';
+import TaskDetailPage from './pages/Training/TaskDetailPage';
+import TaskDetailError from './pages/Training/TaskDetailError';
+import TrainingAbout from './pages/Training/About';
+import TrainingPlan from './pages/Training/Plan';
+import TrainingLogin from './pages/Training/Login';
+import ContentManager from './pages/Training/ContentManager';
 
 const App = () => {
-  const [queryClient] = useState(() => new QueryClient());
-
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <AuthProvider>
-          <SubscriptionProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/forgot-password" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
-                
-                <Route path="/training" element={<TrainingHome />} />
-                <Route path="/training/login" element={<TrainingLogin />} />
-                <Route path="/training/:slug" element={<TrainingDetail />} />
-                <Route path="/training/:slug/:taskSlug" element={<TaskDetailPage />} />
-                <Route path="/training/plan" element={<TrainingPlan />} />
-                <Route path="/training/about" element={<TrainingAbout />} />
-                
-                <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
-                <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                
-                <Route path="/content" element={<Content />} />
-                <Route path="/content/:id" element={<ContentDetail />} />
-                
-                <Route path="/video-detail-test/:id" element={<VideoDetailTest />} />
-                
-                <Route path="/paid-only" element={
-                  <ProtectedPremiumRoute>
-                    <PaidContent />
-                  </ProtectedPremiumRoute>
-                } />
-
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
-          </SubscriptionProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <Router>
+      <AuthContextProvider>
+        <SubscriptionContextProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            
+            {/* コンテンツページ */}
+            <Route path="/content" element={<Content />} />
+            <Route path="/content/:contentId" element={<ContentDetail />} />
+            <Route path="/content-test" element={<ContentTest />} />
+            <Route path="/video-test" element={<VideoDetailTest />} />
+            
+            {/* プレミアムコンテンツ */}
+            <Route 
+              path="/paid-content" 
+              element={<ProtectedPremiumRoute><PaidContent /></ProtectedPremiumRoute>} 
+            />
+            
+            {/* サブスクリプション */}
+            <Route path="/subscription" element={<Subscription />} />
+            
+            {/* プロフィール */}
+            <Route 
+              path="/profile" 
+              element={<PrivateRoute><Profile /></PrivateRoute>} 
+            />
+            
+            {/* トレーニング関連ページ */}
+            <Route path="/training" element={<TrainingIndex />} />
+            <Route path="/training/about" element={<TrainingAbout />} />
+            <Route path="/training/plan" element={<TrainingPlan />} />
+            <Route path="/training/login" element={<TrainingLogin />} />
+            <Route path="/training/content-manager" element={<PrivateRoute><ContentManager /></PrivateRoute>} />
+            <Route path="/training/:slug" element={<TrainingDetail />} />
+            <Route path="/training/:trainingSlug/:taskSlug" element={<TaskDetailPage />} />
+            <Route path="/training/error" element={<TaskDetailError />} />
+            
+            {/* 404ページ */}
+            <Route path="/404" element={<NotFound />} />
+            <Route path="*" element={<Navigate to="/404" replace />} />
+          </Routes>
+          
+          <Toaster richColors position="top-center" />
+        </SubscriptionContextProvider>
+      </AuthContextProvider>
+    </Router>
   );
 };
 
