@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
-import TaskContent from '@/components/training/TaskContent';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
@@ -12,6 +11,7 @@ import { TaskDetailData } from '@/types/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { loadMdxContent } from '@/utils/mdxLoader';
+import TaskDetail from '@/components/training/TaskDetail';
 
 const TaskDetailPage = () => {
   const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
@@ -179,35 +179,17 @@ const TaskDetailPage = () => {
     <TrainingLayout>
       <TrainingHeader />
       <div className="container py-8">
-        <div className="flex items-center justify-between mb-6">
-          <Button 
-            variant="ghost" 
-            className="flex items-center"
-            onClick={handleBack}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            {trainingData.title}に戻る
-          </Button>
-          
-          {user && (
-            <Button
-              variant={isCompleted ? "outline" : "default"}
-              className={isCompleted ? "border-green-500 text-green-700" : ""}
-              onClick={handleToggleComplete}
-            >
-              {isCompleted ? "完了済み" : "完了にする"}
-            </Button>
-          )}
-        </div>
-        
-        <TaskContent
-          title={taskData.title}
-          content={mdxContent || taskData.content}
+        {/* TaskDetailコンポーネントに置き換え */}
+        <TaskDetail
+          task={taskData}
+          training={trainingData}
+          mdxContent={mdxContent || taskData.content}
+          progress={progress?.progressMap?.[taskData.id]}
+          onProgressUpdate={handleProgressUpdate}
           isPremium={taskData.is_premium || false}
-          videoUrl={taskData.video_full}
-          previewVideoUrl={taskData.video_preview}
+          className="mb-8"
         />
-        
+
         <div className="mt-12 flex justify-between">
           <Button 
             variant="outline" 
