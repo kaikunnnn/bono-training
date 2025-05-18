@@ -25,8 +25,8 @@ const TrainingDetail = () => {
           
           // TrainingDetailData型の要件を満たすようにデータを加工
           const formattedData: TrainingDetailData = {
-            ...data,
             id: data.id || `storage-${slug}`,
+            slug: slug,
             title: data.title || '',
             description: data.description || '', 
             type: data.type || 'challenge', 

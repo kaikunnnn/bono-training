@@ -27,7 +27,7 @@ export interface TrainingMeta {
   difficulty?: string;
   tags?: string[];
   slug: string;
-  thumbnailImage?: string; // サムネイル画像用のプロパティを追加
+  thumbnailImage?: string;
   tasks?: Array<{
     slug: string;
     title: string;
@@ -36,6 +36,9 @@ export interface TrainingMeta {
     video_full?: string;
     video_preview?: string;
     preview_sec?: number;
+    content?: string;
+    next_task?: string | null;
+    prev_task?: string | null;
   }>;
 }
 
@@ -102,7 +105,6 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
   try {
     // get-training-metaエッジ関数を呼び出す
     const { data, error } = await supabase.functions.invoke('get-training-meta', {
-      // bodyでパラメータを渡す
       body: { 
         slug: trainingSlug,
         tasks: withTasks ? 'true' : 'false'
@@ -118,7 +120,13 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
       throw new Error('メタデータが取得できませんでした');
     }
     
-    return data as TrainingMeta;
+    // 戻り値にtasksがなければ空配列を設定
+    const trainingData = data as TrainingMeta;
+    if (withTasks && !trainingData.tasks) {
+      trainingData.tasks = [];
+    }
+    
+    return trainingData;
   } catch (error) {
     console.error('トレーニングメタデータ読み込みエラー:', error);
     
@@ -130,7 +138,7 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
       difficulty: "初級",
       tags: ["React", "JavaScript", "フロントエンド"],
       slug: trainingSlug,
-      thumbnailImage: 'https://source.unsplash.com/random/200x100' // サムネイル画像のデフォルト値を設定
+      thumbnailImage: 'https://source.unsplash.com/random/200x100'
     };
     
     if (withTasks) {
@@ -139,13 +147,19 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
           slug: "introduction",
           title: "はじめに",
           is_premium: false,
-          order_index: 1
+          order_index: 1,
+          content: "はじめに関するコンテンツです。",
+          next_task: "advanced",
+          prev_task: null
         },
         {
           slug: "advanced",
           title: "応用編",
           is_premium: true,
-          order_index: 2
+          order_index: 2,
+          content: "応用編のコンテンツです。",
+          next_task: null,
+          prev_task: "introduction"
         }
       ];
     }
@@ -186,7 +200,8 @@ export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
         type: "skill",
         difficulty: "初級",
         tags: ["React", "JavaScript", "フロントエンド"],
-        thumbnailImage: 'https://source.unsplash.com/random/200x100'
+        thumbnailImage: 'https://source.unsplash.com/random/200x100',
+        tasks: []  // 空の配列を明示的に設定
       }
     ];
   }
