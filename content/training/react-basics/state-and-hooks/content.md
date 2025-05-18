@@ -1,9 +1,11 @@
 
 ---
 title: "StateとHooksの使い方"
+slug: "state-and-hooks"
 order_index: 2
 is_premium: true
-video_full: "845235300" 
+preview_sec: 30
+video_full: "845235300"
 video_preview: "845235301"
 ---
 
@@ -34,23 +36,23 @@ function Counter() {
 }
 ```
 
-## 複数のState変数
+## 複数のstate変数の使用
 
-一つのコンポーネントで複数のState変数を使用できます。
+複数のstate変数を使用することで、異なる種類の値を管理できます。
 
 ```jsx
 function UserForm() {
   const [name, setName] = useState('');
   const [age, setAge] = useState(0);
-  const [email, setEmail] = useState('');
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   // ...
 }
 ```
 
-## useEffect Hook
+## useEffect Hookの基本
 
-`useEffect`を使うと、コンポーネントのレンダリング後に副作用を実行できます。
+`useEffect`は、関数コンポーネントで副作用を実行するためのHookです。
 
 ```jsx
 import React, { useState, useEffect } from 'react';
@@ -58,16 +60,11 @@ import React, { useState, useEffect } from 'react';
 function Example() {
   const [count, setCount] = useState(0);
 
-  // componentDidMount, componentDidUpdate, componentWillUnmountに相当
+  // Similar to componentDidMount and componentDidUpdate:
   useEffect(() => {
-    // ブラウザAPIを使用してドキュメントのタイトルを更新
+    // Update the document title using the browser API
     document.title = `You clicked ${count} times`;
-    
-    // クリーンアップ関数（componentWillUnmountに相当）
-    return () => {
-      document.title = 'React App';
-    };
-  }, [count]); // countが変更されたときだけ副作用を再実行
+  });
 
   return (
     <div>
@@ -80,41 +77,65 @@ function Example() {
 }
 ```
 
-## カスタムHooks
+## 依存配列
 
-共通のロジックを抽出して再利用可能なカスタムHooksを作成できます。
+`useEffect`の第二引数に依存配列を渡すことで、特定の値が変更されたときだけ副作用を実行できます。
 
 ```jsx
-function useWindowSize() {
-  const [windowSize, setWindowSize] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  });
+useEffect(() => {
+  document.title = `You clicked ${count} times`;
+}, [count]); // countが変更されたときだけ実行
 
-  useEffect(() => {
-    function handleResize() {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    }
-    
-    window.addEventListener('resize', handleResize);
-    
-    // クリーンアップ関数
-    return () => window.removeEventListener('resize', handleResize);
-  }, []); // 空の配列を渡すと、マウント時とアンマウント時のみ実行
+// 空の依存配列を渡すと、初回レンダリング時のみ実行
+useEffect(() => {
+  console.log('Component mounted');
+}, []);
+```
 
-  return windowSize;
+## カスタムフック
+
+カスタムフックを作成することで、コンポーネント間でロジックを再利用できます。
+
+```jsx
+function useFormInput(initialValue) {
+  const [value, setValue] = useState(initialValue);
+  
+  function handleChange(e) {
+    setValue(e.target.value);
+  }
+  
+  return {
+    value,
+    onChange: handleChange
+  };
+}
+
+function ProfileForm() {
+  const name = useFormInput('');
+  const email = useFormInput('');
+  
+  return (
+    <form>
+      <input value={name.value} onChange={name.onChange} />
+      <input value={email.value} onChange={email.onChange} />
+    </form>
+  );
 }
 ```
 
-## 高度な課題
+## その他の主要なHooks
 
-以下の要件を満たすTodoアプリを作成してください：
+- `useContext`: コンテキストからの値を取得
+- `useReducer`: 複雑な状態管理
+- `useCallback`: コールバック関数のメモ化
+- `useMemo`: 計算結果のメモ化
+- `useRef`: DOMノードや値の参照を保持
 
-1. タスクの追加、削除、完了/未完了の切り替えができる
-2. ローカルストレージを使ってタスクを保存する
-3. カスタムHookを作成してタスク管理ロジックをコンポーネントから分離する
+## 演習課題
 
-この課題を通じて、HooksとStateの高度な使い方、カスタムHooksの作成方法を学びましょう。
+1. `useState`を使ってフォームの状態を管理するコンポーネントを作成する
+2. `useEffect`を使って、コンポーネントのマウント/アンマウント時に処理を実行する
+3. カスタムフックを作成して、複数のコンポーネントで共有する
+
+Hooksを活用することで、関数コンポーネントでも複雑なロジックを実装できます。
+プレミアムコンテンツでは、より高度なHooksの使い方と状態管理のベストプラクティスについて解説します。

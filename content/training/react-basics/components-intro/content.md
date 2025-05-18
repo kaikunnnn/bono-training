@@ -1,8 +1,10 @@
 
 ---
 title: "Reactコンポーネント入門"
+slug: "components-intro"
 order_index: 1
 is_premium: false
+preview_sec: 30
 video_full: "845235294"
 video_preview: "845235294"
 ---
@@ -28,7 +30,7 @@ Reactには主に2種類のコンポーネントがあります：
 1. **関数コンポーネント**: JavaScriptの関数として定義されたコンポーネント
 2. **クラスコンポーネント**: ES6のクラスとして定義されたコンポーネント
 
-### 関数コンポーネント
+## 関数コンポーネントの例
 
 ```jsx
 function Welcome(props) {
@@ -36,7 +38,7 @@ function Welcome(props) {
 }
 ```
 
-### クラスコンポーネント
+## クラスコンポーネントの例
 
 ```jsx
 class Welcome extends React.Component {
@@ -46,28 +48,46 @@ class Welcome extends React.Component {
 }
 ```
 
-## コンポーネントの呼び出し
+## コンポーネントの使い方
 
-コンポーネントは他のコンポーネント内で呼び出すことができます。
+コンポーネントを作成したら、他のコンポーネント内で使用できます。
 
 ```jsx
 function App() {
   return (
     <div>
-      <Welcome name="Alice" />
-      <Welcome name="Bob" />
-      <Welcome name="Charlie" />
+      <Welcome name="Sara" />
+      <Welcome name="Cahal" />
+      <Welcome name="Edite" />
     </div>
   );
 }
 ```
 
-## 課題
+## コンポーネントの分割
 
-以下の要件を満たす`Profile`コンポーネントを作成してください：
+大きなコンポーネントを小さなコンポーネントに分割することで、再利用性が高まり、コードの管理が容易になります。
 
-1. `name`、`age`、`occupation`のプロパティを受け取る
-2. これらのプロパティを使用して、ユーザープロフィールを表示する
-3. `occupation`が指定されていない場合は、「職業不明」と表示する
+```jsx
+function Comment(props) {
+  return (
+    <div className="Comment">
+      <UserInfo user={props.author} />
+      <div className="Comment-text">
+        {props.text}
+      </div>
+      <div className="Comment-date">
+        {formatDate(props.date)}
+      </div>
+    </div>
+  );
+}
+```
 
-この課題を通じて、コンポーネントの作成と使用、props、条件付きレンダリングの基本を学びましょう。
+## 演習課題
+
+1. シンプルな挨拶コンポーネントを作成してみましょう
+2. 複数のコンポーネントを組み合わせたアプリケーションを作成してみましょう
+3. propsを使って異なるデータでコンポーネントをレンダリングしてみましょう
+
+以上がReactコンポーネントの基本となります。次のレッスンでは、Stateとライフサイクルについて学びます。

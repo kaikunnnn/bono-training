@@ -24,77 +24,92 @@ interface MdxContentResponse {
     [key: string]: any;
   };
   error?: string;
+  isFreePreview?: boolean;
 }
 
-// サンプルMDXコンテンツ（実際の実装では、ファイルシステムやDBから取得する）
-const SAMPLE_MDX_CONTENTS: Record<string, Record<string, MdxContentResponse>> = {
-  "react-basics": {
-    "components-intro": {
-      content: `# Reactコンポーネント入門
+// ストレージからMDXファイルを取得する関数
+async function getMdxFileFromStorage(supabase, trainingSlug: string, taskSlug: string) {
+  try {
+    // パスの構築: public/trainingSlug/taskSlug/content.md
+    const filePath = `public/${trainingSlug}/${taskSlug}/content.md`;
 
-Reactの最も重要な概念の一つが「コンポーネント」です。コンポーネントを使うことで、UIを独立した再利用可能なパーツに分割できます。
+    // ファイルの存在確認
+    const { data: existsData, error: existsError } = await supabase
+      .storage
+      .from('content')
+      .list(`public/${trainingSlug}/${taskSlug}`);
 
-## コンポーネントとは何か？
+    if (existsError) {
+      console.error('ファイル存在確認エラー:', existsError);
+      throw new Error('ファイルの確認に失敗しました');
+    }
 
-コンポーネントは、アプリケーションのUIの一部を表すJavaScriptの関数やクラスです。コンポーネントは入力としてプロパティ（props）を受け取り、画面に表示されるReact要素を返します。
+    if (!existsData || existsData.length === 0 || !existsData.some(file => file.name === 'content.md')) {
+      console.error('ファイルが見つかりません:', filePath);
+      throw new Error('指定されたコンテンツファイルが見つかりません');
+    }
 
-\`\`\`jsx
-function Welcome(props) {
-  return <h1>Hello, {props.name}</h1>;
+    // ファイル内容の取得
+    const { data, error } = await supabase
+      .storage
+      .from('content')
+      .download(filePath);
+
+    if (error) {
+      console.error('ファイル取得エラー:', error);
+      throw new Error('ファイルの取得に失敗しました');
+    }
+
+    // ファイル内容をテキストに変換
+    const content = await data.text();
+
+    // front matterと本文を分離
+    const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+    if (!frontmatterMatch) {
+      throw new Error('正しいフロントマター形式ではありません');
+    }
+
+    const [_, frontmatterText, mdContent] = frontmatterMatch;
+    const frontmatter = parseFrontmatter(frontmatterText);
+
+    return { content: mdContent.trim(), frontmatter };
+  } catch (error) {
+    console.error('ストレージからのファイル取得エラー:', error);
+    throw error;
+  }
 }
-\`\`\`
 
-## コンポーネントの種類
+// シンプルなYAML frontmatterパーサー
+function parseFrontmatter(text: string) {
+  const result: Record<string, any> = {};
+  const lines = text.split('\n');
+  
+  for (const line of lines) {
+    const match = line.match(/^([^:]+):\s*(.+)$/);
+    if (match) {
+      const [_, key, valueStr] = match;
+      const trimmedKey = key.trim();
+      let value: any = valueStr.trim();
 
-Reactには主に2種類のコンポーネントがあります：
-
-1. **関数コンポーネント**: JavaScriptの関数として定義されたコンポーネント
-2. **クラスコンポーネント**: ES6のクラスとして定義されたコンポーネント`,
-      frontmatter: {
-        title: "Reactコンポーネント入門",
-        order_index: 1,
-        is_premium: false,
-        video_full: "845235294",
-        video_preview: "845235294"
+      // 真偽値の変換
+      if (value === 'true') value = true;
+      else if (value === 'false') value = false;
+      // 数値の変換
+      else if (!isNaN(Number(value)) && value !== '') value = Number(value);
+      // 配列の変換 (簡易実装: ["value1", "value2"] 形式のみ対応)
+      else if (value.startsWith('[') && value.endsWith(']')) {
+        try {
+          value = JSON.parse(value.replace(/'/g, '"'));
+        } catch (e) {
+          // パースに失敗した場合は文字列のまま
+        }
       }
-    },
-    "state-and-hooks": {
-      content: `# StateとHooksの使い方
 
-Reactアプリケーションで動的なUIを作成するには、「State（状態）」の管理が不可欠です。
-React Hooksを使うと、関数コンポーネントでもStateや他のReact機能を使用できます。
-
-## useState Hookの基本
-
-\`useState\`は、関数コンポーネントでStateを使うための最も基本的なHookです。
-
-\`\`\`jsx
-import React, { useState } from 'react';
-
-function Counter() {
-  // [現在の状態, 状態を更新する関数] = useState(初期値);
-  const [count, setCount] = useState(0);
-
-  return (
-    <div>
-      <p>You clicked {count} times</p>
-      <button onClick={() => setCount(count + 1)}>
-        Click me
-      </button>
-    </div>
-  );
-}
-\`\`\``,
-      frontmatter: {
-        title: "StateとHooksの使い方",
-        order_index: 2,
-        is_premium: true,
-        video_full: "845235300",
-        video_preview: "845235301"
-      }
+      result[trimmedKey] = value;
     }
   }
-};
+  return result;
+}
 
 // MDXコンテンツ取得ハンドラ
 const handleGetMdxContent = async (req: Request): Promise<Response> => {
@@ -116,27 +131,32 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     }
     
     // Supabaseクライアントの初期化
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
     const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      supabaseUrl,
+      supabaseAnonKey,
       { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
     );
     
     // 認証情報を取得
     const { data: { user } } = await supabaseAdmin.auth.getUser();
     
-    // ここでは簡易的にサンプルデータを返していますが、
-    // 実際の実装ではファイルシステムやDBからMDXコンテンツを取得します
-    let mdxContent = SAMPLE_MDX_CONTENTS[trainingSlug]?.[taskSlug];
+    let mdxContent: MdxContentResponse;
     
-    if (!mdxContent) {
-      // 見つからない場合はダミーデータを返す
+    try {
+      // ストレージからファイルを取得
+      mdxContent = await getMdxFileFromStorage(supabaseAdmin, trainingSlug, taskSlug);
+    } catch (storageError) {
+      console.log('ストレージからの取得に失敗、サンプルデータを使用:', storageError);
+      
+      // ストレージから取得できない場合はサンプルデータを使用
       mdxContent = {
-        content: `# ${taskSlug} タスク\n\n${trainingSlug}の詳細を説明します。`,
+        content: `# ${taskSlug} タスク\n\n${trainingSlug}の詳細を説明します。\n\nこのコンテンツはサンプルデータです。`,
         frontmatter: {
           title: `${taskSlug} タスク`,
           order_index: 1,
-          is_premium: false
+          is_premium: taskSlug.includes('premium')
         }
       };
     }

@@ -1,203 +1,250 @@
 
-/**
- * トレーニングデータを取得する
- */
-import { Training, TrainingDetailData, Task, TaskDetailData } from '@/types/training';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
-import { loadMdxContent, loadTrainingMeta } from '@/utils/mdxLoader';
+import { supabase } from "@/integrations/supabase/client";
+import { loadTrainingMeta } from "@/utils/mdxLoader";
 
 /**
- * トレーニング一覧を取得する
+ * トレーニング一覧を取得
  */
-export async function getTrainingList(): Promise<Training[]> {
+export const getTrainings = async () => {
   try {
-    const { data, error } = await supabase
+    // Supabase DBからトレーニングデータを取得
+    const { data: supabaseData, error } = await supabase
       .from('training')
-      .select('*')
-      .order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('トレーニングデータ取得エラー:', error);
-      throw error;
+      .select('*');
+
+    if (error) throw error;
+
+    // Storageからトレーニングデータも併せて取得
+    try {
+      const mdxData = await loadAllTrainingMetaFromStorage();
+      
+      // 両方のデータソースを結合（Supabaseデータを優先）
+      const combinedData = [
+        ...(supabaseData || []),
+        ...mdxData
+      ];
+      
+      // スラッグの重複を削除
+      const slugMap = new Map();
+      combinedData.forEach(item => {
+        if (!slugMap.has(item.slug)) {
+          slugMap.set(item.slug, item);
+        }
+      });
+      
+      return Array.from(slugMap.values());
+    } catch (mdxError) {
+      console.error('MDXデータ取得エラー:', mdxError);
+      // MDX取得エラーの場合はSupabaseデータのみ返す
+      return supabaseData || [];
     }
-    
-    // データを型に合わせて変換
-    return data.map(item => ({
-      id: item.id,
-      slug: item.slug,
-      title: item.title,
-      description: item.description || '',
-      type: (item.type as 'challenge' | 'skill') || 'challenge', // 型を明示的に変換
-      difficulty: item.difficulty || '',
-      tags: item.tags || [],
-      backgroundImage: 'https://source.unsplash.com/random/800x400', // 固定値を設定
-      thumbnailImage: 'https://source.unsplash.com/random/200x100', // 固定値を設定
-      isFree: !item.tags?.includes('premium')
-    }));
   } catch (error) {
-    console.error('トレーニングデータ取得エラー:', error);
-    // エラー時はダミーデータを返す（本番環境では適切なエラーハンドリングが必要）
-    return [
-      {
-        id: '1',
-        slug: 'react-basic',
-        title: 'Reactの基礎',
-        description: 'Reactの基礎を学ぶ',
-        type: 'skill',
-        difficulty: '初級',
-        tags: ['React', 'JavaScript'],
-        backgroundImage: 'https://source.unsplash.com/random/800x400',
-        thumbnailImage: 'https://source.unsplash.com/random/200x100',
-        isFree: true,
-      },
-      {
-        id: '2',
-        slug: 'nextjs-basic',
-        title: 'Next.jsの基礎',
-        description: 'Next.jsの基礎を学ぶ',
-        type: 'skill',
-        difficulty: '初級',
-        tags: ['Next.js', 'React', 'JavaScript'],
-        backgroundImage: 'https://source.unsplash.com/random/800x400',
-        thumbnailImage: 'https://source.unsplash.com/random/200x100',
-        isFree: false,
-      },
-      {
-        id: '3',
-        slug: 'typescript-basic',
-        title: 'TypeScriptの基礎',
-        description: 'TypeScriptの基礎を学ぶ',
-        type: 'skill',
-        difficulty: '初級',
-        tags: ['TypeScript', 'JavaScript'],
-        backgroundImage: 'https://source.unsplash.com/random/800x400',
-        thumbnailImage: 'https://source.unsplash.com/random/200x100',
-        isFree: false,
-      },
-    ];
+    console.error('トレーニング一覧取得エラー:', error);
+    throw error;
+  }
+};
+
+/**
+ * ストレージからすべてのトレーニングメタデータを取得
+ */
+async function loadAllTrainingMetaFromStorage() {
+  try {
+    // エッジ関数経由でトレーニングメタデータを取得
+    const { data, error } = await supabase.functions.invoke('get-training-meta', {
+      method: 'GET'
+    });
+    
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error('ストレージからのメタデータ取得エラー:', error);
+    return [];
   }
 }
 
 /**
- * トレーニング詳細データを取得する
+ * トレーニング詳細情報を取得
  */
-export async function getTrainingDetail(slug: string): Promise<TrainingDetailData> {
+export const getTrainingDetail = async (slug: string) => {
   try {
-    // トレーニング情報を取得
-    const { data: trainingData, error: trainingError } = await supabase
+    // まずSupabaseから検索
+    const { data: supabaseData, error } = await supabase
       .from('training')
       .select('*')
       .eq('slug', slug)
       .single();
-    
-    if (trainingError) {
-      console.error('トレーニング詳細データ取得エラー:', trainingError);
-      
-      // エラー時にMDXからトレーニングメタデータを取得してみる
-      try {
-        const trainingMeta = await loadTrainingMeta(slug);
-        if (trainingMeta) {
-          // MDXからトレーニングメタデータが取得できた場合、ダミーデータを返す
-          return {
-            id: 'mdx-' + slug,
-            slug: slug,
-            title: trainingMeta.title || slug,
-            description: trainingMeta.description || '',
-            type: trainingMeta.type || 'skill',
-            difficulty: trainingMeta.difficulty || '初級',
-            tags: trainingMeta.tags || [],
-            tasks: [], // 初期値（後で更新）
-            skills: trainingMeta.tags || [],
-            prerequisites: trainingMeta.prerequisites || ['基本的な知識'],
-            has_premium_content: false // 初期値（後で更新）
-          };
+
+    if (error) {
+      if (error.code === 'PGRST116') { // データが見つからない場合
+        // ストレージから検索
+        try {
+          const storageData = await loadTrainingMeta(slug);
+          if (storageData) {
+            return {
+              id: `storage-${slug}`,
+              ...storageData
+            };
+          }
+        } catch (storageError) {
+          console.error('ストレージからのメタデータ取得エラー:', storageError);
+          throw error; // 元のエラーをスロー
         }
-      } catch (mdxError) {
-        console.error('MDXからのトレーニングメタデータ取得エラー:', mdxError);
+      } else {
+        throw error;
       }
-      
-      throw trainingError;
     }
-    
-    // トレーニングに属するタスク一覧を取得
-    const { data: tasksData, error: tasksError } = await supabase
-      .from('task')
-      .select('*')
-      .eq('training_id', trainingData.id)
-      .order('order_index', { ascending: true });
-    
-    if (tasksError) {
-      console.error('タスクデータ取得エラー:', tasksError);
-      throw tasksError;
-    }
-    
-    // プレミアムコンテンツの有無を確認
-    const hasPremiumContent = tasksData.some(task => task.is_premium);
-    
-    return {
-      ...trainingData,
-      tasks: tasksData,
-      skills: trainingData.tags || [],
-      prerequisites: ['HTML', 'CSS', 'JavaScript'], // 仮のデータ
-      has_premium_content: hasPremiumContent
-    };
+
+    return supabaseData;
   } catch (error) {
-    console.error('トレーニング詳細データ取得エラー:', error);
-    // エラー時はモックデータを返す（本番環境では適切なエラーハンドリングが必要）
-    return {
-      id: '1',
-      slug: 'react-basic',
-      title: 'Reactの基礎',
-      description: 'Reactの基礎を学ぶ',
-      type: 'skill',
-      difficulty: '初級',
-      tags: ['React', 'JavaScript'],
-      tasks: [
-        {
-          id: '1',
-          training_id: '1',
-          slug: 'react-basic-1',
-          title: 'Reactの基礎1',
-          order_index: 1,
-          is_premium: false,
-          preview_sec: 30,
-        },
-        {
-          id: '2',
-          training_id: '1',
-          slug: 'react-basic-2',
-          title: 'Reactの基礎2',
-          order_index: 2,
-          is_premium: true,
-          preview_sec: 30,
-        },
-        {
-          id: '3',
-          training_id: '1',
-          slug: 'react-basic-3',
-          title: 'Reactの基礎3',
-          order_index: 3,
-          is_premium: true,
-          preview_sec: 30,
-        },
-      ],
-      skills: ['React', 'JavaScript', 'JSX'],
-      prerequisites: ['HTML', 'CSS', 'JavaScript'],
-      has_premium_content: true,
-    };
+    console.error('トレーニング詳細取得エラー:', error);
+    throw error;
   }
-}
+};
 
 /**
- * タスクの進捗状況を更新する
+ * トレーニングのタスク一覧を取得
  */
-export async function updateTaskProgress(userId: string, taskId: string, status: string) {
+export const getTrainingTasks = async (trainingId: string) => {
   try {
-    // 現在の日時を取得（完了の場合のみ使用）
+    // トレーニングIDがUUID形式かどうかで処理を分ける
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(trainingId);
+    
+    // Supabase DBからのデータ取得
+    if (isUuid) {
+      const { data, error } = await supabase
+        .from('task')
+        .select('*')
+        .eq('training_id', trainingId)
+        .order('order_index');
+
+      if (error) throw error;
+      return data || [];
+    } 
+    // Storageからのデータ取得
+    else {
+      // trainingIdがストレージ識別子の場合（例: storage-react-basics）
+      const slug = trainingId.replace('storage-', '');
+      const trainingData = await loadTrainingMeta(slug, true);
+      
+      if (trainingData && trainingData.tasks) {
+        // Storageから取得したタスク一覧にIDを付与してDBと同じ形式に整形
+        return trainingData.tasks.map((task: any, index: number) => ({
+          id: `${slug}-task-${index}`,
+          training_id: trainingId,
+          ...task
+        }));
+      }
+      
+      return [];
+    }
+  } catch (error) {
+    console.error('タスク一覧取得エラー:', error);
+    throw error;
+  }
+};
+
+/**
+ * タスク詳細を取得
+ */
+export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string) => {
+  try {
+    // まず、トレーニング詳細を取得
+    const training = await getTrainingDetail(trainingSlug);
+    
+    if (!training) {
+      throw new Error('トレーニングが見つかりません');
+    }
+    
+    // トレーニングIDがUUID形式かどうかで処理を分ける
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(training.id);
+    
+    if (isUuid) {
+      // Supabase DBからタスク詳細を取得
+      const { data, error } = await supabase
+        .from('task')
+        .select('*')
+        .eq('training_id', training.id)
+        .eq('slug', taskSlug)
+        .single();
+
+      if (error) throw error;
+      return {
+        ...data,
+        trainingTitle: training.title,
+        trainingSlug: trainingSlug
+      };
+    } else {
+      // Storageからタスク詳細を取得
+      const trainingData = await loadTrainingMeta(trainingSlug, true);
+      
+      if (trainingData && trainingData.tasks) {
+        const task = trainingData.tasks.find((t: any) => t.slug === taskSlug);
+        
+        if (!task) {
+          throw new Error('タスクが見つかりません');
+        }
+        
+        // 前後のタスクを取得
+        const taskIndex = trainingData.tasks.findIndex((t: any) => t.slug === taskSlug);
+        const prevTask = taskIndex > 0 ? trainingData.tasks[taskIndex - 1].slug : null;
+        const nextTask = taskIndex < trainingData.tasks.length - 1 ? trainingData.tasks[taskIndex + 1].slug : null;
+        
+        return {
+          id: `${trainingSlug}-task-${taskIndex}`,
+          training_id: training.id,
+          ...task,
+          trainingTitle: training.title,
+          trainingSlug,
+          prev_task: prevTask,
+          next_task: nextTask
+        };
+      }
+      
+      throw new Error('タスクが見つかりません');
+    }
+  } catch (error) {
+    console.error('タスク詳細取得エラー:', error);
+    throw error;
+  }
+};
+
+/**
+ * ユーザーの進捗状況を取得
+ */
+export const getUserTaskProgress = async (userId: string, trainingId: string) => {
+  try {
+    // Supabase DBからユーザーの進捗状況を取得
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('task_id, status, completed_at')
+      .eq('user_id', userId);
+
+    if (error) throw error;
+    
+    // タスクIDごとの進捗状況をマッピング
+    const progressMap = {};
+    data?.forEach(item => {
+      progressMap[item.task_id] = {
+        status: item.status,
+        completed_at: item.completed_at
+      };
+    });
+    
+    return { progressMap, userId, trainingId };
+  } catch (error) {
+    console.error('進捗状況取得エラー:', error);
+    return { error: error.message, userId, trainingId };
+  }
+};
+
+/**
+ * ユーザーの進捗状況を更新
+ */
+export const updateTaskProgress = async (userId: string, taskId: string, status: 'done' | 'todo' | 'in-progress') => {
+  try {
     const completed_at = status === 'done' ? new Date().toISOString() : null;
     
-    // user_progressテーブルを更新
+    // upsert操作で進捗状況を更新/挿入
     const { data, error } = await supabase
       .from('user_progress')
       .upsert({
@@ -205,218 +252,12 @@ export async function updateTaskProgress(userId: string, taskId: string, status:
         task_id: taskId,
         status,
         completed_at
-      }, {
-        onConflict: 'user_id,task_id'
-      });
-    
-    if (error) {
-      console.error('タスク進捗状況の更新に失敗しました:', error);
-      throw error;
-    }
-    
-    return { data, error: null };
+      }, { onConflict: 'user_id,task_id' });
+
+    if (error) throw error;
+    return { success: true, status };
   } catch (error) {
-    console.error('タスク進捗状況の更新に失敗しました:', error);
-    return { data: null, error };
+    console.error('進捗状況更新エラー:', error);
+    return { error: error.message, success: false };
   }
-}
-
-/**
- * トレーニングタスクの詳細情報を取得する
- */
-export async function getTrainingTaskDetail(
-  trainingSlug: string,
-  taskSlug: string
-): Promise<TaskDetailData> {
-  try {
-    // まずトレーニング情報を取得
-    const { data: trainingData, error: trainingError } = await supabase
-      .from('training')
-      .select('*')
-      .eq('slug', trainingSlug)
-      .single();
-    
-    if (trainingError) {
-      console.error('トレーニングデータ取得エラー:', trainingError);
-      // MDXからデータを取得を試みる
-      try {
-        // MDXコンテンツを取得
-        const { content, frontmatter } = await loadMdxContent(trainingSlug, taskSlug);
-        
-        // MDXからデータが取得できた場合、ダミーIDを生成
-        return {
-          id: `mdx-${trainingSlug}-${taskSlug}`,
-          title: frontmatter.title || taskSlug,
-          content: content,
-          is_premium: frontmatter.is_premium || false,
-          video_url: frontmatter.video_full,
-          preview_video_url: frontmatter.video_preview,
-          next_task: null, // MDXからは次タスクの情報が無いので、nullとする
-          // 他の必要な属性
-          training_id: `mdx-${trainingSlug}`,
-          slug: taskSlug,
-          order_index: frontmatter.order_index || 1,
-          preview_sec: frontmatter.preview_sec || 30,
-          video_full: frontmatter.video_full,
-          video_preview: frontmatter.video_preview,
-          created_at: new Date().toISOString()
-        };
-      } catch (mdxError) {
-        console.error('MDXからのタスク詳細データ取得エラー:', mdxError);
-        throw trainingError; // MDXからの取得も失敗した場合は元のエラーを投げる
-      }
-    }
-    
-    // トレーニングIDを使ってタスクを取得
-    const { data: taskData, error: taskError } = await supabase
-      .from('task')
-      .select('*')
-      .eq('training_id', trainingData.id)
-      .eq('slug', taskSlug)
-      .single();
-    
-    if (taskError) {
-      console.error('タスクデータ取得エラー:', taskError);
-      // MDXからデータを取得を試みる
-      try {
-        // MDXコンテンツを取得
-        const { content, frontmatter } = await loadMdxContent(trainingSlug, taskSlug);
-        
-        // MDXからデータが取得できた場合、ダミーIDを生成
-        return {
-          id: `mdx-${trainingSlug}-${taskSlug}`,
-          title: frontmatter.title || taskSlug,
-          content: content,
-          is_premium: frontmatter.is_premium || false,
-          video_url: frontmatter.video_full,
-          preview_video_url: frontmatter.video_preview,
-          next_task: null, // MDXからは次タスクの情報が無いので、nullとする
-          // 他の必要な属性
-          training_id: trainingData.id,
-          slug: taskSlug,
-          order_index: frontmatter.order_index || 1,
-          preview_sec: frontmatter.preview_sec || 30,
-          video_full: frontmatter.video_full,
-          video_preview: frontmatter.video_preview,
-          created_at: new Date().toISOString()
-        };
-      } catch (mdxError) {
-        console.error('MDXからのタスク詳細データ取得エラー:', mdxError);
-        throw taskError; // MDXからの取得も失敗した場合は元のエラーを投げる
-      }
-    }
-    
-    // 次のタスクを取得
-    const { data: nextTaskData } = await supabase
-      .from('task')
-      .select('slug')
-      .eq('training_id', trainingData.id)
-      .gt('order_index', taskData.order_index)
-      .order('order_index', { ascending: true })
-      .limit(1)
-      .single();
-    
-    // MDXコンテンツを取得してみる
-    let mdxContent = '';
-    try {
-      const { content } = await loadMdxContent(trainingSlug, taskSlug);
-      mdxContent = content;
-      console.log('MDXコンテンツの取得に成功しました');
-    } catch (mdxError) {
-      console.warn('MDXコンテンツの取得に失敗しました。データベースのコンテンツを使用します:', mdxError);
-    }
-    
-    // content/trainingからMDXコンテンツを取得する予定（現段階ではモックコンテンツを使用）
-    const content = mdxContent || `
-# ${taskData.title}
-
-これはサンプルコンテンツです。実際の内容はSupabaseから取得する予定です。
-
-## 主要なポイント
-
-- ポイント1: Reactコンポーネントの基本構造
-- ポイント2: プロップスの受け渡し方法
-- ポイント3: ステート管理の基本
-
-詳細な説明はここに記載されます。
-
-\`\`\`javascript
-// サンプルコード
-function ExampleComponent() {
-  const [count, setCount] = useState(0);
-  
-  return (
-    <div>
-      <p>カウント: {count}</p>
-      <button onClick={() => setCount(count + 1)}>
-        増やす
-      </button>
-    </div>
-  );
-}
-\`\`\`
-`;
-    
-    return {
-      id: taskData.id,
-      title: taskData.title,
-      content: content,
-      is_premium: taskData.is_premium,
-      video_url: taskData.video_full || "https://example.com/videos/full.mp4",
-      preview_video_url: taskData.video_preview || "https://example.com/videos/preview.mp4",
-      next_task: nextTaskData ? nextTaskData.slug : null,
-      // TaskDetailData型をTaskとの互換性を保つための追加プロパティ
-      training_id: taskData.training_id,
-      slug: taskData.slug,
-      order_index: taskData.order_index,
-      preview_sec: taskData.preview_sec,
-      video_full: taskData.video_full || "https://example.com/videos/full.mp4", // 必ず文字列を返すようにデフォルト値を設定
-      video_preview: taskData.video_preview || "https://example.com/videos/preview.mp4", // 必ず文字列を返すようにデフォルト値を設定
-      created_at: taskData.created_at || new Date().toISOString() // 必ず文字列を返すようにする
-    };
-  } catch (error) {
-    console.error("タスク詳細データの取得に失敗しました:", error);
-    throw error;
-  }
-}
-
-/**
- * ユーザーのタスク進捗状況を取得する
- */
-export async function getUserTaskProgress(userId: string, trainingId: string) {
-  try {
-    // トレーニングに属するすべてのタスクIDを取得
-    const { data: tasks, error: tasksError } = await supabase
-      .from('task')
-      .select('id')
-      .eq('training_id', trainingId);
-    
-    if (tasksError) {
-      console.error('タスク一覧の取得に失敗しました:', tasksError);
-      throw tasksError;
-    }
-    
-    // ユーザーの進捗状況を取得
-    const { data: progress, error: progressError } = await supabase
-      .from('user_progress')
-      .select('*')
-      .eq('user_id', userId)
-      .in('task_id', tasks.map(task => task.id));
-    
-    if (progressError) {
-      console.error('進捗状況の取得に失敗しました:', progressError);
-      throw progressError;
-    }
-    
-    // タスクIDをキーとした進捗状況のマップを作成
-    const progressMap = progress.reduce((acc, item) => {
-      acc[item.task_id] = item;
-      return acc;
-    }, {});
-    
-    return { data: progress, error: null, progressMap, completedCount: progress.filter(p => p.status === 'done').length };
-  } catch (error) {
-    console.error('タスク進捗状況の取得に失敗しました:', error);
-    return { data: [], error, progressMap: {}, completedCount: 0 };
-  }
-}
+};

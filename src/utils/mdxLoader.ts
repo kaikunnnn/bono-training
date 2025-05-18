@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -13,6 +14,7 @@ export interface MdxContent {
     video_preview?: string;
     [key: string]: any;
   };
+  isFreePreview?: boolean;
 }
 
 /**
@@ -22,18 +24,25 @@ export interface MdxContent {
  */
 export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Promise<MdxContent> => {
   try {
-    // 実際の実装では、エッジ関数を通してMDXファイルを取得する
-    // または、インポート機能を使ってwebpackなどで直接ファイルを取り込む
+    // get-mdx-contentエッジ関数を呼び出す
+    const { data, error } = await supabase.functions.invoke('get-mdx-content', {
+      body: { trainingSlug, taskSlug }
+    });
     
-    // エッジ関数を呼び出す例（実際の実装では使用）
-    // const { data, error } = await supabase.functions.invoke('get-mdx-content', {
-    //   body: { trainingSlug, taskSlug }
-    // });
+    if (error) {
+      console.error('エッジ関数呼び出しエラー:', error);
+      throw error;
+    }
     
-    // if (error) throw error;
-    // return data;
+    if (!data) {
+      throw new Error('コンテンツが取得できませんでした');
+    }
+
+    return data as MdxContent;
+  } catch (error) {
+    console.error('MDXコンテンツ読み込みエラー:', error);
     
-    // 仮のデータ（開発用）
+    // エラー時はフォールバックのダミーデータを返す
     const frontmatter = {
       title: `${taskSlug} タスク`,
       order_index: 1,
@@ -55,79 +64,70 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
 2. 次に実践的な例を見ていきます
 3. 最後に自分で実装してみましょう
 
-## コード例
-
-\`\`\`javascript
-function example() {
-  console.log("Hello, Training!");
-}
-\`\`\`
-
-## 参考リソース
-
-- [公式ドキュメント](https://example.com)
-- [チュートリアル](https://example.com/tutorial)
-
-## 課題
-
-以下の要件を満たすアプリケーションを実装してください：
-
-- 要件1: xxx
-- 要件2: xxx
-- 要件3: xxx
-
-## プレミアムコンテンツ（ここから先はプレミアム会員のみ）
-
-こちらは詳細な解説と実装のヒントです。
-
-### 実装のポイント
-
-- ポイント1
-- ポイント2
-- ポイント3
-
-### 解答例
-
-\`\`\`javascript
-// 解答例のコード
-function solution() {
-  // 詳細な実装
-}
-\`\`\`
+**注意**: エラーが発生したためデモコンテンツを表示しています。
 `;
 
-    return { content, frontmatter };
-  } catch (error) {
-    console.error('MDXコンテンツ読み込みエラー:', error);
-    throw new Error('コンテンツの読み込みに失敗しました');
+    return { content, frontmatter, isFreePreview: false };
   }
 };
 
 /**
  * トレーニングのメタデータを読み込む関数
  * @param trainingSlug トレーニングのスラッグ
+ * @param withTasks タスク一覧も取得するかどうか
  */
-export const loadTrainingMeta = async (trainingSlug: string): Promise<any> => {
+export const loadTrainingMeta = async (trainingSlug: string, withTasks = false): Promise<any> => {
   try {
-    // 実際の実装では、エッジ関数を通してMDXファイルを取得する
-    // const { data, error } = await supabase.functions.invoke('get-training-meta', {
-    //   body: { trainingSlug }
-    // });
+    // get-training-metaエッジ関数を呼び出す
+    const { data, error } = await supabase.functions.invoke('get-training-meta', {
+      method: 'GET',
+      queryParams: { 
+        slug: trainingSlug,
+        tasks: withTasks ? 'true' : 'false'
+      }
+    });
     
-    // if (error) throw error;
-    // return data;
+    if (error) {
+      console.error('エッジ関数呼び出しエラー:', error);
+      throw error;
+    }
     
-    // 仮のデータ（開発用）
-    return {
+    if (!data) {
+      throw new Error('メタデータが取得できませんでした');
+    }
+    
+    return data;
+  } catch (error) {
+    console.error('トレーニングメタデータ読み込みエラー:', error);
+    
+    // エラー時はフォールバックのダミーデータを返す
+    const result = {
       title: `${trainingSlug} トレーニング`,
       description: `${trainingSlug}の基本的な概念と実践的な使い方を学びます。`,
       type: "skill",
       difficulty: "初級",
-      tags: ["React", "JavaScript", "フロントエンド"]
+      tags: ["React", "JavaScript", "フロントエンド"],
+      slug: trainingSlug
     };
-  } catch (error) {
-    console.error('トレーニングメタデータ読み込みエラー:', error);
-    throw new Error('メタデータの読み込みに失敗しました');
+    
+    if (withTasks) {
+      result.tasks = [
+        {
+          slug: "introduction",
+          title: "はじめに",
+          is_premium: false,
+          order_index: 1
+        },
+        {
+          slug: "advanced",
+          title: "応用編",
+          is_premium: true,
+          order_index: 2
+        }
+      ];
+    }
+    
+    return result;
   }
 };
 
@@ -136,28 +136,34 @@ export const loadTrainingMeta = async (trainingSlug: string): Promise<any> => {
  */
 export async function loadAllTrainingMeta() {
   try {
-    const trainings = [];
+    // get-training-metaエッジ関数を呼び出す
+    const { data, error } = await supabase.functions.invoke('get-training-meta', {
+      method: 'GET'
+    });
     
-    // content/training/ ディレクトリ内のトレーニングディレクトリを取得
-    // 注: ここでは実際のファイルシステム走査の代わりに既知のトレーニングスラッグを使用
-    const knownTrainingSlugs = ['react-basics']; // 既知のトレーニングスラッグリスト
-    
-    // 各トレーニングのメタデータを取得
-    for (const slug of knownTrainingSlugs) {
-      try {
-        const meta = await loadTrainingMeta(slug);
-        if (meta) {
-          trainings.push(meta);
-        }
-      } catch (error) {
-        console.warn(`トレーニング ${slug} のメタデータ取得エラー:`, error);
-        // エラーが発生しても続行
-      }
+    if (error) {
+      console.error('エッジ関数呼び出しエラー:', error);
+      throw error;
     }
     
-    return trainings;
+    if (!data || !Array.isArray(data)) {
+      throw new Error('トレーニング一覧が取得できませんでした');
+    }
+    
+    return data;
   } catch (error) {
     console.error('トレーニングメタデータの取得に失敗しました:', error);
-    return [];
+    
+    // エラー時はフォールバックのダミーデータを返す
+    return [
+      {
+        slug: "react-basics",
+        title: "React 基礎",
+        description: "Reactの基本的な概念と実践的な使い方を学びます。",
+        type: "skill",
+        difficulty: "初級",
+        tags: ["React", "JavaScript", "フロントエンド"]
+      }
+    ];
   }
 }
