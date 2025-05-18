@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 /**
@@ -131,3 +130,34 @@ export const loadTrainingMeta = async (trainingSlug: string): Promise<any> => {
     throw new Error('メタデータの読み込みに失敗しました');
   }
 };
+
+/**
+ * すべてのトレーニングのメタ情報を取得する
+ */
+export async function loadAllTrainingMeta() {
+  try {
+    const trainings = [];
+    
+    // content/training/ ディレクトリ内のトレーニングディレクトリを取得
+    // 注: ここでは実際のファイルシステム走査の代わりに既知のトレーニングスラッグを使用
+    const knownTrainingSlugs = ['react-basics']; // 既知のトレーニングスラッグリスト
+    
+    // 各トレーニングのメタデータを取得
+    for (const slug of knownTrainingSlugs) {
+      try {
+        const meta = await loadTrainingMeta(slug);
+        if (meta) {
+          trainings.push(meta);
+        }
+      } catch (error) {
+        console.warn(`トレーニング ${slug} のメタデータ取得エラー:`, error);
+        // エラーが発生しても続行
+      }
+    }
+    
+    return trainings;
+  } catch (error) {
+    console.error('トレーニングメタデータの取得に失敗しました:', error);
+    return [];
+  }
+}
