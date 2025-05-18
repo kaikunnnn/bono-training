@@ -83,7 +83,8 @@ async function getTrainingMetaFromStorage(supabase, trainingSlug?: string) {
       return {
         ...frontmatter,
         slug: trainingSlug,
-        description: frontmatter.description || mdContent.trim().split('\n')[0]
+        description: frontmatter.description || mdContent.trim().split('\n')[0],
+        thumbnailImage: frontmatter.thumbnailImage || 'https://source.unsplash.com/random/200x100'
       };
     } 
     // 全トレーニングの一覧を取得する場合
@@ -212,10 +213,24 @@ async function getTrainingTaskList(supabase, trainingSlug: string) {
 // トレーニングメタデータ取得ハンドラ
 const handleGetTrainingMeta = async (req: Request): Promise<Response> => {
   try {
-    // リクエストパラメータの取得
-    const url = new URL(req.url);
-    const trainingSlug = url.searchParams.get('slug') || undefined;
-    const withTasks = url.searchParams.get('tasks') === 'true';
+    // リクエストから情報を取得
+    let trainingSlug, withTasks;
+    
+    // リクエスト方法によって異なる処理
+    if (req.method === 'GET') {
+      const url = new URL(req.url);
+      trainingSlug = url.searchParams.get('slug') || undefined;
+      withTasks = url.searchParams.get('tasks') === 'true';
+    } else {
+      // POSTリクエストの場合はbodyから取得
+      try {
+        const body = await req.json();
+        trainingSlug = body.slug;
+        withTasks = body.tasks === 'true';
+      } catch (e) {
+        console.error('リクエストボディの解析エラー:', e);
+      }
+    }
     
     // Supabaseクライアントの初期化
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
@@ -251,7 +266,8 @@ const handleGetTrainingMeta = async (req: Request): Promise<Response> => {
           description: `${trainingSlug}の基本的な概念と実践的な使い方を学びます。`,
           type: "skill",
           difficulty: "初級",
-          tags: ["React", "JavaScript", "フロントエンド"]
+          tags: ["React", "JavaScript", "フロントエンド"],
+          thumbnailImage: 'https://source.unsplash.com/random/200x100'
         };
         
         if (withTasks) {
@@ -284,7 +300,8 @@ const handleGetTrainingMeta = async (req: Request): Promise<Response> => {
             description: "Reactの基本的な概念と実践的な使い方を学びます。",
             type: "skill",
             difficulty: "初級",
-            tags: ["React", "JavaScript", "フロントエンド"]
+            tags: ["React", "JavaScript", "フロントエンド"],
+            thumbnailImage: 'https://source.unsplash.com/random/200x100'
           }
         ];
       }
@@ -321,8 +338,8 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
   
-  // GETリクエストの処理
-  if (req.method === 'GET') {
+  // GET/POSTリクエストの処理
+  if (req.method === 'GET' || req.method === 'POST') {
     return await handleGetTrainingMeta(req);
   }
   

@@ -31,9 +31,12 @@ export interface TaskDetailData extends Task {
   video_url?: string;
   preview_video_url?: string;
   next_task?: string;
-  created_at: string; // created_atを必須プロパティに変更
-  video_full: string; // video_fullを必須プロパティに変更
-  video_preview: string; // video_previewを必須プロパティに変更
+  trainingTitle?: string;
+  trainingSlug?: string;
+  // TypeScriptエラーを防ぐためにnullable型を明示的に定義
+  created_at: string;
+  video_full: string;
+  video_preview: string;
 }
 
 export interface TrainingDetailData {

@@ -34,15 +34,29 @@ const TaskDetailPage = () => {
           
           // タスク詳細データを取得
           const taskDetailData = await getTrainingTaskDetail(slug, taskSlug);
-          setTaskData(taskDetailData);
+          
+          // タスクデータをTaskDetailData型に適合させる
+          // content プロパティが必要なので初期値を設定
+          setTaskData({
+            ...taskDetailData,
+            content: taskDetailData.content || '', // contentプロパティを初期化
+            created_at: taskDetailData.created_at || new Date().toISOString(),
+            video_full: taskDetailData.video_full || '',
+            video_preview: taskDetailData.video_preview || '',
+          } as TaskDetailData);
           
           // MDXコンテンツを取得
           try {
             const { content } = await loadMdxContent(slug, taskSlug);
             setMdxContent(content);
+            
+            // MDX取得成功したらtaskDataのcontentも更新
+            if (taskData) {
+              setTaskData(prev => prev ? { ...prev, content } : null);
+            }
           } catch (mdxError) {
             console.warn('MDXコンテンツの取得に失敗しました。通常のコンテンツを使用します:', mdxError);
-            // MDXが取得できない場合はタスク詳細のコンテンツを使用
+            // taskDetailData.contentがあれば使用
             setMdxContent(taskDetailData.content || '');
           }
           

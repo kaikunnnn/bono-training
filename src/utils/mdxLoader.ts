@@ -27,6 +27,7 @@ export interface TrainingMeta {
   difficulty?: string;
   tags?: string[];
   slug: string;
+  thumbnailImage?: string; // サムネイル画像用のプロパティを追加
   tasks?: Array<{
     slug: string;
     title: string;
@@ -100,10 +101,11 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
 export const loadTrainingMeta = async (trainingSlug: string, withTasks = false): Promise<TrainingMeta> => {
   try {
     // get-training-metaエッジ関数を呼び出す
-    // 修正：queryParamsではなくparamsを使用
+    // Supabase Edge Functionsの正しい呼び出し方法を使用
     const { data, error } = await supabase.functions.invoke('get-training-meta', {
       method: 'GET',
-      params: { 
+      // paramsではなくbodyでクエリパラメータを渡す
+      body: { 
         slug: trainingSlug,
         tasks: withTasks ? 'true' : 'false'
       }
@@ -130,7 +132,8 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
       type: "skill",
       difficulty: "初級",
       tags: ["React", "JavaScript", "フロントエンド"],
-      slug: trainingSlug
+      slug: trainingSlug,
+      thumbnailImage: 'https://source.unsplash.com/random/200x100' // サムネイル画像のデフォルト値を設定
     };
     
     if (withTasks) {
@@ -185,7 +188,8 @@ export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
         description: "Reactの基本的な概念と実践的な使い方を学びます。",
         type: "skill",
         difficulty: "初級",
-        tags: ["React", "JavaScript", "フロントエンド"]
+        tags: ["React", "JavaScript", "フロントエンド"],
+        thumbnailImage: 'https://source.unsplash.com/random/200x100'
       }
     ];
   }

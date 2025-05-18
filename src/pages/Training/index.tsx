@@ -39,6 +39,7 @@ const TrainingHome: React.FC = () => {
             type: (meta.type as 'challenge' | 'skill') || 'challenge',
             difficulty: meta.difficulty || '初級',
             tags: meta.tags || [],
+            // thumbnailImageプロパティが存在しない場合はデフォルト値を設定
             thumbnailImage: meta.thumbnailImage || 'https://source.unsplash.com/random/200x100'
           }));
         } catch (mdxError) {

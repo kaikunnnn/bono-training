@@ -22,7 +22,14 @@ const TrainingDetail = () => {
       try {
         if (slug) {
           const data = await getTrainingDetail(slug);
-          setTrainingData(data);
+          
+          // TrainingDetailData型の要件を満たすようにデータを加工
+          const formattedData: TrainingDetailData = {
+            ...data,
+            tasks: data.tasks || [], // tasksが存在しない場合は空配列にする
+          };
+          
+          setTrainingData(formattedData);
         }
       } catch (error) {
         console.error("トレーニングデータの取得中にエラーが発生しました:", error);
