@@ -39,10 +39,11 @@ const TaskDetailPage = () => {
           const fullTaskData: TaskDetailData = {
             ...taskDetailData,
             content: taskDetailData.content || '', // コンテンツプロパティを初期化
-            created_at: taskDetailData.created_at || new Date().toISOString(),
-            video_full: taskDetailData.video_full || '',
-            video_preview: taskDetailData.video_preview || '',
-            preview_sec: taskDetailData.preview_sec || 30, // preview_secを必須に設定
+            created_at: taskDetailData.created_at || null,
+            video_full: taskDetailData.video_full || null,
+            video_preview: taskDetailData.video_preview || null,
+            preview_sec: taskDetailData.preview_sec || 30,
+            training_id: taskDetailData.training_id || '',
           };
           
           setTaskData(fullTaskData);

@@ -31,7 +31,7 @@ const TrainingDetail = () => {
             tasks: Array.isArray(data.tasks) ? data.tasks : [], // tasksが存在しない場合は空配列にする
             type: data.type || 'challenge', // デフォルト値を設定
             difficulty: data.difficulty || '初級', // デフォルト値を設定
-            tags: data.tags || [], // デフォルト値を設定
+            tags: Array.isArray(data.tags) ? data.tags : [], // デフォルト値を設定
           };
           
           setTrainingData(formattedData);

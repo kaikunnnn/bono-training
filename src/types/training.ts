@@ -40,6 +40,7 @@ export interface TaskDetailData extends Task {
   video_full: string | null;
   video_preview: string | null;
   preview_sec: number | null;
+  training_id: string;
 }
 
 export interface TrainingDetailData {
