@@ -1,13 +1,14 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { Button } from '@/components/ui/button';
-import { Lock } from 'lucide-react';
+import { Lock, CheckCircle, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
+import TaskActionButton from './TaskActionButton';
 
 interface MdxPreviewProps {
   content: string;
@@ -16,6 +17,10 @@ interface MdxPreviewProps {
   previewLength?: number;
   previewMarker?: string;
   className?: string;
+  taskId?: string;
+  userId?: string;
+  isCompleted?: boolean;
+  onProgressUpdate?: () => void;
 }
 
 /**
@@ -28,10 +33,15 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
   isSubscribed = false, 
   previewLength = 1000,
   previewMarker = '<!--PREMIUM-->',
-  className
+  className,
+  taskId,
+  userId,
+  isCompleted = false,
+  onProgressUpdate
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [showStatusInfo, setShowStatusInfo] = useState(false);
   
   // プレミアムコンテンツの場合の表示処理
   let displayContent = content;
@@ -56,9 +66,43 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
     });
     navigate('/training/plan');
   };
+
+  const handleStatusInfo = () => {
+    setShowStatusInfo(!showStatusInfo);
+  };
   
   return (
     <div className={cn('prose prose-slate max-w-none dark:prose-invert', className)}>
+      {taskId && userId && (
+        <div className="mb-8 flex justify-end">
+          <TaskActionButton
+            taskId={taskId}
+            userId={userId}
+            isCompleted={isCompleted}
+            onProgressUpdate={onProgressUpdate}
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="ml-2"
+            onClick={handleStatusInfo}
+          >
+            <AlertCircle className="w-4 h-4 mr-1" />
+            ヘルプ
+          </Button>
+        </div>
+      )}
+      
+      {showStatusInfo && (
+        <div className="mb-8 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-800">
+          <h4 className="text-blue-800 dark:text-blue-300 font-medium mb-2 mt-0">タスクの進捗状態について</h4>
+          <p className="text-blue-700 dark:text-blue-400 text-sm mb-0">
+            「完了にする」ボタンをクリックして、タスクの完了状態を記録できます。
+            完了済みのタスクは自動的に進捗状況に反映され、トレーニング全体の達成率が表示されます。
+          </p>
+        </div>
+      )}
+
       <ReactMarkdown 
         remarkPlugins={[remarkGfm]} 
         rehypePlugins={[rehypeHighlight]}
@@ -130,6 +174,18 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {isCompleted && (
+        <div className="mt-8 p-4 rounded-lg bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800">
+          <div className="flex items-center">
+            <CheckCircle className="text-green-500 dark:text-green-400 mr-2" />
+            <h3 className="text-green-800 dark:text-green-300 font-medium m-0">おめでとうございます！このタスクを完了しました。</h3>
+          </div>
+          <p className="text-green-700 dark:text-green-400 text-sm mb-0 mt-2">
+            このタスクの進捗は保存されました。次のタスクに進むか、トレーニングの進捗状況を確認してください。
+          </p>
         </div>
       )}
     </div>

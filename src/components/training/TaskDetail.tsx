@@ -48,7 +48,8 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
     isSubscribed: contextIsSubscribed,
     planMembers,
     hasPremiumAccess,
-    taskTitle: task.title
+    taskTitle: task.title,
+    isCompleted
   });
 
   return (
@@ -81,6 +82,10 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
         isPremium={isPremium}
         hasPremiumAccess={hasPremiumAccess}
         className="mt-6"
+        taskId={task.id}
+        userId={user?.id}
+        isCompleted={isCompleted}
+        onProgressUpdate={onProgressUpdate}
       />
     </div>
   );
