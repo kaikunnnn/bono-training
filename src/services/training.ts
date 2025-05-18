@@ -1,9 +1,11 @@
+
 /**
  * トレーニングデータを取得する
  */
 import { Training, TrainingDetailData, Task, TaskDetailData } from '@/types/training';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { loadMdxContent, loadTrainingMeta } from '@/utils/mdxLoader';
 
 /**
  * トレーニング一覧を取得する
@@ -91,6 +93,30 @@ export async function getTrainingDetail(slug: string): Promise<TrainingDetailDat
     
     if (trainingError) {
       console.error('トレーニング詳細データ取得エラー:', trainingError);
+      
+      // エラー時にMDXからトレーニングメタデータを取得してみる
+      try {
+        const trainingMeta = await loadTrainingMeta(slug);
+        if (trainingMeta) {
+          // MDXからトレーニングメタデータが取得できた場合、ダミーデータを返す
+          return {
+            id: 'mdx-' + slug,
+            slug: slug,
+            title: trainingMeta.title || slug,
+            description: trainingMeta.description || '',
+            type: trainingMeta.type || 'skill',
+            difficulty: trainingMeta.difficulty || '初級',
+            tags: trainingMeta.tags || [],
+            tasks: [], // 初期値（後で更新）
+            skills: trainingMeta.tags || [],
+            prerequisites: trainingMeta.prerequisites || ['基本的な知識'],
+            has_premium_content: false // 初期値（後で更新）
+          };
+        }
+      } catch (mdxError) {
+        console.error('MDXからのトレーニングメタデータ取得エラー:', mdxError);
+      }
+      
       throw trainingError;
     }
     
@@ -212,7 +238,33 @@ export async function getTrainingTaskDetail(
     
     if (trainingError) {
       console.error('トレーニングデータ取得エラー:', trainingError);
-      throw trainingError;
+      // MDXからデータを取得を試みる
+      try {
+        // MDXコンテンツを取得
+        const { content, frontmatter } = await loadMdxContent(trainingSlug, taskSlug);
+        
+        // MDXからデータが取得できた場合、ダミーIDを生成
+        return {
+          id: `mdx-${trainingSlug}-${taskSlug}`,
+          title: frontmatter.title || taskSlug,
+          content: content,
+          is_premium: frontmatter.is_premium || false,
+          video_url: frontmatter.video_full,
+          preview_video_url: frontmatter.video_preview,
+          next_task: null, // MDXからは次タスクの情報が無いので、nullとする
+          // 他の必要な属性
+          training_id: `mdx-${trainingSlug}`,
+          slug: taskSlug,
+          order_index: frontmatter.order_index || 1,
+          preview_sec: frontmatter.preview_sec || 30,
+          video_full: frontmatter.video_full,
+          video_preview: frontmatter.video_preview,
+          created_at: new Date().toISOString()
+        };
+      } catch (mdxError) {
+        console.error('MDXからのタスク詳細データ取得エラー:', mdxError);
+        throw trainingError; // MDXからの取得も失敗した場合は元のエラーを投げる
+      }
     }
     
     // トレーニングIDを使ってタスクを取得
@@ -225,7 +277,33 @@ export async function getTrainingTaskDetail(
     
     if (taskError) {
       console.error('タスクデータ取得エラー:', taskError);
-      throw taskError;
+      // MDXからデータを取得を試みる
+      try {
+        // MDXコンテンツを取得
+        const { content, frontmatter } = await loadMdxContent(trainingSlug, taskSlug);
+        
+        // MDXからデータが取得できた場合、ダミーIDを生成
+        return {
+          id: `mdx-${trainingSlug}-${taskSlug}`,
+          title: frontmatter.title || taskSlug,
+          content: content,
+          is_premium: frontmatter.is_premium || false,
+          video_url: frontmatter.video_full,
+          preview_video_url: frontmatter.video_preview,
+          next_task: null, // MDXからは次タスクの情報が無いので、nullとする
+          // 他の必要な属性
+          training_id: trainingData.id,
+          slug: taskSlug,
+          order_index: frontmatter.order_index || 1,
+          preview_sec: frontmatter.preview_sec || 30,
+          video_full: frontmatter.video_full,
+          video_preview: frontmatter.video_preview,
+          created_at: new Date().toISOString()
+        };
+      } catch (mdxError) {
+        console.error('MDXからのタスク詳細データ取得エラー:', mdxError);
+        throw taskError; // MDXからの取得も失敗した場合は元のエラーを投げる
+      }
     }
     
     // 次のタスクを取得
@@ -238,8 +316,18 @@ export async function getTrainingTaskDetail(
       .limit(1)
       .single();
     
+    // MDXコンテンツを取得してみる
+    let mdxContent = '';
+    try {
+      const { content } = await loadMdxContent(trainingSlug, taskSlug);
+      mdxContent = content;
+      console.log('MDXコンテンツの取得に成功しました');
+    } catch (mdxError) {
+      console.warn('MDXコンテンツの取得に失敗しました。データベースのコンテンツを使用します:', mdxError);
+    }
+    
     // content/trainingからMDXコンテンツを取得する予定（現段階ではモックコンテンツを使用）
-    const content = `
+    const content = mdxContent || `
 # ${taskData.title}
 
 これはサンプルコンテンツです。実際の内容はSupabaseから取得する予定です。

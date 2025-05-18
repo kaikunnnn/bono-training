@@ -1,15 +1,49 @@
 
+import { supabase } from "@/integrations/supabase/client";
+
+/**
+ * MDXファイルのコンテンツ型定義
+ */
+export interface MdxContent {
+  content: string;
+  frontmatter: {
+    title: string;
+    order_index?: number;
+    is_premium?: boolean;
+    video_full?: string;
+    video_preview?: string;
+    [key: string]: any;
+  };
+}
+
 /**
  * MDXファイルを読み込む関数
- * 今は単純なファイル読み込みシミュレーション
- * 実際の実装では、APIエンドポイントからMDXコンテンツを取得する
- * または、クライアントサイドでのインポートを使用する
+ * @param trainingSlug トレーニングのスラッグ
+ * @param taskSlug タスクのスラッグ 
  */
-export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Promise<string> => {
+export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Promise<MdxContent> => {
   try {
-    // サンプルコンテンツ（実際の実装では、APIエンドポイントからMDXコンテンツを取得する）
+    // 実際の実装では、エッジ関数を通してMDXファイルを取得する
     // または、インポート機能を使ってwebpackなどで直接ファイルを取り込む
-    return `
+    
+    // エッジ関数を呼び出す例（実際の実装では使用）
+    // const { data, error } = await supabase.functions.invoke('get-mdx-content', {
+    //   body: { trainingSlug, taskSlug }
+    // });
+    
+    // if (error) throw error;
+    // return data;
+    
+    // 仮のデータ（開発用）
+    const frontmatter = {
+      title: `${taskSlug} タスク`,
+      order_index: 1,
+      is_premium: taskSlug.includes('premium'),
+      video_full: taskSlug.includes('premium') ? "845235300" : "845235294",
+      video_preview: "845235294"
+    };
+    
+    const content = `
 # ${taskSlug} タスク
 
 ## 目的
@@ -62,8 +96,38 @@ function solution() {
 }
 \`\`\`
 `;
+
+    return { content, frontmatter };
   } catch (error) {
     console.error('MDXコンテンツ読み込みエラー:', error);
-    return '# コンテンツの読み込みに失敗しました';
+    throw new Error('コンテンツの読み込みに失敗しました');
+  }
+};
+
+/**
+ * トレーニングのメタデータを読み込む関数
+ * @param trainingSlug トレーニングのスラッグ
+ */
+export const loadTrainingMeta = async (trainingSlug: string): Promise<any> => {
+  try {
+    // 実際の実装では、エッジ関数を通してMDXファイルを取得する
+    // const { data, error } = await supabase.functions.invoke('get-training-meta', {
+    //   body: { trainingSlug }
+    // });
+    
+    // if (error) throw error;
+    // return data;
+    
+    // 仮のデータ（開発用）
+    return {
+      title: `${trainingSlug} トレーニング`,
+      description: `${trainingSlug}の基本的な概念と実践的な使い方を学びます。`,
+      type: "skill",
+      difficulty: "初級",
+      tags: ["React", "JavaScript", "フロントエンド"]
+    };
+  } catch (error) {
+    console.error('トレーニングメタデータ読み込みエラー:', error);
+    throw new Error('メタデータの読み込みに失敗しました');
   }
 };

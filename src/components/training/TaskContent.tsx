@@ -5,6 +5,7 @@ import MdxPreview from './MdxPreview';
 import TrainingGuard from './TrainingGuard';
 import { Badge } from '@/components/ui/badge';
 import { Lock } from 'lucide-react';
+import VimeoPlayer from '@/components/content/VimeoPlayer';
 
 interface TaskContentProps {
   title: string;
@@ -60,13 +61,11 @@ const TaskContent: React.FC<TaskContentProps> = ({
       
       {displayVideoUrl && (
         <div className="aspect-video bg-muted rounded-lg overflow-hidden">
-          <iframe
-            src={displayVideoUrl}
+          <VimeoPlayer
+            vimeoId={displayVideoUrl}
+            title={title}
             className="w-full h-full"
-            frameBorder="0"
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowFullScreen
-          ></iframe>
+          />
           
           {isPremium && !hasPremiumAccess && (
             <div className="mt-2 text-sm text-amber-600 flex items-center">

@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
 import PremiumContentBanner from './PremiumContentBanner';
@@ -36,7 +38,34 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
   
   return (
     <div className={cn('prose max-w-none dark:prose-invert', className)}>
-      <ReactMarkdown>{displayContent}</ReactMarkdown>
+      <ReactMarkdown 
+        remarkPlugins={[remarkGfm]} 
+        rehypePlugins={[rehypeHighlight]}
+        components={{
+          // カスタムコンポーネントをここで定義
+          a: ({node, ...props}) => (
+            <a className="text-blue-600 hover:text-blue-800 underline" {...props} />
+          ),
+          code: ({node, inline, className, children, ...props}) => {
+            if (inline) {
+              return (
+                <code className="bg-gray-100 text-red-500 px-1 py-0.5 rounded" {...props}>
+                  {children}
+                </code>
+              );
+            }
+            return (
+              <div className="bg-gray-100 rounded-md overflow-x-auto">
+                <code className={`${className || ''} block p-4`} {...props}>
+                  {children}
+                </code>
+              </div>
+            );
+          }
+        }}
+      >
+        {displayContent}
+      </ReactMarkdown>
       
       {isPremium && !isSubscribed && (
         <div className="mt-8">
