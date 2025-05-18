@@ -111,6 +111,49 @@ function parseFrontmatter(text: string) {
   return result;
 }
 
+// ユーザーのサブスクリプション確認関数
+async function checkUserMemberSubscription(supabase, user) {
+  if (!user) return false;
+  
+  try {
+    // サブスクリプション情報を確認
+    const { data, error } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('plan_members', true)
+      .single();
+
+    if (error) {
+      console.error('サブスクリプション確認エラー:', error);
+      return false;
+    }
+
+    // サブスクリプションが存在する場合、プレミアム権限あり
+    return Boolean(data);
+  } catch (error) {
+    console.error('サブスクリプション確認中にエラー:', error);
+    return false;
+  }
+}
+
+// プレミアムコンテンツのプレビュー用に本文を制限する関数
+function createContentPreview(content: string, previewLength: number = 1000) {
+  if (!content) return '';
+  
+  // 単純に文字数で切る場合（より洗練された方法も検討可能）
+  if (content.length <= previewLength) return content;
+  
+  // ある程度の文脈を保持するために段落や見出しで区切る
+  const paragraphBreak = content.indexOf('\n\n', previewLength - 100);
+  if (paragraphBreak !== -1 && paragraphBreak < previewLength + 200) {
+    return content.substring(0, paragraphBreak) + '\n\n...';
+  }
+  
+  // 段落の区切りがない場合は文字数で切る
+  return content.substring(0, previewLength) + '...';
+}
+
 // MDXコンテンツ取得ハンドラ
 const handleGetMdxContent = async (req: Request): Promise<Response> => {
   try {
@@ -142,23 +185,51 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     // 認証情報を取得
     const { data: { user } } = await supabaseAdmin.auth.getUser();
     
+    // ユーザー情報のログ
+    console.log(`リクエストユーザー: ${user ? user.id : '未認証'}`);
+    
     let mdxContent: MdxContentResponse;
     
     try {
       // ストレージからファイルを取得
       mdxContent = await getMdxFileFromStorage(supabaseAdmin, trainingSlug, taskSlug);
+      console.log(`コンテンツ取得完了: ${trainingSlug}/${taskSlug}`);
     } catch (storageError) {
       console.log('ストレージからの取得に失敗、サンプルデータを使用:', storageError);
       
-      // ストレージから取得できない場合はサンプルデータを使用
-      mdxContent = {
-        content: `# ${taskSlug} タスク\n\n${trainingSlug}の詳細を説明します。\n\nこのコンテンツはサンプルデータです。`,
-        frontmatter: {
-          title: `${taskSlug} タスク`,
-          order_index: 1,
-          is_premium: taskSlug.includes('premium')
+      // ストレージから取得できない場合はDBからの取得を試みる
+      try {
+        const { data: taskData, error: taskError } = await supabaseAdmin
+          .from('task')
+          .select('*, training:training_id(*)')
+          .eq('slug', taskSlug)
+          .single();
+          
+        if (taskError || !taskData) {
+          throw new Error('タスクが見つかりません');
         }
-      };
+        
+        mdxContent = {
+          content: taskData.content || `# ${taskSlug}\n\n${trainingSlug}のタスク内容です。`,
+          frontmatter: {
+            title: taskData.title || `${taskSlug} タスク`,
+            order_index: taskData.order_index || 1,
+            is_premium: taskData.is_premium || false,
+            video_full: taskData.video_full,
+            video_preview: taskData.video_preview
+          }
+        };
+      } catch (dbError) {
+        // DBからも取得できない場合はサンプルデータを使用
+        mdxContent = {
+          content: `# ${taskSlug} タスク\n\n${trainingSlug}の詳細を説明します。\n\nこのコンテンツはサンプルデータです。`,
+          frontmatter: {
+            title: `${taskSlug} タスク`,
+            order_index: 1,
+            is_premium: taskSlug.includes('premium')
+          }
+        };
+      }
     }
     
     // プレミアムコンテンツのアクセス制御
@@ -168,31 +239,21 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     let isFreePreview = false;
     
     if (isPremium) {
-      // ユーザーのサブスクリプション情報を取得
-      if (!user) {
-        // 未認証ユーザー：プレビューのみ表示
+      // 会員ステータスの確認
+      const hasMembership = await checkUserMemberSubscription(supabaseAdmin, user);
+      
+      // 非会員または未認証ユーザーはプレビューのみ表示
+      if (!hasMembership) {
+        console.log('非会員ユーザーまたは未認証ユーザー: プレビュー表示');
         isFreePreview = true;
-      } else {
-        // サブスクリプション情報を確認
-        const { data: subscription } = await supabaseAdmin
-          .from('subscriptions')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('plan_members', true)
-          .single();
         
-        // サブスクリプションがない場合はプレビューのみ表示
-        if (!subscription) {
-          isFreePreview = true;
-        }
+        // コンテンツの最初の一部分のみを返す
+        const previewLength = mdxContent.frontmatter.preview_sec 
+          ? Number(mdxContent.frontmatter.preview_sec) * 10 // 秒数に応じて文字数を調整
+          : 1000; // デフォルトは1000文字
+          
+        mdxContent.content = createContentPreview(mdxContent.content, previewLength);
       }
-    }
-    
-    // プレビュー表示の場合はコンテンツを制限
-    if (isFreePreview) {
-      // コンテンツの最初の一部分のみを返す
-      const previewLength = 500; // 500文字までをプレビューとする
-      mdxContent.content = mdxContent.content.substring(0, previewLength) + '...';
     }
     
     return new Response(
@@ -211,10 +272,14 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'MDXコンテンツの取得に失敗しました' 
+        error: error.message || 'MDXコンテンツの取得に失敗しました',
+        // 最低限のコンテンツを返してフロントエンドのクラッシュを防ぐ
+        content: '# エラーが発生しました\n\nコンテンツの取得中にエラーが発生しました。',
+        frontmatter: { title: 'エラー' },
+        isFreePreview: false
       }),
       { 
-        status: 500, 
+        status: 200, // エラーでも200を返しフロントエンドでハンドリング
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );

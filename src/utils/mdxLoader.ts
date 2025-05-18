@@ -12,6 +12,7 @@ export interface MdxContent {
     is_premium?: boolean;
     video_full?: string;
     video_preview?: string;
+    preview_sec?: number;
     [key: string]: any;
   };
   isFreePreview?: boolean;
@@ -62,6 +63,11 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
     if (!data) {
       throw new Error('コンテンツが取得できませんでした');
     }
+    
+    console.log(`コンテンツ取得成功: ${trainingSlug}/${taskSlug}`, {
+      title: data.frontmatter?.title,
+      isFreePreview: data.isFreePreview
+    });
 
     return data as MdxContent;
   } catch (error) {
@@ -73,7 +79,8 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
       order_index: 1,
       is_premium: taskSlug.includes('premium'),
       video_full: taskSlug.includes('premium') ? "845235300" : "845235294",
-      video_preview: "845235294"
+      video_preview: "845235294",
+      preview_sec: 30
     };
     
     const content = `
