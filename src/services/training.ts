@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
-import { loadTrainingMeta } from "@/utils/mdxLoader";
-import { loadMdxContent } from "@/utils/mdxLoader";
+import { loadTrainingMeta, loadMdxContent } from "@/utils/mdxLoader";
+import { TrainingDetailData, TaskDetailData } from "@/types/training";
 
 /**
  * トレーニング一覧を取得
@@ -121,7 +121,7 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
 
     return trainingDetailData;
   } catch (error) {
-    console.error('トレーニング詳細取得エラー:', error);
+    console.error('トレーニング詳細取得エラ���:', error);
     throw error;
   }
 };
