@@ -24,6 +24,18 @@ const TaskDetailPage = () => {
   const [mdxContent, setMdxContent] = useState<string>('');
   const [showAchievement, setShowAchievement] = useState<boolean>(false);
   
+  // タスク難易度に基づいたバッジタイプを決定
+  const getBadgeType = () => {
+    if (!trainingData?.difficulty) return 'beginner';
+    
+    switch (trainingData.difficulty.toLowerCase()) {
+      case 'easy': return 'beginner';
+      case 'normal': return 'intermediate';
+      case 'hard': return 'advanced';
+      default: return 'beginner';
+    }
+  };
+  
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -111,6 +123,9 @@ const TaskDetailPage = () => {
     return <TaskDetailError />;
   }
   
+  // バッジタイプを決定
+  const badgeType = getBadgeType();
+  
   return (
     <TrainingLayout>
       <TrainingHeader />
@@ -120,6 +135,7 @@ const TaskDetailPage = () => {
             title={taskData.title}
             shareText={`BONOトレーニングで「${taskData.title}」のタスクを完了しました！学習を続けています。`}
             className="mb-8"
+            badgeType={badgeType}
           />
         )}
         
@@ -136,6 +152,7 @@ const TaskDetailPage = () => {
         <TaskNavigation 
           trainingSlug={slug || ''} 
           nextTaskSlug={taskData.next_task}
+          taskTitle={taskData.title}
         />
       </div>
     </TrainingLayout>

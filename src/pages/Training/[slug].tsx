@@ -82,6 +82,19 @@ const TrainingDetail = () => {
     // すべてのタスクが完了しているかどうかの判定
     setIsAllCompleted(total > 0 && completed === total);
   }, [tasks, progressData]);
+  
+  // トレーニングの難易度に基づいてバッジタイプを決定
+  const getBadgeType = () => {
+    if (!training?.difficulty) return 'intermediate';
+    
+    switch (training.difficulty.toLowerCase()) {
+      case 'easy': return 'beginner';
+      case 'normal': return 'intermediate';
+      case 'hard': return 'advanced';
+      case 'expert': return 'expert';
+      default: return 'intermediate';
+    }
+  };
 
   if (isTrainingLoading || isTasksLoading) {
     return (
@@ -117,18 +130,19 @@ const TrainingDetail = () => {
             shareText={`BONOトレーニングで「${training.title}」のすべてのタスクを完了しました！`}
             className="mb-8"
             isTraining={true}
+            badgeType={getBadgeType()}
           />
         )}
 
         {/* トレーニング情報 */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-4">{training.title}</h1>
-          <p className="text-gray-600 mb-4">{training.description || '詳細説明はありません'}</p>
+          <p className="text-gray-600 mb-4 dark:text-gray-300">{training.description || '詳細説明はありません'}</p>
           <div className="flex gap-2">
             {training.tags?.map((tag: string) => (
               <span 
                 key={tag}
-                className="px-2 py-1 bg-gray-100 rounded-full text-sm"
+                className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded-full text-sm"
               >
                 {tag}
               </span>
@@ -151,7 +165,12 @@ const TrainingDetail = () => {
         {tasks && (
           <div className="mt-8">
             <h2 className="text-xl font-bold mb-4">タスク一覧</h2>
-            <TaskList tasks={tasks} progressMap={progressData?.progressMap || {}} trainingSlug={training.slug} />
+            <TaskList 
+              tasks={tasks} 
+              progressMap={progressData?.progressMap || {}} 
+              trainingSlug={training.slug}
+              className="mb-8" 
+            />
           </div>
         )}
       </div>

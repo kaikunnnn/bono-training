@@ -1,89 +1,99 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Lock, CheckCircle2 } from 'lucide-react';
-import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { CheckCircle, Clock, CircleDashed, Lock } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Task } from '@/types/training';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { Badge } from '@/components/ui/badge';
 
 interface TaskListProps {
-  tasks: Task[];
-  progressMap?: Record<string, { status: string, completed_at: string | null }>;
-  trainingSlug?: string;
+  tasks: {
+    id: string;
+    title: string;
+    slug: string;
+    order_index?: number;
+    is_premium?: boolean;
+  }[];
+  progressMap: Record<string, { status?: string; completed_at?: string | null }>;
+  trainingSlug: string;
+  className?: string;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSlug }) => {
-  const { isSubscribed } = useSubscriptionContext();
+/**
+ * タスク一覧コンポーネント
+ * 完了済みタスクを視覚的に分かりやすく表示する改善を実装
+ */
+const TaskList: React.FC<TaskListProps> = ({
+  tasks,
+  progressMap = {},
+  trainingSlug,
+  className
+}) => {
+  const { isSubscribed, planMembers } = useSubscriptionContext();
+  const hasPremiumAccess = isSubscribed && planMembers;
   
-  // trainingSlug が指定されていない場合は URL から取得する
-  const slug = trainingSlug || '';
+  // タスクを順番に並べ替え
+  const sortedTasks = [...tasks].sort((a, b) => 
+    (a.order_index || 0) - (b.order_index || 0)
+  );
+
+  const getTaskStatusIcon = (taskId: string, isPremium: boolean = false) => {
+    // 有料タスクで、有料会員でない場合はロックアイコン
+    if (isPremium && !hasPremiumAccess) {
+      return <Lock className="w-5 h-5 text-amber-500" />;
+    }
+    
+    const status = progressMap[taskId]?.status;
+    
+    if (status === 'done') {
+      return <CheckCircle className="w-5 h-5 text-green-500" />;
+    } else if (status === 'in-progress') {
+      return <Clock className="w-5 h-5 text-blue-500" />;
+    } else {
+      return <CircleDashed className="w-5 h-5 text-gray-300" />;
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4">
-        {tasks.map((task) => {
-          const taskProgress = progressMap[task.id];
-          const isCompleted = taskProgress?.status === 'done';
-          
-          return (
-            <Link
-              key={task.id}
-              to={`/training/${slug}/${task.slug}`}
-              className={cn(
-                "block p-6 bg-white rounded-xl border-2 border-[#374151] transition-colors",
-                task.is_premium && !isSubscribed 
-                  ? "opacity-80 hover:opacity-100" 
-                  : "hover:bg-gray-50"
-              )}
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">{task.title}</h3>
-                    {task.is_premium && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200">
-                        <Lock className="w-3 h-3" />
-                        <span>プレミアム</span>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <CheckCircle2 className={cn(
-                      "w-4 h-4",
-                      isCompleted ? "text-green-500" : "text-gray-300"
-                    )} />
-                    <span className="text-sm text-gray-500">
-                      {isCompleted ? "完了" : "未完了"}
-                    </span>
-                  </div>
-                  {task.is_premium && !isSubscribed && (
-                    <div className="mt-2 text-sm text-gray-500">
-                      プレビュー可能 - {task.preview_sec}秒
-                    </div>
-                  )}
-                </div>
-                <div className="text-gray-400">
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M9 6L15 12L9 18"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </div>
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+    <div className={cn("space-y-2", className)}>
+      {sortedTasks.map((task) => (
+        <Link
+          key={task.id}
+          to={`/training/${trainingSlug}/${task.slug}`}
+          className={cn(
+            "flex items-center p-3 rounded-lg border transition-all",
+            progressMap[task.id]?.status === 'done' 
+              ? "border-green-200 bg-green-50 dark:bg-green-900/10 dark:border-green-800" 
+              : "border-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 dark:border-gray-700",
+          )}
+        >
+          <span className="mr-3">{getTaskStatusIcon(task.id, task.is_premium)}</span>
+          <span className={cn(
+            "flex-1",
+            progressMap[task.id]?.status === 'done' ? 'text-green-700 font-medium dark:text-green-400' : ''
+          )}>
+            {task.title}
+          </span>
+          <div className="flex items-center space-x-2">
+            {progressMap[task.id]?.status === 'done' && (
+              <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800">
+                完了
+              </Badge>
+            )}
+            {task.is_premium && (
+              <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800">
+                プレミアム
+              </Badge>
+            )}
+          </div>
+        </Link>
+      ))}
+      
+      {sortedTasks.length === 0 && (
+        <div className="p-4 text-center text-gray-500 border border-dashed rounded-lg">
+          タスクがありません
+        </div>
+      )}
     </div>
   );
 };
