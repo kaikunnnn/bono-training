@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface TrainingProgressProps {
   tasks: { id: string; title: string; slug: string; is_premium?: boolean }[];
@@ -19,18 +20,20 @@ const TrainingProgress: React.FC<TrainingProgressProps> = ({
   className
 }) => {
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const [completedTasks, setCompletedTasks] = useState(0);
 
   useEffect(() => {
     if (tasks.length === 0) return;
     
     // 完了タスク数を計算
-    const completedTasks = tasks.filter(task => 
+    const completed = tasks.filter(task => 
       progressMap[task.id]?.status === 'done'
     ).length;
     
     // 進捗率を計算（パーセント）
-    const percentage = Math.round((completedTasks / tasks.length) * 100);
+    const percentage = Math.round((completed / tasks.length) * 100);
     setProgressPercentage(percentage);
+    setCompletedTasks(completed);
   }, [tasks, progressMap]);
 
   const getStatusIcon = (taskId: string) => {
@@ -50,9 +53,22 @@ const TrainingProgress: React.FC<TrainingProgressProps> = ({
       <div className="space-y-2">
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-medium">進捗状況</h3>
-          <span className="text-sm font-medium">{progressPercentage}% 完了</span>
+          <span className="text-sm font-medium">
+            {completedTasks}/{tasks.length} タスク ({progressPercentage}%)
+          </span>
         </div>
-        <Progress value={progressPercentage} className="h-2" />
+        <Progress 
+          value={progressPercentage} 
+          className={cn(
+            "h-2",
+            progressPercentage === 100 ? "bg-green-100" : "bg-gray-100"
+          )}
+        />
+        {progressPercentage === 100 && (
+          <div className="mt-2 text-center">
+            <Badge className="bg-green-500">トレーニング完了！</Badge>
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">

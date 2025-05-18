@@ -6,12 +6,12 @@ import PremiumContentBanner from './PremiumContentBanner';
 import { useNavigate } from 'react-router-dom';
 
 interface TaskVideoProps {
-  videoUrl?: string;
-  previewVideoUrl?: string;
+  videoUrl?: string | null;
+  previewVideoUrl?: string | null;
   isPremium: boolean;
   hasPremiumAccess: boolean;
   title: string;
-  previewSeconds?: number;
+  previewSeconds?: number | null;
   className?: string;
 }
 
@@ -34,7 +34,7 @@ const TaskVideo: React.FC<TaskVideoProps> = ({
   const displayVideoUrl = hasPremiumAccess ? videoUrl : (previewVideoUrl || videoUrl);
   
   const handleSubscribe = () => {
-    navigate('/subscription', { state: { returnUrl: window.location.pathname } });
+    navigate('/training/plan', { state: { returnUrl: window.location.pathname } });
   };
 
   if (!displayVideoUrl) {

@@ -37,6 +37,7 @@ const TaskContent: React.FC<TaskContentProps> = ({
         userId={userId}
         isCompleted={isCompleted}
         onProgressUpdate={onProgressUpdate}
+        previewMarker="<!--PREMIUM-->"
       />
     </div>
   );
