@@ -42,6 +42,7 @@ const TaskDetailPage = () => {
             created_at: taskDetailData.created_at || new Date().toISOString(),
             video_full: taskDetailData.video_full || '',
             video_preview: taskDetailData.video_preview || '',
+            preview_sec: taskDetailData.preview_sec || 30, // preview_secを必須に設定
           };
           
           setTaskData(fullTaskData);

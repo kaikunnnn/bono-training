@@ -26,8 +26,9 @@ const TrainingDetail = () => {
           // TrainingDetailData型の要件を満たすようにデータを加工
           const formattedData: TrainingDetailData = {
             ...data,
+            id: data.id || `storage-${slug}`,
             description: data.description || '', // 必須プロパティを確保
-            tasks: data.tasks || [], // tasksが存在しない場合は空配列にする
+            tasks: Array.isArray(data.tasks) ? data.tasks : [], // tasksが存在しない場合は空配列にする
             type: data.type || 'challenge', // デフォルト値を設定
             difficulty: data.difficulty || '初級', // デフォルト値を設定
             tags: data.tags || [], // デフォルト値を設定
