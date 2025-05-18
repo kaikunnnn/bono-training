@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,7 +21,7 @@ import VideoDetailTest from "./pages/VideoDetailTest";
 import Profile from "./pages/Profile";
 import TrainingHome from "./pages/Training";
 import TrainingDetail from "./pages/TrainingDetail";
-import TaskDetail from "./pages/Training/TaskDetail";
+import TaskDetailPage from './pages/Training/TaskDetailPage';
 import TrainingPlan from "./pages/Training/Plan";
 import TrainingAbout from "./pages/Training/About";
 import TrainingLogin from "./pages/Training/Login";
@@ -50,7 +49,7 @@ const App = () => {
                 <Route path="/training" element={<TrainingHome />} />
                 <Route path="/training/login" element={<TrainingLogin />} />
                 <Route path="/training/:slug" element={<TrainingDetail />} />
-                <Route path="/training/:slug/:taskSlug" element={<TaskDetail />} />
+                <Route path="/training/:slug/:taskSlug" element={<TaskDetailPage />} />
                 <Route path="/training/plan" element={<TrainingPlan />} />
                 <Route path="/training/about" element={<TrainingAbout />} />
                 
