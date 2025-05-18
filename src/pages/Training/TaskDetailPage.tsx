@@ -35,6 +35,18 @@ const TaskDetailPage = () => {
           // タスク詳細データを取得
           const taskDetailData = await getTrainingTaskDetail(slug, taskSlug);
           
+          // MDXコンテンツを取得
+          let content = '';
+          try {
+            const mdxData = await loadMdxContent(slug, taskSlug);
+            content = mdxData.content || '';
+            setMdxContent(content);
+          } catch (mdxError) {
+            console.warn('MDXコンテンツの取得に失敗しました:', mdxError);
+            content = taskDetailData.content || 'コンテンツを読み込めませんでした。';
+            setMdxContent(content);
+          }
+          
           // タスクデータをTaskDetailData型に適合させる
           const fullTaskData: TaskDetailData = {
             id: taskDetailData.id || '',
@@ -43,33 +55,18 @@ const TaskDetailPage = () => {
             order_index: taskDetailData.order_index || 0,
             is_premium: taskDetailData.is_premium || false,
             preview_sec: taskDetailData.preview_sec || 30,
-            content: taskDetailData.content || '',
+            content: content, // contentを明示的に設定
             created_at: taskDetailData.created_at || null,
             video_full: taskDetailData.video_full || null,
             video_preview: taskDetailData.video_preview || null,
             training_id: taskDetailData.training_id || '',
             trainingTitle: taskDetailData.trainingTitle || '',
             trainingSlug: taskDetailData.trainingSlug || slug,
-            next_task: taskDetailData.next_task || null,
-            prev_task: taskDetailData.prev_task || null
+            next_task: taskDetailData.next_task || null, // next_taskを明示的に設定
+            prev_task: taskDetailData.prev_task || null  // prev_taskを明示的に設定
           };
           
           setTaskData(fullTaskData);
-          
-          // MDXコンテンツを取得
-          try {
-            const { content } = await loadMdxContent(slug, taskSlug);
-            setMdxContent(content);
-            
-            // MDX取得成功したらtaskDataのcontentも更新
-            if (fullTaskData) {
-              setTaskData(prev => prev ? { ...prev, content } : null);
-            }
-          } catch (mdxError) {
-            console.warn('MDXコンテンツの取得に失敗しました。通常のコンテンツを使用します:', mdxError);
-            // taskDetailData.contentがあれば使用
-            setMdxContent(fullTaskData.content || '');
-          }
           
           // ユーザーがログインしている場合は進捗状況を取得
           if (user) {
@@ -147,7 +144,7 @@ const TaskDetailPage = () => {
 
         <TaskNavigation 
           trainingSlug={slug || ''} 
-          nextTaskSlug={taskData.next_task}
+          nextTaskSlug={taskData.next_task || null}
         />
       </div>
     </TrainingLayout>
