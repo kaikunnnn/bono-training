@@ -27,11 +27,13 @@ const TrainingDetail = () => {
           const formattedData: TrainingDetailData = {
             ...data,
             id: data.id || `storage-${slug}`,
-            description: data.description || '', // 必須プロパティを確保
-            tasks: Array.isArray(data.tasks) ? data.tasks : [], // tasksが存在しない場合は空配列にする
-            type: data.type || 'challenge', // デフォルト値を設定
-            difficulty: data.difficulty || '初級', // デフォルト値を設定
-            tags: Array.isArray(data.tags) ? data.tags : [], // デフォルト値を設定
+            title: data.title || '',
+            description: data.description || '', 
+            type: data.type || 'challenge', 
+            difficulty: data.difficulty || '初級', 
+            tags: Array.isArray(data.tags) ? data.tags : [],
+            // tasksプロパティが存在しない場合は空配列を設定
+            tasks: Array.isArray(data.tasks) ? data.tasks : []
           };
           
           setTrainingData(formattedData);

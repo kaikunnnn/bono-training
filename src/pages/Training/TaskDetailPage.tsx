@@ -38,12 +38,23 @@ const TaskDetailPage = () => {
           // タスクデータをTaskDetailData型に適合させる
           const fullTaskData: TaskDetailData = {
             ...taskDetailData,
-            content: taskDetailData.content || '', // コンテンツプロパティを初期化
+            // すべての必須プロパティを確実に初期化
+            content: taskDetailData.content || '', 
             created_at: taskDetailData.created_at || null,
             video_full: taskDetailData.video_full || null,
             video_preview: taskDetailData.video_preview || null,
             preview_sec: taskDetailData.preview_sec || 30,
             training_id: taskDetailData.training_id || '',
+            // 型定義に従って他のプロパティも初期化
+            id: taskDetailData.id || '',
+            slug: taskDetailData.slug || '',
+            title: taskDetailData.title || '',
+            order_index: taskDetailData.order_index || 0,
+            is_premium: taskDetailData.is_premium || false,
+            trainingTitle: taskDetailData.trainingTitle || '',
+            trainingSlug: taskDetailData.trainingSlug || slug,
+            next_task: taskDetailData.next_task || null,
+            prev_task: taskDetailData.prev_task || null
           };
           
           setTaskData(fullTaskData);
