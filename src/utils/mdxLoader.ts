@@ -18,6 +18,27 @@ export interface MdxContent {
 }
 
 /**
+ * トレーニングのメタ情報（タスク一覧付き）の型定義
+ */
+export interface TrainingMeta {
+  title: string;
+  description?: string;
+  type?: string;
+  difficulty?: string;
+  tags?: string[];
+  slug: string;
+  tasks?: Array<{
+    slug: string;
+    title: string;
+    is_premium: boolean;
+    order_index: number;
+    video_full?: string;
+    video_preview?: string;
+    preview_sec?: number;
+  }>;
+}
+
+/**
  * MDXファイルを読み込む関数
  * @param trainingSlug トレーニングのスラッグ
  * @param taskSlug タスクのスラッグ 
@@ -76,12 +97,13 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
  * @param trainingSlug トレーニングのスラッグ
  * @param withTasks タスク一覧も取得するかどうか
  */
-export const loadTrainingMeta = async (trainingSlug: string, withTasks = false): Promise<any> => {
+export const loadTrainingMeta = async (trainingSlug: string, withTasks = false): Promise<TrainingMeta> => {
   try {
     // get-training-metaエッジ関数を呼び出す
+    // 修正：queryParamsではなくparamsを使用
     const { data, error } = await supabase.functions.invoke('get-training-meta', {
       method: 'GET',
-      queryParams: { 
+      params: { 
         slug: trainingSlug,
         tasks: withTasks ? 'true' : 'false'
       }
@@ -96,12 +118,13 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
       throw new Error('メタデータが取得できませんでした');
     }
     
-    return data;
+    return data as TrainingMeta;
   } catch (error) {
     console.error('トレーニングメタデータ読み込みエラー:', error);
     
     // エラー時はフォールバックのダミーデータを返す
-    const result = {
+    // tasks プロパティを型に一致させるため適切に初期化
+    const result: TrainingMeta = {
       title: `${trainingSlug} トレーニング`,
       description: `${trainingSlug}の基本的な概念と実践的な使い方を学びます。`,
       type: "skill",
@@ -134,7 +157,7 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
 /**
  * すべてのトレーニングのメタ情報を取得する
  */
-export async function loadAllTrainingMeta() {
+export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
   try {
     // get-training-metaエッジ関数を呼び出す
     const { data, error } = await supabase.functions.invoke('get-training-meta', {
@@ -150,7 +173,7 @@ export async function loadAllTrainingMeta() {
       throw new Error('トレーニング一覧が取得できませんでした');
     }
     
-    return data;
+    return data as TrainingMeta[];
   } catch (error) {
     console.error('トレーニングメタデータの取得に失敗しました:', error);
     
