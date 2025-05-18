@@ -7,6 +7,7 @@ interface TaskContentProps {
   content: string;
   isPremium: boolean;
   hasPremiumAccess: boolean;
+  previewMarker?: string;
   className?: string;
 }
 
@@ -17,6 +18,7 @@ const TaskContent: React.FC<TaskContentProps> = ({
   content,
   isPremium,
   hasPremiumAccess,
+  previewMarker,
   className
 }) => {
   // コンテンツが空の場合のフォールバック
@@ -38,6 +40,7 @@ const TaskContent: React.FC<TaskContentProps> = ({
           content={content}
           isPremium={isPremium}
           isSubscribed={hasPremiumAccess}
+          previewMarker={previewMarker}
           previewLength={1000}
         />
       </div>

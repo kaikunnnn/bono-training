@@ -21,6 +21,7 @@ interface MdxContentResponse {
     is_premium?: boolean;
     video_full?: string;
     video_preview?: string;
+    preview_marker?: string;
     [key: string]: any;
   };
   error?: string;
@@ -30,14 +31,14 @@ interface MdxContentResponse {
 // ストレージからMDXファイルを取得する関数
 async function getMdxFileFromStorage(supabase, trainingSlug: string, taskSlug: string) {
   try {
-    // パスの構築: public/trainingSlug/taskSlug/content.md
-    const filePath = `public/${trainingSlug}/${taskSlug}/content.md`;
-
+    // パスの構築: content/trainingSlug/taskSlug/content.md
+    const filePath = `content/${trainingSlug}/${taskSlug}/content.md`;
+    
     // ファイルの存在確認
     const { data: existsData, error: existsError } = await supabase
       .storage
       .from('content')
-      .list(`public/${trainingSlug}/${taskSlug}`);
+      .list(`content/${trainingSlug}/${taskSlug}`);
 
     if (existsError) {
       console.error('ファイル存在確認エラー:', existsError);
@@ -138,10 +139,23 @@ async function checkUserMemberSubscription(supabase, user) {
 }
 
 // プレミアムコンテンツのプレビュー用に本文を制限する関数
-function createContentPreview(content: string, previewLength: number = 1000) {
+function processContentForFreeUser(content: string, frontmatter: any) {
   if (!content) return '';
   
-  // 単純に文字数で切る場合（より洗練された方法も検討可能）
+  // <!--PREMIUM--> マーカー（または設定されたカスタムマーカー）で分割
+  const previewMarker = frontmatter.preview_marker || '<!--PREMIUM-->';
+  const contentParts = content.split(previewMarker);
+  
+  if (contentParts.length > 1) {
+    // マーカーが存在する場合は、マーカー前のコンテンツのみ返す
+    return contentParts[0];
+  }
+  
+  // マーカーがない場合は、文字数制限でプレビューを作成
+  const previewLength = frontmatter.preview_sec 
+    ? Number(frontmatter.preview_sec) * 10 // 秒数に応じて文字数を調整
+    : 1000; // デフォルトは1000文字
+  
   if (content.length <= previewLength) return content;
   
   // ある程度の文脈を保持するために段落や見出しで区切る
@@ -195,7 +209,7 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
       mdxContent = await getMdxFileFromStorage(supabaseAdmin, trainingSlug, taskSlug);
       console.log(`コンテンツ取得完了: ${trainingSlug}/${taskSlug}`);
     } catch (storageError) {
-      console.log('ストレージからの取得に失敗、サンプルデータを使用:', storageError);
+      console.error('ストレージからの取得に失敗、データベースからの取得を試みます:', storageError);
       
       // ストレージから取得できない場合はDBからの取得を試みる
       try {
@@ -216,17 +230,20 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
             order_index: taskData.order_index || 1,
             is_premium: taskData.is_premium || false,
             video_full: taskData.video_full,
-            video_preview: taskData.video_preview
+            video_preview: taskData.video_preview,
+            preview_sec: taskData.preview_sec || 30
           }
         };
       } catch (dbError) {
+        console.error('データベースからの取得にも失敗、サンプルデータを使用します:', dbError);
         // DBからも取得できない場合はサンプルデータを使用
         mdxContent = {
           content: `# ${taskSlug} タスク\n\n${trainingSlug}の詳細を説明します。\n\nこのコンテンツはサンプルデータです。`,
           frontmatter: {
             title: `${taskSlug} タスク`,
             order_index: 1,
-            is_premium: taskSlug.includes('premium')
+            is_premium: taskSlug.includes('premium'),
+            preview_sec: 30
           }
         };
       }
@@ -237,6 +254,7 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     
     // プレミアムコンテンツで非認証ユーザーまたは非サブスクライバーの場合プレビュー表示
     let isFreePreview = false;
+    let processedContent = mdxContent.content;
     
     if (isPremium) {
       // 会員ステータスの確認
@@ -247,18 +265,15 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
         console.log('非会員ユーザーまたは未認証ユーザー: プレビュー表示');
         isFreePreview = true;
         
-        // コンテンツの最初の一部分のみを返す
-        const previewLength = mdxContent.frontmatter.preview_sec 
-          ? Number(mdxContent.frontmatter.preview_sec) * 10 // 秒数に応じて文字数を調整
-          : 1000; // デフォルトは1000文字
-          
-        mdxContent.content = createContentPreview(mdxContent.content, previewLength);
+        // フロントで処理を行うため、ここではコンテンツは変更せず、isFreePreviewフラグのみ設定
+        // （フラグを見てフロントエンド側でマーカーによる分割を行う）
       }
     }
     
     return new Response(
       JSON.stringify({ 
-        ...mdxContent,
+        content: processedContent,
+        frontmatter: mdxContent.frontmatter,
         isFreePreview
       }),
       {

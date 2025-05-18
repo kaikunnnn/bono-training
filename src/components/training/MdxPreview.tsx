@@ -14,6 +14,7 @@ interface MdxPreviewProps {
   isPremium?: boolean;
   isSubscribed?: boolean;
   previewLength?: number;
+  previewMarker?: string;
   className?: string;
 }
 
@@ -21,17 +22,28 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
   content,
   isPremium = false,
   isSubscribed = false, 
-  previewLength = 500,
+  previewLength = 1000,
+  previewMarker = '<!--PREMIUM-->',
   className
 }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [showingPreview, setShowingPreview] = React.useState(isPremium && !isSubscribed);
   
-  // プレミアムコンテンツかつサブスクリプションがない場合、プレビューのみ表示
-  const displayContent = showingPreview 
-    ? content.substring(0, previewLength) + '...' 
-    : content;
+  // プレミアムコンテンツの場合の表示処理
+  let displayContent = content;
+
+  if (isPremium && !isSubscribed) {
+    // マーカーでコンテンツを分割
+    const contentParts = content.split(previewMarker);
+    
+    if (contentParts.length > 1) {
+      // マーカーが存在する場合は、マーカー前のコンテンツのみ表示
+      displayContent = contentParts[0];
+    } else {
+      // マーカーがない場合は、previewLength文字数で制限
+      displayContent = content.substring(0, previewLength) + '...';
+    }
+  }
   
   const handleSubscribe = () => {
     toast({

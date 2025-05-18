@@ -30,7 +30,8 @@ const TaskVideo: React.FC<TaskVideoProps> = ({
   const navigate = useNavigate();
   
   // 表示する動画URLを決定
-  const displayVideoUrl = hasPremiumAccess ? videoUrl : previewVideoUrl || videoUrl;
+  // 有料会員の場合はフル動画、そうでなければプレビュー動画（なければフル動画）を表示
+  const displayVideoUrl = hasPremiumAccess ? videoUrl : (previewVideoUrl || videoUrl);
   
   const handleSubscribe = () => {
     navigate('/subscription', { state: { returnUrl: window.location.pathname } });
