@@ -67,7 +67,7 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
           a: ({node, ...props}) => (
             <a className="text-blue-600 hover:text-blue-800 underline" target="_blank" rel="noopener noreferrer" {...props} />
           ),
-          code: ({node, children, className, ...props}) => {
+          code: ({node, className, children, ...props}: any) => {
             const match = /language-(\w+)/.exec(className || '');
             const isInline = !match && props.inline;
             
