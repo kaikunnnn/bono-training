@@ -36,14 +36,15 @@ const TaskDetailPage = () => {
           const taskDetailData = await getTrainingTaskDetail(slug, taskSlug);
           
           // タスクデータをTaskDetailData型に適合させる
-          // content プロパティが必要なので初期値を設定
-          setTaskData({
+          const fullTaskData: TaskDetailData = {
             ...taskDetailData,
-            content: taskDetailData.content || '', // contentプロパティを初期化
+            content: taskDetailData.content || '', // コンテンツプロパティを初期化
             created_at: taskDetailData.created_at || new Date().toISOString(),
             video_full: taskDetailData.video_full || '',
             video_preview: taskDetailData.video_preview || '',
-          } as TaskDetailData);
+          };
+          
+          setTaskData(fullTaskData);
           
           // MDXコンテンツを取得
           try {
@@ -51,13 +52,13 @@ const TaskDetailPage = () => {
             setMdxContent(content);
             
             // MDX取得成功したらtaskDataのcontentも更新
-            if (taskData) {
+            if (fullTaskData) {
               setTaskData(prev => prev ? { ...prev, content } : null);
             }
           } catch (mdxError) {
             console.warn('MDXコンテンツの取得に失敗しました。通常のコンテンツを使用します:', mdxError);
             // taskDetailData.contentがあれば使用
-            setMdxContent(taskDetailData.content || '');
+            setMdxContent(fullTaskData.content || '');
           }
           
           // ユーザーがログインしている場合は進捗状況を取得

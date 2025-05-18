@@ -24,13 +24,15 @@ export interface Task {
   video_preview?: string;
   created_at?: string;
   isLocked?: boolean;
+  content?: string; // コンテンツプロパティを追加
 }
 
 export interface TaskDetailData extends Task {
-  content: string;
+  content: string; // 必須プロパティとして定義
   video_url?: string;
   preview_video_url?: string;
   next_task?: string;
+  prev_task?: string; // 前のタスクへのリンクも追加
   trainingTitle?: string;
   trainingSlug?: string;
   // TypeScriptエラーを防ぐためにnullable型を明示的に定義
@@ -51,4 +53,5 @@ export interface TrainingDetailData {
   skills?: string[];
   prerequisites?: string[];
   has_premium_content?: boolean;
+  thumbnailImage?: string; // サムネイル画像のプロパティを追加
 }

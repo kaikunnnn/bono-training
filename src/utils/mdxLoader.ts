@@ -101,10 +101,8 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
 export const loadTrainingMeta = async (trainingSlug: string, withTasks = false): Promise<TrainingMeta> => {
   try {
     // get-training-metaエッジ関数を呼び出す
-    // Supabase Edge Functionsの正しい呼び出し方法を使用
     const { data, error } = await supabase.functions.invoke('get-training-meta', {
-      method: 'GET',
-      // paramsではなくbodyでクエリパラメータを渡す
+      // bodyでパラメータを渡す
       body: { 
         slug: trainingSlug,
         tasks: withTasks ? 'true' : 'false'
@@ -125,7 +123,6 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
     console.error('トレーニングメタデータ読み込みエラー:', error);
     
     // エラー時はフォールバックのダミーデータを返す
-    // tasks プロパティを型に一致させるため適切に初期化
     const result: TrainingMeta = {
       title: `${trainingSlug} トレーニング`,
       description: `${trainingSlug}の基本的な概念と実践的な使い方を学びます。`,
