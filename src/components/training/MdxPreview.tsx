@@ -6,7 +6,6 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
-import PremiumContentBanner from './PremiumContentBanner';
 import { cn } from '@/lib/utils';
 
 interface MdxPreviewProps {
@@ -46,14 +45,18 @@ const MdxPreview: React.FC<MdxPreviewProps> = ({
           a: ({node, ...props}) => (
             <a className="text-blue-600 hover:text-blue-800 underline" {...props} />
           ),
-          code: ({node, inline, className, children, ...props}) => {
-            if (inline) {
+          code: ({className, children, ...props}) => {
+            const match = /language-(\w+)/.exec(className || '');
+            const isInline = !match && (props as any).inline;
+            
+            if (isInline) {
               return (
                 <code className="bg-gray-100 text-red-500 px-1 py-0.5 rounded" {...props}>
                   {children}
                 </code>
               );
             }
+            
             return (
               <div className="bg-gray-100 rounded-md overflow-x-auto">
                 <code className={`${className || ''} block p-4`} {...props}>
