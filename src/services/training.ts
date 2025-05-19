@@ -1,6 +1,7 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { loadTrainingMeta, loadMdxContent } from "@/utils/mdxLoader";
-import { TrainingDetailData, TaskDetailData } from "@/types/training";
+import { TrainingDetailData, TaskDetailData, UserProgressData } from "@/types/training";
 import { QueryKeys } from "@/utils/queryUtils";
 
 /**
@@ -117,7 +118,8 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
       skills: training.skills || [],
       prerequisites: training.prerequisites || [],
       has_premium_content: tasks?.some(task => task.is_premium) || false,
-      thumbnailImage: training.thumbnailImage || ''
+      thumbnailImage: training.thumbnailImage || '',
+      created_at: training.created_at || new Date().toISOString() // created_atが不足していたため追加
     };
 
     return trainingDetailData;
