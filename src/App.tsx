@@ -45,7 +45,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5, // 5分間はデータをstaleとみなさない
-      cacheTime: 1000 * 60 * 30, // 30分間キャッシュを保持
+      gcTime: 1000 * 60 * 30, // 30分間キャッシュを保持（cacheTimeから変更）
       retry: 1, // エラー時に1回だけ再試行
       refetchOnWindowFocus: false, // ウィンドウフォーカス時に再フェッチしない（トレーニングデータは頻繁に変わらないため）
     },

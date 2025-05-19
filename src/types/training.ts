@@ -1,3 +1,4 @@
+
 export interface Training {
   id: string;
   slug: string;
@@ -49,20 +50,12 @@ export interface TaskDetailData {
   preview_video_url?: string;
 }
 
-// TrainingDetailDataに必須プロパティとしてtasksを定義
-export interface TrainingDetailData {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  type: string;
-  difficulty: string;
-  tags: string[];
+// TrainingDetailDataの定義
+export interface TrainingDetailData extends Training {
   tasks: Task[]; // 必須プロパティとして定義
   skills?: string[];
   prerequisites?: string[];
   has_premium_content?: boolean;
-  thumbnailImage?: string;
 }
 
 /**

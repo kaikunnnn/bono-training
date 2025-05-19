@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import { getTrainingTaskDetail, getTrainingDetail, getUserTaskProgress } from '@/services/training';
-import { TaskDetailData } from '@/types/training';
+import { TaskDetailData, TrainingDetailData } from '@/types/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import TaskDetail from '@/components/training/TaskDetail';
@@ -14,6 +14,18 @@ import TaskDetailError from './TaskDetailError';
 import TaskNavigation from './TaskNavigation';
 import AchievementCard from '@/components/training/AchievementCard';
 import { QueryKeys } from '@/utils/queryUtils';
+
+interface ProgressMap {
+  [taskId: string]: {
+    status: string;
+    completed_at?: string | null;
+  };
+}
+
+interface UserProgressData {
+  progressMap: ProgressMap;
+  error?: any;
+}
 
 const TaskDetailPage = () => {
   const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
@@ -50,7 +62,7 @@ const TaskDetailPage = () => {
   const {
     data: progress,
     isLoading: progressLoading
-  } = useQuery({
+  } = useQuery<UserProgressData, Error>({
     queryKey: QueryKeys.userProgress(user?.id || '', trainingData?.id || ''),
     queryFn: () => getUserTaskProgress(user?.id || '', trainingData?.id || ''),
     enabled: !!user && !!trainingData?.id,
@@ -88,7 +100,7 @@ const TaskDetailPage = () => {
       });
       
       // タスクが完了したかチェック (進捗データが更新された後)
-      const updatedProgress = queryClient.getQueryData(
+      const updatedProgress = queryClient.getQueryData<UserProgressData>(
         QueryKeys.userProgress(user.id, trainingData.id)
       );
       
