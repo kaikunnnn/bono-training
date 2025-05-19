@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { memo } from 'react';
 
 interface VimeoPlayerProps {
   vimeoId: string;
@@ -13,8 +13,9 @@ interface VimeoPlayerProps {
 
 /**
  * Vimeo動画プレーヤーコンポーネント
+ * React.memoで無駄な再レンダリングを防止
  */
-const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
+const VimeoPlayer: React.FC<VimeoPlayerProps> = memo(({
   vimeoId,
   title,
   width = '100%',
@@ -56,9 +57,12 @@ const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
         allowFullScreen
         title={title || 'Vimeo動画'}
         className={responsive ? 'w-full h-full' : ''}
+        loading="lazy" // 遅延読み込みを有効化
       />
     </div>
   );
-};
+});
+
+VimeoPlayer.displayName = 'VimeoPlayer';
 
 export default VimeoPlayer;

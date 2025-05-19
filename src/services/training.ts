@@ -1,6 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { loadTrainingMeta, loadMdxContent } from "@/utils/mdxLoader";
 import { TrainingDetailData, TaskDetailData } from "@/types/training";
+import { QueryKeys } from "@/utils/queryUtils";
 
 /**
  * トレーニング一覧を取得
@@ -72,29 +73,29 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
       .from('training')
       .select('*')
       .eq('slug', slug)
-      .single();
+      .maybeSingle();
 
     let training;
     
     if (error) {
-      if (error.code === 'PGRST116') { // データが見つからない場合
-        // ストレージから検索
-        try {
-          const storageData = await loadTrainingMeta(slug);
-          if (storageData) {
-            training = {
-              id: `storage-${slug}`,
-              ...storageData
-            };
-          } else {
-            throw new Error('トレーニングが見つかりません');
-          }
-        } catch (storageError) {
-          console.error('ストレージからのメタデータ取得エラー:', storageError);
-          throw error; // 元のエラーをスロー
+      throw error;
+    }
+    
+    if (!supabaseData) {
+      // ストレージから検索
+      try {
+        const storageData = await loadTrainingMeta(slug);
+        if (storageData) {
+          training = {
+            id: `storage-${slug}`,
+            ...storageData
+          };
+        } else {
+          throw new Error('トレーニングが見つかりません');
         }
-      } else {
-        throw error;
+      } catch (storageError) {
+        console.error('ストレージからのメタデータ取得エラー:', storageError);
+        throw new Error('トレーニングが見つかりません');
       }
     } else {
       training = supabaseData;
@@ -121,7 +122,7 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
 
     return trainingDetailData;
   } catch (error) {
-    console.error('トレーニング詳細取得エラ���:', error);
+    console.error('トレーニング詳細取得エラー:', error);
     throw error;
   }
 };
