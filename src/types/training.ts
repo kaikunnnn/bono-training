@@ -10,6 +10,7 @@ export interface Training {
   backgroundImage?: string;
   thumbnailImage?: string;
   isFree?: boolean;
+  created_at?: string;
 }
 
 export interface Task {
@@ -56,6 +57,20 @@ export interface TrainingDetailData extends Training {
   skills?: string[];
   prerequisites?: string[];
   has_premium_content?: boolean;
+  created_at: string; // 必須プロパティとして追加
+}
+
+// UserProgressDataの定義
+export interface UserProgressData {
+  progressMap: {
+    [taskId: string]: {
+      status: string;
+      completed_at?: string | null;
+    }
+  };
+  userId?: string;
+  trainingId?: string;
+  error?: any;
 }
 
 /**

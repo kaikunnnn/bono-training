@@ -5,7 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import { getTrainingTaskDetail, getTrainingDetail, getUserTaskProgress } from '@/services/training';
-import { TaskDetailData, TrainingDetailData } from '@/types/training';
+import { TaskDetailData, TrainingDetailData, UserProgressData } from '@/types/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import TaskDetail from '@/components/training/TaskDetail';
@@ -14,18 +14,6 @@ import TaskDetailError from './TaskDetailError';
 import TaskNavigation from './TaskNavigation';
 import AchievementCard from '@/components/training/AchievementCard';
 import { QueryKeys } from '@/utils/queryUtils';
-
-interface ProgressMap {
-  [taskId: string]: {
-    status: string;
-    completed_at?: string | null;
-  };
-}
-
-interface UserProgressData {
-  progressMap: ProgressMap;
-  error?: any;
-}
 
 const TaskDetailPage = () => {
   const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
@@ -39,7 +27,7 @@ const TaskDetailPage = () => {
     data: trainingData,
     isLoading: trainingLoading,
     error: trainingError 
-  } = useQuery({
+  } = useQuery<TrainingDetailData>({
     queryKey: QueryKeys.trainingDetail(trainingSlug || ''),
     queryFn: () => getTrainingDetail(trainingSlug || ''),
     enabled: !!trainingSlug,
@@ -51,7 +39,7 @@ const TaskDetailPage = () => {
     data: taskData,
     isLoading: taskLoading,
     error: taskError 
-  } = useQuery({
+  } = useQuery<TaskDetailData>({
     queryKey: QueryKeys.taskDetail(trainingSlug || '', taskSlug || ''),
     queryFn: () => getTrainingTaskDetail(trainingSlug || '', taskSlug || ''),
     enabled: !!trainingSlug && !!taskSlug,
@@ -62,7 +50,7 @@ const TaskDetailPage = () => {
   const {
     data: progress,
     isLoading: progressLoading
-  } = useQuery<UserProgressData, Error>({
+  } = useQuery<UserProgressData>({
     queryKey: QueryKeys.userProgress(user?.id || '', trainingData?.id || ''),
     queryFn: () => getUserTaskProgress(user?.id || '', trainingData?.id || ''),
     enabled: !!user && !!trainingData?.id,
@@ -83,7 +71,7 @@ const TaskDetailPage = () => {
   
   // タスクの完了状態を確認してAchievementCardの表示を判断
   useEffect(() => {
-    if (taskData && progress?.progressMap) {
+    if (taskData && progress?.progressMap && taskData.id) {
       const isCompleted = progress.progressMap[taskData.id]?.status === 'done';
       setShowAchievement(isCompleted);
     }
@@ -104,7 +92,7 @@ const TaskDetailPage = () => {
         QueryKeys.userProgress(user.id, trainingData.id)
       );
       
-      const isCompleted = updatedProgress?.progressMap?.[taskData.id]?.status === 'done';
+      const isCompleted = updatedProgress?.progressMap[taskData.id]?.status === 'done';
       setShowAchievement(isCompleted);
       
       toast({

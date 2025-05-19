@@ -259,7 +259,7 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
 /**
  * ユーザーの進捗状況を取得
  */
-export const getUserTaskProgress = async (userId: string, trainingId: string) => {
+export const getUserTaskProgress = async (userId: string, trainingId: string): Promise<UserProgressData> => {
   try {
     // Supabase DBからユーザーの進捗状況を取得
     const { data, error } = await supabase
@@ -278,10 +278,20 @@ export const getUserTaskProgress = async (userId: string, trainingId: string) =>
       };
     });
     
-    return { progressMap, userId, trainingId };
+    return { 
+      progressMap, 
+      userId, 
+      trainingId 
+    };
   } catch (error) {
     console.error('進捗状況取得エラー:', error);
-    return { error: error.message, userId, trainingId };
+    // エラー時でも必ず progressMap を返す
+    return { 
+      progressMap: {}, 
+      userId, 
+      trainingId, 
+      error: error.message 
+    };
   }
 };
 

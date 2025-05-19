@@ -6,7 +6,6 @@ import './App.css';
 
 // React Query
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 // Pages
 import Index from './pages/Index';
@@ -145,7 +144,11 @@ const App = () => {
           </SubscriptionProvider>
         </AuthProvider>
       </Router>
-      {process.env.NODE_ENV === 'development' && <ReactQueryDevtools initialIsOpen={false} />}
+      {process.env.NODE_ENV === 'development' && (
+        <div style={{ display: 'none' }}>
+          {/* ReactQueryDevtools を実際に使用する際にはインストールして使用してください */}
+        </div>
+      )}
     </QueryClientProvider>
   );
 };
