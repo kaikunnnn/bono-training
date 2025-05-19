@@ -18,8 +18,8 @@ import Subscription from './pages/Subscription';
 import NotFound from './pages/NotFound';
 
 // Context Providers
-import { AuthContextProvider } from './contexts/AuthContext';
-import { SubscriptionContextProvider } from './contexts/SubscriptionContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 
 // Components
 import PrivateRoute from './components/auth/PrivateRoute';
@@ -37,8 +37,8 @@ import ContentManager from './pages/Training/ContentManager';
 const App = () => {
   return (
     <Router>
-      <AuthContextProvider>
-        <SubscriptionContextProvider>
+      <AuthProvider>
+        <SubscriptionProvider>
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
@@ -82,8 +82,8 @@ const App = () => {
           </Routes>
           
           <Toaster richColors position="top-center" />
-        </SubscriptionContextProvider>
-      </AuthContextProvider>
+        </SubscriptionProvider>
+      </AuthProvider>
     </Router>
   );
 };
