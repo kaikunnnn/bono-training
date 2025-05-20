@@ -1,8 +1,6 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { loadTrainingMeta, loadMdxContent } from "@/utils/mdxLoader";
-import { TrainingDetailData, TaskDetailData, UserProgressData } from "@/types/training";
-import { QueryKeys } from "@/utils/queryUtils";
+import { TrainingDetailData, TaskDetailData } from "@/types/training";
 
 /**
  * トレーニング一覧を取得
@@ -74,29 +72,29 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
       .from('training')
       .select('*')
       .eq('slug', slug)
-      .maybeSingle();
+      .single();
 
     let training;
     
     if (error) {
-      throw error;
-    }
-    
-    if (!supabaseData) {
-      // ストレージから検索
-      try {
-        const storageData = await loadTrainingMeta(slug);
-        if (storageData) {
-          training = {
-            id: `storage-${slug}`,
-            ...storageData
-          };
-        } else {
-          throw new Error('トレーニングが見つかりません');
+      if (error.code === 'PGRST116') { // データが見つからない場合
+        // ストレージから検索
+        try {
+          const storageData = await loadTrainingMeta(slug);
+          if (storageData) {
+            training = {
+              id: `storage-${slug}`,
+              ...storageData
+            };
+          } else {
+            throw new Error('トレーニングが見つかりません');
+          }
+        } catch (storageError) {
+          console.error('ストレージからのメタデータ取得エラー:', storageError);
+          throw error; // 元のエラーをスロー
         }
-      } catch (storageError) {
-        console.error('ストレージからのメタデータ取得エラー:', storageError);
-        throw new Error('トレーニングが見つかりません');
+      } else {
+        throw error;
       }
     } else {
       training = supabaseData;
@@ -118,13 +116,12 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
       skills: training.skills || [],
       prerequisites: training.prerequisites || [],
       has_premium_content: tasks?.some(task => task.is_premium) || false,
-      thumbnailImage: training.thumbnailImage || '',
-      created_at: training.created_at || new Date().toISOString() // created_atが不足していたため追加
+      thumbnailImage: training.thumbnailImage || ''
     };
 
     return trainingDetailData;
   } catch (error) {
-    console.error('トレーニング詳細取得エラー:', error);
+    console.error('トレーニング詳細取得エラ���:', error);
     throw error;
   }
 };
@@ -261,7 +258,7 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
 /**
  * ユーザーの進捗状況を取得
  */
-export const getUserTaskProgress = async (userId: string, trainingId: string): Promise<UserProgressData> => {
+export const getUserTaskProgress = async (userId: string, trainingId: string) => {
   try {
     // Supabase DBからユーザーの進捗状況を取得
     const { data, error } = await supabase
@@ -280,20 +277,10 @@ export const getUserTaskProgress = async (userId: string, trainingId: string): P
       };
     });
     
-    return { 
-      progressMap, 
-      userId, 
-      trainingId 
-    };
+    return { progressMap, userId, trainingId };
   } catch (error) {
     console.error('進捗状況取得エラー:', error);
-    // エラー時でも必ず progressMap を返す
-    return { 
-      progressMap: {}, 
-      userId, 
-      trainingId, 
-      error: error.message 
-    };
+    return { error: error.message, userId, trainingId };
   }
 };
 

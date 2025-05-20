@@ -1,6 +1,6 @@
 
-import React, { memo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
@@ -10,19 +10,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Training } from '@/types/training';
 import { loadAllTrainingMeta } from '@/utils/mdxLoader';
 import { useToast } from '@/hooks/use-toast';
-import { QueryKeys } from '@/utils/queryUtils';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import LoadingFallback from '@/components/LoadingFallback';
-
-// メモ化したトレーニンググリッドコンポーネント
-const MemoizedTrainingGrid = memo(TrainingGrid);
 
 const TrainingHome: React.FC = () => {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   
-  const { data: trainings, isLoading, error } = useQuery({
-    queryKey: [QueryKeys.trainings],
+  const { data: trainings, isLoading } = useQuery({
+    queryKey: ['trainings'],
     queryFn: async () => {
       try {
         // 1. Supabaseからトレーニングデータを取得
@@ -76,26 +69,17 @@ const TrainingHome: React.FC = () => {
           description: "トレーニングデータの取得中にエラーが発生しました。",
           variant: "destructive"
         });
-        throw error; // エラーを投げてErrorBoundaryに捕捉させる
+        return [];
       }
-    },
-    staleTime: 1000 * 60 * 10, // 10分間はstaleとみなさない（トレーニング一覧はそう頻繁に更新されないため）
+    }
   });
 
-  if (error) {
+  if (isLoading) {
     return (
       <TrainingLayout>
         <TrainingHeader />
         <div className="flex justify-center items-center h-[400px]">
-          <div className="p-4 bg-red-50 text-red-800 rounded-md">
-            データの取得中にエラーが発生しました。更新ボタンをクリックして再読み込みしてください。
-            <button 
-              onClick={() => queryClient.invalidateQueries({ queryKey: [QueryKeys.trainings] })}
-              className="mt-2 px-4 py-2 bg-primary text-white rounded-md"
-            >
-              更新
-            </button>
-          </div>
+          <div className="animate-pulse">読み込み中...</div>
         </div>
       </TrainingLayout>
     );
@@ -118,11 +102,9 @@ const TrainingHome: React.FC = () => {
           </div>
 
           {/* トレーニングリスト */}
-          <ErrorBoundary fallback={<div>エラーが発生しました。再読み込みしてください。</div>}>
-            {isLoading ? (
-              <LoadingFallback height="400px" message="トレーニングデータを読み込み中..." />
-            ) : trainings && trainings.length > 0 ? (
-              <MemoizedTrainingGrid trainings={trainings} />
+          <div className="mt-6">
+            {trainings && trainings.length > 0 ? (
+              <TrainingGrid trainings={trainings} />
             ) : (
               <Card className="w-full">
                 <CardContent className="flex flex-col items-center justify-center py-12">
@@ -132,7 +114,7 @@ const TrainingHome: React.FC = () => {
                 </CardContent>
               </Card>
             )}
-          </ErrorBoundary>
+          </div>
         </div>
       </div>
     </TrainingLayout>

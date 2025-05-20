@@ -1,4 +1,3 @@
-
 export interface Training {
   id: string;
   slug: string;
@@ -10,7 +9,6 @@ export interface Training {
   backgroundImage?: string;
   thumbnailImage?: string;
   isFree?: boolean;
-  created_at?: string;
 }
 
 export interface Task {
@@ -51,26 +49,20 @@ export interface TaskDetailData {
   preview_video_url?: string;
 }
 
-// TrainingDetailDataの定義
-export interface TrainingDetailData extends Training {
+// TrainingDetailDataに必須プロパティとしてtasksを定義
+export interface TrainingDetailData {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  type: string;
+  difficulty: string;
+  tags: string[];
   tasks: Task[]; // 必須プロパティとして定義
   skills?: string[];
   prerequisites?: string[];
   has_premium_content?: boolean;
-  created_at: string; // 必須プロパティとして追加
-}
-
-// UserProgressDataの定義
-export interface UserProgressData {
-  progressMap: {
-    [taskId: string]: {
-      status: string;
-      completed_at?: string | null;
-    }
-  };
-  userId?: string;
-  trainingId?: string;
-  error?: any;
+  thumbnailImage?: string;
 }
 
 /**

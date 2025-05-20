@@ -1,11 +1,10 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import { getTrainingTaskDetail, getTrainingDetail, getUserTaskProgress } from '@/services/training';
-import { TaskDetailData, TrainingDetailData, UserProgressData } from '@/types/training';
+import { TaskDetailData } from '@/types/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import TaskDetail from '@/components/training/TaskDetail';
@@ -13,52 +12,20 @@ import TaskDetailSkeleton from './TaskDetailSkeleton';
 import TaskDetailError from './TaskDetailError';
 import TaskNavigation from './TaskNavigation';
 import AchievementCard from '@/components/training/AchievementCard';
-import { QueryKeys } from '@/utils/queryUtils';
 
 const TaskDetailPage = () => {
-  const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
+  const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
   const { user } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
+  const [loading, setLoading] = useState(true);
+  const [taskData, setTaskData] = useState<TaskDetailData | null>(null);
+  const [trainingData, setTrainingData] = useState<any>(null);
+  const [progress, setProgress] = useState<any>(null);
+  const [mdxContent, setMdxContent] = useState<string>('');
   const [showAchievement, setShowAchievement] = useState<boolean>(false);
   
-  // トレーニング詳細を取得
-  const { 
-    data: trainingData,
-    isLoading: trainingLoading,
-    error: trainingError 
-  } = useQuery<TrainingDetailData>({
-    queryKey: QueryKeys.trainingDetail(trainingSlug || ''),
-    queryFn: () => getTrainingDetail(trainingSlug || ''),
-    enabled: !!trainingSlug,
-    staleTime: 1000 * 60 * 5, // 5分間はstaleとみなさない
-  });
-  
-  // タスク詳細を取得
-  const { 
-    data: taskData,
-    isLoading: taskLoading,
-    error: taskError 
-  } = useQuery<TaskDetailData>({
-    queryKey: QueryKeys.taskDetail(trainingSlug || '', taskSlug || ''),
-    queryFn: () => getTrainingTaskDetail(trainingSlug || '', taskSlug || ''),
-    enabled: !!trainingSlug && !!taskSlug,
-    staleTime: 1000 * 60 * 5, // 5分間はstaleとみなさない
-  });
-  
-  // ユーザーの進捗データを取得
-  const {
-    data: progress,
-    isLoading: progressLoading
-  } = useQuery<UserProgressData>({
-    queryKey: QueryKeys.userProgress(user?.id || '', trainingData?.id || ''),
-    queryFn: () => getUserTaskProgress(user?.id || '', trainingData?.id || ''),
-    enabled: !!user && !!trainingData?.id,
-    staleTime: 1000 * 30, // 30秒間はstaleとみなさない（進捗は頻繁に更新される可能性があるため）
-  });
-  
   // タスク難易度に基づいたバッジタイプを決定
-  const getBadgeType = useCallback(() => {
+  const getBadgeType = () => {
     if (!trainingData?.difficulty) return 'beginner';
     
     switch (trainingData.difficulty.toLowerCase()) {
@@ -67,38 +34,77 @@ const TaskDetailPage = () => {
       case 'hard': return 'advanced';
       default: return 'beginner';
     }
-  }, [trainingData?.difficulty]);
+  };
   
-  // タスクの完了状態を確認してAchievementCardの表示を判断
   useEffect(() => {
-    if (taskData && progress?.progressMap && taskData.id) {
-      const isCompleted = progress.progressMap[taskData.id]?.status === 'done';
-      setShowAchievement(isCompleted);
-    }
-  }, [taskData, progress]);
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        if (slug && taskSlug) {
+          // トレーニング詳細データを取得
+          const trainingDetailData = await getTrainingDetail(slug);
+          setTrainingData(trainingDetailData);
+          
+          // タスク詳細データを取得（すでにMDXコンテンツと統合されたデータ）
+          const taskDetailData = await getTrainingTaskDetail(slug, taskSlug);
+          
+          // MDXコンテンツをUIで表示するために別途保持
+          setMdxContent(taskDetailData.content || '');
+          
+          // タスクデータをセット
+          setTaskData(taskDetailData as TaskDetailData);
+          
+          // ユーザーがログインしている場合は進捗状況を取得
+          if (user) {
+            try {
+              // 現在のタスクの進捗状況を取得
+              const progressData = await getUserTaskProgress(user.id, trainingDetailData.id);
+              if (!progressData.error) {
+                setProgress(progressData);
+                
+                // タスクが完了しているかチェック
+                const isCompleted = progressData?.progressMap?.[taskDetailData.id]?.status === 'done';
+                setShowAchievement(isCompleted);
+              }
+            } catch (progressError) {
+              console.error('進捗状況の取得に失敗しました:', progressError);
+              // プログレスエラーでページ全体が失敗するわけではないので続行
+            }
+          }
+        }
+      } catch (error) {
+        console.error("データの取得中にエラーが発生しました:", error);
+        toast({
+          title: "エラーが発生しました",
+          description: "コンテンツの取得に失敗しました。もう一度お試しください。",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [slug, taskSlug, user, toast]);
   
   // タスク進捗が更新されたときに進捗データを再取得
-  const handleProgressUpdate = useCallback(async () => {
+  const handleProgressUpdate = async () => {
     if (!user || !trainingData?.id || !taskData) return;
     
     try {
-      // ユーザー進捗を再フェッチ
-      await queryClient.invalidateQueries({ 
-        queryKey: QueryKeys.userProgress(user.id, trainingData.id) 
-      });
-      
-      // タスクが完了したかチェック (進捗データが更新された後)
-      const updatedProgress = queryClient.getQueryData<UserProgressData>(
-        QueryKeys.userProgress(user.id, trainingData.id)
-      );
-      
-      const isCompleted = updatedProgress?.progressMap[taskData.id]?.status === 'done';
-      setShowAchievement(isCompleted);
-      
-      toast({
-        title: isCompleted ? "タスク完了！" : "タスクの進捗を更新しました",
-        description: isCompleted ? "おめでとうございます！タスクを完了しました。" : "タスクの進捗状態が正常に更新されました。",
-      });
+      const progressData = await getUserTaskProgress(user.id, trainingData.id);
+      if (!progressData.error) {
+        setProgress(progressData);
+        
+        // タスクが完了したかチェック
+        const isCompleted = progressData?.progressMap?.[taskData.id]?.status === 'done';
+        setShowAchievement(isCompleted);
+        
+        toast({
+          title: isCompleted ? "タスク完了！" : "タスクの進捗を更新しました",
+          description: isCompleted ? "おめでとうございます！タスクを完了しました。" : "タスクの進捗状態が正常に更新されました。",
+        });
+      }
     } catch (error) {
       console.error('進捗状況の更新に失敗しました:', error);
       toast({
@@ -107,16 +113,13 @@ const TaskDetailPage = () => {
         variant: "destructive"
       });
     }
-  }, [user, trainingData, taskData, toast, queryClient]);
+  };
   
-  const isLoading = trainingLoading || taskLoading || progressLoading;
-  const error = trainingError || taskError;
-  
-  if (isLoading) {
+  if (loading) {
     return <TaskDetailSkeleton />;
   }
   
-  if (error || !taskData || !trainingData) {
+  if (!taskData || !trainingData) {
     return <TaskDetailError />;
   }
   
@@ -139,7 +142,7 @@ const TaskDetailPage = () => {
         <TaskDetail
           task={taskData}
           training={trainingData}
-          mdxContent={taskData.content}
+          mdxContent={mdxContent}
           progress={progress?.progressMap?.[taskData.id]}
           onProgressUpdate={handleProgressUpdate}
           isPremium={taskData.is_premium || false}
@@ -147,7 +150,7 @@ const TaskDetailPage = () => {
         />
 
         <TaskNavigation 
-          trainingSlug={trainingSlug || ''} 
+          trainingSlug={slug || ''} 
           nextTaskSlug={taskData.next_task}
           taskTitle={taskData.title}
         />
