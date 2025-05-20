@@ -3,6 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import './App.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 // Pages
 import Index from './pages/Index';
@@ -34,57 +35,62 @@ import TrainingPlan from './pages/Training/Plan';
 import TrainingLogin from './pages/Training/Login';
 import ContentManager from './pages/Training/ContentManager';
 
+// QueryClientの作成
+const queryClient = new QueryClient();
+
 const App = () => {
   return (
-    <Router>
-      <AuthProvider>
-        <SubscriptionProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <SubscriptionProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              
+              {/* コンテンツページ */}
+              <Route path="/content" element={<Content />} />
+              <Route path="/content/:contentId" element={<ContentDetail />} />
+              <Route path="/content-test" element={<ContentTest />} />
+              <Route path="/video-test" element={<VideoDetailTest />} />
+              
+              {/* プレミアムコンテンツ */}
+              <Route 
+                path="/paid-content" 
+                element={<ProtectedPremiumRoute><PaidContent /></ProtectedPremiumRoute>} 
+              />
+              
+              {/* サブスクリプション */}
+              <Route path="/subscription" element={<Subscription />} />
+              
+              {/* プロフィール */}
+              <Route 
+                path="/profile" 
+                element={<PrivateRoute><Profile /></PrivateRoute>} 
+              />
+              
+              {/* トレーニング関連ページ */}
+              <Route path="/training" element={<TrainingIndex />} />
+              <Route path="/training/about" element={<TrainingAbout />} />
+              <Route path="/training/plan" element={<TrainingPlan />} />
+              <Route path="/training/login" element={<TrainingLogin />} />
+              <Route path="/training/content-manager" element={<PrivateRoute><ContentManager /></PrivateRoute>} />
+              <Route path="/training/:slug" element={<TrainingDetail />} />
+              <Route path="/training/:trainingSlug/:taskSlug" element={<TaskDetailPage />} />
+              <Route path="/training/error" element={<TaskDetailError />} />
+              
+              {/* 404ページ */}
+              <Route path="/404" element={<NotFound />} />
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Routes>
             
-            {/* コンテンツページ */}
-            <Route path="/content" element={<Content />} />
-            <Route path="/content/:contentId" element={<ContentDetail />} />
-            <Route path="/content-test" element={<ContentTest />} />
-            <Route path="/video-test" element={<VideoDetailTest />} />
-            
-            {/* プレミアムコンテンツ */}
-            <Route 
-              path="/paid-content" 
-              element={<ProtectedPremiumRoute><PaidContent /></ProtectedPremiumRoute>} 
-            />
-            
-            {/* サブスクリプション */}
-            <Route path="/subscription" element={<Subscription />} />
-            
-            {/* プロフィール */}
-            <Route 
-              path="/profile" 
-              element={<PrivateRoute><Profile /></PrivateRoute>} 
-            />
-            
-            {/* トレーニング関連ページ */}
-            <Route path="/training" element={<TrainingIndex />} />
-            <Route path="/training/about" element={<TrainingAbout />} />
-            <Route path="/training/plan" element={<TrainingPlan />} />
-            <Route path="/training/login" element={<TrainingLogin />} />
-            <Route path="/training/content-manager" element={<PrivateRoute><ContentManager /></PrivateRoute>} />
-            <Route path="/training/:slug" element={<TrainingDetail />} />
-            <Route path="/training/:trainingSlug/:taskSlug" element={<TaskDetailPage />} />
-            <Route path="/training/error" element={<TaskDetailError />} />
-            
-            {/* 404ページ */}
-            <Route path="/404" element={<NotFound />} />
-            <Route path="*" element={<Navigate to="/404" replace />} />
-          </Routes>
-          
-          <Toaster richColors position="top-center" />
-        </SubscriptionProvider>
-      </AuthProvider>
-    </Router>
+            <Toaster richColors position="top-center" />
+          </SubscriptionProvider>
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   );
 };
 
