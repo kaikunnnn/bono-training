@@ -11,7 +11,6 @@ import TaskDetail from '@/components/training/TaskDetail';
 import TaskDetailSkeleton from './TaskDetailSkeleton';
 import TaskDetailError from './TaskDetailError';
 import TaskNavigation from './TaskNavigation';
-import AchievementCard from '@/components/training/AchievementCard';
 
 const TaskDetailPage = () => {
   const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
@@ -22,19 +21,6 @@ const TaskDetailPage = () => {
   const [trainingData, setTrainingData] = useState<any>(null);
   const [progress, setProgress] = useState<any>(null);
   const [mdxContent, setMdxContent] = useState<string>('');
-  const [showAchievement, setShowAchievement] = useState<boolean>(false);
-  
-  // タスク難易度に基づいたバッジタイプを決定
-  const getBadgeType = () => {
-    if (!trainingData?.difficulty) return 'beginner';
-    
-    switch (trainingData.difficulty.toLowerCase()) {
-      case 'easy': return 'beginner';
-      case 'normal': return 'intermediate';
-      case 'hard': return 'advanced';
-      default: return 'beginner';
-    }
-  };
   
   useEffect(() => {
     const fetchData = async () => {
@@ -61,10 +47,6 @@ const TaskDetailPage = () => {
               const progressData = await getUserTaskProgress(user.id, trainingDetailData.id);
               if (!progressData.error) {
                 setProgress(progressData);
-                
-                // タスクが完了しているかチェック
-                const isCompleted = progressData?.progressMap?.[taskDetailData.id]?.status === 'done';
-                setShowAchievement(isCompleted);
               }
             } catch (progressError) {
               console.error('進捗状況の取得に失敗しました:', progressError);
@@ -89,20 +71,15 @@ const TaskDetailPage = () => {
   
   // タスク進捗が更新されたときに進捗データを再取得
   const handleProgressUpdate = async () => {
-    if (!user || !trainingData?.id || !taskData) return;
+    if (!user || !trainingData?.id) return;
     
     try {
       const progressData = await getUserTaskProgress(user.id, trainingData.id);
       if (!progressData.error) {
         setProgress(progressData);
-        
-        // タスクが完了したかチェック
-        const isCompleted = progressData?.progressMap?.[taskData.id]?.status === 'done';
-        setShowAchievement(isCompleted);
-        
         toast({
-          title: isCompleted ? "タスク完了！" : "タスクの進捗を更新しました",
-          description: isCompleted ? "おめでとうございます！タスクを完了しました。" : "タスクの進捗状態が正常に更新されました。",
+          title: "進捗を更新しました",
+          description: "タスクの進捗状態が正常に更新されました。",
         });
       }
     } catch (error) {
@@ -123,22 +100,10 @@ const TaskDetailPage = () => {
     return <TaskDetailError />;
   }
   
-  // バッジタイプを決定
-  const badgeType = getBadgeType();
-  
   return (
     <TrainingLayout>
       <TrainingHeader />
       <div className="container py-8">
-        {showAchievement && (
-          <AchievementCard
-            title={taskData.title}
-            shareText={`BONOトレーニングで「${taskData.title}」のタスクを完了しました！学習を続けています。`}
-            className="mb-8"
-            badgeType={badgeType}
-          />
-        )}
-        
         <TaskDetail
           task={taskData}
           training={trainingData}
@@ -146,13 +111,12 @@ const TaskDetailPage = () => {
           progress={progress?.progressMap?.[taskData.id]}
           onProgressUpdate={handleProgressUpdate}
           isPremium={taskData.is_premium || false}
-          className={showAchievement ? "opacity-75" : ""}
+          className="mb-8"
         />
 
         <TaskNavigation 
           trainingSlug={slug || ''} 
           nextTaskSlug={taskData.next_task}
-          taskTitle={taskData.title}
         />
       </div>
     </TrainingLayout>

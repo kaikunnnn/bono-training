@@ -1,3 +1,4 @@
+
 export interface Training {
   id: string;
   slug: string;
@@ -63,26 +64,4 @@ export interface TrainingDetailData {
   prerequisites?: string[];
   has_premium_content?: boolean;
   thumbnailImage?: string;
-}
-
-/**
- * コンテンツアップロード結果の型定義
- */
-export interface ContentUploadResult {
-  success: boolean;
-  path: string;
-  data?: any;
-  error?: string;
-}
-
-/**
- * コンテンツ管理画面の状態
- */
-export interface ContentManagementState {
-  currentTraining: string | null;
-  currentTask: string | null;
-  isUploading: boolean;
-  uploadResult: ContentUploadResult | null;
-  availableTrainings: Array<{slug: string}>;
-  trainingContents: Array<{name: string; path: string; isDirectory: boolean}>;
 }
