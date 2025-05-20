@@ -7,16 +7,22 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 interface TaskNavigationProps {
   trainingSlug: string;
   nextTaskSlug?: string | null;
+  prevTaskSlug?: string | null;
 }
 
 const TaskNavigation: React.FC<TaskNavigationProps> = ({ 
   trainingSlug,
-  nextTaskSlug
+  nextTaskSlug,
+  prevTaskSlug
 }) => {
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate(`/training/${trainingSlug}`);
+    if (prevTaskSlug) {
+      navigate(`/training/${trainingSlug}/${prevTaskSlug}`);
+    } else {
+      navigate(`/training/${trainingSlug}`);
+    }
   };
 
   const handleNext = () => {
@@ -32,7 +38,7 @@ const TaskNavigation: React.FC<TaskNavigationProps> = ({
         onClick={handleBack}
       >
         <ArrowLeft className="mr-2 h-4 w-4" />
-        トレーニング一覧へ戻る
+        {prevTaskSlug ? '前のタスク' : 'トレーニング一覧へ戻る'}
       </Button>
       
       {nextTaskSlug && (
