@@ -1,8 +1,8 @@
 ---
 title: "TodoアプリUIデザイン"
-description: "FigmaでTodoアプリのUIデザインを作成するトレーニングです。"
-type: "challenge"
-difficulty: "normal"
+description: "データビジュアライゼーションとレイアウトの実践"
+type: "チャレンジ"
+difficulty: "ノーマル"
 tags: ["ui", "figma", "basic"]
 ---
 
