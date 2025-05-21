@@ -1,5 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import { getTrainingMetaFromStorage, getMdxContentFromStorage } from "@/services/storage";
 
 /**
  * MDXファイルのコンテンツ型定義
@@ -51,26 +51,19 @@ export interface TrainingMeta {
  */
 export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Promise<MdxContent> => {
   try {
-    // get-mdx-contentエッジ関数を呼び出す
-    const { data, error } = await supabase.functions.invoke('get-mdx-content', {
-      body: { trainingSlug, taskSlug }
-    });
+    // Storageからコンテンツを取得
+    const mdxContent = await getMdxContentFromStorage(trainingSlug, taskSlug);
     
-    if (error) {
-      console.error('エッジ関数呼び出しエラー:', error);
-      throw error;
-    }
-    
-    if (!data) {
+    if (!mdxContent) {
       throw new Error('コンテンツが取得できませんでした');
     }
     
     console.log(`コンテンツ取得成功: ${trainingSlug}/${taskSlug}`, {
-      title: data.frontmatter?.title,
-      isFreePreview: data.isFreePreview
+      title: mdxContent.frontmatter?.title,
+      isPremium: mdxContent.frontmatter?.is_premium
     });
 
-    return data as MdxContent;
+    return mdxContent;
   } catch (error) {
     console.error('MDXコンテンツ読み込みエラー:', error);
     
@@ -97,24 +90,30 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
  */
 export const loadTrainingMeta = async (trainingSlug: string, withTasks = false): Promise<TrainingMeta> => {
   try {
-    // get-training-metaエッジ関数を呼び出す
-    const { data, error } = await supabase.functions.invoke('get-training-meta', {
-      body: { 
-        slug: trainingSlug,
-        tasks: withTasks ? 'true' : 'false'
-      }
-    });
+    // Storageからメタデータを取得
+    const metaContent = await getTrainingMetaFromStorage(trainingSlug);
     
-    if (error) {
-      console.error('エッジ関数呼び出しエラー:', error);
-      throw error;
-    }
-    
-    if (!data) {
+    if (!metaContent) {
       throw new Error('メタデータが取得できませんでした');
     }
     
-    return data as TrainingMeta;
+    const meta: TrainingMeta = {
+      title: metaContent.frontmatter.title,
+      description: metaContent.frontmatter.description || metaContent.content.split('\n')[0],
+      type: metaContent.frontmatter.type || "skill",
+      difficulty: metaContent.frontmatter.difficulty || "初級",
+      tags: metaContent.frontmatter.tags || [],
+      slug: trainingSlug,
+      thumbnailImage: metaContent.frontmatter.thumbnailImage || 'https://source.unsplash.com/random/200x100'
+    };
+    
+    // タスク一覧も取得する場合
+    if (withTasks) {
+      // ここでタスク一覧を取得する処理を追加（STEP 3で実装予定）
+      meta.tasks = [];
+    }
+    
+    return meta;
   } catch (error) {
     console.error('トレーニングメタデータ読み込みエラー:', error);
     
@@ -154,21 +153,48 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
  */
 export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
   try {
-    // get-training-metaエッジ関数を呼び出す
-    const { data, error } = await supabase.functions.invoke('get-training-meta', {
-      method: 'GET'
-    });
+    // Storageからすべてのトレーニングフォルダを取得
+    const { data: folders, error } = await supabase
+      .storage
+      .from('content')
+      .list('content', { sortBy: { column: 'name', order: 'asc' } });
     
     if (error) {
-      console.error('エッジ関数呼び出しエラー:', error);
+      console.error('フォルダ一覧取得エラー:', error);
       throw error;
     }
     
-    if (!data || !Array.isArray(data)) {
-      throw new Error('トレーニング一覧が取得できませんでした');
+    if (!folders || folders.length === 0) {
+      return [];
     }
     
-    return data as TrainingMeta[];
+    const trainings: TrainingMeta[] = [];
+    
+    // 各フォルダのmeta.mdファイルを読み込む
+    for (const folder of folders) {
+      if (!folder.id.endsWith('/')) continue; // フォルダのみ処理
+      
+      const slug = folder.name;
+      try {
+        const meta = await getTrainingMetaFromStorage(slug);
+        if (meta) {
+          trainings.push({
+            slug,
+            title: meta.frontmatter.title,
+            description: meta.frontmatter.description || meta.content.split('\n')[0],
+            type: meta.frontmatter.type || "skill",
+            difficulty: meta.frontmatter.difficulty || "初級",
+            tags: meta.frontmatter.tags || [],
+            thumbnailImage: meta.frontmatter.thumbnailImage || 'https://source.unsplash.com/random/200x100'
+          });
+        }
+      } catch (error) {
+        console.warn(`トレーニング ${slug} のメタデータ取得エラー:`, error);
+        // エラーが発生しても続行
+      }
+    }
+    
+    return trainings;
   } catch (error) {
     console.error('トレーニングメタデータの取得に失敗しました:', error);
     

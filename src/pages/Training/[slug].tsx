@@ -1,98 +1,191 @@
-
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, BookOpen, Users, Tag } from 'lucide-react';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import TaskList from '@/components/training/TaskList';
-import { Progress } from "@/components/ui/progress";
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { getTrainingDetail, getUserTaskProgress } from '@/services/training';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import TrainingProgress from '@/components/training/TrainingProgress';
 
 const TrainingDetail = () => {
   const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAuth();
+  const { isSubscribed, planMembers } = useSubscriptionContext();
+  const [loading, setLoading] = useState(true);
+  const [trainingData, setTrainingData] = useState<any>(null);
+  const [progressMap, setProgressMap] = useState<Record<string, any>>({});
+  
+  const hasPremiumAccess = isSubscribed && planMembers;
+  
+  useEffect(() => {
+    const fetchTrainingData = async () => {
+      setLoading(true);
+      try {
+        if (!slug) return;
 
-  const { data: training, isLoading: isTrainingLoading } = useQuery({
-    queryKey: ['training', slug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('training')
-        .select('*')
-        .eq('slug', slug)
-        .single();
+        // トレーニング詳細データを取得
+        const trainingDetailData = await getTrainingDetail(slug);
+        setTrainingData(trainingDetailData);
+        
+        // ユーザーがログインしている場合は進捗状況を取得
+        if (user && trainingDetailData) {
+          try {
+            const progressData = await getUserTaskProgress(user.id, trainingDetailData.id);
+            if (progressData && !progressData.error && progressData.progressMap) {
+              setProgressMap(progressData.progressMap);
+            }
+          } catch (progressError) {
+            console.error('進捗状況の取得に失敗しました:', progressError);
+          }
+        }
+      } catch (error) {
+        console.error('トレーニングデータの取得に失敗しました:', error);
+        toast({
+          title: 'エラーが発生しました',
+          description: 'トレーニングデータの取得に失敗しました。もう一度お試しください。',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const { data: tasks, isLoading: isTasksLoading } = useQuery({
-    queryKey: ['tasks', training?.id],
-    enabled: !!training?.id,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('task')
-        .select('*')
-        .eq('training_id', training.id)
-        .order('order_index');
-
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  if (isTrainingLoading || isTasksLoading) {
+    fetchTrainingData();
+  }, [slug, toast, user]);
+  
+  const handleBack = () => {
+    navigate('/training');
+  };
+  
+  if (loading) {
     return (
       <TrainingLayout>
         <TrainingHeader />
-        <div className="flex justify-center items-center h-[400px]">
-          <div className="animate-pulse">読み込み中...</div>
+        <div className="container py-8">
+          <div className="flex justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          </div>
         </div>
       </TrainingLayout>
     );
   }
-
-  if (!training) {
+  
+  if (!trainingData) {
     return (
       <TrainingLayout>
         <TrainingHeader />
-        <div className="flex justify-center items-center h-[400px]">
-          <div>トレーニングが見つかりませんでした</div>
+        <div className="container py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">トレーニングが見つかりません</h1>
+            <p className="mt-2">指定されたトレーニングは存在しないか、アクセスできません。</p>
+            <Button
+              className="mt-4"
+              onClick={handleBack}
+            >
+              トレーニング一覧に戻る
+            </Button>
+          </div>
         </div>
       </TrainingLayout>
     );
   }
-
+  
   return (
     <TrainingLayout>
       <TrainingHeader />
-      <div className="px-6 py-8">
-        {/* トレーニング情報 */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4">{training.title}</h1>
-          <p className="text-gray-600 mb-4">{training.description}</p>
-          <div className="flex gap-2">
-            {training.tags?.map((tag) => (
-              <span 
-                key={tag}
-                className="px-2 py-1 bg-gray-100 rounded-full text-sm"
-              >
-                {tag}
-              </span>
-            ))}
+      <div className="container py-8">
+        <div className="flex items-center mb-6">
+          <Button variant="ghost" onClick={handleBack} className="mr-2">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            戻る
+          </Button>
+          <h1 className="text-3xl font-bold">{trainingData.title}</h1>
+        </div>
+        
+        <div className="flex flex-col md:flex-row gap-8">
+          <div className="w-full md:w-2/3">
+            <div className="mb-6">
+              <p className="text-gray-600 dark:text-gray-300">{trainingData.description}</p>
+              
+              <div className="flex items-center mt-4 space-x-4">
+                <div className="flex items-center">
+                  <BookOpen className="w-4 h-4 text-gray-500 mr-1" />
+                  <span className="text-sm">{`難易度: ${trainingData.difficulty}`}</span>
+                </div>
+                <div className="flex items-center">
+                  <Users className="w-4 h-4 text-gray-500 mr-1" />
+                  <span className="text-sm">{`${trainingData.type === 'challenge' ? 'チャレンジ' : 'スキル'}`}</span>
+                </div>
+              </div>
+              
+              {trainingData.tags?.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-4">
+                  {trainingData.tags.map((tag: string) => (
+                    <Badge key={tag} variant="secondary" className="text-xs">
+                      <Tag className="w-3 h-3 mr-1" />
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <Separator className="my-6" />
+            
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold mb-4">タスク一覧</h2>
+              {trainingData.has_premium_content && !hasPremiumAccess && (
+                <div className="mb-4 p-4 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg">
+                  <p className="text-amber-800 dark:text-amber-300 text-sm">
+                    このトレーニングには有料コンテンツが含まれています。すべてのコンテンツにアクセスするには
+                    <Link to="/training/plan" className="text-amber-600 dark:text-amber-400 font-medium ml-1">
+                      メンバーシップに登録
+                    </Link>
+                    してください。
+                  </p>
+                </div>
+              )}
+              
+              <TaskList 
+                tasks={trainingData.tasks || []} 
+                progressMap={progressMap} 
+                trainingSlug={slug || ''}
+              />
+            </div>
+          </div>
+          
+          <div className="w-full md:w-1/3">
+            {user && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl border p-6 shadow-sm">
+                <TrainingProgress 
+                  tasks={trainingData.tasks || []}
+                  progressMap={progressMap}
+                  trainingSlug={slug || ''}
+                />
+              </div>
+            )}
+            
+            {!user && (
+              <div className="bg-white dark:bg-gray-800 rounded-xl border p-6 shadow-sm">
+                <h3 className="text-lg font-medium mb-2">進捗を記録するには</h3>
+                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                  トレーニングの進捗を記録するには、ログインしてください。
+                </p>
+                <Link to="/auth?redirect=/training">
+                  <Button className="w-full">ログイン / 登録</Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
-
-        {/* 進捗バー */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium">進捗状況</span>
-            <span className="text-sm text-gray-500">2/5 完了</span>
-          </div>
-          <Progress value={40} className="h-2" />
-        </div>
-
-        {/* タスク一覧 */}
-        {tasks && <TaskList tasks={tasks} />}
       </div>
     </TrainingLayout>
   );
