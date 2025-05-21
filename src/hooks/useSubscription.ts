@@ -7,57 +7,64 @@ import { PlanType } from '@/utils/subscriptionPlans';
 export interface SubscriptionState {
   isSubscribed: boolean;
   planType: PlanType | null;
+  planMembers: boolean; // トレーニングメンバーシップのアクセス権限
   loading: boolean;
   error: Error | null;
+  refresh: () => Promise<void>;
 }
 
-export const useSubscription = () => {
-  const { user } = useAuth();
-  const [state, setState] = useState<SubscriptionState>({
-    isSubscribed: false,
-    planType: null,
-    loading: true,
-    error: null
-  });
+/**
+ * サブスクリプション状態を取得・管理するカスタムフック
+ */
+export const useSubscription = (): SubscriptionState => {
+  const { user, loading: authLoading } = useAuth();
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [planType, setPlanType] = useState<PlanType | null>(null);
+  const [planMembers, setPlanMembers] = useState(false); // メンバーシップアクセス権限
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchSubscriptionStatus = async () => {
+    if (!user) {
+      setIsSubscribed(false);
+      setPlanType(null);
+      setPlanMembers(false);
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { isSubscribed, planType, planMembers, error } = await checkSubscriptionStatus();
+      
+      if (error) {
+        throw error;
+      }
+      
+      setIsSubscribed(isSubscribed);
+      setPlanType(planType);
+      setPlanMembers(planMembers);
+      setError(null);
+    } catch (err) {
+      console.error('サブスクリプション取得エラー:', err);
+      setError(err instanceof Error ? err : new Error('サブスクリプション情報の取得に失敗しました'));
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const checkSubscription = async () => {
-      if (!user) {
-        setState({ isSubscribed: false, planType: null, loading: false, error: null });
-        return;
-      }
+    if (!authLoading) {
+      fetchSubscriptionStatus();
+    }
+  }, [user, authLoading]);
 
-      try {
-        const { isSubscribed, planType, error } = await checkSubscriptionStatus();
-        if (error) throw error;
-        
-        setState({
-          isSubscribed,
-          planType,
-          loading: false,
-          error: null
-        });
-      } catch (error) {
-        console.error('サブスクリプション状態確認エラー:', error);
-        setState({
-          isSubscribed: false,
-          planType: null,
-          loading: false,
-          error: error instanceof Error ? error : new Error('不明なエラーが発生しました')
-        });
-      }
-    };
-
-    // ユーザー情報が変更されたときにサブスクリプション状態を確認
-    checkSubscription();
-
-    // 定期的にサブスクリプション状態を更新（オプション）
-    const intervalId = setInterval(checkSubscription, 60000); // 1分ごとに更新
-
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [user]);
-
-  return state;
+  return {
+    isSubscribed,
+    planType,
+    planMembers,
+    loading,
+    error,
+    refresh: fetchSubscriptionStatus
+  };
 };

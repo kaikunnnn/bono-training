@@ -8,6 +8,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// デバッグログ関数
+const logDebug = (message: string, details?: any) => {
+  console.log(`[CREATE-CHECKOUT] ${message}${details ? ` ${JSON.stringify(details)}` : ''}`);
+};
+
 serve(async (req) => {
   // CORSプリフライトリクエストの処理
   if (req.method === "OPTIONS") {
@@ -16,7 +21,9 @@ serve(async (req) => {
 
   try {
     // リクエストボディを解析
-    const { returnUrl, useTestPrice = false } = await req.json();
+    const { returnUrl, useTestPrice = false, planType = 'standard' } = await req.json();
+    
+    logDebug("リクエスト受信", { returnUrl, useTestPrice, planType });
     
     if (!returnUrl) {
       throw new Error("リダイレクトURLが指定されていません");
@@ -40,6 +47,8 @@ serve(async (req) => {
       throw new Error("ユーザー情報の取得に失敗しました");
     }
     
+    logDebug("ユーザー認証成功", { userId: user.id, email: user.email });
+    
     // Stripeクライアントの初期化
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2023-10-16",
@@ -57,7 +66,7 @@ serve(async (req) => {
     
     if (customerError || !customerData) {
       // Stripe顧客が存在しない場合は新規作成
-      console.log(`${user.id}のStripe顧客情報がDBに存在しないため作成します`);
+      logDebug(`${user.id}のStripe顧客情報がDBに存在しないため作成します`);
       
       const customer = await stripe.customers.create({
         email: user.email,
@@ -75,7 +84,7 @@ serve(async (req) => {
         });
       
       if (insertError) {
-        console.error("Stripe顧客情報のDB保存に失敗:", insertError);
+        logDebug("Stripe顧客情報のDB保存に失敗:", insertError);
         throw new Error("顧客情報の保存に失敗しました");
       }
       
@@ -83,13 +92,55 @@ serve(async (req) => {
     } else {
       // 既存の顧客IDを使用
       stripeCustomerId = customerData.stripe_customer_id;
-      console.log(`既存のStripe顧客ID ${stripeCustomerId} を使用します`);
+      logDebug(`既存のStripe顧客ID ${stripeCustomerId} を使用します`);
     }
 
-    // 環境に応じたPrice IDを選択
-    const priceId = useTestPrice 
-      ? Deno.env.get("STRIPE_TEST_PRICE_ID") 
-      : Deno.env.get("STRIPE_PRICE_ID");
+    // プランタイプに応じたPrice IDを選択
+    let priceId: string | undefined;
+    
+    // テスト環境と本番環境で異なるPrice IDを使用
+    if (useTestPrice) {
+      // テスト環境のPrice ID
+      switch(planType) {
+        case 'community':
+          priceId = Deno.env.get("STRIPE_TEST_COMMUNITY_PRICE_ID");
+          logDebug("テスト環境のCommunityプラン使用", { priceId });
+          break;
+        case 'growth':
+          priceId = Deno.env.get("STRIPE_TEST_GROWTH_PRICE_ID");
+          logDebug("テスト環境のGrowthプラン使用", { priceId });
+          break;
+        case 'standard':
+        default:
+          priceId = Deno.env.get("STRIPE_TEST_STANDARD_PRICE_ID");
+          logDebug("テスト環境のStandardプラン使用", { priceId });
+      }
+    } else {
+      // 本番環境のPrice ID
+      switch(planType) {
+        case 'community':
+          priceId = Deno.env.get("STRIPE_COMMUNITY_PRICE_ID");
+          logDebug("本番環境のCommunityプラン使用", { priceId });
+          break;
+        case 'growth':
+          priceId = Deno.env.get("STRIPE_GROWTH_PRICE_ID");
+          logDebug("本番環境のGrowthプラン使用", { priceId });
+          break;
+        case 'standard':
+        default:
+          priceId = Deno.env.get("STRIPE_STANDARD_PRICE_ID");
+          logDebug("本番環境のStandardプラン使用", { priceId });
+      }
+    }
+    
+    // Price IDがなければデフォルトを使用
+    if (!priceId) {
+      priceId = useTestPrice 
+        ? Deno.env.get("STRIPE_TEST_PRICE_ID")
+        : Deno.env.get("STRIPE_PRICE_ID");
+        
+      logDebug("デフォルトのPrice IDを使用", { priceId });
+    }
     
     if (!priceId) {
       throw new Error("Stripe Price IDが設定されていません");
@@ -110,7 +161,14 @@ serve(async (req) => {
       cancel_url: returnUrl,
       metadata: {
         user_id: user.id,
+        plan_type: planType
       }
+    });
+    
+    logDebug("Checkoutセッション作成完了", { 
+      sessionId: session.id, 
+      url: session.url,
+      planType
     });
 
     // セッションURLをフロントエンドに返す
@@ -122,7 +180,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error("Checkoutセッション作成エラー:", error);
+    logDebug("Checkoutセッション作成エラー:", error);
     
     return new Response(
       JSON.stringify({ error: error.message || "Checkoutセッション作成中にエラーが発生しました" }),

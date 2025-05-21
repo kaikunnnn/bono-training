@@ -38,8 +38,13 @@ const ContentTest: React.FC = () => {
   const mockSubscriptionValue = {
     isSubscribed: userPlan.isActive,
     planType: userPlan.planType,
+    planMembers: userPlan.planType === 'growth' || userPlan.planType === 'community', // growthプランとcommunityプランは planMembers をtrueに設定
     loading: false,
-    error: null
+    error: null,
+    refresh: async () => {
+      console.log('Mock refresh called');
+      // 実際の更新処理は行わない（モックのため）
+    }
   };
 
   return (
@@ -98,7 +103,11 @@ const ContentTest: React.FC = () => {
                 <div className="pt-4">
                   <h3 className="text-sm font-medium mb-2">現在の設定</h3>
                   <pre className="bg-muted p-2 rounded text-xs">
-                    {JSON.stringify(userPlan, null, 2)}
+                    {JSON.stringify({
+                      ...userPlan,
+                      // トレーニングメンバーシップ状態を表示に追加
+                      planMembers: userPlan.planType === 'growth' || userPlan.planType === 'community'
+                    }, null, 2)}
                   </pre>
                 </div>
               </CardContent>

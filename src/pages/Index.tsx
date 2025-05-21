@@ -11,13 +11,15 @@ const Index: React.FC = () => {
   return (
     <Layout>
       <div className="container py-8">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl font-bold mb-4">ようこそ</h1>
-          <p className="text-lg mb-8">
+        <div className="max-w-3xl mx-auto text-center animate-fade-in">
+          <h1 className="text-4xl font-bold mb-4 opacity-0 animate-[fade-in_0.6s_ease-out_0.2s_forwards]">
+            ようこそ
+          </h1>
+          <p className="text-lg mb-8 opacity-0 animate-[fade-in_0.6s_ease-out_0.4s_forwards]">
             ログインして、アプリケーションの全機能をお試しください。
           </p>
 
-          <div className="space-y-4">
+          <div className="space-y-4 opacity-0 animate-[fade-in_0.6s_ease-out_0.6s_forwards]">
             {!user ? (
               <Button asChild size="lg">
                 <Link to="/auth">ログイン</Link>

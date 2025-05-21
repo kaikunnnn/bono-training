@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { createCheckoutSession } from '@/services/stripe';
 import { getCurrentPlan } from '@/utils/stripe';
+import { PlanType } from '@/utils/subscriptionPlans';
 
 interface SubscriptionButtonProps {
   /**
@@ -19,6 +20,10 @@ interface SubscriptionButtonProps {
    * isTest - テスト環境のPrice IDを強制的に使用するかどうか
    */
   isTest?: boolean;
+  /**
+   * プランタイプ - サブスクリプションのプランタイプ
+   */
+  planType?: PlanType;
 }
 
 /**
@@ -27,7 +32,8 @@ interface SubscriptionButtonProps {
 export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({ 
   returnUrl,
   label = '購読を開始する',
-  isTest = false
+  isTest = false,
+  planType = 'standard'
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -41,7 +47,7 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
       const finalReturnUrl = returnUrl || defaultReturnUrl;
       
       // チェックアウトセッションを作成
-      const { url, error } = await createCheckoutSession(finalReturnUrl, isTest);
+      const { url, error } = await createCheckoutSession(finalReturnUrl, planType, isTest);
       
       if (error || !url) {
         throw new Error(error?.message || '決済処理の準備に失敗しました');
