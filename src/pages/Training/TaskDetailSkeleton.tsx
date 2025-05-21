@@ -1,4 +1,3 @@
-
 import React from 'react';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';

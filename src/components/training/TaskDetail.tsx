@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tables } from '@/integrations/supabase/types';
@@ -7,17 +6,16 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import TaskHeader from './TaskHeader';
 import TaskVideo from './TaskVideo';
-import TaskContent from './TaskContent';
+import MdxPreview from './MdxPreview';
 
 interface TaskDetailProps {
-  task: Tables<'task'>;
+  task: Tables<'task'> & { content?: string };
   training: Tables<'training'>;
   mdxContent: string;
   progress?: { status?: string; completed_at?: string | null } | null;
   className?: string;
   onProgressUpdate?: () => void;
   isPremium?: boolean;
-  isSubscribed?: boolean;
 }
 
 /**
@@ -30,22 +28,21 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   progress,
   className,
   onProgressUpdate,
-  isPremium = false,
-  isSubscribed = false
+  isPremium = false
 }) => {
   const { user } = useAuth();
-  const { isSubscribed: contextIsSubscribed, planMembers } = useSubscriptionContext();
+  const { isSubscribed, planMembers } = useSubscriptionContext();
   const navigate = useNavigate();
   const isCompleted = progress?.status === 'done';
 
   // プレミアムコンテンツへのアクセス権があるかどうかを判定
   // plan_members=true の場合にのみプレミアムコンテンツにアクセス可能
-  const hasPremiumAccess = contextIsSubscribed && planMembers;
+  const hasPremiumAccess = isSubscribed && planMembers;
 
   // デバッグ用ログ
   console.log('TaskDetail - コンテンツアクセス状態:', { 
     isPremium, 
-    isSubscribed: contextIsSubscribed,
+    isSubscribed, 
     planMembers,
     hasPremiumAccess,
     taskTitle: task.title,
@@ -77,10 +74,11 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
         className="mb-10"
       />
 
-      <TaskContent 
+      <MdxPreview 
         content={mdxContent}
         isPremium={isPremium}
-        hasPremiumAccess={hasPremiumAccess}
+        isSubscribed={hasPremiumAccess}
+        previewMarker="<!--PREMIUM-->"
         className="mt-6"
         taskId={task.id}
         userId={user?.id}

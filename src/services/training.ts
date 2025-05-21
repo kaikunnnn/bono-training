@@ -1,7 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
-import { getTrainingMetaFromStorage } from "./storage";
+import { getTrainingMetaFromStorage, getMdxContentFromStorage } from "./storage";
 import { Tables } from "@/integrations/supabase/types";
-import { Task, Training, TrainingDetailData } from "@/types/training";
+import { Task, Training, TrainingDetailData, TaskDetailData } from "@/types/training";
+import { loadMdxContent } from "@/utils/mdxLoader";
 
 /**
  * トレーニング詳細を取得する
@@ -121,7 +122,7 @@ export async function updateTaskProgress(
 /**
  * トレーニングのタスク詳細を取得する
  */
-export async function getTrainingTaskDetail(trainingSlug: string, taskSlug: string) {
+export async function getTrainingTaskDetail(trainingSlug: string, taskSlug: string): Promise<TaskDetailData | null> {
   try {
     // データベースからトレーニングとタスク情報を取得
     const { data: trainingData, error: trainingError } = await supabase
@@ -133,6 +134,35 @@ export async function getTrainingTaskDetail(trainingSlug: string, taskSlug: stri
 
     if (trainingError) {
       console.error('タスクデータ取得エラー:', trainingError);
+      
+      // データベースから取得できない場合はStorageから取得を試みる
+      try {
+        const mdxData = await loadMdxContent(trainingSlug, taskSlug);
+        const trainingMeta = await getTrainingMetaFromStorage(trainingSlug);
+        
+        if (mdxData && trainingMeta) {
+          return {
+            id: `storage-${taskSlug}`,
+            training_id: `storage-${trainingSlug}`,
+            slug: taskSlug,
+            title: mdxData.frontmatter.title,
+            order_index: mdxData.frontmatter.order_index || 1,
+            is_premium: mdxData.frontmatter.is_premium || false,
+            preview_sec: mdxData.frontmatter.preview_sec || 30,
+            content: mdxData.content,
+            video_full: mdxData.frontmatter.video_full || null,
+            video_preview: mdxData.frontmatter.video_preview || null,
+            created_at: null,
+            next_task: null,
+            prev_task: null,
+            trainingTitle: trainingMeta.frontmatter.title,
+            trainingSlug: trainingSlug
+          };
+        }
+      } catch (storageError) {
+        console.error('Storageからのタスクデータ取得エラー:', storageError);
+      }
+      
       return null;
     }
 
@@ -153,8 +183,19 @@ export async function getTrainingTaskDetail(trainingSlug: string, taskSlug: stri
     const prevTask = currentIndex > 0 ? allTasks?.[currentIndex - 1].slug : null;
     const nextTask = currentIndex < (allTasks?.length ?? 0) - 1 ? allTasks?.[currentIndex + 1].slug : null;
 
+    // Storageからコンテンツを取得
+    let content = '';
+    try {
+      const mdxData = await loadMdxContent(trainingSlug, taskSlug);
+      content = mdxData.content;
+    } catch (mdxError) {
+      console.error('MDXコンテンツ取得エラー:', mdxError);
+      content = task.content || '';
+    }
+
     return {
       ...task,
+      content,
       trainingTitle: trainingData.title,
       trainingSlug: trainingData.slug,
       prev_task: prevTask,
