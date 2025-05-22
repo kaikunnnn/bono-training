@@ -138,6 +138,23 @@ async function checkUserMemberSubscription(supabase, user) {
   }
 }
 
+// プレミアムコンテンツをフィルタリングする関数
+function filterPremiumContent(content: string, previewMarker: string = '<!--PREMIUM-->') {
+  // プレビューマーカーでコンテンツを分割
+  const contentParts = content.split(previewMarker);
+  
+  // マーカーがない場合、または分割後の配列が不正な場合は元のコンテンツを返す
+  if (contentParts.length <= 1) {
+    return { freeContent: content, hasPreviewMarker: false };
+  }
+  
+  // マーカーがある場合はマーカーまでのコンテンツを返す
+  return { 
+    freeContent: contentParts[0].trim(), 
+    hasPreviewMarker: true 
+  };
+}
+
 // MDXコンテンツ取得ハンドラ
 const handleGetMdxContent = async (req: Request): Promise<Response> => {
   try {
@@ -220,28 +237,39 @@ const handleGetMdxContent = async (req: Request): Promise<Response> => {
     }
     
     // プレミアムコンテンツのアクセス制御
-    const isPremium = mdxContent.frontmatter.is_premium;
-    
-    // プレミアムコンテンツで非認証ユーザーまたは非サブスクライバーの場合プレビュー表示
+    const isPremium = mdxContent.frontmatter.is_premium === true;
     let isFreePreview = false;
+    let contentToReturn = mdxContent.content;
     
+    // プレミアムコンテンツの場合のアクセス制御
     if (isPremium) {
       // 会員ステータスの確認
       const hasMembership = await checkUserMemberSubscription(supabaseAdmin, user);
       
-      // 非会員または未認証ユーザーはプレビューのみ表示
+      // 非会員または未認証ユーザーの場合
       if (!hasMembership) {
-        console.log('非会員ユーザーまたは未認証ユーザー: プレビュー表示');
+        console.log('非会員ユーザーまたは未認証ユーザー: プレミアムコンテンツを制限します');
         isFreePreview = true;
         
-        // フロントで処理を行うため、ここではコンテンツは変更せず、isFreePreviewフラグのみ設定
-        // （フラグを見てフロントエンド側でマーカーによる分割を行う）
+        // プレビューマーカーで分割
+        const previewMarker = mdxContent.frontmatter.preview_marker || '<!--PREMIUM-->';
+        const { freeContent, hasPreviewMarker } = filterPremiumContent(mdxContent.content, previewMarker);
+        
+        if (hasPreviewMarker) {
+          contentToReturn = freeContent;
+          console.log('プレミアムマーカーが見つかりました。コンテンツを制限します。');
+        } else {
+          // マーカーがない場合は全文を返すが、isFreePreviewフラグを設定
+          console.log('プレミアムマーカーが見つかりませんでした。フラグのみ設定します。');
+        }
+      } else {
+        console.log('メンバーシップ会員: 全コンテンツを表示');
       }
     }
     
     return new Response(
       JSON.stringify({ 
-        content: mdxContent.content,
+        content: contentToReturn,
         frontmatter: mdxContent.frontmatter,
         isFreePreview
       }),

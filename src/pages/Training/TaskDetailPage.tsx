@@ -1,123 +1,157 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
-import { getTrainingTaskDetail, getTrainingDetail, getUserTaskProgress } from '@/services/training';
-import { TaskDetailData } from '@/types/training';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { getTrainingDetail } from '@/services/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskDetail from '@/components/training/TaskDetail';
-import TaskDetailSkeleton from './TaskDetailSkeleton';
-import TaskDetailError from './TaskDetailError';
 import TaskNavigation from './TaskNavigation';
+import { getUserTaskProgress, updateUserTaskProgress } from '@/services/training';
 
 const TaskDetailPage = () => {
-  const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
-  const { user } = useAuth();
+  const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
+  const navigate = useNavigate();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [taskData, setTaskData] = useState<TaskDetailData | null>(null);
-  const [trainingData, setTrainingData] = useState<any>(null);
-  const [progress, setProgress] = useState<any>(null);
-  const [mdxContent, setMdxContent] = useState<string>('');
+  const { user } = useAuth();
   
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [trainingData, setTrainingData] = useState<any>(null);
+  const [taskData, setTaskData] = useState<any>(null);
+  const [mdxContent, setMdxContent] = useState<string>('');
+  const [progress, setProgress] = useState<any>(null);
+  const [isFreePreview, setIsFreePreview] = useState(false);
+
+  // タスクIDが変更されたときにコンテンツを再取得
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setError(null);
+      
       try {
-        if (slug && taskSlug) {
-          // トレーニング詳細データを取得
-          const trainingDetailData = await getTrainingDetail(slug);
-          setTrainingData(trainingDetailData);
-          
-          // タスク詳細データを取得（すでにMDXコンテンツと統合されたデータ）
-          const taskDetailData = await getTrainingTaskDetail(slug, taskSlug);
-          
-          // MDXコンテンツをUIで表示するために別途保持
-          setMdxContent(taskDetailData.content || '');
-          
-          // タスクデータをセット
-          setTaskData(taskDetailData as TaskDetailData);
-          
-          // ユーザーがログインしている場合は進捗状況を取得
-          if (user) {
-            try {
-              // 現在のタスクの進捗状況を取得
-              const progressData = await getUserTaskProgress(user.id, trainingDetailData.id);
-              if (!progressData.error) {
-                setProgress(progressData);
-              }
-            } catch (progressError) {
-              console.error('進捗状況の取得に失敗しました:', progressError);
-              // プログレスエラーでページ全体が失敗するわけではないので続行
-            }
+        if (!trainingSlug || !taskSlug) {
+          throw new Error('トレーニングまたはタスクが指定されていません');
+        }
+
+        // トレーニングデータを取得
+        const trainingDetailData = await getTrainingDetail(trainingSlug);
+        if (!trainingDetailData) {
+          throw new Error('トレーニングが見つかりませんでした');
+        }
+        setTrainingData(trainingDetailData);
+
+        // タスクデータを取得
+        const taskItem = trainingDetailData.tasks?.find((task: any) => task.slug === taskSlug);
+        if (!taskItem) {
+          throw new Error('タスクが見つかりませんでした');
+        }
+        setTaskData(taskItem);
+
+        // MDXコンテンツを取得
+        const { data, error } = await supabase.functions.invoke('get-mdx-content', {
+          body: { trainingSlug, taskSlug }
+        });
+
+        if (error) {
+          throw new Error(`MDXコンテンツの取得に失敗しました: ${error.message}`);
+        }
+        
+        if (data.error) {
+          console.warn('MDXコンテンツ警告:', data.error);
+        }
+        
+        setMdxContent(data.content || '');
+        setIsFreePreview(data.isFreePreview || false);
+
+        // ユーザーの進捗情報を取得
+        if (user && taskItem.id) {
+          try {
+            const userProgress = await getUserTaskProgress(user.id, taskItem.id);
+            setProgress(userProgress);
+          } catch (progressError) {
+            console.error('進捗状況の取得に失敗しました:', progressError);
           }
         }
-      } catch (error) {
-        console.error("データの取得中にエラーが発生しました:", error);
+
+      } catch (err) {
+        console.error('データ取得エラー:', err);
+        setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
         toast({
-          title: "エラーが発生しました",
-          description: "コンテンツの取得に失敗しました。もう一度お試しください。",
-          variant: "destructive"
+          title: 'エラーが発生しました',
+          description: err instanceof Error ? err.message : '不明なエラーが発生しました',
+          variant: 'destructive',
         });
       } finally {
         setLoading(false);
       }
     };
-    
+
     fetchData();
-  }, [slug, taskSlug, user, toast]);
-  
-  // タスク進捗が更新されたときに進捗データを再取得
-  const handleProgressUpdate = async () => {
-    if (!user || !trainingData?.id) return;
-    
+  }, [trainingSlug, taskSlug, user, toast]);
+
+  // タスク完了状態の更新ハンドラ
+  const handleProgressUpdate = async (status: string = 'done') => {
+    if (!user || !taskData?.id) return;
+
     try {
-      const progressData = await getUserTaskProgress(user.id, trainingData.id);
-      if (!progressData.error) {
-        setProgress(progressData);
+      const updatedProgress = await updateUserTaskProgress(user.id, taskData.id, status);
+      if (updatedProgress) {
+        setProgress(updatedProgress);
         toast({
-          title: "進捗を更新しました",
-          description: "タスクの進捗状態が正常に更新されました。",
+          title: '進捗を更新しました',
+          description: status === 'done' ? 'タスクを完了としてマークしました' : '進捗状態を更新しました',
+          variant: 'default',
         });
       }
     } catch (error) {
-      console.error('進捗状況の更新に失敗しました:', error);
+      console.error('進捗の更新中にエラーが発生しました:', error);
       toast({
-        title: "エラーが発生しました",
-        description: "進捗状況の更新に失敗しました。",
-        variant: "destructive"
+        title: 'エラーが発生しました',
+        description: '進捗の更新に失敗しました。もう一度お試しください。',
+        variant: 'destructive',
       });
     }
   };
-  
-  if (loading) {
-    return <TaskDetailSkeleton />;
+
+  // エラー表示
+  if (error) {
+    navigate(`/training/${trainingSlug}/error`, {
+      state: { error, trainingSlug, taskSlug, returnPath: `/training/${trainingSlug}` }
+    });
+    return null;
   }
-  
-  if (!taskData || !trainingData) {
-    return <TaskDetailError />;
-  }
-  
+
   return (
     <TrainingLayout>
-      <TrainingHeader />
-      <div className="container py-8">
-        <TaskDetail
-          task={taskData}
-          training={trainingData}
-          mdxContent={mdxContent}
-          progress={progress?.progressMap?.[taskData.id]}
-          onProgressUpdate={handleProgressUpdate}
-          isPremium={taskData.is_premium || false}
-          className="mb-8"
-        />
-
-        <TaskNavigation 
-          trainingSlug={slug || ''} 
-          nextTaskSlug={taskData.next_task}
-        />
+      <div className="mb-6">
+        {trainingData && taskData && (
+          <TaskNavigation 
+            training={trainingData} 
+            currentTaskSlug={taskSlug} 
+          />
+        )}
+      </div>
+      
+      <div className="px-6 py-2">
+        {loading ? (
+          <div className="flex justify-center items-center h-[400px]">
+            <div className="animate-pulse">読み込み中...</div>
+          </div>
+        ) : (
+          trainingData && taskData && (
+            <TaskDetail
+              task={taskData}
+              training={trainingData}
+              mdxContent={mdxContent}
+              progress={progress}
+              onProgressUpdate={handleProgressUpdate}
+              isPremium={taskData.is_premium}
+              isFreePreview={isFreePreview}
+            />
+          )
+        )}
       </div>
     </TrainingLayout>
   );
