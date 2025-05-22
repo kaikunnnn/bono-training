@@ -23,15 +23,36 @@ export async function getTrainingMetaFromStorage(trainingSlug: string): Promise<
     // メタファイルのパスを構築
     const filePath = `content/training/${trainingSlug}/meta.md`;
     
+    // バケットの存在確認
+    const { data: bucketData, error: bucketError } = await supabase
+      .storage
+      .getBucket('content');
+
+    if (bucketError) {
+      console.error('Storage bucketの確認エラー:', bucketError);
+      throw new Error(`Storage bucket 'content' が見つかりません`);
+    }
+
     // ファイルの存在確認
     const { data: existsData, error: existsError } = await supabase
       .storage
       .from('content')
       .list(`content/training/${trainingSlug}`);
 
-    if (existsError || !existsData || existsData.length === 0 || !existsData.some(file => file.name === 'meta.md')) {
+    if (existsError) {
+      console.error('ファイル一覧取得エラー:', existsError);
+      throw new Error(`トレーニングフォルダの確認中にエラーが発生しました: ${trainingSlug}`);
+    }
+
+    if (!existsData || existsData.length === 0) {
+      console.error('トレーニングフォルダが見つかりません:', trainingSlug);
+      throw new Error(`トレーニングフォルダが見つかりません: ${trainingSlug}`);
+    }
+
+    const metaFile = existsData.find(file => file.name === 'meta.md');
+    if (!metaFile) {
       console.error('メタファイルが見つかりません:', filePath);
-      return null;
+      throw new Error(`メタファイルが見つかりません: ${filePath}\nトレーニングフォルダは存在しますが、meta.mdファイルがありません。`);
     }
 
     // ファイル内容の取得
@@ -42,7 +63,7 @@ export async function getTrainingMetaFromStorage(trainingSlug: string): Promise<
 
     if (error) {
       console.error('ファイル取得エラー:', error);
-      return null;
+      throw new Error(`メタファイルの取得に失敗しました: ${error.message}`);
     }
 
     // ファイル内容をテキストに変換
@@ -65,7 +86,12 @@ export async function getTrainingMetaFromStorage(trainingSlug: string): Promise<
       }
     };
   } catch (error) {
-    console.error('メタデータ取得エラー:', error);
+    // エラーをより詳細に記録
+    console.error('メタデータ取得エラー:', {
+      error,
+      trainingSlug,
+      timestamp: new Date().toISOString()
+    });
     return null;
   }
 }
