@@ -31,14 +31,14 @@ interface MdxContentResponse {
 // ストレージからMDXファイルを取得する関数
 async function getMdxFileFromStorage(supabase, trainingSlug: string, taskSlug: string) {
   try {
-    // パスの構築: content/trainingSlug/taskSlug/content.md
-    const filePath = `content/${trainingSlug}/${taskSlug}/content.md`;
+    // 新しいパスの構築: content/training/trainingSlug/taskSlug/content.md
+    const filePath = `content/training/${trainingSlug}/${taskSlug}/content.md`;
     
     // ファイルの存在確認
     const { data: existsData, error: existsError } = await supabase
       .storage
       .from('content')
-      .list(`content/${trainingSlug}/${taskSlug}`);
+      .list(`content/training/${trainingSlug}/${taskSlug}`);
 
     if (existsError) {
       console.error('ファイル存在確認エラー:', existsError);

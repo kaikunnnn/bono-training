@@ -44,17 +44,19 @@ async function getTrainingMetaFromStorage(supabase, trainingSlug?: string) {
   try {
     // 特定のトレーニングが指定されている場合
     if (trainingSlug) {
-      const filePath = `public/${trainingSlug}/meta.md`;
+      // 新しいパスを優先的に確認
+      const filePath = `content/training/${trainingSlug}/meta.md`;
       
       // ファイルの存在確認
       const { data: existsData, error: existsError } = await supabase
         .storage
         .from('content')
-        .list(`public/${trainingSlug}`);
+        .list(`content/training/${trainingSlug}`);
 
+      // 新しいパスで見つからなかった場合のエラーログ
       if (existsError || !existsData || existsData.length === 0 || !existsData.some(file => file.name === 'meta.md')) {
-        console.error('メタファイルが見つかりません:', filePath);
-        throw new Error('指定されたトレーニングのメタデータが見つかりません');
+        console.log(`新しいパス ${filePath} にメタファイルが見つかりません`);
+        throw new Error('トレーニングのメタデータが見つかりません');
       }
 
       // ファイル内容の取得
@@ -89,11 +91,11 @@ async function getTrainingMetaFromStorage(supabase, trainingSlug?: string) {
     } 
     // 全トレーニングの一覧を取得する場合
     else {
-      // public/ディレクトリ内のすべてのフォルダを列挙
+      // 新しいパスでのフォルダ一覧取得
       const { data: folders, error } = await supabase
         .storage
         .from('content')
-        .list('public', { sortBy: { column: 'name', order: 'asc' } });
+        .list('content/training', { sortBy: { column: 'name', order: 'asc' } });
 
       if (error) {
         console.error('フォルダ一覧取得エラー:', error);
@@ -134,7 +136,7 @@ async function getTrainingTaskList(supabase, trainingSlug: string) {
     const { data: taskFolders, error } = await supabase
       .storage
       .from('content')
-      .list(`public/${trainingSlug}`, { sortBy: { column: 'name', order: 'asc' } });
+      .list(`content/training/${trainingSlug}`, { sortBy: { column: 'name', order: 'asc' } });
 
     if (error) {
       console.error('タスク一覧取得エラー:', error);
@@ -157,14 +159,14 @@ async function getTrainingTaskList(supabase, trainingSlug: string) {
         const { data: files, error: filesError } = await supabase
           .storage
           .from('content')
-          .list(`public/${trainingSlug}/${taskSlug}`);
+          .list(`content/training/${trainingSlug}/${taskSlug}`);
 
         if (filesError || !files || !files.some(file => file.name === 'content.md')) {
           console.warn(`タスク ${taskSlug} のコンテンツファイルがありません`);
           continue;
         }
 
-        const filePath = `public/${trainingSlug}/${taskSlug}/content.md`;
+        const filePath = `content/training/${trainingSlug}/${taskSlug}/content.md`;
         const { data, error: contentError } = await supabase
           .storage
           .from('content')
