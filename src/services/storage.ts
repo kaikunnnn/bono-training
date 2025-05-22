@@ -21,13 +21,13 @@ export interface MdxContent {
 export async function getTrainingMetaFromStorage(trainingSlug: string): Promise<MdxContent | null> {
   try {
     // メタファイルのパスを構築
-    const filePath = `content/${trainingSlug}/meta.md`;
+    const filePath = `content/training/${trainingSlug}/meta.md`;
     
     // ファイルの存在確認
     const { data: existsData, error: existsError } = await supabase
       .storage
       .from('content')
-      .list(`content/${trainingSlug}`);
+      .list(`content/training/${trainingSlug}`);
 
     if (existsError || !existsData || existsData.length === 0 || !existsData.some(file => file.name === 'meta.md')) {
       console.error('メタファイルが見つかりません:', filePath);
@@ -76,13 +76,13 @@ export async function getTrainingMetaFromStorage(trainingSlug: string): Promise<
 export async function getMdxContentFromStorage(trainingSlug: string, taskSlug: string): Promise<MdxContent | null> {
   try {
     // コンテンツファイルのパスを構築
-    const filePath = `content/${trainingSlug}/${taskSlug}/content.md`;
+    const filePath = `content/training/${trainingSlug}/${taskSlug}/content.md`;
     
     // ファイルの存在確認
     const { data: existsData, error: existsError } = await supabase
       .storage
       .from('content')
-      .list(`content/${trainingSlug}/${taskSlug}`);
+      .list(`content/training/${trainingSlug}/${taskSlug}`);
 
     if (existsError || !existsData || existsData.length === 0 || !existsData.some(file => file.name === 'content.md')) {
       console.error('コンテンツファイルが見つかりません:', filePath);

@@ -17,9 +17,10 @@ export async function getTrainingDetail(slug: string): Promise<TrainingDetailDat
       .from('training')
       .select('*, task(*)')
       .eq('slug', slug)
-      .single();
-    
-    if (trainingError) {
+      .maybeSingle(); // single()の代わりにmaybeSingle()を使用
+
+    if (trainingError && trainingError.code !== 'PGRST116') {
+      // PGRST116以外のエラーの場合はエラーを投げる
       console.error('トレーニングデータ取得エラー:', trainingError);
       
       // Storageからのデータがある場合はそれを使用
@@ -39,18 +40,33 @@ export async function getTrainingDetail(slug: string): Promise<TrainingDetailDat
       return null;
     }
 
+    // データベースにデータがない場合はStorageのデータのみを使用
+    if (!trainingData && metaData) {
+      return {
+        id: `storage-${slug}`,
+        slug: slug,
+        title: metaData.frontmatter.title,
+        description: metaData.frontmatter.description || metaData.content.split('\n')[0],
+        type: metaData.frontmatter.type || 'skill',
+        difficulty: metaData.frontmatter.difficulty || '初級',
+        tags: metaData.frontmatter.tags || [],
+        tasks: [], // タスクリストは別途取得
+        thumbnailImage: metaData.frontmatter.thumbnailImage
+      };
+    }
+
     // メタデータとデータベースの情報をマージ
     const mergedData: TrainingDetailData = {
-      id: trainingData.id,
-      slug: trainingData.slug,
-      title: metaData?.frontmatter.title || trainingData.title,
-      description: metaData?.frontmatter.description || trainingData.description || '',
-      type: metaData?.frontmatter.type || trainingData.type || 'skill',
-      difficulty: metaData?.frontmatter.difficulty || trainingData.difficulty || '初級',
-      tags: metaData?.frontmatter.tags || trainingData.tags || [],
-      tasks: trainingData.task as Task[],
+      id: trainingData?.id || `storage-${slug}`,
+      slug: trainingData?.slug || slug,
+      title: metaData?.frontmatter.title || trainingData?.title || slug,
+      description: metaData?.frontmatter.description || trainingData?.description || '',
+      type: metaData?.frontmatter.type || trainingData?.type || 'skill',
+      difficulty: metaData?.frontmatter.difficulty || trainingData?.difficulty || '初級',
+      tags: metaData?.frontmatter.tags || trainingData?.tags || [],
+      tasks: trainingData?.task as Task[] || [],
       thumbnailImage: metaData?.frontmatter.thumbnailImage,
-      has_premium_content: trainingData.task?.some((task: Task) => task.is_premium) || false
+      has_premium_content: trainingData?.task?.some((task: Task) => task.is_premium) || false
     };
 
     return mergedData;
@@ -130,12 +146,44 @@ export async function getTrainingTaskDetail(trainingSlug: string, taskSlug: stri
       .select('*, task!inner(*)')
       .eq('slug', trainingSlug)
       .eq('task.slug', taskSlug)
-      .single();
+      .maybeSingle(); // single()の代わりにmaybeSingle()を使用
 
-    if (trainingError) {
+    if (trainingError && trainingError.code !== 'PGRST116') {
       console.error('タスクデータ取得エラー:', trainingError);
       
       // データベースから取得できない場合はStorageから取得を試みる
+      try {
+        const mdxData = await loadMdxContent(trainingSlug, taskSlug);
+        const trainingMeta = await getTrainingMetaFromStorage(trainingSlug);
+        
+        if (mdxData && trainingMeta) {
+          return {
+            id: `storage-${taskSlug}`,
+            training_id: `storage-${trainingSlug}`,
+            slug: taskSlug,
+            title: mdxData.frontmatter.title,
+            order_index: mdxData.frontmatter.order_index || 1,
+            is_premium: mdxData.frontmatter.is_premium || false,
+            preview_sec: mdxData.frontmatter.preview_sec || 30,
+            content: mdxData.content,
+            video_full: mdxData.frontmatter.video_full || null,
+            video_preview: mdxData.frontmatter.video_preview || null,
+            created_at: null,
+            next_task: null,
+            prev_task: null,
+            trainingTitle: trainingMeta.frontmatter.title,
+            trainingSlug: trainingSlug
+          };
+        }
+      } catch (storageError) {
+        console.error('Storageからのタスクデータ取得エラー:', storageError);
+      }
+      
+      return null;
+    }
+
+    // データベースにデータがない場合はStorageから取得を試みる
+    if (!trainingData) {
       try {
         const mdxData = await loadMdxContent(trainingSlug, taskSlug);
         const trainingMeta = await getTrainingMetaFromStorage(trainingSlug);

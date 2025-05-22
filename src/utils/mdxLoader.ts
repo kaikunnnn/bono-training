@@ -157,7 +157,7 @@ export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
     const { data: folders, error } = await supabase
       .storage
       .from('content')
-      .list('content', { sortBy: { column: 'name', order: 'asc' } });
+      .list('content/training', { sortBy: { column: 'name', order: 'asc' } });
     
     if (error) {
       console.error('フォルダ一覧取得エラー:', error);
