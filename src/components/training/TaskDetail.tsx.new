@@ -1,0 +1,50 @@
+
+import React from 'react';
+import TaskHeader from './TaskHeader';
+import TaskContent from './TaskContent';
+import { Badge } from '@/components/ui/badge';
+import { Video } from 'lucide-react';
+import TaskVideo from './TaskVideo';
+
+// この型定義はプロジェクト内の型定義ファイルから適宜調整が必要かもしれません
+interface TaskDetailProps {
+  task: any;
+  training: any;
+  mdxContent: string;
+  progress?: any;
+  onProgressUpdate?: (status?: string) => void;
+  isPremium?: boolean;
+  isFreePreview?: boolean; // 追加
+}
+
+/**
+ * タスク詳細表示コンポーネント
+ */
+const TaskDetail: React.FC<TaskDetailProps> = ({
+  task,
+  training,
+  mdxContent,
+  progress,
+  onProgressUpdate,
+  isPremium = false,
+  isFreePreview = false // 追加
+}) => {
+  // ... 既存のコード
+  
+  return (
+    <div className="task-detail">
+      {/* ... 既存のコード */}
+      <TaskContent 
+        content={mdxContent}
+        isPremium={isPremium}
+        isFreePreview={isFreePreview} // 追加
+        userId={progress?.userId}
+        taskId={task.id}
+        isCompleted={isCompleted}
+        onProgressUpdate={onProgressUpdate}
+      />
+    </div>
+  );
+};
+
+export default TaskDetail;

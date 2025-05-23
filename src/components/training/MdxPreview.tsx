@@ -2,7 +2,7 @@
 import React from 'react';
 import Markdown from 'react-markdown';
 import { cn } from '@/lib/utils';
-import { PremiumContentBanner } from './PremiumContentBanner';
+import PremiumContentBanner from './PremiumContentBanner';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 
 interface MdxPreviewProps {
@@ -50,7 +50,7 @@ export function MdxPreview({
 
   return (
     <div className={cn("mdx-preview space-y-4", className)}>
-      <Markdown className="prose dark:prose-invert max-w-none">
+      <Markdown>
         {displayContent}
       </Markdown>
       

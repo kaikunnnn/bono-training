@@ -2,13 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { getTrainingDetail } from '@/services/training';
+import { getTrainingDetail, updateTaskProgress } from '@/services/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskDetail from '@/components/training/TaskDetail';
 import TaskNavigation from './TaskNavigation';
-import { getUserTaskProgress, updateUserTaskProgress } from '@/services/training';
+import { getUserTaskProgress } from '@/services/training';
 
 const TaskDetailPage = () => {
   const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
@@ -96,7 +96,7 @@ const TaskDetailPage = () => {
     if (!user || !taskData?.id) return;
 
     try {
-      const updatedProgress = await updateUserTaskProgress(user.id, taskData.id, status);
+      const updatedProgress = await updateTaskProgress(user.id, taskData.id, status as 'done' | 'todo' | 'in-progress');
       if (updatedProgress) {
         setProgress(updatedProgress);
         toast({
@@ -129,7 +129,7 @@ const TaskDetailPage = () => {
         {trainingData && taskData && (
           <TaskNavigation 
             training={trainingData} 
-            currentTaskSlug={taskSlug} 
+            currentTaskSlug={taskSlug || ''}
           />
         )}
       </div>
