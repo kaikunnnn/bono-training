@@ -32,9 +32,6 @@ const TaskDetailPage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold">エラー</h1>
             <p className="mt-2">トレーニングまたはタスクが指定されていません</p>
-            <p className="mt-2 text-sm text-gray-500">
-              trainingSlug: {trainingSlug || '未指定'}, taskSlug: {taskSlug || '未指定'}
-            </p>
             <button 
               onClick={() => navigate('/training')}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -152,9 +149,6 @@ const TaskDetailPage = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-red-600">エラーが発生しました</h1>
             <p className="mt-2 text-gray-600">{error}</p>
-            <p className="mt-2 text-sm text-gray-500">
-              パラメータ: trainingSlug={trainingSlug}, taskSlug={taskSlug}
-            </p>
             <div className="mt-4 space-x-2">
               <button 
                 onClick={() => navigate(`/training/${trainingSlug}`)}
