@@ -18,6 +18,7 @@ interface TaskDetailProps {
   onProgressUpdate?: () => void;
   isPremium?: boolean;
   isSubscribed?: boolean;
+  isFreePreview?: boolean;
 }
 
 /**
@@ -31,7 +32,8 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   className,
   onProgressUpdate,
   isPremium = false,
-  isSubscribed = false
+  isSubscribed = false,
+  isFreePreview = false
 }) => {
   const { user } = useAuth();
   const { isSubscribed: contextIsSubscribed, planMembers } = useSubscriptionContext();
@@ -48,6 +50,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
     isSubscribed: contextIsSubscribed,
     planMembers,
     hasPremiumAccess,
+    isFreePreview,
     taskTitle: task.title,
     isCompleted
   });
@@ -80,6 +83,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
       <TaskContent 
         content={mdxContent}
         isPremium={isPremium}
+        isFreePreview={isFreePreview}
         hasPremiumAccess={hasPremiumAccess}
         className="mt-6"
         taskId={task.id}
