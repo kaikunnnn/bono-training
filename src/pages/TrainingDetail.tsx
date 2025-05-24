@@ -26,14 +26,36 @@ const TrainingDetail = () => {
   
   const hasPremiumAccess = isSubscribed && planMembers;
   
+  // slugが存在しない場合のエラーハンドリング
+  if (!slug) {
+    return (
+      <TrainingLayout>
+        <TrainingHeader />
+        <div className="container py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">エラー</h1>
+            <p className="mt-2">トレーニングスラッグが指定されていません。</p>
+            <Button
+              className="mt-4"
+              onClick={() => navigate('/training')}
+            >
+              トレーニング一覧に戻る
+            </Button>
+          </div>
+        </div>
+      </TrainingLayout>
+    );
+  }
+  
   useEffect(() => {
     const fetchTrainingData = async () => {
       setLoading(true);
       try {
-        if (!slug) return;
-
+        console.log('TrainingDetail - slug:', slug);
+        
         // トレーニング詳細データを取得
         const trainingDetailData = await getTrainingDetail(slug);
+        console.log('TrainingDetail - trainingDetailData:', trainingDetailData);
         setTrainingData(trainingDetailData);
         
         // ユーザーがログインしている場合は進捗状況を取得
@@ -86,7 +108,7 @@ const TrainingDetail = () => {
         <div className="container py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">トレーニングが見つかりません</h1>
-            <p className="mt-2">指定されたトレーニングは存在しないか、アクセスできません。</p>
+            <p className="mt-2">指定されたトレーニング「{slug}」は存在しないか、アクセスできません。</p>
             <Button
               className="mt-4"
               onClick={handleBack}
@@ -98,6 +120,8 @@ const TrainingDetail = () => {
       </TrainingLayout>
     );
   }
+  
+  console.log('TrainingDetail - rendering with slug:', slug, 'trainingData:', trainingData);
   
   return (
     <TrainingLayout>
@@ -158,7 +182,7 @@ const TrainingDetail = () => {
               <TaskList 
                 tasks={trainingData.tasks || []} 
                 progressMap={progressMap} 
-                trainingSlug={slug || ''}
+                trainingSlug={slug}
               />
             </div>
           </div>
@@ -169,7 +193,7 @@ const TrainingDetail = () => {
                 <TrainingProgress 
                   tasks={trainingData.tasks || []}
                   progressMap={progressMap}
-                  trainingSlug={slug || ''}
+                  trainingSlug={slug}
                 />
               </div>
             )}

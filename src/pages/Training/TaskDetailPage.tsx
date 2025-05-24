@@ -24,6 +24,26 @@ const TaskDetailPage = () => {
   const [progress, setProgress] = useState<any>(null);
   const [isFreePreview, setIsFreePreview] = useState(false);
 
+  // パラメータが存在しない場合のエラーハンドリング
+  if (!trainingSlug || !taskSlug) {
+    return (
+      <TrainingLayout>
+        <div className="container py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold">エラー</h1>
+            <p className="mt-2">トレーニングまたはタスクが指定されていません</p>
+            <button 
+              onClick={() => navigate('/training')}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              トレーニング一覧に戻る
+            </button>
+          </div>
+        </div>
+      </TrainingLayout>
+    );
+  }
+
   // タスクIDが変更されたときにコンテンツを再取得
   useEffect(() => {
     const fetchData = async () => {
@@ -31,23 +51,23 @@ const TaskDetailPage = () => {
       setError(null);
       
       try {
-        if (!trainingSlug || !taskSlug) {
-          throw new Error('トレーニングまたはタスクが指定されていません');
-        }
+        console.log('TaskDetailPage - trainingSlug:', trainingSlug, 'taskSlug:', taskSlug);
 
         // トレーニングデータを取得
         const trainingDetailData = await getTrainingDetail(trainingSlug);
         if (!trainingDetailData) {
-          throw new Error('トレーニングが見つかりませんでした');
+          throw new Error(`トレーニング「${trainingSlug}」が見つかりませんでした`);
         }
         setTrainingData(trainingDetailData);
+        console.log('TaskDetailPage - trainingDetailData:', trainingDetailData);
 
         // タスクデータを取得
         const taskItem = trainingDetailData.tasks?.find((task: any) => task.slug === taskSlug);
         if (!taskItem) {
-          throw new Error('タスクが見つかりませんでした');
+          throw new Error(`タスク「${taskSlug}」が見つかりませんでした。利用可能なタスク: ${trainingDetailData.tasks?.map((t: any) => t.slug).join(', ')}`);
         }
         setTaskData(taskItem);
+        console.log('TaskDetailPage - taskItem:', taskItem);
 
         // MDXコンテンツを取得
         const { data, error } = await supabase.functions.invoke('get-mdx-content', {
@@ -55,6 +75,7 @@ const TaskDetailPage = () => {
         });
 
         if (error) {
+          console.error('MDXコンテンツ取得エラー:', error);
           throw new Error(`MDXコンテンツの取得に失敗しました: ${error.message}`);
         }
         
@@ -64,6 +85,10 @@ const TaskDetailPage = () => {
         
         setMdxContent(data.content || '');
         setIsFreePreview(data.isFreePreview || false);
+        console.log('TaskDetailPage - MDXコンテンツ取得成功:', { 
+          contentLength: data.content?.length, 
+          isFreePreview: data.isFreePreview 
+        });
 
         // ユーザーの進捗情報を取得
         if (user && taskItem.id) {
@@ -77,10 +102,11 @@ const TaskDetailPage = () => {
 
       } catch (err) {
         console.error('データ取得エラー:', err);
-        setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+        const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
+        setError(errorMessage);
         toast({
           title: 'エラーが発生しました',
-          description: err instanceof Error ? err.message : '不明なエラーが発生しました',
+          description: errorMessage,
           variant: 'destructive',
         });
       } finally {
@@ -117,10 +143,30 @@ const TaskDetailPage = () => {
 
   // エラー表示
   if (error) {
-    navigate(`/training/${trainingSlug}/error`, {
-      state: { error, trainingSlug, taskSlug, returnPath: `/training/${trainingSlug}` }
-    });
-    return null;
+    return (
+      <TrainingLayout>
+        <div className="container py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-red-600">エラーが発生しました</h1>
+            <p className="mt-2 text-gray-600">{error}</p>
+            <div className="mt-4 space-x-2">
+              <button 
+                onClick={() => navigate(`/training/${trainingSlug}`)}
+                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                トレーニングページに戻る
+              </button>
+              <button 
+                onClick={() => navigate('/training')}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                トレーニング一覧に戻る
+              </button>
+            </div>
+          </div>
+        </div>
+      </TrainingLayout>
+    );
   }
 
   return (
@@ -129,7 +175,8 @@ const TaskDetailPage = () => {
         {trainingData && taskData && (
           <TaskNavigation 
             training={trainingData} 
-            currentTaskSlug={taskSlug || ''}
+            currentTaskSlug={taskSlug}
+            trainingSlug={trainingSlug}
           />
         )}
       </div>

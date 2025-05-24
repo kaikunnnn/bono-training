@@ -9,14 +9,23 @@ import { Task } from '@/types/training';
 interface TaskListProps {
   tasks: Task[];
   progressMap?: Record<string, { status: string, completed_at: string | null }>;
-  trainingSlug?: string;
+  trainingSlug: string; // 必須にして空文字列を防ぐ
 }
 
 const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSlug }) => {
   const { isSubscribed } = useSubscriptionContext();
   
-  // trainingSlug が指定されていない場合は URL から取得する
-  const slug = trainingSlug || '';
+  // trainingSlugが空の場合はエラーログを出す
+  if (!trainingSlug) {
+    console.error('TaskList: trainingSlugが指定されていません');
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-700">エラー: トレーニングスラッグが指定されていません</p>
+      </div>
+    );
+  }
+
+  console.log('TaskList - trainingSlug:', trainingSlug, 'tasks:', tasks);
 
   return (
     <div className="space-y-4">
@@ -28,7 +37,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSl
           return (
             <Link
               key={task.id}
-              to={`/training/${slug}/${task.slug}`}
+              to={`/training/${trainingSlug}/${task.slug}`}
               className={cn(
                 "block p-6 bg-white rounded-xl border-2 border-[#374151] transition-colors",
                 task.is_premium && !isSubscribed 

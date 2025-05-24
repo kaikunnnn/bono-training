@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 interface TaskNavigationProps {
   training: any;
   currentTaskSlug: string;
-  trainingSlug?: string;
+  trainingSlug: string; // 必須にして確実に渡されるようにする
   nextTaskSlug?: string | null;
   prevTaskSlug?: string | null;
 }
@@ -21,12 +21,27 @@ const TaskNavigation: React.FC<TaskNavigationProps> = ({
 }) => {
   const navigate = useNavigate();
 
-  // training.slugまたはtrainingSlugを使用
-  const actualTrainingSlug = trainingSlug || training?.slug;
+  // trainingSlugが空の場合のエラーハンドリング
+  if (!trainingSlug) {
+    console.error('TaskNavigation: trainingSlugが指定されていません');
+    return (
+      <div className="mt-12 flex justify-center">
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/training')}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          トレーニング一覧へ戻る
+        </Button>
+      </div>
+    );
+  }
 
   // タスクリストから現在のタスクのインデックスを見つける
   const tasks = training?.tasks || [];
   const currentTaskIndex = tasks.findIndex((task: any) => task.slug === currentTaskSlug);
+  
+  console.log('TaskNavigation - trainingSlug:', trainingSlug, 'currentTaskSlug:', currentTaskSlug, 'currentTaskIndex:', currentTaskIndex);
   
   // 前後のタスクを決定（propsで指定されていればそれを使用）
   const nextTaskSlug = propNextTaskSlug !== undefined 
@@ -41,17 +56,19 @@ const TaskNavigation: React.FC<TaskNavigationProps> = ({
       ? tasks[currentTaskIndex - 1].slug
       : null;
 
+  console.log('TaskNavigation - nextTaskSlug:', nextTaskSlug, 'prevTaskSlug:', prevTaskSlug);
+
   const handleBack = () => {
     if (prevTaskSlug) {
-      navigate(`/training/${actualTrainingSlug}/${prevTaskSlug}`);
+      navigate(`/training/${trainingSlug}/${prevTaskSlug}`);
     } else {
-      navigate(`/training/${actualTrainingSlug}`);
+      navigate(`/training/${trainingSlug}`);
     }
   };
 
   const handleNext = () => {
     if (nextTaskSlug) {
-      navigate(`/training/${actualTrainingSlug}/${nextTaskSlug}`);
+      navigate(`/training/${trainingSlug}/${nextTaskSlug}`);
     }
   };
 
