@@ -67,6 +67,8 @@ async function loadAllTrainingMetaFromStorage() {
  */
 export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
   try {
+    console.log('getTrainingDetail - slug:', slug);
+
     // まずSupabaseから検索
     const { data: supabaseData, error } = await supabase
       .from('training')
@@ -76,33 +78,36 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
 
     let training;
     
-    if (error) {
-      if (error.code === 'PGRST116') { // データが見つからない場合
-        // ストレージから検索
-        try {
-          const storageData = await loadTrainingMeta(slug);
-          if (storageData) {
-            training = {
-              id: `storage-${slug}`,
-              ...storageData
-            };
-          } else {
-            throw new Error('トレーニングが見つかりません');
-          }
-        } catch (storageError) {
-          console.error('ストレージからのメタデータ取得エラー:', storageError);
-          throw error; // 元のエラーをスロー
+    if (error && error.code === 'PGRST116') {
+      console.log('Supabaseに見つからないため、Storageから検索します:', slug);
+      // ストレージから検索
+      try {
+        const { data: storageData, error: storageError } = await supabase.functions.invoke('get-training-meta', {
+          body: { slug, tasks: true }
+        });
+        
+        if (storageError || !storageData) {
+          throw new Error(`トレーニング「${slug}」が見つかりませんでした`);
         }
-      } else {
-        throw error;
+        
+        training = {
+          id: `storage-${slug}`,
+          ...storageData
+        };
+        console.log('Storageから取得成功:', training);
+      } catch (storageError) {
+        console.error('ストレージからのメタデータ取得エラー:', storageError);
+        throw new Error(`トレーニング「${slug}」が見つかりませんでした`);
       }
+    } else if (error) {
+      throw error;
     } else {
       training = supabaseData;
+      // Supabaseのデータの場合、タスク一覧を別途取得
+      const tasks = await getTrainingTasks(training.id);
+      training.tasks = tasks;
     }
 
-    // タスク一覧を取得
-    const tasks = await getTrainingTasks(training.id);
-    
     // TrainingDetailData形式に整形して返す
     const trainingDetailData: TrainingDetailData = {
       id: training.id,
@@ -112,16 +117,17 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
       type: training.type || 'challenge',
       difficulty: training.difficulty || '初級',
       tags: Array.isArray(training.tags) ? training.tags : [],
-      tasks: tasks || [], // 必ず配列を設定
+      tasks: training.tasks || [], // 必ず配列を設定
       skills: training.skills || [],
       prerequisites: training.prerequisites || [],
-      has_premium_content: tasks?.some(task => task.is_premium) || false,
+      has_premium_content: training.tasks?.some(task => task.is_premium) || false,
       thumbnailImage: training.thumbnailImage || ''
     };
 
+    console.log('最終的なtrainingDetailData:', trainingDetailData);
     return trainingDetailData;
   } catch (error) {
-    console.error('トレーニング詳細取得エラ���:', error);
+    console.error('トレーニング詳細取得エラー:', error);
     throw error;
   }
 };
@@ -152,7 +158,7 @@ export const getTrainingTasks = async (trainingId: string) => {
       const trainingData = await loadTrainingMeta(slug, true);
       
       if (trainingData && trainingData.tasks) {
-        // Storageから取得したタスク一覧にIDを付与���てDBと同じ形式に整形
+        // Storageから取得したタスク一覧にIDを付与してDBと同じ形式に整形
         return trainingData.tasks.map((task: any, index: number) => ({
           id: `${slug}-task-${index}`,
           training_id: trainingId,
