@@ -39,3 +39,15 @@ serve_port = 54328
 
 [functions.get-mdx-content]
 verify_jwt = true
+
+[functions.get-training-meta]
+verify_jwt = false
+
+[functions.get-training-list]
+verify_jwt = false
+
+[functions.get-training-detail]
+verify_jwt = false
+
+[functions.get-task-content]
+verify_jwt = true
