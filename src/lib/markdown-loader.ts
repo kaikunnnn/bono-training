@@ -56,7 +56,7 @@ export async function getAllTrainingFiles(): Promise<MarkdownFile[]> {
     
     for (const [path, contentPromise] of Object.entries(trainingIndexFiles)) {
       try {
-        const content = await (contentPromise as Promise<string>);
+        const content = await (contentPromise as () => Promise<string>)();
         const { data: frontmatter, content: markdownContent } = matter(content);
         
         // 型安全性をチェック
@@ -115,7 +115,7 @@ export async function loadTrainingTasks(trainingSlug: string): Promise<MarkdownF
           continue;
         }
         
-        const content = await (contentPromise as Promise<string>);
+        const content = await (contentPromise as () => Promise<string>)();
         const { data: frontmatter, content: markdownContent } = matter(content);
         
         // 型安全性をチェック
@@ -167,7 +167,7 @@ export async function loadTaskContent(trainingSlug: string, taskSlug: string): P
         continue;
       }
       
-      const content = await (contentPromise as Promise<string>);
+      const content = await (contentPromise as () => Promise<string>)();
       const { data: frontmatter, content: markdownContent } = matter(content);
       
       // 型安全性をチェック
