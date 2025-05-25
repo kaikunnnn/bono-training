@@ -36,21 +36,3 @@ enable_confirmations = false
 [functions]
 port = 54321
 serve_port = 54328
-
-[functions.get-mdx-content]
-verify_jwt = true
-
-[functions.get-training-meta]
-verify_jwt = false
-
-[functions.get-training-list]
-verify_jwt = false
-
-[functions.get-training-detail]
-verify_jwt = false
-
-[functions.get-task-content]
-verify_jwt = true
-
-[functions.debug-storage]
-verify_jwt = false

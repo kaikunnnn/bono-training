@@ -1,26 +1,25 @@
+
 ---
-title: "Todoアプリ UI設計講座"
-slug: "todo-app"
-description: "Figmaを使って、実用的なTodoアプリのUIをゼロから設計していく実践トレーニングです。"
+title: "Todo アプリ UI 制作"
+description: "実践的な Todo アプリの UI デザインを学ぶ"
 type: "challenge"
 difficulty: "normal"
-tags: ["UIデザイン", "Figma", "レイアウト"]
-thumbnailImage: "https://source.unsplash.com/400x200?ui"
+tags: ["ui", "todo", "実践"]
 estimated_total_time: "2時間"
-task_count: 1
+task_count: 2
 ---
 
-# Todo アプリ UI 設計講座
+# Todo アプリ UI 制作トレーニング
 
-この講座では、Figma を使って Todo アプリの UI をゼロから設計していきます。
+このトレーニングでは、実践的な Todo アプリの UI デザインを学びます。
 
-## こんなことを学べます
+## 学習内容
 
-- ユーザー視点での画面構成
-- 実用的なレイアウトの作り方
-- コンポーネント設計の考え方
+- UI コンポーネントの設計
+- レイアウトの最適化
+- ユーザビリティの向上
 
-## 対象レベル
+## 対象者
 
-- Web デザインやバナー制作の経験はあるが、UI 設計にまだ自信がない方
-- UIUX 転職に向けてアウトプットを増やしたい方
+- UI デザインの基礎を学びたい方
+- 実践的な課題に取り組みたい方
