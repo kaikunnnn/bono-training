@@ -48,8 +48,11 @@ function parseFrontmatter(text: string) {
 
 async function getTrainingWithTasks(supabase, trainingSlug: string) {
   try {
-    // トレーニングのindex.mdを取得
-    const indexPath = `content/training/${trainingSlug}/index.md`;
+    console.log(`トレーニング詳細取得開始: ${trainingSlug}`);
+    
+    // トレーニングのindex.mdを取得（パス修正）
+    const indexPath = `training/${trainingSlug}/index.md`;
+    console.log(`index.mdパス: ${indexPath}`);
     
     const { data: indexData, error: indexError } = await supabase
       .storage
@@ -62,6 +65,8 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
     }
 
     const indexContent = await indexData.text();
+    console.log('index.mdコンテンツ取得成功:', indexContent.slice(0, 100) + '...');
+    
     const indexMatch = indexContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
     
     if (!indexMatch) {
@@ -70,28 +75,43 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
 
     const [_, frontmatterText, description] = indexMatch;
     const frontmatter = parseFrontmatter(frontmatterText);
+    console.log('front-matter解析結果:', frontmatter);
 
-    // タスクフォルダ一覧を取得
+    // タスクフォルダ一覧を取得（パス修正）
+    const tasksPath = `training/${trainingSlug}/tasks`;
+    console.log(`タスクフォルダパス: ${tasksPath}`);
+    
     const { data: taskFolders, error: taskListError } = await supabase
       .storage
       .from('content')
-      .list(`content/training/${trainingSlug}/tasks`, { sortBy: { column: 'name', order: 'asc' } });
+      .list(tasksPath, { sortBy: { column: 'name', order: 'asc' } });
 
     if (taskListError) {
       console.error('タスクフォルダ取得エラー:', taskListError);
       // タスクがなくてもトレーニング情報は返す
     }
 
+    console.log('取得したタスクフォルダ:', taskFolders);
     const tasks = [];
 
     if (taskFolders && taskFolders.length > 0) {
+      console.log(`${taskFolders.length}個のタスクフォルダを処理開始`);
+      
       // 各タスクフォルダのcontent.mdを読み込む
       for (const folder of taskFolders) {
-        if (!folder.id || !folder.id.endsWith('/')) continue;
+        // フォルダのみを処理（ファイルは除外）
+        if (!folder.id || folder.id.includes('.')) {
+          console.log(`スキップ（ファイル）: ${folder.name}`);
+          continue;
+        }
 
         const taskSlug = folder.name;
+        console.log(`タスク処理開始: ${taskSlug}`);
+        
         try {
-          const taskPath = `content/training/${trainingSlug}/tasks/${taskSlug}/content.md`;
+          // パス修正：content.mdのパス
+          const taskPath = `training/${trainingSlug}/tasks/${taskSlug}/content.md`;
+          console.log(`タスクコンテンツパス: ${taskPath}`);
           
           const { data: taskData, error: taskError } = await supabase
             .storage
@@ -104,6 +124,8 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
           }
 
           const taskContent = await taskData.text();
+          console.log(`タスク ${taskSlug} コンテンツ取得成功:`, taskContent.slice(0, 100) + '...');
+          
           const taskMatch = taskContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
           
           if (!taskMatch) {
@@ -113,6 +135,7 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
 
           const [_, taskFrontmatterText] = taskMatch;
           const taskFrontmatter = parseFrontmatter(taskFrontmatterText);
+          console.log(`タスク ${taskSlug} front-matter:`, taskFrontmatter);
 
           tasks.push({
             slug: taskSlug,
@@ -135,8 +158,9 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
 
     // order_indexでソート
     tasks.sort((a, b) => a.order_index - b.order_index);
+    console.log(`最終的なタスク数: ${tasks.length}`);
 
-    return {
+    const result = {
       slug: trainingSlug,
       title: frontmatter.title || trainingSlug,
       description: frontmatter.description || description.trim(),
@@ -148,6 +172,9 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
       task_count: tasks.length,
       tasks
     };
+
+    console.log('最終結果:', result);
+    return result;
 
   } catch (error) {
     console.error('トレーニング詳細取得エラー:', error);
