@@ -30,32 +30,9 @@ export async function getContentById(contentId: string): Promise<{
     
     console.log(`認証状態: ${isAuthenticated ? '認証済み' : '未認証'}`);
 
-    // エッジファンクションで問題が発生する場合のフォールバック処理
-    // モックデータから直接取得を試みる
-    const mockContent = getMockContentById(contentId);
-    if (mockContent) {
-      if (mockContent.accessLevel === 'free' || isAuthenticated) {
-        // 無料コンテンツまたは認証済みユーザーには完全なコンテンツを返す
-        return {
-          content: mockContent,
-          error: null,
-          isFreePreview: false
-        };
-      } else {
-        // 未認証ユーザーには無料プレビューを返す
-        return {
-          content: {
-            ...mockContent,
-            videoUrl: mockContent.freeVideoUrl || mockContent.videoUrl,
-            content: mockContent.freeContent || mockContent.content
-          },
-          error: new Error('このコンテンツの完全版を閲覧するには、ログインが必要です'),
-          isFreePreview: true
-        };
-      }
-    }
-
-    // Supabase Edge Functionを呼び出してコンテンツを取得（バックアップとして維持）
+    // TODO: Phase-1でGitHub/ローカルファイルベースの実装に変更予定
+    // Supabase Edge Functionの呼び出しは一時的に無効化
+    /*
     const { data, error } = await supabase.functions.invoke('get-content', {
       method: 'POST',
       body: { id: contentId },
@@ -89,6 +66,31 @@ export async function getContentById(contentId: string): Promise<{
         content: data.content as ContentItem,
         error: null
       };
+    }
+    */
+
+    // Phase-0: モックデータから直接取得
+    const mockContent = getMockContentById(contentId);
+    if (mockContent) {
+      if (mockContent.accessLevel === 'free' || isAuthenticated) {
+        // 無料コンテンツまたは認証済みユーザーには完全なコンテンツを返す
+        return {
+          content: mockContent,
+          error: null,
+          isFreePreview: false
+        };
+      } else {
+        // 未認証ユーザーには無料プレビューを返す
+        return {
+          content: {
+            ...mockContent,
+            videoUrl: mockContent.freeVideoUrl || mockContent.videoUrl,
+            content: mockContent.freeContent || mockContent.content
+          },
+          error: new Error('このコンテンツの完全版を閲覧するには、ログインが必要です'),
+          isFreePreview: true
+        };
+      }
     }
 
     // ここまで到達したが、コンテンツが見つからない場合はエラーを返す
