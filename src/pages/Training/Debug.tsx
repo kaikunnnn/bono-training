@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { getTrainings, getTrainingDetail } from '@/services/training';
-import { loadAllTrainingMeta } from '@/lib/markdown-loader';
+import { getAllTrainingFiles } from '@/lib/markdown-loader';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 
@@ -30,7 +30,7 @@ const TrainingDebug = () => {
         console.log('Service trainings:', serviceTrainings);
         
         // 2. 直接ファイルローダーからも取得
-        const directFiles = await loadAllTrainingMeta();
+        const directFiles = await getAllTrainingFiles();
         setRawFiles(directFiles);
         console.log('Direct files:', directFiles);
         

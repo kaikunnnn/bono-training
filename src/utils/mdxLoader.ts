@@ -1,5 +1,5 @@
 
-import { loadAllTrainingMeta, loadTrainingTasks, loadTaskContent } from '@/lib/markdown-loader';
+import { getAllTrainingFiles, loadTrainingTasks, loadTaskContent } from '@/lib/markdown-loader';
 import { TrainingFrontmatter, TaskFrontmatter } from '@/types/training';
 
 /**
@@ -101,7 +101,7 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
   console.log(`Loading training meta for ${trainingSlug}, withTasks: ${withTasks}`);
   
   try {
-    const trainingFiles = await loadAllTrainingMeta();
+    const trainingFiles = await getAllTrainingFiles();
     const trainingFile = trainingFiles.find(file => file.slug === trainingSlug);
     
     if (!trainingFile) {
@@ -183,7 +183,7 @@ export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
   console.log('Loading all training meta');
   
   try {
-    const trainingFiles = await loadAllTrainingMeta();
+    const trainingFiles = await getAllTrainingFiles();
     
     return trainingFiles.map(file => {
       const frontmatter = file.frontmatter as TrainingFrontmatter;

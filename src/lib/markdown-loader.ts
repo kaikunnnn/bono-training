@@ -39,10 +39,11 @@ function extractTaskSlugFromPath(path: string): string {
 }
 
 /**
- * すべてのトレーニングのメタデータを取得
+ * すべてのトレーニングファイルのメタデータを取得
+ * （関数名を変更して mdxLoader.ts との衝突を回避）
  */
-export async function loadAllTrainingMeta(): Promise<MarkdownFile[]> {
-  console.time('loadAllTrainingMeta');
+export async function getAllTrainingFiles(): Promise<MarkdownFile[]> {
+  console.time('getAllTrainingFiles');
   
   try {
     // トレーニングのindex.mdファイルを取得
@@ -53,7 +54,7 @@ export async function loadAllTrainingMeta(): Promise<MarkdownFile[]> {
     const trainings: MarkdownFile[] = [];
     const slugMap = new Map<string, string>(); // slug -> filePath
     
-    for const [path, contentPromise] of Object.entries(trainingIndexFiles)) {
+    for (const [path, contentPromise] of Object.entries(trainingIndexFiles)) {
       try {
         const content = await (contentPromise as Promise<string>);
         const { data: frontmatter, content: markdownContent } = matter(content);
@@ -91,7 +92,7 @@ export async function loadAllTrainingMeta(): Promise<MarkdownFile[]> {
     console.error('Error loading training metadata:', error);
     return [];
   } finally {
-    console.timeEnd('loadAllTrainingMeta');
+    console.timeEnd('getAllTrainingFiles');
   }
 }
 
