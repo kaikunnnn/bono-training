@@ -1,4 +1,3 @@
-
 export interface Training {
   id: string;
   slug: string;
@@ -64,4 +63,60 @@ export interface TrainingDetailData {
   prerequisites?: string[];
   has_premium_content?: boolean;
   thumbnailImage?: string;
+}
+
+/**
+ * Markdownフロントマターの型定義
+ */
+export interface TrainingFrontmatter {
+  title: string;
+  description?: string;
+  type?: 'challenge' | 'skill';
+  difficulty?: string;
+  tags?: string[];
+  estimated_total_time?: string;
+  task_count?: number;
+  is_premium?: boolean;
+  slug?: string;
+}
+
+/**
+ * タスクフロントマターの型定義
+ */
+export interface TaskFrontmatter {
+  title: string;
+  slug: string;
+  order_index: number;
+  is_premium?: boolean;
+  difficulty?: string;
+  estimated_time?: string;
+  video_preview?: string;
+  video_full?: string;
+  preview_sec?: number;
+  preview_marker?: string;
+}
+
+/**
+ * Markdownファイルの読み込み結果型
+ */
+export interface MarkdownFile {
+  path: string;
+  content: string;
+  frontmatter: TrainingFrontmatter | TaskFrontmatter;
+  slug: string;
+}
+
+/**
+ * 型安全性確認用のアサート関数
+ */
+export function assertTrainingMeta(meta: any): asserts meta is TrainingFrontmatter {
+  if (!meta.title) {
+    throw new Error(`Training meta is missing required field 'title'`);
+  }
+}
+
+export function assertTaskMeta(meta: any): asserts meta is TaskFrontmatter {
+  if (!meta.title || !meta.slug || typeof meta.order_index !== 'number') {
+    throw new Error(`Task meta is missing required fields: title, slug, or order_index`);
+  }
 }
