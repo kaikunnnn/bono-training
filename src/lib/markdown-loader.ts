@@ -46,8 +46,12 @@ export function getAllTrainingFiles(): MarkdownFile[] {
   console.time('getAllTrainingFiles');
   
   try {
-    // トレーニングのindex.mdファイルを取得（eager読み込み）
-    const trainingIndexFiles = import.meta.glob('/content/training/**/index.md', { as: 'raw', eager: true });
+    // トレーニングのindex.mdファイルを取得（eager読み込み + Vite v5対応）
+    const trainingIndexFiles = import.meta.glob('/content/training/**/index.md', {
+      query: '?raw', 
+      import: 'default', 
+      eager: true
+    }) as Record<string, string>;
     
     console.log('Found training files:', Object.keys(trainingIndexFiles));
     
@@ -56,7 +60,7 @@ export function getAllTrainingFiles(): MarkdownFile[] {
     
     for (const [path, content] of Object.entries(trainingIndexFiles)) {
       try {
-        const { data: frontmatter, content: markdownContent } = matter(content as string);
+        const { data: frontmatter, content: markdownContent } = matter(content);
         
         // 型安全性をチェック
         assertTrainingMeta(frontmatter);
@@ -102,8 +106,12 @@ export function loadTrainingTasks(trainingSlug: string): MarkdownFile[] {
   console.time(`loadTrainingTasks-${trainingSlug}`);
   
   try {
-    // 特定のトレーニングのタスクファイルを取得（eager読み込み）
-    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', { as: 'raw', eager: true });
+    // 特定のトレーニングのタスクファイルを取得（eager読み込み + Vite v5対応）
+    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', {
+      query: '?raw',
+      import: 'default',
+      eager: true
+    }) as Record<string, string>;
     
     const tasks: MarkdownFile[] = [];
     
@@ -114,7 +122,7 @@ export function loadTrainingTasks(trainingSlug: string): MarkdownFile[] {
           continue;
         }
         
-        const { data: frontmatter, content: markdownContent } = matter(content as string);
+        const { data: frontmatter, content: markdownContent } = matter(content);
         
         // 型安全性をチェック
         assertTaskMeta(frontmatter);
@@ -157,7 +165,11 @@ export function loadTrainingTasks(trainingSlug: string): MarkdownFile[] {
  */
 export function loadTaskContent(trainingSlug: string, taskSlug: string): MarkdownFile | null {
   try {
-    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', { as: 'raw', eager: true });
+    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', {
+      query: '?raw',
+      import: 'default',
+      eager: true
+    }) as Record<string, string>;
     
     for (const [path, content] of Object.entries(taskFiles)) {
       // パスからトレーニングスラッグとタスクスラッグをチェック
@@ -165,7 +177,7 @@ export function loadTaskContent(trainingSlug: string, taskSlug: string): Markdow
         continue;
       }
       
-      const { data: frontmatter, content: markdownContent } = matter(content as string);
+      const { data: frontmatter, content: markdownContent } = matter(content);
       
       // 型安全性をチェック
       assertTaskMeta(frontmatter);
