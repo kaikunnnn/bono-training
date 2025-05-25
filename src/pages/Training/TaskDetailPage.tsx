@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,25 +68,20 @@ const TaskDetailPage = () => {
         setTaskData(taskItem);
         console.log('TaskDetailPage - taskItem:', taskItem);
 
+        // TODO: Phase-1でGitHub Markdown読み込みに置換
         // MDXコンテンツを取得
-        const { data, error } = await supabase.functions.invoke('get-mdx-content', {
-          body: { trainingSlug, taskSlug }
-        });
+        // const { data, error } = await supabase.functions.invoke('get-mdx-content', {
+        //   body: { trainingSlug, taskSlug }
+        // });
 
-        if (error) {
-          console.error('MDXコンテンツ取得エラー:', error);
-          throw new Error(`MDXコンテンツの取得に失敗しました: ${error.message}`);
-        }
+        // Phase-0: 一時的にダミーコンテンツを設定
+        const dummyContent = `# ${taskSlug} タスク\n\n${trainingSlug}の基本的な概念を学びます。\n\n（Phase-1で実装予定：GitHubからMarkdownを読み込み）`;
+        setMdxContent(dummyContent);
+        setIsFreePreview(false);
         
-        if (data.error) {
-          console.warn('MDXコンテンツ警告:', data.error);
-        }
-        
-        setMdxContent(data.content || '');
-        setIsFreePreview(data.isFreePreview || false);
-        console.log('TaskDetailPage - MDXコンテンツ取得成功:', { 
-          contentLength: data.content?.length, 
-          isFreePreview: data.isFreePreview 
+        console.log('TaskDetailPage - ダミーコンテンツ設定完了:', { 
+          contentLength: dummyContent.length, 
+          isFreePreview: false 
         });
 
         // ユーザーの進捗情報を取得
