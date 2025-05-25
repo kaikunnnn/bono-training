@@ -1,5 +1,5 @@
 
-import matter from 'gray-matter';
+import { matter } from 'fast-matter';
 import { TrainingFrontmatter, TaskFrontmatter, MarkdownFile, assertTrainingMeta, assertTaskMeta } from '@/types/training';
 
 /**
