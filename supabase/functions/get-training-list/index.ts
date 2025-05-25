@@ -46,13 +46,73 @@ function parseFrontmatter(text: string) {
   return result;
 }
 
+async function testStorageAccess(supabase) {
+  try {
+    console.log('=== Storage アクセステスト開始 ===');
+    
+    // 1. content バケットの存在確認
+    console.log('1. content バケットの存在確認...');
+    const { data: buckets, error: bucketsError } = await supabase
+      .storage
+      .listBuckets();
+    
+    if (bucketsError) {
+      console.error('バケット一覧取得エラー:', bucketsError);
+      return false;
+    }
+    
+    console.log('利用可能なバケット:', buckets?.map(b => b.name));
+    const contentBucket = buckets?.find(b => b.name === 'content');
+    if (!contentBucket) {
+      console.error('content バケットが見つかりません');
+      return false;
+    }
+    console.log('✓ content バケット確認完了');
+
+    // 2. ルートディレクトリの確認
+    console.log('2. content バケットのルートディレクトリ確認...');
+    const { data: rootFiles, error: rootError } = await supabase
+      .storage
+      .from('content')
+      .list('', { limit: 100 });
+    
+    if (rootError) {
+      console.error('ルートディレクトリアクセスエラー:', rootError);
+      return false;
+    }
+    
+    console.log('ルートディレクトリの内容:', rootFiles?.map(f => ({ name: f.name, id: f.id })));
+    
+    // 3. training フォルダの確認
+    console.log('3. training フォルダの確認...');
+    const trainingExists = rootFiles?.some(f => f.name === 'training');
+    if (!trainingExists) {
+      console.error('training フォルダが見つかりません');
+      return false;
+    }
+    console.log('✓ training フォルダ確認完了');
+    
+    return true;
+  } catch (error) {
+    console.error('Storage アクセステスト中にエラー:', error);
+    return false;
+  }
+}
+
 async function getAllTrainings(supabase) {
   try {
-    console.log('トレーニング一覧取得開始');
+    console.log('=== トレーニング一覧取得開始 ===');
     
-    // training フォルダ一覧を取得（パス修正）
+    // まずStorage接続テストを実行
+    const storageAccessOk = await testStorageAccess(supabase);
+    if (!storageAccessOk) {
+      console.error('Storage アクセステストに失敗しました');
+      return [];
+    }
+    
+    // training フォルダ一覧を取得
     const trainingPath = 'training';
-    console.log(`トレーニングフォルダパス: ${trainingPath}`);
+    console.log(`4. トレーニングフォルダ内容取得: ${trainingPath}`);
     
     const { data: folders, error } = await supabase
       .storage
@@ -61,10 +121,18 @@ async function getAllTrainings(supabase) {
 
     if (error) {
       console.error('フォルダ一覧取得エラー:', error);
+      console.error('エラー詳細:', JSON.stringify(error, null, 2));
       throw new Error('トレーニング一覧の取得に失敗しました');
     }
 
-    console.log('取得したフォルダ:', folders);
+    console.log('取得したフォルダ数:', folders?.length || 0);
+    console.log('取得したフォルダ詳細:', folders?.map(f => ({ 
+      name: f.name, 
+      id: f.id,
+      metadata: f.metadata,
+      created_at: f.created_at,
+      updated_at: f.updated_at
+    })));
 
     if (!folders || folders.length === 0) {
       console.log('フォルダが見つかりません');
@@ -82,7 +150,7 @@ async function getAllTrainings(supabase) {
       }
 
       const slug = folder.name;
-      console.log(`トレーニング処理開始: ${slug}`);
+      console.log(`=== トレーニング処理開始: ${slug} ===`);
       
       try {
         // パス修正：index.mdのパス
@@ -90,24 +158,36 @@ async function getAllTrainings(supabase) {
         console.log(`index.mdパス: ${filePath}`);
         
         // ファイル存在確認
+        console.log(`${slug} フォルダ内容確認中...`);
         const { data: files, error: listError } = await supabase
           .storage
           .from('content')
           .list(`training/${slug}`);
 
-        if (listError || !files || !files.some(file => file.name === 'index.md')) {
+        if (listError) {
+          console.error(`${slug} フォルダアクセスエラー:`, listError);
+          console.error('エラー詳細:', JSON.stringify(listError, null, 2));
+          continue;
+        }
+
+        console.log(`${slug} フォルダ内のファイル:`, files?.map(f => f.name));
+
+        if (!files || !files.some(file => file.name === 'index.md')) {
           console.warn(`トレーニング ${slug} のindex.mdが見つかりません`);
+          console.log(`${slug} 内の利用可能ファイル:`, files?.map(f => f.name));
           continue;
         }
 
         // ファイル内容取得
+        console.log(`${slug} のindex.md取得中...`);
         const { data, error: downloadError } = await supabase
           .storage
           .from('content')
           .download(filePath);
 
         if (downloadError) {
-          console.warn(`トレーニング ${slug} のファイル取得エラー:`, downloadError);
+          console.error(`トレーニング ${slug} のファイル取得エラー:`, downloadError);
+          console.error('ダウンロードエラー詳細:', JSON.stringify(downloadError, null, 2));
           continue;
         }
 
@@ -118,6 +198,7 @@ async function getAllTrainings(supabase) {
         
         if (!frontmatterMatch) {
           console.warn(`トレーニング ${slug} のフロントマター形式が不正です`);
+          console.log(`${slug} のコンテンツ冒頭:`, content.slice(0, 200));
           continue;
         }
 
@@ -137,17 +218,21 @@ async function getAllTrainings(supabase) {
           task_count: frontmatter.task_count || 0
         });
 
+        console.log(`✓ トレーニング ${slug} 処理完了`);
+
       } catch (error) {
         console.warn(`トレーニング ${slug} の処理エラー:`, error);
+        console.error('詳細エラー:', JSON.stringify(error, null, 2));
         continue;
       }
     }
 
-    console.log(`最終的なトレーニング数: ${trainings.length}`);
+    console.log(`=== 最終的なトレーニング数: ${trainings.length} ===`);
     console.log('最終結果:', trainings);
     return trainings;
   } catch (error) {
     console.error('全トレーニング取得エラー:', error);
+    console.error('全体エラー詳細:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
@@ -169,12 +254,21 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== get-training-list API呼び出し開始 ===');
+    
     // Supabaseクライアントの初期化
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    
+    console.log('Supabase URL:', supabaseUrl);
+    console.log('Service Key 設定状況:', supabaseServiceKey ? '設定済み' : '未設定');
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     const trainings = await getAllTrainings(supabase);
+    
+    console.log('=== API レスポンス送信 ===');
+    console.log('送信するトレーニング数:', trainings.length);
     
     return new Response(
       JSON.stringify(trainings),
@@ -185,7 +279,9 @@ serve(async (req) => {
     );
     
   } catch (error) {
-    console.error('トレーニング一覧取得エラー:', error);
+    console.error('=== トレーニング一覧取得エラー ===');
+    console.error('エラーメッセージ:', error.message);
+    console.error('エラー詳細:', JSON.stringify(error, null, 2));
     
     return new Response(
       JSON.stringify({ 

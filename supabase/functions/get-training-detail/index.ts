@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
@@ -46,11 +45,66 @@ function parseFrontmatter(text: string) {
   return result;
 }
 
+async function testStorageAccess(supabase, trainingSlug: string) {
+  try {
+    console.log(`=== Storage アクセステスト開始 (${trainingSlug}) ===`);
+    
+    // 1. training フォルダの確認
+    console.log('1. training フォルダの確認...');
+    const { data: trainingFiles, error: trainingError } = await supabase
+      .storage
+      .from('content')
+      .list('training', { limit: 100 });
+    
+    if (trainingError) {
+      console.error('training フォルダアクセスエラー:', trainingError);
+      return false;
+    }
+    
+    console.log('training フォルダ内容:', trainingFiles?.map(f => f.name));
+    
+    // 2. 指定されたトレーニングフォルダの確認
+    console.log(`2. ${trainingSlug} フォルダの確認...`);
+    const trainingExists = trainingFiles?.some(f => f.name === trainingSlug);
+    if (!trainingExists) {
+      console.error(`${trainingSlug} フォルダが見つかりません`);
+      console.log(`利用可能なトレーニング:`, trainingFiles?.map(f => f.name));
+      return false;
+    }
+    
+    // 3. トレーニングフォルダ内容の確認
+    console.log(`3. ${trainingSlug} フォルダ内容の確認...`);
+    const { data: folderContents, error: folderError } = await supabase
+      .storage
+      .from('content')
+      .list(`training/${trainingSlug}`, { limit: 100 });
+    
+    if (folderError) {
+      console.error(`${trainingSlug} フォルダ内容取得エラー:`, folderError);
+      return false;
+    }
+    
+    console.log(`${trainingSlug} フォルダ内のファイル:`, folderContents?.map(f => f.name));
+    
+    return true;
+  } catch (error) {
+    console.error('Storage アクセステスト中にエラー:', error);
+    return false;
+  }
+}
+
 async function getTrainingWithTasks(supabase, trainingSlug: string) {
   try {
-    console.log(`トレーニング詳細取得開始: ${trainingSlug}`);
+    console.log(`=== トレーニング詳細取得開始: ${trainingSlug} ===`);
     
-    // トレーニングのindex.mdを取得（パス修正）
+    // まずStorage接続テストを実行
+    const storageAccessOk = await testStorageAccess(supabase, trainingSlug);
+    if (!storageAccessOk) {
+      console.error('Storage アクセステストに失敗しました');
+      throw new Error(`トレーニング「${trainingSlug}」へのアクセスに失敗しました`);
+    }
+    
+    // トレーニングのindex.mdを取得
     const indexPath = `training/${trainingSlug}/index.md`;
     console.log(`index.mdパス: ${indexPath}`);
     
@@ -61,6 +115,7 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
 
     if (indexError) {
       console.error('index.md取得エラー:', indexError);
+      console.error('index.md エラー詳細:', JSON.stringify(indexError, null, 2));
       throw new Error(`トレーニング「${trainingSlug}」が見つかりません`);
     }
 
@@ -70,6 +125,8 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
     const indexMatch = indexContent.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
     
     if (!indexMatch) {
+      console.error('index.mdのフロントマター形式が不正です');
+      console.log('index.mdコンテンツ冒頭:', indexContent.slice(0, 200));
       throw new Error('index.mdのフロントマター形式が不正です');
     }
 
@@ -77,7 +134,7 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
     const frontmatter = parseFrontmatter(frontmatterText);
     console.log('front-matter解析結果:', frontmatter);
 
-    // タスクフォルダ一覧を取得（パス修正）
+    // タスクフォルダ一覧を取得
     const tasksPath = `training/${trainingSlug}/tasks`;
     console.log(`タスクフォルダパス: ${tasksPath}`);
     
@@ -88,10 +145,12 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
 
     if (taskListError) {
       console.error('タスクフォルダ取得エラー:', taskListError);
+      console.error('タスクフォルダエラー詳細:', JSON.stringify(taskListError, null, 2));
       // タスクがなくてもトレーニング情報は返す
     }
 
-    console.log('取得したタスクフォルダ:', taskFolders);
+    console.log('取得したタスクフォルダ数:', taskFolders?.length || 0);
+    console.log('取得したタスクフォルダ:', taskFolders?.map(f => ({ name: f.name, id: f.id })));
     const tasks = [];
 
     if (taskFolders && taskFolders.length > 0) {
@@ -106,10 +165,10 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
         }
 
         const taskSlug = folder.name;
-        console.log(`タスク処理開始: ${taskSlug}`);
+        console.log(`=== タスク処理開始: ${taskSlug} ===`);
         
         try {
-          // パス修正：content.mdのパス
+          // content.mdのパス
           const taskPath = `training/${trainingSlug}/tasks/${taskSlug}/content.md`;
           console.log(`タスクコンテンツパス: ${taskPath}`);
           
@@ -120,6 +179,7 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
 
           if (taskError) {
             console.warn(`タスク ${taskSlug} のcontent.md取得エラー:`, taskError);
+            console.warn('タスクエラー詳細:', JSON.stringify(taskError, null, 2));
             continue;
           }
 
@@ -130,6 +190,7 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
           
           if (!taskMatch) {
             console.warn(`タスク ${taskSlug} のフロントマター形式が不正です`);
+            console.log(`${taskSlug} コンテンツ冒頭:`, taskContent.slice(0, 200));
             continue;
           }
 
@@ -149,8 +210,11 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
             preview_sec: taskFrontmatter.preview_sec || 30
           });
 
+          console.log(`✓ タスク ${taskSlug} 処理完了`);
+
         } catch (error) {
           console.warn(`タスク ${taskSlug} の処理エラー:`, error);
+          console.error('タスク処理エラー詳細:', JSON.stringify(error, null, 2));
           continue;
         }
       }
@@ -158,7 +222,7 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
 
     // order_indexでソート
     tasks.sort((a, b) => a.order_index - b.order_index);
-    console.log(`最終的なタスク数: ${tasks.length}`);
+    console.log(`=== 最終的なタスク数: ${tasks.length} ===`);
 
     const result = {
       slug: trainingSlug,
@@ -173,11 +237,13 @@ async function getTrainingWithTasks(supabase, trainingSlug: string) {
       tasks
     };
 
-    console.log('最終結果:', result);
+    console.log('=== 最終結果 ===:', result);
     return result;
 
   } catch (error) {
-    console.error('トレーニング詳細取得エラー:', error);
+    console.error('=== トレーニング詳細取得エラー ===');
+    console.error('エラーメッセージ:', error.message);
+    console.error('エラー詳細:', JSON.stringify(error, null, 2));
     throw error;
   }
 }
@@ -199,8 +265,12 @@ serve(async (req) => {
   }
 
   try {
+    console.log('=== get-training-detail API呼び出し開始 ===');
+    
     const url = new URL(req.url);
     const trainingSlug = url.searchParams.get('slug');
+    
+    console.log('リクエストされたslug:', trainingSlug);
     
     if (!trainingSlug) {
       return new Response(
@@ -215,9 +285,16 @@ serve(async (req) => {
     // Supabaseクライアントの初期化
     const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+    
+    console.log('Supabase URL:', supabaseUrl);
+    console.log('Service Key 設定状況:', supabaseServiceKey ? '設定済み' : '未設定');
+    
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
     
     const trainingDetail = await getTrainingWithTasks(supabase, trainingSlug);
+    
+    console.log('=== API レスポンス送信 ===');
+    console.log('送信するトレーニング詳細:', trainingDetail.title);
     
     return new Response(
       JSON.stringify(trainingDetail),
@@ -228,7 +305,9 @@ serve(async (req) => {
     );
     
   } catch (error) {
-    console.error('トレーニング詳細取得エラー:', error);
+    console.error('=== トレーニング詳細取得エラー ===');
+    console.error('エラーメッセージ:', error.message);
+    console.error('エラー詳細:', JSON.stringify(error, null, 2));
     
     return new Response(
       JSON.stringify({ 

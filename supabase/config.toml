@@ -51,3 +51,6 @@ verify_jwt = false
 
 [functions.get-task-content]
 verify_jwt = true
+
+[functions.debug-storage]
+verify_jwt = false
