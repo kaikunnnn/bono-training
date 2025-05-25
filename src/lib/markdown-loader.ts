@@ -42,22 +42,21 @@ function extractTaskSlugFromPath(path: string): string {
  * すべてのトレーニングファイルのメタデータを取得
  * （関数名を変更して mdxLoader.ts との衝突を回避）
  */
-export async function getAllTrainingFiles(): Promise<MarkdownFile[]> {
+export function getAllTrainingFiles(): MarkdownFile[] {
   console.time('getAllTrainingFiles');
   
   try {
-    // トレーニングのindex.mdファイルを取得
-    const trainingIndexFiles = import.meta.glob('/content/training/**/index.md', { as: 'raw' });
+    // トレーニングのindex.mdファイルを取得（eager読み込み）
+    const trainingIndexFiles = import.meta.glob('/content/training/**/index.md', { as: 'raw', eager: true });
     
     console.log('Found training files:', Object.keys(trainingIndexFiles));
     
     const trainings: MarkdownFile[] = [];
     const slugMap = new Map<string, string>(); // slug -> filePath
     
-    for (const [path, contentPromise] of Object.entries(trainingIndexFiles)) {
+    for (const [path, content] of Object.entries(trainingIndexFiles)) {
       try {
-        const content = await (contentPromise as () => Promise<string>)();
-        const { data: frontmatter, content: markdownContent } = matter(content);
+        const { data: frontmatter, content: markdownContent } = matter(content as string);
         
         // 型安全性をチェック
         assertTrainingMeta(frontmatter);
@@ -99,24 +98,23 @@ export async function getAllTrainingFiles(): Promise<MarkdownFile[]> {
 /**
  * 特定のトレーニングのタスクを取得
  */
-export async function loadTrainingTasks(trainingSlug: string): Promise<MarkdownFile[]> {
+export function loadTrainingTasks(trainingSlug: string): MarkdownFile[] {
   console.time(`loadTrainingTasks-${trainingSlug}`);
   
   try {
-    // 特定のトレーニングのタスクファイルを取得
-    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', { as: 'raw' });
+    // 特定のトレーニングのタスクファイルを取得（eager読み込み）
+    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', { as: 'raw', eager: true });
     
     const tasks: MarkdownFile[] = [];
     
-    for (const [path, contentPromise] of Object.entries(taskFiles)) {
+    for (const [path, content] of Object.entries(taskFiles)) {
       try {
         // パスからトレーニングスラッグをチェック
         if (!path.includes(`/training/${trainingSlug}/`)) {
           continue;
         }
         
-        const content = await (contentPromise as () => Promise<string>)();
-        const { data: frontmatter, content: markdownContent } = matter(content);
+        const { data: frontmatter, content: markdownContent } = matter(content as string);
         
         // 型安全性をチェック
         assertTaskMeta(frontmatter);
@@ -157,18 +155,17 @@ export async function loadTrainingTasks(trainingSlug: string): Promise<MarkdownF
 /**
  * 特定のタスクコンテンツを取得
  */
-export async function loadTaskContent(trainingSlug: string, taskSlug: string): Promise<MarkdownFile | null> {
+export function loadTaskContent(trainingSlug: string, taskSlug: string): MarkdownFile | null {
   try {
-    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', { as: 'raw' });
+    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', { as: 'raw', eager: true });
     
-    for (const [path, contentPromise] of Object.entries(taskFiles)) {
+    for (const [path, content] of Object.entries(taskFiles)) {
       // パスからトレーニングスラッグとタスクスラッグをチェック
       if (!path.includes(`/training/${trainingSlug}/`) || !path.includes(`/tasks/${taskSlug}/`)) {
         continue;
       }
       
-      const content = await (contentPromise as () => Promise<string>)();
-      const { data: frontmatter, content: markdownContent } = matter(content);
+      const { data: frontmatter, content: markdownContent } = matter(content as string);
       
       // 型安全性をチェック
       assertTaskMeta(frontmatter);

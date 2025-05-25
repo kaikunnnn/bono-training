@@ -9,12 +9,12 @@ import { TaskFrontmatter } from "@/types/training";
  * トレーニング一覧を取得
  * Phase-1: GitHub/ローカルファイルベースの実装
  */
-export const getTrainings = async () => {
+export const getTrainings = () => {
   console.log('Phase-1: GitHub/ローカルファイルベースの実装を使用');
   
   try {
     // ローカルファイルからトレーニング一覧を取得
-    const trainingMetas = await loadAllTrainingMeta();
+    const trainingMetas = loadAllTrainingMeta();
     
     return trainingMetas.map(meta => ({
       id: `${meta.slug}-1`,
@@ -59,13 +59,13 @@ export const getTrainings = async () => {
  * トレーニング詳細情報を取得
  * Phase-1: GitHub/ローカルファイルベースの実装
  */
-export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
+export const getTrainingDetail = (slug: string): TrainingDetailData => {
   console.log('Phase-1: GitHub/ローカルファイルベースの実装を使用');
   
   try {
     // ローカルファイルからトレーニング詳細を取得
-    const trainingMeta = await loadTrainingMeta(slug, true);
-    const taskFiles = await loadTrainingTasks(slug);
+    const trainingMeta = loadTrainingMeta(slug, true);
+    const taskFiles = loadTrainingTasks(slug);
     
     const tasks = taskFiles.map((taskFile, index) => {
       const taskFrontmatter = taskFile.frontmatter as TaskFrontmatter;

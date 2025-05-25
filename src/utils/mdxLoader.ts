@@ -49,11 +49,11 @@ export interface TrainingMeta {
  * MDXファイルを読み込む関数
  * Phase-1: GitHub/ローカルファイルベースの実装
  */
-export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Promise<MdxContent> => {
+export const loadMdxContent = (trainingSlug: string, taskSlug: string): MdxContent => {
   console.log(`Loading MDX content for ${trainingSlug}/${taskSlug}`);
   
   try {
-    const taskFile = await loadTaskContent(trainingSlug, taskSlug);
+    const taskFile = loadTaskContent(trainingSlug, taskSlug);
     
     if (!taskFile) {
       throw new Error(`Task content not found for ${trainingSlug}/${taskSlug}`);
@@ -97,11 +97,11 @@ export const loadMdxContent = async (trainingSlug: string, taskSlug: string): Pr
  * トレーニングのメタデータを読み込む関数
  * Phase-1: GitHub/ローカルファイルベースの実装
  */
-export const loadTrainingMeta = async (trainingSlug: string, withTasks = false): Promise<TrainingMeta> => {
+export const loadTrainingMeta = (trainingSlug: string, withTasks = false): TrainingMeta => {
   console.log(`Loading training meta for ${trainingSlug}, withTasks: ${withTasks}`);
   
   try {
-    const trainingFiles = await getAllTrainingFiles();
+    const trainingFiles = getAllTrainingFiles();
     const trainingFile = trainingFiles.find(file => file.slug === trainingSlug);
     
     if (!trainingFile) {
@@ -113,7 +113,7 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
     let tasks: TrainingMeta['tasks'] = [];
     
     if (withTasks) {
-      const taskFiles = await loadTrainingTasks(trainingSlug);
+      const taskFiles = loadTrainingTasks(trainingSlug);
       tasks = taskFiles.map((taskFile, index) => {
         const taskFrontmatter = taskFile.frontmatter as TaskFrontmatter;
         return {
@@ -179,11 +179,11 @@ export const loadTrainingMeta = async (trainingSlug: string, withTasks = false):
  * すべてのトレーニングのメタ情報を取得する
  * Phase-1: GitHub/ローカルファイルベースの実装
  */
-export async function loadAllTrainingMeta(): Promise<TrainingMeta[]> {
+export function loadAllTrainingMeta(): TrainingMeta[] {
   console.log('Loading all training meta');
   
   try {
-    const trainingFiles = await getAllTrainingFiles();
+    const trainingFiles = getAllTrainingFiles();
     
     return trainingFiles.map(file => {
       const frontmatter = file.frontmatter as TrainingFrontmatter;
