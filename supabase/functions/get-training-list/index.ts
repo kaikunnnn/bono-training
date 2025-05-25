@@ -48,18 +48,26 @@ function parseFrontmatter(text: string) {
 
 async function getAllTrainings(supabase) {
   try {
-    // training フォルダ一覧を取得
+    console.log('トレーニング一覧取得開始');
+    
+    // training フォルダ一覧を取得（パス修正）
+    const trainingPath = 'training';
+    console.log(`トレーニングフォルダパス: ${trainingPath}`);
+    
     const { data: folders, error } = await supabase
       .storage
       .from('content')
-      .list('content/training', { sortBy: { column: 'name', order: 'asc' } });
+      .list(trainingPath, { sortBy: { column: 'name', order: 'asc' } });
 
     if (error) {
       console.error('フォルダ一覧取得エラー:', error);
       throw new Error('トレーニング一覧の取得に失敗しました');
     }
 
+    console.log('取得したフォルダ:', folders);
+
     if (!folders || folders.length === 0) {
+      console.log('フォルダが見つかりません');
       return [];
     }
 
@@ -67,17 +75,25 @@ async function getAllTrainings(supabase) {
 
     // 各フォルダのindex.mdファイルを読み込む
     for (const folder of folders) {
-      if (!folder.id || !folder.id.endsWith('/')) continue; // フォルダのみ処理
+      // フォルダのみを処理（ファイルは除外）
+      if (!folder.id || folder.id.includes('.')) {
+        console.log(`スキップ（ファイル）: ${folder.name}`);
+        continue;
+      }
 
       const slug = folder.name;
+      console.log(`トレーニング処理開始: ${slug}`);
+      
       try {
-        const filePath = `content/training/${slug}/index.md`;
+        // パス修正：index.mdのパス
+        const filePath = `training/${slug}/index.md`;
+        console.log(`index.mdパス: ${filePath}`);
         
         // ファイル存在確認
         const { data: files, error: listError } = await supabase
           .storage
           .from('content')
-          .list(`content/training/${slug}`);
+          .list(`training/${slug}`);
 
         if (listError || !files || !files.some(file => file.name === 'index.md')) {
           console.warn(`トレーニング ${slug} のindex.mdが見つかりません`);
@@ -96,6 +112,8 @@ async function getAllTrainings(supabase) {
         }
 
         const content = await data.text();
+        console.log(`トレーニング ${slug} コンテンツ取得成功:`, content.slice(0, 100) + '...');
+        
         const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
         
         if (!frontmatterMatch) {
@@ -105,6 +123,7 @@ async function getAllTrainings(supabase) {
 
         const [_, frontmatterText, mdContent] = frontmatterMatch;
         const frontmatter = parseFrontmatter(frontmatterText);
+        console.log(`トレーニング ${slug} front-matter:`, frontmatter);
 
         trainings.push({
           slug,
@@ -124,6 +143,8 @@ async function getAllTrainings(supabase) {
       }
     }
 
+    console.log(`最終的なトレーニング数: ${trainings.length}`);
+    console.log('最終結果:', trainings);
     return trainings;
   } catch (error) {
     console.error('全トレーニング取得エラー:', error);
