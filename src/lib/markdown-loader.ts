@@ -1,89 +1,39 @@
 
-import fm from 'front-matter';
 import { TrainingFrontmatter, TaskFrontmatter, MarkdownFile, assertTrainingMeta, assertTaskMeta } from '@/types/training';
-
-/**
- * Windowsパスを POSIX パスに変換
- */
-function toPosix(path: string): string {
-  return path.replace(/\\/g, '/');
-}
-
-/**
- * パスからスラッグを抽出
- */
-function extractSlugFromPath(path: string): string {
-  const posixPath = toPosix(path);
-  const parts = posixPath.split('/');
-  // content/training/todo-app/index.md -> todo-app
-  // content/training/todo-app/tasks/01-introduction/content.md -> todo-app
-  const trainingIndex = parts.findIndex(part => part === 'training');
-  if (trainingIndex !== -1 && parts[trainingIndex + 1]) {
-    return parts[trainingIndex + 1];
-  }
-  return 'unknown';
-}
-
-/**
- * タスクスラッグをパスから抽出
- */
-function extractTaskSlugFromPath(path: string): string {
-  const posixPath = toPosix(path);
-  const parts = posixPath.split('/');
-  // content/training/todo-app/tasks/01-introduction/content.md -> 01-introduction
-  const tasksIndex = parts.findIndex(part => part === 'tasks');
-  if (tasksIndex !== -1 && parts[tasksIndex + 1]) {
-    return parts[tasksIndex + 1];
-  }
-  return 'unknown';
-}
+import { PARSED_TRAININGS, PARSED_TASKS } from './markdown-data';
 
 /**
  * すべてのトレーニングファイルのメタデータを取得
- * （関数名を変更して mdxLoader.ts との衝突を回避）
+ * ビルド時にパース済みのデータを使用
  */
 export function getAllTrainingFiles(): MarkdownFile[] {
   console.time('getAllTrainingFiles');
   
   try {
-    // トレーニングのindex.mdファイルを取得（eager読み込み + Vite v5対応）
-    const trainingIndexFiles = import.meta.glob('/content/training/**/index.md', {
-      query: '?raw', 
-      import: 'default', 
-      eager: true
-    }) as Record<string, string>;
-    
-    console.log('Found training files:', Object.keys(trainingIndexFiles));
-    
     const trainings: MarkdownFile[] = [];
-    const slugMap = new Map<string, string>(); // slug -> filePath
+    const slugMap = new Map<string, string>();
     
-    for (const [path, content] of Object.entries(trainingIndexFiles)) {
+    for (const parsedTraining of PARSED_TRAININGS) {
       try {
-        const { attributes: frontmatter, body: markdownContent } = fm(content);
-        
         // 型安全性をチェック
-        assertTrainingMeta(frontmatter);
-        
-        const pathSlug = extractSlugFromPath(path);
-        const metaSlug = frontmatter.slug || pathSlug;
+        assertTrainingMeta(parsedTraining.frontmatter);
         
         // slug重複チェック
-        if (slugMap.has(metaSlug)) {
-          console.warn(`[WARN] duplicate slug "${metaSlug}" in ${path} and ${slugMap.get(metaSlug)}`);
+        if (slugMap.has(parsedTraining.slug)) {
+          console.warn(`[WARN] duplicate slug "${parsedTraining.slug}" in ${parsedTraining.path} and ${slugMap.get(parsedTraining.slug)}`);
           continue;
         }
-        slugMap.set(metaSlug, path);
+        slugMap.set(parsedTraining.slug, parsedTraining.path);
         
         trainings.push({
-          path: toPosix(path),
-          content: markdownContent,
-          frontmatter: frontmatter as TrainingFrontmatter,
-          slug: metaSlug
+          path: parsedTraining.path,
+          content: parsedTraining.content,
+          frontmatter: parsedTraining.frontmatter,
+          slug: parsedTraining.slug
         });
         
       } catch (error) {
-        console.warn(`Failed to parse training file ${path}:`, error);
+        console.warn(`Failed to validate training file ${parsedTraining.path}:`, error);
         continue;
       }
     }
@@ -101,43 +51,33 @@ export function getAllTrainingFiles(): MarkdownFile[] {
 
 /**
  * 特定のトレーニングのタスクを取得
+ * ビルド時にパース済みのデータを使用
  */
 export function loadTrainingTasks(trainingSlug: string): MarkdownFile[] {
   console.time(`loadTrainingTasks-${trainingSlug}`);
   
   try {
-    // 特定のトレーニングのタスクファイルを取得（eager読み込み + Vite v5対応）
-    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', {
-      query: '?raw',
-      import: 'default',
-      eager: true
-    }) as Record<string, string>;
-    
     const tasks: MarkdownFile[] = [];
     
-    for (const [path, content] of Object.entries(taskFiles)) {
+    for (const parsedTask of PARSED_TASKS) {
+      // 指定されたトレーニングのタスクのみをフィルタ
+      if (parsedTask.trainingSlug !== trainingSlug) {
+        continue;
+      }
+      
       try {
-        // パスからトレーニングスラッグをチェック
-        if (!path.includes(`/training/${trainingSlug}/`)) {
-          continue;
-        }
-        
-        const { attributes: frontmatter, body: markdownContent } = fm(content);
-        
         // 型安全性をチェック
-        assertTaskMeta(frontmatter);
-        
-        const taskSlug = frontmatter.slug || extractTaskSlugFromPath(path);
+        assertTaskMeta(parsedTask.frontmatter);
         
         tasks.push({
-          path: toPosix(path),
-          content: markdownContent,
-          frontmatter: frontmatter as TaskFrontmatter,
-          slug: taskSlug
+          path: parsedTask.path,
+          content: parsedTask.content,
+          frontmatter: parsedTask.frontmatter,
+          slug: parsedTask.slug
         });
         
       } catch (error) {
-        console.warn(`Failed to parse task file ${path}:`, error);
+        console.warn(`Failed to validate task file ${parsedTask.path}:`, error);
         continue;
       }
     }
@@ -162,32 +102,23 @@ export function loadTrainingTasks(trainingSlug: string): MarkdownFile[] {
 
 /**
  * 特定のタスクコンテンツを取得
+ * ビルド時にパース済みのデータを使用
  */
 export function loadTaskContent(trainingSlug: string, taskSlug: string): MarkdownFile | null {
   try {
-    const taskFiles = import.meta.glob('/content/training/**/tasks/**/content.md', {
-      query: '?raw',
-      import: 'default',
-      eager: true
-    }) as Record<string, string>;
-    
-    for (const [path, content] of Object.entries(taskFiles)) {
-      // パスからトレーニングスラッグとタスクスラッグをチェック
-      if (!path.includes(`/training/${trainingSlug}/`) || !path.includes(`/tasks/${taskSlug}/`)) {
-        continue;
+    for (const parsedTask of PARSED_TASKS) {
+      // 指定されたトレーニングとタスクの組み合わせを検索
+      if (parsedTask.trainingSlug === trainingSlug && parsedTask.slug === taskSlug) {
+        // 型安全性をチェック
+        assertTaskMeta(parsedTask.frontmatter);
+        
+        return {
+          path: parsedTask.path,
+          content: parsedTask.content,
+          frontmatter: parsedTask.frontmatter,
+          slug: parsedTask.slug
+        };
       }
-      
-      const { attributes: frontmatter, body: markdownContent } = fm(content);
-      
-      // 型安全性をチェック
-      assertTaskMeta(frontmatter);
-      
-      return {
-        path: toPosix(path),
-        content: markdownContent,
-        frontmatter: frontmatter as TaskFrontmatter,
-        slug: taskSlug
-      };
     }
     
     return null;
