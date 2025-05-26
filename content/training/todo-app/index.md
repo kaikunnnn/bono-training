@@ -1,4 +1,3 @@
-
 ---
 title: "Todo アプリ UI 制作"
 description: "実践的な Todo アプリの UI デザインを学ぶ"
