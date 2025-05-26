@@ -21,11 +21,5 @@ export default defineConfig(({ mode }) => ({
     },
     // React重複バンドル問題を解決
     dedupe: ['react', 'react-dom'],
-  },
-  // gray-matterをバンドルから除外（ビルド時専用）
-  build: {
-    rollupOptions: {
-      external: ['gray-matter']
-    }
   }
 }));

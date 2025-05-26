@@ -1,5 +1,5 @@
 
-import matter from 'gray-matter';
+import { parseFrontmatter } from './simple-frontmatter';
 import { TrainingFrontmatter, TaskFrontmatter } from '@/types/training';
 
 /**
@@ -49,7 +49,7 @@ function extractTaskSlugFromPath(path: string): string {
  */
 export const PARSED_TRAININGS = Object.entries(trainingIndexFiles).map(([path, rawContent]) => {
   try {
-    const { data: frontmatter, content } = matter(rawContent);
+    const { data: frontmatter, content } = parseFrontmatter(rawContent);
     const pathSlug = extractSlugFromPath(path);
     const slug = frontmatter.slug || pathSlug;
     
@@ -70,7 +70,7 @@ export const PARSED_TRAININGS = Object.entries(trainingIndexFiles).map(([path, r
  */
 export const PARSED_TASKS = Object.entries(taskFiles).map(([path, rawContent]) => {
   try {
-    const { data: frontmatter, content } = matter(rawContent);
+    const { data: frontmatter, content } = parseFrontmatter(rawContent);
     const taskSlug = frontmatter.slug || extractTaskSlugFromPath(path);
     const trainingSlug = extractSlugFromPath(path);
     
