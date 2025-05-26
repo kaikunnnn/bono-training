@@ -1,4 +1,5 @@
-import { matter } from 'fastmatter';
+
+import fm from 'front-matter';
 import { TrainingFrontmatter, TaskFrontmatter, MarkdownFile, assertTrainingMeta, assertTaskMeta } from '@/types/training';
 
 /**
@@ -59,7 +60,7 @@ export function getAllTrainingFiles(): MarkdownFile[] {
     
     for (const [path, content] of Object.entries(trainingIndexFiles)) {
       try {
-        const { data: frontmatter, content: markdownContent } = matter(content);
+        const { attributes: frontmatter, body: markdownContent } = fm(content);
         
         // 型安全性をチェック
         assertTrainingMeta(frontmatter);
@@ -121,7 +122,7 @@ export function loadTrainingTasks(trainingSlug: string): MarkdownFile[] {
           continue;
         }
         
-        const { data: frontmatter, content: markdownContent } = matter(content);
+        const { attributes: frontmatter, body: markdownContent } = fm(content);
         
         // 型安全性をチェック
         assertTaskMeta(frontmatter);
@@ -176,7 +177,7 @@ export function loadTaskContent(trainingSlug: string, taskSlug: string): Markdow
         continue;
       }
       
-      const { data: frontmatter, content: markdownContent } = matter(content);
+      const { attributes: frontmatter, body: markdownContent } = fm(content);
       
       // 型安全性をチェック
       assertTaskMeta(frontmatter);
