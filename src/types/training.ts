@@ -1,3 +1,4 @@
+
 export interface Training {
   id: string;
   slug: string;
@@ -74,7 +75,7 @@ export interface TrainingFrontmatter {
   type?: 'challenge' | 'skill';
   difficulty?: string;
   tags?: string[];
-  estimated_total_time?: string;
+  estimated_total_time?: number; // 時間単位（数値）
   task_count?: number;
   is_premium?: boolean;
   slug?: string;
@@ -89,7 +90,7 @@ export interface TaskFrontmatter {
   order_index: number;
   is_premium?: boolean;
   difficulty?: string;
-  estimated_time?: string;
+  estimated_time?: number; // 分単位（数値）
   video_preview?: string;
   video_full?: string;
   preview_sec?: number;
@@ -119,4 +120,20 @@ export function assertTaskMeta(meta: any): asserts meta is TaskFrontmatter {
   if (!meta.title || !meta.slug || typeof meta.order_index !== 'number') {
     throw new Error(`Task meta is missing required fields: title, slug, or order_index`);
   }
+}
+
+/**
+ * 時間表示用のユーティリティ関数
+ */
+export function formatDuration(minutes: number): string {
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return remainingMinutes > 0 ? `${hours}時間${remainingMinutes}分` : `${hours}時間`;
+  }
+  return `${minutes}分`;
+}
+
+export function formatTotalTime(hours: number): string {
+  return hours === 1 ? '1時間' : `${hours}時間`;
 }

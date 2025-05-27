@@ -1,10 +1,11 @@
+
 ---
 title: "画面構成の基本"
 slug: "ui-layout-basic01"
 order_index: 2
 is_premium: true
 difficulty: "easy"
-estimated_time: "30分"
+estimated_time: 30
 video_preview: "https://example.com/preview.mp4"
 video_full: "https://example.com/full.mp4"
 preview_sec: 30

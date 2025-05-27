@@ -1,4 +1,5 @@
 
+
 /**
  * 軽量なフロントマターパーサー
  * ---
@@ -41,13 +42,16 @@ export function parseFrontmatter(raw: string): {
         .map((s) => s.trim().replace(/^["']|["']$/g, ''));
     }
 
-    // 数値 / 真偽値変換
+    // 数値変換（純粋な数値のみ）
     if (val === 'true') val = true;
     else if (val === 'false') val = false;
-    else if (!isNaN(Number(val))) val = Number(val);
+    else if (/^\d+$/.test(val)) { // 純粋な数値のみを変換
+      val = Number(val);
+    }
 
     data[key] = val;
   }
 
   return { data, content: body };
 }
+
