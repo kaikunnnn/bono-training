@@ -1,11 +1,10 @@
-
 ---
 title: "トレーニングの紹介"
 slug: "introduction"
 order_index: 1
 is_premium: false
 difficulty: "easy"
-estimated_time: 30
+estimated_time: "30分"
 video_preview: "https://example.com/preview.mp4"
 video_full: "https://example.com/full.mp4"
 preview_sec: 30

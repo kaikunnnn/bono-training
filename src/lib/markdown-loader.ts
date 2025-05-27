@@ -8,19 +8,13 @@ import { PARSED_TRAININGS, PARSED_TASKS } from './markdown-data';
  */
 export function getAllTrainingFiles(): MarkdownFile[] {
   console.time('getAllTrainingFiles');
-  console.log('Loading all training files...');
   
   try {
     const trainings: MarkdownFile[] = [];
     const slugMap = new Map<string, string>();
     
-    console.log(`Found ${PARSED_TRAININGS.length} parsed training files`);
-    
     for (const parsedTraining of PARSED_TRAININGS) {
       try {
-        console.log(`Processing training file: ${parsedTraining.path}`);
-        console.log(`Training frontmatter:`, parsedTraining.frontmatter);
-        
         // 型安全性をチェック
         assertTrainingMeta(parsedTraining.frontmatter);
         
@@ -38,16 +32,13 @@ export function getAllTrainingFiles(): MarkdownFile[] {
           slug: parsedTraining.slug
         });
         
-        console.log(`Successfully processed training: ${parsedTraining.frontmatter.title}`);
-        
       } catch (error) {
-        console.error(`Failed to validate training file ${parsedTraining.path}:`, error);
-        // エラーが発生してもスキップして続行
+        console.warn(`Failed to validate training file ${parsedTraining.path}:`, error);
         continue;
       }
     }
     
-    console.log(`Successfully loaded ${trainings.length} training files`);
+    console.log(`Loaded ${trainings.length} training files`);
     return trainings;
     
   } catch (error) {

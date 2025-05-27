@@ -1,11 +1,10 @@
-
 ---
 title: "Todo アプリ UI 制作"
 description: "実践的な Todo アプリの UI デザインを学ぶ"
 type: "challenge"
 difficulty: "normal"
 tags: ["ui", "todo", "実践"]
-estimated_total_time: 2
+estimated_total_time: "2時間"
 task_count: 2
 ---
 

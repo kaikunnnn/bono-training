@@ -74,7 +74,7 @@ export interface TrainingFrontmatter {
   type?: 'challenge' | 'skill';
   difficulty?: string;
   tags?: string[];
-  estimated_total_time?: number; // 時間単位（数値）
+  estimated_total_time?: string;
   task_count?: number;
   is_premium?: boolean;
   slug?: string;
@@ -89,7 +89,7 @@ export interface TaskFrontmatter {
   order_index: number;
   is_premium?: boolean;
   difficulty?: string;
-  estimated_time?: number; // 分単位（数値）
+  estimated_time?: string;
   video_preview?: string;
   video_full?: string;
   preview_sec?: number;
@@ -110,47 +110,13 @@ export interface MarkdownFile {
  * 型安全性確認用のアサート関数
  */
 export function assertTrainingMeta(meta: any): asserts meta is TrainingFrontmatter {
-  console.log('assertTrainingMeta called with:', meta);
-  
-  if (!meta || typeof meta !== 'object') {
-    throw new Error(`Training meta must be an object, got: ${typeof meta}`);
-  }
-  
   if (!meta.title) {
-    console.error('Training meta missing title. Available fields:', Object.keys(meta));
-    throw new Error(`Training meta is missing required field 'title'. Available fields: ${Object.keys(meta).join(', ')}`);
+    throw new Error(`Training meta is missing required field 'title'`);
   }
-  
-  console.log('Training meta validation passed for:', meta.title);
 }
 
 export function assertTaskMeta(meta: any): asserts meta is TaskFrontmatter {
-  console.log('assertTaskMeta called with:', meta);
-  
-  if (!meta || typeof meta !== 'object') {
-    throw new Error(`Task meta must be an object, got: ${typeof meta}`);
-  }
-  
   if (!meta.title || !meta.slug || typeof meta.order_index !== 'number') {
-    console.error('Task meta validation failed. Available fields:', Object.keys(meta));
-    throw new Error(`Task meta is missing required fields: title, slug, or order_index. Available fields: ${Object.keys(meta).join(', ')}`);
+    throw new Error(`Task meta is missing required fields: title, slug, or order_index`);
   }
-  
-  console.log('Task meta validation passed for:', meta.title);
-}
-
-/**
- * 時間表示用のユーティリティ関数
- */
-export function formatDuration(minutes: number): string {
-  if (minutes >= 60) {
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return remainingMinutes > 0 ? `${hours}時間${remainingMinutes}分` : `${hours}時間`;
-  }
-  return `${minutes}分`;
-}
-
-export function formatTotalTime(hours: number): string {
-  return hours === 1 ? '1時間' : `${hours}時間`;
 }
