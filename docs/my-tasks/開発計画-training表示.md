@@ -63,7 +63,7 @@
 
 1. `pages/training/index.tsx` で一覧カード表示
 2. `pages/training/[slug].tsx` で Markdown をレンダリング
-3. TailwindCSS で簡易スタイリング
+3. `pages/training/[slug]/[taskSlug].tsx` に該当するページで、content/[training^-name]/tasks/[task-folder]/content.md の中身を詳細ページとして表示する
 
 ### テストゲート
 
