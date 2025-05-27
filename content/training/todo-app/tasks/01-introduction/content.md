@@ -1,5 +1,5 @@
 ---
-title: "トレーニングの紹介w"
+title: "トレーニングの紹介"
 slug: "introduction"
 order_index: 1
 is_premium: false
