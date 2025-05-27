@@ -7,7 +7,7 @@ import { ArrowLeft, ArrowRight } from 'lucide-react';
 interface TaskNavigationProps {
   training: any;
   currentTaskSlug: string;
-  trainingSlug: string; // 必須にして確実に渡されるようにする
+  trainingSlug: string;
   nextTaskSlug?: string | null;
   prevTaskSlug?: string | null;
 }
@@ -16,8 +16,8 @@ const TaskNavigation: React.FC<TaskNavigationProps> = ({
   training,
   currentTaskSlug,
   trainingSlug,
-  nextTaskSlug: propNextTaskSlug,
-  prevTaskSlug: propPrevTaskSlug
+  nextTaskSlug,
+  prevTaskSlug
 }) => {
   const navigate = useNavigate();
 
@@ -37,26 +37,12 @@ const TaskNavigation: React.FC<TaskNavigationProps> = ({
     );
   }
 
-  // タスクリストから現在のタスクのインデックスを見つける
-  const tasks = training?.tasks || [];
-  const currentTaskIndex = tasks.findIndex((task: any) => task.slug === currentTaskSlug);
-  
-  console.log('TaskNavigation - trainingSlug:', trainingSlug, 'currentTaskSlug:', currentTaskSlug, 'currentTaskIndex:', currentTaskIndex);
-  
-  // 前後のタスクを決定（propsで指定されていればそれを使用）
-  const nextTaskSlug = propNextTaskSlug !== undefined 
-    ? propNextTaskSlug 
-    : (currentTaskIndex >= 0 && currentTaskIndex < tasks.length - 1)
-      ? tasks[currentTaskIndex + 1].slug
-      : null;
-  
-  const prevTaskSlug = propPrevTaskSlug !== undefined
-    ? propPrevTaskSlug
-    : (currentTaskIndex > 0)
-      ? tasks[currentTaskIndex - 1].slug
-      : null;
-
-  console.log('TaskNavigation - nextTaskSlug:', nextTaskSlug, 'prevTaskSlug:', prevTaskSlug);
+  console.log('TaskNavigation - フロントマターベース:', { 
+    trainingSlug, 
+    currentTaskSlug, 
+    nextTaskSlug, 
+    prevTaskSlug 
+  });
 
   const handleBack = () => {
     if (prevTaskSlug) {

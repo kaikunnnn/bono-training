@@ -1,13 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { getTrainingDetail, updateTaskProgress } from '@/services/training';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import TrainingLayout from '@/components/training/TrainingLayout';
-import TaskDetail from '@/components/training/TaskDetail';
 import TaskNavigation from './TaskNavigation';
-import { getUserTaskProgress } from '@/services/training';
+import { loadTaskContent, loadTrainingTasks } from '@/lib/markdown-loader';
+import { MarkdownFile, TaskFrontmatter } from '@/types/training';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
+import TaskDetailError from './TaskDetailError';
 
 const TaskDetailPage = () => {
   const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
@@ -17,11 +20,8 @@ const TaskDetailPage = () => {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [trainingData, setTrainingData] = useState<any>(null);
-  const [taskData, setTaskData] = useState<any>(null);
-  const [mdxContent, setMdxContent] = useState<string>('');
-  const [progress, setProgress] = useState<any>(null);
-  const [isFreePreview, setIsFreePreview] = useState(false);
+  const [task, setTask] = useState<MarkdownFile | null>(null);
+  const [trainingTasks, setTrainingTasks] = useState<MarkdownFile[]>([]);
 
   // パラメータが存在しない場合のエラーハンドリング
   if (!trainingSlug || !taskSlug) {
@@ -43,7 +43,7 @@ const TaskDetailPage = () => {
     );
   }
 
-  // タスクIDが変更されたときにコンテンツを再取得
+  // タスクデータを取得
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -52,47 +52,28 @@ const TaskDetailPage = () => {
       try {
         console.log('TaskDetailPage - trainingSlug:', trainingSlug, 'taskSlug:', taskSlug);
 
-        // トレーニングデータを取得
-        const trainingDetailData = await getTrainingDetail(trainingSlug);
-        if (!trainingDetailData) {
-          throw new Error(`トレーニング「${trainingSlug}」が見つかりませんでした`);
+        // タスクコンテンツを取得
+        const taskData = loadTaskContent(trainingSlug, taskSlug);
+        if (!taskData) {
+          throw new Error(`タスク「${taskSlug}」が見つかりませんでした`);
         }
-        setTrainingData(trainingDetailData);
-        console.log('TaskDetailPage - trainingDetailData:', trainingDetailData);
+        setTask(taskData);
+        console.log('TaskDetailPage - taskData loaded:', taskData);
 
-        // タスクデータを取得
-        const taskItem = trainingDetailData.tasks?.find((task: any) => task.slug === taskSlug);
-        if (!taskItem) {
-          throw new Error(`タスク「${taskSlug}」が見つかりませんでした。利用可能なタスク: ${trainingDetailData.tasks?.map((t: any) => t.slug).join(', ')}`);
-        }
-        setTaskData(taskItem);
-        console.log('TaskDetailPage - taskItem:', taskItem);
+        // フォールバック用にトレーニングのタスク一覧も取得
+        const allTasks = loadTrainingTasks(trainingSlug);
+        setTrainingTasks(allTasks);
+        console.log('TaskDetailPage - training tasks loaded:', allTasks.length);
 
-        // TODO: Phase-1でGitHub Markdown読み込みに置換
-        // MDXコンテンツを取得
-        // const { data, error } = await supabase.functions.invoke('get-mdx-content', {
-        //   body: { trainingSlug, taskSlug }
-        // });
-
-        // Phase-0: 一時的にダミーコンテンツを設定
-        const dummyContent = `# ${taskSlug} タスク\n\n${trainingSlug}の基本的な概念を学びます。\n\n（Phase-1で実装予定：GitHubからMarkdownを読み込み）`;
-        setMdxContent(dummyContent);
-        setIsFreePreview(false);
-        
-        console.log('TaskDetailPage - ダミーコンテンツ設定完了:', { 
-          contentLength: dummyContent.length, 
-          isFreePreview: false 
-        });
-
-        // ユーザーの進捗情報を取得
-        if (user && taskItem.id) {
-          try {
-            const userProgress = await getUserTaskProgress(user.id, taskItem.id);
-            setProgress(userProgress);
-          } catch (progressError) {
-            console.error('進捗状況の取得に失敗しました:', progressError);
-          }
-        }
+        // TODO: Phase-3 で復活予定 - 進捗情報の取得
+        // if (user && taskItem.id) {
+        //   try {
+        //     const userProgress = await getUserTaskProgress(user.id, taskItem.id);
+        //     setProgress(userProgress);
+        //   } catch (progressError) {
+        //     console.error('進捗状況の取得に失敗しました:', progressError);
+        //   }
+        // }
 
       } catch (err) {
         console.error('データ取得エラー:', err);
@@ -111,88 +92,101 @@ const TaskDetailPage = () => {
     fetchData();
   }, [trainingSlug, taskSlug, user, toast]);
 
-  // タスク完了状態の更新ハンドラ
-  const handleProgressUpdate = async (status: string = 'done') => {
-    if (!user || !taskData?.id) return;
+  // TODO: Phase-3 で復活予定 - タスク完了状態の更新ハンドラ
+  // const handleProgressUpdate = async (status: string = 'done') => {
+  //   if (!user || !taskData?.id) return;
+  //   try {
+  //     const updatedProgress = await updateTaskProgress(user.id, taskData.id, status as 'done' | 'todo' | 'in-progress');
+  //     if (updatedProgress) {
+  //       setProgress(updatedProgress);
+  //       toast({
+  //         title: '進捗を更新しました',
+  //         description: status === 'done' ? 'タスクを完了としてマークしました' : '進捗状態を更新しました',
+  //         variant: 'default',
+  //       });
+  //     }
+  //   } catch (error) {
+  //     console.error('進捗の更新中にエラーが発生しました:', error);
+  //     toast({
+  //       title: 'エラーが発生しました',
+  //       description: '進捗の更新に失敗しました。もう一度お試しください。',
+  //       variant: 'destructive',
+  //     });
+  //   }
+  // };
 
-    try {
-      const updatedProgress = await updateTaskProgress(user.id, taskData.id, status as 'done' | 'todo' | 'in-progress');
-      if (updatedProgress) {
-        setProgress(updatedProgress);
-        toast({
-          title: '進捗を更新しました',
-          description: status === 'done' ? 'タスクを完了としてマークしました' : '進捗状態を更新しました',
-          variant: 'default',
-        });
+  // 前後のタスクを決定（フロントマター優先 + フォールバック）
+  const getPrevNextTasks = () => {
+    if (!task) return { prevSlug: null, nextSlug: null };
+    
+    const frontmatter = task.frontmatter as TaskFrontmatter;
+    
+    // フロントマターに指定があればそれを使用
+    let prevSlug = frontmatter.prev_task || null;
+    let nextSlug = frontmatter.next_task || null;
+    
+    // フォールバック: タスクリスト順の自動推論
+    if (!prevSlug || !nextSlug) {
+      const currentIndex = trainingTasks.findIndex(t => t.slug === taskSlug);
+      if (currentIndex >= 0) {
+        if (!prevSlug && currentIndex > 0) {
+          prevSlug = trainingTasks[currentIndex - 1].slug;
+        }
+        if (!nextSlug && currentIndex < trainingTasks.length - 1) {
+          nextSlug = trainingTasks[currentIndex + 1].slug;
+        }
       }
-    } catch (error) {
-      console.error('進捗の更新中にエラーが発生しました:', error);
-      toast({
-        title: 'エラーが発生しました',
-        description: '進捗の更新に失敗しました。もう一度お試しください。',
-        variant: 'destructive',
-      });
     }
+    
+    return { prevSlug, nextSlug };
   };
 
   // エラー表示
   if (error) {
+    return <TaskDetailError />;
+  }
+
+  // ローディング表示
+  if (loading) {
     return (
       <TrainingLayout>
         <div className="container py-8">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-red-600">エラーが発生しました</h1>
-            <p className="mt-2 text-gray-600">{error}</p>
-            <div className="mt-4 space-x-2">
-              <button 
-                onClick={() => navigate(`/training/${trainingSlug}`)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                トレーニングページに戻る
-              </button>
-              <button 
-                onClick={() => navigate('/training')}
-                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-              >
-                トレーニング一覧に戻る
-              </button>
-            </div>
+          <div className="flex justify-center items-center h-[400px]">
+            <div className="animate-pulse">読み込み中...</div>
           </div>
         </div>
       </TrainingLayout>
     );
   }
 
+  // タスクが見つからない場合
+  if (!task) {
+    return <TaskDetailError />;
+  }
+
+  const { prevSlug, nextSlug } = getPrevNextTasks();
+
   return (
     <TrainingLayout>
-      <div className="mb-6">
-        {trainingData && taskData && (
-          <TaskNavigation 
-            training={trainingData} 
-            currentTaskSlug={taskSlug}
-            trainingSlug={trainingSlug}
-          />
-        )}
-      </div>
-      
-      <div className="px-6 py-2">
-        {loading ? (
-          <div className="flex justify-center items-center h-[400px]">
-            <div className="animate-pulse">読み込み中...</div>
-          </div>
-        ) : (
-          trainingData && taskData && (
-            <TaskDetail
-              task={taskData}
-              training={trainingData}
-              mdxContent={mdxContent}
-              progress={progress}
-              onProgressUpdate={handleProgressUpdate}
-              isPremium={taskData.is_premium}
-              isFreePreview={isFreePreview}
-            />
-          )
-        )}
+      <div className="container max-w-4xl mx-auto py-8">
+        {/* Markdownコンテンツ表示 */}
+        <article className="prose prose-lg max-w-none">
+          <ReactMarkdown
+            remarkPlugins={[remarkGfm]}
+            rehypePlugins={[rehypeHighlight]}
+          >
+            {task.content}
+          </ReactMarkdown>
+        </article>
+
+        {/* ナビゲーション */}
+        <TaskNavigation 
+          training={{ title: `${trainingSlug} トレーニング` }}
+          currentTaskSlug={taskSlug}
+          trainingSlug={trainingSlug}
+          nextTaskSlug={nextSlug}
+          prevTaskSlug={prevSlug}
+        />
       </div>
     </TrainingLayout>
   );
