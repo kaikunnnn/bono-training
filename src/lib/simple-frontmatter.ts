@@ -1,5 +1,4 @@
 
-
 /**
  * 軽量なフロントマターパーサー
  * ---
@@ -13,10 +12,17 @@ export function parseFrontmatter(raw: string): {
   data: Record<string, any>;
   content: string;
 } {
+  console.log('parseFrontmatter called with content length:', raw.length);
+  
   const fmMatch = raw.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
-  if (!fmMatch) return { data: {}, content: raw };
+  if (!fmMatch) {
+    console.log('No frontmatter found in content');
+    return { data: {}, content: raw };
+  }
 
   const [, fmBlock, body] = fmMatch;
+  console.log('Frontmatter block found:', fmBlock);
+  
   const data: Record<string, any> = {};
 
   for (const line of fmBlock.split('\n')) {
@@ -50,8 +56,9 @@ export function parseFrontmatter(raw: string): {
     }
 
     data[key] = val;
+    console.log(`Parsed field: ${key} = ${JSON.stringify(val)} (type: ${typeof val})`);
   }
 
+  console.log('Final parsed data:', data);
   return { data, content: body };
 }
-

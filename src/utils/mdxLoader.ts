@@ -1,4 +1,3 @@
-
 import { getAllTrainingFiles, loadTrainingTasks, loadTaskContent } from '@/lib/markdown-loader';
 import { TrainingFrontmatter, TaskFrontmatter } from '@/types/training';
 
@@ -180,27 +179,41 @@ export const loadTrainingMeta = (trainingSlug: string, withTasks = false): Train
  * Phase-1: GitHub/ローカルファイルベースの実装
  */
 export function loadAllTrainingMeta(): TrainingMeta[] {
-  console.log('Loading all training meta');
+  console.log('Loading all training meta...');
   
   try {
     const trainingFiles = getAllTrainingFiles();
+    console.log(`Found ${trainingFiles.length} training files`);
     
-    return trainingFiles.map(file => {
-      const frontmatter = file.frontmatter as TrainingFrontmatter;
-      return {
-        slug: file.slug,
-        title: frontmatter.title,
-        description: frontmatter.description,
-        type: frontmatter.type,
-        difficulty: frontmatter.difficulty,
-        tags: frontmatter.tags || [],
-        thumbnailImage: 'https://source.unsplash.com/random/200x100'
-      };
-    });
+    const results = trainingFiles.map(file => {
+      try {
+        const frontmatter = file.frontmatter as TrainingFrontmatter;
+        console.log(`Processing training meta for: ${frontmatter.title}`);
+        
+        return {
+          slug: file.slug,
+          title: frontmatter.title,
+          description: frontmatter.description,
+          type: frontmatter.type,
+          difficulty: frontmatter.difficulty,
+          tags: frontmatter.tags || [],
+          thumbnailImage: 'https://source.unsplash.com/random/200x100'
+        };
+      } catch (error) {
+        console.error(`Error processing training file ${file.path}:`, error);
+        // エラーが発生したファイルはスキップ
+        return null;
+      }
+    }).filter((meta): meta is TrainingMeta => meta !== null);
+    
+    console.log(`Successfully processed ${results.length} training meta`);
+    return results;
+    
   } catch (error) {
     console.error('Error loading all training meta:', error);
     
     // フォールバックのダミーデータを返す
+    console.log('Falling back to dummy data');
     return [
       {
         slug: "todo-app",
@@ -209,15 +222,6 @@ export function loadAllTrainingMeta(): TrainingMeta[] {
         type: "challenge",
         difficulty: "normal",
         tags: ["ui", "todo", "実践"],
-        thumbnailImage: 'https://source.unsplash.com/random/200x100'
-      },
-      {
-        slug: "react-basics",
-        title: "React 基礎",
-        description: "Reactの基本的な概念と実践的な使い方を学びます。",
-        type: "skill",
-        difficulty: "初級",
-        tags: ["React", "JavaScript", "フロントエンド"],
         thumbnailImage: 'https://source.unsplash.com/random/200x100'
       }
     ];
