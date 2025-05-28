@@ -15,7 +15,7 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import TrainingProgress from '@/components/training/TrainingProgress';
 
 const TrainingDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
+  const { trainingSlug } = useParams<{ trainingSlug: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -26,8 +26,8 @@ const TrainingDetail = () => {
   
   const hasPremiumAccess = isSubscribed && planMembers;
   
-  // slugが存在しない場合のエラーハンドリング
-  if (!slug) {
+  // trainingSlugが存在しない場合のエラーハンドリング
+  if (!trainingSlug) {
     return (
       <TrainingLayout>
         <TrainingHeader />
@@ -51,10 +51,10 @@ const TrainingDetail = () => {
     const fetchTrainingData = async () => {
       setLoading(true);
       try {
-        console.log('TrainingDetail - slug:', slug);
+        console.log('TrainingDetail - trainingSlug:', trainingSlug);
         
         // トレーニング詳細データを取得
-        const trainingDetailData = await getTrainingDetail(slug);
+        const trainingDetailData = await getTrainingDetail(trainingSlug);
         console.log('TrainingDetail - trainingDetailData:', trainingDetailData);
         setTrainingData(trainingDetailData);
         
@@ -82,7 +82,7 @@ const TrainingDetail = () => {
     };
 
     fetchTrainingData();
-  }, [slug, toast, user]);
+  }, [trainingSlug, toast, user]);
   
   const handleBack = () => {
     navigate('/training');
@@ -108,7 +108,7 @@ const TrainingDetail = () => {
         <div className="container py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">トレーニングが見つかりません</h1>
-            <p className="mt-2">指定されたトレーニング「{slug}」は存在しないか、アクセスできません。</p>
+            <p className="mt-2">指定されたトレーニング「{trainingSlug}」は存在しないか、アクセスできません。</p>
             <Button
               className="mt-4"
               onClick={handleBack}
@@ -121,7 +121,7 @@ const TrainingDetail = () => {
     );
   }
   
-  console.log('TrainingDetail - rendering with slug:', slug, 'trainingData:', trainingData);
+  console.log('TrainingDetail - rendering with trainingSlug:', trainingSlug, 'trainingData:', trainingData);
   
   return (
     <TrainingLayout>
@@ -182,7 +182,7 @@ const TrainingDetail = () => {
               <TaskList 
                 tasks={trainingData.tasks || []} 
                 progressMap={progressMap} 
-                trainingSlug={slug}
+                trainingSlug={trainingSlug}
               />
             </div>
           </div>
@@ -193,7 +193,7 @@ const TrainingDetail = () => {
                 <TrainingProgress 
                   tasks={trainingData.tasks || []}
                   progressMap={progressMap}
-                  trainingSlug={slug}
+                  trainingSlug={trainingSlug}
                 />
               </div>
             )}

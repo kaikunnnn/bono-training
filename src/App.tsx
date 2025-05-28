@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -50,8 +51,8 @@ const App = () => {
                   
                   <Route path="/training" element={<TrainingHome />} />
                   <Route path="/training/login" element={<TrainingLogin />} />
-                  <Route path="/training/:slug" element={<TrainingDetail />} />
-                  <Route path="/training/:slug/:taskSlug" element={<TaskDetailPage />} />
+                  <Route path="/training/:trainingSlug" element={<TrainingDetail />} />
+                  <Route path="/training/:trainingSlug/:taskSlug" element={<TaskDetailPage />} />
                   <Route path="/training/plan" element={<TrainingPlan />} />
                   <Route path="/training/about" element={<TrainingAbout />} />
                   <Route path="/training/debug" element={<TrainingDebug />} />
