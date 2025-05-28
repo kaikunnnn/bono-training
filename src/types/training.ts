@@ -1,3 +1,4 @@
+
 export interface Training {
   id: string;
   slug: string;
@@ -94,6 +95,10 @@ export interface TaskFrontmatter {
   video_full?: string;
   preview_sec?: number;
   preview_marker?: string;
+  /** 前タスクの slug（任意） */
+  prev_task?: string;
+  /** 次タスクの slug（任意） */
+  next_task?: string;
 }
 
 /**
