@@ -1,9 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, BookOpen, Users, Tag } from 'lucide-react';
 import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
 import TaskList from '@/components/training/TaskList';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -30,7 +28,6 @@ const TrainingDetail = () => {
   if (!trainingSlug) {
     return (
       <TrainingLayout>
-        <TrainingHeader />
         <div className="container py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">エラー</h1>
@@ -91,7 +88,6 @@ const TrainingDetail = () => {
   if (loading) {
     return (
       <TrainingLayout>
-        <TrainingHeader />
         <div className="container py-8">
           <div className="flex justify-center">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -104,7 +100,6 @@ const TrainingDetail = () => {
   if (!trainingData) {
     return (
       <TrainingLayout>
-        <TrainingHeader />
         <div className="container py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">トレーニングが見つかりません</h1>
@@ -125,7 +120,6 @@ const TrainingDetail = () => {
   
   return (
     <TrainingLayout>
-      <TrainingHeader />
       <div className="container py-8">
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={handleBack} className="mr-2">
