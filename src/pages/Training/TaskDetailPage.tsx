@@ -2,9 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { useToast } from '@/hooks/use-toast';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskNavigation from './TaskNavigation';
+import TaskVideo from '@/components/training/TaskVideo';
 import { loadTaskContent, loadTrainingTasks } from '@/lib/markdown-loader';
 import { MarkdownFile, TaskFrontmatter } from '@/types/training';
 import ReactMarkdown from 'react-markdown';
@@ -17,11 +19,14 @@ const TaskDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isSubscribed, planMembers } = useSubscriptionContext();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [task, setTask] = useState<MarkdownFile | null>(null);
   const [trainingTasks, setTrainingTasks] = useState<MarkdownFile[]>([]);
+
+  const hasPremiumAccess = isSubscribed && planMembers;
 
   // デバッグ: URL パラメータの詳細ログ
   console.log('=== TaskDetailPage Debug Start ===');
@@ -99,16 +104,6 @@ const TaskDetailPage = () => {
 
         console.log('=== Data Fetching Success ===');
 
-        // TODO: Phase-3 で復活予定 - 進捗情報の取得
-        // if (user && taskItem.id) {
-        //   try {
-        //     const userProgress = await getUserTaskProgress(user.id, taskItem.id);
-        //     setProgress(userProgress);
-        //   } catch (progressError) {
-        //     console.error('進捗状況の取得に失敗しました:', progressError);
-        //   }
-        // }
-
       } catch (err) {
         console.error('=== Data Fetching Error ===');
         console.error('Error details:', err);
@@ -127,29 +122,6 @@ const TaskDetailPage = () => {
 
     fetchData();
   }, [trainingSlug, taskSlug, user, toast]);
-
-  // TODO: Phase-3 で復活予定 - タスク完了状態の更新ハンドラ
-  // const handleProgressUpdate = async (status: string = 'done') => {
-  //   if (!user || !taskData?.id) return;
-  //   try {
-  //     const updatedProgress = await updateTaskProgress(user.id, taskData.id, status as 'done' | 'todo' | 'in-progress');
-  //     if (updatedProgress) {
-  //       setProgress(updatedProgress);
-  //       toast({
-  //         title: '進捗を更新しました',
-  //         description: status === 'done' ? 'タスクを完了としてマークしました' : '進捗状態を更新しました',
-  //         variant: 'default',
-  //       });
-  //     }
-  //   } catch (error) {
-  //     console.error('進捗の更新中にエラーが発生しました:', error);
-  //     toast({
-  //       title: 'エラーが発生しました',
-  //       description: '進捗の更新に失敗しました。もう一度お試しください。',
-  //       variant: 'destructive',
-  //     });
-  //   }
-  // };
 
   // 前後のタスクを決定（フロントマター優先 + フォールバック）
   const getPrevNextTasks = () => {
@@ -202,11 +174,30 @@ const TaskDetailPage = () => {
     return <TaskDetailError />;
   }
 
+  const frontmatter = task.frontmatter as TaskFrontmatter;
   const { prevSlug, nextSlug } = getPrevNextTasks();
+
+  // 動画URLがある場合のみ動画プレーヤーを表示
+  const hasVideo = frontmatter.video_preview || frontmatter.video_full;
 
   return (
     <TrainingLayout>
       <div className="container max-w-4xl mx-auto py-8">
+        {/* 動画プレーヤー */}
+        {hasVideo && (
+          <div className="mb-8">
+            <TaskVideo
+              videoUrl={frontmatter.video_full}
+              previewVideoUrl={frontmatter.video_preview}
+              isPremium={frontmatter.is_premium || false}
+              hasPremiumAccess={hasPremiumAccess}
+              title={frontmatter.title}
+              previewSeconds={frontmatter.preview_sec || 30}
+              className="w-full"
+            />
+          </div>
+        )}
+
         {/* Markdownコンテンツ表示 */}
         <article className="prose prose-lg max-w-none">
           <ReactMarkdown
