@@ -23,14 +23,36 @@ const TaskDetailPage = () => {
   const [task, setTask] = useState<MarkdownFile | null>(null);
   const [trainingTasks, setTrainingTasks] = useState<MarkdownFile[]>([]);
 
+  // デバッグ: URL パラメータの詳細ログ
+  console.log('=== TaskDetailPage Debug Start ===');
+  console.log('URL params raw:', { trainingSlug, taskSlug });
+  console.log('URL params type check:', { 
+    trainingSlugType: typeof trainingSlug, 
+    taskSlugType: typeof taskSlug,
+    trainingSlugExists: !!trainingSlug,
+    taskSlugExists: !!taskSlug
+  });
+  console.log('Current location:', window.location.pathname);
+
   // パラメータが存在しない場合のエラーハンドリング
   if (!trainingSlug || !taskSlug) {
+    console.error('=== PARAMETER ERROR ===');
+    console.error('Missing parameters:', { trainingSlug, taskSlug });
+    console.error('Expected format: /training/{trainingSlug}/{taskSlug}');
+    console.error('Current path:', window.location.pathname);
+    
     return (
       <TrainingLayout>
         <div className="container py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold">エラー</h1>
             <p className="mt-2">トレーニングまたはタスクが指定されていません</p>
+            <div className="mt-4 text-sm text-gray-600">
+              <p>Debug info:</p>
+              <p>trainingSlug: {trainingSlug || 'undefined'}</p>
+              <p>taskSlug: {taskSlug || 'undefined'}</p>
+              <p>Path: {window.location.pathname}</p>
+            </div>
             <button 
               onClick={() => navigate('/training')}
               className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -50,20 +72,32 @@ const TaskDetailPage = () => {
       setError(null);
       
       try {
-        console.log('TaskDetailPage - trainingSlug:', trainingSlug, 'taskSlug:', taskSlug);
+        console.log('=== Data Fetching Start ===');
+        console.log('Fetching data for:', { trainingSlug, taskSlug });
 
         // タスクコンテンツを取得
+        console.log('Calling loadTaskContent...');
         const taskData = loadTaskContent(trainingSlug, taskSlug);
+        console.log('loadTaskContent result:', taskData);
+        
         if (!taskData) {
+          console.error('=== TASK NOT FOUND ===');
+          console.error(`Task not found: ${trainingSlug}/${taskSlug}`);
           throw new Error(`タスク「${taskSlug}」が見つかりませんでした`);
         }
+        
         setTask(taskData);
-        console.log('TaskDetailPage - taskData loaded:', taskData);
+        console.log('Task data set successfully:', taskData.frontmatter);
 
         // フォールバック用にトレーニングのタスク一覧も取得
+        console.log('Calling loadTrainingTasks...');
         const allTasks = loadTrainingTasks(trainingSlug);
+        console.log('loadTrainingTasks result count:', allTasks.length);
+        console.log('Available task slugs:', allTasks.map(t => t.slug));
+        
         setTrainingTasks(allTasks);
-        console.log('TaskDetailPage - training tasks loaded:', allTasks.length);
+
+        console.log('=== Data Fetching Success ===');
 
         // TODO: Phase-3 で復活予定 - 進捗情報の取得
         // if (user && taskItem.id) {
@@ -76,7 +110,8 @@ const TaskDetailPage = () => {
         // }
 
       } catch (err) {
-        console.error('データ取得エラー:', err);
+        console.error('=== Data Fetching Error ===');
+        console.error('Error details:', err);
         const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
         setError(errorMessage);
         toast({
@@ -86,6 +121,7 @@ const TaskDetailPage = () => {
         });
       } finally {
         setLoading(false);
+        console.log('=== Data Fetching End ===');
       }
     };
 
@@ -137,6 +173,8 @@ const TaskDetailPage = () => {
         }
       }
     }
+    
+    console.log('Navigation slugs:', { prevSlug, nextSlug, currentIndex: trainingTasks.findIndex(t => t.slug === taskSlug) });
     
     return { prevSlug, nextSlug };
   };
