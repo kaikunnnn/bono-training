@@ -7,11 +7,9 @@ import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
 import LessonHeader from '@/components/training/LessonHeader';
+import MarkdownRenderer from '@/components/training/MarkdownRenderer';
 import { loadTaskContent, loadTrainingTasks } from '@/lib/markdown-loader';
 import { MarkdownFile, TaskFrontmatter } from '@/types/training';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeHighlight from 'rehype-highlight';
 import TaskDetailError from './TaskDetailError';
 
 const TaskDetailPage = () => {
@@ -203,15 +201,11 @@ const TaskDetailPage = () => {
           </div>
         )}
 
-        {/* Markdownコンテンツ表示 */}
-        <article className="prose prose-lg max-w-none">
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            rehypePlugins={[rehypeHighlight]}
-          >
-            {task.content}
-          </ReactMarkdown>
-        </article>
+        {/* Markdownコンテンツ表示（学習ゴール自動検出・置換） */}
+        <MarkdownRenderer 
+          content={task.content}
+          className="mb-8"
+        />
 
         {/* ナビゲーション */}
         <TaskNavigation 
