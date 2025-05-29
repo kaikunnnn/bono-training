@@ -17,7 +17,7 @@ const LearningGoals: React.FC<LearningGoalsProps> = ({
 }) => {
   return <div className="bg-transparent">
       {/* 内側のラッパー */}
-      <div className="border border-gray-300 rounded-[48px] px-4 py-6 md:px-8 md:py-8 max-w-4xl mx-auto bg-white lg:py-[49px] lg:px-[56px]">
+      <div className=" rounded-[48px] px-4 py-6 md:px-8 md:py-8 max-w-4xl mx-auto bg-white lg:py-[49px] lg:px-[56px]">
         {/* コンテンツエリア */}
         <div className="max-w-3xl mx-auto space-y-10">
           {/* ヘッダー */}
