@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
+import LessonHeader from '@/components/training/LessonHeader';
 import { loadTaskContent, loadTrainingTasks } from '@/lib/markdown-loader';
 import { MarkdownFile, TaskFrontmatter } from '@/types/training';
 import ReactMarkdown from 'react-markdown';
@@ -183,6 +183,11 @@ const TaskDetailPage = () => {
   return (
     <TrainingLayout>
       <div className="container max-w-4xl mx-auto py-8">
+        {/* LessonHeader - builder.ioデザインを再現 */}
+        <div className="mb-10">
+          <LessonHeader frontmatter={frontmatter} />
+        </div>
+
         {/* 動画プレーヤー */}
         {hasVideo && (
           <div className="mb-8">
