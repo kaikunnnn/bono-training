@@ -1,5 +1,6 @@
 ---
 title: "トレーニングの紹介"
+description: "説明がはいるんだよ"
 slug: "introduction"
 order_index: 1
 is_premium: false

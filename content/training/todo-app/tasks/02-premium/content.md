@@ -1,5 +1,6 @@
 ---
 title: "画面構成の基本"
+description: "このレッスンでは、Todo アプリの基本的な画面設計を行います。"
 slug: "ui-layout-basic01"
 order_index: 2
 is_premium: true
