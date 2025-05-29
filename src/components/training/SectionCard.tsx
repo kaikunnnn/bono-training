@@ -23,8 +23,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
   className,
   variant = 'default'
 }) => {
-  const isPremium = variant === 'premium';
-  
   return (
     <div className="bg-transparent">
       {/* 内側のラッパー */}
@@ -36,10 +34,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
         <div className="max-w-3xl mx-auto space-y-10">
           {/* ヘッダー */}
           <div className="text-center space-y-8">
-            <h2 className={cn(
-              "text-2xl md:text-3xl font-bold text-left border-b-2 border-dotted pb-2",
-              isPremium ? "text-amber-700 border-amber-300" : "text-black border-gray-300"
-            )}>
+            <h2 className="text-2xl md:text-3xl font-bold text-left border-b-2 border-dotted pb-2 text-black border-gray-300">
               {title}
             </h2>
           </div>
