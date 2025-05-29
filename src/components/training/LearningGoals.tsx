@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 interface LearningGoalsProps {
@@ -22,7 +23,7 @@ const LearningGoals: React.FC<LearningGoalsProps> = ({
         <div className="max-w-3xl mx-auto space-y-10">
           {/* ヘッダー */}
           <div className="text-center space-y-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-black text-left">
+            <h2 className="text-2xl md:text-3xl font-bold text-black text-left border-b-2 border-dotted border-gray-300 pb-2">
               学習のゴール
             </h2>
           </div>
