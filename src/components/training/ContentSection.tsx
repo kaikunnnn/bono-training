@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 interface ContentSectionProps {
-  title: string;
+  title: string | React.ReactNode;
   children: React.ReactNode;
   variant?: 'default' | 'premium';
   className?: string;
