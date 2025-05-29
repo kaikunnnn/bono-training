@@ -21,7 +21,7 @@ export const getTrainings = () => {
       slug: meta.slug,
       title: meta.title,
       description: meta.description || '',
-      type: meta.type || 'challenge',
+      type: (meta.type === 'challenge' || meta.type === 'skill') ? meta.type : 'challenge' as 'challenge' | 'skill',
       difficulty: meta.difficulty || 'normal',
       tags: meta.tags || [],
       thumbnailImage: meta.thumbnailImage || 'https://source.unsplash.com/random/200x100'
@@ -36,7 +36,7 @@ export const getTrainings = () => {
         slug: "todo-app",
         title: "Todo アプリ UI 制作",
         description: "実践的な Todo アプリの UI デザインを学ぶ",
-        type: "challenge",
+        type: "challenge" as 'challenge',
         difficulty: "normal",
         tags: ["ui", "todo", "実践"],
         thumbnailImage: 'https://source.unsplash.com/random/200x100'
@@ -46,7 +46,7 @@ export const getTrainings = () => {
         slug: "react-basics",
         title: "React 基礎",
         description: "Reactの基本的な概念と実践的な使い方を学びます。",
-        type: "skill",
+        type: "skill" as 'skill',
         difficulty: "初級",
         tags: ["React", "JavaScript", "フロントエンド"],
         thumbnailImage: 'https://source.unsplash.com/random/200x100'
