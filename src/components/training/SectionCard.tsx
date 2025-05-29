@@ -30,7 +30,6 @@ const SectionCard: React.FC<SectionCardProps> = ({
       {/* 内側のラッパー */}
       <div className={cn(
         "rounded-[48px] px-4 py-6 md:px-8 md:py-8 max-w-4xl mx-auto bg-white lg:py-[48px] lg:px-[64px]",
-        isPremium && "bg-amber-50 border border-amber-200",
         className
       )}>
         {/* コンテンツエリア */}
@@ -39,7 +38,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
           <div className="text-center space-y-8">
             <h2 className={cn(
               "text-2xl md:text-3xl font-bold text-left border-b-2 border-dotted pb-2",
-              isPremium ? "text-amber-800 border-amber-300" : "text-black border-gray-300"
+              isPremium ? "text-amber-700 border-amber-300" : "text-black border-gray-300"
             )}>
               {title}
             </h2>
@@ -49,10 +48,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
           <div className="space-y-6">
             {/* 説明文 */}
             {description && (
-              <p className={cn(
-                "text-base leading-[1.66] tracking-[1px] font-normal",
-                isPremium ? "text-amber-800" : "text-black"
-              )}>
+              <p className="text-base leading-[1.66] tracking-[1px] font-normal text-black">
                 {description}
               </p>
             )}
@@ -63,10 +59,7 @@ const SectionCard: React.FC<SectionCardProps> = ({
                 {items.map((item, index) => (
                   <li 
                     key={index} 
-                    className={cn(
-                      "text-base leading-[1.66] tracking-[1px] font-normal",
-                      isPremium ? "text-amber-800" : "text-black"
-                    )}
+                    className="text-base leading-[1.66] tracking-[1px] font-normal text-black"
                   >
                     {item}
                   </li>
@@ -77,12 +70,9 @@ const SectionCard: React.FC<SectionCardProps> = ({
                 {items.map((item, index) => (
                   <li 
                     key={index} 
-                    className={cn(
-                      "flex items-center gap-2.5 h-[27px] text-base leading-[1.66] tracking-[1px] font-normal",
-                      isPremium ? "text-amber-800" : "text-black"
-                    )}
+                    className="flex items-center gap-2.5 h-[27px] text-base leading-[1.66] tracking-[1px] font-normal text-black"
                   >
-                    <span className={isPremium ? "text-amber-800" : "text-black"}>•</span>
+                    <span className="text-black">•</span>
                     <span>{item}</span>
                   </li>
                 ))}
