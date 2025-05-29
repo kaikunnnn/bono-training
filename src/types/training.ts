@@ -1,4 +1,3 @@
-
 export interface Training {
   id: string;
   slug: string;
@@ -86,6 +85,7 @@ export interface TrainingFrontmatter {
  */
 export interface TaskFrontmatter {
   title: string;
+  description?: string;
   slug: string;
   order_index: number;
   is_premium?: boolean;
