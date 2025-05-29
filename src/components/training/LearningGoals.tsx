@@ -5,6 +5,7 @@ import ContentSection from './ContentSection';
 interface LearningGoalsProps {
   description?: string;
   goals: string[];
+  variant?: 'default' | 'premium';
   className?: string;
 }
 
@@ -15,17 +16,23 @@ interface LearningGoalsProps {
 const LearningGoals: React.FC<LearningGoalsProps> = ({
   description,
   goals,
+  variant = 'default',
   className
 }) => {
+  const isPremium = variant === 'premium';
+
   return (
     <ContentSection 
       title="学習ゴール" 
+      variant={variant}
       className={className}
     >
       <div className="space-y-6">
         {/* 説明文 */}
         {description && (
-          <p className="font-noto-sans text-base text-black leading-relaxed">
+          <p className={`font-noto-sans text-base leading-relaxed ${
+            isPremium ? 'text-training-dark' : 'text-black'
+          }`}>
             {description}
           </p>
         )}
@@ -34,8 +41,12 @@ const LearningGoals: React.FC<LearningGoalsProps> = ({
         <ul className="space-y-2">
           {goals.map((goal, index) => (
             <li key={index} className="flex items-center space-x-2">
-              <div className="w-1.5 h-1.5 bg-black rounded-full flex-shrink-0" />
-              <span className="font-noto-sans text-base text-black leading-relaxed">
+              <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                isPremium ? 'bg-training-dark' : 'bg-black'
+              }`} />
+              <span className={`font-noto-sans text-base leading-relaxed ${
+                isPremium ? 'text-training-dark' : 'text-black'
+              }`}>
                 {goal}
               </span>
             </li>
