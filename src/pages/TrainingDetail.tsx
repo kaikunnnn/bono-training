@@ -17,12 +17,12 @@ const TrainingDetail = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isSubscribed, planMembers } = useSubscriptionContext();
+  const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
   const [loading, setLoading] = useState(true);
   const [trainingData, setTrainingData] = useState<any>(null);
   const [progressMap, setProgressMap] = useState<Record<string, any>>({});
   
-  const hasPremiumAccess = isSubscribed && planMembers;
+  const hasPremiumAccess = isSubscribed && hasMemberAccess;
   
   // trainingSlugが存在しない場合のエラーハンドリング
   if (!trainingSlug) {
