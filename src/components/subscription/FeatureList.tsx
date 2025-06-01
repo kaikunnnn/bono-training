@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Star } from 'lucide-react';
 import { ContentAccessType } from '@/utils/subscriptionPlans';
@@ -15,15 +14,11 @@ function getFeaturesByContentType(contentType: ContentAccessType): string[] {
     case 'member':
       return [
         '全てのメンバー限定コンテンツへのアクセス',
-        '追加機能の利用',
-        'コミュニティへの参加'
-      ];
-    case 'training':
-      return [
         '全てのトレーニングプログラムへのアクセス',
         '実践的なスキル習得カリキュラム',
         'ハンズオンでの技術習得',
-        'プロジェクト例と解説'
+        'プロジェクト例と解説',
+        'コミュニティへの参加'
       ];
     default:
       return [

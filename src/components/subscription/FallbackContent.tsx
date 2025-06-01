@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,9 +13,7 @@ function getContentTypeDescription(contentType: ContentAccessType, customDescrip
     case 'learning':
       return 'この学習コンテンツを閲覧するには、プランのアップグレードが必要です。';
     case 'member':
-      return 'このメンバー限定コンテンツを閲覧するには、プランのアップグレードが必要です。';
-    case 'training':
-      return 'このトレーニングプログラムに参加するには、グロースプランへのアップグレードが必要です。';
+      return 'このメンバー限定コンテンツ（トレーニングプログラム含む）を閲覧するには、プランのアップグレードが必要です。';
     default:
       return 'このコンテンツを閲覧するには、プランのアップグレードが必要です。';
   }
