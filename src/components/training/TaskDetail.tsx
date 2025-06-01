@@ -36,19 +36,19 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   isFreePreview = false
 }) => {
   const { user } = useAuth();
-  const { isSubscribed: contextIsSubscribed, planMembers } = useSubscriptionContext();
+  const { isSubscribed: contextIsSubscribed, hasMemberAccess } = useSubscriptionContext();
   const navigate = useNavigate();
   const isCompleted = progress?.status === 'done';
 
   // プレミアムコンテンツへのアクセス権があるかどうかを判定
-  // plan_members=true の場合にのみプレミアムコンテンツにアクセス可能
-  const hasPremiumAccess = contextIsSubscribed && planMembers;
+  // hasMemberAccess=true の場合にのみプレミアムコンテンツにアクセス可能
+  const hasPremiumAccess = contextIsSubscribed && hasMemberAccess;
 
   // デバッグ用ログ
   console.log('TaskDetail - コンテンツアクセス状態:', { 
     isPremium, 
     isSubscribed: contextIsSubscribed,
-    planMembers,
+    hasMemberAccess,
     hasPremiumAccess,
     isFreePreview,
     taskTitle: task.title,

@@ -24,10 +24,10 @@ export function MdxPreview({
   isFreePreview = false,
   previewMarker = '<!--PREMIUM-->'
 }: MdxPreviewProps) {
-  const { isSubscribed, planMembers } = useSubscriptionContext();
+  const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
 
   // プレミアムアクセス権があるかどうかを判定
-  const hasPremiumAccess = isSubscribed && planMembers;
+  const hasPremiumAccess = isSubscribed && hasMemberAccess;
   
   // プレミアムコンテンツへのアクセス制限が必要かどうかを判定
   const shouldLimitContent = isPremium && !hasPremiumAccess;

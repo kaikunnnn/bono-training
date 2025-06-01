@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,14 +18,14 @@ const TaskDetailPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
-  const { isSubscribed, planMembers } = useSubscriptionContext();
+  const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [task, setTask] = useState<MarkdownFile | null>(null);
   const [trainingTasks, setTrainingTasks] = useState<MarkdownFile[]>([]);
 
-  const hasPremiumAccess = isSubscribed && planMembers;
+  const hasPremiumAccess = isSubscribed && hasMemberAccess;
 
   // デバッグ: URL パラメータの詳細ログ
   console.log('=== TaskDetailPage Debug Start ===');

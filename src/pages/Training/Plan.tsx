@@ -14,7 +14,7 @@ import PlanCard from '@/components/subscription/PlanCard';
 const TrainingPlan: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isSubscribed, planType, planMembers } = useSubscriptionContext();
+  const { isSubscribed, planType, hasMemberAccess } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
   
   // コミュニティプラン情報
@@ -84,7 +84,7 @@ const TrainingPlan: React.FC = () => {
             price={communityPlan.price}
             features={communityPlan.features}
             recommended={communityPlan.recommended}
-            isCurrentPlan={isSubscribed && planType === 'community' && planMembers}
+            isCurrentPlan={isSubscribed && planType === 'community' && hasMemberAccess}
             onSubscribe={handleSubscribe}
             isLoading={isLoading}
           />
