@@ -2,15 +2,17 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkSubscriptionStatus } from '@/services/stripe';
-import { PlanType } from '@/utils/subscriptionPlans';
+import { PlanType, hasLearningAccess, hasMemberAccess, UserPlanInfo } from '@/utils/subscriptionPlans';
 
 export interface SubscriptionState {
   isSubscribed: boolean;
   planType: PlanType | null;
-  planMembers: boolean; // トレーニングメンバーシップのアクセス権限
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
+  // 新しいアクセス権限フラグ
+  hasMemberAccess: boolean;
+  hasLearningAccess: boolean;
 }
 
 /**
@@ -20,7 +22,6 @@ export const useSubscription = (): SubscriptionState => {
   const { user, loading: authLoading } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [planType, setPlanType] = useState<PlanType | null>(null);
-  const [planMembers, setPlanMembers] = useState(false); // メンバーシップアクセス権限
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -28,14 +29,13 @@ export const useSubscription = (): SubscriptionState => {
     if (!user) {
       setIsSubscribed(false);
       setPlanType(null);
-      setPlanMembers(false);
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      const { isSubscribed, planType, planMembers, error } = await checkSubscriptionStatus();
+      const { isSubscribed, planType, error } = await checkSubscriptionStatus();
       
       if (error) {
         throw error;
@@ -43,7 +43,6 @@ export const useSubscription = (): SubscriptionState => {
       
       setIsSubscribed(isSubscribed);
       setPlanType(planType);
-      setPlanMembers(planMembers);
       setError(null);
     } catch (err) {
       console.error('サブスクリプション取得エラー:', err);
@@ -59,12 +58,23 @@ export const useSubscription = (): SubscriptionState => {
     }
   }, [user, authLoading]);
 
+  // ユーザープラン情報を作成
+  const userPlan: UserPlanInfo = {
+    planType,
+    isActive: isSubscribed,
+  };
+
+  // 新しいヘルパー関数を使用してアクセス権限を計算
+  const memberAccess = hasMemberAccess(userPlan);
+  const learningAccess = hasLearningAccess(userPlan);
+
   return {
     isSubscribed,
     planType,
-    planMembers,
     loading,
     error,
-    refresh: fetchSubscriptionStatus
+    refresh: fetchSubscriptionStatus,
+    hasMemberAccess: memberAccess,
+    hasLearningAccess: learningAccess
   };
 };
