@@ -9,7 +9,7 @@ import { CheckSubscriptionResponse } from "./types.ts";
 export function createUnauthenticatedResponse(): Response {
   logDebug("認証ヘッダーなし");
   return new Response(
-    JSON.stringify({ subscribed: false, planType: null, planMembers: false }),
+    JSON.stringify({ subscribed: false, planType: null }),
     {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
@@ -34,7 +34,7 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
   if (userError || !user) {
     logDebug("ユーザー取得エラー", { error: userError });
     return new Response(
-      JSON.stringify({ subscribed: false, planType: null, planMembers: false }),
+      JSON.stringify({ subscribed: false, planType: null }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -51,15 +51,13 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
   if (dbSubscription) {
     logDebug("データベースの購読情報を返却", { 
       isActive: dbSubscription.is_active,
-      planType: dbSubscription.plan_type,
-      planMembers: dbSubscription.plan_members
+      planType: dbSubscription.plan_type
     });
     
     return new Response(
       JSON.stringify({
         subscribed: dbSubscription.is_active,
-        planType: dbSubscription.plan_type,
-        planMembers: dbSubscription.plan_members
+        planType: dbSubscription.plan_type
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -86,15 +84,13 @@ export async function handleStripeSubscriptionCheck(
       await subscriptionService.updateSubscriptionStatus(
         userId,
         true,
-        "standard",
-        true
+        "standard"
       );
       
       return new Response(
         JSON.stringify({ 
           subscribed: true, 
           planType: "standard",
-          planMembers: true,
           testMode: true
         }),
         {
@@ -119,15 +115,13 @@ export async function handleStripeSubscriptionCheck(
     await subscriptionService.updateSubscriptionStatus(
       userId,
       true,
-      "standard",
-      true
+      "standard"
     );
     
     return new Response(
       JSON.stringify({ 
         subscribed: true,
         planType: "standard",
-        planMembers: true,
         error: "Stripeとの同期に失敗しましたが、標準プランとして処理します"
       }),
       {
@@ -156,21 +150,18 @@ export async function processStripeSubscription(
 
   const hasActiveSubscription = subscriptions.data.length > 0;
   let planType = null;
-  let planMembers = false;
   
   if (hasActiveSubscription) {
     const subscription = subscriptions.data[0];
     const price = await subscriptionService.getPlanInfo(subscription);
     if (price && price.unit_amount) {
-      // 金額に基づいてプランタイプとトレーニングメンバーシップ権限を判定
-      const [determinedPlanType, hasTrainingAccess] = subscriptionService.determinePlanInfo(price.unit_amount);
+      // 金額に基づいてプランタイプを判定
+      const [determinedPlanType] = subscriptionService.determinePlanInfo(price.unit_amount);
       planType = determinedPlanType;
-      planMembers = hasTrainingAccess;
       
       logDebug("プラン判定", { 
         amount: price.unit_amount, 
-        planType, 
-        planMembers
+        planType
       });
     }
     
@@ -179,7 +170,6 @@ export async function processStripeSubscription(
       userId,
       true,
       planType,
-      planMembers,
       subscription.id
     );
   } else {
@@ -189,14 +179,12 @@ export async function processStripeSubscription(
     await subscriptionService.updateSubscriptionStatus(
       userId,
       false,
-      planType,
-      false
+      planType
     );
   }
 
   return { 
     subscribed: hasActiveSubscription, 
-    planType,
-    planMembers 
+    planType
   };
 }

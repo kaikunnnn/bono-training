@@ -50,7 +50,6 @@ export class DbOperations {
     userId: string,
     isActive: boolean,
     planType: string | null,
-    planMembers: boolean = false,
     stripeSubscriptionId?: string
   ) {
     if (!userId) {
@@ -64,7 +63,6 @@ export class DbOperations {
         .update({
           is_active: isActive,
           plan_type: planType,
-          plan_members: planMembers,
           stripe_subscription_id: stripeSubscriptionId,
           updated_at: new Date().toISOString()
         })
@@ -73,7 +71,7 @@ export class DbOperations {
       if (updateError) {
         logDebug("サブスクリプション情報更新エラー", updateError);
       } else {
-        logDebug("サブスクリプション情報更新成功", { userId, isActive, planType, planMembers });
+        logDebug("サブスクリプション情報更新成功", { userId, isActive, planType });
       }
       
       return { data: updateData, error: updateError };
