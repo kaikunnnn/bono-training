@@ -71,103 +71,93 @@
 
 ---
 
-## Phase 3 – 出し分けロジック統合（約 2 日）
+## Phase 3 – プラン定義と権限判定ロジック整備（約 1 日）
+
+### 前提と問題点
+
+    1. “Member権限” の定義がずれている
+    •	subscriptionPlans.ts の CONTENT_PERMISSIONS において、
+    •	member と training に割り当てられたプラン配列が、本来の仕様（['standard','growth','community']）と異なる
+    •	useSubscription.ts 内で独自の planMembers フラグを使っているため、「Member権限かどうか」の判定が不明確
+    2.	アクセス制御がずれている結果、正しいユーザーにコンテンツを出し分けられていない
+    •	free ユーザーでも閲覧すべきでないコンテンツが見えてしまう
+    •	standard ユーザーが本来閲覧できるはずのメンバー限定コンテンツに弾かれてしまっている
+    •	その結果、Markdown 内の <!-- PREMIUM_ONLY --> を使った出し分けや、動画／ラベル表示の制御が正しく動作していない
+
+⸻
 
 ### ゴール
 
-- 認証済みユーザーの “有料会員かどうか” を判定し、Markdown 内の「PREMIUM_ONLY」以降の表示や動画の種類、ラベル表示を動的に切り替える。
+- free/standard/growth/community の各プランを正しく判定し、以降の表示切り替えロジックの前提を整える
+- subscriptionPlans.ts と useSubscription.ts を修正して、「hasMemberAccess」「hasTrainingAccess」などのメソッド名で必要な Boolean フラグを返すようにする
+- Guard コンポーネントが「Member 権限」ベースで正しく制御できるようにする
 
----
+### 実装タスク
 
-### やりたいこと
+※以下を参考にして現状のコードを分析して実装タスクを計画してください
 
-1. Markdown 本文中の `<!-- PREMIUM_ONLY -->` を区切りとして、無料会員と有料会員で表示する範囲を切り分ける
-   - 無料会員：区切りより前のコンテンツのみ表示し、「ここから先はプレミアム会員限定です」などのメッセージを表示
-   - 有料会員：区切り以降も含めた全文を表示
-2. 動画 URL を出し分ける
-   - Markdown frontmatter に定義された `video_preview` と `video_full` のどちらを埋め込むかを切り替える
-3. 「難易度」表示の横に “メンバー限定コンテンツ” のラベルを出し分ける
-   - 無料会員：ラベルを表示
-   - 有料会員：ラベルを非表示
+1. subscriptionPlans.ts の修正
+2. useSubscription.ts（カスタムフック）の修正
+3. ガードコンポーネントの更新
 
----
+### テストゲート（Phase 3 完了チェック）
 
-### ゴールを達成するための実装タスク
+    1.	プラン定義の検証
+    2.	権限判定フックの動作確認
+    3.	Guardコンポーネントの動作確認
+    4.	全体ビルド確認
 
-1. **Supabase 側の準備**
+## Phase 4 – Markdown 出し分け＆動画／ラベル制御実装（約 1 日）
 
-   1. `users` テーブルに Boolean 型の `is_premium` 列を追加する
-   2. Stripe Webhook をトリガーして、有料契約完了時に Supabase のカラム `is_premium=true` を更新する RPC 関数を用意する
+### 前提
 
-2. **フロントエンドで「有料会員判定フラグ」を取得できるようにする**
+- Phase 3 までで「hasMemberAccess」「hasTrainingAccess」等が正常に返る状態になっている
+- Routing で /training/:trainingSlug/:taskSlug から、TaskDetailPage.tsx が呼ばれるようになっている
+- loadTaskContent(trainingSlug, taskSlug) で Markdown の content.md と frontmatter が取得できる状態になっている
 
-   - 例：`useAuth()` や `AuthContext` などを通じて、ログイン中のユーザーオブジェクトから“有料会員かどうか”を判定できる Boolean フラグを取得する
-   - 仕様書には具体的なプロパティ名を記載せず、あくまで「AuthContext などから返ってくる Boolean 判定機能を使う」と抽象的に記述する
+### ゴール
 
-3. **Markdown の表示ロジックを組み込む**
+- タスクページにおいて、<!-- PREMIUM_ONLY --> の位置でコンテンツを切り分け
+- free ユーザーと standard/growth/community の "member"権限を持つユーザーで以下を切り替えるを切り替える
+  - Markdown の表示範囲
+  - 動画(URL) の種類
+  - 「メンバー限定コンテンツ」ラベル表示
 
-   1. 各タスクページコンポーネントで Markdown 本文を取得
-   2. 下記のように `split('<!-- PREMIUM_ONLY -->')` して、先頭部分とその後のコンテンツを分割
-      ```ts
-      const [beforePremium, afterPremium] = rawMarkdown.split(
-        "<!-- PREMIUM_ONLY -->"
-      );
-      ```
-   3. 取得した“有料会員判定フラグ” をチェックして、
-      - 無料会員の場合：`beforePremium` のみをレンダリングし、区切り以降のコンテンツ部分には「ここから先はプレミアム会員限定です…」といったバナーを表示
-      - 有料会員の場合：`beforePremium + afterPremium` をそのまま全文レンダリング
+### 実装タスク
 
-4. **動画 URL の切り分け**
+※以下を参考にして現状のコードを分析して実装タスクを計画してください
 
-   - Markdown frontmatter から `video_preview` と `video_full` をどちらも取得できるようにしておく
-   - 表示箇所では“有料会員判定フラグ” を見て、
-     - 無料会員：`video_preview` を埋め込む
-     - 有料会員：`video_full` を埋め込む
+1. Markdown 本文の分割と表示制御
 
-5. **「メンバー限定コンテンツ」ラベルの切り分け**
-   - 「難易度」やタイトル付近の UI で、
-     - 無料会員の場合：`(メンバー限定コンテンツ)` ラベルを並べて表示
-     - 有料会員の場合：ラベルを非表示
+   1. コンテンツ取得
+   2. PREMIUM_ONLY で分割
+   3. 表示切り替えロジック
+   4. コンポーネント例：TaskDetailContent.tsx
 
----
+2. TaskDetailPage.tsx の呼び出し／エラーハンドリング
+   1. TaskDetailPage.tsx での流れ
+   2. 注意点
+      • trainingSlug／taskSlug が存在しない場合はエラーページ表示
+      • loadTaskContent が null を返したらエラーページ表示
+      • データロード中は「読み込み中…」を表示
+3. 共通ヘッダーでのラベル表示
+   1. TaskHeader.tsx（または TrainingHeader.tsx）の更新例
 
-### テストゲート
+### テストゲート（Phase 4 完了チェック）
 
-- **無料会員の挙動確認**
-
-  1. Stripe で有料プランに加入していないユーザー（`is_premium = false`）でログイン
-  2. 有料タスクのページを開くと、
-     - Markdown 本文の区切りより後ろの部分は出ず、代わりに「ここから先はプレミアム会員限定です」の案内が表示される
-     - 動画は `video_preview` が埋め込まれている
-     - 難易度欄の横に「メンバー限定コンテンツ」が表示される
-
-- **有料会員の挙動確認**
-
-  1. Stripe でプレミアムプランに加入しているユーザー（`is_premium = true`）でログイン
-  2. 同じタスクページを開くと、
-     - Markdown 本文の全文（区切り以降も含む）がすべて表示される
-     - 動画は `video_full` が埋め込まれている
-     - 難易度欄の横には「メンバー限定コンテンツ」ラベルが表示されない
-
-- **全体チェック**
-  - 型チェック（`pnpm tsc --noEmit`）通過
-  - ビルドおよびプレビュー（`pnpm build && pnpm preview`）でエラーなし
-  - 各ページを実際に操作して、出し分けが正しく機能する
-
----
-
-### 補足：実装時の注意点
-
-- **有料会員判定フラグの取得方法**
-  - 実際のコードでは `session.user.is_premium` のように具体的なキー名を使うかもしれませんが、コード例では「AuthContext などから返ってくる Boolean 判定機能」を参照するように記述すると、実装時にキー名が変わっても柔軟に対応できる
-- **`<!-- PREMIUM_ONLY -->` がないファイルへの対応**
-  - 区切りマーカーが見つからない場合は全文を「無料コンテンツ」として扱い、動画は `video_preview` を使う（`afterPremium` 部分が空配列扱いになるので、区切り以降の表示がそもそも発生しない）
-- **動画 URL が未定義の場合**
-  - `video_preview` または `video_full` が frontmatter に存在しないときは、あらかじめ “サムネイルのみ表示” などフォールバックの UI を用意しておく
-
----
-
-このように記述しておくと、実装者は「AuthContext から Boolean 判定を受け取る箇所」だけを自分のコードベースに合わせて差し替えればよく、混乱を防いだまま Phase 3 の要件を正しく実装できます。```
+    1.	無料ユーザー（free）の場合
+    •	Markdown の前半部分のみ表示
+    •	区切り以降はバナー表示
+    •	video_preview のみ動作
+    •	「メンバー限定コンテンツ」ラベルが表示される
+    2.	有料ユーザー（standard/growth/community）の場合
+    •	Markdown の全文が表示される（区切り以降も含む）
+    •	video_full のみ動作
+    •	「メンバー限定コンテンツ」ラベルが非表示
+    3.	全体ビルド確認
+    •	pnpm tsc --noEmit → 型エラーゼロ
+    •	pnpm build && pnpm preview → ブラウザで /training/todo-app/introduction を開いて動作を一通りチェック
+    •	コンソールエラーが 0 件
 
 ---
 
