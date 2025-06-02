@@ -1,6 +1,6 @@
 ---
 title: "Todo アプリ UI 制作"
-description: "実践的な Todo アプリの UI デザインを学ぶ"
+description: "実践的な Todo アプリの UI デザインを学ぶぜよ"
 type: "challenge"
 difficulty: "normal"
 tags: ["ui", "todo", "実践"]
