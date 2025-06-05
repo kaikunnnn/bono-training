@@ -22,30 +22,52 @@ export function MdxPreview({
   className,
   isPremium = false,
   isFreePreview = false,
-  previewMarker = '<!--PREMIUM-->'
+  previewMarker = '<!-- PREMIUM_ONLY -->'
 }: MdxPreviewProps) {
   const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
 
   // プレミアムアクセス権があるかどうかを判定
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
   
-  // プレミアムコンテンツへのアクセス制限が必要かどうかを判定
-  const shouldLimitContent = isPremium && !hasPremiumAccess;
+  console.log('MdxPreview Debug:', {
+    isPremium,
+    hasPremiumAccess,
+    isSubscribed,
+    hasMemberAccess,
+    hasMarker: content.includes(previewMarker)
+  });
 
-  // フロントエンド側でのマーカー処理
-  // (通常はサーバー側で処理済みだが、フォールバックとして実装)
   let displayContent = content;
   let showPremiumBanner = false;
   
-  // サーバー側からisFreePreviewフラグが来ている場合は
-  // 既にコンテンツが制限されているため、バナーのみ表示
-  if (isFreePreview) {
-    showPremiumBanner = true;
-  } 
-  // サーバー側での処理がされていない場合のフォールバック
-  else if (shouldLimitContent && content.includes(previewMarker)) {
-    displayContent = content.split(previewMarker)[0];
-    showPremiumBanner = true;
+  // 無料コンテンツ (is_premium: false) の場合
+  if (!isPremium) {
+    // 無料コンテンツは常に全文表示、プレミアムバナーなし
+    displayContent = content;
+    showPremiumBanner = false;
+    console.log('Free content: showing full content, no banner');
+  }
+  // 有料コンテンツ (is_premium: true) の場合
+  else {
+    // プレミアムアクセスがある場合：全文表示
+    if (hasPremiumAccess) {
+      displayContent = content;
+      showPremiumBanner = false;
+      console.log('Premium content + premium access: showing full content');
+    }
+    // プレミアムアクセスがない場合：マーカーで切り分け
+    else {
+      if (content.includes(previewMarker)) {
+        displayContent = content.split(previewMarker)[0];
+        showPremiumBanner = true;
+        console.log('Premium content + no access: showing preview only with banner');
+      } else {
+        // マーカーがない場合は全文表示してバナー表示
+        displayContent = content;
+        showPremiumBanner = true;
+        console.log('Premium content + no access + no marker: showing full content with banner');
+      }
+    }
   }
 
   return (
