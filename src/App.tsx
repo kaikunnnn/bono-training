@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import PrivateRoute from "@/components/auth/PrivateRoute";
@@ -31,6 +31,65 @@ import TrainingDebug from '@/pages/Training/Debug';
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
 
+const AppContent = () => {
+  const location = useLocation();
+  const urlPlan = new URLSearchParams(location.search).get('plan');
+  
+  // クエリパラメータに基づいてモックのサブスクリプション状態を生成
+  const mockSubscription = urlPlan ? {
+    planType: urlPlan as any, // PlanType
+    isSubscribed: urlPlan !== 'free',
+    hasMemberAccess: ['standard', 'growth', 'community'].includes(urlPlan),
+    hasLearningAccess: ['standard', 'growth'].includes(urlPlan),
+    loading: false,
+    error: null,
+    refresh: async () => {}
+  } : undefined;
+
+  // デバッグ用ログ
+  if (urlPlan) {
+    console.log('Phase 3 Debug Mode:', {
+      urlPlan,
+      mockSubscription
+    });
+  }
+
+  return (
+    <SubscriptionProvider overrideValue={mockSubscription}>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        
+        <Route path="/training" element={<TrainingHome />} />
+        <Route path="/training/login" element={<TrainingLogin />} />
+        <Route path="/training/:trainingSlug" element={<TrainingDetail />} />
+        <Route path="/training/:trainingSlug/:taskSlug" element={<TaskDetailPage />} />
+        <Route path="/training/plan" element={<TrainingPlan />} />
+        <Route path="/training/about" element={<TrainingAbout />} />
+        <Route path="/training/debug" element={<TrainingDebug />} />
+        
+        <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+        <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+        
+        <Route path="/content" element={<Content />} />
+        <Route path="/content/:id" element={<ContentDetail />} />
+        
+        <Route path="/video-detail-test/:id" element={<VideoDetailTest />} />
+        
+        <Route path="/paid-only" element={
+          <ProtectedPremiumRoute>
+            <PaidContent />
+          </ProtectedPremiumRoute>
+        } />
+
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </SubscriptionProvider>
+  );
+};
+
 const App = () => {
   const [queryClient] = useState(() => new QueryClient());
 
@@ -39,42 +98,11 @@ const App = () => {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <AuthProvider>
-            <SubscriptionProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/reset-password" element={<ResetPassword />} />
-                  
-                  <Route path="/training" element={<TrainingHome />} />
-                  <Route path="/training/login" element={<TrainingLogin />} />
-                  <Route path="/training/:trainingSlug" element={<TrainingDetail />} />
-                  <Route path="/training/:trainingSlug/:taskSlug" element={<TaskDetailPage />} />
-                  <Route path="/training/plan" element={<TrainingPlan />} />
-                  <Route path="/training/about" element={<TrainingAbout />} />
-                  <Route path="/training/debug" element={<TrainingDebug />} />
-                  
-                  <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
-                  <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                  
-                  <Route path="/content" element={<Content />} />
-                  <Route path="/content/:id" element={<ContentDetail />} />
-                  
-                  <Route path="/video-detail-test/:id" element={<VideoDetailTest />} />
-                  
-                  <Route path="/paid-only" element={
-                    <ProtectedPremiumRoute>
-                      <PaidContent />
-                    </ProtectedPremiumRoute>
-                  } />
-
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-            </SubscriptionProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppContent />
+            </BrowserRouter>
           </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
