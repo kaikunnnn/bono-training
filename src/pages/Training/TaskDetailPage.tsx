@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -177,7 +176,8 @@ const TaskDetailPage = () => {
   const { prevSlug, nextSlug } = getPrevNextTasks();
 
   // 動画URLがある場合のみ動画プレーヤーを表示
-  const hasVideo = frontmatter.video_preview || frontmatter.video_full;
+  const hasValidVideo = (frontmatter.video_preview && frontmatter.video_preview.trim()) || 
+                        (frontmatter.video_full && frontmatter.video_full.trim());
 
   return (
     <TrainingLayout>
@@ -188,7 +188,7 @@ const TaskDetailPage = () => {
         </div>
 
         {/* 動画プレーヤー */}
-        {hasVideo && (
+        {hasValidVideo && (
           <div className="mb-8">
             <TaskVideo
               videoUrl={frontmatter.video_full}
