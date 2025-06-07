@@ -5,10 +5,13 @@ import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import LearningGoals from './LearningGoals';
 import SectionCard from './SectionCard';
+import PremiumBanner from './PremiumBanner';
 
 interface MarkdownRendererProps {
   content: string;
   className?: string;
+  isPremium?: boolean;
+  hasMemberAccess?: boolean;
 }
 
 interface SectionData {
@@ -17,12 +20,45 @@ interface SectionData {
 }
 
 /**
+ * プレミアムコンテンツの分割処理
+ */
+const getDisplayContent = (
+  content: string,
+  isPremium: boolean,
+  hasMemberAccess: boolean,
+  marker: string = '<!-- PREMIUM_ONLY -->'
+): { content: string; showBanner: boolean } => {
+  // 無料コンテンツまたはプレミアムアクセスがある場合は全文表示
+  if (!isPremium || hasMemberAccess) {
+    return { content, showBanner: false };
+  }
+
+  // プレミアムコンテンツかつアクセス権がない場合
+  if (content.includes(marker)) {
+    const [freeContent] = content.split(marker);
+    return { content: freeContent.trim(), showBanner: true };
+  }
+
+  // マーカーがない場合は全文表示してバナーも表示
+  return { content, showBanner: true };
+};
+
+/**
  * マークダウンをレンダリングし、特定のセクションをカスタムコンポーネントに置き換える
  */
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ 
   content, 
-  className 
+  className,
+  isPremium = false,
+  hasMemberAccess = false
 }) => {
+  // プレミアムコンテンツの分割処理
+  const { content: displayContent, showBanner } = getDisplayContent(
+    content,
+    isPremium,
+    hasMemberAccess
+  );
+
   // 汎用的なセクション解析関数
   const parseSection = (markdown: string, sectionTitle: string): SectionData | null => {
     const escapedTitle = sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -65,14 +101,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   };
 
   // 各セクションのデータを取得
-  const learningGoalsData = parseSection(content, '学習のゴール');
-  const procedureData = parseSection(content, '手順');
-  const completionImageData = parseSection(content, '完成イメージ');
-  const premiumData = parseSection(content, 'プレミアム限定：デザイン改善の実例');
+  const learningGoalsData = parseSection(displayContent, '学習のゴール');
+  const procedureData = parseSection(displayContent, '手順');
+  const completionImageData = parseSection(displayContent, '完成イメージ');
+  const premiumData = parseSection(displayContent, 'プレミアム限定：デザイン改善の実例');
 
   // 処理したセクションを除外したマークダウンを作成
   const processedSections = ['学習のゴール', '手順', '完成イメージ', 'プレミアム限定：デザイン改善の実例'];
-  const contentWithoutProcessedSections = removeSections(content, processedSections);
+  const contentWithoutProcessedSections = removeSections(displayContent, processedSections);
 
   return (
     <div className={className}>
@@ -132,6 +168,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
           {contentWithoutProcessedSections}
         </ReactMarkdown>
       </article>
+
+      {/* プレミアムバナー */}
+      {showBanner && (
+        <div className="mt-8">
+          <PremiumBanner />
+        </div>
+      )}
     </div>
   );
 };

@@ -8,7 +8,7 @@ import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
 import LessonHeader from '@/components/training/LessonHeader';
-import MdxPreview from '@/components/training/MdxPreview';
+import MarkdownRenderer from '@/components/training/MarkdownRenderer';
 import { loadTaskContent, loadTrainingTasks } from '@/lib/markdown-loader';
 import { MarkdownFile, TaskFrontmatter } from '@/types/training';
 import TaskDetailError from './TaskDetailError';
@@ -312,10 +312,11 @@ const TaskDetailPage = () => {
           </div>
         )}
 
-        {/* Markdownコンテンツ表示（MdxPreviewに変更してコンテンツ分割を有効化） */}
-        <MdxPreview 
+        {/* Markdownコンテンツ表示（MarkdownRendererに戻してプレミアム制御を追加） */}
+        <MarkdownRenderer 
           content={task.content}
           isPremium={frontmatter.is_premium || false}
+          hasMemberAccess={hasPremiumAccess}
           className="mb-8"
         />
 
