@@ -45,8 +45,8 @@ export const useSubscription = (): SubscriptionState => {
         throw response.error;
       }
       
-      // Edge Functionからのレスポンスに hasMemberAccess, hasLearningAccess が含まれている場合はそれを使用
-      const subscribed = response.isSubscribed ?? response.subscribed;
+      // レスポンスから値を安全に取得
+      const subscribed = response.isSubscribed ?? response.subscribed ?? false;
       const plan = response.planType;
       const memberAccessFromResponse = response.hasMemberAccess;
       const learningAccessFromResponse = response.hasLearningAccess;

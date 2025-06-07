@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { getCheckoutLineItems } from '@/utils/stripe';
 import { PlanType } from '@/utils/subscriptionPlans';
@@ -51,14 +50,24 @@ export const createCheckoutSession = async (
  */
 export const checkSubscriptionStatus = async (): Promise<{ 
   isSubscribed: boolean;
+  subscribed: boolean; // 後方互換性のため
   planType: PlanType | null;
+  hasMemberAccess: boolean;
+  hasLearningAccess: boolean;
   error: Error | null;
 }> => {
   try {
     // ユーザーが認証済みか確認
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      return { isSubscribed: false, planType: null, error: null };
+      return { 
+        isSubscribed: false, 
+        subscribed: false,
+        planType: null, 
+        hasMemberAccess: false,
+        hasLearningAccess: false,
+        error: null 
+      };
     }
     
     // Supabase Edge Functionを呼び出して購読状態を確認
@@ -72,12 +81,22 @@ export const checkSubscriptionStatus = async (): Promise<{
     console.log('購読状態確認結果:', data);
     
     return { 
-      isSubscribed: data.subscribed, 
+      isSubscribed: data.isSubscribed || data.subscribed, 
+      subscribed: data.subscribed || data.isSubscribed, // 後方互換性
       planType: data.planType || null,
+      hasMemberAccess: data.hasMemberAccess || false,
+      hasLearningAccess: data.hasLearningAccess || false,
       error: null 
     };
   } catch (error) {
     console.error('購読状態確認エラー:', error);
-    return { isSubscribed: false, planType: null, error: error as Error };
+    return { 
+      isSubscribed: false, 
+      subscribed: false,
+      planType: null, 
+      hasMemberAccess: false,
+      hasLearningAccess: false,
+      error: error as Error 
+    };
   }
 };
