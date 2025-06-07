@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -35,8 +34,26 @@ const getDisplayContent = (
 
   // プレミアムコンテンツかつアクセス権がない場合
   if (content.includes(marker)) {
-    const [freeContent] = content.split(marker);
-    return { content: freeContent.trim(), showBanner: true };
+    const markerIndex = content.indexOf(marker);
+    const beforeMarker = content.substring(0, markerIndex);
+    
+    // マーカー直前に見出しがあるかチェック
+    // パターン: "## プレミアム限定..." のような見出しがマーカー直前にある場合
+    const headingMatch = beforeMarker.match(/(.*?\n## [^\n]+)\s*$/);
+    
+    if (headingMatch) {
+      // 見出しまでを含めて返す
+      return { 
+        content: headingMatch[1].trim(), 
+        showBanner: true 
+      };
+    } else {
+      // 従来通りの分割（見出しなしの場合）
+      return { 
+        content: beforeMarker.trim(), 
+        showBanner: true 
+      };
+    }
   }
 
   // マーカーがない場合は全文表示してバナーも表示
