@@ -1,170 +1,335 @@
-# Git ベースでの Training コンテンツ管理計画
 
-**（Phase 3 まで・テーブル無し版）**
+# 統合開発計画 - Training コンテンツ管理・表示システム
 
----
-
-## Phase 0 – リポジトリ初期化 & 旧 Storage コード掃除（0.5–1 日）
-
-### ゴール
-
-- GitHub に雛形を push し、Supabase Storage 依存のビルドエラーが 0 になる。
-
-### 具体タスク
-
-1. **リポジトリ作成 & 雛形配置**
-   - `content/` ディレクトリをコミット
-   - ダミー `todo-app/index.md` と `tasks/01-introduction.md` を追加
-2. **旧 Edge Function を完全削除**
-   - `supabase/functions/get-training-*` 系 6 本
-   - `supabase/config.toml` から上記 Function 定義を削除
-3. **ソース修正（TODO 化）**
-   - `src/utils/mdxLoader.ts` の `supabase.functions.invoke()` 呼び出しをコメントアウト
-   - `src/services/training.ts` の Storage 依存関数を TODO に置換
-4. **CI セットアップ**
-   - GitHub Action で `pnpm typecheck && pnpm lint && pnpm build` を回す
-
-### PR チェックリスト
-
-- [ ] Edge Function の残骸が 0
-- [ ] `config.toml` から該当行を削除
-- [ ] ビルド／typecheck／lint が緑
-
-### テストゲート
-
-- `npm run build` が成功し、GitHub Actions が緑で通過する
+**（統合 Phase 3 & Phase 4 - Supabase Storage 一元化版）**
 
 ---
 
-## Phase 1 – Markdown 静的読み込み PoC（1 日）
+## 📑 統合プラン概要
 
-### ゴール
+**キー方針**
+1. **ローカル Markdown 執筆は従来どおり** - 開発体験を維持
+2. **git push すると GitHub Actions がバケットへ自動同期** - ヒューマンエラー防止
+3. **フロント／Edge Function は常に Storage だけを見る** - 分岐ゼロ、テスト・本番で経路が変わらない
 
-- `import.meta.glob()` で `content/` 配下の Markdown を取り込み、JSON を返す API が動く。
+**変更背景（旧案 → 新案）**
 
-### タスク
-
-1. `lib/getTrainings.ts` を実装（front-matter 抽出）
-2. API ルート `/api/debug-training` を作り、Training 配列を返す
-
-### テストゲート
-
-- ブラウザで `http://localhost:3000/api/debug-training` を叩くと `todo-app` が含まれる JSON が返る
-
----
-
-## Phase 2 – UI プロトタイプ（1.5 日）
-
-### ゴール
-
-- 最低限の画面で一覧ページ `/training` と詳細ページ `/training/[slug]` が表示できる。
-
-### タスク
-
-1. `pages/training/index.tsx` で一覧カード表示
-2. `pages/training/[slug].tsx` で Markdown をレンダリング
-3. `pages/training/[slug]/[taskSlug].tsx` に該当するページで、content/[training^-name]/tasks/[task-folder]/content.md の中身を詳細ページとして表示する
-
-### テストゲート
-
-- 一覧ページからクリック → 詳細ページに遷移し、`index.md` のタイトルが表示される
+| 旧案 | 新案（採用） | 理由 |
+|------|-------------|------|
+| 無料: ローカル読込<br>有料: Storage | 無料も有料も Storage | コード分岐をなくしバグ要因を削減。CI が「同期 → ビルド」で一貫。 |
+| 手動アップロード or 部分同期 | GitHub Actions で全 Markdown をワンクリック同期 | 執筆フローは git push だけ。ヒューマンエラー防止。 |
+| Edge Function が複雑（分岐＋正規化） | 単一 API・単一パスですべて取得 | テスト・監視・キャッシュ戦略をシンプルに。 |
 
 ---
 
-## Phase 3 – プラン定義と権限判定ロジック整備（約 1 日）
-
-### 前提と問題点
-
-    1. “Member権限” の定義がずれている
-    •	subscriptionPlans.ts の CONTENT_PERMISSIONS において、
-    •	member と training に割り当てられたプラン配列が、本来の仕様（['standard','growth','community']）と異なる
-    •	useSubscription.ts 内で独自の planMembers フラグを使っているため、「Member権限かどうか」の判定が不明確
-    2.	アクセス制御がずれている結果、正しいユーザーにコンテンツを出し分けられていない
-    •	free ユーザーでも閲覧すべきでないコンテンツが見えてしまう
-    •	standard ユーザーが本来閲覧できるはずのメンバー限定コンテンツに弾かれてしまっている
-    •	その結果、Markdown 内の <!-- PREMIUM_ONLY --> を使った出し分けや、動画／ラベル表示の制御が正しく動作していない
-
-⸻
+## Phase 3 – プラン判定ロジック完成（約 0.5 日）
 
 ### ゴール
-
-- free/standard/growth/community の各プランを正しく判定し、以降の表示切り替えロジックの前提を整える
-- subscriptionPlans.ts と useSubscription.ts を修正して、「hasMemberAccess」「hasTrainingAccess」などのメソッド名で必要な Boolean フラグを返すようにする
-- Guard コンポーネントが「Member 権限」ベースで正しく制御できるようにする
+- free/standard/growth/community の各プランを正しく判定
+- 「hasMemberAccess」「hasLearningAccess」などのメソッド名で必要な Boolean フラグを返す
+- Guard コンポーネントが「Member 権限」ベースで正しく制御できる
 
 ### 実装タスク
 
-※以下を参考にして現状のコードを分析して実装タスクを計画してください
-
-1. subscriptionPlans.ts の修正
-2. useSubscription.ts（カスタムフック）の修正
-3. ガードコンポーネントの更新
+| #   | 作業 | 主要ファイル | 完了条件 |
+|-----|------|-------------|----------|
+| 3-1 | subscriptionPlans.ts 仕上げ<br>`learning: ['standard','growth']`<br>`member: ['standard','growth','community']` | `src/utils/subscriptionPlans.ts` | 型チェック OK |
+| 3-2 | useSubscription.ts リファクタ<br>返却値：`hasMemberAccess` / `hasLearningAccess` | `src/hooks/useSubscription.ts` | Storybook／Jest 4 ケース通過 |
+| 3-3 | Guard 置換<br>`planMembers` → `hasMemberAccess` | `TrainingGuard.tsx` など | `/training?plan=...` テストで OK |
+| 3-4 | Edge Function check-subscription ミニマム化<br>`{ subscribed, planType }` のみ返す | `supabase/functions/check-subscription/...` | DevTools で JSON 確認 |
 
 ### テストゲート（Phase 3 完了チェック）
 
-    1.	プラン定義の検証
-    2.	権限判定フックの動作確認
-    3.	Guardコンポーネントの動作確認
-    4.	全体ビルド確認
+1. **プラン定義の検証**
+   ```bash
+   # URL パラメータでのテスト
+   ?plan=free → hasMemberAccess: false
+   ?plan=standard → hasMemberAccess: true  
+   ?plan=growth → hasMemberAccess: true
+   ?plan=community → hasMemberAccess: true
+   ```
 
-## Phase 4 – Markdown 出し分け＆動画／ラベル制御実装（約 1 日）
+2. **権限判定フックの動作確認**
+   - `useSubscriptionContext()` で正しい Boolean 値が返る
 
-### 前提
+3. **Guard コンポーネントの動作確認**
+   - 無料ユーザーが有料コンテンツにアクセス → 適切にブロック
+   - 有料ユーザーが有料コンテンツにアクセス → 正常表示
 
-- Phase 3 までで「hasMemberAccess」「hasTrainingAccess」等が正常に返る状態になっている
-- Routing で /training/:trainingSlug/:taskSlug から、TaskDetailPage.tsx が呼ばれるようになっている
-- loadTaskContent(trainingSlug, taskSlug) で Markdown の content.md と frontmatter が取得できる状態になっている
-
-### ゴール
-
-- タスクページにおいて、<!-- PREMIUM_ONLY --> の位置でコンテンツを切り分け
-- free ユーザーと standard/growth/community の "member"権限を持つユーザーで以下を切り替えるを切り替える
-  - Markdown の表示範囲
-  - 動画(URL) の種類
-  - 「メンバー限定コンテンツ」ラベル表示
-
-### 実装タスク
-
-※以下を参考にして現状のコードを分析して実装タスクを計画してください
-
-1. Markdown 本文の分割と表示制御
-
-   1. コンテンツ取得
-   2. PREMIUM_ONLY で分割
-   3. 表示切り替えロジック
-   4. コンポーネント例：TaskDetailContent.tsx
-
-2. TaskDetailPage.tsx の呼び出し／エラーハンドリング
-   1. TaskDetailPage.tsx での流れ
-   2. 注意点
-      • trainingSlug／taskSlug が存在しない場合はエラーページ表示
-      • loadTaskContent が null を返したらエラーページ表示
-      • データロード中は「読み込み中…」を表示
-3. 共通ヘッダーでのラベル表示
-   1. TaskHeader.tsx（または TrainingHeader.tsx）の更新例
-
-### テストゲート（Phase 4 完了チェック）
-
-    1.	無料ユーザー（free）の場合
-    •	Markdown の前半部分のみ表示
-    •	区切り以降はバナー表示
-    •	video_preview のみ動作
-    •	「メンバー限定コンテンツ」ラベルが表示される
-    2.	有料ユーザー（standard/growth/community）の場合
-    •	Markdown の全文が表示される（区切り以降も含む）
-    •	video_full のみ動作
-    •	「メンバー限定コンテンツ」ラベルが非表示
-    3.	全体ビルド確認
-    •	pnpm tsc --noEmit → 型エラーゼロ
-    •	pnpm build && pnpm preview → ブラウザで /training/todo-app/introduction を開いて動作を一通りチェック
-    •	コンソールエラーが 0 件
+4. **全体ビルド確認**
+   ```bash
+   pnpm typecheck && pnpm test && pnpm build
+   ```
 
 ---
 
-## 主要マイルストーン（ここまでで MVP 完了）
+## Phase 4 – コンテンツ同期 & PREMIUM 出し分け（約 1 日）
 
-1. **PoC 成功** – Phase 1 で JSON API 返却を確認
-2. **UI MVP** – Phase 2 でブラウザ表示
-3. **Paywall 稼働** – Phase 3 で有料出し分けが機能
+### ゴール
+- すべての Markdown（無料・有料）を Supabase Storage に同期
+- `<!-- PREMIUM_ONLY -->` マーカーでコンテンツを出し分け
+- 無料ユーザーと有料ユーザーで適切な表示制御
 
-> Phase 4（Vercel 自動デプロイ）／Phase 5（運用ガイド）は後日追加予定
+### フェーズ別時間目安
+
+| フェーズ | 目的 | 時間目安 |
+|---------|------|----------|
+| 4-1 | Storage 自動同期セットアップ | 1h |
+| 4-2 | get-training-content Edge Function | 2h |
+| 4-3 | サービス層 & 型統一 | 1h |
+| 4-4 | MdxPreview + TaskHeader 出し分け | 1h |
+| 4-5 | クリーンアップ & 総合テスト | 0.5h |
+
+---
+
+### Phase 4-1: Storage 自動同期セットアップ
+
+#### 1. バケット作成
+```sql
+-- プライベートバケット作成
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('training-content', 'training-content', false);
+```
+
+#### 2. RLS ポリシー設定
+```sql
+-- 匿名でも無料ファイルを読める
+CREATE POLICY "anon_read_free"
+  ON storage.objects FOR SELECT
+  TO anon
+  USING (
+    bucket_id = 'training-content' 
+    AND metadata->>'is_free' = 'true'
+  );
+
+-- 認証ユーザーはすべて読める  
+CREATE POLICY "authed_read_all"
+  ON storage.objects FOR SELECT
+  TO authenticated
+  USING (bucket_id = 'training-content');
+```
+
+#### 3. GitHub Actions 設定
+```yaml
+# .github/workflows/sync-training-content.yml
+name: Sync Training Content to Supabase
+on:
+  push:
+    paths: ['content/training/**']
+    
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Detect Free Content
+        id: detect_free
+        run: |
+          # front-matter の is_premium を読んで metadata.is_free を付与
+          
+      - uses: supabase/supabase-js@cli-sync
+        with:
+          from: content/
+          to: training-content/
+          metadata: |
+            is_free=${{ steps.detect_free.outputs.is_free }}
+```
+
+---
+
+### Phase 4-2: Edge Function 実装
+
+#### get-training-content Edge Function
+```typescript
+export const handler = async (req) => {
+  const { slug, task } = JSON.parse(req.body);
+  const path = task
+    ? `training/${slug}/tasks/${task}/content.md`
+    : `training/${slug}/index.md`;
+
+  // Storage からファイル取得
+  const { data, error } = await supabase.storage
+    .from('training-content')
+    .download(path);
+
+  if (error) return new Response('Not found', { status: 404 });
+
+  // Front-matter パース
+  const { data: fm, content } = parseFrontmatter(await data.text());
+  
+  // アクセス権判定
+  const hasAccess = fm.is_premium ? req.ctx.user?.hasMemberAccess : true;
+  
+  // コンテンツ分割
+  const rendered = hasAccess
+    ? content
+    : content.split('<!-- PREMIUM_ONLY -->')[0];
+
+  return new Response(JSON.stringify({
+    meta: fm,
+    content: rendered,
+    showPremiumBanner: fm.is_premium && !hasAccess
+  }), { 
+    headers: { 'Content-Type': 'application/json' }
+  });
+};
+```
+
+#### エラー防止策
+- **JWT パースロジック追加** - `req.ctx.user?.hasMemberAccess` の実装
+- **段階的テスト** - 認証なし → あり → プレミアム分割の順
+- **フォールバック処理** - Storage 接続失敗時のローカルファイル読み込み
+
+---
+
+### Phase 4-3: フロントエンド統合
+
+#### サービス層統一
+```typescript
+// src/services/training.ts
+export const fetchTrainingContent = async (slug: string, task?: string) => {
+  const { data } = await supabase.functions.invoke(
+    'get-training-content', 
+    { body: { slug, task } }
+  );
+  return data; // { meta, content, showPremiumBanner }
+};
+```
+
+#### 型定義統一
+```typescript
+// src/types/training.ts  
+export interface TrainingContentResponse {
+  meta: TaskFrontmatter;
+  content: string;
+  showPremiumBanner: boolean;
+}
+```
+
+#### 後方互換性維持
+- 既存の `loadTaskContent()` 関数は残してフォールバック用に活用
+- 新旧両方の取得方法を並行実装し、段階的に切り替え
+
+---
+
+### Phase 4-4: 表示コンポーネント調整
+
+#### MdxPreview 更新
+```typescript
+// showPremiumBanner プロパティ追加
+<MdxPreview 
+  content={content}
+  showPremiumBanner={showPremiumBanner}
+/>
+
+// 内部実装
+{showPremiumBanner && <PremiumContentBanner />}
+<ReactMarkdown>{content}</ReactMarkdown>
+```
+
+#### TaskHeader 更新  
+```typescript
+// アクセス制御表示
+{!hasMemberAccess && meta.is_premium && (
+    <Badge variant="outline">メンバー限定コンテンツ</Badge>
+)}
+
+// 動画プレーヤー
+<VideoPlayer 
+  src={hasMemberAccess ? meta.video_full : meta.video_preview}
+  isPremium={meta.is_premium}
+  hasPremiumAccess={hasMemberAccess}
+/>
+```
+
+---
+
+### Phase 4-5: クリーンアップ & 総合テスト
+
+#### 1. git push → Actions 同期テスト
+- 新しい Markdown ファイルを追加
+- GitHub Actions でのバケット同期を確認
+
+#### 2. ブラウザテスト（プラン別）
+- **free**: `/training/todo-app/introduction` → バナー表示＆preview 動画
+- **community**: 全文表示、preview 動画  
+- **standard/growth**: 全文表示、full 動画
+
+#### 3. ビルドテスト
+```bash
+pnpm typecheck && pnpm build && pnpm preview
+# エラー 0 件を確認
+```
+
+#### 4. 不要コード削除
+- ローカルファイル読み込み関数の削除
+- 分岐処理のクリーンアップ
+- 使われていない import の整理
+
+---
+
+## Phase 3.5: Edge Function 準備（追加フェーズ）
+
+### 目的
+Phase 4-2 で必要な JWT パースと権限判定ロジックを事前準備
+
+### 実装内容
+```typescript
+// Edge Function 内での認証チェック実装
+const getUserFromJWT = async (authHeader: string) => {
+  // JWT 検証とユーザー情報取得
+  // サブスクリプション状態の確認
+  // hasMemberAccess フラグの生成
+};
+```
+
+---
+
+## 🎯 最終成果物
+
+### 1. ファイル構造
+```
+content/training/           # ローカル執筆環境（従来通り）
+├── todo-app/
+│   ├── index.md           # Training 概要
+│   └── tasks/
+│       ├── 01-introduction/
+│       │   └── content.md  # 無料タスク
+│       └── 02-premium/
+│           └── content.md  # 有料タスク（<!-- PREMIUM_ONLY -->マーカー付き）
+
+# GitHub Actions で自動同期 ↓
+
+Supabase Storage training-content/ # 本番配信環境
+├── training/
+│   └── todo-app/          # 同じ構造で同期される
+```
+
+### 2. データフロー
+```
+ローカル執筆 → git push → GitHub Actions → Supabase Storage
+                                              ↓
+ユーザーアクセス → Edge Function → 権限チェック → コンテンツ分割 → フロントエンド表示
+```
+
+### 3. セキュリティ
+- **Storage**: プライベートバケット + RLS
+- **Edge Function**: JWT 検証 + サブスクリプション確認
+- **フロント**: 追加のクライアント側バリデーション
+
+---
+
+## 🚀 次のステップ
+
+### Phase 5（予定）
+- Vercel 自動デプロイ連携
+- CDN キャッシュ最適化
+- パフォーマンス監視
+
+### 運用フロー
+1. **新コンテンツ作成**: ローカルで Markdown 執筆
+2. **デプロイ**: `git push` のみ（Actions が自動同期）
+3. **確認**: ブラウザでプレビュー、権限テスト
+4. **公開**: 自動的に本番反映
+
+これで **ローカル Markdown 執筆の快適さ** と **本番での安全なプレミアム出し分け** を両立した統合システムが完成します。
