@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -38,13 +39,14 @@ const getDisplayContent = (
     const beforeMarker = content.substring(0, markerIndex);
     
     // マーカー直前に見出しがあるかチェック
-    // パターン: "## プレミアム限定..." のような見出しがマーカー直前にある場合
-    const headingMatch = beforeMarker.match(/(.*?\n## [^\n]+)\s*$/);
+    // より確実な方法：改行で分割して最後の行をチェック
+    const lines = beforeMarker.split('\n');
+    const lastLine = lines[lines.length - 1]?.trim();
     
-    if (headingMatch) {
-      // 見出しまでを含めて返す
+    // 最後の行が見出し（## で始まる）の場合、見出しまでの全内容を表示
+    if (lastLine && lastLine.startsWith('## ')) {
       return { 
-        content: headingMatch[1].trim(), 
+        content: beforeMarker.trim(), 
         showBanner: true 
       };
     } else {
