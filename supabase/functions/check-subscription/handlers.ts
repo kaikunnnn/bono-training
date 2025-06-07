@@ -9,7 +9,13 @@ import { CheckSubscriptionResponse } from "./types.ts";
 export function createUnauthenticatedResponse(): Response {
   logDebug("認証ヘッダーなし");
   return new Response(
-    JSON.stringify({ subscribed: false, planType: null }),
+    JSON.stringify({ 
+      subscribed: false, 
+      planType: null,
+      isSubscribed: false,
+      hasMemberAccess: false,
+      hasLearningAccess: false
+    }),
     {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
@@ -33,13 +39,7 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
   
   if (userError || !user) {
     logDebug("ユーザー取得エラー", { error: userError });
-    return new Response(
-      JSON.stringify({ subscribed: false, planType: null }),
-      {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      }
-    );
+    return createUnauthenticatedResponse();
   }
   
   logDebug("ユーザー取得成功", { userId: user.id, email: user.email });
@@ -49,15 +49,27 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
   
   // データベースに購読情報がある場合はそれを信頼する
   if (dbSubscription) {
+    const isSubscribed = dbSubscription.is_active;
+    const planType = dbSubscription.plan_type;
+    
+    // アクセス権限を計算
+    const hasMemberAccess = isSubscribed && ['standard', 'growth', 'community'].includes(planType);
+    const hasLearningAccess = isSubscribed && ['standard', 'growth'].includes(planType);
+    
     logDebug("データベースの購読情報を返却", { 
-      isActive: dbSubscription.is_active,
-      planType: dbSubscription.plan_type
+      isActive: isSubscribed,
+      planType,
+      hasMemberAccess,
+      hasLearningAccess
     });
     
     return new Response(
       JSON.stringify({
-        subscribed: dbSubscription.is_active,
-        planType: dbSubscription.plan_type
+        subscribed: isSubscribed,
+        planType,
+        isSubscribed,
+        hasMemberAccess,
+        hasLearningAccess
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -80,7 +92,6 @@ export async function handleStripeSubscriptionCheck(
   try {
     if (!stripe) {
       // Stripeが利用できない場合はデフォルトプランを設定
-      // デモ用にデフォルトでトレーニングメンバーシップをtrueに設定
       await subscriptionService.updateSubscriptionStatus(
         userId,
         true,
@@ -91,6 +102,9 @@ export async function handleStripeSubscriptionCheck(
         JSON.stringify({ 
           subscribed: true, 
           planType: "standard",
+          isSubscribed: true,
+          hasMemberAccess: true,
+          hasLearningAccess: true,
           testMode: true
         }),
         {
@@ -101,8 +115,18 @@ export async function handleStripeSubscriptionCheck(
     }
     
     const response = await processStripeSubscription(subscriptionService, userId, stripe);
+    
+    // アクセス権限を計算
+    const hasMemberAccess = response.subscribed && ['standard', 'growth', 'community'].includes(response.planType);
+    const hasLearningAccess = response.subscribed && ['standard', 'growth'].includes(response.planType);
+    
     return new Response(
-      JSON.stringify(response),
+      JSON.stringify({
+        ...response,
+        isSubscribed: response.subscribed,
+        hasMemberAccess,
+        hasLearningAccess
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
@@ -122,6 +146,9 @@ export async function handleStripeSubscriptionCheck(
       JSON.stringify({ 
         subscribed: true,
         planType: "standard",
+        isSubscribed: true,
+        hasMemberAccess: true,
+        hasLearningAccess: true,
         error: "Stripeとの同期に失敗しましたが、標準プランとして処理します"
       }),
       {

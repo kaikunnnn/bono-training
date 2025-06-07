@@ -24,25 +24,50 @@ export const useSubscription = (): SubscriptionState => {
   const [planType, setPlanType] = useState<PlanType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
+  const [memberAccess, setMemberAccess] = useState(false);
+  const [learningAccess, setLearningAccess] = useState(false);
 
   const fetchSubscriptionStatus = async () => {
     if (!user) {
       setIsSubscribed(false);
       setPlanType(null);
+      setMemberAccess(false);
+      setLearningAccess(false);
       setLoading(false);
       return;
     }
 
     setLoading(true);
     try {
-      const { isSubscribed, planType, error } = await checkSubscriptionStatus();
+      const response = await checkSubscriptionStatus();
       
-      if (error) {
-        throw error;
+      if (response.error) {
+        throw response.error;
       }
       
-      setIsSubscribed(isSubscribed);
-      setPlanType(planType);
+      // Edge Functionからのレスポンスに hasMemberAccess, hasLearningAccess が含まれている場合はそれを使用
+      const subscribed = response.isSubscribed ?? response.subscribed;
+      const plan = response.planType;
+      const memberAccessFromResponse = response.hasMemberAccess;
+      const learningAccessFromResponse = response.hasLearningAccess;
+      
+      setIsSubscribed(subscribed);
+      setPlanType(plan);
+      
+      // Edge Functionから直接アクセス権限が取得できる場合はそれを使用
+      if (memberAccessFromResponse !== undefined && learningAccessFromResponse !== undefined) {
+        setMemberAccess(memberAccessFromResponse);
+        setLearningAccess(learningAccessFromResponse);
+      } else {
+        // フォールバック: ローカルで計算
+        const userPlan: UserPlanInfo = {
+          planType: plan,
+          isActive: subscribed,
+        };
+        setMemberAccess(hasMemberAccess(userPlan));
+        setLearningAccess(hasLearningAccess(userPlan));
+      }
+      
       setError(null);
     } catch (err) {
       console.error('サブスクリプション取得エラー:', err);
@@ -57,16 +82,6 @@ export const useSubscription = (): SubscriptionState => {
       fetchSubscriptionStatus();
     }
   }, [user, authLoading]);
-
-  // ユーザープラン情報を作成
-  const userPlan: UserPlanInfo = {
-    planType,
-    isActive: isSubscribed,
-  };
-
-  // 新しいヘルパー関数を使用してアクセス権限を計算
-  const memberAccess = hasMemberAccess(userPlan);
-  const learningAccess = hasLearningAccess(userPlan);
 
   return {
     isSubscribed,

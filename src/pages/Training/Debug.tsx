@@ -1,198 +1,179 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useSearchParams, Link } from 'react-router-dom';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import TrainingLayout from '@/components/training/TrainingLayout';
+import TrainingHeader from '@/components/training/TrainingHeader';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { getTrainings, getTrainingDetail } from '@/services/training';
-import { getAllTrainingFiles } from '@/lib/markdown-loader';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
 
 const TrainingDebug = () => {
-  const [trainings, setTrainings] = useState<any[]>([]);
-  const [rawFiles, setRawFiles] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedTraining, setSelectedTraining] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  const currentPlan = searchParams.get('plan') || 'actual';
+  
+  const {
+    isSubscribed,
+    planType,
+    loading,
+    hasMemberAccess,
+    hasLearningAccess,
+    error
+  } = useSubscriptionContext();
 
-  useEffect(() => {
-    const loadDebugData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        console.log('=== Training Debug - データ読み込み開始 ===');
-        
-        // 1. サービス関数経由でトレーニング一覧を取得
-        const serviceTrainings = await getTrainings();
-        setTrainings(serviceTrainings);
-        console.log('Service trainings:', serviceTrainings);
-        
-        // 2. 直接ファイルローダーからも取得
-        const directFiles = await getAllTrainingFiles();
-        setRawFiles(directFiles);
-        console.log('Direct files:', directFiles);
-        
-        console.log('=== Training Debug - データ読み込み完了 ===');
-      } catch (err) {
-        console.error('Debug data loading error:', err);
-        setError(err instanceof Error ? err.message : 'Unknown error');
-      } finally {
-        setLoading(false);
-      }
-    };
+  const testPlans = ['free', 'standard', 'growth', 'community'];
 
-    loadDebugData();
-  }, []);
-
-  const handleTrainingDetail = async (slug: string) => {
-    try {
-      console.log(`=== Loading detail for ${slug} ===`);
-      const detail = await getTrainingDetail(slug);
-      setSelectedTraining(detail);
-      console.log('Training detail:', detail);
-    } catch (err) {
-      console.error('Error loading training detail:', err);
-      setError(err instanceof Error ? err.message : 'Unknown error');
+  const getExpectedAccess = (plan: string) => {
+    switch (plan) {
+      case 'free':
+        return { member: false, learning: false };
+      case 'standard':
+        return { member: true, learning: true };
+      case 'growth':
+        return { member: true, learning: true };
+      case 'community':
+        return { member: true, learning: false };
+      default:
+        return { member: false, learning: false };
     }
   };
-
-  if (loading) {
-    return (
-      <TrainingLayout>
-        <TrainingHeader />
-        <div className="container py-8">
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-          </div>
-        </div>
-      </TrainingLayout>
-    );
-  }
 
   return (
     <TrainingLayout>
       <TrainingHeader />
-      <div className="container py-8 space-y-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Training Debug Console</h1>
-          <Badge variant="outline">Phase-1 Testing</Badge>
-        </div>
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Phase 3 - プラン判定テスト</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* 現在の状態表示 */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Loading</div>
+                  <Badge variant={loading ? "destructive" : "default"}>
+                    {loading ? "Yes" : "No"}
+                  </Badge>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Subscribed</div>
+                  <Badge variant={isSubscribed ? "default" : "secondary"}>
+                    {isSubscribed ? "Yes" : "No"}
+                  </Badge>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Plan Type</div>
+                  <Badge variant="outline">
+                    {planType || "null"}
+                  </Badge>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Current Test</div>
+                  <Badge variant="outline">
+                    {currentPlan}
+                  </Badge>
+                </div>
+              </div>
 
-        {error && (
-          <Card className="border-red-200 bg-red-50">
-            <CardContent className="pt-6">
-              <p className="text-red-800">{error}</p>
+              {/* アクセス権限表示 */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Member Access</div>
+                  <Badge variant={hasMemberAccess ? "default" : "destructive"}>
+                    {hasMemberAccess ? "✓ Granted" : "✗ Denied"}
+                  </Badge>
+                </div>
+                <div className="text-center">
+                  <div className="text-sm text-gray-500">Learning Access</div>
+                  <Badge variant={hasLearningAccess ? "default" : "destructive"}>
+                    {hasLearningAccess ? "✓ Granted" : "✗ Denied"}
+                  </Badge>
+                </div>
+              </div>
+
+              {/* エラー表示 */}
+              {error && (
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                  <div className="text-red-800">Error: {error.message}</div>
+                </div>
+              )}
+
+              {/* 期待値チェック */}
+              {currentPlan !== 'actual' && (
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="text-blue-800 font-medium mb-2">期待値チェック (plan={currentPlan})</div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      Member Access: 
+                      <span className={`ml-2 ${getExpectedAccess(currentPlan).member === hasMemberAccess ? 'text-green-600' : 'text-red-600'}`}>
+                        Expected: {getExpectedAccess(currentPlan).member ? 'true' : 'false'}, 
+                        Actual: {hasMemberAccess ? 'true' : 'false'}
+                        {getExpectedAccess(currentPlan).member === hasMemberAccess ? ' ✓' : ' ✗'}
+                      </span>
+                    </div>
+                    <div>
+                      Learning Access: 
+                      <span className={`ml-2 ${getExpectedAccess(currentPlan).learning === hasLearningAccess ? 'text-green-600' : 'text-red-600'}`}>
+                        Expected: {getExpectedAccess(currentPlan).learning ? 'true' : 'false'}, 
+                        Actual: {hasLearningAccess ? 'true' : 'false'}
+                        {getExpectedAccess(currentPlan).learning === hasLearningAccess ? ' ✓' : ' ✗'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
-        )}
 
-        {/* サービス経由で取得したトレーニング一覧 */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Service Layer Trainings ({trainings.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {trainings.map((training) => (
-              <div key={training.id} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{training.title}</h3>
-                    <p className="text-sm text-gray-600">Slug: {training.slug}</p>
-                    <p className="text-sm text-gray-600">Type: {training.type}</p>
-                    <div className="flex gap-1 mt-2">
-                      {training.tags?.map((tag: string) => (
-                        <Badge key={tag} variant="secondary" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                  <Button 
-                    size="sm" 
-                    onClick={() => handleTrainingDetail(training.slug)}
+          {/* テストプラン切り替えボタン */}
+          <Card>
+            <CardHeader>
+              <CardTitle>プランテスト</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                <Button
+                  asChild
+                  variant={currentPlan === 'actual' ? 'default' : 'outline'}
+                  size="sm"
+                >
+                  <Link to="/training/debug">Actual</Link>
+                </Button>
+                {testPlans.map((plan) => (
+                  <Button
+                    key={plan}
+                    asChild
+                    variant={currentPlan === plan ? 'default' : 'outline'}
+                    size="sm"
                   >
-                    詳細取得
+                    <Link to={`/training/debug?plan=${plan}`}>{plan}</Link>
                   </Button>
-                </div>
+                ))}
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
-        {/* 直接ファイルから取得した生データ */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Raw File Data ({rawFiles.length})</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {rawFiles.map((file, index) => (
-              <div key={index} className="p-4 border rounded-lg">
-                <h3 className="font-semibold">{file.frontmatter.title}</h3>
-                <p className="text-sm text-gray-600">Path: {file.path}</p>
-                <p className="text-sm text-gray-600">Slug: {file.slug}</p>
-                <pre className="text-xs bg-gray-100 p-2 rounded mt-2 overflow-x-auto">
-                  {JSON.stringify(file.frontmatter, null, 2)}
-                </pre>
+          {/* Navigation Links */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Navigation Test</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link to="/training">← Back to Training Home</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link to="/training/todo-app">Test Training Detail</Link>
+                </Button>
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <Link to="/training/todo-app/introduction">Test Task Page</Link>
+                </Button>
               </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* 選択されたトレーニングの詳細 */}
-        {selectedTraining && (
-          <>
-            <Separator />
-            <Card>
-              <CardHeader>
-                <CardTitle>Training Detail: {selectedTraining.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="font-medium">Basic Info</h4>
-                  <p>Description: {selectedTraining.description}</p>
-                  <p>Tasks: {selectedTraining.tasks?.length || 0}</p>
-                  <p>Has Premium: {selectedTraining.has_premium_content ? 'Yes' : 'No'}</p>
-                </div>
-                
-                {selectedTraining.tasks && selectedTraining.tasks.length > 0 && (
-                  <div>
-                    <h4 className="font-medium">Tasks</h4>
-                    <div className="space-y-2">
-                      {selectedTraining.tasks.map((task: any) => (
-                        <div key={task.id} className="p-2 bg-gray-50 rounded">
-                          <p className="font-medium">{task.title}</p>
-                          <p className="text-sm">Slug: {task.slug}</p>
-                          <p className="text-sm">Premium: {task.is_premium ? 'Yes' : 'No'}</p>
-                          <p className="text-sm">Order: {task.order_index}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </>
-        )}
-
-        {/* JSON Export */}
-        <Card>
-          <CardHeader>
-            <CardTitle>JSON Export</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => {
-                const data = { trainings, rawFiles, selectedTraining };
-                console.log('Debug JSON:', data);
-                navigator.clipboard?.writeText(JSON.stringify(data, null, 2));
-              }}
-            >
-              Copy JSON to Clipboard
-            </Button>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </TrainingLayout>
   );
