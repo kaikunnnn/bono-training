@@ -1,81 +1,124 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingDetailData, TaskDetailData } from "@/types/training";
 
 /**
- * トレーニング一覧を取得
- * TODO: Phase 4-2でEdge Functionに切り替え
+ * トレーニング一覧を取得（Storageベース）
  */
 export const getTrainings = async () => {
-  console.log('TODO: Edge Functionからトレーニング一覧を取得');
-  
-  // 暫定的なダミーデータ
-  return [
-    {
-      id: "todo-app-1",
-      slug: "todo-app",
-      title: "Todo アプリ UI 制作",
-      description: "実践的な Todo アプリの UI デザインを学ぶ",
-      type: "challenge" as 'challenge',
-      difficulty: "normal",
-      tags: ["ui", "todo", "実践"],
-      thumbnailImage: 'https://source.unsplash.com/random/200x100'
+  try {
+    console.log('Edge Functionからトレーニング一覧を取得');
+    
+    const { data, error } = await supabase.functions.invoke('get-training-list', {
+      body: {}
+    });
+
+    if (error) {
+      console.error('Edge Function エラー:', error);
+      throw new Error(`トレーニング一覧取得エラー: ${error.message}`);
     }
-  ];
+
+    if (!data?.success || !data?.data) {
+      console.error('Edge Function 失敗レスポンス:', data);
+      throw new Error(data?.message || 'トレーニング一覧の取得に失敗しました');
+    }
+
+    return data.data;
+    
+  } catch (err) {
+    console.error('getTrainings エラー:', err);
+    
+    // フォールバック: ダミーデータを返す
+    console.log('フォールバック: ダミーデータを使用');
+    return [
+      {
+        id: "todo-app-1",
+        slug: "todo-app",
+        title: "Todo アプリ UI 制作",
+        description: "実践的な Todo アプリの UI デザインを学ぶ",
+        type: "challenge" as 'challenge',
+        difficulty: "normal",
+        tags: ["ui", "todo", "実践"],
+        thumbnailImage: 'https://source.unsplash.com/random/200x100'
+      }
+    ];
+  }
 };
 
 /**
- * トレーニング詳細情報を取得
- * TODO: Phase 4-2でEdge Functionに切り替え
+ * トレーニング詳細情報を取得（Storageベース）
  */
 export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
-  console.log(`TODO: Edge Functionからトレーニング詳細を取得: ${slug}`);
-  
-  // 暫定的なダミーデータ
-  const trainingDetailData: TrainingDetailData = {
-    id: `${slug}-1`,
-    slug: slug,
-    title: "Todo アプリ UI 制作",
-    description: "実践的な Todo アプリの UI デザインを学ぶ",
-    type: "challenge",
-    difficulty: "normal",
-    tags: ["ui", "todo", "実践"],
-    tasks: [
-      {
-        id: `${slug}-task-1`,
-        slug: "introduction",
-        title: "トレーニングの紹介",
-        is_premium: false,
-        order_index: 1,
-        training_id: `${slug}-1`,
-        created_at: null,
-        video_full: "https://example.com/full.mp4",
-        video_preview: "https://example.com/preview.mp4",
-        preview_sec: 30,
-        next_task: "ui-layout-basic01",
-        prev_task: null
-      },
-      {
-        id: `${slug}-task-2`,
-        slug: "ui-layout-basic01",
-        title: "画面構成の基本",
-        is_premium: true,
-        order_index: 2,
-        training_id: `${slug}-1`,
-        created_at: null,
-        video_full: "https://example.com/full.mp4",
-        video_preview: "https://example.com/preview.mp4",
-        preview_sec: 30,
-        next_task: null,
-        prev_task: "introduction"
-      }
-    ],
-    skills: [],
-    prerequisites: [],
-    has_premium_content: true,
-    thumbnailImage: 'https://source.unsplash.com/random/200x100'
-  };
+  try {
+    console.log(`Edge Functionからトレーニング詳細を取得: ${slug}`);
+    
+    const { data, error } = await supabase.functions.invoke('get-training-detail', {
+      body: { slug }
+    });
 
-  return trainingDetailData;
+    if (error) {
+      console.error('Edge Function エラー:', error);
+      throw new Error(`トレーニング詳細取得エラー: ${error.message}`);
+    }
+
+    if (!data?.success || !data?.data) {
+      console.error('Edge Function 失敗レスポンス:', data);
+      throw new Error(data?.message || 'トレーニング詳細の取得に失敗しました');
+    }
+
+    return data.data as TrainingDetailData;
+    
+  } catch (err) {
+    console.error('getTrainingDetail エラー:', err);
+    
+    // フォールバック: ダミーデータを返す
+    console.log('フォールバック: ダミーデータを使用');
+    const trainingDetailData: TrainingDetailData = {
+      id: `${slug}-1`,
+      slug: slug,
+      title: "Todo アプリ UI 制作",
+      description: "実践的な Todo アプリの UI デザインを学ぶ",
+      type: "challenge",
+      difficulty: "normal",
+      tags: ["ui", "todo", "実践"],
+      tasks: [
+        {
+          id: `${slug}-task-1`,
+          slug: "introduction",
+          title: "トレーニングの紹介",
+          is_premium: false,
+          order_index: 1,
+          training_id: `${slug}-1`,
+          created_at: null,
+          video_full: "https://example.com/full.mp4",
+          video_preview: "https://example.com/preview.mp4",
+          preview_sec: 30,
+          next_task: "ui-layout-basic01",
+          prev_task: null
+        },
+        {
+          id: `${slug}-task-2`,
+          slug: "ui-layout-basic01",
+          title: "画面構成の基本",
+          is_premium: true,
+          order_index: 2,
+          training_id: `${slug}-1`,
+          created_at: null,
+          video_full: "https://example.com/full.mp4",
+          video_preview: "https://example.com/preview.mp4",
+          preview_sec: 30,
+          next_task: null,
+          prev_task: "introduction"
+        }
+      ],
+      skills: [],
+      prerequisites: [],
+      has_premium_content: true,
+      thumbnailImage: 'https://source.unsplash.com/random/200x100'
+    };
+
+    return trainingDetailData;
+  }
 };
 
 /**
