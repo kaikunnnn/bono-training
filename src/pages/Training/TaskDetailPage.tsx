@@ -1,97 +1,55 @@
 
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { useToast } from '@/hooks/use-toast';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
 import LessonHeader from '@/components/training/LessonHeader';
 import MarkdownRenderer from '@/components/training/MarkdownRenderer';
 import ErrorDisplay from '@/components/common/ErrorBoundary';
-import { getTrainingTaskDetail } from '@/services/training';
-import { TaskDetailData, TaskFrontmatter } from '@/types/training';
-import { TrainingError } from '@/utils/errors';
+import { useTaskDetail } from '@/hooks/useTrainingCache';
+import { TaskFrontmatter } from '@/types/training';
+import { Skeleton } from '@/components/ui/skeleton';
 
+/**
+ * タスク詳細ページ（React Query対応版）
+ */
 const TaskDetailPage = () => {
   const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
   const navigate = useNavigate();
-  const { toast } = useToast();
   const { user } = useAuth();
   const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
   
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<TrainingError | null>(null);
-  const [task, setTask] = useState<TaskDetailData | null>(null);
+  if (!trainingSlug || !taskSlug) {
+    return <Navigate to="/training" replace />;
+  }
 
+  const { data: task, isLoading, error } = useTaskDetail(trainingSlug, taskSlug);
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
 
-  // デバッグ: URL パラメータの詳細ログ
-  console.log('=== TaskDetailPage Debug Start ===');
-  console.log('URL params raw:', { trainingSlug, taskSlug });
-  console.log('Premium access:', { isSubscribed, hasMemberAccess, hasPremiumAccess });
-
-  // パラメータが存在しない場合のエラーハンドリング
-  if (!trainingSlug || !taskSlug) {
-    console.error('=== PARAMETER ERROR ===');
-    console.error('Missing parameters:', { trainingSlug, taskSlug });
-    
+  if (isLoading) {
     return (
       <TrainingLayout>
-        <div className="container py-8">
-          <ErrorDisplay 
-            error={new TrainingError('URLパラメータが正しく指定されていません', 'INVALID_REQUEST', 400)}
-            onReset={() => navigate('/training')}
-          />
+        <div className="container max-w-4xl mx-auto py-8">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
         </div>
       </TrainingLayout>
     );
   }
 
-  // タスクデータを取得
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        console.log('=== Data Fetching Start ===');
-        console.log('Fetching data for:', { trainingSlug, taskSlug });
-
-        // タスクコンテンツを取得（services/training の関数を使用）
-        const taskData = await getTrainingTaskDetail(trainingSlug, taskSlug);
-        console.log('getTrainingTaskDetail result:', taskData);
-        
-        setTask(taskData);
-        console.log('Task data set successfully:', taskData);
-
-      } catch (err) {
-        console.error('=== Data Fetching Error ===');
-        console.error('Error details:', err);
-        
-        if (err instanceof TrainingError) {
-          setError(err);
-        } else {
-          setError(new TrainingError('予期しないエラーが発生しました', 'UNKNOWN_ERROR'));
-        }
-        
-        toast({
-          title: 'コンテンツ読み込みエラー',
-          description: err instanceof Error ? err.message : '不明なエラーが発生しました',
-          variant: 'destructive',
-          duration: 5000,
-        });
-      } finally {
-        setLoading(false);
-        console.log('=== Data Fetching End ===');
-      }
-    };
-
-    fetchData();
-  }, [trainingSlug, taskSlug, user, toast]);
-
-  // エラー表示
   if (error) {
     return (
       <TrainingLayout>
@@ -106,32 +64,12 @@ const TaskDetailPage = () => {
     );
   }
 
-  // ローディング表示
-  if (loading) {
-    return (
-      <TrainingLayout>
-        <div className="container py-8">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex justify-center items-center h-[400px]">
-              <div className="text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                <div className="text-lg font-medium text-gray-700">コンテンツを読み込み中...</div>
-                <div className="text-sm text-gray-500 mt-2">{trainingSlug}/{taskSlug}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </TrainingLayout>
-    );
-  }
-
-  // タスクが見つからない場合
   if (!task) {
     return (
       <TrainingLayout>
         <div className="container py-8">
           <ErrorDisplay 
-            error={new TrainingError('タスクが見つかりませんでした', 'NOT_FOUND', 404)}
+            error={new Error('タスクが見つかりませんでした')}
             onReset={() => navigate(`/training/${trainingSlug}`)}
           />
         </div>

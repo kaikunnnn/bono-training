@@ -41,36 +41,56 @@ function createSuccessResponse(data: any) {
 }
 
 /**
- * デバッグ用ログ出力関数
+ * キャッシュヘッダー付きレスポンス作成
  */
-function logDebug(message: string, data?: any) {
-  console.log(`[DEBUG] ${message}`, data ? JSON.stringify(data) : '');
+function createCachedResponse(data: any) {
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data
+    }),
+    {
+      status: 200,
+      headers: { 
+        ...corsHeaders, 
+        'Content-Type': 'application/json',
+        'Cache-Control': 'public, max-age=300, s-maxage=600', // 5分キャッシュ、CDNで10分
+        'ETag': `"training-${data.slug}-${Date.now()}"` // 簡易ETag
+      }
+    }
+  );
 }
 
 /**
- * ファイルパスからコンテンツを取得
+ * ファイルパスからコンテンツを取得（キャッシュ最適化）
  */
 async function getFileContent(supabase: any, filePath: string) {
   try {
+    console.log(`[CACHE] Fetching file: ${filePath}`);
+    const startTime = Date.now();
+    
     const { data, error } = await supabase.storage
       .from('training-content')
       .download(filePath);
     
     if (error) {
-      console.error('ファイル取得エラー:', error);
+      console.error('[ERROR] File fetch failed:', error);
       return null;
     }
     
     const text = await data.text();
+    const duration = Date.now() - startTime;
+    console.log(`[PERFORMANCE] File fetch took ${duration}ms`);
+    
     return text;
   } catch (err) {
-    console.error('ファイル読み込みエラー:', err);
+    console.error('[ERROR] File read exception:', err);
     return null;
   }
 }
 
 /**
- * フロントマターとコンテンツを分離
+ * フロントマターとコンテンツを分離（最適化版）
  */
 function parseFrontmatter(content: string) {
   const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
@@ -83,28 +103,30 @@ function parseFrontmatter(content: string) {
   const frontmatterText = match[1];
   const mainContent = match[2];
   
-  // 簡易YAML解析
+  // 簡易YAML解析（高速化）
   const frontmatter: any = {};
-  frontmatterText.split('\n').forEach(line => {
+  const lines = frontmatterText.split('\n');
+  
+  for (const line of lines) {
     const colonIndex = line.indexOf(':');
-    if (colonIndex > 0) {
-      const key = line.substring(0, colonIndex).trim();
-      let value = line.substring(colonIndex + 1).trim().replace(/^["']|["']$/g, '');
-      
-      // 配列の処理
-      if (value.startsWith('[') && value.endsWith(']')) {
-        value = value.slice(1, -1).split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
-      } else if (value === 'true') {
-        value = true;
-      } else if (value === 'false') {
-        value = false;
-      } else if (!isNaN(Number(value))) {
-        value = Number(value);
-      }
-      
-      frontmatter[key] = value;
+    if (colonIndex <= 0) continue;
+    
+    const key = line.substring(0, colonIndex).trim();
+    let value = line.substring(colonIndex + 1).trim().replace(/^["']|["']$/g, '');
+    
+    // 配列の処理
+    if (value.startsWith('[') && value.endsWith(']')) {
+      value = value.slice(1, -1).split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
+    } else if (value === 'true') {
+      value = true;
+    } else if (value === 'false') {
+      value = false;
+    } else if (!isNaN(Number(value)) && value !== '') {
+      value = Number(value);
     }
-  });
+    
+    frontmatter[key] = value;
+  }
   
   return { frontmatter, content: mainContent };
 }
@@ -116,18 +138,18 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    logDebug('トレーニング詳細取得リクエスト受信');
+  const startTime = Date.now();
+  console.log('[START] Training detail request');
 
+  try {
     let slug: string | null = null;
 
     if (req.method === 'POST') {
       try {
         const body = await req.json();
-        logDebug('リクエストボディ:', body);
         slug = body.slug;
       } catch (e) {
-        console.error('リクエストボディ解析エラー:', e);
+        console.error('[ERROR] Request body parsing failed:', e);
         return createErrorResponse('INVALID_REQUEST', 'リクエストボディの解析に失敗しました', 400);
       }
     }
@@ -147,12 +169,14 @@ serve(async (req) => {
     const indexContent = await getFileContent(supabaseAdmin, indexPath);
     
     if (!indexContent) {
+      console.log(`[NOT_FOUND] Training not found: ${slug}`);
       return createErrorResponse('NOT_FOUND', 'トレーニングが見つかりませんでした', 404);
     }
 
     const { frontmatter } = parseFrontmatter(indexContent);
     
-    // tasksフォルダ内のファイル一覧を取得
+    // tasksフォルダ内のファイル一覧を取得（並列処理で高速化）
+    console.log('[FETCH] Getting task list...');
     const { data: taskFiles, error: taskListError } = await supabaseAdmin.storage
       .from('training-content')
       .list(`${slug}/tasks`, { limit: 100 });
@@ -160,7 +184,8 @@ serve(async (req) => {
     const tasks = [];
     
     if (taskFiles && !taskListError) {
-      for (const taskFolder of taskFiles) {
+      // 並列でタスクファイルを処理
+      const taskPromises = taskFiles.map(async (taskFolder) => {
         if (taskFolder.name && !taskFolder.name.includes('.')) {
           const taskContentPath = `${slug}/tasks/${taskFolder.name}/content.md`;
           const taskContent = await getFileContent(supabaseAdmin, taskContentPath);
@@ -168,7 +193,7 @@ serve(async (req) => {
           if (taskContent) {
             const { frontmatter: taskMeta } = parseFrontmatter(taskContent);
             
-            tasks.push({
+            return {
               id: `${slug}-task-${taskMeta.order_index || tasks.length + 1}`,
               slug: taskMeta.slug || taskFolder.name,
               title: taskMeta.title || taskFolder.name,
@@ -181,10 +206,14 @@ serve(async (req) => {
               preview_sec: taskMeta.preview_sec || 30,
               next_task: taskMeta.next_task || null,
               prev_task: taskMeta.prev_task || null
-            });
+            };
           }
         }
-      }
+        return null;
+      });
+
+      const taskResults = await Promise.all(taskPromises);
+      tasks.push(...taskResults.filter(task => task !== null));
     }
 
     // order_indexでソート
@@ -205,12 +234,14 @@ serve(async (req) => {
       thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100'
     };
 
-    logDebug('パースされたトレーニング詳細:', trainingDetail);
+    const duration = Date.now() - startTime;
+    console.log(`[PERFORMANCE] Total request took ${duration}ms`);
     
-    return createSuccessResponse(trainingDetail);
+    return createCachedResponse(trainingDetail);
     
   } catch (error) {
-    console.error('サーバーエラー:', error);
+    const duration = Date.now() - startTime;
+    console.error(`[ERROR] Server error after ${duration}ms:`, error);
     return createErrorResponse('INTERNAL_ERROR', 'サーバー内部エラーが発生しました', 500);
   }
 });
