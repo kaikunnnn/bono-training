@@ -1,5 +1,5 @@
 
-// Jest型定義の最小限実装（TypeScriptエラー回避用）
+// Jest型定義の完全実装（TypeScriptエラー回避用）
 declare global {
   function describe(name: string, fn: () => void): void;
   function beforeEach(fn: () => void): void;
@@ -43,7 +43,7 @@ declare namespace React {
   }
 }
 
-// Testing Library型定義
+// Testing Library型定義の正しい実装
 declare module '@testing-library/react' {
   export function render(component: React.ReactElement): {
     getByText: (text: string | RegExp) => HTMLElement;
