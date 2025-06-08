@@ -36,6 +36,3 @@ enable_confirmations = false
 [functions]
 port = 54321
 serve_port = 54328
-
-[functions.get-mdx-content]
-verify_jwt = true

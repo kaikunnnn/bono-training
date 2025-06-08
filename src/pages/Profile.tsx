@@ -11,7 +11,7 @@ import { Mail, User, ChevronRight } from "lucide-react";
 
 const Profile: React.FC = () => {
   const { user, signOut } = useAuth();
-  const { isSubscribed, planType, planMembers, loading } = useSubscriptionContext();
+  const { isSubscribed, planType, hasMemberAccess, loading } = useSubscriptionContext();
   const navigate = useNavigate();
   
   // プラン名を取得する関数
@@ -90,7 +90,7 @@ const Profile: React.FC = () => {
                         : "登録中のプランはありません"}
                     </p>
                     
-                    {planMembers && (
+                    {hasMemberAccess && (
                       <p className="text-sm text-green-600 mt-1">
                         ✓ トレーニングメンバーシップ有効
                       </p>

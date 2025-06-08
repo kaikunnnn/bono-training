@@ -26,7 +26,7 @@ alwaysApply: true
 
 - 有料フラグ Content 単位で保持
 - 無料ユーザーが有料 Content にアクセスした場合
-  - 記事本文：途中で “ここから先は有料” バナーを表示
+  - 記事本文：途中で "ここから先は有料" バナーを表示
   - 動画　　：無料アカウントにはその Content の無料用の動画を表示、有料アカウントには有料用の動画を表示。
 
 ※それぞれの一覧ページが存在する
@@ -121,28 +121,43 @@ alwaysApply: true
 
 サブスクリプションは以下の 2 つの大きな区分で管理されます：
 
-#### 1.学習コンテンツ（Learning）
+#### "learning"の閲覧権限
 
 - アクセス可能なプラン: `standard`, `growth`
-- 基本的な学習コンテンツにアクセスできます
+- 学習コンテンツにアクセスできる権限
+- 有料プランの基本のプラン
 
-#### 2. メンバー限定コンテンツ（Member）
+#### "member"の閲覧権限
 
 - アクセス可能なプラン: `standard`, `growth`, `community`
-- より高度または専門的なコンテンツにアクセスできます
+- コミュニティ系のコンテンツにアクセスできる権限
 
-### プランの階層
+### プランの種類
 
-- `free`: すべての無料コンテンツにアクセス可能
-- `standard`: 学習コンテンツと一部のメンバー限定コンテンツ
-- `growth`: すべての学習コンテンツとほぼすべてのメンバー限定コンテンツ
-- `community`: すべてのコンテンツにアクセス可能
+1. `free` (無料)
+   - 無料コンテンツのみ閲覧可能
+   - ログイン不要で閲覧可能
+
+2. `community` (1480円/月)
+   - "member"向けコンテンツが閲覧可能
+   - 最も安価な有料プラン
+
+3. `standard` (4000円/月)
+   - "learning"向けコンテンツが閲覧可能
+   - "member"向けコンテンツが閲覧可能
+
+4. `growth` (9800円/月)
+   - "learning"向けコンテンツが閲覧可能
+   - "member"向けコンテンツが閲覧可能
+   - フィードバック依頼の申請とフィードバック受信が可能
+   - 最上位プラン
 
 ### アクセス制御の基本ルール
 
 1. 無料ユーザーは無料コンテンツのみ閲覧可能
 2. サブスクリプション保持者は、そのプランに応じたコンテンツにアクセス可能
 3. 上位プランは下位プランのコンテンツもすべて閲覧可能
+   - growth > standard > community > free の順で上位プランが下位プランの機能を包含
 
 ### 価格設定
 
@@ -158,7 +173,7 @@ alwaysApply: true
 
 #### 目的
 
-Stripe 上で提供する有料プラン（Product と Price）を 1 種類に統一し、Checkout セッションの作成時に正しい Price ID を参照できるようにする。
+Stripe 上で提供する有料プラン（Product と Price）を定義し、Checkout セッションの作成時に正しい Price ID を参照できるようにする。
 
 #### 要件
 
@@ -171,30 +186,26 @@ Stripe 上で提供する有料プラン（Product と Price）を 1 種類に�
   - 3 ヶ月：price_1OIiMRKUVUnt8GtyttXJ71Hz
 - `community`
   - １ヶ月：price_1RI4ClKUVUnt8GtygLpincko
-- Checkout セッション作成時に、環境によって適切な Price ID を使い分ける
 
-#### 環境変数（すでに設定済み）
+#### データベース設計
 
+```sql
+-- subscriptions テーブル
+CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id),
+  stripe_customer_id TEXT,
+  stripe_subscription_id TEXT,
+  plan_type VARCHAR(20) NOT NULL, -- 'standard', 'growth', 'community'
+  learning_access BOOLEAN NOT NULL DEFAULT false,
+  member_access BOOLEAN NOT NULL DEFAULT false,
+  is_active BOOLEAN NOT NULL DEFAULT false,
+  current_period_start TIMESTAMP WITH TIME ZONE,
+  current_period_end TIMESTAMP WITH TIME ZONE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
 ```
-env
-コピーする編集する
-NEXT_PUBLIC_STRIPE_PRICE_ID=price_1QisOmKUVUnt8Gty3x1P7GyW
-NEXT_PUBLIC_STRIPE_TEST_PRICE_ID=price_1Qit9MKUVUnt8GtyoXFzn2Ui
-STRIPE_SECRET_KEY=sk_test_51HDQT3KUVUnt8GtyBvbE1xjTcOZUDnXQBSoYyiSpaf5OIRDftnZZfeIsRGuSqHseAS6uhBFGNsfJ96kCyYgdgYSy00sDvQHQMO
-
-```
-
-#### 実装タスク
-
-- Checkout セッション作成 API で`process.env.NEXT_PUBLIC_STRIPE_PRICE_ID`を参照
-- 環境（開発・本番）によって、Price ID を使い分けられるようにするロジックを追加
-- Checkout セッションの`line_items`に適切な Price ID を設定する
-- 今後複数プランができた場合に備え、Price ID の管理を共通ユーティリティに切り出してもよい
-
-#### 補足
-
-- `STRIPE_SECRET_KEY`はサーバー側でのみ利用（Webhook や Checkout API）
-- `NEXT_PUBLIC_〜`はフロントで参照する場合用。セキュリティの観点で秘密情報を含まないよう注意する
 
 ### 2 Checkout セッション作成 API の実装
 
@@ -208,6 +219,7 @@ STRIPE_SECRET_KEY=sk_test_51HDQT3KUVUnt8GtyBvbE1xjTcOZUDnXQBSoYyiSpaf5OIRDftnZZf
 - `stripe_customer_id`を Supabase の DB から取得する
 - 存在しない場合は Stripe で Customer を作成し、DB に保存する
 - セッション作成時に`price_id`, `success_url`, `cancel_url`を指定する
+- プランタイプに応じた権限を設定する
 
 #### 実装タスク
 
@@ -215,57 +227,66 @@ STRIPE_SECRET_KEY=sk_test_51HDQT3KUVUnt8GtyBvbE1xjTcOZUDnXQBSoYyiSpaf5OIRDftnZZf
 - Stripe で Customer を作成（必要に応じて）
 - Checkout セッションを作成してフロントに URL を返す API を用意
 - API の認証・エラー処理を実装
+- プランタイプに応じた権限設定の実装
 
 ### 3 Webhook エンドポイントの実装
 
-**目的**
+#### 目的
 
 Stripe からのイベントを受け取り、DB に Subscription 情報を反映させる。
 
-**要件**
+#### 要件
 
 - 以下のイベントに対応する：
   - `checkout.session.completed`
   - `invoice.paid`
   - `customer.subscription.deleted`
-- `subscriptions`テーブルの`is_active`や期限情報を更新する
+- `subscriptions`テーブルの更新：
+  - `is_active`や期限情報
+  - プランタイプに応じた権限設定
+  - アクセス制御フラグの更新
 
-**実装タスク**
+#### 実装タスク
 
 - Stripe Webhook の署名検証を含むエンドポイントを実装
 - 各イベントごとに DB の`subscriptions`テーブルを更新
+- プランタイプに応じた権限設定の実装
 - 該当ユーザーの`stripe_customer_id`や`stripe_subscription_id`を取得して紐付け
 
-### 4 保護された動画ページの認可制御
+### 4 アクセス制御の実装
 
-#### 2025.04.06 仕様の状態
+#### 目的
 
-**目的**
+ユーザーのプランに応じたコンテンツアクセス制御を実装する。
 
-有効なサブスクリプションを持つユーザーだけが動画を閲覧できるようにする。
+#### 要件
 
-**要件**
+- プランタイプに応じた権限チェック
+- コンテンツタイプ（learning/member）に応じたアクセス制御
 
-- `checkSubscriptionStatus` が `ture` のユーザーだけ動画を閲覧可能にする
-- 非会員には「メンバー登録を促す画面」を表示する
+#### 実装タスク
 
-**実装タスク**
-
-- メンバーシップ状態取得 API をクライアントから呼び出す
-- ステータスに応じて再生画面と登録画面を切り替える
-- 複数のページで共通で横展開しやすい機構にしてください
+- アクセス制御ユーティリティの実装
+- コンテンツページでの権限チェック実装
+- 未アクセス権限時のUI表示実装
+- プラン変更・アップグレードの導線実装
 
 ### 5 カード情報変更、サブスクリプション解約
 
-- 「アカウントページ」を作成して以下の内容を Stripe Checkout の仕組みを使って実装
-  - カード情報変更
-    - StripeCheckout の仕組みを変更できる
-  - サブスクリプション情報の確認
-    - サイト上でも現在のプラン名を所得して表示
-    - 詳細は StripeCheckout を使って外部ページで確認できる
-  - サブスクリプションの変更
-    - プランの変更
-      - StripeCheckout の仕組みを使ってプランの変更が可能
-      - プライシングのページでも、「変更(update)」できるようにはしたい
-    - 解約
-      - StripeCheckout の仕組みを使ってプランをキャンセル
+#### 目的
+
+ユーザーが自身のサブスクリプションを管理できるようにする。
+
+#### 要件
+
+- カード情報変更機能
+- サブスクリプション情報の確認
+- プラン変更機能
+- 解約機能
+
+#### 実装タスク
+
+- アカウントページの作成
+- Stripe Customer Portal の連携
+- プラン変更・解約フローの実装
+- エラーハンドリングの実装

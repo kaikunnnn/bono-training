@@ -1,122 +1,137 @@
 
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
-import { getTrainingTaskDetail, getTrainingDetail, getUserTaskProgress } from '@/services/training';
-import { TaskDetailData } from '@/types/training';
+import React from 'react';
+import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import TaskDetail from '@/components/training/TaskDetail';
-import TaskDetailSkeleton from './TaskDetailSkeleton';
-import TaskDetailError from './TaskDetailError';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskNavigation from './TaskNavigation';
+import TaskVideo from '@/components/training/TaskVideo';
+import LessonHeader from '@/components/training/LessonHeader';
+import MarkdownRenderer from '@/components/training/MarkdownRenderer';
+import ErrorDisplay from '@/components/common/ErrorBoundary';
+import { useTaskDetail } from '@/hooks/useTrainingCache';
+import { TaskFrontmatter } from '@/types/training';
+import { Skeleton } from '@/components/ui/skeleton';
 
+/**
+ * タスク詳細ページ（React Query対応版）
+ */
 const TaskDetailPage = () => {
-  const { slug, taskSlug } = useParams<{ slug: string; taskSlug: string }>();
+  const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [taskData, setTaskData] = useState<TaskDetailData | null>(null);
-  const [trainingData, setTrainingData] = useState<any>(null);
-  const [progress, setProgress] = useState<any>(null);
-  const [mdxContent, setMdxContent] = useState<string>('');
+  const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
   
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        if (slug && taskSlug) {
-          // トレーニング詳細データを取得
-          const trainingDetailData = await getTrainingDetail(slug);
-          setTrainingData(trainingDetailData);
-          
-          // タスク詳細データを取得（すでにMDXコンテンツと統合されたデータ）
-          const taskDetailData = await getTrainingTaskDetail(slug, taskSlug);
-          
-          // MDXコンテンツをUIで表示するために別途保持
-          setMdxContent(taskDetailData.content || '');
-          
-          // タスクデータをセット
-          setTaskData(taskDetailData as TaskDetailData);
-          
-          // ユーザーがログインしている場合は進捗状況を取得
-          if (user) {
-            try {
-              // 現在のタスクの進捗状況を取得
-              const progressData = await getUserTaskProgress(user.id, trainingDetailData.id);
-              if (!progressData.error) {
-                setProgress(progressData);
-              }
-            } catch (progressError) {
-              console.error('進捗状況の取得に失敗しました:', progressError);
-              // プログレスエラーでページ全体が失敗するわけではないので続行
-            }
-          }
-        }
-      } catch (error) {
-        console.error("データの取得中にエラーが発生しました:", error);
-        toast({
-          title: "エラーが発生しました",
-          description: "コンテンツの取得に失敗しました。もう一度お試しください。",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [slug, taskSlug, user, toast]);
-  
-  // タスク進捗が更新されたときに進捗データを再取得
-  const handleProgressUpdate = async () => {
-    if (!user || !trainingData?.id) return;
-    
-    try {
-      const progressData = await getUserTaskProgress(user.id, trainingData.id);
-      if (!progressData.error) {
-        setProgress(progressData);
-        toast({
-          title: "進捗を更新しました",
-          description: "タスクの進捗状態が正常に更新されました。",
-        });
-      }
-    } catch (error) {
-      console.error('進捗状況の更新に失敗しました:', error);
-      toast({
-        title: "エラーが発生しました",
-        description: "進捗状況の更新に失敗しました。",
-        variant: "destructive"
-      });
-    }
+  if (!trainingSlug || !taskSlug) {
+    return <Navigate to="/training" replace />;
+  }
+
+  const { data: task, isLoading, error } = useTaskDetail(trainingSlug, taskSlug);
+  const hasPremiumAccess = isSubscribed && hasMemberAccess;
+
+  if (isLoading) {
+    return (
+      <TrainingLayout>
+        <div className="container max-w-4xl mx-auto py-8">
+          <div className="space-y-8">
+            <div className="space-y-4">
+              <Skeleton className="h-8 w-3/4" />
+              <Skeleton className="h-4 w-1/2" />
+            </div>
+            <Skeleton className="h-64 w-full rounded-lg" />
+            <div className="space-y-4">
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-3/4" />
+            </div>
+          </div>
+        </div>
+      </TrainingLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <TrainingLayout>
+        <div className="container py-8">
+          <ErrorDisplay 
+            error={error}
+            onRetry={() => window.location.reload()}
+            onReset={() => navigate(`/training/${trainingSlug}`)}
+          />
+        </div>
+      </TrainingLayout>
+    );
+  }
+
+  if (!task) {
+    return (
+      <TrainingLayout>
+        <div className="container py-8">
+          <ErrorDisplay 
+            error={new Error('タスクが見つかりませんでした')}
+            onReset={() => navigate(`/training/${trainingSlug}`)}
+          />
+        </div>
+      </TrainingLayout>
+    );
+  }
+
+  // TaskDetailData を TaskFrontmatter 型に変換
+  const frontmatter: TaskFrontmatter = {
+    title: task.title,
+    slug: task.slug,
+    order_index: task.order_index,
+    is_premium: task.is_premium || false,
+    video_preview: task.video_preview || undefined,
+    video_full: task.video_full || undefined,
+    preview_sec: task.preview_sec || undefined,
+    next_task: task.next_task || undefined,
+    prev_task: task.prev_task || undefined,
   };
-  
-  if (loading) {
-    return <TaskDetailSkeleton />;
-  }
-  
-  if (!taskData || !trainingData) {
-    return <TaskDetailError />;
-  }
-  
+
+  // 動画URLがある場合のみ動画プレーヤーを表示
+  const hasValidVideo = (frontmatter.video_preview && frontmatter.video_preview.trim()) || 
+                        (frontmatter.video_full && frontmatter.video_full.trim());
+
   return (
     <TrainingLayout>
-      <TrainingHeader />
-      <div className="container py-8">
-        <TaskDetail
-          task={taskData}
-          training={trainingData}
-          mdxContent={mdxContent}
-          progress={progress?.progressMap?.[taskData.id]}
-          onProgressUpdate={handleProgressUpdate}
-          isPremium={taskData.is_premium || false}
+      <div className="container max-w-4xl mx-auto py-8">
+        {/* LessonHeader */}
+        <div className="mb-10">
+          <LessonHeader frontmatter={frontmatter} />
+        </div>
+
+        {/* 動画プレーヤー */}
+        {hasValidVideo && (
+          <div className="mb-8">
+            <TaskVideo
+              videoUrl={frontmatter.video_full}
+              previewVideoUrl={frontmatter.video_preview}
+              isPremium={frontmatter.is_premium || false}
+              hasPremiumAccess={hasPremiumAccess}
+              title={frontmatter.title}
+              previewSeconds={frontmatter.preview_sec || 30}
+              className="w-full"
+            />
+          </div>
+        )}
+
+        {/* Markdownコンテンツ表示 */}
+        <MarkdownRenderer 
+          content={task.content}
+          isPremium={frontmatter.is_premium || false}
+          hasMemberAccess={hasPremiumAccess}
           className="mb-8"
         />
 
+        {/* ナビゲーション */}
         <TaskNavigation 
-          trainingSlug={slug || ''} 
-          nextTaskSlug={taskData.next_task}
+          training={{ title: task.trainingTitle }}
+          currentTaskSlug={taskSlug}
+          trainingSlug={trainingSlug}
+          nextTaskSlug={frontmatter.next_task}
+          prevTaskSlug={frontmatter.prev_task}
         />
       </div>
     </TrainingLayout>

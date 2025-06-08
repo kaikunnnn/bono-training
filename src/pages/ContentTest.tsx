@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -38,13 +39,15 @@ const ContentTest: React.FC = () => {
   const mockSubscriptionValue = {
     isSubscribed: userPlan.isActive,
     planType: userPlan.planType,
-    planMembers: userPlan.planType === 'growth' || userPlan.planType === 'community', // growthプランとcommunityプランは planMembers をtrueに設定
     loading: false,
     error: null,
     refresh: async () => {
       console.log('Mock refresh called');
       // 実際の更新処理は行わない（モックのため）
-    }
+    },
+    // 新しいアクセス権限フラグを追加
+    hasMemberAccess: userPlan.isActive && (userPlan.planType === 'standard' || userPlan.planType === 'growth' || userPlan.planType === 'community'),
+    hasLearningAccess: userPlan.isActive && (userPlan.planType === 'standard' || userPlan.planType === 'growth')
   };
 
   return (
@@ -105,8 +108,9 @@ const ContentTest: React.FC = () => {
                   <pre className="bg-muted p-2 rounded text-xs">
                     {JSON.stringify({
                       ...userPlan,
-                      // トレーニングメンバーシップ状態を表示に追加
-                      planMembers: userPlan.planType === 'growth' || userPlan.planType === 'community'
+                      // 新しいアクセス権限フラグも表示に追加
+                      hasMemberAccess: mockSubscriptionValue.hasMemberAccess,
+                      hasLearningAccess: mockSubscriptionValue.hasLearningAccess
                     }, null, 2)}
                   </pre>
                 </div>
@@ -167,7 +171,7 @@ const ContentTest: React.FC = () => {
                     <CardHeader>
                       <CardTitle>メンバー限定コンテンツ（Member）</CardTitle>
                       <CardDescription>
-                        このコンテンツを閲覧するには Growth または Community プランが必要です
+                        このコンテンツを閲覧するには Standard, Growth または Community プランが必要です
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -177,7 +181,7 @@ const ContentTest: React.FC = () => {
                             <h3 className="text-lg font-medium text-purple-800 mb-2">アクセス成功！</h3>
                             <p className="text-purple-700">
                               あなたは「メンバー限定コンテンツ」へのアクセス権を持っています。
-                              このコンテンツはGrowthまたはCommunityプランユーザーのみが閲覧できます。
+                              このコンテンツはStandard, Growth または Communityプランユーザーのみが閲覧できます。
                             </p>
                           </div>
                           

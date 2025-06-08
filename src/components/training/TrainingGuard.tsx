@@ -20,7 +20,7 @@ const TrainingGuard: React.FC<TrainingGuardProps> = ({
   isPremium = false,
   fallbackComponent
 }) => {
-  const { isSubscribed, planMembers, loading } = useSubscriptionContext();
+  const { isSubscribed, hasMemberAccess, loading } = useSubscriptionContext();
   const navigate = useNavigate();
   
   // 無料コンテンツの場合は常にアクセス可能
@@ -38,7 +38,7 @@ const TrainingGuard: React.FC<TrainingGuardProps> = ({
   }
   
   // メンバーシップを持つユーザーはアクセス可能
-  if (isSubscribed && planMembers) {
+  if (isSubscribed && hasMemberAccess) {
     return <>{children}</>;
   }
   

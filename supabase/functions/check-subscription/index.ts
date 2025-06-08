@@ -28,8 +28,7 @@ serve(async (req) => {
         error: true,
         message: "サーバー内部エラーが発生しました",
         subscribed: false,
-        planType: null,
-        planMembers: false
+        planType: null
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
