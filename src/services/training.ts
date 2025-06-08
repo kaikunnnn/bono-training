@@ -1,6 +1,56 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingDetailData, TaskDetailData } from "@/types/training";
+import { 
+  AuthError, 
+  ForbiddenError, 
+  NotFoundError, 
+  NetworkError, 
+  TrainingError,
+  createErrorFromCode 
+} from "@/utils/errors";
+
+/**
+ * Edge Function レスポンスのエラーハンドリング
+ */
+function handleEdgeFunctionError(error: any, fallbackMessage: string): never {
+  console.error('Edge Function エラー詳細:', error);
+  
+  // ネットワークエラーの判定
+  if (!error || error.name === 'TypeError' || error.message?.includes('Failed to fetch')) {
+    throw new NetworkError('ネットワーク接続エラーが発生しました。インターネット接続を確認してください。');
+  }
+  
+  // Supabase Functions の構造化エラー
+  if (error.context?.body?.error) {
+    const errorData = error.context.body.error;
+    const customError = createErrorFromCode(errorData.code, errorData.message);
+    throw customError;
+  }
+  
+  // 汎用的なエラーメッセージでフォールバック
+  throw new TrainingError(fallbackMessage, 'UNKNOWN_ERROR');
+}
+
+/**
+ * Edge Function レスポンスの検証
+ */
+function validateEdgeFunctionResponse(data: any, context: string): any {
+  if (!data) {
+    throw new TrainingError(`${context}のレスポンスが空です`, 'EMPTY_RESPONSE');
+  }
+  
+  if (data.success === false && data.error) {
+    const customError = createErrorFromCode(data.error.code, data.error.message);
+    throw customError;
+  }
+  
+  if (!data.success || !data.data) {
+    throw new TrainingError(data.message || `${context}のデータ取得に失敗しました`, 'INVALID_RESPONSE');
+  }
+  
+  return data.data;
+}
 
 /**
  * トレーニング一覧を取得（Storageベース）
@@ -14,19 +64,18 @@ export const getTrainings = async () => {
     });
 
     if (error) {
-      console.error('Edge Function エラー:', error);
-      throw new Error(`トレーニング一覧取得エラー: ${error.message}`);
+      handleEdgeFunctionError(error, 'トレーニング一覧の取得に失敗しました');
     }
 
-    if (!data?.success || !data?.data) {
-      console.error('Edge Function 失敗レスポンス:', data);
-      throw new Error(data?.message || 'トレーニング一覧の取得に失敗しました');
-    }
-
-    return data.data;
+    return validateEdgeFunctionResponse(data, 'トレーニング一覧');
     
   } catch (err) {
-    console.error('getTrainings エラー:', err);
+    // カスタムエラーは再スロー
+    if (err instanceof TrainingError) {
+      throw err;
+    }
+    
+    console.error('getTrainings 予期しないエラー:', err);
     
     // フォールバック: ダミーデータを返す
     console.log('フォールバック: ダミーデータを使用');
@@ -52,24 +101,27 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
   try {
     console.log(`Edge Functionからトレーニング詳細を取得: ${slug}`);
     
+    if (!slug || slug.trim() === '') {
+      throw new TrainingError('トレーニングスラッグが指定されていません', 'INVALID_REQUEST', 400);
+    }
+    
     const { data, error } = await supabase.functions.invoke('get-training-detail', {
       body: { slug }
     });
 
     if (error) {
-      console.error('Edge Function エラー:', error);
-      throw new Error(`トレーニング詳細取得エラー: ${error.message}`);
+      handleEdgeFunctionError(error, 'トレーニング詳細の取得に失敗しました');
     }
 
-    if (!data?.success || !data?.data) {
-      console.error('Edge Function 失敗レスポンス:', data);
-      throw new Error(data?.message || 'トレーニング詳細の取得に失敗しました');
-    }
-
-    return data.data as TrainingDetailData;
+    return validateEdgeFunctionResponse(data, 'トレーニング詳細') as TrainingDetailData;
     
   } catch (err) {
-    console.error('getTrainingDetail エラー:', err);
+    // カスタムエラーは再スロー
+    if (err instanceof TrainingError) {
+      throw err;
+    }
+    
+    console.error('getTrainingDetail 予期しないエラー:', err);
     
     // フォールバック: ダミーデータを返す
     console.log('フォールバック: ダミーデータを使用');
@@ -128,6 +180,10 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
   console.log(`Edge Functionからタスク詳細を取得: ${trainingSlug}/${taskSlug}`);
   
   try {
+    if (!trainingSlug || !taskSlug) {
+      throw new TrainingError('トレーニングスラッグとタスクスラッグが必要です', 'INVALID_REQUEST', 400);
+    }
+    
     // Edge Functionを呼び出し
     const { data, error } = await supabase.functions.invoke('get-training-content', {
       body: {
@@ -139,19 +195,18 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
     console.log('Edge Function レスポンス:', { data, error });
 
     if (error) {
-      console.error('Edge Function エラー:', error);
-      throw new Error(`Edge Function呼び出しエラー: ${error.message}`);
+      handleEdgeFunctionError(error, 'タスク詳細の取得に失敗しました');
     }
 
-    if (!data?.success || !data?.data) {
-      console.error('Edge Function 失敗レスポンス:', data);
-      throw new Error(data?.message || 'コンテンツの取得に失敗しました');
-    }
-
-    return data.data as TaskDetailData;
+    return validateEdgeFunctionResponse(data, 'タスク詳細') as TaskDetailData;
     
   } catch (err) {
-    console.error('getTrainingTaskDetail エラー:', err);
+    // カスタムエラーは再スロー
+    if (err instanceof TrainingError) {
+      throw err;
+    }
+    
+    console.error('getTrainingTaskDetail 予期しないエラー:', err);
     
     // フォールバック: ダミーデータを返す
     console.log('フォールバック: ダミーデータを使用');
@@ -206,9 +261,6 @@ export const getUserTaskProgress = async (userId: string, trainingId: string) =>
   }
 };
 
-/**
- * ユーザーの進捗状況を更新
- */
 export const updateTaskProgress = async (userId: string, taskId: string, status: 'done' | 'todo' | 'in-progress') => {
   try {
     const completed_at = status === 'done' ? new Date().toISOString() : null;

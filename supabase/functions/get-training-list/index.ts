@@ -9,6 +9,28 @@ const corsHeaders = {
 };
 
 /**
+ * 統一エラーレスポンス作成
+ */
+function createErrorResponse(statusCode: number, code: string, message: string, details?: any) {
+  console.error(`[ERROR] ${code}: ${message}`, details || '');
+  return new Response(
+    JSON.stringify({ 
+      success: false,
+      error: {
+        code,
+        message,
+        statusCode,
+        details: details || null
+      }
+    }),
+    { 
+      status: statusCode, 
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+    }
+  );
+}
+
+/**
  * デバッグ用ログ出力関数
  */
 function logDebug(message: string, data?: any) {
@@ -25,15 +47,24 @@ async function getFileContent(supabase: any, filePath: string) {
       .download(filePath);
     
     if (error) {
-      console.error('ファイル取得エラー:', error);
-      return null;
+      // ストレージエラーの詳細分類
+      if (error.message?.includes('not found') || error.message?.includes('404')) {
+        console.error('ファイル未発見:', filePath, error);
+        return { success: false, errorCode: 'NOT_FOUND', error };
+      }
+      if (error.message?.includes('permission') || error.message?.includes('403')) {
+        console.error('権限エラー:', filePath, error);
+        return { success: false, errorCode: 'FORBIDDEN', error };
+      }
+      console.error('ストレージエラー:', filePath, error);
+      return { success: false, errorCode: 'STORAGE_ERROR', error };
     }
     
     const text = await data.text();
-    return text;
+    return { success: true, content: text };
   } catch (err) {
-    console.error('ファイル読み込みエラー:', err);
-    return null;
+    console.error('ファイル読み込み例外:', filePath, err);
+    return { success: false, errorCode: 'INTERNAL_ERROR', error: err };
   }
 }
 
@@ -93,6 +124,10 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
     
+    if (!supabaseAdmin) {
+      return createErrorResponse(500, 'CONFIG_ERROR', 'Supabase設定エラー');
+    }
+    
     // training-content バケットのファイル一覧を取得
     const { data: files, error: listError } = await supabaseAdmin.storage
       .from('training-content')
@@ -100,16 +135,16 @@ serve(async (req) => {
 
     if (listError) {
       console.error('ファイル一覧取得エラー:', listError);
-      return new Response(
-        JSON.stringify({ 
-          error: true, 
-          message: 'ファイル一覧の取得に失敗しました'
-        }),
-        { 
-          status: 500, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
+      
+      if (listError.message?.includes('permission') || listError.message?.includes('403')) {
+        return createErrorResponse(403, 'FORBIDDEN', 'ストレージアクセス権限がありません', { originalError: listError.message });
+      }
+      
+      return createErrorResponse(500, 'STORAGE_LIST_ERROR', 'ファイル一覧の取得に失敗しました', { originalError: listError.message });
+    }
+
+    if (!files || files.length === 0) {
+      return createErrorResponse(404, 'NO_CONTENT', 'トレーニングコンテンツが見つかりませんでした');
     }
 
     logDebug('取得したファイル一覧:', files);
@@ -117,14 +152,14 @@ serve(async (req) => {
     // 各トレーニングフォルダのindex.mdを読み込み
     const trainings = [];
     
-    for (const file of files || []) {
+    for (const file of files) {
       if (file.name && !file.name.includes('.')) {
         // フォルダの場合、index.mdを取得
         const indexPath = `${file.name}/index.md`;
-        const content = await getFileContent(supabaseAdmin, indexPath);
+        const result = await getFileContent(supabaseAdmin, indexPath);
         
-        if (content) {
-          const { frontmatter } = parseFrontmatter(content);
+        if (result.success && result.content) {
+          const { frontmatter } = parseFrontmatter(result.content);
           
           trainings.push({
             id: `${file.name}-1`,
@@ -136,8 +171,14 @@ serve(async (req) => {
             tags: frontmatter.tags || [],
             thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100'
           });
+        } else {
+          console.warn(`トレーニング ${file.name} のindex.mdが読み込めませんでした:`, result.error);
         }
       }
+    }
+
+    if (trainings.length === 0) {
+      return createErrorResponse(404, 'NO_VALID_CONTENT', '有効なトレーニングコンテンツが見つかりませんでした');
     }
 
     logDebug('パースされたトレーニング一覧:', trainings);
@@ -145,7 +186,11 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true,
-        data: trainings
+        data: trainings,
+        meta: {
+          total: trainings.length,
+          timestamp: new Date().toISOString()
+        }
       }),
       { 
         status: 200, 
@@ -154,16 +199,9 @@ serve(async (req) => {
     );
     
   } catch (error) {
-    console.error('サーバーエラー:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: true, 
-        message: 'サーバー内部エラーが発生しました'
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+    console.error('予期しないサーバーエラー:', error);
+    return createErrorResponse(500, 'INTERNAL_ERROR', 'サーバー内部エラーが発生しました', { 
+      message: error instanceof Error ? error.message : '不明なエラー'
+    });
   }
 });
