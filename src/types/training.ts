@@ -1,3 +1,4 @@
+
 export interface Training {
   id: string;
   slug: string;
@@ -28,7 +29,6 @@ export interface Task {
   prev_task?: string | null;
 }
 
-// TaskDetailDataはTaskを拡張し、必須プロパティを明示的に定義
 export interface TaskDetailData {
   id: string;
   training_id: string;
@@ -37,19 +37,18 @@ export interface TaskDetailData {
   order_index: number;
   is_premium: boolean | null;
   preview_sec: number | null;
-  content: string; // 必須プロパティとして定義
+  content: string;
   video_full: string | null;
   video_preview: string | null;
   created_at: string | null;
-  next_task: string | null; // 必須プロパティとして定義
-  prev_task: string | null; // 必須プロパティとして定義
+  next_task: string | null;
+  prev_task: string | null;
   trainingTitle: string;
   trainingSlug: string;
   video_url?: string;
   preview_video_url?: string;
 }
 
-// TrainingDetailDataに必須プロパティとしてtasksを定義
 export interface TrainingDetailData {
   id: string;
   slug: string;
@@ -58,11 +57,20 @@ export interface TrainingDetailData {
   type: string;
   difficulty: string;
   tags: string[];
-  tasks: Task[]; // 必須プロパティとして定義
+  tasks: Task[];
   skills?: string[];
   prerequisites?: string[];
   has_premium_content?: boolean;
   thumbnailImage?: string;
+}
+
+/**
+ * Edge Functionからのレスポンス型
+ */
+export interface TrainingContentResponse {
+  meta: TaskFrontmatter;
+  content: string;
+  showPremiumBanner: boolean;
 }
 
 /**
@@ -80,9 +88,6 @@ export interface TrainingFrontmatter {
   slug?: string;
 }
 
-/**
- * タスクフロントマターの型定義
- */
 export interface TaskFrontmatter {
   title: string;
   description?: string;
@@ -95,15 +100,10 @@ export interface TaskFrontmatter {
   video_full?: string;
   preview_sec?: number;
   preview_marker?: string;
-  /** 前タスクの slug（任意） */
   prev_task?: string;
-  /** 次タスクの slug（任意） */
   next_task?: string;
 }
 
-/**
- * Markdownファイルの読み込み結果型
- */
 export interface MarkdownFile {
   path: string;
   content: string;

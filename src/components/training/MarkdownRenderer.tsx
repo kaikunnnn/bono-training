@@ -28,29 +28,23 @@ const getDisplayContent = (
   hasMemberAccess: boolean,
   marker: string = '<!-- PREMIUM_ONLY -->'
 ): { content: string; showBanner: boolean } => {
-  // 無料コンテンツまたはプレミアムアクセスがある場合は全文表示
   if (!isPremium || hasMemberAccess) {
     return { content, showBanner: false };
   }
 
-  // プレミアムコンテンツかつアクセス権がない場合
   if (content.includes(marker)) {
     const markerIndex = content.indexOf(marker);
     const beforeMarker = content.substring(0, markerIndex);
     
-    // マーカー直前に見出しがあるかチェック
-    // より確実な方法：改行で分割して最後の行をチェック
     const lines = beforeMarker.split('\n');
     const lastLine = lines[lines.length - 1]?.trim();
     
-    // 最後の行が見出し（## で始まる）の場合、見出しまでの全内容を表示
     if (lastLine && lastLine.startsWith('## ')) {
       return { 
         content: beforeMarker.trim(), 
         showBanner: true 
       };
     } else {
-      // 従来通りの分割（見出しなしの場合）
       return { 
         content: beforeMarker.trim(), 
         showBanner: true 
@@ -58,7 +52,6 @@ const getDisplayContent = (
     }
   }
 
-  // マーカーがない場合は全文表示してバナーも表示
   return { content, showBanner: true };
 };
 
@@ -71,7 +64,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   isPremium = false,
   hasMemberAccess = false
 }) => {
-  // プレミアムコンテンツの分割処理
   const { content: displayContent, showBanner } = getDisplayContent(
     content,
     isPremium,
@@ -95,10 +87,8 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     for (const line of lines) {
       const trimmedLine = line.trim();
       if (trimmedLine.match(/^\d+\.\s/)) {
-        // 番号付きリスト（例: "1. ..."）
         items.push(trimmedLine.replace(/^\d+\.\s/, ''));
       } else if (trimmedLine.startsWith('- ')) {
-        // 箇条書きリスト
         items.push(trimmedLine.substring(2));
       } else if (trimmedLine && !trimmedLine.startsWith('#')) {
         description = trimmedLine;

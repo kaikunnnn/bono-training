@@ -1,240 +1,113 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { loadTrainingMeta, loadMdxContent, loadAllTrainingMeta } from "@/utils/mdxLoader";
-import { loadTrainingTasks } from "@/lib/markdown-loader";
 import { TrainingDetailData, TaskDetailData } from "@/types/training";
-import { TaskFrontmatter } from "@/types/training";
 
 /**
  * トレーニング一覧を取得
- * Phase-1: GitHub/ローカルファイルベースの実装
+ * TODO: Phase 4-2でEdge Functionに切り替え
  */
-export const getTrainings = () => {
-  console.log('Phase-1: GitHub/ローカルファイルベースの実装を使用');
+export const getTrainings = async () => {
+  console.log('TODO: Edge Functionからトレーニング一覧を取得');
   
-  try {
-    // ローカルファイルからトレーニング一覧を取得
-    const trainingMetas = loadAllTrainingMeta();
-    
-    return trainingMetas.map(meta => ({
-      id: `${meta.slug}-1`,
-      slug: meta.slug,
-      title: meta.title,
-      description: meta.description || '',
-      type: (meta.type === 'challenge' || meta.type === 'skill') ? meta.type : 'challenge' as 'challenge' | 'skill',
-      difficulty: meta.difficulty || 'normal',
-      tags: meta.tags || [],
-      thumbnailImage: meta.thumbnailImage || 'https://source.unsplash.com/random/200x100'
-    }));
-  } catch (error) {
-    console.error('Error loading trainings:', error);
-    
-    // フォールバックのダミーデータを返す
-    return [
-      {
-        id: "todo-app-1",
-        slug: "todo-app",
-        title: "Todo アプリ UI 制作",
-        description: "実践的な Todo アプリの UI デザインを学ぶ",
-        type: "challenge" as 'challenge',
-        difficulty: "normal",
-        tags: ["ui", "todo", "実践"],
-        thumbnailImage: 'https://source.unsplash.com/random/200x100'
-      },
-      {
-        id: "react-basics-1", 
-        slug: "react-basics",
-        title: "React 基礎",
-        description: "Reactの基本的な概念と実践的な使い方を学びます。",
-        type: "skill" as 'skill',
-        difficulty: "初級",
-        tags: ["React", "JavaScript", "フロントエンド"],
-        thumbnailImage: 'https://source.unsplash.com/random/200x100'
-      }
-    ];
-  }
+  // 暫定的なダミーデータ
+  return [
+    {
+      id: "todo-app-1",
+      slug: "todo-app",
+      title: "Todo アプリ UI 制作",
+      description: "実践的な Todo アプリの UI デザインを学ぶ",
+      type: "challenge" as 'challenge',
+      difficulty: "normal",
+      tags: ["ui", "todo", "実践"],
+      thumbnailImage: 'https://source.unsplash.com/random/200x100'
+    }
+  ];
 };
 
 /**
  * トレーニング詳細情報を取得
- * Phase-1: GitHub/ローカルファイルベースの実装
+ * TODO: Phase 4-2でEdge Functionに切り替え
  */
-export const getTrainingDetail = (slug: string): TrainingDetailData => {
-  console.log('Phase-1: GitHub/ローカルファイルベースの実装を使用');
+export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
+  console.log(`TODO: Edge Functionからトレーニング詳細を取得: ${slug}`);
   
-  try {
-    // ローカルファイルからトレーニング詳細を取得
-    const trainingMeta = loadTrainingMeta(slug, true);
-    const taskFiles = loadTrainingTasks(slug);
-    
-    const tasks = taskFiles.map((taskFile, index) => {
-      const taskFrontmatter = taskFile.frontmatter as TaskFrontmatter;
-      return {
-        id: `${slug}-task-${index + 1}`,
-        slug: taskFile.slug,
-        title: taskFrontmatter.title,
-        is_premium: taskFrontmatter.is_premium || false,
-        order_index: taskFrontmatter.order_index,
-        training_id: `${slug}-1`,
-        created_at: null,
-        video_full: taskFrontmatter.video_full || null,
-        video_preview: taskFrontmatter.video_preview || null,
-        preview_sec: taskFrontmatter.preview_sec || 30,
-        next_task: index < taskFiles.length - 1 ? taskFiles[index + 1].slug : null,
-        prev_task: index > 0 ? taskFiles[index - 1].slug : null
-      };
-    });
-    
-    const trainingDetailData: TrainingDetailData = {
-      id: `${slug}-1`,
-      slug: slug,
-      title: trainingMeta.title,
-      description: trainingMeta.description || '',
-      type: trainingMeta.type as 'challenge' | 'skill' || 'challenge',
-      difficulty: trainingMeta.difficulty || '初級',
-      tags: trainingMeta.tags || [],
-      tasks: tasks,
-      skills: [],
-      prerequisites: [],
-      has_premium_content: tasks.some(task => task.is_premium),
-      thumbnailImage: trainingMeta.thumbnailImage || 'https://source.unsplash.com/random/200x100'
-    };
-
-    return trainingDetailData;
-  } catch (error) {
-    console.error(`Error loading training detail for ${slug}:`, error);
-    
-    // フォールバックのダミーデータを返す
-    const trainingDetailData: TrainingDetailData = {
-      id: `${slug}-1`,
-      slug: slug,
-      title: `${slug} トレーニング`,
-      description: `${slug}の基本的な概念と実践的な使い方を学びます。`,
-      type: "skill",
-      difficulty: "初級",
-      tags: ["React", "JavaScript", "フロントエンド"],
-      tasks: [
-        {
-          id: `${slug}-task-1`,
-          slug: "introduction",
-          title: "はじめに",
-          is_premium: false,
-          order_index: 1,
-          training_id: `${slug}-1`,
-          created_at: null,
-          video_full: "845235294",
-          video_preview: "845235294",
-          preview_sec: 30,
-          next_task: "advanced",
-          prev_task: null
-        },
-        {
-          id: `${slug}-task-2`,
-          slug: "advanced", 
-          title: "応用編",
-          is_premium: true,
-          order_index: 2,
-          training_id: `${slug}-1`,
-          created_at: null,
-          video_full: "845235300",
-          video_preview: "845235294", 
-          preview_sec: 30,
-          next_task: null,
-          prev_task: "introduction"
-        }
-      ],
-      skills: [],
-      prerequisites: [],
-      has_premium_content: true,
-      thumbnailImage: 'https://source.unsplash.com/random/200x100'
-    };
-
-    return trainingDetailData;
-  }
-};
-
-/**
- * トレーニングのタスク一覧を取得
- * Phase-1: GitHub/ローカルファイルベースの実装
- */
-export const getTrainingTasks = async (trainingId: string) => {
-  console.log('Phase-1: GitHub/ローカルファイルベースの実装を使用');
-  
-  try {
-    // trainingIdからslugを抽出（format: "todo-app-1" -> "todo-app"）
-    const slug = trainingId.replace(/-\d+$/, '');
-    const taskFiles = await loadTrainingTasks(slug);
-    
-    return taskFiles.map((taskFile, index) => {
-      const taskFrontmatter = taskFile.frontmatter as TaskFrontmatter;
-      return {
-        id: `${trainingId}-task-${index + 1}`,
-        slug: taskFile.slug,
-        title: taskFrontmatter.title,
-        is_premium: taskFrontmatter.is_premium || false,
-        order_index: taskFrontmatter.order_index,
-        training_id: trainingId
-      };
-    });
-  } catch (error) {
-    console.error(`Error loading tasks for training ${trainingId}:`, error);
-    
-    // フォールバックのダミーデータを返す
-    return [
+  // 暫定的なダミーデータ
+  const trainingDetailData: TrainingDetailData = {
+    id: `${slug}-1`,
+    slug: slug,
+    title: "Todo アプリ UI 制作",
+    description: "実践的な Todo アプリの UI デザインを学ぶ",
+    type: "challenge",
+    difficulty: "normal",
+    tags: ["ui", "todo", "実践"],
+    tasks: [
       {
-        id: `${trainingId}-task-1`,
+        id: `${slug}-task-1`,
         slug: "introduction",
-        title: "はじめに",
+        title: "トレーニングの紹介",
         is_premium: false,
         order_index: 1,
-        training_id: trainingId
+        training_id: `${slug}-1`,
+        created_at: null,
+        video_full: "https://example.com/full.mp4",
+        video_preview: "https://example.com/preview.mp4",
+        preview_sec: 30,
+        next_task: "ui-layout-basic01",
+        prev_task: null
       },
       {
-        id: `${trainingId}-task-2`,
-        slug: "advanced",
-        title: "応用編", 
+        id: `${slug}-task-2`,
+        slug: "ui-layout-basic01",
+        title: "画面構成の基本",
         is_premium: true,
         order_index: 2,
-        training_id: trainingId
+        training_id: `${slug}-1`,
+        created_at: null,
+        video_full: "https://example.com/full.mp4",
+        video_preview: "https://example.com/preview.mp4",
+        preview_sec: 30,
+        next_task: null,
+        prev_task: "introduction"
       }
-    ];
-  }
+    ],
+    skills: [],
+    prerequisites: [],
+    has_premium_content: true,
+    thumbnailImage: 'https://source.unsplash.com/random/200x100'
+  };
+
+  return trainingDetailData;
 };
 
 /**
  * タスク詳細を取得
- * Phase-1: GitHub/ローカルファイルベースの実装
+ * TODO: Phase 4-2でEdge Functionに切り替え
  */
 export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string): Promise<TaskDetailData> => {
-  console.log('Phase-1: GitHub/ローカルファイルベースの実装を使用');
+  console.log(`TODO: Edge Functionからタスク詳細を取得: ${trainingSlug}/${taskSlug}`);
   
-  try {
-    // MDXコンテンツを取得
-    const mdxData = await loadMdxContent(trainingSlug, taskSlug);
-    
-    const taskDetailData: TaskDetailData = {
-      id: `${trainingSlug}-${taskSlug}`,
-      slug: taskSlug,
-      title: mdxData.frontmatter.title,
-      content: mdxData.content,
-      is_premium: mdxData.frontmatter.is_premium || false,
-      order_index: mdxData.frontmatter.order_index || 1,
-      training_id: `${trainingSlug}-1`,
-      created_at: null,
-      video_full: mdxData.frontmatter.video_full || null,
-      video_preview: mdxData.frontmatter.video_preview || null,
-      preview_sec: mdxData.frontmatter.preview_sec || 30,
-      trainingTitle: `${trainingSlug} トレーニング`,
-      trainingSlug: trainingSlug,
-      next_task: taskSlug === "introduction" ? "advanced" : null,
-      prev_task: taskSlug === "advanced" ? "introduction" : null
-    };
-    
-    return taskDetailData;
-  } catch (error) {
-    console.error('タスク詳細取得エラー:', error);
-    throw error;
-  }
+  // 暫定的なダミーデータ
+  const taskDetailData: TaskDetailData = {
+    id: `${trainingSlug}-${taskSlug}`,
+    slug: taskSlug,
+    title: taskSlug === "introduction" ? "トレーニングの紹介" : "画面構成の基本",
+    content: taskSlug === "introduction" 
+      ? "# Todo アプリ：画面構成の基本\n\nこのレッスンでは、Todo アプリの基本的な画面設計を行います。\n\n## 学習のゴール\n\n- ユーザー視点での UI 構成の考え方を理解する\n- 最小限の構成でアプリの目的を伝える設計ができるようになる"
+      : "# Todo アプリ：画面構成の基本\n\nこのレッスンでは、Todo アプリの基本的な画面設計を行います。\n\n## 学習のゴール\n\n### 画面構成の基本を意識して以下の目標を目指してみよう\n\n- ユーザー視点での UI 構成の考え方を理解する\n- 最小限の構成でアプリの目的を伝える設計ができるようになる\n\n<!-- PREMIUM_ONLY -->\n\n## プレミアム限定：デザイン改善の実例\n\n以下のような改善テクニックも紹介します：\n\n- 枠線と余白で UI を整理する方法\n- ステータス別のタスク表示に色を使う方法\n- アイコンとテキストの配置で視認性を高める工夫",
+    is_premium: taskSlug === "ui-layout-basic01",
+    order_index: taskSlug === "introduction" ? 1 : 2,
+    training_id: `${trainingSlug}-1`,
+    created_at: null,
+    video_full: "https://example.com/full.mp4",
+    video_preview: "https://example.com/preview.mp4",
+    preview_sec: 30,
+    trainingTitle: "Todo アプリ UI 制作",
+    trainingSlug: trainingSlug,
+    next_task: taskSlug === "introduction" ? "ui-layout-basic01" : null,
+    prev_task: taskSlug === "ui-layout-basic01" ? "introduction" : null
+  };
+  
+  return taskDetailData;
 };
 
 /**
@@ -242,7 +115,6 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
  */
 export const getUserTaskProgress = async (userId: string, trainingId: string) => {
   try {
-    // Supabase DBからユーザーの進捗状況を取得
     const { data, error } = await supabase
       .from('user_progress')
       .select('task_id, status, completed_at')
@@ -250,7 +122,6 @@ export const getUserTaskProgress = async (userId: string, trainingId: string) =>
 
     if (error) throw error;
     
-    // タスクIDごとの進捗状況をマッピング
     const progressMap: Record<string, any> = {};
     data?.forEach(item => {
       progressMap[item.task_id] = {
@@ -273,7 +144,6 @@ export const updateTaskProgress = async (userId: string, taskId: string, status:
   try {
     const completed_at = status === 'done' ? new Date().toISOString() : null;
     
-    // upsert操作で進捗状況を更新/挿入
     const { data, error } = await supabase
       .from('user_progress')
       .upsert({
