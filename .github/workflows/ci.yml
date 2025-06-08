@@ -26,11 +26,11 @@ jobs:
     - name: Run linting
       run: npm run lint
     
-    - name: Run type checking (excluding tests)
-      run: npx tsc --noEmit --skipLibCheck --exclude 'src/__tests__/**/*'
+    - name: Run type checking (production build)
+      run: npx tsc --noEmit --project tsconfig.json
     
-    - name: Run tests
-      run: npx jest --passWithNoTests --coverage --watchAll=false
+    - name: Run tests with Jest configuration
+      run: npx jest --passWithNoTests --coverage --watchAll=false --config jest.config.js
     
     - name: Build application
       run: npm run build

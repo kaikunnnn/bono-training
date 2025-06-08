@@ -8,7 +8,7 @@ export default {
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      tsconfig: 'tsconfig.json',
+      tsconfig: 'tsconfig.jest.json',
     }],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
@@ -22,4 +22,9 @@ export default {
     '!src/main.tsx',
     '!src/vite-env.d.ts',
   ],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.jest.json'
+    }
+  }
 };
