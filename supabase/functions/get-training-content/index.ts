@@ -9,6 +9,38 @@ const corsHeaders = {
 };
 
 /**
+ * 統一エラーレスポンス作成
+ */
+function createErrorResponse(code: string, message: string, statusCode: number = 400) {
+  return new Response(
+    JSON.stringify({
+      success: false,
+      error: { code, message }
+    }),
+    {
+      status: statusCode,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    }
+  );
+}
+
+/**
+ * 成功レスポンス作成
+ */
+function createSuccessResponse(data: any) {
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data
+    }),
+    {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    }
+  );
+}
+
+/**
  * デバッグ用ログ出力関数
  */
 function logDebug(message: string, data?: any) {
@@ -152,37 +184,12 @@ serve(async (req) => {
         taskSlug = body.taskSlug;
       } catch (e) {
         console.error('リクエストボディ解析エラー:', e);
-        return new Response(
-          JSON.stringify({ 
-            error: true, 
-            message: 'リクエストボディの解析に失敗しました'
-          }),
-          { 
-            status: 400, 
-            headers: { 
-              ...corsHeaders,
-              'Content-Type': 'application/json'
-            } 
-          }
-        );
+        return createErrorResponse('INVALID_REQUEST', 'リクエストボディの解析に失敗しました', 400);
       }
     }
 
     if (!trainingSlug || !taskSlug) {
-      console.error('必要なパラメータが未指定');
-      return new Response(
-        JSON.stringify({ 
-          error: true, 
-          message: 'trainingSlugとtaskSlugが必要です'
-        }),
-        { 
-          status: 400, 
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      return createErrorResponse('INVALID_REQUEST', 'trainingSlugとtaskSlugが必要です', 400);
     }
 
     // Supabase クライアントを初期化
@@ -217,19 +224,7 @@ serve(async (req) => {
     
     if (!rawContent) {
       console.error('コンテンツが見つかりません:', filePath);
-      return new Response(
-        JSON.stringify({ 
-          error: true, 
-          message: 'コンテンツが見つかりませんでした'
-        }),
-        { 
-          status: 404, 
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      return createErrorResponse('NOT_FOUND', 'コンテンツが見つかりませんでした', 404);
     }
     
     // フロントマターを解析
@@ -268,34 +263,10 @@ serve(async (req) => {
     
     logDebug('レスポンスデータ:', responseData);
     
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        data: responseData
-      }),
-      { 
-        status: 200, 
-        headers: { 
-          ...corsHeaders, 
-          'Content-Type': 'application/json' 
-        } 
-      }
-    );
+    return createSuccessResponse(responseData);
     
   } catch (error) {
     console.error('サーバーエラー:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: true, 
-        message: 'サーバー内部エラーが発生しました'
-      }),
-      { 
-        status: 500, 
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
+    return createErrorResponse('INTERNAL_ERROR', 'サーバー内部エラーが発生しました', 500);
   }
 });

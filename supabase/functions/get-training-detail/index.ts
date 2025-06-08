@@ -9,6 +9,38 @@ const corsHeaders = {
 };
 
 /**
+ * 統一エラーレスポンス作成
+ */
+function createErrorResponse(code: string, message: string, statusCode: number = 400) {
+  return new Response(
+    JSON.stringify({
+      success: false,
+      error: { code, message }
+    }),
+    {
+      status: statusCode,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    }
+  );
+}
+
+/**
+ * 成功レスポンス作成
+ */
+function createSuccessResponse(data: any) {
+  return new Response(
+    JSON.stringify({
+      success: true,
+      data
+    }),
+    {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    }
+  );
+}
+
+/**
  * デバッグ用ログ出力関数
  */
 function logDebug(message: string, data?: any) {
@@ -96,30 +128,12 @@ serve(async (req) => {
         slug = body.slug;
       } catch (e) {
         console.error('リクエストボディ解析エラー:', e);
-        return new Response(
-          JSON.stringify({ 
-            error: true, 
-            message: 'リクエストボディの解析に失敗しました'
-          }),
-          { 
-            status: 400, 
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-          }
-        );
+        return createErrorResponse('INVALID_REQUEST', 'リクエストボディの解析に失敗しました', 400);
       }
     }
 
     if (!slug) {
-      return new Response(
-        JSON.stringify({ 
-          error: true, 
-          message: 'slugが指定されていません'
-        }),
-        { 
-          status: 400, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      return createErrorResponse('INVALID_REQUEST', 'slugが指定されていません', 400);
     }
 
     // Supabase クライアントを初期化
@@ -133,16 +147,7 @@ serve(async (req) => {
     const indexContent = await getFileContent(supabaseAdmin, indexPath);
     
     if (!indexContent) {
-      return new Response(
-        JSON.stringify({ 
-          error: true, 
-          message: 'トレーニングが見つかりませんでした'
-        }),
-        { 
-          status: 404, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      return createErrorResponse('NOT_FOUND', 'トレーニングが見つかりませんでした', 404);
     }
 
     const { frontmatter } = parseFrontmatter(indexContent);
@@ -202,28 +207,10 @@ serve(async (req) => {
 
     logDebug('パースされたトレーニング詳細:', trainingDetail);
     
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        data: trainingDetail
-      }),
-      { 
-        status: 200, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-      }
-    );
+    return createSuccessResponse(trainingDetail);
     
   } catch (error) {
     console.error('サーバーエラー:', error);
-    return new Response(
-      JSON.stringify({ 
-        error: true, 
-        message: 'サーバー内部エラーが発生しました'
-      }),
-      { 
-        status: 500, 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
-    );
+    return createErrorResponse('INTERNAL_ERROR', 'サーバー内部エラーが発生しました', 500);
   }
 });

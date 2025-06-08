@@ -9,9 +9,10 @@ import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
 import LessonHeader from '@/components/training/LessonHeader';
 import MarkdownRenderer from '@/components/training/MarkdownRenderer';
+import ErrorDisplay from '@/components/common/ErrorBoundary';
 import { getTrainingTaskDetail } from '@/services/training';
 import { TaskDetailData, TaskFrontmatter } from '@/types/training';
-import TaskDetailError from './TaskDetailError';
+import { TrainingError } from '@/utils/errors';
 
 const TaskDetailPage = () => {
   const { trainingSlug, taskSlug } = useParams<{ trainingSlug: string; taskSlug: string }>();
@@ -21,7 +22,7 @@ const TaskDetailPage = () => {
   const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
   
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<TrainingError | null>(null);
   const [task, setTask] = useState<TaskDetailData | null>(null);
 
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
@@ -39,21 +40,10 @@ const TaskDetailPage = () => {
     return (
       <TrainingLayout>
         <div className="container py-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-red-600 mb-2">URL エラー</h1>
-              <p className="text-lg text-gray-700 mb-4">トレーニングまたはタスクが正しく指定されていません</p>
-            </div>
-            
-            <div className="space-y-3">
-              <button 
-                onClick={() => navigate('/training')}
-                className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                トレーニング一覧に戻る
-              </button>
-            </div>
-          </div>
+          <ErrorDisplay 
+            error={new TrainingError('URLパラメータが正しく指定されていません', 'INVALID_REQUEST', 400)}
+            onReset={() => navigate('/training')}
+          />
         </div>
       </TrainingLayout>
     );
@@ -73,22 +63,22 @@ const TaskDetailPage = () => {
         const taskData = await getTrainingTaskDetail(trainingSlug, taskSlug);
         console.log('getTrainingTaskDetail result:', taskData);
         
-        if (!taskData) {
-          throw new Error(`タスク「${taskSlug}」が見つかりませんでした`);
-        }
-        
         setTask(taskData);
         console.log('Task data set successfully:', taskData);
 
       } catch (err) {
         console.error('=== Data Fetching Error ===');
         console.error('Error details:', err);
-        const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
-        setError(errorMessage);
+        
+        if (err instanceof TrainingError) {
+          setError(err);
+        } else {
+          setError(new TrainingError('予期しないエラーが発生しました', 'UNKNOWN_ERROR'));
+        }
         
         toast({
           title: 'コンテンツ読み込みエラー',
-          description: errorMessage,
+          description: err instanceof Error ? err.message : '不明なエラーが発生しました',
           variant: 'destructive',
           duration: 5000,
         });
@@ -106,27 +96,11 @@ const TaskDetailPage = () => {
     return (
       <TrainingLayout>
         <div className="container py-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-red-600 mb-2">コンテンツエラー</h1>
-              <p className="text-lg text-gray-700 mb-4">{error}</p>
-            </div>
-            
-            <div className="space-y-3">
-              <button 
-                onClick={() => navigate(`/training/${trainingSlug}`)}
-                className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-              >
-                {trainingSlug} トレーニングに戻る
-              </button>
-              <button 
-                onClick={() => navigate('/training')}
-                className="w-full px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                トレーニング一覧に戻る
-              </button>
-            </div>
-          </div>
+          <ErrorDisplay 
+            error={error}
+            onRetry={() => window.location.reload()}
+            onReset={() => navigate(`/training/${trainingSlug}`)}
+          />
         </div>
       </TrainingLayout>
     );
@@ -153,7 +127,16 @@ const TaskDetailPage = () => {
 
   // タスクが見つからない場合
   if (!task) {
-    return <TaskDetailError />;
+    return (
+      <TrainingLayout>
+        <div className="container py-8">
+          <ErrorDisplay 
+            error={new TrainingError('タスクが見つかりませんでした', 'NOT_FOUND', 404)}
+            onReset={() => navigate(`/training/${trainingSlug}`)}
+          />
+        </div>
+      </TrainingLayout>
+    );
   }
 
   // TaskDetailData を TaskFrontmatter 型に変換
