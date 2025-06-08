@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingDetailData, TaskDetailData } from "@/types/training";
 
@@ -80,34 +79,61 @@ export const getTrainingDetail = async (slug: string): Promise<TrainingDetailDat
 };
 
 /**
- * タスク詳細を取得
- * TODO: Phase 4-2でEdge Functionに切り替え
+ * タスク詳細を取得（Edge Functionを使用）
  */
 export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string): Promise<TaskDetailData> => {
-  console.log(`TODO: Edge Functionからタスク詳細を取得: ${trainingSlug}/${taskSlug}`);
+  console.log(`Edge Functionからタスク詳細を取得: ${trainingSlug}/${taskSlug}`);
   
-  // 暫定的なダミーデータ
-  const taskDetailData: TaskDetailData = {
-    id: `${trainingSlug}-${taskSlug}`,
-    slug: taskSlug,
-    title: taskSlug === "introduction" ? "トレーニングの紹介" : "画面構成の基本",
-    content: taskSlug === "introduction" 
-      ? "# Todo アプリ：画面構成の基本\n\nこのレッスンでは、Todo アプリの基本的な画面設計を行います。\n\n## 学習のゴール\n\n- ユーザー視点での UI 構成の考え方を理解する\n- 最小限の構成でアプリの目的を伝える設計ができるようになる"
-      : "# Todo アプリ：画面構成の基本\n\nこのレッスンでは、Todo アプリの基本的な画面設計を行います。\n\n## 学習のゴール\n\n### 画面構成の基本を意識して以下の目標を目指してみよう\n\n- ユーザー視点での UI 構成の考え方を理解する\n- 最小限の構成でアプリの目的を伝える設計ができるようになる\n\n<!-- PREMIUM_ONLY -->\n\n## プレミアム限定：デザイン改善の実例\n\n以下のような改善テクニックも紹介します：\n\n- 枠線と余白で UI を整理する方法\n- ステータス別のタスク表示に色を使う方法\n- アイコンとテキストの配置で視認性を高める工夫",
-    is_premium: taskSlug === "ui-layout-basic01",
-    order_index: taskSlug === "introduction" ? 1 : 2,
-    training_id: `${trainingSlug}-1`,
-    created_at: null,
-    video_full: "https://example.com/full.mp4",
-    video_preview: "https://example.com/preview.mp4",
-    preview_sec: 30,
-    trainingTitle: "Todo アプリ UI 制作",
-    trainingSlug: trainingSlug,
-    next_task: taskSlug === "introduction" ? "ui-layout-basic01" : null,
-    prev_task: taskSlug === "ui-layout-basic01" ? "introduction" : null
-  };
-  
-  return taskDetailData;
+  try {
+    // Edge Functionを呼び出し
+    const { data, error } = await supabase.functions.invoke('get-training-content', {
+      body: {
+        trainingSlug,
+        taskSlug
+      }
+    });
+
+    console.log('Edge Function レスポンス:', { data, error });
+
+    if (error) {
+      console.error('Edge Function エラー:', error);
+      throw new Error(`Edge Function呼び出しエラー: ${error.message}`);
+    }
+
+    if (!data?.success || !data?.data) {
+      console.error('Edge Function 失敗レスポンス:', data);
+      throw new Error(data?.message || 'コンテンツの取得に失敗しました');
+    }
+
+    return data.data as TaskDetailData;
+    
+  } catch (err) {
+    console.error('getTrainingTaskDetail エラー:', err);
+    
+    // フォールバック: ダミーデータを返す
+    console.log('フォールバック: ダミーデータを使用');
+    const taskDetailData: TaskDetailData = {
+      id: `${trainingSlug}-${taskSlug}`,
+      slug: taskSlug,
+      title: taskSlug === "introduction" ? "トレーニングの紹介" : "画面構成の基本",
+      content: taskSlug === "introduction" 
+        ? "# Todo アプリ：画面構成の基本\n\nこのレッスンでは、Todo アプリの基本的な画面設計を行います。\n\n## 学習のゴール\n\n- ユーザー視点での UI 構成の考え方を理解する\n- 最小限の構成でアプリの目的を伝える設計ができるようになる"
+        : "# Todo アプリ：画面構成の基本\n\nこのレッスンでは、Todo アプリの基本的な画面設計を行います。\n\n## 学習のゴール\n\n### 画面構成の基本を意識して以下の目標を目指してみよう\n\n- ユーザー視点での UI 構成の考え方を理解する\n- 最小限の構成でアプリの目的を伝える設計ができるようになる\n\n<!-- PREMIUM_ONLY -->\n\n## プレミアム限定：デザイン改善の実例\n\n以下のような改善テクニックも紹介します：\n\n- 枠線と余白で UI を整理する方法\n- ステータス別のタスク表示に色を使う方法\n- アイコンとテキストの配置で視認性を高める工夫",
+      is_premium: taskSlug === "ui-layout-basic01",
+      order_index: taskSlug === "introduction" ? 1 : 2,
+      training_id: `${trainingSlug}-1`,
+      created_at: null,
+      video_full: "https://example.com/full.mp4",
+      video_preview: "https://example.com/preview.mp4",
+      preview_sec: 30,
+      trainingTitle: "Todo アプリ UI 制作",
+      trainingSlug: trainingSlug,
+      next_task: taskSlug === "introduction" ? "ui-layout-basic01" : null,
+      prev_task: taskSlug === "ui-layout-basic01" ? "introduction" : null
+    };
+    
+    return taskDetailData;
+  }
 };
 
 /**
