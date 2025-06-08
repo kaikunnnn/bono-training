@@ -27,6 +27,7 @@ import TrainingPlan from "./pages/Training/Plan";
 import TrainingAbout from "./pages/Training/About";
 import TrainingLogin from "./pages/Training/Login";
 import TrainingDebug from '@/pages/Training/Debug';
+import Home from "./pages/Home";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -58,6 +59,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
