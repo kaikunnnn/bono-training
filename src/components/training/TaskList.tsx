@@ -9,10 +9,16 @@ import { Task } from '@/types/training';
 interface TaskListProps {
   tasks: Task[];
   progressMap?: Record<string, { status: string, completed_at: string | null }>;
-  trainingSlug: string; // 必須にして空文字列を防ぐ
+  trainingSlug: string;
+  className?: string;
 }
 
-const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSlug }) => {
+const TaskList: React.FC<TaskListProps> = ({ 
+  tasks, 
+  progressMap = {}, 
+  trainingSlug,
+  className 
+}) => {
   const { isSubscribed } = useSubscriptionContext();
   
   // trainingSlugが空の場合はエラーログを出す
@@ -28,7 +34,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, progressMap = {}, trainingSl
   console.log('TaskList - trainingSlug:', trainingSlug, 'tasks:', tasks);
 
   return (
-    <div className="space-y-4">
+    <div className={cn('space-y-4', className)}>
       <div className="grid gap-4">
         {tasks.map((task) => {
           const taskProgress = progressMap[task.id];

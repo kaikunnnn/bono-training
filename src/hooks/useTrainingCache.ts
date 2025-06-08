@@ -11,7 +11,7 @@ export const useTrainings = () => {
     queryKey: ['trainings'],
     queryFn: getTrainings,
     staleTime: 5 * 60 * 1000, // 5分
-    cacheTime: 10 * 60 * 1000, // 10分
+    gcTime: 10 * 60 * 1000, // 10分（cacheTime → gcTime）
     retry: 2,
     refetchOnWindowFocus: false
   });
@@ -25,7 +25,7 @@ export const useTrainingDetail = (slug: string) => {
     queryKey: ['training-detail', slug],
     queryFn: () => getTrainingDetail(slug),
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000, // 10分（cacheTime → gcTime）
     retry: 2,
     enabled: !!slug,
     refetchOnWindowFocus: false
@@ -40,7 +40,7 @@ export const useTaskDetail = (trainingSlug: string, taskSlug: string) => {
     queryKey: ['task-detail', trainingSlug, taskSlug],
     queryFn: () => getTrainingTaskDetail(trainingSlug, taskSlug),
     staleTime: 5 * 60 * 1000,
-    cacheTime: 10 * 60 * 1000,
+    gcTime: 10 * 60 * 1000, // 10分（cacheTime → gcTime）
     retry: 2,
     enabled: !!(trainingSlug && taskSlug),
     refetchOnWindowFocus: false

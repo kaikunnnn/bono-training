@@ -2,13 +2,14 @@
 export default {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+  setupFilesAfterEnv: ['@testing-library/jest-dom'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '\\.(css|less|scss)$': 'identity-obj-proxy'
   },
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      tsconfig: 'tsconfig.json',
+      tsconfig: 'tsconfig.jest.json',
     }],
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
@@ -22,4 +23,9 @@ export default {
     '!src/main.tsx',
     '!src/vite-env.d.ts',
   ],
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.jest.json'
+    }
+  }
 };

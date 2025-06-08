@@ -71,8 +71,13 @@ const TrainingDetail = () => {
   return (
     <TrainingLayout>
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <TrainingHeader training={training} />
-        <TrainingProgress training={training} className="my-8" />
+        <TrainingHeader />
+        <TrainingProgress 
+          tasks={training.tasks || []}
+          progressMap={{}}
+          trainingSlug={trainingSlug}
+          className="my-8" 
+        />
         <TaskList 
           tasks={training.tasks || []} 
           trainingSlug={trainingSlug}
