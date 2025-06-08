@@ -9,7 +9,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -58,8 +57,7 @@ const AppContent = () => {
   return (
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/" element={<Home />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
