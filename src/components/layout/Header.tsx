@@ -39,31 +39,51 @@ const Header = () => {
   }, []);
 
   const ListItem = React.forwardRef<
-    React.ElementRef<"a">,
-    React.ComponentPropsWithoutRef<"a">
-  >(({ className, title, children, ...props }, ref) => {
-    return (
-      <li>
-        <NavigationMenuLink asChild>
-          <a
-            ref={ref}
-            className={cn(
-              "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-              className
-            )}
-            {...props}
-          >
-            <div className="text-sm font-medium leading-none">{title}</div>
-            <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-              {children}
-            </p>
-          </a>
-        </NavigationMenuLink>
-      </li>
-    );
-  });
+    React.ElementRef<'a'>,
+    React.ComponentPropsWithoutRef<'a'>
+  >(({ className, title, children, ...props }, ref) => (
+    <li>
+      <NavigationMenuLink asChild>
+        <a
+          ref={ref}
+          className={cn(
+            'block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground',
+            className
+          )}
+          {...props}
+        >
+          <div className="text-sm font-medium leading-none">{title}</div>
+          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+            {children}
+          </p>
+        </a>
+      </NavigationMenuLink>
+    </li>
+  ));
   
   ListItem.displayName = "ListItem";
+
+  const learnLinks = [
+    {
+      href: '/courses',
+      title: 'コース',
+      description: '体系的にUIUXデザインを学ぶコース'
+    },
+    {
+      href: '/content',
+      title: 'コンテンツライブラリ',
+      description: '動画や記事でスキルアップ'
+    },
+    { href: '/roadmap', title: '学習ロードマップ', description: 'UIUXデザイナーへの近道' },
+    { href: '/tips', title: 'デザインのヒント', description: '実践で役立つテクニック' }
+  ];
+
+  const toolLinks = [
+    { href: '/figma', title: 'Figma', description: 'UI/UXデザインの主要ツール' },
+    { href: '/sketch', title: 'Sketch', description: 'macOS向けのデザインツール' },
+    { href: '/adobe-xd', title: 'Adobe XD', description: 'Adobeのデザイン&プロトタイピングツール' },
+    { href: '/tools', title: 'その他のツール', description: '便利なデザインツール一覧' }
+  ];
 
   // モバイル用メニュー
   const MobileMenu = () => (
@@ -75,39 +95,46 @@ const Header = () => {
       </SheetTrigger>
       <SheetContent side="left">
         <div className="flex h-full flex-col gap-4 py-4">
-          <Link
-            to="/"
-            className="text-lg font-bold"
-          >
+          <Link to="/" className="text-lg font-bold">
             UIUX DESIGN
           </Link>
-          <div className="flex flex-col space-y-3">
-            <Link
-              to="/content"
-              className="flex flex-col rounded-lg p-3 hover:bg-accent"
-            >
-              <span className="font-medium">コンテンツ</span>
-              <span className="text-sm text-muted-foreground">
-                ビデオ、記事、チュートリアル
-              </span>
-            </Link>
-            <Link
-              to="/courses"
-              className="flex flex-col rounded-lg p-3 hover:bg-accent"
-            >
-              <span className="font-medium">コース</span>
-              <span className="text-sm text-muted-foreground">
-                スキルを身につけるコース一覧
-              </span>
-            </Link>
+          <div className="space-y-6">
+            <div className="flex flex-col space-y-3">
+              <span className="font-semibold">デザインを学ぶ</span>
+              {learnLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="flex flex-col rounded-lg p-3 hover:bg-accent"
+                >
+                  <span className="font-medium">{item.title}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {item.description}
+                  </span>
+                </Link>
+              ))}
+            </div>
+            <div className="flex flex-col space-y-3">
+              <span className="font-semibold">デザインツール</span>
+              {toolLinks.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="flex flex-col rounded-lg p-3 hover:bg-accent"
+                >
+                  <span className="font-medium">{item.title}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {item.description}
+                  </span>
+                </Link>
+              ))}
+            </div>
             <Link
               to="/subscription"
               className="flex flex-col rounded-lg p-3 hover:bg-accent"
             >
               <span className="font-medium">プレミアム</span>
-              <span className="text-sm text-muted-foreground">
-                会員プランと特典
-              </span>
+              <span className="text-sm text-muted-foreground">会員プランと特典</span>
             </Link>
           </div>
         </div>
@@ -119,44 +146,23 @@ const Header = () => {
   const DesktopNavigation = () => (
     <NavigationMenu className="hidden md:flex">
       <NavigationMenuList>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>デザインを学ぶ</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              <ListItem href="/courses" title="コース">
-                体系的にUIUXデザインを学ぶコース
-              </ListItem>
-              <ListItem href="/content" title="コンテンツライブラリ">
-                動画や記事でスキルアップ
-              </ListItem>
-              <ListItem href="/roadmap" title="学習ロードマップ">
-                UIUXデザイナーへの近道
-              </ListItem>
-              <ListItem href="/tips" title="デザインのヒント">
-                実践で役立つテクニック
-              </ListItem>
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <NavigationMenuTrigger>デザインツール</NavigationMenuTrigger>
-          <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
-              <ListItem href="/figma" title="Figma">
-                UI/UXデザインの主要ツール
-              </ListItem>
-              <ListItem href="/sketch" title="Sketch">
-                macOS向けのデザインツール
-              </ListItem>
-              <ListItem href="/adobe-xd" title="Adobe XD">
-                Adobeのデザイン&プロトタイピングツール
-              </ListItem>
-              <ListItem href="/tools" title="その他のツール">
-                便利なデザインツール一覧
-              </ListItem>
-            </ul>
-          </NavigationMenuContent>
-        </NavigationMenuItem>
+        {[
+          { label: 'デザインを学ぶ', links: learnLinks },
+          { label: 'デザインツール', links: toolLinks }
+        ].map((group) => (
+          <NavigationMenuItem key={group.label}>
+            <NavigationMenuTrigger>{group.label}</NavigationMenuTrigger>
+            <NavigationMenuContent>
+              <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
+                {group.links.map((item) => (
+                  <ListItem key={item.href} href={item.href} title={item.title}>
+                    {item.description}
+                  </ListItem>
+                ))}
+              </ul>
+            </NavigationMenuContent>
+          </NavigationMenuItem>
+        ))}
         <NavigationMenuItem>
           <Link to="/subscription">
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
