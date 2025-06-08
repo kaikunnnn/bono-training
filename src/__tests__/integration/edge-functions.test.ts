@@ -20,7 +20,7 @@ describe('Edge Functions Integration', () => {
       ]
     };
 
-    const mockInvoke = supabase.functions.invoke as jest.Mock;
+    const mockInvoke = supabase.functions.invoke as unknown as jest.Mock;
     mockInvoke.mockResolvedValue({ data: mockData, error: null });
 
     const { data, error } = await supabase.functions.invoke('get-training-list', {
@@ -39,7 +39,7 @@ describe('Edge Functions Integration', () => {
       error: { code: 'NOT_FOUND', message: 'Training not found' }
     };
 
-    const mockInvoke = supabase.functions.invoke as jest.Mock;
+    const mockInvoke = supabase.functions.invoke as unknown as jest.Mock;
     mockInvoke.mockResolvedValue({ data: mockError, error: null });
 
     const { data } = await supabase.functions.invoke('get-training-detail', {
@@ -60,7 +60,7 @@ describe('Edge Functions Integration', () => {
       }
     };
 
-    const mockInvoke = supabase.functions.invoke as jest.Mock;
+    const mockInvoke = supabase.functions.invoke as unknown as jest.Mock;
     mockInvoke.mockResolvedValue({ data: mockData, error: null });
 
     const { data } = await supabase.functions.invoke('get-training-content', {

@@ -26,6 +26,20 @@ declare global {
     function fn(): Mock;
     function clearAllMocks(): void;
     function requireActual(moduleName: string): any;
+    function mock(moduleName: string, factory?: () => any): void;
+  }
+}
+
+// React型定義（Testing Library用）
+declare namespace React {
+  interface ReactElement<P = any> {
+    type: any;
+    props: P;
+    key: string | number | null;
+  }
+  
+  interface ReactNode {
+    // 最小限の定義
   }
 }
 
@@ -35,7 +49,7 @@ declare module '@testing-library/react' {
     getByText: (text: string | RegExp) => HTMLElement;
     queryByText: (text: string | RegExp) => HTMLElement | null;
   };
-  export function screen(): {
+  export const screen: {
     getByText: (text: string | RegExp) => HTMLElement;
     queryByText: (text: string | RegExp) => HTMLElement | null;
   };
