@@ -9,7 +9,6 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
-import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
@@ -27,6 +26,7 @@ import TrainingPlan from "./pages/Training/Plan";
 import TrainingAbout from "./pages/Training/About";
 import TrainingLogin from "./pages/Training/Login";
 import TrainingDebug from '@/pages/Training/Debug';
+import Home from "./pages/Home";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -57,7 +57,7 @@ const AppContent = () => {
   return (
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route path="/" element={<Home />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
