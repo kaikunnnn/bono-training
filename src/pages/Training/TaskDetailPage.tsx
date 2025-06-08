@@ -9,8 +9,8 @@ import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
 import LessonHeader from '@/components/training/LessonHeader';
 import MarkdownRenderer from '@/components/training/MarkdownRenderer';
-import { loadTaskContent, loadTrainingTasks } from '@/lib/markdown-loader';
-import { MarkdownFile, TaskFrontmatter } from '@/types/training';
+import { getTrainingTaskDetail } from '@/services/training';
+import { TaskDetailData, TaskFrontmatter } from '@/types/training';
 import TaskDetailError from './TaskDetailError';
 
 const TaskDetailPage = () => {
@@ -22,29 +22,19 @@ const TaskDetailPage = () => {
   
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [task, setTask] = useState<MarkdownFile | null>(null);
-  const [trainingTasks, setTrainingTasks] = useState<MarkdownFile[]>([]);
+  const [task, setTask] = useState<TaskDetailData | null>(null);
 
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
 
   // デバッグ: URL パラメータの詳細ログ
   console.log('=== TaskDetailPage Debug Start ===');
   console.log('URL params raw:', { trainingSlug, taskSlug });
-  console.log('URL params type check:', { 
-    trainingSlugType: typeof trainingSlug, 
-    taskSlugType: typeof taskSlug,
-    trainingSlugExists: !!trainingSlug,
-    taskSlugExists: !!taskSlug
-  });
-  console.log('Current location:', window.location.pathname);
   console.log('Premium access:', { isSubscribed, hasMemberAccess, hasPremiumAccess });
 
-  // パラメータが存在しない場合のエラーハンドリング - 改善版
+  // パラメータが存在しない場合のエラーハンドリング
   if (!trainingSlug || !taskSlug) {
     console.error('=== PARAMETER ERROR ===');
     console.error('Missing parameters:', { trainingSlug, taskSlug });
-    console.error('Expected format: /training/{trainingSlug}/{taskSlug}');
-    console.error('Current path:', window.location.pathname);
     
     return (
       <TrainingLayout>
@@ -55,29 +45,12 @@ const TaskDetailPage = () => {
               <p className="text-lg text-gray-700 mb-4">トレーニングまたはタスクが正しく指定されていません</p>
             </div>
             
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-6">
-              <div className="text-sm text-gray-600 mb-2">
-                <strong>Debug info:</strong>
-              </div>
-              <div className="font-mono text-xs space-y-1">
-                <div>trainingSlug: {trainingSlug || 'undefined'}</div>
-                <div>taskSlug: {taskSlug || 'undefined'}</div>
-                <div>Path: {window.location.pathname}</div>
-              </div>
-            </div>
-            
             <div className="space-y-3">
               <button 
                 onClick={() => navigate('/training')}
                 className="w-full px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
               >
                 トレーニング一覧に戻る
-              </button>
-              <button 
-                onClick={() => navigate('/training/debug')}
-                className="w-full px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors"
-              >
-                デバッグページで確認
               </button>
             </div>
           </div>
@@ -96,38 +69,16 @@ const TaskDetailPage = () => {
         console.log('=== Data Fetching Start ===');
         console.log('Fetching data for:', { trainingSlug, taskSlug });
 
-        // タスクコンテンツを取得
-        console.log('Calling loadTaskContent...');
-        const taskData = loadTaskContent(trainingSlug, taskSlug);
-        console.log('loadTaskContent result:', taskData);
+        // タスクコンテンツを取得（services/training の関数を使用）
+        const taskData = await getTrainingTaskDetail(trainingSlug, taskSlug);
+        console.log('getTrainingTaskDetail result:', taskData);
         
         if (!taskData) {
-          console.error('=== TASK NOT FOUND ===');
-          console.error(`Task not found: ${trainingSlug}/${taskSlug}`);
-          
-          // より詳細なエラー情報を提供
-          const allTasks = loadTrainingTasks(trainingSlug);
-          console.error('Available tasks in this training:', allTasks.map(t => t.slug));
-          
-          if (allTasks.length === 0) {
-            throw new Error(`トレーニング「${trainingSlug}」が見つかりませんでした`);
-          } else {
-            throw new Error(`タスク「${taskSlug}」が見つかりませんでした。利用可能なタスク: ${allTasks.map(t => t.slug).join(', ')}`);
-          }
+          throw new Error(`タスク「${taskSlug}」が見つかりませんでした`);
         }
         
         setTask(taskData);
-        console.log('Task data set successfully:', taskData.frontmatter);
-
-        // フォールバック用にトレーニングのタスク一覧も取得
-        console.log('Calling loadTrainingTasks...');
-        const allTasks = loadTrainingTasks(trainingSlug);
-        console.log('loadTrainingTasks result count:', allTasks.length);
-        console.log('Available task slugs:', allTasks.map(t => t.slug));
-        
-        setTrainingTasks(allTasks);
-
-        console.log('=== Data Fetching Success ===');
+        console.log('Task data set successfully:', taskData);
 
       } catch (err) {
         console.error('=== Data Fetching Error ===');
@@ -135,7 +86,6 @@ const TaskDetailPage = () => {
         const errorMessage = err instanceof Error ? err.message : '不明なエラーが発生しました';
         setError(errorMessage);
         
-        // より親切なエラートースト
         toast({
           title: 'コンテンツ読み込みエラー',
           description: errorMessage,
@@ -151,35 +101,7 @@ const TaskDetailPage = () => {
     fetchData();
   }, [trainingSlug, taskSlug, user, toast]);
 
-  // 前後のタスクを決定（フロントマター優先 + フォールバック）
-  const getPrevNextTasks = () => {
-    if (!task) return { prevSlug: null, nextSlug: null };
-    
-    const frontmatter = task.frontmatter as TaskFrontmatter;
-    
-    // フロントマターに指定があればそれを使用
-    let prevSlug = frontmatter.prev_task || null;
-    let nextSlug = frontmatter.next_task || null;
-    
-    // フォールバック: タスクリスト順の自動推論
-    if (!prevSlug || !nextSlug) {
-      const currentIndex = trainingTasks.findIndex(t => t.slug === taskSlug);
-      if (currentIndex >= 0) {
-        if (!prevSlug && currentIndex > 0) {
-          prevSlug = trainingTasks[currentIndex - 1].slug;
-        }
-        if (!nextSlug && currentIndex < trainingTasks.length - 1) {
-          nextSlug = trainingTasks[currentIndex + 1].slug;
-        }
-      }
-    }
-    
-    console.log('Navigation slugs:', { prevSlug, nextSlug, currentIndex: trainingTasks.findIndex(t => t.slug === taskSlug) });
-    
-    return { prevSlug, nextSlug };
-  };
-
-  // エラー表示 - 改善版
+  // エラー表示
   if (error) {
     return (
       <TrainingLayout>
@@ -188,12 +110,6 @@ const TaskDetailPage = () => {
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-red-600 mb-2">コンテンツエラー</h1>
               <p className="text-lg text-gray-700 mb-4">{error}</p>
-            </div>
-            
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <div className="text-sm text-red-700">
-                <strong>要求されたコンテンツ:</strong> {trainingSlug}/{taskSlug}
-              </div>
             </div>
             
             <div className="space-y-3">
@@ -209,12 +125,6 @@ const TaskDetailPage = () => {
               >
                 トレーニング一覧に戻る
               </button>
-              <button 
-                onClick={() => navigate('/training/debug')}
-                className="w-full px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
-              >
-                デバッグページで詳細確認
-              </button>
             </div>
           </div>
         </div>
@@ -222,7 +132,7 @@ const TaskDetailPage = () => {
     );
   }
 
-  // ローディング表示 - 改善版
+  // ローディング表示
   if (loading) {
     return (
       <TrainingLayout>
@@ -246,53 +156,27 @@ const TaskDetailPage = () => {
     return <TaskDetailError />;
   }
 
-  const frontmatter = task.frontmatter as TaskFrontmatter;
-  const { prevSlug, nextSlug } = getPrevNextTasks();
+  // TaskDetailData を TaskFrontmatter 型に変換
+  const frontmatter: TaskFrontmatter = {
+    title: task.title,
+    slug: task.slug,
+    order_index: task.order_index,
+    is_premium: task.is_premium || false,
+    video_preview: task.video_preview || undefined,
+    video_full: task.video_full || undefined,
+    preview_sec: task.preview_sec || undefined,
+    next_task: task.next_task || undefined,
+    prev_task: task.prev_task || undefined,
+  };
 
   // 動画URLがある場合のみ動画プレーヤーを表示
   const hasValidVideo = (frontmatter.video_preview && frontmatter.video_preview.trim()) || 
                         (frontmatter.video_full && frontmatter.video_full.trim());
 
-  // Step 3 統合テスト用のデバッグ情報
-  console.log('=== Step 3 Integration Test Info ===');
-  console.log('Content splitting test:', {
-    isPremium: frontmatter.is_premium,
-    hasPremiumAccess,
-    contentLength: task.content.length,
-    hasPremiumMarker: task.content.includes('<!-- PREMIUM_ONLY -->')
-  });
-  console.log('Video display test:', {
-    hasValidVideo,
-    videoPreview: frontmatter.video_preview,
-    videoFull: frontmatter.video_full,
-    shouldShowPreview: !hasPremiumAccess && frontmatter.is_premium
-  });
-
   return (
     <TrainingLayout>
       <div className="container max-w-4xl mx-auto py-8">
-        {/* Step 3 テスト用デバッグバナー */}
-        {process.env.NODE_ENV === 'development' && (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="text-yellow-800 font-medium mb-2">Step 3 統合テストモード</div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-              <div>
-                <strong>Premium:</strong> {frontmatter.is_premium ? 'Yes' : 'No'}
-              </div>
-              <div>
-                <strong>Access:</strong> {hasPremiumAccess ? 'Full' : 'Limited'}
-              </div>
-              <div>
-                <strong>Video:</strong> {hasValidVideo ? 'Available' : 'None'}
-              </div>
-              <div>
-                <strong>Marker:</strong> {task.content.includes('<!-- PREMIUM_ONLY -->') ? 'Found' : 'None'}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* LessonHeader - builder.ioデザインを再現 */}
+        {/* LessonHeader */}
         <div className="mb-10">
           <LessonHeader frontmatter={frontmatter} />
         </div>
@@ -312,7 +196,7 @@ const TaskDetailPage = () => {
           </div>
         )}
 
-        {/* Markdownコンテンツ表示（MarkdownRendererに戻してプレミアム制御を追加） */}
+        {/* Markdownコンテンツ表示 */}
         <MarkdownRenderer 
           content={task.content}
           isPremium={frontmatter.is_premium || false}
@@ -322,11 +206,11 @@ const TaskDetailPage = () => {
 
         {/* ナビゲーション */}
         <TaskNavigation 
-          training={{ title: `${trainingSlug} トレーニング` }}
+          training={{ title: task.trainingTitle }}
           currentTaskSlug={taskSlug}
           trainingSlug={trainingSlug}
-          nextTaskSlug={nextSlug}
-          prevTaskSlug={prevSlug}
+          nextTaskSlug={frontmatter.next_task}
+          prevTaskSlug={frontmatter.prev_task}
         />
       </div>
     </TrainingLayout>

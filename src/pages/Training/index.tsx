@@ -13,7 +13,7 @@ const TrainingHome = () => {
   useEffect(() => {
     const fetchTrainings = async () => {
       try {
-        const trainingData = getTrainings();
+        const trainingData = await getTrainings(); // await を追加
         setTrainings(trainingData);
       } catch (error) {
         console.error('トレーニング一覧の取得に失敗しました:', error);
