@@ -1,0 +1,37 @@
+
+name: Sync Training Content to Supabase Storage
+
+on:
+  push:
+    paths:
+      - 'content/training/**'
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  sync-content:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Sync training content to Supabase Storage
+        env:
+          SUPABASE_URL: https://fryogvfhymnpiqwssmuu.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/sync-training-content.js
+        
+      - name: Report sync status
+        run: echo "Training content sync completed successfully"
