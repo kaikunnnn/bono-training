@@ -4,6 +4,23 @@ import { SubscriptionService } from "./subscription-service/index.ts";
 import { CheckSubscriptionResponse } from "./types.ts";
 
 /**
+ * プランタイプに基づいてアクセス権限を計算
+ */
+function calculateAccessPermissions(planType: string | null, isActive: boolean): { hasMemberAccess: boolean; hasLearningAccess: boolean } {
+  if (!isActive || !planType) {
+    return { hasMemberAccess: false, hasLearningAccess: false };
+  }
+  
+  // メンバーアクセス: standard, growth, community
+  const hasMemberAccess = ['standard', 'growth', 'community'].includes(planType);
+  
+  // 学習アクセス: standard, growth のみ
+  const hasLearningAccess = ['standard', 'growth'].includes(planType);
+  
+  return { hasMemberAccess, hasLearningAccess };
+}
+
+/**
  * 未認証レスポンスを返す
  */
 export function createUnauthenticatedResponse(): Response {
@@ -53,8 +70,7 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
     const planType = dbSubscription.plan_type;
     
     // アクセス権限を計算
-    const hasMemberAccess = isSubscribed && ['standard', 'growth', 'community'].includes(planType);
-    const hasLearningAccess = isSubscribed && ['standard', 'growth'].includes(planType);
+    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(planType, isSubscribed);
     
     logDebug("データベースの購読情報を返却", { 
       isActive: isSubscribed,
@@ -98,13 +114,15 @@ export async function handleStripeSubscriptionCheck(
         "standard"
       );
       
+      const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions("standard", true);
+      
       return new Response(
         JSON.stringify({ 
           subscribed: true, 
           planType: "standard",
           isSubscribed: true,
-          hasMemberAccess: true,
-          hasLearningAccess: true,
+          hasMemberAccess,
+          hasLearningAccess,
           testMode: true
         }),
         {
@@ -117,8 +135,7 @@ export async function handleStripeSubscriptionCheck(
     const response = await processStripeSubscription(subscriptionService, userId, stripe);
     
     // アクセス権限を計算
-    const hasMemberAccess = response.subscribed && ['standard', 'growth', 'community'].includes(response.planType);
-    const hasLearningAccess = response.subscribed && ['standard', 'growth'].includes(response.planType);
+    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(response.planType, response.subscribed);
     
     return new Response(
       JSON.stringify({
@@ -142,13 +159,15 @@ export async function handleStripeSubscriptionCheck(
       "standard"
     );
     
+    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions("standard", true);
+    
     return new Response(
       JSON.stringify({ 
         subscribed: true,
         planType: "standard",
         isSubscribed: true,
-        hasMemberAccess: true,
-        hasLearningAccess: true,
+        hasMemberAccess,
+        hasLearningAccess,
         error: "Stripeとの同期に失敗しましたが、標準プランとして処理します"
       }),
       {

@@ -10,7 +10,7 @@ export interface SubscriptionState {
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
-  // 新しいアクセス権限フラグ
+  // アクセス権限フラグ
   hasMemberAccess: boolean;
   hasLearningAccess: boolean;
 }
@@ -48,18 +48,22 @@ export const useSubscription = (): SubscriptionState => {
       // レスポンスから値を安全に取得
       const subscribed = response.isSubscribed ?? response.subscribed ?? false;
       const plan = response.planType;
-      const memberAccessFromResponse = response.hasMemberAccess;
-      const learningAccessFromResponse = response.hasLearningAccess;
       
       setIsSubscribed(subscribed);
       setPlanType(plan);
       
-      // Edge Functionから直接アクセス権限が取得できる場合はそれを使用
-      if (memberAccessFromResponse !== undefined && learningAccessFromResponse !== undefined) {
-        setMemberAccess(memberAccessFromResponse);
-        setLearningAccess(learningAccessFromResponse);
+      // Edge Functionから直接アクセス権限が取得できる場合はそれを優先使用
+      if (response.hasMemberAccess !== undefined && response.hasLearningAccess !== undefined) {
+        console.log('Edge Functionから取得したアクセス権限を使用:', {
+          hasMemberAccess: response.hasMemberAccess,
+          hasLearningAccess: response.hasLearningAccess,
+          planType: plan
+        });
+        setMemberAccess(response.hasMemberAccess);
+        setLearningAccess(response.hasLearningAccess);
       } else {
-        // フォールバック: ローカルで計算
+        // フォールバック: ローカルで計算（Edge Functionの更新が完了していない場合）
+        console.log('フォールバック: ローカルでアクセス権限を計算:', { planType: plan, subscribed });
         const userPlan: UserPlanInfo = {
           planType: plan,
           isActive: subscribed,

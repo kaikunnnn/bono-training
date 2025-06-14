@@ -1,3 +1,4 @@
+
 export interface Training {
   id: string;
   slug: string;
@@ -47,6 +48,10 @@ export interface TaskDetailData {
   // 新しいフィールド: プレミアムコンテンツ切り替え情報
   isPremiumCut?: boolean;
   hasAccess?: boolean;
+  // Storage front-matterから取得するフィールドを追加
+  estimated_time?: string;
+  difficulty?: string;
+  description?: string;
 }
 
 export interface TrainingDetailData {
@@ -70,7 +75,9 @@ export interface TrainingDetailData {
 export interface TrainingContentResponse {
   meta: TaskFrontmatter;
   content: string;
+  isPremium: boolean;
   showPremiumBanner: boolean;
+  hasAccess: boolean;
 }
 
 /**
@@ -102,6 +109,7 @@ export interface TaskFrontmatter {
   preview_marker?: string;
   prev_task?: string;
   next_task?: string;
+  training_title?: string;
 }
 
 export interface MarkdownFile {

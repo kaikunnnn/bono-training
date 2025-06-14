@@ -20,7 +20,7 @@ const TrainingGuard: React.FC<TrainingGuardProps> = ({
   isPremium = false,
   fallbackComponent
 }) => {
-  const { isSubscribed, hasMemberAccess, loading } = useSubscriptionContext();
+  const { isSubscribed, hasMemberAccess, loading, error } = useSubscriptionContext();
   const navigate = useNavigate();
   
   // 無料コンテンツの場合は常にアクセス可能
@@ -33,8 +33,40 @@ const TrainingGuard: React.FC<TrainingGuardProps> = ({
     return (
       <div className="flex justify-center items-center p-12">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <span className="ml-2 text-gray-600">アクセス権限を確認中...</span>
       </div>
     );
+  }
+  
+  // エラーが発生した場合
+  if (error) {
+    console.error('TrainingGuard - アクセス権限確認エラー:', error);
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <h3 className="text-lg font-medium text-red-800 mb-2">アクセス権限の確認に失敗しました</h3>
+        <p className="text-red-700 mb-4">
+          一時的なエラーが発生しました。ページを再読み込みするか、しばらく時間をおいてからお試しください。
+        </p>
+        <button 
+          onClick={() => window.location.reload()} 
+          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          ページを再読み込み
+        </button>
+      </div>
+    );
+  }
+  
+  // デバッグ情報（開発環境でのみ表示）
+  if (process.env.NODE_ENV === 'development') {
+    console.log('TrainingGuard - アクセス制御状態:', {
+      isPremium,
+      isSubscribed,
+      hasMemberAccess,
+      hasAccess: isSubscribed && hasMemberAccess,
+      loading,
+      error
+    });
   }
   
   // メンバーシップを持つユーザーはアクセス可能
@@ -56,6 +88,11 @@ const TrainingGuard: React.FC<TrainingGuardProps> = ({
           このコンテンツの一部を無料で閲覧しています。
           すべてのコンテンツを閲覧するにはメンバーシップへの登録が必要です。
         </p>
+        {!isSubscribed && (
+          <p className="text-amber-600 text-sm mt-2">
+            💡 メンバーシップに登録すると、全ての学習コンテンツにアクセスできます。
+          </p>
+        )}
       </div>
       
       <PremiumContentBanner />

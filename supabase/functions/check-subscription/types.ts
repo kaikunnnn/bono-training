@@ -20,6 +20,9 @@ export interface StripeSubscriptionInfo {
 export interface CheckSubscriptionResponse {
   subscribed: boolean;
   planType: string | null;
+  isSubscribed: boolean;
+  hasMemberAccess: boolean;
+  hasLearningAccess: boolean;
   dbData?: any;
   testMode?: boolean;
   error?: string;

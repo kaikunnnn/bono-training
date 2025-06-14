@@ -74,60 +74,96 @@ async function getFileContent(supabase: any, filePath: string) {
       .download(filePath);
     
     if (error) {
-      console.error('[ERROR] File fetch failed:', error);
+      console.error('[ERROR] File fetch failed:', filePath, error);
       return null;
     }
     
     const text = await data.text();
     const duration = Date.now() - startTime;
-    console.log(`[PERFORMANCE] File fetch took ${duration}ms`);
+    console.log(`[PERFORMANCE] File fetch took ${duration}ms for ${filePath}`);
     
     return text;
   } catch (err) {
-    console.error('[ERROR] File read exception:', err);
+    console.error('[ERROR] File read exception:', filePath, err);
     return null;
   }
 }
 
 /**
- * フロントマターとコンテンツを分離（最適化版）
+ * フロントマターとコンテンツを分離（強化版）
  */
 function parseFrontmatter(content: string) {
-  const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/;
+  console.log(`[DEBUG] Parsing frontmatter for content length: ${content.length}`);
+  
+  // より柔軟な正規表現パターン（空行の有無に関係なく動作）
+  const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/;
   const match = content.match(frontmatterRegex);
   
   if (!match) {
+    console.log('[DEBUG] No frontmatter found');
     return { frontmatter: {}, content };
   }
   
   const frontmatterText = match[1];
   const mainContent = match[2];
   
-  // 簡易YAML解析（高速化）
-  const frontmatter: any = {};
-  const lines = frontmatterText.split('\n');
+  console.log(`[DEBUG] Found frontmatter block: ${frontmatterText.substring(0, 100)}...`);
   
-  for (const line of lines) {
+  // 強化されたYAML解析（高速化）
+  const frontmatter: any = {};
+  const lines = frontmatterText.split(/\r?\n/);
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line || line.startsWith('#')) continue; // 空行やコメントをスキップ
+    
     const colonIndex = line.indexOf(':');
     if (colonIndex <= 0) continue;
     
     const key = line.substring(0, colonIndex).trim();
-    let value = line.substring(colonIndex + 1).trim().replace(/^["']|["']$/g, '');
+    let rawValue = line.substring(colonIndex + 1).trim();
+    
+    // マルチライン値の処理（次の行がインデントされている場合）
+    while (i + 1 < lines.length && lines[i + 1].startsWith('  ')) {
+      i++;
+      rawValue += ' ' + lines[i].trim();
+    }
+    
+    let value = rawValue;
+    
+    // クォート除去（シングル・ダブル両対応）
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
     
     // 配列の処理
     if (value.startsWith('[') && value.endsWith(']')) {
-      value = value.slice(1, -1).split(',').map(v => v.trim().replace(/^["']|["']$/g, ''));
-    } else if (value === 'true') {
+      const arrayContent = value.slice(1, -1).trim();
+      if (arrayContent) {
+        value = arrayContent.split(',').map((item: string) => {
+          const trimmed = item.trim();
+          return trimmed.replace(/^["']|["']$/g, '');
+        });
+      } else {
+        value = [];
+      }
+    } 
+    // 真偽値の変換
+    else if (value === 'true') {
       value = true;
     } else if (value === 'false') {
       value = false;
-    } else if (!isNaN(Number(value)) && value !== '') {
+    } 
+    // 数値の変換（ゼロパディングを避ける）
+    else if (!isNaN(Number(value)) && value !== '' && !/^0[0-9]/.test(value)) {
       value = Number(value);
     }
     
     frontmatter[key] = value;
+    console.log(`[DEBUG] Parsed ${key}:`, value, `(type: ${typeof value})`);
   }
   
+  console.log(`[DEBUG] Final frontmatter keys:`, Object.keys(frontmatter));
   return { frontmatter, content: mainContent };
 }
 
@@ -184,40 +220,59 @@ serve(async (req) => {
     const tasks = [];
     
     if (taskFiles && !taskListError) {
-      // 並列でタスクファイルを処理
-      const taskPromises = taskFiles.map(async (taskFolder) => {
+      // より堅牢な並列でタスクファイルを処理（エラーハンドリング強化）
+      const taskPromises = taskFiles.map(async (taskFolder, index) => {
         if (taskFolder.name && !taskFolder.name.includes('.')) {
-          const taskContentPath = `${slug}/tasks/${taskFolder.name}/content.md`;
-          const taskContent = await getFileContent(supabaseAdmin, taskContentPath);
-          
-          if (taskContent) {
-            const { frontmatter: taskMeta } = parseFrontmatter(taskContent);
+          try {
+            const taskContentPath = `${slug}/tasks/${taskFolder.name}/content.md`;
+            const taskContent = await getFileContent(supabaseAdmin, taskContentPath);
             
-            return {
-              id: `${slug}-task-${taskMeta.order_index || tasks.length + 1}`,
-              slug: taskMeta.slug || taskFolder.name,
-              title: taskMeta.title || taskFolder.name,
-              is_premium: taskMeta.is_premium || false,
-              order_index: taskMeta.order_index || tasks.length + 1,
-              training_id: `${slug}-1`,
-              created_at: null,
-              video_full: taskMeta.video_full || null,
-              video_preview: taskMeta.video_preview || null,
-              preview_sec: taskMeta.preview_sec || 30,
-              next_task: taskMeta.next_task || null,
-              prev_task: taskMeta.prev_task || null
-            };
+            if (taskContent) {
+              const { frontmatter: taskMeta } = parseFrontmatter(taskContent);
+              
+              // デフォルト値をより堅牢に設定
+              const task = {
+                id: `${slug}-task-${taskMeta.order_index || index + 1}`,
+                slug: taskMeta.slug || taskFolder.name,
+                title: taskMeta.title || taskFolder.name, // フォルダ名をフォールバックに
+                is_premium: Boolean(taskMeta.is_premium), // 確実にboolean型に
+                order_index: typeof taskMeta.order_index === 'number' ? taskMeta.order_index : index + 1,
+                training_id: `${slug}-1`,
+                created_at: null,
+                video_full: taskMeta.video_full || null,
+                video_preview: taskMeta.video_preview || null,
+                preview_sec: typeof taskMeta.preview_sec === 'number' ? taskMeta.preview_sec : 30,
+                next_task: taskMeta.next_task || null,
+                prev_task: taskMeta.prev_task || null
+              };
+              
+              console.log(`[TASK_PARSED] Task: ${task.title} (order: ${task.order_index})`);
+              return task;
+            } else {
+              console.warn(`[WARNING] Task content not found: ${taskContentPath}`);
+              return null;
+            }
+          } catch (error) {
+            console.error(`[ERROR] Failed to process task folder: ${taskFolder.name}`, error);
+            return null;
           }
         }
         return null;
       });
 
       const taskResults = await Promise.all(taskPromises);
-      tasks.push(...taskResults.filter(task => task !== null));
+      const validTasks = taskResults.filter(task => task !== null);
+      tasks.push(...validTasks);
+      
+      console.log(`[TASK_COUNT] Processed ${validTasks.length} valid tasks out of ${taskFiles.length} folders`);
     }
 
-    // order_indexでソート
-    tasks.sort((a, b) => a.order_index - b.order_index);
+    // order_indexでソート（確実に数値としてソート）
+    tasks.sort((a, b) => {
+      const orderA = typeof a.order_index === 'number' ? a.order_index : 999;
+      const orderB = typeof b.order_index === 'number' ? b.order_index : 999;
+      return orderA - orderB;
+    });
 
     const trainingDetail = {
       id: `${slug}-1`,
@@ -226,16 +281,17 @@ serve(async (req) => {
       description: frontmatter.description || '',
       type: frontmatter.type || 'challenge',
       difficulty: frontmatter.difficulty || 'normal',
-      tags: frontmatter.tags || [],
+      tags: Array.isArray(frontmatter.tags) ? frontmatter.tags : [],
       tasks: tasks,
-      skills: frontmatter.skills || [],
-      prerequisites: frontmatter.prerequisites || [],
+      skills: Array.isArray(frontmatter.skills) ? frontmatter.skills : [],
+      prerequisites: Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [],
       has_premium_content: tasks.some(task => task.is_premium),
       thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100'
     };
 
     const duration = Date.now() - startTime;
     console.log(`[PERFORMANCE] Total request took ${duration}ms`);
+    console.log(`[SUCCESS] Training detail generated for ${slug} with ${tasks.length} tasks`);
     
     return createCachedResponse(trainingDetail);
     

@@ -5,17 +5,17 @@ import { TrainingError } from "@/utils/errors";
 import { handleEdgeFunctionError, validateEdgeFunctionResponse } from "./error-handlers";
 
 /**
- * タスク詳細を取得（Edge Functionを使用）
+ * タスク詳細を取得（Storage + Edge Functionベース）
  */
 export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string): Promise<TaskDetailData> => {
-  console.log(`Edge Functionからタスク詳細を取得: ${trainingSlug}/${taskSlug}`);
+  console.log(`Storage + Edge Functionからタスク詳細を取得: ${trainingSlug}/${taskSlug}`);
   
   try {
     if (!trainingSlug || !taskSlug) {
       throw new TrainingError('トレーニングスラッグとタスクスラッグが必要です', 'INVALID_REQUEST', 400);
     }
     
-    // Edge Functionを呼び出し
+    // 新しいEdge Functionを呼び出し
     const { data, error } = await supabase.functions.invoke('get-training-content', {
       body: {
         trainingSlug,
@@ -29,7 +29,36 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
       handleEdgeFunctionError(error, 'タスク詳細の取得に失敗しました');
     }
 
-    return validateEdgeFunctionResponse(data, 'タスク詳細') as TaskDetailData;
+    const responseData = validateEdgeFunctionResponse(data, 'タスク詳細');
+    
+    // レスポンス形式を TaskDetailData 型に合わせて変換
+    const taskDetail: TaskDetailData = {
+      id: `${trainingSlug}-${taskSlug}`,
+      slug: taskSlug,
+      title: responseData.meta.title || taskSlug,
+      content: responseData.content,
+      is_premium: responseData.isPremium,
+      order_index: responseData.meta.order_index || 1,
+      training_id: trainingSlug,
+      created_at: new Date().toISOString(),
+      video_full: responseData.meta.video_full || null,
+      video_preview: responseData.meta.video_preview || null,
+      preview_sec: responseData.meta.preview_sec || 30,
+      trainingTitle: responseData.meta.training_title || trainingSlug,
+      trainingSlug: trainingSlug,
+      next_task: responseData.meta.next_task || null,
+      prev_task: responseData.meta.prev_task || null,
+      isPremiumCut: responseData.showPremiumBanner,
+      hasAccess: responseData.hasAccess,
+      // Storage front-matterから取得した新しいフィールドを追加
+      estimated_time: responseData.meta.estimated_time || null,
+      difficulty: responseData.meta.difficulty || null,
+      description: responseData.meta.description || null
+    };
+
+    console.log('変換済みタスク詳細:', taskDetail);
+    
+    return taskDetail;
     
   } catch (err) {
     // カスタムエラーは再スロー

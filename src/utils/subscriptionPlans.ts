@@ -78,13 +78,28 @@ export interface UserPlanInfo {
  * @returns アクセス権限があればtrue
  */
 export function hasAccessToContent(userPlan: UserPlanInfo, contentType: ContentAccessType): boolean {
-  // アクティブなサブスクリプションがなければアクセス不可
-  if (!userPlan.isActive || !userPlan.planType) {
+  // null/undefined の安全なチェック
+  if (!userPlan || !userPlan.isActive || !userPlan.planType) {
     return false;
+  }
+
+  // 期限切れチェック（expiresAtが設定されている場合）
+  if (userPlan.expiresAt) {
+    const expirationDate = new Date(userPlan.expiresAt);
+    const now = new Date();
+    if (expirationDate < now) {
+      console.warn('プランが期限切れです:', { expiresAt: userPlan.expiresAt, planType: userPlan.planType });
+      return false;
+    }
   }
 
   // プランタイプに対応するコンテンツアクセス権限があるかチェック
   const allowedPlans = CONTENT_PERMISSIONS[contentType];
+  if (!allowedPlans || !Array.isArray(allowedPlans)) {
+    console.error('無効なコンテンツタイプです:', contentType);
+    return false;
+  }
+  
   return allowedPlans.includes(userPlan.planType);
 }
 
@@ -137,4 +152,14 @@ export function getPlanBenefits(planType: PlanType | null): string[] {
   }
   
   return benefits.length > 0 ? benefits : ['基本コンテンツへのアクセス'];
+}
+
+/**
+ * プランタイプの安全な検証
+ * @param planType 検証するプランタイプ
+ * @returns 有効なプランタイプかどうか
+ */
+export function isValidPlanType(planType: string | null | undefined): planType is PlanType {
+  if (!planType) return false;
+  return ['standard', 'growth', 'community'].includes(planType);
 }
