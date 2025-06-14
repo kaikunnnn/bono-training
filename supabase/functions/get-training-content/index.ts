@@ -8,7 +8,7 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 /**
- * Front-matterを解析
+ * Front-matterを解析（軽量版）
  */
 function parseFrontmatter(content: string): { data: Record<string, any>, content: string } {
   const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);

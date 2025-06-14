@@ -38,7 +38,7 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
       title: responseData.meta.title || taskSlug,
       content: responseData.content,
       is_premium: responseData.isPremium,
-      order_index: responseData.meta.order || 1,
+      order_index: responseData.meta.order_index || 1,
       training_id: trainingSlug,
       created_at: new Date().toISOString(),
       video_full: responseData.meta.video_full || null,
