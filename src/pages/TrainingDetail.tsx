@@ -70,14 +70,32 @@ const TrainingDetail = () => {
 
   return (
     <TrainingLayout>
-      <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <TrainingHeader />
+      <div className="px-6 py-8">
+        {/* トレーニング基本情報 */}
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-4">{training.title || 'タイトルなし'}</h1>
+          <p className="text-gray-600 mb-4">{training.description || ''}</p>
+          <div className="flex gap-2">
+            {(training.tags || []).map((tag) => (
+              <span 
+                key={tag}
+                className="px-2 py-1 bg-gray-100 rounded-full text-sm"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* 進捗バー */}
         <TrainingProgress 
           tasks={training.tasks || []}
           progressMap={{}}
           trainingSlug={trainingSlug}
-          className="my-8" 
+          className="mb-8" 
         />
+
+        {/* タスク一覧 */}
         <TaskList 
           tasks={training.tasks || []} 
           trainingSlug={trainingSlug}

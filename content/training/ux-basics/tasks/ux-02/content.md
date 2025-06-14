@@ -1,7 +1,7 @@
 ---
 title: "UXデザインとはの基本"
 description: "このレッスンでは、Todo アプリの基本的な画面設計を行います。"
-slug: "ui-layout-basic01"
+slug: "ux-02"
 order_index: 2
 is_premium: true
 difficulty: "easy"
