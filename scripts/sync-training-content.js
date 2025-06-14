@@ -7,20 +7,13 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Supabase設定
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Supabase設定（直接設定）
+const supabaseUrl = 'https://fryogvfhymnpiqwssmuu.supabase.co';
+const supabaseServiceKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZyeW9ndmZoeW1ucGlxd3NzbXV1Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTcyODEwNzYyMSwiZXhwIjoyMDQzNjgzNjIxfQ.Bb1juIfjbv9wElyJl2Q9c1dpXmG7ONXfHzyxoBKjykE';
 
-console.log('🔧 環境変数チェック:');
-console.log(`SUPABASE_URL: ${supabaseUrl ? '✅ 設定済み' : '❌ 未設定'}`);
-console.log(`SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? '✅ 設定済み' : '❌ 未設定'}`);
-
-if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('❌ 必要な環境変数が設定されていません:');
-  console.error('  - SUPABASE_URL');
-  console.error('  - SUPABASE_SERVICE_ROLE_KEY');
-  process.exit(1);
-}
+console.log('🔧 Supabase接続設定:');
+console.log(`URL: ${supabaseUrl}`);
+console.log(`Service Key: ${'✅ 設定済み'}`);
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
