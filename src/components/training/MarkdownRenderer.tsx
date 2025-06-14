@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -5,6 +6,7 @@ import rehypeHighlight from 'rehype-highlight';
 import LearningGoals from './LearningGoals';
 import SectionCard from './SectionCard';
 import PremiumBanner from './PremiumBanner';
+import { getDisplayContent } from '@/lib/content-splitter';
 
 interface MarkdownRendererProps {
   content: string;
@@ -19,63 +21,6 @@ interface SectionData {
 }
 
 /**
- * プレミアムコンテンツの分割処理
- */
-const getDisplayContent = (
-  content: string,
-  isPremium: boolean,
-  hasMemberAccess: boolean,
-  marker: string = '<!-- PREMIUM_ONLY -->'
-): { content: string; showBanner: boolean } => {
-  // デバッグログを強化
-  console.log('MarkdownRenderer - コンテンツ分割処理:', {
-    isPremium,
-    hasMemberAccess,
-    contentLength: content.length,
-    hasMarker: content.includes(marker),
-    markerPosition: content.indexOf(marker)
-  });
-
-  // 無料コンテンツまたは有料ユーザーの場合は全文表示
-  if (!isPremium || hasMemberAccess) {
-    console.log('MarkdownRenderer - 全文表示:', { reason: !isPremium ? 'free_content' : 'premium_user' });
-    return { content, showBanner: false };
-  }
-
-  // 有料コンテンツかつ無料ユーザーの場合
-  if (content.includes(marker)) {
-    const markerIndex = content.indexOf(marker);
-    const beforeMarker = content.substring(0, markerIndex);
-    
-    const lines = beforeMarker.split('\n');
-    const lastLine = lines[lines.length - 1]?.trim();
-    
-    console.log('MarkdownRenderer - プレミアムコンテンツ分割:', {
-      markerIndex,
-      beforeMarkerLength: beforeMarker.length,
-      lastLine,
-      willShowBanner: true
-    });
-    
-    if (lastLine && lastLine.startsWith('## ')) {
-      return { 
-        content: beforeMarker.trim(), 
-        showBanner: true 
-      };
-    } else {
-      return { 
-        content: beforeMarker.trim(), 
-        showBanner: true 
-      };
-    }
-  }
-
-  // マーカーがない有料コンテンツの場合もバナー表示
-  console.log('MarkdownRenderer - マーカーなし有料コンテンツ:', { showBanner: true });
-  return { content, showBanner: true };
-};
-
-/**
  * マークダウンをレンダリングし、特定のセクションをカスタムコンポーネントに置き換える
  */
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ 
@@ -84,6 +29,16 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   isPremium = false,
   hasMemberAccess = false
 }) => {
+  // 入力検証
+  if (!content || typeof content !== 'string') {
+    console.warn('MarkdownRenderer: 無効なコンテンツが渡されました');
+    return (
+      <div className={className}>
+        <p className="text-gray-500">コンテンツが利用できません。</p>
+      </div>
+    );
+  }
+
   // デバッグログを強化
   console.log('MarkdownRenderer - レンダリング開始:', {
     isPremium,
@@ -92,6 +47,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     shouldShowBanner: isPremium && !hasMemberAccess
   });
 
+  // コンテンツ分割処理（エラーハンドリング強化版）
   const { content: displayContent, showBanner } = getDisplayContent(
     content,
     isPremium,
@@ -103,50 +59,73 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     console.log('MarkdownRenderer - PremiumBanner表示:', { isPremium, hasMemberAccess });
   }
 
-  // 汎用的なセクション解析関数
+  // 汎用的なセクション解析関数（エラーハンドリング強化）
   const parseSection = (markdown: string, sectionTitle: string): SectionData | null => {
-    const escapedTitle = sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const sectionRegex = new RegExp(`## ${escapedTitle}\\s*\\n\\n?(.*?)(?=\\n##|\\n---|\\n\\n##|$)`, 's');
-    const match = markdown.match(sectionRegex);
-    
-    if (!match) return null;
-    
-    const sectionContent = match[1].trim();
-    const lines = sectionContent.split('\n').filter(line => line.trim());
-    
-    let description = '';
-    const items: string[] = [];
-    
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      if (trimmedLine.match(/^\d+\.\s/)) {
-        items.push(trimmedLine.replace(/^\d+\.\s/, ''));
-      } else if (trimmedLine.startsWith('- ')) {
-        items.push(trimmedLine.substring(2));
-      } else if (trimmedLine && !trimmedLine.startsWith('#')) {
-        description = trimmedLine;
+    try {
+      if (!markdown || !sectionTitle) return null;
+      
+      const escapedTitle = sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const sectionRegex = new RegExp(`## ${escapedTitle}\\s*\\n\\n?(.*?)(?=\\n##|\\n---|\\n\\n##|$)`, 's');
+      const match = markdown.match(sectionRegex);
+      
+      if (!match) return null;
+      
+      const sectionContent = match[1]?.trim();
+      if (!sectionContent) return null;
+      
+      const lines = sectionContent.split('\n').filter(line => line.trim());
+      
+      let description = '';
+      const items: string[] = [];
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim();
+        if (trimmedLine.match(/^\d+\.\s/)) {
+          items.push(trimmedLine.replace(/^\d+\.\s/, ''));
+        } else if (trimmedLine.startsWith('- ')) {
+          items.push(trimmedLine.substring(2));
+        } else if (trimmedLine && !trimmedLine.startsWith('#')) {
+          description = trimmedLine;
+        }
       }
+      
+      return { description: description || undefined, items };
+    } catch (error) {
+      console.error(`parseSection エラー (${sectionTitle}):`, error);
+      return null;
     }
-    
-    return { description: description || undefined, items };
   };
 
-  // 処理済みセクションをマークダウンから除去する関数
+  // 処理済みセクションをマークダウンから除去する関数（エラーハンドリング強化）
   const removeSections = (markdown: string, sectionTitles: string[]): string => {
-    let result = markdown;
-    sectionTitles.forEach(title => {
-      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`## ${escapedTitle}\\s*\\n\\n?(.*?)(?=\\n##|\\n---|\\n\\n##|$)`, 's');
-      result = result.replace(regex, '');
-    });
-    return result;
+    try {
+      let result = markdown;
+      sectionTitles.forEach(title => {
+        const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`## ${escapedTitle}\\s*\\n\\n?(.*?)(?=\\n##|\\n---|\\n\\n##|$)`, 's');
+        result = result.replace(regex, '');
+      });
+      return result;
+    } catch (error) {
+      console.error('removeSections エラー:', error);
+      return markdown; // エラー時は元のマークダウンを返す
+    }
   };
 
-  // 各セクションのデータを取得
-  const learningGoalsData = parseSection(displayContent, '学習のゴール');
-  const procedureData = parseSection(displayContent, '手順');
-  const completionImageData = parseSection(displayContent, '完成イメージ');
-  const premiumData = parseSection(displayContent, 'プレミアム限定：デザイン改善の実例');
+  // 各セクションのデータを取得（エラーハンドリング付き）
+  let learningGoalsData: SectionData | null = null;
+  let procedureData: SectionData | null = null;
+  let completionImageData: SectionData | null = null;
+  let premiumData: SectionData | null = null;
+
+  try {
+    learningGoalsData = parseSection(displayContent, '学習のゴール');
+    procedureData = parseSection(displayContent, '手順');
+    completionImageData = parseSection(displayContent, '完成イメージ');
+    premiumData = parseSection(displayContent, 'プレミアム限定：デザイン改善の実例');
+  } catch (error) {
+    console.error('セクション解析中にエラーが発生:', error);
+  }
 
   // 処理したセクションを除外したマークダウンを作成
   const processedSections = ['学習のゴール', '手順', '完成イメージ', 'プレミアム限定：デザイン改善の実例'];
