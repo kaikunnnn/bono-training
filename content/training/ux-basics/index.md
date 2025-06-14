@@ -1,6 +1,6 @@
 ---
 title: "UX Basics"
-description: "実践的な Todo アプリの UI デザインを学ぶぜよ"
+description: "UXはデザインの一部！当たり前！"
 type: "challenge"
 difficulty: "normal"
 tags: ["ui", "todo", "実践"]
