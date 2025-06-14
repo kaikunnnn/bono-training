@@ -77,7 +77,7 @@ const TaskDetailPage = () => {
     );
   }
 
-  // TaskDetailData を TaskFrontmatter 型に変換
+  // TaskDetailData を TaskFrontmatter 型に変換（Storage front-matterデータを含む）
   const frontmatter: TaskFrontmatter = {
     title: task.title,
     slug: task.slug,
@@ -88,6 +88,10 @@ const TaskDetailPage = () => {
     preview_sec: task.preview_sec || undefined,
     next_task: task.next_task || undefined,
     prev_task: task.prev_task || undefined,
+    // Storage front-matterから取得したフィールドを追加
+    estimated_time: task.estimated_time || undefined,
+    difficulty: task.difficulty || undefined,
+    description: task.description || undefined,
   };
 
   // 動画URLがある場合のみ動画プレーヤーを表示

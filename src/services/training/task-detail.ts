@@ -49,7 +49,11 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
       next_task: responseData.meta.next_task || null,
       prev_task: responseData.meta.prev_task || null,
       isPremiumCut: responseData.showPremiumBanner,
-      hasAccess: responseData.hasAccess
+      hasAccess: responseData.hasAccess,
+      // Storage front-matterから取得した新しいフィールドを追加
+      estimated_time: responseData.meta.estimated_time || null,
+      difficulty: responseData.meta.difficulty || null,
+      description: responseData.meta.description || null
     };
 
     console.log('変換済みタスク詳細:', taskDetail);
