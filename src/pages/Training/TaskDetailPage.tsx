@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,15 +28,25 @@ const TaskDetailPage = () => {
   const { data: task, isLoading, error } = useTaskDetail(trainingSlug, taskSlug);
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
 
-  // デバッグログを追加
+  // デバッグログを強化
   console.log('TaskDetailPage - アクセス権情報:', { 
     isSubscribed,
     hasMemberAccess,
     hasPremiumAccess,
     taskIsPremium: task?.is_premium,
     trainingSlug,
-    taskSlug
+    taskSlug,
+    userAuthenticated: !!user
   });
+
+  // フェーズ2: 有料コンテンツテスト用ログ追加
+  if (task?.is_premium) {
+    console.log('TaskDetailPage - 有料コンテンツ検出:', {
+      taskTitle: task.title,
+      userCanAccess: hasPremiumAccess,
+      needsUpgrade: !hasPremiumAccess
+    });
+  }
 
   if (isLoading) {
     return (
@@ -107,6 +116,15 @@ const TaskDetailPage = () => {
   // 動画URLがある場合のみ動画プレーヤーを表示
   const hasValidVideo = (frontmatter.video_preview && frontmatter.video_preview.trim()) || 
                         (frontmatter.video_full && frontmatter.video_full.trim());
+
+  // フェーズ2: 動画とコンテンツアクセスログ
+  console.log('TaskDetailPage - コンテンツアクセス詳細:', {
+    hasValidVideo,
+    videoFull: !!frontmatter.video_full,
+    videoPreview: !!frontmatter.video_preview,
+    contentLength: task.content?.length || 0,
+    renderMarkdown: true
+  });
 
   return (
     <TrainingLayout>

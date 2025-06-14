@@ -27,24 +27,35 @@ const getDisplayContent = (
   hasMemberAccess: boolean,
   marker: string = '<!-- PREMIUM_ONLY -->'
 ): { content: string; showBanner: boolean } => {
-  // デバッグログを追加
+  // デバッグログを強化
   console.log('MarkdownRenderer - コンテンツ分割処理:', {
     isPremium,
     hasMemberAccess,
     contentLength: content.length,
-    hasMarker: content.includes(marker)
+    hasMarker: content.includes(marker),
+    markerPosition: content.indexOf(marker)
   });
 
+  // 無料コンテンツまたは有料ユーザーの場合は全文表示
   if (!isPremium || hasMemberAccess) {
+    console.log('MarkdownRenderer - 全文表示:', { reason: !isPremium ? 'free_content' : 'premium_user' });
     return { content, showBanner: false };
   }
 
+  // 有料コンテンツかつ無料ユーザーの場合
   if (content.includes(marker)) {
     const markerIndex = content.indexOf(marker);
     const beforeMarker = content.substring(0, markerIndex);
     
     const lines = beforeMarker.split('\n');
     const lastLine = lines[lines.length - 1]?.trim();
+    
+    console.log('MarkdownRenderer - プレミアムコンテンツ分割:', {
+      markerIndex,
+      beforeMarkerLength: beforeMarker.length,
+      lastLine,
+      willShowBanner: true
+    });
     
     if (lastLine && lastLine.startsWith('## ')) {
       return { 
@@ -59,6 +70,8 @@ const getDisplayContent = (
     }
   }
 
+  // マーカーがない有料コンテンツの場合もバナー表示
+  console.log('MarkdownRenderer - マーカーなし有料コンテンツ:', { showBanner: true });
   return { content, showBanner: true };
 };
 
@@ -71,11 +84,12 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   isPremium = false,
   hasMemberAccess = false
 }) => {
-  // デバッグログを追加
+  // デバッグログを強化
   console.log('MarkdownRenderer - レンダリング開始:', {
     isPremium,
     hasMemberAccess,
-    contentLength: content.length
+    contentLength: content.length,
+    shouldShowBanner: isPremium && !hasMemberAccess
   });
 
   const { content: displayContent, showBanner } = getDisplayContent(
@@ -192,10 +206,12 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
         </ReactMarkdown>
       </article>
 
-      {/* プレミアムバナー */}
+      {/* プレミアムバナー - 強化されたロジック */}
       {showBanner && (
         <div className="mt-8">
           <PremiumBanner />
+          {/* デバッグ用ログ */}
+          {console.log('MarkdownRenderer - PremiumBanner表示:', { isPremium, hasMemberAccess })}
         </div>
       )}
     </div>
