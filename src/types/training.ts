@@ -1,3 +1,4 @@
+
 export interface Training {
   id: string;
   slug: string;
@@ -70,7 +71,9 @@ export interface TrainingDetailData {
 export interface TrainingContentResponse {
   meta: TaskFrontmatter;
   content: string;
+  isPremium: boolean;
   showPremiumBanner: boolean;
+  hasAccess: boolean;
 }
 
 /**
@@ -102,6 +105,7 @@ export interface TaskFrontmatter {
   preview_marker?: string;
   prev_task?: string;
   next_task?: string;
+  training_title?: string;
 }
 
 export interface MarkdownFile {

@@ -31,33 +31,24 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
 
     const responseData = validateEdgeFunctionResponse(data, 'タスク詳細');
     
-    // レスポンス形式を既存の型に合わせる
+    // レスポンス形式を TaskDetailData 型に合わせて変換
     const taskDetail: TaskDetailData = {
-      task: {
-        id: `${trainingSlug}-${taskSlug}`,
-        slug: taskSlug,
-        title: responseData.meta.title || taskSlug,
-        video_full: responseData.meta.video_full || null,
-        video_preview: responseData.meta.video_preview || null,
-        preview_sec: responseData.meta.preview_sec || 30,
-        is_premium: responseData.isPremium,
-        order_index: responseData.meta.order || 1,
-        training_id: trainingSlug,
-        created_at: new Date().toISOString()
-      },
-      training: {
-        id: trainingSlug,
-        slug: trainingSlug,
-        title: responseData.meta.training_title || trainingSlug,
-        description: responseData.meta.description || '',
-        type: responseData.meta.type || 'challenge',
-        difficulty: responseData.meta.difficulty || 'normal',
-        tags: responseData.meta.tags || [],
-        created_at: new Date().toISOString()
-      },
-      mdxContent: responseData.content,
-      isPremium: responseData.isPremium,
-      showPremiumBanner: responseData.showPremiumBanner,
+      id: `${trainingSlug}-${taskSlug}`,
+      slug: taskSlug,
+      title: responseData.meta.title || taskSlug,
+      content: responseData.content,
+      is_premium: responseData.isPremium,
+      order_index: responseData.meta.order || 1,
+      training_id: trainingSlug,
+      created_at: new Date().toISOString(),
+      video_full: responseData.meta.video_full || null,
+      video_preview: responseData.meta.video_preview || null,
+      preview_sec: responseData.meta.preview_sec || 30,
+      trainingTitle: responseData.meta.training_title || trainingSlug,
+      trainingSlug: trainingSlug,
+      next_task: responseData.meta.next_task || null,
+      prev_task: responseData.meta.prev_task || null,
+      isPremiumCut: responseData.showPremiumBanner,
       hasAccess: responseData.hasAccess
     };
 
