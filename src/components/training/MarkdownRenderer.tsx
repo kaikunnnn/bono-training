@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -28,6 +27,14 @@ const getDisplayContent = (
   hasMemberAccess: boolean,
   marker: string = '<!-- PREMIUM_ONLY -->'
 ): { content: string; showBanner: boolean } => {
+  // デバッグログを追加
+  console.log('MarkdownRenderer - コンテンツ分割処理:', {
+    isPremium,
+    hasMemberAccess,
+    contentLength: content.length,
+    hasMarker: content.includes(marker)
+  });
+
   if (!isPremium || hasMemberAccess) {
     return { content, showBanner: false };
   }
@@ -64,6 +71,13 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
   isPremium = false,
   hasMemberAccess = false
 }) => {
+  // デバッグログを追加
+  console.log('MarkdownRenderer - レンダリング開始:', {
+    isPremium,
+    hasMemberAccess,
+    contentLength: content.length
+  });
+
   const { content: displayContent, showBanner } = getDisplayContent(
     content,
     isPremium,

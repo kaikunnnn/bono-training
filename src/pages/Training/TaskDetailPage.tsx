@@ -29,6 +29,16 @@ const TaskDetailPage = () => {
   const { data: task, isLoading, error } = useTaskDetail(trainingSlug, taskSlug);
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
 
+  // デバッグログを追加
+  console.log('TaskDetailPage - アクセス権情報:', { 
+    isSubscribed,
+    hasMemberAccess,
+    hasPremiumAccess,
+    taskIsPremium: task?.is_premium,
+    trainingSlug,
+    taskSlug
+  });
+
   if (isLoading) {
     return (
       <TrainingLayout>
@@ -82,7 +92,7 @@ const TaskDetailPage = () => {
     title: task.title,
     slug: task.slug,
     order_index: task.order_index,
-    is_premium: task.is_premium || false,
+    is_premium: task.is_premium || false, // null安全性を確保
     video_preview: task.video_preview || undefined,
     video_full: task.video_full || undefined,
     preview_sec: task.preview_sec || undefined,
@@ -112,7 +122,7 @@ const TaskDetailPage = () => {
             <TaskVideo
               videoUrl={frontmatter.video_full}
               previewVideoUrl={frontmatter.video_preview}
-              isPremium={frontmatter.is_premium || false}
+              isPremium={frontmatter.is_premium}
               hasPremiumAccess={hasPremiumAccess}
               title={frontmatter.title}
               previewSeconds={frontmatter.preview_sec || 30}
@@ -121,10 +131,10 @@ const TaskDetailPage = () => {
           </div>
         )}
 
-        {/* Markdownコンテンツ表示 */}
+        {/* Markdownコンテンツ表示 - プロパティ名を統一 */}
         <MarkdownRenderer 
           content={task.content}
-          isPremium={frontmatter.is_premium || false}
+          isPremium={frontmatter.is_premium}
           hasMemberAccess={hasPremiumAccess}
           className="mb-8"
         />
