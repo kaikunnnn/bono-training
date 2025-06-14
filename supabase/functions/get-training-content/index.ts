@@ -8,13 +8,13 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 /**
- * 強化されたFront-matterを解析（より堅牢な正規表現とYAML解析）
+ * 強化されたFront-matterを解析（より柔軟な正規表現とYAML解析）
  */
 function parseFrontmatter(content: string): { data: Record<string, any>, content: string } {
   console.log('Parsing frontmatter for content length:', content.length);
   
-  // より堅牢な正規表現パターン（改行やスペースの違いに対応）
-  const fmMatch = content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n([\s\S]*)$/);
+  // より柔軟な正規表現パターン（空行の有無に関係なく動作）
+  const fmMatch = content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/);
   if (!fmMatch) {
     console.log('No frontmatter found in content');
     return { data: {}, content };

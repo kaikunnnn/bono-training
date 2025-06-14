@@ -95,8 +95,8 @@ async function getFileContent(supabase: any, filePath: string) {
 function parseFrontmatter(content: string) {
   console.log(`[DEBUG] Parsing frontmatter for content length: ${content.length}`);
   
-  // より堅牢な正規表現パターン（改行やスペースの違いに対応）
-  const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n([\s\S]*)$/;
+  // より柔軟な正規表現パターン（空行の有無に関係なく動作）
+  const frontmatterRegex = /^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n?([\s\S]*)$/;
   const match = content.match(frontmatterRegex);
   
   if (!match) {
