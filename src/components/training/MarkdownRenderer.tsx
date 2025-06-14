@@ -98,6 +98,11 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
     hasMemberAccess
   );
 
+  // プレミアムバナー表示時のログ（JSX外で実行）
+  if (showBanner) {
+    console.log('MarkdownRenderer - PremiumBanner表示:', { isPremium, hasMemberAccess });
+  }
+
   // 汎用的なセクション解析関数
   const parseSection = (markdown: string, sectionTitle: string): SectionData | null => {
     const escapedTitle = sectionTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -210,8 +215,6 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({
       {showBanner && (
         <div className="mt-8">
           <PremiumBanner />
-          {/* デバッグ用ログ */}
-          {console.log('MarkdownRenderer - PremiumBanner表示:', { isPremium, hasMemberAccess })}
         </div>
       )}
     </div>
