@@ -8,40 +8,80 @@ const supabaseUrl = Deno.env.get('SUPABASE_URL')!
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 
 /**
- * Front-matterを解析（軽量版）
+ * 強化されたFront-matterを解析（より堅牢な正規表現とYAML解析）
  */
 function parseFrontmatter(content: string): { data: Record<string, any>, content: string } {
-  const fmMatch = content.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
-  if (!fmMatch) return { data: {}, content };
+  console.log('Parsing frontmatter for content length:', content.length);
+  
+  // より堅牢な正規表現パターン（改行やスペースの違いに対応）
+  const fmMatch = content.match(/^---\s*\r?\n([\s\S]*?)\r?\n---\s*\r?\n([\s\S]*)$/);
+  if (!fmMatch) {
+    console.log('No frontmatter found in content');
+    return { data: {}, content };
+  }
 
   const [, fmBlock, body] = fmMatch;
+  console.log('Frontmatter block found:', fmBlock);
+  
   const data: Record<string, any> = {};
 
-  for (const line of fmBlock.split('\n')) {
-    const m = line.match(/^([^:]+):\s*(.+)$/);
-    if (!m) continue;
+  // 改行で分割してYAMLライクな解析
+  const lines = fmBlock.split(/\r?\n/);
+  
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line || line.startsWith('#')) continue; // 空行やコメントをスキップ
+    
+    const colonIndex = line.indexOf(':');
+    if (colonIndex <= 0) continue;
 
-    const key = m[1].trim();
-    let val: any = m[2].trim();
+    const key = line.substring(0, colonIndex).trim();
+    let rawValue = line.substring(colonIndex + 1).trim();
+    
+    console.log(`Processing key: ${key}, raw value: ${rawValue}`);
 
-    // クォートを取る
+    // マルチライン値の処理（次の行がインデントされている場合）
+    while (i + 1 < lines.length && lines[i + 1].startsWith('  ')) {
+      i++;
+      rawValue += ' ' + lines[i].trim();
+    }
+
+    let val: any = rawValue;
+
+    // クォートを取る（シングル・ダブル両対応）
     if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
       val = val.slice(1, -1);
     }
 
-    // 配列 [a, b] → ["a", "b"]
+    // 配列の処理 [item1, item2, item3]
     if (val.startsWith('[') && val.endsWith(']')) {
-      val = val.slice(1, -1).split(',').map((s: string) => s.trim().replace(/^["']|["']$/g, ''));
+      const arrayContent = val.slice(1, -1).trim();
+      if (arrayContent) {
+        val = arrayContent.split(',').map((item: string) => {
+          const trimmed = item.trim();
+          // 各要素のクォートも除去
+          return trimmed.replace(/^["']|["']$/g, '');
+        });
+      } else {
+        val = [];
+      }
+    }
+    // 真偽値の変換
+    else if (val === 'true') {
+      val = true;
+    } else if (val === 'false') {
+      val = false;
+    }
+    // 数値の変換（整数・小数点）
+    else if (!isNaN(Number(val)) && val !== '' && !/^0[0-9]/.test(val)) {
+      val = Number(val);
     }
 
-    // 数値 / 真偽値変換
-    if (val === 'true') val = true;
-    else if (val === 'false') val = false;
-    else if (!isNaN(Number(val))) val = Number(val);
-
     data[key] = val;
+    console.log(`Parsed ${key}:`, val, `(type: ${typeof val})`);
   }
 
+  console.log('Final parsed frontmatter data:', data);
   return { data, content: body };
 }
 
@@ -158,9 +198,11 @@ Deno.serve(async (req) => {
     }
 
     const content = await data.text();
+    console.log('Raw content length:', content.length, 'first 200 chars:', content.substring(0, 200));
+    
     const { data: frontmatter, content: body } = parseFrontmatter(content);
     
-    console.log('Parsed frontmatter:', frontmatter);
+    console.log('Parsed frontmatter keys:', Object.keys(frontmatter));
 
     // ユーザーのアクセス権を確認
     const authHeader = req.headers.get('Authorization');
@@ -197,7 +239,8 @@ Deno.serve(async (req) => {
       isPremiumContent, 
       hasPremiumAccess, 
       showPremiumBanner,
-      contentLength: displayContent.length 
+      contentLength: displayContent.length,
+      frontmatterKeys: Object.keys(frontmatter)
     });
 
     return new Response(
