@@ -9,6 +9,11 @@ on:
       - main
       - develop
   workflow_dispatch:
+    inputs:
+      force_sync:
+        description: 'Force sync all content'
+        required: false
+        default: 'false'
 
 jobs:
   sync-content:
@@ -25,13 +30,53 @@ jobs:
           cache: 'npm'
           
       - name: Install dependencies
-        run: npm ci
-        
+        run: |
+          npm ci
+          echo "✅ Dependencies installed"
+          
+      - name: Verify environment variables
+        env:
+          SUPABASE_URL: https://fryogvfhymnpiqwssmuu.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "🔧 Environment check:"
+          echo "SUPABASE_URL: ${SUPABASE_URL:+✅ Set}"
+          echo "SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY:+✅ Set}"
+          if [ -z "$SUPABASE_SERVICE_ROLE_KEY" ]; then
+            echo "❌ SUPABASE_SERVICE_ROLE_KEY is not set"
+            echo "Please add it to GitHub repository secrets"
+            exit 1
+          fi
+          
+      - name: Test Storage connection
+        env:
+          SUPABASE_URL: https://fryogvfhymnpiqwssmuu.supabase.co
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          echo "🧪 Testing Storage connection..."
+          node scripts/test-sync.js
+          
       - name: Sync training content to Supabase Storage
         env:
           SUPABASE_URL: https://fryogvfhymnpiqwssmuu.supabase.co
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-        run: node scripts/sync-training-content.js
-        
+        run: |
+          echo "🚀 Starting content sync..."
+          node scripts/sync-training-content.js
+          
       - name: Report sync status
-        run: echo "Training content sync completed successfully"
+        if: success()
+        run: |
+          echo "✅ Training content sync completed successfully"
+          echo "📊 Check the logs above for detailed sync information"
+          
+      - name: Report sync failure
+        if: failure()
+        run: |
+          echo "❌ Training content sync failed"
+          echo "🔍 Please check the logs above for error details"
+          echo "💡 Common issues:"
+          echo "   - SUPABASE_SERVICE_ROLE_KEY secret not set"
+          echo "   - Storage bucket not created"
+          echo "   - Permission issues"
+          exit 1

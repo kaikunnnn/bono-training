@@ -5,6 +5,14 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = 'https://fryogvfhymnpiqwssmuu.supabase.co';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+console.log('🔧 環境変数チェック:');
+console.log(`Service Key: ${supabaseServiceKey ? '✅ 設定済み' : '❌ 未設定'}`);
+
+if (!supabaseServiceKey) {
+  console.error('❌ SUPABASE_SERVICE_ROLE_KEY環境変数が設定されていません');
+  process.exit(1);
+}
+
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 /**
@@ -18,16 +26,18 @@ async function testStorage() {
     const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
     
     if (bucketError) {
-      console.error('バケット取得エラー:', bucketError);
+      console.error('❌ バケット取得エラー:', bucketError);
       return;
     }
     
-    console.log('利用可能なバケット:', buckets.map(b => b.name));
+    console.log('📦 利用可能なバケット:', buckets.map(b => b.name));
     
     // training-contentバケットの確認
     const trainingBucket = buckets.find(b => b.name === 'training-content');
     if (!trainingBucket) {
-      console.error('training-contentバケットが見つかりません');
+      console.error('❌ training-contentバケットが見つかりません');
+      console.log('💡 以下のSQLを実行してバケットを作成してください:');
+      console.log('INSERT INTO storage.buckets (id, name, public) VALUES (\'training-content\', \'training-content\', false);');
       return;
     }
     
@@ -37,11 +47,13 @@ async function testStorage() {
     const testContent = `---
 title: "テストファイル"
 is_premium: false
+difficulty: "easy"
 ---
 
 # テストコンテンツ
 
 これはStorage接続テスト用のファイルです。
+現在時刻: ${new Date().toISOString()}
 `;
     
     const { data, error } = await supabase.storage
@@ -57,7 +69,7 @@ is_premium: false
       });
     
     if (error) {
-      console.error('テストファイルアップロードエラー:', error);
+      console.error('❌ テストファイルアップロードエラー:', error);
       return;
     }
     
@@ -69,14 +81,30 @@ is_premium: false
       .list('test');
     
     if (listError) {
-      console.error('ファイル一覧取得エラー:', listError);
+      console.error('❌ ファイル一覧取得エラー:', listError);
       return;
     }
     
-    console.log('テストディレクトリのファイル:', files);
+    console.log('📁 テストディレクトリのファイル:', files);
+    
+    // ファイル取得テスト
+    const { data: downloadData, error: downloadError } = await supabase.storage
+      .from('training-content')
+      .download('test/test-file.md');
+    
+    if (downloadError) {
+      console.error('❌ ファイル取得エラー:', downloadError);
+      return;
+    }
+    
+    const downloadedContent = await downloadData.text();
+    console.log('📄 ダウンロードしたファイル内容（先頭100文字）:');
+    console.log(downloadedContent.substring(0, 100) + '...');
+    
+    console.log('\n🎉 すべてのテストが成功しました！');
     
   } catch (error) {
-    console.error('テスト実行エラー:', error);
+    console.error('❌ テスト実行エラー:', error);
   }
 }
 

@@ -11,8 +11,14 @@ const __dirname = path.dirname(__filename);
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
+console.log('🔧 環境変数チェック:');
+console.log(`SUPABASE_URL: ${supabaseUrl ? '✅ 設定済み' : '❌ 未設定'}`);
+console.log(`SUPABASE_SERVICE_ROLE_KEY: ${supabaseServiceKey ? '✅ 設定済み' : '❌ 未設定'}`);
+
 if (!supabaseUrl || !supabaseServiceKey) {
-  console.error('環境変数が設定されていません: SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY');
+  console.error('❌ 必要な環境変数が設定されていません:');
+  console.error('  - SUPABASE_URL');
+  console.error('  - SUPABASE_SERVICE_ROLE_KEY');
   process.exit(1);
 }
 
@@ -32,7 +38,7 @@ function parseFrontmatter(content) {
   const frontmatterContent = match[1];
   const body = content.replace(frontmatterRegex, '');
   
-  // 簡単なYAMLパースと
+  // 簡単なYAMLパース
   const metadata = {};
   const lines = frontmatterContent.split('\n');
   
@@ -64,9 +70,14 @@ function parseFrontmatter(content) {
  */
 async function syncFile(localPath, storagePath) {
   try {
-    console.log(`同期中: ${localPath} -> ${storagePath}`);
+    console.log(`📁 同期中: ${localPath} -> ${storagePath}`);
     
     // ファイル読み込み
+    if (!fs.existsSync(localPath)) {
+      console.error(`❌ ファイルが見つかりません: ${localPath}`);
+      return false;
+    }
+    
     const content = fs.readFileSync(localPath, 'utf8');
     const { metadata } = parseFrontmatter(content);
     
@@ -76,8 +87,11 @@ async function syncFile(localPath, storagePath) {
       difficulty: metadata.difficulty || 'normal',
       estimated_time: metadata.estimated_time || '',
       tags: JSON.stringify(metadata.tags || []),
+      title: metadata.title || '',
       last_updated: new Date().toISOString()
     };
+    
+    console.log(`📝 メタデータ: ${JSON.stringify(storageMetadata)}`);
     
     // Storageにアップロード
     const { data, error } = await supabase.storage
@@ -89,14 +103,14 @@ async function syncFile(localPath, storagePath) {
       });
     
     if (error) {
-      console.error(`エラー: ${storagePath}`, error);
+      console.error(`❌ アップロードエラー: ${storagePath}`, error);
       return false;
     }
     
     console.log(`✅ 同期完了: ${storagePath}`);
     return true;
   } catch (error) {
-    console.error(`ファイル処理エラー: ${localPath}`, error);
+    console.error(`❌ ファイル処理エラー: ${localPath}`, error);
     return false;
   }
 }
@@ -105,6 +119,13 @@ async function syncFile(localPath, storagePath) {
  * ディレクトリを再帰的にスキャンして同期
  */
 async function syncDirectory(localDir, storagePrefix = '') {
+  console.log(`📂 ディレクトリスキャン: ${localDir}`);
+  
+  if (!fs.existsSync(localDir)) {
+    console.error(`❌ ディレクトリが見つかりません: ${localDir}`);
+    return { successCount: 0, totalCount: 0 };
+  }
+  
   const items = fs.readdirSync(localDir);
   let successCount = 0;
   let totalCount = 0;
@@ -134,16 +155,57 @@ async function syncDirectory(localDir, storagePrefix = '') {
 }
 
 /**
+ * Storage接続テスト
+ */
+async function testStorageConnection() {
+  console.log('🧪 Storage接続テスト開始...');
+  
+  try {
+    // バケット一覧を取得
+    const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+    
+    if (bucketError) {
+      console.error('❌ バケット取得エラー:', bucketError);
+      return false;
+    }
+    
+    console.log('📦 利用可能なバケット:', buckets.map(b => b.name));
+    
+    // training-contentバケットの確認
+    const trainingBucket = buckets.find(b => b.name === 'training-content');
+    if (!trainingBucket) {
+      console.error('❌ training-contentバケットが見つかりません');
+      console.log('💡 マイグレーションを実行してバケットを作成してください');
+      return false;
+    }
+    
+    console.log('✅ training-contentバケットが見つかりました');
+    return true;
+  } catch (error) {
+    console.error('❌ Storage接続テストエラー:', error);
+    return false;
+  }
+}
+
+/**
  * メイン実行関数
  */
 async function main() {
   console.log('🚀 Training content 同期を開始します...');
-  console.log(`Supabase URL: ${supabaseUrl}`);
+  console.log(`📍 Supabase URL: ${supabaseUrl}`);
+  
+  // Storage接続テスト
+  const connectionOk = await testStorageConnection();
+  if (!connectionOk) {
+    console.error('❌ Storage接続に失敗しました');
+    process.exit(1);
+  }
   
   const contentDir = path.join(__dirname, '../content/training');
+  console.log(`📁 コンテンツディレクトリ: ${contentDir}`);
   
   if (!fs.existsSync(contentDir)) {
-    console.error(`コンテンツディレクトリが見つかりません: ${contentDir}`);
+    console.error(`❌ コンテンツディレクトリが見つかりません: ${contentDir}`);
     process.exit(1);
   }
   
@@ -153,15 +215,18 @@ async function main() {
     console.log('\n📊 同期結果:');
     console.log(`成功: ${result.successCount}/${result.totalCount} ファイル`);
     
-    if (result.successCount === result.totalCount) {
+    if (result.successCount === result.totalCount && result.totalCount > 0) {
       console.log('✅ すべてのファイルの同期が完了しました！');
       process.exit(0);
+    } else if (result.totalCount === 0) {
+      console.log('⚠️ 同期対象のMarkdownファイルが見つかりませんでした');
+      process.exit(1);
     } else {
       console.log('⚠️ 一部のファイルで同期に失敗しました');
       process.exit(1);
     }
   } catch (error) {
-    console.error('同期処理でエラーが発生しました:', error);
+    console.error('❌ 同期処理でエラーが発生しました:', error);
     process.exit(1);
   }
 }
