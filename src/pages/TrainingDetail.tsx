@@ -70,7 +70,6 @@ const TrainingDetail = () => {
 
   return (
     <TrainingLayout>
-      <TrainingHeader />
       <div className="px-6 py-8">
         {/* トレーニング基本情報 */}
         <div className="mb-8">
