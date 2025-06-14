@@ -1,0 +1,34 @@
+/* Training専用CSS変数 */
+:root {
+  /* Colors */
+  --training-primary: 29 56 47;           /* #1D382F */
+  --training-primary-foreground: 248 249 245; /* #F8F9F5 */
+  --training-secondary: 248 249 245;      /* #F8F9F5 */
+  --training-secondary-foreground: 29 56 47;
+  --training-background: 248 249 245;     /* #F8F9F5 */
+  --training-card: 255 255 255;          /* #FFFFFF */
+  --training-border: 229 231 235;        /* #E5E7EB */
+  --training-accent: 255 153 0;          /* #FF9900 */
+  
+  /* Typography */
+  --training-font-primary: 'Rounded Mplus 1c', sans-serif;
+  --training-font-secondary: 'Inter', sans-serif;
+  --training-font-mono: 'Futura', monospace;
+  
+  /* Spacing (8px grid) */
+  --training-space-1: 0.25rem;   /* 4px */
+  --training-space-2: 0.5rem;    /* 8px */
+  --training-space-3: 0.75rem;   /* 12px */
+  --training-space-4: 1rem;      /* 16px */
+  --training-space-6: 1.5rem;    /* 24px */
+  --training-space-8: 2rem;      /* 32px */
+  --training-space-12: 3rem;     /* 48px */
+  --training-space-16: 4rem;     /* 64px */
+  
+  /* Component Sizes */
+  --training-button-sm: 2rem;     /* 32px */
+  --training-button-md: 2.5rem;   /* 40px */
+  --training-button-lg: 3rem;     /* 48px */
+  --training-input-height: 2.75rem; /* 44px */
+  --training-border-radius: 0.5rem; /* 8px */
+}

@@ -68,6 +68,13 @@ const config = {
           'background': '#FFF9F4',
           'dark': '#0D221D',
           'text': '#1D382F',
+          'primary': 'hsl(var(--training-primary))',
+          'primary-foreground': 'hsl(var(--training-primary-foreground))',
+          'secondary': 'hsl(var(--training-secondary))',
+          'secondary-foreground': 'hsl(var(--training-secondary-foreground))',
+          'card': 'hsl(var(--training-card))',
+          'border': 'hsl(var(--training-border))',
+          'accent': 'hsl(var(--training-accent))',
         }
       },
       borderRadius: {
@@ -118,6 +125,19 @@ const config = {
         'noto-sans': ['Noto Sans', 'sans-serif'],
         'rounded-mplus': ['Rounded Mplus 1c', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],
+        'training-primary': ['var(--training-font-primary)'],
+        'training-secondary': ['var(--training-font-secondary)'],
+        'training-mono': ['var(--training-font-mono)'],
+      },
+      spacing: {
+        'training-1': 'var(--training-space-1)',
+        'training-2': 'var(--training-space-2)',
+        'training-3': 'var(--training-space-3)',
+        'training-4': 'var(--training-space-4)',
+        'training-6': 'var(--training-space-6)',
+        'training-8': 'var(--training-space-8)',
+        'training-12': 'var(--training-space-12)',
+        'training-16': 'var(--training-space-16)',
       }
     }
   },

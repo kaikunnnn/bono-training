@@ -2,6 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import TrainingHeader from "./TrainingHeader";
+import '@/styles/training.css';
 
 interface TrainingLayoutProps {
   children: React.ReactNode;

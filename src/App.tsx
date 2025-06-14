@@ -27,6 +27,7 @@ import TrainingPlan from "./pages/Training/Plan";
 import TrainingAbout from "./pages/Training/About";
 import TrainingLogin from "./pages/Training/Login";
 import TrainingDebug from '@/pages/Training/Debug';
+import TrainingUITest from '@/pages/Training/UITest';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -69,6 +70,7 @@ const AppContent = () => {
         <Route path="/training/plan" element={<TrainingPlan />} />
         <Route path="/training/about" element={<TrainingAbout />} />
         <Route path="/training/debug" element={<TrainingDebug />} />
+        <Route path="/training/ui-test" element={<TrainingUITest />} />
         
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
