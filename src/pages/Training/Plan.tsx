@@ -4,44 +4,53 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { createCheckoutSession } from '@/services/stripe';
-import { PlanType } from '@/utils/subscriptionPlans';
-import PlanCard from '@/components/subscription/PlanCard';
+import { Check } from 'lucide-react';
 
 const TrainingPlan: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { isSubscribed, planType, hasMemberAccess } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1);
   
   // コミュニティプラン情報
-  const communityPlan = {
-    id: 'community',
-    name: 'コミュニティプラン',
-    description: 'トレーニングの全コンテンツにアクセス可能',
-    price: '1,480円/月',
-    features: {
-      learning: true,
-      member: true,
-      training: false
+  const communityPlans = [
+    {
+      duration: 1,
+      price: '1,480円/月',
+      totalPrice: '1,480円',
+      description: '月額プラン',
+      savings: null
     },
-    recommended: true
-  };
+    {
+      duration: 3,
+      price: '1,280円/月',
+      totalPrice: '3,840円',
+      description: '3ヶ月プラン',
+      savings: '600円お得'
+    }
+  ];
   
-  const handleSubscribe = async (selectedPlanType: PlanType) => {
+  const currentPlan = communityPlans.find(p => p.duration === selectedDuration);
+  
+  const handleSubscribe = async () => {
     setIsLoading(true);
     try {
-      console.log(`プラン ${selectedPlanType} のチェックアウト開始`);
+      console.log(`コミュニティプラン ${selectedDuration}ヶ月のチェックアウト開始`);
       
       // チェックアウト後に戻るURLを指定
       const returnUrl = window.location.origin + '/profile';
       
       const { url, error } = await createCheckoutSession(
         returnUrl,
-        selectedPlanType
+        'community',
+        selectedDuration
       );
       
       if (error) {
@@ -75,22 +84,105 @@ const TrainingPlan: React.FC = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 gap-8 max-w-md mx-auto">
-          {/* コミュニティプランカード */}
-          <PlanCard 
-            id={communityPlan.id}
-            name={communityPlan.name}
-            description={communityPlan.description}
-            price={communityPlan.price}
-            features={communityPlan.features}
-            recommended={communityPlan.recommended}
-            isCurrentPlan={isSubscribed && planType === 'community' && hasMemberAccess}
-            onSubscribe={handleSubscribe}
-            isLoading={isLoading}
-          />
+        <div className="max-w-md mx-auto">
+          {/* プラン期間選択 */}
+          <Tabs 
+            value={selectedDuration.toString()} 
+            onValueChange={(value) => setSelectedDuration(parseInt(value) as 1 | 3)}
+            className="mb-8"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="1">1ヶ月</TabsTrigger>
+              <TabsTrigger value="3">3ヶ月</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="1" className="mt-6">
+              <Card className="relative">
+                <CardHeader className="text-center">
+                  <CardTitle>コミュニティプラン</CardTitle>
+                  <div className="mt-2 mb-2">
+                    <span className="text-3xl font-bold">1,480円</span>
+                    <span className="text-gray-500">/月</span>
+                  </div>
+                  <CardDescription>月額プラン</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-2" />
+                      <span>すべてのトレーニングコンテンツが見放題</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-2" />
+                      <span>実践的な課題とサンプルコード</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-2" />
+                      <span>プロジェクト例と解説</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    className="w-full"
+                    disabled={isLoading || (isSubscribed && planType === 'community' && hasMemberAccess)}
+                    onClick={handleSubscribe}
+                  >
+                    {isLoading ? '処理中...' : 
+                     (isSubscribed && planType === 'community' && hasMemberAccess) ? '現在のプラン' : 
+                     '選択する'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="3" className="mt-6">
+              <Card className="relative border-amber-200">
+                <div className="absolute -top-3 left-0 right-0 flex justify-center">
+                  <Badge className="bg-amber-500 text-white px-3 py-1">600円お得</Badge>
+                </div>
+                <CardHeader className="text-center pt-8">
+                  <CardTitle>コミュニティプラン</CardTitle>
+                  <div className="mt-2 mb-2">
+                    <span className="text-3xl font-bold">1,280円</span>
+                    <span className="text-gray-500">/月</span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    3ヶ月分: 3,840円
+                  </div>
+                  <CardDescription>3ヶ月プラン（600円お得）</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 mb-6">
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-2" />
+                      <span>すべてのトレーニングコンテンツが見放題</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-2" />
+                      <span>実践的な課題とサンプルコード</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Check className="h-5 w-5 text-green-500 mr-2" />
+                      <span>プロジェクト例と解説</span>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    className="w-full bg-amber-500 hover:bg-amber-600"
+                    disabled={isLoading || (isSubscribed && planType === 'community' && hasMemberAccess)}
+                    onClick={handleSubscribe}
+                  >
+                    {isLoading ? '処理中...' : 
+                     (isSubscribed && planType === 'community' && hasMemberAccess) ? '現在のプラン' : 
+                     '選択する'}
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
         </div>
         
-        <div className="mt-12 bg-gray-50 border border-gray-100 rounded-lg p-6">
+        <div className="mt-12 bg-gray-50 border border-gray-100 rounded-lg p-6 max-w-md mx-auto">
           <h3 className="text-lg font-medium mb-3">メンバーシッププランの特典</h3>
           <ul className="space-y-2">
             <li className="flex items-center">
