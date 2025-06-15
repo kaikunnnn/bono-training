@@ -1,220 +1,713 @@
+# /training 実装ガイド - 開発者向け詳細仕様
 
-# 統合開発計画 - Training コンテンツ管理・表示システム
+## 📋 **実装概要**
 
-**（統合 Phase 3 & Phase 4 - Supabase Storage 一元化版）**
+### 🎯 **目標**
+`/training` 以下のページを段階的に実装し、Communityプラン（1,480円/月）の課金導線を完成させる
 
-## ✅ 実装完了 - 全システム稼働中
-
----
-
-## 📑 統合プラン概要
-
-**キー方針**
-1. **ローカル Markdown 執筆は従来どおり** - 開発体験を維持 ✅
-2. **git push すると GitHub Actions がバケットへ自動同期** - ヒューマンエラー防止 ✅
-3. **フロント／Edge Function は常に Storage だけを見る** - 分岐ゼロ、テスト・本番で経路が変わらない ✅
-
-**変更背景（旧案 → 新案）**
-
-| 旧案 | 新案（採用） | 理由 | 状況 |
-|------|-------------|------|------|
-| 無料: ローカル読込<br>有料: Storage | 無料も有料も Storage | コード分岐をなくしバグ要因を削減。CI が「同期 → ビルド」で一貫。 | ✅ 完了 |
-| 手動アップロード or 部分同期 | GitHub Actions で全 Markdown をワンクリック同期 | 執筆フローは git push だけ。ヒューマンエラー防止。 | ✅ 完了 |
-| Edge Function が複雑（分岐＋正規化） | 単一 API・単一パスですべて取得 | テスト・監視・キャッシュ戦略をシンプルに。 | ✅ 完了 |
-
----
-
-## ✅ Phase 3 – プラン判定ロジック完成（完了）
-
-### ゴール ✅
-- ✅ free/standard/growth/community の各プランを正しく判定
-- ✅ 「hasMemberAccess」「hasLearningAccess」などのメソッド名で必要な Boolean フラグを返す
-- ✅ Guard コンポーネントが「Member 権限」ベースで正しく制御できる
-
-### 実装タスク ✅
-
-| #   | 作業 | 主要ファイル | 完了状況 |
-|-----|------|-------------|----------|
-| 3-1 | subscriptionPlans.ts 仕上げ<br>`learning: ['standard','growth']`<br>`member: ['standard','growth','community']` | `src/utils/subscriptionPlans.ts` | ✅ 完了 |
-| 3-2 | useSubscription.ts リファクタ<br>返却値：`hasMemberAccess` / `hasLearningAccess` | `src/hooks/useSubscription.ts` | ✅ 完了 |
-| 3-3 | Guard 置換<br>`planMembers` → `hasMemberAccess` | `TrainingGuard.tsx` など | ✅ 完了 |
-| 3-4 | Edge Function check-subscription ミニマム化<br>`{ subscribed, planType }` のみ返す | `supabase/functions/check-subscription/...` | ✅ 完了 |
-
-### テストゲート（Phase 3 完了チェック） ✅
-
-1. **✅ プラン定義の検証**
-   - ✅ `?plan=free` → hasMemberAccess: false
-   - ✅ `?plan=standard` → hasMemberAccess: true  
-   - ✅ `?plan=growth` → hasMemberAccess: true
-   - ✅ `?plan=community` → hasMemberAccess: true
-
-2. **✅ 権限判定フックの動作確認**
-   - ✅ `useSubscriptionContext()` で正しい Boolean 値が返る
-
-3. **✅ Guard コンポーネントの動作確認**
-   - ✅ 無料ユーザーが有料コンテンツにアクセス → 適切にブロック
-   - ✅ 有料ユーザーが有料コンテンツにアクセス → 正常表示
-
-4. **✅ 全体ビルド確認**
-   - ✅ `pnpm typecheck && pnpm test && pnpm build` 成功
-
----
-
-## ✅ Phase 4 – コンテンツ同期 & PREMIUM 出し分け（完了）
-
-### ゴール ✅
-- ✅ すべての Markdown（無料・有料）を Supabase Storage に同期
-- ✅ `<!-- PREMIUM_ONLY -->` マーカーでコンテンツを出し分け
-- ✅ 無料ユーザーと有料ユーザーで適切な表示制御
-
-### フェーズ別実装状況
-
-| フェーズ | 目的 | 実装状況 |
-|---------|------|----------|
-| 4-1 | Storage 自動同期セットアップ | ✅ 完了 |
-| 4-2 | get-training-content Edge Function | ✅ 完了 |
-| 4-3 | サービス層 & 型統一 | ✅ 完了 |
-| 4-4 | MdxPreview + TaskHeader 出し分け | ✅ 完了 |
-| 4-5 | クリーンアップ & 総合テスト | ✅ 完了 |
-
----
-
-### ✅ Phase 4-1: Storage 自動同期セットアップ（完了）
-
-#### ✅ 1. バケット作成
-- ✅ プライベートバケット `training-content` 作成済み
-
-#### ✅ 2. RLS ポリシー設定
-- ✅ 匿名ユーザーの無料ファイル読み込み権限設定済み
-- ✅ 認証ユーザーの全ファイル読み込み権限設定済み
-
-#### ✅ 3. GitHub Actions 設定
-- ✅ `.github/workflows/sync-training-content.yml` 設定済み
-- ✅ content/training/ の変更時に自動同期実行
-
----
-
-### ✅ Phase 4-2: Edge Function 実装（完了）
-
-#### ✅ get-training-content Edge Function
-- ✅ `supabase/functions/get-training-content/index.ts` 実装完了
-- ✅ Storage からファイル取得
-- ✅ Front-matter パース（強化版）
-- ✅ アクセス権判定（JWT + サブスクリプション確認）
-- ✅ コンテンツ分割（`<!-- PREMIUM_ONLY -->` マーカー対応）
-- ✅ エラーハンドリング強化
-
----
-
-### ✅ Phase 4-3: フロントエンド統合（完了）
-
-#### ✅ サービス層統一
-- ✅ `src/services/training/task-detail.ts` 実装完了
-- ✅ `src/services/training/error-handlers.ts` エラーハンドリング強化
-
-#### ✅ 型定義統一
-- ✅ `src/types/training.ts` で統一された型定義
-
-#### ✅ 後方互換性維持
-- ✅ 既存機能を破綻させることなく新システムに移行完了
-
----
-
-### ✅ Phase 4-4: 表示コンポーネント調整（完了）
-
-#### ✅ MarkdownRenderer 更新
-- ✅ `src/components/training/MarkdownRenderer.tsx` 強化完了
-- ✅ プレミアムコンテンツ分割処理実装
-- ✅ `PremiumBanner` 表示制御
-
-#### ✅ コンテンツ分割ライブラリ
-- ✅ `src/lib/content-splitter.ts` 実装完了
-- ✅ 安全なコンテンツ分割処理とエラーハンドリング
-
----
-
-### ✅ Phase 4-5: クリーンアップ & 総合テスト（完了）
-
-#### ✅ 1. GitHub Actions 同期テスト
-- ✅ 新しい Markdown ファイル追加テスト完了
-- ✅ バケット同期動作確認済み
-
-#### ✅ 2. ブラウザテスト（プラン別）
-- ✅ **free**: バナー表示＆preview 動画表示確認
-- ✅ **community**: 全文表示、preview 動画表示確認  
-- ✅ **standard/growth**: 全文表示、full 動画表示確認
-
-#### ✅ 3. ビルドテスト
-- ✅ `pnpm typecheck && pnpm build && pnpm preview` エラー0件確認
-
-#### ✅ 4. 不要コード削除
-- ✅ ローカルファイル読み込み関数の整理完了
-- ✅ 分岐処理のクリーンアップ完了
-- ✅ 未使用import整理完了
-
----
-
-## 🎯 最終成果物（実装完了）
-
-### ✅ 1. ファイル構造
+### 📊 **3段階の実装計画**
 ```
-content/training/           # ローカル執筆環境（従来通り）
-├── todo-app/
-│   ├── index.md           # Training 概要
-│   └── tasks/
-│       ├── introduction/
-│       │   └── content.md  # 無料タスク ✅
-│       └── ui-layout-basic01/
-│           └── content.md  # 有料タスク（<!-- PREMIUM_ONLY -->マーカー付き） ✅
-
-# GitHub Actions で自動同期済み ✅
-
-Supabase Storage training-content/ # 本番配信環境 ✅
-├── training/
-│   └── todo-app/          # 同じ構造で同期済み ✅
+Phase 1 (最優先): Community課金完成 → 即リリース可能
+Phase 2 (次優先): /training コンテンツ基盤 → 公開準備完了
+Phase 3 (将来): 全プラン対応 → 必要に応じて拡張
 ```
 
-### ✅ 2. データフロー（稼働中）
-```
-ローカル執筆 → git push → GitHub Actions → Supabase Storage ✅
-                                              ↓
-ユーザーアクセス → Edge Function → 権限チェック → コンテンツ分割 → フロントエンド表示 ✅
+---
+
+## 🚀 **Phase 1: Community課金完成**
+**期間**: 0.5日 | **優先度**: 最高 | **リリース**: 即座に可能
+
+### 1.1 環境変数設定
+**場所**: Supabase Dashboard → Settings → Edge Functions → Environment Variables
+
+```env
+# 追加する環境変数
+STRIPE_TEST_COMMUNITY_PRICE_ID=price_1RI4ClKUVUnt8GtygLpincko
+STRIPE_COMMUNITY_PRICE_ID=[本番で新規作成するPrice ID]
+
+# 削除する環境変数  
+❌ STRIPE_PRICE_ID
+❌ STRIPE_TEST_PRICE_ID
 ```
 
-### ✅ 3. セキュリティ（実装済み）
-- ✅ **Storage**: プライベートバケット + RLS
-- ✅ **Edge Function**: JWT 検証 + サブスクリプション確認
-- ✅ **フロント**: クライアント側バリデーション
+### 1.2 Stripe Dashboard作業
+**本番Price ID作成**:
+1. [Stripe Dashboard](https://dashboard.stripe.com) にログイン
+2. 「本番データを表示」に切り替え
+3. 新商品作成:
+   ```
+   商品名: Training Community Plan
+   説明: BONOトレーニングの全コンテンツアクセス
+   価格: ¥1,480
+   請求期間: 毎月
+   ```
+4. 作成されたPrice IDをSupabaseに設定
+
+### 1.3 確認テスト
+- [ ] `/training/plan` でCommunityプラン表示
+- [ ] 決済ボタンクリック → Stripe Checkout遷移
+- [ ] テスト決済完了 → member権限付与確認
+- [ ] Training コンテンツへのアクセス確認
 
 ---
 
-## 🚀 運用フロー（稼働中）
+## 🛠 **Phase 2: /training コンテンツ基盤整備**
+**期間**: 2日 | **優先度**: 高 | **目標**: コンテンツ公開準備完了
 
-### ✅ 日常運用
-1. **✅ 新コンテンツ作成**: ローカルで Markdown 執筆
-2. **✅ デプロイ**: `git push` のみ（Actions が自動同期）
-3. **✅ 確認**: ブラウザでプレビュー、権限テスト自動実行
-4. **✅ 公開**: 自動的に本番反映
+### 2.1 ページ構成
+```
+/training/
+├── index.tsx          # ホーム・カタログページ
+├── [slug]/
+│   ├── index.tsx      # トレーニング詳細ページ  
+│   └── [task].tsx     # タスク詳細ページ
+└── plan/
+    └── index.tsx      # 課金ページ ✅ 完成済み
+```
 
-### ✅ 運用ルール
-- ✅ **無料コンテンツ**: `is_premium: false` に `<!-- PREMIUM_ONLY -->` マーカーは使用しない
-- ✅ **有料コンテンツ**: `is_premium: true` で適切にマーカーを配置
-- ✅ **プラン権限**: members権限（standard/growth/community）でアクセス制御
+### 2.2 データ構造
+```typescript
+// トレーニング情報
+interface Training {
+  slug: string;
+  title: string;
+  description: string;
+  type: 'challenge' | 'skill';
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  isPremium: boolean;
+  tasks: Task[];
+  tags: string[];
+}
+
+// タスク情報  
+interface Task {
+  slug: string;
+  title: string;
+  description: string;
+  isPremium: boolean;
+  content: string; // Markdown content
+  videoUrl?: string;
+  estimatedTime: number;
+  order: number;
+}
+```
+
+### 2.3 Supabase Storage セットアップ
+
+#### A. バケット作成（SQL実行）
+```sql
+-- プライベートバケット作成
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('training-content', 'training-content', false);
+```
+
+#### B. RLS ポリシー設定（SQL実行）
+```sql
+-- 無料コンテンツは匿名でも閲覧可能
+CREATE POLICY "anon_read_free_content"
+  ON storage.objects FOR SELECT  
+  TO anon
+  USING (
+    bucket_id = 'training-content' 
+    AND metadata->>'is_free' = 'true'
+  );
+
+-- 認証ユーザーは全コンテンツ閲覧可能
+CREATE POLICY "authenticated_read_all"
+  ON storage.objects FOR SELECT
+  TO authenticated  
+  USING (bucket_id = 'training-content');
+```
+
+### 2.4 Edge Function実装
+
+#### A. get-training-content Function
+**ファイル**: `supabase/functions/get-training-content/index.ts`
+
+```typescript
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
+
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const { slug, task } = await req.json();
+    
+    // Supabase client初期化
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+    
+    // JWT トークンから ユーザー情報取得
+    const authHeader = req.headers.get("authorization");
+    const { data: { user } } = await supabase.auth.getUser(
+      authHeader?.replace("Bearer ", "") ?? ""
+    );
+    
+    // ファイルパス決定
+    const path = task 
+      ? `training/${slug}/tasks/${task}.md`
+      : `training/${slug}/index.md`;
+    
+    // Storage からファイル取得
+    const { data, error } = await supabase.storage
+      .from('training-content')
+      .download(path);
+      
+    if (error) {
+      return new Response(JSON.stringify({ error: "Content not found" }), {
+        status: 404,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    
+    const content = await data.text();
+    const { frontMatter, body } = parseFrontMatter(content);
+    
+    // アクセス権限チェック
+    const hasAccess = frontMatter.isPremium 
+      ? user?.app_metadata?.subscription?.hasMemberAccess 
+      : true;
+    
+    // コンテンツ出し分け
+    const displayContent = hasAccess 
+      ? body
+      : body.split('<!-- PREMIUM_ONLY -->')[0];
+    
+    return new Response(JSON.stringify({
+      frontMatter,
+      content: displayContent,
+      hasAccess,
+      showPremiumBanner: frontMatter.isPremium && !hasAccess
+    }), {
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
+
+// Front Matter パース関数
+function parseFrontMatter(content: string) {
+  const match = content.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (!match) return { frontMatter: {}, body: content };
+  
+  const [, frontMatterStr, body] = match;
+  const frontMatter = Object.fromEntries(
+    frontMatterStr.split('\n')
+      .filter(line => line.includes(':'))
+      .map(line => {
+        const [key, ...valueParts] = line.split(':');
+        return [key.trim(), valueParts.join(':').trim()];
+      })
+  );
+  
+  return { frontMatter, body };
+}
+```
+
+### 2.5 フロントエンド実装
+
+#### A. Training ホームページ
+**ファイル**: `src/pages/Training/index.tsx`
+
+```tsx
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import TrainingLayout from '@/components/training/TrainingLayout';
+import TrainingHeader from '@/components/training/TrainingHeader';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+
+interface Training {
+  slug: string;
+  title: string;
+  description: string;
+  type: 'challenge' | 'skill';
+  difficulty: string;
+  isPremium: boolean;
+  taskCount: number;
+  estimatedTime: string;
+  tags: string[];
+}
+
+const TrainingHome: React.FC = () => {
+  const [trainings, setTrainings] = useState<Training[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { hasMemberAccess } = useSubscriptionContext();
+
+  useEffect(() => {
+    // TODO: Training一覧を取得するAPI実装
+    fetchTrainings();
+  }, []);
+
+  const fetchTrainings = async () => {
+    try {
+      // 暫定的なモックデータ
+      setTrainings([
+        {
+          slug: 'ui-todo',
+          title: 'Todo アプリのUI設計',
+          description: 'シンプルなTodoアプリのUIを設計し、Figmaでプロトタイプを作成',
+          type: 'challenge',
+          difficulty: 'beginner',
+          isPremium: true,
+          taskCount: 5,
+          estimatedTime: '2-3時間',
+          tags: ['UI', 'Figma', 'プロトタイプ']
+        },
+        {
+          slug: 'design-system-basics',
+          title: 'デザインシステムの基礎',
+          description: 'コンポーネント設計とスタイルガイドの作成方法を学ぶ',
+          type: 'skill',
+          difficulty: 'intermediate', 
+          isPremium: false,
+          taskCount: 3,
+          estimatedTime: '1-2時間',
+          tags: ['デザインシステム', 'コンポーネント']
+        }
+      ]);
+    } catch (error) {
+      console.error('Training一覧取得エラー:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <TrainingLayout>
+      <TrainingHeader />
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-10">
+            <h1 className="text-3xl font-bold mb-4">BONO Training</h1>
+            <p className="text-lg text-gray-600">
+              実践的なデザインスキルを身につける筋トレ型トレーニング
+            </p>
+          </div>
+          
+          {loading ? (
+            <div className="text-center py-12">読み込み中...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {trainings.map((training) => (
+                <TrainingCard 
+                  key={training.slug}
+                  training={training}
+                  hasAccess={!training.isPremium || hasMemberAccess}
+                />
+              ))}
+            </div>
+          )}
+          
+          {!hasMemberAccess && (
+            <div className="mt-12 text-center">
+              <Card className="border-orange-200 bg-orange-50">
+                <CardContent className="pt-6">
+                  <h3 className="text-lg font-medium mb-2">
+                    すべてのトレーニングにアクセス
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    プレミアムトレーニングを含む全コンテンツにアクセス
+                  </p>
+                  <Link to="/training/plan">
+                    <Button>プランを見る</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </div>
+      </div>
+    </TrainingLayout>
+  );
+};
+
+const TrainingCard: React.FC<{
+  training: Training;
+  hasAccess: boolean;
+}> = ({ training, hasAccess }) => {
+  return (
+    <Link to={`/training/${training.slug}`}>
+      <Card className="h-full hover:shadow-lg transition-shadow cursor-pointer">
+        <CardHeader>
+          <div className="flex justify-between items-start mb-2">
+            <Badge variant={training.type === 'challenge' ? 'default' : 'secondary'}>
+              {training.type === 'challenge' ? 'チャレンジ' : 'スキル'}
+            </Badge>
+            {training.isPremium && !hasAccess && (
+              <Badge variant="outline">Premium</Badge>
+            )}
+          </div>
+          <CardTitle className="text-lg">{training.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-600 mb-4">{training.description}</p>
+          <div className="space-y-2 text-sm text-gray-500">
+            <div>📚 {training.taskCount}個のタスク</div>
+            <div>⏱️ 目安時間: {training.estimatedTime}</div>
+            <div>📊 難易度: {training.difficulty}</div>
+          </div>
+          <div className="flex flex-wrap gap-1 mt-3">
+            {training.tags.map(tag => (
+              <span key={tag} className="px-2 py-1 bg-gray-100 text-xs rounded">
+                {tag}
+              </span>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+};
+
+export default TrainingHome;
+```
+
+#### B. Training詳細ページ
+**ファイル**: `src/pages/Training/[slug].tsx`
+
+```tsx
+import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import TrainingLayout from '@/components/training/TrainingLayout';
+import TrainingHeader from '@/components/training/TrainingHeader';
+import TrainingGuard from '@/components/training/TrainingGuard';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { CheckCircle, Clock, ArrowRight } from 'lucide-react';
+
+interface Task {
+  slug: string;
+  title: string;
+  description: string;
+  isPremium: boolean;
+  estimatedTime: number;
+  isCompleted: boolean;
+  order: number;
+}
+
+interface TrainingDetail {
+  slug: string;
+  title: string;
+  description: string;
+  type: 'challenge' | 'skill';
+  difficulty: string;
+  isPremium: boolean;
+  tasks: Task[];
+  totalTime: string;
+  objectives: string[];
+}
+
+const TrainingDetailPage: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [training, setTraining] = useState<TrainingDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (slug) {
+      fetchTrainingDetail(slug);
+    }
+  }, [slug]);
+
+  const fetchTrainingDetail = async (trainingSlug: string) => {
+    try {
+      // TODO: Training詳細を取得するAPI実装
+      // 暫定的なモックデータ
+      setTraining({
+        slug: trainingSlug,
+        title: 'Todo アプリのUI設計',
+        description: 'ユーザビリティを重視したTodoアプリのインターフェースを設計し、Figmaでプロトタイプを作成します。',
+        type: 'challenge',
+        difficulty: 'beginner',
+        isPremium: true,
+        totalTime: '2-3時間',
+        objectives: [
+          'ユーザーのメンタルモデルを理解する',
+          '情報アーキテクチャを設計する',
+          'プロトタイプで操作性を検証する'
+        ],
+        tasks: [
+          {
+            slug: 'user-research',
+            title: 'ユーザーリサーチ',
+            description: 'Todoアプリのユーザーニーズを分析',
+            isPremium: false,
+            estimatedTime: 30,
+            isCompleted: false,
+            order: 1
+          },
+          {
+            slug: 'wireframe',
+            title: 'ワイヤーフレーム作成',
+            description: '画面構成と情報設計を決める',
+            isPremium: true,
+            estimatedTime: 45,
+            isCompleted: false,
+            order: 2
+          }
+        ]
+      });
+    } catch (error) {
+      console.error('Training詳細取得エラー:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <TrainingLayout>
+        <TrainingHeader />
+        <div className="container mx-auto px-6 py-8">
+          <div className="text-center">読み込み中...</div>
+        </div>
+      </TrainingLayout>
+    );
+  }
+
+  if (!training) {
+    return (
+      <TrainingLayout>
+        <TrainingHeader />
+        <div className="container mx-auto px-6 py-8">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold mb-4">Training が見つかりません</h1>
+            <Link to="/training">
+              <Button>一覧に戻る</Button>
+            </Link>
+          </div>
+        </div>
+      </TrainingLayout>
+    );
+  }
+
+  return (
+    <TrainingLayout>
+      <TrainingHeader />
+      <div className="container mx-auto px-6 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* ヘッダー部分 */}
+          <div className="mb-8">
+            <div className="flex items-center gap-2 mb-4">
+              <Badge variant={training.type === 'challenge' ? 'default' : 'secondary'}>
+                {training.type === 'challenge' ? 'チャレンジ' : 'スキル'}
+              </Badge>
+              <span className="text-sm text-gray-500">難易度: {training.difficulty}</span>
+              <span className="text-sm text-gray-500">⏱️ {training.totalTime}</span>
+            </div>
+            <h1 className="text-3xl font-bold mb-4">{training.title}</h1>
+            <p className="text-lg text-gray-600">{training.description}</p>
+          </div>
+
+          {/* 学習目標 */}
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>学習目標</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-2">
+                {training.objectives.map((objective, index) => (
+                  <li key={index} className="flex items-center">
+                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
+                    {objective}
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+
+          {/* タスク一覧 */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold">タスク一覧</h2>
+            {training.tasks.map((task, index) => (
+              <TrainingGuard key={task.slug} isPremium={task.isPremium}>
+                <TaskCard 
+                  task={task} 
+                  trainingSlug={training.slug}
+                  index={index}
+                />
+              </TrainingGuard>
+            ))}
+          </div>
+        </div>
+      </div>
+    </TrainingLayout>
+  );
+};
+
+const TaskCard: React.FC<{
+  task: Task;
+  trainingSlug: string;
+  index: number;
+}> = ({ task, trainingSlug, index }) => {
+  return (
+    <Link to={`/training/${trainingSlug}/${task.slug}`}>
+      <Card className="hover:shadow-md transition-shadow cursor-pointer">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-600 font-medium">{index + 1}</span>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-lg font-medium">{task.title}</h3>
+                <p className="text-gray-600">{task.description}</p>
+                <div className="flex items-center mt-2 text-sm text-gray-500">
+                  <Clock className="h-4 w-4 mr-1" />
+                  <span>{task.estimatedTime}分</span>
+                  {task.isPremium && (
+                    <Badge variant="outline" className="ml-2">Premium</Badge>
+                  )}
+                </div>
+              </div>
+            </div>
+            <ArrowRight className="h-5 w-5 text-gray-400" />
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
+  );
+};
+
+export default TrainingDetailPage;
+```
+
+### 2.6 権限制御コンポーネント
+
+#### TrainingGuard 最終調整
+**ファイル**: `src/components/training/TrainingGuard.tsx`
+
+```tsx
+import React, { ReactNode } from 'react';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import PremiumContentBanner from './PremiumContentBanner';
+import { Loader2 } from 'lucide-react';
+
+interface TrainingGuardProps {
+  children: ReactNode;
+  isPremium?: boolean;
+  fallbackComponent?: React.ReactNode;
+}
+
+const TrainingGuard: React.FC<TrainingGuardProps> = ({
+  children,
+  isPremium = false,
+  fallbackComponent
+}) => {
+  const { isSubscribed, hasMemberAccess, loading } = useSubscriptionContext();
+  
+  // 無料コンテンツは常にアクセス可能
+  if (!isPremium) {
+    return <>{children}</>;
+  }
+  
+  // ローディング中
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center p-12">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+  
+  // member権限を持つユーザーはアクセス可能
+  if (isSubscribed && hasMemberAccess) {
+    return <>{children}</>;
+  }
+  
+  // カスタム表示コンポーネント
+  if (fallbackComponent) {
+    return <>{fallbackComponent}</>;
+  }
+  
+  // デフォルトのプレミアムバナー
+  return <PremiumContentBanner />;
+};
+
+export default TrainingGuard;
+```
 
 ---
 
-## 🎉 プロジェクト完了！
+## ✅ **Phase 2 完了チェックリスト**
 
-**実装期間**: Phase 3 & 4 統合実装  
-**システム状態**: ✅ **全機能稼働中**  
-**テスト状況**: ✅ **全項目パス**  
-**デプロイ状況**: ✅ **本番環境稼働**
+### Supabase設定
+- [ ] training-content バケット作成
+- [ ] RLS ポリシー設定
+- [ ] get-training-content Edge Function デプロイ
 
-### 達成した目標
-- ✅ **ローカル Markdown 執筆の快適さ** と **本番での安全なプレミアム出し分け** の両立
-- ✅ GitHub Actions による完全自動化されたコンテンツ同期
-- ✅ 統一されたEdge Function APIによるシンプルなアーキテクチャ
-- ✅ 堅牢なエラーハンドリングとセキュリティ実装
-- ✅ プラン別アクセス制御の完全実装
+### フロントエンド実装  
+- [ ] `/training` ホームページ実装
+- [ ] `/training/[slug]` 詳細ページ実装
+- [ ] `/training/[slug]/[task]` タスクページ実装
+- [ ] TrainingGuard 権限制御動作確認
 
-**このシステムにより、BONOのTrainingコンテンツ管理・表示システムが完成し、安定稼働中です。** 🎊
+### 動作確認
+- [ ] 無料ユーザーでプレビュー表示確認
+- [ ] Community会員でフルアクセス確認
+- [ ] 課金導線からの権限付与確認
+
+---
+
+## 🎯 **Phase 3: 全プラン対応（将来実装）**
+
+### 実装タイミング
+以下の条件を満たしてから検討:
+- [ ] Phase 2完了
+- [ ] Communityプランでの実ユーザー獲得  
+- [ ] Learning専用コンテンツの企画完了
+- [ ] Standard/Growthプランの差別化明確化
+
+### 主な変更点
+1. **Price ID拡張**: 12個のPrice ID管理
+2. **UI拡張**: 複数プラン・期間選択
+3. **権限拡張**: `hasLearningAccess` 追加
+4. **API拡張**: `planType` + `duration` パラメータ
+
+---
+
+## 🚨 **重要な実装ポイント**
+
+### セキュリティ
+- **JWT検証**: Edge Function でのユーザー認証
+- **RLS適用**: Storage アクセス制御
+- **フロント制御**: TrainingGuard による UI制御
+
+### パフォーマンス  
+- **遅延ローディング**: 大きなMarkdownファイルの分割読み込み
+- **キャッシュ戦略**: 静的コンテンツのキャッシュ
+- **プリフェッチ**: ナビゲーション時の先読み
+
+### エラーハンドリング
+- **ネットワークエラー**: 再試行機能
+- **認証エラー**: ログイン誘導
+- **権限エラー**: 課金誘導
+
+---
+
+## 🎯 **開発開始の手順**
+
+1. **今すぐ**: Phase 1（Community課金）完成
+2. **来週**: Phase 2（コンテンツ基盤）着手  
+3. **必要時**: Phase 3（全プラン）検討
+
+この実装ガイドに従い、段階的に確実に進めることで、リスクを最小化しながら `/training` を公開できます。
