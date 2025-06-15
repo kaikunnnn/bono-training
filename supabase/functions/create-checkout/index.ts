@@ -21,7 +21,7 @@ serve(async (req) => {
 
   try {
     // リクエストボディを解析
-    const { returnUrl, useTestPrice, planType = 'community' } = await req.json();
+    const { returnUrl, useTestPrice = false, planType = 'standard' } = await req.json();
     
     logDebug("リクエスト受信", { returnUrl, useTestPrice, planType });
     
@@ -95,24 +95,55 @@ serve(async (req) => {
       logDebug(`既存のStripe顧客ID ${stripeCustomerId} を使用します`);
     }
 
-    // Community専用の価格ID取得
+    // プランタイプに応じたPrice IDを選択
     let priceId: string | undefined;
     
-    // 環境に応じてPrice IDを選択（Community専用）
-    const isTestMode = useTestPrice || Deno.env.get("ENVIRONMENT") !== "production";
-    
-    if (isTestMode) {
-      // テスト環境のCommunity Price ID
-      priceId = Deno.env.get("STRIPE_TEST_COMMUNITY_1M_PRICE_ID");
-      logDebug("テスト環境のCommunityプラン価格ID使用", { priceId });
+    // テスト環境と本番環境で異なるPrice IDを使用
+    if (useTestPrice) {
+      // テスト環境のPrice ID
+      switch(planType) {
+        case 'community':
+          priceId = Deno.env.get("STRIPE_TEST_COMMUNITY_PRICE_ID");
+          logDebug("テスト環境のCommunityプラン使用", { priceId });
+          break;
+        case 'growth':
+          priceId = Deno.env.get("STRIPE_TEST_GROWTH_PRICE_ID");
+          logDebug("テスト環境のGrowthプラン使用", { priceId });
+          break;
+        case 'standard':
+        default:
+          priceId = Deno.env.get("STRIPE_TEST_STANDARD_PRICE_ID");
+          logDebug("テスト環境のStandardプラン使用", { priceId });
+      }
     } else {
-      // 本番環境のCommunity Price ID
-      priceId = Deno.env.get("STRIPE_COMMUNITY_1M_PRICE_ID");
-      logDebug("本番環境のCommunityプラン価格ID使用", { priceId });
+      // 本番環境のPrice ID
+      switch(planType) {
+        case 'community':
+          priceId = Deno.env.get("STRIPE_COMMUNITY_PRICE_ID");
+          logDebug("本番環境のCommunityプラン使用", { priceId });
+          break;
+        case 'growth':
+          priceId = Deno.env.get("STRIPE_GROWTH_PRICE_ID");
+          logDebug("本番環境のGrowthプラン使用", { priceId });
+          break;
+        case 'standard':
+        default:
+          priceId = Deno.env.get("STRIPE_STANDARD_PRICE_ID");
+          logDebug("本番環境のStandardプラン使用", { priceId });
+      }
+    }
+    
+    // Price IDがなければデフォルトを使用
+    if (!priceId) {
+      priceId = useTestPrice 
+        ? Deno.env.get("STRIPE_TEST_PRICE_ID")
+        : Deno.env.get("STRIPE_PRICE_ID");
+        
+      logDebug("デフォルトのPrice IDを使用", { priceId });
     }
     
     if (!priceId) {
-      throw new Error("Communityプランの価格IDが設定されていません");
+      throw new Error("Stripe Price IDが設定されていません");
     }
 
     // Checkoutセッションの作成
@@ -126,24 +157,18 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: returnUrl,
       metadata: {
         user_id: user.id,
-        plan_type: 'community'
-      },
-      subscription_data: {
-        metadata: {
-          user_id: user.id,
-          plan_type: 'community'
-        }
+        plan_type: planType
       }
     });
     
     logDebug("Checkoutセッション作成完了", { 
       sessionId: session.id, 
       url: session.url,
-      planType: 'community'
+      planType
     });
 
     // セッションURLをフロントエンドに返す

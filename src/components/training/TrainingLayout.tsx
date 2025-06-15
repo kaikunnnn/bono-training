@@ -1,16 +1,22 @@
 
-import React from 'react';
+import React from "react";
+import { cn } from "@/lib/utils";
+import TrainingHeader from "./TrainingHeader";
 
 interface TrainingLayoutProps {
   children: React.ReactNode;
+  className?: string;
 }
 
-const TrainingLayout: React.FC<TrainingLayoutProps> = ({ children }) => {
+const TrainingLayout = ({ children, className }: TrainingLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-blue-50">
-      <div className="min-h-screen bg-white/80 backdrop-blur-sm">
-        {children}
-      </div>
+    <div className={cn("min-h-screen flex flex-col bg-[#F8F9F5]", className)}>
+      <TrainingHeader />
+      <main className="flex-1">
+        <div className="mx-auto max-w-[1670px] w-full">
+          {children}
+        </div>
+      </main>
     </div>
   );
 };

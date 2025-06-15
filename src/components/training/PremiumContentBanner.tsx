@@ -1,57 +1,80 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardContent } from '@/components/ui/card';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Star, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Lock, Star } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const PremiumContentBanner: React.FC = () => {
+interface PremiumContentBannerProps {
+  className?: string;
+  onSubscribe?: () => void;
+  returnUrl?: string;
+}
+
+/**
+ * プレミアムコンテンツのプレビュー制限バナー
+ * ユーザーにメンバーシップへのアップグレードを促す
+ */
+const PremiumContentBanner: React.FC<PremiumContentBannerProps> = ({
+  className,
+  onSubscribe,
+  returnUrl = window.location.pathname
+}) => {
+  const handleClick = () => {
+    if (onSubscribe) {
+      onSubscribe();
+    }
+  };
+
   return (
-    <Card className="border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
-      <CardContent className="p-6 text-center">
-        <div className="flex justify-center mb-4">
-          <div className="bg-orange-100 p-3 rounded-full">
-            <Lock className="w-6 h-6 text-orange-600" />
-          </div>
+    <div className={cn(
+      'bg-gradient-to-r from-amber-50 to-yellow-50 border border-amber-200 rounded-lg p-6 shadow-md',
+      className
+    )}>
+      <div className="flex items-start gap-4">
+        <div className="p-3 rounded-full bg-amber-100 text-amber-600 flex-shrink-0">
+          <Star className="w-6 h-6" />
         </div>
         
-        <h3 className="text-xl font-bold text-gray-800 mb-2">
-          プレミアムコンテンツ
-        </h3>
-        
-        <p className="text-gray-600 mb-4">
-          このコンテンツはメンバー限定です。<br />
-          メンバーシップに登録して、すべてのトレーニングにアクセスしましょう。
-        </p>
-        
-        <div className="space-y-3 text-sm text-gray-600 mb-6">
-          <div className="flex items-center justify-center">
-            <Star className="w-4 h-4 text-orange-500 mr-2" />
-            <span>実践的なデザインプロジェクト</span>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="text-lg font-semibold text-gray-900">プレミアムコンテンツ</h3>
+            <Badge variant="outline" className="bg-amber-100 text-amber-700 border-amber-200">
+              <Lock className="w-3 h-3 mr-1" />
+              メンバー限定
+            </Badge>
           </div>
-          <div className="flex items-center justify-center">
-            <Star className="w-4 h-4 text-orange-500 mr-2" />
-            <span>プレミアム学習教材</span>
-          </div>
-          <div className="flex items-center justify-center">
-            <Star className="w-4 h-4 text-orange-500 mr-2" />
-            <span>コミュニティ参加権限</span>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <Button asChild className="w-full bg-orange-600 hover:bg-orange-700">
-            <Link to="/training/plan">
-              メンバーシップに登録する（¥1,480/月）
-            </Link>
-          </Button>
           
-          <p className="text-xs text-gray-500">
-            いつでも解約可能・初回課金後即座にアクセス可能
+          <p className="mt-3 text-gray-700">
+            このコンテンツの続きを閲覧するには、メンバーシッププランへの登録が必要です。
+            メンバーになると、すべてのトレーニングコンテンツに無制限でアクセスできるようになります。
           </p>
+          
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Button 
+              className="bg-amber-500 hover:bg-amber-600 text-white"
+              onClick={handleClick}
+            >
+              メンバーに登録する
+            </Button>
+            
+            <Button variant="outline" asChild>
+              <Link to="/pricing">料金プランを見る</Link>
+            </Button>
+          </div>
+          
+          <div className="mt-4 text-sm text-gray-500">
+            <p>メンバーシップ特典：</p>
+            <ul className="list-disc pl-5 mt-1 space-y-1">
+              <li>すべてのトレーニングコンテンツが見放題</li>
+              <li>実践的な課題とサンプルコード</li>
+              <li>プロジェクト例と解説</li>
+            </ul>
+          </div>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 };
 
