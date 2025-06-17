@@ -1,4 +1,61 @@
-実装計画：サブスクリプションサービス ナビゲーション仕様
+# 実装計画
+
+既存のコードを確認しました。my-tasksの開発計画に基づいて、エラーなく実装するための詳細な実装計画を立てます。
+
+分析結果
+現在の状況：
+
+TrainingHeader: 現在「はじめる」ボタンが /training/plan になっている → /training/signup に変更が必要
+App.tsx: /training/signup ルートが存在しない → 追加が必要
+AuthContext: 既に実装済みで利用可能
+Training/Login.tsx: 既存のタブ形式の実装あり → 参考にできる
+Training/Plan.tsx: セッション管理機能が未実装 → 追加が必要
+エラーなく実装するための詳細計画
+Phase 1: プラン選択セッション管理ユーティリティ作成
+ファイル: src/utils/planSession.ts
+
+プラン情報構造: { planType: 'community', duration: 1 | 3, price: string, selectedAt: timestamp }
+sessionStorage + cookie バックアップによる24時間保持
+Base64エンコード実装
+型安全性を保つためのインターフェース定義
+Phase 2: TrainingHeader更新
+ファイル: src/components/training/TrainingHeader.tsx
+
+未ログインユーザー向けボタン配置変更
+「はじめる」リンクを /training/plan → /training/signup に変更
+「プラン」ボタンを追加（/training/planへのリンク）
+Phase 3: ルーティング追加
+ファイル: src/App.tsx
+
+/training/signup ルートを追加
+既存のルート構造を保持
+Phase 4: TrainingSignup ページ作成
+ファイル: src/pages/Training/Signup.tsx
+
+既存の Login.tsx をベースにした独立ページ
+プラン選択情報表示エリアの実装
+セッションからプラン情報取得・表示
+アカウント作成成功時の決済フロー連携
+エラーハンドリング（既存のAuthContextパターンに従う）
+Phase 5: Plan ページにセッション管理機能追加
+ファイル: src/pages/Training/Plan.tsx
+
+プラン選択時のセッション保存処理
+未ログインユーザーの /training/signup リダイレクト
+ログイン済みユーザーは既存の決済フロー維持
+Phase 6: エラーハンドリング実装
+セッション消失時の /training/plan リダイレクト
+toast通知: "セッションが消失しました"
+決済完了後の /training リダイレクト
+実装順序とエラー回避のポイント
+セッション管理から開始: 他のコンポーネントが依存するため最初に実装
+型定義の一貫性: 既存の PlanType 型と整合性を保つ
+既存AuthContextの活用: 新しい認証ロジックを作らず既存を利用
+段階的テスト: 各Phase完了後に動作確認
+リダイレクトロジック: 無限ループを避けるため条件分岐を慎重に実装
+この計画により、既存機能を破壊せず、エラーなく段階的に実装できます。
+
+# 実装計画：サブスクリプションサービス ナビゲーション仕様
 Phase 1: ナビゲーション構成の更新
 1.1 TrainingHeaderの更新
 
