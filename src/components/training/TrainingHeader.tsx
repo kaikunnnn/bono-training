@@ -74,7 +74,7 @@ const TrainingHeader = () => {
         </Link>
 
         {/* Right block */}
-        <div className="flex-1 flex items-center justify-end gap-4">
+        <div className="flex-1 flex items-center justify-end gap-3">
           {!user ? (
             <>
               <Link
@@ -87,6 +87,14 @@ const TrainingHeader = () => {
               </Link>
               <Link
                 to="/training/plan"
+                className="inline-flex h-9 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+              >
+                <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
+                  プラン
+                </span>
+              </Link>
+              <Link
+                to="/training/signup"
                 className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
               >
                 <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
