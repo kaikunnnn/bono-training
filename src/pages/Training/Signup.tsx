@@ -10,6 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import { getPlanSession, clearPlanSession, PlanSessionData } from '@/utils/planSession';
 import { useToast } from '@/hooks/use-toast';
+import { createCheckoutSession } from '@/services/stripe';
 
 const TrainingSignup = () => {
   const [email, setEmail] = useState('');
@@ -29,21 +30,11 @@ const TrainingSignup = () => {
     }
   }, [user, navigate]);
 
-  // プランセッション情報の取得
+  // プランセッション情報の取得（必須ではない）
   useEffect(() => {
     const sessionData = getPlanSession();
     setPlanSession(sessionData);
-    
-    // セッション情報がない場合は/training/planにリダイレクト
-    if (!sessionData) {
-      toast({
-        title: "プラン選択が必要です",
-        description: "まずプランを選択してからアカウントを作成してください。",
-        variant: "destructive",
-      });
-      navigate('/training/plan');
-    }
-  }, [navigate, toast]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,9 +73,43 @@ const TrainingSignup = () => {
         description: "確認メールを送信しました。メール認証後にサービスをご利用いただけます。",
       });
 
-      // プランセッション情報をクリア
-      clearPlanSession();
-      
+      // プランセッション情報がある場合は決済フローへ
+      if (planSession) {
+        try {
+          const checkoutResult = await createCheckoutSession(
+            '/training',
+            planSession.planType,
+            planSession.duration
+          );
+
+          if (checkoutResult.error) {
+            console.error('決済セッション作成エラー:', checkoutResult.error);
+            toast({
+              title: "決済処理でエラーが発生しました",
+              description: "アカウントは作成されました。後ほどプランページから購読してください。",
+              variant: "destructive",
+            });
+          } else if (checkoutResult.url) {
+            // 決済URLを新しいタブで開く
+            window.open(checkoutResult.url, '_blank');
+            toast({
+              title: "決済ページを開きました",
+              description: "新しいタブで決済を完了してください。",
+            });
+          }
+
+          // プランセッション情報をクリア
+          clearPlanSession();
+        } catch (error) {
+          console.error('決済処理エラー:', error);
+          toast({
+            title: "決済処理でエラーが発生しました",
+            description: "アカウントは作成されました。後ほどプランページから購読してください。",
+            variant: "destructive",
+          });
+        }
+      }
+
       // トレーニングホームにリダイレクト
       navigate('/training');
       
@@ -124,12 +149,12 @@ const TrainingSignup = () => {
               BONOトレーニングをはじめる
             </h1>
             <p className="text-sm text-gray-600 font-['Rounded_Mplus_1c']">
-              BONOトレーニングの全コンテンツにアクセスして、<br />
-              効率的にデザインスキルを身につけましょう。
+              アカウントを作成して、デザインスキルを学習しましょう。<br />
+              {planSession ? '選択したプランで' : '無料コンテンツから'}始められます。
             </p>
           </div>
 
-          {/* プラン選択情報表示 */}
+          {/* プラン選択情報表示（プランが選択されている場合のみ） */}
           {planSession && (
             <Card className="border-2 border-[#0D221D]">
               <CardHeader className="pb-3">
@@ -158,6 +183,25 @@ const TrainingSignup = () => {
                     className="text-[#0D221D] hover:underline"
                   >
                     プランを変更する
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* プランが選択されていない場合の案内 */}
+          {!planSession && (
+            <Card className="border border-gray-200 bg-gray-50">
+              <CardContent className="pt-4">
+                <div className="text-center space-y-2">
+                  <p className="text-sm text-gray-600 font-['Rounded_Mplus_1c']">
+                    プランを選択していませんが、無料コンテンツをお楽しみいただけます。
+                  </p>
+                  <Link 
+                    to="/training/plan" 
+                    className="inline-block text-sm text-[#0D221D] hover:underline font-medium"
+                  >
+                    プランを選択する
                   </Link>
                 </div>
               </CardContent>
