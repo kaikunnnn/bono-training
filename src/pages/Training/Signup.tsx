@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -107,6 +108,12 @@ const TrainingSignup = () => {
             variant: "destructive",
           });
         }
+      } else {
+        // プラン情報がない場合の案内
+        toast({
+          title: "アカウント作成が完了しました",
+          description: "プランを選択して学習を開始してください。",
+        });
       }
 
       // トレーニングホームにリダイレクト
