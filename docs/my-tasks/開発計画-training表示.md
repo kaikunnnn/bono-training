@@ -97,3 +97,22 @@ Phase 5: エラーハンドリングの実装
 エラーメッセージ表示（既存UIスタイル）
 プラン情報は保持したまま再試行可能
 "プランを変更する" リンクで /training/plan に戻る機能
+
+
+
+開発順序
+
+Phase 1 → TrainingHeaderの更新（基本ナビゲーション）
+Phase 3 → セッション管理の実装（基盤機能）
+Phase 2 → Signupページの作成
+Phase 3.2 → Planページの更新（セッション連携）
+Phase 4 → アカウント作成後フローの実装
+Phase 5 → エラーハンドリングの追加
+
+技術仕様
+
+セッション管理: sessionStorage + cookie（24時間）
+暗号化: Base64エンコード（シンプルな実装）
+認証: 既存の AuthContext 活用
+決済: 既存の Stripe 連携機能活用
+エラー通知: 既存の toast システム活用
