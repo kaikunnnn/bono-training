@@ -24,6 +24,10 @@ interface SubscriptionButtonProps {
    * プランタイプ - サブスクリプションのプランタイプ
    */
   planType?: PlanType;
+  /**
+   * プラン期間 - 1ヶ月または3ヶ月
+   */
+  duration?: 1 | 3;
 }
 
 /**
@@ -33,7 +37,8 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
   returnUrl,
   label = '購読を開始する',
   isTest = false,
-  planType = 'standard'
+  planType = 'standard',
+  duration = 1
 }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -46,8 +51,8 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
       const defaultReturnUrl = window.location.href;
       const finalReturnUrl = returnUrl || defaultReturnUrl;
       
-      // チェックアウトセッションを作成
-      const { url, error } = await createCheckoutSession(finalReturnUrl, planType, isTest);
+      // チェックアウトセッションを作成（正しい引数順序）
+      const { url, error } = await createCheckoutSession(finalReturnUrl, planType, duration, isTest);
       
       if (error || !url) {
         throw new Error(error?.message || '決済処理の準備に失敗しました');

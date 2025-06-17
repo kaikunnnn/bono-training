@@ -21,9 +21,9 @@ serve(async (req) => {
 
   try {
     // リクエストボディを解析
-    const { returnUrl, useTestPrice = false, planType = 'standard' } = await req.json();
+    const { returnUrl, useTestPrice = false, planType = 'community', duration = 1 } = await req.json();
     
-    logDebug("リクエスト受信", { returnUrl, useTestPrice, planType });
+    logDebug("リクエスト受信", { returnUrl, useTestPrice, planType, duration });
     
     if (!returnUrl) {
       throw new Error("リダイレクトURLが指定されていません");
@@ -95,55 +95,20 @@ serve(async (req) => {
       logDebug(`既存のStripe顧客ID ${stripeCustomerId} を使用します`);
     }
 
-    // プランタイプに応じたPrice IDを選択
+    // プランタイプと期間に応じたPrice IDを選択
     let priceId: string | undefined;
     
-    // テスト環境と本番環境で異なるPrice IDを使用
-    if (useTestPrice) {
-      // テスト環境のPrice ID
-      switch(planType) {
-        case 'community':
-          priceId = Deno.env.get("STRIPE_TEST_COMMUNITY_PRICE_ID");
-          logDebug("テスト環境のCommunityプラン使用", { priceId });
-          break;
-        case 'growth':
-          priceId = Deno.env.get("STRIPE_TEST_GROWTH_PRICE_ID");
-          logDebug("テスト環境のGrowthプラン使用", { priceId });
-          break;
-        case 'standard':
-        default:
-          priceId = Deno.env.get("STRIPE_TEST_STANDARD_PRICE_ID");
-          logDebug("テスト環境のStandardプラン使用", { priceId });
-      }
-    } else {
-      // 本番環境のPrice ID
-      switch(planType) {
-        case 'community':
-          priceId = Deno.env.get("STRIPE_COMMUNITY_PRICE_ID");
-          logDebug("本番環境のCommunityプラン使用", { priceId });
-          break;
-        case 'growth':
-          priceId = Deno.env.get("STRIPE_GROWTH_PRICE_ID");
-          logDebug("本番環境のGrowthプラン使用", { priceId });
-          break;
-        case 'standard':
-        default:
-          priceId = Deno.env.get("STRIPE_STANDARD_PRICE_ID");
-          logDebug("本番環境のStandardプラン使用", { priceId });
-      }
-    }
+    // 環境変数の命名規則: STRIPE_[TEST_]PLANTYPE_DURATION_PRICE_ID
+    const envPrefix = useTestPrice ? "STRIPE_TEST_" : "STRIPE_";
+    const planTypeUpper = planType.toUpperCase();
+    const durationSuffix = duration === 1 ? "1M" : "3M";
+    const envVarName = `${envPrefix}${planTypeUpper}_${durationSuffix}_PRICE_ID`;
     
-    // Price IDがなければデフォルトを使用
-    if (!priceId) {
-      priceId = useTestPrice 
-        ? Deno.env.get("STRIPE_TEST_PRICE_ID")
-        : Deno.env.get("STRIPE_PRICE_ID");
-        
-      logDebug("デフォルトのPrice IDを使用", { priceId });
-    }
+    priceId = Deno.env.get(envVarName);
+    logDebug(`Price ID環境変数 ${envVarName}:`, { priceId });
     
     if (!priceId) {
-      throw new Error("Stripe Price IDが設定されていません");
+      throw new Error(`Price ID環境変数 ${envVarName} が設定されていません`);
     }
 
     // Checkoutセッションの作成
@@ -161,14 +126,16 @@ serve(async (req) => {
       cancel_url: returnUrl,
       metadata: {
         user_id: user.id,
-        plan_type: planType
+        plan_type: planType,
+        duration: duration.toString()
       }
     });
     
     logDebug("Checkoutセッション作成完了", { 
       sessionId: session.id, 
       url: session.url,
-      planType
+      planType,
+      duration
     });
 
     // セッションURLをフロントエンドに返す

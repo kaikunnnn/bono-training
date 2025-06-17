@@ -1,335 +1,513 @@
+# コミュニティプラン課金機能実装
 
-# 統合開発計画 - Training コンテンツ管理・表示システム
+## 🎯 実装方針
 
-**（統合 Phase 3 & Phase 4 - Supabase Storage 一元化版）**
-
----
-
-## 📑 統合プラン概要
-
-**キー方針**
-1. **ローカル Markdown 執筆は従来どおり** - 開発体験を維持
-2. **git push すると GitHub Actions がバケットへ自動同期** - ヒューマンエラー防止
-3. **フロント／Edge Function は常に Storage だけを見る** - 分岐ゼロ、テスト・本番で経路が変わらない
-
-**変更背景（旧案 → 新案）**
-
-| 旧案 | 新案（採用） | 理由 |
-|------|-------------|------|
-| 無料: ローカル読込<br>有料: Storage | 無料も有料も Storage | コード分岐をなくしバグ要因を削減。CI が「同期 → ビルド」で一貫。 |
-| 手動アップロード or 部分同期 | GitHub Actions で全 Markdown をワンクリック同期 | 執筆フローは git push だけ。ヒューマンエラー防止。 |
-| Edge Function が複雑（分岐＋正規化） | 単一 API・単一パスですべて取得 | テスト・監視・キャッシュ戦略をシンプルに。 |
+`/training/plan`でコミュニティプランの1ヶ月・3ヶ月プランを選択できる課金導線を実装します。
 
 ---
 
-## Phase 3 – プラン判定ロジック完成（約 0.5 日）
+## 1. バックエンド修正: create-checkout/index.ts
 
-### ゴール
-- free/standard/growth/community の各プランを正しく判定
-- 「hasMemberAccess」「hasLearningAccess」などのメソッド名で必要な Boolean フラグを返す
-- Guard コンポーネントが「Member 権限」ベースで正しく制御できる
+```typescript
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import Stripe from "https://esm.sh/stripe@14.21.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
-### 実装タスク
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-| #   | 作業 | 主要ファイル | 完了条件 |
-|-----|------|-------------|----------|
-| 3-1 | subscriptionPlans.ts 仕上げ<br>`learning: ['standard','growth']`<br>`member: ['standard','growth','community']` | `src/utils/subscriptionPlans.ts` | 型チェック OK |
-| 3-2 | useSubscription.ts リファクタ<br>返却値：`hasMemberAccess` / `hasLearningAccess` | `src/hooks/useSubscription.ts` | Storybook／Jest 4 ケース通過 |
-| 3-3 | Guard 置換<br>`planMembers` → `hasMemberAccess` | `TrainingGuard.tsx` など | `/training?plan=...` テストで OK |
-| 3-4 | Edge Function check-subscription ミニマム化<br>`{ subscribed, planType }` のみ返す | `supabase/functions/check-subscription/...` | DevTools で JSON 確認 |
+// デバッグログ関数
+const logDebug = (message: string, details?: any) => {
+  console.log(`[CREATE-CHECKOUT] ${message}${details ? ` ${JSON.stringify(details)}` : ''}`);
+};
 
-### テストゲート（Phase 3 完了チェック）
+serve(async (req) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { headers: corsHeaders });
+  }
 
-1. **プラン定義の検証**
-   ```bash
-   # URL パラメータでのテスト
-   ?plan=free → hasMemberAccess: false
-   ?plan=standard → hasMemberAccess: true  
-   ?plan=growth → hasMemberAccess: true
-   ?plan=community → hasMemberAccess: true
-   ```
-
-2. **権限判定フックの動作確認**
-   - `useSubscriptionContext()` で正しい Boolean 値が返る
-
-3. **Guard コンポーネントの動作確認**
-   - 無料ユーザーが有料コンテンツにアクセス → 適切にブロック
-   - 有料ユーザーが有料コンテンツにアクセス → 正常表示
-
-4. **全体ビルド確認**
-   ```bash
-   pnpm typecheck && pnpm test && pnpm build
-   ```
-
----
-
-## Phase 4 – コンテンツ同期 & PREMIUM 出し分け（約 1 日）
-
-### ゴール
-- すべての Markdown（無料・有料）を Supabase Storage に同期
-- `<!-- PREMIUM_ONLY -->` マーカーでコンテンツを出し分け
-- 無料ユーザーと有料ユーザーで適切な表示制御
-
-### フェーズ別時間目安
-
-| フェーズ | 目的 | 時間目安 |
-|---------|------|----------|
-| 4-1 | Storage 自動同期セットアップ | 1h |
-| 4-2 | get-training-content Edge Function | 2h |
-| 4-3 | サービス層 & 型統一 | 1h |
-| 4-4 | MdxPreview + TaskHeader 出し分け | 1h |
-| 4-5 | クリーンアップ & 総合テスト | 0.5h |
-
----
-
-### Phase 4-1: Storage 自動同期セットアップ
-
-#### 1. バケット作成
-```sql
--- プライベートバケット作成
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('training-content', 'training-content', false);
-```
-
-#### 2. RLS ポリシー設定
-```sql
--- 匿名でも無料ファイルを読める
-CREATE POLICY "anon_read_free"
-  ON storage.objects FOR SELECT
-  TO anon
-  USING (
-    bucket_id = 'training-content' 
-    AND metadata->>'is_free' = 'true'
-  );
-
--- 認証ユーザーはすべて読める  
-CREATE POLICY "authed_read_all"
-  ON storage.objects FOR SELECT
-  TO authenticated
-  USING (bucket_id = 'training-content');
-```
-
-#### 3. GitHub Actions 設定
-```yaml
-# .github/workflows/sync-training-content.yml
-name: Sync Training Content to Supabase
-on:
-  push:
-    paths: ['content/training/**']
+  try {
+    // リクエストボディを解析 - planPeriodを追加
+    const { 
+      returnUrl, 
+      useTestPrice = false, 
+      planType = 'community',
+      planPeriod = '1M' // '1M' または '3M'
+    } = await req.json();
     
-jobs:
-  sync:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Detect Free Content
-        id: detect_free
-        run: |
-          # front-matter の is_premium を読んで metadata.is_free を付与
-          
-      - uses: supabase/supabase-js@cli-sync
-        with:
-          from: content/
-          to: training-content/
-          metadata: |
-            is_free=${{ steps.detect_free.outputs.is_free }}
+    logDebug("リクエスト受信", { returnUrl, useTestPrice, planType, planPeriod });
+    
+    if (!returnUrl) {
+      throw new Error("リダイレクトURLが指定されていません");
+    }
+
+    // Supabaseクライアントの作成
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const supabaseClient = createClient(supabaseUrl, supabaseAnonKey);
+    
+    // 認証ヘッダーから現在のユーザーを取得
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("認証されていません");
+    }
+    
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError || !user) {
+      throw new Error("ユーザー情報の取得に失敗しました");
+    }
+    
+    logDebug("ユーザー認証成功", { userId: user.id, email: user.email });
+    
+    // Stripeクライアントの初期化
+    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      apiVersion: "2023-10-16",
+    });
+
+    // ユーザーのStripe Customer IDを取得または作成
+    let stripeCustomerId: string;
+    
+    const { data: customerData, error: customerError } = await supabaseClient
+      .from("stripe_customers")
+      .select("stripe_customer_id")
+      .eq("user_id", user.id)
+      .single();
+    
+    if (customerError || !customerData) {
+      // Stripe顧客が存在しない場合は新規作成
+      logDebug(`${user.id}のStripe顧客情報がDBに存在しないため作成します`);
+      
+      const customer = await stripe.customers.create({
+        email: user.email,
+        metadata: {
+          user_id: user.id
+        }
+      });
+      
+      // 作成した顧客情報をDBに保存
+      const { error: insertError } = await supabaseClient
+        .from("stripe_customers")
+        .insert({
+          user_id: user.id,
+          stripe_customer_id: customer.id
+        });
+      
+      if (insertError) {
+        logDebug("Stripe顧客情報のDB保存に失敗:", insertError);
+        throw new Error("顧客情報の保存に失敗しました");
+      }
+      
+      stripeCustomerId = customer.id;
+    } else {
+      stripeCustomerId = customerData.stripe_customer_id;
+      logDebug(`既存のStripe顧客ID ${stripeCustomerId} を使用します`);
+    }
+
+    // プランタイプと期間に応じたPrice IDを選択
+    let priceId: string | undefined;
+    
+    // コミュニティプランの期間別Price ID取得
+    if (planType === 'community') {
+      if (useTestPrice) {
+        // テスト環境
+        if (planPeriod === '3M') {
+          priceId = Deno.env.get("STRIPE_TEST_COMMUNITY_3M_PRICE_ID");
+          logDebug("テスト環境のCommunity 3ヶ月プラン使用", { priceId });
+        } else {
+          priceId = Deno.env.get("STRIPE_TEST_COMMUNITY_1M_PRICE_ID");
+          logDebug("テスト環境のCommunity 1ヶ月プラン使用", { priceId });
+        }
+      } else {
+        // 本番環境
+        if (planPeriod === '3M') {
+          priceId = Deno.env.get("STRIPE_COMMUNITY_3M_PRICE_ID");
+          logDebug("本番環境のCommunity 3ヶ月プラン使用", { priceId });
+        } else {
+          priceId = Deno.env.get("STRIPE_COMMUNITY_1M_PRICE_ID");
+          logDebug("本番環境のCommunity 1ヶ月プラン使用", { priceId });
+        }
+      }
+    }
+    
+    if (!priceId) {
+      throw new Error(`指定されたプラン (${planType}/${planPeriod}) のPrice IDが設定されていません`);
+    }
+
+    // Checkoutセッションの作成
+    const session = await stripe.checkout.sessions.create({
+      customer: stripeCustomerId,
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: returnUrl,
+      metadata: {
+        user_id: user.id,
+        plan_type: planType,
+        plan_period: planPeriod
+      }
+    });
+    
+    logDebug("Checkoutセッション作成完了", { 
+      sessionId: session.id, 
+      url: session.url,
+      planType,
+      planPeriod
+    });
+
+    return new Response(
+      JSON.stringify({ url: session.url }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
+    );
+  } catch (error) {
+    logDebug("Checkoutセッション作成エラー:", error);
+    
+    return new Response(
+      JSON.stringify({ error: error.message || "Checkoutセッション作成中にエラーが発生しました" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      }
+    );
+  }
+});
 ```
 
 ---
 
-### Phase 4-2: Edge Function 実装
+## 2. フロントエンド修正: Training/Plan.tsx
 
-#### get-training-content Edge Function
 ```typescript
-export const handler = async (req) => {
-  const { slug, task } = JSON.parse(req.body);
-  const path = task
-    ? `training/${slug}/tasks/${task}/content.md`
-    : `training/${slug}/index.md`;
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import TrainingLayout from '@/components/training/TrainingLayout';
+import TrainingHeader from '@/components/training/TrainingHeader';
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import { createCheckoutSession } from '@/services/stripe';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
-  // Storage からファイル取得
-  const { data, error } = await supabase.storage
-    .from('training-content')
-    .download(path);
+type PlanPeriod = '1M' | '3M';
 
-  if (error) return new Response('Not found', { status: 404 });
-
-  // Front-matter パース
-  const { data: fm, content } = parseFrontmatter(await data.text());
+const TrainingPlan: React.FC = () => {
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const { isSubscribed, planType, hasMemberAccess } = useSubscriptionContext();
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedPeriod, setSelectedPeriod] = useState<PlanPeriod>('1M');
   
-  // アクセス権判定
-  const hasAccess = fm.is_premium ? req.ctx.user?.hasMemberAccess : true;
+  // コミュニティプラン情報
+  const communityPlans = {
+    '1M': {
+      id: 'community_1m',
+      name: 'コミュニティプラン',
+      period: '1ヶ月',
+      price: '1,480円/月',
+      description: 'トレーニングの全コンテンツにアクセス可能（月額プラン）',
+      features: {
+        member: true,
+        learning: false,
+        training: false
+      }
+    },
+    '3M': {
+      id: 'community_3m',
+      name: 'コミュニティプラン',
+      period: '3ヶ月',
+      price: '4,200円/3ヶ月',
+      description: 'トレーニングの全コンテンツにアクセス可能（3ヶ月プラン・5%割引）',
+      savings: '240円お得',
+      features: {
+        member: true,
+        learning: false,
+        training: false
+      }
+    }
+  };
   
-  // コンテンツ分割
-  const rendered = hasAccess
-    ? content
-    : content.split('<!-- PREMIUM_ONLY -->')[0];
-
-  return new Response(JSON.stringify({
-    meta: fm,
-    content: rendered,
-    showPremiumBanner: fm.is_premium && !hasAccess
-  }), { 
-    headers: { 'Content-Type': 'application/json' }
-  });
-};
-```
-
-#### エラー防止策
-- **JWT パースロジック追加** - `req.ctx.user?.hasMemberAccess` の実装
-- **段階的テスト** - 認証なし → あり → プレミアム分割の順
-- **フォールバック処理** - Storage 接続失敗時のローカルファイル読み込み
-
----
-
-### Phase 4-3: フロントエンド統合
-
-#### サービス層統一
-```typescript
-// src/services/training.ts
-export const fetchTrainingContent = async (slug: string, task?: string) => {
-  const { data } = await supabase.functions.invoke(
-    'get-training-content', 
-    { body: { slug, task } }
+  const handleSubscribe = async () => {
+    setIsLoading(true);
+    try {
+      console.log(`コミュニティプラン ${selectedPeriod} のチェックアウト開始`);
+      
+      // チェックアウト後に戻るURLを指定
+      const returnUrl = window.location.origin + '/profile';
+      
+      const { url, error } = await createCheckoutSession(
+        returnUrl,
+        'community', // プランタイプ
+        selectedPeriod // プラン期間
+      );
+      
+      if (error) throw error;
+      if (url) window.location.href = url;
+    } catch (error) {
+      console.error('購読エラー:', error);
+      toast({
+        title: "エラーが発生しました",
+        description: "決済処理の開始に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // 現在のユーザーがすでにコミュニティプランに加入している場合
+  const isCurrentCommunityPlan = isSubscribed && planType === 'community' && hasMemberAccess;
+  
+  return (
+    <TrainingLayout>
+      <TrainingHeader />
+      <div className="max-w-4xl mx-auto px-4 py-12">
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold mb-4">トレーニングプラン</h1>
+          <p className="text-lg text-gray-600">
+            BONOトレーニングの全コンテンツにアクセスして、実践的なスキルを身につけましょう
+          </p>
+        </div>
+        
+        {/* プラン期間選択 */}
+        <div className="max-w-md mx-auto mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-center">プラン期間を選択</CardTitle>
+              <CardDescription className="text-center">
+                お支払い期間をお選びください
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <RadioGroup value={selectedPeriod} onValueChange={(value: PlanPeriod) => setSelectedPeriod(value)}>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50">
+                  <RadioGroupItem value="1M" id="1M" />
+                  <Label htmlFor="1M" className="flex-1 cursor-pointer">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">月額プラン</div>
+                        <div className="text-sm text-gray-500">毎月1,480円</div>
+                      </div>
+                      <div className="text-xl font-bold">¥1,480/月</div>
+                    </div>
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 p-4 border rounded-lg hover:bg-gray-50 relative">
+                  <RadioGroupItem value="3M" id="3M" />
+                  <Label htmlFor="3M" className="flex-1 cursor-pointer">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">3ヶ月プラン</div>
+                        <div className="text-sm text-gray-500">3ヶ月間4,200円</div>
+                        <div className="text-sm text-green-600 font-medium">240円お得！</div>
+                      </div>
+                      <div className="text-xl font-bold">¥1,400/月</div>
+                    </div>
+                  </Label>
+                  <div className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
+                    おすすめ
+                  </div>
+                </div>
+              </RadioGroup>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* 選択されたプランの詳細 */}
+        <div className="max-w-md mx-auto">
+          <Card className="border-2 border-blue-500">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl">
+                {communityPlans[selectedPeriod].name}
+              </CardTitle>
+              <CardDescription>
+                {communityPlans[selectedPeriod].description}
+              </CardDescription>
+              <div className="text-3xl font-bold text-blue-600">
+                {communityPlans[selectedPeriod].price}
+              </div>
+              {selectedPeriod === '3M' && (
+                <div className="text-green-600 font-medium">
+                  {communityPlans[selectedPeriod].savings}
+                </div>
+              )}
+            </CardHeader>
+            <CardContent>
+              <ul className="space-y-3 mb-6">
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  すべてのトレーニングコンテンツへのアクセス
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  コミュニティへの参加権限
+                </li>
+                <li className="flex items-center">
+                  <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  プレミアム教材の閲覧
+                </li>
+              </ul>
+              
+              {isCurrentCommunityPlan ? (
+                <Button disabled className="w-full">
+                  現在のプラン
+                </Button>
+              ) : (
+                <Button 
+                  onClick={handleSubscribe}
+                  disabled={isLoading}
+                  className="w-full"
+                >
+                  {isLoading ? '処理中...' : `${communityPlans[selectedPeriod].period}プランに申し込む`}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="mt-8 text-center text-sm text-gray-600 max-w-md mx-auto">
+          <p>* 会員期間中はいつでも解約可能です</p>
+          <p>* 支払いはStripeの安全な決済システムを利用します</p>
+          <p>* 3ヶ月プランは一括前払いとなります</p>
+        </div>
+        
+        {isSubscribed && planType && (
+          <div className="text-center mt-8">
+            <Button variant="outline" onClick={() => navigate('/profile')}>
+              プロフィールページに戻る
+            </Button>
+          </div>
+        )}
+      </div>
+    </TrainingLayout>
   );
-  return data; // { meta, content, showPremiumBanner }
+};
+
+export default TrainingPlan;
+```
+
+---
+
+## 3. サービス層修正: services/stripe.ts
+
+```typescript
+export type PlanType = 'community' | 'standard' | 'growth';
+export type PlanPeriod = '1M' | '3M';
+
+export const createCheckoutSession = async (
+  returnUrl: string,
+  planType: PlanType = 'community',
+  planPeriod: PlanPeriod = '1M'
+): Promise<{ url?: string; error?: Error }> => {
+  try {
+    const { data: session } = await supabase.auth.getSession();
+    
+    if (!session?.session?.access_token) {
+      throw new Error('認証が必要です');
+    }
+
+    const response = await fetch(`${supabaseUrl}/functions/v1/create-checkout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.session.access_token}`
+      },
+      body: JSON.stringify({ 
+        returnUrl,
+        planType,
+        planPeriod,
+        useTestPrice: process.env.NODE_ENV === 'development'
+      })
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'チェックアウトセッションの作成に失敗しました');
+    }
+    
+    const data = await response.json();
+    return { url: data.url };
+  } catch (error) {
+    console.error('チェックアウトセッション作成エラー:', error);
+    return { error: error as Error };
+  }
 };
 ```
 
-#### 型定義統一
+---
+
+## 4. Webhook修正: stripe-webhook/index.ts
+
 ```typescript
-// src/types/training.ts  
-export interface TrainingContentResponse {
-  meta: TaskFrontmatter;
-  content: string;
-  showPremiumBanner: boolean;
+// determineMembershipAccess関数を修正
+function determineMemberAccess(planType: string): boolean {
+  // communityプランでもmember権限は付与
+  return ['community', 'standard', 'growth'].includes(planType);
 }
-```
 
-#### 後方互換性維持
-- 既存の `loadTaskContent()` 関数は残してフォールバック用に活用
-- 新旧両方の取得方法を並行実装し、段階的に切り替え
+// handleCheckoutCompleted関数内で
+const planType = session.metadata?.plan_type || "community";
+const planPeriod = session.metadata?.plan_period || "1M";
 
----
-
-### Phase 4-4: 表示コンポーネント調整
-
-#### MdxPreview 更新
-```typescript
-// showPremiumBanner プロパティ追加
-<MdxPreview 
-  content={content}
-  showPremiumBanner={showPremiumBanner}
-/>
-
-// 内部実装
-{showPremiumBanner && <PremiumContentBanner />}
-<ReactMarkdown>{content}</ReactMarkdown>
-```
-
-#### TaskHeader 更新  
-```typescript
-// アクセス制御表示
-{!hasMemberAccess && meta.is_premium && (
-    <Badge variant="outline">メンバー限定コンテンツ</Badge>
-)}
-
-// 動画プレーヤー
-<VideoPlayer 
-  src={hasMemberAccess ? meta.video_full : meta.video_preview}
-  isPremium={meta.is_premium}
-  hasPremiumAccess={hasMemberAccess}
-/>
+// データベース保存時にplan_periodも保存
+const { error: userSubError } = await supabase
+  .from("user_subscriptions")
+  .upsert({
+    user_id: userId,
+    is_active: true,
+    plan_type: planType,
+    plan_period: planPeriod, // 追加
+    plan_members: determineMemberAccess(planType),
+    stripe_subscription_id: subscriptionId,
+    updated_at: new Date().toISOString()
+  }, { 
+    onConflict: 'user_id'
+  });
 ```
 
 ---
 
-### Phase 4-5: クリーンアップ & 総合テスト
+## 5. テスト手順
 
-#### 1. git push → Actions 同期テスト
-- 新しい Markdown ファイルを追加
-- GitHub Actions でのバケット同期を確認
+1. **開発環境でのテスト**
+   ```bash
+   # /training/planにアクセス
+   # 1ヶ月プランを選択してチェックアウト開始
+   # テストカード: 4242 4242 4242 4242 で決済
+   # Webhookが正常に処理されることを確認
+   ```
 
-#### 2. ブラウザテスト（プラン別）
-- **free**: `/training/todo-app/introduction` → バナー表示＆preview 動画
-- **community**: 全文表示、preview 動画  
-- **standard/growth**: 全文表示、full 動画
+2. **データベース確認**
+   ```sql
+   SELECT 
+     u.email,
+     us.plan_type,
+     us.plan_period,
+     us.is_active,
+     us.plan_members
+   FROM auth.users u
+   LEFT JOIN user_subscriptions us ON u.id = us.user_id;
+   ```
 
-#### 3. ビルドテスト
-```bash
-pnpm typecheck && pnpm build && pnpm preview
-# エラー 0 件を確認
-```
-
-#### 4. 不要コード削除
-- ローカルファイル読み込み関数の削除
-- 分岐処理のクリーンアップ
-- 使われていない import の整理
-
----
-
-## Phase 3.5: Edge Function 準備（追加フェーズ）
-
-### 目的
-Phase 4-2 で必要な JWT パースと権限判定ロジックを事前準備
-
-### 実装内容
-```typescript
-// Edge Function 内での認証チェック実装
-const getUserFromJWT = async (authHeader: string) => {
-  // JWT 検証とユーザー情報取得
-  // サブスクリプション状態の確認
-  // hasMemberAccess フラグの生成
-};
-```
-
----
-
-## 🎯 最終成果物
-
-### 1. ファイル構造
-```
-content/training/           # ローカル執筆環境（従来通り）
-├── todo-app/
-│   ├── index.md           # Training 概要
-│   └── tasks/
-│       ├── 01-introduction/
-│       │   └── content.md  # 無料タスク
-│       └── 02-premium/
-│           └── content.md  # 有料タスク（<!-- PREMIUM_ONLY -->マーカー付き）
-
-# GitHub Actions で自動同期 ↓
-
-Supabase Storage training-content/ # 本番配信環境
-├── training/
-│   └── todo-app/          # 同じ構造で同期される
-```
-
-### 2. データフロー
-```
-ローカル執筆 → git push → GitHub Actions → Supabase Storage
-                                              ↓
-ユーザーアクセス → Edge Function → 権限チェック → コンテンツ分割 → フロントエンド表示
-```
-
-### 3. セキュリティ
-- **Storage**: プライベートバケット + RLS
-- **Edge Function**: JWT 検証 + サブスクリプション確認
-- **フロント**: 追加のクライアント側バリデーション
-
----
-
-## 🚀 次のステップ
-
-### Phase 5（予定）
-- Vercel 自動デプロイ連携
-- CDN キャッシュ最適化
-- パフォーマンス監視
-
-### 運用フロー
-1. **新コンテンツ作成**: ローカルで Markdown 執筆
-2. **デプロイ**: `git push` のみ（Actions が自動同期）
-3. **確認**: ブラウザでプレビュー、権限テスト
-4. **公開**: 自動的に本番反映
-
-これで **ローカル Markdown 執筆の快適さ** と **本番での安全なプレミアム出し分け** を両立した統合システムが完成します。
+3. **権限制御確認**
+   - 決済後にmember権限コンテンツにアクセス可能か確認
+   - 無料ユーザーは制限されるか確認

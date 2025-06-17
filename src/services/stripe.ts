@@ -1,16 +1,18 @@
+
 import { supabase } from '@/integrations/supabase/client';
-import { getCheckoutLineItems } from '@/utils/stripe';
 import { PlanType } from '@/utils/subscriptionPlans';
 
 /**
  * Stripeチェックアウトセッションを作成する
  * @param returnUrl チェックアウト完了後のリダイレクトURL
  * @param planType プランタイプ（standard, growth, communityなど）
+ * @param duration プラン期間（1ヶ月または3ヶ月）
  * @param isTest 強制的にテスト環境のPrice IDを使用するかどうか
  */
 export const createCheckoutSession = async (
   returnUrl: string,
-  planType: PlanType = 'standard',
+  planType: PlanType = 'community',
+  duration: 1 | 3 = 1,
   isTest?: boolean
 ): Promise<{ url: string | null; error: Error | null }> => {
   try {
@@ -20,13 +22,14 @@ export const createCheckoutSession = async (
       throw new Error('認証されていません。ログインしてください。');
     }
     
-    console.log(`Checkout開始: プラン=${planType}, 環境=${isTest ? 'テスト' : '本番'}`);
+    console.log(`Checkout開始: プラン=${planType}, 期間=${duration}ヶ月, 環境=${isTest ? 'テスト' : '本番'}`);
     
     // Supabase Edge Functionを呼び出してCheckoutセッションを作成
     const { data, error } = await supabase.functions.invoke('create-checkout', {
       body: {
         returnUrl,
         planType,
+        duration,
         useTestPrice: isTest || import.meta.env.MODE !== 'production' 
       }
     });
