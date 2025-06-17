@@ -26,6 +26,7 @@ import TaskDetailPage from './pages/Training/TaskDetailPage';
 import TrainingPlan from "./pages/Training/Plan";
 import TrainingAbout from "./pages/Training/About";
 import TrainingLogin from "./pages/Training/Login";
+import TrainingSignup from "./pages/Training/Signup";
 import TrainingDebug from '@/pages/Training/Debug';
 
 // コンソールログでインポートの確認
@@ -64,6 +65,7 @@ const AppContent = () => {
         
         <Route path="/training" element={<TrainingHome />} />
         <Route path="/training/login" element={<TrainingLogin />} />
+        <Route path="/training/signup" element={<TrainingSignup />} />
         <Route path="/training/:trainingSlug" element={<TrainingDetail />} />
         <Route path="/training/:trainingSlug/:taskSlug" element={<TaskDetailPage />} />
         <Route path="/training/plan" element={<TrainingPlan />} />
