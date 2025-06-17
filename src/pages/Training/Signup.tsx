@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -149,8 +148,7 @@ const TrainingSignup = () => {
               BONOトレーニングをはじめる
             </h1>
             <p className="text-sm text-gray-600 font-['Rounded_Mplus_1c']">
-              アカウントを作成して、デザインスキルを学習しましょう。<br />
-              {planSession ? '選択したプランで' : '無料コンテンツから'}始められます。
+              アカウントを作成して、デザインスキルを学習しましょう。
             </p>
           </div>
 
@@ -183,25 +181,6 @@ const TrainingSignup = () => {
                     className="text-[#0D221D] hover:underline"
                   >
                     プランを変更する
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* プランが選択されていない場合の案内 */}
-          {!planSession && (
-            <Card className="border border-gray-200 bg-gray-50">
-              <CardContent className="pt-4">
-                <div className="text-center space-y-2">
-                  <p className="text-sm text-gray-600 font-['Rounded_Mplus_1c']">
-                    プランを選択していませんが、無料コンテンツをお楽しみいただけます。
-                  </p>
-                  <Link 
-                    to="/training/plan" 
-                    className="inline-block text-sm text-[#0D221D] hover:underline font-medium"
-                  >
-                    プランを選択する
                   </Link>
                 </div>
               </CardContent>
