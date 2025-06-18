@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { createCheckoutSession } from '@/services/stripe';
@@ -100,7 +99,6 @@ const TrainingPlan: React.FC = () => {
   
   return (
     <TrainingLayout>
-      <TrainingHeader />
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-4">トレーニングプラン</h1>
