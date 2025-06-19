@@ -18,11 +18,13 @@ const COOKIE_KEY = 'bono_plan_session';
 const EXPIRY_HOURS = 24;
 
 /**
- * Base64エンコード（セキュリティではなく、データ保護のため）
+ * UTF-8対応エンコード（日本語文字列対応）
  */
 const encodeData = (data: PlanSessionData): string => {
   try {
-    return btoa(JSON.stringify(data));
+    const jsonString = JSON.stringify(data);
+    // encodeURIComponentを使用してUTF-8文字列を安全にエンコード
+    return encodeURIComponent(jsonString);
   } catch (error) {
     console.error('プランセッション情報のエンコードに失敗:', error);
     return '';
@@ -30,11 +32,12 @@ const encodeData = (data: PlanSessionData): string => {
 };
 
 /**
- * Base64デコード
+ * UTF-8対応デコード
  */
 const decodeData = (encodedData: string): PlanSessionData | null => {
   try {
-    const decoded = atob(encodedData);
+    // decodeURIComponentを使用してUTF-8文字列を復元
+    const decoded = decodeURIComponent(encodedData);
     return JSON.parse(decoded) as PlanSessionData;
   } catch (error) {
     console.error('プランセッション情報のデコードに失敗:', error);
@@ -106,6 +109,7 @@ export const savePlanSession = (planData: Omit<PlanSessionData, 'selectedAt'>): 
 
     const encodedData = encodeData(sessionData);
     if (!encodedData) {
+      console.error('プランデータのエンコードに失敗しました');
       return false;
     }
 
