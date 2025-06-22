@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
@@ -7,14 +6,16 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { createCheckoutSession } from '@/services/stripe';
+import { savePlanSession } from '@/utils/planSession';
 import { Check } from 'lucide-react';
 
 const TrainingPlan: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { isSubscribed, planType, hasMemberAccess } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1);
@@ -41,10 +42,34 @@ const TrainingPlan: React.FC = () => {
   
   const handleSubscribe = async () => {
     setIsLoading(true);
+    
     try {
-      console.log(`コミュニティプラン ${selectedDuration}ヶ月のチェックアウト開始`);
+      // プラン情報をセッションに保存
+      const planSessionData = {
+        planType: 'community' as const,
+        duration: selectedDuration,
+        price: currentPlan?.price || ''
+      };
       
-      // チェックアウト後に戻るURLを指定
+      const sessionSaved = savePlanSession(planSessionData);
+      if (!sessionSaved) {
+        throw new Error('プラン情報の保存に失敗しました');
+      }
+
+      // 未ログインユーザーの場合は signup ページにリダイレクト
+      if (!user) {
+        console.log('未ログインユーザー: signup ページにリダイレクト');
+        toast({
+          title: "アカウント作成が必要です",
+          description: "選択したプランでアカウントを作成してください。",
+        });
+        navigate('/training/signup');
+        return;
+      }
+
+      // ログイン済みユーザーは既存の決済フローを実行
+      console.log(`コミュニティプラン ${selectedDuration}ヶ月のチェックアウト開始（ログイン済み）`);
+      
       const returnUrl = window.location.origin + '/profile';
       
       const { url, error } = await createCheckoutSession(
@@ -58,14 +83,13 @@ const TrainingPlan: React.FC = () => {
       }
       
       if (url) {
-        // Stripeチェックアウトページにリダイレクト
         window.location.href = url;
       }
     } catch (error) {
       console.error('購読エラー:', error);
       toast({
         title: "エラーが発生しました",
-        description: "決済処理の開始に失敗しました。もう一度お試しください。",
+        description: error instanceof Error ? error.message : "決済処理の開始に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     } finally {
@@ -75,7 +99,6 @@ const TrainingPlan: React.FC = () => {
   
   return (
     <TrainingLayout>
-      <TrainingHeader />
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-4">トレーニングプラン</h1>
@@ -129,7 +152,7 @@ const TrainingPlan: React.FC = () => {
                   >
                     {isLoading ? '処理中...' : 
                      (isSubscribed && planType === 'community' && hasMemberAccess) ? '現在のプラン' : 
-                     '選択する'}
+                     user ? '選択する' : 'アカウントを作成して始める'}
                   </Button>
                 </CardContent>
               </Card>
@@ -174,7 +197,7 @@ const TrainingPlan: React.FC = () => {
                   >
                     {isLoading ? '処理中...' : 
                      (isSubscribed && planType === 'community' && hasMemberAccess) ? '現在のプラン' : 
-                     '選択する'}
+                     user ? '選択する' : 'アカウントを作成して始める'}
                   </Button>
                 </CardContent>
               </Card>
