@@ -103,3 +103,44 @@ export const checkSubscriptionStatus = async (): Promise<{
     };
   }
 };
+
+/**
+ * Stripe Customer Portalセッションを作成する
+ * @param returnUrl Customer Portal完了後のリダイレクトURL
+ */
+export const createCustomerPortalSession = async (
+  returnUrl: string
+): Promise<{ url: string | null; error: Error | null }> => {
+  try {
+    // ユーザーが認証済みか確認
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('認証されていません。ログインしてください。');
+    }
+    
+    console.log(`Customer Portal開始: returnUrl=${returnUrl}`);
+    
+    // Supabase Edge Functionを呼び出してCustomer Portalセッションを作成
+    const { data, error } = await supabase.functions.invoke('create-customer-portal', {
+      body: {
+        returnUrl
+      }
+    });
+    
+    if (error) {
+      console.error('Customer Portalセッション作成エラー:', error);
+      throw new Error('サブスクリプション管理ページの準備に失敗しました。');
+    }
+    
+    if (data.error) {
+      throw new Error(data.error);
+    }
+    
+    console.log('Customer Portalセッション作成成功:', data.url);
+    
+    return { url: data.url, error: null };
+  } catch (error) {
+    console.error('Customer Portal作成エラー:', error);
+    return { url: null, error: error as Error };
+  }
+};
