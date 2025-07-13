@@ -4,7 +4,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import TaskList from '@/components/training/TaskList';
-import TrainingProgress from '@/components/training/TrainingProgress';
+
 import { useTrainingDetail } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
 import ErrorDisplay from '@/components/common/ErrorBoundary';
@@ -87,13 +87,6 @@ const TrainingDetail = () => {
           </div>
         </div>
 
-        {/* 進捗バー */}
-        <TrainingProgress 
-          tasks={training.tasks || []}
-          progressMap={{}}
-          trainingSlug={trainingSlug}
-          className="mb-8" 
-        />
 
         {/* タスク一覧 */}
         <TaskList 

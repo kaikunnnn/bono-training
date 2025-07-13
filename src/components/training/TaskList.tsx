@@ -1,21 +1,19 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Lock, CheckCircle2 } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { cn } from '@/lib/utils';
 import { Task } from '@/types/training';
 
 interface TaskListProps {
   tasks: Task[];
-  progressMap?: Record<string, { status: string, completed_at: string | null }>;
   trainingSlug: string;
   className?: string;
 }
 
 const TaskList: React.FC<TaskListProps> = ({ 
   tasks, 
-  progressMap = {}, 
   trainingSlug,
   className 
 }) => {
@@ -37,9 +35,6 @@ const TaskList: React.FC<TaskListProps> = ({
     <div className={cn('space-y-4', className)}>
       <div className="grid gap-4">
         {tasks.map((task) => {
-          const taskProgress = progressMap[task.id];
-          const isCompleted = taskProgress?.status === 'done';
-          
           return (
             <Link
               key={task.id}
@@ -61,15 +56,6 @@ const TaskList: React.FC<TaskListProps> = ({
                         <span>プレミアム</span>
                       </div>
                     )}
-                  </div>
-                  <div className="flex items-center gap-2 mt-2">
-                    <CheckCircle2 className={cn(
-                      "w-4 h-4",
-                      isCompleted ? "text-green-500" : "text-gray-300"
-                    )} />
-                    <span className="text-sm text-gray-500">
-                      {isCompleted ? "完了" : "未完了"}
-                    </span>
                   </div>
                   {task.is_premium && !isSubscribed && (
                     <div className="mt-2 text-sm text-gray-500">

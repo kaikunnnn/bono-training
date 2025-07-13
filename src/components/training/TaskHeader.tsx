@@ -4,19 +4,15 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import TaskActionButton from './TaskActionButton';
+
 
 interface TaskHeaderProps {
   title: string;
   trainingTitle: string;
   trainingSlug: string;
-  userId?: string;
-  taskId: string;
   difficulty?: string;
   isPremium: boolean;
   hasPremiumAccess: boolean;
-  isCompleted?: boolean;
-  onProgressUpdate?: () => void;
 }
 
 /**
@@ -26,13 +22,9 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
   title,
   trainingTitle,
   trainingSlug,
-  userId,
-  taskId,
   difficulty,
   isPremium,
-  hasPremiumAccess,
-  isCompleted = false,
-  onProgressUpdate
+  hasPremiumAccess
 }) => {
   const navigate = useNavigate();
 
@@ -43,7 +35,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
   return (
     <>
       {/* ナビゲーションヘッダー */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6">
         <Button 
           variant="ghost" 
           className="flex items-center gap-2 px-3 py-2"
@@ -52,15 +44,6 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
           <ArrowLeft className="w-4 h-4" />
           <span>{trainingTitle}に戻る</span>
         </Button>
-        
-        {userId && (
-          <TaskActionButton
-            userId={userId}
-            taskId={taskId}
-            isCompleted={isCompleted}
-            onProgressUpdate={onProgressUpdate}
-          />
-        )}
       </div>
 
       {/* ヘッダー情報 */}

@@ -3,7 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tables } from '@/integrations/supabase/types';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { useAuth } from '@/contexts/AuthContext';
+
 import { cn } from '@/lib/utils';
 import TaskHeader from './TaskHeader';
 import TaskVideo from './TaskVideo';
@@ -13,9 +13,7 @@ interface TaskDetailProps {
   task: Tables<'task'>;
   training: Tables<'training'>;
   mdxContent: string;
-  progress?: { status?: string; completed_at?: string | null } | null;
   className?: string;
-  onProgressUpdate?: () => void;
   isPremium?: boolean;
   isSubscribed?: boolean;
   isFreePreview?: boolean;
@@ -28,17 +26,12 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
   task,
   training,
   mdxContent,
-  progress,
   className,
-  onProgressUpdate,
   isPremium = false,
   isSubscribed = false,
   isFreePreview = false
 }) => {
-  const { user } = useAuth();
   const { isSubscribed: contextIsSubscribed, hasMemberAccess } = useSubscriptionContext();
-  const navigate = useNavigate();
-  const isCompleted = progress?.status === 'done';
 
   // プレミアムコンテンツへのアクセス権があるかどうかを判定
   // hasMemberAccess=true の場合にのみプレミアムコンテンツにアクセス可能
@@ -51,8 +44,7 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
     hasMemberAccess,
     hasPremiumAccess,
     isFreePreview,
-    taskTitle: task.title,
-    isCompleted
+    taskTitle: task.title
   });
 
   return (
@@ -61,13 +53,9 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
         title={task.title}
         trainingTitle={training.title}
         trainingSlug={training.slug}
-        userId={user?.id}
-        taskId={task.id}
         difficulty={training.difficulty}
         isPremium={isPremium}
         hasPremiumAccess={hasPremiumAccess}
-        isCompleted={isCompleted}
-        onProgressUpdate={onProgressUpdate}
       />
 
       <TaskVideo 
@@ -86,10 +74,6 @@ const TaskDetail: React.FC<TaskDetailProps> = ({
         isFreePreview={isFreePreview}
         hasPremiumAccess={hasPremiumAccess}
         className="mt-6"
-        taskId={task.id}
-        userId={user?.id}
-        isCompleted={isCompleted}
-        onProgressUpdate={onProgressUpdate}
       />
     </div>
   );
