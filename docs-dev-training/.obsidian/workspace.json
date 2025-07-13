@@ -1,0 +1,237 @@
+{
+  "main": {
+    "id": "87bd291bca3cf82a",
+    "type": "split",
+    "children": [
+      {
+        "id": "89940015c98cc0e7",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "26cda66640b3cf86",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/training/ui-basic-training/task-01/content.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "content"
+            }
+          },
+          {
+            "id": "37f4c52b5b5b6808",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/training/ui-basic-training/index.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "index"
+            }
+          },
+          {
+            "id": "343e98e75286b909",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "my-tasks/todo-content/todo-content.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "todo-content"
+            }
+          }
+        ],
+        "currentTab": 2
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "49d8f1daf6c3dd57",
+    "type": "split",
+    "children": [
+      {
+        "id": "af2ac1416f639451",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bb00d6c637a40a1d",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "c9d877fc0b43f033",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "9779adeb9c2682f0",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 200
+  },
+  "right": {
+    "id": "876d4185040a12c3",
+    "type": "split",
+    "children": [
+      {
+        "id": "a633658b780e8248",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "751b339b455ceff2",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
+            }
+          },
+          {
+            "id": "1d48d0f8de55948b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
+            }
+          },
+          {
+            "id": "ec7218570409ac8e",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "0df4f96cf8ff9725",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false
+    }
+  },
+  "active": "343e98e75286b909",
+  "lastOpenFiles": [
+    "content/training/ui-basic-training/task-01/content.md",
+    "content/training/ui-basic-training/index.md",
+    "my-tasks/todo-content/todo-content.md",
+    "content/training/portfolio-attendance-management/task-01/content.md",
+    "content/training/ui-basic-training/task-02/content.md",
+    "content/training/ui-basic-training/task-00/content.md",
+    "content/training/portfolio-solve-beautysalonissue/index.md",
+    "content/training/portfolio-attendance-management/index.md",
+    "content/training/portfolio-solve-beautysalonissue/task-01/content.md",
+    "content/training/portfolio-solve-beautysalonissue/task-01",
+    "content/training/portfolio-solve-beautysalonissue",
+    "content/training/ui-trace-basic/index.md",
+    "content/training/ui-trace-basic/task-02/content.md",
+    "content/training/ui-trace-basic/task-01/content.md",
+    "content/training/ui-basic-training/task-00",
+    "my-tasks/index-todo-list.md",
+    "content/training/ui-trace-basic/task-02",
+    "content/training/ui-trace-basic/task-01",
+    "content/training/ui-trace-basic",
+    "2025-07-12.md",
+    "Untitled.canvas",
+    "content/training/portfolio-attendance-management/task-01",
+    "content/training/ui-basic-training/task-02",
+    "content/training/ui-basic-training/task-01",
+    "content/training/todo-app/index.md",
+    "content/training/portfolio-attendance-management",
+    "content/training/todo-app/tasks/ui-layout-basic01/content.md",
+    "content/training/todo-app/tasks/introduction/content.md",
+    "my-tasks/todo-subscription/todo-subscription.md",
+    "my-tasks/todo-style/todo-style.md",
+    "training/04Trainingの表示ロジック.md",
+    "manual-testing-checklist.md",
+    "feature.md",
+    "training/03pagestructure.md",
+    "training/02feature.md",
+    "training/01overview.md",
+    "my-tasks/task-md-taraining-content.md"
+  ]
+}
