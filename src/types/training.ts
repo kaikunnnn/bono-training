@@ -67,6 +67,10 @@ export interface TrainingDetailData {
   prerequisites?: string[];
   has_premium_content?: boolean;
   thumbnailImage?: string;
+  content?: string; // index.mdの本文コンテンツ
+  estimated_total_time?: string; // 推定時間
+  task_count?: number; // タスク数
+  category?: string; // カテゴリ（将来追加予定）
 }
 
 /**

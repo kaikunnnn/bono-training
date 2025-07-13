@@ -209,7 +209,7 @@ serve(async (req) => {
       return createErrorResponse('NOT_FOUND', 'トレーニングが見つかりませんでした', 404);
     }
 
-    const { frontmatter } = parseFrontmatter(indexContent);
+    const { frontmatter, content } = parseFrontmatter(indexContent);
     
     // tasksフォルダ内のファイル一覧を取得（並列処理で高速化）
     console.log('[FETCH] Getting task list...');
@@ -286,7 +286,11 @@ serve(async (req) => {
       skills: Array.isArray(frontmatter.skills) ? frontmatter.skills : [],
       prerequisites: Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [],
       has_premium_content: tasks.some(task => task.is_premium),
-      thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100'
+      thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100',
+      content: content || '', // index.mdの本文コンテンツを追加
+      estimated_total_time: frontmatter.estimated_total_time || '',
+      task_count: frontmatter.task_count || tasks.length,
+      category: frontmatter.category || ''
     };
 
     const duration = Date.now() - startTime;

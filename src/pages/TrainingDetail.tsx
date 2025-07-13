@@ -5,6 +5,8 @@ import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHeader from '@/components/training/TrainingHeader';
 import TaskList from '@/components/training/TaskList';
 import TrainingProgress from '@/components/training/TrainingProgress';
+import YamlMetaDisplay from '@/components/training/YamlMetaDisplay';
+import MarkdownRenderer from '@/components/training/MarkdownRenderer';
 import { useTrainingDetail } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
 import ErrorDisplay from '@/components/common/ErrorBoundary';
@@ -86,6 +88,32 @@ const TrainingDetail = () => {
             ))}
           </div>
         </div>
+
+        {/* YAMLメタデータ表示セクション */}
+        <YamlMetaDisplay 
+          title={training.title || 'タイトルなし'}
+          description={training.description}
+          type={training.type}
+          tags={training.tags}
+          estimated_total_time={training.estimated_total_time}
+          task_count={training.task_count}
+          category={training.category}
+          thumbnailImage={training.thumbnailImage}
+          className="mb-8"
+        />
+
+        {/* index.md本文コンテンツ表示セクション */}
+        {training.content && (
+          <div className="mb-8">
+            <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">トレーニング詳細</h2>
+              <MarkdownRenderer 
+                content={training.content}
+                className="prose prose-lg max-w-none"
+              />
+            </div>
+          </div>
+        )}
 
         {/* 進捗バー */}
         <TrainingProgress 
