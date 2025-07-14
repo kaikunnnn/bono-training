@@ -44,7 +44,7 @@ export class DbOperations {
   }
 
   /**
-   * サブスクリプション情報を更新
+   * サブスクリプション情報を更新（upsert操作）
    */
   async updateSubscriptionStatus(
     userId: string,
@@ -58,23 +58,35 @@ export class DbOperations {
     }
 
     try {
-      const { data: updateData, error: updateError } = await this.supabaseAdmin
+      // UPSERTを使用してレコードが存在しない場合は新規作成
+      const { data: upsertData, error: upsertError } = await this.supabaseAdmin
         .from("user_subscriptions")
-        .update({
-          is_active: isActive,
-          plan_type: planType,
-          stripe_subscription_id: stripeSubscriptionId,
+        .upsert({
+          user_id: userId,
+          subscribed: isActive,
+          plan_type: planType || 'free',
+          subscription_id: stripeSubscriptionId,
           updated_at: new Date().toISOString()
         })
-        .eq("user_id", userId);
+        .select();
         
-      if (updateError) {
-        logDebug("サブスクリプション情報更新エラー", updateError);
+      if (upsertError) {
+        logDebug("サブスクリプション情報upsertエラー", upsertError);
+        
+        // テーブルが存在しない場合はフォールバック処理
+        if (upsertError.message.includes('relation "user_subscriptions" does not exist')) {
+          logDebug("user_subscriptionsテーブルが存在しません。マイグレーションを実行してください。");
+          return { 
+            data: null, 
+            error: new Error("データベーステーブルが存在しません。マイグレーションを実行してください。") 
+          };
+        }
+        
       } else {
-        logDebug("サブスクリプション情報更新成功", { userId, isActive, planType });
+        logDebug("サブスクリプション情報upsert成功", { userId, isActive, planType });
       }
       
-      return { data: updateData, error: updateError };
+      return { data: upsertData, error: upsertError };
     } catch (err) {
       logDebug("予期せぬエラー - updateSubscriptionStatus", err);
       return { data: null, error: err instanceof Error ? err : new Error('不明なエラー') };

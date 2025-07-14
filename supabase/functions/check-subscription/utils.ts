@@ -25,6 +25,25 @@ export function createSupabaseClients() {
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
   
+  // 環境変数の検証
+  if (!supabaseUrl) {
+    throw new Error("SUPABASE_URL環境変数が設定されていません");
+  }
+  
+  if (!supabaseAnonKey) {
+    throw new Error("SUPABASE_ANON_KEY環境変数が設定されていません");
+  }
+  
+  if (!supabaseServiceKey) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY環境変数が設定されていません");
+  }
+  
+  logDebug("Supabaseクライアント初期化", { 
+    url: supabaseUrl.substring(0, 30) + "...",
+    hasAnonKey: !!supabaseAnonKey,
+    hasServiceKey: !!supabaseServiceKey
+  });
+  
   return {
     supabaseClient: createClient(supabaseUrl, supabaseAnonKey),
     supabaseAdmin: createClient(supabaseUrl, supabaseServiceKey, {

@@ -44,48 +44,71 @@ export function createUnauthenticatedResponse(): Response {
  * ユーザーの購読状態を取得して返す
  */
 export async function handleAuthenticatedRequest(authHeader: string): Promise<Response> {
-  // クライアントの初期化
-  const { supabaseClient, supabaseAdmin } = createSupabaseClients();
-  const stripe = createStripeClient();
-  const subscriptionService = new SubscriptionService(supabaseAdmin, stripe);
-  
-  const token = authHeader.replace("Bearer ", "");
-  logDebug("トークン取得", { token: token.substring(0, 10) + "..." });
-  
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-  
-  if (userError || !user) {
-    logDebug("ユーザー取得エラー", { error: userError });
-    return createUnauthenticatedResponse();
-  }
-  
-  logDebug("ユーザー取得成功", { userId: user.id, email: user.email });
+  try {
+    // クライアントの初期化
+    const { supabaseClient, supabaseAdmin } = createSupabaseClients();
+    const stripe = createStripeClient();
+    const subscriptionService = new SubscriptionService(supabaseAdmin, stripe);
+    
+    const token = authHeader.replace("Bearer ", "");
+    logDebug("トークン取得", { token: token.substring(0, 10) + "..." });
+    
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+    
+    if (userError || !user) {
+      logDebug("ユーザー取得エラー", { error: userError });
+      return createUnauthenticatedResponse();
+    }
+    
+    logDebug("ユーザー取得成功", { userId: user.id, email: user.email });
 
-  // データベースからの購読情報を優先チェック
-  const dbSubscription = await subscriptionService.getUserSubscription(user.id);
-  
-  // データベースに購読情報がある場合はそれを信頼する
-  if (dbSubscription) {
-    const isSubscribed = dbSubscription.is_active;
-    const planType = dbSubscription.plan_type;
+    // データベースからの購読情報を優先チェック
+    const dbSubscription = await subscriptionService.getUserSubscription(user.id);
     
-    // アクセス権限を計算
-    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(planType, isSubscribed);
-    
-    logDebug("データベースの購読情報を返却", { 
-      isActive: isSubscribed,
-      planType,
-      hasMemberAccess,
-      hasLearningAccess
-    });
-    
-    return new Response(
-      JSON.stringify({
-        subscribed: isSubscribed,
+    // データベースに購読情報がある場合はそれを信頼する
+    if (dbSubscription) {
+      const isSubscribed = dbSubscription.is_active;
+      const planType = dbSubscription.plan_type;
+      
+      // アクセス権限を計算
+      const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(planType, isSubscribed);
+      
+      logDebug("データベースの購読情報を返却", { 
+        isActive: isSubscribed,
         planType,
-        isSubscribed,
         hasMemberAccess,
         hasLearningAccess
+      });
+      
+      return new Response(
+        JSON.stringify({
+          subscribed: isSubscribed,
+          planType,
+          isSubscribed,
+          hasMemberAccess,
+          hasLearningAccess
+        }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        }
+      );
+    }
+    
+    return await handleStripeSubscriptionCheck(subscriptionService, user.id, stripe);
+  } catch (error) {
+    logDebug("handleAuthenticatedRequest エラー", { error: error.message });
+    
+    // 環境変数やデータベースのエラーでも適切なレスポンスを返す
+    return new Response(
+      JSON.stringify({ 
+        error: true,
+        message: "サーバー内部エラーが発生しました",
+        subscribed: false,
+        planType: null,
+        isSubscribed: false,
+        hasMemberAccess: false,
+        hasLearningAccess: false
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -93,8 +116,6 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
       }
     );
   }
-  
-  return await handleStripeSubscriptionCheck(subscriptionService, user.id, stripe);
 }
 
 /**
