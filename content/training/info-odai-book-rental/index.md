@@ -1,5 +1,5 @@
 ---
-icon: "/thumbnails/task-01.jpg"
+icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Smiling%20face%20with%20halo/3D/smiling_face_with_halo_3d.png"
 title: "社内本質し出しレシステムをデザインしよう"
 description: "デザインシステムの基本的な考え方から実装まで..."
 thumbnail: "/thumbnails/task.jpg"
