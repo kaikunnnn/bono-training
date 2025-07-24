@@ -86,13 +86,16 @@ export interface TrainingContentResponse {
 export interface TrainingFrontmatter {
   title: string;
   description?: string;
-  type?: 'challenge' | 'skill';
+  type?: 'challenge' | 'skill' | 'portfolio';  // 🆕 portfolio追加
   difficulty?: string;
   tags?: string[];
   estimated_total_time?: string;
   task_count?: number;
   is_premium?: boolean;
   slug?: string;
+  icon?: string;                               // 🆕 アイコン画像
+  thumbnail?: string;                          // 🆕 サムネイル画像
+  category?: string;                           // 🆕 カテゴリ
 }
 
 export interface TaskFrontmatter {
