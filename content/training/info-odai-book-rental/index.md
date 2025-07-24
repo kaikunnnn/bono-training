@@ -4,7 +4,7 @@ title: "社内本質し出しレシステムをデザインしよう"
 description: "デザインシステムの基本的な考え方から実装まで..."
 thumbnail: "/thumbnails/task.jpg"
 type: "portfolio"
-difficulty: "normal"
+category: "情報設計"
 tags: ["ポートフォリオ", "情報設計"]
 estimated_total_time: "2時間"
 task_count: 2
