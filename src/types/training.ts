@@ -4,12 +4,16 @@ export interface Training {
   slug: string;
   title: string;
   description: string;
-  type: 'challenge' | 'skill';
+  type: 'challenge' | 'skill' | 'portfolio';
   difficulty: string;
   tags: string[];
   backgroundImage?: string;
   thumbnailImage?: string;
   isFree?: boolean;
+  icon?: string;
+  category?: string;
+  estimated_total_time?: string;
+  task_count?: number;
 }
 
 export interface Task {
@@ -86,13 +90,16 @@ export interface TrainingContentResponse {
 export interface TrainingFrontmatter {
   title: string;
   description?: string;
-  type?: 'challenge' | 'skill';
+  type?: 'challenge' | 'skill' | 'portfolio';
   difficulty?: string;
   tags?: string[];
   estimated_total_time?: string;
   task_count?: number;
   is_premium?: boolean;
   slug?: string;
+  icon?: string;
+  thumbnail?: string;
+  category?: string;
 }
 
 export interface TaskFrontmatter {
