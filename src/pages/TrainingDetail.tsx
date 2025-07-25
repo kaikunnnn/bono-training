@@ -3,7 +3,6 @@ import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TaskList from '@/components/training/TaskList';
-import TrainingProgress from '@/components/training/TrainingProgress';
 import SimpleMarkdownRenderer from '@/components/training/SimpleMarkdownRenderer';
 import { useTrainingDetail } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,6 +10,7 @@ import ErrorDisplay from '@/components/common/ErrorBoundary';
 import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
+import { loadTrainingContent } from '@/utils/loadTrainingContent';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -19,6 +19,7 @@ const TrainingDetail = () => {
   const { trainingSlug } = useParams<{ trainingSlug: string }>();
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [frontmatter, setFrontmatter] = useState<TrainingFrontmatter | null>(null);
+  const [contentError, setContentError] = useState<string | null>(null);
   
   if (!trainingSlug) {
     return <Navigate to="/training" replace />;
@@ -26,7 +27,29 @@ const TrainingDetail = () => {
 
   const { data: training, isLoading, error } = useTrainingDetail(trainingSlug);
 
-  // index.mdコンテンツの取得（実際のAPIまたはローカルファイルから）
+  // 動的インポートでindex.mdコンテンツを読み込み
+  useEffect(() => {
+    const loadContent = async () => {
+      try {
+        setContentError(null);
+        const { frontmatter, content } = await loadTrainingContent(trainingSlug);
+        setFrontmatter(frontmatter);
+        setMarkdownContent(content);
+      } catch (error) {
+        console.error('コンテンツ読み込みエラー:', error);
+        setContentError(error instanceof Error ? error.message : 'コンテンツの読み込みに失敗しました');
+        setFrontmatter(null);
+        setMarkdownContent('');
+      }
+    };
+
+    if (trainingSlug) {
+      loadContent();
+    }
+  }, [trainingSlug]);
+
+  // 旧useEffect削除用（一時的コメントアウト）
+  /*
   useEffect(() => {
     // TODO: 実際のindex.mdコンテンツを取得する処理に置き換える
     // 現在はモックデータを使用
@@ -95,7 +118,8 @@ task_count: 2
 
 - なんでも良いですが、なるべく単一機能を提供しているアプリが良いと思います。普段使っている iPhone/Android の純正アプリ、ホーム画面に入っていていつも使っているアプリ、ストアのランキング上位のアプリなどから気楽に探してください。
 
-</div>`;
+</div>
+`;
 
     // フロントマターとコンテンツを分離
     const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/;
@@ -119,6 +143,7 @@ task_count: 2
       setMarkdownContent(content.trim());
     }
   }, [trainingSlug]);
+  */
 
   if (isLoading) {
     return (
@@ -235,13 +260,6 @@ task_count: 2
           </div>
         )}
 
-        {/* 進捗バー */}
-        <TrainingProgress 
-          tasks={training.tasks || []}
-          progressMap={{}}
-          trainingSlug={trainingSlug}
-          className="mb-8" 
-        />
 
         {/* マークダウンコンテンツ */}
         {markdownContent && (
@@ -261,6 +279,61 @@ task_count: 2
           trainingSlug={trainingSlug}
           className="mt-8"
         />
+
+        {/* 新しいスキルセクション */}
+        <div className="mt-12">
+          <SimpleMarkdownRenderer 
+            content={`<div class="section-challenge-merit">
+
+<div class="block-text">
+💪
+
+### このチャレンジで伸ばせる力
+
+トレーニングはそのままやってもいいです。基礎も合わせて学習して、実践をトレーニングで行うと土台を築けるでしょう。
+</div>
+
+<div class="skill-group">
+
+<div class="skill-item">
+
+#### ■ "使いやすいUI"を要件とユーザーから設計する力
+
+- 自分が良いと思うではなく、使う人目線のUI作成スキル
+- 参考リンク：『~~~~~~~~~~~~~~』
+
+</div>
+
+<div class="skill-separator"></div>
+
+<div class="skill-item">
+
+#### ■ 機能や状態を網羅してUI設計する力
+
+- 要件を満たす情報や機能や状態のパターンをUIで網羅
+
+</div>
+
+<div class="skill-separator"></div>
+
+<div class="skill-item">
+
+#### ■ ユーザーゴールから配慮するべきものをUIに落とす
+
+- ただ機能を作るのではなく、"使いやすさ"を考えたUIの配慮を設計する
+
+</div>
+
+</div>
+
+</div>`}
+            className="prose prose-lg max-w-none"
+            options={{
+              isPremium: false,
+              hasMemberAccess: true
+            }}
+          />
+        </div>
       </div>
     </TrainingLayout>
   );

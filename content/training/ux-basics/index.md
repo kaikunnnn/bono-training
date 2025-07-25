@@ -16,7 +16,7 @@ task_count: 2
 
 <div class="skill-group">
 
-### ■ "使いやすい UI"を要件とユーザーから設計する力
+### ■ UX の力
 
 - 自分が良いと思うではなく、使う人目線の UI 作成スキル
 - 参考リンク：『[デザイン基礎講座](https://example.com)』
@@ -44,7 +44,7 @@ task_count: 2
 <!-- 以下1つのグループとしてスタイルを定義したい-->
 
 <div class="lesson">
-![画像](http://i.imgur.com/Jjwsc.jpg "サンプル")
+![画像](https://wacul-ai.com/blog/wp-content/uploads/2024/07/image_02.jpg "サンプル")
 ##### ゼロからはじめる情報設計
 進め方の基礎はBONOで詳細に学習・実践できます
 </div>
