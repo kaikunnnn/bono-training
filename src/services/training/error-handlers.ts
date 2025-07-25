@@ -71,6 +71,13 @@ export function handleEdgeFunctionError(error: any, fallbackMessage: string): ne
         throw new TrainingError(error.message || 'サーバーエラーが発生しました', 'SERVER_ERROR', statusCode);
     }
   }
+
+  // Edge Function特有の404エラーパターンを追加検出
+  if (error.message && error.message.includes('Edge Function returned a non-2xx status code')) {
+    // ログからFunctionsHttpErrorで404を判定
+    console.log('Edge Function 404エラーを検出しています');
+    throw new NotFoundError('タスクが見つかりませんでした');
+  }
   
   // 汎用的なエラーメッセージでフォールバック
   throw new TrainingError(fallbackMessage, 'UNKNOWN_ERROR');

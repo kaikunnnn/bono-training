@@ -12,6 +12,10 @@ import ErrorDisplay from '@/components/common/ErrorBoundary';
 import { useTaskDetail } from '@/hooks/useTrainingCache';
 import { TaskFrontmatter } from '@/types/training';
 import { Skeleton } from '@/components/ui/skeleton';
+import { parseContentSections, extractSubSections, type ContentSectionData } from '@/utils/parseContentSections';
+import ContentSection from '@/components/training/ContentSection';
+import DesignSolutionSection from '@/components/training/DesignSolutionSection';
+import NavigationHeader from '@/components/training/NavigationHeader';
 
 /**
  * 安全にbooleanを変換するヘルパー関数
@@ -69,7 +73,10 @@ const TaskDetailPage = () => {
     taskIsPremium: task?.is_premium,
     trainingSlug,
     taskSlug,
-    userAuthenticated: !!user
+    userAuthenticated: !!user,
+    taskDataExists: !!task,
+    taskTitle: task?.title,
+    taskContentLength: task?.content?.length || 0
   });
 
   // フェーズ2: 有料コンテンツテスト用ログ追加
@@ -103,14 +110,130 @@ const TaskDetailPage = () => {
   }
 
   if (error) {
+    // エラータイプの判定
+    const isNotFoundError = error.name === 'NotFoundError' || 
+                           error.message?.includes('コンテンツが見つかりませんでした') ||
+                           error.message?.includes('404');
+    
+    const isAuthError = error.name === 'AuthError' || 
+                       error.message?.includes('ログインが必要');
+    
+    const isForbiddenError = error.name === 'ForbiddenError' || 
+                            error.message?.includes('権限がありません');
+
+    console.log('TaskDetailPage - エラー詳細:', {
+      errorName: error.name,
+      errorMessage: error.message,
+      isNotFoundError,
+      isAuthError,
+      isForbiddenError
+    });
+
     return (
       <TrainingLayout>
-        <div className="container py-8">
-          <ErrorDisplay 
-            error={error}
-            onRetry={() => window.location.reload()}
-            onReset={() => navigate(`/training/${trainingSlug}`)}
-          />
+        <div className="container max-w-4xl mx-auto py-8">
+          <div className="box-border content-stretch flex flex-col items-start justify-start p-0 relative size-full">
+            {/* Navigation Section */}
+            <NavigationHeader 
+              trainingSlug={trainingSlug} 
+              orderIndex={1} 
+            />
+
+            {/* Error Content */}
+            <div className="relative rounded-[66px] shrink-0 w-full">
+              <div className="flex flex-col items-center relative size-full">
+                <div className="box-border content-stretch flex flex-col gap-8 items-center justify-start pb-24 pt-0 px-24 relative w-full">
+                  <div className="box-border content-stretch flex flex-col gap-5 items-center justify-start pb-4 pt-5 px-0 relative shrink-0 w-[741px]">
+                    
+                    {isNotFoundError ? (
+                      // 404エラー専用表示（フォールバック処理の案内付き）
+                      <div className="bg-orange-50 border border-orange-200 rounded-lg p-8 text-center w-full">
+                        <div className="text-orange-600 text-6xl mb-4">⚠️</div>
+                        <div className="text-orange-800 font-bold text-xl mb-2">
+                          一時的な読み込み問題
+                        </div>
+                        <div className="text-orange-600 text-sm mb-4">
+                          タスク「{taskSlug}」の読み込みで問題が発生しました。<br/>
+                          Edge Functionでの取得に失敗しましたが、ローカルフォールバック処理が実行されています。
+                        </div>
+                        <div className="text-orange-500 text-xs mb-4 p-3 bg-orange-100 rounded">
+                          <strong>開発者向け情報:</strong><br/>
+                          • Edge Function: 404エラー<br/>
+                          • ローカルファイル: /content/training/{trainingSlug}/tasks/ui-layout-basic01/content.md<br/>
+                          • slug マッピング: "{taskSlug}" → "ui-layout-basic01"
+                        </div>
+                        <button
+                          onClick={() => window.location.reload()}
+                          className="bg-orange-600 hover:bg-orange-700 text-white px-6 py-2 rounded-lg transition-colors mr-4"
+                        >
+                          再読み込み
+                        </button>
+                        <button
+                          onClick={() => navigate(`/training/${trainingSlug}`)}
+                          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
+                        >
+                          トレーニング一覧に戻る
+                        </button>
+                      </div>
+                    ) : isAuthError ? (
+                      // 認証エラー専用表示
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center w-full">
+                        <div className="text-blue-600 text-6xl mb-4">🔐</div>
+                        <div className="text-blue-800 font-bold text-xl mb-2">
+                          ログインが必要です
+                        </div>
+                        <div className="text-blue-600 text-sm mb-4">
+                          このコンテンツを表示するにはログインしてください。
+                        </div>
+                        <button
+                          onClick={() => navigate('/training/login')}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors mr-4"
+                        >
+                          ログイン
+                        </button>
+                        <button
+                          onClick={() => navigate(`/training/${trainingSlug}`)}
+                          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
+                        >
+                          戻る
+                        </button>
+                      </div>
+                    ) : isForbiddenError ? (
+                      // 権限エラー専用表示
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-8 text-center w-full">
+                        <div className="text-yellow-600 text-6xl mb-4">⛔</div>
+                        <div className="text-yellow-800 font-bold text-xl mb-2">
+                          アクセス権限がありません
+                        </div>
+                        <div className="text-yellow-600 text-sm mb-4">
+                          このコンテンツを表示する権限がありません。プランをアップグレードしてください。
+                        </div>
+                        <button
+                          onClick={() => navigate('/training/plan')}
+                          className="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded-lg transition-colors mr-4"
+                        >
+                          プランを確認
+                        </button>
+                        <button
+                          onClick={() => navigate(`/training/${trainingSlug}`)}
+                          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
+                        >
+                          戻る
+                        </button>
+                      </div>
+                    ) : (
+                      // 一般的なエラー表示
+                      <ErrorDisplay 
+                        error={error}
+                        onRetry={() => window.location.reload()}
+                        onReset={() => navigate(`/training/${trainingSlug}`)}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </TrainingLayout>
     );
@@ -193,45 +316,123 @@ const TaskDetailPage = () => {
     renderMarkdown: true
   });
 
+  // Step 6: 最終統合 - content.md解析と構造化コンテンツ表示
+  let contentSections: ContentSectionData[] = [];
+  const hasValidContent = task && task.content && typeof task.content === 'string' && task.content.trim();
+  
+  if (hasValidContent) {
+    contentSections = parseContentSections(task.content);
+    console.log('✅ 最終統合 - 解析されたセクション数:', contentSections.length);
+    console.log('✅ 最終統合 - セクション構成:', contentSections.map(s => ({ title: s.title, type: s.type })));
+  } else {
+    console.warn('⚠️ 最終統合 - コンテンツが無効またはない:', { 
+      hasTask: !!task, 
+      hasContent: !!(task?.content), 
+      contentType: typeof task?.content,
+      contentLength: task?.content?.length || 0 
+    });
+  }
+
   return (
     <TrainingLayout>
-      <div className="container max-w-4xl mx-auto py-8">
-        {/* LessonHeader */}
-        <div className="mb-10">
-          <LessonHeader frontmatter={frontmatter} />
-        </div>
+      <div className="box-border content-stretch flex flex-col items-start justify-start p-0 relative size-full">
+        {/* Navigation Section */}
+        <NavigationHeader 
+          trainingSlug={trainingSlug} 
+          orderIndex={frontmatter.order_index} 
+        />
+        
+        {/* Main Content Section */}
+        <div className="relative rounded-[66px] shrink-0 w-full">
+          <div className="flex flex-col items-center relative size-full">
+            <div className="box-border content-stretch flex flex-col gap-8 items-center justify-start pb-24 pt-0 px-24 relative w-full">
+              
+              {/* Eyecatch Section */}
+              <div className="box-border content-stretch flex flex-col gap-5 items-center justify-start pb-4 pt-5 px-0 relative shrink-0 w-[741px]">
+                <div className="box-border content-stretch flex flex-col gap-5 items-center justify-start p-0 relative shrink-0 w-full">
+                  {/* Block - カテゴリとタグ */}
+                  <div className="box-border content-stretch flex flex-row gap-4 items-start justify-center p-0 relative shrink-0 w-full">
+                    <div className="bg-[rgba(184,163,4,0.12)] box-border content-stretch flex flex-row gap-2.5 items-center justify-center overflow-clip px-1.5 py-0.5 relative rounded shrink-0">
+                      <div className="font-['Noto_Sans_JP:Medium',_sans-serif] font-medium leading-[0] relative shrink-0 text-[#5e4700] text-[12px] text-center text-nowrap">
+                        <p className="block leading-[16px] whitespace-pre">説明</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Heading - タイトルと説明 */}
+                  <div className="box-border content-stretch flex flex-col gap-4 items-center justify-start p-0 relative shrink-0 w-[640px]">
+                    <div className="box-border content-stretch flex flex-row gap-2.5 items-end justify-center p-0 relative shrink-0 w-full">
+                      <div className="basis-0 font-['Rounded_Mplus_1c:Medium',_sans-serif] grow leading-[0] min-h-px min-w-px not-italic relative shrink-0 text-[#0d0f18] text-[40px] text-center">
+                        <p className="block leading-[1.28]">{frontmatter.title}</p>
+                      </div>
+                    </div>
+                    {frontmatter.description && (
+                      <div className="font-['Rounded_Mplus_1c:Medium',_sans-serif] leading-[0] not-italic relative shrink-0 text-[20px] text-[rgba(13,15,24,0.8)] text-center w-[477px]">
+                        <p className="block leading-[1.69]">{frontmatter.description}</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-        {/* 動画プレーヤー */}
-        {hasValidVideo && (
-          <div className="mb-8">
-            <TaskVideo
-              videoUrl={frontmatter.video_full}
-              previewVideoUrl={frontmatter.video_preview}
-              isPremium={frontmatter.is_premium}
-              hasPremiumAccess={hasPremiumAccess}
-              title={frontmatter.title}
-              previewSeconds={frontmatter.preview_sec || 30}
-              className="w-full"
-            />
+              {/* Content Sections */}
+              <div className="box-border content-stretch flex flex-col gap-6 items-start justify-start p-0 relative shrink-0 w-[740px]">
+                {/* 動画プレーヤー */}
+                {hasValidVideo && (
+                  <div className="mb-8">
+                    <TaskVideo
+                      videoUrl={frontmatter.video_full}
+                      previewVideoUrl={frontmatter.video_preview}
+                      isPremium={frontmatter.is_premium}
+                      hasPremiumAccess={hasPremiumAccess}
+                      title={frontmatter.title}
+                      previewSeconds={frontmatter.preview_sec || 30}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+
+                {/* Step 4-5: 新しいコンテンツセクション表示 */}
+                <div className="mb-8">
+                  {hasValidContent && contentSections.length > 0 ? (
+                    contentSections.map((section, index) => (
+                      <div key={index} className="mb-6">
+                        {section.type === 'design-solution' ? (
+                          <DesignSolutionSection 
+                            content={section.content}
+                          />
+                        ) : (
+                          <ContentSection 
+                            title={section.title}
+                            content={section.content}
+                          />
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
+                      <div className="text-yellow-800 font-medium mb-2">
+                        📄 コンテンツが利用できません
+                      </div>
+                      <div className="text-yellow-600 text-sm">
+                        {task ? 'このタスクにはまだコンテンツが設定されていません。' : 'タスクデータの取得に失敗しました。'}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* ナビゲーション */}
+                <TaskNavigation 
+                  training={{ title: task.trainingTitle || 'トレーニング' }}
+                  currentTaskSlug={taskSlug}
+                  trainingSlug={trainingSlug}
+                  nextTaskSlug={frontmatter.next_task}
+                  prevTaskSlug={frontmatter.prev_task}
+                />
+              </div>
+            </div>
           </div>
-        )}
-
-        {/* Markdownコンテンツ表示 - プロパティ名を統一 */}
-        <MarkdownRenderer 
-          content={task.content || ''}
-          isPremium={frontmatter.is_premium}
-          hasMemberAccess={hasPremiumAccess}
-          className="mb-8"
-        />
-
-        {/* ナビゲーション */}
-        <TaskNavigation 
-          training={{ title: task.trainingTitle || 'トレーニング' }}
-          currentTaskSlug={taskSlug}
-          trainingSlug={trainingSlug}
-          nextTaskSlug={frontmatter.next_task}
-          prevTaskSlug={frontmatter.prev_task}
-        />
+        </div>
       </div>
     </TrainingLayout>
   );

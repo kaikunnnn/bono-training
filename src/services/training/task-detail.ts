@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { TaskDetailData } from "@/types/training";
 import { TrainingError } from "@/utils/errors";
 import { handleEdgeFunctionError, validateEdgeFunctionResponse } from "./error-handlers";
+import { getLocalTaskContent } from "./local-content-fallback";
 
 /**
  * 安全にプロパティを取得するヘルパー関数
@@ -101,7 +102,13 @@ const validateAndTransformResponse = (responseData: any, trainingSlug: string, t
  * タスク詳細を取得（Storage + Edge Functionベース）
  */
 export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: string): Promise<TaskDetailData> => {
-  console.log(`Storage + Edge Functionからタスク詳細を取得: ${trainingSlug}/${taskSlug}`);
+  console.log(`🚀 タスク詳細取得開始: ${trainingSlug}/${taskSlug}`);
+  console.log(`📊 デバッグ情報:`, {
+    trainingSlug,
+    taskSlug,
+    timestamp: new Date().toISOString(),
+    userAgent: navigator.userAgent
+  });
   
   try {
     if (!trainingSlug || !taskSlug) {
@@ -113,6 +120,14 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
     }
     
     // 新しいEdge Functionを呼び出し
+    console.log(`📡 Edge Function呼び出し:`, {
+      functionName: 'get-training-content',
+      requestBody: {
+        trainingSlug: trainingSlug.trim(),
+        taskSlug: taskSlug.trim()
+      }
+    });
+    
     const { data, error } = await supabase.functions.invoke('get-training-content', {
       body: {
         trainingSlug: trainingSlug.trim(),
@@ -120,29 +135,62 @@ export const getTrainingTaskDetail = async (trainingSlug: string, taskSlug: stri
       }
     });
 
-    console.log('Edge Function レスポンス:', { 
+    console.log('📥 Edge Function レスポンス:', { 
       hasData: !!data, 
       hasError: !!error,
       dataKeys: data ? Object.keys(data) : [],
-      errorDetails: error 
+      errorDetails: error,
+      errorType: error?.name,
+      errorMessage: error?.message 
     });
 
+    // エラーがある場合、まずローカルフォールバックを試行
     if (error) {
+      console.log('🔄 Edge Functionエラー検出 - ローカルフォールバックを優先実行');
+      
+      try {
+        const localTaskDetail = await getLocalTaskContent(trainingSlug, taskSlug);
+        if (localTaskDetail) {
+          console.log('✅ ローカルフォールバック成功 - Edge Functionエラーを回避');
+          return localTaskDetail;
+        } else {
+          console.log('❌ ローカルフォールバック失敗 - 元のエラーを処理');
+        }
+      } catch (fallbackError) {
+        console.error('❌ ローカルフォールバック処理中エラー:', fallbackError);
+      }
+      
+      // ローカルフォールバック失敗時のみエラーハンドリング実行
       handleEdgeFunctionError(error, 'タスク詳細の取得に失敗しました');
     }
 
+    // Edge Function成功時の通常処理
     const responseData = validateEdgeFunctionResponse(data, 'タスク詳細');
     const taskDetail = validateAndTransformResponse(responseData, trainingSlug, taskSlug);
     
     return taskDetail;
     
   } catch (err) {
+    console.error('getTrainingTaskDetail 最終catch - 予期しないエラー:', err);
+    
+    // 最後の試行としてローカルフォールバック実行
+    console.log('🔄 最終フォールバック試行...');
+    try {
+      const localTaskDetail = await getLocalTaskContent(trainingSlug, taskSlug);
+      if (localTaskDetail) {
+        console.log('✅ 最終フォールバック成功');
+        return localTaskDetail;
+      }
+    } catch (fallbackError) {
+      console.error('❌ 最終フォールバックも失敗:', fallbackError);
+    }
+    
     // カスタムエラーは再スロー
     if (err instanceof TrainingError) {
       throw err;
     }
     
-    console.error('getTrainingTaskDetail 予期しないエラー:', err);
+    console.error('getTrainingTaskDetail 全ての試行が失敗:', err);
     throw new TrainingError('タスク詳細の取得中に予期しないエラーが発生しました', 'UNKNOWN_ERROR');
   }
 };
