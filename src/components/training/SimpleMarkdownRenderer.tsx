@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
 import type { Components } from 'react-markdown';
 
 interface SimpleMarkdownRendererProps {
@@ -40,7 +41,17 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
     // divタグの処理（skill-group, lesson, step クラスに対応）
     div: ({ className: divClassName, children, ...props }) => {
       const classMap: Record<string, string> = {
-        'skill-group': 'bg-gray-50 border border-gray-200 rounded-lg p-6 mb-6 space-y-6',
+        // セクション全体のスタイル
+        'section-challenge-merit': 'w-full bg-white py-8 px-4 border border-slate-400 flex flex-col items-center',
+        // テキストブロック
+        'block-text': 'w-full max-w-2xl mb-9 py-6 border-b border-slate-300 flex flex-col items-center text-center space-y-3',
+        // スキルグループ
+        'skill-group': 'w-full max-w-2xl bg-white border-2 border-black rounded-3xl px-12 py-4 space-y-0',
+        // 個別スキル項目
+        'skill-item': 'py-5 px-0',
+        // 区切り線
+        'skill-separator': 'w-full h-0 border-t-2 border-dotted border-slate-700',
+        // 既存のクラス
         'lesson': 'flex gap-4 bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4',
         'step': 'bg-white border-l-4 border-blue-500 pl-4 py-3 mb-4 shadow-sm'
       };
@@ -59,14 +70,25 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
       </h2>
     ),
 
-    h3: ({ children, ...props }) => (
-      <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-800" {...props}>
-        {children}
-      </h3>
-    ),
+    h3: ({ children, ...props }) => {
+      // セクションタイトル用の特別なスタイリング
+      const childrenStr = React.Children.toArray(children).join('');
+      if (childrenStr.includes('このチャレンジで伸ばせる力')) {
+        return (
+          <h3 className="text-2xl font-bold text-black leading-tight" {...props}>
+            {children}
+          </h3>
+        );
+      }
+      return (
+        <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-800" {...props}>
+          {children}
+        </h3>
+      );
+    },
 
     h4: ({ children, ...props }) => (
-      <h4 className="text-lg font-semibold mt-4 mb-2 text-gray-800" {...props}>
+      <h4 className="text-lg font-semibold mb-6 text-gray-800" {...props}>
         {children}
       </h4>
     ),
@@ -78,11 +100,22 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
     ),
 
     // 段落
-    p: ({ children, ...props }) => (
-      <p className="text-gray-700 leading-relaxed mb-4" {...props}>
-        {children}
-      </p>
-    ),
+    p: ({ children, ...props }) => {
+      // 絵文字のみの段落の場合の特別な処理
+      const childrenStr = React.Children.toArray(children).join('');
+      if (childrenStr.trim() === '💪') {
+        return (
+          <div className="text-sm font-semibold text-slate-900 mb-3" {...props}>
+            {children}
+          </div>
+        );
+      }
+      return (
+        <p className="text-gray-700 leading-relaxed mb-4" {...props}>
+          {children}
+        </p>
+      );
+    },
 
     // リスト
     ul: ({ children, ...props }) => (
@@ -160,7 +193,10 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
 
   return (
     <div className={className}>
-      <ReactMarkdown components={components}>
+      <ReactMarkdown 
+        components={components}
+        rehypePlugins={[rehypeRaw]}
+      >
         {displayContent}
       </ReactMarkdown>
 
