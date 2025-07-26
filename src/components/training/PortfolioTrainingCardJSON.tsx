@@ -12,16 +12,10 @@ interface PortfolioTrainingCardJSONProps {
 
 const PortfolioTrainingCardJSON: React.FC<PortfolioTrainingCardJSONProps> = ({ training, className }) => {
   return (
-    <div className="relative">
-      {/* Label */}
-      <div className="absolute -top-8 left-0 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded">
-        JSON仕様
-      </div>
-      
-      <Link 
-        to={`/training/${training.slug}`} 
-        className={cn("block w-full max-w-[328px] mx-auto", className)}
-      >
+    <Link 
+      to={`/training/${training.slug}`} 
+      className={cn("block w-full max-w-[328px] mx-auto", className)}
+    >
         {/* Step 1: 外側コンテナ（training_content） */}
         <div className="relative w-[328px] h-[346px] pt-6 flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
           
@@ -88,7 +82,6 @@ const PortfolioTrainingCardJSON: React.FC<PortfolioTrainingCardJSONProps> = ({ t
           </div>
         </div>
       </Link>
-    </div>
   );
 };
 
