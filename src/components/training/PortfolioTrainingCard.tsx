@@ -45,7 +45,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           </svg>
           
           {/* 統合コンテンツブロック */}
-          <div className="bg-white px-[34px] pb-6 flex flex-col items-center gap-3 -mt-24">
+          <div className="bg-white px-[34px] pb-6 flex flex-col items-center gap-3">
             {/* Step 2-1: アイコン部分 */}
             <div className="w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px]">
               <img
