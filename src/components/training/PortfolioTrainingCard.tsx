@@ -36,7 +36,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           {/* アイコンと楕円の統合ブロック */}
           <div className="flex flex-col items-start w-full">
             {/* Step 2-1: アイコン部分 */}
-            <div className="relative z-20 w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px] -mb-8 ml-[34px]">
+            <div className="relative z-30 w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px] -mb-18 ml-[34px]">
               <img
                 src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
                 alt={training.title}
@@ -46,13 +46,13 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             
             {/* 上が円のブロック（SVG） */}
             <svg 
-              className="relative z-10 w-full h-[50px]" 
-              viewBox="0 0 328 50" 
+              className="relative z-15 w-full h-[70px]" 
+              viewBox="0 0 328 70" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
               preserveAspectRatio="none"
             >
-              <path d="M0 49.2753C0 49.2753 67.866 0 165.787 0C263.709 0 328 49.2753 328 49.2753V50H0V49.2753Z" fill="white"/>
+              <path d="M0 69.2753C0 69.2753 67.866 0 165.787 0C263.709 0 328 69.2753 328 69.2753V70H0V69.2753Z" fill="white"/>
             </svg>
           </div>
           
