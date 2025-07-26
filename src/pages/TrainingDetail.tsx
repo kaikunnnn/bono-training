@@ -2,7 +2,7 @@
 import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import TrainingLayout from '@/components/training/TrainingLayout';
-import TaskList from '@/components/training/TaskList';
+import TaskCollectionBlock from '@/components/training/TaskCollectionBlock';
 import SimpleMarkdownRenderer from '@/components/training/SimpleMarkdownRenderer';
 import { useTrainingDetail } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -488,8 +488,8 @@ task_count: 2
           })()}
 
           {/* タスク一覧 */}
-          <div data-lov-id="src/components/training/TaskList.tsx:37:4" data-name="task-collection-block">
-            <TaskList 
+          <div data-name="task-collection-block">
+            <TaskCollectionBlock 
               tasks={training.tasks || []} 
               trainingSlug={trainingSlug}
               className="mt-8"
