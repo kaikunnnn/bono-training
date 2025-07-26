@@ -52,7 +52,7 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
                     strokeLinecap="round" 
                     strokeLinejoin="round" 
                     strokeWidth={2} 
-                    d="M9 5l7 7-7 7" 
+                    d="M5 9l7 7 7-7" 
                   />
                 </svg>
               </div>
