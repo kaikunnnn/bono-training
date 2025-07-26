@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
@@ -70,8 +71,8 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             {/* お題内容をみるボタン（3層構造） */}
             <div className="flex items-center">
               <div className="flex items-center">
-                <div className="bg-[#111827] border-2 border-[#111827] rounded-full py-1 px-4 flex items-center gap-2">
-                  <span className="text-white text-sm font-semibold whitespace-nowrap">
+                <div className="bg-[#111827] rounded-full py-1 px-4 flex items-center gap-2">
+                  <span className="text-gray-900 text-sm font-semibold whitespace-nowrap">
                     お題内容をみる
                   </span>
                   <div className="w-5 h-5 bg-[#0d221d] rounded-full flex items-center justify-center">
