@@ -201,10 +201,9 @@ task_count: 2
         {/* Figmaデザインベースのeyecatchセクション */}
         {frontmatter && (
           <div
-            className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative size-full mb-8"
+            className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative size-full mb-8 border-b border-slate-200"
             data-name="training-overview"
           >
-            <div className="absolute border-[0px_0px_1px] border-slate-200 border-solid inset-0 pointer-events-none" />
             
             {/* 背景 */}
             <div
