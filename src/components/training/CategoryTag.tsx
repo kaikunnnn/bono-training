@@ -51,10 +51,10 @@ const CategoryTag: React.FC<CategoryTagProps> = ({
       data-name="category"
     >
       <div
-        className="bg-[rgba(184,4,85,0.12)] box-border content-stretch flex flex-row gap-2.5 items-center justify-center overflow-clip px-1.5 py-0.5 relative rounded shrink-0"
+        className="bg-[rgba(184,4,85,0.12)] border border-[rgba(184,4,85,0.4)] border-opacity-40 box-border content-stretch flex flex-row gap-2.5 items-center justify-center overflow-clip px-1.5 py-0.5 relative rounded min-w-[60px] h-[20px] shrink-0"
         data-name="Component 4"
       >
-        <div className="font-['Noto_Sans_JP:Medium',_sans-serif] font-medium leading-[0] relative shrink-0 text-[#b80455] text-[12px] text-center text-nowrap">
+        <div className="font-medium leading-[0] relative shrink-0 text-[#b80455] text-[12px] text-center text-nowrap">
           <p className="block leading-[16px] whitespace-pre">{category}</p>
         </div>
       </div>

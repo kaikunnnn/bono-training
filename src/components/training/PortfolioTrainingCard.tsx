@@ -60,23 +60,25 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           </div>
 
           {/* Step 2-3: 区切り線 */}
-          <div className="w-[260px] h-[1px] bg-[#E2E8F0]" />
+          <div className="w-full max-w-[260px] h-[1px] bg-[#E2E8F0]" />
 
           {/* Step 2-4: フッター部分 */}
-          <div className="w-[260px] flex justify-between items-center">
-            {/* カテゴリタグ（小） */}
-            <div className="px-2 py-1 bg-[#F1F5F9] rounded">
-              <span className="text-[10px] font-medium text-[#64748B]">
-                {training.category || 'UIビジュアル'}
-              </span>
-            </div>
+          <div className="w-full max-w-[260px] h-[28px] flex justify-between items-center gap-5">
+            {/* カテゴリタグ */}
+            <CategoryTag category={training.category || 'UIビジュアル'} displayMode="category" />
 
-            {/* お題内容をみるボタン */}
-            <div className="flex items-center gap-1">
-              <span className="text-[12px] font-medium text-[#020617]">
-                お題内容をみる
-              </span>
-              <ArrowRight className="w-3 h-3 text-[#020617]" />
+            {/* お題内容をみるボタン（3層構造） */}
+            <div className="flex items-center">
+              <div className="flex items-center">
+                <div className="bg-[#111827] border-2 border-[#111827] rounded-full py-1 px-4 flex items-center gap-2">
+                  <span className="text-white text-sm font-semibold whitespace-nowrap">
+                    お題内容をみる
+                  </span>
+                  <div className="w-5 h-5 bg-[#0d221d] rounded-full flex items-center justify-center">
+                    <ArrowRight className="w-2.5 h-2.5 text-white" />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
