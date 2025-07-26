@@ -1,4 +1,440 @@
-# index.md のスタイルを共有するコードのスタイルとレイアウトをもとに回収しつつ、index.md の情報をそのデザインに反映できるようにする
+いかに
+1 : trainingSlug の実装方針の内容
+2 : コードで示す新しいスタイルの情報
+を渡します。これらをもとに :trainingSlug のスタイルを改修し、index.md のデータを表示できるようにしてください
+
+# 1 実装方針
+
+# :trainingSlug ページ スタイル改善・データ反映 AI エンジニア実装指示書
+
+## 📋 プロジェクト概要
+
+- **対象ページ**: `/training/[trainingSlug]` (例: `/training/info-odai-book-rental`)
+- **修正対象ファイル**: `src/pages/TrainingDetail.tsx`
+- **目的**: 提供された Figma デザインコードのスタイルを適用し、index.md のデータを適切に反映する
+- **重要**: 既存機能（リンク、データ取得、認証等）は全て保持すること
+
+## ⚠️ 実装前の重要確認事項
+
+### 1. 既存コード構造の理解
+
+```typescript
+// 現在使用されているデータ取得
+const { data: training, isLoading, error } = useTrainingDetail(trainingSlug);
+const [frontmatter, setFrontmatter] = useState<TrainingFrontmatter | null>(
+  null
+);
+const [markdownContent, setMarkdownContent] = useState<string>("");
+
+// データ構造
+interface TrainingDetailData {
+  tasks: Task[]; // ← これがタスク一覧
+}
+
+interface Task {
+  slug: string;
+  title: string;
+  order_index: number; // ← CHALLENGE番号はこれを使用
+  is_premium: boolean;
+}
+```
+
+### 2. 絶対に変更してはいけない項目
+
+- 既存のリンク生成ロジック（`/training/${trainingSlug}/${task.slug}`）
+- データ取得フック（`useTrainingDetail`、`loadTrainingContent`）
+- 認証・権限チェック機能
+- 既存のエラーハンドリング
+
+### 3. 画像・SVG 取り扱い方針
+
+- **現段階では画像・SVG は実装しない**
+- プレースホルダーを配置し、サイズのみ正確に設定
+- 後で差し替え可能な構造にする
+
+---
+
+## 🚀 段階的実装フェーズ
+
+## Phase 1: 基盤準備・データ拡張（1-2 時間）
+
+### 目標
+
+既存のデータ構造を壊すことなく、新しい front-matter 項目を追加準備する
+
+### 実装内容
+
+1. **型定義拡張**
+
+   ```typescript
+   // src/types/training.ts に追加
+   interface TrainingFrontmatter {
+     // 既存項目は保持...
+     skills?: Array<{
+       id: string;
+       title: string;
+       description: string;
+     }>;
+     skillDetails?: Array<{
+       id: string;
+       title: string;
+       description: string;
+       bulletPoints: string[];
+       referenceLinks?: Array<{
+         text: string;
+         url: string;
+       }>;
+     }>;
+   }
+   ```
+
+2. **カテゴリマッピング関数作成**
+
+   ```typescript
+   const getCategoryProperty = (category?: string) => {
+     const mapping = {
+       情報設計: "tag-info",
+       レイアウト: "tag-layout",
+       "要件・戦略": "tag-strategy",
+       ビジュアル: "tag-visual",
+       説明: "explain",
+     };
+     return mapping[category] || "tag-visual";
+   };
+   ```
+
+3. **Component4 コンポーネントのインポート確認**
+   - 提供された Figma コードから Component4 をコピー
+   - 必要な svgPaths も含めてインポート
+
+### 完了条件
+
+- ビルドエラーが発生しない
+- 既存ページが正常に表示される
+- 新しい型定義が正しく適用されている
+
+---
+
+## Phase 2: section-eyecatch 実装（2-3 時間）
+
+### 目標
+
+ページ上部のメインビジュアル部分を Figma デザインに置き換える
+
+### 実装詳細
+
+1. **既存の markdownContent 表示部分を特定**
+
+   - `src/pages/TrainingDetail.tsx`の既存レンダリング部分を確認
+
+2. **section-eyecatch JSX 実装**
+
+   - 提供された Figma コードの`SectionEyecatch`部分を適用
+   - `frontmatter.title`、`frontmatter.description`を動的に表示
+   - `getCategoryProperty(frontmatter.category)`でカテゴリタグを設定
+
+3. **レスポンシブ対応**
+
+   - `w-[1440px]`、`w-[766px]`等の固定幅を適切に調整
+   - モバイルでも崩れないように配慮
+
+4. **画像プレースホルダー設定**
+
+   ```typescript
+   // アイコン部分（68x68px）
+   <div className="relative shrink-0 size-[68px]">
+     <div className="absolute bg-gray-200 inset-0 rounded-full" />
+   </div>
+
+   // サムネイル部分（120x120px）
+   <div className="bg-[#ffffff] size-[120px] rounded-full">
+     <div className="size-[68px] bg-gray-200 rounded-full m-auto" />
+   </div>
+   ```
+
+### 完了条件
+
+- タイトルと説明文が正しく表示される
+- カテゴリタグが適切な色で表示される
+- 既存のボタンリンクが動作する
+- レスポンシブでレイアウトが崩れない
+
+---
+
+## Phase 3: section-overview 実装（3-4 時間）
+
+### 目標
+
+「チャレンジで身につくこと」と「トレーニング一覧」セクションを実装
+
+### A. challenge-merit 部分（1.5 時間）
+
+1. **データ確認**
+
+   ```typescript
+   // frontmatter.skillsの存在確認
+   {frontmatter?.skills && (
+     // レンダリング処理
+   )}
+   ```
+
+2. **Figma コード適用**
+
+   - 提供された`ChallengeMerit`コンポーネントのスタイルを適用
+   - スキル項目を動的生成
+   - 矢印アイコンはプレースホルダーで代替
+
+3. **アンカーリンク準備**
+   ```typescript
+   <div id={`skill-${skill.id}`}>
+   ```
+
+### B. task-collection-block 部分（1.5-2 時間）
+
+1. **既存 tasks データ活用**
+
+   ```typescript
+   {training?.tasks && training.tasks.map((task) => (
+     // CHALLENGE {task.order_index.toString().padStart(2, '0')}
+   ))}
+   ```
+
+2. **タスクカード実装**
+
+   - 提供された`TaskCollectionBlock`のスタイルを適用
+   - 既存の Link to を保持
+   - プレミアムタスクの識別（`task.is_premium`）
+
+3. **動的レンダリング対応**
+   - タスク数に関係なく正しく表示
+   - order_index に基づいた正確な順序
+
+### 完了条件
+
+- スキル一覧が正しく表示される（データがある場合）
+- タスク一覧が CHALLENGE 番号付きで表示される
+- タスクへのリンクが正常に動作する
+- プレミアムタスクが適切に表示される
+
+---
+
+## Phase 4: section-challenge-merit 実装（2-3 時間）
+
+### 目標
+
+詳細なスキル説明セクションを実装
+
+### 実装詳細
+
+1. **データ構造対応**
+
+   ```typescript
+   {frontmatter?.skillDetails && (
+     // 詳細なスキル情報表示
+   )}
+   ```
+
+2. **カード形式レイアウト**
+
+   - 白背景カードに黒枠
+   - スキルごとに区切り線
+   - 箇条書きリストの動的生成
+
+3. **アンカーリンク実装**
+
+   ```typescript
+   <div id={`skill-${skill.id}`}>
+   ```
+
+4. **参考リンク処理**
+   ```typescript
+   {
+     skill.referenceLinks?.map((link) => <a href={link.url}>{link.text}</a>);
+   }
+   ```
+
+### 完了条件
+
+- スキル詳細が整理されて表示される
+- section-overview からのリンクが動作する
+- 参考リンクが正しく動作する
+- 区切り線が適切に表示される
+
+---
+
+## Phase 5: section-進め方ガイド 実装（2-3 時間）
+
+### 目標
+
+レッスンカードとステップ一覧を実装
+
+### 実装詳細
+
+1. **マークダウン解析関数作成**
+
+   ```typescript
+   const parseSteps = (content: string) => {
+     const stepMatches = content.match(/<div class="step">(.*?)<\/div>/gs);
+     // ステップ情報を抽出
+   };
+
+   const parseLessonInfo = (content: string) => {
+     // レッスン情報を抽出
+   };
+   ```
+
+2. **条件付きレッスン表示**
+
+   - レッスン情報がある場合のみ表示
+   - サムネイルプレースホルダー（163x105px）
+
+3. **ステップ一覧の動的生成**
+
+   - `<div class="step">`タグを検出
+   - ステップ間の矢印表示（最後以外）
+   - 番号の自動生成
+
+4. **マークダウン記法対応**
+   ```markdown
+   <div class="step">
+   ### 1. ステップタイトル
+   - 箇条書き項目
+   </div>
+   ```
+
+### 完了条件
+
+- ステップが正しい順序で表示される
+- 矢印が適切な位置に表示される（最後を除く）
+- レッスンカードが条件付きで表示される
+- マークダウンが正しく解析される
+
+---
+
+## Phase 6: 最終調整・テスト（1-2 時間）
+
+### 目標
+
+全体の動作確認と微調整
+
+### チェック項目
+
+1. **機能テスト**
+
+   - [ ] 全セクションが正しく表示される
+   - [ ] 既存のリンクが全て動作する
+   - [ ] データがない場合のフォールバック表示
+   - [ ] エラーハンドリングが正常に動作する
+
+2. **スタイルテスト**
+
+   - [ ] デザインが Figma に近い見た目になっている
+   - [ ] レスポンシブ対応ができている
+   - [ ] プレースホルダーが適切なサイズで表示される
+
+3. **パフォーマンステスト**
+   - [ ] ページ読み込み速度に問題がない
+   - [ ] 不要な再レンダリングが発生していない
+
+### 完了条件
+
+- 全ての既存機能が正常に動作する
+- 新しいセクションが期待通りに表示される
+- エラーが発生しない
+
+---
+
+## 🚨 重要な注意事項
+
+### コード品質について
+
+1. **TypeScript 厳格チェック**
+
+   - 全ての型定義を正確に設定
+   - `any`型の使用禁止
+   - null チェックを確実に実行
+
+2. **エラーハンドリング**
+
+   ```typescript
+   // データが存在しない場合の安全な表示
+   {frontmatter?.skills && frontmatter.skills.length > 0 && (
+     // レンダリング
+   )}
+   ```
+
+3. **パフォーマンス配慮**
+   - 不要な再レンダリングを避ける
+   - useMemo や useCallback を適切に使用
+   - 大きなデータの場合はバーチャルスクロール検討
+
+### デバッグ・トラブルシューティング
+
+1. **段階的確認**
+
+   - 各フェーズ完了時に必ず動作確認
+   - console.log でデータ構造を確認
+   - ブラウザ DevTools でスタイル確認
+
+2. **よくある問題**
+   - CSS クラス名の typo
+   - データ構造の想定違い
+   - 既存スタイルとの競合
+   - レスポンシブブレークポイントの考慮不足
+
+### 品質保証
+
+1. **複数ブラウザでの確認**
+
+   - Chrome、Firefox、Safari
+   - モバイルブラウザ
+
+2. **異なるデータパターンでのテスト**
+   - データが全て揃っている場合
+   - 一部データが欠けている場合
+   - データが全くない場合
+
+---
+
+## 📋 最終成果物チェックリスト
+
+### ✅ 機能要件
+
+- [ ] section-eyecatch が正しく表示される
+- [ ] section-overview が正しく表示される
+- [ ] section-challenge-merit が正しく表示される
+- [ ] section-進め方ガイドが正しく表示される
+- [ ] 既存のタスクリンクが全て動作する
+- [ ] データがない場合も正常に表示される
+
+### ✅ 非機能要件
+
+- [ ] TypeScript エラーが 0 件
+- [ ] ESLint 警告が 0 件
+- [ ] ページ読み込み時間が 3 秒以内
+- [ ] モバイルでレイアウトが崩れない
+- [ ] 画像プレースホルダーが適切なサイズ
+
+### ✅ 保守性要件
+
+- [ ] コードにコメントが適切に記載されている
+- [ ] 型定義が正確で拡張可能
+- [ ] 画像・SVG 差し替えが容易な構造
+- [ ] 新しい front-matter 項目追加が容易
+
+---
+
+## 🎯 実装成功のポイント
+
+1. **段階的実装**: 一度に全てを変更せず、フェーズごとに確実に進める
+2. **既存機能保護**: 新機能追加時も既存機能が壊れないよう細心の注意
+3. **データ駆動**: ハードコードせず、front-matter データに基づく動的表示
+4. **エラー耐性**: データが不完全でもページが表示される設計
+5. **将来拡張性**: 新しい項目やセクション追加が容易な構造
+
+この指示書に従って実装することで、要求された Figma デザインを正確に反映し、既存機能を保持しながら、保守性の高いコードが完成します。
+
+# 2【コードでスタイル共有】 :trainingSlug のスタイルをコードで共有します。これもとにスタイル改修しつつ、index.md の情報をそのデザインに反映できるようにする
 
 ## やりたいこと
 
