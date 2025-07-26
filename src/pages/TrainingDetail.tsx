@@ -440,16 +440,6 @@ task_count: 2
           </div>
         )}
 
-        {/* サムネイル表示 */}
-        {frontmatter?.thumbnail && (
-          <div className="mb-8">
-            <img 
-              src={frontmatter.thumbnail} 
-              alt="Training thumbnail" 
-              className="w-full max-w-2xl mx-auto rounded-lg shadow-lg"
-            />
-          </div>
-        )}
 
 
         {/* セクション・オーバービュー */}
