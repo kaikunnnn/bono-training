@@ -60,7 +60,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           <div className="bg-white px-[34px] pb-6 flex flex-col items-start gap-3">
 
             {/* Step 2-2: コンテンツブロック（260×102px） */}
-            <div className="w-[260px] h-[102px] flex flex-col gap-2">
+            <div className="w-[260px] h-[102px] flex flex-col gap-3">
               {/* タイプタグ */}
               <div className="flex justify-start">
                 <CategoryTag type={training.type} displayMode="type" />
