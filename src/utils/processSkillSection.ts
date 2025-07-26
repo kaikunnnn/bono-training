@@ -88,6 +88,48 @@ ${formattedSkillItems}
 };
 
 /**
+ * マークダウンコンテンツからスキルタイトル一覧を抽出
+ * @param markdownContent - 完全なマークダウンコンテンツ
+ * @returns スキルタイトルの配列
+ */
+export const extractSkillTitles = (markdownContent: string): string[] => {
+  if (!markdownContent) return [];
+
+  // 「このチャレンジで伸ばせる力」セクションの開始を探す
+  const skillSectionStart = markdownContent.indexOf('## このチャレンジで伸ばせる力');
+  
+  if (skillSectionStart === -1) {
+    return []; // セクションが見つからない場合
+  }
+
+  // 次の主要セクション（## 進め方ガイド）を探す
+  const nextSectionStart = markdownContent.indexOf('## 進め方ガイド', skillSectionStart);
+  
+  let skillSectionContent: string;
+  
+  if (nextSectionStart === -1) {
+    // 進め方ガイドが見つからない場合は、コンテンツの最後まで取得
+    skillSectionContent = markdownContent.substring(skillSectionStart);
+  } else {
+    // 進め方ガイドまでの内容を取得
+    skillSectionContent = markdownContent.substring(skillSectionStart, nextSectionStart);
+  }
+
+  // ### 見出しを抽出（■や*マークを除去）
+  const skillTitleMatches = skillSectionContent.match(/### (?:■|\\*)\s*(.+)/g);
+  
+  if (!skillTitleMatches) {
+    return []; // スキル項目が見つからない場合
+  }
+
+  // 見出しからタイトル部分のみを抽出
+  return skillTitleMatches.map(match => {
+    const titleMatch = match.match(/### (?:■|\\*)\s*(.+)/);
+    return titleMatch ? titleMatch[1].trim() : '';
+  }).filter(title => title.length > 0);
+};
+
+/**
  * マークダウンコンテンツからスキルセクションを除外
  * @param markdownContent - 完全なマークダウンコンテンツ
  * @returns スキルセクションを除外したマークダウン文字列

@@ -11,7 +11,8 @@ import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
 import { loadTrainingContent } from '@/utils/loadTrainingContent';
-import { extractSkillSection, removeSkillSection } from '@/utils/processSkillSection';
+import { extractSkillSection, removeSkillSection, extractSkillTitles } from '@/utils/processSkillSection';
+import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -476,12 +477,25 @@ task_count: 2
         )}
 
 
-        {/* タスク一覧 */}
-        <TaskList 
-          tasks={training.tasks || []} 
-          trainingSlug={trainingSlug}
-          className="mt-8"
-        />
+        {/* セクション・オーバービュー */}
+        <div className="max-w-3xl mx-auto" data-name="section-overview">
+          {/* チャレンジで身につくことセクション */}
+          {markdownContent && (() => {
+            const skillTitles = extractSkillTitles(markdownContent);
+            return skillTitles.length > 0 ? (
+              <ChallengeMeritSection skillTitles={skillTitles} />
+            ) : null;
+          })()}
+
+          {/* タスク一覧 */}
+          <div data-lov-id="src/components/training/TaskList.tsx:37:4" data-name="task-collection-block">
+            <TaskList 
+              tasks={training.tasks || []} 
+              trainingSlug={trainingSlug}
+              className="mt-8"
+            />
+          </div>
+        </div>
 
         {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
         {markdownContent && (
