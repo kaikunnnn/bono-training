@@ -4,13 +4,13 @@ title: "UXデザインをやれ！"
 description: "デザインシステムの基本的な考え方から実装まで..."
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"
 type: "portfolio"
-category: "情報設計"
+category: "UXデザイン"
 tags: ["UX", "情報設計"]
 estimated_total_time: "2時間"
 task_count: 2
 ---
 
-### このチャレンジで伸ばせる力
+## このチャレンジで伸ばせる力
 
 トレーニングはそのままやってもいいです。基礎も合わせて学習して、実践をトレーニングで行うと土台を築けるでしょう。
 

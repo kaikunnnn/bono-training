@@ -11,6 +11,7 @@ import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
 import { loadTrainingContent } from '@/utils/loadTrainingContent';
+import { extractSkillSection, removeSkillSection } from '@/utils/processSkillSection';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -419,7 +420,7 @@ task_count: 2
               >
                 {/* はじめるボタン */}
                 <button
-                  className="bg-[#0d221d] box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-4 py-3 relative rounded-[1000px] flex-1 min-w-0 max-w-[200px] hover:bg-opacity-90 transition-all duration-200"
+                  className="bg-[#0d221d] box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-4 py-3 relative rounded-[1000px] shrink-0 hover:bg-opacity-90 transition-all duration-200"
                   data-name="button"
                   onClick={() => {
                     // 最初のタスクに移動
@@ -439,7 +440,7 @@ task_count: 2
 
                 {/* 進め方をみるボタン */}
                 <button
-                  className="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-4 py-3 relative rounded-[1000px] flex-1 min-w-0 max-w-[200px] hover:bg-gray-100 transition-all duration-200"
+                  className="box-border content-stretch flex flex-row gap-2.5 items-center justify-center px-4 py-3 relative rounded-[1000px] shrink-0 hover:bg-gray-100 transition-all duration-200"
                   data-name="button"
                   onClick={() => {
                     // 進め方ガイドセクションへスクロールまたはページ下部へ
@@ -475,18 +476,6 @@ task_count: 2
         )}
 
 
-        {/* マークダウンコンテンツ */}
-        {markdownContent && (
-          <SimpleMarkdownRenderer 
-            content={markdownContent}
-            className="prose prose-lg max-w-none"
-            options={{
-              isPremium: frontmatter?.is_premium || false,
-              hasMemberAccess: true // TODO: 実際のユーザー権限を確認
-            }}
-          />
-        )}
-
         {/* タスク一覧 */}
         <TaskList 
           tasks={training.tasks || []} 
@@ -494,60 +483,31 @@ task_count: 2
           className="mt-8"
         />
 
-        {/* 新しいスキルセクション */}
-        <div className="mt-12">
+        {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
+        {markdownContent && (
+          <div className="mt-12">
+            <SimpleMarkdownRenderer 
+              content={extractSkillSection(markdownContent)}
+              className="prose prose-lg max-w-none"
+              options={{
+                isPremium: frontmatter?.is_premium || false,
+                hasMemberAccess: true
+              }}
+            />
+          </div>
+        )}
+
+        {/* マークダウンコンテンツ（進め方ガイド含む） */}
+        {markdownContent && (
           <SimpleMarkdownRenderer 
-            content={`<div class="section-challenge-merit">
-
-<div class="block-text">
-💪
-
-### このチャレンジで伸ばせる力
-
-トレーニングはそのままやってもいいです。基礎も合わせて学習して、実践をトレーニングで行うと土台を築けるでしょう。
-</div>
-
-<div class="skill-group">
-
-<div class="skill-item">
-
-#### ■ "使いやすいUI"を要件とユーザーから設計する力
-
-- 自分が良いと思うではなく、使う人目線のUI作成スキル
-- 参考リンク：『~~~~~~~~~~~~~~』
-
-</div>
-
-<div class="skill-separator"></div>
-
-<div class="skill-item">
-
-#### ■ 機能や状態を網羅してUI設計する力
-
-- 要件を満たす情報や機能や状態のパターンをUIで網羅
-
-</div>
-
-<div class="skill-separator"></div>
-
-<div class="skill-item">
-
-#### ■ ユーザーゴールから配慮するべきものをUIに落とす
-
-- ただ機能を作るのではなく、"使いやすさ"を考えたUIの配慮を設計する
-
-</div>
-
-</div>
-
-</div>`}
+            content={removeSkillSection(markdownContent)}
             className="prose prose-lg max-w-none"
             options={{
-              isPremium: false,
-              hasMemberAccess: true
+              isPremium: frontmatter?.is_premium || false,
+              hasMemberAccess: true // TODO: 実際のユーザー権限を確認
             }}
           />
-        </div>
+        )}
       </div>
     </TrainingLayout>
   );
