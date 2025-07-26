@@ -17,7 +17,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
       className={cn("block w-full max-w-[328px] mx-auto", className)}
     >
       {/* Step 1: 外側コンテナ（training_content） */}
-      <div className="relative w-[328px] h-[346px] pt-6 flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
+      <div className="relative w-[328px] h-[346px] rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
         
         {/* Step 3: グラデーション背景 */}
         <div 
@@ -29,54 +29,61 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           }}
         />
 
-        {/* Step 2: 内部ブロック構造 */}
-        <div className="relative z-10 px-[34px] pb-6 flex flex-col items-center gap-3">
+        {/* Rectangle 7: 上部白背景領域（328×50px） */}
+        <div className="relative z-5 w-[328px] h-[50px] bg-white" />
+
+        {/* Step 2: wrapコンテナ（328×322px） */}
+        <div className="relative z-10 w-[328px] h-[322px] bg-white flex flex-col justify-end rounded-b-[32px]">
           
-          {/* Step 2-1: アイコン部分 */}
-          <div className="w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px]">
-            <img
-              src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
-              alt={training.title}
-              className="w-[49.5px] h-[49.5px] object-cover rounded-lg"
-            />
-          </div>
-
-          {/* Step 2-2: コンテンツブロック（260×102px） */}
-          <div className="w-[260px] h-[102px] flex flex-col gap-2">
-            {/* カテゴリタグ */}
-            <div className="flex justify-center">
-              <CategoryTag category={training.category || 'UIビジュアル'} />
-            </div>
+          {/* hoverエリア（328×272px） */}
+          <div className="w-[328px] h-[272px] px-9 pb-5 flex flex-col items-center justify-end gap-3">
             
-            {/* タイトルと説明 */}
-            <div className="flex flex-col gap-1 text-center">
-              <h3 className="text-[20px] font-bold font-['Rounded_Mplus_1c'] leading-[1.2] text-[#020617]">
-                {training.title}
-              </h3>
-              <p className="text-[14px] font-normal font-['Noto_Sans_JP'] leading-[1.4] text-[#64748B] line-clamp-2">
-                {training.description || ''}
-              </p>
-            </div>
-          </div>
-
-          {/* Step 2-3: 区切り線 */}
-          <div className="w-[260px] h-[1px] bg-[#E2E8F0]" />
-
-          {/* Step 2-4: フッター部分 */}
-          <div className="w-[260px] flex justify-between items-center">
-            {/* カテゴリタグ（小） */}
-            <div className="px-2 py-1 bg-[#F1F5F9] rounded">
-              <span className="text-[10px] font-medium font-['Noto_Sans_JP'] text-[#64748B]">
-                {training.category || 'UIビジュアル'}
-              </span>
+            {/* Step 2-1: アイコン部分 */}
+            <div className="w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px]">
+              <img
+                src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
+                alt={training.title}
+                className="w-[49.5px] h-[49.5px] object-cover rounded-lg"
+              />
             </div>
 
-            {/* お題内容をみるボタン */}
-            <div className="flex items-center gap-1">
-              <span className="text-[12px] font-medium font-['Noto_Sans_JP'] text-[#020617]">
-                お題内容をみる
-              </span>
-              <ArrowRight className="w-3 h-3 text-[#020617]" />
+            {/* Step 2-2: コンテンツブロック（260×102px） */}
+            <div className="w-[260px] h-[102px] flex flex-col gap-2">
+              {/* カテゴリタグ */}
+              <div className="flex justify-center">
+                <CategoryTag category={training.category || 'UIビジュアル'} />
+              </div>
+              
+              {/* タイトルと説明 */}
+              <div className="flex flex-col gap-1 text-center">
+                <h3 className="text-[20px] font-bold font-rounded-mplus leading-[1.2] text-[#020617]">
+                  {training.title}
+                </h3>
+                <p className="text-[14px] font-normal font-noto-sans leading-[1.4] text-[#64748B] line-clamp-2">
+                  {training.description || ''}
+                </p>
+              </div>
+            </div>
+
+            {/* Step 2-3: 区切り線 */}
+            <div className="w-[260px] h-[1px] bg-[#E2E8F0]" />
+
+            {/* Step 2-4: フッター部分 */}
+            <div className="w-[260px] flex justify-between items-center">
+              {/* カテゴリタグ（小） */}
+              <div className="px-2 py-1 bg-[#F1F5F9] rounded">
+                <span className="text-[10px] font-medium font-noto-sans text-[#64748B]">
+                  {training.category || 'UIビジュアル'}
+                </span>
+              </div>
+
+              {/* お題内容をみるボタン */}
+              <div className="flex items-center gap-1">
+                <span className="text-[12px] font-medium font-noto-sans text-[#020617]">
+                  お題内容をみる
+                </span>
+                <ArrowRight className="w-3 h-3 text-[#020617]" />
+              </div>
             </div>
           </div>
         </div>
