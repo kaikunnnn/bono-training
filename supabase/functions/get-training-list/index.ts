@@ -169,6 +169,8 @@ serve(async (req) => {
             type: frontmatter.type || 'challenge',
             difficulty: frontmatter.difficulty || 'normal',
             tags: frontmatter.tags || [],
+            icon: frontmatter.icon || null,
+            category: frontmatter.category || null,
             thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100'
           });
         } else {
