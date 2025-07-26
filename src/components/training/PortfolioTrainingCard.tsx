@@ -34,9 +34,9 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
         <div className="relative z-10 flex flex-col items-center -mt-5">
           
           {/* アイコンと楕円の統合ブロック */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-start w-full">
             {/* Step 2-1: アイコン部分 */}
-            <div className="relative z-20 w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px] -mb-8">
+            <div className="relative z-20 w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px] -mb-8 ml-[34px]">
               <img
                 src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
                 alt={training.title}
