@@ -26,7 +26,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           style={{
             background: 'linear-gradient(183deg, #F5F8FD 2.2%, #FAF4F0 49.72%, rgba(222, 228, 242, 0.00) 97.86%)',
             left: '-140px',
-            top: '-150px'
+            top: '-118px'
           }}
         />
 
