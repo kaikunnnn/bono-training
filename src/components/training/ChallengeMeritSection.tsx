@@ -24,7 +24,7 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
           チャレンジで身につくこと
         </h2>
         
-        <div className="space-y-3">
+        <div className="space-y-0">
           {skillTitles.map((title, index) => (
             <div 
               key={index}
