@@ -1,16 +1,18 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHero from '@/components/training/TrainingHero';
 import TrainingGrid from '@/components/training/TrainingGrid';
 import { useTrainings } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 
 /**
  * トレーニングホームページ（React Query対応版）
  */
 const TrainingHome = () => {
   const { data: trainings, isLoading, error } = useTrainings();
+  const [compareMode, setCompareMode] = useState(false);
 
   return (
     <TrainingLayout>
@@ -18,9 +20,17 @@ const TrainingHome = () => {
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            利用可能なトレーニング
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-gray-900">
+              利用可能なトレーニング
+            </h2>
+            <Button 
+              onClick={() => setCompareMode(!compareMode)}
+              variant={compareMode ? "default" : "outline"}
+            >
+              {compareMode ? "通常表示" : "スタイル比較"}
+            </Button>
+          </div>
           
           {isLoading && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -48,7 +58,7 @@ const TrainingHome = () => {
             </div>
           )}
 
-          {trainings && <TrainingGrid trainings={trainings} />}
+          {trainings && <TrainingGrid trainings={trainings} compareMode={compareMode} />}
         </div>
       </div>
     </TrainingLayout>
