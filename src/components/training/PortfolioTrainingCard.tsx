@@ -44,12 +44,12 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           {/* Step 2-2: コンテンツブロック（260×102px） */}
           <div className="w-[260px] h-[102px] flex flex-col gap-2">
             {/* タイプタグ */}
-            <div className="flex justify-center">
+            <div className="flex justify-start">
               <CategoryTag type={training.type} displayMode="type" />
             </div>
             
             {/* タイトルと説明 */}
-            <div className="flex flex-col gap-1 text-center">
+            <div className="flex flex-col gap-1 text-left">
               <h3 className="text-[20px] font-bold font-['Rounded_Mplus_1c'] leading-[1.2] text-[#020617]">
                 {training.title}
               </h3>
