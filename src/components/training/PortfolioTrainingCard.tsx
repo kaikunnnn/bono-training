@@ -18,7 +18,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
       className={cn("block w-full max-w-[328px] mx-auto", className)}
     >
       {/* Step 1: 外側コンテナ（training_content） */}
-      <div className="relative w-[328px] h-[346px] pt-6 flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
+      <div className="relative w-[328px] flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
         
         {/* Step 3: グラデーション背景 */}
         <div 
