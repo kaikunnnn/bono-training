@@ -14,7 +14,6 @@ import { loadTrainingContent } from '@/utils/loadTrainingContent';
 import { extractSkillSection, removeSkillSection, extractSkillTitles } from '@/utils/processSkillSection';
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
-import TypeTag from '@/components/training/TypeTag';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -360,12 +359,12 @@ task_count: 2
                 >
                   {/* タイプ */}
                   {frontmatter.type && (
-                    <TypeTag type={frontmatter.type} />
+                    <CategoryTag type={frontmatter.type} displayMode="type" />
                   )}
                   
                   {/* カテゴリ */}
                   {frontmatter.category && (
-                    <CategoryTag category={frontmatter.category} />
+                    <CategoryTag category={frontmatter.category} displayMode="category" />
                   )}
                 </div>
 

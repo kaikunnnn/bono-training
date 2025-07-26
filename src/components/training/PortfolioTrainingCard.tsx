@@ -43,9 +43,9 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
 
           {/* Step 2-2: コンテンツブロック（260×102px） */}
           <div className="w-[260px] h-[102px] flex flex-col gap-2">
-            {/* カテゴリタグ */}
+            {/* タイプタグ */}
             <div className="flex justify-center">
-              <CategoryTag category={training.category || 'UIビジュアル'} />
+              <CategoryTag type={training.type} displayMode="type" />
             </div>
             
             {/* タイトルと説明 */}
