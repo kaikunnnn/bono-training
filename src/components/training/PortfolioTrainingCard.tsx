@@ -31,7 +31,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
         />
 
         {/* Step 2: hoverブロック構造 */}
-        <div className="relative z-10 flex flex-col items-center -mt-5">
+        <div className="relative z-10 flex flex-col items-center -mt-5 -space-y-8">
           
           {/* 上が円のブロック（SVG） */}
           <svg 
