@@ -19,7 +19,12 @@ export const getTrainings = async (): Promise<Training[]> => {
       handleEdgeFunctionError(error, 'トレーニング一覧の取得に失敗しました');
     }
 
-    return validateEdgeFunctionResponse(data, 'トレーニング一覧');
+    const result = validateEdgeFunctionResponse(data, 'トレーニング一覧');
+    console.log('Edge Functionからの応答:', result);
+    console.log('最初のtraining:', result[0]);
+    console.log('iconの値:', result[0]?.icon);
+    
+    return result;
     
   } catch (err) {
     // カスタムエラーは再スロー
@@ -40,6 +45,7 @@ export const getTrainings = async (): Promise<Training[]> => {
         type: "challenge" as 'challenge',
         difficulty: "normal",
         tags: ["ui", "todo", "実践"],
+        icon: "📱",
         thumbnailImage: 'https://source.unsplash.com/random/200x100'
       }
     ];
