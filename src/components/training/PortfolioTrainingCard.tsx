@@ -31,7 +31,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
         />
 
         {/* Step 2: 内部ブロック構造 */}
-        <div className="relative z-10 px-[34px] pb-6 flex flex-col items-center gap-3">
+        <div className="relative z-10 px-[34px] pb-6 flex flex-col items-center gap-3 bg-white">
           
           {/* Step 2-1: アイコン部分 */}
           <div className="w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px]">
