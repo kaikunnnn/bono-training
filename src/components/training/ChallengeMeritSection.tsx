@@ -24,11 +24,11 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
           チャレンジで身につくこと
         </h2>
         
-        <div className="space-y-4">
+        <div className="space-y-3">
           {skillTitles.map((title, index) => (
             <div 
               key={index}
-              className="flex items-center justify-between p-4 bg-card border border-border rounded-lg"
+              className="flex items-center justify-between py-3"
             >
               <div className="flex items-center gap-3">
                 {/* 四角いアイコン */}
@@ -41,9 +41,9 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
               </div>
               
               {/* 矢印アイコン */}
-              <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
                 <svg 
-                  className="w-3 h-3 text-primary-foreground" 
+                  className="w-2.5 h-2.5 text-primary-foreground" 
                   fill="none" 
                   stroke="currentColor" 
                   viewBox="0 0 24 24"
