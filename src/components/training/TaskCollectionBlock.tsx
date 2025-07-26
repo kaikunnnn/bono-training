@@ -27,7 +27,7 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
       {/* タスクリスト */}
       <div className="relative">
         {/* 縦線（左側） */}
-        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-[#94A3B8]"></div>
+        <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-200"></div>
         
         <div className="space-y-4">
           {sortedTasks.map((task, index) => (
@@ -37,25 +37,18 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                 {/* 左側の円（縦線との接続点） */}
                 <div className="absolute -left-12 top-6 w-3 h-3 bg-blue-500 rounded-full border-2 border-white shadow-sm"></div>
                 
-                {/* numberoftraining セクション */}
-                <div className="flex items-center gap-5 mb-4">
-                  <div className="w-2 h-2 bg-[#0D221D] rounded-full"></div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[#0D221D] text-xs font-normal">
-                      {task.training_id ? 'CHALLENGE' : 'SKILL'}
-                    </span>
-                    <span className="text-[#0D221D] text-base font-normal">
-                      {String(task.order_index).padStart(2, '0')}
-                    </span>
-                  </div>
-                </div>
-                
                 <Link
                   to={`/training/${trainingSlug}/${task.slug}`}
                   className="block group"
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
+                      {/* カテゴリタグ */}
+                      <div className="mb-3">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          {task.training_id ? 'CHALLENGE' : 'SKILL'}
+                        </span>
+                      </div>
                       
                       {/* タイトル */}
                       <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
@@ -69,6 +62,9 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                       
                       {/* タグエリア */}
                       <div className="flex flex-wrap gap-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-gray-100 text-gray-600">
+                          ステップ {index + 1}
+                        </span>
                         {task.is_premium && (
                           <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-amber-100 text-amber-700">
                             プレミアム
