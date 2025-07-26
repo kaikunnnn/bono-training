@@ -53,7 +53,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
               <h3 className="text-[20px] font-bold font-['Rounded_Mplus_1c'] leading-[1.2] text-[#020617]">
                 {training.title}
               </h3>
-              <p className="text-[14px] font-normal font-['Noto_Sans_JP'] leading-[1.4] text-[#64748B] line-clamp-2">
+              <p className="text-[14px] font-normal leading-[1.4] text-[#64748B] line-clamp-2">
                 {training.description || ''}
               </p>
             </div>
@@ -66,14 +66,14 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           <div className="w-[260px] flex justify-between items-center">
             {/* カテゴリタグ（小） */}
             <div className="px-2 py-1 bg-[#F1F5F9] rounded">
-              <span className="text-[10px] font-medium font-['Noto_Sans_JP'] text-[#64748B]">
+              <span className="text-[10px] font-medium text-[#64748B]">
                 {training.category || 'UIビジュアル'}
               </span>
             </div>
 
             {/* お題内容をみるボタン */}
             <div className="flex items-center gap-1">
-              <span className="text-[12px] font-medium font-['Noto_Sans_JP'] text-[#020617]">
+              <span className="text-[12px] font-medium text-[#020617]">
                 お題内容をみる
               </span>
               <ArrowRight className="w-3 h-3 text-[#020617]" />
