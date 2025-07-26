@@ -3,6 +3,7 @@
 - trainingSlug で表示されるページです
 - つまり http://localhost:8080/training/[trainnigSlug] のような URL のページになります
 - これ以外のページのスタイル変更は望んでません。
+- このページの task 一覧のブロックを変更します。
 
 ## やって欲しいこと
 
