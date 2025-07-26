@@ -11,9 +11,10 @@ import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
 import { loadTrainingContent } from '@/utils/loadTrainingContent';
-import { extractSkillSection, removeSkillSection, extractSkillTitles } from '@/utils/processSkillSection';
+import { extractSkillSection, removeSkillAndGuideSection, extractSkillTitles, extractGuideSection, parseGuideContent } from '@/utils/processSkillSection';
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
+import TrainingGuideSection from '@/components/training/TrainingGuideSection';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -474,10 +475,13 @@ task_count: 2
           </div>
         )}
 
-        {/* マークダウンコンテンツ（進め方ガイド含む） */}
+        {/* 進め方ガイドセクション */}
+        <TrainingGuideSection />
+
+        {/* マークダウンコンテンツ（スキルセクションと進め方ガイドを除外） */}
         {markdownContent && (
           <SimpleMarkdownRenderer 
-            content={removeSkillSection(markdownContent)}
+            content={removeSkillAndGuideSection(markdownContent)}
             className="prose prose-lg max-w-none"
             options={{
               isPremium: frontmatter?.is_premium || false,
