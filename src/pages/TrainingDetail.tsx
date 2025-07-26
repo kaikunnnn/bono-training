@@ -14,6 +14,7 @@ import { loadTrainingContent } from '@/utils/loadTrainingContent';
 import { extractSkillSection, removeSkillSection, extractSkillTitles } from '@/utils/processSkillSection';
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
+import TypeTag from '@/components/training/TypeTag';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -360,22 +361,7 @@ task_count: 2
                 >
                   {/* タイプ */}
                   {frontmatter.type && (
-                    <div
-                      className="box-border content-stretch flex flex-row gap-1 items-center justify-start p-0 relative shrink-0"
-                      data-name="type"
-                    >
-                      <div
-                        className="box-border content-stretch flex flex-row gap-2 items-center justify-start p-0 relative shrink-0"
-                        data-name="Component 2"
-                      >
-                        <div className="bg-gradient-to-b from-[#0618e3] rounded-[1000px] shrink-0 size-2 to-[#3cf5fc]" />
-                        <div className="font-['Rounded_Mplus_1c_Bold:Bold',_sans-serif] leading-[0] not-italic relative shrink-0 text-[#000000] text-[14px] text-left text-nowrap tracking-[0.75px]">
-                          <p className="adjustLetterSpacing block leading-none whitespace-pre">
-                            {frontmatter.type === 'portfolio' ? 'ポートフォリオお題' : frontmatter.type}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                    <TypeTag type={frontmatter.type} />
                   )}
                   
                   {/* カテゴリ */}

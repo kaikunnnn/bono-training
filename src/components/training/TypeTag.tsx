@@ -1,0 +1,37 @@
+import React from 'react';
+import { cn } from '@/lib/utils';
+
+interface TypeTagProps {
+  type: 'challenge' | 'skill' | 'portfolio';
+  className?: string;
+}
+
+const TypeTag: React.FC<TypeTagProps> = ({ type, className }) => {
+  const getDisplayText = (type: string) => {
+    return type === 'portfolio' ? 'ポートフォリオお題' : type;
+  };
+
+  return (
+    <div
+      className={cn(
+        "box-border content-stretch flex flex-row gap-1 items-center justify-start p-0 relative shrink-0",
+        className
+      )}
+      data-name="type"
+    >
+      <div
+        className="box-border content-stretch flex flex-row gap-2 items-center justify-start p-0 relative shrink-0"
+        data-name="Component 2"
+      >
+        <div className="bg-gradient-to-b from-[#0618e3] rounded-[1000px] shrink-0 size-2 to-[#3cf5fc]" />
+        <div className="font-['Rounded_Mplus_1c_Bold:Bold',_sans-serif] leading-[0] not-italic relative shrink-0 text-[#000000] text-[14px] text-left text-nowrap tracking-[0.75px]">
+          <p className="adjustLetterSpacing block leading-none whitespace-pre">
+            {getDisplayText(type)}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default TypeTag;
