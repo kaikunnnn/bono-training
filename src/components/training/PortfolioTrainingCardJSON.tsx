@@ -36,10 +36,10 @@ const PortfolioTrainingCardJSON: React.FC<PortfolioTrainingCardJSONProps> = ({ t
           />
 
           {/* Step 2: 内部ブロック構造 */}
-          <div className="relative z-10 px-[34px] pb-6 flex flex-col items-center gap-3">
+          <div className="relative z-10 px-[34px] pb-6 flex flex-col items-start gap-2">
             
             {/* Step 2-1: アイコン部分 */}
-            <div className="w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px]">
+            <div className="w-[72px] h-[72px] p-[11px] flex justify-start items-start bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px]">
               <img
                 src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
                 alt={training.title}
@@ -48,18 +48,18 @@ const PortfolioTrainingCardJSON: React.FC<PortfolioTrainingCardJSONProps> = ({ t
             </div>
 
             {/* Step 2-2: コンテンツブロック（260×102px） */}
-            <div className="w-[260px] h-[102px] flex flex-col gap-1">
+            <div className="w-[260px] h-[102px] flex flex-col gap-2">
               {/* タイプタグ */}
-              <div className="flex justify-center">
+              <div className="flex justify-start">
                 <CategoryTag type={training.type} displayMode="type" />
               </div>
               
               {/* タイトルと説明 */}
-              <div className="flex flex-col gap-1 text-center">
-                <h3 className="text-[20px] font-bold font-['Rounded_Mplus_1c'] leading-[1.49] text-[#020617] tracking-[0.75px]">
+              <div className="flex flex-col gap-1 text-left">
+                <h3 className="text-[20px] font-bold font-rounded-mplus leading-[1.49] text-[#020617] tracking-[0.75px]">
                   {training.title}
                 </h3>
-                <p className="text-[14px] font-medium font-['Noto_Sans_JP'] leading-[1.66] text-[#1D283D] tracking-normal line-clamp-2">
+                <p className="text-[14px] font-medium font-noto-sans-jp leading-[1.66] text-[#1D283D] tracking-normal line-clamp-2">
                   {training.description?.replace('UI デザイン', 'UIデザイン') || ''}
                 </p>
               </div>
