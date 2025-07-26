@@ -3,6 +3,7 @@ import React from 'react';
 import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHero from '@/components/training/TrainingHero';
 import TrainingGrid from '@/components/training/TrainingGrid';
+import SectionHeading from '@/components/training/SectionHeading';
 import { useTrainings } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -19,9 +20,11 @@ const TrainingHome = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="mb-4">
-            <h2 className="text-2xl font-bold text-gray-900">
-              利用可能なトレーニング
-            </h2>
+            <SectionHeading
+              category="ポートフォリオ"
+              title="利用可能なトレーニング"
+              description="実践的なデザイン課題でスキルアップしよう"
+            />
           </div>
           
           {isLoading && (
