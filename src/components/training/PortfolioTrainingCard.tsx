@@ -33,8 +33,16 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
         {/* Step 2: hoverブロック構造 */}
         <div className="relative z-10 px-[34px] pb-6 flex flex-col items-center gap-3 -mt-5" style={{ backgroundColor: '#fff' }}>
           
-          {/* 上が円のブロック */}
-          <div className="w-full h-[50px] rounded-t-full" style={{ backgroundColor: '#fff' }}></div>
+          {/* 上が円のブロック（SVG） */}
+          <svg 
+            className="w-full h-[50px]" 
+            viewBox="0 0 328 50" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            preserveAspectRatio="none"
+          >
+            <path d="M0 49.2753C0 49.2753 67.866 0 165.787 0C263.709 0 328 49.2753 328 49.2753V50H0V49.2753Z" fill="white"/>
+          </svg>
           
           {/* Step 2-1: アイコン部分 */}
           <div className="w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px]">
