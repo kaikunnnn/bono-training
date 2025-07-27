@@ -297,20 +297,27 @@ export const parseGuideContent = (guideMarkdown: string): GuideContent => {
   if (lessonSectionMatch) {
     const lessonContent = lessonSectionMatch[1];
     
-    // <div class="lesson"> 内のコンテンツを抽出
-    const lessonDivMatch = lessonContent.match(/<div class="lesson">\s*(.*?)\s*<\/div>/s);
+    // コメント行を除去
+    const cleanedLessonContent = lessonContent
+      .replace(/<!--.*?-->/gs, '') // HTMLコメントを除去
+      .trim();
+    
+    // <div class="lesson"> 内のコンテンツを抽出（より柔軟な正規表現）
+    const lessonDivMatch = cleanedLessonContent.match(/<div\s+class="lesson">\s*(.*?)\s*<\/div>/s);
     
     if (lessonDivMatch) {
-      const lessonInnerContent = lessonDivMatch[1];
+      let lessonInnerContent = lessonDivMatch[1].trim();
+      
+      // 画像記述を最初に除去
+      lessonInnerContent = lessonInnerContent.replace(/!\[.*?\]\(.*?(?:\s+".*?")?\)/g, '').trim();
       
       // タイトルを抽出（##### で始まる行）
       const titleMatch = lessonInnerContent.match(/^##### (.+)$/m);
       const lessonTitle = titleMatch ? titleMatch[1].trim() : 'ゼロからはじめる情報設計';
       
-      // 説明文を抽出（タイトルの後の行、画像は除外）
+      // 説明文を抽出（タイトルの後の行）
       const descriptionPart = lessonInnerContent.replace(/^##### .+$/m, '').trim();
       const lessonDescription = descriptionPart
-        .replace(/!\[.*?\]\(.*?\)/g, '') // 画像を除外
         .replace(/\n+/g, ' ') // 改行を空白に変換
         .trim() || '進め方の基礎はBONOで詳細に学習・実践できます';
       
