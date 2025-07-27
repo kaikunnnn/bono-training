@@ -11,7 +11,7 @@ import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
 import { loadTrainingContent } from '@/utils/loadTrainingContent';
-import { extractSkillSection, removeSkillAndGuideSection, extractSkillTitles, extractGuideSection, parseGuideContent } from '@/utils/processSkillSection';
+import { extractSkillSection, removeSkillAndGuideSection, extractSkillTitles, extractGuideSection, parseGuideContent, GuideContent } from '@/utils/processSkillSection';
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
@@ -25,6 +25,7 @@ const TrainingDetail = () => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [frontmatter, setFrontmatter] = useState<TrainingFrontmatter | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
+  const [guideContent, setGuideContent] = useState<GuideContent | undefined>();
   
   if (!trainingSlug) {
     return <Navigate to="/training" replace />;
@@ -40,11 +41,15 @@ const TrainingDetail = () => {
         const { frontmatter, content } = await loadTrainingContent(trainingSlug);
         setFrontmatter(frontmatter);
         setMarkdownContent(content);
+        const guideSection = extractGuideSection(content);
+        const parsedGuide = parseGuideContent(guideSection);
+        setGuideContent(parsedGuide);
       } catch (error) {
         console.error('コンテンツ読み込みエラー:', error);
         setContentError(error instanceof Error ? error.message : 'コンテンツの読み込みに失敗しました');
         setFrontmatter(null);
         setMarkdownContent('');
+        setGuideContent(undefined);
       }
     };
 
@@ -471,7 +476,7 @@ task_count: 2
         )}
 
         {/* 進め方ガイドセクション */}
-        <TrainingGuideSection />
+        <TrainingGuideSection guideContent={guideContent} />
 
         {/* マークダウンコンテンツ（スキルセクションと進め方ガイドを除外） */}
         {markdownContent && (

@@ -23,46 +23,14 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
   guideContent,
   steps: propSteps
 }) => {
-  // デフォルトコンテンツ
-  const defaultSteps = [
-    {
-      title: '要件からユーザーが達成するべき目的を整理',
-      description: '自分が良いと思うではなく、使う人目線の条件を達成するUI作成能力をトレーニングするお題です。',
-      referenceLink: {
-        text: 'ユーザー中心設計の基本',
-        url: '#'
-      }
-    },
-    {
-      title: '情報の優先順位を設計する',
-      description: 'ユーザーが必要とする情報を適切な順序で配置し、効率的な体験を提供するための設計手法を学びます。',
-    },
-    {
-      title: 'UIコンポーネントの選定と配置',
-      description: '目的に応じた適切なUIコンポーネントを選び、ユーザビリティを考慮した配置を行います。',
-    },
-    {
-      title: 'デザインシステムの活用',
-      description: '一貫性のあるデザインを効率的に作成するため、デザインシステムを理解し活用します。',
-    },
-    {
-      title: 'プロトタイプの作成と検証',
-      description: '実際に動作するプロトタイプを作成し、ユーザーテストを通じて設計の妥当性を検証します。',
-    }
-  ];
+  // デフォルト文言
+  const defaultTitle = '進め方ガイド';
+  const defaultDescription = 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。';
 
-  const defaultLessonCard = {
-    title: 'ゼロからはじめる情報設計',
-    emoji: '📚',
-    description: '進め方の基礎はBONOで詳細に学習・実践できます',
-    link: '/training'
-  };
-
-  // 使用するデータを決定（デフォルトのみ使用）
-  const title = '進め方ガイド';
-  const description = 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。';
-  const lessonCard = defaultLessonCard;
-  const steps = defaultSteps;
+  const title = guideContent?.title || defaultTitle;
+  const description = guideContent?.description || defaultDescription;
+  const lessonCard = guideContent?.lessonCard;
+  const steps = propSteps ?? guideContent?.steps ?? [];
   return (
     <section className="w-full py-16 px-4 bg-white">
       <div className="max-w-3xl mx-auto">
