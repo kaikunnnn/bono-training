@@ -200,41 +200,58 @@ export const removeSkillAndGuideSection = (markdownContent: string): string => {
 
   let result = markdownContent;
 
-  // スキルセクション（## このチャレンジで伸ばせる力）を除外
-  const skillSectionStart = result.indexOf('## このチャレンジで伸ばせる力');
-  if (skillSectionStart !== -1) {
-    const guideSectionStart = result.indexOf('## 進め方ガイド', skillSectionStart);
-    if (guideSectionStart !== -1) {
-      // スキルセクションのみを削除
-      const beforeSkill = result.substring(0, skillSectionStart);
-      const afterSkill = result.substring(guideSectionStart);
-      result = (beforeSkill + afterSkill).trim();
-    } else {
-      // 進め方ガイドが見つからない場合は、スキルセクション以降をすべて削除
-      result = result.substring(0, skillSectionStart).trim();
-    }
-  }
+  // 両方のセクションを一度に処理する方法に変更
+  // スキルセクションの開始位置を特定
+  const skillSectionRegex = /^## このチャレンジで伸ばせる力\s*$/m;
+  const skillMatch = result.match(skillSectionRegex);
+  const skillStartIndex = skillMatch ? result.indexOf(skillMatch[0]) : -1;
 
-  // 進め方ガイドセクション（## 進め方ガイド）を除外
-  const guideSectionStart = result.indexOf('## 進め方ガイド');
-  if (guideSectionStart !== -1) {
-    // 次の主要セクション（## で始まる）を探す
-    const nextSectionMatch = result.substring(guideSectionStart + 1).match(/^## /m);
+  // 進め方ガイドセクションの開始位置を特定
+  const guideSecitonRegex = /^## 進め方ガイド\s*$/m;
+  const guideMatch = result.match(guideSecitonRegex);
+  const guideStartIndex = guideMatch ? result.indexOf(guideMatch[0]) : -1;
+
+  // 両方のセクションを除去
+  if (skillStartIndex !== -1 && guideStartIndex !== -1) {
+    // 両方のセクションが存在する場合
+    const beforeSkill = result.substring(0, skillStartIndex);
     
-    if (nextSectionMatch) {
+    // 進め方ガイドセクション以降の次のセクション（## で始まる）を探す
+    const afterGuideText = result.substring(guideStartIndex);
+    const nextSectionMatch = afterGuideText.substring(1).match(/^## /m);
+    
+    if (nextSectionMatch && nextSectionMatch.index !== undefined) {
       // 次のセクションが見つかった場合
-      const nextSectionStart = guideSectionStart + 1 + (nextSectionMatch.index || 0);
-      const beforeGuide = result.substring(0, guideSectionStart);
+      const nextSectionStart = guideStartIndex + 1 + nextSectionMatch.index;
       const afterGuide = result.substring(nextSectionStart);
-      result = (beforeGuide + afterGuide).trim();
+      result = beforeSkill + afterGuide;
     } else {
-      // 次のセクションが見つからない場合は、進め方ガイド以降をすべて削除
-      result = result.substring(0, guideSectionStart).trim();
+      // 次のセクションがない場合は、スキルセクション以前の内容のみ
+      result = beforeSkill;
+    }
+  } else if (skillStartIndex !== -1) {
+    // スキルセクションのみ存在する場合
+    result = result.substring(0, skillStartIndex);
+  } else if (guideStartIndex !== -1) {
+    // 進め方ガイドセクションのみ存在する場合
+    const beforeGuide = result.substring(0, guideStartIndex);
+    const afterGuideText = result.substring(guideStartIndex);
+    const nextSectionMatch = afterGuideText.substring(1).match(/^## /m);
+    
+    if (nextSectionMatch && nextSectionMatch.index !== undefined) {
+      const nextSectionStart = guideStartIndex + 1 + nextSectionMatch.index;
+      const afterGuide = result.substring(nextSectionStart);
+      result = beforeGuide + afterGuide;
+    } else {
+      result = beforeGuide;
     }
   }
 
-  // 余分な空行を除去
-  result = result.replace(/\n{3,}/g, '\n\n').trim();
+  // 余分な空行を整理（3行以上の連続した空行を2行に削減）
+  result = result.replace(/\n{3,}/g, '\n\n');
+  
+  // 先頭と末尾の余分な空白を削除
+  result = result.trim();
 
   return result;
 };
