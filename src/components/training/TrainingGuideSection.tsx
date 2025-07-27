@@ -51,17 +51,10 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
     }
   ];
 
-  const defaultLessonCard = {
-    title: 'ゼロからはじめる情報設計',
-    emoji: '📚',
-    description: '進め方の基礎はBONOで詳細に学習・実践できます',
-    link: '/training'
-  };
-
   // 使用するデータを決定（propsのguideContentを優先、存在しない場合はデフォルト）
   const title = guideContent?.title || '進め方ガイド';
   const description = guideContent?.description || 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。';
-  const lessonCard = guideContent?.lessonCard || defaultLessonCard;
+  const lessonCard = guideContent?.lessonCard; // レッスンカードはguideContentにある場合のみ表示
   const steps = guideContent?.steps || propSteps || defaultSteps;
 
   console.log('TrainingGuideSection - 使用するデータ:', { 
