@@ -15,6 +15,7 @@ import { extractSkillSection, removeSkillAndGuideSection, extractSkillTitles, ex
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
+import { HalfCircleBg } from '@/components/training/HalfCircleBg';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -310,19 +311,12 @@ task_count: 2
               </div>
             </div>
 
-            {/* 半円オブジェクト（SVG素材使用） */}
+            {/* 半円オブジェクト（インラインSVG） */}
             <div
               className="absolute h-40 left-0 top-[140px] w-full"
               data-name="img_half_circle_object"
             >
-              <img
-                src="/images/half-circle-bg.svg"
-                alt="Half circle background"
-                className="block w-full h-full object-cover"
-                style={{
-                  filter: 'drop-shadow(0 -2px 4px rgba(0, 0, 0, 0.04))'
-                }}
-              />
+              <HalfCircleBg />
             </div>
 
             {/* メインコンテンツ */}
