@@ -313,7 +313,7 @@ task_count: 2
 
             {/* 半円オブジェクト（インラインSVG） */}
             <div
-              className="absolute h-20 left-0 top-[140px] w-full"
+              className="absolute h-40 left-0 top-[140px] w-full"
               data-name="img_half_circle_object"
             >
               <HalfCircleBg />
