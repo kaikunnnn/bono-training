@@ -58,11 +58,18 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
     link: '/training'
   };
 
-  // 使用するデータを決定（デフォルトのみ使用）
-  const title = '進め方ガイド';
-  const description = 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。';
-  const lessonCard = defaultLessonCard;
-  const steps = defaultSteps;
+  // 使用するデータを決定（propsのguideContentを優先、存在しない場合はデフォルト）
+  const title = guideContent?.title || '進め方ガイド';
+  const description = guideContent?.description || 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。';
+  const lessonCard = guideContent?.lessonCard || defaultLessonCard;
+  const steps = guideContent?.steps || propSteps || defaultSteps;
+
+  console.log('TrainingGuideSection - 使用するデータ:', { 
+    hasGuideContent: !!guideContent,
+    title, 
+    lessonCard,
+    stepsCount: steps.length 
+  });
   return (
     <section className="w-full py-16 px-4 bg-white">
       <div className="max-w-3xl mx-auto">
