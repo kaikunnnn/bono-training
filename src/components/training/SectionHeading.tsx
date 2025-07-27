@@ -42,7 +42,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {/* メインタイトル */}
       <div
-        className="font-semibold text-[36px] leading-[40px] text-white/80 text-center not-italic relative shrink-0 min-w-full w-min"
+        className="font-semibold text-[36px] leading-[40px] text-slate-900 text-center not-italic relative shrink-0 min-w-full w-min"
         style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
         id="node-3248_5676"
       >
