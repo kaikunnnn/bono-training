@@ -280,7 +280,9 @@ export const parseGuideContent = (guideMarkdown: string): GuideContent => {
   const title = titleMatch ? titleMatch[1].trim() : defaultContent.title;
 
   // 引用文から説明を抽出（> で始まる行）
-  const descriptionMatch = guideMarkdown.match(/^> (.+?)(?=\n\n|\n####|$)/ms);
+  const descriptionMatch = guideMarkdown.match(
+    /^> ?((?:.*(?:\n>.*)*))/m
+  );
   let description = defaultContent.description;
   if (descriptionMatch) {
     description = descriptionMatch[1]
