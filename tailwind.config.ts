@@ -116,6 +116,7 @@ const config = {
         'futura': ['Futura', 'sans-serif'],
         'inter': ['Inter', 'sans-serif'],
         'noto-sans': ['Noto Sans', 'sans-serif'],
+        'noto-sans-jp': ['Noto Sans JP', 'Noto Sans', 'sans-serif'],
         'rounded-mplus': ['Rounded Mplus 1c', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],
       }
