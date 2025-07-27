@@ -267,17 +267,25 @@ export interface GuideContent {
  * @returns 解析された進め方ガイドデータ
  */
 export const parseGuideContent = (guideMarkdown: string): GuideContent => {
+  console.log('🔍 parseGuideContent - 開始');
+  console.log('🔍 入力コンテンツ:', guideMarkdown);
+  console.log('🔍 入力コンテンツ長:', guideMarkdown?.length || 0);
+  
   const defaultContent: GuideContent = {
     title: '進め方ガイド',
     description: 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。',
     steps: []
   };
 
-  if (!guideMarkdown) return defaultContent;
+  if (!guideMarkdown) {
+    console.log('⚠️ ガイドマークダウンが空です');
+    return defaultContent;
+  }
 
   // タイトルを抽出（## 進め方ガイド）
   const titleMatch = guideMarkdown.match(/^## (.+)$/m);
   const title = titleMatch ? titleMatch[1].trim() : defaultContent.title;
+  console.log('🔍 抽出されたタイトル:', title);
 
   // 引用文から説明を抽出（> で始まる行）
   const descriptionMatch = guideMarkdown.match(/^> (.+?)(?=\n\n|\n####|$)/ms);
@@ -289,37 +297,76 @@ export const parseGuideContent = (guideMarkdown: string): GuideContent => {
       .join('\n')
       .trim();
   }
+  console.log('🔍 抽出された説明文:', description);
 
   // レッスンカード情報を抽出（#### レッスンで身につける セクション）
   let lessonCard: GuideContent['lessonCard'];
-  const lessonSectionMatch = guideMarkdown.match(/#### レッスンで身につける\s*\n(.*?)(?=####|$)/s);
+  console.log('🔍 レッスンセクション検索開始...');
+  
+  // 複数のパターンでレッスンセクションを探す
+  const lessonPatterns = [
+    /#### レッスンで身につける\s*\n(.*?)(?=####|$)/s,
+    /#### (.+?レッスン.+?)\s*\n(.*?)(?=####|$)/s,
+    /####\s*(.+)\s*\n(.*?<div\s+class="lesson">.*?<\/div>.*?)(?=####|$)/s
+  ];
+  
+  let lessonSectionMatch = null;
+  let patternUsed = -1;
+  
+  for (let i = 0; i < lessonPatterns.length; i++) {
+    lessonSectionMatch = guideMarkdown.match(lessonPatterns[i]);
+    if (lessonSectionMatch) {
+      patternUsed = i;
+      console.log(`✅ レッスンセクション発見 (パターン${i + 1}):`, lessonSectionMatch[1] || lessonSectionMatch[0]);
+      break;
+    }
+  }
   
   if (lessonSectionMatch) {
-    const lessonContent = lessonSectionMatch[1];
+    const lessonContent = lessonSectionMatch[patternUsed === 1 ? 2 : 1];
+    console.log('🔍 レッスンコンテンツ:', lessonContent);
     
-    // コメント行を除去
-    const cleanedLessonContent = lessonContent
-      .replace(/<!--.*?-->/gs, '') // HTMLコメントを除去
-      .trim();
+    // HTMLコメントを除去
+    const cleanedContent = lessonContent.replace(/<!--.*?-->/gs, '').trim();
+    console.log('🔍 コメント除去後:', cleanedContent);
     
-    // <div class="lesson"> 内のコンテンツを抽出（より柔軟な正規表現）
-    const lessonDivMatch = cleanedLessonContent.match(/<div\s+class="lesson">\s*(.*?)\s*<\/div>/s);
+    // <div class="lesson"> の抽出（より柔軟な正規表現）
+    const lessonDivPatterns = [
+      /<div\s+class="lesson">\s*(.*?)\s*<\/div>/s,
+      /<div\s+class='lesson'>\s*(.*?)\s*<\/div>/s,
+      /<div[^>]*class[^>]*lesson[^>]*>\s*(.*?)\s*<\/div>/s
+    ];
+    
+    let lessonDivMatch = null;
+    for (const pattern of lessonDivPatterns) {
+      lessonDivMatch = cleanedContent.match(pattern);
+      if (lessonDivMatch) {
+        console.log('✅ レッスンdiv発見:', lessonDivMatch[1].substring(0, 100));
+        break;
+      }
+    }
     
     if (lessonDivMatch) {
       let lessonInnerContent = lessonDivMatch[1].trim();
+      console.log('🔍 レッスン内部コンテンツ:', lessonInnerContent);
       
-      // 画像記述を最初に除去
+      // 画像記述を除去
+      const beforeImageRemoval = lessonInnerContent;
       lessonInnerContent = lessonInnerContent.replace(/!\[.*?\]\(.*?(?:\s+".*?")?\)/g, '').trim();
+      console.log('🔍 画像除去前:', beforeImageRemoval);
+      console.log('🔍 画像除去後:', lessonInnerContent);
       
       // タイトルを抽出（##### で始まる行）
       const titleMatch = lessonInnerContent.match(/^##### (.+)$/m);
       const lessonTitle = titleMatch ? titleMatch[1].trim() : 'ゼロからはじめる情報設計';
+      console.log('🔍 抽出されたレッスンタイトル:', lessonTitle);
       
-      // 説明文を抽出（タイトルの後の行）
+      // 説明文を抽出（タイトルの後の部分）
       const descriptionPart = lessonInnerContent.replace(/^##### .+$/m, '').trim();
       const lessonDescription = descriptionPart
         .replace(/\n+/g, ' ') // 改行を空白に変換
         .trim() || '進め方の基礎はBONOで詳細に学習・実践できます';
+      console.log('🔍 抽出されたレッスン説明文:', lessonDescription);
       
       lessonCard = {
         title: lessonTitle,
@@ -327,26 +374,39 @@ export const parseGuideContent = (guideMarkdown: string): GuideContent => {
         description: lessonDescription,
         link: '/training'
       };
+      
+      console.log('✅ レッスンカード作成成功:', lessonCard);
+    } else {
+      console.warn('⚠️ レッスンdivが見つかりません');
+      console.log('🔍 検索対象コンテンツ:', cleanedContent.substring(0, 500));
     }
+  } else {
+    console.warn('⚠️ レッスンセクションが見つかりません');
+    console.log('🔍 検索対象の全コンテンツ:', guideMarkdown.substring(0, 1000));
   }
 
   // ステップを抽出（#### 進め方 セクション）
   const steps: GuideContent['steps'] = [];
   const stepSectionMatch = guideMarkdown.match(/#### 進め方\s*\n(.*?)(?=####|$)/s);
+  console.log('🔍 ステップセクション検索:', stepSectionMatch ? 'マッチしました' : 'マッチしませんでした');
   
   if (stepSectionMatch) {
     const stepSectionContent = stepSectionMatch[1];
+    console.log('🔍 ステップセクションコンテンツ:', stepSectionContent.substring(0, 200));
     
     // 各 <div class="step"> ブロックを抽出
     const stepMatches = stepSectionContent.match(/<div class="step">\s*(.*?)\s*<\/div>/gs);
+    console.log('🔍 ステップマッチ数:', stepMatches?.length || 0);
     
     if (stepMatches) {
-      stepMatches.forEach(stepMatch => {
+      stepMatches.forEach((stepMatch, index) => {
         const stepContent = stepMatch.replace(/<div class="step">\s*|\s*<\/div>/g, '');
+        console.log(`🔍 ステップ${index + 1}コンテンツ:`, stepContent.substring(0, 100));
         
         // ステップタイトルを抽出（##### で始まる行）
         const stepTitleMatch = stepContent.match(/^##### (.+)$/m);
         const stepTitle = stepTitleMatch ? stepTitleMatch[1].trim() : '';
+        console.log(`🔍 ステップ${index + 1}タイトル:`, stepTitle);
         
         if (stepTitle) {
           // ステップの説明文を抽出（タイトルの後の内容）
@@ -358,6 +418,8 @@ export const parseGuideContent = (guideMarkdown: string): GuideContent => {
             .replace(/\n{2,}/g, '\n') // 余分な改行を除去
             .trim();
           
+          console.log(`🔍 ステップ${index + 1}説明文:`, stepDescription);
+          
           steps.push({
             title: stepTitle,
             description: stepDescription
@@ -367,10 +429,13 @@ export const parseGuideContent = (guideMarkdown: string): GuideContent => {
     }
   }
 
-  return {
+  const result = {
     title,
     description,
     lessonCard,
     steps
   };
+  
+  console.log('📋 parseGuideContent - 最終結果:', result);
+  return result;
 };
