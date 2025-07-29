@@ -141,7 +141,16 @@ const TrainingDetail = () => {
                 className="absolute h-[399px] left-[-10%] overflow-clip top-[-10px] w-[120%]"
                 data-name="表紙"
               >
-                <div className="relative size-full bg-gradient-to-r from-[#fdf3ff] via-[#f3e8ff] to-[#e9d5ff]" data-name="Property 1=Variant2">
+                <div 
+                  className={`relative size-full ${
+                    frontmatter.background_svg 
+                      ? `bg-[url('${frontmatter.background_svg}')] bg-cover bg-center bg-no-repeat` 
+                      : frontmatter.fallback_gradient 
+                        ? `bg-gradient-to-r from-[${frontmatter.fallback_gradient.from}] via-[${frontmatter.fallback_gradient.via}] to-[${frontmatter.fallback_gradient.to}]`
+                        : "bg-gradient-to-r from-[#fdf3ff] via-[#f3e8ff] to-[#e9d5ff]"
+                  }`} 
+                  data-name="Property 1=Variant2"
+                >
                   <div
                     className="absolute h-3.5 left-[-5%] top-[308px] w-[110%]"
                     data-name="line-wave"

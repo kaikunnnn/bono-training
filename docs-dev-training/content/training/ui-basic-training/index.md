@@ -10,6 +10,11 @@ estimated_total_time: "2時間"
 task_count: 10
 category: "UIビジュアル"
 tags: ["UI", "ビジュアルデザイン", "基礎"]
+background_svg: "/assets/backgrounds/ui-basic-training-bg.svg"
+fallback_gradient:
+  from: "#fff7ed"
+  via: "#fed7aa"
+  to: "#fdba74"
 skills:
   - title: "定番UIの基礎表現力"
     description: "よく見るUIパターンを真似して基本的なビジュアル表現をマスター"

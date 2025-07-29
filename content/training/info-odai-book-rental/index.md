@@ -8,6 +8,11 @@ category: "情報設計"
 tags: ["ポートフォリオ", "情報設計"]
 estimated_total_time: "2時間"
 task_count: 2
+background_svg: "/assets/backgrounds/info-odai-book-rental-bg.svg"
+fallback_gradient:
+  from: "#f0f9ff"
+  via: "#e0f2fe"
+  to: "#bae6fd"
 skills:
   - title: "使いやすいUIを要件とユーザーから設計する力"
     description: 自分が良いと思うではなく、使う人目線のUI作成スキル

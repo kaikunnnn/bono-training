@@ -129,6 +129,12 @@ export interface TrainingFrontmatter {
   category?: string;
   skills?: SkillData[];
   guide?: GuideData;
+  background_svg?: string;
+  fallback_gradient?: {
+    from: string;
+    via: string;
+    to: string;
+  };
 }
 
 export interface TaskFrontmatter {
@@ -195,7 +201,13 @@ export const TrainingFrontmatterSchema = z.object({
   thumbnail: z.string().optional(),
   category: z.string().optional(),
   skills: z.array(SkillDataSchema).optional(),
-  guide: GuideDataSchema.optional()
+  guide: GuideDataSchema.optional(),
+  background_svg: z.string().optional(),
+  fallback_gradient: z.object({
+    from: z.string(),
+    via: z.string(),
+    to: z.string()
+  }).optional()
 });
 
 export const TaskFrontmatterSchema = z.object({

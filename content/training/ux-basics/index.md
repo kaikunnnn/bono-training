@@ -8,6 +8,11 @@ category: "UXデザイン"
 tags: ["UX", "情報設計"]
 estimated_total_time: "2時間"
 task_count: 2
+background_svg: "/assets/backgrounds/ux-basics-bg.svg"
+fallback_gradient:
+  from: "#fdf3ff"
+  via: "#f3e8ff"
+  to: "#e9d5ff"
 skills:
   - title: "UXの力"
     description: 自分が良いと思うではなく、使う人目線のUI作成スキル
