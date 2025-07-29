@@ -404,10 +404,11 @@ const TrainingDetail = () => {
         })()}
 
         {/* 進め方ガイドセクション */}
-        <TrainingGuideSection 
-          guideContent={guideContent}
-          data-name="section-progress-guide"
-        />
+        {guideContent && (
+          <div data-name="section-progress-guide">
+            <TrainingGuideSection guideContent={guideContent} />
+          </div>
+        )}
 
         {/* マークダウンコンテンツ（残りのコンテンツ） */}
         {markdownContent && (
