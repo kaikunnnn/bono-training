@@ -1,4 +1,4 @@
-// content.mdの解析とセクション分割ユーティリティ
+// content.mdの解析とセクション分割ユーティリティ（構造化データ対応版）
 
 export interface ContentSectionData {
   title: string;

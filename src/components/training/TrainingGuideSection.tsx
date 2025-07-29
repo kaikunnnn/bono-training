@@ -3,7 +3,21 @@ import GuideHeader from './GuideHeader';
 import LessonCard from './LessonCard';
 import StepBlock from './StepBlock';
 import ArrowDown from './ArrowDown';
-import { GuideContent } from '@/utils/processSkillSection';
+// Phase 3: GuideContentの型定義を移動
+export interface GuideContent {
+  title: string;
+  description: string;
+  lessonCard?: {
+    title: string;
+    description: string;
+    emoji: string;
+    link: string;
+  };
+  steps: Array<{
+    title: string;
+    description: string;
+  }>;
+}
 
 interface Step {
   title: string;
@@ -103,7 +117,6 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
                     <StepBlock
                       title={step.title}
                       description={step.description}
-                      referenceLink={step.referenceLink}
                     />
                     {index < steps.length - 1 && (
                       <div className="flex justify-center py-2">

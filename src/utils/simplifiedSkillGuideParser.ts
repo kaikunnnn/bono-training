@@ -4,7 +4,21 @@
  */
 
 import { TrainingFrontmatter, SkillData, GuideData } from '@/types/training';
-import { GuideContent } from './processSkillSection';
+// Phase 3: GuideContentの型定義（TrainingGuideSectionから移動）
+export interface GuideContent {
+  title: string;
+  description: string;
+  lessonCard?: {
+    title: string;
+    description: string;
+    emoji: string;
+    link: string;
+  };
+  steps: Array<{
+    title: string;
+    description: string;
+  }>;
+}
 
 /**
  * フロントマターからスキル情報を取得
