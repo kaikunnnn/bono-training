@@ -11,7 +11,7 @@ import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
 import { loadTrainingContent } from '@/utils/loadTrainingContent';
-import { extractSkillSection, removeSkillAndGuideSection, extractSkillTitles, extractGuideSection, parseGuideContent } from '@/utils/processSkillSection';
+import { getSkillsFromFrontmatter, getGuideFromFrontmatter, convertGuideDataToGuideContent, convertSkillsToHtml } from '@/utils/simplifiedSkillGuideParser';
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
@@ -45,19 +45,19 @@ const TrainingDetail = () => {
         setFrontmatter(frontmatter);
         setMarkdownContent(content);
 
-        // ガイドコンテンツの抽出と解析
+        // ガイドコンテンツの抽出と解析（新しいシンプルなパーサー使用）
         try {
-          const guideSection = extractGuideSection(content);
-          if (guideSection) {
-            const parsedGuideContent = parseGuideContent(guideSection);
-            setGuideContent(parsedGuideContent);
-            console.log('ガイドコンテンツを正常に抽出しました:', parsedGuideContent);
+          const guideData = getGuideFromFrontmatter(frontmatter);
+          if (guideData) {
+            const convertedGuideContent = convertGuideDataToGuideContent(guideData);
+            setGuideContent(convertedGuideContent);
+            console.log('✅ YAMLからガイドコンテンツを正常に抽出しました:', convertedGuideContent);
           } else {
-            console.warn('進め方ガイドセクションが見つかりませんでした');
+            console.warn('⚠️ フロントマターに進め方ガイド情報が見つかりませんでした');
             setGuideContent(null);
           }
         } catch (guideParseError) {
-          console.error('ガイドコンテンツの解析に失敗しました:', guideParseError);
+          console.error('❌ ガイドコンテンツの解析に失敗しました:', guideParseError);
           setGuideError(guideParseError instanceof Error ? guideParseError.message : 'ガイドの解析に失敗しました');
           setGuideContent(null);
         }
@@ -461,8 +461,9 @@ task_count: 2
         {/* セクション・オーバービュー */}
         <div className="max-w-3xl mx-auto" data-name="section-overview">
           {/* チャレンジで身につくことセクション */}
-          {markdownContent && (() => {
-            const skillTitles = extractSkillTitles(markdownContent);
+          {frontmatter && (() => {
+            const skills = getSkillsFromFrontmatter(frontmatter);
+            const skillTitles = skills.map(skill => skill.title);
             return skillTitles.length > 0 ? (
               <ChallengeMeritSection skillTitles={skillTitles} />
             ) : null;
@@ -479,18 +480,24 @@ task_count: 2
         </div>
 
         {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
-        {markdownContent && (
-          <div className="mt-12">
-            <SimpleMarkdownRenderer 
-              content={extractSkillSection(markdownContent)}
-              className="prose prose-lg max-w-none"
-              options={{
-                isPremium: frontmatter?.is_premium || false,
-                hasMemberAccess: true
-              }}
-            />
-          </div>
-        )}
+        {frontmatter && (() => {
+          const skills = getSkillsFromFrontmatter(frontmatter);
+          if (skills.length === 0) return null;
+          
+          const skillsHtml = convertSkillsToHtml(skills);
+          return (
+            <div className="mt-12">
+              <SimpleMarkdownRenderer 
+                content={skillsHtml}
+                className="prose prose-lg max-w-none"
+                options={{
+                  isPremium: frontmatter?.is_premium || false,
+                  hasMemberAccess: true
+                }}
+              />
+            </div>
+          );
+        })()}
 
         {/* 進め方ガイドセクション */}
         <TrainingGuideSection 
@@ -498,10 +505,10 @@ task_count: 2
           data-name="section-progress-guide"
         />
 
-        {/* マークダウンコンテンツ（スキルセクションと進め方ガイドを除外） */}
+        {/* マークダウンコンテンツ（残りのコンテンツ） */}
         {markdownContent && (
           <SimpleMarkdownRenderer 
-            content={removeSkillAndGuideSection(markdownContent)}
+            content={markdownContent}
             className="prose prose-lg max-w-none"
             options={{
               isPremium: frontmatter?.is_premium || false,

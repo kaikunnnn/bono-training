@@ -85,6 +85,33 @@ export interface TrainingContentResponse {
 }
 
 /**
+ * スキル情報の型定義
+ */
+export interface SkillData {
+  title: string;
+  description: string;
+  reference_link?: string;
+}
+
+/**
+ * ガイド情報の型定義
+ */
+export interface GuideData {
+  title: string;
+  description: string;
+  lesson?: {
+    title: string;
+    emoji: string;
+    description: string;
+    link: string;
+  };
+  steps: Array<{
+    title: string;
+    description: string;
+  }>;
+}
+
+/**
  * Markdownフロントマターの型定義
  */
 export interface TrainingFrontmatter {
@@ -100,6 +127,8 @@ export interface TrainingFrontmatter {
   icon?: string;
   thumbnail?: string;
   category?: string;
+  skills?: SkillData[];
+  guide?: GuideData;
 }
 
 export interface TaskFrontmatter {
