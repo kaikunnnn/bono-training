@@ -9,7 +9,7 @@ tags: ["ポートフォリオ", "情報設計"]
 estimated_total_time: "2時間"
 task_count: 2
 skills:
-  - title: "使いやすいUI"を要件とユーザーから設計する力
+  - title: "使いやすいUIを要件とユーザーから設計する力"
     description: 自分が良いと思うではなく、使う人目線のUI作成スキル
     reference_link: https://example.com
   - title: 機能や状態を網羅してUI設計する力
