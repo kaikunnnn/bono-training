@@ -3,7 +3,18 @@
 export interface ContentSectionData {
   title: string;
   content: string;
-  type: 'regular' | 'design-solution';
+  type: 'regular' | 'design-solution' | 'premium-only';
+}
+
+// フロントマターからの構造化データ型
+export interface StructuredSection {
+  title: string;
+  content: string;
+  type?: 'regular' | 'design-solution' | 'premium-only';
+  subsections?: {
+    title: string;
+    content: string;
+  }[];
 }
 
 export interface SubSectionData {
@@ -12,9 +23,25 @@ export interface SubSectionData {
 }
 
 /**
- * content.mdのマークダウンコンテンツを ## セクションごとに分割
+ * 構造化データを優先して、フォールバックでマークダウン解析を行う
  */
-export const parseContentSections = (markdown: string | null | undefined): ContentSectionData[] => {
+export const parseContentSections = (
+  markdown: string | null | undefined,
+  structuredSections?: StructuredSection[]
+): ContentSectionData[] => {
+  // 構造化データが利用可能な場合は優先して使用
+  if (structuredSections && structuredSections.length > 0) {
+    console.log('📋 parseContentSections - 構造化データを使用:', structuredSections);
+    return structuredSections.map(section => ({
+      title: section.title,
+      content: section.content,
+      type: section.type || 'regular'
+    }));
+  }
+
+  // フォールバック: 従来のマークダウン解析
+  console.log('📋 parseContentSections - マークダウン解析にフォールバック');
+  
   // エラーガード: nullやundefinedの場合は空配列を返す
   if (!markdown || typeof markdown !== 'string') {
     console.warn('parseContentSections: 無効なマークダウンコンテンツ:', { markdown, type: typeof markdown });
@@ -40,16 +67,25 @@ export const parseContentSections = (markdown: string | null | undefined): Conte
       
       // 新しいセクションを開始
       const title = line.replace('## ', '').trim();
-      const isDesignSolution = title === 'デザイン解答例';
+      let type: 'regular' | 'design-solution' | 'premium-only' = 'regular';
+      
+      if (title === 'デザイン解答例') {
+        type = 'design-solution';
+      }
       
       currentSection = {
         title,
         content: '',
-        type: isDesignSolution ? 'design-solution' : 'regular'
+        type
       };
     } else if (currentSection) {
-      // 現在のセクションにコンテンツを追加
-      currentSection.content += line + '\n';
+      // PREMIUM_ONLY コメントチェック
+      if (line.includes('<!-- PREMIUM_ONLY -->')) {
+        currentSection.type = 'premium-only';
+      } else {
+        // 現在のセクションにコンテンツを追加
+        currentSection.content += line + '\n';
+      }
     }
   }
   

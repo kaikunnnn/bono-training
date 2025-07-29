@@ -137,6 +137,16 @@ export interface TrainingFrontmatter {
   };
 }
 
+export interface TaskContentSection {
+  title: string;
+  content: string;
+  type?: 'regular' | 'design-solution' | 'premium-only';
+  subsections?: {
+    title: string;
+    content: string;
+  }[];
+}
+
 export interface TaskFrontmatter {
   title: string;
   description?: string;
@@ -152,6 +162,8 @@ export interface TaskFrontmatter {
   prev_task?: string;
   next_task?: string;
   training_title?: string;
+  // 構造化コンテンツフィールド
+  sections?: TaskContentSection[];
 }
 
 export interface MarkdownFile {
@@ -210,6 +222,16 @@ export const TrainingFrontmatterSchema = z.object({
   }).optional()
 });
 
+export const TaskContentSectionSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+  type: z.enum(['regular', 'design-solution', 'premium-only']).optional(),
+  subsections: z.array(z.object({
+    title: z.string(),
+    content: z.string()
+  })).optional()
+});
+
 export const TaskFrontmatterSchema = z.object({
   title: z.string(),
   description: z.string().optional(),
@@ -224,7 +246,8 @@ export const TaskFrontmatterSchema = z.object({
   preview_marker: z.string().optional(),
   prev_task: z.string().optional(),
   next_task: z.string().optional(),
-  training_title: z.string().optional()
+  training_title: z.string().optional(),
+  sections: z.array(TaskContentSectionSchema).optional()
 });
 
 /**
