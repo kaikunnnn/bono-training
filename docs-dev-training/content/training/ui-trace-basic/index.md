@@ -1,13 +1,37 @@
 ---
-title: UIビジュアル入門トレ
-description: UIデザインの入門になる定番UIを10個作成して基礎パターンを習得
-type: 実践
-difficulty: ふつう
-estimated_total_time: 2時間
+title: "UIトレース入門トレ"
+description: "有名サービスの10画面をトレースしてUIデザインの基本パターンを習得"
+icon: "🎯"
+thumbnail: "https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png"
+background_image: "https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg"
+type: "skill"
+difficulty: "normal"
+estimated_total_time: "2時間"
 task_count: 10
-category: UIビジュアル
-thumbnailImage: https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png
-background_image: https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg
+category: "UIビジュアル"
+tags: ["UI", "トレース", "模写"]
+skills:
+  - title: "定番UI表現の習得"
+    description: "有名サービスのUI表現を模写して基本パターンをマスター"
+  - title: "ビジュアル分析力"
+    description: "優れたUIの構成要素を分析して理解する能力"
+  - title: "デザイン制作精度"
+    description: "細部まで正確に再現する制作スキル"
+guide:
+  title: "進め方ガイド"
+  description: "定番UIをトレースして\n基礎表現を身につけるための流れ"
+  lesson:
+    title: "センスを磨くスキル"
+    emoji: "✨"
+    description: "UIトレースの技術をBONOで詳細に学習できます"
+    link: "https://bo-no.design"
+  steps:
+    - title: "ステップ 1: トレース対象を選ぶ"
+      description: "Apple、Spotify、Airbnbなど有名サービスから学びたいUIを選択"
+    - title: "ステップ 2: 構成要素を分析"
+      description: "余白、フォント、色、アイコンなどの要素を詳しく観察します"
+    - title: "ステップ 3: 正確にトレース"
+      description: "オリジナルと見比べながら細部まで正確に再現します"
 ---
 
 # UI トレース入門トレ

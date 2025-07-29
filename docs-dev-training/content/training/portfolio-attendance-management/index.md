@@ -1,13 +1,37 @@
 ---
-title: "Todo アプリ UI 制作"
-description: "実践的な Todo アプリの UI デザインを学ぶぜよ"
+title: "勤怠管理システム 休暇申請機能デザイン"
+description: "休暇申請の機能をデザインして情報設計の実践を学ぶ"
+icon: "📋"
+thumbnail: "https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png"
+background_image: "https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg"
 type: "challenge"
 difficulty: "normal"
 estimated_total_time: "2時間"
 task_count: 2
-category: UIビジュアル
-thumbnailImage: https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png
-background_image: https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg
+category: "情報設計"
+tags: ["UX", "情報設計", "業務システム"]
+skills:
+  - title: "要件からUI設計する力"
+    description: "機能要件からユーザーニーズを整理してUIに落とし込む技術"
+  - title: "ユーザーシナリオ設計"
+    description: "申請から承認までのフローを考慮した体験設計能力"
+  - title: "業務システムのUX改善"
+    description: "使いやすい業務システムのインターフェース設計スキル"
+guide:
+  title: "進め方ガイド"
+  description: "要件からユーザーの要望や感情を整理して\nUIをデザインするための流れ"
+  lesson:
+    title: "ゼロからはじめる情報設計"
+    emoji: "📚"
+    description: "情報設計の基礎をBONOで詳細に学習できます"
+    link: "https://bo-no.design"
+  steps:
+    - title: "ステップ 1: ユーザーの感情を理解"
+      description: "申請時の不安や承認待ちの心理状態を分析しましょう"
+    - title: "ステップ 2: 必要な情報を整理"
+      description: "申請に必要な項目と承認者が知りたい情報を洗い出します"
+    - title: "ステップ 3: 操作フローを設計"
+      description: "申請から承認までのステップを明確に設計します"
 ---
 
 # ※お題パターンはステップが必要ないかもしれない

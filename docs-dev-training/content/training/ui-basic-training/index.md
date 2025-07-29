@@ -1,13 +1,37 @@
 ---
-title: UIビジュアル入門トレ
-description: UIデザインの入門になる定番UIを10個作成して基礎パターンを習得
-type: 実践
-difficulty: ふつう
-estimated_total_time: 2時間
+title: "UIビジュアル入門トレ"
+description: "UIデザインの入門になる定番UIを10個作成して基礎パターンを習得"
+icon: "🎨"
+thumbnail: "https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png"
+background_image: "https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg"
+type: "skill"
+difficulty: "normal"
+estimated_total_time: "2時間"
 task_count: 10
-category: UIビジュアル
-thumbnailImage: https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png
-background_image: https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg
+category: "UIビジュアル"
+tags: ["UI", "ビジュアルデザイン", "基礎"]
+skills:
+  - title: "定番UIの基礎表現力"
+    description: "よく見るUIパターンを真似して基本的なビジュアル表現をマスター"
+  - title: "デザイン制作フローの習得"
+    description: "参考探し→比較検討→制作のサイクルを身につける"
+  - title: "1画面UI設計能力"
+    description: "1つの画面に集中してビジュアル面の完成度を高める技術"
+guide:
+  title: "進め方ガイド"
+  description: "定番UIを参考にしながら\n基礎表現を盗むためのやり方を説明します"
+  lesson:
+    title: "センスを磨くスキル"
+    emoji: "✨"
+    description: "参考から盗む技術をBONOで詳細に学習できます"
+    link: "https://bo-no.design"
+  steps:
+    - title: "ステップ 1: 作りたいUIパターンを選ぶ"
+      description: "10個のお題から興味のあるUIを選んで制作開始しましょう"
+    - title: "ステップ 2: 参考UIを複数収集する"
+      description: "同じパターンのUIを複数見つけて表現の違いを比較分析します"
+    - title: "ステップ 3: パターンを作って比較改善"
+      description: "複数のデザインパターンを作成し比較することで最適な形に絞り込みます"
 ---
 
 # UI ビジュアル入門トレ
