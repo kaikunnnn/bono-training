@@ -27,7 +27,7 @@ const TrainingHeader = () => {
   };
 
   const handleBonoLinkClick = () => {
-    navigate("/training");
+    window.open("https://bo-no.design", "_blank", "noopener,noreferrer");
   };
 
   const LeftSection = () => {
@@ -71,179 +71,18 @@ const TrainingHeader = () => {
     </div>
   );
 
-  const RightSection = () => {
-    if (isMobile) {
-      return (
-        <div className="flex-1 flex items-center justify-end">
-          {!user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50">
-                <DropdownMenuItem onClick={() => navigate('/training/about')}>
-                  遊び方
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/training/login')}>
-                  ログイン
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/training/plan')}>
-                  プラン
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/training/signup')}>
-                  はじめる
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 p-2">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src={user.user_metadata?.avatar_url} />
-                    <AvatarFallback className="text-xs">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50">
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  アカウント情報
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/training/plan')}>
-                  プランを確認・変更
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  ログアウト
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      );
-    }
-
-    if (isTablet) {
-      return (
-        <div className="flex-1 flex items-center justify-end gap-2 max-w-[480px]">
-          {!user ? (
-            <>
-              <Link
-                to="/training/login"
-                className="inline-flex h-8 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-              >
-                <span className="font-rounded-mplus text-sm font-bold">
-                  ログイン
-                </span>
-              </Link>
-              <Link
-                to="/training/signup"
-                className="inline-flex h-8 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-              >
-                <span className="font-rounded-mplus text-sm font-bold">
-                  はじめる
-                </span>
-              </Link>
-            </>
-          ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <Avatar className="h-7 w-7">
-                    <AvatarImage src={user.user_metadata?.avatar_url} />
-                    <AvatarFallback className="text-xs">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background border z-50">
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  アカウント情報
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/training/plan')}>
-                  プランを確認・変更
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  ログアウト
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-      );
-    }
-
-    // Desktop
-    return (
-      <div className="flex-1 flex items-center justify-end gap-3 max-w-[480px]">
-        {!user ? (
-          <>
-            <Link
-              to="/training/login"
-              className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-rounded-mplus text-sm font-bold">
-                ログイン
-              </span>
-            </Link>
-            <Link
-              to="/training/plan"
-              className="inline-flex h-9 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-rounded-mplus text-sm font-bold">
-                プラン
-              </span>
-            </Link>
-            <Link
-              to="/training/signup"
-              className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-rounded-mplus text-sm font-bold">
-                はじめる
-              </span>
-            </Link>
-          </>
-        ) : (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="flex items-center gap-2">
-                {user.email ? (
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.user_metadata?.avatar_url} />
-                    <AvatarFallback>
-                      {user.email.charAt(0).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                ) : (
-                  <span>アカウント</span>
-                )}
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-background border z-50">
-              <DropdownMenuItem onClick={() => navigate('/profile')}>
-                アカウント情報
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/training/plan')}>
-                プランを確認・変更
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
-                ログアウト
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
-    );
-  };
+  const RightSection = () => (
+    <div className="flex-1 flex items-center justify-end max-w-[480px]">
+      <button
+        onClick={() => window.open("https://bo-no.design", "_blank", "noopener,noreferrer")}
+        className="inline-flex items-center justify-center px-4 py-3 rounded-full border-2 border-[#0d221d] bg-white hover:bg-gray-50 transition-colors"
+      >
+        <span className="font-rounded-mplus text-sm font-bold">
+          BONOに戻る
+        </span>
+      </button>
+    </div>
+  );
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 w-full animate-gradient-fade-in"
