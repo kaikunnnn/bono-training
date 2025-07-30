@@ -31,6 +31,28 @@ const TrainingHeader = () => {
   };
 
   const LeftSection = () => {
+    if (!user) {
+      return (
+        <div className="flex-1 flex items-center justify-start gap-4">
+          <Link to="/training/login">
+            <Button variant="ghost" size="sm">
+              ログイン
+            </Button>
+          </Link>
+          <Link to="/training/plan">
+            <Button variant="ghost" size="sm">
+              プラン
+            </Button>
+          </Link>
+          <Link to="/training">
+            <Button variant="default" size="sm">
+              今すぐ始める
+            </Button>
+          </Link>
+        </div>
+      );
+    }
+
     if (isMobile) {
       return (
         <div className="flex-1 flex items-center justify-start">
@@ -73,14 +95,13 @@ const TrainingHeader = () => {
 
   const RightSection = () => (
     <div className="flex-1 flex items-center justify-end max-w-[480px]">
-      <button
+      <Button
+        variant="outline"
         onClick={() => window.open("https://bo-no.design", "_blank", "noopener,noreferrer")}
-        className="inline-flex items-center justify-center px-4 py-3 rounded-full border-2 border-[#0d221d] bg-white hover:bg-gray-50 transition-colors"
+        className="rounded-full border-2 border-[#0d221d] bg-white hover:bg-gray-50 px-4 py-3 font-rounded-mplus text-sm font-bold"
       >
-        <span className="font-rounded-mplus text-sm font-bold">
-          BONOに戻る
-        </span>
-      </button>
+        BONOに戻る
+      </Button>
     </div>
   );
 
