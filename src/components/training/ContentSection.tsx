@@ -1,4 +1,7 @@
 import React from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeHighlight from 'rehype-highlight';
 import { SubSectionData, extractSubSections } from '@/utils/parseContentSections';
 
 interface ContentSectionProps {
@@ -6,6 +9,48 @@ interface ContentSectionProps {
   content: string | null | undefined;
   className?: string;
 }
+
+// マークダウンコンポーネントの定義
+const markdownComponents = {
+  // 箇条書きスタイリング
+  ul: ({ children, ...props }: any) => (
+    <ul className="list-disc list-inside space-y-1 mb-2 ml-4" {...props}>
+      {children}
+    </ul>
+  ),
+  li: ({ children, ...props }: any) => (
+    <li className="text-[rgba(13,15,24,0.8)] leading-[1.6] font-['Noto_Sans_JP:Regular',_sans-serif] text-[14px]" {...props}>
+      {children}
+    </li>
+  ),
+  
+  // リンクスタイリング
+  a: ({ href, children, ...props }: any) => (
+    <a
+      href={href}
+      className="text-blue-600 hover:text-blue-800 underline transition-colors"
+      target={href?.startsWith('http') ? '_blank' : undefined}
+      rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+
+  // 段落スタイリング
+  p: ({ children, ...props }: any) => (
+    <p className="text-[rgba(13,15,24,0.8)] leading-[1.6] mb-2 font-['Noto_Sans_JP:Regular',_sans-serif] text-[14px]" {...props}>
+      {children}
+    </p>
+  ),
+
+  // インラインコードスタイリング
+  code: ({ children, ...props }: any) => (
+    <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono" {...props}>
+      {children}
+    </code>
+  ),
+};
 
 // BlockText コンポーネント（セクションタイトル）
 const BlockText: React.FC<{ title: string }> = ({ title }) => {
@@ -63,7 +108,13 @@ const SubSection: React.FC<{ title: string; content: string | null | undefined }
           
           return (
             <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(13,15,24,0.8)] text-left">
-              <p className="block leading-[1.6] whitespace-pre-wrap">{trimmedContent}</p>
+              <ReactMarkdown 
+                components={markdownComponents}
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeHighlight]}
+              >
+                {trimmedContent}
+              </ReactMarkdown>
             </div>
           );
         })()}
@@ -175,7 +226,13 @@ const ContentSection: React.FC<ContentSectionProps> = ({
                 // サブセクションがない場合は通常のコンテンツとして表示
                 return (
                   <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(13,15,24,0.8)] text-left w-full">
-                    <p className="block leading-[1.6] whitespace-pre-wrap">{trimmedContent}</p>
+                    <ReactMarkdown 
+                      components={markdownComponents}
+                      remarkPlugins={[remarkGfm]}
+                      rehypePlugins={[rehypeHighlight]}
+                    >
+                      {trimmedContent}
+                    </ReactMarkdown>
                   </div>
                 );
               }
