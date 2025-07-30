@@ -17,7 +17,7 @@
 
 ### 「ヒーローセクション」「TrainingHero のメインコンテナ」
 
-- スタイルと内容を [ヒーローセクション](./top-hero-message.json)をもとに実装する
+- スタイルと内容を [ヒーローセクション](./top-hero-message.md)をもとに実装する
 - <!-- ### コンポーネント: CategoryTag ファイル: src/components/training/CategoryTag.tsx
 
 
