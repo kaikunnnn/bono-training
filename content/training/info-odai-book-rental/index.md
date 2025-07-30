@@ -15,7 +15,10 @@ fallback_gradient:
   to: "#bae6fd"
 skills:
   - title: "使いやすいUIを要件とユーザーから設計する力"
-    description: 自分が良いと思うではなく、使う人目線のUI作成スキル
+    description: |
+      - 自分が良いと思うではなく、使う人目線のUI作成スキル
+      - とにかく頑張ろう！
+      - 参考デザインをちゃんとみよう！
     reference_link: https://example.com
   - title: 機能や状態を網羅してUI設計する力
     description: 例外を考えて実装や検証や状況のパターンをUIで網羅

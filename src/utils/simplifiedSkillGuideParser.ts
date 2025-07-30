@@ -72,7 +72,7 @@ export const convertSkillsToHtml = (skills: SkillData[]): string => {
 
 #### ■ ${skill.title}
 
-- ${skill.description}
+${skill.description}
 ${referenceLink}
 
 </div>`;
