@@ -18,7 +18,7 @@ const TrainingLayout = ({ children, className }: TrainingLayoutProps) => {
           {children}
         </div>
       </main>
-      <footer className="bg-training-dark">
+      <footer>
         <TrainingFooter />
       </footer>
     </div>
