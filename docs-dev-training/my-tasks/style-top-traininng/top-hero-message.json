@@ -1,0 +1,174 @@
+{
+  "$comment": "This is structural design data exported by the Figma Raw plugin. It is formatted to help LLMs (Large Language Models) understand design structures and components from Figma designs.",
+  "name": "top-hero-message",
+  "type": "FRAME",
+  "width": 1165,
+  "height": 158,
+  "layoutMode": "VERTICAL",
+  "primaryAxisSizingMode": "AUTO",
+  "counterAxisSizingMode": "FIXED",
+  "primaryAxisAlignItems": "MIN",
+  "counterAxisAlignItems": "MIN",
+  "paddingTop": {
+    "name": "Spacing/10",
+    "fullName": "Spacing/10",
+    "actualValue": 40
+  },
+  "paddingBottom": {
+    "name": "Spacing/10",
+    "fullName": "Spacing/10",
+    "actualValue": 40
+  },
+  "itemSpacing": {
+    "name": "Spacing/4",
+    "fullName": "Spacing/4",
+    "actualValue": 16
+  },
+  "strokes": [
+    {
+      "name": "Text/LightGray",
+      "fullName": "Text/LightGray",
+      "actualValue": {
+        "type": "SOLID",
+        "opacity": 1,
+        "color": {
+          "r": 0.886274516582489,
+          "g": 0.9098039269447327,
+          "b": 0.9411764740943909,
+          "a": 1,
+          "hex": "#e2e8f0"
+        }
+      }
+    }
+  ],
+  "strokeWeight": "Symbol(figma.mixed)",
+  "strokeAlign": "INSIDE",
+  "strokeCap": "NONE",
+  "strokeJoin": "MITER",
+  "children": [
+    {
+      "name": "h1",
+      "type": "TEXT",
+      "width": 720,
+      "height": 40,
+      "rotation": -7.951386703658792e-16,
+      "fills": [
+        {
+          "type": "SOLID",
+          "opacity": 1,
+          "color": {
+            "r": 0.11372549086809158,
+            "g": 0.21960784494876862,
+            "b": 0.18431372940540314,
+            "a": 1,
+            "hex": "#1d382f"
+          }
+        }
+      ],
+      "strokeWeight": 1.691356897354126,
+      "strokeAlign": "OUTSIDE",
+      "strokeCap": "NONE",
+      "strokeJoin": "MITER",
+      "characters": "トレーニング。それは”可能性”をひらく扉。",
+      "fontSize": 36,
+      "fontName": {
+        "family": "Rounded Mplus 1c Bold",
+        "style": "Bold"
+      },
+      "fontWeight": 700,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": 0
+      },
+      "lineHeight": {
+        "unit": "PIXELS",
+        "value": 40
+      },
+      "textAlignHorizontal": "CENTER",
+      "textAlignVertical": "CENTER",
+      "textAutoResize": "WIDTH_AND_HEIGHT",
+      "textCase": "ORIGINAL",
+      "textDecoration": "NONE"
+    },
+    {
+      "name": "p = description",
+      "type": "TEXT",
+      "width": 495,
+      "height": 22,
+      "rotation": -7.951386703658792e-16,
+      "fills": [
+        {
+          "name": "Text/LightBlack",
+          "fullName": "Text/LightBlack",
+          "actualValue": {
+            "type": "SOLID",
+            "opacity": 1,
+            "color": {
+              "r": 0.27843138575553894,
+              "g": 0.3333333432674408,
+              "b": 0.4117647111415863,
+              "a": 1,
+              "hex": "#475569"
+            }
+          }
+        }
+      ],
+      "strokeWeight": 1.691356897354126,
+      "strokeAlign": "OUTSIDE",
+      "strokeCap": "NONE",
+      "strokeJoin": "MITER",
+      "variables": {
+        "fills": [
+          {
+            "name": "Text/LightBlack",
+            "fullName": "Text/LightBlack",
+            "actualValue": {
+              "type": "SOLID",
+              "opacity": 1,
+              "color": {
+                "r": 0.27843138575553894,
+                "g": 0.3333333432674408,
+                "b": 0.4117647111415863,
+                "a": 1,
+                "hex": "#475569"
+              }
+            }
+          }
+        ]
+      },
+      "characters": "各コースで身につけたことをアウトプットするお題を並べています🙋",
+      "fontSize": 16,
+      "fontName": {
+        "family": "Noto Sans",
+        "style": "Medium"
+      },
+      "fontWeight": 500,
+      "letterSpacing": {
+        "unit": "PERCENT",
+        "value": 0
+      },
+      "lineHeight": {
+        "unit": "AUTO"
+      },
+      "textAlignHorizontal": "CENTER",
+      "textAlignVertical": "TOP",
+      "textAutoResize": "WIDTH_AND_HEIGHT",
+      "textCase": "ORIGINAL",
+      "textDecoration": "NONE"
+    }
+  ],
+  "textContent": [
+    {
+      "name": "h1",
+      "text": "トレーニング。それは”可能性”をひらく扉。",
+      "path": "top-hero-message/h1",
+      "nodeType": "TEXT"
+    },
+    {
+      "name": "p = description",
+      "text": "各コースで身につけたことをアウトプットするお題を並べています🙋",
+      "path": "top-hero-message/p = description",
+      "nodeType": "TEXT"
+    }
+  ]
+}
