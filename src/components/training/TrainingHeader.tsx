@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, Menu, ExternalLink } from "lucide-react";
 import { useMobile, useTablet, useDesktop } from "@/hooks/use-mobile";
 
 const TrainingHeader = () => {
@@ -27,7 +27,7 @@ const TrainingHeader = () => {
   };
 
   const handleBonoLinkClick = () => {
-    window.open("https://bo-no.design", "_blank", "noopener,noreferrer");
+    window.open("https://bo-no.design", "_blank");
   };
 
   const LeftSection = () => {
@@ -61,13 +61,26 @@ const TrainingHeader = () => {
   };
 
   const CenterSection = () => (
-    <div className="flex flex-col items-center gap-[2px] cursor-pointer" onClick={handleBonoLinkClick}>
-      <span className="font-futura text-xl font-bold tracking-[1px]">
+    <div 
+      className="flex flex-col items-center gap-[2px] cursor-pointer hover:opacity-80 transition-opacity min-h-[44px] min-w-[44px] flex items-center justify-center" 
+      onClick={handleBonoLinkClick}
+      role="button"
+      tabIndex={0}
+      aria-label="BONO Design サイトを開く"
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          handleBonoLinkClick();
+        }
+      }}
+    >
+      <span className="font-futura text-xl font-bold tracking-[1px] select-none">
         BONO
       </span>
-      <span className="font-futura text-[8px] font-bold tracking-[1px] text-[#666666]">
+      <span className="font-futura text-[8px] font-bold tracking-[1px] text-slate-500 select-none">
         TRAINING
       </span>
+      <ExternalLink className="h-3 w-3 ml-1 opacity-60" aria-hidden="true" />
     </div>
   );
 
@@ -78,7 +91,12 @@ const TrainingHeader = () => {
           {!user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="p-2 min-h-[44px] min-w-[44px]"
+                  aria-label="メニューを開く"
+                >
                   <Menu className="h-5 w-5" />
                 </Button>
               </DropdownMenuTrigger>
@@ -134,17 +152,19 @@ const TrainingHeader = () => {
             <>
               <Link
                 to="/training/login"
-                className="inline-flex h-8 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+                className="inline-flex h-10 min-w-[80px] items-center justify-center px-3 py-2 rounded-full border-2 border-slate-700 hover:bg-slate-50 transition-colors touch-manipulation"
+                aria-label="ログインページに移動"
               >
-                <span className="font-rounded-mplus text-sm font-bold">
+                <span className="font-rounded-mplus text-sm font-bold text-slate-700">
                   ログイン
                 </span>
               </Link>
               <Link
                 to="/training/signup"
-                className="inline-flex h-8 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+                className="inline-flex h-10 min-w-[80px] items-center justify-center px-3 py-2 rounded-full border-2 border-slate-700 hover:bg-slate-50 transition-colors touch-manipulation"
+                aria-label="サインアップページに移動"
               >
-                <span className="font-rounded-mplus text-sm font-bold">
+                <span className="font-rounded-mplus text-sm font-bold text-slate-700">
                   はじめる
                 </span>
               </Link>
@@ -187,25 +207,28 @@ const TrainingHeader = () => {
           <>
             <Link
               to="/training/login"
-              className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+              className="inline-flex h-11 min-w-[90px] items-center justify-center px-4 py-2 rounded-full border-2 border-slate-700 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all touch-manipulation"
+              aria-label="ログインページに移動"
             >
-              <span className="font-rounded-mplus text-sm font-bold">
+              <span className="font-rounded-mplus text-sm font-bold text-slate-700">
                 ログイン
               </span>
             </Link>
             <Link
               to="/training/plan"
-              className="inline-flex h-9 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+              className="inline-flex h-11 min-w-[80px] items-center justify-center px-3 py-2 rounded-full border-2 border-slate-700 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all touch-manipulation"
+              aria-label="プランページに移動"
             >
-              <span className="font-rounded-mplus text-sm font-bold">
+              <span className="font-rounded-mplus text-sm font-bold text-slate-700">
                 プラン
               </span>
             </Link>
             <Link
               to="/training/signup"
-              className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
+              className="inline-flex h-11 min-w-[90px] items-center justify-center px-4 py-2 rounded-full border-2 border-slate-700 hover:bg-slate-50 focus:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400 transition-all touch-manipulation"
+              aria-label="サインアップページに移動"
             >
-              <span className="font-rounded-mplus text-sm font-bold">
+              <span className="font-rounded-mplus text-sm font-bold text-slate-700">
                 はじめる
               </span>
             </Link>
