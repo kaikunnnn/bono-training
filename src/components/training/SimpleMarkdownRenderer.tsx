@@ -65,7 +65,7 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
 
     // 見出しのスタイリング
     h2: ({ children, ...props }) => (
-      <h2 className="text-2xl font-bold mt-8 mb-4 text-gray-900" {...props}>
+      <h2 className="text-xl font-bold mt-8 mb-4 text-gray-900" {...props}>
         {children}
       </h2>
     ),
@@ -81,7 +81,7 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
         );
       }
       return (
-        <h3 className="text-xl font-semibold mt-6 mb-3 text-gray-800" {...props}>
+        <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-800" {...props}>
           {children}
         </h3>
       );
