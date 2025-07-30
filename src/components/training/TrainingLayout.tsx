@@ -2,6 +2,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import TrainingHeader from "./TrainingHeader";
+import TrainingFooter from "./TrainingFooter";
 
 interface TrainingLayoutProps {
   children: React.ReactNode;
@@ -17,6 +18,7 @@ const TrainingLayout = ({ children, className }: TrainingLayoutProps) => {
           {children}
         </div>
       </main>
+      <TrainingFooter />
     </div>
   );
 };
