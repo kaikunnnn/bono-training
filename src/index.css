@@ -34,6 +34,11 @@
     --ring: 222.2 84% 4.9%;
 
     --radius: 0.5rem;
+
+    /* Training header gradient colors */
+    --training-gradient-start: 237 35% 93%;      /* #e0e5f8 */
+    --training-gradient-middle: 33 20% 97%;      /* #faf4f0 */
+    --training-gradient-end: 33 20% 95%;         /* #faf2f0 transparent */
   }
 
   .dark {

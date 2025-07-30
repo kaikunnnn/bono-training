@@ -68,6 +68,11 @@ const config = {
           'background': '#FFF9F4',
           'dark': '#0D221D',
           'text': '#1D382F',
+          'gradient': {
+            'start': 'hsl(var(--training-gradient-start))',
+            'middle': 'hsl(var(--training-gradient-middle))',
+            'end': 'hsl(var(--training-gradient-end))'
+          }
         }
       },
       borderRadius: {
@@ -106,11 +111,22 @@ const config = {
             transform: 'translateY(0)'
           }
         },
+        'gradient-fade-in': {
+          '0%': {
+            opacity: '0',
+            background: 'linear-gradient(180deg, hsl(var(--training-gradient-start)) 0%, transparent 100%)'
+          },
+          '100%': {
+            opacity: '1', 
+            background: 'linear-gradient(180deg, hsl(var(--training-gradient-start)) 0%, hsl(var(--training-gradient-middle)) 36.7%, transparent 100%)'
+          }
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.6s ease-out forwards',
+        'gradient-fade-in': 'gradient-fade-in 0.8s ease-out forwards',
       },
       fontFamily: {
         'futura': ['Futura', 'sans-serif'],
