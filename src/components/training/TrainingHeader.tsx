@@ -27,7 +27,7 @@ const TrainingHeader = () => {
   };
 
   const handleBonoLinkClick = () => {
-    window.open("https://bo-no.design", "_blank", "noopener,noreferrer");
+    navigate("/training");
   };
 
   const LeftSection = () => {
