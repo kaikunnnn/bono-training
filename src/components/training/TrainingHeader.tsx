@@ -75,7 +75,7 @@ const TrainingHeader = () => {
     <div className="flex-1 flex items-center justify-end max-w-[480px]">
       <button
         onClick={() => window.open("https://bo-no.design", "_blank", "noopener,noreferrer")}
-        className="inline-flex items-center justify-center px-4 py-3 rounded-full border-2 border-[#0d221d] bg-white hover:bg-gray-50 transition-colors"
+        className="inline-flex items-center justify-center px-4 h-10 rounded-full border-2 border-[#0d221d] transition-colors"
       >
         <span className="font-rounded-mplus text-sm font-bold">
           BONOに戻る
