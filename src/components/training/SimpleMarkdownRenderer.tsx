@@ -119,19 +119,19 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
 
     // リスト
     ul: ({ children, ...props }) => (
-      <ul className="list-disc list-inside space-y-2 mb-4 ml-4" {...props}>
+      <ul className="list-disc list-outside space-y-2 mb-4 ml-6" {...props}>
         {children}
       </ul>
     ),
 
     ol: ({ children, ...props }) => (
-      <ol className="list-decimal list-inside space-y-2 mb-4 ml-4" {...props}>
+      <ol className="list-decimal list-outside space-y-2 mb-4 ml-6" {...props}>
         {children}
       </ol>
     ),
 
     li: ({ children, ...props }) => (
-      <li className="text-gray-700" {...props}>
+      <li className="text-gray-700 pl-2" {...props}>
         {children}
       </li>
     ),
