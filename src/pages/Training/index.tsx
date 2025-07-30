@@ -11,8 +11,7 @@ import { Training } from '@/types/training';
 // カテゴリ定数
 const CATEGORIES = {
   INFO_DESIGN: '情報設計',
-  UX_DESIGN: 'UXデザイン',
-  OTHER: 'その他'
+  UX_DESIGN: 'UXデザイン'
 } as const;
 
 /**
@@ -27,8 +26,7 @@ const TrainingHome = () => {
     
     return {
       [CATEGORIES.INFO_DESIGN]: trainings.filter(t => t.category === CATEGORIES.INFO_DESIGN),
-      [CATEGORIES.UX_DESIGN]: trainings.filter(t => t.category === CATEGORIES.UX_DESIGN),
-      [CATEGORIES.OTHER]: trainings.filter(t => !t.category || (t.category !== CATEGORIES.INFO_DESIGN && t.category !== CATEGORIES.UX_DESIGN))
+      [CATEGORIES.UX_DESIGN]: trainings.filter(t => t.category === CATEGORIES.UX_DESIGN)
     };
   }, [trainings]);
 
@@ -125,13 +123,6 @@ const TrainingHome = () => {
               title="UXデザイントレーニング"
               description="ユーザー体験を向上させるデザイン思考とプロセスを学ぼう"
               trainings={groupedTrainings[CATEGORIES.UX_DESIGN]}
-            />
-            
-            <CategorySection
-              category={CATEGORIES.OTHER}
-              title="その他のトレーニング"
-              description="様々なデザインスキルを幅広く身につけよう"
-              trainings={groupedTrainings[CATEGORIES.OTHER]}
             />
           </div>
         )}
