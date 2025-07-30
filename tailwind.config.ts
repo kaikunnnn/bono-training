@@ -71,7 +71,10 @@ const config = {
           DEFAULT: '#FF9900',
           'background': '#FFF9F4',
           'dark': '#0D221D',
-          'text': '#1D382F',
+          'text': {
+            'primary': 'hsl(var(--training-text-primary))',
+            'secondary': 'hsl(var(--training-text-secondary))'
+          },
           'gradient': {
             'start': 'hsl(var(--training-gradient-start))',
             'middle': 'hsl(var(--training-gradient-middle))',
@@ -122,7 +125,7 @@ const config = {
           },
           '100%': {
             opacity: '1', 
-            background: 'linear-gradient(180deg, hsl(var(--training-gradient-start)) 0%, hsl(var(--training-gradient-middle)) 36.7%, transparent 100%)'
+            background: 'var(--training-gradient-bg)'
           }
         },
       },
