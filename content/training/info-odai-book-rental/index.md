@@ -59,6 +59,9 @@ guide:
         複数行のコード表示
         ```
         
+        ### 画像テスト
+        ![プレースホルダー画像](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=400&h=200&fit=crop)
+        
         この部分でマークダウンが正しく表示されているか確認してください。
       reference_link:
         text: "SimpleMarkdownRenderer参考実装"
