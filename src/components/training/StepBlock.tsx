@@ -1,4 +1,5 @@
 import React from 'react';
+import SimpleMarkdownRenderer from './SimpleMarkdownRenderer';
 
 interface StepBlockProps {
   title: string;
@@ -29,11 +30,13 @@ const StepBlock: React.FC<StepBlockProps> = ({
         
         {/* Content section */}
         <div className="flex flex-col gap-4">
-          <p className="text-base font-medium leading-[167.99%] text-[#0d0f18] whitespace-pre-line">
-            {description}
+          <div className="text-base font-medium leading-[167.99%] text-[#0d0f18]">
+            <SimpleMarkdownRenderer 
+              content={description}
+              className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+            />
             {referenceLink && (
-              <>
-                <br />
+              <div className="mt-2">
                 参考リンク：
                 <a 
                   href={referenceLink.url}
@@ -43,9 +46,9 @@ const StepBlock: React.FC<StepBlockProps> = ({
                 >
                   『{referenceLink.text}』
                 </a>
-              </>
+              </div>
             )}
-          </p>
+          </div>
         </div>
       </div>
     </div>
