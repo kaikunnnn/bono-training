@@ -89,12 +89,20 @@ ${referenceLink}
 
   return `<div class="section-challenge-merit">
 
-<div class="block-text">
-<div class="block-text-emoji">💪</div>
+<div class="block-text" data-name="block-text">
+<div class="block-text-wrapper">
+
+<div class="block-text-emoji">
+
+💪
+
+</div>
 
 <h2 class="block-text-title">このチャレンジで伸ばせる力</h2>
 
 <p class="block-text-description">トレーニングはそのままやってもいいです。基礎も合わせて学習して、実践をトレーニングで行うと土台を築けるでしょう。</p>
+
+</div>
 </div>
 
 <div class="skill-group">

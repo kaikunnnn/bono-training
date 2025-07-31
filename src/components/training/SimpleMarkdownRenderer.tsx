@@ -36,52 +36,88 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
 
   const { content: displayContent, showBanner } = getDisplayContent(content);
 
+  // ドキュメント仕様に完全準拠したスタイル定義
+  const blockStyles: Record<string, string> = {
+    // セクション全体
+    'section-challenge-merit': 'w-full max-w-2xl mx-auto',
+    // ブロックテキスト系（ドキュメント仕様準拠）
+    'block-text': 'box-border content-stretch flex flex-col gap-9 items-start justify-start px-4 md:px-0 py-6 relative size-full w-full',
+    // ブロックテキストラッパー（中央配置、最大幅472px）
+    'block-text-wrapper': 'box-border content-stretch flex flex-col gap-3 items-center justify-start p-0 relative shrink-0 w-full max-w-[472px] mx-auto',
+    // 絵文字（Inter Semi Bold、14pxベース、実際は大きく表示）
+    'block-text-emoji': 'font-inter font-semibold relative shrink-0 text-center text-slate-900 w-full text-2xl md:text-3xl leading-tight',
+    // タイトル（Rounded Mplus 1c Bold、白色、24px、tracking-1px）
+    'block-text-title': 'font-rounded-mplus text-white text-xl md:text-[24px] tracking-[1px] leading-[1.6] text-center w-full whitespace-normal md:whitespace-nowrap',
+    // 説明文（Inter+Noto Sans JP、16px、line-height: 1.88）
+    'block-text-description': 'font-inter font-normal text-[14px] md:text-[16px] text-center text-slate-900 leading-[1.7] md:leading-[1.88] w-full',
+    // スキルグループ
+    'skill-group': 'w-full max-w-2xl bg-white border-2 border-black rounded-3xl px-12 py-4 space-y-0',
+    // スキルアイテム
+    'skill-item': 'w-full py-4',
+    // スキルセパレーター
+    'skill-separator': 'w-full h-px bg-gray-200 my-4',
+    // スキル項目のタイトル
+    'skill-title': 'text-lg font-bold text-black mb-2'
+  };
+
   // カスタムコンポーネントの定義
   const components: Components = {
-    // divタグの処理（skill-group, lesson, step クラスに対応）
-    div: ({ className: divClassName, children, ...props }) => {
-      const classMap: Record<string, string> = {
-        // セクション全体のスタイル
-        'section-challenge-merit': 'w-full bg-white py-8 px-4 border border-slate-400 flex flex-col items-center',
-        // テキストブロック - Figmaデザインに合わせて最大幅を472pxに調整
-        'block-text': 'w-full max-w-[472px] mb-9 py-6 border-b border-slate-300 flex flex-col items-center text-center space-y-3',
-        // ブロックテキスト内の絵文字用
-        'block-text-emoji': 'text-3xl sm:text-4xl mb-2',
-        // ブロックテキスト内のタイトル用 - 白色、24px、太字、tracking-1px
-        'block-text-title': 'text-xl sm:text-2xl font-bold text-white leading-tight mb-3 tracking-[1px]',
-        // ブロックテキスト内の説明文用 - グレー、16px、line-height: 1.88
-        'block-text-description': 'text-sm sm:text-base text-gray-300 leading-[1.88] px-4',
-        // スキルグループ
-        'skill-group': 'w-full max-w-2xl bg-white border-2 border-black rounded-3xl px-12 py-4 space-y-0',
-        // 個別スキル項目
-        'skill-item': 'py-5 px-0',
-        // 区切り線
-        'skill-separator': 'w-full h-0 border-t-2 border-dotted border-slate-700',
-        // 既存のクラス
-        'lesson': 'flex gap-4 bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4',
-        'step': 'bg-white border-l-4 border-blue-500 pl-4 py-3 mb-4 shadow-sm'
-      };
-
-      const finalClassName = divClassName && classMap[divClassName] 
-        ? classMap[divClassName] 
-        : divClassName || '';
-
-      return <div className={finalClassName} {...props}>{children}</div>;
+    div: ({ children, className, ...props }) => {
+      // Block-text-wrapper クラスのハンドリング
+      if (className?.includes('block-text-wrapper')) {
+        return (
+          <div
+            className={blockStyles['block-text-wrapper']}
+            {...props}
+          >
+            {children}
+          </div>
+        );
+      }
+      
+      // Block-text-emoji クラスのハンドリング
+      if (className?.includes('block-text-emoji')) {
+        return (
+          <div className={blockStyles['block-text-emoji']} {...props}>
+            {children}
+          </div>
+        );
+      }
+      
+      // Block-text クラスのハンドリング
+      if (className?.includes('block-text')) {
+        return (
+          <div
+            className={blockStyles['block-text']}
+            data-name="block-text"
+            {...props}
+          >
+            {children}
+          </div>
+        );
+      }
+      
+      // その他のdivクラスのハンドリング
+      const style = blockStyles[className || ''] || className || '';
+      return (
+        <div className={style} {...props}>
+          {children}
+        </div>
+      );
     },
 
-    // 見出しのスタイリング
-    h2: ({ children, ...props }) => {
-      // block-text内のタイトルの場合
-      const childrenStr = React.Children.toArray(children).join('');
-      if (childrenStr.includes('このチャレンジで伸ばせる力')) {
+    h2: ({ children, className, ...props }) => {
+      // Block-text-title のスタイル適用
+      if (className?.includes('block-text-title')) {
         return (
-          <h2 className="block-text-title" {...props}>
+          <h2 className={`${blockStyles['block-text-title']} adjustLetterSpacing`} {...props}>
             {children}
           </h2>
         );
       }
+      
       return (
-        <h2 className="text-xl font-bold mt-8 mb-4 text-gray-900" {...props}>
+        <h2 className="text-2xl font-bold text-gray-900 mb-4" {...props}>
           {children}
         </h2>
       );
@@ -107,30 +143,32 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
       </h5>
     ),
 
-    // 段落
-    p: ({ children, ...props }) => {
-      // 絵文字のみの段落の場合の特別な処理
-      const childrenStr = React.Children.toArray(children).join('');
-      if (childrenStr.trim() === '💪') {
+    p: ({ children, className, ...props }) => {
+      // Block-text-description のスタイル適用
+      if (className?.includes('block-text-description')) {
         return (
-          <div className="block-text-emoji" {...props}>
+          <p className={blockStyles['block-text-description']} {...props}>
             {children}
-          </div>
+          </p>
         );
       }
       
-      // block-text内の説明文かどうかを判定する簡易的な方法
-      // 絵文字でも見出しでもない通常のテキストで、特定の内容の場合
-      if (childrenStr.includes('トレーニングはそのままやってもいいです')) {
+      // 絵文字のpタグの特別処理
+      if (typeof children === 'string' && children.match(/^[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]+$/u)) {
         return (
-          <p className="block-text-description" {...props}>
+          <p 
+            className="block text-2xl md:text-3xl leading-tight" 
+            role="img" 
+            aria-label="力こぶ"
+            {...props}
+          >
             {children}
           </p>
         );
       }
       
       return (
-        <p className="text-gray-700 leading-relaxed mb-4" {...props}>
+        <p className="text-gray-700 mb-4 leading-relaxed" {...props}>
           {children}
         </p>
       );
