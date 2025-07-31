@@ -22,6 +22,10 @@ Console ログの分析により、以下の重大な問題が確認されまし
 | [#08](./ticket-08-missing-image-resources.md) | ⚠️ MEDIUM | 未着手 | 画像リソース欠損修正 |
 | [#09](./ticket-09-process-improvement.md) | 📈 LOW | 未着手 | プロセス改善・再発防止策 |
 
+## 📋 実装計画
+
+詳細な実装計画は [implementation-plan.md](./implementation-plan.md) を参照してください。
+
 ## 実装順序
 
 ### 1. 緊急対応（即座）
