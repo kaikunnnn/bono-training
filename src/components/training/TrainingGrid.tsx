@@ -8,15 +8,26 @@ interface TrainingGridProps {
 }
 
 const TrainingGrid: React.FC<TrainingGridProps> = ({ trainings }) => {
+  // デバッグ: トレーニングデータの確認
+  console.log('TrainingGrid - 受信したtrainings:', trainings);
+  console.log('TrainingGrid - trainings数:', trainings.length);
+  
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 px-4">
-      {trainings.map((training) => (
-        training.type === 'portfolio' ? (
+      {trainings.map((training) => {
+        console.log(`TrainingGrid - rendering ${training.slug}:`, {
+          title: training.title,
+          type: training.type,
+          icon: training.icon,
+          thumbnail: training.thumbnailImage
+        });
+        
+        return training.type === 'portfolio' ? (
           <PortfolioTrainingCard key={training.id} training={training} />
         ) : (
           <TrainingCard key={training.id} training={training} />
         )
-      ))}
+      })}
     </div>
   );
 };

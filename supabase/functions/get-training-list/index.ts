@@ -161,18 +161,22 @@ serve(async (req) => {
         if (result.success && result.content) {
           const { frontmatter } = parseFrontmatter(result.content);
           
-          trainings.push({
-            id: `${file.name}-1`,
-            slug: file.name,
-            title: frontmatter.title || file.name,
-            description: frontmatter.description || '',
-            type: frontmatter.type || 'challenge',
-            difficulty: frontmatter.difficulty || 'normal',
-            tags: frontmatter.tags || [],
-            icon: frontmatter.icon || null,
-            category: frontmatter.category || null,
-            thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100'
-          });
+            // フロントマターのバリデーション
+            const training = {
+              id: `${file.name}-1`,
+              slug: file.name,
+              title: frontmatter.title || file.name,
+              description: frontmatter.description || '',
+              type: frontmatter.type || 'challenge',
+              difficulty: frontmatter.difficulty || 'normal',
+              tags: frontmatter.tags || [],
+              icon: frontmatter.icon || null,
+              category: frontmatter.category || null,
+              thumbnailImage: frontmatter.thumbnail || frontmatter.thumbnail_url || 'https://source.unsplash.com/random/200x100'
+            };
+            
+            logDebug(`トレーニング追加: ${file.name}`, training);
+            trainings.push(training);
         } else {
           console.warn(`トレーニング ${file.name} のindex.mdが読み込めませんでした:`, result.error);
         }

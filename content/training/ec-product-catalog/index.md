@@ -8,7 +8,7 @@ duration: "120分"
 tags: ["情報設計", "UX", "EC", "カタログ"]
 isPremium: false
 order_index: 3
-thumbnail_url: "/assets/backgrounds/ec-catalog-bg.svg"
+thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
 skills:
   - "情報アーキテクチャ設計"
   - "ユーザーニーズ分析"
