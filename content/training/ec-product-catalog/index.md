@@ -7,7 +7,7 @@ category: "UIデザイン"
 tags: ["UI", "EC", "カタログ", "情報設計"]
 isPremium: false
 order_index: 2
-thumbnail: "/assets/backgrounds/ui-basic-training-bg.svg"
+thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
 icon: "🛒"
 skills:
   - "情報アーキテクチャ"

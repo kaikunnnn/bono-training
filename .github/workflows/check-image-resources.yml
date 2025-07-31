@@ -1,0 +1,34 @@
+name: Image Resources Check
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'content/training/**/*.md'
+      - 'public/assets/backgrounds/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'content/training/**/*.md'
+      - 'public/assets/backgrounds/**'
+
+jobs:
+  check-images:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Make script executable
+      run: chmod +x scripts/check-image-resources.sh
+      
+    - name: Check image resources
+      run: ./scripts/check-image-resources.sh
+      
+    - name: Report results
+      if: failure()
+      run: |
+        echo "❌ 画像リソースチェックに失敗しました"
+        echo "不足している画像ファイルを確認し、適切に配置してください"
+        exit 1
