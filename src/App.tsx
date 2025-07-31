@@ -1,10 +1,10 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, ScrollRestoration } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import PrivateRoute from "@/components/auth/PrivateRoute";
@@ -35,6 +35,11 @@ console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undef
 const AppContent = () => {
   const location = useLocation();
   const urlPlan = new URLSearchParams(location.search).get('plan');
+  
+  // ページ遷移時にスクロール位置をリセット
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   
   // クエリパラメータに基づいてモックのサブスクリプション状態を生成
   const mockSubscription = urlPlan ? {
@@ -88,7 +93,6 @@ const AppContent = () => {
 
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <ScrollRestoration />
     </SubscriptionProvider>
   );
 };
