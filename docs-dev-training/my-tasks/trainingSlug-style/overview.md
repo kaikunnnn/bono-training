@@ -16,3 +16,12 @@
 
 - 背景のスタイルはこのファイルを使う [この SVG 画像](../../../public/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)
 -
+
+### チャレンジで身につくこと
+
+-
+
+### このチャレンジで伸ばせる力セクション
+
+- このスタイルと内容を元に編集して → [challenge-skills.md](challenge-skills.md)
+-
