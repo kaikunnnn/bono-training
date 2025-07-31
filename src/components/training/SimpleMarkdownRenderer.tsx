@@ -47,9 +47,9 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
         'block-text': 'w-full max-w-[472px] mb-9 py-6 border-b border-slate-300 flex flex-col items-center text-center space-y-3',
         // ブロックテキスト内の絵文字用
         'block-text-emoji': 'text-3xl sm:text-4xl mb-2',
-        // ブロックテキスト内のタイトル用 
-        'block-text-title': 'text-xl sm:text-2xl font-bold text-white leading-tight mb-3',
-        // ブロックテキスト内の説明文用
+        // ブロックテキスト内のタイトル用 - 白色、24px、太字、tracking-1px
+        'block-text-title': 'text-xl sm:text-2xl font-bold text-white leading-tight mb-3 tracking-[1px]',
+        // ブロックテキスト内の説明文用 - グレー、16px、line-height: 1.88
         'block-text-description': 'text-sm sm:text-base text-gray-300 leading-[1.88] px-4',
         // スキルグループ
         'skill-group': 'w-full max-w-2xl bg-white border-2 border-black rounded-3xl px-12 py-4 space-y-0',
