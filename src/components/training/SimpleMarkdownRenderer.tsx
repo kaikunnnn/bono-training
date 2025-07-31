@@ -43,8 +43,14 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
       const classMap: Record<string, string> = {
         // セクション全体のスタイル
         'section-challenge-merit': 'w-full bg-white py-8 px-4 border border-slate-400 flex flex-col items-center',
-        // テキストブロック
-        'block-text': 'w-full max-w-2xl mb-9 py-6 border-b border-slate-300 flex flex-col items-center text-center space-y-3',
+        // テキストブロック - Figmaデザインに合わせて最大幅を472pxに調整
+        'block-text': 'w-full max-w-[472px] mb-9 py-6 border-b border-slate-300 flex flex-col items-center text-center space-y-3',
+        // ブロックテキスト内の絵文字用
+        'block-text-emoji': 'text-3xl sm:text-4xl mb-2',
+        // ブロックテキスト内のタイトル用 
+        'block-text-title': 'text-xl sm:text-2xl font-bold text-white leading-tight mb-3',
+        // ブロックテキスト内の説明文用
+        'block-text-description': 'text-sm sm:text-base text-gray-300 leading-[1.88] px-4',
         // スキルグループ
         'skill-group': 'w-full max-w-2xl bg-white border-2 border-black rounded-3xl px-12 py-4 space-y-0',
         // 個別スキル項目
@@ -64,22 +70,24 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
     },
 
     // 見出しのスタイリング
-    h2: ({ children, ...props }) => (
-      <h2 className="text-xl font-bold mt-8 mb-4 text-gray-900" {...props}>
-        {children}
-      </h2>
-    ),
-
-    h3: ({ children, ...props }) => {
-      // セクションタイトル用の特別なスタイリング
+    h2: ({ children, ...props }) => {
+      // block-text内のタイトルの場合
       const childrenStr = React.Children.toArray(children).join('');
       if (childrenStr.includes('このチャレンジで伸ばせる力')) {
         return (
-          <h3 className="text-2xl font-bold text-black leading-tight" {...props}>
+          <h2 className="block-text-title" {...props}>
             {children}
-          </h3>
+          </h2>
         );
       }
+      return (
+        <h2 className="text-xl font-bold mt-8 mb-4 text-gray-900" {...props}>
+          {children}
+        </h2>
+      );
+    },
+
+    h3: ({ children, ...props }) => {
       return (
         <h3 className="text-lg font-semibold mt-6 mb-3 text-gray-800" {...props}>
           {children}
@@ -105,11 +113,22 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
       const childrenStr = React.Children.toArray(children).join('');
       if (childrenStr.trim() === '💪') {
         return (
-          <div className="text-sm font-semibold text-slate-900 mb-3" {...props}>
+          <div className="block-text-emoji" {...props}>
             {children}
           </div>
         );
       }
+      
+      // block-text内の説明文かどうかを判定する簡易的な方法
+      // 絵文字でも見出しでもない通常のテキストで、特定の内容の場合
+      if (childrenStr.includes('トレーニングはそのままやってもいいです')) {
+        return (
+          <p className="block-text-description" {...props}>
+            {children}
+          </p>
+        );
+      }
+      
       return (
         <p className="text-gray-700 leading-relaxed mb-4" {...props}>
           {children}
