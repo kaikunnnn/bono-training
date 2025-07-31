@@ -11,3 +11,8 @@
 - 対象：data-lov-id="src/pages/TrainingDetail.tsx:282:14"　のブロックのスタイルを調整
 - skills の title を使った文字情報を表示するのはそのままにスタイル調整をしたい
 - スタイル調整の内容はこのファイルを使う [herosection.md](herosection.md)
+
+### 背景のスタイル
+
+- 背景のスタイルはこのファイルを使う [この SVG 画像](../../../public/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)
+-
