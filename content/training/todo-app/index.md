@@ -10,9 +10,12 @@ thumbnail: "/assets/backgrounds/ui-basic-training-bg.svg"
 icon: "📱"
 category: "UXデザイン"
 skills:
-  - "UIコンポーネント設計"
-  - "インタラクションデザイン"
-  - "レスポンシブデザイン"
+  - title: "UIコンポーネント設計"
+    description: "ボタン、入力フィールド、リストアイテムなどの基本的なUIコンポーネントの設計原則を学習"
+  - title: "インタラクションデザイン"
+    description: "タスクの追加・編集・削除など、ユーザーの操作に対する適切なフィードバック設計"
+  - title: "レスポンシブデザイン"
+    description: "モバイルとデスクトップの両方で最適に表示されるレイアウト設計手法"
 estimated_total_time: "3-4時間"
 task_count: 3
 ---

@@ -10,9 +10,12 @@ order_index: 2
 thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
 icon: "🛒"
 skills:
-  - "情報アーキテクチャ"
-  - "UIワイヤーフレーム"
-  - "要件分析"
+  - title: "情報アーキテクチャ"
+    description: "商品情報を効率的に整理・分類し、ユーザーが目的の商品を見つけやすい構造設計"
+  - title: "UIワイヤーフレーム"
+    description: "ユーザビリティを重視したレイアウト設計とワイヤーフレーム作成技術"
+  - title: "要件分析"
+    description: "ステークホルダーからの要求を整理し、適切な設計方針を決定する分析手法"
 estimated_total_time: "4-5時間"
 task_count: 3
 ---
