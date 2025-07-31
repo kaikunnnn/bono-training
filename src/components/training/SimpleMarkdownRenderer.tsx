@@ -117,7 +117,7 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
       }
       
       return (
-        <h2 className="text-2xl font-bold text-training-text-primary mb-4" {...props}>
+        <h2 className="text-2xl font-bold text-training-text-primary mb-4 font-rounded-mplus-force" {...props}>
           {children}
         </h2>
       );

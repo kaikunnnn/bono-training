@@ -100,4 +100,10 @@
   .adjustLetterSpacing {
     letter-spacing: -0.02em;
   }
+  
+  /* Rounded Mplus フォントの強制適用 */
+  .font-rounded-mplus-force {
+    font-family: 'Rounded Mplus 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif !important;
+    font-display: swap;
+  }
 }
