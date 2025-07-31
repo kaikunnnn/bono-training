@@ -1,0 +1,41 @@
+name: Content Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'content/training/**/*.md'
+      - 'public/assets/backgrounds/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'content/training/**/*.md'
+      - 'public/assets/backgrounds/**'
+
+jobs:
+  content-validation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Make scripts executable
+      run: |
+        chmod +x scripts/validate-training-content.sh
+        chmod +x scripts/validate-frontmatter.sh
+        chmod +x scripts/check-image-resources.sh
+      
+    - name: Validate training content
+      run: ./scripts/validate-training-content.sh
+      
+    - name: Validate frontmatter
+      run: ./scripts/validate-frontmatter.sh
+      
+    - name: Check image resources
+      run: ./scripts/check-image-resources.sh
+      
+    - name: Report success
+      run: |
+        echo "✅ すべての品質チェックに合格しました！"
+        echo "🎉 コンテンツの品質が確保されています"
