@@ -140,7 +140,7 @@ const config = {
         'inter': ['Inter', 'sans-serif'],
         'noto-sans': ['Noto Sans', 'sans-serif'],
         'noto-sans-jp': ['Noto Sans JP', 'Noto Sans', 'sans-serif'],
-        'rounded-mplus': ['Rounded Mplus 1c', 'sans-serif'],
+        'rounded-mplus': ['Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],
       }
     }
