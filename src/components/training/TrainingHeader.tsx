@@ -26,8 +26,8 @@ const TrainingHeader = () => {
     navigate("/training/login");
   };
 
-  const handleBonoLinkClick = () => {
-    window.open("https://bo-no.design", "_blank", "noopener,noreferrer");
+  const handleTrainingHomeClick = () => {
+    navigate("/training");
   };
 
   const LeftSection = () => {
@@ -61,7 +61,7 @@ const TrainingHeader = () => {
   };
 
   const CenterSection = () => (
-    <div className="flex flex-col items-center gap-[2px] cursor-pointer" onClick={handleBonoLinkClick}>
+    <div className="flex flex-col items-center gap-[2px] cursor-pointer" onClick={handleTrainingHomeClick}>
       <span className="font-futura text-xl font-bold tracking-[1px]">
         BONO
       </span>
