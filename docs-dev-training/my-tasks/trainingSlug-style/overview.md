@@ -12,16 +12,16 @@
 - skills の title を使った文字情報を表示するのはそのままにスタイル調整をしたい
 - スタイル調整の内容はこのファイルを使う [herosection.md](herosection.md)
 
-### 背景のスタイル
-
-- 背景のスタイルはこのファイルを使う [この SVG 画像](../../../public/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)
--
-
 ### チャレンジで身につくこと
 
--
+- 場所 : data-lov-id="src/components/training/ChallengeMeritSection.tsx:21:4" のブロックが対象です
+- このスタイルと内容を元に編集して → []()
 
 ### このチャレンジで伸ばせる力セクション
 
 - このスタイルと内容を元に編集して → [challenge-skills.md](challenge-skills.md)
+
+### 背景のスタイル
+
+- 背景のスタイルはこのファイルを使う [この SVG 画像](../../../public/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)
 -
