@@ -43,7 +43,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
           {/* Title block */}
           <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2">
-              <span className="text-lg">{emoji}</span>
+              {emoji && <span className="text-lg">{emoji}</span>}
               <h3 className="text-lg font-bold tracking-[0.75px] text-[#0d0f18] font-noto-sans">
                 {title}
               </h3>

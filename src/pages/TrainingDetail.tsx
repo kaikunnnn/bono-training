@@ -11,7 +11,7 @@ import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
 import { loadTrainingContent } from '@/utils/loadTrainingContent';
-import { extractSkillSection, removeSkillAndGuideSection, extractSkillTitles, extractGuideSection, parseGuideContent } from '@/utils/processSkillSection';
+import { getSkillsFromFrontmatter, getGuideFromFrontmatter, convertGuideDataToGuideContent, convertSkillsToHtml } from '@/utils/simplifiedSkillGuideParser';
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
@@ -25,6 +25,8 @@ const TrainingDetail = () => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [frontmatter, setFrontmatter] = useState<TrainingFrontmatter | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
+  const [guideContent, setGuideContent] = useState<any>(null);
+  const [guideError, setGuideError] = useState<string | null>(null);
   
   if (!trainingSlug) {
     return <Navigate to="/training" replace />;
@@ -37,14 +39,34 @@ const TrainingDetail = () => {
     const loadContent = async () => {
       try {
         setContentError(null);
+        setGuideError(null);
+        
         const { frontmatter, content } = await loadTrainingContent(trainingSlug);
         setFrontmatter(frontmatter);
         setMarkdownContent(content);
+
+        // ガイドコンテンツの抽出と解析（新しいシンプルなパーサー使用）
+        try {
+          const guideData = getGuideFromFrontmatter(frontmatter);
+          if (guideData) {
+            const convertedGuideContent = convertGuideDataToGuideContent(guideData);
+            setGuideContent(convertedGuideContent);
+            console.log('✅ YAMLからガイドコンテンツを正常に抽出しました:', convertedGuideContent);
+          } else {
+            console.warn('⚠️ フロントマターに進め方ガイド情報が見つかりませんでした');
+            setGuideContent(null);
+          }
+        } catch (guideParseError) {
+          console.error('❌ ガイドコンテンツの解析に失敗しました:', guideParseError);
+          setGuideError(guideParseError instanceof Error ? guideParseError.message : 'ガイドの解析に失敗しました');
+          setGuideContent(null);
+        }
       } catch (error) {
         console.error('コンテンツ読み込みエラー:', error);
         setContentError(error instanceof Error ? error.message : 'コンテンツの読み込みに失敗しました');
         setFrontmatter(null);
         setMarkdownContent('');
+        setGuideContent(null);
       }
     };
 
@@ -53,102 +75,6 @@ const TrainingDetail = () => {
     }
   }, [trainingSlug]);
 
-  // 旧useEffect削除用（一時的コメントアウト）
-  /*
-  useEffect(() => {
-    // TODO: 実際のindex.mdコンテンツを取得する処理に置き換える
-    // 現在はモックデータを使用
-    const mockIndexContent = `---
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Smiling%20face%20with%20halo/3D/smiling_face_with_halo_3d.png"
-title: "社内本質し出しレシステムをデザインしよう"
-description: "デザインシステムの基本的な考え方から実装まで..."
-thumbnail: "/thumbnails/task.jpg"
-type: "portfolio"
-category: "情報設計"
-tags: ["ポートフォリオ", "情報設計"]
-estimated_total_time: "2時間"
-task_count: 2
----
-
-### このチャレンジで伸ばせる力
-
-トレーニングはそのままやってもいいです。基礎も合わせて学習して、実践をトレーニングで行うと土台を築けるでしょう。
-
-<div class="skill-group">
-
-### ■ "使いやすい UI"を要件とユーザーから設計する力
-
-- 自分が良いと思うではなく、使う人目線の UI 作成スキル
-- 参考リンク：『[デザイン基礎講座](https://example.com)』
-
-![スキル解説画像](http://i.imgur.com/Jjwsc.jpg "サンプル")
-
-### ■ 機能や状態を網羅して UI 設計する力
-
-- 例外を考えて実装や検証や状況のパターンを UI で網羅
-- より詳細な状態管理の考え方
-
-### ■ ユーザーゴールから配慮するべきものを UI に落とす
-
-- 自分が良いと思うではなく、使う人目線の UI 作成スキル
-- 参考リンク：『デザイン基礎を学ぶ』
-</div>
-
-## 進め方ガイド
-
-> デザイン基礎を身につけながらデザインするための
-> やり方の流れを説明します。
-
-#### レッスンで身につける
-
-<div class="lesson">
-![画像](http://i.imgur.com/Jjwsc.jpg "サンプル")
-##### ゼロからはじめる情報設計
-進め方の基礎はBONOで詳細に学習・実践できます
-</div>
-
-#### 進め方
-
-<div class="step">
-
-##### ステップ 1: 摸写したいアプリを選ぶ
-
-- なんでも良いですが、なるべく単一機能を提供しているアプリが良いと思います。普段使っている iPhone/Android の純正アプリ、ホーム画面に入っていていつも使っているアプリ、ストアのランキング上位のアプリなどから気楽に探してください。
-
-</div>
-
-<div class="step">
-
-##### ステップ 2: 📱 2.アプリを触りながら、気になったことをメモする(10 分)
-
-- なんでも良いですが、なるべく単一機能を提供しているアプリが良いと思います。普段使っている iPhone/Android の純正アプリ、ホーム画面に入っていていつも使っているアプリ、ストアのランキング上位のアプリなどから気楽に探してください。
-
-</div>
-`;
-
-    // フロントマターとコンテンツを分離
-    const frontmatterRegex = /^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/;
-    const match = mockIndexContent.match(frontmatterRegex);
-    
-    if (match) {
-      const [, yamlString, content] = match;
-      // TODO: 実際のYAMLパーサーを使用する
-      const parsedFrontmatter: TrainingFrontmatter = {
-        icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Smiling%20face%20with%20halo/3D/smiling_face_with_halo_3d.png",
-        title: "社内本質し出しレシステムをデザインしよう",
-        description: "デザインシステムの基本的な考え方から実装まで...",
-        thumbnail: "/thumbnails/task.jpg",
-        type: "portfolio",
-        category: "情報設計",
-        tags: ["ポートフォリオ", "情報設計"],
-        estimated_total_time: "2時間",
-        task_count: 2
-      };
-      setFrontmatter(parsedFrontmatter);
-      setMarkdownContent(content.trim());
-    }
-  }, [trainingSlug]);
-  */
 
   if (isLoading) {
     return (
@@ -215,7 +141,16 @@ task_count: 2
                 className="absolute h-[399px] left-[-10%] overflow-clip top-[-10px] w-[120%]"
                 data-name="表紙"
               >
-                <div className="relative size-full bg-gradient-to-r from-[#fdf3ff] via-[#f3e8ff] to-[#e9d5ff]" data-name="Property 1=Variant2">
+                <div 
+                  className={`relative size-full ${
+                    frontmatter.background_svg 
+                      ? `bg-[url('${frontmatter.background_svg}')] bg-cover bg-center bg-no-repeat` 
+                      : frontmatter.fallback_gradient 
+                        ? `bg-gradient-to-r from-[${frontmatter.fallback_gradient.from}] via-[${frontmatter.fallback_gradient.via}] to-[${frontmatter.fallback_gradient.to}]`
+                        : "bg-gradient-to-r from-[#fdf3ff] via-[#f3e8ff] to-[#e9d5ff]"
+                  }`} 
+                  data-name="Property 1=Variant2"
+                >
                   <div
                     className="absolute h-3.5 left-[-5%] top-[308px] w-[110%]"
                     data-name="line-wave"
@@ -439,8 +374,9 @@ task_count: 2
         {/* セクション・オーバービュー */}
         <div className="max-w-3xl mx-auto" data-name="section-overview">
           {/* チャレンジで身につくことセクション */}
-          {markdownContent && (() => {
-            const skillTitles = extractSkillTitles(markdownContent);
+          {frontmatter && (() => {
+            const skills = getSkillsFromFrontmatter(frontmatter);
+            const skillTitles = skills.map(skill => skill.title);
             return skillTitles.length > 0 ? (
               <ChallengeMeritSection skillTitles={skillTitles} />
             ) : null;
@@ -457,26 +393,36 @@ task_count: 2
         </div>
 
         {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
-        {markdownContent && (
-          <div className="mt-12">
-            <SimpleMarkdownRenderer 
-              content={extractSkillSection(markdownContent)}
-              className="prose prose-lg max-w-none"
-              options={{
-                isPremium: frontmatter?.is_premium || false,
-                hasMemberAccess: true
-              }}
-            />
+        {frontmatter && (() => {
+          const skills = getSkillsFromFrontmatter(frontmatter);
+          if (skills.length === 0) return null;
+          
+          const skillsHtml = convertSkillsToHtml(skills);
+          return (
+            <div className="mt-12">
+              <SimpleMarkdownRenderer 
+                content={skillsHtml}
+                className="prose prose-lg max-w-none"
+                options={{
+                  isPremium: frontmatter?.is_premium || false,
+                  hasMemberAccess: true
+                }}
+              />
+            </div>
+          );
+        })()}
+
+        {/* 進め方ガイドセクション */}
+        {guideContent && (
+          <div data-name="section-progress-guide">
+            <TrainingGuideSection guideContent={guideContent} />
           </div>
         )}
 
-        {/* 進め方ガイドセクション */}
-        <TrainingGuideSection />
-
-        {/* マークダウンコンテンツ（スキルセクションと進め方ガイドを除外） */}
+        {/* マークダウンコンテンツ（残りのコンテンツ） */}
         {markdownContent && (
           <SimpleMarkdownRenderer 
-            content={removeSkillAndGuideSection(markdownContent)}
+            content={markdownContent}
             className="prose prose-lg max-w-none"
             options={{
               isPremium: frontmatter?.is_premium || false,

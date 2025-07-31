@@ -1,13 +1,37 @@
 ---
-title: 美容室で要望を伝えられない悩みを解決
-description: 美容室での課題解決にチャレンジするお題です。
-type: challenge
-difficulty: normal
-estimated_total_time: 2時間
+title: "美容室で要望を伝えられない悩みを解決"
+description: "美容室での課題解決にチャレンジするお題です"
+icon: "💇"
+thumbnail: "https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png"
+background_image: "https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg"
+type: "challenge"
+difficulty: "normal"
+estimated_total_time: "2時間"
 task_count: 2
-category: UIビジュアル
-thumbnailImage: https://png.pngtree.com/png-clipart/20230825/original/pngtree-custom-home-screen-user-interface-mobile-app-realistic-picture-image_8699042.png
-background_image: https://www.shutterstock.com/image-illustration/blue-backgroundimage-260nw-629750951.jpg
+category: "ユーザーリサーチ"
+tags: ["UX", "ユーザーリサーチ", "課題解決"]
+skills:
+  - title: "ユーザーリサーチ実践力"
+    description: "リアルなユーザーインタビューから課題を発見する技術"
+  - title: "課題定義とゴール設定"
+    description: "ユーザーの本当の課題とゴール状態を定義する能力"
+  - title: "プロトタイピング実践"
+    description: "課題解決のアイデアを検証するプロトタイプ制作スキル"
+guide:
+  title: "進め方ガイド"
+  description: "ユーザーリサーチから課題解決まで\n実践的な UX デザインの流れ"
+  lesson:
+    title: "ゼロからはじめる情報設計"
+    emoji: "📚"
+    description: "ユーザーリサーチの基礎をBONOで学習できます"
+    link: "https://bo-no.design"
+  steps:
+    - title: "ステップ 1: ユーザーインタビュー実施"
+      description: "実際のユーザーにインタビューして課題を発見しましょう"
+    - title: "ステップ 2: 課題とゴールを定義"
+      description: "インタビュー結果から本当の課題とゴール状態を明確化します"
+    - title: "ステップ 3: 解決策をプロトタイピング"
+      description: "課題を解決するアイデアをプロトタイプで検証します"
 ---
 
 # ※お題パターンはステップが必要ないかもしれない

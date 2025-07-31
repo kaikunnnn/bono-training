@@ -11,129 +11,88 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu } from "lucide-react";
+import { useMobile, useTablet, useDesktop } from "@/hooks/use-mobile";
 
 const TrainingHeader = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useMobile();
+  const isTablet = useTablet();
+  const isDesktop = useDesktop();
 
   const handleSignOut = async () => {
     await signOut();
     navigate("/training/login");
   };
 
-  return (
-    <header className="flex flex-col items-end w-full">
-      {/* Top bar */}
-      <div className="w-full px-6">
-        <Link 
-          to="/"
-          className="inline-flex items-center bg-[#0D0F18] border border-white/[0.08] rounded-b-[10px] pl-3 pr-2 py-1"
-        >
-          <span className="font-['Futura'] text-[10.5px] font-bold tracking-[0.75px] text-white">
-            BONO
-          </span>
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            className="ml-1"
-          >
-            <path
-              d="M5.99935 3.3335V4.66683H10.3927L2.66602 12.3935L3.60602 13.3335L11.3327 5.60683V10.0002H12.666V3.3335H5.99935Z"
-              fill="white"
-            />
-          </svg>
-        </Link>
-      </div>
+  const handleTrainingHomeClick = () => {
+    navigate("/training");
+  };
 
-      {/* Main header */}
-      <div className="flex justify-between items-center w-full h-20 px-5">
-        {/* Left block */}
+  const LeftSection = () => {
+    if (isMobile) {
+      return (
         <div className="flex-1 flex items-center justify-start">
-          <Link 
-            to="/training/about"
-            className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-          >
-            <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
-              遊び方
-            </span>
-          </Link>
-        </div>
-
-        {/* Center - Logo */}
-        <Link to="/training" className="flex flex-col items-center gap-[2px]">
-          <span className="font-['Futura'] text-xl font-bold tracking-[1px]">
-            BONO
+          <span className="font-rounded-mplus text-sm font-bold text-[#475569]">
+            α版
           </span>
-          <span className="font-['Futura'] text-[8px] font-bold tracking-[1px] text-[#666666]">
-            TRAINING
-          </span>
-        </Link>
-
-        {/* Right block */}
-        <div className="flex-1 flex items-center justify-end gap-3">
-          {!user ? (
-            <>
-              <Link
-                to="/training/login"
-                className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-              >
-                <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
-                  ログイン
-                </span>
-              </Link>
-              <Link
-                to="/training/plan"
-                className="inline-flex h-9 items-center justify-center px-3 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-              >
-                <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
-                  プラン
-                </span>
-              </Link>
-              <Link
-                to="/training/signup"
-                className="inline-flex h-9 items-center justify-center px-4 py-2 rounded-full border-2 border-[#0D221D] hover:bg-gray-50 transition-colors"
-              >
-                <span className="font-['Rounded_Mplus_1c'] text-sm font-bold">
-                  はじめる
-                </span>
-              </Link>
-            </>
-          ) : (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  {user.email ? (
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.user_metadata?.avatar_url} />
-                      <AvatarFallback>
-                        {user.email.charAt(0).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                  ) : (
-                    <span>アカウント</span>
-                  )}
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  アカウント情報
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/training/plan')}>
-                  プランを確認・変更
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut}>
-                  ログアウト
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
         </div>
+      );
+    }
+    
+    if (isTablet) {
+      return (
+        <div className="flex-1 flex items-center justify-start">
+          <span className="font-rounded-mplus text-sm font-bold text-[#475569]">
+            αテスト版
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex-1 flex items-center justify-start max-w-[480px]">
+        <span className="font-rounded-mplus text-sm font-bold text-[#475569]">
+          αテスト版だよ
+        </span>
+      </div>
+    );
+  };
+
+  const CenterSection = () => (
+    <div className="flex flex-col items-center gap-[2px] cursor-pointer" onClick={handleTrainingHomeClick}>
+      <span className="font-futura text-xl font-bold tracking-[1px]">
+        BONO
+      </span>
+      <span className="font-futura text-[8px] font-bold tracking-[1px] text-[#666666]">
+        TRAINING
+      </span>
+    </div>
+  );
+
+  const RightSection = () => (
+    <div className="flex-1 flex items-center justify-end max-w-[480px]">
+      <button
+        onClick={() => window.open("https://bo-no.design", "_blank", "noopener,noreferrer")}
+        className="inline-flex items-center justify-center px-4 h-10 rounded-full border-2 border-[#0d221d] transition-colors"
+      >
+        <span className="font-rounded-mplus text-sm font-bold">
+          BONOに戻る
+        </span>
+      </button>
+    </div>
+  );
+
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 w-full animate-gradient-fade-in"
+            style={{
+              background: 'linear-gradient(180deg, hsl(var(--training-gradient-start)) 0%, hsl(var(--training-gradient-middle)) 36.7%, transparent 100%)'
+            }}>
+      <div className="flex justify-between items-center h-[88px] w-full max-w-[1670px] mx-auto px-5">
+        <LeftSection />
+        <CenterSection />
+        <RightSection />
       </div>
     </header>
   );

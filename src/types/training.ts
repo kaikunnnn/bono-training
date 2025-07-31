@@ -85,6 +85,33 @@ export interface TrainingContentResponse {
 }
 
 /**
+ * スキル情報の型定義
+ */
+export interface SkillData {
+  title: string;
+  description: string;
+  reference_link?: string;
+}
+
+/**
+ * ガイド情報の型定義
+ */
+export interface GuideData {
+  title: string;
+  description: string;
+  lesson?: {
+    title: string;
+    emoji?: string;
+    description: string;
+    link: string;
+  };
+  steps: Array<{
+    title: string;
+    description: string;
+  }>;
+}
+
+/**
  * Markdownフロントマターの型定義
  */
 export interface TrainingFrontmatter {
@@ -100,6 +127,24 @@ export interface TrainingFrontmatter {
   icon?: string;
   thumbnail?: string;
   category?: string;
+  skills?: SkillData[];
+  guide?: GuideData;
+  background_svg?: string;
+  fallback_gradient?: {
+    from: string;
+    via: string;
+    to: string;
+  };
+}
+
+export interface TaskContentSection {
+  title: string;
+  content: string;
+  type?: 'regular' | 'design-solution' | 'premium-only';
+  subsections?: {
+    title: string;
+    content: string;
+  }[];
 }
 
 export interface TaskFrontmatter {
@@ -117,6 +162,8 @@ export interface TaskFrontmatter {
   prev_task?: string;
   next_task?: string;
   training_title?: string;
+  // 構造化コンテンツフィールド
+  sections?: TaskContentSection[];
 }
 
 export interface MarkdownFile {
@@ -126,17 +173,108 @@ export interface MarkdownFile {
   slug: string;
 }
 
+import { z } from 'zod';
+
 /**
- * 型安全性確認用のアサート関数
+ * Zodスキーマ定義
  */
-export function assertTrainingMeta(meta: any): asserts meta is TrainingFrontmatter {
-  if (!meta.title) {
-    throw new Error(`Training meta is missing required field 'title'`);
+export const SkillDataSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  reference_link: z.string().url().optional()
+});
+
+export const GuideDataSchema = z.object({
+  title: z.string(),
+  description: z.string(),
+  lesson: z.object({
+    title: z.string(),
+    emoji: z.string().optional(),
+    description: z.string(),
+    link: z.string()
+  }).optional(),
+  steps: z.array(z.object({
+    title: z.string(),
+    description: z.string()
+  }))
+});
+
+export const TrainingFrontmatterSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  type: z.enum(['challenge', 'skill', 'portfolio']).optional(),
+  difficulty: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  estimated_total_time: z.string().optional(),
+  task_count: z.number().optional(),
+  is_premium: z.boolean().optional(),
+  slug: z.string().optional(),
+  icon: z.string().optional(),
+  thumbnail: z.string().optional(),
+  category: z.string().optional(),
+  skills: z.array(SkillDataSchema).optional(),
+  guide: GuideDataSchema.optional(),
+  background_svg: z.string().optional(),
+  fallback_gradient: z.object({
+    from: z.string(),
+    via: z.string(),
+    to: z.string()
+  }).optional()
+});
+
+export const TaskContentSectionSchema = z.object({
+  title: z.string(),
+  content: z.string(),
+  type: z.enum(['regular', 'design-solution', 'premium-only']).optional(),
+  subsections: z.array(z.object({
+    title: z.string(),
+    content: z.string()
+  })).optional()
+});
+
+export const TaskFrontmatterSchema = z.object({
+  title: z.string(),
+  description: z.string().optional(),
+  slug: z.string(),
+  order_index: z.number(),
+  is_premium: z.boolean().optional(),
+  difficulty: z.string().optional(),
+  estimated_time: z.string().optional(),
+  video_preview: z.string().optional(),
+  video_full: z.string().optional(),
+  preview_sec: z.number().optional(),
+  preview_marker: z.string().optional(),
+  prev_task: z.string().optional(),
+  next_task: z.string().optional(),
+  training_title: z.string().optional(),
+  sections: z.array(TaskContentSectionSchema).optional()
+});
+
+/**
+ * 型安全性確認用のバリデーション関数
+ */
+export function validateTrainingMeta(meta: unknown): TrainingFrontmatter {
+  try {
+    const validated = TrainingFrontmatterSchema.parse(meta);
+    return validated as TrainingFrontmatter;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const issues = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
+      throw new Error(`Training frontmatter validation failed: ${issues}`);
+    }
+    throw new Error('Training frontmatter validation failed');
   }
 }
 
-export function assertTaskMeta(meta: any): asserts meta is TaskFrontmatter {
-  if (!meta.title || !meta.slug || typeof meta.order_index !== 'number') {
-    throw new Error(`Task meta is missing required fields: title, slug, or order_index`);
+export function validateTaskMeta(meta: unknown): TaskFrontmatter {
+  try {
+    const validated = TaskFrontmatterSchema.parse(meta);
+    return validated as TaskFrontmatter;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const issues = error.issues.map(issue => `${issue.path.join('.')}: ${issue.message}`).join(', ');
+      throw new Error(`Task frontmatter validation failed: ${issues}`);
+    }
+    throw new Error('Task frontmatter validation failed');
   }
 }

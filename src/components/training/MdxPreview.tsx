@@ -14,6 +14,65 @@ interface MdxPreviewProps {
   previewMarker?: string;
 }
 
+// マークダウンコンポーネントの定義
+const markdownComponents = {
+  // 箇条書きスタイリング
+  ul: ({ children, ...props }: any) => (
+    <ul className="list-disc list-inside space-y-2 mb-4 ml-4" {...props}>
+      {children}
+    </ul>
+  ),
+  li: ({ children, ...props }: any) => (
+    <li className="text-gray-700 leading-relaxed" {...props}>
+      {children}
+    </li>
+  ),
+  
+  // リンクスタイリング
+  a: ({ href, children, ...props }: any) => (
+    <a
+      href={href}
+      className="text-blue-600 hover:text-blue-800 underline transition-colors"
+      target={href?.startsWith('http') ? '_blank' : undefined}
+      rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined}
+      {...props}
+    >
+      {children}
+    </a>
+  ),
+
+  // 見出しスタイリング
+  h2: ({ children, ...props }: any) => (
+    <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4" {...props}>
+      {children}
+    </h2>
+  ),
+  h3: ({ children, ...props }: any) => (
+    <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3" {...props}>
+      {children}
+    </h3>
+  ),
+  h4: ({ children, ...props }: any) => (
+    <h4 className="text-lg font-medium text-gray-800 mt-4 mb-2" {...props}>
+      {children}
+    </h4>
+  ),
+
+  // 段落スタイリング
+  p: ({ children, ...props }: any) => (
+    <p className="text-gray-700 leading-relaxed mb-4" {...props}>
+      {children}
+    </p>
+  ),
+
+  // インラインコードスタイリング
+  code: ({ children, ...props }: any) => (
+    <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono" {...props}>
+      {children}
+    </code>
+  ),
+};
+
 /**
  * MDXコンテンツをプレビュー表示するコンポーネント
  * プレミアムコンテンツの場合は制限表示を行う
@@ -40,7 +99,7 @@ export function MdxPreview({
 
   return (
     <div className={cn("mdx-preview space-y-4", className)}>
-      <Markdown>
+      <Markdown components={markdownComponents}>
         {displayContent}
       </Markdown>
       

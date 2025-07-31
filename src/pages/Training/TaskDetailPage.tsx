@@ -12,7 +12,7 @@ import ErrorDisplay from '@/components/common/ErrorBoundary';
 import { useTaskDetail } from '@/hooks/useTrainingCache';
 import { TaskFrontmatter } from '@/types/training';
 import { Skeleton } from '@/components/ui/skeleton';
-import { parseContentSections, extractSubSections, type ContentSectionData } from '@/utils/parseContentSections';
+import { parseContentSections, extractSubSections, type ContentSectionData, type StructuredSection } from '@/utils/parseContentSections';
 import ContentSection from '@/components/training/ContentSection';
 import DesignSolutionSection from '@/components/training/DesignSolutionSection';
 import NavigationHeader from '@/components/training/NavigationHeader';
@@ -316,20 +316,26 @@ const TaskDetailPage = () => {
     renderMarkdown: true
   });
 
-  // Step 6: 最終統合 - content.md解析と構造化コンテンツ表示
+  // Step 6: 最終統合 - 構造化コンテンツ対応版
   let contentSections: ContentSectionData[] = [];
   const hasValidContent = task && task.content && typeof task.content === 'string' && task.content.trim();
   
+  // 構造化セクションデータの確認（将来的にフロントマターから取得）
+  const structuredSections: StructuredSection[] | undefined = (task as any)?.sections;
+  
   if (hasValidContent) {
-    contentSections = parseContentSections(task.content);
+    // 構造化データを優先的に使用し、フォールバックでマークダウン解析
+    contentSections = parseContentSections(task.content, structuredSections);
     console.log('✅ 最終統合 - 解析されたセクション数:', contentSections.length);
     console.log('✅ 最終統合 - セクション構成:', contentSections.map(s => ({ title: s.title, type: s.type })));
+    console.log('✅ 最終統合 - 構造化データ使用:', !!structuredSections?.length);
   } else {
     console.warn('⚠️ 最終統合 - コンテンツが無効またはない:', { 
       hasTask: !!task, 
       hasContent: !!(task?.content), 
       contentType: typeof task?.content,
-      contentLength: task?.content?.length || 0 
+      contentLength: task?.content?.length || 0,
+      hasStructuredSections: !!structuredSections?.length
     });
   }
 
@@ -392,24 +398,47 @@ const TaskDetailPage = () => {
                   </div>
                 )}
 
-                {/* Step 4-5: 新しいコンテンツセクション表示 */}
-                <div className="mb-8">
-                  {hasValidContent && contentSections.length > 0 ? (
-                    contentSections.map((section, index) => (
-                      <div key={index} className="mb-6">
-                        {section.type === 'design-solution' ? (
-                          <DesignSolutionSection 
-                            content={section.content}
-                          />
-                        ) : (
-                          <ContentSection 
-                            title={section.title}
-                            content={section.content}
-                          />
-                        )}
-                      </div>
-                    ))
-                  ) : (
+                 {/* Step 4-5: 構造化コンテンツセクション表示（プレミアムコンテンツ対応） */}
+                 <div className="mb-8">
+                   {hasValidContent && contentSections.length > 0 ? (
+                     contentSections.map((section, index) => (
+                       <div key={index} className="mb-6">
+                         {section.type === 'design-solution' ? (
+                           <DesignSolutionSection 
+                             content={section.content}
+                           />
+                         ) : section.type === 'premium-only' ? (
+                           hasPremiumAccess ? (
+                             <ContentSection 
+                               title={section.title}
+                               content={section.content}
+                             />
+                           ) : (
+                             <div className="border-2 border-orange-200 rounded-lg p-6 bg-orange-50">
+                               <div className="flex items-center gap-3 mb-3">
+                                 <span className="text-2xl">🔒</span>
+                                 <h3 className="text-lg font-bold text-orange-800">{section.title}</h3>
+                               </div>
+                               <div className="text-orange-600 text-sm mb-4">
+                                 このセクションはメンバー限定コンテンツです。
+                               </div>
+                               <button
+                                 onClick={() => navigate('/training/plan')}
+                                 className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                               >
+                                 プランを確認
+                               </button>
+                             </div>
+                           )
+                         ) : (
+                           <ContentSection 
+                             title={section.title}
+                             content={section.content}
+                           />
+                         )}
+                       </div>
+                     ))
+                   ) : (
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
                       <div className="text-yellow-800 font-medium mb-2">
                         📄 コンテンツが利用できません

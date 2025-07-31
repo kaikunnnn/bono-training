@@ -3,7 +3,21 @@ import GuideHeader from './GuideHeader';
 import LessonCard from './LessonCard';
 import StepBlock from './StepBlock';
 import ArrowDown from './ArrowDown';
-import { GuideContent } from '@/utils/processSkillSection';
+// Phase 3: GuideContentの型定義を移動
+export interface GuideContent {
+  title: string;
+  description: string;
+  lessonCard?: {
+    title: string;
+    description: string;
+    emoji: string;
+    link: string;
+  };
+  steps: Array<{
+    title: string;
+    description: string;
+  }>;
+}
 
 interface Step {
   title: string;
@@ -51,18 +65,18 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
     }
   ];
 
-  const defaultLessonCard = {
-    title: 'ゼロからはじめる情報設計',
-    emoji: '📚',
-    description: '進め方の基礎はBONOで詳細に学習・実践できます',
-    link: '/training'
-  };
+  // 使用するデータを決定（propsのguideContentを優先、存在しない場合はデフォルト）
+  const title = guideContent?.title || '進め方ガイド';
+  const description = guideContent?.description || 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。';
+  const lessonCard = guideContent?.lessonCard; // レッスンカードはguideContentにある場合のみ表示
+  const steps = guideContent?.steps || propSteps || defaultSteps;
 
-  // 使用するデータを決定（デフォルトのみ使用）
-  const title = '進め方ガイド';
-  const description = 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。';
-  const lessonCard = defaultLessonCard;
-  const steps = defaultSteps;
+  console.log('TrainingGuideSection - 使用するデータ:', { 
+    hasGuideContent: !!guideContent,
+    title, 
+    lessonCard,
+    stepsCount: steps.length 
+  });
   return (
     <section className="w-full py-16 px-4 bg-white">
       <div className="max-w-3xl mx-auto">
@@ -103,7 +117,6 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
                     <StepBlock
                       title={step.title}
                       description={step.description}
-                      referenceLink={step.referenceLink}
                     />
                     {index < steps.length - 1 && (
                       <div className="flex justify-center py-2">

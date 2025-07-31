@@ -1,5 +1,5 @@
 import yaml from 'js-yaml';
-import { TrainingFrontmatter } from '@/types/training';
+import { TrainingFrontmatter, validateTrainingMeta } from '@/types/training';
 
 export interface TrainingContent {
   frontmatter: TrainingFrontmatter;
@@ -20,14 +20,21 @@ export const loadTrainingContent = async (trainingSlug: string): Promise<Trainin
       const [, yamlString, content] = match;
       try {
         // js-yamlでフロントマターをパース
-        const parsedFrontmatter = yaml.load(yamlString) as TrainingFrontmatter;
+        const rawFrontmatter = yaml.load(yamlString);
+        
+        // Zodスキーマでバリデーション
+        const validatedFrontmatter = validateTrainingMeta(rawFrontmatter);
+        
         return {
-          frontmatter: parsedFrontmatter,
+          frontmatter: validatedFrontmatter,
           content: content.trim()
         };
       } catch (yamlError) {
-        console.error('YAMLパースエラー:', yamlError);
-        throw new Error('YAMLパースに失敗しました');
+        console.error('フロントマターの処理エラー:', yamlError);
+        if (yamlError instanceof Error) {
+          throw new Error(`フロントマターの処理に失敗しました: ${yamlError.message}`);
+        }
+        throw new Error('フロントマターの処理に失敗しました');
       }
     } else {
       throw new Error('フロントマターが見つかりません');

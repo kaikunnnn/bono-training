@@ -22,7 +22,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
   return (
     <div
       className={cn(
-        "box-border flex flex-col gap-4 items-center justify-start p-0 relative w-full h-full",
+        "box-border flex flex-col gap-4 items-start justify-start p-0 relative w-full h-full",
         className
       )}
       data-name="Heading"
@@ -42,7 +42,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {/* メインタイトル */}
       <div
-        className="font-semibold text-[36px] leading-[40px] text-slate-900 text-center not-italic relative shrink-0 min-w-full w-min"
+        className="font-semibold text-[24px] leading-[40px] text-slate-900 text-left not-italic relative shrink-0 min-w-full w-min"
         style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
         id="node-3248_5676"
       >
@@ -51,7 +51,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {/* 説明文 */}
       <div
-        className="font-semibold text-[14px] leading-[20px] text-[#1d382f] text-center not-italic relative shrink-0 min-w-full w-min"
+        className="font-medium text-[16px] leading-[20px] text-[#1d382f] text-left not-italic relative shrink-0 min-w-full w-min"
         style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
         id="node-3283_4562"
       >
