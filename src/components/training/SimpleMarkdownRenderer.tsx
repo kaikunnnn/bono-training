@@ -47,7 +47,7 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
     // 絵文字（Inter Semi Bold、14pxベース、実際は大きく表示）
     'block-text-emoji': 'font-inter font-semibold relative shrink-0 text-center text-slate-900 w-full text-2xl md:text-3xl leading-tight',
     // タイトル（Rounded Mplus 1c Bold、白色、24px、tracking-1px）
-    'block-text-title': 'font-rounded-mplus text-black text-xl md:text-[24px] tracking-[1px] leading-[1.6] text-center w-full whitespace-normal md:whitespace-nowrap',
+    'block-text-title': 'font-rounded-mplus font-bold text-black text-xl md:text-[24px] tracking-[1px] leading-[1.6] text-center w-full whitespace-normal md:whitespace-nowrap',
     // 説明文（Inter+Noto Sans JP、16px、line-height: 1.88）
     'block-text-description': 'font-inter font-normal text-[14px] md:text-[16px] text-center text-slate-900 leading-[1.7] md:leading-[1.88] w-full',
     // スキルグループ
