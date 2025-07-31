@@ -1,4 +1,4 @@
-name: Image Resources Check
+name: Content Quality Check
 
 on:
   push:
@@ -13,22 +13,29 @@ on:
       - 'public/assets/backgrounds/**'
 
 jobs:
-  check-images:
+  content-validation:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout repository
       uses: actions/checkout@v4
       
-    - name: Make script executable
-      run: chmod +x scripts/check-image-resources.sh
+    - name: Make scripts executable
+      run: |
+        chmod +x scripts/validate-training-content.sh
+        chmod +x scripts/validate-frontmatter.sh
+        chmod +x scripts/check-image-resources.sh
+      
+    - name: Validate training content
+      run: ./scripts/validate-training-content.sh
+      
+    - name: Validate frontmatter
+      run: ./scripts/validate-frontmatter.sh
       
     - name: Check image resources
       run: ./scripts/check-image-resources.sh
       
-    - name: Report results
-      if: failure()
+    - name: Report success
       run: |
-        echo "❌ 画像リソースチェックに失敗しました"
-        echo "不足している画像ファイルを確認し、適切に配置してください"
-        exit 1
+        echo "✅ すべての品質チェックに合格しました！"
+        echo "🎉 コンテンツの品質が確保されています"
