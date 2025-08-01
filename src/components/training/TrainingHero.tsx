@@ -4,7 +4,7 @@ import React from "react";
 const TrainingHero = () => {
   return (
     <section 
-      className="flex flex-col items-center py-10 w-full" 
+      className="flex flex-col items-center pt-10 w-full" 
       role="banner"
       aria-labelledby="training-hero-title"
     >
