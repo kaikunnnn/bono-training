@@ -61,7 +61,7 @@ const TrainingHome = () => {
     }
 
     return (
-      <div className="mb-12">
+      <div className="py-8">
         <div className="mb-6">
           <SectionHeading
             category={category}
@@ -78,7 +78,7 @@ const TrainingHome = () => {
     <TrainingLayout>
       <TrainingHero />
       
-      <div className="py-8">
+      <div>
         {/* ローディング状態 */}
         {isLoading && (
           <div className="space-y-12">
