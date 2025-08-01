@@ -141,7 +141,7 @@ const config = {
         'noto-sans': ['Noto Sans', 'sans-serif'],
         'noto-sans-jp': ['Noto Sans JP', 'Noto Sans', 'sans-serif'],
         'rounded-mplus': ['Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
-        'rounded-mplus-bold': ['Rounded M PLUS 1c Bold', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
+        'rounded-mplus-bold': ['Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],
       },
       // アイコンブロック用のカスタムクラス
