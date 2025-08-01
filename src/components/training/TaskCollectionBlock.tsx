@@ -31,7 +31,7 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
             {/* numberoftraining セクション */}
             <div className="flex items-center gap-5 mb-[11px]">
               {/* 小さな黒い円 */}
-              <div className="w-2 h-2 rounded-full bg-[#0D221D]"></div>
+              <img src="/images/dot/dot-gradation-01.svg" alt="" className="w-3 h-3" />
               
               {/* テキスト部分 */}
               <div className="flex items-center gap-2">
