@@ -294,7 +294,7 @@ const TrainingDetail = () => {
                 <div
                   className="font-['Rounded_Mplus_1c_Bold:Bold',_sans-serif] leading-[0] w-full not-italic relative shrink-0 text-[#0d221d] text-[24px] sm:text-[28px] md:text-[32px] text-center tracking-[0.75px] px-4"
                 >
-                  <p className="block leading-[1.49]">
+                  <p className="block leading-[1.49] font-bold font-['Rounded_M_PLUS_1c']">
                     {frontmatter.title || training.title || 'タイトルなし'}
                   </p>
                 </div>
