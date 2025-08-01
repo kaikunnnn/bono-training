@@ -16,10 +16,7 @@ const TrainingHero = () => {
           トレーニング。それは"可能性"をひらく扉。
         </h1>
         
-        <p 
-          className="font-['Noto_Sans'] font-medium text-[16px] text-[#475569] text-left"
-          style={{ fontVariationSettings: "'CTGR' 0, 'wdth' 100" }}
-        >
+        <p className="font-medium text-[16px] text-[#475569] text-left">
           各コースで身につけたことをアウトプットするお題を並べています🙋
         </p>
       </div>
