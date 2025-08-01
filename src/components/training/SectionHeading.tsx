@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import CategoryTag from './CategoryTag';
 
 interface SectionHeadingProps {
   category?: string;
@@ -29,16 +28,6 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
       id="node-3248_5674"
       data-annotations="この部分は /trainingのページで使い回すセクションタイトルのコンポーネントセットにしたいです。"
     >
-      {/* カテゴリタグ */}
-      {category && (
-        <div
-          data-name="Component 4"
-          id="node-3287_2230"
-          data-annotations="この部分は カテゴリタグのコンポーネントを使います ゆくゆく実装では、このカテゴリと同じ type=portfolioの :trainingSlugのコンテンツを表示するものを実装していきたいです。"
-        >
-          <CategoryTag category={category} />
-        </div>
-      )}
 
       {/* メインタイトル */}
       <div
