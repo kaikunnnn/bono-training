@@ -274,21 +274,6 @@ const TrainingDetail = () => {
                 className="box-border content-stretch flex flex-col gap-3 items-center justify-start p-0 relative shrink-0 w-full"
                 data-name="text-section"
               >
-                {/* カテゴリとタイプ */}
-                <div
-                  className="box-border content-stretch flex flex-row gap-3 sm:gap-5 items-center justify-center flex-wrap p-0 relative shrink-0"
-                  data-name="section_category_and_tags"
-                >
-                  {/* タイプ */}
-                  {frontmatter.type && (
-                    <CategoryTag type={frontmatter.type} displayMode="type" />
-                  )}
-                  
-                  {/* カテゴリ */}
-                  {frontmatter.category && (
-                    <CategoryTag category={frontmatter.category} displayMode="category" />
-                  )}
-                </div>
 
                 {/* タイトル */}
                 <div

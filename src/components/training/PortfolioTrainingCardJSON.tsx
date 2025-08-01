@@ -43,10 +43,6 @@ const PortfolioTrainingCardJSON: React.FC<PortfolioTrainingCardJSONProps> = ({ t
 
             {/* Step 2-2: コンテンツブロック（260×102px） */}
             <div className="w-[260px] h-[102px] flex flex-col gap-2">
-              {/* タイプタグ */}
-              <div className="flex justify-start">
-                <CategoryTag type={training.type} displayMode="type" />
-              </div>
               
               {/* タイトルと説明 */}
               <div className="flex flex-col gap-1 text-left">
