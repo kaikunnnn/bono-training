@@ -17,6 +17,7 @@ import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
 import { HalfCircleBg } from '@/components/training/HalfCircleBg';
 import IconBlock from '@/components/training/IconBlock';
+import ContentWrapper from '@/components/training/ContentWrapper';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -125,13 +126,12 @@ const TrainingDetail = () => {
 
   return (
     <TrainingLayout>
-      <div>
-        {/* Figmaデザインベースのeyecatchセクション */}
-        {frontmatter && (
-          <div
-            className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative size-full mb-8 border-b border-slate-200"
-            data-name="training-overview"
-          >
+      {/* Figmaデザインベースのeyecatchセクション - 全幅 */}
+      {frontmatter && (
+        <div
+          className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative w-full mb-8 border-b border-slate-200"
+          data-name="training-overview"
+        >
             
             {/* 背景 */}
             <div
@@ -360,10 +360,10 @@ const TrainingDetail = () => {
           </div>
         )}
 
-
-
-        {/* セクション・オーバービュー */}
-        <div className="max-w-3xl mx-auto" data-name="section-overview">
+        {/* その他のコンテンツ - 幅制限あり */}
+        <ContentWrapper>
+          {/* セクション・オーバービュー */}
+          <div className="max-w-3xl mx-auto" data-name="section-overview">
           {/* チャレンジで身につくことセクション */}
           {frontmatter && (() => {
             const skills = getSkillsFromFrontmatter(frontmatter);
@@ -382,46 +382,54 @@ const TrainingDetail = () => {
             />
           </div>
         </div>
+        </ContentWrapper>
 
-        {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
-        {frontmatter && (() => {
-          const skills = getSkillsFromFrontmatter(frontmatter);
-          if (skills.length === 0) return null;
-          
-          const skillsHtml = convertSkillsToHtml(skills);
-          return (
-            <div className="mt-12">
-              <SimpleMarkdownRenderer 
-                content={skillsHtml}
-                className="prose prose-lg max-w-none"
-                options={{
-                  isPremium: frontmatter?.is_premium || false,
-                  hasMemberAccess: true
-                }}
-              />
-            </div>
-          );
-        })()}
+        {/* スキル・ガイドセクション - 全幅背景 */}
+        <div className="w-full bg-[#FBFBFB] py-16 mt-12">
+          <ContentWrapper>
+            {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
+            {frontmatter && (() => {
+              const skills = getSkillsFromFrontmatter(frontmatter);
+              if (skills.length === 0) return null;
+              
+              const skillsHtml = convertSkillsToHtml(skills);
+              return (
+                <div>
+                  <SimpleMarkdownRenderer 
+                    content={skillsHtml}
+                    className="prose prose-lg max-w-none"
+                    options={{
+                      isPremium: frontmatter?.is_premium || false,
+                      hasMemberAccess: true
+                    }}
+                  />
+                </div>
+              );
+            })()}
 
-        {/* 進め方ガイドセクション */}
-        {guideContent && (
-          <div data-name="section-progress-guide">
-            <TrainingGuideSection guideContent={guideContent} />
-          </div>
-        )}
+            {/* 進め方ガイドセクション */}
+            {guideContent && (
+              <div data-name="section-progress-guide" className="mt-12">
+                <TrainingGuideSection guideContent={guideContent} />
+              </div>
+            )}
+          </ContentWrapper>
+        </div>
 
-        {/* マークダウンコンテンツ（残りのコンテンツ） */}
-        {markdownContent && (
-          <SimpleMarkdownRenderer 
-            content={markdownContent}
-            className="prose prose-lg max-w-none"
-            options={{
-              isPremium: frontmatter?.is_premium || false,
-              hasMemberAccess: true // TODO: 実際のユーザー権限を確認
-            }}
-          />
-        )}
-      </div>
+        <ContentWrapper>
+
+          {/* マークダウンコンテンツ（残りのコンテンツ） */}
+          {markdownContent && (
+            <SimpleMarkdownRenderer 
+              content={markdownContent}
+              className="prose prose-lg max-w-none"
+              options={{
+                isPremium: frontmatter?.is_premium || false,
+                hasMemberAccess: true // TODO: 実際のユーザー権限を確認
+              }}
+            />
+          )}
+        </ContentWrapper>
     </TrainingLayout>
   );
 };

@@ -4,6 +4,7 @@ import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHero from '@/components/training/TrainingHero';
 import TrainingGrid from '@/components/training/TrainingGrid';
 import SectionHeading from '@/components/training/SectionHeading';
+import ContentWrapper from '@/components/training/ContentWrapper';
 import { useTrainings } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
@@ -77,9 +78,10 @@ const TrainingHome = () => {
 
   return (
     <TrainingLayout>
-      <TrainingHero />
-      
-      <div>
+      <ContentWrapper>
+        <TrainingHero />
+        
+        <div>
         {/* ローディング状態 */}
         {isLoading && (
           <div className="space-y-12">
@@ -130,6 +132,7 @@ const TrainingHome = () => {
           </div>
         )}
       </div>
+      </ContentWrapper>
     </TrainingLayout>
   );
 };

@@ -24,7 +24,9 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
         <div 
           className="absolute inset-0 w-[571px] h-[328px]"
           style={{
-            background: 'linear-gradient(183deg, #F5F8FD 2.2%, #FAF4F0 49.72%, rgba(222, 228, 242, 0.00) 97.86%)',
+            backgroundImage: 'url(/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             left: '-140px',
             top: '-118px'
           }}
@@ -60,15 +62,15 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           <div className="bg-white px-[34px] pb-6 flex flex-col items-start gap-3">
 
             {/* Step 2-2: コンテンツブロック（260×102px） */}
-            <div className="w-[260px] h-[102px] flex flex-col gap-3">
+            <div className="w-[260px] flex flex-col gap-3">
               {/* タイプタグ */}
               <div className="flex justify-start">
                 <CategoryTag type={training.type} displayMode="type" />
               </div>
               
               {/* タイトルと説明 */}
-              <div className="flex flex-col gap-1 text-left">
-                <h3 className="text-[20px] font-bold font-['Rounded_Mplus_1c'] leading-[1.2] text-[#020617]">
+              <div className="flex flex-col gap-2 text-left">
+                <h3 className="text-[20px] font-rounded-mplus-bold leading-[1.2] text-[#020617]">
                   {training.title}
                 </h3>
                 <p className="text-[14px] font-normal leading-[1.4] text-[#64748B] line-clamp-2">
@@ -81,7 +83,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             <div className="w-full max-w-[260px] h-[1px] bg-[#E2E8F0]" />
 
             {/* Step 2-4: フッター部分 */}
-            <div className="w-full max-w-[260px] h-[28px] flex justify-between items-center gap-5">
+            <div className="w-full max-w-[260px] flex justify-between items-center gap-5">
               {/* カテゴリタグ */}
               <CategoryTag category={training.category || 'UIビジュアル'} displayMode="category" />
 

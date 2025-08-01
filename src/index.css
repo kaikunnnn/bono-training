@@ -107,4 +107,14 @@
     font-display: swap;
     font-weight: 700;
   }
+  
+  /* Rounded Mplus フォントのグローバル適用 */
+  .font-rounded-mplus {
+    font-family: 'Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  }
+  
+  /* 日本語テキストにRounded Mplusを自動適用 */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  }
 }

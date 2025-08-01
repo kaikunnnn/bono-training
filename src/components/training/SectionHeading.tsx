@@ -35,7 +35,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
         style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
         id="node-3248_5676"
       >
-        <p className="block leading-[40px] font-bold font-noto-sans-jp">{title}</p>
+        <h2 className="block leading-[40px] font-rounded-mplus-bold">{title}</h2>
       </div>
 
       {/* 説明文 */}

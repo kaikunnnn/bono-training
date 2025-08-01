@@ -78,7 +78,7 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
     stepsCount: steps.length 
   });
   return (
-    <section className="w-full py-16 px-4 bg-white">
+    <section className="w-full py-16 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
         <div className="mb-12">

@@ -24,7 +24,7 @@ const TypeTag: React.FC<TypeTagProps> = ({ type, className }) => {
         data-name="Component 2"
       >
         <div className="bg-gradient-to-b from-[#0618e3] rounded-[1000px] shrink-0 size-2 to-[#3cf5fc]" />
-        <div className="font-['Rounded_Mplus_1c_Bold:Bold',_sans-serif] leading-[0] not-italic relative shrink-0 text-[#000000] text-[14px] text-left text-nowrap tracking-[0.75px]">
+        <div className="font-rounded-mplus font-bold leading-[0] not-italic relative shrink-0 text-[#000000] text-[14px] text-left text-nowrap tracking-[0.75px]">
           <p className="adjustLetterSpacing block leading-none whitespace-pre">
             {getDisplayText(type)}
           </p>

@@ -11,7 +11,7 @@ const TrainingHero = () => {
       <div className="w-full flex flex-col gap-4 border-b border-[#e2e8f0] pb-10">
         <h1 
           id="training-hero-title"
-          className="font-['Rounded_Mplus_1c_Bold'] text-[36px] text-[#1d382f] text-left text-nowrap leading-[40px]"
+          className="font-rounded-mplus-bold text-[36px] text-[#1d382f] text-left text-nowrap leading-[40px]"
         >
           トレーニング。それは"可能性"をひらく扉。
         </h1>

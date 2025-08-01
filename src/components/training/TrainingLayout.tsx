@@ -14,9 +14,7 @@ const TrainingLayout = ({ children, className }: TrainingLayoutProps) => {
     <div className={cn("min-h-screen flex flex-col bg-[#F8F9F5]", className)}>
       <TrainingHeader />
       <main className="flex-1 pt-[88px]">
-        <div className="mx-auto w-[92%] sm:w-[85%] lg:w-[70.2%] max-w-[1480px]">
-          {children}
-        </div>
+        {children}
       </main>
       <footer>
         <TrainingFooter />

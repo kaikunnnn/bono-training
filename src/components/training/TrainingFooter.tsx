@@ -54,7 +54,7 @@ const TrainingFooter = () => {
 
         {/* Message Section */}
         <div data-name="message" className="flex justify-center py-6">
-          <p className="text-[#1D382F] font-['Rounded_Mplus_1c'] font-bold text-xs text-center adjustLetterSpacing">
+          <p className="text-[#1D382F] font-rounded-mplus font-bold text-xs text-center adjustLetterSpacing">
             机上の空論ではなく人に響く体験を<br />
             クリエイションしていこう
           </p>
