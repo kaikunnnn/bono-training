@@ -6,6 +6,7 @@ import TrainingGrid from '@/components/training/TrainingGrid';
 import SectionHeading from '@/components/training/SectionHeading';
 import { useTrainings } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 import { Training } from '@/types/training';
 
 // カテゴリ定数
@@ -110,13 +111,15 @@ const TrainingHome = () => {
 
         {/* カテゴリ別セクション表示 */}
         {trainings && (
-          <div className="space-y-8">
+          <div>
             <CategorySection
               category={CATEGORIES.INFO_DESIGN}
               title="情報設計トレーニング"
               description="ユーザーが求める情報を整理し、分かりやすく構造化するスキルを身につけよう"
               trainings={groupedTrainings[CATEGORIES.INFO_DESIGN]}
             />
+            
+            <Separator className="my-8" />
             
             <CategorySection
               category={CATEGORIES.UX_DESIGN}
