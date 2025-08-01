@@ -32,7 +32,7 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
             >
               <div className="flex items-center gap-3">
                 {/* 四角いアイコン */}
-                <div className="w-2.5 h-2.5 bg-background border border-foreground/20 rounded-sm flex-shrink-0" />
+                <div className="w-2.5 h-2.5 bg-background border-2 border-foreground/20 rounded-sm flex-shrink-0" />
                 
                 {/* スキルタイトル */}
                 <span className="text-foreground font-medium">

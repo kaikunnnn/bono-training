@@ -35,6 +35,11 @@ jobs:
     - name: Build application
       run: npm run build
       
+    - name: Validate training content quality
+      run: |
+        chmod +x scripts/run-all-validations.sh
+        ./scripts/run-all-validations.sh
+      
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       if: success()

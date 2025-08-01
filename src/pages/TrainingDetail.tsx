@@ -16,6 +16,7 @@ import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
 import { HalfCircleBg } from '@/components/training/HalfCircleBg';
+import IconBlock from '@/components/training/IconBlock';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -261,22 +262,12 @@ const TrainingDetail = () => {
               data-name="wrapper-content"
             >
               {/* アイコンフレーム */}
-              <div className="bg-[#ffffff] box-border content-stretch flex flex-row gap-[15px] items-center justify-center p-0 relative rounded-bl-[16px] rounded-br-[16px] rounded-tl-[120px] rounded-tr-[120px] shrink-0 size-[120px]">
-                <div className="absolute border-[1.5px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-bl-[16px] rounded-br-[16px] rounded-tl-[120px] rounded-tr-[120px]" />
-                <div className="relative shrink-0 size-[68px]" data-name="Component 3">
-                  {frontmatter.icon ? (
-                    <div
-                      className="absolute bg-center bg-cover bg-no-repeat inset-0"
-                      data-name="Image"
-                      style={{ backgroundImage: `url('${frontmatter.icon}')` }}
-                    />
-                  ) : (
-                    <div className="absolute bg-gray-200 inset-0 rounded-full flex items-center justify-center">
-                      <span className="text-gray-500 text-xs">アイコン</span>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <IconBlock
+                iconSrc={frontmatter.icon}
+                iconAlt={`${frontmatter.title || 'トレーニング'}のアイコン`}
+                size="lg"
+                className="sm:!size-[80px] md:!size-[100px] lg:!size-[120px]"
+              />
 
               {/* テキストセクション */}
               <div

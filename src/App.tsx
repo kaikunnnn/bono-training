@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -35,6 +35,11 @@ console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undef
 const AppContent = () => {
   const location = useLocation();
   const urlPlan = new URLSearchParams(location.search).get('plan');
+  
+  // ページ遷移時にスクロール位置をリセット
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
   
   // クエリパラメータに基づいてモックのサブスクリプション状態を生成
   const mockSubscription = urlPlan ? {

@@ -140,8 +140,19 @@ const config = {
         'inter': ['Inter', 'sans-serif'],
         'noto-sans': ['Noto Sans', 'sans-serif'],
         'noto-sans-jp': ['Noto Sans JP', 'Noto Sans', 'sans-serif'],
-        'rounded-mplus': ['Rounded Mplus 1c', 'sans-serif'],
+        'rounded-mplus': ['Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],
+      },
+      // アイコンブロック用のカスタムクラス
+      extend: {
+        spacing: {
+          'icon-block-sm': '80px',
+          'icon-block-md': '100px', 
+          'icon-block-lg': '120px',
+          'icon-inner-sm': '44px',
+          'icon-inner-md': '56px',
+          'icon-inner-lg': '68px',
+        }
       }
     }
   },
