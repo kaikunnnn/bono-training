@@ -78,7 +78,7 @@ const TrainingHome = () => {
     <TrainingLayout>
       <TrainingHero />
       
-      <div className="container mx-auto px-4 py-8">
+      <div className="py-8">
         {/* ローディング状態 */}
         {isLoading && (
           <div className="space-y-12">
