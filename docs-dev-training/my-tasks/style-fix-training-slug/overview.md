@@ -1,14 +1,34 @@
 # :trainingSlug の変更内容
 
-### icon block のスタイル調整
+1. ファーストビューの背景：
+   - 高さとグラデーションの指定
+   - 背景のスタイルはこのファイルを使う [この SVG 画像](../../../public/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)
+   - 余白を調整してコンテンツを表示できるようにする
+   - icon block のスタイル調整
+2. 見出しを RoundM1 フォントにする
+3. トレーニング内容：
+   - dot 変更
+   - border を dot に変更＋左右余白の調整
+   - circle arrow の変更
+   - CHALLENGE のフォントを dot にする
+4. チャレンジで伸ばせる力
 
-- 角丸の修正
+   - 背景の色を白透過にする
+   - 内容セクションのスタイルを変更する
 
-### チャレンジで身につくこと
+5. 進め方ガイド
+   - レッスン：画像の設定 - サイズと変更可能か
+   - 進め方のスタイルを調整
+   - 矢印を変更する
 
-- underbar の調整
+---
 
-### 背景のトップ背景のスタイル
+## ファーストビューの背景
 
-- 背景のスタイルはこのファイルを使う [この SVG 画像](../../../public/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)
--
+## 見出しをRoundM1フォントにする
+
+## トレーニング内容
+
+## チャレンジで伸ばせる力
+
+## 進め方ガイド
