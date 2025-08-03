@@ -22,7 +22,7 @@ guide:
   description: "ユーザーリサーチから課題解決まで\n実践的な UX デザインの流れ"
   lesson:
     title: "ゼロからはじめる情報設計"
-    emoji: "📚"
+    image: "beauty-salon-lesson.jpg"
     description: "ユーザーリサーチの基礎をBONOで学習できます"
     link: "https://bo-no.design"
   steps:

@@ -63,8 +63,8 @@ const TrainingHome = () => {
     }
 
     return (
-      <div className="py-8">
-        <div className="mb-6">
+      <div className="py-12">
+        <div className="mb-8">
           <SectionHeading
             category={category}
             title={title}
@@ -121,7 +121,7 @@ const TrainingHome = () => {
               trainings={groupedTrainings[CATEGORIES.INFO_DESIGN]}
             />
             
-            <Separator className="my-8" />
+            <Separator />
             
             <CategorySection
               category={CATEGORIES.UX_DESIGN}

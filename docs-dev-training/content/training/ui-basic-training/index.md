@@ -27,7 +27,7 @@ guide:
   description: "定番UIを参考にしながら\n基礎表現を盗むためのやり方を説明します"
   lesson:
     title: "センスを磨くスキル"
-    emoji: "✨"
+    image: "ui-basic-training-lesson.jpg"
     description: "参考から盗む技術をBONOで詳細に学習できます"
     link: "https://bo-no.design"
   steps:

@@ -47,10 +47,28 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
             {/* training-detail セクション */}
             <div className="flex items-center gap-[25px]">
               {/* 縦のドット線 */}
-              <div className="w-0.5 h-[153px] bg-[#94A3B8]"></div>
+              <svg 
+                className="w-px h-[153px] md:ml-[5px]" 
+                viewBox="0 0 1 153" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <line 
+                  x1="0.5" 
+                  y1="0" 
+                  x2="0.5" 
+                  y2="153" 
+                  stroke="#94A3B8" 
+                  strokeWidth="1"
+                  strokeDasharray="8 8"
+                />
+              </svg>
               
               {/* task-training-card */}
-              <div className="flex-1 bg-white rounded-[24px] p-8 border border-gray-100 shadow-sm">
+              <div 
+                className="flex-1 bg-white rounded-[24px] p-8 border border-gray-100"
+                style={{ boxShadow: '1px 1px 24px 0 rgb(0 0 0 / 0.075)' }}
+              >
                 <Link
                   to={`/training/${trainingSlug}/${task.slug}`}
                   className="block group"
@@ -58,30 +76,36 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       {/* カテゴリタグ */}
-                      <div className="mb-2">
-                        <span className="inline-flex items-center px-[6px] py-[2px] rounded text-xs font-medium bg-[rgba(184,163,4,0.12)] text-[#5E4700]">
-                          説明
-                        </span>
-                      </div>
+                      {task.category && (
+                        <div className="mb-2">
+                          <span className="inline-flex items-center px-[6px] py-[2px] rounded text-xs font-medium bg-[rgba(184,163,4,0.12)] text-[#5E4700]">
+                            {task.category}
+                          </span>
+                        </div>
+                      )}
                       
                       {/* タイトル */}
-                      <h3 className="text-lg font-bold text-[#0D0F18] mb-2 group-hover:text-blue-600 transition-colors leading-[160%] tracking-[0.75px]">
+                      <h3 className="text-lg font-bold text-[#0D0F18] group-hover:text-blue-600 transition-colors leading-[160%] tracking-[0.75px]">
                         {task.title}
                       </h3>
                       
                       {/* 説明 */}
-                      <p className="text-sm text-[#0F1742] mb-2 line-clamp-2 font-normal leading-[185%]">
-                        ユーザーインタビューでリアルな課題を発見して、解決するプロトタイプをデザインするお題です
-                      </p>
+                      {task.description && (
+                        <p className="text-sm text-[#0F1742] mb-2 line-clamp-2 font-normal leading-[185%]">
+                          {task.description}
+                        </p>
+                      )}
                       
                       {/* タグエリア */}
                       <div className="flex items-start gap-2">
-                        <span className="text-[#94A3B8] text-xs font-bold leading-[160%] tracking-[1px]">
-                          課題解決
-                        </span>
-                        <span className="text-[#94A3B8] text-xs font-bold leading-[160%] tracking-[1px]">
-                          ポートフォリオ
-                        </span>
+                        {task.tags?.map((tag, tagIndex) => (
+                          <span 
+                            key={tagIndex}
+                            className="text-[#94A3B8] text-xs font-bold leading-[160%] tracking-[1px]"
+                          >
+                            {tag}
+                          </span>
+                        ))}
                         {task.is_premium && (
                           <span className="text-[#94A3B8] text-xs font-bold leading-[160%] tracking-[1px]">
                             プレミアム
@@ -91,25 +115,11 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                     </div>
                     
                     {/* 右矢印アイコン */}
-                    <div className="ml-4 flex-shrink-0">
-                      <div className="w-8 h-8 bg-[#238CF0] border-2 border-[#0D221D] rounded-full flex items-center justify-center text-white group-hover:bg-blue-600 transition-colors p-2">
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 14 14"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="transform rotate-[135deg]"
-                        >
-                          <path
-                            d="M11.1968 7.0979L8.27098 10.0237L7.53487 9.28758L9.20527 7.61718L3.04986 7.61718L3.04916 7.48391L3.04916 6.71189L3.04986 6.57862L9.20527 6.57862L7.53487 4.90822L8.27098 4.17211L11.1968 7.0979Z"
-                            fill="white"
-                            stroke="white"
-                            strokeWidth="0.266667"
-                          />
-                        </svg>
-                      </div>
-                    </div>
+                    <img 
+                      src="/images/arrow/arrow/primary/right.svg" 
+                      alt=""
+                      className="ml-4 flex-shrink-0 w-8 h-8"
+                    />
                   </div>
                 </Link>
               </div>

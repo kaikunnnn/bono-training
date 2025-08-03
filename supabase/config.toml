@@ -34,5 +34,4 @@ double_confirm_changes = true
 enable_confirmations = false
 
 [functions]
-port = 54321
-serve_port = 54328
+# Edge Functions設定

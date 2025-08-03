@@ -22,7 +22,7 @@ guide:
   description: "実践的なTodoアプリUIを\n効率的にデザインするための流れ"
   lesson:
     title: "UIデザイン基礎"
-    emoji: "🎨"
+    image: "ui-design-basics-lesson.jpg"
     description: "UI設計の基礎をBONOで学習できます"
     link: "/"
   steps:

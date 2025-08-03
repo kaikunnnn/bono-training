@@ -369,7 +369,7 @@ const TaskDetailPage = () => {
                   <div className="box-border content-stretch flex flex-col gap-4 items-center justify-start p-0 relative shrink-0 w-[640px]">
                     <div className="box-border content-stretch flex flex-row gap-2.5 items-end justify-center p-0 relative shrink-0 w-full">
                       <div className="basis-0 font-['Rounded_Mplus_1c:Medium',_sans-serif] grow leading-[0] min-h-px min-w-px not-italic relative shrink-0 text-[#0d0f18] text-[40px] text-center">
-                        <p className="block leading-[1.28]">{frontmatter.title}</p>
+                        <h1 className="block leading-[1.28] font-rounded-mplus font-bold">{frontmatter.title}</h1>
                       </div>
                     </div>
                     {frontmatter.description && (

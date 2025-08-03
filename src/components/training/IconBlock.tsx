@@ -43,7 +43,7 @@ export default function IconBlock({
       aria-label={iconAlt}
     >
       {/* ボーダー */}
-      <div className="absolute border-[1.5px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-bl-[16px] rounded-br-[16px] rounded-tl-[120px] rounded-tr-[120px]" />
+      <div className="absolute border-[1.5px] border-[rgba(0,0,0,0.1)] border-solid inset-0 pointer-events-none rounded-bl-[32px] rounded-br-[32px] rounded-tl-[120px] rounded-tr-[120px]" />
       
       {/* アイコン内容 */}
       <div

@@ -1,5 +1,6 @@
 import React from 'react';
 import SimpleMarkdownRenderer from './SimpleMarkdownRenderer';
+import DottedSeparator from '@/components/common/DottedSeparator';
 
 interface StepBlockProps {
   title: string;
@@ -16,21 +17,26 @@ const StepBlock: React.FC<StepBlockProps> = ({
   referenceLink
 }) => {
   return (
-    <div className="w-full max-w-[730px] bg-white border-2 border-black rounded-3xl p-12">
+    <div className="relative w-full max-w-[730px] bg-white p-[48px] rounded-3xl flex flex-col gap-5 items-center justify-start">
       {/* Header section */}
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 w-full">
         {/* Title */}
-        <div className="flex flex-col gap-5">
-          <h3 className="text-lg font-bold leading-[160%] tracking-[0.75px] text-[#0d0f18] font-noto-sans">
+        <div className="flex flex-col gap-5 w-full">
+          <h3 className="text-lg font-bold font-noto-sans tracking-[0.75px] leading-[1.6] text-[#0d0f18]">
             {title}
           </h3>
           {/* Divider line */}
-          <div className="w-full h-[2px] bg-[#334155] rounded-full" />
+          <DottedSeparator 
+            dotSize={0.5} 
+            spacing={12} 
+            color="#334155"
+            className="my-0"
+          />
         </div>
         
         {/* Content section */}
-        <div className="flex flex-col gap-4">
-          <div className="text-base font-medium leading-[167.99%] text-[#0d0f18]">
+        <div className="flex flex-col gap-4 w-full">
+          <div className="font-inter font-medium text-base leading-[1.68] text-[#0f172a]">
             <SimpleMarkdownRenderer 
               content={description}
               className="prose prose-sm max-w-none [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
@@ -42,7 +48,7 @@ const StepBlock: React.FC<StepBlockProps> = ({
                   href={referenceLink.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-600 underline hover:text-blue-800"
+                  className="text-[#6b9fff] underline underline-offset-auto hover:text-[#5a8ce6]"
                 >
                   『{referenceLink.text}』
                 </a>

@@ -22,7 +22,7 @@ guide:
   description: "定番UIをトレースして\n基礎表現を身につけるための流れ"
   lesson:
     title: "センスを磨くスキル"
-    emoji: "✨"
+    image: "ui-trace-basic-lesson.jpg"
     description: "UIトレースの技術をBONOで詳細に学習できます"
     link: "https://bo-no.design"
   steps:

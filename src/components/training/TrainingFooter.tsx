@@ -4,8 +4,8 @@ import { Youtube, Twitter } from "lucide-react";
 const TrainingFooter = () => {
   return (
     <div className="size-full flex justify-center">
-      <div className="max-w-[1280px] w-[76.19%]">
-        <div data-name="footer-main-block" className="px-0 py-12 border-t border-[rgba(13,15,24,0.2)] flex justify-between">
+      <div className="max-w-[1280px] w-[88%]">
+        <div data-name="footer-main-block" className="px-0 py-12 flex justify-between">
           <div className="flex gap-[68px]">
             {/* SNS Section */}
             <div data-name="content-block-sns" className="w-[178px] flex flex-col gap-4">

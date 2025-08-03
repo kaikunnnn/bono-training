@@ -2,6 +2,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeRaw from 'rehype-raw';
 import type { Components } from 'react-markdown';
+import DottedSeparator from '@/components/common/DottedSeparator';
 
 interface SimpleMarkdownRendererProps {
   content: string;
@@ -40,8 +41,10 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
   const blockStyles: Record<string, string> = {
     // セクション全体
     'section-challenge-merit': 'w-full max-w-2xl mx-auto',
-    // ブロックテキスト系（ドキュメント仕様準拠）
-    'block-text': 'box-border content-stretch flex flex-col gap-9 items-start justify-start px-4 md:px-0 py-6 relative size-full w-full',
+    // ヘディング説明ブロック全体（skillgroup-listblock.md仕様）
+    'heading-explain-block': 'w-full flex flex-col items-start justify-center py-8',
+    // ブロックテキスト系（skillgroup-listblock.md仕様準拠）
+    'block-text': 'box-border content-stretch flex flex-col gap-2 items-start justify-start px-0 py-8 relative w-full',
     // ブロックテキストラッパー（中央配置、最大幅472px）
     'block-text-wrapper': 'box-border content-stretch flex flex-col gap-3 items-center justify-start p-0 relative shrink-0 w-full max-w-[472px] mx-auto',
     // 絵文字（Inter Semi Bold、14pxベース、実際は大きく表示）
@@ -51,13 +54,20 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
     // 説明文（Inter+Noto Sans JP、16px、line-height: 1.88）
     'block-text-description': 'font-inter font-normal text-[14px] md:text-[16px] text-center text-slate-900 leading-[1.7] md:leading-[1.88] w-full',
     // スキルグループ
-    'skill-group': 'w-full max-w-2xl bg-white border-2 border-black rounded-3xl px-12 py-4 space-y-0',
+    'skill-group': 'w-full max-w-2xl bg-white rounded-3xl px-12 py-4 space-y-0',
+    // スキルグループ（dashed border版）
+    'skill-group-dashed': 'w-full max-w-2xl bg-white rounded-3xl px-12 py-4 space-y-0',
     // スキルアイテム
     'skill-item': 'w-full py-4',
     // スキルセパレーター
-    'skill-separator': 'w-full h-px bg-gray-200 my-4',
+    'skill-separator': 'w-full h-0 border-t-2 border-dotted border-gray-200 my-4',
     // スキル項目のタイトル
-    'skill-title': 'text-lg font-bold text-black mb-2'
+    'skill-title': 'text-lg font-bold text-black mb-2',
+    // ヘディング説明ブロック（skillgroup-listblock.md仕様）
+    'heading-container': 'w-full flex flex-row gap-2.5 items-center justify-start',
+    'heading-icon': 'w-2.5 h-2.5 bg-[#0d221d] flex-shrink-0',
+    'heading-title': 'font-noto-sans-jp font-bold text-[18px] leading-[1.6] tracking-[0.75px] text-black whitespace-nowrap',
+    'heading-description': 'font-inter font-medium text-[16px] leading-[1.68] text-[#0f172a]/[.72] w-full'
   };
 
   // カスタムコンポーネントの定義
@@ -99,6 +109,43 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
       
       // その他のdivクラスのハンドリング
       const style = blockStyles[className || ''] || className || '';
+      
+      // skill-separatorの場合、DottedSeparatorコンポーネントを使用
+      if (className === 'skill-separator') {
+        return <DottedSeparator {...props} />;
+      }
+      
+      // skill-group-dashedの場合、カスタムdash patternを適用
+      if (className === 'skill-group-dashed') {
+        return (
+          <div 
+            className={style} 
+            style={{ borderStyle: 'dashed', borderWidth: '2px', ...props.style }}
+            {...props}
+          >
+            {children}
+          </div>
+        );
+      }
+      
+      // heading-explain-blockの場合
+      if (className === 'heading-explain-block') {
+        return (
+          <div className={style} {...props}>
+            {children}
+          </div>
+        );
+      }
+      
+      // heading関連のクラスの場合
+      if (className?.startsWith('heading-')) {
+        return (
+          <div className={style} {...props}>
+            {children}
+          </div>
+        );
+      }
+      
       return (
         <div className={style} {...props}>
           {children}
@@ -132,7 +179,7 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
     },
 
     h4: ({ children, ...props }) => (
-      <h4 className="text-lg font-semibold mb-6 text-gray-800" {...props}>
+      <h4 className="text-lg font-semibold mb-3 text-gray-800" {...props}>
         {children}
       </h4>
     ),
@@ -168,7 +215,7 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
       }
       
       return (
-        <p className="text-gray-700 mb-4 leading-relaxed" {...props}>
+        <p className="text-gray-700 mb-0 leading-relaxed" {...props}>
           {children}
         </p>
       );

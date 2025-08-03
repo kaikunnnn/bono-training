@@ -28,7 +28,7 @@ guide:
   description: "実際のECサイトで使用される商品カタログページのUI制作を通じて、要件分析から情報アーキテクチャ、ワイヤーフレーム作成まで実践的なデザインプロセスを学習します"
   lesson:
     title: "情報設計とUXデザインの基礎"
-    emoji: "🛒"
+    image: "ec-catalog-lesson.jpg"
     description: "ECサイト設計の基礎とユーザビリティをBONOで学習できます"
     link: "/training"
   steps:

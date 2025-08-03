@@ -15,7 +15,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
   return (
     <Link 
       to={`/training/${training.slug}`} 
-      className={cn("max-w-[453px] w-full mx-auto flex flex-col gap-6", className)}
+      className={cn("w-full max-w-[400px] flex flex-col gap-6", className)}
     >
       <div className="w-full flex flex-col">
         {/* カードの上部 */}

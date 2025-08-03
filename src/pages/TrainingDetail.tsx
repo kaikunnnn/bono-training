@@ -125,7 +125,7 @@ const TrainingDetail = () => {
   }
 
   return (
-    <TrainingLayout>
+    <TrainingLayout noPaddingTop={true}>
       {/* Figmaデザインベースのeyecatchセクション - 全幅 */}
       {frontmatter && (
         <div
@@ -135,114 +135,17 @@ const TrainingDetail = () => {
             
             {/* 背景 */}
             <div
-              className="absolute h-[289px] left-0 overflow-clip top-0 w-full"
+              className="absolute h-[400px] left-0 overflow-clip top-[-96px] w-full"
               data-name="bg"
             >
               <div
-                className="absolute h-[399px] left-[-10%] overflow-clip top-[-10px] w-[120%]"
+                className="absolute h-[400px] left-[-10%] overflow-clip top-[-10px] w-[120%]"
                 data-name="表紙"
               >
                 <div 
-                  className={`relative size-full ${
-                    frontmatter.background_svg 
-                      ? `bg-[url('${frontmatter.background_svg}')] bg-cover bg-center bg-no-repeat` 
-                      : frontmatter.fallback_gradient 
-                        ? `bg-gradient-to-r from-[${frontmatter.fallback_gradient.from}] via-[${frontmatter.fallback_gradient.via}] to-[${frontmatter.fallback_gradient.to}]`
-                        : "bg-gradient-to-r from-[#fdf3ff] via-[#f3e8ff] to-[#e9d5ff]"
-                  }`} 
+                  className="relative size-full bg-[url('/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg')] bg-cover bg-center bg-no-repeat animate-gradient-scale-slide"
                   data-name="Property 1=Variant2"
                 >
-                  <div
-                    className="absolute h-3.5 left-[-5%] top-[308px] w-[110%]"
-                    data-name="line-wave"
-                  >
-                    <svg
-                      className="block size-full"
-                      fill="none"
-                      preserveAspectRatio="none"
-                      viewBox="0 0 1695 14"
-                    >
-                      <g clipPath="url(#clip0_3_4644)" id="line-wave" opacity="0.14">
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_2"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_3"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_4"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_5"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_6"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_7"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_8"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_9"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_3_4644">
-                          <rect fill="white" height="14" width="1695" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </div>
                 </div>
               </div>
             </div>
@@ -373,6 +276,9 @@ const TrainingDetail = () => {
             ) : null;
           })()}
 
+          {/* Divider */}
+          <div className="w-full h-px bg-gray-200 my-8"></div>
+
           {/* タスク一覧 */}
           <div data-name="task-collection-block">
             <TaskCollectionBlock 
@@ -385,7 +291,7 @@ const TrainingDetail = () => {
         </ContentWrapper>
 
         {/* スキル・ガイドセクション - 全幅背景 */}
-        <div className="w-full bg-[#FBFBFB] py-16 mt-12">
+        <div className="w-full bg-[#F3F3F3] py-16 mt-12">
           <ContentWrapper>
             {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
             {frontmatter && (() => {
@@ -409,7 +315,7 @@ const TrainingDetail = () => {
 
             {/* 進め方ガイドセクション */}
             {guideContent && (
-              <div data-name="section-progress-guide" className="mt-12">
+              <div data-name="section-progress-guide" className="">
                 <TrainingGuideSection guideContent={guideContent} />
               </div>
             )}

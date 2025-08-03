@@ -19,7 +19,7 @@ const markdownComponents = {
     </ul>
   ),
   li: ({ children, ...props }: any) => (
-    <li className="text-[rgba(13,15,24,0.8)] leading-[1.6] font-['Noto_Sans_JP:Regular',_sans-serif] text-[14px]" {...props}>
+    <li className="text-[rgba(13,15,24,0.8)] leading-[1.6] font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
       {children}
     </li>
   ),
@@ -39,7 +39,7 @@ const markdownComponents = {
 
   // 段落スタイリング
   p: ({ children, ...props }: any) => (
-    <p className="text-[rgba(13,15,24,0.8)] leading-[1.6] mb-2 font-['Noto_Sans_JP:Regular',_sans-serif] text-[14px]" {...props}>
+    <p className="text-[rgba(13,15,24,0.8)] leading-[1.6] mb-2 font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
       {children}
     </p>
   ),
@@ -59,14 +59,8 @@ const BlockText: React.FC<{ title: string }> = ({ title }) => {
       className="box-border content-stretch flex flex-col gap-2 items-start justify-start leading-[0] p-0 relative shrink-0 text-[#0d0f18] text-center tracking-[1px] w-full"
       data-name="block-Text"
     >
-      <div
-        className="flex flex-col font-['Noto_Sans:Display_Regular',_'Noto_Sans_JP:Regular',_sans-serif] font-normal justify-center relative shrink-0 text-[12px] w-full"
-        style={{ fontVariationSettings: "'CTGR' 100, 'wdth' 100" }}
-      >
-        <p className="block leading-[1.6]">(結論)</p>
-      </div>
-      <div className="flex flex-col font-['Noto_Sans_JP:Bold',_sans-serif] font-bold justify-center relative shrink-0 text-[24px] w-full">
-        <p className="block leading-[1.6]">{title}</p>
+      <div className="flex flex-col font-rounded-mplus font-bold justify-center relative shrink-0 text-[24px] w-full">
+        <h2 className="block leading-[1.6]">{title}</h2>
       </div>
     </div>
   );
@@ -77,7 +71,7 @@ const SubSection: React.FC<{ title: string; content: string | null | undefined }
   return (
     <div className="box-border content-stretch flex flex-row gap-4 items-start justify-start p-0 relative shrink-0 w-full">
       {/* 黒丸アイコン */}
-      <div className="flex items-center justify-center relative shrink-0">
+      <div className="flex items-center justify-center relative shrink-0 mt-2.5">
         <div 
           className="bg-[#0d221d] h-2.5 rounded-full relative shrink-0 w-2.5" 
           data-name="black-dot"
@@ -87,8 +81,8 @@ const SubSection: React.FC<{ title: string; content: string | null | undefined }
       {/* サブセクション内容 */}
       <div className="box-border content-stretch flex flex-col gap-3 items-start justify-start p-0 relative shrink-0 w-full">
         {/* サブセクションタイトル */}
-        <div className="font-['Noto_Sans_JP:Bold',_sans-serif] font-bold leading-[0] not-italic relative shrink-0 text-[16px] text-[#0d0f18] text-left">
-          <p className="block leading-[1.6]">{title}</p>
+        <div className="font-rounded-mplus font-bold leading-[0] not-italic relative shrink-0 text-[18px] text-[#0d0f18] text-left">
+          <h3 className="block leading-[1.6]">{title}</h3>
         </div>
         
         {/* サブセクション本文 */}
@@ -107,7 +101,7 @@ const SubSection: React.FC<{ title: string; content: string | null | undefined }
           }
           
           return (
-            <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(13,15,24,0.8)] text-left">
+            <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-lg text-[rgba(13,15,24,0.8)] text-left">
               <ReactMarkdown 
                 components={markdownComponents}
                 remarkPlugins={[remarkGfm]}
@@ -225,7 +219,7 @@ const ContentSection: React.FC<ContentSectionProps> = ({
               } else {
                 // サブセクションがない場合は通常のコンテンツとして表示
                 return (
-                  <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-[14px] text-[rgba(13,15,24,0.8)] text-left w-full">
+                  <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-lg text-[rgba(13,15,24,0.8)] text-left w-full">
                     <ReactMarkdown 
                       components={markdownComponents}
                       remarkPlugins={[remarkGfm]}

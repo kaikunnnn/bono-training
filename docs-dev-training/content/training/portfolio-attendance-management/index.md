@@ -22,7 +22,7 @@ guide:
   description: "要件からユーザーの要望や感情を整理して\nUIをデザインするための流れ"
   lesson:
     title: "ゼロからはじめる情報設計"
-    emoji: "📚"
+    image: "attendance-management-lesson.jpg"
     description: "情報設計の基礎をBONOで詳細に学習できます"
     link: "https://bo-no.design"
   steps:

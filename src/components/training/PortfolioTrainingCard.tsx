@@ -15,10 +15,10 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
   return (
     <Link 
       to={`/training/${training.slug}`} 
-      className={cn("block w-full max-w-[328px] mx-auto", className)}
+      className={cn("block w-full min-w-[280px] max-w-[400px]", className)}
     >
       {/* Step 1: 外側コンテナ（training_content） */}
-      <div className="relative w-[328px] flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
+      <div className="relative w-full flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
         
         {/* Step 3: グラデーション背景 */}
         <div 
@@ -27,8 +27,8 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             backgroundImage: 'url(/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)',
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            left: '-140px',
-            top: '-118px'
+            left: '-42.7%',
+            top: '-36%'
           }}
         />
 
@@ -38,7 +38,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           {/* アイコンと楕円の統合ブロック */}
           <div className="flex flex-col items-start w-full">
             {/* Step 2-1: アイコン部分 */}
-            <div className="relative z-30 w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px] top-[56px] ml-[34px]">
+            <div className="relative z-30 w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px] top-[56px] ml-[10.4%]">
               <img
                 src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
                 alt={training.title}
@@ -59,10 +59,10 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           </div>
           
           {/* コンテンツブロック */}
-          <div className="bg-white px-[34px] pb-6 flex flex-col items-start gap-3">
+          <div className="bg-white px-[10.4%] pb-6 flex flex-col items-start gap-3">
 
             {/* Step 2-2: コンテンツブロック（260×102px） */}
-            <div className="w-[260px] flex flex-col gap-3">
+            <div className="w-full flex flex-col gap-3">
               {/* タイプタグ */}
               <div className="flex justify-start">
                 <CategoryTag type={training.type} displayMode="type" />
@@ -80,17 +80,17 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             </div>
 
             {/* Step 2-3: 区切り線 */}
-            <div className="w-full max-w-[260px] h-[1px] bg-[#E2E8F0]" />
+            <div className="w-full h-[1px] bg-[#E2E8F0]" />
 
             {/* Step 2-4: フッター部分 */}
-            <div className="w-full max-w-[260px] flex justify-between items-center gap-5">
+            <div className="w-full flex justify-between items-center gap-5">
               {/* カテゴリタグ */}
               <CategoryTag category={training.category || 'UIビジュアル'} displayMode="category" />
 
               {/* お題内容をみるボタン（3層構造） */}
               <div className="flex items-center">
                 <div className="flex items-center">
-                  <div className="rounded-full py-1 px-4 flex items-center gap-2">
+                  <div className="rounded-full py-1 flex items-center gap-2">
                     <span className="text-[#111827] text-sm font-semibold whitespace-nowrap">
                       お題内容をみる
                     </span>
