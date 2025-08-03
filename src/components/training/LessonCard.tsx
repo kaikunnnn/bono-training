@@ -23,9 +23,9 @@ const LessonCard: React.FC<LessonCardProps> = ({
         className="relative w-full h-full bg-[#f4eae3] rounded-3xl border border-[#d4d4d8] overflow-hidden"
         style={{ boxShadow: '1px 1px 14px 0px rgba(0,0,0,0.04)' }}
       >
-        <div className="w-full h-full p-4 flex items-center gap-8 overflow-hidden">
+        <div className="w-full h-full p-4 flex flex-col md:flex-row md:items-center gap-4 md:gap-8 overflow-hidden">
           {/* Left block - Image area */}
-          <div className="flex-shrink-0 w-[140px] sm:w-[180px] lg:w-[220px] aspect-[16/9] bg-[#475569] rounded-2xl overflow-hidden">
+          <div className="flex-shrink-0 w-full md:w-[140px] md:sm:w-[180px] md:lg:w-[220px] aspect-[16/9] bg-[#475569] rounded-2xl overflow-hidden">
           {imageUrl ? (
             <img 
               src={imageUrl} 
@@ -40,7 +40,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
           {/* Right block - Content area */}
           <div className="flex-1 flex flex-col gap-1">
             {/* Title block */}
-            <div className="flex flex-col gap-1 h-[61px]">
+            <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2">
                 <h3 className="text-lg font-bold tracking-[0.75px] text-[#0d0f18] font-noto-sans leading-[1.6]">
                   {title}

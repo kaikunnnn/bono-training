@@ -23,7 +23,7 @@ const ContentWrapper: React.FC<ContentWrapperProps> = ({
 
   return (
     <div className={cn(
-      "mx-auto w-[92%] sm:w-[85%] lg:w-[88%] max-w-[1120px]",
+      "mx-auto w-[88%] sm:w-[85%] lg:w-[88%] max-w-[1120px]",
       className
     )}>
       {children}

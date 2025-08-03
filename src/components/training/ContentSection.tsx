@@ -19,7 +19,7 @@ const markdownComponents = {
     </ul>
   ),
   li: ({ children, ...props }: any) => (
-    <li className="text-[rgba(13,15,24,0.8)] leading-[1.6] font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
+    <li className="text-[#475569] leading-[1.6] font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
       {children}
     </li>
   ),
@@ -39,7 +39,7 @@ const markdownComponents = {
 
   // 段落スタイリング
   p: ({ children, ...props }: any) => (
-    <p className="text-[rgba(13,15,24,0.8)] leading-[1.6] mb-2 font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
+    <p className="text-[#475569] leading-[1.6] mb-2 font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
       {children}
     </p>
   ),
@@ -50,17 +50,27 @@ const markdownComponents = {
       {children}
     </code>
   ),
+
+  // 画像スタイリング
+  img: ({ src, alt, ...props }: any) => (
+    <img 
+      src={src} 
+      alt={alt || ""} 
+      className="w-full rounded-2xl lg:rounded-[20px] mb-4" 
+      {...props} 
+    />
+  )
 };
 
 // BlockText コンポーネント（セクションタイトル）
 const BlockText: React.FC<{ title: string }> = ({ title }) => {
   return (
     <div
-      className="box-border content-stretch flex flex-col gap-2 items-start justify-start leading-[0] p-0 relative shrink-0 text-[#0d0f18] text-center tracking-[1px] w-full"
+      className="box-border content-stretch flex flex-col gap-2 items-start justify-start leading-[0] p-0 relative shrink-0 text-[#1d382f] text-center tracking-[1px] w-full"
       data-name="block-Text"
     >
-      <div className="flex flex-col font-rounded-mplus font-bold justify-center relative shrink-0 text-[24px] w-full">
-        <h2 className="block leading-[1.6]">{title}</h2>
+      <div className="flex flex-col font-rounded-mplus font-bold justify-center relative shrink-0 text-lg md:text-xl lg:text-[24px] w-full">
+        <h2 className="block leading-[1.6] text-[20px] mt-2 -mb-2 md:text-[20px] md:mt-2 md:-mb-2 lg:text-[24px] lg:mt-0 lg:mb-0">{title}</h2>
       </div>
     </div>
   );
@@ -79,10 +89,10 @@ const SubSection: React.FC<{ title: string; content: string | null | undefined }
       </div>
       
       {/* サブセクション内容 */}
-      <div className="box-border content-stretch flex flex-col gap-3 items-start justify-start p-0 relative shrink-0 w-full">
+      <div className="box-border content-stretch flex flex-col gap-3 items-start justify-start p-0 relative shrink-0 flex-1 min-w-0">
         {/* サブセクションタイトル */}
-        <div className="font-rounded-mplus font-bold leading-[0] not-italic relative shrink-0 text-[18px] text-[#0d0f18] text-left">
-          <h3 className="block leading-[1.6]">{title}</h3>
+        <div className="font-rounded-mplus font-bold leading-[0] not-italic relative shrink-0 text-base md:text-lg lg:text-[18px] text-[#1d382f] text-left break-words">
+          <h3 className="block leading-[1.6] break-words">{title}</h3>
         </div>
         
         {/* サブセクション本文 */}
@@ -101,7 +111,7 @@ const SubSection: React.FC<{ title: string; content: string | null | undefined }
           }
           
           return (
-            <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-lg text-[rgba(13,15,24,0.8)] text-left">
+            <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-lg text-[#475569] text-left">
               <ReactMarkdown 
                 components={markdownComponents}
                 remarkPlugins={[remarkGfm]}
@@ -160,12 +170,12 @@ const ContentSection: React.FC<ContentSectionProps> = ({
 
   return (
     <div
-      className={`bg-[#ffffff] relative rounded-[56px] shrink-0 w-full ${className}`}
+      className={`bg-[#ffffff] relative rounded-[40px] lg:rounded-[56px] shrink-0 w-full ${className}`}
       data-name={`##${title}`}
     >
-      <div className="absolute border-2 border-[#000000] border-solid inset-0 pointer-events-none rounded-[56px]" />
+      <div className="absolute border-2 border-[#000000] border-solid inset-0 pointer-events-none rounded-[40px] lg:rounded-[56px]" />
       <div className="flex flex-col items-center relative size-full">
-        <div className="box-border content-stretch flex flex-col gap-8 items-center justify-start p-[56px] relative w-full">
+        <div className="box-border content-stretch flex flex-col gap-8 items-center justify-start p-6 md:p-10 lg:p-[56px] relative w-full">
           
           {/* ヘッダー部分 */}
           <div
@@ -219,7 +229,7 @@ const ContentSection: React.FC<ContentSectionProps> = ({
               } else {
                 // サブセクションがない場合は通常のコンテンツとして表示
                 return (
-                  <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-lg text-[rgba(13,15,24,0.8)] text-left w-full">
+                  <div className="font-['Noto_Sans_JP:Regular',_sans-serif] font-normal leading-[0] not-italic relative shrink-0 text-lg text-[#475569] text-left w-full">
                     <ReactMarkdown 
                       components={markdownComponents}
                       remarkPlugins={[remarkGfm]}

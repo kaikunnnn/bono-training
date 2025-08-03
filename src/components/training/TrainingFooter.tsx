@@ -5,10 +5,10 @@ const TrainingFooter = () => {
   return (
     <div className="size-full flex justify-center">
       <div className="max-w-[1280px] w-[88%]">
-        <div data-name="footer-main-block" className="px-0 py-12 flex justify-between">
-          <div className="flex gap-[68px]">
+        <div data-name="footer-main-block" className="px-0 py-12 flex flex-col md:flex-row md:justify-between gap-8 md:gap-0">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-[68px]">
             {/* SNS Section */}
-            <div data-name="content-block-sns" className="w-[178px] flex flex-col gap-4">
+            <div data-name="content-block-sns" className="w-full md:w-[178px] flex flex-col gap-4">
               <h3 className="text-[#1D382F] font-['Noto_Sans_JP'] font-medium text-sm">SNS</h3>
               <div className="flex flex-col gap-3">
                 <a 
@@ -33,7 +33,7 @@ const TrainingFooter = () => {
             </div>
 
             {/* About BONO Section */}
-            <div data-name="content-block-about" className="w-[239px] flex flex-col gap-4">
+            <div data-name="content-block-about" className="w-full md:w-[239px] flex flex-col gap-4">
               <h3 className="text-[#1D382F] font-['Noto_Sans_JP'] font-medium text-sm">ボノトレについて</h3>
               <p className="text-[rgba(13,15,24,0.8)] font-['Noto_Sans_Display'] font-normal text-sm leading-relaxed adjustLetterSpacing">
                 BONOを運営するカイクンが実験的に作成した。デザイントレーニングのサイトです。作るを前提に基礎を磨くお題を用意してアウトプットでつながることを画策中です。
@@ -42,7 +42,7 @@ const TrainingFooter = () => {
           </div>
 
           {/* Logo Section */}
-          <div data-name="logo-area" className="w-[144px] h-[144px] flex flex-col items-center justify-center">
+          <div data-name="logo-area" className="w-full md:w-[144px] h-[144px] flex flex-col items-center justify-center">
             <div className="text-[#1D382F] font-['Futura'] font-bold text-[39.45px] leading-[31.562px] tracking-tight">
               BONO
             </div>

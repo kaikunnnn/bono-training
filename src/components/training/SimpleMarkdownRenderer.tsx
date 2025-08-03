@@ -54,9 +54,9 @@ const SimpleMarkdownRenderer: React.FC<SimpleMarkdownRendererProps> = ({
     // 説明文（Inter+Noto Sans JP、16px、line-height: 1.88）
     'block-text-description': 'font-inter font-normal text-[14px] md:text-[16px] text-center text-slate-900 leading-[1.7] md:leading-[1.88] w-full',
     // スキルグループ
-    'skill-group': 'w-full max-w-2xl bg-white rounded-3xl px-12 py-4 space-y-0',
+    'skill-group': 'w-full max-w-2xl bg-white rounded-3xl px-8 py-3 space-y-0',
     // スキルグループ（dashed border版）
-    'skill-group-dashed': 'w-full max-w-2xl bg-white rounded-3xl px-12 py-4 space-y-0',
+    'skill-group-dashed': 'w-full max-w-2xl bg-white rounded-3xl px-8 py-3 space-y-0',
     // スキルアイテム
     'skill-item': 'w-full py-4',
     // スキルセパレーター

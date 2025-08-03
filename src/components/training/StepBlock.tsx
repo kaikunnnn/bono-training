@@ -17,7 +17,7 @@ const StepBlock: React.FC<StepBlockProps> = ({
   referenceLink
 }) => {
   return (
-    <div className="relative w-full max-w-[730px] bg-white p-[48px] rounded-3xl flex flex-col gap-5 items-center justify-start">
+    <div className="relative w-full max-w-2xl bg-white px-8 py-6 rounded-3xl flex flex-col gap-5 items-center justify-start">
       {/* Header section */}
       <div className="flex flex-col gap-5 w-full">
         {/* Title */}

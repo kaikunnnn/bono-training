@@ -38,7 +38,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           {/* アイコンと楕円の統合ブロック */}
           <div className="flex flex-col items-start w-full">
             {/* Step 2-1: アイコン部分 */}
-            <div className="relative z-30 w-[72px] h-[72px] p-[11px] flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_12px_12px] top-[56px] ml-[10.4%]">
+            <div className="relative z-30 w-[72px] h-[72px] p-[11px] pt-4 flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_32px_32px] top-[56px] ml-[10.4%]">
               <img
                 src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
                 alt={training.title}
@@ -48,7 +48,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             
             {/* 上が円のブロック（SVG） */}
             <svg 
-              className="relative z-15 w-full h-[70px]" 
+              className="relative z-15 w-full h-[50px]" 
               viewBox="0 0 328 70" 
               fill="none" 
               xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           </div>
           
           {/* コンテンツブロック */}
-          <div className="bg-white px-[10.4%] pb-6 flex flex-col items-start gap-3">
+          <div className="bg-white px-[10.4%] pt-6 pb-6 flex flex-col items-start gap-3">
 
             {/* Step 2-2: コンテンツブロック（260×102px） */}
             <div className="w-full flex flex-col gap-3">
@@ -70,7 +70,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
               
               {/* タイトルと説明 */}
               <div className="flex flex-col gap-2 text-left">
-                <h3 className="text-[20px] font-rounded-mplus-bold leading-[1.2] text-[#020617]">
+                <h3 className="text-[20px] md:text-lg lg:text-[20px] font-rounded-mplus-bold leading-[1.2] text-[#020617]">
                   {training.title}
                 </h3>
                 <p className="text-[14px] font-normal leading-[1.4] text-[#64748B] line-clamp-2">

@@ -51,7 +51,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
             <span className="text-[14px] font-bold font-rounded-mplus tracking-[0.75px] text-[#1D283D]">
               {training.type === 'challenge' ? 'チャレンジ' : 'スキル'}
             </span>
-            <h3 className="text-[28px] font-bold font-rounded-mplus leading-[149%] tracking-[0.75px] text-[#020617]">
+            <h3 className="text-[22px] md:text-2xl lg:text-[28px] font-bold font-rounded-mplus leading-[149%] tracking-[0.75px] text-[#020617]">
               {training.title}
             </h3>
             <p className="text-[12px] font-normal font-rounded-mplus leading-[160%] tracking-[1px] text-[#1D283D]">

@@ -91,7 +91,7 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                       
                       {/* 説明 */}
                       {task.description && (
-                        <p className="text-sm text-[#0F1742] mb-2 line-clamp-2 font-normal leading-[185%]">
+                        <p className="text-sm text-[#0F1742] mb-2 line-clamp-2 font-normal leading-[148%]">
                           {task.description}
                         </p>
                       )}
@@ -118,7 +118,7 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                     <img 
                       src="/images/arrow/arrow/primary/right.svg" 
                       alt=""
-                      className="ml-4 flex-shrink-0 w-8 h-8"
+                      className="ml-4 flex-shrink-0 w-7 h-7 md:w-8 md:h-8"
                     />
                   </div>
                 </Link>
