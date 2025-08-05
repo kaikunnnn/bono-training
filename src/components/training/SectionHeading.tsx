@@ -1,6 +1,5 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
-import CategoryTag from './CategoryTag';
 
 interface SectionHeadingProps {
   category?: string;
@@ -22,31 +21,21 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
   return (
     <div
       className={cn(
-        "box-border flex flex-col gap-4 items-start justify-start p-0 relative w-full h-full",
+        "box-border flex flex-col gap-2 items-start justify-start p-0 relative w-full h-full",
         className
       )}
       data-name="Heading"
       id="node-3248_5674"
       data-annotations="この部分は /trainingのページで使い回すセクションタイトルのコンポーネントセットにしたいです。"
     >
-      {/* カテゴリタグ */}
-      {category && (
-        <div
-          data-name="Component 4"
-          id="node-3287_2230"
-          data-annotations="この部分は カテゴリタグのコンポーネントを使います ゆくゆく実装では、このカテゴリと同じ type=portfolioの :trainingSlugのコンテンツを表示するものを実装していきたいです。"
-        >
-          <CategoryTag category={category} />
-        </div>
-      )}
 
       {/* メインタイトル */}
       <div
-        className="font-semibold text-[24px] leading-[40px] text-slate-900 text-left not-italic relative shrink-0 min-w-full w-min"
+        className="font-semibold text-2xl md:text-xl lg:text-2xl leading-[40px] text-slate-900 text-left not-italic relative shrink-0 min-w-full w-min"
         style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
         id="node-3248_5676"
       >
-        <p className="block leading-[40px]">{title}</p>
+        <h2 className="block leading-[40px] font-rounded-mplus-bold">{title}</h2>
       </div>
 
       {/* 説明文 */}

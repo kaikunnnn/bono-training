@@ -75,9 +75,9 @@ const TrainingHeader = () => {
     <div className="flex-1 flex items-center justify-end max-w-[480px]">
       <button
         onClick={() => window.open("https://bo-no.design", "_blank", "noopener,noreferrer")}
-        className="inline-flex items-center justify-center px-4 h-10 rounded-full border-2 border-[#0d221d] transition-colors"
+        className="inline-flex items-center justify-center px-2 sm:px-4 h-8 sm:h-10 rounded-full border-2 border-[#0d221d] transition-colors"
       >
-        <span className="font-rounded-mplus text-sm font-bold">
+        <span className="font-rounded-mplus text-xs sm:text-sm font-bold">
           BONOに戻る
         </span>
       </button>
@@ -85,9 +85,9 @@ const TrainingHeader = () => {
   );
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 w-full animate-gradient-fade-in"
+    <header className="fixed top-0 left-0 right-0 z-50 w-full"
             style={{
-              background: 'linear-gradient(180deg, hsl(var(--training-gradient-start)) 0%, hsl(var(--training-gradient-middle)) 36.7%, transparent 100%)'
+              background: 'linear-gradient(180deg, #E1E2F2 0%, #FAF4F0 20%, hsl(var(--training-gradient-middle)) 36.7%, transparent 100%)'
             }}>
       <div className="flex justify-between items-center h-[88px] w-full max-w-[1670px] mx-auto px-5">
         <LeftSection />

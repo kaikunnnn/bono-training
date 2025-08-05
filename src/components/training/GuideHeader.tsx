@@ -9,17 +9,18 @@ interface GuideHeaderProps {
 const GuideHeader: React.FC<GuideHeaderProps> = ({
   emoji = '💪',
   title = '進め方ガイド',
-  description = 'デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します。'
+  description = `デザイン基礎を身につけながらデザインするための
+やり方の流れを説明します。`
 }) => {
   return (
-    <div className="flex flex-col gap-3 max-w-[368px]">
-      <span className="text-sm font-semibold leading-5 text-[#0f172a]">
+    <div className="box-border content-stretch flex flex-col gap-2 items-start justify-start px-0 py-8 relative w-full">
+      <div className="font-inter font-semibold relative shrink-0 text-center text-slate-900 w-full text-2xl md:text-3xl leading-tight">
         {emoji}
-      </span>
-      <h2 className="text-2xl font-bold leading-[160%] tracking-[1px] text-[#0d0f18] font-noto-sans">
+      </div>
+      <h2 className="font-rounded-mplus font-bold text-black text-xl md:text-[24px] tracking-[1px] leading-[1.6] text-center w-full whitespace-normal md:whitespace-nowrap">
         {title}
       </h2>
-      <p className="text-base font-normal leading-6 text-[#0f172a] whitespace-pre-line">
+      <p className="font-inter font-normal text-[14px] md:text-[16px] text-center text-slate-900 leading-[1.7] md:leading-[1.88] w-full whitespace-pre-line">
         {description}
       </p>
     </div>

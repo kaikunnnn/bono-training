@@ -17,10 +17,16 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
     return null;
   }
 
+  // スキルクリック時のスクロール処理
+  const handleSkillClick = (index: number) => {
+    const element = document.getElementById(`skill-${index}`);
+    element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
-    <div className={cn('w-full max-w-3xl mx-auto py-6 pb-8', className)}>
+    <div className={cn('w-full max-w-3xl mx-auto', className)}>
       <div className="challenge-merit">
-        <h2 className="text-xl font-bold text-foreground mb-6">
+        <h2 className="text-xl font-bold text-foreground mb-3">
           チャレンジで身につくこと
         </h2>
         
@@ -28,7 +34,8 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
           {skillTitles.map((title, index) => (
             <div 
               key={index}
-              className="flex items-center justify-between py-3"
+              onClick={() => handleSkillClick(index)}
+              className="flex items-center justify-between py-2 cursor-pointer hover:bg-gray-50 rounded-lg px-2 transition-colors"
             >
               <div className="flex items-center gap-3">
                 {/* 四角いアイコン */}
@@ -41,21 +48,11 @@ const ChallengeMeritSection: React.FC<ChallengeMeritSectionProps> = ({
               </div>
               
               {/* 矢印アイコン */}
-              <div className="w-5 h-5 bg-primary rounded-full flex items-center justify-center flex-shrink-0">
-                <svg 
-                  className="w-2.5 h-2.5 text-primary-foreground" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path 
-                    strokeLinecap="round" 
-                    strokeLinejoin="round" 
-                    strokeWidth={2} 
-                    d="M5 9l7 7 7-7" 
-                  />
-                </svg>
-              </div>
+              <img 
+                src="/images/arrow/arrow/secondary/down.svg" 
+                alt=""
+                className="w-5 h-5 flex-shrink-0"
+              />
             </div>
           ))}
         </div>

@@ -15,7 +15,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
   return (
     <Link 
       to={`/training/${training.slug}`} 
-      className={cn("max-w-[453px] w-full mx-auto flex flex-col gap-6", className)}
+      className={cn("w-full max-w-[400px] flex flex-col gap-6", className)}
     >
       <div className="w-full flex flex-col">
         {/* カードの上部 */}
@@ -48,13 +48,13 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
         <div className="mt-6 flex flex-col gap-4">
           {/* タイトルセクション */}
           <div className="flex flex-col gap-2">
-            <span className="text-[14px] font-bold font-['Rounded_Mplus_1c'] tracking-[0.75px] text-[#1D283D]">
+            <span className="text-[14px] font-bold font-rounded-mplus tracking-[0.75px] text-[#1D283D]">
               {training.type === 'challenge' ? 'チャレンジ' : 'スキル'}
             </span>
-            <h3 className="text-[28px] font-bold font-['Rounded_Mplus_1c'] leading-[149%] tracking-[0.75px] text-[#020617]">
+            <h3 className="text-[22px] md:text-2xl lg:text-[28px] font-bold font-rounded-mplus leading-[149%] tracking-[0.75px] text-[#020617]">
               {training.title}
             </h3>
-            <p className="text-[12px] font-normal font-['Rounded_Mplus_1c'] leading-[160%] tracking-[1px] text-[#1D283D]">
+            <p className="text-[12px] font-normal font-rounded-mplus leading-[160%] tracking-[1px] text-[#1D283D]">
               {training.description || ''}
             </p>
           </div>
@@ -64,7 +64,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
             {/* 筋トレ部位 */}
             <div className="flex items-center gap-1">
               <div className="w-[60px] px-1 py-0.5 flex justify-center items-center bg-[#F1F5F9] rounded-md">
-                <span className="text-[10px] font-medium font-['Rounded_Mplus_1c'] text-[#1D283D]">
+                <span className="text-[10px] font-medium font-rounded-mplus text-[#1D283D]">
                   筋トレ部位
                 </span>
               </div>
@@ -76,7 +76,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
             {/* 難易度 */}
             <div className="flex items-center gap-1">
               <div className="w-[60px] px-1 py-0.5 flex justify-center items-center bg-[#F1F5F9] rounded-md">
-                <span className="text-[10px] font-medium font-['Rounded_Mplus_1c'] text-[#1D283D]">
+                <span className="text-[10px] font-medium font-rounded-mplus text-[#1D283D]">
                   難易度
                 </span>
               </div>
@@ -88,7 +88,7 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
 
           {/* CTAボタン */}
           <button className="w-full mt-2 py-2.5 px-4 flex justify-center items-center rounded-full border border-[#020617]">
-            <span className="text-[14px] font-extrabold font-['Rounded_Mplus_1c'] tracking-[0.75px] text-[#020617]">
+            <span className="text-[14px] font-extrabold font-rounded-mplus tracking-[0.75px] text-[#020617]">
               トレーニングを見る
             </span>
           </button>

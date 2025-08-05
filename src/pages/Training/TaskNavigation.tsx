@@ -58,24 +58,7 @@ const TaskNavigation: React.FC<TaskNavigationProps> = ({
     }
   };
 
-  return (
-    <div className="mt-12 flex justify-between">
-      <Button 
-        variant="outline" 
-        onClick={handleBack}
-      >
-        <ArrowLeft className="mr-2 h-4 w-4" />
-        {prevTaskSlug ? '前のタスク' : 'トレーニング一覧へ戻る'}
-      </Button>
-      
-      {nextTaskSlug && (
-        <Button onClick={handleNext}>
-          次のタスクへ進む
-          <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      )}
-    </div>
-  );
+  return null;
 };
 
 export default TaskNavigation;

@@ -68,7 +68,7 @@ export const convertSkillsToHtml = (skills: SkillData[]): string => {
       ? `- 参考リンク：[詳細はこちら](${skill.reference_link})` 
       : '';
     
-    let result = `<div class="skill-item">
+    let result = `<div class="skill-item" id="skill-${index}">
 
 #### ■ ${skill.title}
 

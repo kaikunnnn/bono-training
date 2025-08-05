@@ -103,8 +103,24 @@
   
   /* Rounded Mplus フォントの強制適用 */
   .font-rounded-mplus-force {
-    font-family: 'Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
+    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
     font-display: swap;
     font-weight: 700;
+  }
+  
+  /* Rounded Mplus フォントのグローバル適用 */
+  .font-rounded-mplus {
+    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  }
+  
+  /* 日本語テキストにRounded Mplusを自動適用 */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  }
+  
+  /* Rounded Mplus Bold クラスの確実な適用 */
+  .font-rounded-mplus-bold {
+    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
+    font-weight: 700 !important;
   }
 }

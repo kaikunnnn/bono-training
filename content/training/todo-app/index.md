@@ -28,7 +28,7 @@ guide:
   description: "実践的なTodoアプリのUIデザインを通じて、基本的なUIコンポーネントからユーザビリティを考慮したインタラクション設計まで段階的に学習します"
   lesson:
     title: "UIコンポーネント設計の基礎"
-    emoji: "🎨"
+    image: "todo-app-lesson.jpg"
     description: "デザインシステムとコンポーネント設計の基礎をBONOで学習できます"
     link: "/training"
   steps:

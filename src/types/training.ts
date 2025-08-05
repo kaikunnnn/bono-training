@@ -31,6 +31,9 @@ export interface Task {
   content?: string;
   next_task?: string | null;
   prev_task?: string | null;
+  category?: string;
+  tags?: string[];
+  description?: string;
 }
 
 export interface TaskDetailData {

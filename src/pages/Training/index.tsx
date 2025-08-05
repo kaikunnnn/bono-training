@@ -4,8 +4,10 @@ import TrainingLayout from '@/components/training/TrainingLayout';
 import TrainingHero from '@/components/training/TrainingHero';
 import TrainingGrid from '@/components/training/TrainingGrid';
 import SectionHeading from '@/components/training/SectionHeading';
+import ContentWrapper from '@/components/training/ContentWrapper';
 import { useTrainings } from '@/hooks/useTrainingCache';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
 import { Training } from '@/types/training';
 
 // カテゴリ定数
@@ -61,8 +63,8 @@ const TrainingHome = () => {
     }
 
     return (
-      <div className="mb-12">
-        <div className="mb-6">
+      <div className="py-12">
+        <div className="mb-8">
           <SectionHeading
             category={category}
             title={title}
@@ -76,9 +78,10 @@ const TrainingHome = () => {
 
   return (
     <TrainingLayout>
-      <TrainingHero />
-      
-      <div className="container mx-auto px-4 py-8">
+      <ContentWrapper>
+        <TrainingHero />
+        
+        <div>
         {/* ローディング状態 */}
         {isLoading && (
           <div className="space-y-12">
@@ -110,13 +113,15 @@ const TrainingHome = () => {
 
         {/* カテゴリ別セクション表示 */}
         {trainings && (
-          <div className="space-y-8">
+          <div>
             <CategorySection
               category={CATEGORIES.INFO_DESIGN}
               title="情報設計トレーニング"
               description="ユーザーが求める情報を整理し、分かりやすく構造化するスキルを身につけよう"
               trainings={groupedTrainings[CATEGORIES.INFO_DESIGN]}
             />
+            
+            <Separator />
             
             <CategorySection
               category={CATEGORIES.UX_DESIGN}
@@ -127,6 +132,7 @@ const TrainingHome = () => {
           </div>
         )}
       </div>
+      </ContentWrapper>
     </TrainingLayout>
   );
 };

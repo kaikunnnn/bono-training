@@ -88,7 +88,7 @@ const NavigationHeader: React.FC<NavigationHeaderProps> = ({ trainingSlug, order
   return (
     <div className="h-6 relative shrink-0 w-full" data-name="tableofcontents">
       <div className="flex flex-row items-center overflow-clip relative size-full">
-        <div className="box-border content-stretch flex flex-row h-6 items-center justify-between px-10 py-0 relative w-full">
+        <div className="box-border content-stretch flex flex-row h-6 items-center justify-between px-6 lg:px-10 py-0 relative w-full">
           <Frame3467320 trainingSlug={trainingSlug} />
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <NumberoforderIndex orderIndex={orderIndex} />

@@ -351,10 +351,10 @@ const TaskDetailPage = () => {
         {/* Main Content Section */}
         <div className="relative rounded-[66px] shrink-0 w-full">
           <div className="flex flex-col items-center relative size-full">
-            <div className="box-border content-stretch flex flex-col gap-8 items-center justify-start pb-24 pt-0 px-24 relative w-full">
+            <div className="box-border content-stretch flex flex-col gap-8 items-center justify-start pb-24 pt-0 px-4 md:px-8 lg:px-24 relative w-full">
               
               {/* Eyecatch Section */}
-              <div className="box-border content-stretch flex flex-col gap-5 items-center justify-start pb-4 pt-5 px-0 relative shrink-0 w-[741px]">
+              <div className="box-border content-stretch flex flex-col gap-5 items-center justify-start pb-4 pt-5 px-0 relative shrink-0 w-full max-w-[741px]">
                 <div className="box-border content-stretch flex flex-col gap-5 items-center justify-start p-0 relative shrink-0 w-full">
                   {/* Block - カテゴリとタグ */}
                   <div className="box-border content-stretch flex flex-row gap-4 items-start justify-center p-0 relative shrink-0 w-full">
@@ -366,14 +366,14 @@ const TaskDetailPage = () => {
                   </div>
                   
                   {/* Heading - タイトルと説明 */}
-                  <div className="box-border content-stretch flex flex-col gap-4 items-center justify-start p-0 relative shrink-0 w-[640px]">
+                  <div className="box-border content-stretch flex flex-col gap-4 items-center justify-start p-0 relative shrink-0 w-full max-w-[640px]">
                     <div className="box-border content-stretch flex flex-row gap-2.5 items-end justify-center p-0 relative shrink-0 w-full">
-                      <div className="basis-0 font-['Rounded_Mplus_1c:Medium',_sans-serif] grow leading-[0] min-h-px min-w-px not-italic relative shrink-0 text-[#0d0f18] text-[40px] text-center">
-                        <p className="block leading-[1.28]">{frontmatter.title}</p>
+                      <div className="basis-0 font-['Rounded_Mplus_1c:Medium',_sans-serif] grow leading-[0] min-h-px min-w-px not-italic relative shrink-0 text-[#1d382f] text-[28px] md:text-[28px] lg:text-[40px] text-center">
+                        <h1 className="block leading-[1.28] font-rounded-mplus font-bold">{frontmatter.title}</h1>
                       </div>
                     </div>
                     {frontmatter.description && (
-                      <div className="font-['Rounded_Mplus_1c:Medium',_sans-serif] leading-[0] not-italic relative shrink-0 text-[20px] text-[rgba(13,15,24,0.8)] text-center w-[477px]">
+                      <div className="font-['Rounded_Mplus_1c:Medium',_sans-serif] leading-[0] not-italic relative shrink-0 text-base md:text-lg lg:text-[20px] text-[#475569] text-center w-full max-w-[477px]">
                         <p className="block leading-[1.69]">{frontmatter.description}</p>
                       </div>
                     )}
@@ -382,7 +382,7 @@ const TaskDetailPage = () => {
               </div>
 
               {/* Content Sections */}
-              <div className="box-border content-stretch flex flex-col gap-6 items-start justify-start p-0 relative shrink-0 w-[740px]">
+              <div className="box-border content-stretch flex flex-col gap-6 items-start justify-start p-0 relative shrink-0 w-full max-w-[740px]">
                 {/* 動画プレーヤー */}
                 {hasValidVideo && (
                   <div className="mb-8">

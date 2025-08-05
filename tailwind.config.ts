@@ -128,19 +128,44 @@ const config = {
             background: 'var(--training-gradient-bg)'
           }
         },
+        'gradient-slide': {
+          '0%': { 
+            'background-position': '-100% center',
+            'background-size': '200% 100%'
+          },
+          '100%': { 
+            'background-position': '0% center',
+            'background-size': '100% 100%'
+          }
+        },
+        'gradient-scale-slide': {
+          '0%': { 
+            'background-position': '-100% center',
+            'background-size': '400% 250%',
+            'transform': 'scale(2.0)'
+          },
+          '100%': { 
+            'background-position': '0% center',
+            'background-size': '100% 100%',
+            'transform': 'scale(1)'
+          }
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.6s ease-out forwards',
         'gradient-fade-in': 'gradient-fade-in 0.8s ease-out forwards',
+        'gradient-slide': 'gradient-slide 1.2s ease-out forwards',
+        'gradient-scale-slide': 'gradient-scale-slide 2.0s cubic-bezier(0.215, 0.61, 0.355, 1) -0.3s forwards',
       },
       fontFamily: {
         'futura': ['Futura', 'sans-serif'],
         'inter': ['Inter', 'sans-serif'],
         'noto-sans': ['Noto Sans', 'sans-serif'],
         'noto-sans-jp': ['Noto Sans JP', 'Noto Sans', 'sans-serif'],
-        'rounded-mplus': ['Rounded M PLUS 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
+        'rounded-mplus': ['M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
+        'rounded-mplus-bold': ['M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],
       },
       // アイコンブロック用のカスタムクラス

@@ -10,7 +10,7 @@ export interface GuideContent {
   lessonCard?: {
     title: string;
     description: string;
-    emoji: string;
+    image?: string;
     link: string;
   };
   steps: Array<{
@@ -78,10 +78,10 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
     stepsCount: steps.length 
   });
   return (
-    <section className="w-full py-16 px-4 bg-white">
+    <section className="w-full py-16 px-4">
       <div className="max-w-3xl mx-auto">
         {/* Header */}
-        <div className="mb-12">
+        <div className="box-border content-stretch flex flex-col gap-2 items-start justify-start px-0 py-8 relative w-full">
           <GuideHeader 
             title={title}
             description={description}
@@ -98,9 +98,9 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
               </h3>
               <LessonCard 
                 title={lessonCard.title}
-                emoji={lessonCard.emoji}
                 description={lessonCard.description}
                 link={lessonCard.link}
+                imageUrl={lessonCard.image ? `/assets/lesson/${lessonCard.image}` : undefined}
               />
             </div>
           )}

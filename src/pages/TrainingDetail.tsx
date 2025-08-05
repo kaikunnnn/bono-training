@@ -17,6 +17,7 @@ import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
 import { HalfCircleBg } from '@/components/training/HalfCircleBg';
 import IconBlock from '@/components/training/IconBlock';
+import ContentWrapper from '@/components/training/ContentWrapper';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -124,125 +125,27 @@ const TrainingDetail = () => {
   }
 
   return (
-    <TrainingLayout>
-      <div>
-        {/* Figmaデザインベースのeyecatchセクション */}
-        {frontmatter && (
-          <div
-            className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative size-full mb-8 border-b border-slate-200"
-            data-name="training-overview"
-          >
+    <TrainingLayout noPaddingTop={true}>
+      {/* Figmaデザインベースのeyecatchセクション - 全幅 */}
+      {frontmatter && (
+        <div
+          className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative w-full mb-8 border-b border-slate-200"
+          data-name="training-overview"
+        >
             
             {/* 背景 */}
             <div
-              className="absolute h-[289px] left-0 overflow-clip top-0 w-full"
+              className="absolute h-[400px] left-0 overflow-clip top-[-96px] w-full"
               data-name="bg"
             >
               <div
-                className="absolute h-[399px] left-[-10%] overflow-clip top-[-10px] w-[120%]"
+                className="absolute h-[400px] left-[-10%] overflow-clip top-[-10px] w-[120%]"
                 data-name="表紙"
               >
                 <div 
-                  className={`relative size-full ${
-                    frontmatter.background_svg 
-                      ? `bg-[url('${frontmatter.background_svg}')] bg-cover bg-center bg-no-repeat` 
-                      : frontmatter.fallback_gradient 
-                        ? `bg-gradient-to-r from-[${frontmatter.fallback_gradient.from}] via-[${frontmatter.fallback_gradient.via}] to-[${frontmatter.fallback_gradient.to}]`
-                        : "bg-gradient-to-r from-[#fdf3ff] via-[#f3e8ff] to-[#e9d5ff]"
-                  }`} 
+                  className="relative size-full bg-[url('/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg')] bg-cover bg-center bg-no-repeat animate-gradient-scale-slide"
                   data-name="Property 1=Variant2"
                 >
-                  <div
-                    className="absolute h-3.5 left-[-5%] top-[308px] w-[110%]"
-                    data-name="line-wave"
-                  >
-                    <svg
-                      className="block size-full"
-                      fill="none"
-                      preserveAspectRatio="none"
-                      viewBox="0 0 1695 14"
-                    >
-                      <g clipPath="url(#clip0_3_4644)" id="line-wave" opacity="0.14">
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_2"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_3"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_4"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_5"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_6"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_7"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 14 200 7C300 0 400 14 500 7C600 0 700 14 800 7C900 0 1000 14 1100 7C1200 0 1300 14 1400 7C1500 0 1600 14 1700 7"
-                          id="Vector_8"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                        <path
-                          d="M0 7C0 7 100 0 200 7C300 14 400 0 500 7C600 14 700 0 800 7C900 14 1000 0 1100 7C1200 14 1300 0 1400 7C1500 14 1600 0 1700 7"
-                          id="Vector_9"
-                          stroke="var(--stroke-0, #3B0764)"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="0.75"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id="clip0_3_4644">
-                          <rect fill="white" height="14" width="1695" />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                  </div>
                 </div>
               </div>
             </div>
@@ -292,11 +195,11 @@ const TrainingDetail = () => {
 
                 {/* タイトル */}
                 <div
-                  className="font-['Rounded_Mplus_1c_Bold:Bold',_sans-serif] leading-[0] w-full not-italic relative shrink-0 text-[#0d221d] text-[24px] sm:text-[28px] md:text-[32px] text-center tracking-[0.75px] px-4"
+                  className="font-['Rounded_Mplus_1c_Bold:Bold',_sans-serif] leading-[0] w-full not-italic relative shrink-0 text-[#0d221d] text-[28px] md:text-[32px] text-center tracking-[0.75px] px-4"
                 >
-                  <p className="block leading-[1.49]">
+                  <h1 className="block leading-[1.49] font-rounded-mplus-bold">
                     {frontmatter.title || training.title || 'タイトルなし'}
-                  </p>
+                  </h1>
                 </div>
 
                 {/* 説明文 */}
@@ -360,10 +263,10 @@ const TrainingDetail = () => {
           </div>
         )}
 
-
-
-        {/* セクション・オーバービュー */}
-        <div className="max-w-3xl mx-auto" data-name="section-overview">
+        {/* その他のコンテンツ - 幅制限あり */}
+        <ContentWrapper>
+          {/* セクション・オーバービュー */}
+          <div className="max-w-3xl mx-auto" data-name="section-overview">
           {/* チャレンジで身につくことセクション */}
           {frontmatter && (() => {
             const skills = getSkillsFromFrontmatter(frontmatter);
@@ -372,6 +275,9 @@ const TrainingDetail = () => {
               <ChallengeMeritSection skillTitles={skillTitles} />
             ) : null;
           })()}
+
+          {/* Divider */}
+          <div className="w-full h-px bg-gray-200 my-8"></div>
 
           {/* タスク一覧 */}
           <div data-name="task-collection-block">
@@ -382,46 +288,54 @@ const TrainingDetail = () => {
             />
           </div>
         </div>
+        </ContentWrapper>
 
-        {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
-        {frontmatter && (() => {
-          const skills = getSkillsFromFrontmatter(frontmatter);
-          if (skills.length === 0) return null;
-          
-          const skillsHtml = convertSkillsToHtml(skills);
-          return (
-            <div className="mt-12">
-              <SimpleMarkdownRenderer 
-                content={skillsHtml}
-                className="prose prose-lg max-w-none"
-                options={{
-                  isPremium: frontmatter?.is_premium || false,
-                  hasMemberAccess: true
-                }}
-              />
-            </div>
-          );
-        })()}
+        {/* スキル・ガイドセクション - 全幅背景 */}
+        <div className="w-full bg-[#F3F3F3] py-16 mt-12">
+          <ContentWrapper>
+            {/* このチャレンジで伸ばせる力セクション（進め方ガイドの上） */}
+            {frontmatter && (() => {
+              const skills = getSkillsFromFrontmatter(frontmatter);
+              if (skills.length === 0) return null;
+              
+              const skillsHtml = convertSkillsToHtml(skills);
+              return (
+                <div>
+                  <SimpleMarkdownRenderer 
+                    content={skillsHtml}
+                    className="prose prose-lg max-w-none"
+                    options={{
+                      isPremium: frontmatter?.is_premium || false,
+                      hasMemberAccess: true
+                    }}
+                  />
+                </div>
+              );
+            })()}
 
-        {/* 進め方ガイドセクション */}
-        {guideContent && (
-          <div data-name="section-progress-guide">
-            <TrainingGuideSection guideContent={guideContent} />
-          </div>
-        )}
+            {/* 進め方ガイドセクション */}
+            {guideContent && (
+              <div data-name="section-progress-guide" className="">
+                <TrainingGuideSection guideContent={guideContent} />
+              </div>
+            )}
+          </ContentWrapper>
+        </div>
 
-        {/* マークダウンコンテンツ（残りのコンテンツ） */}
-        {markdownContent && (
-          <SimpleMarkdownRenderer 
-            content={markdownContent}
-            className="prose prose-lg max-w-none"
-            options={{
-              isPremium: frontmatter?.is_premium || false,
-              hasMemberAccess: true // TODO: 実際のユーザー権限を確認
-            }}
-          />
-        )}
-      </div>
+        <ContentWrapper>
+
+          {/* マークダウンコンテンツ（残りのコンテンツ） */}
+          {markdownContent && (
+            <SimpleMarkdownRenderer 
+              content={markdownContent}
+              className="prose prose-lg max-w-none"
+              options={{
+                isPremium: frontmatter?.is_premium || false,
+                hasMemberAccess: true // TODO: 実際のユーザー権限を確認
+              }}
+            />
+          )}
+        </ContentWrapper>
     </TrainingLayout>
   );
 };

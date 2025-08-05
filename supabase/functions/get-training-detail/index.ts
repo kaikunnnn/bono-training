@@ -235,6 +235,9 @@ serve(async (req) => {
                 id: `${slug}-task-${taskMeta.order_index || index + 1}`,
                 slug: taskMeta.slug || taskFolder.name,
                 title: taskMeta.title || taskFolder.name, // フォルダ名をフォールバックに
+                description: taskMeta.description || null,
+                category: taskMeta.category || null,
+                tags: Array.isArray(taskMeta.tags) ? taskMeta.tags : [],
                 is_premium: Boolean(taskMeta.is_premium), // 確実にboolean型に
                 order_index: typeof taskMeta.order_index === 'number' ? taskMeta.order_index : index + 1,
                 training_id: `${slug}-1`,

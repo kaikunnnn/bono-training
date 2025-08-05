@@ -29,6 +29,7 @@ guide:
   description: デザイン基礎を身につけながらデザインするための\nやり方の流れを説明します
   lesson:
     title: ゼロからはじめる情報設計
+    image: "info-design-lesson.jpg"
     description: 進め方の基礎はBONOで詳細に学習・実践できます
     link: /training
   steps:
