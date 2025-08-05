@@ -1,6 +1,6 @@
 ---
 title: "お題について：社内本貸し出しシステム"
-slug: "introduction"
+slug: "explain-book-lending-system"
 description: "情報設計をしてUI体験をデザインしよう"
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"
 category: "お題説明"
