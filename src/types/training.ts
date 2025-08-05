@@ -107,6 +107,7 @@ export interface GuideData {
     emoji?: string;
     description: string;
     link: string;
+    image?: string;
   };
   steps: Array<{
     title: string;
@@ -194,7 +195,8 @@ export const GuideDataSchema = z.object({
     title: z.string(),
     emoji: z.string().optional(),
     description: z.string(),
-    link: z.string()
+    link: z.string(),
+    image: z.string().optional()
   }).optional(),
   steps: z.array(z.object({
     title: z.string(),

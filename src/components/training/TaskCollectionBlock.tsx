@@ -66,7 +66,7 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
               
               {/* task-training-card */}
               <div 
-                className="flex-1 bg-white rounded-[24px] p-8 border border-gray-100"
+                className="flex-1 bg-white rounded-[24px] p-8 border border-[#0d0f18]"
                 style={{ boxShadow: '1px 1px 24px 0 rgb(0 0 0 / 0.075)' }}
               >
                 <Link

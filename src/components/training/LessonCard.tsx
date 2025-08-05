@@ -17,7 +17,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
   return (
     <Link 
       to={link}
-      className="block w-full max-w-[730px] group"
+      className="block w-full group"
     >
       <div 
         className="relative w-full h-full bg-[#f4eae3] rounded-3xl border border-[#d4d4d8] overflow-hidden"
