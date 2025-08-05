@@ -1,7 +1,7 @@
 ---
 icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Person%20feeding%20baby/Default/3D/person_feeding_baby_3d_default.png"
-title: "子育ての困りごとを解決しよう"
-description: "子育てする人を理解して小さな課題を解決しよう"
+title: "ひとり時間のモヤモヤを解決"
+description: "ひとりで過ごす時間をもっと充実させたい人を理解して取り組むUXテーマです。🌙"
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"
 type: "portfolio"
 category: "UXデザイン"
