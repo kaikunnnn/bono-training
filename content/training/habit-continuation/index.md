@@ -1,5 +1,5 @@
 ---
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Check%20mark/3D/check_mark_3d.png"
+icon: "/assets/emoji/check.svg"
 title: "習慣化する人の困りごとを解決しよう"
 description: "習慣化する人を理解して小さな課題を解決するUXテーマ"
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"

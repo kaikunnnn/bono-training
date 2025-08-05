@@ -1,7 +1,7 @@
 ---
 title: "お題について：目標習慣化サービス"
 description: "情報設計をしてUI体験をデザインしよう"
-thumbnail: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/One%20oclock/3D/one_oclock_3d.png"
+thumbnail: "/assets/emoji/watch.svg"
 category: "お題説明"
 tags: ["ポートフォリオ"]
 order_index: 1

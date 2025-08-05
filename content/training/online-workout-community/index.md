@@ -8,7 +8,7 @@ tags: ["SaaS", "業務システム"]
 isPremium: false
 order_index: 1
 thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Flexed%20biceps/Default/3D/flexed_biceps_3d_default.png"
+icon: "/assets/emoji/muscle.svg"
 background_svg: "/assets/backgrounds/ec-catalog-bg.svg"
 fallback_gradient:
   from: "#f0f9ff"
