@@ -42,19 +42,19 @@ function Frame3467320({ trainingSlug }: { trainingSlug: string }) {
   const navigate = useNavigate();
   
   return (
-    <div className="box-border content-stretch flex flex-row gap-2 items-center justify-start p-0 relative shrink-0">
+    <button 
+      className="box-border content-stretch flex flex-row gap-2 items-center justify-start p-0 relative shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+      onClick={() => navigate(`/training/${trainingSlug}`)}
+    >
       <div className="flex items-center justify-center relative shrink-0">
         <div className="flex-none rotate-[180deg] scale-y-[-100%]">
           <ArrowRight />
         </div>
       </div>
-      <button 
-        className="[white-space-collapse:collapse] block cursor-pointer font-['Inter:Semi_Bold',_'Noto_Sans_JP:Bold',_sans-serif] font-semibold leading-[0] not-italic relative shrink-0 text-[16px] text-[rgba(13,15,24,0.8)] text-left text-nowrap"
-        onClick={() => navigate(`/training/${trainingSlug}`)}
-      >
+      <div className="[white-space-collapse:collapse] block font-['Inter:Semi_Bold',_'Noto_Sans_JP:Bold',_sans-serif] font-semibold leading-[0] not-italic relative shrink-0 text-[16px] text-[rgba(13,15,24,0.8)] text-left text-nowrap">
         <p className="block leading-[24px] whitespace-pre">戻る</p>
-      </button>
-    </div>
+      </div>
+    </button>
   );
 }
 

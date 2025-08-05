@@ -3,21 +3,7 @@ import GuideHeader from './GuideHeader';
 import LessonCard from './LessonCard';
 import StepBlock from './StepBlock';
 import ArrowDown from './ArrowDown';
-// Phase 3: GuideContentの型定義を移動
-export interface GuideContent {
-  title: string;
-  description: string;
-  lessonCard?: {
-    title: string;
-    description: string;
-    image?: string;
-    link: string;
-  };
-  steps: Array<{
-    title: string;
-    description: string;
-  }>;
-}
+import { GuideContent } from '@/utils/simplifiedSkillGuideParser';
 
 interface Step {
   title: string;
@@ -96,12 +82,14 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
               <h3 className="text-xs font-bold font-noto-sans">
                 レッスンで身につける
               </h3>
-              <LessonCard 
-                title={lessonCard.title}
-                description={lessonCard.description}
-                link={lessonCard.link}
-                imageUrl={lessonCard.image ? `/assets/lesson/${lessonCard.image}` : undefined}
-              />
+              <div className="w-full">
+                <LessonCard 
+                  title={lessonCard.title}
+                  description={lessonCard.description}
+                  link={lessonCard.link}
+                  imageUrl={lessonCard.image ? `/assets/lesson/${lessonCard.image}` : undefined}
+                />
+              </div>
             </div>
           )}
 

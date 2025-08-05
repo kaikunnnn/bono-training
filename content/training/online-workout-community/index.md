@@ -1,6 +1,6 @@
 ---
-title: "社内本貸し出しシステムをデザインしよう"
-description: "社内で利用する本の貸し出しシステムを要件を整理してデザインしよう"
+title: "オンライン筋トレアプリ"
+description: "オンラインで他の人と筋トレできて継続できるアプリを設計しよう"
 type: "portfolio"
 difficulty: "normal"
 category: "情報設計"
@@ -8,7 +8,7 @@ tags: ["SaaS", "業務システム"]
 isPremium: false
 order_index: 1
 thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Open%20book/3D/open_book_3d.png"
+icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Flexed%20biceps/Default/3D/flexed_biceps_3d_default.png"
 background_svg: "/assets/backgrounds/ec-catalog-bg.svg"
 fallback_gradient:
   from: "#f0f9ff"

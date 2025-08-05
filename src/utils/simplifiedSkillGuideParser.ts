@@ -11,8 +11,9 @@ export interface GuideContent {
   lessonCard?: {
     title: string;
     description: string;
-    emoji: string;
+    emoji?: string;
     link: string;
+    image?: string;
   };
   steps: Array<{
     title: string;
@@ -46,7 +47,8 @@ export const convertGuideDataToGuideContent = (guideData: GuideData): GuideConte
       title: guideData.lesson.title,
       emoji: guideData.lesson.emoji,
       description: guideData.lesson.description,
-      link: guideData.lesson.link
+      link: guideData.lesson.link,
+      image: guideData.lesson.image
     } : undefined,
     steps: guideData.steps.map(step => ({
       title: step.title,

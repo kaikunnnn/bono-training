@@ -37,7 +37,7 @@ export default function IconBlock({
 
   return (
     <div
-      className={`bg-white box-border content-stretch flex flex-row gap-[15px] items-center justify-center pt-6 pb-3 px-0 relative rounded-bl-[16px] rounded-br-[16px] rounded-tl-[120px] rounded-tr-[120px] shrink-0 md:pt-8 md:pb-4 lg:pt-10 lg:pb-5 ${containerSizes[size]} ${className}`}
+      className={`bg-white box-border content-stretch flex flex-row gap-[15px] items-center justify-center pt-6 pb-6 px-0 relative rounded-bl-[16px] rounded-br-[16px] rounded-tl-[120px] rounded-tr-[120px] shrink-0 md:pt-8 md:pb-8 lg:pt-10 lg:pb-10 ${containerSizes[size]} ${className}`}
       data-name="icon_block"
       role="img"
       aria-label={iconAlt}
@@ -63,7 +63,7 @@ export default function IconBlock({
           ) : (
             // 画像URLの場合
             <div
-              className="absolute bg-center bg-cover bg-no-repeat inset-0 rounded-full"
+              className="absolute bg-center bg-cover bg-no-repeat inset-0"
               style={{ backgroundImage: `url('${iconSrc}')` }}
               role="img"
               aria-label={iconAlt}

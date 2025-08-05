@@ -1,5 +1,5 @@
 ---
-title: "社内本貸し出しシステムをデザインしよう"
+title: "作業カフェを探すアプリ"
 description: "社内で利用する本の貸し出しシステムを要件を整理してデザインしよう"
 type: "portfolio"
 difficulty: "normal"
@@ -8,7 +8,7 @@ tags: ["SaaS", "業務システム"]
 isPremium: false
 order_index: 1
 thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Open%20book/3D/open_book_3d.png"
+icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Hot%20beverage/3D/hot_beverage_3d.png"
 background_svg: "/assets/backgrounds/ec-catalog-bg.svg"
 fallback_gradient:
   from: "#f0f9ff"

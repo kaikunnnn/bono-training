@@ -1,6 +1,6 @@
 ---
-title: "社内本貸し出しシステムをデザインしよう"
-description: "社内で利用する本の貸し出しシステムを要件を整理してデザインしよう"
+title: "目標への習慣化サポートサービス"
+description: "目標を達成するための内容を整理保存できるサービスをデザインしよう"
 type: "portfolio"
 difficulty: "normal"
 category: "情報設計"
@@ -8,7 +8,7 @@ tags: ["SaaS", "業務システム"]
 isPremium: false
 order_index: 1
 thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Open%20book/3D/open_book_3d.png"
+icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/One%20oclock/3D/one_oclock_3d.png"
 background_svg: "/assets/backgrounds/ec-catalog-bg.svg"
 fallback_gradient:
   from: "#f0f9ff"
@@ -90,6 +90,4 @@ guide:
         - Hi-Fi プロトタイプを自分で触りながら、ユーザーが迷いなくゴールを達成できるかを確認しましょう
         - UI の修正だけでなく、配慮するべき要素があればこのフェーズでも立ち戻ってブラッシュアップすることがとても大切です
         - ゴールを達成できる状態だと判断したら細かい部分も詰めて完成まで持っていきましょう
----
-
 ---
