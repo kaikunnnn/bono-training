@@ -8,7 +8,7 @@ tags: ["C向け", "コミュニティ"]
 isPremium: false
 order_index: 1
 thumbnail: "/assets/backgrounds/ec-catalog-bg.svg"
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Circus%20tent/3D/circus_tent_3d.png"
+icon: "/assets/emoji/circus.svg"
 background_svg: "/assets/backgrounds/ec-catalog-bg.svg"
 fallback_gradient:
   from: "#f0f9ff"

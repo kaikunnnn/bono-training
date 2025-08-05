@@ -1,5 +1,5 @@
 ---
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bubble%20tea/3D/bubble_tea_3d.png"
+icon: "/assets/emoji/coffee.svg"
 title: "好みの商品や場所を探しづらい課題を解決"
 description: "狭くて深い価値だけど、確かに存在するニーズを具体的に明らかにするUXテーマ"
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"

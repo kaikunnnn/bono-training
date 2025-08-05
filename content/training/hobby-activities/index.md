@@ -1,5 +1,5 @@
 ---
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Man%20dancing/Default/3D/man_dancing_3d_default.png"
+icon: "/assets/emoji/dancer.svg"
 title: "趣味の活動をもっとよくしたい"
 description: "趣味の活動をより始めやすく、続けやすく、充実したものにするための UXテーマです🎯"
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"
