@@ -1,5 +1,5 @@
 ---
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Person%20feeding%20baby/Default/3D/person_feeding_baby_3d_default.png"
+icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/House/3D/house_3d.png"
 title: "同居人との情報共有を上手にしたい"
 description: "一緒に暮らす人の小さなズレを解決するUXテーマ"
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"

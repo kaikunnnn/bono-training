@@ -1,5 +1,5 @@
 ---
-icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Person%20feeding%20baby/Default/3D/person_feeding_baby_3d_default.png"
+icon: "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Wolf/3D/wolf_3d.png"
 title: "ひとり時間のモヤモヤを解決"
 description: "ひとりで過ごす時間をもっと充実させたい人を理解して取り組むUXテーマです。🌙"
 thumbnail: "https://assets.st-note.com/production/uploads/images/108585497/rectangle_large_type_2_e25111bbba69e541866bb37caf921ee0.png?width=1200"
