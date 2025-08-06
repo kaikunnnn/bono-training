@@ -11,7 +11,7 @@ import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
 import { useState, useEffect } from 'react';
 import { loadTrainingContent } from '@/utils/loadTrainingContent';
-import { getSkillsFromFrontmatter, getGuideFromFrontmatter, convertGuideDataToGuideContent, convertSkillsToHtml } from '@/utils/simplifiedSkillGuideParser';
+import { getSkillsFromFrontmatter, getGuideFromFrontmatter, convertGuideDataToGuideContent, convertSkillsToHtml, GuideContent } from '@/utils/simplifiedSkillGuideParser';
 import ChallengeMeritSection from '@/components/training/ChallengeMeritSection';
 import CategoryTag from '@/components/training/CategoryTag';
 import TrainingGuideSection from '@/components/training/TrainingGuideSection';
@@ -27,7 +27,7 @@ const TrainingDetail = () => {
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [frontmatter, setFrontmatter] = useState<TrainingFrontmatter | null>(null);
   const [contentError, setContentError] = useState<string | null>(null);
-  const [guideContent, setGuideContent] = useState<any>(null);
+  const [guideContent, setGuideContent] = useState<GuideContent | null>(null);
   const [guideError, setGuideError] = useState<string | null>(null);
   
   const { data: training, isLoading, error } = useTrainingDetail(

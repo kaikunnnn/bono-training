@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { PlanType } from "@/utils/subscriptionPlans";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
 import Index from "./pages/Index";
@@ -43,7 +44,7 @@ const AppContent = () => {
   
   // クエリパラメータに基づいてモックのサブスクリプション状態を生成
   const mockSubscription = urlPlan ? {
-    planType: urlPlan as any, // PlanType
+    planType: urlPlan as PlanType,
     isSubscribed: urlPlan !== 'free',
     hasMemberAccess: ['standard', 'growth', 'community'].includes(urlPlan),
     hasLearningAccess: ['standard', 'growth'].includes(urlPlan),

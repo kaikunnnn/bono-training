@@ -8,17 +8,39 @@ import {
   createErrorFromCode 
 } from "@/utils/errors";
 
+// Type guard for error objects
+function isErrorWithContext(error: unknown): error is { context: { body: { error: { code: string; message: string } } } } {
+  return error !== null && 
+         typeof error === 'object' && 
+         'context' in error && 
+         typeof (error as any).context === 'object' &&
+         (error as any).context?.body?.error;
+}
+
+function isErrorWithDirectError(error: unknown): error is { error: { code: string; message: string } } {
+  return error !== null && 
+         typeof error === 'object' && 
+         'error' in error && 
+         typeof (error as any).error === 'object';
+}
+
+function isErrorWithStatus(error: unknown): error is { status?: number; statusCode?: number; message?: string } {
+  return error !== null && 
+         typeof error === 'object' && 
+         ('status' in error || 'statusCode' in error);
+}
+
 /**
  * Edge Function レスポンスのエラーハンドリング（強化版）
  */
-export function handleEdgeFunctionError(error: any, fallbackMessage: string): never {
+export function handleEdgeFunctionError(error: unknown, fallbackMessage: string): never {
   console.error('Edge Function エラー詳細:', {
     error,
     errorType: typeof error,
-    errorName: error?.name,
-    errorMessage: error?.message,
-    errorStack: error?.stack,
-    errorContext: error?.context
+    errorName: error instanceof Error ? error.name : undefined,
+    errorMessage: error instanceof Error ? error.message : String(error),
+    errorStack: error instanceof Error ? error.stack : undefined,
+    errorContext: error && typeof error === 'object' && 'context' in error ? (error as any).context : undefined
   });
   
   // ネットワークエラーの判定（より厳密に）
@@ -26,11 +48,11 @@ export function handleEdgeFunctionError(error: any, fallbackMessage: string): ne
     throw new NetworkError('不明なネットワークエラーが発生しました');
   }
   
-  if (error.name === 'TypeError' || error.name === 'NetworkError') {
+  if (error instanceof Error && (error.name === 'TypeError' || error.name === 'NetworkError')) {
     throw new NetworkError('ネットワーク接続エラーが発生しました。インターネット接続を確認してください。');
   }
   
-  if (error.message && (
+  if (error instanceof Error && error.message && (
     error.message.includes('Failed to fetch') ||
     error.message.includes('Network request failed') ||
     error.message.includes('net::ERR_')
@@ -39,14 +61,14 @@ export function handleEdgeFunctionError(error: any, fallbackMessage: string): ne
   }
   
   // Supabase Functions の構造化エラー（複数パターンに対応）
-  if (error.context?.body?.error) {
+  if (isErrorWithContext(error)) {
     const errorData = error.context.body.error;
     const customError = createErrorFromCode(errorData.code, errorData.message);
     throw customError;
   }
   
   // 直接的なエラーレスポンス
-  if (error.error && typeof error.error === 'object') {
+  if (isErrorWithDirectError(error)) {
     const errorData = error.error;
     if (errorData.code && errorData.message) {
       const customError = createErrorFromCode(errorData.code, errorData.message);
@@ -55,7 +77,7 @@ export function handleEdgeFunctionError(error: any, fallbackMessage: string): ne
   }
   
   // HTTP ステータスコードベースの判定
-  if (error.status || error.statusCode) {
+  if (isErrorWithStatus(error)) {
     const statusCode = error.status || error.statusCode;
     switch (statusCode) {
       case 401:
@@ -73,7 +95,7 @@ export function handleEdgeFunctionError(error: any, fallbackMessage: string): ne
   }
 
   // Edge Function特有の404エラーパターンを追加検出
-  if (error.message && error.message.includes('Edge Function returned a non-2xx status code')) {
+  if (error instanceof Error && error.message && error.message.includes('Edge Function returned a non-2xx status code')) {
     // ログからFunctionsHttpErrorで404を判定
     console.log('Edge Function 404エラーを検出しています');
     throw new NotFoundError('タスクが見つかりませんでした');
@@ -86,7 +108,7 @@ export function handleEdgeFunctionError(error: any, fallbackMessage: string): ne
 /**
  * Edge Function レスポンスの検証（強化版）
  */
-export function validateEdgeFunctionResponse(data: any, context: string): any {
+export function validateEdgeFunctionResponse(data: unknown, context: string): unknown {
   console.log('validateEdgeFunctionResponse 開始:', {
     context,
     hasData: !!data,

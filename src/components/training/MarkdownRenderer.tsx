@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import LearningGoals from './LearningGoals';
@@ -21,21 +21,21 @@ interface SectionData {
 }
 
 // マークダウンコンポーネントの定義
-const markdownComponents = {
+const markdownComponents: Components = {
   // 箇条書きスタイリング
-  ul: ({ children, ...props }: any) => (
+  ul: ({ children, ...props }) => (
     <ul className="list-disc list-inside space-y-2 mb-4 ml-4" {...props}>
       {children}
     </ul>
   ),
-  li: ({ children, ...props }: any) => (
+  li: ({ children, ...props }) => (
     <li className="text-gray-700 leading-relaxed" {...props}>
       {children}
     </li>
   ),
   
   // リンクスタイリング
-  a: ({ href, children, ...props }: any) => (
+  a: ({ href, children, ...props }) => (
     <a
       href={href}
       className="text-blue-600 hover:text-blue-800 underline transition-colors"
@@ -48,31 +48,31 @@ const markdownComponents = {
   ),
 
   // 見出しスタイリング
-  h2: ({ children, ...props }: any) => (
+  h2: ({ children, ...props }) => (
     <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4" {...props}>
       {children}
     </h2>
   ),
-  h3: ({ children, ...props }: any) => (
+  h3: ({ children, ...props }) => (
     <h3 className="text-xl font-semibold text-gray-800 mt-6 mb-3" {...props}>
       {children}
     </h3>
   ),
-  h4: ({ children, ...props }: any) => (
+  h4: ({ children, ...props }) => (
     <h4 className="text-lg font-medium text-gray-800 mt-4 mb-2" {...props}>
       {children}
     </h4>
   ),
 
   // 段落スタイリング
-  p: ({ children, ...props }: any) => (
+  p: ({ children, ...props }) => (
     <p className="text-gray-700 leading-relaxed mb-4" {...props}>
       {children}
     </p>
   ),
 
   // インラインコードスタイリング
-  code: ({ children, ...props }: any) => (
+  code: ({ children, ...props }) => (
     <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono" {...props}>
       {children}
     </code>

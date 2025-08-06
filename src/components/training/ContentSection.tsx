@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown, { Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeHighlight from 'rehype-highlight';
 import { SubSectionData, extractSubSections } from '@/utils/parseContentSections';
@@ -11,21 +11,21 @@ interface ContentSectionProps {
 }
 
 // マークダウンコンポーネントの定義
-const markdownComponents = {
+const markdownComponents: Components = {
   // 箇条書きスタイリング
-  ul: ({ children, ...props }: any) => (
+  ul: ({ children, ...props }) => (
     <ul className="list-disc list-inside space-y-1 mb-2 ml-4" {...props}>
       {children}
     </ul>
   ),
-  li: ({ children, ...props }: any) => (
+  li: ({ children, ...props }) => (
     <li className="text-[#475569] leading-[1.6] font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
       {children}
     </li>
   ),
   
   // リンクスタイリング
-  a: ({ href, children, ...props }: any) => (
+  a: ({ href, children, ...props }) => (
     <a
       href={href}
       className="text-blue-600 hover:text-blue-800 underline transition-colors"
@@ -38,21 +38,21 @@ const markdownComponents = {
   ),
 
   // 段落スタイリング
-  p: ({ children, ...props }: any) => (
+  p: ({ children, ...props }) => (
     <p className="text-[#475569] leading-[1.6] mb-2 font-['Noto_Sans_JP:Regular',_sans-serif] text-lg" {...props}>
       {children}
     </p>
   ),
 
   // インラインコードスタイリング
-  code: ({ children, ...props }: any) => (
+  code: ({ children, ...props }) => (
     <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono" {...props}>
       {children}
     </code>
   ),
 
   // 画像スタイリング
-  img: ({ src, alt, ...props }: any) => (
+  img: ({ src, alt, ...props }) => (
     <img 
       src={src} 
       alt={alt || ""} 
