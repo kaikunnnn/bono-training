@@ -18,17 +18,15 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
       className={cn("block w-full min-w-[280px] max-w-[400px]", className)}
     >
       {/* Step 1: 外側コンテナ（training_content） */}
-      <div className="relative w-full flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
+      <div className="relative w-full flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300 border border-gray-100">
         
         {/* Step 3: グラデーション背景 */}
         <div 
-          className="absolute inset-0 w-[571px] h-[328px]"
+          className="absolute inset-0"
           style={{
-            backgroundImage: 'url(/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            left: '-42.7%',
-            top: '-36%'
+            backgroundImage: 'url(/assets/backgrounds/gradation/bg-gradation/bg-gradation-training-list.svg)',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center'
           }}
         />
 
