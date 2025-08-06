@@ -58,11 +58,14 @@ const TaskDetailPage = () => {
   const { user } = useAuth();
   const { isSubscribed, hasMemberAccess } = useSubscriptionContext();
   
+  const { data: task, isLoading, error } = useTaskDetail(
+    trainingSlug || '', 
+    taskSlug || ''
+  );
+  
   if (!trainingSlug || !taskSlug) {
     return <Navigate to="/training" replace />;
   }
-
-  const { data: task, isLoading, error } = useTaskDetail(trainingSlug, taskSlug);
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
 
   // デバッグログを強化

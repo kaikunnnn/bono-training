@@ -54,12 +54,18 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
   // コンテンツへのアクセス権があるかチェック
   const hasAccess = hasAccessToContent(userPlan, contentType);
   
+  // リダイレクト処理
+  useEffect(() => {
+    if (!hasAccess && redirectTo && !confirmMessage) {
+      navigate(redirectTo);
+    }
+  }, [hasAccess, redirectTo, confirmMessage, navigate]);
+  
   // アクセス権があれば子コンポーネントを表示
   if (hasAccess) {
     return <>{children}</>;
   }
   
-  // リダイレクト処理
   if (redirectTo) {
     const handleRedirect = () => {
       if (confirmMessage) {
@@ -72,12 +78,8 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
       }
     };
     
-    // 即時リダイレクト（確認メッセージがない場合）
+    // 確認メッセージがない場合は即時リダイレクト
     if (!confirmMessage) {
-      useEffect(() => {
-        handleRedirect();
-      }, []);
-      
       // リダイレクト中の表示
       return (
         <div className="flex justify-center items-center p-12">

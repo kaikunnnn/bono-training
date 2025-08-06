@@ -30,14 +30,14 @@ const TrainingDetail = () => {
   const [guideContent, setGuideContent] = useState<any>(null);
   const [guideError, setGuideError] = useState<string | null>(null);
   
-  if (!trainingSlug) {
-    return <Navigate to="/training" replace />;
-  }
-
-  const { data: training, isLoading, error } = useTrainingDetail(trainingSlug);
+  const { data: training, isLoading, error } = useTrainingDetail(
+    trainingSlug || ''
+  );
 
   // 動的インポートでindex.mdコンテンツを読み込み
   useEffect(() => {
+    if (!trainingSlug) return;
+    
     const loadContent = async () => {
       try {
         setContentError(null);
@@ -76,6 +76,10 @@ const TrainingDetail = () => {
       loadContent();
     }
   }, [trainingSlug]);
+
+  if (!trainingSlug) {
+    return <Navigate to="/training" replace />;
+  }
 
 
   if (isLoading) {
