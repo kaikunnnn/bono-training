@@ -98,4 +98,4 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
   );
 };
 
-export default TrainingCard;
+export default React.memo(TrainingCard);

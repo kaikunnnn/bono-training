@@ -38,7 +38,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             {/* Step 2-1: アイコン部分 */}
             <div className="relative z-30 w-[72px] h-[72px] p-[11px] pt-4 flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_32px_32px] top-[56px] ml-[10.4%]">
               <img
-                src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
+                src={training.icon || '/assets/emoji/book.svg'}
                 alt={training.title}
                 className="w-[49.5px] h-[49.5px] object-cover rounded-lg"
               />
@@ -106,4 +106,4 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
   );
 };
 
-export default PortfolioTrainingCard;
+export default React.memo(PortfolioTrainingCard);
