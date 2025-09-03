@@ -62,7 +62,7 @@ sections:
 
 この画面は機能は満たせていますが、”ふつうの UI”パターンではない箇所が多く、操作が難しくユーザーが価値を感じるための操作がやりづらい状態になっています。参考 UI を集め、そこから基本パターンを盗んで、ふつうの UI パターンでリデザインしてみましょう。
 
-- ![お題の画面UIイメージ](../../assets/images/ui_redesign.jpg)
+![お題の画面UIイメージ](/assets/task_explain/ui_starter_dailyui/ui_redesign.jpg)
 
 ## デザインに必要な素材
 
