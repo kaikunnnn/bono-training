@@ -9,8 +9,6 @@ import { handleEdgeFunctionError, validateEdgeFunctionResponse } from "./error-h
  */
 export const getTrainings = async (): Promise<Training[]> => {
   try {
-    console.log('Edge Functionからトレーニング一覧を取得');
-    
     const { data, error } = await supabase.functions.invoke('get-training-list', {
       body: {}
     });
@@ -20,9 +18,6 @@ export const getTrainings = async (): Promise<Training[]> => {
     }
 
     const result = validateEdgeFunctionResponse(data, 'トレーニング一覧');
-    console.log('Edge Functionからの応答:', result);
-    console.log('最初のtraining:', result[0]);
-    console.log('iconの値:', result[0]?.icon);
     
     return result;
     
@@ -35,7 +30,6 @@ export const getTrainings = async (): Promise<Training[]> => {
     console.error('getTrainings 予期しないエラー:', err);
     
     // フォールバック: ダミーデータを返す
-    console.log('フォールバック: ダミーデータを使用');
     return [
       {
         id: "todo-app-1",

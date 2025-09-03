@@ -15,6 +15,56 @@ const CATEGORIES = {
   UX_DESIGN: "UXデザイン",
 } as const;
 
+// ローディング用スケルトンコンポーネント
+const SkeletonGrid = () => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {[...Array(3)].map((_, i) => (
+      <div key={i} className="space-y-4">
+        <Skeleton className="h-48 w-full rounded-lg" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-4 w-1/2" />
+      </div>
+    ))}
+  </div>
+);
+
+// カテゴリセクション表示コンポーネント
+const CategorySection = ({
+  category,
+  title,
+  description,
+  trainings: categoryTrainings,
+  linkText,
+  linkHref,
+}: {
+  category: string;
+  title: string;
+  description: string;
+  trainings: Training[];
+  linkText?: string;
+  linkHref?: string;
+}) => {
+  // 空のカテゴリは非表示
+  if (!categoryTrainings || categoryTrainings.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="py-12">
+      <div className="mb-8">
+        <SectionHeading
+          category={category}
+          title={title}
+          description={description}
+          linkText={linkText}
+          linkHref={linkHref}
+        />
+      </div>
+      <TrainingGrid trainings={categoryTrainings} />
+    </div>
+  );
+};
+
 /**
  * トレーニングホームページ（React Query対応版）
  */
@@ -34,56 +84,6 @@ const TrainingHome = () => {
       ),
     };
   }, [trainings]);
-
-  // ローディング用スケルトンコンポーネント
-  const SkeletonGrid = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {[...Array(3)].map((_, i) => (
-        <div key={i} className="space-y-4">
-          <Skeleton className="h-48 w-full rounded-lg" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-        </div>
-      ))}
-    </div>
-  );
-
-  // カテゴリセクション表示コンポーネント
-  const CategorySection = ({
-    category,
-    title,
-    description,
-    trainings: categoryTrainings,
-    linkText,
-    linkHref,
-  }: {
-    category: string;
-    title: string;
-    description: string;
-    trainings: Training[];
-    linkText?: string;
-    linkHref?: string;
-  }) => {
-    // 空のカテゴリは非表示
-    if (!categoryTrainings || categoryTrainings.length === 0) {
-      return null;
-    }
-
-    return (
-      <div className="py-12">
-        <div className="mb-8">
-          <SectionHeading
-            category={category}
-            title={title}
-            description={description}
-            linkText={linkText}
-            linkHref={linkHref}
-          />
-        </div>
-        <TrainingGrid trainings={categoryTrainings} />
-      </div>
-    );
-  };
 
   return (
     <TrainingLayout>

@@ -18,17 +18,15 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
       className={cn("block w-full min-w-[280px] max-w-[400px]", className)}
     >
       {/* Step 1: 外側コンテナ（training_content） */}
-      <div className="relative w-full flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300">
+      <div className="relative w-full flex flex-col justify-end rounded-[32px] overflow-hidden hover:scale-105 transition-transform duration-300 border border-gray-100">
         
         {/* Step 3: グラデーション背景 */}
         <div 
-          className="absolute inset-0 w-[571px] h-[328px]"
+          className="absolute inset-0"
           style={{
-            backgroundImage: 'url(/assets/backgrounds/gradation/bg-gradation/type-trainingdetail.svg)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            left: '-42.7%',
-            top: '-36%'
+            backgroundImage: 'url(/assets/backgrounds/gradation/bg-gradation/bg-gradation-training-list.svg)',
+            backgroundSize: 'contain',
+            backgroundPosition: 'center'
           }}
         />
 
@@ -40,7 +38,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             {/* Step 2-1: アイコン部分 */}
             <div className="relative z-30 w-[72px] h-[72px] p-[11px] pt-4 flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_32px_32px] top-[56px] ml-[10.4%]">
               <img
-                src={training.icon || 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7'}
+                src={training.icon || '/assets/emoji/book.svg'}
                 alt={training.title}
                 className="w-[49.5px] h-[49.5px] object-cover rounded-lg"
               />
@@ -108,4 +106,4 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
   );
 };
 
-export default PortfolioTrainingCard;
+export default React.memo(PortfolioTrainingCard);
