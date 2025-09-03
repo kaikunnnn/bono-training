@@ -61,8 +61,7 @@ sections:
 お薬手帳アプリの「お薬手帳画面」のみのリデザインにチャレンジしてみましょう。
 
 この画面は機能は満たせていますが、”ふつうの UI”パターンではない箇所が多く、操作が難しくユーザーが価値を感じるための操作がやりづらい状態になっています。参考 UI を集め、そこから基本パターンを盗んで、ふつうの UI パターンでリデザインしてみましょう。
-
-![お題の画面UIイメージ](/assets/task_explain/ui_starter_dailyui/ui_redesign.jpg)
+※ 下のセクション：「素材はこちら」で Figma で以下のリデザイン対象 UI を確認できます。
 
 ![お題の画面UIイメージ](/assets/task_explain/ui_starter_dailyui/ui_redesign.jpg)
 
