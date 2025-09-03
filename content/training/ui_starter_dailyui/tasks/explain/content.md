@@ -64,8 +64,6 @@ sections:
 
 ![お題の画面UIイメージ](/assets/task_explain/ui_starter_dailyui/ui_redesign.jpg)
 
-![お題の画面UIイメージ](/assets/task_explain/ui_starter_dailyui/ui_redesign.jpg)
-
 ## デザインに必要な素材
 
 ### 🙋🙋‍♀️ 素材はこちら
