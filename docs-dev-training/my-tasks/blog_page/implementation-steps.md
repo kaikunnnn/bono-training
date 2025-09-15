@@ -331,6 +331,24 @@ export const getRelatedPosts = (currentPost: BlogPost, limit = 3): BlogPost[] =>
 
 ### Step 4: ブログ専用コンポーネントの作成
 
+#### 【重要】コンポーネント一覧表示ページの作成
+ブログ用コンポーネントのスタイルを確認するため、以下のコンポーネント一覧ページも作成します：
+
+**ファイル**: `src/pages/blog/components-preview.tsx`
+- 全ブログコンポーネントを一覧表示
+- 各コンポーネントの状態（normal、hover、selected等）を確認
+- レスポンシブ対応の確認
+- アニメーションの確認
+- カラーバリエーションの確認
+
+**URL**: `/blog/components-preview`（デバッグ用）
+
+このページにより：
+1. コンポーネントの見た目をbonoSite-mainと比較できる
+2. 各コンポーネントの状態を確認できる
+3. レスポンシブ動作を確認できる
+4. デザイン統一性をチェックできる
+
 #### 4-1. BlogCard コンポーネント
 **ファイル**: `src/components/blog/BlogCard.tsx`
 
