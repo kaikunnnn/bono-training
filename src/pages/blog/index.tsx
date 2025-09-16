@@ -12,6 +12,8 @@ import { categories } from '@/data/blog/categories';
 import { BlogPostsResponse } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
 import SEO from '@/components/common/SEO';
+import { useRSSFeed } from '@/hooks/useRSSFeed';
+import { useSitemap } from '@/hooks/useSitemap';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -34,6 +36,12 @@ const BlogIndex: React.FC = () => {
   });
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+
+  // RSS フィード用フック
+  const { generateAndDownloadRSS, isGenerating } = useRSSFeed();
+
+  // サイトマップ用フック
+  const { generateAndDownloadSitemap, isGenerating: isSitemapGenerating } = useSitemap();
 
   // URLパラメータからページ番号を取得
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
@@ -130,9 +138,49 @@ const BlogIndex: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-bold !leading-normal mb-4 text-gray-900">
             ブログ
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 mb-4">
             最新の記事をお届けします
           </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={generateAndDownloadRSS}
+              disabled={isGenerating}
+              className="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+            >
+              {isGenerating ? (
+                <span className="flex items-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  RSS生成中...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3.429 2.667v2.667c6.667 0 12 5.333 12 12h2.667c0-8-6.667-14.667-14.667-14.667zM3.429 8v2.667c3.333 0 6 2.667 6 6h2.667c0-4.667-3.833-8.667-8.667-8.667zM6.095 13.333c0 1.467-1.2 2.667-2.667 2.667s-2.667-1.2-2.667-2.667 1.2-2.667 2.667-2.667 2.667 1.2 2.667 2.667z"/>
+                  </svg>
+                  RSSフィード
+                </span>
+              )}
+            </button>
+            <button
+              onClick={generateAndDownloadSitemap}
+              disabled={isSitemapGenerating}
+              className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+            >
+              {isSitemapGenerating ? (
+                <span className="flex items-center">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                  サイトマップ生成中...
+                </span>
+              ) : (
+                <span className="flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  サイトマップ
+                </span>
+              )}
+            </button>
+          </div>
         </motion.div>
 
         {/* コンテンツエリア */}
