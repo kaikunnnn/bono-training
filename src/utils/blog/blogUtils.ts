@@ -1,12 +1,43 @@
 // src/utils/blog/blogUtils.ts
 import { BlogPost, BlogPostsResponse } from '@/types/blog';
 import { mockPosts } from '@/data/blog/mockPosts';
+import {
+  fetchGhostPosts,
+  fetchGhostPostBySlug,
+  fetchFeaturedGhostPosts,
+  fetchRelatedGhostPosts,
+  checkGhostConnection
+} from '@/services/ghostService';
 
-export const getBlogPosts = (params?: {
+// データソースの設定
+const isGhostEnabled = () => {
+  return import.meta.env.VITE_BLOG_DATA_SOURCE === 'ghost' &&
+         import.meta.env.VITE_GHOST_URL &&
+         import.meta.env.VITE_GHOST_KEY;
+};
+
+export const getBlogPosts = async (params?: {
   page?: number;
   category?: string;
   limit?: number;
-}): BlogPostsResponse => {
+}): Promise<BlogPostsResponse> => {
+  if (isGhostEnabled()) {
+    try {
+      const isConnected = await checkGhostConnection();
+      if (isConnected) {
+        const filter = params?.category ? `tag:${params.category}` : undefined;
+        return await fetchGhostPosts({
+          page: params?.page,
+          limit: params?.limit,
+          filter,
+        });
+      }
+    } catch (error) {
+      console.warn('Ghost API failed, falling back to mock data:', error);
+    }
+  }
+
+  // フォールバック: mockPostsを使用
   let posts = [...mockPosts];
 
   // カテゴリフィルター
@@ -33,15 +64,30 @@ export const getBlogPosts = (params?: {
   };
 };
 
-export const getBlogPost = (slug: string): BlogPost | null => {
+// レガシー関数（getBlogPostBySlugを使用することを推奨）
+export const getBlogPost = async (slug: string): Promise<BlogPost | null> => {
+  return await getBlogPostBySlug(slug);
+};
+
+export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+  if (isGhostEnabled()) {
+    try {
+      const isConnected = await checkGhostConnection();
+      if (isConnected) {
+        return await fetchGhostPostBySlug(slug);
+      }
+    } catch (error) {
+      console.warn(`Ghost API failed for slug ${slug}, falling back to mock data:`, error);
+    }
+  }
+
+  // フォールバック: mockPostsから取得
   return mockPosts.find(post => post.slug === slug) || null;
 };
 
-export const getBlogPostBySlug = (slug: string): BlogPost | null => {
-  return mockPosts.find(post => post.slug === slug) || null;
-};
-
-export const getPrevPost = (currentId: string): BlogPost | null => {
+export const getPrevPost = async (currentId: string): Promise<BlogPost | null> => {
+  // Note: Ghost APIでは前後の記事を直接取得する機能がないため、
+  // 現在はmockPostsのロジックを使用（将来的に改善予定）
   const currentIndex = mockPosts.findIndex(post => post.id === currentId);
   if (currentIndex > 0) {
     return mockPosts[currentIndex - 1];
@@ -49,7 +95,9 @@ export const getPrevPost = (currentId: string): BlogPost | null => {
   return null;
 };
 
-export const getNextPost = (currentId: string): BlogPost | null => {
+export const getNextPost = async (currentId: string): Promise<BlogPost | null> => {
+  // Note: Ghost APIでは前後の記事を直接取得する機能がないため、
+  // 現在はmockPostsのロジックを使用（将来的に改善予定）
   const currentIndex = mockPosts.findIndex(post => post.id === currentId);
   if (currentIndex !== -1 && currentIndex < mockPosts.length - 1) {
     return mockPosts[currentIndex + 1];
@@ -57,11 +105,48 @@ export const getNextPost = (currentId: string): BlogPost | null => {
   return null;
 };
 
-export const getFeaturedPosts = (limit = 3): BlogPost[] => {
+// Ghost APIの接続状態を確認
+export const testGhostConnection = async (): Promise<boolean> => {
+  if (!isGhostEnabled()) {
+    return false;
+  }
+  return await checkGhostConnection();
+};
+
+// データソースの表示用関数
+export const getCurrentDataSource = (): 'ghost' | 'mock' => {
+  return isGhostEnabled() ? 'ghost' : 'mock';
+};
+
+export const getFeaturedPosts = async (limit = 3): Promise<BlogPost[]> => {
+  if (isGhostEnabled()) {
+    try {
+      const isConnected = await checkGhostConnection();
+      if (isConnected) {
+        return await fetchFeaturedGhostPosts(limit);
+      }
+    } catch (error) {
+      console.warn('Ghost API failed for featured posts, falling back to mock data:', error);
+    }
+  }
+
+  // フォールバック: mockPostsを使用
   return mockPosts.filter(post => post.featured).slice(0, limit);
 };
 
-export const getRelatedPosts = (currentPost: BlogPost, limit = 3): BlogPost[] => {
+export const getRelatedPosts = async (currentPost: BlogPost, limit = 3): Promise<BlogPost[]> => {
+  if (isGhostEnabled()) {
+    try {
+      const isConnected = await checkGhostConnection();
+      if (isConnected) {
+        return await fetchRelatedGhostPosts(currentPost, limit);
+      }
+    } catch (error) {
+      console.warn('Ghost API failed for related posts, falling back to mock data:', error);
+    }
+  }
+
+  // フォールバック: mockPostsを使用
   return mockPosts
     .filter(post =>
       post.id !== currentPost.id &&

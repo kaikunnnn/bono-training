@@ -11,6 +11,7 @@ import { getBlogPosts } from '@/utils/blog/blogUtils';
 import { categories } from '@/data/blog/categories';
 import { BlogPostsResponse } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
+import SEO from '@/components/common/SEO';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -39,20 +40,35 @@ const BlogIndex: React.FC = () => {
 
   // データ取得
   useEffect(() => {
-    setIsLoading(true);
+    const loadPosts = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getBlogPosts({
+          page: currentPage,
+          category: selectedCategory || undefined,
+          limit: 9
+        });
+        setBlogData(data);
+      } catch (error) {
+        console.error('Failed to load posts:', error);
+        // エラー時はmockデータにフォールバック
+        setBlogData({
+          posts: [],
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalPosts: 0,
+            postsPerPage: 9,
+            hasNextPage: false,
+            hasPrevPage: false
+          }
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // 実際のAPIコールをシミュレート（遅延を追加）
-    const timer = setTimeout(() => {
-      const data = getBlogPosts({
-        page: currentPage,
-        category: selectedCategory || undefined,
-        limit: 9
-      });
-      setBlogData(data);
-      setIsLoading(false);
-    }, 300); // 300msの遅延でローディング状態を表示
-
-    return () => clearTimeout(timer);
+    loadPosts();
   }, [currentPage, selectedCategory]);
 
   // カテゴリ変更ハンドラ
@@ -91,6 +107,14 @@ const BlogIndex: React.FC = () => {
       exit="out"
       className="min-h-screen bg-Top"
     >
+      {/* SEO設定 */}
+      <SEO
+        title="ブログ"
+        description="BONOトレーニングのブログ記事一覧。デザイン、開発、UI/UXに関する最新の記事をお届けします。"
+        ogUrl="/blog"
+        ogType="blog"
+      />
+
       {/* ヘッダー */}
       <Header />
 

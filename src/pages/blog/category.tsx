@@ -48,18 +48,34 @@ const CategoryPage: React.FC = () => {
 
     setIsLoading(true);
 
-    // 実際のAPIコールをシミュレート（遅延を追加）
-    const timer = setTimeout(() => {
-      const data = getBlogPosts({
-        page: currentPage,
-        category: categorySlug,
-        limit: 9
-      });
-      setBlogData(data);
-      setIsLoading(false);
-    }, 300);
+    const loadPosts = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getBlogPosts({
+          page: currentPage,
+          category: categorySlug,
+          limit: 9
+        });
+        setBlogData(data);
+      } catch (error) {
+        console.error('Failed to load category posts:', error);
+        setBlogData({
+          posts: [],
+          pagination: {
+            currentPage: 1,
+            totalPages: 1,
+            totalPosts: 0,
+            postsPerPage: 9,
+            hasNextPage: false,
+            hasPrevPage: false
+          }
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    return () => clearTimeout(timer);
+    loadPosts();
   }, [currentPage, categorySlug]);
 
   // ページ変更ハンドラ

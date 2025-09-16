@@ -15,6 +15,7 @@ import { categories } from '@/data/blog/categories';
 import { BlogPost } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import SEO from '@/components/common/SEO';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -33,32 +34,46 @@ const BlogDetail: React.FC = () => {
   useEffect(() => {
     if (!slug) return;
 
-    setIsLoading(true);
+    const loadPost = async () => {
+      setIsLoading(true);
+      try {
+        const currentPost = await getBlogPostBySlug(slug);
+        setPost(currentPost);
 
-    // 実際のAPIコールをシミュレート（遅延を追加）
-    const timer = setTimeout(() => {
-      const currentPost = getBlogPostBySlug(slug);
-      setPost(currentPost);
+        if (currentPost) {
+          const [prevPostData, nextPostData] = await Promise.all([
+            getPrevPost(currentPost.id),
+            getNextPost(currentPost.id)
+          ]);
 
-      if (currentPost) {
-        setPrevPost(getPrevPost(currentPost.id));
-        setNextPost(getNextPost(currentPost.id));
+          setPrevPost(prevPostData);
+          setNextPost(nextPostData);
 
-        // 目次の生成（実際のコンテンツから見出しを抽出する想定）
-        const mockTocItems = [
-          { id: 'introduction', text: 'はじめに', level: 2 },
-          { id: 'main-content', text: 'メインコンテンツ', level: 2 },
-          { id: 'sub-section-1', text: 'サブセクション1', level: 3 },
-          { id: 'sub-section-2', text: 'サブセクション2', level: 3 },
-          { id: 'conclusion', text: 'まとめ', level: 2 }
-        ];
-        setTocItems(mockTocItems);
+          // 実際のコンテンツから見出しを抽出して目次を生成
+          const extractTocFromHTML = (html: string) => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+            return Array.from(headings).map((heading, index) => ({
+              id: heading.id || `heading-${index}`,
+              text: heading.textContent || '',
+              level: parseInt(heading.tagName.charAt(1))
+            }));
+          };
+
+          const tocItems = extractTocFromHTML(currentPost.content);
+          setTocItems(tocItems);
+        }
+      } catch (error) {
+        console.error(`Failed to load post with slug ${slug}:`, error);
+        setPost(null);
+      } finally {
+        setIsLoading(false);
       }
+    };
 
-      setIsLoading(false);
-    }, 300);
-
-    return () => clearTimeout(timer);
+    loadPost();
   }, [slug]);
 
   // ローディングスケルトン
@@ -138,6 +153,33 @@ const BlogDetail: React.FC = () => {
     { label: post.title }
   ];
 
+  // 構造化データ（JSON-LD）for Article
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "headline": post.title,
+    "description": post.excerpt || post.description,
+    "image": post.imageUrl || post.thumbnail,
+    "datePublished": post.publishedAt,
+    "dateModified": post.publishedAt,
+    "author": {
+      "@type": "Person",
+      "name": post.author
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "BONO Training",
+      "logo": {
+        "@type": "ImageObject",
+        "url": `${import.meta.env.VITE_SITE_URL || 'http://localhost:8080'}/logo.png`
+      }
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `${import.meta.env.VITE_SITE_URL || 'http://localhost:8080'}/blog/${post.slug}`
+    }
+  };
+
   return (
     <motion.div
       variants={pageVariants}
@@ -146,6 +188,18 @@ const BlogDetail: React.FC = () => {
       exit="out"
       className="min-h-screen bg-Top"
     >
+      {/* SEO設定 */}
+      <SEO
+        title={post.title}
+        description={post.excerpt || post.description}
+        ogTitle={post.title}
+        ogDescription={post.excerpt || post.description}
+        ogImage={post.imageUrl || post.thumbnail}
+        ogUrl={`/blog/${post.slug}`}
+        ogType="article"
+        jsonLd={articleJsonLd}
+      />
+
       <Header />
 
       <main className="container pt-24 pb-16">
@@ -217,37 +271,8 @@ const BlogDetail: React.FC = () => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                >
-                  <div id="introduction">
-                    <h2>はじめに</h2>
-                    <p>{post.excerpt}</p>
-                    <p>この記事では、{post.title}について詳しく解説していきます。実際の開発現場で使える実践的な内容を中心に、基礎から応用まで幅広くカバーしています。</p>
-                  </div>
-
-                  <div id="main-content">
-                    <h2>メインコンテンツ</h2>
-                    <p>ここからが本編です。実際のコード例や具体的な実装方法について詳しく見ていきましょう。</p>
-
-                    <div id="sub-section-1">
-                      <h3>サブセクション1</h3>
-                      <p>具体的な実装例を交えながら、ステップバイステップで説明していきます。</p>
-                      <pre><code>{`// サンプルコード
-const example = () => {
-  console.log('Hello, World!');
-};`}</code></pre>
-                    </div>
-
-                    <div id="sub-section-2">
-                      <h3>サブセクション2</h3>
-                      <p>より高度なテクニックや応用例についても触れていきます。</p>
-                    </div>
-                  </div>
-
-                  <div id="conclusion">
-                    <h2>まとめ</h2>
-                    <p>今回は{post.title}について解説しました。この知識を活用して、より良い開発体験を実現してください。</p>
-                  </div>
-                </motion.div>
+                  dangerouslySetInnerHTML={{ __html: post.content }}
+                />
               </div>
 
               {/* タグ */}
