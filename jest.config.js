@@ -1,7 +1,7 @@
 
 export default {
   preset: 'ts-jest',
-  testEnvironment: 'jsdom',
+  testEnvironment: 'jest-environment-jsdom',
   setupFilesAfterEnv: ['@testing-library/jest-dom'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
@@ -14,8 +14,14 @@ export default {
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
   testMatch: [
-    '<rootDir>/src/**/__tests__/**/*.{ts,tsx}',
+    '<rootDir>/src/**/__tests__/**/*.test.{ts,tsx}',
+    '<rootDir>/src/**/__tests__/**/*.spec.{ts,tsx}',
     '<rootDir>/src/**/*.{test,spec}.{ts,tsx}',
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    'test-utils',
+    'setup',
   ],
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
@@ -23,9 +29,4 @@ export default {
     '!src/main.tsx',
     '!src/vite-env.d.ts',
   ],
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.jest.json'
-    }
-  }
 };
