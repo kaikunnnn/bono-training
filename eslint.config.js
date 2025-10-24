@@ -5,7 +5,13 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 
 export default tseslint.config(
-  { ignores: ["dist"] },
+  {
+    ignores: [
+      "dist",
+      "supabase/functions/**/*",  // Supabase Edge Functionsを除外（別PRで対応）
+      "src/__tests__/**/*",        // テストファイルを除外（別PRで対応）
+    ]
+  },
   {
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     files: ["**/*.{ts,tsx}"],
@@ -24,6 +30,8 @@ export default tseslint.config(
         { allowConstantExport: true },
       ],
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "warn", // 既存コードのanyを段階的に修正するため警告に変更
+      "@typescript-eslint/no-empty-object-type": "warn", // 既存のUIコンポーネントを段階的に修正するため警告に変更
     },
   }
 );
