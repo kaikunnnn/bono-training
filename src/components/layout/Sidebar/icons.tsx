@@ -1,6 +1,10 @@
 /**
  * サイドバーで使用するアイコンマッピング
  * lucide-reactを使用
+ *
+ * Note: react-refresh/only-export-components 警告を回避するため、
+ * このファイルはコンポーネント（アイコン）のみをエクスポートします。
+ * 定数やユーティリティ関数は icon-utils.ts を参照してください。
  */
 
 import {
@@ -13,12 +17,6 @@ import {
   Search,
   Play,
 } from "lucide-react";
-
-/**
- * アイコンサイズの定数
- * Figma仕様: 16×16px
- */
-export const ICON_SIZE = 16;
 
 /**
  * メニュー項目用アイコンコンポーネント
@@ -47,18 +45,3 @@ export const MenuIcons = {
  * アイコンキーの型定義
  */
 export type IconKey = keyof typeof MenuIcons;
-
-/**
- * アイコンを取得するヘルパー関数
- * @param key - アイコンキー
- * @param size - アイコンサイズ（デフォルト: 16）
- * @param className - 追加のクラス名
- */
-export const getIcon = (
-  key: IconKey,
-  size: number = ICON_SIZE,
-  className?: string
-) => {
-  const IconComponent = MenuIcons[key];
-  return <IconComponent size={size} className={className} />;
-};

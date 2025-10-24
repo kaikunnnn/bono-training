@@ -6,7 +6,8 @@ import SidebarLogo from "./SidebarLogo";
 import SidebarSearch from "./SidebarSearch";
 import SidebarMenuGroup from "./SidebarMenuGroup";
 import SidebarMenuItem from "./SidebarMenuItem";
-import { MenuIcons, ICON_SIZE } from "./icons";
+import { MenuIcons } from "./icons";
+import { ICON_SIZE } from "./icon-utils";
 import { useAuth } from "@/contexts/AuthContext";
 
 /**
