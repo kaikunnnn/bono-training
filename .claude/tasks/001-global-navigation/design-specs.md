@@ -7,6 +7,7 @@ MCP を使ってスタイルの情報を読み取ってください。
 
 - **URL**: https://www.figma.com/design/v4tNiQnPCjzSFFDmdcEYSh/%F0%9F%97%BA%EF%B8%8F-guide_2025?node-id=895-3936&t=MxnTW0U9lfHtOasG-4
 - **説明**: 今回実装するサイドナビゲーションタイプのグローバルナビゲーションのデザインデータ
+- **詳細スペック**: [グローバルナビゲーション全体仕様](./figma-specs/global-navigation.md) ← MCP で取得した情報をこちらに記載
 
 ▽ スマホとタブレット縦の時のデザイン
 
@@ -29,15 +30,17 @@ MCP を使ってスタイルの情報を読み取ってください。
 
 #### ナビゲーションのグループラベル
 
-- ナビゲーションのグループ内の”メイン”などで使っているグループのラベルです。
-- Figma の URL を共有します。MCP で実装内容を分析して的確に実装してほしいです
-- https://www.figma.com/design/v4tNiQnPCjzSFFDmdcEYSh/%F0%9F%97%BA%EF%B8%8F-guide_2025?node-id=898-4127&t=MxnTW0U9lfHtOasG-4
+- ナビゲーションのグループ内の"メイン"などで使っているグループのラベルです。
+- Figma の URL: https://www.figma.com/design/v4tNiQnPCjzSFFDmdcEYSh/%F0%9F%97%BA%EF%B8%8F-guide_2025?node-id=898-4127&t=MxnTW0U9lfHtOasG-4
+- **詳細スペック**: [ナビゲーショングループラベル仕様](./figma-specs/nav-group-label.md)
 
 #### ナビゲーション項目アイテム
 
 - ナビゲーションのグループ内のアイテムです。アイコン＋テキストです。リンクになって各ページを表示します
-- Figma の URL を共有します。MCP で実装内容を分析して的確に実装してほしいです
-  ○ 通常時のデザイン
+- **詳細スペック**: [ナビゲーション項目仕様](./figma-specs/nav-item.md)
+
+○ 通常時のデザイン
+
 - https://www.figma.com/design/v4tNiQnPCjzSFFDmdcEYSh/%F0%9F%97%BA%EF%B8%8F-guide_2025?node-id=898-4101&t=MxnTW0U9lfHtOasG-4
 
 ○ ページ表示中の項目のデザイン
@@ -47,3 +50,4 @@ MCP を使ってスタイルの情報を読み取ってください。
 #### アイコン
 
 - アイコンを一定のルールのもとに追加していきたいです。ルールを定めてフォルダを定めて、Figma のデータのアイコンを整理して格納したのちに、表示されるように実装してほしいです
+- **詳細スペック**: [アイコン仕様](./figma-specs/icons.md)
