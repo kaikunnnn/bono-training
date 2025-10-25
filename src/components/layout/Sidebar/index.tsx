@@ -76,9 +76,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             ロードマップ
           </SidebarMenuItem>
           <SidebarMenuItem
-            href="/courses"
+            href="/lessons"
             icon={<MenuIcons.lesson size={ICON_SIZE} />}
-            isActive={isActive("/courses")}
+            isActive={isActive("/lessons")}
           >
             レッスン
           </SidebarMenuItem>
