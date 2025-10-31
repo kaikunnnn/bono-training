@@ -4,11 +4,17 @@
 
 ## 📋 タスクファイル
 
+### 基本ドキュメント
 - **[task.md](./task.md)** - タスク概要と進捗
 - **[requirements.md](./requirements.md)** - 詳細な要件定義
 - **[data-structure.md](./data-structure.md)** - データ構造とAPI設計
 - **[implementation-plan.md](./implementation-plan.md)** - フェーズ別実装計画
 - **[cms-comparison.md](./cms-comparison.md)** - CMS検討（Ghost vs Markdown）
+
+### 最終仕様（✨ 重要）
+- **[final-specification.md](./final-specification.md)** - 最終決定した仕様書
+- **[obsidian-workflow.md](./obsidian-workflow.md)** - Obsidianでの執筆ワークフロー
+- **[image-optimization.md](./image-optimization.md)** - 画像最適化の仕組み
 
 ## 🎯 概要
 
@@ -24,7 +30,7 @@
 
 ## 🏗️ 技術選定
 
-**採用: Markdown方式**
+**✅ 決定: Markdown方式**
 
 既存の `/training` と同じMarkdownベースのシステムを採用。
 
@@ -33,8 +39,22 @@
 - ✅ 開発コストが低い
 - ✅ Git でバージョン管理
 - ✅ 運用コスト $0
+- ✅ **Obsidianで執筆可能**
+- ✅ **`npm run dev` で実デザインプレビュー可能**
 
-詳細は [cms-comparison.md](./cms-comparison.md) を参照。
+詳細は [cms-comparison.md](./cms-comparison.md) と [final-specification.md](./final-specification.md) を参照。
+
+## ✍️ 執筆ワークフロー
+
+**Obsidian + 開発サーバー**
+
+1. Obsidianで記事を書く
+2. `npm run dev` でリアルタイムプレビュー
+3. ブラウザで実際のデザイン確認
+4. Git で下書き管理
+5. 公開
+
+詳細な手順は [obsidian-workflow.md](./obsidian-workflow.md) を参照。
 
 ## 📂 想定ディレクトリ構造
 
