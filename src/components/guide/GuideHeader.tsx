@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import ContentWrapper from "@/components/training/ContentWrapper";
 import type { Guide } from "@/types/guide";
 import CategoryBadge from "./CategoryBadge";
 import { Clock, Calendar, User, ChevronRight } from "lucide-react";
@@ -14,7 +15,7 @@ interface GuideHeaderProps {
 const GuideHeader = ({ guide }: GuideHeaderProps) => {
   return (
     <div className="bg-white border-b border-gray-200">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <ContentWrapper className="py-8">
         {/* パンくずリスト */}
         <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
           <Link to="/guide" className="hover:text-gray-700 transition-colors">
@@ -75,7 +76,7 @@ const GuideHeader = ({ guide }: GuideHeaderProps) => {
             ))}
           </div>
         )}
-      </div>
+      </ContentWrapper>
     </div>
   );
 };

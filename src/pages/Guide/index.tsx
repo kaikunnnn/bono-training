@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { GuideLayout, GuideHero, CategorySection } from "@/components/guide";
+import ContentWrapper from "@/components/training/ContentWrapper";
 import { useGuides } from "@/hooks/useGuides";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
@@ -29,7 +30,7 @@ const GuidePage = () => {
       <div className="bg-gray-50">
         {/* ローディング状態 */}
         {isLoading && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <ContentWrapper className="py-12">
             <div className="space-y-12">
               {[1, 2, 3].map((i) => (
                 <div key={i}>
@@ -45,18 +46,18 @@ const GuidePage = () => {
                 </div>
               ))}
             </div>
-          </div>
+          </ContentWrapper>
         )}
 
         {/* エラー状態 */}
         {error && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <ContentWrapper className="py-12">
             <div className="text-center py-8 bg-white rounded-lg border border-red-200">
               <p className="text-red-600">
                 ガイド記事の読み込みでエラーが発生しました
               </p>
             </div>
-          </div>
+          </ContentWrapper>
         )}
 
         {/* カテゴリ別セクション表示 */}
@@ -69,9 +70,9 @@ const GuidePage = () => {
                   guides={groupedGuides[category.id] || []}
                 />
                 {index < GUIDE_CATEGORIES.length - 1 && (
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <ContentWrapper>
                     <Separator />
-                  </div>
+                  </ContentWrapper>
                 )}
               </React.Fragment>
             ))}

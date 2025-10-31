@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import ContentWrapper from "@/components/training/ContentWrapper";
 import type { Guide } from "@/types/guide";
 import { useGuides } from "@/hooks/useGuides";
 import CategoryBadge from "./CategoryBadge";
@@ -19,14 +20,14 @@ const RelatedGuides = ({ relatedSlugs, currentSlug }: RelatedGuidesProps) => {
   if (isLoading) {
     return (
       <div className="py-12 border-t border-gray-200">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <ContentWrapper>
           <h2 className="text-2xl font-bold text-gray-900 mb-6">関連記事</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[1, 2].map((i) => (
               <div key={i} className="bg-gray-100 animate-pulse rounded-lg h-32" />
             ))}
           </div>
-        </div>
+        </ContentWrapper>
       </div>
     );
   }
@@ -46,7 +47,7 @@ const RelatedGuides = ({ relatedSlugs, currentSlug }: RelatedGuidesProps) => {
 
   return (
     <div className="py-12 border-t border-gray-200 bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <ContentWrapper>
         <h2 className="text-2xl font-bold text-gray-900 mb-6">関連記事</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {relatedGuides.map((guide) => (
@@ -74,7 +75,7 @@ const RelatedGuides = ({ relatedSlugs, currentSlug }: RelatedGuidesProps) => {
             </Link>
           ))}
         </div>
-      </div>
+      </ContentWrapper>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import type { Guide, GuideCategory } from "@/types/guide";
 import { getCategoryInfo } from "@/lib/guideCategories";
+import ContentWrapper from "@/components/training/ContentWrapper";
 import GuideGrid from "./GuideGrid";
 import { ArrowRight } from "lucide-react";
 
@@ -37,7 +38,7 @@ const CategorySection = ({
 
   return (
     <section className={cn("py-12", className)}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <ContentWrapper>
         {/* セクションヘッダー */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
@@ -61,7 +62,7 @@ const CategorySection = ({
 
         {/* ガイドグリッド */}
         <GuideGrid guides={guides} />
-      </div>
+      </ContentWrapper>
     </section>
   );
 };
