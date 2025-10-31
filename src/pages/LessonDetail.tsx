@@ -1,0 +1,178 @@
+import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { client } from "@/lib/sanity";
+import Layout from "@/components/layout/Layout";
+import LessonHero from "@/components/lesson/LessonHero";
+import LessonTabs from "@/components/lesson/LessonTabs";
+import QuestList from "@/components/lesson/QuestList";
+import OverviewTab from "@/components/lesson/OverviewTab";
+
+interface Article {
+  _id: string;
+  articleNumber: number;
+  title: string;
+  slug: { current: string };
+  thumbnail?: any;
+  videoDuration?: number;
+}
+
+interface Quest {
+  _id: string;
+  questNumber: number;
+  title: string;
+  description?: string;
+  goal?: string;
+  estTimeMins?: number;
+  articles: Article[];
+}
+
+interface Lesson {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  description?: string;
+  iconImage?: any;
+  category?: string;
+  isPremium?: boolean;
+  contentHeading?: string;
+  overview?: any;
+  quests: Quest[];
+}
+
+export default function LessonDetail() {
+  const { slug } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
+  const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchLesson = async () => {
+      try {
+        setLoading(true);
+        const query = `*[_type == "lesson" && slug.current == $slug][0] {
+          _id,
+          title,
+          slug,
+          description,
+          iconImage {
+            _type,
+            asset {
+              _ref,
+              _type
+            }
+          },
+          category,
+          isPremium,
+          contentHeading,
+          overview,
+          "quests": quests[]-> {
+            _id,
+            questNumber,
+            title,
+            description,
+            goal,
+            estTimeMins,
+            "articles": articles[]-> {
+              _id,
+              articleNumber,
+              title,
+              slug,
+              thumbnail {
+                _type,
+                asset {
+                  _ref,
+                  _type
+                }
+              },
+              videoDuration
+            } | order(articleNumber asc)
+          } | order(questNumber asc)
+        }`;
+
+        const data = await client.fetch(query, { slug });
+
+        if (!data) {
+          setError("レッスンが見つかりませんでした");
+        } else {
+          setLesson(data);
+        }
+      } catch (err) {
+        console.error("Error fetching lesson:", err);
+        setError("レッスンの読み込みに失敗しました");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchLesson();
+    }
+  }, [slug]);
+
+  const handleStart = () => {
+    if (lesson?.quests?.[0]?.articles?.[0]) {
+      const firstArticle = lesson.quests[0].articles[0];
+      navigate(`/articles/${firstArticle.slug.current}`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+            <p className="text-gray-600">読み込み中...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error || !lesson) {
+    return (
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error || "エラーが発生しました"}</p>
+            <button
+              onClick={() => navigate("/lessons")}
+              className="text-blue-600 underline"
+            >
+              レッスン一覧に戻る
+            </button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  const canStart = lesson.quests?.[0]?.articles?.[0] !== undefined;
+
+  return (
+    <Layout>
+      <div className="min-h-screen bg-white">
+        <LessonHero
+          title={lesson.title}
+          description={lesson.description}
+          iconImage={lesson.iconImage}
+          category={lesson.category}
+          isPremium={lesson.isPremium}
+          onStartClick={handleStart}
+          canStart={canStart}
+        />
+
+        <LessonTabs
+          contentTab={
+            <QuestList
+              contentHeading={lesson.contentHeading}
+              quests={lesson.quests || []}
+            />
+          }
+          overviewTab={<OverviewTab overview={lesson.overview} />}
+        />
+      </div>
+    </Layout>
+  );
+}
