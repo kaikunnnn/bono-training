@@ -30,6 +30,8 @@ import TrainingLogin from "./pages/Training/Login";
 import TrainingSignup from "./pages/Training/Signup";
 import TrainingDebug from '@/pages/Training/Debug';
 import Lessons from "./pages/Lessons";
+import GuidePage from "./pages/Guide";
+import GuideDetailPage from "./pages/Guide/GuideDetail";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -78,7 +80,10 @@ const AppContent = () => {
         <Route path="/training/plan" element={<TrainingPlan />} />
         <Route path="/training/about" element={<TrainingAbout />} />
         <Route path="/training/debug" element={<TrainingDebug />} />
-        
+
+        <Route path="/guide" element={<GuidePage />} />
+        <Route path="/guide/:slug" element={<GuideDetailPage />} />
+
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
