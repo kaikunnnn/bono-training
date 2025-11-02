@@ -31,6 +31,7 @@ import TrainingSignup from "./pages/Training/Signup";
 import TrainingDebug from '@/pages/Training/Debug';
 import Lessons from "./pages/Lessons";
 import LessonDetail from "./pages/LessonDetail";
+import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
 
 // コンソールログでインポートの確認
@@ -86,6 +87,7 @@ const AppContent = () => {
 
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />
+        <Route path="/articles/:slug" element={<ArticleDetail />} />
         <Route path="/sanity-test" element={<SanityTest />} />
 
         <Route path="/content" element={<Content />} />
