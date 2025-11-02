@@ -33,6 +33,7 @@ import Lessons from "./pages/Lessons";
 import GuidePage from "./pages/Guide";
 import GuideDetailPage from "./pages/Guide/GuideDetail";
 import DevRoute from "./pages/Dev";
+import DevHome from "./pages/Dev/DevHome";
 import ComponentsReferencePage from "./pages/Dev/Components";
 
 // コンソールログでインポートの確認
@@ -86,6 +87,7 @@ const AppContent = () => {
         <Route path="/guide" element={<GuidePage />} />
         <Route path="/guide/:slug" element={<GuideDetailPage />} />
 
+        <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
         <Route path="/dev/components" element={<DevRoute><ComponentsReferencePage /></DevRoute>} />
 
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
