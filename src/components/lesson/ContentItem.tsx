@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
 
 interface ContentItemProps {
-  articleNumber: number;
+  articleNumber: number; // ランタイムで付与
   title: string;
   slug: string;
   thumbnail?: any;
@@ -25,7 +25,7 @@ export default function ContentItem({
   return (
     <div
       onClick={handleClick}
-      className="flex items-center gap-4 p-3 hover:bg-gray-50 rounded-lg cursor-pointer transition"
+      className="flex items-center gap-4 px-8 py-3 hover:bg-gray-50 rounded-lg cursor-pointer transition"
     >
       {/* 記事番号 */}
       <div className="flex-shrink-0">

@@ -126,4 +126,27 @@
     font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
     font-weight: 700 !important;
   }
+
+  /* レスポンシブ楕円弧 - LessonHero */
+  .arc-wrapper {
+    width: 100%;
+    height: 40px;
+    background: transparent;
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+    margin-top: -40px;
+  }
+
+  .ellipse {
+    width: 103%;
+    height: 200%;
+    border-radius: 50%;
+    background: #ffffff;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    clip-path: polygon(0 50%, 0 0, 100% 0, 100% 50%);
+  }
 }

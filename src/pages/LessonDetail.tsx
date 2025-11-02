@@ -9,7 +9,6 @@ import OverviewTab from "@/components/lesson/OverviewTab";
 
 interface Article {
   _id: string;
-  articleNumber: number;
   title: string;
   slug: { current: string };
   thumbnail?: any;
@@ -18,7 +17,6 @@ interface Article {
 
 interface Quest {
   _id: string;
-  questNumber: number;
   title: string;
   description?: string;
   goal?: string;
@@ -68,14 +66,12 @@ export default function LessonDetail() {
           overview,
           "quests": quests[]-> {
             _id,
-            questNumber,
             title,
             description,
             goal,
             estTimeMins,
             "articles": articles[]-> {
               _id,
-              articleNumber,
               title,
               slug,
               thumbnail {
@@ -86,8 +82,8 @@ export default function LessonDetail() {
                 }
               },
               videoDuration
-            } | order(articleNumber asc)
-          } | order(questNumber asc)
+            }
+          }
         }`;
 
         const data = await client.fetch(query, { slug });
@@ -95,7 +91,19 @@ export default function LessonDetail() {
         if (!data) {
           setError("レッスンが見つかりませんでした");
         } else {
-          setLesson(data);
+          // 配列のindexから番号を付与
+          const processedData = {
+            ...data,
+            quests: data.quests?.map((quest: Quest, questIndex: number) => ({
+              ...quest,
+              questNumber: questIndex + 1,
+              articles: quest.articles?.map((article: Article, articleIndex: number) => ({
+                ...article,
+                articleNumber: articleIndex + 1,
+              })) || [],
+            })) || [],
+          };
+          setLesson(processedData);
         }
       } catch (err) {
         console.error("Error fetching lesson:", err);

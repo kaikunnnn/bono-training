@@ -47,6 +47,11 @@ export default function LessonHero({
         </div>
       </div>
 
+      {/* 楕円弧要素 */}
+      <div className="arc-wrapper">
+        <div className="ellipse"></div>
+      </div>
+
       {/* 詳細情報領域 */}
       <div className="bg-white">
         <div className="container mx-auto relative">
@@ -60,6 +65,7 @@ export default function LessonHero({
                 height: "184px",
                 borderRadius: "0px 4px 4px 0px",
                 boxShadow: "1px 1px 13.56px 0px rgba(0, 0, 0, 0.33)",
+                zIndex: 3,
               }}
             >
               <img

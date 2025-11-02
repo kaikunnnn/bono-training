@@ -3,7 +3,7 @@ import ContentItem from "./ContentItem";
 
 interface Article {
   _id: string;
-  articleNumber: number;
+  articleNumber: number; // ランタイムで付与
   title: string;
   slug: { current: string };
   thumbnail?: any;
@@ -117,7 +117,7 @@ export default function QuestCard({
         </div>
 
         {/* コンテンツリスト */}
-        <div className="px-8 py-3">
+        <div className="py-3">
           {articles.map((article) => (
             <ContentItem
               key={article._id}

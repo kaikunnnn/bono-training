@@ -4,6 +4,496 @@
 
 https://www.figma.com/design/v4tNiQnPCjzSFFDmdcEYSh/%F0%9F%97%BA%EF%B8%8F-guide_2025?node-id=923-4966&t=8KUlYZGhAZ4geioC-4
 
+## レスポンシブ楕円弧の実装ガイドここより下
+
+## 概要
+
+グラデーションセクション上に重ねるレスポンシブな楕円弧（上半分のみ）を実装するガイドです。
+ボックスのサイズに応じて、楕円も自動的にスケーリングします。
+
+---
+
+## 設計仕様
+
+### 基本構造
+
+```
+【グラデーションセクション】（高さ：216px）
+    ↓ 負のmargin-topで上に被さる
+【楕円ボックス（.arc-wrapper）】
+  └─【楕円要素（.ellipse）】
+     └─ 上半分の弧を表示（clip-pathでカット）
+【白セクション（.detail-hero）】
+```
+
+### 関連の原則
+
+1. **楕円ボックス（.arc-wrapper）の高さ**：32〜48px（固定値）
+2. **楕円要素（.ellipse）の高さ**：ボックスの高さの 200%（ボックスに動的に連動）
+3. **楕円要素の幅**：103%（画面幅いっぱいに見えるが、アスペクト比を保つ）
+4. **配置**：負の margin-top で上のセクションに被さる
+
+---
+
+## 実装コード
+
+### HTML 構造
+
+```html
+<div class="container">
+  <!-- グラデーションセクション -->
+  <div class="gradient-section">
+    <div class="navigation">← トレーニング一覧</div>
+  </div>
+
+  <!-- 楕円弧要素 -->
+  <div class="arc-wrapper">
+    <div class="ellipse"></div>
+  </div>
+
+  <!-- 白セクション -->
+  <div class="detail-hero">
+    <h1>社内で使う本貸し出しシステムのデザイン</h1>
+    <p>
+      設定された「社内本貸し出しシステム」の内容をもとにサービスのデザインをゼロから行いましょう...
+    </p>
+  </div>
+</div>
+```
+
+### CSS 実装
+
+#### グラデーションセクション
+
+```css
+.gradient-section {
+  width: 100%;
+  height: 216px;
+  background: linear-gradient(
+    252deg,
+    rgba(253, 251, 245, 0.88) 15%,
+    rgba(244, 232, 223, 1) 55%,
+    rgba(239, 237, 255, 0.08) 94%
+  );
+  display: flex;
+  align-items: flex-start;
+  padding: 32px 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.gradient-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+.navigation {
+  font-size: 14px;
+  color: #909090;
+  font-weight: 700;
+  position: relative;
+  z-index: 2;
+}
+```
+
+#### 楕円弧要素（**重要**）
+
+```css
+/* 楕円ボックス */
+.arc-wrapper {
+  width: 100%;
+  height: 40px; /* 32〜48px の間で調整可能 */
+  background: transparent;
+  border: none;
+  position: relative;
+  overflow: hidden;
+  z-index: 2;
+  margin-top: -40px; /* グラデーションセクションに被さる：ボックス高さと同じ値をマイナス */
+}
+
+/* 楕円要素 */
+.ellipse {
+  width: 103%; /* 重要：103%でアスペクト比を保つ */
+  height: 200%; /* 重要：ボックスの高さの200%に動的に連動 */
+  border-radius: 50%; /* 完全な円 */
+  background: #ffffff;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%); /* 中央配置 */
+  clip-path: polygon(0 50%, 0 0, 100% 0, 100% 50%); /* 上半分だけ表示 */
+}
+```
+
+#### 白セクション
+
+```css
+.detail-hero {
+  background: #ffffff;
+  padding: 112px 40px 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  position: relative;
+  z-index: 3;
+}
+
+.detail-hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #0d221d;
+  text-align: center;
+  line-height: 1.49;
+  max-width: 800px;
+}
+
+.detail-hero p {
+  font-size: 16px;
+  color: #0d221d;
+  text-align: center;
+  line-height: 1.6;
+  max-width: 720px;
+}
+```
+
+---
+
+## 実装のポイント
+
+### 1. **高さの連動性**
+
+```
+arc-wrapper の height = X px
+ellipse の height = 200% = X * 2 px
+```
+
+ボックスの高さを変更すれば、楕円も自動的にスケーリングします。
+
+### 2. **幅のアスペクト比**
+
+```
+ellipse の width = 103%
+ellipse の height = 200%
+```
+
+幅を 103%にすることで、画面幅いっぱいに楕円が広がり、円に見えます。
+
+### 3. **上半分だけを表示**
+
+```css
+clip-path: polygon(0 50%, 0 0, 100% 0, 100% 50%);
+```
+
+この clip-path で、楕円の上半分だけがボックス内に見えます。
+
+### 4. **グラデーションセクションとの重ねる**
+
+```css
+.arc-wrapper {
+  margin-top: -40px; /* ボックス高さと同じ値をマイナス */
+}
+```
+
+負の margin-top で上のセクションに被さります。
+
+### 5. **z-index の層制御**
+
+```
+gradient-section: z-index: 1
+arc-wrapper: z-index: 2
+detail-hero: z-index: 3
+```
+
+正しい層の順序で、楕円がグラデーションと白の間に見えます。
+
+---
+
+## 調整ガイド
+
+### ボックスの高さを変更する場合
+
+1. `.arc-wrapper` の `height` を変更
+2. `.arc-wrapper` の `margin-top` を同じ値をマイナスに変更
+
+例：ボックスを 50px にしたい場合
+
+```css
+.arc-wrapper {
+  height: 50px;
+  margin-top: -50px;
+}
+```
+
+→ `.ellipse` の `height: 200%` は自動的に連動します
+
+### 弧のシャープさを調整する場合
+
+`.ellipse` の `height` をパーセンテージで調整します。
+
+| 値     | 結果                           |
+| ------ | ------------------------------ |
+| `150%` | 非常にシャープな弧             |
+| `200%` | 推奨値（バランスが取れている） |
+| `300%` | ゆるい弧                       |
+
+例：もっとシャープにしたい場合
+
+```css
+.ellipse {
+  height: 150%; /* ボックスの150%に変更 */
+}
+```
+
+### 幅のアスペクト比を調整する場合
+
+`.ellipse` の `width` をパーセンテージで調整します。
+
+| 値     | 結果                 |
+| ------ | -------------------- |
+| `100%` | 楕円（横に狭い）     |
+| `103%` | 推奨値（円に見える） |
+| `110%` | 横に広い楕円         |
+
+---
+
+## レスポンシブ対応
+
+現在の実装は以下に対応しています：
+
+- ✅ 画面幅に対して楕円が自動的にスケーリング
+- ✅ ボックス高さに対して楕円が動的に連動
+- ✅ すべてのデバイス（モバイル〜デスクトップ）で正常に表示
+
+---
+
+## 実装チェックリスト
+
+実装時に以下を確認してください：
+
+- [ ] `.arc-wrapper` の高さが 32〜48px に設定されている
+- [ ] `.arc-wrapper` の `margin-top` がボックス高さと同じ値をマイナスに設定されている
+- [ ] `.ellipse` の `height` が `200%` に設定されている
+- [ ] `.ellipse` の `width` が `103%` に設定されている
+- [ ] `clip-path: polygon(0 50%, 0 0, 100% 0, 100% 50%)` が指定されている
+- [ ] `z-index` の層が正しく設定されている（gradient-section: 1, arc-wrapper: 2, detail-hero: 3）
+- [ ] グラデーションセクションと白セクションが正しく表示されている
+- [ ] 楕円が画面幅いっぱいに弧を描いている
+- [ ] グラデーションセクション下辺と楕円下辺が揃っている
+- [ ] ウィンドウをリサイズしても楕円がレスポンシブに動く
+
+---
+
+## トラブルシューティング
+
+### 問題：楕円が見えない
+
+**原因**：`clip-path` が正しく指定されていない、または `overflow: hidden` が設定されていない
+**解決**：
+
+```css
+.arc-wrapper {
+  overflow: hidden; /* これが必須 */
+}
+.ellipse {
+  clip-path: polygon(0 50%, 0 0, 100% 0, 100% 50%); /* 正確に指定 */
+}
+```
+
+### 問題：楕円がグラデーションセクションに被さっていない
+
+**原因**：`margin-top` の値が正しくない、または `z-index` が設定されていない
+**解決**：
+
+```css
+.arc-wrapper {
+  margin-top: -40px; /* ボックス高さと同じ値をマイナス */
+  z-index: 2; /* グラデーション（z-index: 1）より上に */
+}
+```
+
+### 問題：楕円が円に見えず、楕円形になっている
+
+**原因**：`width` が 103%ではない
+**解決**：
+
+```css
+.ellipse {
+  width: 103%; /* 正確に103%に */
+  height: 200%;
+}
+```
+
+### 問題：ボックスをリサイズしても楕円が追従しない
+
+**原因**：`.ellipse` の `height` が固定値に設定されている
+**解決**：
+
+```css
+.ellipse {
+  height: 200%; /* パーセンテージで指定（固定値ではなく） */
+}
+```
+
+---
+
+## サンプル実装（完全コード）
+
+```html
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>レスポンシブ楕円弧</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Noto Sans JP", sans-serif;
+      }
+
+      .container {
+        width: 100%;
+        position: relative;
+      }
+
+      /* グラデーションセクション */
+      .gradient-section {
+        width: 100%;
+        height: 216px;
+        background: linear-gradient(
+          252deg,
+          rgba(253, 251, 245, 0.88) 15%,
+          rgba(244, 232, 223, 1) 55%,
+          rgba(239, 237, 255, 0.08) 94%
+        );
+        display: flex;
+        align-items: flex-start;
+        padding: 32px 28px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .gradient-section::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.2);
+        pointer-events: none;
+      }
+
+      .navigation {
+        font-size: 14px;
+        color: #909090;
+        font-weight: 700;
+        position: relative;
+        z-index: 2;
+      }
+
+      /* 楕円弧要素 */
+      .arc-wrapper {
+        width: 100%;
+        height: 40px;
+        background: transparent;
+        position: relative;
+        overflow: hidden;
+        z-index: 2;
+        margin-top: -40px;
+      }
+
+      .ellipse {
+        width: 103%;
+        height: 200%;
+        border-radius: 50%;
+        background: #ffffff;
+        position: absolute;
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        clip-path: polygon(0 50%, 0 0, 100% 0, 100% 50%);
+      }
+
+      /* 白セクション */
+      .detail-hero {
+        background: #ffffff;
+        padding: 112px 40px 48px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        position: relative;
+        z-index: 3;
+      }
+
+      .detail-hero h1 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #0d221d;
+        text-align: center;
+        line-height: 1.49;
+        max-width: 800px;
+      }
+
+      .detail-hero p {
+        font-size: 16px;
+        color: #0d221d;
+        text-align: center;
+        line-height: 1.6;
+        max-width: 720px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="gradient-section">
+        <div class="navigation">← トレーニング一覧</div>
+      </div>
+
+      <div class="arc-wrapper">
+        <div class="ellipse"></div>
+      </div>
+
+      <div class="detail-hero">
+        <h1>社内で使う本貸し出しシステムのデザイン</h1>
+        <p>
+          設定された「社内本貸し出しシステム」の内容をもとにサービスのデザインをゼロから行いましょう。期限が曖昧だったり、今どこにその本があるのかわかからない、という現状を解決するサービスを作ろう。
+        </p>
+      </div>
+    </div>
+  </body>
+</html>
+```
+
+---
+
+## まとめ
+
+このドキュメントに従うことで、確実にレスポンシブな楕円弧を実装できます。
+
+**重要ポイント：**
+
+1. `.arc-wrapper` と `.ellipse` の高さが 2 倍の関係（200%）
+2. `.ellipse` の幅は 103%
+3. `clip-path` で上半分だけを表示
+4. `z-index` で正しい層制御
+5. 負の `margin-top` でグラデーションセクションに被さる
+
+これらを守れば、他のエンジニアが確実に正しく実装できます。
+
 ## 全体構成 Figma MCP server
 
 # ヒーローセクション - デザインスペック

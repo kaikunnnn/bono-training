@@ -2,7 +2,7 @@ import QuestCard from "./QuestCard";
 
 interface Article {
   _id: string;
-  articleNumber: number;
+  articleNumber: number; // ランタイムで付与
   title: string;
   slug: { current: string };
   thumbnail?: any;
@@ -11,7 +11,7 @@ interface Article {
 
 interface Quest {
   _id: string;
-  questNumber: number;
+  questNumber: number; // ランタイムで付与
   title: string;
   description?: string;
   goal?: string;
