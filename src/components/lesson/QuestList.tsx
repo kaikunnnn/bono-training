@@ -22,9 +22,10 @@ interface Quest {
 interface QuestListProps {
   contentHeading?: string;
   quests: Quest[];
+  questProgressMap?: Record<string, { completed: number; total: number; completedArticleIds: string[] }>;
 }
 
-export default function QuestList({ contentHeading, quests }: QuestListProps) {
+export default function QuestList({ contentHeading, quests, questProgressMap = {} }: QuestListProps) {
   return (
     <div className="w-full max-w-3xl mx-auto">
       {/* コンテンツ見出し */}
@@ -36,17 +37,22 @@ export default function QuestList({ contentHeading, quests }: QuestListProps) {
 
       {/* クエストカード一覧 */}
       <div>
-        {quests.map((quest) => (
-          <QuestCard
-            key={quest._id}
-            questNumber={quest.questNumber}
-            title={quest.title}
-            description={quest.description}
-            goal={quest.goal}
-            estTimeMins={quest.estTimeMins}
-            articles={quest.articles}
-          />
-        ))}
+        {quests.map((quest) => {
+          const progress = questProgressMap[quest._id] || { completed: 0, total: quest.articles.length, completedArticleIds: [] };
+          return (
+            <QuestCard
+              key={quest._id}
+              questNumber={quest.questNumber}
+              title={quest.title}
+              description={quest.description}
+              goal={quest.goal}
+              estTimeMins={quest.estTimeMins}
+              articles={quest.articles}
+              completedCount={progress.completed}
+              completedArticleIds={progress.completedArticleIds}
+            />
+          );
+        })}
       </div>
     </div>
   );

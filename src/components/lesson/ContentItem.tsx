@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
+import { Check } from "lucide-react";
 
 interface ContentItemProps {
   articleNumber: number; // ランタイムで付与
@@ -7,6 +8,7 @@ interface ContentItemProps {
   slug: string;
   thumbnail?: any;
   videoDuration?: number;
+  isCompleted?: boolean;
 }
 
 export default function ContentItem({
@@ -15,6 +17,7 @@ export default function ContentItem({
   slug,
   thumbnail,
   videoDuration,
+  isCompleted = false,
 }: ContentItemProps) {
   const navigate = useNavigate();
 
@@ -47,9 +50,15 @@ export default function ContentItem({
 
       {/* タイトルと動画時間 */}
       <div className="flex-1 min-w-0">
-        <p className="font-noto-sans-jp text-sm text-lesson-item-title font-medium truncate">
-          {title}
-        </p>
+        <div className="flex items-center gap-2">
+          {/* チェックマーク（完了済みの場合） */}
+          {isCompleted && (
+            <Check className="w-5 h-5 text-green-500 flex-shrink-0" strokeWidth={2.5} />
+          )}
+          <p className="font-noto-sans-jp text-sm text-lesson-item-title font-medium truncate">
+            {title}
+          </p>
+        </div>
         {videoDuration && (
           <p className="font-geist text-xs text-lesson-item-duration mt-0.5">
             {videoDuration}分

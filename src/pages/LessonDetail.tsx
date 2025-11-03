@@ -6,6 +6,7 @@ import LessonHero from "@/components/lesson/LessonHero";
 import LessonTabs from "@/components/lesson/LessonTabs";
 import QuestList from "@/components/lesson/QuestList";
 import OverviewTab from "@/components/lesson/OverviewTab";
+import { getLessonProgress } from "@/services/progress";
 
 interface Article {
   _id: string;
@@ -44,6 +45,7 @@ export default function LessonDetail() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [questProgressMap, setQuestProgressMap] = useState<Record<string, { completed: number; total: number; completedArticleIds: string[] }>>({});
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -120,6 +122,31 @@ export default function LessonDetail() {
     }
   }, [slug]);
 
+  // 各クエストの進捗データを取得
+  useEffect(() => {
+    const fetchQuestProgress = async () => {
+      if (!lesson || !lesson._id) return;
+
+      const progressMap: Record<string, { completed: number; total: number; completedArticleIds: string[] }> = {};
+
+      // 各クエストの進捗を取得
+      for (const quest of lesson.quests) {
+        const articleIds = quest.articles.map(a => a._id);
+        const progress = await getLessonProgress(lesson._id, articleIds);
+
+        progressMap[quest._id] = {
+          completed: progress.completedArticles,
+          total: progress.totalArticles,
+          completedArticleIds: progress.completedArticleIds,
+        };
+      }
+
+      setQuestProgressMap(progressMap);
+    };
+
+    fetchQuestProgress();
+  }, [lesson]);
+
   const handleStart = () => {
     if (lesson?.quests?.[0]?.articles?.[0]) {
       const firstArticle = lesson.quests[0].articles[0];
@@ -178,6 +205,7 @@ export default function LessonDetail() {
             <QuestList
               contentHeading={lesson.contentHeading}
               quests={lesson.quests || []}
+              questProgressMap={questProgressMap}
             />
           }
           overviewTab={<OverviewTab purposes={lesson.purposes} overview={lesson.overview} />}
