@@ -11,6 +11,8 @@ interface HeadingSectionProps {
   onNext?: () => void;
   isBookmarked?: boolean;
   bookmarkLoading?: boolean;
+  isCompleted?: boolean;
+  completionLoading?: boolean;
 }
 
 /**
@@ -34,6 +36,8 @@ const HeadingSection = ({
   onNext,
   isBookmarked = false,
   bookmarkLoading = false,
+  isCompleted = false,
+  completionLoading = false,
 }: HeadingSectionProps) => {
   return (
     <div className="w-full space-y-3">
@@ -89,12 +93,17 @@ const HeadingSection = ({
           {/* Complete Button */}
           <button
             onClick={onComplete}
-            className="flex items-center gap-1 px-3 py-2 rounded-full bg-[#F3F5F5] hover:bg-gray-200 transition-colors"
+            disabled={completionLoading}
+            className={`flex items-center gap-1 px-3 py-2 rounded-full transition-colors ${
+              isCompleted
+                ? 'bg-green-100 hover:bg-green-200 text-green-800'
+                : 'bg-[#F3F5F5] hover:bg-gray-200 text-[#34373D]'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             <Check className="w-[18px] h-[18px]" strokeWidth={2} />
-            <span className="text-sm font-bold leading-5 text-[#34373D]" style={{ letterSpacing: "-1.07421875%" }}>
-              完了にする
+            <span className="text-sm font-bold leading-5" style={{ letterSpacing: "-1.07421875%" }}>
+              {isCompleted ? '完了済み' : '完了にする'}
             </span>
           </button>
 

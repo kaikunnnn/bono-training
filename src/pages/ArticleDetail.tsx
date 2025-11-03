@@ -9,6 +9,7 @@ import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
 import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
+import { toggleArticleCompletion, getArticleProgress } from "@/services/progress";
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -18,6 +19,8 @@ const ArticleDetail = () => {
   const [error, setError] = useState<string | null>(null);
   const [bookmarked, setBookmarked] = useState(false);
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [completionLoading, setCompletionLoading] = useState(false);
 
   // 前後の記事を計算
   const navigation = useMemo(() => {
@@ -93,6 +96,17 @@ const ArticleDetail = () => {
     checkBookmark();
   }, [article?._id]);
 
+  // 記事の進捗状態を取得
+  useEffect(() => {
+    const checkProgress = async () => {
+      if (article?._id) {
+        const status = await getArticleProgress(article._id);
+        setIsCompleted(status === 'completed');
+      }
+    };
+    checkProgress();
+  }, [article?._id]);
+
   // ブックマークトグル処理
   const handleBookmarkToggle = async () => {
     if (!article) return;
@@ -104,6 +118,22 @@ const ArticleDetail = () => {
       setBookmarked(result.isBookmarked);
     }
     setBookmarkLoading(false);
+  };
+
+  // 完了ボタンのハンドラー
+  const handleCompleteToggle = async () => {
+    if (!article || !article.lessonInfo?._id) return;
+
+    setCompletionLoading(true);
+    const result = await toggleArticleCompletion(
+      article._id,
+      article.lessonInfo._id
+    );
+
+    if (result.success) {
+      setIsCompleted(result.isCompleted);
+    }
+    setCompletionLoading(false);
   };
 
   if (loading) {
@@ -162,12 +192,14 @@ const ArticleDetail = () => {
                 stepNumber={article.articleNumber}
                 title={article.title}
                 description={article.excerpt}
-                onComplete={() => console.log("Complete clicked")}
+                onComplete={handleCompleteToggle}
                 onFavorite={handleBookmarkToggle}
                 onShare={() => console.log("Share clicked")}
                 onNext={() => console.log("Next clicked")}
                 isBookmarked={bookmarked}
                 bookmarkLoading={bookmarkLoading}
+                isCompleted={isCompleted}
+                completionLoading={completionLoading}
               />
 
               {/* TODO Section - learningObjectives がある場合のみ表示 */}
