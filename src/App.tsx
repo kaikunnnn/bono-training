@@ -30,6 +30,11 @@ import TrainingLogin from "./pages/Training/Login";
 import TrainingSignup from "./pages/Training/Signup";
 import TrainingDebug from '@/pages/Training/Debug';
 import Lessons from "./pages/Lessons";
+import GuidePage from "./pages/Guide";
+import GuideDetailPage from "./pages/Guide/GuideDetail";
+import DevRoute from "./pages/Dev";
+import DevHome from "./pages/Dev/DevHome";
+import ComponentsReferencePage from "./pages/Dev/Components";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -81,7 +86,13 @@ const AppContent = () => {
         <Route path="/training/plan" element={<TrainingPlan />} />
         <Route path="/training/about" element={<TrainingAbout />} />
         <Route path="/training/debug" element={<TrainingDebug />} />
-        
+
+        <Route path="/guide" element={<GuidePage />} />
+        <Route path="/guide/:slug" element={<GuideDetailPage />} />
+
+        <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
+        <Route path="/dev/components" element={<DevRoute><ComponentsReferencePage /></DevRoute>} />
+
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
