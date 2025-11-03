@@ -4,6 +4,8 @@
 
 **URL**: https://lovable.dev/projects/2c82edfd-7abe-4c05-aead-23c33ce3ad78
 
+<!-- Test comment to verify PR workflow -->
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
