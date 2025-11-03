@@ -1,0 +1,117 @@
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
+interface NavigationItem {
+  slug: string;
+  title: string;
+}
+
+interface ContentNavigationProps {
+  previous?: NavigationItem;
+  next?: NavigationItem;
+}
+
+/**
+ * ContentNavigation コンポーネント
+ * 記事の最後に表示される前後の記事へのナビゲーション
+ *
+ * 仕様:
+ * - 前の記事カード（左側、左矢印）
+ * - 次の記事カード（右側、右矢印）
+ * - 216px ギャップ（デスクトップ）
+ * - カード: 16px ボーダーラディウス、1px #DEDEDE ボーダー
+ * - ラベル: 10px Noto Sans JP Medium #787878
+ * - タイトル: 12px Hind SemiBold #101828
+ */
+const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
+  const navigate = useNavigate();
+
+  // 前後どちらもない場合は何も表示しない
+  if (!previous && !next) {
+    return null;
+  }
+
+  return (
+    <div className="w-full flex flex-col md:flex-row justify-between gap-6 md:gap-[216px] mt-12">
+      {/* 前の記事カード */}
+      {previous ? (
+        <button
+          onClick={() => navigate(`/articles/${previous.slug}`)}
+          className="flex items-center gap-[11px] px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1"
+        >
+          {/* 左矢印 */}
+          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+            <ChevronLeft className="w-6 h-6" strokeWidth={1.5} />
+          </div>
+
+          {/* テキストコンテナ */}
+          <div className="flex flex-col gap-1 text-left" style={{ width: "199px" }}>
+            {/* ラベル */}
+            <span
+              className="text-[10px] font-medium leading-[10px] text-[#787878]"
+              style={{
+                fontFamily: '"Noto Sans JP", sans-serif',
+                letterSpacing: "-3.125%",
+              }}
+            >
+              前
+            </span>
+
+            {/* タイトル */}
+            <span
+              className="text-xs font-semibold leading-4 text-[#101828]"
+              style={{
+                fontFamily: "Hind, sans-serif",
+              }}
+            >
+              {previous.title}
+            </span>
+          </div>
+        </button>
+      ) : (
+        <div className="flex-1" /> // スペーサー
+      )}
+
+      {/* 次の記事カード */}
+      {next ? (
+        <button
+          onClick={() => navigate(`/articles/${next.slug}`)}
+          className="flex items-center gap-[11px] px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1"
+        >
+          {/* テキストコンテナ */}
+          <div className="flex flex-col gap-1 text-left" style={{ width: "199px" }}>
+            {/* ラベル */}
+            <span
+              className="text-[10px] font-medium leading-[10px] text-[#787878]"
+              style={{
+                fontFamily: '"Noto Sans JP", sans-serif',
+                letterSpacing: "-3.125%",
+              }}
+            >
+              次
+            </span>
+
+            {/* タイトル */}
+            <span
+              className="text-xs font-semibold leading-4 text-[#101828]"
+              style={{
+                fontFamily: "Hind, sans-serif",
+              }}
+            >
+              {next.title}
+            </span>
+          </div>
+
+          {/* 右矢印 */}
+          <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
+            <ChevronRight className="w-6 h-6" strokeWidth={1.5} />
+          </div>
+        </button>
+      ) : (
+        <div className="flex-1" /> // スペーサー
+      )}
+    </div>
+  );
+};
+
+export default ContentNavigation;

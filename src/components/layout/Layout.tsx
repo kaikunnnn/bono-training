@@ -48,7 +48,7 @@ const Layout = ({ children, className }: LayoutProps) => {
 
       {/* メインコンテンツエリア */}
       <div className="flex-1 flex flex-col lg:ml-60">
-        <main className="flex-1 pt-16 lg:pt-0 px-4 sm:px-8">
+        <main className="flex-1 pt-16 lg:pt-0">
           {children}
         </main>
         <Footer />
