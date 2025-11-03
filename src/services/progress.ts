@@ -133,3 +133,99 @@ export async function getArticleProgress(
     return 'not_started';
   }
 }
+
+/**
+ * レッスンの進捗情報
+ */
+export interface LessonProgress {
+  lessonId: string;
+  totalArticles: number;
+  completedArticles: number;
+  percentage: number; // 0-100
+  completedArticleIds: string[];
+}
+
+/**
+ * レッスンの進捗状況を取得
+ * @param lessonId レッスンID
+ * @param articleIds そのレッスンに含まれる全記事ID
+ * @returns レッスンの進捗情報
+ */
+export async function getLessonProgress(
+  lessonId: string,
+  articleIds: string[]
+): Promise<LessonProgress> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user || articleIds.length === 0) {
+      return {
+        lessonId,
+        totalArticles: articleIds.length,
+        completedArticles: 0,
+        percentage: 0,
+        completedArticleIds: [],
+      };
+    }
+
+    // そのレッスンの記事で完了しているものを取得
+    const { data } = await supabase
+      .from('article_progress')
+      .select('article_id')
+      .eq('user_id', user.id)
+      .eq('lesson_id', lessonId)
+      .eq('status', 'completed')
+      .in('article_id', articleIds);
+
+    const completedArticleIds = data?.map(item => item.article_id) || [];
+    const completedCount = completedArticleIds.length;
+    const percentage = Math.round((completedCount / articleIds.length) * 100);
+
+    return {
+      lessonId,
+      totalArticles: articleIds.length,
+      completedArticles: completedCount,
+      percentage,
+      completedArticleIds,
+    };
+  } catch (error) {
+    console.error('Get lesson progress error:', error);
+    return {
+      lessonId,
+      totalArticles: articleIds.length,
+      completedArticles: 0,
+      percentage: 0,
+      completedArticleIds: [],
+    };
+  }
+}
+
+/**
+ * 複数のレッスンの進捗を一括取得
+ * @param lessons レッスン情報の配列 { lessonId, articleIds }
+ * @returns レッスン進捗のマップ
+ */
+export async function getMultipleLessonProgress(
+  lessons: Array<{ lessonId: string; articleIds: string[] }>
+): Promise<Record<string, LessonProgress>> {
+  const progressMap: Record<string, LessonProgress> = {};
+
+  await Promise.all(
+    lessons.map(async (lesson) => {
+      const progress = await getLessonProgress(lesson.lessonId, lesson.articleIds);
+      progressMap[lesson.lessonId] = progress;
+    })
+  );
+
+  return progressMap;
+}
+
+/**
+ * 記事IDが完了済みかどうかをチェック
+ * @param articleId 記事ID
+ * @returns 完了済みならtrue
+ */
+export async function isArticleCompleted(articleId: string): Promise<boolean> {
+  const status = await getArticleProgress(articleId);
+  return status === 'completed';
+}

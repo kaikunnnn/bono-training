@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface ContentItemProps {
@@ -38,6 +38,11 @@ const ContentItem = ({
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
   const [checked, setChecked] = useState(isCompleted);
+
+  // isCompletedが変わったらcheckedを更新
+  useEffect(() => {
+    setChecked(isCompleted);
+  }, [isCompleted]);
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();

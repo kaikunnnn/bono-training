@@ -21,6 +21,7 @@ const ArticleDetail = () => {
   const [bookmarkLoading, setBookmarkLoading] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [completionLoading, setCompletionLoading] = useState(false);
+  const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
 
   // 前後の記事を計算
   const navigation = useMemo(() => {
@@ -132,6 +133,8 @@ const ArticleDetail = () => {
 
     if (result.success) {
       setIsCompleted(result.isCompleted);
+      // サイドナビの進捗を更新するトリガー
+      setProgressUpdateTrigger(prev => prev + 1);
     }
     setCompletionLoading(false);
   };
@@ -173,7 +176,7 @@ const ArticleDetail = () => {
       <div className="flex max-w-[1920px] mx-auto">
         {/* サイドナビゲーション - 固定320px幅 */}
         <aside className="w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-gray-200">
-          <ArticleSideNav article={article} currentArticleId={article._id} />
+          <ArticleSideNav article={article} currentArticleId={article._id} progressUpdateTrigger={progressUpdateTrigger} />
         </aside>
 
         {/* メインコンテンツエリア */}
