@@ -8,6 +8,7 @@ import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
+import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +16,8 @@ const ArticleDetail = () => {
   const [article, setArticle] = useState<ArticleWithContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
 
   // 前後の記事を計算
   const navigation = useMemo(() => {
@@ -79,6 +82,30 @@ const ArticleDetail = () => {
     fetchArticle();
   }, [slug]);
 
+  // ブックマーク状態の初期化
+  useEffect(() => {
+    const checkBookmark = async () => {
+      if (article?._id) {
+        const result = await isBookmarked(article._id);
+        setBookmarked(result);
+      }
+    };
+    checkBookmark();
+  }, [article?._id]);
+
+  // ブックマークトグル処理
+  const handleBookmarkToggle = async () => {
+    if (!article) return;
+
+    setBookmarkLoading(true);
+    const result = await toggleBookmark(article._id, false);
+
+    if (result.success) {
+      setBookmarked(result.isBookmarked);
+    }
+    setBookmarkLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -136,9 +163,11 @@ const ArticleDetail = () => {
                 title={article.title}
                 description={article.excerpt}
                 onComplete={() => console.log("Complete clicked")}
-                onFavorite={() => console.log("Favorite clicked")}
+                onFavorite={handleBookmarkToggle}
                 onShare={() => console.log("Share clicked")}
                 onNext={() => console.log("Next clicked")}
+                isBookmarked={bookmarked}
+                bookmarkLoading={bookmarkLoading}
               />
 
               {/* TODO Section - learningObjectives がある場合のみ表示 */}

@@ -9,6 +9,8 @@ interface HeadingSectionProps {
   onFavorite?: () => void;
   onShare?: () => void;
   onNext?: () => void;
+  isBookmarked?: boolean;
+  bookmarkLoading?: boolean;
 }
 
 /**
@@ -30,6 +32,8 @@ const HeadingSection = ({
   onFavorite,
   onShare,
   onNext,
+  isBookmarked = false,
+  bookmarkLoading = false,
 }: HeadingSectionProps) => {
   return (
     <div className="w-full space-y-3">
@@ -97,10 +101,19 @@ const HeadingSection = ({
           {/* Favorite Button */}
           <button
             onClick={onFavorite}
-            className="flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"
+            disabled={bookmarkLoading}
+            className="flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ fontFamily: "Inter, sans-serif" }}
+            aria-label={isBookmarked ? 'ブックマークを解除' : 'ブックマークに追加'}
           >
-            <Star className="w-[18px] h-[18px]" strokeWidth={1.5} />
+            <Star
+              className={`w-[18px] h-[18px] transition-colors ${
+                isBookmarked
+                  ? 'fill-yellow-400 stroke-yellow-400'
+                  : 'stroke-[#6A7282]'
+              }`}
+              strokeWidth={1.5}
+            />
             <span className="text-sm leading-5 text-[#6A7282]" style={{ letterSpacing: "-1.07421875%" }}>
               お気に入り
             </span>
