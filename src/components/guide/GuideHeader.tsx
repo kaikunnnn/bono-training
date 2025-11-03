@@ -3,7 +3,15 @@ import { Link } from "react-router-dom";
 import ContentWrapper from "@/components/training/ContentWrapper";
 import type { Guide } from "@/types/guide";
 import CategoryBadge from "./CategoryBadge";
-import { Clock, Calendar, User, ChevronRight } from "lucide-react";
+import { Clock, Calendar, User } from "lucide-react";
+import {
+  Breadcrumb,
+  BreadcrumbList,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 
 interface GuideHeaderProps {
   guide: Guide;
@@ -17,13 +25,19 @@ const GuideHeader = ({ guide }: GuideHeaderProps) => {
     <div className="bg-white border-b border-gray-200">
       <ContentWrapper className="py-8">
         {/* パンくずリスト */}
-        <nav className="flex items-center gap-2 text-sm text-gray-500 mb-6">
-          <Link to="/guide" className="hover:text-gray-700 transition-colors">
-            ガイド
-          </Link>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900">{guide.title}</span>
-        </nav>
+        <Breadcrumb className="mb-6">
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to="/guide">ガイド</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{guide.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
 
         {/* カテゴリ */}
         <div className="mb-4">

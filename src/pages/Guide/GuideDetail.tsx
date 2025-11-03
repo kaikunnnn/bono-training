@@ -5,6 +5,7 @@ import {
   GuideHeader,
   GuideContent,
   RelatedGuides,
+  TableOfContents,
 } from "@/components/guide";
 import ContentWrapper from "@/components/training/ContentWrapper";
 import { useGuide } from "@/hooks/useGuides";
@@ -74,7 +75,17 @@ const GuideDetailPage = () => {
       {/* コンテンツ */}
       <div className="bg-white">
         <ContentWrapper className="py-12">
-          <GuideContent content={guide.content || ""} />
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+            {/* メインコンテンツ */}
+            <div className="min-w-0">
+              <GuideContent content={guide.content || ""} />
+            </div>
+
+            {/* 目次（デスクトップのみ） */}
+            <aside className="hidden lg:block">
+              <TableOfContents content={guide.content || ""} />
+            </aside>
+          </div>
         </ContentWrapper>
       </div>
 

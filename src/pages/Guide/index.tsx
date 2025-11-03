@@ -1,33 +1,51 @@
-import React, { useMemo } from "react";
-import { GuideLayout, GuideHero, CategorySection } from "@/components/guide";
+import React, { useMemo, useState } from "react";
+import { GuideLayout, GuideHero, CategorySection, CategoryFilter } from "@/components/guide";
 import ContentWrapper from "@/components/training/ContentWrapper";
 import { useGuides } from "@/hooks/useGuides";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
+import type { GuideCategory } from "@/types/guide";
 
 /**
  * ガイド一覧ページ
  */
 const GuidePage = () => {
   const { data: guides, isLoading, error } = useGuides();
+  const [selectedCategory, setSelectedCategory] = useState<GuideCategory | "all">("all");
+
+  const filteredGuides = useMemo(() => {
+    if (!guides) return [];
+    if (selectedCategory === "all") return guides;
+    return guides.filter((guide) => guide.category === selectedCategory);
+  }, [guides, selectedCategory]);
 
   // カテゴリ別にグループ化
   const groupedGuides = useMemo(() => {
-    if (!guides) return {};
+    if (!filteredGuides) return {};
 
-    const grouped: Record<string, typeof guides> = {};
+    const grouped: Record<string, typeof filteredGuides> = {};
     GUIDE_CATEGORIES.forEach((category) => {
-      grouped[category.id] = guides.filter((guide) => guide.category === category.id);
+      grouped[category.id] = filteredGuides.filter((guide) => guide.category === category.id);
     });
     return grouped;
-  }, [guides]);
+  }, [filteredGuides]);
 
   return (
     <GuideLayout>
       <GuideHero />
 
       <div className="bg-gray-50">
+        {/* カテゴリフィルター */}
+        {!isLoading && !error && guides && (
+          <ContentWrapper className="pt-8 pb-4">
+            <CategoryFilter
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+            />
+          </ContentWrapper>
+        )}
+
         {/* ローディング状態 */}
         {isLoading && (
           <ContentWrapper className="py-12">
