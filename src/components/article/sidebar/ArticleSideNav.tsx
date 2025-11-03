@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import LogoBlock from "./LogoBlock";
 import BackNavigation from "./BackNavigation";
 import LessonSection from "./LessonSection";
 import QuestBlock from "./QuestBlock";
@@ -78,9 +79,12 @@ const ArticleSideNav = ({ article, currentArticleId }: ArticleSideNavProps) => {
 
   return (
     <div className="flex flex-col pb-8">
+      {/* ロゴブロック */}
+      <LogoBlock />
+
       {/* レッスン詳細セクション（BackNavigation + LessonSection） */}
       <section
-        className="flex flex-col w-full py-3 bg-white"
+        className="flex flex-col w-full py-3"
         style={{ borderBottom: "1px solid #F0F0F0" }}
       >
         {/* ナビゲーション領域 */}

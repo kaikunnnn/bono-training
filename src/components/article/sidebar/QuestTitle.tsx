@@ -20,7 +20,7 @@ interface QuestTitleProps {
  */
 const QuestTitle = ({ questNumber, title, isFocus = false }: QuestTitleProps) => {
   return (
-    <div className="flex flex-col w-full bg-white" style={{ gap: "10px", padding: "12px 16px" }}>
+    <div className="flex flex-col w-full" style={{ gap: "10px", padding: "12px 16px" }}>
       <div className="flex items-center w-full" style={{ gap: "12px" }}>
         {/* 番号ボックス 16x16px */}
         <div

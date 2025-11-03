@@ -111,11 +111,11 @@ const ArticleDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
       {/* 2カラムレイアウト: サイドナビゲーション (320px) + メインコンテンツ (720px) */}
       <div className="flex max-w-[1920px] mx-auto">
         {/* サイドナビゲーション - 固定320px幅 */}
-        <aside className="w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-gray-200 bg-white">
+        <aside className="w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-gray-200">
           <ArticleSideNav article={article} currentArticleId={article._id} />
         </aside>
 

@@ -45,16 +45,19 @@ const QuestBlock = ({
 
   return (
     <div
-      className={`w-[312px] flex flex-col bg-transparent px-1.5 py-3 transition-all duration-150`}
+      className={`w-[312px] flex flex-col px-1.5 py-3 transition-all duration-150`}
       style={
         isFocus
           ? {
+              backgroundColor: "#FFFFFF",
               borderLeft: "2px solid transparent",
               borderImage:
                 "linear-gradient(180deg, rgba(254, 166, 103, 1) 0%, rgba(196, 113, 245, 1) 100%) 1",
               borderImageSlice: "0 0 0 1",
             }
-          : {}
+          : {
+              backgroundColor: "transparent",
+            }
       }
       data-state={isFocus ? "focus" : "default"}
       role="region"
