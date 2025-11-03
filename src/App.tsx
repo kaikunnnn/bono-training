@@ -35,6 +35,7 @@ import GuideDetailPage from "./pages/Guide/GuideDetail";
 import DevRoute from "./pages/Dev";
 import DevHome from "./pages/Dev/DevHome";
 import ComponentsReferencePage from "./pages/Dev/Components";
+import WebflowTest from "./pages/Dev/WebflowTest";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -92,6 +93,7 @@ const AppContent = () => {
 
         <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
         <Route path="/dev/components" element={<DevRoute><ComponentsReferencePage /></DevRoute>} />
+        <Route path="/dev/webflow-test" element={<DevRoute><WebflowTest /></DevRoute>} />
 
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
