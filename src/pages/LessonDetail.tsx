@@ -33,6 +33,7 @@ interface Lesson {
   category?: string;
   isPremium?: boolean;
   contentHeading?: string;
+  purposes?: string[];
   overview?: any;
   quests: Quest[];
 }
@@ -63,6 +64,7 @@ export default function LessonDetail() {
           category,
           isPremium,
           contentHeading,
+          purposes,
           overview,
           "quests": quests[]-> {
             _id,
@@ -178,7 +180,7 @@ export default function LessonDetail() {
               quests={lesson.quests || []}
             />
           }
-          overviewTab={<OverviewTab overview={lesson.overview} />}
+          overviewTab={<OverviewTab purposes={lesson.purposes} overview={lesson.overview} />}
         />
       </div>
     </Layout>

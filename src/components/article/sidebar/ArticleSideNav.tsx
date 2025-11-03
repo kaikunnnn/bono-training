@@ -98,6 +98,7 @@ const ArticleSideNav = ({ article, currentArticleId }: ArticleSideNavProps) => {
             title={navData.lessonTitle}
             thumbnail={navData.lessonThumbnail}
             progressPercent={navData.progressPercent}
+            lessonSlug={navData.lessonSlug}
           />
         </div>
       </section>

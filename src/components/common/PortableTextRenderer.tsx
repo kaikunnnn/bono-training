@@ -19,6 +19,26 @@ const components = {
       </p>
     ),
   },
+  list: {
+    bullet: ({ children }: any) => (
+      <ul className="list-disc list-inside space-y-2 mb-4 ml-4 text-lesson-overview-text">
+        {children}
+      </ul>
+    ),
+    number: ({ children }: any) => (
+      <ol className="list-decimal list-inside space-y-2 mb-4 ml-4 text-lesson-overview-text">
+        {children}
+      </ol>
+    ),
+  },
+  listItem: {
+    bullet: ({ children }: any) => (
+      <li className="text-base leading-relaxed">{children}</li>
+    ),
+    number: ({ children }: any) => (
+      <li className="text-base leading-relaxed">{children}</li>
+    ),
+  },
   marks: {
     strong: ({ children }: any) => (
       <strong className="font-bold">{children}</strong>

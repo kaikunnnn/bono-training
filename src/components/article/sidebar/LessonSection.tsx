@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
 import type { SanityImage } from "@/types/sanity";
 
@@ -5,6 +6,7 @@ interface LessonSectionProps {
   title: string;
   thumbnail?: SanityImage;
   progressPercent: number;
+  lessonSlug: string;
 }
 
 /**
@@ -23,11 +25,15 @@ const LessonSection = ({
   title,
   thumbnail,
   progressPercent,
+  lessonSlug,
 }: LessonSectionProps) => {
   return (
     <div className="flex flex-col w-full gap-1 bg-transparent">
       {/* ラップコンテナ */}
-      <div className="flex flex-col items-center w-full gap-1.5">
+      <Link
+        to={`/lessons/${lessonSlug}`}
+        className="flex flex-col items-center w-full gap-1.5 no-underline hover:opacity-80 transition-opacity cursor-pointer"
+      >
         {/* レッスンアイコン 53.33 x 80px */}
         <div
           className="w-[53.33px] h-20 overflow-hidden transition-shadow duration-150"
@@ -108,7 +114,7 @@ const LessonSection = ({
             </div>
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };
