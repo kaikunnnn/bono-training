@@ -19,7 +19,7 @@ import { useAuth } from "@/contexts/AuthContext";
  */
 const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   const location = useLocation();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
 
   // 現在のパスがメニュー項目のhrefと一致するかチェック
   const isActive = (href: string) => location.pathname === href;
@@ -51,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           {/* ユーザーメニュー */}
           <SidebarMenuGroup>
             <SidebarMenuItem
-              href={user ? "/profile" : "/auth"}
+              href={user ? "/mypage" : "/auth"}
               icon={
                 user ? (
                   <MenuIcons.mypage size={ICON_SIZE} />
@@ -59,7 +59,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
                   <MenuIcons.login size={ICON_SIZE} />
                 )
               }
-              isActive={isActive(user ? "/profile" : "/auth")}
+              isActive={isActive(user ? "/mypage" : "/auth")}
             >
               {user ? "マイページ" : "ログイン"}
             </SidebarMenuItem>
@@ -109,6 +109,19 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           >
             設定
           </SidebarMenuItem>
+          {user && (
+            <SidebarMenuItem
+              href="#"
+              icon={<MenuIcons.logout size={ICON_SIZE} />}
+              isActive={false}
+              onClick={(e) => {
+                e.preventDefault();
+                signOut();
+              }}
+            >
+              ログアウト
+            </SidebarMenuItem>
+          )}
         </SidebarMenuGroup>
       </div>
     </nav>

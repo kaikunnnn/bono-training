@@ -14,6 +14,7 @@ import {
   Settings,
   User,
   LogIn,
+  LogOut,
   Search,
   Play,
 } from "lucide-react";
@@ -37,6 +38,8 @@ export const MenuIcons = {
   user: User,
   // ログイン
   login: LogIn,
+  // ログアウト
+  logout: LogOut,
   // 検索
   search: Search,
 } as const;

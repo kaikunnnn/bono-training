@@ -1,5 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
+import { client } from '@/lib/sanity';
+import type { Article } from '@/types/sanity';
 
 /**
  * 記事をブックマーク/解除する（トグル）
@@ -123,6 +125,72 @@ export async function getBookmarks(): Promise<string[]> {
     return data?.map(b => b.article_id) || [];
   } catch (error) {
     console.error('Get bookmarks error:', error);
+    return [];
+  }
+}
+
+export interface BookmarkedArticle extends Article {
+  questInfo?: {
+    _id: string;
+    questNumber: number;
+    title: string;
+    lessonInfo?: {
+      _id: string;
+      title: string;
+      slug: {
+        current: string;
+      };
+    };
+  };
+}
+
+/**
+ * ブックマークした記事の詳細情報を取得
+ * @returns ブックマーク済み記事の配列（Sanityから取得）
+ */
+export async function getBookmarkedArticles(): Promise<BookmarkedArticle[]> {
+  try {
+    // 1. Supabaseからブックマークした記事IDを取得
+    const bookmarkIds = await getBookmarks();
+
+    if (bookmarkIds.length === 0) {
+      return [];
+    }
+
+    // 2. SanityからArticle情報を取得
+    const query = `*[_type == "article" && _id in $ids] {
+      _id,
+      _type,
+      title,
+      slug,
+      thumbnail,
+      coverImage,
+      videoDuration,
+      articleNumber,
+      excerpt,
+      content,
+      learningObjectives,
+      quest,
+      publishedAt,
+      author,
+      tags,
+      isPremium,
+      "questInfo": *[_type == "quest" && references(^._id)][0] {
+        _id,
+        questNumber,
+        title,
+        "lessonInfo": *[_type == "lesson" && references(^._id)][0] {
+          _id,
+          title,
+          slug
+        }
+      }
+    } | order(_createdAt desc)`;
+
+    const articles = await client.fetch(query, { ids: bookmarkIds });
+    return articles;
+  } catch (error) {
+    console.error('Get bookmarked articles error:', error);
     return [];
   }
 }
