@@ -16,6 +16,7 @@ export interface WebflowVideo {
     'link-video'?: string;
     'video-length'?: string;
     description?: string;
+    series?: string;
   };
 }
 

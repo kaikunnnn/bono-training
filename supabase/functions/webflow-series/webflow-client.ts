@@ -58,7 +58,8 @@ export class WebflowClient {
     const response = await this.fetchWebflow<WebflowCollectionResponse<WebflowVideo>>(url);
     
     const seriesVideos = response.items.filter(video => {
-      return video.series === seriesId;
+      const videoSeriesId = video.fieldData?.series || video.series;
+      return videoSeriesId === seriesId;
     });
     
     seriesVideos.sort((a, b) => {
