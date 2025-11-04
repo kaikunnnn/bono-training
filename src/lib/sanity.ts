@@ -50,7 +50,8 @@ export async function getArticleWithContext(
           _id,
           title,
           slug,
-          videoDuration
+          videoDuration,
+          isPremium
         }
       },
 
@@ -68,7 +69,8 @@ export async function getArticleWithContext(
             _id,
             title,
             slug,
-            videoDuration
+            videoDuration,
+            isPremium
           }
         }
       }

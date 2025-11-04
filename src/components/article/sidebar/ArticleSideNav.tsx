@@ -75,6 +75,7 @@ const ArticleSideNav = ({ article, currentArticleId, progressUpdateTrigger }: Ar
         slug: a.slug.current,
         isCompleted: completedArticleIds.includes(a._id),
         isFocus: a._id === currentArticleId,
+        isPremium: a.isPremium,
       }));
 
       return {

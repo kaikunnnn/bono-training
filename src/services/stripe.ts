@@ -51,7 +51,7 @@ export const createCheckoutSession = async (
 /**
  * 購読状態を確認する
  */
-export const checkSubscriptionStatus = async (): Promise<{ 
+export const checkSubscriptionStatus = async (): Promise<{
   isSubscribed: boolean;
   subscribed: boolean; // 後方互換性のため
   planType: PlanType | null;
@@ -63,43 +63,110 @@ export const checkSubscriptionStatus = async (): Promise<{
     // ユーザーが認証済みか確認
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
-      return { 
-        isSubscribed: false, 
+      return {
+        isSubscribed: false,
         subscribed: false,
-        planType: null, 
+        planType: null,
         hasMemberAccess: false,
         hasLearningAccess: false,
-        error: null 
+        error: null
       };
     }
-    
+
     // Supabase Edge Functionを呼び出して購読状態を確認
     const { data, error } = await supabase.functions.invoke('check-subscription');
-    
-    if (error) {
-      console.error('購読状態確認エラー:', error);
-      throw new Error('購読状態の確認に失敗しました。');
+
+    // Edge Functionがエラーを返した場合、または data.error がある場合は直接DBから取得
+    if (error || data?.error) {
+      console.warn('Edge Functionエラー、直接DBから取得します:', error || data?.error);
+
+      // フォールバック: 直接データベースから購読情報を取得
+      const { data: subscription, error: dbError } = await supabase
+        .from('user_subscriptions')
+        .select('plan_type, is_active')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (dbError) {
+        console.error('DB取得エラー:', dbError);
+        throw new Error('購読状態の確認に失敗しました。');
+      }
+
+      const isActive = subscription?.is_active || false;
+      const planType = subscription?.plan_type as PlanType || null;
+
+      // アクセス権限を計算
+      const hasMemberAccess = isActive && (planType === 'standard' || planType === 'growth' || planType === 'community');
+      const hasLearningAccess = isActive && (planType === 'standard' || planType === 'growth');
+
+      console.log('DB直接取得結果:', { isActive, planType, hasMemberAccess, hasLearningAccess });
+
+      return {
+        isSubscribed: isActive,
+        subscribed: isActive,
+        planType,
+        hasMemberAccess,
+        hasLearningAccess,
+        error: null
+      };
     }
-    
+
     console.log('購読状態確認結果:', data);
-    
-    return { 
-      isSubscribed: data.isSubscribed || data.subscribed, 
+
+    return {
+      isSubscribed: data.isSubscribed || data.subscribed,
       subscribed: data.subscribed || data.isSubscribed, // 後方互換性
       planType: data.planType || null,
       hasMemberAccess: data.hasMemberAccess || false,
       hasLearningAccess: data.hasLearningAccess || false,
-      error: null 
+      error: null
     };
   } catch (error) {
     console.error('購読状態確認エラー:', error);
-    return { 
-      isSubscribed: false, 
+    return {
+      isSubscribed: false,
       subscribed: false,
-      planType: null, 
+      planType: null,
       hasMemberAccess: false,
       hasLearningAccess: false,
-      error: error as Error 
+      error: error as Error
     };
+  }
+};
+
+/**
+ * Stripeカスタマーポータルのセッションを作成し、URLを取得する
+ * @param returnUrl ポータルから戻る際のリダイレクトURL
+ * @returns カスタマーポータルのURL
+ */
+export const getCustomerPortalUrl = async (returnUrl?: string): Promise<string> => {
+  try {
+    // ユーザーが認証済みか確認
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('認証されていません。ログインしてください。');
+    }
+
+    // デフォルトのリターンURLを設定
+    const defaultReturnUrl = `${window.location.origin}/account`;
+
+    // Supabase Edge Functionを呼び出してカスタマーポータルセッションを作成
+    const { data, error } = await supabase.functions.invoke('create-customer-portal', {
+      body: { returnUrl: returnUrl || defaultReturnUrl }
+    });
+
+    if (error) {
+      console.error('カスタマーポータルセッション作成エラー:', error);
+      throw new Error('カスタマーポータルの作成に失敗しました。');
+    }
+
+    if (!data || !data.url) {
+      throw new Error('カスタマーポータルURLの取得に失敗しました。');
+    }
+
+    return data.url;
+  } catch (error) {
+    console.error('カスタマーポータルURL取得エラー:', error);
+    throw error;
   }
 };

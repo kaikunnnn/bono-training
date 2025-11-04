@@ -8,6 +8,7 @@ interface QuestItem {
   slug: string;
   isCompleted: boolean;
   isFocus: boolean;
+  isPremium?: boolean;
 }
 
 interface QuestBlockProps {
@@ -77,6 +78,7 @@ const QuestBlock = ({
             slug={item.slug}
             isCompleted={item.isCompleted}
             isFocus={item.isFocus}
+            isPremium={item.isPremium}
             onCheckChange={(itemId, isChecked) =>
               handleCheckChange(itemId, isChecked)
             }

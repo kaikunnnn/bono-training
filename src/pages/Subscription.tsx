@@ -61,13 +61,14 @@ const SubscriptionPage: React.FC = () => {
     try {
       // ユーザーの現在地を保存し、チェックアウト後に戻れるようにする
       const returnUrl = window.location.origin + '/subscription/success';
-      
-      const { url, error } = await createCheckoutSession(returnUrl);
-      
+
+      // デフォルトは1ヶ月プラン
+      const { url, error } = await createCheckoutSession(returnUrl, selectedPlanType, 1);
+
       if (error) {
         throw error;
       }
-      
+
       if (url) {
         // Stripeチェックアウトページにリダイレクト
         window.location.href = url;
