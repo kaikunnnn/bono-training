@@ -1,5 +1,9 @@
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import PremiumVideoLock from '@/components/premium/PremiumVideoLock';
+
 interface VideoSectionProps {
   videoUrl?: string;
+  isPremium?: boolean;
 }
 
 /**
@@ -11,8 +15,15 @@ interface VideoSectionProps {
  * - width に従って縦も16:9に従って伸びる
  * - テスト用固定URL: https://vimeo.com/76979871
  * - 後でSanityのvideoUrlと連携
+ * - プレミアムコンテンツのアクセス制御
  */
-const VideoSection = ({ videoUrl }: VideoSectionProps) => {
+const VideoSection = ({ videoUrl, isPremium = false }: VideoSectionProps) => {
+  const { canAccessContent } = useSubscriptionContext();
+
+  // プレミアムコンテンツで未契約の場合、ロック表示
+  if (isPremium && !canAccessContent(isPremium)) {
+    return <PremiumVideoLock />;
+  }
   // VimeoのURLからビデオIDを抽出
   const getVimeoId = (url: string): string | null => {
     // https://vimeo.com/76979871 → 76979871

@@ -7,6 +7,7 @@ interface Article {
   slug: { current: string };
   thumbnail?: any;
   videoDuration?: number;
+  isPremium?: boolean;
 }
 
 interface Quest {

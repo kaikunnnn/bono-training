@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { checkSubscriptionStatus } from '@/services/stripe';
 import { PlanType, hasLearningAccess, hasMemberAccess, UserPlanInfo } from '@/utils/subscriptionPlans';
+import { canAccessContent as canAccessContentUtil } from '@/utils/premiumAccess';
 
 export interface SubscriptionState {
   isSubscribed: boolean;
@@ -13,6 +14,8 @@ export interface SubscriptionState {
   // アクセス権限フラグ
   hasMemberAccess: boolean;
   hasLearningAccess: boolean;
+  // プレミアムコンテンツアクセス判定
+  canAccessContent: (isPremium: boolean) => boolean;
 }
 
 /**
@@ -94,6 +97,7 @@ export const useSubscription = (): SubscriptionState => {
     error,
     refresh: fetchSubscriptionStatus,
     hasMemberAccess: memberAccess,
-    hasLearningAccess: learningAccess
+    hasLearningAccess: learningAccess,
+    canAccessContent: (isPremium: boolean) => canAccessContentUtil(isPremium, planType)
   };
 };

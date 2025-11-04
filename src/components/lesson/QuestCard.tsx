@@ -8,6 +8,7 @@ interface Article {
   slug: { current: string };
   thumbnail?: any;
   videoDuration?: number;
+  isPremium?: boolean;
 }
 
 interface QuestCardProps {
@@ -135,6 +136,7 @@ export default function QuestCard({
               thumbnail={article.thumbnail}
               videoDuration={article.videoDuration}
               isCompleted={completedArticleIds.includes(article._id)}
+              isPremium={article.isPremium}
             />
           ))}
         </div>

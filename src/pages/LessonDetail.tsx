@@ -14,6 +14,7 @@ interface Article {
   slug: { current: string };
   thumbnail?: any;
   videoDuration?: number;
+  isPremium?: boolean;
 }
 
 interface Quest {
@@ -85,7 +86,8 @@ export default function LessonDetail() {
                   _type
                 }
               },
-              videoDuration
+              videoDuration,
+              isPremium
             }
           }
         }`;
