@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -22,6 +22,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/components',
     icon: <Layers className="w-8 h-8" />,
     tags: ['Colors', 'Typography', 'Animations', 'UI', 'Custom Components']
+  },
+  {
+    title: 'ガイド記事執筆マニュアル',
+    description: '/guideセクションで記事を書くための完全ガイド。Frontmatter、Markdown記法、画像管理、カテゴリ追加方法など。',
+    path: '/dev/guide-manual',
+    icon: <BookOpen className="w-8 h-8" />,
+    tags: ['Guide', 'Writing', 'Markdown', 'Documentation']
   }
 ];
 
