@@ -51,7 +51,8 @@ export class WebflowClient {
   }
 
   /**
-   * Get all Videos for a Series, ordered by series-video-order
+   * Get all Videos for a Series
+   * Note: Sorting is handled by transformer.ts using series-video-order-3 field
    */
   async getVideosForSeries(seriesId: string): Promise<WebflowVideo[]> {
     const url = `${WEBFLOW_API_BASE}/collections/${VIDEOS_COLLECTION_ID}/items?limit=100`;
@@ -60,12 +61,6 @@ export class WebflowClient {
     const seriesVideos = response.items.filter(video => {
       const videoSeriesId = video.fieldData?.series || video.series;
       return videoSeriesId === seriesId;
-    });
-    
-    seriesVideos.sort((a, b) => {
-      const orderA = a['series-video-order'] || a.fieldData?.['series-video-order'] || 0;
-      const orderB = b['series-video-order'] || b.fieldData?.['series-video-order'] || 0;
-      return orderA - orderB;
     });
     
     return seriesVideos;
