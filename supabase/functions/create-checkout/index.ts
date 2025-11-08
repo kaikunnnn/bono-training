@@ -54,15 +54,28 @@ serve(async (req) => {
       apiVersion: "2023-10-16",
     });
 
-    // ユーザーのStripe Customer IDを取得または作成
+    // ユーザーのStripe Customer IDと既存サブスクリプションを取得
     let stripeCustomerId: string;
-    
+    let existingSubscriptionId: string | null = null;
+
     // DBからユーザーのStripe Customer IDを検索
     const { data: customerData, error: customerError } = await supabaseClient
       .from("stripe_customers")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
       .single();
+
+    // 既存サブスクリプションを確認
+    const { data: existingSubData } = await supabaseClient
+      .from("user_subscriptions")
+      .select("stripe_subscription_id, is_active")
+      .eq("user_id", user.id)
+      .single();
+
+    if (existingSubData?.is_active && existingSubData?.stripe_subscription_id) {
+      existingSubscriptionId = existingSubData.stripe_subscription_id;
+      logDebug("既存のアクティブなサブスクリプションを検出:", { existingSubscriptionId });
+    }
     
     if (customerError || !customerData) {
       // Stripe顧客が存在しない場合は新規作成
@@ -112,6 +125,18 @@ serve(async (req) => {
     }
 
     // Checkoutセッションの作成
+    const sessionMetadata: Record<string, string> = {
+      user_id: user.id,
+      plan_type: planType,
+      duration: duration.toString()
+    };
+
+    // 既存サブスクリプションがある場合はメタデータに含める
+    if (existingSubscriptionId) {
+      sessionMetadata.replace_subscription_id = existingSubscriptionId;
+      logDebug("メタデータに既存サブスクリプションIDを追加:", { existingSubscriptionId });
+    }
+
     const session = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
       payment_method_types: ["card"],
@@ -124,11 +149,7 @@ serve(async (req) => {
       mode: "subscription",
       success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: returnUrl,
-      metadata: {
-        user_id: user.id,
-        plan_type: planType,
-        duration: duration.toString()
-      }
+      metadata: sessionMetadata
     });
     
     logDebug("Checkoutセッション作成完了", { 

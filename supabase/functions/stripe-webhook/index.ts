@@ -136,6 +136,7 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, session: a
     // メタデータからプラン情報を取得
     const planType = session.metadata?.plan_type || "community";
     const duration = parseInt(session.metadata?.duration || "1");
+    const replaceSubscriptionId = session.metadata?.replace_subscription_id; // 既存サブスクリプションのID
 
     // 金額情報を取得
     const items = subscription.items.data;
@@ -175,6 +176,8 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, session: a
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
+        stripe_customer_id: customerId,
+        duration: duration,
         updated_at: new Date().toISOString()
       }, { onConflict: 'user_id' });
 
@@ -198,6 +201,31 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, session: a
       console.error("サブスクリプション情報の保存エラー:", subscriptionError);
     } else {
       console.log(`${planType}プラン（${duration}ヶ月）のサブスクリプション情報を正常に保存しました`);
+    }
+
+    // 既存サブスクリプションがある場合はキャンセル
+    if (replaceSubscriptionId) {
+      console.log(`既存サブスクリプション ${replaceSubscriptionId} をキャンセルします`);
+      try {
+        // 既存サブスクリプションを即座にキャンセル
+        await stripe.subscriptions.cancel(replaceSubscriptionId);
+        console.log(`既存サブスクリプション ${replaceSubscriptionId} をキャンセルしました`);
+
+        // DBの古いサブスクリプション情報も更新
+        const { error: oldSubError } = await supabase
+          .from("subscriptions")
+          .update({
+            end_timestamp: new Date().toISOString()
+          })
+          .eq("stripe_subscription_id", replaceSubscriptionId);
+
+        if (oldSubError) {
+          console.error("古いサブスクリプション情報の更新エラー:", oldSubError);
+        }
+      } catch (cancelError) {
+        console.error(`既存サブスクリプションのキャンセルエラー:`, cancelError.message);
+        // キャンセルに失敗しても新しいサブスクリプションは有効なので、処理を継続
+      }
     }
 
   } catch (error) {

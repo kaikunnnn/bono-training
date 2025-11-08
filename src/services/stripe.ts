@@ -170,3 +170,48 @@ export const getCustomerPortalUrl = async (returnUrl?: string): Promise<string> 
     throw error;
   }
 };
+
+/**
+ * 既存サブスクリプションのプランを変更する
+ * @param planType 変更先のプランタイプ
+ * @param duration プラン期間（1ヶ月または3ヶ月）
+ * @returns 成功/失敗の結果
+ */
+export const updateSubscription = async (
+  planType: PlanType,
+  duration: 1 | 3 = 1
+): Promise<{ success: boolean; error: Error | null }> => {
+  try {
+    // ユーザーが認証済みか確認
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error('認証されていません。ログインしてください。');
+    }
+
+    console.log(`プラン変更開始: プラン=${planType}, 期間=${duration}ヶ月`);
+
+    // Supabase Edge Functionを呼び出してサブスクリプションを更新
+    const { data, error } = await supabase.functions.invoke('update-subscription', {
+      body: {
+        planType,
+        duration
+      }
+    });
+
+    if (error) {
+      console.error('サブスクリプション更新エラー:', error);
+      throw new Error('プラン変更に失敗しました。');
+    }
+
+    if (!data || !data.success) {
+      throw new Error(data?.error || 'プラン変更に失敗しました。');
+    }
+
+    console.log('プラン変更成功:', data);
+
+    return { success: true, error: null };
+  } catch (error) {
+    console.error('プラン変更エラー:', error);
+    return { success: false, error: error as Error };
+  }
+};
