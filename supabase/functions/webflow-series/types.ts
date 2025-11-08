@@ -11,11 +11,11 @@ export interface WebflowVideo {
   fieldData?: {
     name: string;
     slug: string;
-    'isthisasectiontitle?': boolean;
-    'series-video-order': number;
-    'link-video'?: string;
+    'is-this-a-section-title-3': boolean;
+    'series-video-order-3': number;
+    'link-video-3'?: string;
     'video-length'?: string;
-    description?: string;
+    'description-3'?: string;
     series?: string;
   };
 }
