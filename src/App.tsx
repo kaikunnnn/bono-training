@@ -33,6 +33,7 @@ import ComponentsPreview from './pages/blog/components-preview';
 import BlogIndex from './pages/blog/index';
 import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
+import BlogGuide from './pages/dev/BlogGuide';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -86,6 +87,8 @@ const AppContent = () => {
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
         <Route path="/blog/category/:category" element={<CategoryPage />} />
         <Route path="/blog/:slug" element={<BlogDetail />} />
+
+        <Route path="/dev/blog" element={<BlogGuide />} />
 
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
