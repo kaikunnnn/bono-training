@@ -9,6 +9,7 @@
  */
 
 import React from 'react';
+import { motion } from 'framer-motion';
 
 // 太陽SVGのパス
 const imgSunSvg = '/assets/blog/82c8bc0c7e4edf6d630d1c217268bbafd904b609.svg';
@@ -82,6 +83,7 @@ export const SunDecoration: React.FC<SunDecorationProps> = ({
  *
  * レスポンシブ対応の太陽装飾コンポーネント。
  * ページ右下に固定配置され、画面サイズに応じて位置が調整されます。
+ * 下から登るふわっとしたアニメーション付き。
  *
  * @example
  * ```tsx
@@ -90,19 +92,36 @@ export const SunDecoration: React.FC<SunDecorationProps> = ({
  */
 export const ResponsiveSunDecoration: React.FC = () => {
   return (
-    <div
-      className="fixed right-[5%] md:right-[3%] sm:right-[2%] bottom-[268px] md:bottom-[200px] sm:bottom-[150px] w-[260px] h-[260px] z-0 pointer-events-none"
+    <motion.div
+      className="fixed right-[5%] md:right-[3%] sm:right-[2%] w-[260px] h-[260px] pointer-events-none"
+      style={{
+        bottom: '-130px', // 太陽が半分見える位置（260pxの半分 = 130px下にオフセット）
+        zIndex: -1, // 他のすべての要素の下、背景グラデーション（-10）より上
+      }}
       aria-hidden="true"
+      initial={{
+        y: 150, // 初期位置：さらに下に隠れている
+        opacity: 0, // 最初は透明
+      }}
+      animate={{
+        y: 0, // 最終位置：通常の位置
+        opacity: 1, // 完全に表示
+      }}
+      transition={{
+        delay: 0.5, // 0.5秒遅延
+        duration: 1.2, // 1.2秒かけてアニメーション
+        ease: [0.25, 0.46, 0.45, 0.94], // ふわっとしたイージング（easeOutCubic相当）
+      }}
     >
       <SunDecoration />
-    </div>
+    </motion.div>
   );
 };
 
 /**
  * AnimatedSunDecoration Component
  *
- * フェードインアニメーション付きの太陽装飾コンポーネント。
+ * フェードイン＋下から登るアニメーション付きの太陽装飾コンポーネント。
  *
  * @example
  * ```tsx
@@ -111,27 +130,29 @@ export const ResponsiveSunDecoration: React.FC = () => {
  */
 export const AnimatedSunDecoration: React.FC = () => {
   return (
-    <div
-      className="fixed right-[5%] md:right-[3%] sm:right-[2%] bottom-[268px] md:bottom-[200px] sm:bottom-[150px] w-[260px] h-[260px] z-0 pointer-events-none animate-fade-in"
+    <motion.div
+      className="fixed right-[5%] md:right-[3%] sm:right-[2%] w-[260px] h-[260px] pointer-events-none"
       aria-hidden="true"
       style={{
-        animation: 'fadeIn 1s ease-in-out',
+        bottom: '-130px', // 太陽が半分見える位置（260pxの半分 = 130px下にオフセット）
+        zIndex: -1, // 他のすべての要素の下、背景グラデーション（-10）より上
+      }}
+      initial={{
+        y: 150, // 初期位置：さらに下に隠れている
+        opacity: 0, // 最初は透明
+      }}
+      animate={{
+        y: 0, // 最終位置：通常の位置
+        opacity: 1, // 完全に表示
+      }}
+      transition={{
+        delay: 0.5, // 0.5秒遅延
+        duration: 1.2, // 1.2秒かけてアニメーション
+        ease: [0.25, 0.46, 0.45, 0.94], // ふわっとしたイージング（easeOutCubic相当）
       }}
     >
       <SunDecoration />
-
-      {/* アニメーション定義 */}
-      <style>{`
-        @keyframes fadeIn {
-          0% {
-            opacity: 0;
-          }
-          100% {
-            opacity: 1;
-          }
-        }
-      `}</style>
-    </div>
+    </motion.div>
   );
 };
 

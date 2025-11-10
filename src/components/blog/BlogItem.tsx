@@ -83,14 +83,12 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
       >
         {/* サムネイル */}
         <div
-          className="flex-shrink-0 flex items-center justify-center overflow-hidden"
+          className="flex-shrink-0 overflow-hidden"
           style={{
             width: BLOG_SPACING.card.thumbnailWidth,
             height: BLOG_SPACING.card.thumbnailHeight,
             backgroundColor: '#D8E7EF',
             borderRadius: '12px',
-            paddingTop: '40px',
-            paddingBottom: '40px',
           }}
           data-name="thumbanil - 16:9"
           data-node-id="14:19"
@@ -100,10 +98,9 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
               src={post.thumbnail || post.imageUrl}
               alt=""
               style={{
-                width: BLOG_SPACING.card.emojiSize,
-                height: BLOG_SPACING.card.emojiSize,
-                objectFit: 'contain',
-                maxWidth: '350.66px',
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
               }}
               loading="lazy"
               data-name="emoji Image"
@@ -111,6 +108,7 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
             />
           ) : (
             <div
+              className="flex items-center justify-center w-full h-full"
               style={{
                 fontSize: BLOG_SPACING.card.emojiSize,
                 lineHeight: 1,

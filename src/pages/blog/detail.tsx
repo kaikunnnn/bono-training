@@ -2,8 +2,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, Tag, ArrowLeft } from 'lucide-react';
-import Header from '@/components/layout/Header';
+import { ArrowLeft } from 'lucide-react';
+import { BlogHeader } from '@/components/blog/BlogHeader';
+import { BackgroundGradation } from '@/components/blog/BackgroundGradation';
+import { ResponsiveSunDecoration } from '@/components/blog/SunDecoration';
 import Footer from '@/components/layout/Footer';
 import { BlogPostHeader } from '@/components/blog/BlogPostHeader';
 import { TableOfContents } from '@/components/blog/TableOfContents';
@@ -11,7 +13,6 @@ import { ShareButtons } from '@/components/blog/ShareButtons';
 import { PostNavigation } from '@/components/blog/PostNavigation';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
 import { getBlogPostBySlug, getNextPost, getPrevPost } from '@/utils/blog/blogUtils';
-import { categories } from '@/data/blog/categories';
 import { BlogPost } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
@@ -101,10 +102,18 @@ const BlogDetail: React.FC = () => {
         initial="initial"
         animate="in"
         exit="out"
-        className="min-h-screen bg-Top"
+        className="min-h-screen relative"
       >
-        <Header />
-        <main className="container pt-24 pb-16">
+        {/* 背景グラデーション */}
+        <div className="fixed inset-0" style={{ zIndex: -10 }}>
+          <BackgroundGradation />
+        </div>
+
+        {/* 太陽の装飾 */}
+        <ResponsiveSunDecoration />
+
+        <BlogHeader />
+        <main className="container pb-16">
           <div className="max-w-4xl mx-auto">
             <LoadingSkeleton />
           </div>
@@ -121,10 +130,18 @@ const BlogDetail: React.FC = () => {
         initial="initial"
         animate="in"
         exit="out"
-        className="min-h-screen bg-Top"
+        className="min-h-screen relative"
       >
-        <Header />
-        <main className="container pt-24 pb-16">
+        {/* 背景グラデーション */}
+        <div className="fixed inset-0" style={{ zIndex: -10 }}>
+          <BackgroundGradation />
+        </div>
+
+        {/* 太陽の装飾 */}
+        <ResponsiveSunDecoration />
+
+        <BlogHeader />
+        <main className="container pb-16">
           <div className="max-w-4xl mx-auto text-center py-16">
             <div className="text-6xl mb-4">📄</div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
@@ -147,7 +164,6 @@ const BlogDetail: React.FC = () => {
     );
   }
 
-  const category = categories.find(c => c.slug === post.categorySlug);
   const breadcrumbItems = [
     { label: 'ブログ', href: '/blog' },
     { label: post.title }
@@ -186,7 +202,7 @@ const BlogDetail: React.FC = () => {
       initial="initial"
       animate="in"
       exit="out"
-      className="min-h-screen bg-Top"
+      className="min-h-screen relative"
     >
       {/* SEO設定 */}
       <SEO
@@ -200,9 +216,17 @@ const BlogDetail: React.FC = () => {
         jsonLd={articleJsonLd}
       />
 
-      <Header />
+      {/* 背景グラデーション */}
+      <div className="fixed inset-0" style={{ zIndex: -10 }}>
+        <BackgroundGradation />
+      </div>
 
-      <main className="container pt-24 pb-16">
+      {/* 太陽の装飾 */}
+      <ResponsiveSunDecoration />
+
+      <BlogHeader />
+
+      <main className="container pb-16">
         <div className="max-w-4xl mx-auto">
           {/* パンくずリスト */}
           <motion.div
@@ -213,127 +237,97 @@ const BlogDetail: React.FC = () => {
             <Breadcrumb items={breadcrumbItems} className="mb-8" />
           </motion.div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* メインコンテンツ */}
-            <motion.article
-              className="lg:col-span-3 space-y-8"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 }}
+          {/* ブログ一覧に戻るボタン */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+            className="mb-4"
+          >
+            <Link
+              to="/blog"
+              className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
             >
-              {/* 記事ヘッダー */}
-              <BlogPostHeader post={post} />
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              ブログ一覧に戻る
+            </Link>
+          </motion.div>
 
-              {/* メタ情報 */}
-              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-600 pb-6 border-b border-gray-200">
-                <div className="flex items-center">
-                  <Calendar className="w-4 h-4 mr-1" />
-                  {new Date(post.publishedAt).toLocaleDateString('ja-JP')}
-                </div>
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {post.readTime}分で読める
-                </div>
-                {category && (
-                  <div className="flex items-center">
-                    <Tag className="w-4 h-4 mr-1" />
-                    <Badge
-                      variant="secondary"
-                      className={`${category.color} text-white`}
-                    >
-                      {category.name}
-                    </Badge>
-                  </div>
-                )}
-              </div>
+          {/* メインコンテンツ */}
+          <motion.article
+            className="space-y-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            {/* 目次 */}
+            <TableOfContents items={tocItems} />
 
-              {/* 記事コンテンツ */}
-              <div className="prose prose-lg max-w-none">
-                {/* アイキャッチ画像 */}
-                {post.imageUrl && (
-                  <motion.div
-                    className="mb-8"
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <img
-                      src={post.imageUrl}
-                      alt={post.title}
-                      className="w-full h-64 md:h-80 object-cover rounded-xl shadow-md"
-                    />
-                  </motion.div>
-                )}
+            {/* 記事ヘッダー */}
+            <BlogPostHeader post={post} />
 
-                {/* 記事本文 */}
+            {/* 記事コンテンツ */}
+            <div className="prose prose-lg max-w-none">
+              {/* アイキャッチ画像 */}
+              {post.imageUrl && (
                 <motion.div
-                  className="space-y-6"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.4 }}
-                  dangerouslySetInnerHTML={{ __html: post.content }}
-                />
-              </div>
-
-              {/* タグ */}
-              {post.tags && post.tags.length > 0 && (
-                <motion.div
-                  className="pt-6 border-t border-gray-200"
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
+                  className="mb-8 w-full rounded-xl overflow-hidden shadow-md"
+                  style={{ aspectRatio: '16 / 9' }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.3 }}
                 >
-                  <h3 className="text-sm font-medium text-gray-700 mb-3">タグ:</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {post.tags.map((tag, index) => (
-                      <Badge key={index} variant="outline">
-                        #{tag}
-                      </Badge>
-                    ))}
-                  </div>
+                  <img
+                    src={post.imageUrl}
+                    alt={post.title}
+                    className="w-full h-full object-cover"
+                  />
                 </motion.div>
               )}
 
-              {/* シェアボタン */}
+              {/* 記事本文 */}
+              <motion.div
+                className="space-y-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+                dangerouslySetInnerHTML={{ __html: post.content }}
+              />
+            </div>
+
+            {/* タグ */}
+            {post.tags && post.tags.length > 0 && (
               <motion.div
                 className="pt-6 border-t border-gray-200"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.6 }}
+                transition={{ delay: 0.5 }}
               >
-                <ShareButtons
-                  url={`/blog/${post.slug}`}
-                  title={post.title}
-                  description={post.excerpt}
-                />
+                <h3 className="text-sm font-medium text-gray-700 mb-3">タグ:</h3>
+                <div className="flex flex-wrap gap-2">
+                  {post.tags.map((tag, index) => (
+                    <Badge key={index} variant="outline">
+                      #{tag}
+                    </Badge>
+                  ))}
+                </div>
               </motion.div>
-            </motion.article>
+            )}
 
-            {/* サイドバー */}
-            <motion.aside
-              className="lg:col-span-1 space-y-6"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
+            {/* シェアボタン */}
+            <motion.div
+              className="pt-6 border-t border-gray-200"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6 }}
             >
-              {/* 目次 */}
-              <div className="sticky top-24">
-                <TableOfContents
-                  items={tocItems}
-                  className="mb-8"
-                />
-
-                {/* ブログ一覧に戻るボタン */}
-                <Link
-                  to="/blog"
-                  className="block w-full text-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-                >
-                  <ArrowLeft className="w-4 h-4 inline mr-2" />
-                  ブログ一覧に戻る
-                </Link>
-              </div>
-            </motion.aside>
-          </div>
+              <ShareButtons
+                url={`/blog/${post.slug}`}
+                title={post.title}
+                description={post.excerpt}
+              />
+            </motion.div>
+          </motion.article>
 
           {/* 前後の記事ナビゲーション */}
           <motion.div
