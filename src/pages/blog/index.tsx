@@ -1,26 +1,56 @@
-// src/pages/blog/index.tsx
-import { useState, useEffect } from 'react';
+/**
+ * BONO Blog - Main Index Page
+ *
+ * 99frontend 仕様に基づくブログメインページ
+ * 参照: blog-pages-implementation-plan.md - Phase 3
+ *
+ * @page BlogIndex
+ * @description ブログのメインページ。99frontend仕様に完全準拠。
+ */
+
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import { BackgroundGradation } from '@/components/blog/BackgroundGradation';
+import { BlogHeader } from '@/components/blog/BlogHeader';
+import { HeroSection } from '@/components/blog/HeroSection';
 import { BlogList } from '@/components/blog/BlogList';
-import { CategoryFilter } from '@/components/blog/CategoryFilter';
 import { Pagination } from '@/components/blog/Pagination';
-import { getBlogPosts } from '@/utils/blog/blogUtils';
-import { categories } from '@/data/blog/categories';
-import { BlogPostsResponse } from '@/types/blog';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ResponsiveSunDecoration } from '@/components/blog/SunDecoration';
+import Footer from '@/components/layout/Footer';
 import SEO from '@/components/common/SEO';
-import { useRSSFeed } from '@/hooks/useRSSFeed';
-import { useSitemap } from '@/hooks/useSitemap';
+import { getBlogPosts } from '@/utils/blog/blogUtils';
+import { BlogPostsResponse } from '@/types/blog';
 
+// アニメーション定義
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
-  in: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" } },
-  out: { opacity: 0, y: -20, transition: { duration: 0.3, ease: "easeIn" } }
+  initial: { opacity: 0 },
+  in: { opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
+  out: { opacity: 0, transition: { duration: 0.3, ease: 'easeIn' } },
 };
 
+const contentVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+};
+
+/**
+ * BlogIndex Component
+ *
+ * ブログのメインページ。99frontend仕様に準拠した実装。
+ *
+ * 構成:
+ * - BackgroundGradation（背景）
+ * - BlogHeader（ヘッダー）
+ * - HeroSection（ヒーローセクション）
+ * - BlogList（記事一覧）
+ * - Pagination（ページネーション）
+ * - Footer（フッター）
+ */
 const BlogIndex: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [blogData, setBlogData] = useState<BlogPostsResponse>({
@@ -31,17 +61,10 @@ const BlogIndex: React.FC = () => {
       totalPosts: 0,
       postsPerPage: 9,
       hasNextPage: false,
-      hasPrevPage: false
-    }
+      hasPrevPage: false,
+    },
   });
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-
-  // RSS フィード用フック
-  const { generateAndDownloadRSS, isGenerating } = useRSSFeed();
-
-  // サイトマップ用フック
-  const { generateAndDownloadSitemap, isGenerating: isSitemapGenerating } = useSitemap();
 
   // URLパラメータからページ番号を取得
   const currentPage = parseInt(searchParams.get('page') || '1', 10);
@@ -53,13 +76,12 @@ const BlogIndex: React.FC = () => {
       try {
         const data = await getBlogPosts({
           page: currentPage,
-          category: selectedCategory || undefined,
-          limit: 9
+          limit: 9,
         });
         setBlogData(data);
       } catch (error) {
         console.error('Failed to load posts:', error);
-        // エラー時はmockデータにフォールバック
+        // エラー時は空データ
         setBlogData({
           posts: [],
           pagination: {
@@ -68,8 +90,8 @@ const BlogIndex: React.FC = () => {
             totalPosts: 0,
             postsPerPage: 9,
             hasNextPage: false,
-            hasPrevPage: false
-          }
+            hasPrevPage: false,
+          },
         });
       } finally {
         setIsLoading(false);
@@ -77,14 +99,7 @@ const BlogIndex: React.FC = () => {
     };
 
     loadPosts();
-  }, [currentPage, selectedCategory]);
-
-  // カテゴリ変更ハンドラ
-  const handleCategoryChange = (category: string | null) => {
-    setSelectedCategory(category);
-    // カテゴリ変更時は1ページ目に戻る
-    setSearchParams({ page: '1' });
-  };
+  }, [currentPage]);
 
   // ページ変更ハンドラ
   const handlePageChange = (page: number) => {
@@ -93,16 +108,19 @@ const BlogIndex: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // ページタイトルの設定
+  useEffect(() => {
+    document.title = 'BONO Blog - HOPE.';
+  }, []);
+
   // ローディングスケルトン
   const LoadingSkeleton = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="flex flex-col items-center gap-6 py-12">
       {[...Array(6)].map((_, index) => (
-        <div key={index} className="space-y-4">
-          <Skeleton className="h-48 w-full rounded-xl" />
-          <Skeleton className="h-4 w-3/4" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-2/3" />
-        </div>
+        <div
+          key={index}
+          className="w-full max-w-[1120px] h-[159px] bg-gray-100 rounded-lg animate-pulse"
+        />
       ))}
     </div>
   );
@@ -113,147 +131,72 @@ const BlogIndex: React.FC = () => {
       initial="initial"
       animate="in"
       exit="out"
-      className="min-h-screen bg-Top"
+      className="relative min-h-screen blog-page"
     >
       {/* SEO設定 */}
       <SEO
-        title="ブログ"
-        description="BONOトレーニングのブログ記事一覧。デザイン、開発、UI/UXに関する最新の記事をお届けします。"
+        title="BONO Blog - HOPE."
+        description="BONOをつくる30代在宅独身男性のクラフト日誌。デザイン、開発、UI/UXに関する記事をお届けします。"
         ogUrl="/blog"
         ogType="blog"
       />
 
-      {/* ヘッダー */}
-      <Header />
+      {/* 背景グラデーション - Fixed, Full Screen, z-index: -10 */}
+      <div className="fixed inset-0" style={{ zIndex: -10 }}>
+        <BackgroundGradation />
+      </div>
 
-      {/* メインコンテンツ */}
-      <main className="container pt-24 pb-16">
-        {/* ページタイトルセクション */}
+      {/* 太陽の装飾 - Fixed, 右下配置, z-index: 0 */}
+      <ResponsiveSunDecoration />
+
+      {/* ヘッダー - 高さ 74.07px, z-index: 100 */}
+      <BlogHeader />
+
+      {/* ヒーローセクション - 高さ 381px, 背景色 #E8E6EA */}
+      <HeroSection />
+
+      {/* メインコンテンツ - padding: 上48px/下48px, z-index: 0 */}
+      <main className="relative" style={{ paddingTop: '48px', paddingBottom: '48px', zIndex: 0 }}>
         <motion.div
-          className="text-center py-12"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
+          variants={contentVariants}
+          initial="hidden"
+          animate="visible"
         >
-          <h1 className="text-4xl md:text-5xl font-bold !leading-normal mb-4 text-gray-900">
-            ブログ
-          </h1>
-          <p className="text-lg text-gray-600 mb-4">
-            最新の記事をお届けします
-          </p>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={generateAndDownloadRSS}
-              disabled={isGenerating}
-              className="inline-flex items-center px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
-            >
-              {isGenerating ? (
-                <span className="flex items-center">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  RSS生成中...
-                </span>
-              ) : (
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M3.429 2.667v2.667c6.667 0 12 5.333 12 12h2.667c0-8-6.667-14.667-14.667-14.667zM3.429 8v2.667c3.333 0 6 2.667 6 6h2.667c0-4.667-3.833-8.667-8.667-8.667zM6.095 13.333c0 1.467-1.2 2.667-2.667 2.667s-2.667-1.2-2.667-2.667 1.2-2.667 2.667-2.667 2.667 1.2 2.667 2.667z"/>
-                  </svg>
-                  RSSフィード
-                </span>
+          {isLoading ? (
+            <LoadingSkeleton />
+          ) : blogData.posts.length > 0 ? (
+            <>
+              {/* BlogList - 中央寄せ, max-width: 1120px, gap: 24px */}
+              <BlogList posts={blogData.posts} />
+
+              {/* Pagination - 中央寄せ, margin-top: 48px */}
+              {blogData.pagination.totalPages > 1 && (
+                <div style={{ marginTop: '48px' }}>
+                  <Pagination
+                    pagination={blogData.pagination}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
               )}
-            </button>
-            <button
-              onClick={generateAndDownloadSitemap}
-              disabled={isSitemapGenerating}
-              className="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-lg transition-colors disabled:opacity-50"
+            </>
+          ) : (
+            // 記事が見つからない場合
+            <motion.div
+              className="text-center py-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4 }}
             >
-              {isSitemapGenerating ? (
-                <span className="flex items-center">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                  サイトマップ生成中...
-                </span>
-              ) : (
-                <span className="flex items-center">
-                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
-                  サイトマップ
-                </span>
-              )}
-            </button>
-          </div>
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="font-noto text-2xl font-semibold text-[#0F172A] mb-2">
+                記事が見つかりませんでした
+              </h3>
+              <p className="font-noto text-[#9CA3AF]">
+                記事はまだ投稿されていません。
+              </p>
+            </motion.div>
+          )}
         </motion.div>
-
-        {/* コンテンツエリア */}
-        <div className="w-full md:w-11/12 lg:w-10/12 mx-auto">
-          {/* カテゴリフィルター */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3, duration: 0.4 }}
-          >
-            <CategoryFilter
-              categories={categories}
-              selectedCategory={selectedCategory}
-              onCategoryChange={handleCategoryChange}
-            />
-          </motion.div>
-
-          {/* 記事一覧またはローディング */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.4, duration: 0.5 }}
-          >
-            {isLoading ? (
-              <LoadingSkeleton />
-            ) : blogData.posts.length > 0 ? (
-              <>
-                <BlogList posts={blogData.posts} />
-
-                {/* ページネーション */}
-                {blogData.pagination.totalPages > 1 && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.4 }}
-                  >
-                    <Pagination
-                      pagination={blogData.pagination}
-                      onPageChange={handlePageChange}
-                    />
-                  </motion.div>
-                )}
-              </>
-            ) : (
-              // 記事が見つからない場合
-              <motion.div
-                className="text-center py-16"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
-              >
-                <div className="text-6xl mb-4">📝</div>
-                <h3 className="text-2xl font-semibold text-gray-800 mb-2">
-                  記事が見つかりませんでした
-                </h3>
-                <p className="text-gray-600">
-                  {selectedCategory ?
-                    `「${categories.find(c => c.slug === selectedCategory)?.name}」カテゴリの記事はまだありません。` :
-                    '記事はまだ投稿されていません。'
-                  }
-                </p>
-                {selectedCategory && (
-                  <button
-                    onClick={() => handleCategoryChange(null)}
-                    className="mt-4 text-blue-600 hover:text-blue-700 underline"
-                  >
-                    すべての記事を表示
-                  </button>
-                )}
-              </motion.div>
-            )}
-          </motion.div>
-        </div>
       </main>
 
       {/* フッター */}

@@ -1,1 +1,474 @@
-{"$comment":"This is structural design data exported by the Figma Raw plugin. It is formatted to help LLMs (Large Language Models) understand design structures and components from Figma designs.","name":"Main","type":"FRAME","width":1920,"height":1388,"layoutMode":"NONE","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"top-image.svg fill","type":"FRAME","width":1920,"height":1388,"layoutMode":"NONE","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"top-image.svg","type":"FRAME","width":1920,"height":1625.3968505859375,"layoutMode":"NONE","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1.2698413133621216,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1}},"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1},"children":[{"name":"Vector","type":"VECTOR","width":1920,"height":1625.3968505859375,"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}],"fillStyle":{"name":"Library Style 6c3acbf1","fullName":"[Library] Style 6c3acbf1","estimated":true},"strokeWeight":{"name":"Variable 25","fullName":"Variable 25","notFound":true},"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"strokeWeight":{"name":"Variable 25","fullName":"Variable 25","notFound":true},"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1},"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}]},"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1}},{"name":"Vector","type":"VECTOR","width":1920,"height":1625.3968505859375,"fills":[{"name":"Variable 26","fullName":"Variable 26","notFound":true,"actualValue":{"type":"SOLID","opacity":0.4000000059604645,"color":{"r":1,"g":0.9490196108818054,"b":0.8901960849761963,"a":0.4000000059604645,"hex":"#fff2e366"}}}],"fillStyle":{"name":"Library Style e253fb5d","fullName":"[Library] Style e253fb5d","estimated":true},"strokeWeight":{"name":"Variable 25","fullName":"Variable 25","notFound":true},"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"strokeWeight":{"name":"Variable 25","fullName":"Variable 25","notFound":true},"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1},"fills":[{"name":"Variable 26","fullName":"Variable 26","notFound":true,"actualValue":{"type":"SOLID","opacity":0.4000000059604645,"color":{"r":1,"g":0.9490196108818054,"b":0.8901960849761963,"a":0.4000000059604645,"hex":"#fff2e366"}}}]},"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1}},{"name":"Vector","type":"VECTOR","width":1920,"height":1625.3968505859375,"fills":[{"name":"Variable 27","fullName":"Variable 27","notFound":true,"actualValue":{"type":"GRADIENT_LINEAR","opacity":0.10999999940395355,"gradientStops":[{"position":0,"color":{"r":0.5137255191802979,"g":0.5333333611488342,"b":0.9803921580314636,"a":1,"hex":"#8388fa"}},{"position":1,"color":{"r":0.9803921580314636,"g":0.6392157077789307,"b":0.5137255191802979,"a":0,"hex":"#faa38300"}}]}},{"name":"Variable 28","fullName":"Variable 28","notFound":true}],"strokeWeight":{"name":"Variable 25","fullName":"Variable 25","notFound":true},"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"strokeWeight":{"name":"Variable 25","fullName":"Variable 25","notFound":true},"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1},"fills":[{"name":"Variable 27","fullName":"Variable 27","notFound":true,"actualValue":{"type":"GRADIENT_LINEAR","opacity":0.10999999940395355,"gradientStops":[{"position":0,"color":{"r":0.5137255191802979,"g":0.5333333611488342,"b":0.9803921580314636,"a":1,"hex":"#8388fa"}},{"position":1,"color":{"r":0.9803921580314636,"g":0.6392157077789307,"b":0.5137255191802979,"a":0,"hex":"#faa38300"}}]}},{"name":"Variable 28","fullName":"Variable 28","notFound":true}]},"opacity":{"name":"Variable 12","fullName":"Variable 12","notFound":true,"actualValue":1}}]}]},{"name":"Container","type":"FRAME","width":1920,"height":461,"layoutMode":"HORIZONTAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"CENTER","counterAxisAlignItems":"MIN","paddingTop":80,"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Container","type":"FRAME","width":344,"height":381,"layoutMode":"VERTICAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"CENTER","counterAxisAlignItems":"CENTER","paddingTop":96,"paddingBottom":144,"itemSpacing":32,"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Frame","type":"FRAME","width":344,"height":89,"layoutMode":"NONE","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","fills":[{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}],"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Vector","type":"VECTOR","width":343.3340148925781,"height":88.70398712158203,"fills":[{"type":"SOLID","opacity":1,"color":{"r":0.05882352963089943,"g":0.09019608050584793,"b":0.16470588743686676,"a":1,"hex":"#0f172a"}}],"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER"}]},{"name":"Container","type":"FRAME","width":344,"height":20,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"CENTER","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"BONO をつくる 30 代在宅独身男性のクラフト日誌","type":"TEXT","width":325,"height":20,"fills":[{"name":"Variable 48","fullName":"Variable 48","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":0.6117647290229797,"g":0.6392157077789307,"b":0.686274528503418,"a":1,"hex":"#9ca3af"}}}],"fillStyle":{"name":"Library Style 2ea4098b","fullName":"[Library] Style 2ea4098b","estimated":true},"strokeWeight":1,"strokeAlign":"OUTSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"fills":[{"name":"Variable 48","fullName":"Variable 48","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":0.6117647290229797,"g":0.6392157077789307,"b":0.686274528503418,"a":1,"hex":"#9ca3af"}}}],"letterSpacing":[{"name":"Variable 52","fullName":"Variable 52","notFound":true}],"fontFamily":[{"name":"Variable 49","fullName":"Variable 49","notFound":true}],"lineHeight":[{"name":"Variable 53","fullName":"Variable 53","notFound":true}],"fontWeight":[{"name":"Variable 51","fullName":"Variable 51","notFound":true}]},"letterSpacing":{"unit":"PIXELS","value":0.699999988079071},"fontFamily":[{"name":"Variable 49","fullName":"Variable 49","notFound":true}],"lineHeight":{"unit":"PIXELS","value":20},"fontWeight":500,"characters":"BONO をつくる 30 代在宅独身男性のクラフト日誌","fontSize":14,"fontName":{"family":"Noto Sans JP","style":"Medium"},"textAlignHorizontal":"CENTER","textAlignVertical":"CENTER","textAutoResize":"WIDTH_AND_HEIGHT","textCase":"ORIGINAL","textDecoration":"NONE"}]}]}]},{"name":"Container","type":"FRAME","width":1120,"height":872,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Container","type":"FRAME","width":1120,"height":64,"layoutMode":"HORIZONTAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"CENTER","paddingLeft":10,"paddingRight":10,"paddingTop":16,"paddingBottom":16,"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Container","type":"FRAME","width":139,"height":48,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"All Episodes","type":"TEXT","width":139,"height":48,"fills":[{"name":"Variable 60","fullName":"Variable 60","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":0,"g":0,"b":0,"a":1,"hex":"#000000"}}}],"fillStyle":{"name":"Library Style f2565165","fullName":"[Library] Style f2565165","estimated":true},"strokeWeight":1,"strokeAlign":"OUTSIDE","strokeCap":"NONE","strokeJoin":"MITER","textStyle":{"name":"Library Style 8e15d4e9","fullName":"[Library] Style 8e15d4e9","estimated":true},"variables":{"fills":[{"name":"Variable 60","fullName":"Variable 60","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":0,"g":0,"b":0,"a":1,"hex":"#000000"}}}],"letterSpacing":[{"name":"Variable 62","fullName":"Variable 62","notFound":true}],"fontSize":[{"name":"Variable 61","fullName":"Variable 61","notFound":true}],"fontFamily":[{"name":"Variable 41","fullName":"Variable 41","notFound":true}],"lineHeight":[{"name":"Variable 63","fullName":"Variable 63","notFound":true}],"fontWeight":[{"name":"Variable 43","fullName":"Variable 43","notFound":true}]},"letterSpacing":{"unit":"PIXELS","value":0.6000000238418579},"fontSize":24,"fontFamily":[{"name":"Variable 41","fullName":"Variable 41","notFound":true}],"lineHeight":{"unit":"PIXELS","value":48},"fontWeight":700,"characters":"All Episodes","fontName":{"family":"Hind","style":"Bold"},"textAlignHorizontal":"LEFT","textAlignVertical":"CENTER","textAutoResize":"WIDTH_AND_HEIGHT","textCase":"ORIGINAL","textDecoration":"NONE","textStyleName":"Text Style 8e15d4e9..."}]}]},{"name":"List","type":"FRAME","width":1120,"height":808,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","itemSpacing":{"name":"Variable 67","fullName":"Variable 67","notFound":true,"actualValue":12},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"itemSpacing":{"name":"Variable 67","fullName":"Variable 67","notFound":true,"actualValue":12}},"children":[{"name":"Link","type":"FRAME","width":1120,"height":152,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Item","type":"FRAME","width":1120,"height":152,"cornerRadius":16,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","paddingLeft":12,"paddingRight":24,"paddingTop":12,"paddingBottom":12,"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}],"fillStyle":{"name":"Library Style 6c3acbf1","fullName":"[Library] Style 6c3acbf1","estimated":true},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","effects":[{"type":"DROP_SHADOW","radius":2,"spread":0,"offset":{"x":0,"y":1},"color":{"r":0,"g":0,"b":0,"a":0.05000000074505806,"hex":"#0000000d"}}],"variables":{"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}]},"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"children":[{"name":"Container","type":"FRAME","width":1084,"height":128,"layoutMode":"HORIZONTAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"CENTER","itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32}}}]}]},{"name":"Link","type":"FRAME","width":1120,"height":152,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Item","type":"FRAME","width":1120,"height":152,"cornerRadius":16,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","paddingLeft":12,"paddingRight":24,"paddingTop":12,"paddingBottom":12,"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}],"fillStyle":{"name":"Library Style 6c3acbf1","fullName":"[Library] Style 6c3acbf1","estimated":true},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","effects":[{"type":"DROP_SHADOW","radius":2,"spread":0,"offset":{"x":0,"y":1},"color":{"r":0,"g":0,"b":0,"a":0.05000000074505806,"hex":"#0000000d"}}],"variables":{"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}]},"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"children":[{"name":"Container","type":"FRAME","width":1084,"height":128,"layoutMode":"HORIZONTAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"CENTER","itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32}}}]}]},{"name":"Link","type":"FRAME","width":1120,"height":152,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Item","type":"FRAME","width":1120,"height":152,"cornerRadius":16,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","paddingLeft":12,"paddingRight":24,"paddingTop":12,"paddingBottom":12,"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}],"fillStyle":{"name":"Library Style 6c3acbf1","fullName":"[Library] Style 6c3acbf1","estimated":true},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","effects":[{"type":"DROP_SHADOW","radius":2,"spread":0,"offset":{"x":0,"y":1},"color":{"r":0,"g":0,"b":0,"a":0.05000000074505806,"hex":"#0000000d"}}],"variables":{"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}]},"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"children":[{"name":"Container","type":"FRAME","width":1084,"height":128,"layoutMode":"HORIZONTAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"CENTER","itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32}}}]}]},{"name":"Link","type":"FRAME","width":1120,"height":152,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Item","type":"FRAME","width":1120,"height":152,"cornerRadius":16,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","paddingLeft":12,"paddingRight":24,"paddingTop":12,"paddingBottom":12,"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}],"fillStyle":{"name":"Library Style 6c3acbf1","fullName":"[Library] Style 6c3acbf1","estimated":true},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","effects":[{"type":"DROP_SHADOW","radius":2,"spread":0,"offset":{"x":0,"y":1},"color":{"r":0,"g":0,"b":0,"a":0.05000000074505806,"hex":"#0000000d"}}],"variables":{"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}]},"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"children":[{"name":"Container","type":"FRAME","width":1084,"height":128,"layoutMode":"HORIZONTAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"CENTER","itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32}}}]}]},{"name":"Link","type":"FRAME","width":1120,"height":152,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","children":[{"name":"Item","type":"FRAME","width":1120,"height":152,"cornerRadius":16,"layoutMode":"VERTICAL","primaryAxisSizingMode":"AUTO","counterAxisSizingMode":"FIXED","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"MIN","paddingLeft":12,"paddingRight":24,"paddingTop":12,"paddingBottom":12,"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}],"fillStyle":{"name":"Library Style 6c3acbf1","fullName":"[Library] Style 6c3acbf1","estimated":true},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","effects":[{"type":"DROP_SHADOW","radius":2,"spread":0,"offset":{"x":0,"y":1},"color":{"r":0,"g":0,"b":0,"a":0.05000000074505806,"hex":"#0000000d"}}],"variables":{"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"fills":[{"name":"Variable 4","fullName":"Variable 4","notFound":true,"actualValue":{"type":"SOLID","opacity":1,"color":{"r":1,"g":1,"b":1,"a":1,"hex":"#ffffff"}}}]},"minHeight":{"name":"Variable 70","fullName":"Variable 70","notFound":true},"children":[{"name":"Container","type":"FRAME","width":1084,"height":128,"layoutMode":"HORIZONTAL","primaryAxisSizingMode":"FIXED","counterAxisSizingMode":"AUTO","primaryAxisAlignItems":"MIN","counterAxisAlignItems":"CENTER","itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32},"strokeWeight":1,"strokeAlign":"INSIDE","strokeCap":"NONE","strokeJoin":"MITER","variables":{"itemSpacing":{"name":"Variable 72","fullName":"Variable 72","notFound":true,"actualValue":32}}}]}]}]}]}],"textContent":[{"name":"BONO をつくる 30 代在宅独身男性のクラフト日誌","text":"BONO をつくる 30 代在宅独身男性のクラフト日誌","path":"Main/Container/Container/Container/BONO をつくる 30 代在宅独身男性のクラフト日誌","nodeType":"TEXT"},{"name":"All Episodes","text":"All Episodes","path":"Main/Container/Container/Container/All Episodes","nodeType":"TEXT"},{"name":"アンチ合理性。熱を帯びるつくり手を育めるか。BONO の 2023 年","text":"アンチ合理性。熱を帯びるつくり手を育めるか。BONO の 2023 年","path":"Main/Container/List/Link/Item/Container/Container/Heading 4/アンチ合理性。熱を帯びるつくり手を育めるか。BONO の 2023 年","nodeType":"TEXT"},{"name":"BONO","text":"BONO","path":"Main/Container/List/Link/Item/Container/Container/Container/Container/BONO","nodeType":"TEXT"},{"name":"2023 年 08 月 25 日","text":"2023 年 08 月 25 日","path":"Main/Container/List/Link/Item/Container/Container/Container/Time/2023 年 08 月 25 日","nodeType":"TEXT"},{"name":"コース紹介の反省 ユーザーメリットと運営メリットをクロスさせよう","text":"コース紹介の反省 ユーザーメリットと運営メリットをクロスさせよう","path":"Main/Container/List/Link/Item/Container/Container/Heading 4/コース紹介の反省 ユーザーメリットと運営メリットをクロスさせよう","nodeType":"TEXT"},{"name":"Tweet","text":"Tweet","path":"Main/Container/List/Link/Item/Container/Container/Container/Container/Tweet","nodeType":"TEXT"},{"name":"2021 年 12 月 09 日","text":"2021 年 12 月 09 日","path":"Main/Container/List/Link/Item/Container/Container/Container/Time/2021 年 12 月 09 日","nodeType":"TEXT"},{"name":"23 年残り 4 ヶ月、BONO で注力すること | メンバーとのコンテンツ作成チャレンジ","text":"23 年残り 4 ヶ月、BONO で注力すること | メンバーとのコンテンツ作成チャレンジ","path":"Main/Container/List/Link/Item/Container/Container/Heading 4/23 年残り 4 ヶ月、BONO で注力すること | メンバーとのコンテンツ作成チャレンジ","nodeType":"TEXT"},{"name":"BONO","text":"BONO","path":"Main/Container/List/Link/Item/Container/Container/Container/Container/BONO","nodeType":"TEXT"},{"name":"2023 年 08 月 25 日","text":"2023 年 08 月 25 日","path":"Main/Container/List/Link/Item/Container/Container/Container/Time/2023 年 08 月 25 日","nodeType":"TEXT"},{"name":"“作る”ファースト : 未経験からデザイナーになった人の特徴をまとめる","text":"“作る”ファースト : 未経験からデザイナーになった人の特徴をまとめる","path":"Main/Container/List/Link/Item/Container/Container/Heading 4/“作る”ファースト : 未経験からデザイナーになった人の特徴をまとめる","nodeType":"TEXT"},{"name":"BONO","text":"BONO","path":"Main/Container/List/Link/Item/Container/Container/Container/Container/BONO","nodeType":"TEXT"},{"name":"2023 年 08 月 25 日","text":"2023 年 08 月 25 日","path":"Main/Container/List/Link/Item/Container/Container/Container/Time/2023 年 08 月 25 日","nodeType":"TEXT"},{"name":"ヘルシーなモチベが生まれる場をデザインしたい BONO の 2023 年。失敗とやること。","text":"ヘルシーなモチベが生まれる場をデザインしたい BONO の 2023 年。失敗とやること。","path":"Main/Container/List/Link/Item/Container/Container/Heading 4/ヘルシーなモチベが生まれる場をデザインしたい BONO の 2023 年。失敗とやること。","nodeType":"TEXT"},{"name":"BONO","text":"BONO","path":"Main/Container/List/Link/Item/Container/Container/Container/Container/BONO","nodeType":"TEXT"},{"name":"2023 年 08 月 25 日","text":"2023 年 08 月 25 日","path":"Main/Container/List/Link/Item/Container/Container/Container/Time/2023 年 08 月 25 日","nodeType":"TEXT"}]}
+# BONO ブログ - ヒーローセクション 実装仕様書
+
+## 📋 概要
+
+BONO ブログのトップページに配置されるヒーローセクション。大きなタイトル「HOPE.」とサブタイトルが表示される視覚的なインパクトが強いセクション。
+
+**Figma URL**: https://www.figma.com/design/ee9rQHm0c0QLHpMgCqZpRe/BONO-blog-2025-data?node-id=21-119  
+**Node ID**: `21:119`  
+**コンポーネント名**: `herosection`  
+**最終更新**: 2025 年 11 月 10 日
+
+---
+
+## 🎯 全体構造
+
+```
+herosection (21:119) - 1920×461px
+└── Container (1:37)
+    ├── Frame (12:13) - "HOPE." ロゴ画像 (344×89px)
+    └── Container (1:46) - サブタイトル
+        └── Text (1:47) - "BONOをつくる30代在宅独身男性のクラフト日誌"
+```
+
+---
+
+## 📐 レイアウト仕様
+
+### ヒーローセクション全体 (21:119)
+
+| プロパティ           | 値                                     |
+| -------------------- | -------------------------------------- |
+| **要素名**           | herosection                            |
+| **タイプ**           | Frame                                  |
+| **サイズ**           | 1920×461px                             |
+| **レイアウトモード** | Horizontal (flex)                      |
+| **配置**             | items-start, justify-center            |
+| **パディング**       | 上: 80px, 下: 0px, 左右: 0px           |
+| **ボックスサイジング** | border-box                           |
+
+### Container (1:37) - 内部コンテナ
+
+| プロパティ           | 値                                     |
+| -------------------- | -------------------------------------- |
+| **要素名**           | Container                              |
+| **タイプ**           | Frame                                  |
+| **レイアウトモード** | Vertical (flex-col)                    |
+| **配置**             | items-center, justify-center           |
+| **間隔**             | gap: 32px                              |
+| **パディング**       | 上: 96px, 下: 144px, 左右: 0px         |
+| **Flex**             | basis: 0, grow: 1, shrink: 0           |
+| **最小サイズ**       | min-h: 1px, min-w: 1px                 |
+
+---
+
+## 🔧 コンポーネント詳細
+
+### 1. "HOPE." ロゴ画像 (12:13)
+
+| プロパティ   | 値                                                |
+| ------------ | ------------------------------------------------- |
+| **要素名**   | Frame                                             |
+| **タイプ**   | Frame (画像コンテナ)                              |
+| **サイズ**   | 344×89px                                          |
+| **配置**     | 中央寄せ                                          |
+| **アセット** | `/assets/blog/bbde0d9860756a76727bcbe17eabccd0d60e09f6.svg` |
+
+**実装コード**:
+
+```typescript
+<div className="h-[89px] relative shrink-0 w-[344px]">
+  <img
+    alt="HOPE."
+    className="block max-w-none size-full"
+    src="/assets/blog/bbde0d9860756a76727bcbe17eabccd0d60e09f6.svg"
+  />
+</div>
+```
+
+### 2. サブタイトルコンテナ (1:46)
+
+| プロパティ     | 値                        |
+| -------------- | ------------------------- |
+| **要素名**     | Container                 |
+| **タイプ**     | Frame                     |
+| **幅**         | 100% (full width)         |
+| **レイアウト** | flex-col, items-center    |
+| **配置**       | 中央寄せ                  |
+
+### 3. サブタイトルテキスト (1:47)
+
+| プロパティ                 | 値                                            |
+| -------------------------- | --------------------------------------------- |
+| **要素名**                 | Text                                          |
+| **テキスト内容**           | BONO をつくる 30 代在宅独身男性のクラフト日誌 |
+| **フォントファミリー**     | Noto Sans JP                                  |
+| **フォントサイズ**         | 14px                                          |
+| **フォントウェイト**       | 500 (Medium)                                  |
+| **行高**                   | 20px                                          |
+| **文字間隔**               | 0.7px                                         |
+| **テキスト色**             | #9CA3AF (Gray Chateau)                        |
+| **テキストアラインメント** | Center                                        |
+| **white-space**            | pre (改行なし)                                |
+
+**実装コード**:
+
+```typescript
+<div className="flex flex-col font-['Noto_Sans_JP'] font-medium justify-center leading-[0] relative shrink-0 text-[14px] text-[#9ca3af] text-center text-nowrap tracking-[0.7px]">
+  <p className="leading-[20px] whitespace-pre">
+    BONOをつくる30代在宅独身男性のクラフト日誌
+  </p>
+</div>
+```
+
+---
+
+## 🎨 デザイントークン
+
+Figma から取得した設計変数：
+
+| 変数名                             | 値           | 用途                   |
+| ---------------------------------- | ------------ | ---------------------- |
+| `color/azure/65`                   | #9CA3AF      | サブタイトルテキスト色 |
+| `kaikun.bo-no.design/Gray Chateau` | #9CA3AF      | グレーカラー（別名）   |
+| `font family/Font 2`               | Noto Sans JP | フォントファミリー     |
+| `font weight/500`                  | 500          | ミディアムウェイト     |
+| `letter spacing/0_7`               | 0.7px        | 文字間隔               |
+| `line height/20`                   | 20px         | 行高                   |
+
+---
+
+## 💻 完全な実装コード
+
+### React + TypeScript + Tailwind CSS
+
+```typescript
+import React from "react";
+
+const imgHopeLogo = "/assets/blog/bbde0d9860756a76727bcbe17eabccd0d60e09f6.svg";
+
+interface HerosectionProps {
+  className?: string;
+  subtitle?: string;
+}
+
+export const Herosection: React.FC<HerosectionProps> = ({
+  className = "",
+  subtitle = "BONOをつくる30代在宅独身男性のクラフト日誌",
+}) => {
+  return (
+    <div
+      className={`box-border content-stretch flex items-start justify-center pb-0 pt-[80px] px-0 w-[1920px] ${className}`}
+      data-name="herosection"
+      data-node-id="21:119"
+    >
+      <div className="basis-0 box-border content-stretch flex flex-col gap-[32px] grow items-center justify-center min-h-px min-w-px pb-[144px] pt-[96px] px-0 relative self-stretch shrink-0">
+        {/* HOPE. ロゴ */}
+        <div className="h-[89px] relative shrink-0 w-[344px]">
+          <img
+            alt="HOPE."
+            className="block max-w-none size-full"
+            src={imgHopeLogo}
+          />
+        </div>
+
+        {/* サブタイトル */}
+        <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
+          <div className="flex flex-col font-['Noto_Sans_JP'] font-medium justify-center leading-[0] relative shrink-0 text-[14px] text-[#9ca3af] text-center text-nowrap tracking-[0.7px]">
+            <p className="leading-[20px] whitespace-pre">{subtitle}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Herosection;
+```
+
+---
+
+## 📱 レスポンシブ対応
+
+### ブレークポイント別レイアウト
+
+| デバイス                  | 外側幅 | 内側パディング上 | 内側パディング下 | ロゴサイズ | ロゴ縮小率 | サブタイトルサイズ |
+| ------------------------- | ------ | ---------------- | ---------------- | ---------- | ---------- | ------------------ |
+| **デスクトップ** (1920px) | 1920px | 96px             | 144px            | 344×89px   | 100%       | 14px               |
+| **タブレット** (768-1919px) | 100%   | 80px             | 120px            | 280×72px   | 81%        | 13px               |
+| **モバイル** (375-767px)  | 100%   | 60px             | 80px             | 200×52px   | 58%        | 12px               |
+
+### レスポンシブ実装例
+
+```typescript
+export const Herosection: React.FC<HerosectionProps> = ({
+  className = "",
+  subtitle = "BONOをつくる30代在宅独身男性のクラフト日誌",
+}) => {
+  return (
+    <div
+      className={`
+        box-border content-stretch flex items-start justify-center
+        pb-0 pt-[80px] md:pt-[60px] sm:pt-[48px]
+        px-0
+        w-full max-w-[1920px]
+        ${className}
+      `}
+      data-name="herosection"
+      data-node-id="21:119"
+    >
+      <div
+        className="
+          basis-0 box-border content-stretch
+          flex flex-col
+          gap-[32px] md:gap-[24px] sm:gap-[16px]
+          grow items-center justify-center
+          min-h-px min-w-px
+          pb-[144px] md:pb-[120px] sm:pb-[80px]
+          pt-[96px] md:pt-[80px] sm:pt-[60px]
+          px-0
+          relative self-stretch shrink-0
+        "
+      >
+        {/* HOPE. ロゴ */}
+        <div
+          className="
+            h-[89px] md:h-[72px] sm:h-[52px]
+            w-[344px] md:w-[280px] sm:w-[200px]
+            relative shrink-0
+          "
+        >
+          <img
+            alt="HOPE."
+            className="block max-w-none size-full"
+            src={imgHopeLogo}
+          />
+        </div>
+
+        {/* サブタイトル */}
+        <div className="content-stretch flex flex-col items-center relative shrink-0 w-full px-4">
+          <div
+            className="
+              flex flex-col
+              font-['Noto_Sans_JP'] font-medium
+              justify-center leading-[0]
+              relative shrink-0
+              text-[14px] md:text-[13px] sm:text-[12px]
+              text-[#9ca3af]
+              text-center
+              text-nowrap sm:text-wrap
+              tracking-[0.7px]
+            "
+          >
+            <p className="leading-[20px] whitespace-pre sm:whitespace-normal">
+              {subtitle}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+---
+
+## 🎨 Tailwind CSS 設定
+
+### 必要なカスタム設定
+
+```typescript
+// tailwind.config.ts
+export default {
+  theme: {
+    extend: {
+      fontFamily: {
+        noto: ["Noto Sans JP", "sans-serif"],
+      },
+      colors: {
+        "gray-chateau": "#9CA3AF",
+      },
+      letterSpacing: {
+        "0.7": "0.7px",
+      },
+      screens: {
+        sm: "375px",
+        md: "768px",
+        lg: "1920px",
+      },
+    },
+  },
+};
+```
+
+---
+
+## 🔐 アクセシビリティ
+
+### 推奨設定
+
+```typescript
+<div
+  role="banner"
+  aria-label="Hero Section"
+  className="..."
+>
+  <img
+    alt="HOPE. - BONOブログのメインタイトル"
+    src={imgHopeLogo}
+  />
+  <p aria-label="サブタイトル">
+    {subtitle}
+  </p>
+</div>
+```
+
+### コントラスト比
+
+- **サブタイトル** (#9CA3AF on 背景):
+  - 背景が白系の場合: WCAG AA 準拠
+  - 確認推奨: 実際の背景色とのコントラスト比を計算
+
+---
+
+## 📝 実装チェックリスト
+
+### アセット
+
+- [ ] HOPE.ロゴSVGを `/assets/blog/` に配置
+- [ ] 画像パスの確認
+
+### フォント
+
+- [ ] Noto Sans JP の読み込み
+- [ ] フォントウェイト 500 (Medium) の確認
+
+### レイアウト
+
+- [ ] 1920px幅の確認（デスクトップ）
+- [ ] 中央揃えの確認
+- [ ] パディング値の確認（上: 80px+96px, 下: 144px）
+- [ ] ロゴとサブタイトルの間隔 32px
+
+### レスポンシブ
+
+- [ ] タブレット（768px-1919px）での表示確認
+- [ ] モバイル（375px-767px）での表示確認
+- [ ] ロゴサイズの段階的縮小
+- [ ] サブタイトルの折り返し（モバイル）
+
+### アクセシビリティ
+
+- [ ] alt属性の設定
+- [ ] role属性の設定
+- [ ] aria-label の設定
+- [ ] コントラスト比の確認
+
+### パフォーマンス
+
+- [ ] 画像の最適化
+- [ ] フォントの遅延読み込み
+- [ ] 不要な再レンダリングの防止
+
+---
+
+## 🎯 デザイン意図・使用シーン
+
+### 目的
+
+- サイト訪問時に「希望（HOPE）」というメッセージを視覚的に伝える
+- BONO ブログの主軸とコンセプトを明確に示す
+- 視覚的なインパクトで訪問者の注意を引く
+
+### 配置
+
+- ページ最上部（ヘッダーの下）
+- 全ページで共通のヒーローセクション
+
+### 効果
+
+- 大きなタイトルで強い印象を与える
+- サブタイトルで運営者の人柄を伝える
+- シンプルで洗練されたデザイン
+
+---
+
+## 🚀 使用方法
+
+### 1. アセットの準備
+
+```bash
+# HOPEロゴSVGを配置
+cp bbde0d9860756a76727bcbe17eabccd0d60e09f6.svg public/assets/blog/
+```
+
+### 2. フォントの読み込み
+
+```html
+<!-- index.html または _document.tsx -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@500&display=swap"
+  rel="stylesheet"
+/>
+```
+
+### 3. コンポーネントの使用
+
+```typescript
+import { Herosection } from "@/components/blog/Herosection";
+
+export const BlogPage = () => {
+  return (
+    <div>
+      <Herosection />
+      {/* 他のコンテンツ */}
+    </div>
+  );
+};
+```
+
+### 4. カスタマイズ
+
+```typescript
+// サブタイトルをカスタマイズ
+<Herosection subtitle="カスタムサブタイトル" />
+
+// クラスを追加
+<Herosection className="my-custom-class" />
+```
+
+---
+
+## 🔗 関連ドキュメント
+
+- [ブログページ全体レイアウト](./blog-page-layout-specification.md)
+- [背景グラデーション](./background-gradation-implementation.md)
+- [ブログカード](./blogcard.md)
+- [ナビゲーション](./navigation-blog.md)
+
+---
+
+## 📊 技術仕様まとめ
+
+### サイズ
+
+- **全体**: 1920×461px
+- **HOPEロゴ**: 344×89px
+- **サブタイトル**: 幅100%、高さ20px
+
+### スペーシング
+
+- **外側パディング**: 上80px、下0px
+- **内側パディング**: 上96px、下144px
+- **要素間隔**: 32px
+
+### カラー
+
+- **サブタイトル**: #9CA3AF (Gray Chateau)
+
+### タイポグラフィ
+
+- **フォント**: Noto Sans JP
+- **サイズ**: 14px
+- **ウェイト**: 500 (Medium)
+- **行高**: 20px
+- **文字間隔**: 0.7px
+
+---
+
+**仕様書作成日**: 2025 年 11 月 10 日  
+**作成者**: Claude (Figma MCP データ抽出)  
+**Figma File**: ee9rQHm0c0QLHpMgCqZpRe  
+**Node ID**: 21:119

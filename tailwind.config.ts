@@ -164,6 +164,8 @@ const config = {
         'inter': ['Inter', 'sans-serif'],
         'noto-sans': ['Noto Sans', 'sans-serif'],
         'noto-sans-jp': ['Noto Sans JP', 'Noto Sans', 'sans-serif'],
+        'noto': ['Noto Sans JP', 'sans-serif'], // Blog用ショートハンド
+        'hind': ['Hind', 'sans-serif'], // Blog用フォント
         'rounded-mplus': ['M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'rounded-mplus-bold': ['M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],

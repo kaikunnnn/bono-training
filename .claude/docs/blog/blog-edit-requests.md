@@ -37,8 +37,8 @@ http://localhost:8080/blog/:slug
 ■背景の色
 - 背景の色を以下の色要素にしてほしい
 - /blog配下はすべてこのデザイン
-image.png
-※スクショがわからないときは教えて下さい。
+[グラデーション](././99frontend/background-gradation-implementation.md)
+
 
 ■ナビゲーション
 - スクロール固定で常に以下のデザインを表示してほしい
