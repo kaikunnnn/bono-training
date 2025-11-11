@@ -2,9 +2,14 @@
 import { getGhostApi } from '@/lib/ghost';
 import { BlogPost, BlogPostsResponse } from '@/types/blog';
 import { GhostPost, GhostPostsResponse } from '@/types/ghost';
+import { extractEmojiFromText } from '@/utils/blog/emojiUtils';
 
 // GhostPostをBlogPostに変換するアダプター
 export const convertGhostToBlogPost = (ghostPost: GhostPost): BlogPost => {
+  // タイトルから絵文字を抽出（カスタムフィールドがあればそちらを優先）
+  const extractedEmoji = extractEmojiFromText(ghostPost.title);
+  const emoji = ghostPost.emoji || extractedEmoji || undefined;
+
   return {
     id: ghostPost.id,
     slug: ghostPost.slug,
@@ -18,6 +23,7 @@ export const convertGhostToBlogPost = (ghostPost: GhostPost): BlogPost => {
     thumbnail: ghostPost.feature_image || '/blog/images/default.jpg',
     featured: ghostPost.featured || false,
     readingTime: ghostPost.reading_time || 5,
+    emoji: emoji, // タイトルから自動抽出 or カスタムフィールド
     // 追加フィールド（既存のBlogPost型に合わせて）
     imageUrl: ghostPost.feature_image,
     excerpt: ghostPost.excerpt || ghostPost.custom_excerpt || '',

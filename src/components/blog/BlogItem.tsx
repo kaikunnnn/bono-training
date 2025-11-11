@@ -8,10 +8,11 @@
  * @description ブログ一覧で表示される記事カードコンポーネント
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '@/types/blog';
 import { BLOG_COLORS, BLOG_FONTS, BLOG_SPACING } from '@/styles/design-tokens';
+import { getFluentEmojiUrl, getFluentEmojiFallbackUrl, DEFAULT_EMOJI } from '@/utils/blog/emojiUtils';
 
 interface BlogItemProps {
   /** 表示する記事データ */
@@ -19,6 +20,49 @@ interface BlogItemProps {
   /** 追加のカスタムクラス名 */
   className?: string;
 }
+
+/**
+ * EmojiThumbnail Component
+ *
+ * 記事リスト用の絵文字表示コンポーネント（Fluent Emoji 3Dのみ）。
+ * サムネイル画像は表示せず、常に絵文字を表示します。
+ *
+ * 表示ルール:
+ * - post.emoji（タイトルから抽出）がある → その絵文字のFluent Emoji 3D
+ * - post.emojiがない → デフォルト📝のFluent Emoji 3D
+ */
+const EmojiThumbnail: React.FC<{ post: BlogPost }> = ({ post }) => {
+  const emoji = post.emoji || DEFAULT_EMOJI;
+  const [imageError, setImageError] = useState(false);
+  const [currentUrl, setCurrentUrl] = useState(getFluentEmojiUrl(emoji));
+
+  return (
+    <img
+      src={currentUrl}
+      alt=""
+      style={{
+        width: BLOG_SPACING.card.emojiSize,
+        height: BLOG_SPACING.card.emojiSize,
+        objectFit: 'contain',
+        maxWidth: '350.66px',
+      }}
+      loading="lazy"
+      data-name="emoji Image"
+      data-node-id="14:20"
+      onError={() => {
+        // Fluent Emoji読み込み失敗時はフォールバックを試す
+        const fallbackUrl = getFluentEmojiFallbackUrl(emoji);
+        if (!imageError && currentUrl !== fallbackUrl) {
+          setCurrentUrl(fallbackUrl);
+        } else if (emoji !== DEFAULT_EMOJI) {
+          // それでも失敗したらデフォルト絵文字を表示
+          setCurrentUrl(getFluentEmojiUrl(DEFAULT_EMOJI));
+          setImageError(true);
+        }
+      }}
+    />
+  );
+};
 
 /**
  * BlogItem Component
@@ -83,42 +127,19 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
       >
         {/* サムネイル */}
         <div
-          className="flex-shrink-0 overflow-hidden"
+          className="flex-shrink-0 flex items-center justify-center overflow-hidden"
           style={{
             width: BLOG_SPACING.card.thumbnailWidth,
             height: BLOG_SPACING.card.thumbnailHeight,
             backgroundColor: '#D8E7EF',
             borderRadius: '12px',
+            paddingTop: '40px',
+            paddingBottom: '40px',
           }}
           data-name="thumbanil - 16:9"
           data-node-id="14:19"
         >
-          {post.thumbnail || post.imageUrl ? (
-            <img
-              src={post.thumbnail || post.imageUrl}
-              alt=""
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-              loading="lazy"
-              data-name="emoji Image"
-              data-node-id="14:20"
-            />
-          ) : (
-            <div
-              className="flex items-center justify-center w-full h-full"
-              style={{
-                fontSize: BLOG_SPACING.card.emojiSize,
-                lineHeight: 1,
-              }}
-              data-name="emoji Image"
-              data-node-id="14:20"
-            >
-              📝
-            </div>
-          )}
+          <EmojiThumbnail post={post} />
         </div>
 
         {/* テキストエリア */}

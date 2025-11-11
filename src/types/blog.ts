@@ -12,6 +12,7 @@ export interface BlogPost {
   thumbnail: string;        // /blog/images/からのパス
   featured: boolean;
   readingTime: number;      // 分
+  emoji?: string;           // 記事の絵文字（Fluent Emoji 3D表示用）
 }
 
 export interface BlogCategory {

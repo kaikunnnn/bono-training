@@ -5,7 +5,8 @@ export const mockPosts: BlogPost[] = [
   {
     id: '1',
     slug: 'getting-started-with-react',
-    title: 'Reactを始めよう - 初心者向けガイド',
+    title: '⚛️ Reactを始めよう - 初心者向けガイド',
+    emoji: '⚛️',
     description: 'Reactの基本から学ぶ初心者向けガイドです。コンポーネントの作り方から状態管理まで、わかりやすく解説します。',
     content: `
       <h2>Reactとは</h2>
@@ -29,7 +30,8 @@ export const mockPosts: BlogPost[] = [
   {
     id: '2',
     slug: 'modern-web-design-trends',
-    title: 'モダンWebデザインのトレンド2024',
+    title: '🎨 モダンWebデザインのトレンド2024',
+    emoji: '🎨',
     description: '2024年のWebデザインで注目すべきトレンドを紹介。ミニマリズムからグラフィックデザインまで幅広く解説します。',
     content: `
       <h2>2024年のデザイントレンド</h2>
@@ -50,7 +52,8 @@ export const mockPosts: BlogPost[] = [
   {
     id: '3',
     slug: 'productivity-tools-2024',
-    title: '生産性を高める2024年のおすすめツール',
+    title: '🚀 生産性を高める2024年のおすすめツール',
+    emoji: '🚀',
     description: 'リモートワークが定着した今、生産性を高めるために必要なツールを厳選してご紹介します。',
     content: `
       <h2>タスク管理ツール</h2>
@@ -71,7 +74,8 @@ export const mockPosts: BlogPost[] = [
   {
     id: '4',
     slug: 'healthy-work-life-balance',
-    title: 'ワークライフバランスを保つ秘訣',
+    title: '⚖️ ワークライフバランスを保つ秘訣',
+    emoji: '⚖️',
     description: '仕事とプライベートの両立は現代人の大きな課題。健康的なバランスを保つための実践的なアドバイスをお届けします。',
     content: `
       <h2>時間管理の基本</h2>
@@ -92,7 +96,8 @@ export const mockPosts: BlogPost[] = [
   {
     id: '5',
     slug: 'typescript-best-practices',
-    title: 'TypeScript ベストプラクティス集',
+    title: '📘 TypeScript ベストプラクティス集',
+    emoji: '📘',
     description: 'TypeScriptを使った開発で知っておきたいベストプラクティスを実例とともに解説します。',
     content: `
       <h2>型定義の書き方</h2>
@@ -113,7 +118,8 @@ export const mockPosts: BlogPost[] = [
   {
     id: '6',
     slug: 'ux-design-principles',
-    title: 'UXデザインの基本原則',
+    title: '✨ UXデザインの基本原則',
+    emoji: '✨',
     description: '良いユーザーエクスペリエンスを提供するためのデザイン原則を、具体例とともに詳しく解説します。',
     content: `
       <h2>ユーザビリティの原則</h2>

@@ -20,6 +20,7 @@ export interface GhostPost {
   primary_author?: GhostAuthor;
   url: string;
   custom_excerpt?: string | null;
+  emoji?: string | null; // カスタムフィールド: 記事の絵文字
 }
 
 export interface GhostTag {
