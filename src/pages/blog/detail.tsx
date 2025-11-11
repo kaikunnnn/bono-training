@@ -12,11 +12,13 @@ import { TableOfContents } from '@/components/blog/TableOfContents';
 import { ShareButtons } from '@/components/blog/ShareButtons';
 import { PostNavigation } from '@/components/blog/PostNavigation';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
+import { BlogContent } from '@/components/blog/BlogContent';
 import { getBlogPostBySlug, getNextPost, getPrevPost } from '@/utils/blog/blogUtils';
 import { BlogPost } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import SEO from '@/components/common/SEO';
+import { removeEmojiFromText } from '@/utils/blog/emojiUtils';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -166,16 +168,30 @@ const BlogDetail: React.FC = () => {
 
   const breadcrumbItems = [
     { label: 'ブログ', href: '/blog' },
-    { label: post.title }
+    { label: removeEmojiFromText(post.title) }
   ];
+
+  // OGP用の画像URL（Ghost CMSのfeature_imageを優先）
+  const getOgImage = () => {
+    // Ghost CMSのfeature_image（thumbnail）を最優先
+    if (post.thumbnail && post.thumbnail !== '/blog/images/default.jpg') {
+      return post.thumbnail;
+    }
+    // 次にimageUrlをチェック
+    if (post.imageUrl) {
+      return post.imageUrl;
+    }
+    // フォールバック: デフォルトOG画像
+    return '/og-default.svg';
+  };
 
   // 構造化データ（JSON-LD）for Article
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "BlogPosting",
-    "headline": post.title,
-    "description": post.excerpt || post.description,
-    "image": post.imageUrl || post.thumbnail,
+    "headline": removeEmojiFromText(post.title),
+    "description": post.description || post.excerpt,
+    "image": getOgImage(),
     "datePublished": post.publishedAt,
     "dateModified": post.publishedAt,
     "author": {
@@ -193,7 +209,8 @@ const BlogDetail: React.FC = () => {
     "mainEntityOfPage": {
       "@type": "WebPage",
       "@id": `${import.meta.env.VITE_SITE_URL || 'http://localhost:8080'}/blog/${post.slug}`
-    }
+    },
+    "keywords": post.tags?.join(', ')
   };
 
   return (
@@ -204,15 +221,18 @@ const BlogDetail: React.FC = () => {
       exit="out"
       className="min-h-screen relative"
     >
-      {/* SEO設定 */}
+      {/* SEO設定（Ghost CMSデータと連携） */}
       <SEO
-        title={post.title}
-        description={post.excerpt || post.description}
-        ogTitle={post.title}
-        ogDescription={post.excerpt || post.description}
-        ogImage={post.imageUrl || post.thumbnail}
+        title={removeEmojiFromText(post.title)}
+        description={post.description || post.excerpt}
+        keywords={post.tags?.join(', ')}
+        author={post.author}
+        ogTitle={removeEmojiFromText(post.title)}
+        ogDescription={post.description || post.excerpt}
+        ogImage={getOgImage()}
         ogUrl={`/blog/${post.slug}`}
         ogType="article"
+        twitterCard="summary_large_image"
         jsonLd={articleJsonLd}
       />
 
@@ -285,14 +305,14 @@ const BlogDetail: React.FC = () => {
                 </motion.div>
               )}
 
-              {/* 記事本文 */}
+              {/* 記事本文（Bookmark カード対応） */}
               <motion.div
-                className="space-y-6"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+              >
+                <BlogContent html={post.content} className="prose prose-lg max-w-none space-y-6" />
+              </motion.div>
             </div>
 
             {/* タグ */}
@@ -323,7 +343,7 @@ const BlogDetail: React.FC = () => {
             >
               <ShareButtons
                 url={`/blog/${post.slug}`}
-                title={post.title}
+                title={removeEmojiFromText(post.title)}
                 description={post.excerpt}
               />
             </motion.div>

@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Clock, User } from "lucide-react";
 import { BlogPost } from "@/types/blog";
-import { getFluentEmojiUrl, DEFAULT_EMOJI } from "@/utils/blog/emojiUtils";
+import { getFluentEmojiUrl, DEFAULT_EMOJI, removeEmojiFromText } from "@/utils/blog/emojiUtils";
 
 interface BlogPostHeaderProps {
   post: BlogPost;
@@ -28,18 +28,18 @@ export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post }) => {
         className="flex flex-col items-center space-y-6"
       >
         {/* 絵文字アイコン（Fluent Emoji 3D） */}
-        <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="flex items-center justify-center">
           <img
             src={getFluentEmojiUrl(post.emoji || DEFAULT_EMOJI)}
             alt=""
-            className="w-16 h-16"
+            className="w-20 h-20"
             loading="eager"
           />
         </div>
 
-        {/* タイトル */}
+        {/* タイトル（絵文字除去） */}
         <h1 className="text-4xl md:text-5xl font-bold !leading-normal max-w-4xl">
-          {post.title}
+          {removeEmojiFromText(post.title)}
         </h1>
 
         {/* 説明文 */}

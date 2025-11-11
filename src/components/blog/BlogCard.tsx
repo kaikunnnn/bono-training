@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { BlogPost } from "@/types/blog";
 import { Link } from "react-router-dom";
 import { categories } from "@/data/blog/categories";
+import { removeEmojiFromText } from "@/utils/blog/emojiUtils";
 
 interface BlogCardProps {
   post: BlogPost;
@@ -79,7 +80,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, variant = "default", i
           {/* テキストセクション */}
           <div className="w-8/12 flex flex-col gap-1 md:gap-2">
             <h4 className="text-lg md:text-base text-slate-900 font-bold text-left line-clamp-2">
-              {post.title}
+              {removeEmojiFromText(post.title)}
             </h4>
             <div className="flex gap-3">
               <span className="text-xs text-left text-gray-400">

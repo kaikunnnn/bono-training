@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '@/types/blog';
 import { BLOG_COLORS, BLOG_FONTS, BLOG_SPACING } from '@/styles/design-tokens';
-import { getFluentEmojiUrl, getFluentEmojiFallbackUrl, DEFAULT_EMOJI } from '@/utils/blog/emojiUtils';
+import { getFluentEmojiUrl, getFluentEmojiFallbackUrl, DEFAULT_EMOJI, removeEmojiFromText } from '@/utils/blog/emojiUtils';
 
 interface BlogItemProps {
   /** 表示する記事データ */
@@ -112,7 +112,7 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
         paddingBottom: '12px',
       }}
       role="article"
-      aria-label={`記事: ${post.title}`}
+      aria-label={`記事: ${removeEmojiFromText(post.title)}`}
       data-name="Item-link"
       data-node-id="19:34"
     >
@@ -170,7 +170,7 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
               }}
               data-node-id="14:23"
             >
-              {post.title}
+              {removeEmojiFromText(post.title)}
             </h3>
           </div>
 
@@ -320,7 +320,7 @@ export const BlogItemCompact: React.FC<BlogItemProps> = ({ post, className = '' 
         <h4
           className="m-0 font-noto text-base font-bold text-[#0F172A] blog-text-truncate-2"
         >
-          {post.title}
+          {removeEmojiFromText(post.title)}
         </h4>
         <div className="flex items-center gap-2">
           <span className="font-hind text-xs font-medium text-[#9CA3AF]">

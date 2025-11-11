@@ -4,11 +4,33 @@ import { BlogPost, BlogPostsResponse } from '@/types/blog';
 import { GhostPost, GhostPostsResponse } from '@/types/ghost';
 import { extractEmojiFromText } from '@/utils/blog/emojiUtils';
 
+// カテゴリベースのデフォルト絵文字マッピング
+const categoryEmojiMap: Record<string, string> = {
+  tech: '💻',
+  design: '🎨',
+  business: '📊',
+  lifestyle: '🌟',
+  tutorial: '📚',
+  news: '📰',
+  uncategorized: '📝',
+};
+
 // GhostPostをBlogPostに変換するアダプター
 export const convertGhostToBlogPost = (ghostPost: GhostPost): BlogPost => {
   // タイトルから絵文字を抽出（カスタムフィールドがあればそちらを優先）
   const extractedEmoji = extractEmojiFromText(ghostPost.title);
-  const emoji = ghostPost.emoji || extractedEmoji || undefined;
+
+  // 絵文字の優先順位:
+  // 1. Ghostのカスタムemojiフィールド
+  // 2. タイトルから抽出した絵文字
+  // 3. カテゴリに基づくデフォルト絵文字
+  // 4. デフォルト📝
+  let emoji = ghostPost.emoji || extractedEmoji;
+
+  if (!emoji) {
+    const category = ghostPost.primary_tag?.slug || 'uncategorized';
+    emoji = categoryEmojiMap[category] || categoryEmojiMap.uncategorized;
+  }
 
   return {
     id: ghostPost.id,

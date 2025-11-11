@@ -137,8 +137,11 @@ const BlogIndex: React.FC = () => {
       <SEO
         title="BONO Blog - HOPE."
         description="BONOをつくる30代在宅独身男性のクラフト日誌。デザイン、開発、UI/UXに関する記事をお届けします。"
+        keywords="BONO, ブログ, デザイン, UI/UX, Web開発, Ghost CMS"
+        ogImage="/og-default.svg"
         ogUrl="/blog"
-        ogType="blog"
+        ogType="website"
+        twitterCard="summary_large_image"
       />
 
       {/* 背景グラデーション - Fixed, Full Screen, z-index: -10 */}

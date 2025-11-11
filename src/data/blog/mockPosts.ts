@@ -16,6 +16,23 @@ export const mockPosts: BlogPost[] = [
       <pre><code>function Hello() {
   return &lt;h1&gt;Hello, World!&lt;/h1&gt;;
 }</code></pre>
+
+      <figure class="kg-card kg-bookmark-card">
+        <a class="kg-bookmark-container" href="https://react.dev/" target="_blank" rel="noopener noreferrer">
+          <div class="kg-bookmark-content">
+            <div class="kg-bookmark-title">React - The library for web and native user interfaces</div>
+            <div class="kg-bookmark-description">A JavaScript library for building user interfaces</div>
+            <div class="kg-bookmark-metadata">
+              <img class="kg-bookmark-icon" src="https://react.dev/favicon.ico" alt="favicon">
+              <span class="kg-bookmark-publisher">react.dev</span>
+            </div>
+          </div>
+          <div class="kg-bookmark-thumbnail">
+            <img src="https://react.dev/images/og-home.png" alt="React">
+          </div>
+        </a>
+      </figure>
+
       <h2>まとめ</h2>
       <p>Reactを使うことで、再利用可能なUIコンポーネントを作成できます。</p>
     `,

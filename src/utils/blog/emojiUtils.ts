@@ -35,33 +35,31 @@ export const emojiToCodePoints = (emoji: string): string => {
 export const getFluentEmojiUrl = (emoji: string): string => {
   if (!emoji || emoji.trim() === '') {
     // デフォルト絵文字: 📝（メモ）
-    return 'https://emojicdn.elk.sh/%F0%9F%93%9D?style=microsoft-fluent';
+    return 'https://emojicdn.elk.sh/📝';
   }
 
   // 絵文字の最初の文字のみを使用
   const firstEmoji = [...emoji.trim()][0];
 
-  // Emoji CDN (elk.sh) を使用 - Microsoft Fluent スタイル
-  // URLエンコードして絵文字を埋め込む
-  const encodedEmoji = encodeURIComponent(firstEmoji);
-  return `https://emojicdn.elk.sh/${encodedEmoji}?style=microsoft-fluent`;
+  // Emoji CDN (elk.sh) を使用
+  // 注: URLエンコードは不要。ブラウザが自動的に処理します
+  return `https://emojicdn.elk.sh/${firstEmoji}`;
 };
 
 /**
  * Fluent Emoji 3D画像のフォールバックURL（画像が見つからない場合）
  * @param emoji - 絵文字文字列
- * @returns Twemoji CDNのURL（より確実に画像が存在する）
+ * @returns Emoji CDNのURL（同じURLを返す - elk.shは自動的にフォールバック処理する）
  */
 export const getFluentEmojiFallbackUrl = (emoji: string): string => {
   if (!emoji || emoji.trim() === '') {
-    return 'https://emojicdn.elk.sh/%F0%9F%93%9D?style=twitter';
+    return 'https://emojicdn.elk.sh/📝';
   }
 
   const firstEmoji = [...emoji.trim()][0];
-  const encodedEmoji = encodeURIComponent(firstEmoji);
 
-  // Twemojiスタイルをフォールバックとして使用
-  return `https://emojicdn.elk.sh/${encodedEmoji}?style=twitter`;
+  // elk.shは自動的に最適な絵文字画像を選択する
+  return `https://emojicdn.elk.sh/${firstEmoji}`;
 };
 
 /**
@@ -109,4 +107,4 @@ export const removeEmojiFromText = (text: string): string => {
  * 絵文字表示用のデフォルト値を取得
  */
 export const DEFAULT_EMOJI = '📝';
-export const DEFAULT_FLUENT_EMOJI_URL = 'https://emojicdn.elk.sh/%F0%9F%93%9D?style=microsoft-fluent';
+export const DEFAULT_FLUENT_EMOJI_URL = 'https://emojicdn.elk.sh/📝';
