@@ -17,19 +17,20 @@ serve(async (req) => {
   try {
     logDebug("Function started");
 
-    const webflowToken = Deno.env.get("WEBFLOW_CMS_API");
+    const webflowToken = Deno.env.get("WEBFLOW_API_TOKEN");
     if (!webflowToken) {
-      throw new Error("WEBFLOW_CMS_API environment variable not set");
+      throw new Error("WEBFLOW_API_TOKEN environment variable not set");
     }
 
-    const url = new URL(req.url);
-    const seriesIdOrSlug = url.searchParams.get("id") || url.searchParams.get("slug");
-    
+    // POSTリクエストのボディからSeriesIDを取得
+    const body = await req.json();
+    const seriesIdOrSlug = body.seriesId || body.id || body.slug;
+
     if (!seriesIdOrSlug) {
       return new Response(
         JSON.stringify({
           success: false,
-          error: "Missing 'id' or 'slug' query parameter",
+          error: "Missing 'seriesId', 'id', or 'slug' in request body",
         }),
         {
           status: 400,

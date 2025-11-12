@@ -10,6 +10,12 @@ function transformVideoToArticle(video: WebflowVideo): Article {
   const videoDuration = video.fieldData?.['video-length'] || video['video-length'];
   const description = video.fieldData?.['description-3'] || video.fieldData?.description || video.description;
 
+  // 🔄 FreeContentの論理を反転してisPremiumに変換
+  // FreeContent ON (true)  → isPremium false（無料）
+  // FreeContent OFF (false/undefined) → isPremium true（有料）
+  const freeContent = video.fieldData?.['free-content'] ?? video['free-content'];
+  const isPremium = !freeContent;  // 論理反転
+
   return {
     _id: `webflow-video-${video.id}`,
     _type: 'article',
@@ -17,6 +23,7 @@ function transformVideoToArticle(video: WebflowVideo): Article {
     slug: slug,
     videoUrl: videoUrl,
     videoDuration: videoDuration,
+    isPremium: isPremium,  // 🆕 プレミアムフラグ
     content: description,
     source: 'webflow',
     webflowId: video.id,
