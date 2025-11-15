@@ -6,6 +6,7 @@ interface ContentItemProps {
   title: string;
   slug: string;
   thumbnail?: any;
+  thumbnailUrl?: string;
   videoDuration?: number;
 }
 
@@ -14,6 +15,7 @@ export default function ContentItem({
   title,
   slug,
   thumbnail,
+  thumbnailUrl,
   videoDuration,
 }: ContentItemProps) {
   const navigate = useNavigate();
@@ -21,6 +23,19 @@ export default function ContentItem({
   const handleClick = () => {
     navigate(`/articles/${slug}`);
   };
+
+  // サムネイル画像のURLを取得（URL優先、なければSanity画像オブジェクト）
+  const getThumbnailUrl = () => {
+    if (thumbnailUrl) {
+      return thumbnailUrl;
+    }
+    if (thumbnail?.asset?._ref) {
+      return urlFor(thumbnail).width(57).height(32).url();
+    }
+    return null;
+  };
+
+  const thumbnailSrc = getThumbnailUrl();
 
   return (
     <div
@@ -35,10 +50,10 @@ export default function ContentItem({
       </div>
 
       {/* サムネイル */}
-      {thumbnail && (
+      {thumbnailSrc && (
         <div className="flex-shrink-0">
           <img
-            src={urlFor(thumbnail).width(57).height(32).url()}
+            src={thumbnailSrc}
             alt={title}
             className="w-[57px] h-[32px] object-cover rounded-[3.17px] bg-lesson-item-thumbnail-bg"
           />

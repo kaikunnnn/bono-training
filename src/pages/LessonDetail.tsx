@@ -12,6 +12,7 @@ interface Article {
   title: string;
   slug: { current: string };
   thumbnail?: any;
+  thumbnailUrl?: string;
   videoDuration?: number;
 }
 
@@ -30,6 +31,7 @@ interface Lesson {
   slug: { current: string };
   description?: string;
   iconImage?: any;
+  iconImageUrl?: string;
   category?: string;
   isPremium?: boolean;
   contentHeading?: string;
@@ -61,6 +63,7 @@ export default function LessonDetail() {
               _type
             }
           },
+          iconImageUrl,
           category,
           isPremium,
           contentHeading,
@@ -83,6 +86,7 @@ export default function LessonDetail() {
                   _type
                 }
               },
+              thumbnailUrl,
               videoDuration
             }
           }
@@ -167,6 +171,7 @@ export default function LessonDetail() {
           title={lesson.title}
           description={lesson.description}
           iconImage={lesson.iconImage}
+          iconImageUrl={lesson.iconImageUrl}
           category={lesson.category}
           isPremium={lesson.isPremium}
           onStartClick={handleStart}

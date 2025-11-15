@@ -9,11 +9,17 @@ interface RichTextSectionProps {
  * RichTextSection コンポーネント
  * Sanity Portable Text を HTML にレンダリング
  *
- * 対応書式（最小限）:
+ * 対応書式:
  * - H2 (Heading 2): Inter 20px Bold #101828
  * - H3 (Heading 3): Inter 16px SemiBold #101828
+ * - H4 (Heading 4): Inter 15px SemiBold #101828
+ * - Blockquote (引用): 左ボーダー、薄いグレー背景、インデント
  * - 段落 (Paragraph): Inter 16px Regular #364153
- * - 箇条書きリスト (Unordered List): 21.5px インデント
+ * - 箇条書きリスト (Bullet List): ● マーカー、21.5px インデント
+ * - 番号付きリスト (Numbered List): 1. マーカー、21.5px インデント
+ * - 太字 (Strong)、斜体 (Em)、コード (Code)
+ * - リンク (Link): 青色、アンダーライン、新規タブで開く
+ * - 画像 (Image): レスポンシブ、キャプション対応
  *
  * スペーシング:
  * - セクション間: 48px
@@ -39,6 +45,24 @@ const RichTextSection = ({ content }: RichTextSectionProps) => {
         >
           {children}
         </h3>
+      ),
+      // Heading 4
+      h4: ({ children }) => (
+        <h4
+          className="text-[15px] font-semibold leading-6 text-[#101828] mt-6 mb-3"
+          style={{ fontFamily: "Inter, sans-serif", letterSpacing: "-2.8076171875%" }}
+        >
+          {children}
+        </h4>
+      ),
+      // Blockquote (引用)
+      blockquote: ({ children }) => (
+        <blockquote
+          className="border-l-4 border-[#D0D5DD] bg-[#F9FAFB] py-4 px-6 my-6 text-base leading-[26px] text-[#364153]"
+          style={{ fontFamily: "Inter, sans-serif", letterSpacing: "-1.953125%" }}
+        >
+          {children}
+        </blockquote>
       ),
       // 通常の段落
       normal: ({ children }) => (
@@ -84,16 +108,52 @@ const RichTextSection = ({ content }: RichTextSectionProps) => {
       ),
     },
     marks: {
-      // 太字（今後対応予定）
+      // 太字
       strong: ({ children }) => <strong className="font-bold">{children}</strong>,
-      // 斜体（今後対応予定）
+      // 斜体
       em: ({ children }) => <em className="italic">{children}</em>,
-      // コード（今後対応予定）
+      // コード
       code: ({ children }) => (
         <code className="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono">
           {children}
         </code>
       ),
+      // リンク
+      link: ({ children, value }) => {
+        const href = value?.href || '#';
+        return (
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#2563EB] underline hover:text-[#1D4ED8] transition-colors"
+          >
+            {children}
+          </a>
+        );
+      },
+    },
+    types: {
+      // 画像
+      image: ({ value }) => {
+        if (!value?.asset) return null;
+
+        return (
+          <figure className="my-8">
+            <img
+              src={value.asset.url}
+              alt={value.alt || ''}
+              className="w-full h-auto rounded-lg"
+              loading="lazy"
+            />
+            {value.caption && (
+              <figcaption className="mt-2 text-sm text-[#6B7280] text-center italic">
+                {value.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      },
     },
   };
 
