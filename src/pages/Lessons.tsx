@@ -1,15 +1,59 @@
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
 import { useLessons } from "@/hooks/useLessons";
+import { useCategories } from "@/hooks/useCategories";
 
 export default function Lessons() {
   const navigate = useNavigate();
   const { data: lessons, isLoading: loading, error } = useLessons();
+  const { data: categories } = useCategories();
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
 
   const handleLessonClick = (slug: string) => {
     navigate(`/lessons/${slug}`);
   };
+
+  // カテゴリでフィルタリングされたレッスン
+  const filteredLessons = useMemo(() => {
+    if (!lessons) return [];
+    if (!selectedCategoryId) return lessons;
+
+    return lessons.filter((lesson) => {
+      if (!lesson.category) return false;
+
+      const categoryId = typeof lesson.category === 'string'
+        ? lesson.category
+        : (lesson.category as any)?._ref || (lesson.category as any)?._id;
+
+      return categoryId === selectedCategoryId;
+    });
+  }, [lessons, selectedCategoryId]);
+
+  // カテゴリごとのレッスン数
+  const categoryCounts = useMemo(() => {
+    if (!lessons || !categories) return {};
+
+    const counts: Record<string, number> = {};
+    categories.forEach((category) => {
+      counts[category._id] = 0;
+    });
+
+    lessons.forEach((lesson) => {
+      if (lesson.category) {
+        const categoryId = typeof lesson.category === 'string'
+          ? lesson.category
+          : (lesson.category as any)?._ref || (lesson.category as any)?._id;
+
+        if (categoryId && counts[categoryId] !== undefined) {
+          counts[categoryId]++;
+        }
+      }
+    });
+
+    return counts;
+  }, [lessons, categories]);
 
   if (loading) {
     return (
@@ -38,11 +82,57 @@ export default function Lessons() {
       <div className="p-8">
         <h1 className="text-2xl font-bold mb-6">レッスン一覧</h1>
 
-        {lessons.length === 0 ? (
-          <p>レッスンがありません。Sanity Studioでデータを追加してください。</p>
+        {/* カテゴリフィルタータブ */}
+        {categories && categories.length > 0 && (
+          <div className="mb-6">
+            <div className="flex gap-2 overflow-x-auto pb-2">
+              <button
+                onClick={() => setSelectedCategoryId(null)}
+                className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors ${
+                  !selectedCategoryId
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                }`}
+              >
+                すべて ({lessons?.length || 0})
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category._id}
+                  onClick={() => setSelectedCategoryId(category._id)}
+                  className={`px-4 py-2 rounded-lg font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${
+                    selectedCategoryId === category._id
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                  style={
+                    selectedCategoryId === category._id && category.color
+                      ? { backgroundColor: category.color }
+                      : {}
+                  }
+                >
+                  {category.color && (
+                    <div
+                      className="w-3 h-3 rounded-full"
+                      style={{ backgroundColor: category.color }}
+                    />
+                  )}
+                  {category.title} ({categoryCounts[category._id] || 0})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {filteredLessons.length === 0 ? (
+          <p>
+            {selectedCategoryId
+              ? "このカテゴリにはレッスンがありません。"
+              : "レッスンがありません。Sanity Studioでデータを追加してください。"}
+          </p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lessons.map((lesson) => {
+            {filteredLessons.map((lesson) => {
               // Webflowの画像URL（文字列）またはSanityの画像オブジェクト
               const imageUrl = lesson.coverImageUrl ||
                               (lesson.coverImage ? urlFor(lesson.coverImage).width(400).height(300).url() : null);

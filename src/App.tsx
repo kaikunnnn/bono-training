@@ -30,6 +30,8 @@ import TrainingLogin from "./pages/Training/Login";
 import TrainingSignup from "./pages/Training/Signup";
 import TrainingDebug from '@/pages/Training/Debug';
 import Lessons from "./pages/Lessons";
+import Categories from "./pages/Categories";
+import CategoryLessons from "./pages/CategoryLessons";
 import GuidePage from "./pages/Guide";
 import GuideDetailPage from "./pages/Guide/GuideDetail";
 import DevRoute from "./pages/Dev";
@@ -100,6 +102,8 @@ const AppContent = () => {
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
 
+        <Route path="/categories" element={<Categories />} />
+        <Route path="/categories/:categorySlug" element={<CategoryLessons />} />
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />
         <Route path="/articles/:slug" element={<ArticleDetail />} />
