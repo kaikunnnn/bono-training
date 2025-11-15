@@ -55,7 +55,7 @@ function normalizeBoolean(value: unknown): boolean {
 
 /**
  * Group Videos into Quests based on is-this-a-section-title-3 field
- * 
+ *
  * Logic:
  * - Videos are sorted by series-video-order-3 first
  * - Videos with is-this-a-section-title-3 = true are Quest titles
@@ -75,12 +75,12 @@ export function groupVideosIntoQuests(videos: WebflowVideo[]): Quest[] {
   for (const video of sortedVideos) {
     const isSectionTitleRaw = video.fieldData?.['is-this-a-section-title-3'] ?? video['isthisasectiontitle?'];
     const isSectionTitle = normalizeBoolean(isSectionTitleRaw);
-    
+
     if (isSectionTitle) {
       if (currentQuest && currentQuest.articles.length > 0) {
         quests.push(currentQuest);
       }
-      
+
       questNumber++;
       const name = video.fieldData?.name || video.name;
       currentQuest = {
@@ -128,24 +128,6 @@ export function transformToLesson(
   const name = series.fieldData?.name || series.name;
   const slug = series.fieldData?.slug || series.slug;
 
-  // 🆕 Extract additional fields from Webflow Series (実際のフィールド名を使用)
-  const description =
-    series.fieldData?.['descriptions-2'] ||
-    series['descriptions-2'] ||
-    series.fieldData?.description ||
-    series.description;
-
-  const iconImage = series.fieldData?.thumbnail?.url || series.thumbnail?.url;
-
-  // OGP画像 (実際のフィールド名: ogpimezi)
-  const coverImage =
-    series.fieldData?.ogpimezi?.url ||
-    series.ogpimezi?.url ||
-    iconImage; // フォールバック: thumbnailをカバー画像として使用
-
-  const category = series.fieldData?.categories || series.categories;
-  const overview = series.fieldData?.aboutthisseries || series.aboutthisseries;
-
   const quests = groupVideosIntoQuests(videos);
 
   return {
@@ -153,11 +135,6 @@ export function transformToLesson(
     _type: 'lesson',
     title: name,
     slug: slug,
-    description,      // 🆕 説明文
-    coverImage,       // 🆕 カバー画像URL
-    iconImage,        // 🆕 アイコン画像URL
-    category,         // 🆕 カテゴリ
-    overview,         // 🆕 詳細説明（HTML）
     quests: quests,
     source: 'webflow',
     webflowId: series.id,

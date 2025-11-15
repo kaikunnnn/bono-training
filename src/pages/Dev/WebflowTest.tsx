@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Loader2, CheckCircle2, XCircle, Video, Clock } from 'lucide-react';
+import { Loader2, CheckCircle2, XCircle, Video, Clock, Lock, Unlock } from 'lucide-react';
 
 const WebflowTest: React.FC = () => {
   const [seriesInput, setSeriesInput] = useState('');
@@ -119,6 +119,12 @@ const WebflowTest: React.FC = () => {
                     総記事数:{' '}
                     {data.lesson.quests.reduce((sum, q) => sum + q.articles.length, 0)}
                   </p>
+                  <details className="mt-3">
+                    <summary className="cursor-pointer font-medium">🔍 デバッグ: 生データを確認</summary>
+                    <pre className="mt-2 p-3 bg-white rounded text-xs overflow-auto max-h-96">
+                      {JSON.stringify(data, null, 2)}
+                    </pre>
+                  </details>
                 </div>
               </AlertDescription>
             </Alert>
@@ -158,9 +164,22 @@ const WebflowTest: React.FC = () => {
                             {index + 1}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 mb-1">
-                              {article.title}
-                            </h4>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-medium text-gray-900">
+                                {article.title}
+                              </h4>
+                              {article.isPremium ? (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-amber-100 text-amber-700 border border-amber-200">
+                                  <Lock className="h-3 w-3" />
+                                  有料
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-700 border border-green-200">
+                                  <Unlock className="h-3 w-3" />
+                                  無料
+                                </span>
+                              )}
+                            </div>
                             <div className="flex flex-wrap gap-3 text-sm text-gray-600">
                               <span className="flex items-center gap-1">
                                 <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded">

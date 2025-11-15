@@ -10,6 +10,7 @@ interface Article {
   slug: string;
   videoUrl?: string;
   videoDuration?: string;
+  isPremium: boolean;  // 🆕 プレミアムフラグ（true=有料、false=無料）
   content?: string;
   source: 'webflow';
   webflowId: string;
@@ -45,13 +46,15 @@ interface WebflowSeriesResponse {
  * Fetch Webflow Series data from Edge Function
  */
 async function fetchWebflowSeries(seriesIdOrSlug: string): Promise<WebflowSeriesResponse> {
-  const url = `${SUPABASE_URL}/functions/v1/webflow-series?id=${encodeURIComponent(seriesIdOrSlug)}`;
-  
+  const url = `${SUPABASE_URL}/functions/v1/webflow-series`;
+
   const response = await fetch(url, {
+    method: 'POST',  // 🔄 POSTメソッドに変更
     headers: {
       'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
       'Content-Type': 'application/json',
     },
+    body: JSON.stringify({ seriesId: seriesIdOrSlug }),  // 🔄 ボディでseriesIdを送信
   });
 
   if (!response.ok) {

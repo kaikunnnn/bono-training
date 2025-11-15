@@ -5,6 +5,7 @@ import type { SanityImage } from "@/types/sanity";
 interface LessonSectionProps {
   title: string;
   thumbnail?: SanityImage;
+  thumbnailUrl?: string | null;
   progressPercent: number;
   lessonSlug: string;
 }
@@ -24,9 +25,13 @@ interface LessonSectionProps {
 const LessonSection = ({
   title,
   thumbnail,
+  thumbnailUrl,
   progressPercent,
   lessonSlug,
 }: LessonSectionProps) => {
+  // Use thumbnailUrl (from Webflow) if available, otherwise use thumbnail (Sanity image)
+  const imageUrl = thumbnailUrl || (thumbnail ? urlFor(thumbnail).width(80).height(120).url() : null);
+
   return (
     <div className="flex flex-col w-full gap-1 bg-transparent">
       {/* ラップコンテナ */}
@@ -42,9 +47,9 @@ const LessonSection = ({
             boxShadow: "1.33px 1.33px 18.08px rgba(0, 0, 0, 0.33)",
           }}
         >
-          {thumbnail ? (
+          {imageUrl ? (
             <img
-              src={urlFor(thumbnail).width(80).height(120).url()}
+              src={imageUrl}
               alt={title}
               className="w-full h-full object-cover block"
             />

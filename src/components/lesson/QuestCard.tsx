@@ -7,6 +7,7 @@ interface Article {
   title: string;
   slug: { current: string };
   thumbnail?: any;
+  thumbnailUrl?: string;
   videoDuration?: number;
 }
 
@@ -125,6 +126,7 @@ export default function QuestCard({
               title={article.title}
               slug={article.slug.current}
               thumbnail={article.thumbnail}
+              thumbnailUrl={article.thumbnailUrl}
               videoDuration={article.videoDuration}
             />
           ))}

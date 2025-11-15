@@ -32,33 +32,9 @@ export interface WebflowSeries {
   id: string;
   slug: string;
   name: string;
-  thumbnail?: {
-    url: string;
-    alt?: string;
-  }; // Thumbnail画像（iconImage用）
-  ogpimezi?: {
-    url: string;
-    alt?: string;
-  }; // OGP画像（coverImage用）- 実際のフィールド名
-  description?: string; // 説明文（HTML）
-  "descriptions-2"?: string; // 短い説明文
-  categories?: string; // カテゴリ（Reference ID）
-  aboutthisseries?: string; // このシリーズについて（HTML）
   fieldData?: {
     name: string;
     slug: string;
-    thumbnail?: {
-      url: string;
-      alt?: string;
-    }; // Thumbnail画像
-    ogpimezi?: {
-      url: string;
-      alt?: string;
-    }; // OGP画像
-    description?: string; // 説明文（HTML）
-    "descriptions-2"?: string; // 短い説明文
-    categories?: string; // カテゴリ（Reference ID）
-    aboutthisseries?: string; // このシリーズについて（HTML）
   };
 }
 
@@ -96,11 +72,6 @@ export interface Lesson {
   _type: "lesson";
   title: string;
   slug: string;
-  description?: string; // 🆕 説明文
-  coverImage?: string; // 🆕 カバー画像URL
-  iconImage?: string; // 🆕 アイコン画像URL
-  category?: string; // 🆕 カテゴリ
-  overview?: string; // 🆕 詳細説明（HTML）
   quests: Quest[];
   source: "webflow";
   webflowId: string;
