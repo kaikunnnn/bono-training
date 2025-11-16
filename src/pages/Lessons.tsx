@@ -5,6 +5,15 @@ import Layout from "@/components/layout/Layout";
 import { useLessons } from "@/hooks/useLessons";
 import { useCategories } from "@/hooks/useCategories";
 
+/**
+ * カテゴリIDを抽出するヘルパー関数
+ */
+function extractCategoryId(category: any): string | null {
+  if (!category) return null;
+  if (typeof category === 'string') return category;
+  return category._ref || category._id || null;
+}
+
 export default function Lessons() {
   const navigate = useNavigate();
   const { data: lessons, isLoading: loading, error } = useLessons();
@@ -15,23 +24,16 @@ export default function Lessons() {
     navigate(`/lessons/${slug}`);
   };
 
-  // カテゴリでフィルタリングされたレッスン
   const filteredLessons = useMemo(() => {
     if (!lessons) return [];
     if (!selectedCategoryId) return lessons;
 
     return lessons.filter((lesson) => {
-      if (!lesson.category) return false;
-
-      const categoryId = typeof lesson.category === 'string'
-        ? lesson.category
-        : (lesson.category as any)?._ref || (lesson.category as any)?._id;
-
+      const categoryId = extractCategoryId(lesson.category);
       return categoryId === selectedCategoryId;
     });
   }, [lessons, selectedCategoryId]);
 
-  // カテゴリごとのレッスン数
   const categoryCounts = useMemo(() => {
     if (!lessons || !categories) return {};
 
@@ -41,14 +43,9 @@ export default function Lessons() {
     });
 
     lessons.forEach((lesson) => {
-      if (lesson.category) {
-        const categoryId = typeof lesson.category === 'string'
-          ? lesson.category
-          : (lesson.category as any)?._ref || (lesson.category as any)?._id;
-
-        if (categoryId && counts[categoryId] !== undefined) {
-          counts[categoryId]++;
-        }
+      const categoryId = extractCategoryId(lesson.category);
+      if (categoryId && counts[categoryId] !== undefined) {
+        counts[categoryId]++;
       }
     });
 
@@ -133,13 +130,11 @@ export default function Lessons() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredLessons.map((lesson) => {
-              // Webflowの画像URL（文字列）またはSanityの画像オブジェクト
               const imageUrl = lesson.coverImageUrl ||
                               (lesson.coverImage ? urlFor(lesson.coverImage).width(400).height(300).url() : null);
 
-              // WebflowのカテゴリIDは表示しない（Sanityで手動入力したカテゴリは表示）
               const shouldShowCategory = lesson.category &&
-                lesson.category.length < 20; // IDっぽい長い文字列は除外
+                lesson.category.length < 20;
 
               return (
                 <div

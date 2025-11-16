@@ -1,14 +1,22 @@
 import { Link } from "react-router-dom";
+import { useMemo } from "react";
 import Layout from "@/components/layout/Layout";
 import { useCategories, type Category } from "@/hooks/useCategories";
 import { useLessons } from "@/hooks/useLessons";
-import { useMemo } from "react";
+
+/**
+ * カテゴリIDを抽出するヘルパー関数
+ */
+function extractCategoryId(category: any): string | null {
+  if (!category) return null;
+  if (typeof category === 'string') return category;
+  return category._ref || category._id || null;
+}
 
 export default function Categories() {
   const { data: categories, isLoading: categoriesLoading } = useCategories();
   const { data: lessons } = useLessons();
 
-  // カテゴリごとのレッスン数をカウント
   const categoryCounts = useMemo(() => {
     if (!lessons || !categories) return {};
 
@@ -18,15 +26,9 @@ export default function Categories() {
     });
 
     lessons.forEach((lesson) => {
-      if (lesson.category) {
-        // categoryは参照型なので、_idまたは文字列の可能性がある
-        const categoryId = typeof lesson.category === 'string'
-          ? lesson.category
-          : (lesson.category as any)?._ref || (lesson.category as any)?._id;
-
-        if (categoryId && counts[categoryId] !== undefined) {
-          counts[categoryId]++;
-        }
+      const categoryId = extractCategoryId(lesson.category);
+      if (categoryId && counts[categoryId] !== undefined) {
+        counts[categoryId]++;
       }
     });
 
