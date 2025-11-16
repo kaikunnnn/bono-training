@@ -8,10 +8,22 @@ import { useCategories } from "@/hooks/useCategories";
 /**
  * カテゴリIDを抽出するヘルパー関数
  */
-function extractCategoryId(category: any): string | null {
+function extractCategoryId(category: any, categories?: any[]): string | null {
   if (!category) return null;
-  if (typeof category === 'string') return category;
-  return category._ref || category._id || null;
+
+  // 参照型の場合
+  if (typeof category === 'object') {
+    return category._ref || category._id || null;
+  }
+
+  // 文字列の場合、カテゴリタイトルからIDに変換
+  if (typeof category === 'string' && categories) {
+    const matchedCategory = categories.find(cat => cat.title === category);
+    return matchedCategory?._id || null;
+  }
+
+  // それ以外の文字列（既にIDの可能性）
+  return category;
 }
 
 export default function Lessons() {
@@ -29,10 +41,10 @@ export default function Lessons() {
     if (!selectedCategoryId) return lessons;
 
     return lessons.filter((lesson) => {
-      const categoryId = extractCategoryId(lesson.category);
+      const categoryId = extractCategoryId(lesson.category, categories);
       return categoryId === selectedCategoryId;
     });
-  }, [lessons, selectedCategoryId]);
+  }, [lessons, selectedCategoryId, categories]);
 
   const categoryCounts = useMemo(() => {
     if (!lessons || !categories) return {};
@@ -43,7 +55,7 @@ export default function Lessons() {
     });
 
     lessons.forEach((lesson) => {
-      const categoryId = extractCategoryId(lesson.category);
+      const categoryId = extractCategoryId(lesson.category, categories);
       if (categoryId && counts[categoryId] !== undefined) {
         counts[categoryId]++;
       }

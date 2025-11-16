@@ -6,12 +6,25 @@ import { useCategories } from "./useCategories";
  * カテゴリIDを抽出するヘルパー関数
  *
  * @param category - カテゴリ（参照、ID、または文字列）
+ * @param categories - カテゴリ一覧（文字列からIDへの変換用）
  * @returns カテゴリID
  */
-function extractCategoryId(category: any): string | null {
+function extractCategoryId(category: any, categories?: any[]): string | null {
   if (!category) return null;
-  if (typeof category === 'string') return category;
-  return category._ref || category._id || null;
+
+  // 参照型の場合
+  if (typeof category === 'object') {
+    return category._ref || category._id || null;
+  }
+
+  // 文字列の場合、カテゴリタイトルからIDに変換
+  if (typeof category === 'string' && categories) {
+    const matchedCategory = categories.find(cat => cat.title === category);
+    return matchedCategory?._id || null;
+  }
+
+  // それ以外の文字列（既にIDの可能性）
+  return category;
 }
 
 /**
@@ -51,10 +64,10 @@ export function useLessonsByCategory(categorySlug: string) {
     if (!lessons || !category) return [];
 
     return lessons.filter((lesson) => {
-      const categoryId = extractCategoryId(lesson.category);
+      const categoryId = extractCategoryId(lesson.category, categories);
       return categoryId === category._id;
     });
-  }, [lessons, category]);
+  }, [lessons, category, categories]);
 
   return {
     /** フィルタリングされたレッスン一覧 */
