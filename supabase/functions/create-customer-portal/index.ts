@@ -45,17 +45,17 @@ serve(async (req) => {
     // リクエストボディから returnUrl を取得
     const { returnUrl } = await req.json();
 
-    // ユーザーのサブスクリプション情報を取得
-    const { data: subscription, error: subError } = await supabase
-      .from('user_subscriptions')
+    // ユーザーのStripe Customer IDを取得
+    const { data: customer, error: customerError } = await supabase
+      .from('stripe_customers')
       .select('stripe_customer_id')
       .eq('user_id', user.id)
       .single();
 
-    if (subError || !subscription?.stripe_customer_id) {
+    if (customerError || !customer?.stripe_customer_id) {
       return new Response(
         JSON.stringify({
-          error: 'サブスクリプションが見つかりません。まずプランに登録してください。'
+          error: 'Stripe顧客情報が見つかりません。まずプランに登録してください。'
         }),
         {
           status: 404,
@@ -66,7 +66,7 @@ serve(async (req) => {
 
     // Stripe カスタマーポータルセッションを作成
     const session = await stripe.billingPortal.sessions.create({
-      customer: subscription.stripe_customer_id,
+      customer: customer.stripe_customer_id,
       return_url: returnUrl || `${req.headers.get('origin')}/account`,
     });
 

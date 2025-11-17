@@ -75,6 +75,7 @@ serve(async (req) => {
     if (existingSubData?.is_active && existingSubData?.stripe_subscription_id) {
       existingSubscriptionId = existingSubData.stripe_subscription_id;
       logDebug("既存のアクティブなサブスクリプションを検出:", { existingSubscriptionId });
+      // 注意: 既存契約者はCustomer Portalでプラン変更を行うため、ここではキャンセル処理を行わない
     }
     
     if (customerError || !customerData) {
@@ -137,6 +138,10 @@ serve(async (req) => {
       logDebug("メタデータに既存サブスクリプションIDを追加:", { existingSubscriptionId });
     }
 
+    // cancel_urlは/subscriptionページに設定（returnUrlではなく）
+    const baseUrl = returnUrl.split('/subscription')[0];
+    const cancelUrl = `${baseUrl}/subscription`;
+
     const session = await stripe.checkout.sessions.create({
       customer: stripeCustomerId,
       payment_method_types: ["card"],
@@ -148,7 +153,7 @@ serve(async (req) => {
       ],
       mode: "subscription",
       success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: returnUrl,
+      cancel_url: cancelUrl,
       metadata: sessionMetadata
     });
     

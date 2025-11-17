@@ -68,21 +68,24 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
   if (dbSubscription) {
     const isSubscribed = dbSubscription.is_active;
     const planType = dbSubscription.plan_type;
-    
+    const duration = dbSubscription.duration || null;
+
     // アクセス権限を計算
     const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(planType, isSubscribed);
-    
-    logDebug("データベースの購読情報を返却", { 
+
+    logDebug("データベースの購読情報を返却", {
       isActive: isSubscribed,
       planType,
+      duration,
       hasMemberAccess,
       hasLearningAccess
     });
-    
+
     return new Response(
       JSON.stringify({
         subscribed: isSubscribed,
         planType,
+        duration,
         isSubscribed,
         hasMemberAccess,
         hasLearningAccess

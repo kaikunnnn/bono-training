@@ -8,6 +8,7 @@ import { canAccessContent as canAccessContentUtil } from '@/utils/premiumAccess'
 export interface SubscriptionState {
   isSubscribed: boolean;
   planType: PlanType | null;
+  duration: number | null;
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
@@ -25,6 +26,7 @@ export const useSubscription = (): SubscriptionState => {
   const { user, loading: authLoading } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [planType, setPlanType] = useState<PlanType | null>(null);
+  const [duration, setDuration] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [memberAccess, setMemberAccess] = useState(false);
@@ -34,6 +36,7 @@ export const useSubscription = (): SubscriptionState => {
     if (!user) {
       setIsSubscribed(false);
       setPlanType(null);
+      setDuration(null);
       setMemberAccess(false);
       setLearningAccess(false);
       setLoading(false);
@@ -51,9 +54,11 @@ export const useSubscription = (): SubscriptionState => {
       // レスポンスから値を安全に取得
       const subscribed = response.isSubscribed ?? response.subscribed ?? false;
       const plan = response.planType;
-      
+      const dur = response.duration ?? null;
+
       setIsSubscribed(subscribed);
       setPlanType(plan);
+      setDuration(dur);
       
       // Edge Functionから直接アクセス権限が取得できる場合はそれを優先使用
       if (response.hasMemberAccess !== undefined && response.hasLearningAccess !== undefined) {
@@ -93,6 +98,7 @@ export const useSubscription = (): SubscriptionState => {
   return {
     isSubscribed,
     planType,
+    duration,
     loading,
     error,
     refresh: fetchSubscriptionStatus,

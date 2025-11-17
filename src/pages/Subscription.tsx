@@ -4,7 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { createCheckoutSession } from '@/services/stripe';
+import { createCheckoutSession, getCustomerPortalUrl } from '@/services/stripe';
 import { PlanType } from '@/utils/subscriptionPlans';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanCard from '@/components/subscription/PlanCard';
@@ -14,7 +14,7 @@ import SubscriptionHeader from '@/components/subscription/SubscriptionHeader';
 const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isSubscribed, planType } = useSubscriptionContext();
+  const { isSubscribed, planType, duration: currentDuration } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1); // 期間選択の状態
   
@@ -55,30 +55,41 @@ const SubscriptionPage: React.FC = () => {
   const handleSubscribe = async (selectedPlanType: PlanType) => {
     setIsLoading(true);
     try {
-      // 新規登録も既存契約者も、常にチェックアウトページに遷移
-      // 既存契約の場合は、チェックアウトで新しいプランを確認してから決済
-      console.log('チェックアウトページに遷移します:', {
-        planType: selectedPlanType,
-        duration: selectedDuration,
-        isExistingSubscription: isSubscribed && planType
-      });
+      // 既存契約者かどうかで分岐
+      if (isSubscribed) {
+        // 既存契約者 → Customer Portalに遷移してプラン変更
+        console.log('既存契約者: Customer Portalに遷移します', {
+          currentPlan: planType,
+          currentDuration: currentDuration,
+          selectedPlan: selectedPlanType,
+          selectedDuration: selectedDuration
+        });
 
-      const returnUrl = window.location.origin + '/subscription/success';
-      const { url, error } = await createCheckoutSession(returnUrl, selectedPlanType, selectedDuration);
+        const portalUrl = await getCustomerPortalUrl('/subscription');
+        window.location.href = portalUrl;
+      } else {
+        // 新規ユーザー → Checkoutに遷移
+        console.log('新規ユーザー: Checkoutに遷移します', {
+          planType: selectedPlanType,
+          duration: selectedDuration
+        });
 
-      if (error) {
-        throw error;
-      }
+        const returnUrl = window.location.origin + '/subscription/success';
+        const { url, error } = await createCheckoutSession(returnUrl, selectedPlanType, selectedDuration);
 
-      if (url) {
-        // Stripeチェックアウトページにリダイレクト
-        window.location.href = url;
+        if (error) {
+          throw error;
+        }
+
+        if (url) {
+          window.location.href = url;
+        }
       }
     } catch (error) {
       console.error('購読エラー:', error);
       toast({
         title: "エラーが発生しました",
-        description: error instanceof Error ? error.message : "決済処理の開始に失敗しました。もう一度お試しください。",
+        description: error instanceof Error ? error.message : "処理の開始に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
     } finally {
@@ -126,7 +137,7 @@ const SubscriptionPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {plans.map((plan) => {
-            const isCurrentPlan = isSubscribed && planType === plan.id;
+            const isCurrentPlan = isSubscribed && planType === plan.id && currentDuration === selectedDuration;
             const selectedPriceInfo = plan.durations.find(d => d.months === selectedDuration) || plan.durations[0];
 
             return (
