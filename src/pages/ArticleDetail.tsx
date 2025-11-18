@@ -8,13 +8,64 @@ import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
+import { FlowerGrowthNotification } from "@/components/flower/FlowerGrowthNotification";
+import { useMarkArticleComplete, useLessonProgress } from "@/hooks/useFlowerProgress";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import type { GrowthStage } from "@/types/flower";
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [article, setArticle] = useState<ArticleWithContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // 花の成長通知モーダルの状態
+  const [showGrowthModal, setShowGrowthModal] = useState(false);
+  const [previousStage, setPreviousStage] = useState<GrowthStage>(0);
+
+  // 記事完了ミューテーション
+  const markArticleComplete = useMarkArticleComplete();
+
+  // レッスン進捗を取得（モーダル表示用）
+  const { data: lessonProgress } = useLessonProgress(
+    article?.lessonInfo?._id || '',
+    article?.lessonInfo?.title || '',
+    article?.lessonInfo?.slug?.current || '',
+    article?.lessonInfo?.category,
+    user?.id || ''
+  );
+
+  // 記事完了ハンドラー
+  const handleCompleteArticle = async () => {
+    if (!user?.id || !article?._id) {
+      toast.error('ログインが必要です');
+      return;
+    }
+
+    try {
+      // 完了前の成長段階を保存
+      if (lessonProgress) {
+        setPreviousStage(lessonProgress.growthStage);
+      }
+
+      // 記事を完了としてマーク
+      await markArticleComplete.mutateAsync({
+        userId: user.id,
+        articleId: article._id,
+      });
+
+      // 成長通知モーダルを表示
+      setShowGrowthModal(true);
+
+      toast.success('記事を完了しました！');
+    } catch (error) {
+      console.error('Failed to mark article as complete:', error);
+      toast.error('記事の完了に失敗しました');
+    }
+  };
 
   // 前後の記事を計算
   const navigation = useMemo(() => {
@@ -139,7 +190,7 @@ const ArticleDetail = () => {
                 stepNumber={article.articleNumber}
                 title={article.title}
                 description={article.excerpt}
-                onComplete={() => console.log("Complete clicked")}
+                onComplete={handleCompleteArticle}
                 onFavorite={() => console.log("Favorite clicked")}
                 onShare={() => console.log("Share clicked")}
                 onNext={() => console.log("Next clicked")}
@@ -169,6 +220,18 @@ const ArticleDetail = () => {
           </div>
         </main>
       </div>
+
+      {/* 花の成長通知モーダル */}
+      {lessonProgress && (
+        <FlowerGrowthNotification
+          isOpen={showGrowthModal}
+          onClose={() => setShowGrowthModal(false)}
+          lessonTitle={article.lessonInfo?.title || ''}
+          previousStage={previousStage}
+          currentStage={lessonProgress.growthStage}
+          completionRate={lessonProgress.completionRate}
+        />
+      )}
     </div>
   );
 };

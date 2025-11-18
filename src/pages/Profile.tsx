@@ -8,11 +8,16 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 import { Mail, User, ChevronRight } from "lucide-react";
+import { FlowerCollection } from "@/components/flower/FlowerCollection";
+import { useAllFlowersProgress } from "@/hooks/useFlowerProgress";
 
 const Profile: React.FC = () => {
   const { user, signOut } = useAuth();
   const { isSubscribed, planType, hasMemberAccess, loading } = useSubscriptionContext();
   const navigate = useNavigate();
+
+  // 璃奈フラワーの進捗を取得
+  const { data: flowers = [], isLoading: flowersLoading } = useAllFlowersProgress(user?.id || '');
   
   // プラン名を取得する関数
   const getPlanDisplayName = () => {
@@ -115,7 +120,20 @@ const Profile: React.FC = () => {
               )}
             </CardContent>
           </Card>
-          
+
+          {/* 璃奈フラワーコレクションセクション */}
+          <Card>
+            <CardHeader>
+              <CardTitle>🌸 璃奈フラワーコレクション</CardTitle>
+              <CardDescription>
+                レッスンの進捗に応じて花が成長します
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FlowerCollection flowers={flowers} isLoading={flowersLoading} />
+            </CardContent>
+          </Card>
+
           <div className="flex justify-end">
             <Button variant="secondary" onClick={handleSignOut}>
               ログアウト
