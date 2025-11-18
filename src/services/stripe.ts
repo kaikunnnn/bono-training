@@ -137,9 +137,10 @@ export const checkSubscriptionStatus = async (): Promise<{
 /**
  * Stripeカスタマーポータルのセッションを作成し、URLを取得する
  * @param returnUrl ポータルから戻る際のリダイレクトURL
+ * @param useDeepLink サブスクリプション更新画面に直接遷移するか
  * @returns カスタマーポータルのURL
  */
-export const getCustomerPortalUrl = async (returnUrl?: string): Promise<string> => {
+export const getCustomerPortalUrl = async (returnUrl?: string, useDeepLink?: boolean): Promise<string> => {
   try {
     // ユーザーが認証済みか確認
     const { data: { session } } = await supabase.auth.getSession();
@@ -152,7 +153,10 @@ export const getCustomerPortalUrl = async (returnUrl?: string): Promise<string> 
 
     // Supabase Edge Functionを呼び出してカスタマーポータルセッションを作成
     const { data, error } = await supabase.functions.invoke('create-customer-portal', {
-      body: { returnUrl: returnUrl || defaultReturnUrl }
+      body: {
+        returnUrl: returnUrl || defaultReturnUrl,
+        useDeepLink: useDeepLink || false
+      }
     });
 
     if (error) {

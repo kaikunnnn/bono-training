@@ -57,15 +57,16 @@ const SubscriptionPage: React.FC = () => {
     try {
       // 既存契約者かどうかで分岐
       if (isSubscribed) {
-        // 既存契約者 → Customer Portalに遷移してプラン変更
-        console.log('既存契約者: Customer Portalに遷移します', {
+        // 既存契約者 → Customer Portal（ディープリンク）に遷移してプラン変更
+        console.log('既存契約者: Customer Portal（プラン変更画面）に遷移します', {
           currentPlan: planType,
           currentDuration: currentDuration,
           selectedPlan: selectedPlanType,
           selectedDuration: selectedDuration
         });
 
-        const portalUrl = await getCustomerPortalUrl('/subscription');
+        // ディープリンクを使用してサブスクリプション更新画面に直接遷移
+        const portalUrl = await getCustomerPortalUrl('/subscription', true);
         window.location.href = portalUrl;
       } else {
         // 新規ユーザー → Checkoutに遷移
@@ -103,7 +104,9 @@ const SubscriptionPage: React.FC = () => {
 
     const planMap: Record<PlanType, string> = {
       standard: 'スタンダード',
-      feedback: 'フィードバック'
+      feedback: 'フィードバック',
+      community: 'フィードバック', // communityはfeedbackとして表示
+      growth: 'グロース'
     };
 
     return planMap[planType] || 'フリープラン';

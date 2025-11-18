@@ -80,6 +80,9 @@ serve(async (req) => {
       case "checkout.session.completed":
         await handleCheckoutCompleted(stripe, supabase, event.data.object);
         break;
+      case "customer.subscription.updated":
+        await handleSubscriptionUpdated(stripe, supabase, event.data.object);
+        break;
       case "invoice.paid":
         await handleInvoicePaid(stripe, supabase, event.data.object);
         break;
@@ -247,15 +250,47 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, invoice: any) {
 
   try {
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-    
+
     // プラン情報を取得
     const items = subscription.items.data;
+    if (!items || items.length === 0) {
+      console.error("サブスクリプションにアイテムがありません");
+      return;
+    }
+
+    const priceId = items[0].price.id;
     let amount = 0;
-    if (items && items.length > 0 && items[0].price.unit_amount) {
+    if (items[0].price.unit_amount) {
       amount = items[0].price.unit_amount;
     }
-    
-    const planType = subscription.metadata?.plan_type || "community";
+
+    // Price IDからプランタイプと期間を判定（subscription.updatedと同じロジック）
+    const STANDARD_1M = Deno.env.get("STRIPE_TEST_STANDARD_1M_PRICE_ID") || Deno.env.get("STRIPE_STANDARD_1M_PRICE_ID");
+    const STANDARD_3M = Deno.env.get("STRIPE_TEST_STANDARD_3M_PRICE_ID") || Deno.env.get("STRIPE_STANDARD_3M_PRICE_ID");
+    const FEEDBACK_1M = Deno.env.get("STRIPE_TEST_FEEDBACK_1M_PRICE_ID") || Deno.env.get("STRIPE_FEEDBACK_1M_PRICE_ID");
+    const FEEDBACK_3M = Deno.env.get("STRIPE_TEST_FEEDBACK_3M_PRICE_ID") || Deno.env.get("STRIPE_FEEDBACK_3M_PRICE_ID");
+
+    let planType: string;
+    let duration: number;
+
+    if (priceId === STANDARD_1M) {
+      planType = "standard";
+      duration = 1;
+    } else if (priceId === STANDARD_3M) {
+      planType = "standard";
+      duration = 3;
+    } else if (priceId === FEEDBACK_1M) {
+      planType = "feedback";
+      duration = 1;
+    } else if (priceId === FEEDBACK_3M) {
+      planType = "feedback";
+      duration = 3;
+    } else {
+      console.warn(`未知のPrice ID (invoice.paid): ${priceId}`);
+      planType = "community";
+      duration = 1;
+    }
+
     const hasMemberAccess = determineMembershipAccess(planType, amount);
 
     // サブスクリプション情報を更新
@@ -361,5 +396,107 @@ async function handleSubscriptionDeleted(stripe: Stripe, supabase: any, subscrip
 
   } catch (error) {
     console.error("サブスクリプション削除処理エラー:", error.message);
+  }
+}
+
+/**
+ * サブスクリプション更新イベントの処理
+ * Customer Portalでのプラン変更時に発火
+ */
+async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, subscription: any) {
+  console.log("customer.subscription.updatedイベントを処理中");
+
+  const subscriptionId = subscription.id;
+  const customerId = subscription.customer;
+
+  try {
+    // サブスクリプションに紐づくユーザーを検索
+    const { data: customerData, error: customerError } = await supabase
+      .from("stripe_customers")
+      .select("user_id")
+      .eq("stripe_customer_id", customerId)
+      .single();
+
+    if (customerError || !customerData) {
+      console.error("Stripe顧客に紐づくユーザーが見つかりません:", customerError);
+      return;
+    }
+
+    const userId = customerData.user_id;
+
+    // 新しいプラン情報を取得
+    const items = subscription.items.data;
+    if (!items || items.length === 0) {
+      console.error("サブスクリプションにアイテムがありません");
+      return;
+    }
+
+    const priceId = items[0].price.id;
+    const amount = items[0].price.unit_amount;
+
+    console.log("プラン変更情報:", { subscriptionId, userId, priceId, amount });
+
+    // Price IDからプランタイプと期間を判定
+    let planType: string;
+    let duration: number;
+
+    // 環境変数からPrice IDを取得（テスト環境と本番環境の両方に対応）
+    const STANDARD_1M = Deno.env.get("STRIPE_TEST_STANDARD_1M_PRICE_ID") || Deno.env.get("STRIPE_STANDARD_1M_PRICE_ID");
+    const STANDARD_3M = Deno.env.get("STRIPE_TEST_STANDARD_3M_PRICE_ID") || Deno.env.get("STRIPE_STANDARD_3M_PRICE_ID");
+    const FEEDBACK_1M = Deno.env.get("STRIPE_TEST_FEEDBACK_1M_PRICE_ID") || Deno.env.get("STRIPE_FEEDBACK_1M_PRICE_ID");
+    const FEEDBACK_3M = Deno.env.get("STRIPE_TEST_FEEDBACK_3M_PRICE_ID") || Deno.env.get("STRIPE_FEEDBACK_3M_PRICE_ID");
+
+    if (priceId === STANDARD_1M) {
+      planType = "standard";
+      duration = 1;
+    } else if (priceId === STANDARD_3M) {
+      planType = "standard";
+      duration = 3;
+    } else if (priceId === FEEDBACK_1M) {
+      planType = "feedback"; // グロースプラン1ヶ月
+      duration = 1;
+    } else if (priceId === FEEDBACK_3M) {
+      planType = "feedback"; // グロースプラン3ヶ月
+      duration = 3;
+    } else {
+      console.warn(`未知のPrice ID: ${priceId}。デフォルトでcommunityプランに設定します`);
+      planType = "community";
+      duration = 1;
+    }
+
+    console.log("判定結果:", { planType, duration, matchedPriceId: priceId });
+
+    // user_subscriptionsテーブルを更新
+    const { error: updateError } = await supabase
+      .from("user_subscriptions")
+      .update({
+        plan_type: planType,
+        duration: duration,
+        is_active: subscription.status === "active",
+        stripe_subscription_id: subscriptionId,
+        updated_at: new Date().toISOString()
+      })
+      .eq("user_id", userId);
+
+    if (updateError) {
+      console.error("user_subscriptions更新エラー:", updateError);
+    } else {
+      console.log(`プラン変更完了: ${planType} (${duration}ヶ月)`);
+    }
+
+    // subscriptionsテーブルも更新
+    const { error: subUpdateError } = await supabase
+      .from("subscriptions")
+      .update({
+        end_timestamp: new Date(subscription.current_period_end * 1000).toISOString()
+      })
+      .eq("stripe_subscription_id", subscriptionId);
+
+    if (subUpdateError) {
+      console.error("subscriptions更新エラー:", subUpdateError);
+    }
+
+  } catch (error) {
+    console.error("サブスクリプション更新処理エラー:", error.message);
   }
 }

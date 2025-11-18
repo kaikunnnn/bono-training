@@ -42,8 +42,12 @@ serve(async (req) => {
       });
     }
 
-    // リクエストボディから returnUrl を取得
-    const { returnUrl } = await req.json();
+    // リクエストボディから returnUrl と useDeepLink を取得
+    const body = await req.json();
+    const returnUrl = body.returnUrl;
+    const useDeepLink = body.useDeepLink || false; // ディープリンクを使用するか
+
+    console.log('Customer Portal リクエスト:', { userId: user.id, returnUrl, useDeepLink });
 
     // ユーザーのStripe Customer IDを取得
     const { data: customer, error: customerError } = await supabase
@@ -53,6 +57,7 @@ serve(async (req) => {
       .single();
 
     if (customerError || !customer?.stripe_customer_id) {
+      console.error('Stripe顧客情報が見つかりません:', { userId: user.id, error: customerError });
       return new Response(
         JSON.stringify({
           error: 'Stripe顧客情報が見つかりません。まずプランに登録してください。'
@@ -64,11 +69,59 @@ serve(async (req) => {
       );
     }
 
-    // Stripe カスタマーポータルセッションを作成
-    const session = await stripe.billingPortal.sessions.create({
+    // return_urlを検証して設定
+    let finalReturnUrl: string;
+    if (returnUrl && returnUrl.startsWith('http')) {
+      finalReturnUrl = returnUrl;
+    } else {
+      // デフォルトURL（開発環境）
+      finalReturnUrl = 'http://localhost:5173/subscription';
+    }
+
+    console.log('Customer Portal作成:', { customerId: customer.stripe_customer_id, returnUrl: finalReturnUrl });
+
+    // ディープリンク用のセッション設定
+    let sessionConfig: any = {
       customer: customer.stripe_customer_id,
-      return_url: returnUrl || `${req.headers.get('origin')}/account`,
-    });
+      return_url: finalReturnUrl,
+    };
+
+    // ディープリンクが有効な場合、サブスクリプション更新画面に直接遷移
+    if (useDeepLink) {
+      // アクティブなサブスクリプションIDを取得
+      const { data: subscription, error: subError } = await supabase
+        .from('user_subscriptions')
+        .select('stripe_subscription_id')
+        .eq('user_id', user.id)
+        .eq('is_active', true)
+        .single();
+
+      if (subError || !subscription?.stripe_subscription_id) {
+        console.error('アクティブなサブスクリプションが見つかりません:', { userId: user.id, error: subError });
+        return new Response(
+          JSON.stringify({
+            error: 'アクティブなサブスクリプションが見つかりません。'
+          }),
+          {
+            status: 404,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
+      // flow_dataを追加してサブスクリプション更新画面に直接遷移
+      sessionConfig.flow_data = {
+        type: 'subscription_update',
+        subscription_update: {
+          subscription: subscription.stripe_subscription_id
+        }
+      };
+
+      console.log('ディープリンク使用:', { subscriptionId: subscription.stripe_subscription_id });
+    }
+
+    // Stripe カスタマーポータルセッションを作成
+    const session = await stripe.billingPortal.sessions.create(sessionConfig);
 
     return new Response(JSON.stringify({ url: session.url }), {
       status: 200,
