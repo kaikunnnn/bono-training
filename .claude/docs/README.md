@@ -1,20 +1,35 @@
-# Subscription実装ドキュメント
+# Bono Training - Documentation
 
-**最終更新**: 2025-11-18
+**最終更新**: 2025-11-19
 
-このディレクトリには、Bono Training サブスクリプション機能の実装に関するドキュメントがまとめられています。
+このディレクトリには、Subscription（サブスクリプション）システムとデータ移行に関するドキュメントが含まれています。
 
 ---
 
-## 📁 ドキュメント構成
+## 📚 ドキュメント構成
 
-### 🔴 最重要ドキュメント
+### 🔄 **データ移行プロジェクト**（進行中）
 
-#### `TESTING.md` - テストガイド
-**Stripe実装をテストする前に必読！**
+**📁 migration/** フォルダ
+- 既存 Stripe 顧客データ（2,162人、250件）の Supabase への移行
+- **詳細は [migration/README.md](./migration/README.md) を参照**
 
-テスト手順、確認項目、チェックリストを含む統合テストガイドです。
-このドキュメントに従ってテストを実施してください。
+**現在の状況**: Phase 0（1件テスト）の準備完了 ✅
+
+**次にやること**:
+1. [migration/migration-test-guide.md](./migration/migration-test-guide.md) を開く
+2. Phase 0 の手順に従ってスクリプトを実行
+3. 動作確認
+
+---
+
+### 💳 **Subscription システム開発**（ほぼ完了）
+
+#### 🔴 最重要ドキュメント
+
+**TESTING.md** - テストガイド
+
+Stripe実装をテストする前に必読！テスト手順、確認項目、チェックリストを含む統合テストガイドです。
 
 **含まれる内容**:
 - テスト1: プラン変更（feedback → standard）
@@ -25,170 +40,139 @@
 
 ---
 
-### 📘 実装完了レポート
+#### 📘 実装完了レポート
 
-#### `critical-fixes-applied.md`
-二重課金防止のCritical修正完了レポート
+1. **critical-fixes-applied.md** - 二重課金防止のCritical修正完了レポート
+   - 複数サブスクリプション対応
+   - Webhook重複チェック追加
+   - upsert変更
+   - デプロイ完了記録
 
-**内容**:
-- 複数サブスクリプション対応
-- Webhook重複チェック追加
-- upsert変更
-- デプロイ完了記録
-
-#### `implementation-summary-tasks4-5.md`
-タスク4・5 実装完了レポート
-
-**内容**:
-- タスク4: 解約同期改善（Realtime機能追加）
-- タスク5: エラーリトライ処理
+2. **implementation-summary-tasks4-5.md** - タスク4・5 実装完了レポート
+   - タスク4: 解約同期改善（Realtime機能追加）
+   - タスク5: エラーリトライ処理
 
 ---
 
-### 📖 実装詳細ドキュメント
+#### 📖 実装詳細ドキュメント
 
-#### `double-billing-prevention-implementation.md`
-二重課金防止の実装詳細
+3. **double-billing-prevention-implementation.md** - 二重課金防止の実装詳細
+   - 実装方針（Checkout作成前にキャンセル）
+   - 技術的詳細
+   - エッジケース対応（10パターン）
+   - セキュリティ考慮事項
 
-**内容**:
-- 実装方針（Checkout作成前にキャンセル）
-- 技術的詳細
-- エッジケース対応（10パターン）
-- セキュリティ考慮事項
-
-#### `remaining-tasks-priority.md`
-残タスクと優先順位
-
-**内容**:
-- 完了したタスク一覧
-- テスト待ちのタスク
-- 今後の開発タスク（中優先・低優先）
+4. **remaining-tasks-priority.md** - 残タスクと優先順位
+   - 完了したタスク一覧
+   - テスト待ちのタスク
+   - 今後の開発タスク（中優先・低優先）
 
 ---
 
-### 📋 参考ドキュメント
+#### 📋 参考ドキュメント
 
-#### `payment-tasks-detailed.md`
-決済機能 詳細タスク整理ドキュメント
+5. **payment-tasks-detailed.md** - 決済機能 詳細タスク整理ドキュメント
+   - 全7タスクの詳細説明
+   - 実装方針
+   - 失敗パターンと対策
 
-**内容**:
-- 全7タスクの詳細説明
-- 実装方針
-- 失敗パターンと対策
-- 見積もり
+6. **stripe-webhook-best-practices.md** - Stripe Webhookベストプラクティス
+   - Webhookの仕組み
+   - セキュリティ対策
+   - エラーハンドリング
 
-#### `stripe-webhook-best-practices.md`
-Stripe Webhookベストプラクティス
-
-**内容**:
-- Webhookの仕組み
-- セキュリティ対策
-- エラーハンドリング
-- テスト方法
-
-#### `phase6-premium-content-implementation.md`
-Phase 6: プレミアムコンテンツアクセス制御
-
-**内容**:
-- RLS実装
-- アクセス制御ロジック
-- UI実装
+7. **phase6-premium-content-implementation.md** - Phase 6: プレミアムコンテンツアクセス制御
+   - RLS実装
+   - アクセス制御ロジック
 
 ---
 
-## 🗂️ アーカイブ
+### 🗂️ アーカイブ
 
 `archive/` フォルダには、実装完了済みの古いドキュメントが保管されています。
 
-**含まれるもの**:
-- 過去の仕様書
-- 実装計画
-- 調査レポート
-- 古いテスト計画
+---
+
+## 🎯 現在のプロジェクト状況
+
+### 💳 Subscription システム
+
+| カテゴリ | ステータス | ドキュメント |
+|---------|----------|------------|
+| 二重課金防止 | ✅ 完了 | double-billing-prevention-implementation.md |
+| キャンセル機能 | ✅ 完了 | implementation-summary-tasks4-5.md |
+| Duration変更 | ✅ 完了 | implementation-summary-tasks4-5.md |
+| エラーリトライ | ✅ 完了 | implementation-summary-tasks4-5.md |
+| cancel_url修正 | ✅ 完了 | critical-fixes-applied.md |
+| テスト実行 | 🔄 進行中 | TESTING.md |
+
+### 🔄 データ移行プロジェクト
+
+| フェーズ | ステータス | 対象 | ドキュメント |
+|---------|----------|------|-------------|
+| Phase 0 | 🔄 準備完了 | 1件テスト | migration/migration-test-guide.md |
+| Phase 1 | ⏳ 待機中 | 10件テスト | migration/migration-test-guide.md |
+| Phase 2 | ⏳ 待機中 | 全件移行（2,162件） | migration/migration-test-guide.md |
+| Phase 3 | ⏳ 待機中 | 並行稼働 | migration/migration-plan.md |
 
 ---
 
-## 📊 現在の実装状況
+## 🚀 次にやること
 
-### ✅ 完了済み（2025-11-18）
+### 🥇 優先度1: データ移行 Phase 0（最優先）
 
-| タスク | 状態 | 完了日 |
-|--------|------|--------|
-| 1. 二重課金防止 | ✅ 完了 | 2025-11-18 |
-| 2. cancel_url修正 | ✅ 完了 | 2025-11-18 |
-| 3. 期間変更機能 | ✅ 完了 | 2025-11-18 |
-| 4. 解約同期改善 | ✅ 完了 | 2025-11-18 |
-| 5. エラーリトライ | ✅ 完了 | 2025-11-18 |
+**[migration/migration-test-guide.md](./migration/migration-test-guide.md)** を参照
 
-### ⏳ テスト待ち
+```bash
+# Step 1: Auth ユーザー作成
+npx tsx scripts/migrate-create-auth-users.ts stripe-customers-test.csv
 
-- **全実装のテスト実施** - `TESTING.md` 参照
+# Step 2: stripe_customers テーブル
+npx tsx scripts/migrate-stripe-customers.ts stripe-customers-test.csv
 
-### 🔵 今後のタスク（オプション）
+# Step 3: user_subscriptions テーブル
+npx tsx scripts/migrate-subscriptions.ts stripe-subscriptions-test.csv
+```
 
-- タスク6: RLSセキュリティ強化
-- タスク7: DB制約追加
+### 🥈 優先度2: Subscription テスト
 
----
-
-## 🚀 テストを始める前に
-
-### 1. このREADMEを読む
-現在の実装状況を理解する
-
-### 2. `TESTING.md` を開く
-テスト手順を確認する
-
-### 3. テスト実施
-チェックリストに従ってテストを実施する
-
-### 4. 結果を報告
-問題があればドキュメント化する
+**TESTING.md** を参照してテストを実施
 
 ---
 
-## 📝 実装の背景
+## 🐛 トラブルシューティング
 
-### なぜこの実装が必要だったのか
+### Subscription システム
 
-#### 問題1: 二重課金
-- **問題**: プラン変更時に既存サブスクリプションがキャンセルされず、2つ同時にアクティブになる
-- **解決**: Checkout作成前に既存サブスクリプションを全てキャンセル、Webhookでも二重チェック
+1. **二重課金が発生する**
+   - → `double-billing-prevention-implementation.md` 参照
 
-#### 問題2: 解約の反映遅延
-- **問題**: Stripeで解約してもアカウントページで即座に反映されない
-- **解決**: Supabase Realtime Subscriptionsでリアルタイム更新
+2. **キャンセルが反映されない**
+   - → `implementation-summary-tasks4-5.md` のキャンセル同期を確認
 
-#### 問題3: ネットワークエラー
-- **問題**: 一時的なエラーで決済が失敗する
-- **解決**: 指数バックオフリトライを実装
+3. **Webhook エラー**
+   - → `stripe-webhook-best-practices.md` 参照
 
-#### 問題4: 期間変更ができない
-- **問題**: 同じプラン内で期間変更しようとすると「現在のプラン」と判定される
-- **解決**: `isCurrentPlan` 判定にdurationを含める
+### データ移行
+
+1. **移行エラーが発生する**
+   - → `migration/migration-test-guide.md` のトラブルシューティングセクション参照
+
+2. **CSVの形式が異なる**
+   - → スクリプトのカラム名を調整
+
+3. **認証エラー**
+   - → `.env` の `SUPABASE_SERVICE_ROLE_KEY` を確認
 
 ---
 
-## 🔍 トラブルシューティング
+## 📝 ドキュメント作成ルール
 
-### 問題が発生した場合
-
-1. **Supabase Logs を確認**
-   - URL: https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu/logs/edge-functions
-   - 関数: `create-checkout`, `stripe-webhook`
-
-2. **Stripe Dashboard を確認**
-   - URL: https://dashboard.stripe.com/test/subscriptions
-   - Activeサブスクリプションの数を確認
-
-3. **Database を確認**
-   - `user_subscriptions` テーブル
-   - `is_active=true` のレコード数を確認
-
-4. **ドキュメントを参照**
-   - `TESTING.md` - テスト手順
-   - `double-billing-prevention-implementation.md` - 実装詳細
-   - `critical-fixes-applied.md` - 修正内容
+- 実装完了後、必ず実装サマリーを作成
+- テスト計画は事前に作成
+- 重要な修正は critical-fixes-applied.md に記録
+- 古いドキュメントは archive/ に移動
+- 移行関連は migration/ フォルダに配置
 
 ---
 
@@ -206,26 +190,6 @@ Phase 6: プレミアムコンテンツアクセス制御
 
 ---
 
-## 🤝 貢献
+**次にやること**: [migration/migration-test-guide.md](./migration/migration-test-guide.md) の Phase 0 を実行する
 
-ドキュメントの改善提案や、新しい問題の発見があれば、以下の手順で報告してください：
-
-1. 問題を明確に記述
-2. 再現手順を記載
-3. 期待される動作と実際の動作を記載
-4. スクリーンショットやログを添付
-
----
-
-## 📞 サポート
-
-質問や問題がある場合は、以下のドキュメントを参照してください：
-
-- `TESTING.md` - テスト関連
-- `double-billing-prevention-implementation.md` - 実装詳細
-- `payment-tasks-detailed.md` - タスク詳細
-
----
-
-**最終更新日**: 2025-11-18
-**作成者**: Claude Code
+**最終更新日**: 2025-11-19
