@@ -158,6 +158,44 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, session: a
       return;
     }
 
+    // === 重複チェック: 既存のアクティブサブスクリプションを確認して非アクティブ化 ===
+    console.log(`ユーザー ${userId} の既存アクティブサブスクリプションを確認`);
+
+    const { data: existingActiveSubs, error: checkError } = await supabase
+      .from("user_subscriptions")
+      .select("stripe_subscription_id")
+      .eq("user_id", userId)
+      .eq("is_active", true)
+      .neq("stripe_subscription_id", subscriptionId); // 新しいサブスクリプションは除外
+
+    if (checkError) {
+      console.error("既存サブスクリプション確認エラー:", checkError);
+    } else if (existingActiveSubs && existingActiveSubs.length > 0) {
+      console.warn(`警告: ユーザー ${userId} に ${existingActiveSubs.length} 件の既存アクティブサブスクリプションが存在します`);
+
+      // 全て非アクティブ化
+      for (const oldSub of existingActiveSubs) {
+        console.log(`古いサブスクリプション ${oldSub.stripe_subscription_id} を非アクティブ化`);
+
+        // Stripe側でもキャンセル試行
+        try {
+          const oldStripeSubscription = await stripe.subscriptions.retrieve(oldSub.stripe_subscription_id);
+          if (oldStripeSubscription.status === 'active' || oldStripeSubscription.status === 'trialing') {
+            await stripe.subscriptions.cancel(oldSub.stripe_subscription_id, { prorate: true });
+            console.log(`Stripe側でサブスクリプション ${oldSub.stripe_subscription_id} をキャンセル完了`);
+          }
+        } catch (stripeError) {
+          console.error(`Stripe側でのキャンセル失敗 (続行します):`, stripeError);
+        }
+
+        // DB更新
+        await supabase
+          .from("user_subscriptions")
+          .update({ is_active: false, updated_at: new Date().toISOString() })
+          .eq("stripe_subscription_id", oldSub.stripe_subscription_id);
+      }
+    }
+
     // Stripe顧客情報を保存/更新
     const { error: customerError } = await supabase
       .from("stripe_customers")
@@ -206,30 +244,7 @@ async function handleCheckoutCompleted(stripe: Stripe, supabase: any, session: a
       console.log(`${planType}プラン（${duration}ヶ月）のサブスクリプション情報を正常に保存しました`);
     }
 
-    // 既存サブスクリプションがある場合はキャンセル
-    if (replaceSubscriptionId) {
-      console.log(`既存サブスクリプション ${replaceSubscriptionId} をキャンセルします`);
-      try {
-        // 既存サブスクリプションを即座にキャンセル
-        await stripe.subscriptions.cancel(replaceSubscriptionId);
-        console.log(`既存サブスクリプション ${replaceSubscriptionId} をキャンセルしました`);
-
-        // DBの古いサブスクリプション情報も更新
-        const { error: oldSubError } = await supabase
-          .from("subscriptions")
-          .update({
-            end_timestamp: new Date().toISOString()
-          })
-          .eq("stripe_subscription_id", replaceSubscriptionId);
-
-        if (oldSubError) {
-          console.error("古いサブスクリプション情報の更新エラー:", oldSubError);
-        }
-      } catch (cancelError) {
-        console.error(`既存サブスクリプションのキャンセルエラー:`, cancelError.message);
-        // キャンセルに失敗しても新しいサブスクリプションは有効なので、処理を継続
-      }
-    }
+    console.log("新しいサブスクリプションが作成されました。既存サブスクリプションは上記で処理済みです。");
 
   } catch (error) {
     console.error("チェックアウト完了処理エラー:", error.message);
@@ -321,13 +336,26 @@ async function handleInvoicePaid(stripe: Stripe, supabase: any, invoice: any) {
       console.error("サブスクリプション情報の更新エラー:", updateError);
     }
 
+    // 次回更新日とキャンセル情報を取得
+    const currentPeriodEnd = subscription.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toISOString()
+      : null;
+    const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+    const cancelAt = subscription.cancel_at
+      ? new Date(subscription.cancel_at * 1000).toISOString()
+      : null;
+
     // user_subscriptionsテーブルも更新
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
       .update({
         is_active: true,
         plan_type: planType,
+        duration: duration,
         plan_members: hasMemberAccess,
+        current_period_end: currentPeriodEnd,
+        cancel_at_period_end: cancelAtPeriodEnd,
+        cancel_at: cancelAt,
         updated_at: new Date().toISOString()
       })
       .eq("user_id", userId);
@@ -466,6 +494,23 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, subscrip
 
     console.log("判定結果:", { planType, duration, matchedPriceId: priceId });
 
+    // キャンセル情報を取得
+    const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+    const cancelAt = subscription.cancel_at
+      ? new Date(subscription.cancel_at * 1000).toISOString()
+      : null;
+
+    // 次回更新日を取得
+    const currentPeriodEnd = subscription.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toISOString()
+      : null;
+
+    console.log("サブスクリプション情報:", {
+      cancelAtPeriodEnd,
+      cancelAt,
+      currentPeriodEnd
+    });
+
     // user_subscriptionsテーブルを更新
     const { error: updateError } = await supabase
       .from("user_subscriptions")
@@ -474,6 +519,9 @@ async function handleSubscriptionUpdated(stripe: Stripe, supabase: any, subscrip
         duration: duration,
         is_active: subscription.status === "active",
         stripe_subscription_id: subscriptionId,
+        cancel_at_period_end: cancelAtPeriodEnd,
+        cancel_at: cancelAt,
+        current_period_end: currentPeriodEnd,
         updated_at: new Date().toISOString()
       })
       .eq("user_id", userId);

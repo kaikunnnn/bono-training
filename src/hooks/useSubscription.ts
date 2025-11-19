@@ -4,11 +4,15 @@ import { useAuth } from '@/contexts/AuthContext';
 import { checkSubscriptionStatus } from '@/services/stripe';
 import { PlanType, hasLearningAccess, hasMemberAccess, UserPlanInfo } from '@/utils/subscriptionPlans';
 import { canAccessContent as canAccessContentUtil } from '@/utils/premiumAccess';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface SubscriptionState {
   isSubscribed: boolean;
   planType: PlanType | null;
   duration: number | null;
+  cancelAtPeriodEnd: boolean;
+  cancelAt: string | null;
+  renewalDate: string | null;
   loading: boolean;
   error: Error | null;
   refresh: () => Promise<void>;
@@ -27,6 +31,9 @@ export const useSubscription = (): SubscriptionState => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [planType, setPlanType] = useState<PlanType | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
+  const [cancelAt, setCancelAt] = useState<string | null>(null);
+  const [renewalDate, setRenewalDate] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const [memberAccess, setMemberAccess] = useState(false);
@@ -37,6 +44,9 @@ export const useSubscription = (): SubscriptionState => {
       setIsSubscribed(false);
       setPlanType(null);
       setDuration(null);
+      setCancelAtPeriodEnd(false);
+      setCancelAt(null);
+      setRenewalDate(null);
       setMemberAccess(false);
       setLearningAccess(false);
       setLoading(false);
@@ -55,10 +65,16 @@ export const useSubscription = (): SubscriptionState => {
       const subscribed = response.isSubscribed ?? response.subscribed ?? false;
       const plan = response.planType;
       const dur = response.duration ?? null;
+      const cancelPending = response.cancelAtPeriodEnd ?? false;
+      const cancelDate = response.cancelAt ?? null;
+      const renewal = response.renewalDate ?? null;
 
       setIsSubscribed(subscribed);
       setPlanType(plan);
       setDuration(dur);
+      setCancelAtPeriodEnd(cancelPending);
+      setCancelAt(cancelDate);
+      setRenewalDate(renewal);
       
       // Edge Functionから直接アクセス権限が取得できる場合はそれを優先使用
       if (response.hasMemberAccess !== undefined && response.hasLearningAccess !== undefined) {
@@ -95,10 +111,44 @@ export const useSubscription = (): SubscriptionState => {
     }
   }, [user, authLoading]);
 
+  // Realtime Subscription: user_subscriptionsテーブルの変更を監視
+  useEffect(() => {
+    if (!user) return;
+
+    console.log('Realtime Subscriptionを設定:', { userId: user.id });
+
+    const channel = supabase
+      .channel('user_subscriptions_changes')
+      .on('postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'user_subscriptions',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload) => {
+          console.log('サブスクリプション更新を検知:', payload);
+          // DB変更時に即座に状態を更新
+          fetchSubscriptionStatus();
+        }
+      )
+      .subscribe((status) => {
+        console.log('Realtime Subscription status:', status);
+      });
+
+    return () => {
+      console.log('Realtime Subscriptionをクリーンアップ');
+      channel.unsubscribe();
+    };
+  }, [user]);
+
   return {
     isSubscribed,
     planType,
     duration,
+    cancelAtPeriodEnd,
+    cancelAt,
+    renewalDate,
     loading,
     error,
     refresh: fetchSubscriptionStatus,

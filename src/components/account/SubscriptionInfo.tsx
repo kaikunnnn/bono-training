@@ -1,27 +1,32 @@
 import { useState } from 'react';
 import { PlanType } from '@/utils/subscriptionPlans';
 import { getCustomerPortalUrl } from '@/services/stripe';
+import { formatPlanDisplay } from '@/utils/planDisplay';
+import { formatDate } from '@/utils/dateFormat';
 
 interface SubscriptionInfoProps {
   planType: PlanType | null;
+  duration: number | null;
   isSubscribed: boolean;
+  cancelAtPeriodEnd: boolean;
+  cancelAt: string | null;
+  renewalDate: string | null;
 }
 
 /**
  * SubscriptionInfo コンポーネント
  * サブスクリプション情報を表示し、Stripeカスタマーポータルへのリンクを提供
  */
-export default function SubscriptionInfo({ planType, isSubscribed }: SubscriptionInfoProps) {
+export default function SubscriptionInfo({
+  planType,
+  duration,
+  isSubscribed,
+  cancelAtPeriodEnd,
+  cancelAt,
+  renewalDate
+}: SubscriptionInfoProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // プラン名のマッピング
-  const planNames: Record<PlanType, string> = {
-    standard: 'スタンダード',
-    feedback: 'フィードバック',
-    community: 'フィードバック', // communityはfeedbackとして表示
-    growth: 'グロース',
-  };
 
   const handleManageSubscription = async () => {
     setLoading(true);
@@ -47,10 +52,40 @@ export default function SubscriptionInfo({ planType, isSubscribed }: Subscriptio
         <div>
           <span className="font-noto-sans-jp text-sm text-gray-600">現在のプラン:</span>
           <span className="ml-2 font-noto-sans-jp font-medium text-base text-gray-800">
-            {planType && isSubscribed ? planNames[planType] || planType : '無料'}
+            {isSubscribed ? formatPlanDisplay(planType, duration) : '無料'}
           </span>
+          {cancelAtPeriodEnd && (
+            <span className="ml-2 font-noto-sans-jp text-sm font-medium text-orange-600 bg-orange-50 px-2 py-1 rounded">
+              【キャンセル済み】
+            </span>
+          )}
         </div>
+
+        {isSubscribed && renewalDate && (
+          <div>
+            <span className="font-noto-sans-jp text-sm text-gray-600">
+              {cancelAtPeriodEnd ? '利用期限:' : '次回更新日:'}
+            </span>
+            <span className="ml-2 font-noto-sans-jp font-medium text-base text-gray-800">
+              {formatDate(renewalDate)}
+            </span>
+          </div>
+        )}
       </div>
+
+      {cancelAtPeriodEnd && (
+        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="font-noto-sans-jp text-sm text-yellow-800 mb-2">
+            ⚠️ サブスクリプションがキャンセルされています
+          </p>
+          <a
+            href="/subscription"
+            className="inline-flex items-center text-blue-600 hover:text-blue-800 font-noto-sans-jp text-sm font-medium"
+          >
+            プランを再開する →
+          </a>
+        </div>
+      )}
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
@@ -90,11 +125,11 @@ export default function SubscriptionInfo({ planType, isSubscribed }: Subscriptio
                 <span className="font-noto-sans-jp text-sm">読み込み中...</span>
               </>
             ) : (
-              <span className="font-noto-sans-jp text-sm">プランを管理</span>
+              <span className="font-noto-sans-jp text-sm">サブスクリプションを管理</span>
             )}
           </button>
           <p className="font-noto-sans-jp text-xs text-gray-500 mt-3">
-            プランの変更、お支払い方法の更新、キャンセルはStripeのカスタマーポータルで行えます
+            プランの変更、お支払い方法の更新、解約はStripeのカスタマーポータルで行えます
           </p>
         </div>
       )}

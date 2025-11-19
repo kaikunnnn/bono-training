@@ -10,7 +10,15 @@ import SubscriptionInfo from '@/components/account/SubscriptionInfo';
  */
 export default function Account() {
   const { user } = useAuth();
-  const { planType, isSubscribed, loading } = useSubscriptionContext();
+  const {
+    planType,
+    duration,
+    isSubscribed,
+    cancelAtPeriodEnd,
+    cancelAt,
+    renewalDate,
+    loading
+  } = useSubscriptionContext();
   const [email, setEmail] = useState<string>('');
 
   useEffect(() => {
@@ -60,7 +68,14 @@ export default function Account() {
           </div>
 
           {/* サブスクリプション情報 */}
-          <SubscriptionInfo planType={planType} isSubscribed={isSubscribed} />
+          <SubscriptionInfo
+            planType={planType}
+            duration={duration}
+            isSubscribed={isSubscribed}
+            cancelAtPeriodEnd={cancelAtPeriodEnd}
+            cancelAt={cancelAt}
+            renewalDate={renewalDate}
+          />
         </div>
       </div>
     </Layout>

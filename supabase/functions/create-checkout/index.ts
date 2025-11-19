@@ -56,7 +56,6 @@ serve(async (req) => {
 
     // ユーザーのStripe Customer IDと既存サブスクリプションを取得
     let stripeCustomerId: string;
-    let existingSubscriptionId: string | null = null;
 
     // DBからユーザーのStripe Customer IDを検索
     const { data: customerData, error: customerError } = await supabaseClient
@@ -65,17 +64,26 @@ serve(async (req) => {
       .eq("user_id", user.id)
       .single();
 
-    // 既存サブスクリプションを確認
-    const { data: existingSubData } = await supabaseClient
+    // 既存サブスクリプションを確認（複数ある場合も全て取得）
+    const { data: existingSubList, error: existingSubError } = await supabaseClient
       .from("user_subscriptions")
       .select("stripe_subscription_id, is_active")
       .eq("user_id", user.id)
-      .single();
+      .eq("is_active", true);
 
-    if (existingSubData?.is_active && existingSubData?.stripe_subscription_id) {
-      existingSubscriptionId = existingSubData.stripe_subscription_id;
-      logDebug("既存のアクティブなサブスクリプションを検出:", { existingSubscriptionId });
-      // 注意: 既存契約者はCustomer Portalでプラン変更を行うため、ここではキャンセル処理を行わない
+    if (existingSubError) {
+      logDebug("既存サブスクリプション取得エラー:", existingSubError);
+      throw new Error("サブスクリプション情報の取得に失敗しました");
+    }
+
+    // アクティブなサブスクリプションが複数ある場合は警告
+    const activeSubscriptions = existingSubList || [];
+    if (activeSubscriptions.length > 0) {
+      logDebug(`${activeSubscriptions.length}件のアクティブサブスクリプションを検出`);
+
+      if (activeSubscriptions.length > 1) {
+        console.warn(`警告: ユーザー ${user.id} に複数のアクティブサブスクリプション: ${activeSubscriptions.map(s => s.stripe_subscription_id).join(', ')}`);
+      }
     }
     
     if (customerError || !customerData) {
@@ -89,14 +97,14 @@ serve(async (req) => {
         }
       });
       
-      // 作成した顧客情報をDBに保存
+      // 作成した顧客情報をDBに保存（upsertで既存レコードがあっても対応）
       const { error: insertError } = await supabaseClient
         .from("stripe_customers")
-        .insert({
+        .upsert({
           user_id: user.id,
           stripe_customer_id: customer.id
-        });
-      
+        }, { onConflict: 'user_id' });
+
       if (insertError) {
         logDebug("Stripe顧客情報のDB保存に失敗:", insertError);
         throw new Error("顧客情報の保存に失敗しました");
@@ -132,17 +140,12 @@ serve(async (req) => {
       duration: duration.toString()
     };
 
-    // 既存サブスクリプションがある場合はメタデータに含める
-    if (existingSubscriptionId) {
-      sessionMetadata.replace_subscription_id = existingSubscriptionId;
-      logDebug("メタデータに既存サブスクリプションIDを追加:", { existingSubscriptionId });
-    }
-
-    // cancel_urlは/subscriptionページに設定（returnUrlではなく）
-    const baseUrl = returnUrl.split('/subscription')[0];
+    // cancel_urlは常に/subscriptionページに設定
+    const baseUrl = new URL(returnUrl).origin;
     const cancelUrl = `${baseUrl}/subscription`;
 
-    const session = await stripe.checkout.sessions.create({
+    // セッション設定オブジェクト
+    const sessionConfig: any = {
       customer: stripeCustomerId,
       payment_method_types: ["card"],
       line_items: [
@@ -155,7 +158,84 @@ serve(async (req) => {
       success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl,
       metadata: sessionMetadata
-    });
+    };
+
+    // 既存サブスクリプションが複数ある場合は全てキャンセル（二重課金を防止）
+    if (activeSubscriptions.length > 0) {
+      logDebug(`${activeSubscriptions.length}件のアクティブサブスクリプションをキャンセルします`);
+
+      for (const existingSub of activeSubscriptions) {
+        const existingSubscriptionId = existingSub.stripe_subscription_id;
+
+        try {
+          // 1. Stripeで既存サブスクリプションの状態を確認
+          let existingSubscription;
+          try {
+            existingSubscription = await stripe.subscriptions.retrieve(existingSubscriptionId);
+            logDebug("既存サブスクリプション取得成功:", {
+              id: existingSubscriptionId,
+              status: existingSubscription.status,
+              customer: existingSubscription.customer
+            });
+          } catch (retrieveError) {
+            // サブスクリプションが存在しない場合はスキップ
+            logDebug("サブスクリプションが見つかりません（既にキャンセル済みの可能性）:", retrieveError);
+            existingSubscription = null;
+          }
+
+          // 2. サブスクリプションが存在し、顧客IDが一致する場合のみキャンセル
+          if (existingSubscription) {
+            if (existingSubscription.customer !== stripeCustomerId) {
+              logDebug("警告: サブスクリプションの顧客IDが一致しません", {
+                subscriptionId: existingSubscriptionId,
+                subscriptionCustomer: existingSubscription.customer,
+                expectedCustomer: stripeCustomerId
+              });
+              throw new Error("サブスクリプション情報に不整合があります");
+            }
+
+            // アクティブまたはトライアル中のサブスクリプションのみキャンセル
+            if (existingSubscription.status === 'active' || existingSubscription.status === 'trialing') {
+              // Stripeでキャンセル（日割り返金付き）
+              await stripe.subscriptions.cancel(existingSubscriptionId, {
+                prorate: true,
+              });
+              logDebug("Stripeでサブスクリプションをキャンセル完了:", existingSubscriptionId);
+            } else {
+              logDebug("サブスクリプションは既に非アクティブです:", {
+                id: existingSubscriptionId,
+                status: existingSubscription.status
+              });
+            }
+          }
+
+          // 3. DBを更新（Stripeの状態に関わらず、DBは確実に更新）
+          const { error: updateError } = await supabaseClient
+            .from("user_subscriptions")
+            .update({
+              is_active: false,
+              updated_at: new Date().toISOString()
+            })
+            .eq("stripe_subscription_id", existingSubscriptionId)
+            .eq("user_id", user.id); // セキュリティ: 必ずuser_idも条件に含める
+
+          if (updateError) {
+            logDebug("DB更新エラー:", updateError);
+            // DB更新失敗は警告のみ（Webhookで最終的に同期される）
+            console.warn("既存サブスクリプションのDB更新に失敗しましたが、処理を続行します");
+          } else {
+            logDebug("DBでサブスクリプションを非アクティブ化完了:", existingSubscriptionId);
+          }
+
+        } catch (cancelError) {
+          logDebug(`サブスクリプション ${existingSubscriptionId} のキャンセルエラー:`, cancelError);
+          // 1つでもキャンセル失敗したらCheckout作成を中止（二重課金を確実に防止）
+          throw new Error(`既存サブスクリプションのキャンセルに失敗しました: ${cancelError.message}`);
+        }
+      }
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
     
     logDebug("Checkoutセッション作成完了", { 
       sessionId: session.id, 

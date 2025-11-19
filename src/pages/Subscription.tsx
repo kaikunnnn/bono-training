@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanCard from '@/components/subscription/PlanCard';
 import PlanComparison from '@/components/subscription/PlanComparison';
 import SubscriptionHeader from '@/components/subscription/SubscriptionHeader';
+import { formatPlanDisplay } from '@/utils/planDisplay';
 
 const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
@@ -98,26 +99,14 @@ const SubscriptionPage: React.FC = () => {
     }
   };
   
-  // 現在のプランを取得
-  const getCurrentPlanName = () => {
-    if (!isSubscribed || !planType) return 'フリープラン';
-
-    const planMap: Record<PlanType, string> = {
-      standard: 'スタンダード',
-      feedback: 'フィードバック',
-      community: 'フィードバック', // communityはfeedbackとして表示
-      growth: 'グロース'
-    };
-
-    return planMap[planType] || 'フリープラン';
-  };
+  // formatPlanDisplayをimportして使用するため、getCurrentPlanName関数は不要
   
   return (
     <Layout>
       <div className="container py-8 max-w-5xl">
         <SubscriptionHeader
           isSubscribed={isSubscribed}
-          currentPlanName={getCurrentPlanName()}
+          currentPlanName={formatPlanDisplay(planType, currentDuration)}
         />
 
         {/* 期間選択タブ（ページ全体） */}
@@ -140,7 +129,11 @@ const SubscriptionPage: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {plans.map((plan) => {
-            const isCurrentPlan = isSubscribed && planType === plan.id && currentDuration === selectedDuration;
+            // 現在のプランと完全に一致する場合のみ「現在のプラン」と判定
+            // プランタイプと期間の両方が一致する必要がある
+            const isCurrentPlan = isSubscribed &&
+                                  planType === plan.id &&
+                                  currentDuration === selectedDuration;
             const selectedPriceInfo = plan.durations.find(d => d.months === selectedDuration) || plan.durations[0];
 
             return (

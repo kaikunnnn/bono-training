@@ -69,6 +69,14 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
     const isSubscribed = dbSubscription.is_active;
     const planType = dbSubscription.plan_type;
     const duration = dbSubscription.duration || null;
+    const cancelAtPeriodEnd = dbSubscription.cancel_at_period_end || false;
+    const cancelAt = dbSubscription.cancel_at || null;
+    const currentPeriodEnd = dbSubscription.current_period_end || null;
+
+    // renewalDate:
+    // - キャンセル済み（cancel_at_period_end=true）の場合はcancel_atを使用（利用期限）
+    // - 通常のサブスクリプションの場合はcurrent_period_endを使用（次回更新日）
+    const renewalDate = cancelAtPeriodEnd && cancelAt ? cancelAt : currentPeriodEnd;
 
     // アクセス権限を計算
     const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(planType, isSubscribed);
@@ -77,6 +85,9 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
       isActive: isSubscribed,
       planType,
       duration,
+      cancelAtPeriodEnd,
+      cancelAt,
+      renewalDate,
       hasMemberAccess,
       hasLearningAccess
     });
@@ -87,6 +98,9 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
         planType,
         duration,
         isSubscribed,
+        cancelAtPeriodEnd,
+        cancelAt,
+        renewalDate,
         hasMemberAccess,
         hasLearningAccess
       }),

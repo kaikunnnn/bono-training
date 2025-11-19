@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { PlanType } from '@/utils/subscriptionPlans';
+import { retrySupabaseFunction } from '@/utils/retry';
 
 /**
  * Stripeチェックアウトセッションを作成する
@@ -23,17 +24,19 @@ export const createCheckoutSession = async (
     }
     
     console.log(`Checkout開始: プラン=${planType}, 期間=${duration}ヶ月, 環境=${isTest ? 'テスト' : '本番'}`);
-    
-    // Supabase Edge Functionを呼び出してCheckoutセッションを作成
-    const { data, error } = await supabase.functions.invoke('create-checkout', {
-      body: {
-        returnUrl,
-        planType,
-        duration,
-        useTestPrice: isTest || import.meta.env.MODE !== 'production' 
-      }
-    });
-    
+
+    // リトライ付きでSupabase Edge Functionを呼び出してCheckoutセッションを作成
+    const { data, error } = await retrySupabaseFunction(() =>
+      supabase.functions.invoke('create-checkout', {
+        body: {
+          returnUrl,
+          planType,
+          duration,
+          useTestPrice: isTest || import.meta.env.MODE !== 'production'
+        }
+      })
+    );
+
     if (error) {
       console.error('Checkoutセッション作成エラー:', error);
       throw new Error('決済処理の準備に失敗しました。');
@@ -55,6 +58,10 @@ export const checkSubscriptionStatus = async (): Promise<{
   isSubscribed: boolean;
   subscribed: boolean; // 後方互換性のため
   planType: PlanType | null;
+  duration: number | null;
+  cancelAtPeriodEnd: boolean;
+  cancelAt: string | null;
+  renewalDate: string | null;
   hasMemberAccess: boolean;
   hasLearningAccess: boolean;
   error: Error | null;
@@ -67,14 +74,20 @@ export const checkSubscriptionStatus = async (): Promise<{
         isSubscribed: false,
         subscribed: false,
         planType: null,
+        duration: null,
+        cancelAtPeriodEnd: false,
+        cancelAt: null,
+        renewalDate: null,
         hasMemberAccess: false,
         hasLearningAccess: false,
         error: null
       };
     }
 
-    // Supabase Edge Functionを呼び出して購読状態を確認
-    const { data, error } = await supabase.functions.invoke('check-subscription');
+    // リトライ付きでSupabase Edge Functionを呼び出して購読状態を確認
+    const { data, error } = await retrySupabaseFunction(() =>
+      supabase.functions.invoke('check-subscription')
+    );
 
     // Edge Functionがエラーを返した場合、または data.error がある場合は直接DBから取得
     if (error || data?.error) {
@@ -83,7 +96,7 @@ export const checkSubscriptionStatus = async (): Promise<{
       // フォールバック: 直接データベースから購読情報を取得
       const { data: subscription, error: dbError } = await supabase
         .from('user_subscriptions')
-        .select('plan_type, is_active')
+        .select('plan_type, duration, is_active, cancel_at_period_end, cancel_at, current_period_end')
         .eq('user_id', session.user.id)
         .single();
 
@@ -94,17 +107,30 @@ export const checkSubscriptionStatus = async (): Promise<{
 
       const isActive = subscription?.is_active || false;
       const planType = subscription?.plan_type as PlanType || null;
+      const duration = subscription?.duration || null;
+      const cancelAtPeriodEnd = subscription?.cancel_at_period_end || false;
+      const cancelAt = subscription?.cancel_at || null;
+      const currentPeriodEnd = subscription?.current_period_end || null;
+
+      // renewalDate:
+      // - キャンセル済み（cancel_at_period_end=true）の場合はcancel_atを使用（利用期限）
+      // - 通常のサブスクリプションの場合はcurrent_period_endを使用（次回更新日）
+      const renewalDate = cancelAtPeriodEnd && cancelAt ? cancelAt : currentPeriodEnd;
 
       // アクセス権限を計算
       const hasMemberAccess = isActive && (planType === 'standard' || planType === 'growth' || planType === 'community');
       const hasLearningAccess = isActive && (planType === 'standard' || planType === 'growth');
 
-      console.log('DB直接取得結果:', { isActive, planType, hasMemberAccess, hasLearningAccess });
+      console.log('DB直接取得結果:', { isActive, planType, duration, cancelAtPeriodEnd, cancelAt, renewalDate, hasMemberAccess, hasLearningAccess });
 
       return {
         isSubscribed: isActive,
         subscribed: isActive,
         planType,
+        duration,
+        cancelAtPeriodEnd,
+        cancelAt,
+        renewalDate,
         hasMemberAccess,
         hasLearningAccess,
         error: null
@@ -117,6 +143,10 @@ export const checkSubscriptionStatus = async (): Promise<{
       isSubscribed: data.isSubscribed || data.subscribed,
       subscribed: data.subscribed || data.isSubscribed, // 後方互換性
       planType: data.planType || null,
+      duration: data.duration ?? null,
+      cancelAtPeriodEnd: data.cancelAtPeriodEnd || false,
+      cancelAt: data.cancelAt || null,
+      renewalDate: data.renewalDate || null,
       hasMemberAccess: data.hasMemberAccess || false,
       hasLearningAccess: data.hasLearningAccess || false,
       error: null
@@ -127,6 +157,10 @@ export const checkSubscriptionStatus = async (): Promise<{
       isSubscribed: false,
       subscribed: false,
       planType: null,
+      duration: null,
+      cancelAtPeriodEnd: false,
+      cancelAt: null,
+      renewalDate: null,
       hasMemberAccess: false,
       hasLearningAccess: false,
       error: error as Error
@@ -151,13 +185,15 @@ export const getCustomerPortalUrl = async (returnUrl?: string, useDeepLink?: boo
     // デフォルトのリターンURLを設定
     const defaultReturnUrl = `${window.location.origin}/account`;
 
-    // Supabase Edge Functionを呼び出してカスタマーポータルセッションを作成
-    const { data, error } = await supabase.functions.invoke('create-customer-portal', {
-      body: {
-        returnUrl: returnUrl || defaultReturnUrl,
-        useDeepLink: useDeepLink || false
-      }
-    });
+    // リトライ付きでSupabase Edge Functionを呼び出してカスタマーポータルセッションを作成
+    const { data, error } = await retrySupabaseFunction(() =>
+      supabase.functions.invoke('create-customer-portal', {
+        body: {
+          returnUrl: returnUrl || defaultReturnUrl,
+          useDeepLink: useDeepLink || false
+        }
+      })
+    );
 
     if (error) {
       console.error('カスタマーポータルセッション作成エラー:', error);
@@ -194,13 +230,15 @@ export const updateSubscription = async (
 
     console.log(`プラン変更開始: プラン=${planType}, 期間=${duration}ヶ月`);
 
-    // Supabase Edge Functionを呼び出してサブスクリプションを更新
-    const { data, error } = await supabase.functions.invoke('update-subscription', {
-      body: {
-        planType,
-        duration
-      }
-    });
+    // リトライ付きでSupabase Edge Functionを呼び出してサブスクリプションを更新
+    const { data, error } = await retrySupabaseFunction(() =>
+      supabase.functions.invoke('update-subscription', {
+        body: {
+          planType,
+          duration
+        }
+      })
+    );
 
     if (error) {
       console.error('サブスクリプション更新エラー:', error);

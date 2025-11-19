@@ -84,6 +84,7 @@ serve(async (req) => {
     let sessionConfig: any = {
       customer: customer.stripe_customer_id,
       return_url: finalReturnUrl,
+      locale: 'ja', // 日本語で表示
     };
 
     // ディープリンクが有効な場合、サブスクリプション更新画面に直接遷移
