@@ -53,8 +53,6 @@ async function migrateStripeCustomers(csvFilePath: string) {
         .eq("user_id", user.id)
         .maybeSingle();
 
-      console.log(`Debug - existing:`, existing, `checkError:`, checkError);
-
       // エラーがなく、データが存在する場合のみスキップ
       if (!checkError && existing) {
         console.log(`⏭️  Skipped (already exists): ${customer.Email}`);
