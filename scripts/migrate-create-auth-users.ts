@@ -47,9 +47,11 @@ async function createAuthUsers(csvFilePath: string) {
   let errorCount = 0;
   const errors: Array<{ email: string; error: string }> = [];
 
-  // バッチ処理（50件ずつ）
-  for (let i = 0; i < customers.length; i += 50) {
-    const batch = customers.slice(i, i + 50);
+  // バッチ処理（5件ずつ、レート制限対策）
+  for (let i = 0; i < customers.length; i += 5) {
+    const batch = customers.slice(i, i + 5);
+
+    console.log(`\n📦 Processing batch ${Math.floor(i / 5) + 1}/${Math.ceil(customers.length / 5)} (${i + 1}-${Math.min(i + 5, customers.length)}/${customers.length})`);
 
     await Promise.all(
       batch.map(async (customer) => {
@@ -97,9 +99,9 @@ async function createAuthUsers(csvFilePath: string) {
       })
     );
 
-    // レート制限対策（1秒待機）
-    if (i + 50 < customers.length) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    // レート制限対策（2秒待機）
+    if (i + 5 < customers.length) {
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   }
 

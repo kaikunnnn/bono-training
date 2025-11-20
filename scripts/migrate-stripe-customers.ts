@@ -26,21 +26,40 @@ async function migrateStripeCustomers(csvFilePath: string) {
   console.log(`📊 Total customers to sync: ${customers.length}`);
   console.log(`📁 Reading from: ${csvFilePath}\n`);
 
+  // 全てのAuthユーザーを一度に取得（ページネーション対応）
+  console.log("🔍 Fetching all Auth users...");
+  let allUsers: any[] = [];
+  let page = 1;
+  let hasMore = true;
+
+  while (hasMore) {
+    const { data, error } = await supabase.auth.admin.listUsers({
+      page: page,
+      perPage: 1000,
+    });
+
+    if (error) throw error;
+
+    allUsers = allUsers.concat(data.users);
+    hasMore = data.users.length === 1000;
+    page++;
+  }
+
+  console.log(`✅ Fetched ${allUsers.length} Auth users\n`);
+
+  // メールアドレスでユーザーを検索するためのMap
+  const userMap = new Map(
+    allUsers.map((u) => [u.email?.toLowerCase(), u])
+  );
+
   let successCount = 0;
   let errorCount = 0;
   const errors: Array<{ email: string; error: string }> = [];
 
   for (const customer of customers) {
     try {
-      // メールアドレスからSupabase AuthのユーザーIDを取得
-      const { data: users, error: getUserError } =
-        await supabase.auth.admin.listUsers();
-
-      if (getUserError) throw getUserError;
-
-      const user = users.users.find(
-        (u) => u.email?.toLowerCase() === customer.Email.toLowerCase()
-      );
+      // Mapからユーザーを検索
+      const user = userMap.get(customer.Email.toLowerCase());
 
       if (!user) {
         throw new Error(`User not found for email: ${customer.Email}`);
