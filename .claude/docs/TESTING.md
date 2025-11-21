@@ -1,6 +1,7 @@
-# Stripe 実装テストガイド
+# Stripe 実装テストガイド（環境分離対応版）
 
-**最終更新**: 2025-11-18
+**最終更新**: 2025-11-21
+**対応内容**: テスト環境と本番環境の分離実装完了後のテスト
 
 このドキュメントは、Stripe 決済・サブスクリプション機能のテスト手順をまとめたものです。
 
@@ -8,20 +9,26 @@
 
 ## 📋 テスト実施日
 
-**実施日**: **1120**
+**実施日**: **\_\_**
 
 ---
-
-ｃ
 
 ## 🔧 事前確認
 
 ### 環境確認
 
-- [○] 開発サーバーが起動している: http://localhost:8081
-- [○] ログインできる
-- [○] Stripe Dashboard（テストモード）にアクセス可能: https://dashboard.stripe.com/test
-- [○] Supabase Dashboard にアクセス可能: https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu
+- [ ] 開発サーバーが起動している: http://localhost:8081
+- [ ] Stripe Dashboard（テストモード）にアクセス可能: https://dashboard.stripe.com/test
+- [ ] Supabase Dashboard にアクセス可能: https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu
+
+### 環境分離の確認
+
+- [ ] `STRIPE_TEST_SECRET_KEY` が設定されている
+- [ ] `STRIPE_LIVE_SECRET_KEY` が設定されている
+- [ ] `STRIPE_WEBHOOK_SECRET_TEST` が設定されている
+- [ ] `STRIPE_WEBHOOK_SECRET_LIVE` が設定されている
+- [ ] Stripe Webhook（テスト環境）が登録されている: `stripe-webhook-test`
+- [ ] Stripe Webhook（本番環境）が登録されている: `stripe-webhook`
 
 ### テスト用カード番号
 
@@ -34,7 +41,113 @@ CVC: 任意の3桁（例: 123）
 
 ---
 
-## 🧪 テスト 1: プラン変更（feedback → standard）
+## 🧪 テスト 0: 新規ユーザー登録とサブスクリプション作成
+
+### 目的
+
+まっさらな状態から新規登録し、テスト環境でサブスクリプションを作成する
+
+### 前提条件
+
+- テストユーザーのデータが全て削除されている
+
+### 手順
+
+1. [○] http://localhost:8081 にアクセス
+2. [○] 新規登録ページに移動
+3. [○] メール: `takumi.kai.skywalker@gmail.com`、パスワード: 任意
+4. [○] 登録完了後、メール認証リンクをクリック
+5. [○] ログイン
+6. [○] `/subscription` ページに移動
+7. [○] **Standard 1 ヶ月プラン**を選択
+8. [○] 「今すぐ始める」ボタンをクリック
+9. [○] 開発者コンソールで以下のログを確認:
+   - checkout が開いた 11/21 .
+   - ただ Console を見ると以下のエラ＾があるのが気になった大丈夫？
+   - cs_test_a1pDaiZNCotJ…zsX1AMqrbffAjGxMe:6 Uncaught (in promise) Error: Cannot find module './en'
+     at cs_test_a1pDaiZNCotJ…rbffAjGxMe:6:348760
+     14
+     Loading the font '<URL>' violates the following Content Security Policy directive: "font-src 'self' <URL>". The action has been blocked.
+     m=uZmJdd:62
+     POST https://play.google.com/log?format=json&hasfast=true&authuser=0 net::ERR_BLOCKED_BY_CONTENT_BLOCKER
+10. [○] テストカード番号を入力して決済
+11. [○] 成功ページにリダイレクトされる
+12. [×] `/account` ページでサブスクリプション情報が表示される
+
+- サブスクリプション情報
+  現在のプラン:無料
+  プレミアムプランにアップグレードして、全てのコンテンツにアクセスしましょう
+  が表示されています。
+
+Console を見ると
+`DB直接取得結果: {isActive: false, planType: 'standard', duration: 1, cancelAtPeriodEnd: false, cancelAt: null, …}`
+
+````Edge Functionから取得したアクセス権限を使用: {hasMemberAccess: false, hasLearningAccess: false, planType: 'standard'}
+hasLearningAccess
+:
+false
+hasMemberAccess
+:
+false
+planType
+:
+"standard"
+[[Prototype]]
+:
+Object ```
+
+
+
+### 確認 A: Supabase Database
+
+```sql
+-- 新しいユーザーIDを取得（/accountページのコンソールで確認）
+-- テスト環境のデータが作成されているか確認
+SELECT * FROM stripe_customers
+WHERE user_id = 'YOUR_USER_ID' AND environment = 'test';
+
+SELECT * FROM user_subscriptions
+WHERE user_id = 'YOUR_USER_ID' AND environment = 'test';
+````
+
+**確認項目**:
+
+- [ ] `stripe_customers.environment = 'test'`
+- [ ] `user_subscriptions.environment = 'test'`
+- [ ] `user_subscriptions.is_active = true`
+- [ ] `user_subscriptions.plan_type = 'standard'`
+- [ ] `user_subscriptions.duration = 1`
+
+### 確認 B: Stripe Dashboard（テストモード）
+
+**URL**: https://dashboard.stripe.com/test/customers
+
+1. [ ] `takumi.kai.skywalker@gmail.com` で検索
+2. [ ] 顧客が 1 件作成されている
+3. [ ] サブスクリプションが 1 件、`Active` ステータスで存在する
+4. [ ] プランが **standard** になっている
+
+### 確認 C: Stripe Webhook Logs
+
+**URL**: https://dashboard.stripe.com/test/webhooks
+
+1. [ ] `stripe-webhook-test` エンドポイントをクリック
+2. [ ] Logs タブで `checkout.session.completed` イベントを確認
+3. [ ] ステータスが `succeeded` になっている
+4. [ ] ログに `🧪 [TEST環境]` と表示されている
+
+### テスト 0 の結果
+
+- [ ] ✅ 成功
+- [ ] ❌ 失敗
+
+**失敗した場合の詳細**:
+
+---
+
+---
+
+## 🧪 テスト 1: プラン変更（standard → feedback）
 
 ### 目的
 
@@ -42,110 +155,58 @@ CVC: 任意の3桁（例: 123）
 
 ### 前提条件
 
-- 現在のプラン: **standard** (1 ヶ月)
+- 現在のプラン: **standard** (1 ヶ月) - テスト 0 で作成済み
 - 変更先: **feedback** (同じ期間)
 
 ### 手順
 
-1. [○] http://localhost:8081/subscription にアクセス
-2. [○] 現在のプランと期間を確認・メモ:
-   - 現在のプラン: \***\*standard\*\***
-   - 現在の期間: \***\*1 ヶ月\*\***
-3. [○] **feedback** プランの「プラン変更」ボタンをクリック
-4. [×] Stripe Checkout ページに遷移することを確認
-   1. エラーログはいか。カスタマーポータルへの遷移ができませんでした。
-   2. Failed to load resource: the server responded with a status of 404 ()
-      retry.ts:92 最大リトライ回数 (3) に達しました
-      retryWithBackoff @ retry.ts:92
-      stripe.ts:209 カスタマーポータル URL 取得エラー: Error: Edge Function returned a non-2xx status code
-      at retryWithBackoff.maxRetries (retry.ts:132:28)
-      at async retryWithBackoff (retry.ts:79:22)
-      at async getCustomerPortalUrl (stripe.ts:189:29)
-      at async handleSubscribe (Subscription.tsx:70:27)
-      getCustomerPortalUrl @ stripe.ts:209
-      Subscription.tsx:91 購読エラー: Error: Edge Function returned a non-2xx status code
-      at retryWithBackoff.maxRetries (retry.ts:132:28)
-      at async retryWithBackoff (retry.ts:79:22)
-      at async getCustomerPortalUrl (stripe.ts:189:29)
-      at async handleSubscribe (Subscription.tsx
-5. [ ] テストカード番号を入力して決済
-6. [ ] 成功ページ (`/subscription/success`) にリダイレクトされることを確認
-7. [ ] `/account` ページで新しいプランが表示されることを確認
+1. [ ] http://localhost:8081/subscription にアクセス
+2. [ ] 現在のプランと期間を確認:
+   - 現在のプラン: **Standard**
+   - 現在の期間: **1 ヶ月**
+3. [ ] **Feedback プラン**の「プラン変更」ボタンをクリック
+4. [ ] Stripe Customer Portal（プラン変更画面）に遷移することを確認
+5. [ ] プラン選択画面で **Feedback プラン**を選択
+6. [ ] プラン変更を確定
+7. [ ] `/subscription` ページに戻ることを確認
+8. [ ] `/account` ページで新しいプラン(**Feedback**)が表示されることを確認
 
 ### 確認 A: Supabase Logs
 
 **URL**: https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu/logs/edge-functions
 
-#### create-checkout 関数のログ
+#### create-customer-portal 関数のログ
 
-以下のログが順番に出力されているか確認:
-
-```
-[CREATE-CHECKOUT] リクエスト受信
-[CREATE-CHECKOUT] ユーザー認証成功
-[CREATE-CHECKOUT] 1件のアクティブサブスクリプションを検出
-[CREATE-CHECKOUT] 1件のアクティブサブスクリプションをキャンセルします
-[CREATE-CHECKOUT] 既存サブスクリプション取得成功
-[CREATE-CHECKOUT] Stripeでサブスクリプションをキャンセル完了
-[CREATE-CHECKOUT] DBでサブスクリプションを非アクティブ化完了
-[CREATE-CHECKOUT] Checkoutセッション作成完了
-```
-
-- [ ] 上記のログが全て存在する
+- [ ] `[TEST環境]` または `環境: test` のログがある
 - [ ] エラーログがない
-- [ ] 古いサブスクリプション ID が記録されている: \***\*\_\_\*\***
-- [ ] 新しい Checkout セッション ID が記録されている: \***\*\_\_\*\***
 
-#### stripe-webhook 関数のログ
+#### stripe-webhook-test 関数のログ
 
 ```
-checkout.session.completedイベントを処理中
-ユーザー [user_id] の既存アクティブサブスクリプションを確認
-新しいサブスクリプションが作成されました。既存サブスクリプションは上記で処理済みです。
+🧪 [TEST環境] Webhook受信
+🧪 [TEST環境] customer.subscription.updatedイベントを処理中
+✅ [TEST環境] プラン変更完了: feedback (1ヶ月)
 ```
 
-- [ ] checkout.session.completed イベントが処理されている
-- [ ] 既存サブスクリプションのチェックログがある
+- [ ] customer.subscription.updated イベントが処理されている
+- [ ] `[TEST環境]` ログが表示されている
+- [ ] プランが `feedback` に変更されている
 - [ ] エラーログがない
 
 ### 確認 B: Stripe Dashboard
 
 **URL**: https://dashboard.stripe.com/test/subscriptions
 
-1. [ ] Subscriptions ページで自分の顧客を検索
+1. [ ] 自分の顧客を検索
 2. [ ] サブスクリプション一覧を確認
 
-#### 古いサブスクリプション
+#### 確認項目
 
-- [ ] ステータスが `Canceled` になっている
-- [ ] キャンセル日時が記録されている
-- [ ] サブスクリプション ID: \***\*\_\_\*\***
-
-#### 新しいサブスクリプション
-
-- [ ] ステータスが `Active` になっている
-- [ ] プランが **standard** になっている
-- [ ] サブスクリプション ID: \***\*\_\_\*\***
-
-#### ⚠️ 最重要確認
-
+- [ ] サブスクリプションが 1 件、`Active` ステータスで存在する
+- [ ] プランが **Feedback** に変更されている
 - [ ] **同時に 2 つ以上の `Active` サブスクリプションが存在しない**
 
-#### Invoices（請求書）確認
-
-**URL**: https://dashboard.stripe.com/test/invoices
-
-- [ ] 新しい Invoice が作成されている
-- [ ] 日割り返金（Credit）が記録されている
-- [ ] 二重課金が記録されていない
-
 ### 確認 C: Supabase Database
-
-**URL**: https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu/editor
-
-#### user_subscriptions テーブル
-
-以下の SQL を実行:
 
 ```sql
 SELECT
@@ -153,30 +214,19 @@ SELECT
   plan_type,
   duration,
   is_active,
-  cancel_at_period_end,
-  created_at,
+  environment,
   updated_at
 FROM user_subscriptions
-WHERE user_id = 'YOUR_USER_ID'
+WHERE user_id = 'YOUR_USER_ID' AND environment = 'test'
 ORDER BY created_at DESC;
 ```
 
-**YOUR_USER_ID の確認方法**:
+**確認項目**:
 
-1. `/account` ページでブラウザの開発者ツールを開く
-2. Console で以下を実行して JWT をコピー:
-   ```javascript
-   localStorage.getItem("supabase.auth.token");
-   ```
-3. https://jwt.io でデコードして `sub` フィールドを確認
-
-#### 確認項目:
-
-- [ ] 古いサブスクリプションの `is_active` が `false` になっている
-- [ ] 新しいサブスクリプションの `is_active` が `true` になっている
-- [ ] 新しいサブスクリプションの `plan_type` が `standard` になっている
-- [ ] **`is_active=true` のレコードが 1 つだけ存在する**
-- [ ] `updated_at` が最近の時刻になっている
+- [ ] `plan_type = 'feedback'` になっている
+- [ ] `is_active = true`
+- [ ] `environment = 'test'`
+- [ ] **`is_active=true` かつ `environment='test'` のレコードが 1 つだけ存在する**
 
 ### テスト 1 の結果
 
@@ -197,70 +247,43 @@ ORDER BY created_at DESC;
 
 ### 前提条件
 
-- 現在のプラン: **standard** (1 ヶ月)
-- 変更先: **standard** (3 ヶ月)
+- 現在のプラン: **feedback** (1 ヶ月)
+- 変更先: **feedback** (3 ヶ月)
 
 ### 手順
 
 1. [ ] http://localhost:8081/subscription にアクセス
 2. [ ] 期間選択タブで「**3 ヶ月**」を選択
-3. [ ] **standard** プランの「プラン変更」ボタンをクリック
-4. [ ] Stripe Checkout ページに遷移することを確認
-5. [ ] 表示価格が 3 ヶ月プランの価格（3,800 円/月）であることを確認
-6. [ ] テストカード番号を入力して決済
-7. [ ] 成功ページにリダイレクトされることを確認
-8. [ ] `/account` ページで新しい期間（3 ヶ月）が表示されることを確認
+3. [ ] **Feedback プラン**の「プラン変更」ボタンをクリック
+4. [ ] Stripe Customer Portal に遷移
+5. [ ] 3 ヶ月プランを選択
+6. [ ] プラン変更を確定
+7. [ ] `/account` ページで新しい期間（3 ヶ月）が表示されることを確認
 
-### 確認 A: Supabase Logs
+### 確認 A: Stripe Dashboard
 
-#### create-checkout 関数のログ
-
-```
-[CREATE-CHECKOUT] Price ID環境変数 STRIPE_STANDARD_3M_PRICE_ID
-```
-
-- [ ] 3 ヶ月プランの Price ID が使用されている
-- [ ] キャンセル処理のログがある
-- [ ] エラーログがない
-
-#### stripe-webhook 関数のログ
-
-- [ ] checkout.session.completed イベントが処理されている
-- [ ] `duration` が `3` として記録されている
-
-### 確認 B: Stripe Dashboard
-
-#### 古いサブスクリプション（1 ヶ月）
-
-- [ ] ステータスが `Canceled` になっている
-
-#### 新しいサブスクリプション（3 ヶ月）
-
-- [ ] ステータスが `Active` になっている
+- [ ] サブスクリプションが 1 件、`Active` ステータスで存在する
 - [ ] 請求間隔が **3 months** になっている
-- [ ] 価格が 3 ヶ月プランの価格になっている
-
-#### ⚠️ 最重要確認
-
+- [ ] プランが **Feedback** のまま
 - [ ] **同時に 2 つ以上の `Active` サブスクリプションが存在しない**
 
-### 確認 C: Supabase Database
-
-#### user_subscriptions テーブル
+### 確認 B: Supabase Database
 
 ```sql
 SELECT
   stripe_subscription_id,
   plan_type,
   duration,
-  is_active
+  is_active,
+  environment
 FROM user_subscriptions
-WHERE user_id = 'YOUR_USER_ID'
+WHERE user_id = 'YOUR_USER_ID' AND environment = 'test'
 ORDER BY created_at DESC;
 ```
 
-- [ ] 新しいサブスクリプションの `duration` が `3` になっている
-- [ ] 新しいサブスクリプションの `plan_type` が `standard` のまま
+- [ ] `duration = 3` になっている
+- [ ] `plan_type = 'feedback'` のまま
+- [ ] `environment = 'test'`
 - [ ] **`is_active=true` のレコードが 1 つだけ存在する**
 
 ### テスト 2 の結果
@@ -274,125 +297,80 @@ ORDER BY created_at DESC;
 
 ---
 
-## 🧪 テスト 3: 新規ユーザー（オプション）
+## 🧪 テスト 3: 環境分離の確認
 
 ### 目的
 
-既存サブスクリプションがない場合も正常に動作することを確認
-
-### 前提条件
-
-- サブスクリプションなし（新規ユーザーまたは全てキャンセル済み）
+テスト環境と本番環境のデータが正しく分離されていることを確認
 
 ### 手順
 
-1. [ ] 新規アカウントを作成、または既存サブスクリプションを全てキャンセル
-2. [ ] http://localhost:8081/subscription にアクセス
-3. [ ] いずれかのプランを選択
-4. [ ] 「今すぐ始める」ボタンをクリック
-5. [ ] Stripe Checkout ページに遷移することを確認
-6. [ ] テストカード番号を入力して決済
-7. [ ] 成功ページにリダイレクトされることを確認
+1. [ ] Supabase SQL Editor で以下を実行:
 
-### 確認 A: Supabase Logs
+```sql
+-- 全ての環境のデータを確認
+SELECT
+  environment,
+  COUNT(*) as count,
+  STRING_AGG(DISTINCT plan_type, ', ') as plan_types
+FROM user_subscriptions
+WHERE user_id = 'YOUR_USER_ID'
+GROUP BY environment;
+```
 
-#### create-checkout 関数のログ
+**期待される結果**:
 
-- [ ] 「既存のアクティブなサブスクリプションを検出」のログが**ない**
-- [ ] キャンセル処理がスキップされている
-- [ ] Checkout セッション作成ログがある
+```
+environment | count | plan_types
+------------|-------|------------
+test        | 1     | feedback
+```
 
-### 確認 B: Stripe Dashboard
+2. [ ] 本番環境（`environment = 'live'`）のデータが存在しないことを確認
 
-- [ ] 新しいサブスクリプションが正常に作成されている
-- [ ] ステータスが `Active` になっている
+### 確認項目
 
-### 確認 C: Supabase Database
-
-- [ ] `is_active=true` のレコードが 1 つ存在する
+- [ ] テスト環境のデータのみ存在する（`environment = 'test'`）
+- [ ] 本番環境のデータは存在しない（`environment = 'live'` のレコードが 0 件）
 
 ### テスト 3 の結果
 
 - [ ] ✅ 成功
 - [ ] ❌ 失敗
 
-**失敗した場合の詳細**:
-
 ---
 
----
-
-## 🧪 テスト 4: 解約同期（リアルタイム更新）
+## 🧪 テスト 4: Webhook エンドポイントの分離確認
 
 ### 目的
 
-Stripe カスタマーポータルで解約した際に、アカウントページで即座に反映されることを確認
-
-### 前提条件
-
-- アクティブなサブスクリプション契約中
+テスト環境の Webhook が正しいエンドポイントに送信されていることを確認
 
 ### 手順
 
-1. [ ] http://localhost:8081/account にアクセス
-2. [ ] ブラウザの開発者ツール（Console）を開く
-3. [ ] 以下のログが表示されていることを確認:
-   ```
-   Realtime Subscriptionを設定: {userId: "..."}
-   Realtime Subscription status: SUBSCRIBED
-   ```
-4. [ ] 「サブスクリプションを管理」ボタンをクリック
-5. [ ] Stripe カスタマーポータルで「キャンセル」を実行
-6. [ ] 「期間終了時にキャンセル」を選択
-7. [ ] **元のタブに戻らずに待機**
-8. [ ] Console で以下のログが表示されることを確認:
-   ```
-   サブスクリプション更新を検知: {new: {...}, old: {...}}
-   ```
-9. [ ] アカウントページが**リロードなし**で自動更新されることを確認
-10. [ ] 「解約予定」のバッジまたは表示が追加されることを確認
+1. [ ] Stripe Dashboard（テストモード） → Developers → Webhooks
+2. [ ] `stripe-webhook-test` エンドポイントをクリック
+3. [ ] Logs タブで最近のイベントを確認
 
-### 確認項目
+**確認項目**:
 
-- [ ] Realtime Subscription が正常に接続されている
-- [ ] Webhook が`customer.subscription.updated`を処理している
-- [ ] DB が更新されている（`cancel_at_period_end: true`）
-- [ ] ページリロードなしで UI が更新される
+- [ ] `checkout.session.completed` イベントが記録されている
+- [ ] `customer.subscription.updated` イベントが記録されている
+- [ ] 全てのイベントが `succeeded` ステータス
+- [ ] エラーがない
+
+4. [ ] Stripe Dashboard（本番モード - "Viewing test data"をオフ） → Developers → Webhooks
+5. [ ] `stripe-webhook` エンドポイントをクリック
+6. [ ] Logs タブを確認
+
+**確認項目**:
+
+- [ ] テスト期間中のイベントが**記録されていない**（本番 Webhook には何も送信されていない）
 
 ### テスト 4 の結果
 
 - [ ] ✅ 成功
 - [ ] ❌ 失敗
-
-**失敗した場合の詳細**:
-
----
-
----
-
-## 🧪 テスト 5: キャンセル URL
-
-### 目的
-
-Checkout ページでキャンセルした際に正しいページに戻ることを確認
-
-### 手順
-
-1. [ ] http://localhost:8081/subscription にアクセス
-2. [ ] いずれかのプランで「プラン変更」または「今すぐ始める」をクリック
-3. [ ] Stripe Checkout ページに遷移
-4. [ ] ブラウザの「戻る」ボタン、または Checkout の「戻る」リンクをクリック
-5. [ ] `/subscription` ページに正しく戻ることを確認
-6. [ ] 404 エラーが表示されないことを確認
-
-### テスト 5 の結果
-
-- [ ] ✅ 成功
-- [ ] ❌ 失敗
-
-**失敗した場合の詳細**:
-
----
 
 ---
 
@@ -400,16 +378,16 @@ Checkout ページでキャンセルした際に正しいページに戻るこ�
 
 ### テスト実施日時
 
-- 開始: \***\*\_\_\*\***
-- 終了: \***\*\_\_\*\***
+- 開始: **\_\_**
+- 終了: **\_\_**
 
 ### 実施したテスト
 
+- [ ] テスト 0: 新規ユーザー登録とサブスクリプション作成
 - [ ] テスト 1: プラン変更
 - [ ] テスト 2: 期間変更
-- [ ] テスト 3: 新規ユーザー（オプション）
-- [ ] テスト 4: 解約同期
-- [ ] テスト 5: キャンセル URL
+- [ ] テスト 3: 環境分離の確認
+- [ ] テスト 4: Webhook エンドポイントの分離確認
 
 ### 全体結果
 
@@ -417,86 +395,61 @@ Checkout ページでキャンセルした際に正しいページに戻るこ�
 - [ ] ⚠️ 一部のテストが失敗
 - [ ] ❌ 重大な問題が発見された
 
-### 最重要確認事項
+### 最重要確認事項（環境分離）
 
+- [ ] **テスト環境のデータに `environment = 'test'` が記録されている**
+- [ ] **本番環境のデータ（`environment = 'live'`）は作成されていない**
+- [ ] **テスト環境の Webhook エンドポイント（`stripe-webhook-test`）が正しく動作している**
+- [ ] **本番環境の Webhook エンドポイントにテストデータが送信されていない**
 - [ ] **Stripe Dashboard で同時に 2 つ以上の Active サブスクリプションが存在しなかった**
 - [ ] **DB で `is_active=true` のレコードが常に 1 つだけだった**
-- [ ] **二重課金が発生しなかった**
 
 ---
 
 ## 🚨 問題が発生した場合
 
-### 二重課金が発生した場合
+### 環境が正しく分離されていない場合
 
-1. Stripe Dashboard で両方のサブスクリプション ID をメモ
-2. Supabase Logs でエラーを確認
-3. 以下を記録:
-   - 発生したテスト番号
-   - サブスクリプション ID（古い/新しい）
-   - エラーメッセージ
-   - ログのスクリーンショット
+1. コンソールログで `useTestPrice` の値を確認
+2. Edge Function ログで環境判定が正しいか確認
+3. 環境変数が正しく設定されているか確認:
+   ```bash
+   npx supabase secrets list | grep STRIPE
+   ```
 
-### エラーログがある場合
+### Webhook エラーが発生した場合
 
-1. ログの内容を全てコピー
-2. エラーメッセージを確認
-3. 以下を記録:
-   - エラーが発生した Edge Function 名
-   - エラーメッセージ
-   - タイムスタンプ
+1. Stripe Dashboard → Webhooks → Logs でエラー内容を確認
+2. 署名シークレット（`STRIPE_WEBHOOK_SECRET_TEST`）が正しく設定されているか確認
+3. Supabase Edge Function Logs でエラー詳細を確認
 
 ---
 
 ## 📝 テスト完了後の報告事項
-
-以下の情報を報告してください:
 
 1. **テスト結果**
 
    - [ ] 全て成功
    - [ ] 一部失敗（詳細を記載）
 
-2. **Stripe Dashboard 確認結果**
+2. **環境分離確認結果**
 
-   - Active サブスクリプション数: \***\*\_\_\*\***
-   - 最終的なプラン: \***\*\_\_\*\***
-   - 最終的な期間: \***\*\_\_\*\***
+   - テスト環境のレコード数: **\_\_**
+   - 本番環境のレコード数: **\_\_** (0 であるべき)
 
-3. **DB 確認結果**
+3. **Stripe Dashboard 確認結果**
 
-   - `is_active=true` のレコード数: \***\*\_\_\*\***
+   - テスト環境の Active サブスクリプション数: **\_\_**
+   - 最終的なプラン: **\_\_**
+   - 最終的な期間: **\_\_**
 
-4. **ログ確認結果**
+4. **Webhook 確認結果**
 
-   - [ ] エラーログなし
-   - [ ] エラーログあり（詳細を記載）
+   - [ ] テスト環境 Webhook が正常に動作
+   - [ ] 本番環境 Webhook にテストデータが送信されていない
 
 5. **その他気づいた点**
    ***
-   ***
-
----
-
-## 🔍 ログの確認方法
-
-### Supabase Logs の確認
-
-1. Supabase Dashboard > Logs > Edge Functions
-2. 関数名でフィルタ: `create-checkout` または `stripe-webhook`
-3. 時刻でフィルタ: テスト実施時刻の前後 10 分
-
-### Stripe Dashboard の確認
-
-1. Dashboard > Customers
-2. メールアドレスで検索
-3. Subscriptions タブを確認
-
-### DB の確認
-
-1. Supabase Dashboard > Table Editor
-2. `user_subscriptions` テーブルを選択
-3. Filters でユーザー ID で絞り込み
 
 ---
 
@@ -504,9 +457,11 @@ Checkout ページでキャンセルした際に正しいページに戻るこ�
 
 - プロジェクト ID: fryogvfhymnpiqwssmuu
 - フロントエンド URL: http://localhost:8081
-- デプロイ日時: 2025-11-18
-- 修正内容: 複数サブスクリプション対応、Webhook 重複チェック追加、Realtime 機能追加、エラーリトライ追加
+- 実装内容: テスト環境と本番環境の分離
+- Webhook エンドポイント:
+  - テスト: `https://fryogvfhymnpiqwssmuu.supabase.co/functions/v1/stripe-webhook-test`
+  - 本番: `https://fryogvfhymnpiqwssmuu.supabase.co/functions/v1/stripe-webhook`
 
 ---
 
-**このドキュメントを印刷または PDF 保存して、テスト実施時に使用してください。**
+**このドキュメントを使用して、環境分離が正しく実装されていることを確認してください。**

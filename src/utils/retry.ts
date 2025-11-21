@@ -128,6 +128,14 @@ export async function retrySupabaseFunction<T>(
 
       // Supabase Edge Functionのエラーハンドリング
       if (result.error) {
+        // デバッグ: エラーの詳細をログ出力
+        console.error('🔴 Supabase Function Error Details:', {
+          message: result.error.message,
+          status: result.error.status,
+          data: result.data,
+          fullError: result.error
+        });
+
         // エラーをthrowしてリトライ対象にする
         const error: any = new Error(result.error.message || 'Supabase function error');
         error.response = { status: result.error.status || 500 };

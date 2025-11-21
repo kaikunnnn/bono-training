@@ -1,10 +1,6 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import Stripe from 'https://esm.sh/stripe@14.21.0';
-
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') as string, {
-  apiVersion: '2023-10-16',
-});
+import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { createStripeClient, type StripeEnvironment } from "../_shared/stripe-helpers.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') as string;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string;
@@ -42,22 +38,56 @@ serve(async (req) => {
       });
     }
 
-    // リクエストボディから returnUrl と useDeepLink を取得
+    // リクエストボディから returnUrl, useDeepLink, useTestPrice を取得
     const body = await req.json();
     const returnUrl = body.returnUrl;
     const useDeepLink = body.useDeepLink || false; // ディープリンクを使用するか
+    const useTestPrice = body.useTestPrice || false; // テスト環境を使用するか
 
-    console.log('Customer Portal リクエスト:', { userId: user.id, returnUrl, useDeepLink });
+    // 環境を判定（useTestPriceフラグに基づく）
+    const environment: StripeEnvironment = useTestPrice ? 'test' : 'live';
+
+    console.log('Customer Portal リクエスト:', { userId: user.id, returnUrl, useDeepLink, environment });
 
     // ユーザーのStripe Customer IDを取得
-    const { data: customer, error: customerError } = await supabase
-      .from('stripe_customers')
+    // 優先順位: 1) アクティブなサブスクリプションに紐づく顧客ID、2) 最新の顧客ID
+    let stripeCustomerId: string | null = null;
+
+    // まず、アクティブなサブスクリプションから顧客IDを取得（環境フィルタ付き）
+    const { data: activeSubscription } = await supabase
+      .from('user_subscriptions')
       .select('stripe_customer_id')
       .eq('user_id', user.id)
+      .eq('environment', environment)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
-    if (customerError || !customer?.stripe_customer_id) {
-      console.error('Stripe顧客情報が見つかりません:', { userId: user.id, error: customerError });
+    if (activeSubscription?.stripe_customer_id) {
+      stripeCustomerId = activeSubscription.stripe_customer_id;
+      console.log(`[${environment.toUpperCase()}] アクティブなサブスクリプションから顧客IDを取得:`, stripeCustomerId);
+    } else {
+      // アクティブなサブスクリプションがない場合は、最新の顧客IDを取得（環境フィルタ付き）
+      const { data: customers } = await supabase
+        .from('stripe_customers')
+        .select('stripe_customer_id')
+        .eq('user_id', user.id)
+        .eq('environment', environment)
+        .order('created_at', { ascending: false })
+        .limit(1);
+
+      if (customers && customers.length > 0) {
+        stripeCustomerId = customers[0].stripe_customer_id;
+        console.log(`[${environment.toUpperCase()}] 最新の顧客IDを取得:`, stripeCustomerId);
+      }
+    }
+
+    // Stripeクライアントの初期化（環境に応じたAPIキーを使用）
+    const stripe = createStripeClient(environment);
+
+    if (!stripeCustomerId) {
+      console.error('Stripe顧客情報が見つかりません:', { userId: user.id });
       return new Response(
         JSON.stringify({
           error: 'Stripe顧客情報が見つかりません。まずプランに登録してください。'
@@ -78,11 +108,11 @@ serve(async (req) => {
       finalReturnUrl = 'http://localhost:5173/subscription';
     }
 
-    console.log('Customer Portal作成:', { customerId: customer.stripe_customer_id, returnUrl: finalReturnUrl });
+    console.log('Customer Portal作成:', { customerId: stripeCustomerId, returnUrl: finalReturnUrl });
 
     // ディープリンク用のセッション設定
     let sessionConfig: any = {
-      customer: customer.stripe_customer_id,
+      customer: stripeCustomerId,
       return_url: finalReturnUrl,
       locale: 'ja', // 日本語で表示
     };
@@ -129,9 +159,19 @@ serve(async (req) => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error creating customer portal session:', error);
+    console.error('❌ Error creating customer portal session:', error);
+    console.error('❌ Error name:', error.name);
+    console.error('❌ Error message:', error.message);
+    console.error('❌ Error stack:', error.stack);
+    if (error.response) {
+      console.error('❌ Error response:', error.response);
+    }
     return new Response(
-      JSON.stringify({ error: error.message || 'Internal server error' }),
+      JSON.stringify({
+        error: error.message || 'Internal server error',
+        errorName: error.name,
+        errorStack: error.stack
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

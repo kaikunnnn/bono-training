@@ -23,19 +23,29 @@ export const createCheckoutSession = async (
       throw new Error('認証されていません。ログインしてください。');
     }
     
-    console.log(`Checkout開始: プラン=${planType}, 期間=${duration}ヶ月, 環境=${isTest ? 'テスト' : '本番'}`);
+    const useTestPrice = isTest || import.meta.env.MODE !== 'production';
+    console.log(`Checkout開始: プラン=${planType}, 期間=${duration}ヶ月, 環境=${useTestPrice ? 'テスト' : '本番'}`);
+    console.log(`🔍 デバッグ: import.meta.env.MODE = ${import.meta.env.MODE}, useTestPrice = ${useTestPrice}`);
 
     // リトライ付きでSupabase Edge Functionを呼び出してCheckoutセッションを作成
-    const { data, error } = await retrySupabaseFunction(() =>
-      supabase.functions.invoke('create-checkout', {
-        body: {
-          returnUrl,
-          planType,
-          duration,
-          useTestPrice: isTest || import.meta.env.MODE !== 'production'
-        }
-      })
-    );
+    const response = await supabase.functions.invoke('create-checkout', {
+      body: {
+        returnUrl,
+        planType,
+        duration,
+        useTestPrice
+      }
+    });
+
+    console.log('🔍 Edge Function Response:', response);
+
+    if (response.error) {
+      console.error('❌ Checkoutセッション作成エラー:', response.error);
+      console.error('❌ Response data:', response.data);
+      throw new Error(response.data?.error || response.error.message || '決済処理の準備に失敗しました。');
+    }
+
+    const { data, error } = response;
 
     if (error) {
       console.error('Checkoutセッション作成エラー:', error);

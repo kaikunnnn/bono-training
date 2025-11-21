@@ -1,7 +1,6 @@
-
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import Stripe from "https://esm.sh/stripe@14.21.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { createStripeClient, type StripeEnvironment } from "../_shared/stripe-helpers.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -48,27 +47,31 @@ serve(async (req) => {
     }
     
     logDebug("ユーザー認証成功", { userId: user.id, email: user.email });
-    
-    // Stripeクライアントの初期化
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
-    });
+
+    // 環境を判定（useTestPriceフラグに基づく）
+    const environment: StripeEnvironment = useTestPrice ? 'test' : 'live';
+    logDebug(`Stripe環境: ${environment}`);
+
+    // Stripeクライアントの初期化（環境に応じたAPIキーを使用）
+    const stripe = createStripeClient(environment);
 
     // ユーザーのStripe Customer IDと既存サブスクリプションを取得
     let stripeCustomerId: string;
 
-    // DBからユーザーのStripe Customer IDを検索
+    // DBからユーザーのStripe Customer IDを検索（環境フィルタ付き）
     const { data: customerData, error: customerError } = await supabaseClient
       .from("stripe_customers")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
+      .eq("environment", environment)
       .single();
 
-    // 既存サブスクリプションを確認（複数ある場合も全て取得）
+    // 既存サブスクリプションを確認（複数ある場合も全て取得、環境フィルタ付き）
     const { data: existingSubList, error: existingSubError } = await supabaseClient
       .from("user_subscriptions")
       .select("stripe_subscription_id, is_active")
       .eq("user_id", user.id)
+      .eq("environment", environment)
       .eq("is_active", true);
 
     if (existingSubError) {
@@ -97,13 +100,14 @@ serve(async (req) => {
         }
       });
       
-      // 作成した顧客情報をDBに保存（upsertで既存レコードがあっても対応）
+      // 作成した顧客情報をDBに保存（upsertで既存レコードがあっても対応、環境を含む）
       const { error: insertError } = await supabaseClient
         .from("stripe_customers")
         .upsert({
           user_id: user.id,
-          stripe_customer_id: customer.id
-        }, { onConflict: 'user_id' });
+          stripe_customer_id: customer.id,
+          environment: environment
+        }, { onConflict: 'user_id,environment' });
 
       if (insertError) {
         logDebug("Stripe顧客情報のDB保存に失敗:", insertError);
@@ -254,9 +258,14 @@ serve(async (req) => {
     );
   } catch (error) {
     logDebug("Checkoutセッション作成エラー:", error);
-    
+    console.error("❌ Error stack:", error.stack);
+    console.error("❌ Error details:", JSON.stringify(error, null, 2));
+
     return new Response(
-      JSON.stringify({ error: error.message || "Checkoutセッション作成中にエラーが発生しました" }),
+      JSON.stringify({
+        error: error.message || "Checkoutセッション作成中にエラーが発生しました",
+        details: error.stack || String(error)
+      }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 500,
