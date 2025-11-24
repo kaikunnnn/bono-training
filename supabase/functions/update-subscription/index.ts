@@ -20,9 +20,10 @@ serve(async (req) => {
 
   try {
     // リクエストボディを解析
-    const { planType, duration = 1 } = await req.json();
+    const { planType, duration = 1, useTestPrice = false } = await req.json();
 
-    logDebug("プラン変更リクエスト受信", { planType, duration });
+    const environment = useTestPrice ? "test" : "live";
+    logDebug("プラン変更リクエスト受信", { planType, duration, environment });
 
     if (!planType) {
       throw new Error("プランタイプが指定されていません");
@@ -48,16 +49,28 @@ serve(async (req) => {
 
     logDebug("ユーザー認証成功", { userId: user.id, email: user.email });
 
-    // Stripeクライアントの初期化
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    // Stripeクライアントの初期化（環境に応じて切り替え）
+    const stripeSecretKey = environment === "test"
+      ? Deno.env.get("STRIPE_TEST_SECRET_KEY")
+      : Deno.env.get("STRIPE_SECRET_KEY");
+
+    if (!stripeSecretKey) {
+      throw new Error(`Stripe秘密鍵が設定されていません（環境: ${environment}）`);
+    }
+
+    const stripe = new Stripe(stripeSecretKey, {
       apiVersion: "2023-10-16",
     });
 
-    // ユーザーの現在のサブスクリプション情報を取得
+    logDebug("Stripe クライアント初期化完了", { environment });
+
+    // ユーザーの現在のサブスクリプション情報を取得（環境でフィルタ）
     const { data: subscriptionData, error: subError } = await supabaseClient
       .from("user_subscriptions")
       .select("stripe_subscription_id, stripe_customer_id, plan_type")
       .eq("user_id", user.id)
+      .eq("is_active", true)
+      .eq("environment", environment)
       .single();
 
     if (subError || !subscriptionData) {
@@ -99,25 +112,25 @@ serve(async (req) => {
       throw new Error("有効なサブスクリプションが見つかりません");
     }
 
-    // 新しいPrice IDを取得
-    // Edge Functionでは環境変数から直接取得（VITE_プレフィックスなし）
+    // 新しいPrice IDを取得（環境に応じて切り替え）
     const planTypeUpper = planType.toUpperCase();
     const durationSuffix = duration === 1 ? "1M" : "3M";
+    const envPrefix = environment === "test" ? "STRIPE_TEST" : "STRIPE";
 
-    // まずSTRIPE_プレフィックスで試行（Edge Function用）
-    let envVarName = `STRIPE_${planTypeUpper}_${durationSuffix}_PRICE_ID`;
+    // 環境に応じたPrice ID環境変数名を構築
+    let envVarName = `${envPrefix}_${planTypeUpper}_${durationSuffix}_PRICE_ID`;
     let priceId = Deno.env.get(envVarName);
 
     // 見つからなければVITE_プレフィックスを試行（開発環境用）
     if (!priceId) {
-      envVarName = `VITE_STRIPE_${planTypeUpper}_${durationSuffix}_PRICE_ID`;
+      envVarName = `VITE_${envPrefix}_${planTypeUpper}_${durationSuffix}_PRICE_ID`;
       priceId = Deno.env.get(envVarName);
     }
 
     logDebug(`Price ID環境変数 ${envVarName}:`, { priceId });
 
     if (!priceId) {
-      throw new Error(`Price ID環境変数が設定されていません（${planTypeUpper}_${durationSuffix}）`);
+      throw new Error(`Price ID環境変数が設定されていません（${envVarName}）`);
     }
 
     // サブスクリプションアイテムを更新

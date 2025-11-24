@@ -35,3 +35,8 @@ enable_confirmations = false
 
 [functions]
 # Edge Functions設定
+
+# Stripe Webhook用の設定 - JWT検証を無効化
+# Stripeは Authorization ヘッダーを送信しないため、JWT検証を無効にする必要がある
+[functions.stripe-webhook-test]
+verify_jwt = false

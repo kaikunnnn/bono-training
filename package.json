@@ -8,7 +8,11 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "logs": "./scripts/check-edge-function-logs.sh",
+    "logs:watch": "./scripts/watch-edge-function-logs.sh",
+    "logs:checkout": "./scripts/check-edge-function-logs.sh create-checkout",
+    "logs:webhook": "./scripts/check-edge-function-logs.sh stripe-webhook-test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

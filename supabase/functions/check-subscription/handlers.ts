@@ -10,13 +10,13 @@ function calculateAccessPermissions(planType: string | null, isActive: boolean):
   if (!isActive || !planType) {
     return { hasMemberAccess: false, hasLearningAccess: false };
   }
-  
-  // メンバーアクセス: standard, growth, community
-  const hasMemberAccess = ['standard', 'growth', 'community'].includes(planType);
-  
-  // 学習アクセス: standard, growth のみ
-  const hasLearningAccess = ['standard', 'growth'].includes(planType);
-  
+
+  // メンバーアクセス: すべての有料プラン
+  const hasMemberAccess = ['standard', 'growth', 'community', 'feedback'].includes(planType);
+
+  // 学習アクセス: standard, growth, feedback
+  const hasLearningAccess = ['standard', 'growth', 'feedback'].includes(planType);
+
   return { hasMemberAccess, hasLearningAccess };
 }
 
@@ -44,25 +44,38 @@ export function createUnauthenticatedResponse(): Response {
  * ユーザーの購読状態を取得して返す
  */
 export async function handleAuthenticatedRequest(authHeader: string): Promise<Response> {
-  // クライアントの初期化
-  const { supabaseClient, supabaseAdmin } = createSupabaseClients();
-  const stripe = createStripeClient();
-  const subscriptionService = new SubscriptionService(supabaseAdmin, stripe);
-  
-  const token = authHeader.replace("Bearer ", "");
-  logDebug("トークン取得", { token: token.substring(0, 10) + "..." });
-  
-  const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
-  
-  if (userError || !user) {
-    logDebug("ユーザー取得エラー", { error: userError });
-    return createUnauthenticatedResponse();
-  }
-  
-  logDebug("ユーザー取得成功", { userId: user.id, email: user.email });
+  try {
+    logDebug("=== handleAuthenticatedRequest 開始 ===");
 
-  // データベースからの購読情報を優先チェック
-  const dbSubscription = await subscriptionService.getUserSubscription(user.id);
+    // クライアントの初期化
+    logDebug("クライアント初期化開始");
+    const { supabaseClient, supabaseAdmin } = createSupabaseClients();
+    logDebug("Supabaseクライアント作成完了");
+
+    const stripe = createStripeClient();
+    logDebug("Stripeクライアント作成完了", { hasStripe: !!stripe });
+
+    logDebug("SubscriptionService初期化開始");
+    const subscriptionService = new SubscriptionService(supabaseAdmin, stripe);
+    logDebug("SubscriptionService初期化完了");
+
+    const token = authHeader.replace("Bearer ", "");
+    logDebug("トークン取得", { token: token.substring(0, 10) + "..." });
+
+    logDebug("ユーザー認証開始");
+    const { data: { user }, error: userError } = await supabaseClient.auth.getUser(token);
+
+    if (userError || !user) {
+      logDebug("ユーザー取得エラー", { error: userError });
+      return createUnauthenticatedResponse();
+    }
+
+    logDebug("ユーザー取得成功", { userId: user.id, email: user.email });
+
+    // データベースからの購読情報を優先チェック
+    logDebug("getUserSubscription 呼び出し開始", { userId: user.id });
+    const dbSubscription = await subscriptionService.getUserSubscription(user.id);
+    logDebug("getUserSubscription 呼び出し完了", { hasSubscription: !!dbSubscription });
   
   // データベースに購読情報がある場合はそれを信頼する
   if (dbSubscription) {
@@ -110,8 +123,17 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
       }
     );
   }
-  
-  return await handleStripeSubscriptionCheck(subscriptionService, user.id, stripe);
+
+    logDebug("DB購読情報なし、Stripe確認へ");
+    return await handleStripeSubscriptionCheck(subscriptionService, user.id, stripe);
+  } catch (error) {
+    logDebug("=== handleAuthenticatedRequest内でエラー発生 ===", {
+      error,
+      errorMessage: error instanceof Error ? error.message : String(error),
+      errorStack: error instanceof Error ? error.stack : undefined
+    });
+    throw error; // 上位のcatchブロックで処理させる
+  }
 }
 
 /**

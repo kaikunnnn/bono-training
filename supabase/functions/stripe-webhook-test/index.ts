@@ -440,6 +440,7 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
 
     const userId = customerData.user_id;
 
+    // サブスクリプション情報を抽出
     const items = subscription.items.data;
     if (!items || items.length === 0) {
       console.error("サブスクリプションにアイテムがありません");

@@ -37,13 +37,52 @@ export function createSupabaseClients() {
  * Stripeクライアントの作成
  */
 export function createStripeClient(): Stripe | null {
-  const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+  // Test環境かLive環境かを判定してキーを取得
+  const testKey = Deno.env.get("STRIPE_TEST_SECRET_KEY");
+  const liveKey = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
+
+  logDebug("環境変数チェック", {
+    hasTestKey: !!testKey,
+    hasLiveKey: !!liveKey,
+    testKeyPrefix: testKey?.substring(0, 10),
+    liveKeyPrefix: liveKey?.substring(0, 10)
+  });
+
+  // Test keyが存在する場合はTest環境として動作
+  const stripeKey = testKey || liveKey;
+
   if (!stripeKey) {
     logDebug("Stripe APIキーが設定されていません");
     return null;
   }
-  
+
+  logDebug(`Stripe初期化: ${testKey ? 'test' : 'live'}環境`);
   return new Stripe(stripeKey, {
     apiVersion: "2023-10-16",
   });
+}
+
+/**
+ * 現在の環境（test/live）を判定
+ * Stripe APIキーの存在から環境を判定します
+ */
+export function getCurrentEnvironment(): 'test' | 'live' {
+  const testKey = Deno.env.get("STRIPE_TEST_SECRET_KEY");
+  const liveKey = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
+
+  // Test keyが存在する場合はtest環境
+  if (testKey) {
+    logDebug("環境判定: test (STRIPE_TEST_SECRET_KEY検出)");
+    return 'test';
+  }
+
+  // Live keyのみ存在する場合はlive環境
+  if (liveKey) {
+    logDebug("環境判定: live (STRIPE_LIVE_SECRET_KEY検出)");
+    return 'live';
+  }
+
+  // どちらも存在しない場合はliveとしてフォールバック
+  logDebug("環境判定: live (デフォルト)");
+  return 'live';
 }

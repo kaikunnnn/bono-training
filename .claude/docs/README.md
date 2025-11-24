@@ -23,11 +23,29 @@
 
 ---
 
-### 💳 **Subscription システム開発**（ほぼ完了）
+### 💳 **Subscription システム開発**（完了 ✅）
 
-#### 🔴 最重要ドキュメント
+#### 🎯 メインドキュメント索引
 
-**TESTING.md** - テストガイド
+**📁 [subscription/](./subscription/)** - サブスクリプションシステム完全ドキュメント
+
+すべてのサブスクリプション関連ドキュメントは **[subscription/README.md](./subscription/README.md)** から参照できます。
+
+**主要ドキュメント**:
+- **[system-specification.md](./subscription/specifications/system-specification.md)** - システム全体仕様（必読）
+- **[common-errors.md](./subscription/guides/common-errors.md)** - よくある間違いと教訓（必読）
+- **[testing-log.md](./subscription/testing/testing-log.md)** - 完全なテスト履歴
+
+**目的別ガイド**:
+- 新規開発者・引き継ぎ → [subscription/README.md - 新規開発者ガイド](./subscription/README.md#新規開発者引き継ぎ時に読むべきドキュメント)
+- トラブルシューティング → [subscription/README.md - トラブルシューティング](./subscription/README.md#トラブルシューティング時に読むべきドキュメント)
+- テスト実施 → [testing-log.md](./subscription/testing/testing-log.md)
+
+---
+
+#### 🔴 レガシードキュメント（旧）
+
+**TESTING.md** - テストガイド（旧版）
 
 Stripe実装をテストする前に必読！テスト手順、確認項目、チェックリストを含む統合テストガイドです。
 
@@ -37,6 +55,8 @@ Stripe実装をテストする前に必読！テスト手順、確認項目、�
 - テスト3: 新規ユーザー
 - テスト4: 解約同期（リアルタイム更新）
 - テスト5: キャンセルURL
+
+**注意**: 最新のテスト記録は **[subscription/testing/testing-log.md](./subscription/testing/testing-log.md)** を参照してください
 
 ---
 
@@ -117,9 +137,26 @@ Stripe実装をテストする前に必読！テスト手順、確認項目、�
 
 ---
 
+## 🔴 開発ワークフロー（最重要）
+
+**`WORKFLOW.md`** を必ず最初に読んでください
+
+このドキュメントに、全ての作業フロー・ドキュメント管理ルールが記載されています。
+
+**重要:**
+- 全ての作業は `MASTER-DEBUG-LOG.md` に記録
+- 新しいドキュメントは作らない
+- テスト結果は必ず完全記録
+
+---
+
 ## 🚀 次にやること
 
-### 🥇 優先度1: データ移行 Phase 0（最優先）
+### 🥇 優先度1: Subscription Webhook修正（最優先）
+
+**`MASTER-DEBUG-LOG.md`** を開いて、最新の「次のアクション」を確認
+
+### 🥈 優先度2: データ移行 Phase 0
 
 **[migration/migration-test-guide.md](./migration/migration-test-guide.md)** を参照
 

@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.190.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
-import { createStripeClient, type StripeEnvironment } from "../_shared/stripe-helpers.ts";
+import { createStripeClient, type StripeEnvironment, getPriceId, type PlanType, type PlanDuration } from "../_shared/stripe-helpers.ts";
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL') as string;
 const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string;
@@ -38,23 +38,34 @@ serve(async (req) => {
       });
     }
 
-    // リクエストボディから returnUrl, useDeepLink, useTestPrice を取得
+    // リクエストボディから returnUrl, useTestPrice, planType, duration を取得
     const body = await req.json();
     const returnUrl = body.returnUrl;
-    const useDeepLink = body.useDeepLink || false; // ディープリンクを使用するか
     const useTestPrice = body.useTestPrice || false; // テスト環境を使用するか
+    const planType = body.planType as PlanType | undefined; // 選択されたプラン（Deep Link用）
+    const duration = body.duration as PlanDuration | undefined; // 選択された期間（Deep Link用）
 
     // 環境を判定（useTestPriceフラグに基づく）
     const environment: StripeEnvironment = useTestPrice ? 'test' : 'live';
 
-    console.log('Customer Portal リクエスト:', { userId: user.id, returnUrl, useDeepLink, environment });
+    // Deep Link モードかどうかを判定
+    const isDeepLinkMode = !!(planType && duration);
+
+    console.log('Customer Portal リクエスト:', {
+      userId: user.id,
+      returnUrl,
+      environment,
+      isDeepLinkMode,
+      planType,
+      duration
+    });
 
     // ユーザーのStripe Customer IDを取得
     // 優先順位: 1) アクティブなサブスクリプションに紐づく顧客ID、2) 最新の顧客ID
     let stripeCustomerId: string | null = null;
 
     // まず、アクティブなサブスクリプションから顧客IDを取得（環境フィルタ付き）
-    const { data: activeSubscription } = await supabase
+    const { data: activeSubscription, error: subError } = await supabase
       .from('user_subscriptions')
       .select('stripe_customer_id')
       .eq('user_id', user.id)
@@ -64,18 +75,34 @@ serve(async (req) => {
       .limit(1)
       .single();
 
+    console.log('[DEBUG] アクティブサブスクリプション取得結果:', {
+      data: activeSubscription,
+      error: subError,
+      userId: user.id,
+      environment
+    });
+
     if (activeSubscription?.stripe_customer_id) {
       stripeCustomerId = activeSubscription.stripe_customer_id;
       console.log(`[${environment.toUpperCase()}] アクティブなサブスクリプションから顧客IDを取得:`, stripeCustomerId);
     } else {
+      console.log('[DEBUG] アクティブサブスクリプションなし。stripe_customersテーブルを確認します');
+
       // アクティブなサブスクリプションがない場合は、最新の顧客IDを取得（環境フィルタ付き）
-      const { data: customers } = await supabase
+      const { data: customers, error: custError } = await supabase
         .from('stripe_customers')
         .select('stripe_customer_id')
         .eq('user_id', user.id)
         .eq('environment', environment)
         .order('created_at', { ascending: false })
         .limit(1);
+
+      console.log('[DEBUG] stripe_customers取得結果:', {
+        data: customers,
+        error: custError,
+        userId: user.id,
+        environment
+      });
 
       if (customers && customers.length > 0) {
         stripeCustomerId = customers[0].stripe_customer_id;
@@ -87,10 +114,20 @@ serve(async (req) => {
     const stripe = createStripeClient(environment);
 
     if (!stripeCustomerId) {
-      console.error('Stripe顧客情報が見つかりません:', { userId: user.id });
+      console.error('❌ Stripe顧客情報が見つかりません:', {
+        userId: user.id,
+        environment,
+        useTestPrice,
+        message: 'user_subscriptions と stripe_customers の両方で顧客IDが見つかりませんでした'
+      });
       return new Response(
         JSON.stringify({
-          error: 'Stripe顧客情報が見つかりません。まずプランに登録してください。'
+          error: 'Stripe顧客情報が見つかりません。まずプランに登録してください。',
+          debug: {
+            userId: user.id,
+            environment,
+            message: 'データベースに該当環境の顧客情報が存在しません'
+          }
         }),
         {
           status: 404,
@@ -105,54 +142,82 @@ serve(async (req) => {
       finalReturnUrl = returnUrl;
     } else {
       // デフォルトURL（開発環境）
-      finalReturnUrl = 'http://localhost:5173/subscription';
+      finalReturnUrl = 'http://localhost:8080/subscription';
     }
 
-    console.log('Customer Portal作成:', { customerId: stripeCustomerId, returnUrl: finalReturnUrl });
+    console.log('Customer Portal作成:', { customerId: stripeCustomerId, returnUrl: finalReturnUrl, isDeepLinkMode });
 
-    // ディープリンク用のセッション設定
+    // Customer Portal セッション設定を構築
     let sessionConfig: any = {
       customer: stripeCustomerId,
       return_url: finalReturnUrl,
       locale: 'ja', // 日本語で表示
     };
 
-    // ディープリンクが有効な場合、サブスクリプション更新画面に直接遷移
-    if (useDeepLink) {
-      // アクティブなサブスクリプションIDを取得
+    // Deep Link モードの場合: プラン変更画面に直接遷移
+    if (isDeepLinkMode && planType && duration) {
+      console.log('🔗 Deep Link モード: プラン変更画面に直接遷移します');
+
+      // 1. 現在のサブスクリプションIDを取得
       const { data: subscription, error: subError } = await supabase
         .from('user_subscriptions')
         .select('stripe_subscription_id')
         .eq('user_id', user.id)
+        .eq('environment', environment)
         .eq('is_active', true)
         .single();
 
       if (subError || !subscription?.stripe_subscription_id) {
-        console.error('アクティブなサブスクリプションが見つかりません:', { userId: user.id, error: subError });
-        return new Response(
-          JSON.stringify({
-            error: 'アクティブなサブスクリプションが見つかりません。'
-          }),
-          {
-            status: 404,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          }
-        );
+        console.error('❌ アクティブなサブスクリプションが見つかりません:', subError);
+        throw new Error('アクティブなサブスクリプションが見つかりません');
       }
 
-      // flow_dataを追加してサブスクリプション更新画面に直接遷移
+      const stripeSubscriptionId = subscription.stripe_subscription_id;
+      console.log('✅ サブスクリプションID取得:', stripeSubscriptionId);
+
+      // 2. Stripe APIからサブスクリプション詳細を取得（アイテムIDを取得）
+      const stripeSubscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+
+      if (!stripeSubscription.items.data || stripeSubscription.items.data.length === 0) {
+        console.error('❌ サブスクリプションアイテムが見つかりません');
+        throw new Error('サブスクリプションアイテムが見つかりません');
+      }
+
+      const subscriptionItemId = stripeSubscription.items.data[0].id;
+      console.log('✅ サブスクリプションアイテムID取得:', subscriptionItemId);
+
+      // 3. 新しいプランのPrice IDを取得
+      const newPriceId = getPriceId(planType, duration, environment);
+      console.log('✅ 新しいプランのPrice ID:', newPriceId);
+
+      // 4. Deep Link用のflow_dataを設定
       sessionConfig.flow_data = {
-        type: 'subscription_update',
-        subscription_update: {
-          subscription: subscription.stripe_subscription_id
+        type: 'subscription_update_confirm',
+        subscription_update_confirm: {
+          subscription: stripeSubscriptionId,
+          items: [
+            {
+              id: subscriptionItemId,
+              price: newPriceId,
+              quantity: 1
+            }
+          ]
         }
       };
 
-      console.log('ディープリンク使用:', { subscriptionId: subscription.stripe_subscription_id });
+      console.log('🔗 Deep Link設定完了:', {
+        subscription: stripeSubscriptionId,
+        item: subscriptionItemId,
+        newPrice: newPriceId
+      });
+    } else {
+      console.log('📋 標準モード: Customer Portalトップページに遷移します');
     }
 
     // Stripe カスタマーポータルセッションを作成
     const session = await stripe.billingPortal.sessions.create(sessionConfig);
+
+    console.log('✅ Customer Portal URL生成成功:', session.url);
 
     return new Response(JSON.stringify({ url: session.url }), {
       status: 200,
