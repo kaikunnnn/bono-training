@@ -1,7 +1,7 @@
 # サブスクリプションシステム - ドキュメント索引
 
 **最終更新**: 2025-11-24
-**システムステータス**: ✅ 本番稼働可能（Deep Link & Webhook 完全対応）
+**システムステータス**: ✅ 本番稼働可能（Deep Link & Webhook & プレミアムコンテンツ完全対応）
 
 ---
 
@@ -17,25 +17,29 @@
 
 1. **このREADME** - まずここから
 2. [specifications/system-specification.md](#1-subscription-system-specificationmd) - システム全体仕様（必読）
-3. [guides/common-errors.md](#3-common-errorsmd) - よくある間違い集（必読）
-4. [環境構築チェックリスト](#環境構築) - 設定漏れ防止
+3. [specifications/premium-content-access.md](#2-specificationspremium-content-accessmd) - プレミアムコンテンツ仕様
+4. [guides/common-errors.md](#4-guidescommon-errorsmd) - よくある間違い集（必読）
+5. [環境構築チェックリスト](#環境構築) - 設定漏れ防止
 
 ### トラブルシューティング時に読むべきドキュメント
 
-1. [guides/common-errors.md](#3-common-errorsmd) - エラー別の解決方法
-2. [specifications/system-specification.md - トラブルシューティング](#1-subscription-system-specificationmd) - 問題別の対処法
-3. [guides/troubleshooting/webhook-401-error.md](#4-webhook-401-errormd) - Webhook 401エラーの詳細
+1. [guides/common-errors.md](#4-guidescommon-errorsmd) - エラー別の解決方法
+2. [specifications/system-specification.md - トラブルシューティング](#1-specificationssystem-specificationmd) - 問題別の対処法
+3. [specifications/premium-content-access.md - トラブルシューティング](#2-specificationspremium-content-accessmd) - プレミアムコンテンツ関連
+4. [guides/troubleshooting/webhook-401-error.md](#5-guidestroubleshootingwebhook-401-errormd) - Webhook 401エラーの詳細
 
 ### テスト実施時に読むべきドキュメント
 
-1. [testing/testing-log.md](#2-testing-logmd) - テスト手順とテスト履歴
-2. [specifications/user-flow-specification.md](#5-subscription-user-flow-specificationmd) - ユーザーフロー仕様
+1. [testing/testing-log.md](#3-testingtesting-logmd) - テスト手順とテスト履歴
+2. [testing/user-flow-test.md](#6-testinguser-flow-testmd) - ユーザーフローテスト
+3. [specifications/premium-content-access.md - テスト手順](#2-specificationspremium-content-accessmd) - プレミアムコンテンツテスト
 
 ### 機能追加・改善時に読むべきドキュメント
 
-1. [specifications/system-specification.md](#1-subscription-system-specificationmd) - 現在の実装詳細
-2. [guides/common-errors.md](#3-common-errorsmd) - 過去の失敗から学ぶ
-3. [testing/testing-log.md](#2-testing-logmd) - 過去のテスト結果
+1. [specifications/system-specification.md](#1-specificationssystem-specificationmd) - 現在の実装詳細
+2. [specifications/premium-content-access.md](#2-specificationspremium-content-accessmd) - プレミアムコンテンツ実装
+3. [guides/common-errors.md](#4-guidescommon-errorsmd) - 過去の失敗から学ぶ
+4. [testing/testing-log.md](#3-testingtesting-logmd) - 過去のテスト結果
 
 ---
 
@@ -70,7 +74,36 @@
 
 ---
 
-### 2. testing/testing-log.md
+### 2. specifications/premium-content-access.md
+
+**ファイル**: `specifications/premium-content-access.md`
+**サイズ**: 21KB
+**最終更新**: 2025-11-24
+
+#### 内容
+
+プレミアムコンテンツのアクセス制御仕様。サブスクリプション加入者のみがアクセスできるメンバー限定コンテンツの詳細。
+
+- ✅ アクセス制御の基本ルール
+- ✅ プラン別アクセス権限マトリックス
+- ✅ 実装アーキテクチャ（データフロー、コンポーネント構成）
+- ✅ 動画コンテンツのアクセス制御
+- ✅ ロック画面の表示仕様
+- ✅ リアルタイム更新機能
+- ✅ Sanity CMS でのプレミアム設定方法
+- ✅ テスト手順（5つのテストケース）
+- ✅ トラブルシューティング
+
+#### いつ読むか
+
+- プレミアムコンテンツ機能を理解したいとき
+- `isPremium` フラグの実装を確認したいとき
+- ロック画面のデザイン・動作を確認したいとき
+- Sanity CMS でプレミアム設定を行うとき
+
+---
+
+### 3. testing/testing-log.md
 
 **ファイル**: `testing/testing-log.md`
 **サイズ**: 96KB
@@ -94,7 +127,7 @@
 
 ---
 
-### 3. guides/common-errors.md
+### 4. guides/common-errors.md
 
 **ファイル**: `guides/common-errors.md`
 **サイズ**: 15KB
