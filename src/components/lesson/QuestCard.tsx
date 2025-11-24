@@ -7,6 +7,7 @@ interface Article {
   title: string;
   slug: { current: string };
   thumbnail?: any;
+  thumbnailUrl?: string;
   videoDuration?: number;
   isPremium?: boolean;
 }
@@ -134,6 +135,7 @@ export default function QuestCard({
               title={article.title}
               slug={article.slug.current}
               thumbnail={article.thumbnail}
+              thumbnailUrl={article.thumbnailUrl}
               videoDuration={article.videoDuration}
               isCompleted={completedArticleIds.includes(article._id)}
               isPremium={article.isPremium}

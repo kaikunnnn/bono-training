@@ -18,11 +18,13 @@ export function urlFor(source: any) {
 /**
  * Article Detail ページ用のデータ取得
  * 記事の詳細 + 所属するQuest + Lesson + サイドナビゲーション用の全データを取得
+ *
+ * Quest.lessonフィールドを使って直接Lessonを取得
  */
 export async function getArticleWithContext(
   slug: string
 ): Promise<ArticleWithContext | null> {
-  const query = `
+  const articleQuery = `
     *[_type == "article" && slug.current == $slug][0] {
       _id,
       _type,
@@ -32,6 +34,7 @@ export async function getArticleWithContext(
       excerpt,
       coverImage,
       thumbnail,
+      thumbnailUrl,
       videoUrl,
       videoDuration,
       content,
@@ -52,33 +55,52 @@ export async function getArticleWithContext(
           slug,
           videoDuration,
           isPremium
-        }
-      },
-
-      // Questが所属するLessonと、Lessonの全Questと記事を取得（サイドナビ用）
-      "lessonInfo": *[_type == "lesson" && references(*[_type == "quest" && references(^._id)][0]._id)][0] {
-        _id,
-        title,
-        slug,
-        iconImage,
-        "quests": quests[]-> {
+        },
+        // Quest.lessonフィールドから直接Lessonを取得
+        "lessonInfo": lesson-> {
           _id,
-          questNumber,
           title,
-          "articles": articles[]-> {
+          slug,
+          iconImage,
+          iconImageUrl,
+          "quests": quests[]-> {
             _id,
+            questNumber,
             title,
-            slug,
-            videoDuration,
-            isPremium
+            "articles": articles[]-> {
+              _id,
+              title,
+              slug,
+              videoDuration,
+              isPremium
+            }
           }
         }
       }
     }
   `;
 
-  const result = await client.fetch<ArticleWithContext | null>(query, {
-    slug,
-  });
-  return result;
+  const article = await client.fetch<any>(articleQuery, { slug });
+
+  // 記事が見つからない場合
+  if (!article) {
+    return null;
+  }
+
+  // questInfo がない場合はそのまま返す（lessonInfo なし）
+  if (!article.questInfo) {
+    console.warn(`[getArticleWithContext] Article "${slug}" has no questInfo`);
+    return article;
+  }
+
+  // lessonInfo がない場合は警告を出す
+  if (!article.questInfo.lessonInfo) {
+    console.warn(`[getArticleWithContext] Quest "${article.questInfo._id}" has no lesson reference`);
+  }
+
+  // lessonInfo をトップレベルに移動
+  return {
+    ...article,
+    lessonInfo: article.questInfo.lessonInfo,
+  };
 }

@@ -183,7 +183,12 @@ const ArticleDetail = () => {
         <main className="flex-1 flex flex-col items-center">
           {/* Video Section - 1680px以上の画面で最大1320px、センター揃え */}
           <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 min-[1680px]:pt-8">
-            <VideoSection videoUrl={article.videoUrl} isPremium={article.isPremium} />
+            <VideoSection
+              videoUrl={article.videoUrl}
+              thumbnail={article.thumbnail}
+              thumbnailUrl={article.thumbnailUrl}
+              isPremium={article.isPremium}
+            />
           </div>
 
           {/* 記事コンテンツ - 720px幅 */}

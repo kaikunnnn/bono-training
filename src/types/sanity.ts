@@ -33,6 +33,7 @@ export interface Article {
   excerpt?: string;
   coverImage?: SanityImage;
   thumbnail?: SanityImage;
+  thumbnailUrl?: string;
   videoUrl?: string;
   videoDuration?: number;
   content: PortableTextBlock[];

@@ -2,47 +2,90 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import PremiumVideoLock from '@/components/premium/PremiumVideoLock';
 
 interface VideoSectionProps {
-  videoUrl?: string;
+  videoUrl?: string | null | { url?: string; metadata?: any };
+  thumbnail?: any;
+  thumbnailUrl?: string;
   isPremium?: boolean;
 }
 
 /**
  * VideoSection コンポーネント
- * Vimeo動画を16:9のレスポンシブで表示
+ * YouTube/Vimeo動画を16:9のレスポンシブで表示
+ * 動画がない場合はサムネイル画像を表示
  *
  * 仕様:
- * - Vimeoの埋め込み
+ * - YouTubeとVimeoの両方に対応
  * - width に従って縦も16:9に従って伸びる
- * - テスト用固定URL: https://vimeo.com/76979871
- * - 後でSanityのvideoUrlと連携
+ * - URLから自動判定して適切な埋め込みを表示
+ * - 動画がない場合、サムネイル画像があれば表示
  * - プレミアムコンテンツのアクセス制御
  */
-const VideoSection = ({ videoUrl, isPremium = false }: VideoSectionProps) => {
+const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: VideoSectionProps) => {
   const { canAccessContent } = useSubscriptionContext();
 
   // プレミアムコンテンツで未契約の場合、ロック表示
   if (isPremium && !canAccessContent(isPremium)) {
     return <PremiumVideoLock />;
   }
-  // VimeoのURLからビデオIDを抽出
-  const getVimeoId = (url: string): string | null => {
-    // https://vimeo.com/76979871 → 76979871
-    const match = url.match(/vimeo\.com\/(\d+)/);
-    return match ? match[1] : null;
+
+  // URLからプラットフォームとIDを判定
+  const getVideoInfo = (url: string | null | undefined | { url?: string }) => {
+    if (!url) return null;
+
+    // オブジェクトの場合はURLを抽出
+    const urlString = typeof url === 'string' ? url : url?.url;
+
+    if (!urlString || typeof urlString !== 'string') return null;
+
+    // YouTube判定: youtu.be/xxx or youtube.com/watch?v=xxx
+    const youtubeMatch = urlString.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/);
+    if (youtubeMatch) {
+      return { platform: 'youtube', id: youtubeMatch[1] };
+    }
+
+    // Vimeo判定: vimeo.com/xxx
+    const vimeoMatch = urlString.match(/vimeo\.com\/(\d+)/);
+    if (vimeoMatch) {
+      return { platform: 'vimeo', id: vimeoMatch[1] };
+    }
+
+    return null;
   };
 
-  // デフォルトのテスト用動画ID
-  const defaultVideoId = "76979871";
+  // videoUrlからプラットフォームとIDを抽出
+  const videoInfo = videoUrl ? getVideoInfo(videoUrl) : null;
 
-  // videoUrlがあれば抽出、なければデフォルト
-  const vimeoId = videoUrl ? getVimeoId(videoUrl) : defaultVideoId;
+  // サムネイル画像のURLを取得（URL優先、なければSanity画像オブジェクト）
+  const getThumbnailUrl = () => {
+    if (thumbnailUrl) {
+      return thumbnailUrl;
+    }
+    if (thumbnail?.asset?._ref) {
+      // urlForをインポートする必要がある
+      return null; // 後で実装
+    }
+    return null;
+  };
 
-  if (!vimeoId) {
-    return (
-      <div className="w-full bg-gray-100 rounded-lg p-8 text-center">
-        <p className="text-gray-500">動画URLが無効です</p>
-      </div>
-    );
+  const thumbnailSrc = getThumbnailUrl();
+
+  // 動画がない場合、サムネイルがあれば表示
+  if (!videoInfo) {
+    if (thumbnailSrc) {
+      return (
+        <div className="w-full">
+          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+            <img
+              src={thumbnailSrc}
+              alt="記事サムネイル"
+              className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
+            />
+          </div>
+        </div>
+      );
+    }
+    // 動画もサムネイルもない場合は非表示
+    return null;
   }
 
   return (
@@ -50,14 +93,25 @@ const VideoSection = ({ videoUrl, isPremium = false }: VideoSectionProps) => {
       {/* 16:9 レスポンシブコンテナ */}
       <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
         {/* 56.25% = 9/16 * 100 (16:9のアスペクト比) */}
-        <iframe
-          src={`https://player.vimeo.com/video/${vimeoId}?title=0&byline=0&portrait=0`}
-          className="absolute top-0 left-0 w-full h-full"
-          frameBorder="0"
-          allow="autoplay; fullscreen; picture-in-picture"
-          allowFullScreen
-          title="Vimeo video player"
-        />
+        {videoInfo.platform === 'youtube' ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${videoInfo.id}`}
+            className="absolute top-0 left-0 w-full h-full"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title="YouTube video player"
+          />
+        ) : (
+          <iframe
+            src={`https://player.vimeo.com/video/${videoInfo.id}?title=0&byline=0&portrait=0`}
+            className="absolute top-0 left-0 w-full h-full"
+            frameBorder="0"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+            title="Vimeo video player"
+          />
+        )}
       </div>
     </div>
   );

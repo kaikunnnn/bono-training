@@ -8,6 +8,7 @@ interface LessonHeroProps {
   title: string;
   description?: string;
   iconImage?: any;
+  iconImageUrl?: string;
   category?: string;
   isPremium?: boolean;
   onStartClick?: () => void;
@@ -18,6 +19,7 @@ export default function LessonHero({
   title,
   description,
   iconImage,
+  iconImageUrl,
   category,
   isPremium,
   onStartClick,
@@ -28,6 +30,19 @@ export default function LessonHero({
   const handleBackClick = () => {
     navigate("/lessons");
   };
+
+  // アイコン画像のURLを取得（URL優先、なければSanity画像オブジェクト）
+  const getIconImageUrl = () => {
+    if (iconImageUrl) {
+      return iconImageUrl;
+    }
+    if (iconImage?.asset?._ref) {
+      return urlFor(iconImage).width(123).height(184).url();
+    }
+    return null;
+  };
+
+  const iconUrl = getIconImageUrl();
 
   return (
     <div className="w-full">
@@ -56,7 +71,7 @@ export default function LessonHero({
       <div className="bg-white">
         <div className="container mx-auto relative">
           {/* アイコン（絶対配置で上にはみ出させる） */}
-          {iconImage?.asset?._ref && (
+          {iconUrl && (
             <div
               className="absolute left-1/2 transform -translate-x-1/2 bg-white overflow-hidden"
               style={{
@@ -69,7 +84,7 @@ export default function LessonHero({
               }}
             >
               <img
-                src={urlFor(iconImage).width(123).height(184).url()}
+                src={iconUrl}
                 alt={title}
                 className="w-full h-full object-cover"
               />

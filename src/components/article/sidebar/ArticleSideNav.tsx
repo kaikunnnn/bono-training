@@ -91,6 +91,7 @@ const ArticleSideNav = ({ article, currentArticleId, progressUpdateTrigger }: Ar
       lessonSlug: lesson.slug.current,
       lessonTitle: lesson.title,
       lessonThumbnail: lesson.iconImage,
+      lessonThumbnailUrl: lesson.iconImageUrl || null,
       progressPercent,
       quests: questsData,
     };
@@ -124,6 +125,7 @@ const ArticleSideNav = ({ article, currentArticleId, progressUpdateTrigger }: Ar
           <LessonSection
             title={navData.lessonTitle}
             thumbnail={navData.lessonThumbnail}
+            thumbnailUrl={navData.lessonThumbnailUrl}
             progressPercent={navData.progressPercent}
             lessonSlug={navData.lessonSlug}
           />
