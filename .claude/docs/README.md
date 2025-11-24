@@ -1,8 +1,20 @@
 # Bono Training - Documentation
 
-**最終更新**: 2025-11-19
+**最終更新**: 2025-11-24
 
-このディレクトリには、Subscription（サブスクリプション）システムとデータ移行に関するドキュメントが含まれています。
+このディレクトリには、すべてのプロジェクトドキュメントが**目的別フォルダ構成**で整理されています。
+
+---
+
+## 🎯 クイックスタート
+
+| 目的 | ドキュメント |
+|------|------------|
+| システム全体を理解したい | [../ STRUCTURE.md](../STRUCTURE.md) |
+| サブスクリプション機能を修正したい | [subscription/README.md](./subscription/README.md) |
+| データ移行を実施したい | [migration/README.md](./migration/README.md) |
+| 開発ワークフローを確認したい | [workflows/WORKFLOW.md](./workflows/WORKFLOW.md) |
+| インフラ設定を確認したい | [infrastructure/](#インフラ設定) |
 
 ---
 
@@ -43,73 +55,41 @@
 
 ---
 
-#### 🔴 レガシードキュメント（旧）
+### 🔧 **インフラ設定**
 
-**TESTING.md** - テストガイド（旧版）
+**📁 infrastructure/** フォルダ
 
-Stripe実装をテストする前に必読！テスト手順、確認項目、チェックリストを含む統合テストガイドです。
+#### Supabase
 
-**含まれる内容**:
-- テスト1: プラン変更（feedback → standard）
-- テスト2: 期間変更（1ヶ月 → 3ヶ月）
-- テスト3: 新規ユーザー
-- テスト4: 解約同期（リアルタイム更新）
-- テスト5: キャンセルURL
+- **mcp-setup-guide.md** - Supabase MCP サーバーセットアップガイド
+- **mcp-capabilities-summary.md** - MCP 機能概要
+- **supabase-mcp-research.md** - MCP 調査記録
 
-**注意**: 最新のテスト記録は **[subscription/testing/testing-log.md](./subscription/testing/testing-log.md)** を参照してください
+#### MCP (Model Context Protocol)
 
----
-
-#### 📘 実装完了レポート
-
-1. **critical-fixes-applied.md** - 二重課金防止のCritical修正完了レポート
-   - 複数サブスクリプション対応
-   - Webhook重複チェック追加
-   - upsert変更
-   - デプロイ完了記録
-
-2. **implementation-summary-tasks4-5.md** - タスク4・5 実装完了レポート
-   - タスク4: 解約同期改善（Realtime機能追加）
-   - タスク5: エラーリトライ処理
+MCP サーバーの設定と使用方法に関するドキュメント
 
 ---
 
-#### 📖 実装詳細ドキュメント
+### 📋 **開発ワークフロー**
 
-3. **double-billing-prevention-implementation.md** - 二重課金防止の実装詳細
-   - 実装方針（Checkout作成前にキャンセル）
-   - 技術的詳細
-   - エッジケース対応（10パターン）
-   - セキュリティ考慮事項
+**📁 workflows/** フォルダ
 
-4. **remaining-tasks-priority.md** - 残タスクと優先順位
-   - 完了したタスク一覧
-   - テスト待ちのタスク
-   - 今後の開発タスク（中優先・低優先）
+- **[WORKFLOW.md](./workflows/WORKFLOW.md)** - 開発ワークフロー・ドキュメント管理ルール
+- **[TESTING.md](./workflows/TESTING.md)** - テスト実施ガイド（統合版）
+
+**重要**: すべての作業フロー・テスト手順は workflows/ フォルダを参照してください
 
 ---
 
-#### 📋 参考ドキュメント
+### 🗂️ **アーカイブ**
 
-5. **payment-tasks-detailed.md** - 決済機能 詳細タスク整理ドキュメント
-   - 全7タスクの詳細説明
-   - 実装方針
-   - 失敗パターンと対策
+**📁 archive/** フォルダ
 
-6. **stripe-webhook-best-practices.md** - Stripe Webhookベストプラクティス
-   - Webhookの仕組み
-   - セキュリティ対策
-   - エラーハンドリング
+古い・完了したドキュメントを月別に保管しています。
 
-7. **phase6-premium-content-implementation.md** - Phase 6: プレミアムコンテンツアクセス制御
-   - RLS実装
-   - アクセス制御ロジック
-
----
-
-### 🗂️ アーカイブ
-
-`archive/` フォルダには、実装完了済みの古いドキュメントが保管されています。
+- `archive/2025-11/` - 2025年11月のアーカイブ
+- `subscription/archive/old-investigations/` - サブスクリプション関連の過去の調査記録
 
 ---
 
@@ -117,116 +97,32 @@ Stripe実装をテストする前に必読！テスト手順、確認項目、�
 
 ### 💳 Subscription システム
 
-| カテゴリ | ステータス | ドキュメント |
-|---------|----------|------------|
-| 二重課金防止 | ✅ 完了 | double-billing-prevention-implementation.md |
-| キャンセル機能 | ✅ 完了 | implementation-summary-tasks4-5.md |
-| Duration変更 | ✅ 完了 | implementation-summary-tasks4-5.md |
-| エラーリトライ | ✅ 完了 | implementation-summary-tasks4-5.md |
-| cancel_url修正 | ✅ 完了 | critical-fixes-applied.md |
-| テスト実行 | 🔄 進行中 | TESTING.md |
+**ステータス**: ✅ 完了（本番稼働可能）
+
+詳細は [subscription/README.md](./subscription/README.md) を参照
 
 ### 🔄 データ移行プロジェクト
 
-| フェーズ | ステータス | 対象 | ドキュメント |
-|---------|----------|------|-------------|
-| Phase 0 | 🔄 準備完了 | 1件テスト | migration/migration-test-guide.md |
-| Phase 1 | ⏳ 待機中 | 10件テスト | migration/migration-test-guide.md |
-| Phase 2 | ⏳ 待機中 | 全件移行（2,162件） | migration/migration-test-guide.md |
-| Phase 3 | ⏳ 待機中 | 並行稼働 | migration/migration-plan.md |
+**ステータス**: 🔄 進行中
 
----
-
-## 🔴 開発ワークフロー（最重要）
-
-**`WORKFLOW.md`** を必ず最初に読んでください
-
-このドキュメントに、全ての作業フロー・ドキュメント管理ルールが記載されています。
-
-**重要:**
-- 全ての作業は `MASTER-DEBUG-LOG.md` に記録
-- 新しいドキュメントは作らない
-- テスト結果は必ず完全記録
-
----
-
-## 🚀 次にやること
-
-### 🥇 優先度1: Subscription Webhook修正（最優先）
-
-**`MASTER-DEBUG-LOG.md`** を開いて、最新の「次のアクション」を確認
-
-### 🥈 優先度2: データ移行 Phase 0
-
-**[migration/migration-test-guide.md](./migration/migration-test-guide.md)** を参照
-
-```bash
-# Step 1: Auth ユーザー作成
-npx tsx scripts/migrate-create-auth-users.ts stripe-customers-test.csv
-
-# Step 2: stripe_customers テーブル
-npx tsx scripts/migrate-stripe-customers.ts stripe-customers-test.csv
-
-# Step 3: user_subscriptions テーブル
-npx tsx scripts/migrate-subscriptions.ts stripe-subscriptions-test.csv
-```
-
-### 🥈 優先度2: Subscription テスト
-
-**TESTING.md** を参照してテストを実施
-
----
-
-## 🐛 トラブルシューティング
-
-### Subscription システム
-
-1. **二重課金が発生する**
-   - → `double-billing-prevention-implementation.md` 参照
-
-2. **キャンセルが反映されない**
-   - → `implementation-summary-tasks4-5.md` のキャンセル同期を確認
-
-3. **Webhook エラー**
-   - → `stripe-webhook-best-practices.md` 参照
-
-### データ移行
-
-1. **移行エラーが発生する**
-   - → `migration/migration-test-guide.md` のトラブルシューティングセクション参照
-
-2. **CSVの形式が異なる**
-   - → スクリプトのカラム名を調整
-
-3. **認証エラー**
-   - → `.env` の `SUPABASE_SERVICE_ROLE_KEY` を確認
-
----
-
-## 📝 ドキュメント作成ルール
-
-- 実装完了後、必ず実装サマリーを作成
-- テスト計画は事前に作成
-- 重要な修正は critical-fixes-applied.md に記録
-- 古いドキュメントは archive/ に移動
-- 移行関連は migration/ フォルダに配置
+詳細は [migration/README.md](./migration/README.md) を参照
 
 ---
 
 ## 📚 関連リソース
 
-### Stripe公式ドキュメント
-- [Subscriptions API](https://stripe.com/docs/api/subscriptions)
-- [Customer Portal](https://stripe.com/docs/billing/subscriptions/customer-portal)
-- [Webhooks](https://stripe.com/docs/webhooks)
+### 外部ドキュメント
 
-### Supabase公式ドキュメント
-- [Realtime Subscriptions](https://supabase.com/docs/guides/realtime)
-- [Edge Functions](https://supabase.com/docs/guides/functions)
-- [Row Level Security](https://supabase.com/docs/guides/auth/row-level-security)
+- [Stripe API ドキュメント](https://stripe.com/docs/api)
+- [Supabase ドキュメント](https://supabase.com/docs)
+
+### プロジェクトドキュメント
+
+- [../ STRUCTURE.md](../STRUCTURE.md) - ディレクトリ構造ルール
+- [subscription/README.md](./subscription/README.md) - サブスクリプションシステム
+- [migration/README.md](./migration/README.md) - データ移行
+- [workflows/WORKFLOW.md](./workflows/WORKFLOW.md) - 開発ワークフロー
 
 ---
 
-**次にやること**: [migration/migration-test-guide.md](./migration/migration-test-guide.md) の Phase 0 を実行する
-
-**最終更新日**: 2025-11-19
+**最終更新日**: 2025-11-24
