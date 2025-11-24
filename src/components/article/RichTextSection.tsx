@@ -1,8 +1,12 @@
 import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { PortableTextBlock } from "@portabletext/types";
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import ContentPreviewOverlay from '@/components/premium/ContentPreviewOverlay';
 
 interface RichTextSectionProps {
   content: PortableTextBlock[];
+  isPremium?: boolean;
+  previewBlockCount?: number; // プレビューで表示するブロック数（デフォルト: 3）
 }
 
 /**
@@ -24,8 +28,19 @@ interface RichTextSectionProps {
  * スペーシング:
  * - セクション間: 48px
  * - セクション内: 24px-32px
+ *
+ * プレミアム機能:
+ * - isPremium=true かつ未契約の場合、最初のpreviewBlockCountブロックのみ表示
+ * - それ以降はContentPreviewOverlayでロック
  */
-const RichTextSection = ({ content }: RichTextSectionProps) => {
+const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: RichTextSectionProps) => {
+  const { canAccessContent } = useSubscriptionContext();
+  const hasAccess = canAccessContent(isPremium);
+
+  // プレミアムコンテンツで未契約の場合、最初のブロックのみ表示
+  const displayContent = isPremium && !hasAccess
+    ? content.slice(0, previewBlockCount)
+    : content;
   const components: PortableTextComponents = {
     block: {
       // Heading 2
@@ -160,8 +175,11 @@ const RichTextSection = ({ content }: RichTextSectionProps) => {
   return (
     <div className="w-full py-6">
       <div className="prose prose-lg max-w-none">
-        <PortableText value={content} components={components} />
+        <PortableText value={displayContent} components={components} />
       </div>
+
+      {/* プレミアムコンテンツで未契約の場合、オーバーレイを表示 */}
+      {isPremium && !hasAccess && <ContentPreviewOverlay />}
     </div>
   );
 };

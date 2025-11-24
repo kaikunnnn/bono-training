@@ -9,6 +9,10 @@ interface HeadingSectionProps {
   onFavorite?: () => void;
   onShare?: () => void;
   onNext?: () => void;
+  isBookmarked?: boolean;
+  bookmarkLoading?: boolean;
+  isCompleted?: boolean;
+  completionLoading?: boolean;
 }
 
 /**
@@ -30,6 +34,10 @@ const HeadingSection = ({
   onFavorite,
   onShare,
   onNext,
+  isBookmarked = false,
+  bookmarkLoading = false,
+  isCompleted = false,
+  completionLoading = false,
 }: HeadingSectionProps) => {
   return (
     <div className="w-full space-y-3">
@@ -85,22 +93,36 @@ const HeadingSection = ({
           {/* Complete Button */}
           <button
             onClick={onComplete}
-            className="flex items-center gap-1 px-3 py-2 rounded-full bg-[#F3F5F5] hover:bg-gray-200 transition-colors"
+            disabled={completionLoading}
+            className={`flex items-center gap-1 px-3 py-2 rounded-full transition-colors ${
+              isCompleted
+                ? 'bg-green-100 hover:bg-green-200 text-green-800'
+                : 'bg-[#F3F5F5] hover:bg-gray-200 text-[#34373D]'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             <Check className="w-[18px] h-[18px]" strokeWidth={2} />
-            <span className="text-sm font-bold leading-5 text-[#34373D]" style={{ letterSpacing: "-1.07421875%" }}>
-              完了にする
+            <span className="text-sm font-bold leading-5" style={{ letterSpacing: "-1.07421875%" }}>
+              {isCompleted ? '完了済み' : '完了にする'}
             </span>
           </button>
 
           {/* Favorite Button */}
           <button
             onClick={onFavorite}
-            className="flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"
+            disabled={bookmarkLoading}
+            className="flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ fontFamily: "Inter, sans-serif" }}
+            aria-label={isBookmarked ? 'ブックマークを解除' : 'ブックマークに追加'}
           >
-            <Star className="w-[18px] h-[18px]" strokeWidth={1.5} />
+            <Star
+              className={`w-[18px] h-[18px] transition-colors ${
+                isBookmarked
+                  ? 'fill-yellow-400 stroke-yellow-400'
+                  : 'stroke-[#6A7282]'
+              }`}
+              strokeWidth={1.5}
+            />
             <span className="text-sm leading-5 text-[#6A7282]" style={{ letterSpacing: "-1.07421875%" }}>
               お気に入り
             </span>

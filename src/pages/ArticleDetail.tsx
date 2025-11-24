@@ -8,6 +8,8 @@ import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
+import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
+import { toggleArticleCompletion, getArticleProgress } from "@/services/progress";
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +17,11 @@ const ArticleDetail = () => {
   const [article, setArticle] = useState<ArticleWithContext | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [completionLoading, setCompletionLoading] = useState(false);
+  const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
 
   // 前後の記事を計算
   const navigation = useMemo(() => {
@@ -79,6 +86,59 @@ const ArticleDetail = () => {
     fetchArticle();
   }, [slug]);
 
+  // ブックマーク状態の初期化
+  useEffect(() => {
+    const checkBookmark = async () => {
+      if (article?._id) {
+        const result = await isBookmarked(article._id);
+        setBookmarked(result);
+      }
+    };
+    checkBookmark();
+  }, [article?._id]);
+
+  // 記事の進捗状態を取得
+  useEffect(() => {
+    const checkProgress = async () => {
+      if (article?._id) {
+        const status = await getArticleProgress(article._id);
+        setIsCompleted(status === 'completed');
+      }
+    };
+    checkProgress();
+  }, [article?._id]);
+
+  // ブックマークトグル処理
+  const handleBookmarkToggle = async () => {
+    if (!article) return;
+
+    setBookmarkLoading(true);
+    const result = await toggleBookmark(article._id, false);
+
+    if (result.success) {
+      setBookmarked(result.isBookmarked);
+    }
+    setBookmarkLoading(false);
+  };
+
+  // 完了ボタンのハンドラー
+  const handleCompleteToggle = async () => {
+    if (!article || !article.lessonInfo?._id) return;
+
+    setCompletionLoading(true);
+    const result = await toggleArticleCompletion(
+      article._id,
+      article.lessonInfo._id
+    );
+
+    if (result.success) {
+      setIsCompleted(result.isCompleted);
+      // サイドナビの進捗を更新するトリガー
+      setProgressUpdateTrigger(prev => prev + 1);
+    }
+    setCompletionLoading(false);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -116,7 +176,7 @@ const ArticleDetail = () => {
       <div className="flex max-w-[1920px] mx-auto">
         {/* サイドナビゲーション - 固定320px幅 */}
         <aside className="w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-gray-200">
-          <ArticleSideNav article={article} currentArticleId={article._id} />
+          <ArticleSideNav article={article} currentArticleId={article._id} progressUpdateTrigger={progressUpdateTrigger} />
         </aside>
 
         {/* メインコンテンツエリア */}
@@ -127,6 +187,7 @@ const ArticleDetail = () => {
               videoUrl={article.videoUrl}
               thumbnail={article.thumbnail}
               thumbnailUrl={article.thumbnailUrl}
+              isPremium={article.isPremium}
             />
           </div>
 
@@ -139,17 +200,21 @@ const ArticleDetail = () => {
                 stepNumber={article.articleNumber}
                 title={article.title}
                 description={article.excerpt}
-                onComplete={() => console.log("Complete clicked")}
-                onFavorite={() => console.log("Favorite clicked")}
+                onComplete={handleCompleteToggle}
+                onFavorite={handleBookmarkToggle}
                 onShare={() => console.log("Share clicked")}
                 onNext={() => console.log("Next clicked")}
+                isBookmarked={bookmarked}
+                bookmarkLoading={bookmarkLoading}
+                isCompleted={isCompleted}
+                completionLoading={completionLoading}
               />
 
               {/* TODO Section - learningObjectives がある場合のみ表示 */}
               <TodoSection items={article.learningObjectives} />
 
               {/* Rich Text Section - 記事本文 */}
-              <RichTextSection content={article.content} />
+              <RichTextSection content={article.content} isPremium={article.isPremium} />
 
               {/* Content Navigation - 前後の記事へのナビゲーション */}
               <ContentNavigation previous={navigation.previous} next={navigation.next} />

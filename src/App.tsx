@@ -40,6 +40,9 @@ import GuideManual from "./pages/Dev/GuideManual";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
+import MyPage from "./pages/MyPage";
+import Account from "./pages/Account";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -98,7 +101,10 @@ const AppContent = () => {
         <Route path="/dev/guide-manual" element={<DevRoute><GuideManual /></DevRoute>} />
 
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+        <Route path="/subscription/success" element={<PrivateRoute><SubscriptionSuccess /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+        <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+        <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
 
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />

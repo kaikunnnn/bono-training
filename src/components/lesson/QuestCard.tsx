@@ -1,4 +1,4 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Check } from "lucide-react";
 import ContentItem from "./ContentItem";
 
 interface Article {
@@ -9,6 +9,7 @@ interface Article {
   thumbnail?: any;
   thumbnailUrl?: string;
   videoDuration?: number;
+  isPremium?: boolean;
 }
 
 interface QuestCardProps {
@@ -18,6 +19,8 @@ interface QuestCardProps {
   goal?: string;
   estTimeMins?: number;
   articles: Article[];
+  completedCount?: number;
+  completedArticleIds?: string[];
 }
 
 export default function QuestCard({
@@ -27,13 +30,17 @@ export default function QuestCard({
   goal,
   estTimeMins,
   articles,
+  completedCount = 0,
+  completedArticleIds = [],
 }: QuestCardProps) {
   // 所要時間の計算（分→日）
   const estimatedDays = estTimeMins ? Math.ceil(estTimeMins / (60 * 8)) : 0;
 
-  // 完了数の計算（Phase 1では0/N）
-  const completedCount = 0;
+  // 完了数
   const totalCount = articles.length;
+
+  // 全記事が完了しているか
+  const isQuestCompleted = completedCount === totalCount && totalCount > 0;
 
   return (
     <div className="mb-6">
@@ -43,11 +50,13 @@ export default function QuestCard({
         <div
           className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0"
           style={{
-            background: '#F3F3F3',
-            border: '1px solid rgba(0, 0, 0, 0.04)'
+            background: isQuestCompleted ? '#10B981' : '#F3F3F3',
+            border: isQuestCompleted ? '1px solid #10B981' : '1px solid rgba(0, 0, 0, 0.04)'
           }}
         >
-          {/* Phase 1では常に空 */}
+          {isQuestCompleted && (
+            <Check className="w-3 h-3 text-white" strokeWidth={3} />
+          )}
         </div>
 
         {/* クエスト番号テキスト */}
@@ -74,7 +83,7 @@ export default function QuestCard({
           <div
             className="self-stretch"
             style={{
-              borderLeft: '1px dotted #E1E1E1'
+              borderLeft: isQuestCompleted ? '1px dotted #10B981' : '1px dotted #E1E1E1'
             }}
           />
         </div>
@@ -128,6 +137,8 @@ export default function QuestCard({
               thumbnail={article.thumbnail}
               thumbnailUrl={article.thumbnailUrl}
               videoDuration={article.videoDuration}
+              isCompleted={completedArticleIds.includes(article._id)}
+              isPremium={article.isPremium}
             />
           ))}
         </div>

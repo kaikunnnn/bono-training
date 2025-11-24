@@ -40,3 +40,43 @@ Lv.0〜Lv.5 までのレベル指標で、
 - 想定と違う、確認が必要などの場合は、実装前に必ず質問形式で確認すること。
 - 実行は可能な範囲で小分けにし、ステップにして、的確に実装すること
 - デザインシステムに則ってフロントスタイルを実装する、コンポーネントがないならつくりながら進める
+
+---
+
+## 📚 ドキュメント構造
+
+このプロジェクトのドキュメントは **目的別フォルダ構成** で整理されています。
+
+### 🎯 クイックリンク
+
+- **[STRUCTURE.md](./STRUCTURE.md)** - .claude ディレクトリ構造ルール（必読）
+- **[docs/README.md](./docs/README.md)** - ドキュメント索引
+- **[docs/subscription/](./docs/subscription/)** - サブスクリプションシステム完全ドキュメント
+- **[docs/migration/](./docs/migration/)** - データ移行プロジェクト
+- **[docs/workflows/WORKFLOW.md](./docs/workflows/WORKFLOW.md)** - 開発ワークフロー
+
+### 📁 主要フォルダ
+
+```
+.claude/
+├── docs/                        # すべてのドキュメント
+│   ├── subscription/            # サブスクリプションシステム（完了 ✅）
+│   ├── migration/               # データ移行プロジェクト（進行中 🔄）
+│   ├── infrastructure/          # Supabase・MCP 設定
+│   ├── workflows/               # 開発フロー・テストガイド
+│   └── archive/                 # 古いドキュメント
+│
+├── tasks/                       # 機能開発タスク
+└── STRUCTURE.md                 # ディレクトリ構造ルール
+```
+
+### 🚀 新規開発時のガイド
+
+1. **システム全体を理解したい** → [STRUCTURE.md](./STRUCTURE.md)
+2. **サブスクリプション機能を修正したい** → [docs/subscription/README.md](./docs/subscription/README.md)
+3. **データ移行を実施したい** → [docs/migration/README.md](./docs/migration/README.md)
+4. **開発ワークフローを確認したい** → [docs/workflows/WORKFLOW.md](./docs/workflows/WORKFLOW.md)
+
+---
+
+**最終更新**: 2025-11-24

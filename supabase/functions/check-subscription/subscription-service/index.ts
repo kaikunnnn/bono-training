@@ -25,25 +25,40 @@ export class SubscriptionService {
   /**
    * ユーザーの購読情報を取得
    */
-  getUserSubscription = this.dbOperations.getUserSubscription.bind(this.dbOperations);
+  getUserSubscription(userId: string) {
+    return this.dbOperations.getUserSubscription(userId);
+  }
 
   /**
    * サブスクリプション情報を更新
    */
-  updateSubscriptionStatus = this.dbOperations.updateSubscriptionStatus.bind(this.dbOperations);
+  updateSubscriptionStatus(
+    userId: string,
+    isActive: boolean,
+    planType: string | null,
+    stripeSubscriptionId?: string
+  ) {
+    return this.dbOperations.updateSubscriptionStatus(userId, isActive, planType, stripeSubscriptionId);
+  }
 
   /**
    * プランタイプとメンバーシップ権限を判定
    */
-  determinePlanInfo = this.planUtils.determinePlanInfo.bind(this.planUtils);
+  determinePlanInfo(unitAmount: number) {
+    return this.planUtils.determinePlanInfo(unitAmount);
+  }
 
   /**
    * Stripeサブスクリプション情報を取得
    */
-  getStripeSubscription = this.stripeOperations.getStripeSubscription.bind(this.stripeOperations);
+  getStripeSubscription(customerId: string, status?: string) {
+    return this.stripeOperations.getStripeSubscription(customerId, status);
+  }
 
   /**
    * プラン情報を取得
    */
-  getPlanInfo = this.stripeOperations.getPlanInfo.bind(this.stripeOperations);
+  getPlanInfo(subscription: any) {
+    return this.stripeOperations.getPlanInfo(subscription);
+  }
 }

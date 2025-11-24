@@ -53,7 +53,8 @@ export async function getArticleWithContext(
           _id,
           title,
           slug,
-          videoDuration
+          videoDuration,
+          isPremium
         },
         // Quest.lessonフィールドから直接Lessonを取得
         "lessonInfo": lesson-> {
@@ -70,7 +71,8 @@ export async function getArticleWithContext(
               _id,
               title,
               slug,
-              videoDuration
+              videoDuration,
+              isPremium
             }
           }
         }

@@ -1,7 +1,11 @@
+import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
+import PremiumVideoLock from '@/components/premium/PremiumVideoLock';
+
 interface VideoSectionProps {
   videoUrl?: string | null | { url?: string; metadata?: any };
   thumbnail?: any;
   thumbnailUrl?: string;
+  isPremium?: boolean;
 }
 
 /**
@@ -14,8 +18,16 @@ interface VideoSectionProps {
  * - width に従って縦も16:9に従って伸びる
  * - URLから自動判定して適切な埋め込みを表示
  * - 動画がない場合、サムネイル画像があれば表示
+ * - プレミアムコンテンツのアクセス制御
  */
-const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl }: VideoSectionProps) => {
+const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: VideoSectionProps) => {
+  const { canAccessContent } = useSubscriptionContext();
+
+  // プレミアムコンテンツで未契約の場合、ロック表示
+  if (isPremium && !canAccessContent(isPremium)) {
+    return <PremiumVideoLock />;
+  }
+
   // URLからプラットフォームとIDを判定
   const getVideoInfo = (url: string | null | undefined | { url?: string }) => {
     if (!url) return null;

@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Lock } from "lucide-react";
+import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 
 interface ContentItemProps {
   id: string;
@@ -8,6 +10,7 @@ interface ContentItemProps {
   slug: string;
   isCompleted?: boolean;
   isFocus?: boolean;
+  isPremium?: boolean;
   onCheckChange?: (id: string, isChecked: boolean) => void;
 }
 
@@ -33,11 +36,21 @@ const ContentItem = ({
   slug,
   isCompleted = false,
   isFocus = false,
+  isPremium = false,
   onCheckChange,
 }: ContentItemProps) => {
   const navigate = useNavigate();
+  const { canAccessContent } = useSubscriptionContext();
   const [isHovered, setIsHovered] = useState(false);
   const [checked, setChecked] = useState(isCompleted);
+
+  // プレミアムコンテンツで未契約の場合、ロック状態
+  const isLocked = isPremium && !canAccessContent(isPremium);
+
+  // isCompletedが変わったらcheckedを更新
+  useEffect(() => {
+    setChecked(isCompleted);
+  }, [isCompleted]);
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.stopPropagation();
@@ -91,21 +104,27 @@ const ContentItem = ({
 
       {/* コンテンツブロック */}
       <div className="flex items-center justify-between flex-1" style={{ gap: "12px" }}>
-        {/* タイトル */}
-        <h3
-          className={`text-xs m-0 flex-1 transition-all ${
-            state === "focus" || state === "hover"
-              ? "font-medium text-[#101828]"
-              : "font-normal text-[#677B87]"
-          }`}
-          style={{
-            fontFamily: '"Noto Sans JP", sans-serif',
-            letterSpacing: "-1.25%",
-            lineHeight: "1.667em",
-          }}
-        >
-          {title}
-        </h3>
+        {/* タイトルと鍵アイコン */}
+        <div className="flex items-center gap-1.5 flex-1">
+          {/* 鍵アイコン（プレミアムで未契約の場合） */}
+          {isLocked && (
+            <Lock className="w-3 h-3 text-gray-400 flex-shrink-0" strokeWidth={2} />
+          )}
+          <h3
+            className={`text-xs m-0 flex-1 transition-all ${
+              state === "focus" || state === "hover"
+                ? "font-medium text-[#101828]"
+                : "font-normal text-[#677B87]"
+            }`}
+            style={{
+              fontFamily: '"Noto Sans JP", sans-serif',
+              letterSpacing: "-1.25%",
+              lineHeight: "1.667em",
+            }}
+          >
+            {title}
+          </h3>
+        </div>
 
         {/* 学習時間 */}
         {duration !== undefined && (

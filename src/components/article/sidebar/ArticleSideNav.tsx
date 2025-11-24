@@ -1,13 +1,15 @@
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import LogoBlock from "./LogoBlock";
 import BackNavigation from "./BackNavigation";
 import LessonSection from "./LessonSection";
 import QuestBlock from "./QuestBlock";
 import type { ArticleWithContext } from "@/types/sanity";
+import { getLessonProgress, type LessonProgress } from "@/services/progress";
 
 interface ArticleSideNavProps {
   article: ArticleWithContext;
   currentArticleId: string;
+  progressUpdateTrigger?: number;
 }
 
 /**
@@ -19,7 +21,35 @@ interface ArticleSideNavProps {
  * 2. LessonSection (レッスンカード + 進捗バー)
  * 3. QuestBlock[] (複数のクエストブロック)
  */
-const ArticleSideNav = ({ article, currentArticleId }: ArticleSideNavProps) => {
+const ArticleSideNav = ({ article, currentArticleId, progressUpdateTrigger }: ArticleSideNavProps) => {
+  const [progress, setProgress] = useState<LessonProgress | null>(null);
+
+  // レッスンの進捗を取得
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!article.lessonInfo?._id || !article.lessonInfo?.quests) return;
+
+      // すべてのクエストから記事IDを収集
+      const articleIds: string[] = [];
+      article.lessonInfo.quests.forEach(quest => {
+        if (quest.articles) {
+          articleIds.push(...quest.articles.map(a => a._id));
+        }
+      });
+
+      if (articleIds.length === 0) return;
+
+      const lessonProgress = await getLessonProgress(
+        article.lessonInfo._id,
+        articleIds
+      );
+
+      setProgress(lessonProgress);
+    };
+
+    fetchProgress();
+  }, [article.lessonInfo, progressUpdateTrigger]);
+
   // サイドナビゲーション用のデータを整形
   const navData = useMemo(() => {
     if (!article.lessonInfo) {
@@ -29,13 +59,9 @@ const ArticleSideNav = ({ article, currentArticleId }: ArticleSideNavProps) => {
     const lesson = article.lessonInfo;
     const quests = lesson.quests || [];
 
-    // 進捗率の計算（仮: すべてのクエストの記事数から計算）
-    const totalArticles = quests.reduce(
-      (sum, quest) => sum + (quest.articles?.length || 0),
-      0
-    );
-    // TODO: 実際の完了した記事数を取得して進捗を計算
-    const progressPercent = totalArticles > 0 ? 0 : 0; // 仮に0%
+    // 実際の進捗データを使用
+    const progressPercent = progress?.percentage || 0;
+    const completedArticleIds = progress?.completedArticleIds || [];
 
     // 各クエストのデータを変換
     const questsData = quests.map((quest) => {
@@ -47,8 +73,9 @@ const ArticleSideNav = ({ article, currentArticleId }: ArticleSideNavProps) => {
         title: a.title,
         duration: a.videoDuration,
         slug: a.slug.current,
-        isCompleted: false, // TODO: 実際の完了状態を取得
+        isCompleted: completedArticleIds.includes(a._id),
         isFocus: a._id === currentArticleId,
+        isPremium: a.isPremium,
       }));
 
       return {
@@ -68,7 +95,7 @@ const ArticleSideNav = ({ article, currentArticleId }: ArticleSideNavProps) => {
       progressPercent,
       quests: questsData,
     };
-  }, [article, currentArticleId]);
+  }, [article, currentArticleId, progress]);
 
   if (!navData) {
     return (

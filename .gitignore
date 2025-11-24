@@ -28,5 +28,10 @@ dist-ssr
 *.sln
 *.sw?
 
+# Migration data (contains sensitive information)
+stripe-customers.csv
+stripe-subscriptions.csv
+migration-errors-*.json
+
 # Supabase
 supabase/.temp/
