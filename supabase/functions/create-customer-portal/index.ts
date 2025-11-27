@@ -12,6 +12,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
 serve(async (req) => {
   // CORS プリフライトリクエストの処理
   if (req.method === 'OPTIONS') {
@@ -38,15 +41,14 @@ serve(async (req) => {
       });
     }
 
-    // リクエストボディから returnUrl, useTestPrice, planType, duration を取得
+    // リクエストボディから returnUrl, planType, duration を取得
     const body = await req.json();
     const returnUrl = body.returnUrl;
-    const useTestPrice = body.useTestPrice || false; // テスト環境を使用するか
     const planType = body.planType as PlanType | undefined; // 選択されたプラン（Deep Link用）
     const duration = body.duration as PlanDuration | undefined; // 選択された期間（Deep Link用）
 
-    // 環境を判定（useTestPriceフラグに基づく）
-    const environment: StripeEnvironment = useTestPrice ? 'test' : 'live';
+    // 環境はサーバー側で判定（STRIPE_MODE環境変数）
+    const environment: StripeEnvironment = ENVIRONMENT;
 
     // Deep Link モードかどうかを判定
     const isDeepLinkMode = !!(planType && duration);
@@ -117,7 +119,6 @@ serve(async (req) => {
       console.error('❌ Stripe顧客情報が見つかりません:', {
         userId: user.id,
         environment,
-        useTestPrice,
         message: 'user_subscriptions と stripe_customers の両方で顧客IDが見つかりませんでした'
       });
       return new Response(

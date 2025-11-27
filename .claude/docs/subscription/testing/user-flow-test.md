@@ -1080,4 +1080,123 @@ kyasya00@gmail.com
 
 ---
 
-**最終更新**: 2025-11-24
+## 🐛 エラーケースと修正履歴
+
+### Error Case 1: 環境変数 `useTestPrice` 未定義エラー (2025-11-27)
+
+**発生日時**: 2025-11-27
+**症状**: `/subscription` ページからプラン登録時に 500 エラーが発生し、Stripe Checkout が開かない
+
+**エラーログ**:
+```
+POST https://fryogvfhymnpiqwssmuu.supabase.co/functions/v1/create-checkout 500 (Internal Server Error)
+❌ Checkoutセッション作成エラー: FunctionsHttpError: Edge Function returned a non-2xx status code
+❌ Response data: null
+Error: 決済処理の準備に失敗しました。
+```
+
+**根本原因**:
+環境分離実装時（commit: 50217e0）に、3つの Edge Functions で `useTestPrice` 変数の削除が不完全だった:
+
+1. **create-checkout/index.ts:155**
+   ```typescript
+   // ❌ 修正前（未定義変数を参照）
+   const envPrefix = useTestPrice ? "STRIPE_TEST_" : "STRIPE_";
+   ```
+
+2. **create-customer-portal/index.ts:44-49**
+   ```typescript
+   // ❌ 修正前
+   const useTestPrice = body.useTestPrice || false;
+   const environment = useTestPrice ? 'test' : 'live';
+   ```
+
+3. **update-subscription/index.ts:23-25**
+   ```typescript
+   // ❌ 修正前
+   const { planType, duration = 1, useTestPrice = false } = await req.json();
+   const environment = useTestPrice ? "test" : "live";
+   ```
+
+**修正内容**:
+
+1. **create-checkout/index.ts**
+   ```typescript
+   // ✅ 修正後
+   const envPrefix = ENVIRONMENT === 'test' ? "STRIPE_TEST_" : "STRIPE_";
+   ```
+
+2. **create-customer-portal/index.ts**
+   ```typescript
+   // ✅ 修正後（環境変数定義を追加）
+   const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
+   // リクエストボディから useTestPrice を削除
+   const body = await req.json();
+   const returnUrl = body.returnUrl;
+   const planType = body.planType as PlanType | undefined;
+   const duration = body.duration as PlanDuration | undefined;
+
+   // 環境はサーバー側で判定
+   const environment: StripeEnvironment = ENVIRONMENT;
+   ```
+
+3. **update-subscription/index.ts**
+   ```typescript
+   // ✅ 修正後（環境変数定義を追加）
+   const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
+   // リクエストボディから useTestPrice を削除
+   const { planType, duration = 1 } = await req.json();
+   const environment = ENVIRONMENT;
+   ```
+
+**影響範囲**:
+- create-checkout: 新規登録時の全プラン選択
+- create-customer-portal: Customer Portal URL 生成
+- update-subscription: プラン変更機能
+
+**デプロイ**:
+```bash
+npx supabase@latest functions deploy create-checkout
+npx supabase@latest functions deploy create-customer-portal
+npx supabase@latest functions deploy update-subscription
+```
+
+**再発防止策**:
+
+1. **Edge Functions のテストカバレッジ向上**
+   - 各 Edge Function に対するユニットテスト作成
+   - CI/CD パイプラインでの自動テスト実施
+
+2. **環境変数の一元管理**
+   - すべての Edge Functions で同じ環境判定ロジックを使用
+   - `_shared/` ディレクトリにユーティリティ関数を配置
+
+3. **デプロイ前チェックリスト**
+   - [ ] すべての Edge Functions で `useTestPrice` が削除されているか grep で確認
+   - [ ] `ENVIRONMENT` 定数が正しく定義されているか確認
+   - [ ] ローカルテスト（localhost）で動作確認
+   - [ ] デプロイ後の動作確認
+
+**確認コマンド**:
+```bash
+# useTestPrice が残っていないか確認
+grep -r "useTestPrice" supabase/functions/
+
+# ENVIRONMENT 定数の定義を確認
+grep -r "const ENVIRONMENT" supabase/functions/
+```
+
+**テスト結果**:
+- [ ] localhost で新規登録テスト実施
+- [ ] Stripe Checkout が正常に開く
+- [ ] 決済完了まで正常動作
+
+**関連コミット**:
+- 環境分離実装: `50217e0`
+- 本修正: `[次のコミットハッシュ]`
+
+---
+
+**最終更新**: 2025-11-27

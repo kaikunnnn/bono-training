@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
 // デバッグログ関数
 const logDebug = (message: string, details?: any) => {
   console.log(`[UPDATE-SUBSCRIPTION] ${message}${details ? ` ${JSON.stringify(details)}` : ''}`);
@@ -20,9 +23,9 @@ serve(async (req) => {
 
   try {
     // リクエストボディを解析
-    const { planType, duration = 1, useTestPrice = false } = await req.json();
+    const { planType, duration = 1 } = await req.json();
 
-    const environment = useTestPrice ? "test" : "live";
+    const environment = ENVIRONMENT;
     logDebug("プラン変更リクエスト受信", { planType, duration, environment });
 
     if (!planType) {

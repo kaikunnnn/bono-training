@@ -152,7 +152,7 @@ serve(async (req) => {
     let priceId: string | undefined;
 
     // 環境変数の命名規則: STRIPE_[TEST_]PLANTYPE_DURATION_PRICE_ID
-    const envPrefix = useTestPrice ? "STRIPE_TEST_" : "STRIPE_";
+    const envPrefix = ENVIRONMENT === 'test' ? "STRIPE_TEST_" : "STRIPE_";
     const planTypeUpper = planType.toUpperCase();
     const durationSuffix = duration === 1 ? "1M" : "3M";
     const envVarName = `${envPrefix}${planTypeUpper}_${durationSuffix}_PRICE_ID`;
