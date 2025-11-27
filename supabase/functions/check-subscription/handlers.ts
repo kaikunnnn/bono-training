@@ -4,13 +4,9 @@ import { SubscriptionService } from "./subscription-service/index.ts";
 import { CheckSubscriptionResponse } from "./types.ts";
 
 /**
- * プランタイプに基づいてアクセス権限を計算
+ * プランタイプに基づいて具体的なアクセス権限を返すヘルパー関数
  */
-function calculateAccessPermissions(planType: string | null, isActive: boolean): { hasMemberAccess: boolean; hasLearningAccess: boolean } {
-  if (!isActive || !planType) {
-    return { hasMemberAccess: false, hasLearningAccess: false };
-  }
-
+function calculateByPlanType(planType: string): { hasMemberAccess: boolean; hasLearningAccess: boolean } {
   // メンバーアクセス: すべての有料プラン
   const hasMemberAccess = ['standard', 'growth', 'community', 'feedback'].includes(planType);
 
@@ -18,6 +14,41 @@ function calculateAccessPermissions(planType: string | null, isActive: boolean):
   const hasLearningAccess = ['standard', 'growth', 'feedback'].includes(planType);
 
   return { hasMemberAccess, hasLearningAccess };
+}
+
+/**
+ * プランタイプに基づいてアクセス権限を計算
+ * キャンセル済みでも契約期間内であればアクセスを許可する
+ */
+function calculateAccessPermissions(
+  planType: string | null,
+  isActive: boolean,
+  cancelAtPeriodEnd: boolean,
+  currentPeriodEnd: string | null
+): { hasMemberAccess: boolean; hasLearningAccess: boolean } {
+  // プランタイプがない場合はアクセス不可
+  if (!planType) {
+    return { hasMemberAccess: false, hasLearningAccess: false };
+  }
+
+  // ケース1: アクティブなサブスクリプション
+  if (isActive) {
+    return calculateByPlanType(planType);
+  }
+
+  // ケース2: キャンセル済みだが期間内
+  if (cancelAtPeriodEnd && currentPeriodEnd) {
+    const periodEnd = new Date(currentPeriodEnd);
+    const now = new Date();
+
+    if (periodEnd > now) {
+      // 期間内はアクセス可能
+      return calculateByPlanType(planType);
+    }
+  }
+
+  // ケース3: それ以外（期間終了、未登録など）
+  return { hasMemberAccess: false, hasLearningAccess: false };
 }
 
 /**
@@ -92,7 +123,12 @@ export async function handleAuthenticatedRequest(authHeader: string): Promise<Re
     const renewalDate = cancelAtPeriodEnd && cancelAt ? cancelAt : currentPeriodEnd;
 
     // アクセス権限を計算
-    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(planType, isSubscribed);
+    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(
+      planType,
+      isSubscribed,
+      cancelAtPeriodEnd,
+      currentPeriodEnd
+    );
 
     logDebug("データベースの購読情報を返却", {
       isActive: isSubscribed,
@@ -146,23 +182,21 @@ export async function handleStripeSubscriptionCheck(
 ): Promise<Response> {
   try {
     if (!stripe) {
-      // Stripeが利用できない場合はデフォルトプランを設定
+      // Stripeが利用できない場合は未登録として扱う
       await subscriptionService.updateSubscriptionStatus(
         userId,
-        true,
-        "standard"
+        false,
+        null
       );
-      
-      const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions("standard", true);
-      
+
       return new Response(
-        JSON.stringify({ 
-          subscribed: true, 
-          planType: "standard",
-          isSubscribed: true,
-          hasMemberAccess,
-          hasLearningAccess,
-          testMode: true
+        JSON.stringify({
+          subscribed: false,
+          planType: null,
+          isSubscribed: false,
+          hasMemberAccess: false,
+          hasLearningAccess: false,
+          error: "Stripe接続エラー"
         }),
         {
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -172,9 +206,14 @@ export async function handleStripeSubscriptionCheck(
     }
     
     const response = await processStripeSubscription(subscriptionService, userId, stripe);
-    
+
     // アクセス権限を計算
-    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(response.planType, response.subscribed);
+    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions(
+      response.planType,
+      response.subscribed,
+      false,
+      null
+    );
     
     return new Response(
       JSON.stringify({
@@ -190,24 +229,22 @@ export async function handleStripeSubscriptionCheck(
     );
   } catch (stripeError) {
     logDebug("Stripeエラー", { error: stripeError });
-    
-    // Stripeでエラーが発生した場合は、デフォルトの標準プランを設定
+
+    // Stripeエラー時は未登録として扱う
     await subscriptionService.updateSubscriptionStatus(
       userId,
-      true,
-      "standard"
+      false,
+      null
     );
-    
-    const { hasMemberAccess, hasLearningAccess } = calculateAccessPermissions("standard", true);
-    
+
     return new Response(
-      JSON.stringify({ 
-        subscribed: true,
-        planType: "standard",
-        isSubscribed: true,
-        hasMemberAccess,
-        hasLearningAccess,
-        error: "Stripeとの同期に失敗しましたが、標準プランとして処理します"
+      JSON.stringify({
+        subscribed: false,
+        planType: null,
+        isSubscribed: false,
+        hasMemberAccess: false,
+        hasLearningAccess: false,
+        error: "Stripeとの同期に失敗しました"
       }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },

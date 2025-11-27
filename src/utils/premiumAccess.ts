@@ -16,9 +16,10 @@ export const canAccessContent = (
     return true;
   }
 
-  // プレミアムコンテンツの場合、standardまたはcommunity（feedback）プランが必要
-  // 注: 'growth'プランも全コンテンツにアクセス可能
-  return planType === 'standard' || planType === 'growth' || planType === 'community';
+  // プレミアムコンテンツの場合、有料プラン（standard, feedback, growth, community）が必要
+  // feedback: Growthプラン（Stripe Price ID: price_1OIiMRKUVUnt8GtyMGSJIH8H）
+  // standard: Standardプラン（Stripe Price ID: price_1RStBiKUVUnt8GtynMfKweby）
+  return planType === 'standard' || planType === 'growth' || planType === 'community' || planType === 'feedback';
 };
 
 /**
