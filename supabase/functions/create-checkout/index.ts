@@ -11,6 +11,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
 // デバッグログ関数
 const logDebug = (message: string, details?: any) => {
   console.log(
@@ -30,12 +33,11 @@ serve(async (req) => {
     // リクエストボディを解析
     const {
       returnUrl,
-      useTestPrice = false,
       planType = "community",
       duration = 1,
     } = await req.json();
 
-    logDebug("リクエスト受信", { returnUrl, useTestPrice, planType, duration });
+    logDebug("リクエスト受信", { returnUrl, planType, duration, environment: ENVIRONMENT });
 
     if (!returnUrl) {
       throw new Error("リダイレクトURLが指定されていません");
@@ -64,12 +66,9 @@ serve(async (req) => {
 
     logDebug("ユーザー認証成功", { userId: user.id, email: user.email });
 
-    // 環境を判定（useTestPriceフラグに基づく）
-    const environment: StripeEnvironment = useTestPrice ? "test" : "live";
-    logDebug(`Stripe環境: ${environment}`);
-
-    // Stripeクライアントの初期化（環境に応じたAPIキーを使用）
-    const stripe = createStripeClient(environment);
+    // Stripeクライアントの初期化（環境変数に応じたAPIキーを使用）
+    const stripe = createStripeClient(ENVIRONMENT);
+    logDebug(`Stripe環境: ${ENVIRONMENT}`);
 
     // ユーザーのStripe Customer IDと既存サブスクリプションを取得
     let stripeCustomerId: string;
@@ -79,7 +78,7 @@ serve(async (req) => {
       .from("stripe_customers")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
-      .eq("environment", environment)
+      .eq("environment", ENVIRONMENT)
       .single();
 
     // 既存サブスクリプションを確認（複数ある場合も全て取得、環境フィルタ付き）
@@ -88,7 +87,7 @@ serve(async (req) => {
         .from("user_subscriptions")
         .select("stripe_subscription_id, is_active")
         .eq("user_id", user.id)
-        .eq("environment", environment)
+        .eq("environment", ENVIRONMENT)
         .eq("is_active", true);
 
     if (existingSubError) {
@@ -132,7 +131,7 @@ serve(async (req) => {
           {
             user_id: user.id,
             stripe_customer_id: customer.id,
-            environment: environment,
+            environment: ENVIRONMENT,
           },
           { onConflict: "user_id,environment" }
         );
