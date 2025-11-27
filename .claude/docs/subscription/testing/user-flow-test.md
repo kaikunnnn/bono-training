@@ -216,7 +216,7 @@ npx supabase functions logs stripe-webhook-test --limit 20
 - [?] `customer.subscription.updated` イベントが処理されている
 - [?] エラーなし
 
-### 実施結果
+### 実施結果（2025-11-25 初回テスト）
 
 **実施日時**:
 11/25 16:44
@@ -294,7 +294,68 @@ JPY
 
 **判定**: ✅ 成功 ナイス！
 
+---
+
+### 🔄 再テスト結果（2025-11-27 useTestPrice修正後）
+
+**実施日時**: 2025-11-27
+**テストプラン**: スタンダード 1ヶ月 → フィードバック 1ヶ月
+
+**テスト結果**: ✅ **完全成功**
+
+**変更前の状態**:
+```sql
+plan_type: 'standard'
+duration: 1
+stripe_subscription_id: [同じID]
+```
+
+**変更後の状態**:
+```sql
+plan_type: 'feedback'
+duration: 1
+stripe_subscription_id: [同じID]
+```
+
+**Console ログ**:
+```javascript
+購読状態確認結果: {
+  subscribed: true,
+  planType: 'feedback',
+  duration: 1,
+  isSubscribed: true,
+  cancelAtPeriodEnd: false,
+  ...
+}
+
+Edge Functionから取得したアクセス権限を使用: {
+  hasMemberAccess: true,
+  hasLearningAccess: true,
+  planType: 'feedback'
+}
+```
+
+**確認事項**:
+- ✅ プラン変更: スタンダード → フィードバック
+- ✅ Customer Portal で変更完了
+- ✅ `/subscription` ページに正しく反映
+- ✅ 購読状態が正常に取得できている
+- ✅ アクセス権限が正しく設定されている
+- ⚠️ Stripe 404エラー（`billing.stripe.com/ajax/client_init_timeout_report`）
+  - **問題なし**: Stripe側の内部分析用エンドポイント
+  - **影響**: なし（Stripeの内部ログ収集機能）
+  - **対処**: 不要
+
+**判定**: ✅ **修正完了 - 正常動作確認**
+
 **備考**:
+- プラン変更機能が正常に動作
+- useTestPrice修正の影響なし
+- Stripe 404エラーはStripe側の仕様（無視してOK）
+
+---
+
+**備考（初回テスト）**:
 
 ```
 ▼ メモ：更新時（フィードバック3ヶ月からフィードバック1ヶ月）の日割り計算表示のコピペ
