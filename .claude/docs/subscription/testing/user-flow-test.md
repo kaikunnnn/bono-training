@@ -572,6 +572,33 @@ ii_1SXWoyKUVUnt8GtyyVXvElQz
 `
 ```
 
+### 🔄 再テスト結果（2025-11-27 useTestPrice修正後）
+
+**実施日時**: 2025-11-27
+**テストプラン**: フィードバック 1ヶ月 → スタンダード 1ヶ月
+**テスト結果**: ✅ **完全成功**
+
+**Console ログ**:
+```javascript
+Edge Functionから取得したアクセス権限を使用: {
+  hasMemberAccess: true,
+  hasLearningAccess: true,
+  planType: 'standard'
+}
+```
+
+**確認事項**:
+- ✅ プラン変更: フィードバック → スタンダード
+- ✅ プロレーション金額が正しく表示された
+- ✅ アクセス権限が正しく更新された
+  - `hasMemberAccess: true` ✅
+  - `hasLearningAccess: true` ✅
+  - `planType: 'standard'` ✅
+- ✅ Console エラーなし
+- ✅ Edge Function が正常動作
+
+**判定**: ✅ **成功 - useTestPrice修正後も正常動作**
+
 ---
 
 ## Test 3A: 期間変更 - 延長（1 ヶ月 → 3 ヶ月）
