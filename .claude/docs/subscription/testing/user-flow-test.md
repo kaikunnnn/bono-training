@@ -1189,13 +1189,44 @@ grep -r "const ENVIRONMENT" supabase/functions/
 ```
 
 **テスト結果**:
-- [ ] localhost で新規登録テスト実施
-- [ ] Stripe Checkout が正常に開く
-- [ ] 決済完了まで正常動作
+- [✅] localhost で新規登録テスト実施
+- [✅] Stripe Checkout が正常に開く
+- [✅] 決済完了まで正常動作
+- [✅] Console エラーなし
+- [✅] Edge Function が正常動作
+
+**実施日時**: 2025-11-27
+**テストプラン**: スタンダード 1ヶ月
+**テスト結果**: ✅ **完全成功**
+
+**Console ログ**:
+```
+Edge Functionから取得したアクセス権限を使用: {
+  hasMemberAccess: true,
+  hasLearningAccess: true,
+  planType: 'standard'
+}
+```
+
+**確認事項**:
+- ✅ `/subscription` ページからプラン選択
+- ✅ Stripe Checkout が正常に開く
+- ✅ テストカード（4242 4242 4242 4242）で決済完了
+- ✅ `/subscription/success` ページにリダイレクト成功
+- ✅ 正しいアクセス権限が付与されている
+- ✅ 500エラーなし
+- ✅ `useTestPrice` 未定義エラーなし
+
+**判定**: ✅ **修正完了 - 問題解決**
+
+**備考**:
+- 修正前に発生していた500エラーは完全に解消
+- Edge Function が正常に動作し、正しいアクセス権限を返している
+- ログイン時の `check-subscription` エラーは別途調査が必要（タスクリストに追加済み）
 
 **関連コミット**:
 - 環境分離実装: `50217e0`
-- 本修正: `[次のコミットハッシュ]`
+- 本修正: `1e2c36c`
 
 ---
 
