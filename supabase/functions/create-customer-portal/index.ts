@@ -50,8 +50,9 @@ serve(async (req) => {
     // 環境はサーバー側で判定（STRIPE_MODE環境変数）
     const environment: StripeEnvironment = ENVIRONMENT;
 
-    // Deep Link モードかどうかを判定
-    const isDeepLinkMode = !!(planType && duration);
+    // Deep Link モードを無効化（Option 3実装により使用しない）
+    // プラン変更は /subscription ページから create-checkout を使用
+    const isDeepLinkMode = false;
 
     console.log('Customer Portal リクエスト:', {
       userId: user.id,

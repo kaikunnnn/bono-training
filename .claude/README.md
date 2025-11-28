@@ -49,6 +49,7 @@ Lv.0〜Lv.5 までのレベル指標で、
 
 ### 🎯 クイックリンク
 
+- 🚨 **[tasks/ACTIVE_TASKS.md](./tasks/ACTIVE_TASKS.md)** - 今やるべきタスク一覧（最優先）
 - **[STRUCTURE.md](./STRUCTURE.md)** - .claude ディレクトリ構造ルール（必読）
 - **[docs/README.md](./docs/README.md)** - ドキュメント索引
 - **[docs/subscription/](./docs/subscription/)** - サブスクリプションシステム完全ドキュメント
@@ -72,11 +73,12 @@ Lv.0〜Lv.5 までのレベル指標で、
 
 ### 🚀 新規開発時のガイド
 
-1. **システム全体を理解したい** → [STRUCTURE.md](./STRUCTURE.md)
-2. **サブスクリプション機能を修正したい** → [docs/subscription/README.md](./docs/subscription/README.md)
-3. **データ移行を実施したい** → [docs/migration/README.md](./docs/migration/README.md)
-4. **開発ワークフローを確認したい** → [docs/workflows/WORKFLOW.md](./docs/workflows/WORKFLOW.md)
+1. **今やるべきタスクは？** → 🚨 [tasks/ACTIVE_TASKS.md](./tasks/ACTIVE_TASKS.md)
+2. **システム全体を理解したい** → [STRUCTURE.md](./STRUCTURE.md)
+3. **サブスクリプション機能を修正したい** → [docs/subscription/README.md](./docs/subscription/README.md)
+4. **データ移行を実施したい** → [docs/migration/README.md](./docs/migration/README.md)
+5. **開発ワークフローを確認したい** → [docs/workflows/WORKFLOW.md](./docs/workflows/WORKFLOW.md)
 
 ---
 
-**最終更新**: 2025-11-24
+**最終更新**: 2025-11-26

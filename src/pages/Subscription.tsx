@@ -1,10 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { createCheckoutSession, getCustomerPortalUrl } from '@/services/stripe';
+import { createCheckoutSession } from '@/services/stripe';
 import { PlanType } from '@/utils/subscriptionPlans';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanCard from '@/components/subscription/PlanCard';
@@ -18,6 +18,20 @@ const SubscriptionPage: React.FC = () => {
   const { isSubscribed, planType, duration: currentDuration } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1); // 期間選択の状態
+
+  // Success URL処理: プラン変更完了時のトースト表示
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('updated') === 'true') {
+      toast({
+        title: "プランを変更しました",
+        description: "サブスクリプションの変更が完了しました。",
+      });
+      // URLをクリーンアップ
+      window.history.replaceState({}, '', '/subscription');
+    }
+  }, [toast]);
   
   // 料金プラン情報（.envに合わせて修正）
   const plans = [
@@ -58,20 +72,24 @@ const SubscriptionPage: React.FC = () => {
     try {
       // 既存契約者かどうかで分岐
       if (isSubscribed) {
-        // 既存契約者 → Customer Portalに遷移（標準モード）
-        console.log('既存契約者: Customer Portalに遷移します', {
+        // 既存契約者 → Option 3: Stripe Checkoutでプラン変更
+        console.log('既存契約者: Stripe Checkoutでプラン変更します', {
           currentPlan: planType,
           currentDuration: currentDuration,
           selectedPlan: selectedPlanType,
           selectedDuration: selectedDuration
         });
 
-        const returnUrl = window.location.origin + '/subscription';
-        // Deep Link モード: 選択されたプラン情報を渡す
-        const portalUrl = await getCustomerPortalUrl(returnUrl, selectedPlanType, selectedDuration);
+        // Success URLに ?updated=true を追加（プラン変更完了を示す）
+        const returnUrl = window.location.origin + '/subscription?updated=true';
+        const { url, error } = await createCheckoutSession(returnUrl, selectedPlanType, selectedDuration);
 
-        if (portalUrl) {
-          window.location.href = portalUrl;
+        if (error) {
+          throw error;
+        }
+
+        if (url) {
+          window.location.href = url;
         }
       } else {
         // 新規ユーザー → Checkoutに遷移
