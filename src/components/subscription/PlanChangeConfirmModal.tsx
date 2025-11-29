@@ -22,11 +22,11 @@ import {
   type PlanInfo,
 } from '@/utils/prorationCalculator';
 import {
-  getPlanMonthlyPrice,
   getPlanDisplayName,
   type PlanType,
   type PlanDuration,
 } from '@/utils/subscriptionPlans';
+import { getPlanPrices, type PlanPrices } from '@/services/pricing';
 
 interface PlanChangeConfirmModalProps {
   /** 現在のプラン情報 */
@@ -68,17 +68,40 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
   onConfirm,
   onCancel,
 }) => {
-  // プラン情報を構築
+  // Stripe動的料金を取得
+  const [planPrices, setPlanPrices] = React.useState<PlanPrices | null>(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchPrices() {
+      const { prices, error } = await getPlanPrices();
+      if (!error && prices) {
+        setPlanPrices(prices);
+      }
+      setLoading(false);
+    }
+    fetchPrices();
+  }, []);
+
+  // ローディング中は何も表示しない
+  if (loading || !planPrices) {
+    return null;
+  }
+
+  // Stripe料金からプラン情報を構築
+  const currentPriceKey = `${currentPlan.type}_${currentPlan.duration}m` as keyof PlanPrices;
+  const newPriceKey = `${newPlan.type}_${newPlan.duration}m` as keyof PlanPrices;
+
   const currentPlanInfo: PlanInfo = {
     type: currentPlan.type,
     duration: currentPlan.duration,
-    monthlyPrice: getPlanMonthlyPrice(currentPlan.type, currentPlan.duration),
+    monthlyPrice: planPrices[currentPriceKey]?.unit_amount || 0,
   };
 
   const newPlanInfo: PlanInfo = {
     type: newPlan.type,
     duration: newPlan.duration,
-    monthlyPrice: getPlanMonthlyPrice(newPlan.type, newPlan.duration),
+    monthlyPrice: planPrices[newPriceKey]?.unit_amount || 0,
   };
 
   // プロレーション計算
