@@ -78,35 +78,41 @@
 - [x] テスト用 CSV の作成
   - [x] `stripe-customers-test.csv` (1 件)
   - [x] `stripe-subscriptions-test.csv` (1 件)
+  - [x] `stripe-customers-10.csv` (10 件)
+  - [x] `stripe-subscriptions-10.csv` (10 件)
 - [x] Service Role Key の取得
 - [x] 移行スクリプトの作成
   - [x] `scripts/migrate-create-auth-users.ts`
   - [x] `scripts/migrate-stripe-customers.ts`
   - [x] `scripts/migrate-subscriptions.ts`
+- [x] **Phase 0: 1件テスト** ✅ 成功（2025-11-19）
+- [x] **Phase 1: 10件テスト** ✅ 成功（2025-11-19）
+  - 詳細: [phase1-test-report.md](./phase1-test-report.md)
+- [x] **Phase 2: 全件移行（Auth ユーザー）** ✅ 成功（2025-11-28）
+  - 詳細: [phase2-full-migration-report.md](./phase2-full-migration-report.md)
+  - 結果: **2,022/2,162件** 成功（93.5%）
+  - 実質エラー: **4件のみ**（0.18%）
 
 ### 🔄 次にやること
 
-**Phase 0: 1 件テスト**（`migration-test-guide.md` を参照）
+**Phase 2: 残りのテーブル同期**
 
-1. Script 1 を実行: Auth ユーザー作成
+1. ✅ **Script 1 完了**: Auth ユーザー作成（2,022/2,162件）
+
+2. ⏸️ **Script 2 実行待ち**: stripe_customers テーブル同期
    ```bash
-   npx tsx scripts/migrate-create-auth-users.ts stripe-customers-test.csv
+   npx tsx scripts/migrate-stripe-customers.ts stripe-customers.csv
    ```
 
-2. Script 2 を実行: stripe_customers テーブル
+3. ⏸️ **Script 3 実行待ち**: user_subscriptions テーブル同期
    ```bash
-   npx tsx scripts/migrate-stripe-customers.ts stripe-customers-test.csv
+   npx tsx scripts/migrate-subscriptions.ts stripe-subscriptions.csv
    ```
 
-3. Script 3 を実行: user_subscriptions テーブル
-   ```bash
-   npx tsx scripts/migrate-subscriptions.ts stripe-subscriptions-test.csv
-   ```
-
-4. 動作確認
+4. ⏸️ **動作確認**
    - Supabase Dashboard でデータ確認
-   - ログインテスト
-   - サブスクリプション情報の表示確認
+   - データ整合性チェック
+   - （必要に応じて）パスワードリセットメール送信
 
 ---
 

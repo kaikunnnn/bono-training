@@ -11,13 +11,26 @@ import PlanCard from '@/components/subscription/PlanCard';
 import PlanComparison from '@/components/subscription/PlanComparison';
 import SubscriptionHeader from '@/components/subscription/SubscriptionHeader';
 import { formatPlanDisplay } from '@/utils/planDisplay';
+import { PlanChangeConfirmModal } from '@/components/subscription/PlanChangeConfirmModal';
+import { getPlanPrices, PlanPrices } from '@/services/pricing';
 
 const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isSubscribed, planType, duration: currentDuration } = useSubscriptionContext();
+  const { isSubscribed, planType, duration: currentDuration, renewalDate } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1); // 期間選択の状態
+
+  // プラン変更確認モーダル用の状態
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedNewPlan, setSelectedNewPlan] = useState<{
+    type: PlanType;
+    duration: 1 | 3;
+  } | null>(null);
+
+  // 料金データの状態
+  const [planPrices, setPlanPrices] = useState<PlanPrices | null>(null);
+  const [pricesLoading, setPricesLoading] = useState(true);
 
   // Success URL処理: プラン変更完了時のトースト表示
   useEffect(() => {
@@ -32,16 +45,48 @@ const SubscriptionPage: React.FC = () => {
       window.history.replaceState({}, '', '/subscription');
     }
   }, [toast]);
-  
-  // 料金プラン情報（.envに合わせて修正）
-  const plans = [
+
+  // 料金を取得
+  useEffect(() => {
+    async function fetchPrices() {
+      setPricesLoading(true);
+      const { prices, source, error } = await getPlanPrices();
+
+      if (!error && prices) {
+        setPlanPrices(prices);
+        console.log(`✅ 料金取得成功 (source: ${source}):`, prices);
+      } else {
+        console.error('❌ 料金取得失敗:', error);
+        toast({
+          title: "料金情報の取得に失敗しました",
+          description: "ページを再読み込みしてください。",
+          variant: "destructive",
+        });
+      }
+
+      setPricesLoading(false);
+    }
+
+    fetchPrices();
+  }, [toast]);
+
+  // 料金プラン情報（Stripeから動的に取得）
+  const plans = planPrices ? [
     {
       id: 'standard',
       name: 'スタンダード',
       description: '全てのコンテンツにアクセスできる基本プラン',
       durations: [
-        { months: 1, price: 4000, priceLabel: '4,000円/月' },
-        { months: 3, price: 3800, priceLabel: '3,800円/月（3ヶ月）' }
+        {
+          months: 1,
+          price: planPrices.standard_1m.unit_amount,
+          priceLabel: `¥${planPrices.standard_1m.unit_amount.toLocaleString()}/月`
+        },
+        {
+          months: 3,
+          price: planPrices.standard_3m.unit_amount,
+          priceLabel: `¥${planPrices.standard_3m.unit_amount.toLocaleString()}/月（3ヶ月）`
+        }
       ],
       features: {
         learning: true,
@@ -55,8 +100,16 @@ const SubscriptionPage: React.FC = () => {
       name: 'フィードバック',
       description: '全コンテンツ + フィードバック機能が利用できるプラン',
       durations: [
-        { months: 1, price: 1480, priceLabel: '1,480円/月' },
-        { months: 3, price: 1280, priceLabel: '1,280円/月（3ヶ月）' }
+        {
+          months: 1,
+          price: planPrices.feedback_1m.unit_amount,
+          priceLabel: `¥${planPrices.feedback_1m.unit_amount.toLocaleString()}/月`
+        },
+        {
+          months: 3,
+          price: planPrices.feedback_3m.unit_amount,
+          priceLabel: `¥${planPrices.feedback_3m.unit_amount.toLocaleString()}/月（3ヶ月）`
+        }
       ],
       features: {
         learning: true,
@@ -65,32 +118,28 @@ const SubscriptionPage: React.FC = () => {
       },
       recommended: true
     }
-  ];
+  ] : null;
 
   const handleSubscribe = async (selectedPlanType: PlanType) => {
     setIsLoading(true);
     try {
       // 既存契約者かどうかで分岐
       if (isSubscribed) {
-        // 既存契約者 → Option 3: Stripe Checkoutでプラン変更
-        console.log('既存契約者: Stripe Checkoutでプラン変更します', {
+        // 既存契約者 → 確認モーダルを表示
+        console.log('既存契約者: プラン変更確認モーダルを表示します', {
           currentPlan: planType,
           currentDuration: currentDuration,
           selectedPlan: selectedPlanType,
           selectedDuration: selectedDuration
         });
 
-        // Success URLに ?updated=true を追加（プラン変更完了を示す）
-        const returnUrl = window.location.origin + '/subscription?updated=true';
-        const { url, error } = await createCheckoutSession(returnUrl, selectedPlanType, selectedDuration);
-
-        if (error) {
-          throw error;
-        }
-
-        if (url) {
-          window.location.href = url;
-        }
+        // モーダル表示
+        setSelectedNewPlan({
+          type: selectedPlanType,
+          duration: selectedDuration,
+        });
+        setShowConfirmModal(true);
+        setIsLoading(false);
       } else {
         // 新規ユーザー → Checkoutに遷移
         console.log('新規ユーザー: Checkoutに遷移します', {
@@ -108,6 +157,7 @@ const SubscriptionPage: React.FC = () => {
         if (url) {
           window.location.href = url;
         }
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('購読エラー:', error);
@@ -116,13 +166,82 @@ const SubscriptionPage: React.FC = () => {
         description: error instanceof Error ? error.message : "処理の開始に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
-  
+
+  /**
+   * プラン変更確認モーダルで「確定」ボタンが押されたときの処理
+   */
+  const handleConfirmPlanChange = async () => {
+    if (!selectedNewPlan) return;
+
+    setIsLoading(true);
+    setShowConfirmModal(false);
+
+    try {
+      console.log('プラン変更を確定します', {
+        currentPlan: planType,
+        currentDuration: currentDuration,
+        newPlan: selectedNewPlan.type,
+        newDuration: selectedNewPlan.duration
+      });
+
+      // Option 3: Stripe Checkoutでプラン変更
+      const returnUrl = window.location.origin + '/subscription?updated=true';
+      const { url, error } = await createCheckoutSession(
+        returnUrl,
+        selectedNewPlan.type,
+        selectedNewPlan.duration
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      if (url) {
+        window.location.href = url;
+      }
+    } catch (error) {
+      console.error('プラン変更エラー:', error);
+      toast({
+        title: "エラーが発生しました",
+        description: error instanceof Error ? error.message : "プラン変更に失敗しました。もう一度お試しください。",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+      setSelectedNewPlan(null);
+    }
+  };
+
+  /**
+   * プラン変更確認モーダルで「キャンセル」ボタンが押されたときの処理
+   */
+  const handleCancelPlanChange = () => {
+    setShowConfirmModal(false);
+    setSelectedNewPlan(null);
+    setIsLoading(false);
+  };
+
   // formatPlanDisplayをimportして使用するため、getCurrentPlanName関数は不要
-  
+
+  // ローディング中の表示
+  if (pricesLoading || !plans) {
+    return (
+      <Layout>
+        <div className="container py-8 max-w-5xl">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">料金プランを読み込み中...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container py-8 max-w-5xl">
@@ -180,6 +299,20 @@ const SubscriptionPage: React.FC = () => {
 
         <PlanComparison />
       </div>
+
+      {/* プラン変更確認モーダル */}
+      {showConfirmModal && selectedNewPlan && planType && currentDuration && renewalDate && (
+        <PlanChangeConfirmModal
+          currentPlan={{
+            type: planType,
+            duration: currentDuration as 1 | 3,
+          }}
+          newPlan={selectedNewPlan}
+          currentPeriodEnd={new Date(renewalDate)}
+          onConfirm={handleConfirmPlanChange}
+          onCancel={handleCancelPlanChange}
+        />
+      )}
     </Layout>
   );
 };

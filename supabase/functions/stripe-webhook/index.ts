@@ -12,7 +12,8 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ENVIRONMENT = 'live' as const;
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
 
 // プランタイプと金額に基づいてメンバーアクセス権を判定
 function determineMembershipAccess(planType: string, amount?: number): boolean {

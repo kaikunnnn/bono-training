@@ -175,6 +175,17 @@ serve(async (req) => {
     const baseUrl = new URL(returnUrl).origin;
     const cancelUrl = `${baseUrl}/subscription`;
 
+    // 既存サブスクリプションIDをmetadataに追加（Webhookでキャンセルするため）
+    // これにより、Checkout完了「後」に既存サブスクがキャンセルされる
+    // ユーザーがCheckout画面で離脱しても既存サブスクは残るため安全
+    if (activeSubscriptions.length > 0) {
+      logDebug(
+        `${activeSubscriptions.length}件の既存サブスクリプションをmetadataに記録（Webhook経由でキャンセルします）`
+      );
+      // 複数ある場合は最初の1つをmetadataに記録（Webhook側で全てのアクティブサブスクをキャンセル）
+      sessionMetadata.replace_subscription_id = activeSubscriptions[0].stripe_subscription_id;
+    }
+
     // セッション設定オブジェクト
     const sessionConfig: any = {
       customer: stripeCustomerId,
@@ -191,102 +202,9 @@ serve(async (req) => {
       metadata: sessionMetadata,
     };
 
-    // 既存サブスクリプションが複数ある場合は全てキャンセル（二重課金を防止）
-    if (activeSubscriptions.length > 0) {
-      logDebug(
-        `${activeSubscriptions.length}件のアクティブサブスクリプションをキャンセルします`
-      );
-
-      for (const existingSub of activeSubscriptions) {
-        const existingSubscriptionId = existingSub.stripe_subscription_id;
-
-        try {
-          // 1. Stripeで既存サブスクリプションの状態を確認
-          let existingSubscription;
-          try {
-            existingSubscription = await stripe.subscriptions.retrieve(
-              existingSubscriptionId
-            );
-            logDebug("既存サブスクリプション取得成功:", {
-              id: existingSubscriptionId,
-              status: existingSubscription.status,
-              customer: existingSubscription.customer,
-            });
-          } catch (retrieveError) {
-            // サブスクリプションが存在しない場合はスキップ
-            logDebug(
-              "サブスクリプションが見つかりません（既にキャンセル済みの可能性）:",
-              retrieveError
-            );
-            existingSubscription = null;
-          }
-
-          // 2. サブスクリプションが存在し、顧客IDが一致する場合のみキャンセル
-          if (existingSubscription) {
-            if (existingSubscription.customer !== stripeCustomerId) {
-              logDebug("警告: サブスクリプションの顧客IDが一致しません", {
-                subscriptionId: existingSubscriptionId,
-                subscriptionCustomer: existingSubscription.customer,
-                expectedCustomer: stripeCustomerId,
-              });
-              throw new Error("サブスクリプション情報に不整合があります");
-            }
-
-            // アクティブまたはトライアル中のサブスクリプションのみキャンセル
-            if (
-              existingSubscription.status === "active" ||
-              existingSubscription.status === "trialing"
-            ) {
-              // Stripeでキャンセル（日割り返金付き）
-              await stripe.subscriptions.cancel(existingSubscriptionId, {
-                prorate: true,
-              });
-              logDebug(
-                "Stripeでサブスクリプションをキャンセル完了:",
-                existingSubscriptionId
-              );
-            } else {
-              logDebug("サブスクリプションは既に非アクティブです:", {
-                id: existingSubscriptionId,
-                status: existingSubscription.status,
-              });
-            }
-          }
-
-          // 3. DBを更新（Stripeの状態に関わらず、DBは確実に更新）
-          const { error: updateError } = await supabaseClient
-            .from("user_subscriptions")
-            .update({
-              is_active: false,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("stripe_subscription_id", existingSubscriptionId)
-            .eq("user_id", user.id); // セキュリティ: 必ずuser_idも条件に含める
-
-          if (updateError) {
-            logDebug("DB更新エラー:", updateError);
-            // DB更新失敗は警告のみ（Webhookで最終的に同期される）
-            console.warn(
-              "既存サブスクリプションのDB更新に失敗しましたが、処理を続行します"
-            );
-          } else {
-            logDebug(
-              "DBでサブスクリプションを非アクティブ化完了:",
-              existingSubscriptionId
-            );
-          }
-        } catch (cancelError) {
-          logDebug(
-            `サブスクリプション ${existingSubscriptionId} のキャンセルエラー:`,
-            cancelError
-          );
-          // 1つでもキャンセル失敗したらCheckout作成を中止（二重課金を確実に防止）
-          throw new Error(
-            `既存サブスクリプションのキャンセルに失敗しました: ${cancelError.message}`
-          );
-        }
-      }
-    }
+    // 【重要】既存サブスクリプションのキャンセルはWebhook（checkout.session.completed）で実行
+    // Checkout作成「前」にキャンセルすると、ユーザーが離脱時に無課金状態になるため
+    // stripe-webhook/index.ts Lines 178-196 でキャンセル処理を実行
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
 
