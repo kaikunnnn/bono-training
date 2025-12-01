@@ -6,6 +6,13 @@ import { PlanType, hasLearningAccess, hasMemberAccess, UserPlanInfo } from '@/ut
 import { canAccessContent as canAccessContentUtil } from '@/utils/premiumAccess';
 import { supabase } from '@/integrations/supabase/client';
 
+// 開発環境でのみログを出力
+const debugLog = (...args: unknown[]) => {
+  if (import.meta.env.DEV) {
+    console.log(...args);
+  }
+};
+
 export interface SubscriptionState {
   isSubscribed: boolean;
   planType: PlanType | null;
@@ -78,7 +85,7 @@ export const useSubscription = (): SubscriptionState => {
       
       // Edge Functionから直接アクセス権限が取得できる場合はそれを優先使用
       if (response.hasMemberAccess !== undefined && response.hasLearningAccess !== undefined) {
-        console.log('Edge Functionから取得したアクセス権限を使用:', {
+        debugLog('Edge Functionから取得したアクセス権限を使用:', {
           hasMemberAccess: response.hasMemberAccess,
           hasLearningAccess: response.hasLearningAccess,
           planType: plan
@@ -87,7 +94,7 @@ export const useSubscription = (): SubscriptionState => {
         setLearningAccess(response.hasLearningAccess);
       } else {
         // フォールバック: ローカルで計算（Edge Functionの更新が完了していない場合）
-        console.log('フォールバック: ローカルでアクセス権限を計算:', { planType: plan, subscribed });
+        debugLog('フォールバック: ローカルでアクセス権限を計算:', { planType: plan, subscribed });
         const userPlan: UserPlanInfo = {
           planType: plan,
           isActive: subscribed,
@@ -115,7 +122,7 @@ export const useSubscription = (): SubscriptionState => {
   useEffect(() => {
     if (!user) return;
 
-    console.log('Realtime Subscriptionを設定:', { userId: user.id });
+    debugLog('Realtime Subscriptionを設定:', { userId: user.id });
 
     const channel = supabase
       .channel('user_subscriptions_changes')
@@ -127,17 +134,17 @@ export const useSubscription = (): SubscriptionState => {
           filter: `user_id=eq.${user.id}`
         },
         (payload) => {
-          console.log('サブスクリプション更新を検知:', payload);
+          debugLog('サブスクリプション更新を検知:', payload);
           // DB変更時に即座に状態を更新
           fetchSubscriptionStatus();
         }
       )
       .subscribe((status) => {
-        console.log('Realtime Subscription status:', status);
+        debugLog('Realtime Subscription status:', status);
       });
 
     return () => {
-      console.log('Realtime Subscriptionをクリーンアップ');
+      debugLog('Realtime Subscriptionをクリーンアップ');
       channel.unsubscribe();
     };
   }, [user]);

@@ -12,7 +12,7 @@ import PlanCard from '@/components/subscription/PlanCard';
 import PlanComparison from '@/components/subscription/PlanComparison';
 import SubscriptionHeader from '@/components/subscription/SubscriptionHeader';
 import { formatPlanDisplay } from '@/utils/planDisplay';
-import { PlanChangeConfirmModal } from '@/components/subscription/PlanChangeConfirmModal';
+import { PlanChangeConfirmModal, ModalState } from '@/components/subscription/PlanChangeConfirmModal';
 import { getPlanPrices, PlanPrices } from '@/services/pricing';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -26,6 +26,8 @@ const SubscriptionPage: React.FC = () => {
 
   // プラン変更確認モーダル用の状態
   const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>('confirm');
+  const [modalErrorMessage, setModalErrorMessage] = useState<string>('');
   const [selectedNewPlan, setSelectedNewPlan] = useState<{
     type: PlanType;
     duration: 1 | 3;
@@ -175,14 +177,14 @@ const SubscriptionPage: React.FC = () => {
 
   /**
    * プラン変更確認モーダルで「確定」ボタンが押されたときの処理
-   * Phase 5: update-subscription APIを使用（Checkoutは使わない）
-   * Phase 6-3: Realtime通知でWebhook完了を待つ
+   * モーダル内で処理中表示 → 成功時はサクセスページへ遷移
    */
   const handleConfirmPlanChange = async () => {
     if (!selectedNewPlan) return;
 
+    // モーダルを処理中状態に変更
+    setModalState('processing');
     setIsLoading(true);
-    setShowConfirmModal(false);
 
     try {
       console.log('プラン変更を確定します', {
@@ -192,7 +194,7 @@ const SubscriptionPage: React.FC = () => {
         newDuration: selectedNewPlan.duration
       });
 
-      // Phase 5: update-subscription APIでプラン変更
+      // update-subscription APIでプラン変更
       const { success, error } = await updateSubscription(
         selectedNewPlan.type,
         selectedNewPlan.duration
@@ -203,18 +205,6 @@ const SubscriptionPage: React.FC = () => {
       }
 
       if (success) {
-        toast({
-          title: "プラン変更を受け付けました",
-          description: "変更を処理中です。しばらくお待ちください...",
-        });
-
-        // ========================================
-        // Phase 6-3: Realtime通知でWebhook完了を待つ
-        // ========================================
-        // useSubscription hookがすでにRealtime subscriptionを設定済み
-        // user_subscriptionsテーブルが更新されると自動的にUIが更新される
-        // ここでは10秒のタイムアウト処理のみ実装
-
         if (!user) {
           console.error('❌ ユーザー情報が取得できません');
           throw new Error('ユーザー情報が取得できません');
@@ -242,49 +232,35 @@ const SubscriptionPage: React.FC = () => {
                 clearTimeout(timeoutId);
               }
 
-              // 成功メッセージ
-              toast({
-                title: "プラン変更が完了しました",
-                description: "新しいプランが適用されました。",
-              });
-
-              // ローディング終了
-              setIsLoading(false);
-              setSelectedNewPlan(null);
-
               // チャンネルをクリーンアップ
               changeDetectionChannel.unsubscribe();
+
+              // サクセスページへ遷移
+              navigate(`/subscription/updated?plan=${selectedNewPlan.type}&duration=${selectedNewPlan.duration}`);
             }
           )
           .subscribe();
 
-        // 30秒のタイムアウト設定（Stripeの処理に時間がかかる場合があるため）
-        // APIは既に成功しているので、タイムアウトは警告レベルを下げる
+        // 15秒のタイムアウト設定
+        // APIは成功しているので、タイムアウト時もサクセスページへ遷移
         timeoutId = setTimeout(() => {
           if (!updateDetected) {
-            console.log('ℹ️ プラン変更のRealtime検出タイムアウト（30秒経過）- APIは成功済み');
-
-            // API成功済みなので、成功メッセージで完了
-            toast({
-              title: "プラン変更が完了しました",
-              description: "新しいプランが適用されました。画面が更新されない場合は、ページを再読み込みしてください。",
-            });
-
-            setIsLoading(false);
-            setSelectedNewPlan(null);
+            console.log('ℹ️ プラン変更のRealtime検出タイムアウト（15秒経過）- APIは成功済み');
             changeDetectionChannel.unsubscribe();
+
+            // サクセスページへ遷移
+            navigate(`/subscription/updated?plan=${selectedNewPlan.type}`);
           }
-        }, 30000); // 30秒
+        }, 15000); // 15秒
       }
     } catch (error) {
       console.error('プラン変更エラー:', error);
-      toast({
-        title: "エラーが発生しました",
-        description: error instanceof Error ? error.message : "プラン変更に失敗しました。もう一度お試しください。",
-        variant: "destructive",
-      });
+      // モーダルをエラー状態に変更
+      setModalState('error');
+      setModalErrorMessage(
+        error instanceof Error ? error.message : 'プラン変更に失敗しました。もう一度お試しください。'
+      );
       setIsLoading(false);
-      setSelectedNewPlan(null);
     }
   };
 
@@ -294,6 +270,8 @@ const SubscriptionPage: React.FC = () => {
   const handleCancelPlanChange = () => {
     setShowConfirmModal(false);
     setSelectedNewPlan(null);
+    setModalState('confirm');
+    setModalErrorMessage('');
     setIsLoading(false);
   };
 
@@ -384,6 +362,8 @@ const SubscriptionPage: React.FC = () => {
           currentPeriodEnd={new Date(renewalDate)}
           onConfirm={handleConfirmPlanChange}
           onCancel={handleCancelPlanChange}
+          modalState={modalState}
+          errorMessage={modalErrorMessage}
         />
       )}
     </Layout>

@@ -2,6 +2,7 @@
  * プラン変更確認モーダル
  *
  * ユーザーがプラン変更時にプロレーション（差額）を確認できるモーダル
+ * 処理中・エラー状態の表示にも対応
  */
 
 import React from 'react';
@@ -11,10 +12,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { ArrowDown } from 'lucide-react';
+import { ArrowDown, Loader2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import {
@@ -27,6 +29,8 @@ import {
   type PlanDuration,
 } from '@/utils/subscriptionPlans';
 import { getPlanPrices, type PlanPrices } from '@/services/pricing';
+
+export type ModalState = 'confirm' | 'processing' | 'error';
 
 interface PlanChangeConfirmModalProps {
   /** 現在のプラン情報 */
@@ -45,21 +49,14 @@ interface PlanChangeConfirmModalProps {
   onConfirm: () => void;
   /** キャンセルボタンクリック時のコールバック */
   onCancel: () => void;
+  /** モーダルの状態 */
+  modalState?: ModalState;
+  /** エラーメッセージ */
+  errorMessage?: string;
 }
 
 /**
  * プラン変更確認モーダルコンポーネント
- *
- * @example
- * ```tsx
- * <PlanChangeConfirmModal
- *   currentPlan={{ type: 'standard', duration: 1 }}
- *   newPlan={{ type: 'feedback', duration: 1 }}
- *   currentPeriodEnd={new Date('2025-12-13')}
- *   onConfirm={handleConfirm}
- *   onCancel={handleCancel}
- * />
- * ```
  */
 export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
   currentPlan,
@@ -67,6 +64,8 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
   currentPeriodEnd,
   onConfirm,
   onCancel,
+  modalState = 'confirm',
+  errorMessage,
 }) => {
   // Stripe動的料金を取得
   const [planPrices, setPlanPrices] = React.useState<PlanPrices | null>(null);
@@ -111,11 +110,73 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
     currentPeriodEnd
   );
 
+  const newPlanDisplayName = `${getPlanDisplayName(newPlan.type)} ${newPlan.duration}ヶ月`;
+
+  // 処理中の表示
+  if (modalState === 'processing') {
+    return (
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogContent className="max-w-md" onPointerDownOutside={(e) => e.preventDefault()}>
+          <DialogHeader>
+            <DialogTitle className="text-center">プラン変更中</DialogTitle>
+            <DialogDescription className="sr-only">
+              プラン変更処理を実行中です
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center justify-center py-8 space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-lg text-center font-noto-sans-jp">
+              {newPlanDisplayName}プランへの<br />更新処理をしています
+            </p>
+            <p className="text-sm text-muted-foreground">
+              しばらくお待ちください...
+            </p>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // エラーの表示
+  if (modalState === 'error') {
+    return (
+      <Dialog open={true} onOpenChange={() => {}}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-red-600 flex items-center justify-center gap-2">
+              <AlertCircle className="h-5 w-5" />
+              エラーが発生しました
+            </DialogTitle>
+            <DialogDescription className="sr-only">
+              プラン変更中にエラーが発生しました
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-6">
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-sm text-red-800">
+                {errorMessage || 'プラン変更に失敗しました。もう一度お試しください。'}
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={onCancel} className="w-full">
+              閉じる
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  // 確認画面（デフォルト）
   return (
     <Dialog open={true} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>プラン変更の確認</DialogTitle>
+          <DialogDescription className="sr-only">
+            プラン変更の詳細を確認してください
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -150,7 +211,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
 
           {/* プロレーション（差額）表示 */}
           <div className="bg-blue-50 p-4 rounded-md">
-            <p className="text-sm font-semibold mb-3">📊 今回のお支払い</p>
+            <p className="text-sm font-semibold mb-3">今回のお支払い</p>
 
             {/* 残り期間の返金 */}
             <div className="flex justify-between text-sm mb-2">
@@ -203,7 +264,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
           {/* 注意事項 */}
           <div className="bg-yellow-50 p-3 rounded-md border border-yellow-200">
             <p className="text-xs text-gray-700">
-              ⚠️ プラン変更を確定すると、現在のプランはキャンセルされ、新しいプランに切り替わります。
+              プラン変更を確定すると、現在のプランはキャンセルされ、新しいプランに切り替わります。
             </p>
           </div>
         </div>

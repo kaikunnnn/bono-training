@@ -43,6 +43,7 @@ import SanityTest from "./pages/SanityTest";
 import MyPage from "./pages/MyPage";
 import Account from "./pages/Account";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import SubscriptionUpdated from "./pages/SubscriptionUpdated";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -102,6 +103,7 @@ const AppContent = () => {
 
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
         <Route path="/subscription/success" element={<PrivateRoute><SubscriptionSuccess /></PrivateRoute>} />
+        <Route path="/subscription/updated" element={<PrivateRoute><SubscriptionUpdated /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
         <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />

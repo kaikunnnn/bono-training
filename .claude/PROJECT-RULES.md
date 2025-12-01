@@ -279,6 +279,64 @@ npx supabase functions logs [function-name] --project-ref fryogvfhymnpiqwssmuu
 
 ## 🔧 環境管理ルール
 
+### ⚠️ 重要: Supabase MCPツールの注意点
+
+**警告**: Supabase MCPツール（`mcp__supabase__*`）は**本番DB**に接続しています。
+
+**ローカルDBを確認する場合は、以下のDocker経由コマンドを使用してください**:
+
+```bash
+# ローカルDBのテーブル確認
+/Applications/Docker.app/Contents/Resources/bin/docker exec supabase_db_fryogvfhymnpiqwssmuu psql -U postgres -d postgres -c "SELECT * FROM [table] WHERE environment = 'test' LIMIT 10;"
+
+# ローカルDBのスキーマ確認
+/Applications/Docker.app/Contents/Resources/bin/docker exec supabase_db_fryogvfhymnpiqwssmuu psql -U postgres -d postgres -c "\d [table]"
+```
+
+**使い分け**:
+- `mcp__supabase__execute_sql` → 本番DBを確認したい時
+- Docker psql → ローカルDBを確認したい時（テスト中はこちらを使う）
+
+---
+
+### 🧪 ローカルテスト開始前チェックリスト
+
+**ルール**: ローカルテストを開始する前に、以下を全て確認する
+
+```bash
+# 1. Supabase localが起動しているか
+npx supabase status
+# → 全てのサービスがrunningであること
+
+# 2. Edge Functionsが起動しているか
+lsof -i :54321 | grep -i functions
+# → プロセスが存在すること
+# もしなければ: npx supabase functions serve --env-file .env --no-verify-jwt
+
+# 3. Stripe CLIが動いているか
+ps aux | grep "stripe listen"
+# → プロセスが存在すること
+# もしなければ: ~/bin/stripe listen --forward-to http://127.0.0.1:54321/functions/v1/stripe-webhook
+
+# 4. フロントエンドがローカルを向いているか
+grep VITE_SUPABASE_URL .env.local
+# → http://127.0.0.1:54321 であること
+
+# 5. 開発サーバーが起動しているか
+lsof -i :8080
+# → プロセスが存在すること
+# もしなければ: npm run dev
+```
+
+**チェックリストまとめ**:
+- [ ] `npx supabase status` → 全サービスrunning
+- [ ] Edge Functions起動中（ポート54321）
+- [ ] stripe listen起動中
+- [ ] `.env.local`がローカルURL（127.0.0.1:54321）
+- [ ] `npm run dev`起動中（ポート8080）
+
+---
+
 ### 環境の明確化
 
 **ルール**: 常にどの環境で作業しているか明確にする
