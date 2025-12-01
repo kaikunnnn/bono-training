@@ -38,5 +38,9 @@ enable_confirmations = false
 
 # Stripe Webhook用の設定 - JWT検証を無効化
 # Stripeは Authorization ヘッダーを送信しないため、JWT検証を無効にする必要がある
+# これがないと401エラーが発生する（Webhook 401エラーの根本原因）
+[functions.stripe-webhook]
+verify_jwt = false
+
 [functions.stripe-webhook-test]
 verify_jwt = false

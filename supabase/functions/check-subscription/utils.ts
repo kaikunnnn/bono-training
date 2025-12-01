@@ -24,7 +24,12 @@ export function createSupabaseClients() {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  
+
+  // 🔍 DEBUG: 環境変数の実際の値を確認
+  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_URL: ${supabaseUrl}`);
+  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_ANON_KEY (first 20): ${supabaseAnonKey.substring(0, 20)}...`);
+  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_SERVICE_ROLE_KEY (first 20): ${supabaseServiceKey.substring(0, 20)}...`);
+
   return {
     supabaseClient: createClient(supabaseUrl, supabaseAnonKey),
     supabaseAdmin: createClient(supabaseUrl, supabaseServiceKey, {

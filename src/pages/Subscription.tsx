@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { createCheckoutSession } from '@/services/stripe';
+import { createCheckoutSession, updateSubscription } from '@/services/stripe';
 import { PlanType } from '@/utils/subscriptionPlans';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanCard from '@/components/subscription/PlanCard';
@@ -13,10 +14,12 @@ import SubscriptionHeader from '@/components/subscription/SubscriptionHeader';
 import { formatPlanDisplay } from '@/utils/planDisplay';
 import { PlanChangeConfirmModal } from '@/components/subscription/PlanChangeConfirmModal';
 import { getPlanPrices, PlanPrices } from '@/services/pricing';
+import { supabase } from '@/integrations/supabase/client';
 
 const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { isSubscribed, planType, duration: currentDuration, renewalDate } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1); // 期間選択の状態
@@ -172,6 +175,8 @@ const SubscriptionPage: React.FC = () => {
 
   /**
    * プラン変更確認モーダルで「確定」ボタンが押されたときの処理
+   * Phase 5: update-subscription APIを使用（Checkoutは使わない）
+   * Phase 6-3: Realtime通知でWebhook完了を待つ
    */
   const handleConfirmPlanChange = async () => {
     if (!selectedNewPlan) return;
@@ -187,10 +192,8 @@ const SubscriptionPage: React.FC = () => {
         newDuration: selectedNewPlan.duration
       });
 
-      // Option 3: Stripe Checkoutでプラン変更
-      const returnUrl = window.location.origin + '/subscription?updated=true';
-      const { url, error } = await createCheckoutSession(
-        returnUrl,
+      // Phase 5: update-subscription APIでプラン変更
+      const { success, error } = await updateSubscription(
         selectedNewPlan.type,
         selectedNewPlan.duration
       );
@@ -199,8 +202,78 @@ const SubscriptionPage: React.FC = () => {
         throw error;
       }
 
-      if (url) {
-        window.location.href = url;
+      if (success) {
+        toast({
+          title: "プラン変更を受け付けました",
+          description: "変更を処理中です。しばらくお待ちください...",
+        });
+
+        // ========================================
+        // Phase 6-3: Realtime通知でWebhook完了を待つ
+        // ========================================
+        // useSubscription hookがすでにRealtime subscriptionを設定済み
+        // user_subscriptionsテーブルが更新されると自動的にUIが更新される
+        // ここでは10秒のタイムアウト処理のみ実装
+
+        if (!user) {
+          console.error('❌ ユーザー情報が取得できません');
+          throw new Error('ユーザー情報が取得できません');
+        }
+
+        let updateDetected = false;
+        let timeoutId: NodeJS.Timeout;
+
+        // プラン変更を検知するためのチャンネルを個別に設定
+        const changeDetectionChannel = supabase
+          .channel('plan_change_detection')
+          .on('postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'user_subscriptions',
+              filter: `user_id=eq.${user.id}`
+            },
+            (payload) => {
+              console.log('✅ プラン変更をRealtime検知:', payload);
+              updateDetected = true;
+
+              // タイムアウトをクリア
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+              }
+
+              // 成功メッセージ
+              toast({
+                title: "プラン変更が完了しました",
+                description: "新しいプランが適用されました。",
+              });
+
+              // ローディング終了
+              setIsLoading(false);
+              setSelectedNewPlan(null);
+
+              // チャンネルをクリーンアップ
+              changeDetectionChannel.unsubscribe();
+            }
+          )
+          .subscribe();
+
+        // 10秒のタイムアウト設定
+        timeoutId = setTimeout(() => {
+          if (!updateDetected) {
+            console.warn('⚠️ プラン変更のタイムアウト（10秒経過）');
+
+            toast({
+              title: "処理に時間がかかっています",
+              description: "プラン変更の処理が完了していない可能性があります。ページを更新してご確認ください。",
+              variant: "destructive",
+            });
+
+            setIsLoading(false);
+            setSelectedNewPlan(null);
+            changeDetectionChannel.unsubscribe();
+          }
+        }, 10000); // 10秒
       }
     } catch (error) {
       console.error('プラン変更エラー:', error);
@@ -209,7 +282,6 @@ const SubscriptionPage: React.FC = () => {
         description: error instanceof Error ? error.message : "プラン変更に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
       setSelectedNewPlan(null);
     }

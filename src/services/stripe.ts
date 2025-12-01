@@ -11,7 +11,7 @@ import { retrySupabaseFunction } from "@/utils/retry";
  */
 export const createCheckoutSession = async (
   returnUrl: string,
-  planType: PlanType = "community",
+  planType: PlanType = "standard",
   duration: 1 | 3 = 1,
   isTest?: boolean
 ): Promise<{ url: string | null; error: Error | null }> => {

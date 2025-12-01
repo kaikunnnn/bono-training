@@ -42,11 +42,14 @@ const TrainingPlan: React.FC = () => {
   
   const handleSubscribe = async () => {
     setIsLoading(true);
-    
+
     try {
+      // TODO: このページは「コミュニティプラン」を販売していますが、
+      // PlanTypeには'community'が存在しません（'standard'と'feedback'のみ）。
+      // 一時的に'standard'を使用していますが、このページの扱いを再検討する必要があります。
       // プラン情報をセッションに保存
       const planSessionData = {
-        planType: 'community' as const,
+        planType: 'standard' as const,
         duration: selectedDuration,
         price: currentPlan?.price || ''
       };
@@ -68,13 +71,14 @@ const TrainingPlan: React.FC = () => {
       }
 
       // ログイン済みユーザーは既存の決済フローを実行
-      console.log(`コミュニティプラン ${selectedDuration}ヶ月のチェックアウト開始（ログイン済み）`);
-      
+      console.log(`スタンダードプラン ${selectedDuration}ヶ月のチェックアウト開始（ログイン済み）`);
+
       const returnUrl = window.location.origin + '/profile';
-      
+
+      // TODO: 'community'プランは存在しないため、'standard'を使用
       const { url, error } = await createCheckoutSession(
         returnUrl,
-        'community',
+        'standard',
         selectedDuration
       );
       
@@ -145,13 +149,13 @@ const TrainingPlan: React.FC = () => {
                     </div>
                   </div>
                   
-                  <Button 
+                  <Button
                     className="w-full"
-                    disabled={isLoading || (isSubscribed && planType === 'community' && hasMemberAccess)}
+                    disabled={isLoading || (isSubscribed && planType === 'standard' && hasMemberAccess)}
                     onClick={handleSubscribe}
                   >
-                    {isLoading ? '処理中...' : 
-                     (isSubscribed && planType === 'community' && hasMemberAccess) ? '現在のプラン' : 
+                    {isLoading ? '処理中...' :
+                     (isSubscribed && planType === 'standard' && hasMemberAccess) ? '現在のプラン' :
                      user ? '選択する' : 'アカウントを作成して始める'}
                   </Button>
                 </CardContent>
@@ -190,13 +194,13 @@ const TrainingPlan: React.FC = () => {
                     </div>
                   </div>
                   
-                  <Button 
+                  <Button
                     className="w-full bg-amber-500 hover:bg-amber-600"
-                    disabled={isLoading || (isSubscribed && planType === 'community' && hasMemberAccess)}
+                    disabled={isLoading || (isSubscribed && planType === 'standard' && hasMemberAccess)}
                     onClick={handleSubscribe}
                   >
-                    {isLoading ? '処理中...' : 
-                     (isSubscribed && planType === 'community' && hasMemberAccess) ? '現在のプラン' : 
+                    {isLoading ? '処理中...' :
+                     (isSubscribed && planType === 'standard' && hasMemberAccess) ? '現在のプラン' :
                      user ? '選択する' : 'アカウントを作成して始める'}
                   </Button>
                 </CardContent>

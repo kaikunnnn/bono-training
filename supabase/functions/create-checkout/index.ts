@@ -33,7 +33,7 @@ serve(async (req) => {
     // リクエストボディを解析
     const {
       returnUrl,
-      planType = "community",
+      planType = "standard",
       duration = 1,
     } = await req.json();
 
@@ -95,22 +95,26 @@ serve(async (req) => {
       throw new Error("サブスクリプション情報の取得に失敗しました");
     }
 
-    // アクティブなサブスクリプションが複数ある場合は警告
+    // Phase 5: 既存サブスクリプションチェック（新規登録専用）
+    // 既存のアクティブサブスクリプションがある場合はエラーを返す
+    // プラン変更は update-subscription API を使用すること
     const activeSubscriptions = existingSubList || [];
     if (activeSubscriptions.length > 0) {
       logDebug(
-        `${activeSubscriptions.length}件のアクティブサブスクリプションを検出`
+        `${activeSubscriptions.length}件のアクティブサブスクリプションを検出 - エラーを返します`
       );
 
-      if (activeSubscriptions.length > 1) {
-        console.warn(
-          `警告: ユーザー ${
-            user.id
-          } に複数のアクティブサブスクリプション: ${activeSubscriptions
-            .map((s) => s.stripe_subscription_id)
-            .join(", ")}`
-        );
-      }
+      return new Response(
+        JSON.stringify({
+          error: "既存のアクティブなサブスクリプションが存在します。",
+          details: "プラン変更は /account ページの「サブスクリプションを管理」から行ってください。",
+          existing_subscriptions: activeSubscriptions.map((s) => s.stripe_subscription_id),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     if (customerError || !customerData) {

@@ -9,7 +9,7 @@ BEGIN
 END $$;
 
 -- Enable RLS on storage.objects if not already enabled
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
+-- ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY; -- Commented out: RLS is already enabled by default
 
 -- Drop existing policies if they exist
 DROP POLICY IF EXISTS "Allow authenticated users to read training content" ON storage.objects;

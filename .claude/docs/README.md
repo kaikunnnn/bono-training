@@ -1,6 +1,6 @@
 # Bono Training - Documentation
 
-**最終更新**: 2025-11-24
+**最終更新**: 2025-11-30
 
 このディレクトリには、すべてのプロジェクトドキュメントが**目的別フォルダ構成**で整理されています。
 
@@ -82,6 +82,23 @@ MCP サーバーの設定と使用方法に関するドキュメント
 
 ---
 
+### 🔍 **トラブルシューティング**
+
+**📁 troubleshooting/** フォルダ
+
+- **[environment-variables.md](./troubleshooting/environment-variables.md)** - 環境変数トラブルシューティングガイド
+  - 環境変数の優先順位
+  - ハードコードされた値の検出方法
+  - ローカル/本番環境の切り替え手順
+  - トラブルシューティングフローチャート
+
+**よくある問題**:
+- ローカル環境のはずが本番に接続している → [environment-variables.md](./troubleshooting/environment-variables.md)
+- `.env.local`を変更してもViteが読み込まない → [environment-variables.md](./troubleshooting/environment-variables.md)
+- グローバル環境変数の影響を受けている → [environment-variables.md](./troubleshooting/environment-variables.md)
+
+---
+
 ### 🗂️ **アーカイブ**
 
 **📁 archive/** フォルダ
@@ -125,4 +142,4 @@ MCP サーバーの設定と使用方法に関するドキュメント
 
 ---
 
-**最終更新日**: 2025-11-24
+**最終更新日**: 2025-11-30
