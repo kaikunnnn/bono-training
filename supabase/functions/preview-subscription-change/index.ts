@@ -12,6 +12,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
 serve(async (req) => {
   // CORSプリフライトリクエストの処理
   if (req.method === "OPTIONS") {
@@ -82,8 +85,12 @@ serve(async (req) => {
       );
     }
 
-    // Stripeクライアントの初期化（Flexible Billing Mode対応）
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    // Stripeクライアントの初期化（環境に応じて切り替え）
+    const stripeSecretKey = ENVIRONMENT === "test"
+      ? Deno.env.get("STRIPE_TEST_SECRET_KEY")
+      : Deno.env.get("STRIPE_LIVE_SECRET_KEY");
+
+    const stripe = new Stripe(stripeSecretKey || "", {
       apiVersion: "2025-06-30.basil" as any,
       httpClient: Stripe.createFetchHttpClient(),
     });

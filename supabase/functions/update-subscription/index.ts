@@ -55,7 +55,7 @@ serve(async (req) => {
     // Stripeクライアントの初期化（環境に応じて切り替え）
     const stripeSecretKey = environment === "test"
       ? Deno.env.get("STRIPE_TEST_SECRET_KEY")
-      : Deno.env.get("STRIPE_SECRET_KEY");
+      : Deno.env.get("STRIPE_LIVE_SECRET_KEY");
 
     if (!stripeSecretKey) {
       throw new Error(`Stripe秘密鍵が設定されていません（環境: ${environment}）`);
