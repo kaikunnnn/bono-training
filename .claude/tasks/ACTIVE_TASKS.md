@@ -1,6 +1,6 @@
 # アクティブタスク一覧
 
-**最終更新**: 2025-11-26
+**最終更新**: 2025-12-01
 **目的**: 現在進行中のタスクを一元管理
 
 ---
@@ -13,37 +13,40 @@
 
 ## 🚨 Critical Issues (優先度: 最高)
 
-### 1. サブスクリプション: plan_type 判定問題
-
-**ステータス**: 🔍 調査中
-**優先度**: 🔴 CRITICAL
-**担当**: AI開発チーム
-**詳細ドキュメント**: [.claude/docs/subscription/issues/plan-type-detection-issue.md](../docs/subscription/issues/plan-type-detection-issue.md)
-
-**問題概要**:
-- Feedbackプラン（4980円）が `plan_type: "standard"` として保存される
-- 本来は `plan_type: "growth"` であるべき
-- プレミアムコンテンツへのアクセスに影響
-
-**次のアクション**:
-- [ ] Webhook処理のコード調査（`stripe-webhook-test/index.ts`）
-- [ ] Webhookログの確認（テストユーザーのサブスクリプション作成時）
-- [ ] 修正実装
-- [ ] 新規ユーザーでのテスト
-- [ ] 既存ユーザーの一括修正スクリプト作成・実行
-- [ ] Test 4 再実施（Feedbackプランでのキャンセル後アクセス確認）
-
-**ブロック中のタスク**:
-- サブスクリプション Test 4 完全再実施
+**現在なし** - サブスクリプション再構築プロジェクト完了
 
 ---
 
 ## ⚠️ High Priority Tasks
 
-### 2. データマイグレーション: 失敗ユーザー調査
+### 1. サブスクリプション: UX改善（ISSUE-P3-005, 006）
 
 **ステータス**: 📋 TODO
 **優先度**: ⚠️ HIGH
+**担当**: AI開発チーム
+**詳細ドキュメント**: [MASTER-PLAN.md](../docs/subscription/redesign/MASTER-PLAN.md)
+
+**問題概要**:
+
+1. **ISSUE-P3-005: /account反映遅延**
+   - プラン変更後、/accountに遷移しても古いデータが表示される
+   - リロードで反映される
+   - 原因: コンテキストのキャッシュが更新されていない
+
+2. **ISSUE-P3-006: モーダル15秒ローディング**
+   - プラン変更API成功後、モーダルのローディングが15秒続く
+   - 原因: Realtime検出タイムアウト（15秒）を待っている
+
+**次のアクション**:
+- [ ] プラン変更成功時にコンテキストを強制リフレッシュ
+- [ ] API成功後すぐに遷移する（Realtime検出を待たない）
+
+---
+
+### 2. データマイグレーション: 失敗ユーザー調査
+
+**ステータス**: 📋 TODO
+**優先度**: 🟡 MEDIUM
 **担当**: AI開発チーム
 **作成日**: 2025-11-26
 
@@ -52,110 +55,76 @@
 
 1. **既存ユーザーエラー (87件)**: `A user with this email address has already been registered`
    - 実質的には問題なし
-   - スクリプトの改善提案が必要
 
 2. **Database error (6件)**: `Database error creating new user`
    - 🔴 **要調査**: データベース整合性の確認が必要
-   - 対象ユーザー:
-     - `373natsuki@gmail.com` (1度成功後にエラー)
-     - `kyasya00000@gmail.com`
-     - `kyasya000@gmail.com` (2回)
-     - `ysdtkm@icloud.com`
-     - `budouoic@gmail.com`
-     - `amxxkey@gmail.com`
 
 3. **HTML レスポンス (1件)**: `Unexpected token '<', "<html>..."`
-   - `denicro1104@gmail.com`
    - 手動再試行が必要
 
 4. **空のエラー (1件)**: `{}`
-   - `pioko.apple@gmail.com`
    - 手動再試行が必要
-
-**次のアクション**:
-- [ ] Database error の6名のユーザーをデータベースで確認
-- [ ] `373natsuki@gmail.com` の重複登録を調査
-- [ ] `denicro1104@gmail.com` を手動で再試行
-- [ ] `pioko.apple@gmail.com` を手動で再試行
-- [ ] 既存ユーザーチェックのスクリプト改善提案を作成
-- [ ] 調査結果をドキュメント化
-
-**調査用SQLクエリ**:
-```sql
--- Database error が発生したユーザーの確認
-SELECT id, email, created_at, updated_at
-FROM auth.users
-WHERE email IN (
-  '373natsuki@gmail.com',
-  'kyasya00000@gmail.com',
-  'kyasya000@gmail.com',
-  'ysdtkm@icloud.com',
-  'budouoic@gmail.com',
-  'amxxkey@gmail.com'
-)
-ORDER BY email;
-```
 
 **関連ファイル**:
 - エラーログ: `migration-errors-auth.json`
-- マイグレーションスクリプト: （パスを要確認）
 
 ---
 
 ## ✅ 完了済みタスク（直近7日間）
 
+### サブスクリプション再構築プロジェクト
+
+**完了日**: 2025-12-01
+**詳細**: [MASTER-PLAN.md](../docs/subscription/redesign/MASTER-PLAN.md)
+
+**実装内容**:
+- ✅ Phase 0: 緊急現状精査 - 全ての問題を特定
+- ✅ Phase 1: 実際の動作テスト - 新規登録・プラン変更成功
+- ✅ Phase 1.5: 緊急修正 - 環境変数問題解決
+- ✅ Phase 2: 問題の修正 - タイムアウト改善・UX改善
+- ✅ Phase 3: 全体動作確認 - 全フロー正常動作確認
+- ✅ Phase 4: ドキュメント更新
+
+**テスト結果**:
+- ✅ 新規登録（Standard/Feedback）
+- ✅ プラン変更（アップグレード/ダウングレード/期間変更）
+- ✅ キャンセル（期間終了まで利用可能）
+
+**修正した問題**:
+- ISSUE-P3-001: canceled_atカラム追加
+- ISSUE-P3-004: 期間変更「同じプラン」判定修正
+
+**残課題**:
+- ISSUE-P3-005, 006（上記参照）
+
+---
+
 ### サブスクリプション: キャンセル後アクセス機能
 
 **完了日**: 2025-11-26
-**詳細**: [.claude/docs/subscription/issues/cancelled-subscription-access-issue.md](../docs/subscription/issues/cancelled-subscription-access-issue.md)
+**詳細**: [cancelled-subscription-access-issue.md](../docs/subscription/issues/cancelled-subscription-access-issue.md)
 
 **実装内容**:
 - ✅ `calculateAccessPermissions` 関数を修正
 - ✅ `cancel_at_period_end: true` でも `current_period_end` までアクセス可能に変更
 - ✅ check-subscription Edge Function をデプロイ済み
 
-**残課題**:
-- plan_type判定問題の解決待ち（タスク#1）
-
 ---
 
 ## 📅 Backlog（優先度順）
 
-### サブスクリプション: Test 1-5 回帰テスト
-
-**優先度**: 🟡 MEDIUM
-**ブロック元**: タスク#1（plan_type判定問題）
-
-**次のアクション**:
-- plan_type問題解決後に全テスト再実施
-
----
-
-### サブスクリプション: ドキュメント最終更新
-
-**優先度**: 🟢 LOW
-**ブロック元**: タスク#1（plan_type判定問題）
-
-**次のアクション**:
-- system-specification.md にキャンセル後アクセス仕様を追加
-- user-flow-test.md の Test 4 結果を最終更新
+**現在なし**
 
 ---
 
 ## 🎯 今日やるべきこと
 
 **優先順位**:
-1. 🔴 **サブスクリプション: plan_type 判定問題**（タスク#1）
-   - Webhook処理の調査から開始
-2. ⚠️ **データマイグレーション: 失敗ユーザー調査**（タスク#2）
+1. ⚠️ **サブスクリプション: UX改善**（タスク#1）
+   - /account反映遅延の修正
+   - モーダルローディング改善
+2. 🟡 **データマイグレーション: 失敗ユーザー調査**（タスク#2）
    - Database error 6名の確認
-
-**判断基準**:
-- plan_type問題が解決しないとサブスクリプションの完全テストができない
-- データマイグレーション問題は並行作業可能
-
-**推奨アプローチ**:
-- plan_type問題の調査を進めつつ、待ち時間にマイグレーション問題を調査
 
 ---
 
@@ -182,5 +151,6 @@ ORDER BY email;
 ---
 
 **作成日**: 2025-11-26
+**最終更新**: 2025-12-01
 **管理者**: AI開発チーム
 **目的**: 「今やるべきタスクは？」という質問に即答できる仕組み
