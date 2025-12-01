@@ -258,22 +258,23 @@ const SubscriptionPage: React.FC = () => {
           )
           .subscribe();
 
-        // 10秒のタイムアウト設定
+        // 30秒のタイムアウト設定（Stripeの処理に時間がかかる場合があるため）
+        // APIは既に成功しているので、タイムアウトは警告レベルを下げる
         timeoutId = setTimeout(() => {
           if (!updateDetected) {
-            console.warn('⚠️ プラン変更のタイムアウト（10秒経過）');
+            console.log('ℹ️ プラン変更のRealtime検出タイムアウト（30秒経過）- APIは成功済み');
 
+            // API成功済みなので、成功メッセージで完了
             toast({
-              title: "処理に時間がかかっています",
-              description: "プラン変更の処理が完了していない可能性があります。ページを更新してご確認ください。",
-              variant: "destructive",
+              title: "プラン変更が完了しました",
+              description: "新しいプランが適用されました。画面が更新されない場合は、ページを再読み込みしてください。",
             });
 
             setIsLoading(false);
             setSelectedNewPlan(null);
             changeDetectionChannel.unsubscribe();
           }
-        }, 10000); // 10秒
+        }, 30000); // 30秒
       }
     } catch (error) {
       console.error('プラン変更エラー:', error);
