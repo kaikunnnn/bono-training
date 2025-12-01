@@ -394,17 +394,31 @@ Phase 3テスト中に発見された問題への対策として、以下を実�
 - DB保存成功: plan_type=standard, duration=1, is_active=true, environment=test ✅
 - フロントエンド反映: subscribed=true, planType='standard', hasMemberAccess=true ✅
 
-#### Step 2: プラン変更テスト 🔄 実施中
+#### Step 2: プラン変更テスト ✅ 完了
 | テスト | 内容 | ステータス | 備考 |
 |-------|------|-----------|------|
-| 3-2-2 | ダウングレード（Feedback → Standard） | 🔄 実施中 | takumi.kaiで実施 |
-| 3-2-3 | 期間変更（1M → 3M） | ⏳ 予定 | |
-| 3-2-4 | 期間変更（3M → 1M） | ⏳ 予定 | |
+| 3-2-1 | アップグレード（Standard → Feedback） | ✅ 成功 | kyasya00で実施 |
+| 3-2-3 | 期間変更（1M → 3M） | ✅ 成功 | kyasya00 feedback 1M→3M |
+| 3-2-4 | 期間変更（3M → 1M） | ✅ 成功 | kyasya00 feedback 3M→1M |
 
-#### Step 3: キャンセルテスト
+**結果**:
+- プラン変更API成功 ✅
+- Stripe反映 ✅
+- DB反映 ✅
+- 日割り計算正常動作 ✅
+- 発見した問題: ISSUE-P3-004〜006
+
+#### Step 3: キャンセルテスト ✅ 完了
 | テスト | 内容 | ステータス | 備考 |
 |-------|------|-----------|------|
-| 3-3-2 | キャンセル→期間終了まで利用可能確認 | ⏳ 予定 | |
+| 3-3-2 | キャンセル→期間終了まで利用可能確認 | ✅ 成功 | kyasya00で実施 |
+
+**結果**:
+- Stripeカスタマーポータルでキャンセル成功 ✅
+- DB: is_active=true, cancel_at_period_end=true ✅
+- 期間終了日まで利用可能（hasMemberAccess=true） ✅
+- /accountに「キャンセル済み」「利用期限」表示 ✅
+- レッスンコンテンツにアクセス可能（鍵なし） ✅
 
 ### 既に完了済みのテスト（Phase 1/2で実施）
 
@@ -476,6 +490,30 @@ Phase 3テスト中に発見された問題への対策として、以下を実�
   # ローカルDB確認（正しい方法）
   /Applications/Docker.app/Contents/Resources/bin/docker exec supabase_db_fryogvfhymnpiqwssmuu psql -U postgres -d postgres -c "SELECT * FROM [table] LIMIT 10;"
   ```
+
+#### ISSUE-P3-004: 期間変更が「同じプラン」と判定される 🟡
+- **発見日**: 2025-12-01
+- **ステータス**: ✅ 修正済み
+- **症状**: Feedback 1M → Feedback 3M への変更時「既に同じプランです」と返される
+- **原因**: `update-subscription`のスキップ判定がplan_typeのみで、durationを考慮していなかった
+- **修正**: plan_typeとduration両方で判定するように変更 + DB更新時にdurationも保存
+
+#### ISSUE-P3-005: /account反映遅延 🟡
+- **発見日**: 2025-12-01
+- **ステータス**: ⏳ 未修正（Phase 3テスト後に対応）
+- **優先度**: Medium
+- **症状**: プラン変更後、/accountに遷移しても古いデータが表示される
+- **原因**: /accountページがキャッシュされたコンテキストからデータを取得
+- **回避策**: ブラウザをリロードすると反映される
+- **推奨修正**: プラン変更成功ページ遷移時にコンテキストを強制リフレッシュ
+
+#### ISSUE-P3-006: モーダルローディングが15秒長い 🟡
+- **発見日**: 2025-12-01
+- **ステータス**: ⏳ 未修正（Phase 3テスト後に対応）
+- **優先度**: Medium
+- **症状**: プラン変更API成功後、モーダルのローディングが15秒続く
+- **原因**: Realtime検出タイムアウト（15秒）を待っている
+- **推奨修正**: API成功後すぐに遷移する（Realtime検出は補助的に使用）
 
 ### 再発防止策（2025-12-01実施済み）
 
