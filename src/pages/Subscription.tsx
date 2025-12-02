@@ -211,7 +211,7 @@ const SubscriptionPage: React.FC = () => {
         }
 
         let updateDetected = false;
-        let timeoutId: NodeJS.Timeout;
+        let timeoutId: NodeJS.Timeout | undefined = undefined;
 
         // プラン変更を検知するためのチャンネルを個別に設定
         const changeDetectionChannel = supabase

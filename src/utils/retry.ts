@@ -1,4 +1,14 @@
 /**
+ * エラーレスポンスの型定義
+ */
+interface ErrorWithResponse {
+  response?: {
+    status?: number;
+  };
+  message?: string;
+}
+
+/**
  * リトライ処理のオプション設定
  */
 export interface RetryOptions {
@@ -9,14 +19,26 @@ export interface RetryOptions {
   /** 最大遅延時間（ミリ秒、デフォルト: 10000） */
   maxDelay?: number;
   /** リトライするかどうかを判定する関数 */
-  shouldRetry?: (error: any) => boolean;
+  shouldRetry?: (error: unknown) => boolean;
+}
+
+/**
+ * エラーがErrorWithResponse型かどうかを判定するタイプガード
+ */
+function isErrorWithResponse(error: unknown): error is ErrorWithResponse {
+  return typeof error === 'object' && error !== null;
 }
 
 /**
  * デフォルトのリトライ判定関数
  * ネットワークエラーまたは5xxエラー、429エラーの場合のみリトライ
  */
-function defaultShouldRetry(error: any): boolean {
+function defaultShouldRetry(error: unknown): boolean {
+  if (!isErrorWithResponse(error)) {
+    console.log('不明なエラーのためリトライします');
+    return true;
+  }
+
   // ネットワークエラー（response がない場合）
   if (!error.response) {
     console.log('ネットワークエラーのためリトライします');
@@ -26,7 +48,7 @@ function defaultShouldRetry(error: any): boolean {
   const status = error.response?.status;
 
   // 5xx系エラー（サーバーエラー）
-  if (status >= 500 && status < 600) {
+  if (status !== undefined && status >= 500 && status < 600) {
     console.log(`サーバーエラー (${status}) のためリトライします`);
     return true;
   }
@@ -71,7 +93,7 @@ export async function retryWithBackoff<T>(
     shouldRetry = defaultShouldRetry
   } = options;
 
-  let lastError: any;
+  let lastError: unknown;
 
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
@@ -114,14 +136,22 @@ export async function retryWithBackoff<T>(
 }
 
 /**
+ * Supabase Edge Functionエラーの型
+ */
+interface SupabaseFunctionError {
+  message?: string;
+  status?: number;
+}
+
+/**
  * Supabase Edge Function呼び出し専用のリトライラッパー
  *
  * @param fn Supabase functions.invoke を含む関数
  * @returns 関数の実行結果
  */
 export async function retrySupabaseFunction<T>(
-  fn: () => Promise<{ data: T | null; error: any }>
-): Promise<{ data: T | null; error: any }> {
+  fn: () => Promise<{ data: T | null; error: SupabaseFunctionError | null }>
+): Promise<{ data: T | null; error: SupabaseFunctionError | null }> {
   return retryWithBackoff(
     async () => {
       const result = await fn();
@@ -137,9 +167,11 @@ export async function retrySupabaseFunction<T>(
         });
 
         // エラーをthrowしてリトライ対象にする
-        const error: any = new Error(result.error.message || 'Supabase function error');
-        error.response = { status: result.error.status || 500 };
-        throw error;
+        const retryError: ErrorWithResponse & Error = Object.assign(
+          new Error(result.error.message || 'Supabase function error'),
+          { response: { status: result.error.status || 500 } }
+        );
+        throw retryError;
       }
 
       return result;
