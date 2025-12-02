@@ -7,6 +7,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
 // デバッグログ関数
 const logDebug = (message: string, details?: any) => {
   console.log(`[UPDATE-SUBSCRIPTION] ${message}${details ? ` ${JSON.stringify(details)}` : ''}`);
@@ -20,9 +23,9 @@ serve(async (req) => {
 
   try {
     // リクエストボディを解析
-    const { planType, duration = 1, useTestPrice = false } = await req.json();
+    const { planType, duration = 1 } = await req.json();
 
-    const environment = useTestPrice ? "test" : "live";
+    const environment = ENVIRONMENT;
     logDebug("プラン変更リクエスト受信", { planType, duration, environment });
 
     if (!planType) {
@@ -52,7 +55,7 @@ serve(async (req) => {
     // Stripeクライアントの初期化（環境に応じて切り替え）
     const stripeSecretKey = environment === "test"
       ? Deno.env.get("STRIPE_TEST_SECRET_KEY")
-      : Deno.env.get("STRIPE_SECRET_KEY");
+      : Deno.env.get("STRIPE_LIVE_SECRET_KEY");
 
     if (!stripeSecretKey) {
       throw new Error(`Stripe秘密鍵が設定されていません（環境: ${environment}）`);
@@ -67,7 +70,7 @@ serve(async (req) => {
     // ユーザーの現在のサブスクリプション情報を取得（環境でフィルタ）
     const { data: subscriptionData, error: subError } = await supabaseClient
       .from("user_subscriptions")
-      .select("stripe_subscription_id, stripe_customer_id, plan_type")
+      .select("stripe_subscription_id, stripe_customer_id, plan_type, duration")
       .eq("user_id", user.id)
       .eq("is_active", true)
       .eq("environment", environment)
@@ -77,15 +80,15 @@ serve(async (req) => {
       throw new Error("サブスクリプション情報が見つかりません");
     }
 
-    const { stripe_subscription_id, stripe_customer_id, plan_type: currentPlan } = subscriptionData;
+    const { stripe_subscription_id, stripe_customer_id, plan_type: currentPlan, duration: currentDuration } = subscriptionData;
 
     if (!stripe_subscription_id) {
       throw new Error("Stripeサブスクリプションが見つかりません");
     }
 
-    // 同じプランへの変更はスキップ
-    if (currentPlan === planType) {
-      logDebug("同じプランへの変更のためスキップ");
+    // 同じプランかつ同じ期間への変更はスキップ
+    if (currentPlan === planType && currentDuration === duration) {
+      logDebug("同じプラン・期間への変更のためスキップ", { currentPlan, planType, currentDuration, duration });
       return new Response(
         JSON.stringify({
           success: true,
@@ -168,6 +171,7 @@ serve(async (req) => {
       .from("user_subscriptions")
       .update({
         plan_type: planType,
+        duration: duration,
         updated_at: new Date().toISOString()
       })
       .eq("user_id", user.id);

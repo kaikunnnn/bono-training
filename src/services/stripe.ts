@@ -11,7 +11,7 @@ import { retrySupabaseFunction } from "@/utils/retry";
  */
 export const createCheckoutSession = async (
   returnUrl: string,
-  planType: PlanType = "community",
+  planType: PlanType = "standard",
   duration: 1 | 3 = 1,
   isTest?: boolean
 ): Promise<{ url: string | null; error: Error | null }> => {
@@ -24,16 +24,8 @@ export const createCheckoutSession = async (
       throw new Error("認証されていません。ログインしてください。");
     }
 
-    const useTestPrice = isTest || import.meta.env.MODE !== "production";
     console.log(
-      `Checkout開始: プラン=${planType}, 期間=${duration}ヶ月, 環境=${
-        useTestPrice ? "テスト" : "本番"
-      }`
-    );
-    console.log(
-      `🔍 デバッグ: import.meta.env.MODE = ${
-        import.meta.env.MODE
-      }, useTestPrice = ${useTestPrice}`
+      `Checkout開始: プラン=${planType}, 期間=${duration}ヶ月`
     );
 
     // リトライ付きでSupabase Edge Functionを呼び出してCheckoutセッションを作成
@@ -42,7 +34,6 @@ export const createCheckoutSession = async (
         returnUrl,
         planType,
         duration,
-        useTestPrice,
       },
     });
 
@@ -318,7 +309,6 @@ export const getCustomerPortalUrl = async (
       supabase.functions.invoke("create-customer-portal", {
         body: {
           returnUrl: returnUrl || defaultReturnUrl,
-          useTestPrice: true, // テスト環境を使用
           planType,  // Deep Link用: 変更先のプランタイプ
           duration   // Deep Link用: 変更先のプラン期間
         },
@@ -362,11 +352,8 @@ export const updateSubscription = async (
       throw new Error("認証されていません。ログインしてください。");
     }
 
-    const useTestPrice = isTest || import.meta.env.MODE !== "production";
     console.log(
-      `プラン変更開始: プラン=${planType}, 期間=${duration}ヶ月, 環境=${
-        useTestPrice ? "テスト" : "本番"
-      }`
+      `プラン変更開始: プラン=${planType}, 期間=${duration}ヶ月`
     );
 
     // リトライ付きでSupabase Edge Functionを呼び出してサブスクリプションを更新
@@ -375,7 +362,6 @@ export const updateSubscription = async (
         body: {
           planType,
           duration,
-          useTestPrice,
         },
       })
     );

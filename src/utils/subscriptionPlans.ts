@@ -149,3 +149,53 @@ export function isValidPlanType(planType: string | null | undefined): planType i
   if (!planType) return false;
   return ['standard', 'feedback'].includes(planType);
 }
+
+/**
+ * プランの月額料金を取得する
+ *
+ * @param planType - プランタイプ
+ * @param duration - 契約期間（1ヶ月 or 3ヶ月）
+ * @returns 月額料金（円）
+ *
+ * @example
+ * ```typescript
+ * getPlanMonthlyPrice('standard', 1); // 4000
+ * getPlanMonthlyPrice('feedback', 3); // 1280
+ * ```
+ */
+export function getPlanMonthlyPrice(
+  planType: PlanType,
+  duration: PlanDuration
+): number {
+  const plan = AVAILABLE_PLANS.find(
+    (p) => p.type === planType && p.duration === duration
+  );
+
+  if (!plan) {
+    console.error('プランが見つかりません:', { planType, duration });
+    return 0;
+  }
+
+  return plan.pricePerMonth;
+}
+
+/**
+ * プラン名を取得する
+ *
+ * @param planType - プランタイプ
+ * @returns プラン表示名
+ *
+ * @example
+ * ```typescript
+ * getPlanDisplayName('standard'); // 'スタンダード'
+ * getPlanDisplayName('feedback'); // 'フィードバック'
+ * ```
+ */
+export function getPlanDisplayName(planType: PlanType): string {
+  const planNames: Record<PlanType, string> = {
+    standard: 'スタンダード',
+    feedback: 'フィードバック',
+  };
+
+  return planNames[planType] || planType;
+}

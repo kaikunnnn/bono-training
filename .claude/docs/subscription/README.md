@@ -1,349 +1,164 @@
-# サブスクリプションシステム - ドキュメント索引
+# サブスクリプション機能
 
-**最終更新**: 2025-11-24
-**システムステータス**: ✅ 本番稼働可能（Deep Link & Webhook & プレミアムコンテンツ完全対応）
+**このフォルダには、サブスクリプション機能に関するすべての情報があります。**
 
----
-
-## 📚 ドキュメント構成
-
-このドキュメント索引は、サブスクリプションシステムに関するすべてのドキュメントへのナビゲーションを提供します。
+**最終更新**: 2025-11-29
 
 ---
 
-## 🎯 目的別ガイド
+## 📂 フォルダ構成
 
-### 新規開発者・引き継ぎ時に読むべきドキュメント
+### user-experience/ （UX定義）
+**誰が使う**: Takumiさん（UX専門家）
 
-1. **このREADME** - まずここから
-2. [specifications/system-specification.md](#1-subscription-system-specificationmd) - システム全体仕様（必読）
-3. [specifications/premium-content-access.md](#2-specificationspremium-content-accessmd) - プレミアムコンテンツ仕様
-4. [guides/common-errors.md](#4-guidescommon-errorsmd) - よくある間違い集（必読）
-5. [環境構築チェックリスト](#環境構築) - 設定漏れ防止
+**何を書く**:
+- ✅ flows.md - ユーザーフロー
+- ✅ requirements.md - 「こうあるべき」定義
+- ✅ edge-cases.md - 想定外の操作
+- ✅ issues.md - UX問題トラッカー
+- ❌ 技術的な実装詳細は書かない
 
-### トラブルシューティング時に読むべきドキュメント
-
-1. [guides/common-errors.md](#4-guidescommon-errorsmd) - エラー別の解決方法
-2. [specifications/system-specification.md - トラブルシューティング](#1-specificationssystem-specificationmd) - 問題別の対処法
-3. [specifications/premium-content-access.md - トラブルシューティング](#2-specificationspremium-content-accessmd) - プレミアムコンテンツ関連
-4. [guides/troubleshooting/webhook-401-error.md](#5-guidestroubleshootingwebhook-401-errormd) - Webhook 401エラーの詳細
-
-### テスト実施時に読むべきドキュメント
-
-1. [testing/testing-log.md](#3-testingtesting-logmd) - テスト手順とテスト履歴
-2. [testing/user-flow-test.md](#6-testinguser-flow-testmd) - ユーザーフローテスト
-3. [specifications/premium-content-access.md - テスト手順](#2-specificationspremium-content-accessmd) - プレミアムコンテンツテスト
-
-### 機能追加・改善時に読むべきドキュメント
-
-1. [specifications/system-specification.md](#1-specificationssystem-specificationmd) - 現在の実装詳細
-2. [specifications/premium-content-access.md](#2-specificationspremium-content-accessmd) - プレミアムコンテンツ実装
-3. [guides/common-errors.md](#4-guidescommon-errorsmd) - 過去の失敗から学ぶ
-4. [testing/testing-log.md](#3-testingtesting-logmd) - 過去のテスト結果
+**目的**:
+技術的な実装の前に「ユーザーにとってどうあるべきか」を定義する場所。
 
 ---
 
-## 📄 メインドキュメント
+### implementation/ （技術実装）
+**誰が使う**: Claude Code（開発者）
 
-### 1. specifications/system-specification.md
+**何を書く**:
+- ✅ plans/ - 実装計画（TEMPLATE.mdを使用）
+- ✅ specifications/ - 技術仕様書
+- ✅ decisions/ - 実装決定ログ
 
-**ファイル**: `specifications/system-specification.md`
-**サイズ**: 36KB
-**最終更新**: 2025-11-24
-**バージョン**: 2.1
-
-#### 内容
-
-サブスクリプションシステムの完全仕様書。すべての実装者が最初に読むべきドキュメント。
-
-- ✅ システム概要
-- ✅ 実装済み機能（新規登録、プラン変更、キャンセル、二重課金防止など）
-- ✅ 技術仕様（フロントエンド、バックエンド、データベース）
-- ✅ Edge Functions 詳細（create-checkout, create-customer-portal, stripe-webhook など）
-- ✅ **Deep Link 仕様** - Customer Portal へのダイレクト遷移
-- ✅ **Webhook 処理詳細** - customer.subscription.updated での plan_type/duration 更新
-- ✅ **環境構築チェックリスト** - 設定漏れ防止
-- ✅ **トラブルシューティング** - Webhook 401エラー、Price ID エラーなど
-- ✅ 本番環境移行チェックリスト
-
-#### いつ読むか
-
-- 新規参画時（必読）
-- 機能追加・改善前
-- トラブルシューティング時
+**目的**:
+UX要件を満たすための技術的な実装方法を記録する場所。
 
 ---
 
-### 2. specifications/premium-content-access.md
+### troubleshooting/ （エラー・問題対応）
+**誰が使う**: 両方
 
-**ファイル**: `specifications/premium-content-access.md`
-**サイズ**: 21KB
-**最終更新**: 2025-11-24
+**何を書く**:
+- ✅ error-database.md - エラーデータベース
+- ✅ solutions.md - 解決策ログ
 
-#### 内容
-
-プレミアムコンテンツのアクセス制御仕様。サブスクリプション加入者のみがアクセスできるメンバー限定コンテンツの詳細。
-
-- ✅ アクセス制御の基本ルール
-- ✅ プラン別アクセス権限マトリックス
-- ✅ 実装アーキテクチャ（データフロー、コンポーネント構成）
-- ✅ 動画コンテンツのアクセス制御
-- ✅ ロック画面の表示仕様
-- ✅ リアルタイム更新機能
-- ✅ Sanity CMS でのプレミアム設定方法
-- ✅ テスト手順（5つのテストケース）
-- ✅ トラブルシューティング
-
-#### いつ読むか
-
-- プレミアムコンテンツ機能を理解したいとき
-- `isPremium` フラグの実装を確認したいとき
-- ロック画面のデザイン・動作を確認したいとき
-- Sanity CMS でプレミアム設定を行うとき
+**目的**:
+発生したエラーと解決策を蓄積する場所。
 
 ---
 
-### 3. testing/testing-log.md
+## 🔄 使い方
 
-**ファイル**: `testing/testing-log.md`
-**サイズ**: 96KB
-**最終更新**: 2025-11-24
+### Takumiさんが新しいUX要件を追加したい時
 
-#### 内容
-
-テスト実施記録の完全版。Test 2E（プラン変更テスト）を含むすべてのテスト履歴。
-
-- ✅ Test 2E 完了記録（Feedback 1M → Standard 1M）
-- ✅ Webhook 401 エラーの発見と解決プロセス
-- ✅ データベース検証結果
-- ✅ プロレーション計算結果
-- ✅ 過去のテスト履歴（Phase 1-5）
-
-#### いつ読むか
-
-- テスト実施前（手順確認）
-- テスト失敗時（過去の同様のケースを確認）
-- 実装検証時（どのようにテストすべきか確認）
+1. `user-experience/flows.md` を開く
+2. 新しいフローを追加
+3. `user-experience/requirements.md` に要件を追加
+4. Claude Codeに実装を依頼
 
 ---
 
-### 4. guides/common-errors.md
+### Claude Codeが実装を開始する時
 
-**ファイル**: `guides/common-errors.md`
-**サイズ**: 15KB
-**作成日**: 2025-11-24
+**必須手順**:
 
-#### 内容
+1. **UX要件を読む**（絶対に飛ばさない）
+   - [ ] `user-experience/flows.md` を確認
+   - [ ] `user-experience/requirements.md` を確認
+   - [ ] `user-experience/edge-cases.md` を確認
 
-過去の失敗・エラーから学ぶ教訓集。同じ間違いを繰り返さないためのドキュメント。
+2. **実装計画を作成**
+   - [ ] `implementation/plans/TEMPLATE.md` をコピー
+   - [ ] UX要件を満たすための技術方針を記述
 
-- 🔴 **Critical エラー**
-  - Webhook 401 Unauthorized
-  - Price ID が見つからない
-- ❌ **実装の誤解**
-  - customer.subscription.updated で自動キャンセル（誤り）
-  - Deep Link = 新規サブスクリプション作成（誤り）
-  - Stripe CLI が必要（誤り）
-- ⚠️ **環境構築の失敗**
-  - .env と Supabase Secrets の混同
-  - Webhook エンドポイントの設定忘れ
-- ⚠️ **テストの失敗**
-  - フロントエンドだけ確認してデータベースを確認しない
-  - Edge Functions ログを確認しない
-- ✅ **予防策チェックリスト**
+3. **実装**
+   - [ ] 計画に従って実装
+   - [ ] UX要件が満たされているか検証
 
-#### いつ読むか
-
-- 新規参画時（必読）
-- エラー発生時（類似エラーの解決方法を確認）
-- 実装前（同じ間違いを避けるため）
+4. **ドキュメント更新**
+   - [ ] エラーが発生したら `troubleshooting/error-database.md` に記録
+   - [ ] 重要な決定をしたら `implementation/decisions/decisions.md` に記録
 
 ---
 
-### 4. guides/troubleshooting/webhook-401-error.md
+## 🎯 このフォルダの目的
 
-**ファイル**: `guides/troubleshooting/webhook-401-error.md`
-**サイズ**: 8.5KB
-**作成日**: 2025-11-24
+### 1. UXと技術の分離
 
-#### 内容
+**UX定義**（user-experience/）:
+「ユーザーにとってどうあるべきか」
 
-Webhook 401 Unauthorized エラーの詳細解決記録。
+**技術実装**（implementation/）:
+「それをどう実現するか」
 
-- 症状（フロントエンド、データベース、Stripe、Edge Functions）
-- 根本原因（STRIPE_WEBHOOK_SECRET_TEST 未設定）
-- 影響範囲（すべての Webhook イベントが処理されない）
-- 解決方法（Step-by-Step）
-- 検証結果
-- 予防策
-- 教訓
-
-#### いつ読むか
-
-- Webhook 401 エラー発生時
-- Webhook が動作しない問題のトラブルシューティング時
-- 環境構築時（予防のため）
+この分離により：
+- UX専門家が技術を気にせずUXを定義できる
+- 開発者がUX要件を明確に理解して実装できる
+- UXと技術の整合性を保てる
 
 ---
 
-### 5. specifications/user-flow-specification.md
+### 2. 機能の完全集約
 
-**ファイル**: `specifications/user-flow-specification.md`
-**サイズ**: 15KB
-**最終更新**: 2025-11-20
-
-#### 内容
-
-ユーザーフローの詳細仕様。
-
-- 新規登録フロー
-- プラン変更フロー
-- キャンセルフロー
-- 各フローの画面遷移
-- データフロー
-- エラーハンドリング
-
-#### いつ読むか
-
-- UI/UX の改善時
-- フロー変更を検討する時
-- ユーザー体験を理解したい時
+サブスクリプション機能に関する**すべての情報**がこのフォルダにある：
+- ユーザーフロー
+- UX要件
+- 実装計画
+- 技術仕様
+- エラー情報
+- 実装決定の理由
 
 ---
 
-## 🗂️ アーカイブドキュメント
+## 📝 重要なルール
 
-以下のドキュメントは `archive/old-investigations/` に移動されています。
-歴史的記録として保持されていますが、最新情報は上記のメインドキュメントを参照してください。
+### Claude Code（開発者）へのルール
 
-### 古い調査・計画ファイル
+1. **実装前に必ずUX定義を読む**
+   - user-experience/ の内容を確認せずに実装開始してはいけない
 
-- `SUBSCRIPTION-IMPLEMENTATION-SPEC.md` - 誤った実装の分析（2025-11-22）
-- `stripe-system-specification.md` - 古い仕様書（2025-11-20）
-- `debug-subscription-issue.md` - 古いデバッグガイド
-- `subscription-issue-investigation.md` - 古い調査記録
-- `subscription-not-active-investigation.md` - 古い調査記録
-- `SUBSCRIPTION-FIX-PLAN.md` - 古い修正計画
-- `stripe-customers-insert-error.md` - 解決済みエラーの記録
-- `stripe-environment-implementation-plan.md` - 古い実装計画
-- `stripe-environment-separation-plan.md` - 古い実装計画
-- `stripe-implementation-review-and-improvements.md` - 古いレビュー
-- `stripe-additional-review-points.md` - 古いレビュー
-- `stripe-webhook-best-practices.md` - ベストプラクティス（統合済み）
-- `payment-tasks-detailed.md` - 古いタスク整理
-- `stripe-cli-explanation.md` - CLI説明（guides/common-errors.mdに統合）
+2. **UX要件が未定義の場合は質問する**
+   - 不明な点があれば Takumiさんに確認
 
-### いつ参照するか
-
-- 過去の意思決定の経緯を知りたい時
-- 特定の問題の調査履歴を確認したい時
+3. **実装計画を作成せずに実装開始してはいけない**
+   - implementation/plans/TEMPLATE.md を必ず使用
 
 ---
 
-## 🚀 クイックスタートガイド
+### Takumiさん（UX専門家）へのルール
 
-### 環境構築
+1. **技術的な実装詳細は書かない**
+   - 「Stripeを使う」「データベースに保存する」などは書かない
+   - 「決済完了後、即座に新プランが使える」など、UX要件を書く
 
-1. [specifications/system-specification.md - 環境構築チェックリスト](./specifications/system-specification.md#環境構築チェックリスト) を開く
-2. チェックリストに従って設定
-3. **特に重要**: Webhook Secret の設定を忘れない
-4. 動作確認テストを実施
+2. **ユーザー視点で書く**
+   - システム視点ではなく、ユーザー視点で記述
 
-### トラブルシューティング
-
-1. エラーメッセージを確認
-2. [guides/common-errors.md](./guides/common-errors.md) で類似エラーを検索
-3. 見つからない場合は [specifications/system-specification.md - トラブルシューティング](./specifications/system-specification.md#トラブルシューティング) を確認
-4. それでも解決しない場合は Edge Functions Logs を詳細確認
-
-### テスト実施
-
-1. [testing/testing-log.md](./testing/testing-log.md) で該当するテストケースを確認
-2. テスト手順に従って実施
-3. **必ず**: データベースと Edge Functions Logs を確認
-4. 結果を testing/testing-log.md に記録
+3. **「なぜそうあるべきか」を書く**
+   - 単なる仕様ではなく、理由も記載
 
 ---
 
-## 📝 ドキュメント更新ルール
+## 🚀 クイックスタート
 
-### ドキュメントを更新すべきとき
+### 新しい機能を追加したい時
 
-- 新しい機能を追加したとき
-- バグを修正したとき
-- エラーが発生して解決したとき
-- テストを実施したとき
-
-### 更新すべきドキュメント
-
-| 変更内容 | 更新ドキュメント |
-|---------|----------------|
-| 新機能追加 | specifications/system-specification.md |
-| バグ修正 | guides/common-errors.md（教訓を追加） |
-| テスト実施 | testing/testing-log.md |
-| エラー解決 | guides/common-errors.md + 詳細ドキュメント作成 |
+1. Takumiさんが `user-experience/flows.md` に追加
+2. Claude Codeが `implementation/plans/` に実装計画作成
+3. 実装
+4. テスト
+5. 完了
 
 ---
 
-## 🔗 関連リンク
+### UX問題を報告したい時
 
-### 外部ドキュメント
-
-- [Stripe API ドキュメント](https://stripe.com/docs/api)
-- [Stripe Subscriptions](https://stripe.com/docs/billing/subscriptions)
-- [Stripe Customer Portal](https://stripe.com/docs/billing/subscriptions/customer-portal)
-- [Stripe Webhooks](https://stripe.com/docs/webhooks)
-- [Supabase Edge Functions](https://supabase.com/docs/guides/functions)
-- [Supabase Realtime](https://supabase.com/docs/guides/realtime)
-
-### Stripe Dashboard
-
-- [テスト環境 Webhooks](https://dashboard.stripe.com/test/webhooks)
-- [本番環境 Webhooks](https://dashboard.stripe.com/webhooks)
-- [Products & Prices](https://dashboard.stripe.com/test/products)
-
-### Supabase Dashboard
-
-- [Edge Functions](https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu/functions)
-- [Database](https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu/database/tables)
-- [Edge Functions Secrets](https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu/settings/functions)
+1. `user-experience/issues.md` に追加
+2. 深刻度を記載
+3. Claude Codeが対応
 
 ---
 
-## ❓ FAQ
-
-### Q: どのドキュメントから読めばいいですか？
-
-**A**: 
-1. このREADME（今読んでいるドキュメント）
-2. specifications/system-specification.md（システム全体仕様）
-3. guides/common-errors.md（よくある間違い）
-
-この順番で読めば、システムの全体像と注意点を理解できます。
-
-### Q: エラーが発生しました。どうすればいいですか？
-
-**A**: 
-1. guides/common-errors.md でエラーを検索
-2. 見つからない場合は specifications/system-specification.md のトラブルシューティングセクションを確認
-3. Edge Functions Logs を確認
-4. 解決したら guides/common-errors.md に教訓を追加
-
-### Q: テストはどうすればいいですか？
-
-**A**: 
-testing/testing-log.md にテストケースと手順が記載されています。テスト実施後は必ずデータベースと Edge Functions Logs を確認してください。
-
-### Q: 新しい機能を追加したいです。何を確認すればいいですか？
-
-**A**: 
-1. specifications/system-specification.md で現在の実装を確認
-2. guides/common-errors.md で過去の失敗例を確認
-3. 実装後は specifications/system-specification.md を更新
-4. テストを実施して testing/testing-log.md に記録
-
----
-
-**作成日**: 2025-11-24
-**管理者**: AI開発チーム
-**目的**: サブスクリプションシステムの完全なドキュメント体系を提供
+**「ユーザーにとってどうあるべきか」を定義してから、「それをどう実現するか」を考える。**
+**この順序を守ることで、ユーザー中心の開発が実現できます。**

@@ -11,6 +11,9 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+
 // デバッグログ関数
 const logDebug = (message: string, details?: any) => {
   console.log(
@@ -30,12 +33,11 @@ serve(async (req) => {
     // リクエストボディを解析
     const {
       returnUrl,
-      useTestPrice = false,
-      planType = "community",
+      planType = "standard",
       duration = 1,
     } = await req.json();
 
-    logDebug("リクエスト受信", { returnUrl, useTestPrice, planType, duration });
+    logDebug("リクエスト受信", { returnUrl, planType, duration, environment: ENVIRONMENT });
 
     if (!returnUrl) {
       throw new Error("リダイレクトURLが指定されていません");
@@ -64,12 +66,9 @@ serve(async (req) => {
 
     logDebug("ユーザー認証成功", { userId: user.id, email: user.email });
 
-    // 環境を判定（useTestPriceフラグに基づく）
-    const environment: StripeEnvironment = useTestPrice ? "test" : "live";
-    logDebug(`Stripe環境: ${environment}`);
-
-    // Stripeクライアントの初期化（環境に応じたAPIキーを使用）
-    const stripe = createStripeClient(environment);
+    // Stripeクライアントの初期化（環境変数に応じたAPIキーを使用）
+    const stripe = createStripeClient(ENVIRONMENT);
+    logDebug(`Stripe環境: ${ENVIRONMENT}`);
 
     // ユーザーのStripe Customer IDと既存サブスクリプションを取得
     let stripeCustomerId: string;
@@ -79,7 +78,7 @@ serve(async (req) => {
       .from("stripe_customers")
       .select("stripe_customer_id")
       .eq("user_id", user.id)
-      .eq("environment", environment)
+      .eq("environment", ENVIRONMENT)
       .single();
 
     // 既存サブスクリプションを確認（複数ある場合も全て取得、環境フィルタ付き）
@@ -88,7 +87,7 @@ serve(async (req) => {
         .from("user_subscriptions")
         .select("stripe_subscription_id, is_active")
         .eq("user_id", user.id)
-        .eq("environment", environment)
+        .eq("environment", ENVIRONMENT)
         .eq("is_active", true);
 
     if (existingSubError) {
@@ -96,22 +95,26 @@ serve(async (req) => {
       throw new Error("サブスクリプション情報の取得に失敗しました");
     }
 
-    // アクティブなサブスクリプションが複数ある場合は警告
+    // Phase 5: 既存サブスクリプションチェック（新規登録専用）
+    // 既存のアクティブサブスクリプションがある場合はエラーを返す
+    // プラン変更は update-subscription API を使用すること
     const activeSubscriptions = existingSubList || [];
     if (activeSubscriptions.length > 0) {
       logDebug(
-        `${activeSubscriptions.length}件のアクティブサブスクリプションを検出`
+        `${activeSubscriptions.length}件のアクティブサブスクリプションを検出 - エラーを返します`
       );
 
-      if (activeSubscriptions.length > 1) {
-        console.warn(
-          `警告: ユーザー ${
-            user.id
-          } に複数のアクティブサブスクリプション: ${activeSubscriptions
-            .map((s) => s.stripe_subscription_id)
-            .join(", ")}`
-        );
-      }
+      return new Response(
+        JSON.stringify({
+          error: "既存のアクティブなサブスクリプションが存在します。",
+          details: "プラン変更は /account ページの「サブスクリプションを管理」から行ってください。",
+          existing_subscriptions: activeSubscriptions.map((s) => s.stripe_subscription_id),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
 
     if (customerError || !customerData) {
@@ -132,7 +135,7 @@ serve(async (req) => {
           {
             user_id: user.id,
             stripe_customer_id: customer.id,
-            environment: environment,
+            environment: ENVIRONMENT,
           },
           { onConflict: "user_id,environment" }
         );
@@ -153,7 +156,7 @@ serve(async (req) => {
     let priceId: string | undefined;
 
     // 環境変数の命名規則: STRIPE_[TEST_]PLANTYPE_DURATION_PRICE_ID
-    const envPrefix = useTestPrice ? "STRIPE_TEST_" : "STRIPE_";
+    const envPrefix = ENVIRONMENT === 'test' ? "STRIPE_TEST_" : "STRIPE_";
     const planTypeUpper = planType.toUpperCase();
     const durationSuffix = duration === 1 ? "1M" : "3M";
     const envVarName = `${envPrefix}${planTypeUpper}_${durationSuffix}_PRICE_ID`;
@@ -176,6 +179,17 @@ serve(async (req) => {
     const baseUrl = new URL(returnUrl).origin;
     const cancelUrl = `${baseUrl}/subscription`;
 
+    // 既存サブスクリプションIDをmetadataに追加（Webhookでキャンセルするため）
+    // これにより、Checkout完了「後」に既存サブスクがキャンセルされる
+    // ユーザーがCheckout画面で離脱しても既存サブスクは残るため安全
+    if (activeSubscriptions.length > 0) {
+      logDebug(
+        `${activeSubscriptions.length}件の既存サブスクリプションをmetadataに記録（Webhook経由でキャンセルします）`
+      );
+      // 複数ある場合は最初の1つをmetadataに記録（Webhook側で全てのアクティブサブスクをキャンセル）
+      sessionMetadata.replace_subscription_id = activeSubscriptions[0].stripe_subscription_id;
+    }
+
     // セッション設定オブジェクト
     const sessionConfig: any = {
       customer: stripeCustomerId,
@@ -192,102 +206,9 @@ serve(async (req) => {
       metadata: sessionMetadata,
     };
 
-    // 既存サブスクリプションが複数ある場合は全てキャンセル（二重課金を防止）
-    if (activeSubscriptions.length > 0) {
-      logDebug(
-        `${activeSubscriptions.length}件のアクティブサブスクリプションをキャンセルします`
-      );
-
-      for (const existingSub of activeSubscriptions) {
-        const existingSubscriptionId = existingSub.stripe_subscription_id;
-
-        try {
-          // 1. Stripeで既存サブスクリプションの状態を確認
-          let existingSubscription;
-          try {
-            existingSubscription = await stripe.subscriptions.retrieve(
-              existingSubscriptionId
-            );
-            logDebug("既存サブスクリプション取得成功:", {
-              id: existingSubscriptionId,
-              status: existingSubscription.status,
-              customer: existingSubscription.customer,
-            });
-          } catch (retrieveError) {
-            // サブスクリプションが存在しない場合はスキップ
-            logDebug(
-              "サブスクリプションが見つかりません（既にキャンセル済みの可能性）:",
-              retrieveError
-            );
-            existingSubscription = null;
-          }
-
-          // 2. サブスクリプションが存在し、顧客IDが一致する場合のみキャンセル
-          if (existingSubscription) {
-            if (existingSubscription.customer !== stripeCustomerId) {
-              logDebug("警告: サブスクリプションの顧客IDが一致しません", {
-                subscriptionId: existingSubscriptionId,
-                subscriptionCustomer: existingSubscription.customer,
-                expectedCustomer: stripeCustomerId,
-              });
-              throw new Error("サブスクリプション情報に不整合があります");
-            }
-
-            // アクティブまたはトライアル中のサブスクリプションのみキャンセル
-            if (
-              existingSubscription.status === "active" ||
-              existingSubscription.status === "trialing"
-            ) {
-              // Stripeでキャンセル（日割り返金付き）
-              await stripe.subscriptions.cancel(existingSubscriptionId, {
-                prorate: true,
-              });
-              logDebug(
-                "Stripeでサブスクリプションをキャンセル完了:",
-                existingSubscriptionId
-              );
-            } else {
-              logDebug("サブスクリプションは既に非アクティブです:", {
-                id: existingSubscriptionId,
-                status: existingSubscription.status,
-              });
-            }
-          }
-
-          // 3. DBを更新（Stripeの状態に関わらず、DBは確実に更新）
-          const { error: updateError } = await supabaseClient
-            .from("user_subscriptions")
-            .update({
-              is_active: false,
-              updated_at: new Date().toISOString(),
-            })
-            .eq("stripe_subscription_id", existingSubscriptionId)
-            .eq("user_id", user.id); // セキュリティ: 必ずuser_idも条件に含める
-
-          if (updateError) {
-            logDebug("DB更新エラー:", updateError);
-            // DB更新失敗は警告のみ（Webhookで最終的に同期される）
-            console.warn(
-              "既存サブスクリプションのDB更新に失敗しましたが、処理を続行します"
-            );
-          } else {
-            logDebug(
-              "DBでサブスクリプションを非アクティブ化完了:",
-              existingSubscriptionId
-            );
-          }
-        } catch (cancelError) {
-          logDebug(
-            `サブスクリプション ${existingSubscriptionId} のキャンセルエラー:`,
-            cancelError
-          );
-          // 1つでもキャンセル失敗したらCheckout作成を中止（二重課金を確実に防止）
-          throw new Error(
-            `既存サブスクリプションのキャンセルに失敗しました: ${cancelError.message}`
-          );
-        }
-      }
-    }
+    // 【重要】既存サブスクリプションのキャンセルはWebhook（checkout.session.completed）で実行
+    // Checkout作成「前」にキャンセルすると、ユーザーが離脱時に無課金状態になるため
+    // stripe-webhook/index.ts Lines 178-196 でキャンセル処理を実行
 
     const session = await stripe.checkout.sessions.create(sessionConfig);
 

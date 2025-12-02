@@ -24,7 +24,12 @@ export function createSupabaseClients() {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
   const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
   const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-  
+
+  // 🔍 DEBUG: 環境変数の実際の値を確認
+  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_URL: ${supabaseUrl}`);
+  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_ANON_KEY (first 20): ${supabaseAnonKey.substring(0, 20)}...`);
+  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_SERVICE_ROLE_KEY (first 20): ${supabaseServiceKey.substring(0, 20)}...`);
+
   return {
     supabaseClient: createClient(supabaseUrl, supabaseAnonKey),
     supabaseAdmin: createClient(supabaseUrl, supabaseServiceKey, {
@@ -64,25 +69,10 @@ export function createStripeClient(): Stripe | null {
 
 /**
  * 現在の環境（test/live）を判定
- * Stripe APIキーの存在から環境を判定します
+ * 環境変数 STRIPE_MODE から判定します（デフォルトは test）
  */
 export function getCurrentEnvironment(): 'test' | 'live' {
-  const testKey = Deno.env.get("STRIPE_TEST_SECRET_KEY");
-  const liveKey = Deno.env.get("STRIPE_LIVE_SECRET_KEY");
-
-  // Test keyが存在する場合はtest環境
-  if (testKey) {
-    logDebug("環境判定: test (STRIPE_TEST_SECRET_KEY検出)");
-    return 'test';
-  }
-
-  // Live keyのみ存在する場合はlive環境
-  if (liveKey) {
-    logDebug("環境判定: live (STRIPE_LIVE_SECRET_KEY検出)");
-    return 'live';
-  }
-
-  // どちらも存在しない場合はliveとしてフォールバック
-  logDebug("環境判定: live (デフォルト)");
-  return 'live';
+  const environment = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
+  logDebug(`環境判定: ${environment} (STRIPE_MODE=${Deno.env.get('STRIPE_MODE') || 'デフォルト'})`);
+  return environment;
 }

@@ -6,13 +6,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { createStripeClient, getWebhookSecret } from "../_shared/stripe-helpers.ts";
+import { getPlanInfo } from "../_shared/plan-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ENVIRONMENT = 'test' as const;
+// 環境変数から環境を取得（デフォルトはtest）
+const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
 
 // プランタイプと金額に基づいてメンバーアクセス権を判定
 function determineMembershipAccess(planType: string, amount?: number): boolean {
@@ -33,7 +35,8 @@ serve(async (req) => {
   }
 
   try {
-    console.log(`🧪 [TEST環境] Webhook受信`);
+    const envLabel = ENVIRONMENT === 'test' ? '🧪 [TEST環境]' : '🚀 [本番環境]';
+    console.log(`${envLabel} Webhook受信`);
 
     // Stripe署名を取得
     const signature = req.headers.get("stripe-signature");
@@ -132,8 +135,19 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       return;
     }
 
-    const planType = session.metadata?.plan_type || "community";
-    const duration = parseInt(session.metadata?.duration || "1");
+    // Stripe Price ID から plan_type と duration を判定（metadata は使用しない）
+    const priceId = subscription.items.data[0]?.price?.id;
+    if (!priceId) {
+      console.error("Price ID が見つかりません");
+      return;
+    }
+
+    const planInfo = getPlanInfo(priceId);
+    const planType = planInfo.planType;
+    const duration = planInfo.duration;
+
+    console.log(`🧪 [TEST環境] Price ID: ${priceId} → plan_type: ${planType}, duration: ${duration}`);
+
     const userId = session.metadata?.user_id || subscription.metadata?.user_id;
 
     if (!userId) {
@@ -452,33 +466,12 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
 
     console.log("🧪 [TEST環境] プラン変更情報:", { subscriptionId, userId, priceId, amount });
 
-    let planType: string;
-    let duration: number;
+    // Stripe Price ID から plan_type と duration を判定
+    const planInfo = getPlanInfo(priceId);
+    const planType = planInfo.planType;
+    const duration = planInfo.duration;
 
-    const STANDARD_1M = Deno.env.get("STRIPE_TEST_STANDARD_1M_PRICE_ID");
-    const STANDARD_3M = Deno.env.get("STRIPE_TEST_STANDARD_3M_PRICE_ID");
-    const FEEDBACK_1M = Deno.env.get("STRIPE_TEST_FEEDBACK_1M_PRICE_ID");
-    const FEEDBACK_3M = Deno.env.get("STRIPE_TEST_FEEDBACK_3M_PRICE_ID");
-
-    if (priceId === STANDARD_1M) {
-      planType = "standard";
-      duration = 1;
-    } else if (priceId === STANDARD_3M) {
-      planType = "standard";
-      duration = 3;
-    } else if (priceId === FEEDBACK_1M) {
-      planType = "feedback";
-      duration = 1;
-    } else if (priceId === FEEDBACK_3M) {
-      planType = "feedback";
-      duration = 3;
-    } else {
-      console.warn(`🧪 [TEST環境] 未知のPrice ID: ${priceId}。デフォルトでcommunityプランに設定します`);
-      planType = "community";
-      duration = 1;
-    }
-
-    console.log("🧪 [TEST環境] 判定結果:", { planType, duration, matchedPriceId: priceId });
+    console.log(`🧪 [TEST環境] Price ID: ${priceId} → plan_type: ${planType}, duration: ${duration}`);
 
     const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
     const cancelAt = subscription.cancel_at
