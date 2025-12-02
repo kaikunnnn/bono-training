@@ -11,27 +11,13 @@ export default defineConfig(({ mode }) => {
 
   console.log('========== Vite Config Debug ==========');
   console.log('🔧 Mode:', mode);
-  console.log('🔧 process.cwd():', process.cwd());
-  console.log('🔧 All env keys:', Object.keys(env).filter(k => k.includes('SUPABASE')));
-  console.log('🔧 env.VITE_SUPABASE_URL:', env.VITE_SUPABASE_URL);
-  console.log('🔧 env.NEXT_PUBLIC_SUPABASE_URL:', env.NEXT_PUBLIC_SUPABASE_URL);
+  console.log('🔧 VITE_SUPABASE_URL:', env.VITE_SUPABASE_URL || '(not set - will use Vercel env vars)');
   console.log('========================================');
-
-  // 🚨 TESTING MODE: ローカル環境に強制上書き
-  const FORCED_LOCAL_URL = 'http://127.0.0.1:54321';
-  const FORCED_LOCAL_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0';
-
-  console.log('✅ Forcing local Supabase:', FORCED_LOCAL_URL);
 
   return {
     server: {
       host: "::",
       port: 8080,
-    },
-    // 環境変数を強制的に定義
-    define: {
-      'import.meta.env.VITE_SUPABASE_URL': JSON.stringify(FORCED_LOCAL_URL),
-      'import.meta.env.VITE_SUPABASE_ANON_KEY': JSON.stringify(FORCED_LOCAL_ANON_KEY),
     },
     plugins: [
       react(),
