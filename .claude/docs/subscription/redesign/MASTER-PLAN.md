@@ -807,6 +807,12 @@ Stripeのproration（日割り計算）は「返金」ではなく「クレジ�
 - **対応**: 本番デプロイ後にJest互換テストを作成
 - **登録日**: 2025-12-02
 
+### ISSUE-FUTURE-004: Subscription.test.tsxのテスト追加
+- **削除したファイル**: `src/pages/__tests__/Subscription.test.tsx`
+- **理由**: vitest/Jest不整合でCI失敗（vitestをimportしているがCIはJestを使用）
+- **対応**: 本番デプロイ後にJest互換テストを作成
+- **登録日**: 2025-12-02
+
 ---
 
 **最終更新**: 2025-12-02 JST
