@@ -25,7 +25,7 @@ Phase 1: 実際の動作テスト           ████████████
 Phase 2: 問題の修正                 ████████████████████ 100% ✅ 完了
 Phase 3: 全体動作確認               ████████████████████ 100% ✅ 完了
 Phase 4: ドキュメント更新           ████████████████████ 100% ✅ 完了
-Phase 5: 本番デプロイ               ████░░░░░░░░░░░░░░░░  20% 🚀 実施中
+Phase 5: 本番デプロイ               █████████████░░░░░░░  65% 🚀 実施中（2/3問題解決）
 ```
 
 ---
@@ -468,7 +468,7 @@ Phase 3テスト中に発見された問題への対策として、以下を実�
 ## 📋 Phase 5: 本番デプロイ 🚀
 
 **期間**: 2025-12-02
-**ステータス**: 🚀 実施中
+**ステータス**: 🚀 実施中（環境問題対応中）
 
 ### 背景
 
@@ -494,6 +494,18 @@ Phase 3テスト中に発見された問題への対策として、以下を実�
 | 2 | Edge Functions をデプロイ | ✅ 完了 | 2025-12-02 09:31 JST |
 | 3 | Stripe Webhook 有効化 | ✅ 完了 | 2025-12-02（ユーザー実施） |
 | 4 | 動作確認 | 🚀 実施中 | - |
+
+### 環境問題対応（2025-12-02）
+
+**詳細**: `investigations/2025-12-02-environment-issues.md`
+
+| # | 問題 | 影響 | ステータス | 解決方法 |
+|---|------|------|-----------|---------|
+| ENV-001 | VercelでローカルURLが表示 | フロントエンド | ✅ 解決済み | ブラウザキャッシュクリア |
+| ENV-003 | TypeError unit_amount | 料金ページ表示不可 | ✅ 解決済み | Stripe Price IDs をSecrets設定 |
+| ENV-002 | Webhook 401エラー | 全Webhook失敗 | ⏳ 対応待ち | Signing Secret再設定が必要 |
+
+**進捗**: 2/3 解決済み
 
 ### タスクB: 開発環境整備（本番デプロイ完了後）
 
@@ -523,6 +535,38 @@ npx supabase functions deploy preview-subscription-change --project-ref fryogvfh
 **Step 4: 動作確認**
 - Edge Functionログで `STRIPE_MODE: live` を確認
 - 既存ユーザーでログイン・ページアクセス確認
+
+### 🔴 ISSUE-P5-001: stripe-webhook 401エラー（2025-12-02 発見）
+
+**症状**: 本番環境の `stripe-webhook` Edge Function が全て **401 Unauthorized** で失敗
+
+**ログ分析**:
+```
+stripe-webhook      : 13件連続 401 Unauthorized ❌
+check-subscription  : 200 OK ✅
+他のEdge Functions  : 200 OK ✅
+```
+
+**影響**:
+- Stripeからの全Webhookイベントが処理されない
+- 新規登録、プラン変更、キャンセルのDB反映が行われない
+
+**仮説（可能性高）**:
+- Stripe Dashboardで設定されたWebhook Signing Secretと、Supabase Secretsの `STRIPE_WEBHOOK_SECRET_LIVE` の値が**不一致**
+
+**確認が必要な項目**:
+1. Stripe Dashboard → Webhooks → 本番用Endpoint → Signing Secret を確認
+2. `whsec_` で始まる文字列を取得
+3. Supabase Secretsに再設定:
+   ```bash
+   npx supabase secrets set STRIPE_WEBHOOK_SECRET_LIVE=whsec_xxxxx --project-ref fryogvfhymnpiqwssmuu
+   ```
+4. Edge Functionを再デプロイ:
+   ```bash
+   npx supabase functions deploy stripe-webhook --project-ref fryogvfhymnpiqwssmuu
+   ```
+
+**詳細調査レポート**: `investigations/2025-12-02-phase5-webhook-401-investigation.md`
 
 ---
 
