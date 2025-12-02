@@ -1,8 +1,8 @@
 # サブスクリプション実装再構築 - MASTER PLAN
 
 **プロジェクト開始**: 2025-11-30
-**現在のステータス**: ✅ Phase 4 完了（プロジェクト終了）
-**最終更新**: 2025-12-01 18:00 JST
+**現在のステータス**: 🚀 Phase 5 実施中（本番デプロイ）
+**最終更新**: 2025-12-02 JST
 
 ---
 
@@ -25,6 +25,7 @@ Phase 1: 実際の動作テスト           ████████████
 Phase 2: 問題の修正                 ████████████████████ 100% ✅ 完了
 Phase 3: 全体動作確認               ████████████████████ 100% ✅ 完了
 Phase 4: ドキュメント更新           ████████████████████ 100% ✅ 完了
+Phase 5: 本番デプロイ               ████░░░░░░░░░░░░░░░░  20% 🚀 実施中
 ```
 
 ---
@@ -461,6 +462,67 @@ Phase 3テスト中に発見された問題への対策として、以下を実�
 |-------|------|--------|---------|
 | ISSUE-P3-005 | /account反映遅延 | Medium | ACTIVE_TASKS.md |
 | ISSUE-P3-006 | モーダル15秒ローディング | Medium | ACTIVE_TASKS.md |
+
+---
+
+## 📋 Phase 5: 本番デプロイ 🚀
+
+**期間**: 2025-12-02
+**ステータス**: 🚀 実施中
+
+### 背景
+
+- 現在はWebflow + Memberstackでサービス運営中
+- 今回の開発はSupabaseへの移行のため
+- 246人のアクティブユーザーはStripeからインポート済み（2025-11-19）
+
+### 事前調査結果
+
+| 項目 | 結果 |
+|------|------|
+| user_subscriptions | live環境: 246件アクティブ + 1,789件非アクティブ |
+| データ元 | Stripeから直接インポート（Memberstackではない） |
+| Stripe Webhook (Test) | Supabase Edge Function: アクティブ、正常動作 |
+| Stripe Webhook (Live) | 過去523件全て失敗（STRIPE_MODE未設定が原因） |
+| STRIPE_MODE | 本番環境で**未設定**（デフォルトtestで動作していた） |
+
+### タスクA: 本番デプロイ（実施中）
+
+| Step | 内容 | ステータス | 実施日時 |
+|------|------|-----------|---------|
+| 1 | STRIPE_MODE=live を設定 | ✅ 完了 | 2025-12-02 09:30 JST |
+| 2 | Edge Functions をデプロイ | ✅ 完了 | 2025-12-02 09:31 JST |
+| 3 | Stripe Webhook 有効化 | ✅ 完了 | 2025-12-02（ユーザー実施） |
+| 4 | 動作確認 | 🚀 実施中 | - |
+
+### タスクB: 開発環境整備（本番デプロイ完了後）
+
+| 項目 | 内容 | ステータス |
+|------|------|-----------|
+| 1 | Supabase MCPのローカル設定を調査 | ⏳ 待機中 |
+| 2 | 不可能な場合、確認手順を文書化 | ⏳ 待機中 |
+| 3 | PROJECT-RULES.mdにチェックリスト追加 | ⏳ 待機中 |
+
+### デプロイ詳細手順
+
+**Step 1: STRIPE_MODE=live 設定**
+```bash
+npx supabase secrets set STRIPE_MODE=live --project-ref fryogvfhymnpiqwssmuu
+# 確認
+npx supabase secrets list --project-ref fryogvfhymnpiqwssmuu | grep STRIPE_MODE
+```
+
+**Step 2: Edge Functions デプロイ**
+```bash
+npx supabase functions deploy update-subscription --project-ref fryogvfhymnpiqwssmuu
+npx supabase functions deploy preview-subscription-change --project-ref fryogvfhymnpiqwssmuu
+```
+
+**Step 3: ユーザーがStripe DashboardでWebhook有効化**
+
+**Step 4: 動作確認**
+- Edge Functionログで `STRIPE_MODE: live` を確認
+- 既存ユーザーでログイン・ページアクセス確認
 
 ---
 
