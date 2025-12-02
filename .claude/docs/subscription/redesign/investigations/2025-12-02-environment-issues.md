@@ -1,7 +1,7 @@
 # 環境問題の緊急修正
 
 **作成日**: 2025-12-02 JST
-**ステータス**: ENV-002対応中（2/3完了）
+**ステータス**: ✅ 全問題解決済み（3/3完了）
 
 ---
 
@@ -11,7 +11,7 @@
 |---|------|------|--------|-----------|
 | ENV-001 | VercelでローカルURLが使われる | フロントエンド全体 | 🔴 Critical | ✅ 解決済み |
 | ENV-003 | TypeError unit_amount | 料金ページ表示不可 | 🔴 Critical | ✅ 解決済み |
-| ENV-002 | Stripe Webhook 401エラー | 全Webhook失敗 | 🔴 Critical | ⏳ 対応待ち |
+| ENV-002 | Stripe Webhook 401エラー | 全Webhook失敗 | 🔴 Critical | ✅ 解決済み |
 
 ---
 
@@ -78,43 +78,39 @@
 
 ---
 
-## ENV-002: Webhook 401エラー ⏳ 対応待ち
+## ENV-002: Webhook 401エラー ✅ 解決済み
 
 ### 症状
 
 - 本番環境の `stripe-webhook` Edge Function が13件連続 401 Unauthorized
 - 他のEdge Functions（check-subscription等）は200 OK
 
-### ログ分析
+### 根本原因
 
-```
-Edge Function ログ (直近24時間)
-├── stripe-webhook      : 13件連続 401 Unauthorized ❌
-├── check-subscription  : 200 OK ✅
-├── stripe-webhook-test : 200 OK ✅
-└── 他のEdge Functions  : 200 OK ✅
-```
+- **エラーメッセージ**: `"Missing authorization header"`
+- Supabase Edge FunctionがJWT認証を要求していた
+- StripeはJWTではなく独自の署名（Webhook Signature）で認証するため拒否されていた
 
-### 仮説
+### 解決方法
 
-- Stripe DashboardのWebhook Signing Secretと、Supabase Secretsの `STRIPE_WEBHOOK_SECRET_LIVE` の値が不一致
-
-### 対応手順
-
-1. Stripe Dashboard → Webhooks → 本番用Endpoint → Signing Secret を確認
-2. `whsec_` で始まる文字列を取得
-3. Supabase Secretsに再設定:
+1. **Stripe Webhook Signing Secretを再設定**:
    ```bash
    npx supabase secrets set STRIPE_WEBHOOK_SECRET_LIVE=whsec_xxxxx --project-ref fryogvfhymnpiqwssmuu
    ```
-4. Edge Functionを再デプロイ:
+
+2. **Edge Functionを再デプロイ**:
    ```bash
    npx supabase functions deploy stripe-webhook --project-ref fryogvfhymnpiqwssmuu
    ```
 
+### 結果
+
+- ✅ Stripe Dashboard → テストWebhook送信 → **200 OK**
+- ✅ レスポンス: `{ "received": true, "event_type": "checkout.session.completed" }`
+
 ### ステータス
 
-⏳ **対応待ち**（Stripe Dashboard確認が必要）
+✅ **解決済み**（2025-12-02 14:07 JST）
 
 ---
 
@@ -124,7 +120,9 @@ Edge Function ログ (直近24時間)
 |------|------|---------|
 | 2025-12-02 | ENV-001 | ブラウザキャッシュクリア（incognito） |
 | 2025-12-02 | ENV-003 | Stripe Price IDs をSecrets設定 + デプロイ |
+| 2025-12-02 14:07 | ENV-002 | Webhook Signing Secret再設定 + デプロイ |
 
 ---
 
-**更新**: 2025-12-02 JST
+**更新**: 2025-12-02 14:10 JST
+**ステータス**: ✅ 全問題解決完了
