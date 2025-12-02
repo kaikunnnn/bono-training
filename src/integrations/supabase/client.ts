@@ -2,18 +2,8 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// 🔧 環境変数から読み込むように修正
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-// 🔍 超詳細デバッグ用ログ
-console.log('========== Supabase Client Debug ==========');
-console.log('📦 import.meta.env:', import.meta.env);
-console.log('🔑 VITE_SUPABASE_URL:', import.meta.env.VITE_SUPABASE_URL);
-console.log('🔑 VITE_SUPABASE_ANON_KEY (first 30):', import.meta.env.VITE_SUPABASE_ANON_KEY?.substring(0, 30));
-console.log('🎯 使用するURL:', SUPABASE_URL);
-console.log('🌍 環境:', SUPABASE_URL?.includes('127.0.0.1') ? 'ローカル ✅' : '本番 ❌');
-console.log('==========================================');
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
