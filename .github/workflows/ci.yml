@@ -59,20 +59,23 @@ jobs:
 
         FOUND_ISSUES=0
 
-        # Pattern 1: 127.0.0.1:54321 (local Supabase)
-        if grep -r -n "127\.0\.0\.1:54321" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null; then
+        # Note: grep -v ".includes(" excludes validation code that checks for these patterns
+        # This prevents false positives from the ENV-001 check in vite.config.ts
+
+        # Pattern 1: 127.0.0.1:54321 (local Supabase) - exclude validation code
+        if grep -r -n "127\.0\.0\.1:54321" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null | grep -v "\.includes(" | grep -v "// Pattern"; then
           echo "❌ ERROR: Found hardcoded 127.0.0.1:54321 in source files"
           FOUND_ISSUES=1
         fi
 
-        # Pattern 2: localhost:54321
-        if grep -r -n "localhost:54321" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null; then
+        # Pattern 2: localhost:54321 - exclude validation code
+        if grep -r -n "localhost:54321" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null | grep -v "\.includes(" | grep -v "// Pattern"; then
           echo "❌ ERROR: Found hardcoded localhost:54321 in source files"
           FOUND_ISSUES=1
         fi
 
         # Pattern 3: FORCED_LOCAL pattern (common mistake)
-        if grep -r -n "FORCED_LOCAL" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null; then
+        if grep -r -n "FORCED_LOCAL" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null | grep -v "// Pattern"; then
           echo "❌ ERROR: Found FORCED_LOCAL pattern in source files"
           FOUND_ISSUES=1
         fi
