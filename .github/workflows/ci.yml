@@ -44,3 +44,58 @@ jobs:
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       if: success()
+
+  # ENV-001 恒久対策: ハードコードされたローカルURLの検出
+  hardcoded-url-check:
+    runs-on: ubuntu-latest
+    name: Check for hardcoded local URLs
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Check for hardcoded local Supabase URLs
+      run: |
+        echo "🔍 Checking for hardcoded local URLs in source code..."
+
+        FOUND_ISSUES=0
+
+        # Pattern 1: 127.0.0.1:54321 (local Supabase)
+        if grep -r -n "127\.0\.0\.1:54321" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null; then
+          echo "❌ ERROR: Found hardcoded 127.0.0.1:54321 in source files"
+          FOUND_ISSUES=1
+        fi
+
+        # Pattern 2: localhost:54321
+        if grep -r -n "localhost:54321" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null; then
+          echo "❌ ERROR: Found hardcoded localhost:54321 in source files"
+          FOUND_ISSUES=1
+        fi
+
+        # Pattern 3: FORCED_LOCAL pattern (common mistake)
+        if grep -r -n "FORCED_LOCAL" --include="*.ts" --include="*.tsx" --include="*.js" src/ vite.config.ts 2>/dev/null; then
+          echo "❌ ERROR: Found FORCED_LOCAL pattern in source files"
+          FOUND_ISSUES=1
+        fi
+
+        # Pattern 4: define block with hardcoded env vars in vite.config
+        if grep -n "JSON\.stringify.*127\.0\.0\.1" vite.config.ts 2>/dev/null; then
+          echo "❌ ERROR: Found hardcoded URL in vite.config.ts define block"
+          FOUND_ISSUES=1
+        fi
+
+        if [ $FOUND_ISSUES -eq 1 ]; then
+          echo ""
+          echo "=========================================="
+          echo "🚨 HARDCODED LOCAL URL DETECTED!"
+          echo "=========================================="
+          echo ""
+          echo "This will cause production to point to localhost."
+          echo "Please use environment variables instead:"
+          echo "  - VITE_SUPABASE_URL"
+          echo "  - VITE_SUPABASE_ANON_KEY"
+          echo ""
+          echo "See: .claude/docs/subscription/redesign/investigations/2025-12-02-environment-issues.md"
+          exit 1
+        fi
+
+        echo "✅ No hardcoded local URLs found"

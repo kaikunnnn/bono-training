@@ -44,6 +44,7 @@ import MyPage from "./pages/MyPage";
 import Account from "./pages/Account";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionUpdated from "./pages/SubscriptionUpdated";
+import DevEnvironmentBanner from "./components/dev/DevEnvironmentBanner";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -140,6 +141,7 @@ const App = () => {
           <AuthProvider>
             <Toaster />
             <Sonner />
+            <DevEnvironmentBanner />
             <BrowserRouter>
               <AppContent />
             </BrowserRouter>
