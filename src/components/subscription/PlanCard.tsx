@@ -20,6 +20,7 @@ interface PlanCardProps {
   };
   recommended: boolean;
   isCurrentPlan: boolean;
+  isCanceled?: boolean; // キャンセル済み（期間終了で解約予定）かどうか
   onSubscribe: (planType: PlanType) => void;
   isLoading: boolean;
   isSubscribed?: boolean; // 現在サブスクリプション契約中かどうか
@@ -35,6 +36,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
   features,
   recommended,
   isCurrentPlan,
+  isCanceled = false,
   onSubscribe,
   isLoading,
   isSubscribed = false
@@ -55,11 +57,11 @@ const PlanCard: React.FC<PlanCardProps> = ({
   };
   
   return (
-    <Card 
+    <Card
       className={`
         flex flex-col
         ${recommended ? 'border-primary shadow-lg relative' : ''}
-        ${isCurrentPlan ? 'border-green-500' : ''}
+        ${isCurrentPlan ? (isCanceled ? 'border-orange-500' : 'border-green-500') : ''}
       `}
     >
       {recommended && (
@@ -69,7 +71,11 @@ const PlanCard: React.FC<PlanCardProps> = ({
       )}
       {isCurrentPlan && (
         <div className="absolute -top-3 left-0 right-0 flex justify-center">
-          <Badge className="bg-green-500 text-white px-3 py-1">現在のプラン</Badge>
+          {isCanceled ? (
+            <Badge className="bg-orange-500 text-white px-3 py-1">現在のプラン【キャンセル済み】</Badge>
+          ) : (
+            <Badge className="bg-green-500 text-white px-3 py-1">現在のプラン</Badge>
+          )}
         </div>
       )}
       <CardHeader className={recommended ? 'pt-8' : ''}>
@@ -80,13 +86,15 @@ const PlanCard: React.FC<PlanCardProps> = ({
         <div className="mt-6">
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-bold text-gray-900">
-              {price.toLocaleString()}
+              {/* 3ヶ月プランの場合は月額換算（合計÷3）、1ヶ月プランはそのまま */}
+              {duration === 3 ? Math.floor(price / 3).toLocaleString() : price.toLocaleString()}
             </span>
             <span className="text-lg text-gray-600">円/月</span>
           </div>
           {duration === 3 && (
             <div className="text-sm text-gray-500 mt-2 font-noto-sans-jp">
-              一括 {(price * 3).toLocaleString()}円（3ヶ月分）
+              {/* 3ヶ月一括の合計金額を表示 */}
+              3ヶ月一括 {price.toLocaleString()}円
             </div>
           )}
         </div>

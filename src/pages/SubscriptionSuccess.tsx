@@ -4,7 +4,7 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { SubscriptionSuccessContent } from '@/components/subscription/SubscriptionSuccessContent';
 
 const SubscriptionSuccess: React.FC = () => {
-  const { refresh, planType } = useSubscriptionContext();
+  const { refresh, planType, duration } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,6 +34,7 @@ const SubscriptionSuccess: React.FC = () => {
       <SubscriptionSuccessContent
         type="new"
         planType={planType}
+        duration={duration}
         isLoading={isLoading}
         error={error}
       />

@@ -20,7 +20,7 @@ const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { isSubscribed, planType, duration: currentDuration, renewalDate } = useSubscriptionContext();
+  const { isSubscribed, planType, duration: currentDuration, renewalDate, cancelAtPeriodEnd } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1); // 期間選択の状態
 
@@ -249,7 +249,7 @@ const SubscriptionPage: React.FC = () => {
             changeDetectionChannel.unsubscribe();
 
             // サクセスページへ遷移
-            navigate(`/subscription/updated?plan=${selectedNewPlan.type}`);
+            navigate(`/subscription/updated?plan=${selectedNewPlan.type}&duration=${selectedNewPlan.duration}`);
           }
         }, 15000); // 15秒
       }
@@ -340,6 +340,7 @@ const SubscriptionPage: React.FC = () => {
                 features={plan.features}
                 recommended={plan.recommended}
                 isCurrentPlan={isCurrentPlan}
+                isCanceled={isCurrentPlan && cancelAtPeriodEnd}
                 onSubscribe={handleSubscribe}
                 isLoading={isLoading}
                 isSubscribed={isSubscribed}

@@ -50,20 +50,22 @@ export const SubscriptionSuccessContent: React.FC<SubscriptionSuccessContentProp
   const getFullPlanName = (plan: PlanType | null, d: 1 | 3 | null | undefined) => {
     const planName = getPlanName(plan);
     const durationText = getDurationText(d);
-    return durationText ? `${planName} ${durationText}` : planName;
+    // 期間がある場合: 「スタンダードプラン（3ヶ月）」
+    // 期間がない場合: 「スタンダードプラン」
+    return durationText ? `${planName}プラン（${durationText}）` : `${planName}プラン`;
   };
 
   // タイプに応じたテキスト
   const texts = {
     new: {
       title: '決済が完了しました',
-      subtitle: planType ? `${getFullPlanName(planType, duration)}プランへようこそ！` : '',
+      subtitle: planType ? `${getFullPlanName(planType, duration)}へようこそ！` : '',
       description: 'サブスクリプションが有効になりました。すべてのプレミアムコンテンツにアクセスできます。',
       loadingText: '決済情報を確認しています...',
     },
     updated: {
       title: 'プラン変更が完了しました',
-      subtitle: planType ? `${getFullPlanName(planType, duration)}プランへの変更が完了しました` : '',
+      subtitle: planType ? `${getFullPlanName(planType, duration)}への変更が完了しました` : '',
       description: '新しいプランが適用されました。引き続きサービスをお楽しみください。',
       loadingText: 'プラン変更を確認しています...',
     },
