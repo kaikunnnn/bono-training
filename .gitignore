@@ -12,7 +12,7 @@ dist
 dist-ssr
 *.local
 
-# Environment variables
+# Environment variables (contains secrets)
 .env
 .env.local
 .env.*.local
@@ -27,3 +27,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Migration data (contains sensitive information)
+stripe-customers.csv
+stripe-subscriptions.csv
+migration-errors-*.json
+
+# Supabase
+supabase/.temp/

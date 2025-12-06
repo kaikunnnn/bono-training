@@ -1,6 +1,6 @@
 
-export type PlanType = 'standard' | 'growth' | 'community';
-export type PlanDuration = 1 | 3 | 6; // 月単位
+export type PlanType = 'standard' | 'feedback'; // .envに合わせて修正
+export type PlanDuration = 1 | 3; // .envに合わせて修正（1ヶ月 or 3ヶ月）
 export type ContentAccessType = 'learning' | 'member'; // 'training'を削除し、'member'に統一
 
 // プランの情報
@@ -12,55 +12,41 @@ export interface PlanInfo {
   pricePerMonth: number; // 月額価格（単位: 円）
 }
 
-// コンテンツアクセス権限の設定（仕様通りに修正）
+// コンテンツアクセス権限の設定（.envに合わせて修正）
 export const CONTENT_PERMISSIONS: Record<ContentAccessType, PlanType[]> = {
-  learning: ['standard', 'growth'], // learningは標準・成長プランのみ
-  member: ['standard', 'growth', 'community'], // memberは全有料プランでアクセス可能
+  learning: ['standard', 'feedback'], // learningは両プランでアクセス可能
+  member: ['standard', 'feedback'], // memberは両プランでアクセス可能
 };
 
-// 利用可能なプラン定義
+// 利用可能なプラン定義（.envに合わせて修正）
 export const AVAILABLE_PLANS: PlanInfo[] = [
   {
     type: 'standard',
     duration: 1,
     displayName: 'スタンダード（1ヶ月）',
-    description: '基本的な機能が利用できる標準プラン（1ヶ月）',
+    description: '全てのコンテンツにアクセスできる基本プラン',
     pricePerMonth: 4000
   },
   {
     type: 'standard',
     duration: 3,
     displayName: 'スタンダード（3ヶ月）',
-    description: '基本的な機能が利用できる標準プラン（3ヶ月）',
+    description: '全てのコンテンツにアクセスできる基本プラン（3ヶ月で割引）',
     pricePerMonth: 3800 // 3ヶ月契約で月額割引
   },
   {
-    type: 'growth',
+    type: 'feedback',
     duration: 1,
-    displayName: 'グロース（1ヶ月）',
-    description: '成長のための追加機能が利用できるプラン（1ヶ月）',
-    pricePerMonth: 9800
-  },
-  {
-    type: 'growth',
-    duration: 3,
-    displayName: 'グロース（3ヶ月）',
-    description: '成長のための追加機能が利用できるプラン（3ヶ月）',
-    pricePerMonth: 9300 // 3ヶ月契約で月額割引
-  },
-  {
-    type: 'community',
-    duration: 1,
-    displayName: 'コミュニティ（1ヶ月）',
-    description: 'コミュニティ機能を含む全機能が利用できるプラン（1ヶ月）',
+    displayName: 'フィードバック（1ヶ月）',
+    description: '全コンテンツ + フィードバック機能が利用できるプラン',
     pricePerMonth: 1480
   },
   {
-    type: 'community',
-    duration: 6,
-    displayName: 'コミュニティ（6ヶ月）',
-    description: 'コミュニティ機能を含む全機能が利用できるプラン（6ヶ月）',
-    pricePerMonth: 1280 // 6ヶ月契約で月額割引
+    type: 'feedback',
+    duration: 3,
+    displayName: 'フィードバック（3ヶ月）',
+    description: '全コンテンツ + フィードバック機能が利用できるプラン（3ヶ月で割引）',
+    pricePerMonth: 1280 // 3ヶ月契約で月額割引
   }
 ];
 
@@ -161,5 +147,55 @@ export function getPlanBenefits(planType: PlanType | null): string[] {
  */
 export function isValidPlanType(planType: string | null | undefined): planType is PlanType {
   if (!planType) return false;
-  return ['standard', 'growth', 'community'].includes(planType);
+  return ['standard', 'feedback'].includes(planType);
+}
+
+/**
+ * プランの月額料金を取得する
+ *
+ * @param planType - プランタイプ
+ * @param duration - 契約期間（1ヶ月 or 3ヶ月）
+ * @returns 月額料金（円）
+ *
+ * @example
+ * ```typescript
+ * getPlanMonthlyPrice('standard', 1); // 4000
+ * getPlanMonthlyPrice('feedback', 3); // 1280
+ * ```
+ */
+export function getPlanMonthlyPrice(
+  planType: PlanType,
+  duration: PlanDuration
+): number {
+  const plan = AVAILABLE_PLANS.find(
+    (p) => p.type === planType && p.duration === duration
+  );
+
+  if (!plan) {
+    console.error('プランが見つかりません:', { planType, duration });
+    return 0;
+  }
+
+  return plan.pricePerMonth;
+}
+
+/**
+ * プラン名を取得する
+ *
+ * @param planType - プランタイプ
+ * @returns プラン表示名
+ *
+ * @example
+ * ```typescript
+ * getPlanDisplayName('standard'); // 'スタンダード'
+ * getPlanDisplayName('feedback'); // 'フィードバック'
+ * ```
+ */
+export function getPlanDisplayName(planType: PlanType): string {
+  const planNames: Record<PlanType, string> = {
+    standard: 'スタンダード',
+    feedback: 'フィードバック',
+  };
+
+  return planNames[planType] || planType;
 }

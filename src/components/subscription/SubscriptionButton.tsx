@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { createCheckoutSession } from '@/services/stripe';
-import { getCurrentPlan } from '@/utils/stripe';
+import { getPlanInfo } from '@/utils/stripe';
 import { PlanType } from '@/utils/subscriptionPlans';
 
 interface SubscriptionButtonProps {
@@ -72,11 +72,11 @@ export const SubscriptionButton: React.FC<SubscriptionButtonProps> = ({
     }
   };
   
-  const plan = getCurrentPlan(isTest);
-  
+  const plan = getPlanInfo(planType, duration);
+
   return (
-    <Button 
-      onClick={handleSubscribe} 
+    <Button
+      onClick={handleSubscribe}
       disabled={loading}
       className="w-full"
     >

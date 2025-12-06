@@ -29,6 +29,23 @@ import TrainingAbout from "./pages/Training/About";
 import TrainingLogin from "./pages/Training/Login";
 import TrainingSignup from "./pages/Training/Signup";
 import TrainingDebug from '@/pages/Training/Debug';
+import Lessons from "./pages/Lessons";
+import GuidePage from "./pages/Guide";
+import GuideDetailPage from "./pages/Guide/GuideDetail";
+import DevRoute from "./pages/Dev";
+import DevHome from "./pages/Dev/DevHome";
+import ComponentsReferencePage from "./pages/Dev/Components";
+import WebflowTest from "./pages/Dev/WebflowTest";
+import GuideManual from "./pages/Dev/GuideManual";
+import LessonDetail from "./pages/LessonDetail";
+import ArticleDetail from "./pages/ArticleDetail";
+import SanityTest from "./pages/SanityTest";
+import MyPage from "./pages/MyPage";
+import Account from "./pages/Account";
+import SubscriptionSuccess from "./pages/SubscriptionSuccess";
+import SubscriptionUpdated from "./pages/SubscriptionUpdated";
+import DevEnvironmentBanner from "./components/dev/DevEnvironmentBanner";
+// Blog pages
 import ComponentsPreview from './pages/blog/components-preview';
 import BlogIndex from './pages/blog/index';
 import BlogDetail from './pages/blog/detail';
@@ -41,12 +58,12 @@ console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undef
 const AppContent = () => {
   const location = useLocation();
   const urlPlan = new URLSearchParams(location.search).get('plan');
-  
+
   // ページ遷移時にスクロール位置をリセット
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
-  
+
   // クエリパラメータに基づいてモックのサブスクリプション状態を生成
   const mockSubscription = urlPlan ? {
     planType: urlPlan as PlanType,
@@ -73,7 +90,7 @@ const AppContent = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        
+
         <Route path="/training" element={<TrainingHome />} />
         <Route path="/training/login" element={<TrainingLogin />} />
         <Route path="/training/signup" element={<TrainingSignup />} />
@@ -83,21 +100,37 @@ const AppContent = () => {
         <Route path="/training/about" element={<TrainingAbout />} />
         <Route path="/training/debug" element={<TrainingDebug />} />
 
+        <Route path="/guide" element={<GuidePage />} />
+        <Route path="/guide/:slug" element={<GuideDetailPage />} />
+
+        <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
+        <Route path="/dev/components" element={<DevRoute><ComponentsReferencePage /></DevRoute>} />
+        <Route path="/dev/webflow-test" element={<DevRoute><WebflowTest /></DevRoute>} />
+        <Route path="/dev/guide-manual" element={<DevRoute><GuideManual /></DevRoute>} />
+        <Route path="/dev/blog" element={<DevRoute><BlogGuide /></DevRoute>} />
+
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
         <Route path="/blog/category/:category" element={<CategoryPage />} />
         <Route path="/blog/:slug" element={<BlogDetail />} />
 
-        <Route path="/dev/blog" element={<BlogGuide />} />
-
         <Route path="/subscription" element={<PrivateRoute><Subscription /></PrivateRoute>} />
+        <Route path="/subscription/success" element={<PrivateRoute><SubscriptionSuccess /></PrivateRoute>} />
+        <Route path="/subscription/updated" element={<PrivateRoute><SubscriptionUpdated /></PrivateRoute>} />
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-        
+        <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
+        <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
+
+        <Route path="/lessons" element={<Lessons />} />
+        <Route path="/lessons/:slug" element={<LessonDetail />} />
+        <Route path="/articles/:slug" element={<ArticleDetail />} />
+        <Route path="/sanity-test" element={<SanityTest />} />
+
         <Route path="/content" element={<Content />} />
         <Route path="/content/:id" element={<ContentDetail />} />
-        
+
         <Route path="/video-detail-test/:id" element={<VideoDetailTest />} />
-        
+
         <Route path="/paid-only" element={
           <ProtectedPremiumRoute>
             <PaidContent />
@@ -120,6 +153,7 @@ const App = () => {
           <AuthProvider>
             <Toaster />
             <Sonner />
+            <DevEnvironmentBanner />
             <BrowserRouter>
               <AppContent />
             </BrowserRouter>

@@ -1,4 +1,5 @@
 import type { Config } from 'tailwindcss'
+import tailwindcssAnimate from 'tailwindcss-animate'
 
 const config = {
   darkMode: ["class"],
@@ -80,6 +81,40 @@ const config = {
             'middle': 'hsl(var(--training-gradient-middle))',
             'end': 'hsl(var(--training-gradient-end))'
           }
+        },
+        'lesson': {
+          // Hero Section
+          'hero-gradient-start': 'rgba(253, 251, 245, 0.88)',
+          'hero-gradient-mid': 'rgba(244, 232, 223, 1)',
+          'hero-gradient-end': 'rgba(239, 237, 255, 0.08)',
+          'hero-overlay': 'rgba(0, 0, 0, 0.2)',
+          'hero-text': '#0D221D',
+          'hero-nav-text': '#909090',
+
+          // Quest Section
+          'quest-title': '#151834',
+          'quest-detail': '#6F7178',
+          'quest-meta': '#7D8691',
+          'quest-border': 'rgba(0, 0, 0, 0.06)',
+          'quest-card-bg': '#FFFFFF',
+          'quest-divider': '#EEEEEE',
+
+          // Content Item
+          'item-number': '#414141',
+          'item-title': '#5A5A5A',
+          'item-duration': '#8C8C8C',
+          'item-thumbnail-bg': '#E0DFDF',
+
+          // Tab
+          'tab-active': '#000000',
+          'tab-inactive': '#737373',
+          'tab-border': 'rgba(0, 0, 0, 0.1)',
+
+          // Overview Tab
+          'overview-heading': '#151834',
+          'overview-text': '#0D0F18',
+          'overview-checkbox-bg': '#FAFAFA',
+          'overview-image-bg': '#F3F3F3',
         }
       },
       borderRadius: {
@@ -88,8 +123,13 @@ const config = {
         sm: 'calc(var(--radius) - 4px)',
         'training-card': '1.5rem'
       },
+      backgroundImage: {
+        'hero-gradient': 'linear-gradient(252deg, rgba(253, 251, 245, 0.88) 15%, rgba(244, 232, 223, 1) 55%, rgba(239, 237, 255, 0.08) 94%)',
+      },
       boxShadow: {
-        'training-card': '0 4px 20px rgba(0,0,0,0.08)'
+        'training-card': '0 4px 20px rgba(0,0,0,0.08)',
+        'quest-card': '1px 1px 4px 0px rgba(0, 0, 0, 0.08)',
+        'hero-icon': '1px 1px 13.56px 0px rgba(0, 0, 0, 0.33)',
       },
       keyframes: {
         'accordion-down': {
@@ -169,6 +209,8 @@ const config = {
         'rounded-mplus': ['M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'rounded-mplus-bold': ['M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', 'sans-serif'],
         'dot': ['DotGothic16', 'monospace'],
+        'geist': ['Inter', 'sans-serif'], // Geistの代わりにInterを使用
+        'luckiest': ['Luckiest Guy', 'sans-serif'],
       },
       // アイコンブロック用のカスタムクラス
       extend: {
@@ -183,7 +225,7 @@ const config = {
       }
     }
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config
 
 export default config

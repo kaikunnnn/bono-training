@@ -1,133 +1,372 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import { createCheckoutSession } from '@/services/stripe';
+import { createCheckoutSession, updateSubscription } from '@/services/stripe';
 import { PlanType } from '@/utils/subscriptionPlans';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import PlanCard from '@/components/subscription/PlanCard';
 import PlanComparison from '@/components/subscription/PlanComparison';
 import SubscriptionHeader from '@/components/subscription/SubscriptionHeader';
+import { formatPlanDisplay } from '@/utils/planDisplay';
+import { PlanChangeConfirmModal, ModalState } from '@/components/subscription/PlanChangeConfirmModal';
+import { getPlanPrices, PlanPrices } from '@/services/pricing';
+import { supabase } from '@/integrations/supabase/client';
 
 const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { isSubscribed, planType } = useSubscriptionContext();
+  const { user } = useAuth();
+  const { isSubscribed, planType, duration: currentDuration, renewalDate, cancelAtPeriodEnd } = useSubscriptionContext();
   const [isLoading, setIsLoading] = useState(false);
-  
-  // 料金プラン情報
-  const plans = [
+  const [selectedDuration, setSelectedDuration] = useState<1 | 3>(1); // 期間選択の状態
+
+  // プラン変更確認モーダル用の状態
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [modalState, setModalState] = useState<ModalState>('confirm');
+  const [modalErrorMessage, setModalErrorMessage] = useState<string>('');
+  const [selectedNewPlan, setSelectedNewPlan] = useState<{
+    type: PlanType;
+    duration: 1 | 3;
+  } | null>(null);
+
+  // 料金データの状態
+  const [planPrices, setPlanPrices] = useState<PlanPrices | null>(null);
+  const [pricesLoading, setPricesLoading] = useState(true);
+
+  // Success URL処理: プラン変更完了時のトースト表示
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get('updated') === 'true') {
+      toast({
+        title: "プランを変更しました",
+        description: "サブスクリプションの変更が完了しました。",
+      });
+      // URLをクリーンアップ
+      window.history.replaceState({}, '', '/subscription');
+    }
+  }, [toast]);
+
+  // 料金を取得
+  useEffect(() => {
+    async function fetchPrices() {
+      setPricesLoading(true);
+      const { prices, source, error } = await getPlanPrices();
+
+      if (!error && prices) {
+        setPlanPrices(prices);
+        console.log(`✅ 料金取得成功 (source: ${source}):`, prices);
+      } else {
+        console.error('❌ 料金取得失敗:', error);
+        toast({
+          title: "料金情報の取得に失敗しました",
+          description: "ページを再読み込みしてください。",
+          variant: "destructive",
+        });
+      }
+
+      setPricesLoading(false);
+    }
+
+    fetchPrices();
+  }, [toast]);
+
+  // 料金プラン情報（Stripeから動的に取得）
+  const plans = planPrices ? [
     {
       id: 'standard',
       name: 'スタンダード',
-      description: '基本的な学習コンテンツへのアクセス',
-      price: '4,000円/月',
+      description: '全てのコンテンツにアクセスできる基本プラン',
+      durations: [
+        {
+          months: 1,
+          price: planPrices.standard_1m.unit_amount,
+          priceLabel: `¥${planPrices.standard_1m.unit_amount.toLocaleString()}/月`
+        },
+        {
+          months: 3,
+          price: planPrices.standard_3m.unit_amount,
+          priceLabel: `¥${planPrices.standard_3m.unit_amount.toLocaleString()}/月（3ヶ月）`
+        }
+      ],
       features: {
         learning: true,
-        member: false,
-        training: false
+        member: true,
+        training: true
       },
       recommended: false
     },
     {
-      id: 'growth',
-      name: 'グロース',
-      description: '全ての機能とコンテンツへのアクセス',
-      price: '9,800円/月',
+      id: 'feedback',
+      name: 'フィードバック',
+      description: '全コンテンツ + フィードバック機能が利用できるプラン',
+      durations: [
+        {
+          months: 1,
+          price: planPrices.feedback_1m.unit_amount,
+          priceLabel: `¥${planPrices.feedback_1m.unit_amount.toLocaleString()}/月`
+        },
+        {
+          months: 3,
+          price: planPrices.feedback_3m.unit_amount,
+          priceLabel: `¥${planPrices.feedback_3m.unit_amount.toLocaleString()}/月（3ヶ月）`
+        }
+      ],
       features: {
         learning: true,
         member: true,
         training: true
       },
       recommended: true
-    },
-    {
-      id: 'community',
-      name: 'コミュニティ',
-      description: 'メンバーコミュニティへの参加',
-      price: '1,480円/月',
-      features: {
-        learning: true,
-        member: true,
-        training: false
-      },
-      recommended: false
     }
-  ];
+  ] : null;
 
   const handleSubscribe = async (selectedPlanType: PlanType) => {
     setIsLoading(true);
     try {
-      // ユーザーの現在地を保存し、チェックアウト後に戻れるようにする
-      const returnUrl = window.location.origin + '/subscription/success';
-      
-      const { url, error } = await createCheckoutSession(returnUrl);
-      
-      if (error) {
-        throw error;
-      }
-      
-      if (url) {
-        // Stripeチェックアウトページにリダイレクト
-        window.location.href = url;
+      // 既存契約者かどうかで分岐
+      if (isSubscribed) {
+        // 既存契約者 → 確認モーダルを表示
+        console.log('既存契約者: プラン変更確認モーダルを表示します', {
+          currentPlan: planType,
+          currentDuration: currentDuration,
+          selectedPlan: selectedPlanType,
+          selectedDuration: selectedDuration
+        });
+
+        // モーダル表示
+        setSelectedNewPlan({
+          type: selectedPlanType,
+          duration: selectedDuration,
+        });
+        setShowConfirmModal(true);
+        setIsLoading(false);
+      } else {
+        // 新規ユーザー → Checkoutに遷移
+        console.log('新規ユーザー: Checkoutに遷移します', {
+          planType: selectedPlanType,
+          duration: selectedDuration
+        });
+
+        const returnUrl = window.location.origin + '/subscription/success';
+        const { url, error } = await createCheckoutSession(returnUrl, selectedPlanType, selectedDuration);
+
+        if (error) {
+          throw error;
+        }
+
+        if (url) {
+          window.location.href = url;
+        }
+        setIsLoading(false);
       }
     } catch (error) {
       console.error('購読エラー:', error);
       toast({
         title: "エラーが発生しました",
-        description: "決済処理の開始に失敗しました。もう一度お試しください。",
+        description: error instanceof Error ? error.message : "処理の開始に失敗しました。もう一度お試しください。",
         variant: "destructive",
       });
-    } finally {
       setIsLoading(false);
     }
   };
-  
-  // 現在のプランを取得
-  const getCurrentPlanName = () => {
-    if (!isSubscribed || !planType) return 'フリープラン';
-    
-    const planMap: Record<PlanType, string> = {
-      standard: 'スタンダード',
-      growth: 'グロース',
-      community: 'コミュニティ'
-    };
-    
-    return planMap[planType] || 'フリープラン';
+
+  /**
+   * プラン変更確認モーダルで「確定」ボタンが押されたときの処理
+   * モーダル内で処理中表示 → 成功時はサクセスページへ遷移
+   */
+  const handleConfirmPlanChange = async () => {
+    if (!selectedNewPlan) return;
+
+    // モーダルを処理中状態に変更
+    setModalState('processing');
+    setIsLoading(true);
+
+    try {
+      console.log('プラン変更を確定します', {
+        currentPlan: planType,
+        currentDuration: currentDuration,
+        newPlan: selectedNewPlan.type,
+        newDuration: selectedNewPlan.duration
+      });
+
+      // update-subscription APIでプラン変更
+      const { success, error } = await updateSubscription(
+        selectedNewPlan.type,
+        selectedNewPlan.duration
+      );
+
+      if (error) {
+        throw error;
+      }
+
+      if (success) {
+        if (!user) {
+          console.error('❌ ユーザー情報が取得できません');
+          throw new Error('ユーザー情報が取得できません');
+        }
+
+        let updateDetected = false;
+        let timeoutId: NodeJS.Timeout | undefined = undefined;
+
+        // プラン変更を検知するためのチャンネルを個別に設定
+        const changeDetectionChannel = supabase
+          .channel('plan_change_detection')
+          .on('postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'user_subscriptions',
+              filter: `user_id=eq.${user.id}`
+            },
+            (payload) => {
+              console.log('✅ プラン変更をRealtime検知:', payload);
+              updateDetected = true;
+
+              // タイムアウトをクリア
+              if (timeoutId) {
+                clearTimeout(timeoutId);
+              }
+
+              // チャンネルをクリーンアップ
+              changeDetectionChannel.unsubscribe();
+
+              // サクセスページへ遷移
+              navigate(`/subscription/updated?plan=${selectedNewPlan.type}&duration=${selectedNewPlan.duration}`);
+            }
+          )
+          .subscribe();
+
+        // 15秒のタイムアウト設定
+        // APIは成功しているので、タイムアウト時もサクセスページへ遷移
+        timeoutId = setTimeout(() => {
+          if (!updateDetected) {
+            console.log('ℹ️ プラン変更のRealtime検出タイムアウト（15秒経過）- APIは成功済み');
+            changeDetectionChannel.unsubscribe();
+
+            // サクセスページへ遷移
+            navigate(`/subscription/updated?plan=${selectedNewPlan.type}&duration=${selectedNewPlan.duration}`);
+          }
+        }, 15000); // 15秒
+      }
+    } catch (error) {
+      console.error('プラン変更エラー:', error);
+      // モーダルをエラー状態に変更
+      setModalState('error');
+      setModalErrorMessage(
+        error instanceof Error ? error.message : 'プラン変更に失敗しました。もう一度お試しください。'
+      );
+      setIsLoading(false);
+    }
   };
-  
+
+  /**
+   * プラン変更確認モーダルで「キャンセル」ボタンが押されたときの処理
+   */
+  const handleCancelPlanChange = () => {
+    setShowConfirmModal(false);
+    setSelectedNewPlan(null);
+    setModalState('confirm');
+    setModalErrorMessage('');
+    setIsLoading(false);
+  };
+
+  // formatPlanDisplayをimportして使用するため、getCurrentPlanName関数は不要
+
+  // ローディング中の表示
+  if (pricesLoading || !plans) {
+    return (
+      <Layout>
+        <div className="container py-8 max-w-5xl">
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+              <p className="text-muted-foreground">料金プランを読み込み中...</p>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="container py-8 max-w-5xl">
-        <SubscriptionHeader 
-          isSubscribed={isSubscribed} 
-          currentPlanName={getCurrentPlanName()} 
+        <SubscriptionHeader
+          isSubscribed={isSubscribed}
+          currentPlanName={formatPlanDisplay(planType, currentDuration)}
         />
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        {/* 期間選択タブ（ページ全体） */}
+        <div className="flex justify-center mb-8">
+          <Tabs
+            value={selectedDuration.toString()}
+            onValueChange={(value) => setSelectedDuration(Number(value) as 1 | 3)}
+            className="w-auto"
+          >
+            <TabsList className="grid w-[300px] grid-cols-2">
+              <TabsTrigger value="1" className="font-noto-sans-jp">
+                1ヶ月
+              </TabsTrigger>
+              <TabsTrigger value="3" className="font-noto-sans-jp">
+                3ヶ月
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {plans.map((plan) => {
-            const isCurrentPlan = isSubscribed && planType === plan.id;
-            
+            // 現在のプランと完全に一致する場合のみ「現在のプラン」と判定
+            // プランタイプと期間の両方が一致する必要がある
+            const isCurrentPlan = isSubscribed &&
+                                  planType === plan.id &&
+                                  currentDuration === selectedDuration;
+            const selectedPriceInfo = plan.durations.find(d => d.months === selectedDuration) || plan.durations[0];
+
             return (
-              <PlanCard 
+              <PlanCard
                 key={plan.id}
                 id={plan.id}
                 name={plan.name}
                 description={plan.description}
-                price={plan.price}
+                price={selectedPriceInfo.price}
+                priceLabel={selectedPriceInfo.priceLabel}
+                duration={selectedDuration}
                 features={plan.features}
                 recommended={plan.recommended}
                 isCurrentPlan={isCurrentPlan}
+                isCanceled={isCurrentPlan && cancelAtPeriodEnd}
                 onSubscribe={handleSubscribe}
                 isLoading={isLoading}
+                isSubscribed={isSubscribed}
               />
             );
           })}
         </div>
-        
+
         <PlanComparison />
       </div>
+
+      {/* プラン変更確認モーダル */}
+      {showConfirmModal && selectedNewPlan && planType && currentDuration && renewalDate && (
+        <PlanChangeConfirmModal
+          currentPlan={{
+            type: planType,
+            duration: currentDuration as 1 | 3,
+          }}
+          newPlan={selectedNewPlan}
+          currentPeriodEnd={new Date(renewalDate)}
+          onConfirm={handleConfirmPlanChange}
+          onCancel={handleCancelPlanChange}
+          modalState={modalState}
+          errorMessage={modalErrorMessage}
+        />
+      )}
     </Layout>
   );
 };

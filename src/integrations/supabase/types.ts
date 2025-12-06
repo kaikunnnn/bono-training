@@ -202,6 +202,84 @@ export type Database = {
         }
         Relationships: []
       }
+      article_bookmarks: {
+        Row: {
+          user_id: string
+          article_id: string
+          created_at: string
+        }
+        Insert: {
+          user_id: string
+          article_id: string
+          created_at?: string
+        }
+        Update: {
+          user_id?: string
+          article_id?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      article_progress: {
+        Row: {
+          user_id: string
+          article_id: string
+          lesson_id: string
+          status: 'not_started' | 'in_progress' | 'completed'
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          article_id: string
+          lesson_id: string
+          status?: 'not_started' | 'in_progress' | 'completed'
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          article_id?: string
+          lesson_id?: string
+          status?: 'not_started' | 'in_progress' | 'completed'
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      lesson_progress: {
+        Row: {
+          user_id: string
+          lesson_id: string
+          status: 'not_started' | 'in_progress' | 'completed'
+          started_at: string | null
+          completed_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          user_id: string
+          lesson_id: string
+          status?: 'not_started' | 'in_progress' | 'completed'
+          started_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          user_id?: string
+          lesson_id?: string
+          status?: 'not_started' | 'in_progress' | 'completed'
+          started_at?: string | null
+          completed_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

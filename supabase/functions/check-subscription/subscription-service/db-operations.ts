@@ -1,6 +1,6 @@
 
 import { UserSubscription } from "../types.ts";
-import { logDebug } from "../utils.ts";
+import { logDebug, getCurrentEnvironment } from "../utils.ts";
 import type { SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 /**
@@ -19,23 +19,50 @@ export class DbOperations {
         return null;
       }
 
-      const { data, error } = await this.supabaseAdmin
+      // 現在の環境を判定
+      const environment = getCurrentEnvironment();
+      logDebug("購読情報取得開始", { userId, environment });
+
+      // まず指定された環境で検索
+      let { data, error } = await this.supabaseAdmin
         .from("user_subscriptions")
         .select("*")
         .eq("user_id", userId)
-        .single();
+        .eq("environment", environment)
+        .maybeSingle();
 
       if (error) {
         logDebug("データベースからの購読情報取得エラー", error);
         return null;
       }
 
+      // 見つからなければ逆の環境でも検索（フォールバック）
       if (!data) {
-        logDebug("購読情報が見つかりません", { userId });
+        const fallbackEnvironment = environment === 'test' ? 'live' : 'test';
+        logDebug("フォールバック検索", { userId, fallbackEnvironment });
+
+        const fallbackResult = await this.supabaseAdmin
+          .from("user_subscriptions")
+          .select("*")
+          .eq("user_id", userId)
+          .eq("environment", fallbackEnvironment)
+          .maybeSingle();
+
+        data = fallbackResult.data;
+        error = fallbackResult.error;
+
+        if (error) {
+          logDebug("フォールバック検索エラー", error);
+          return null;
+        }
+      }
+
+      if (!data) {
+        logDebug("購読情報が見つかりません（両環境）", { userId });
         return null;
       }
 
-      logDebug("データベースから購読情報を取得", data);
+      logDebug("データベースから購読情報を取得", { data, environment: data.environment });
       return data;
     } catch (err) {
       logDebug("予期せぬエラー - getUserSubscription", err);
