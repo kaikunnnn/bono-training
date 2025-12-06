@@ -16,16 +16,10 @@ const corsHeaders = {
 // 環境変数から環境を取得（デフォルトはtest）
 const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
 
-// プランタイプと金額に基づいてメンバーアクセス権を判定
-function determineMembershipAccess(planType: string, amount?: number): boolean {
-  if (planType === "community") {
-    return true;
-  } else if (planType === "standard" || planType === "growth") {
-    return true;
-  } else if (amount) {
-    return amount >= 1000;
-  }
-  return false;
+// プランタイプに基づいてメンバーアクセス権を判定
+function determineMembershipAccess(planType: string): boolean {
+  // standardとfeedbackプランはメンバーアクセス権あり
+  return planType === "standard" || planType === "feedback";
 }
 
 serve(async (req) => {
@@ -161,7 +155,7 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       amount = items[0].price.unit_amount;
     }
 
-    const hasMemberAccess = determineMembershipAccess(planType, amount);
+    const hasMemberAccess = determineMembershipAccess(planType);
 
     // 既存のアクティブサブスクリプションを非アクティブ化
     console.log(`🧪 [TEST環境] ユーザー ${userId} の既存アクティブサブスクリプションを確認`);
@@ -309,7 +303,7 @@ async function handleInvoicePaid(stripe: any, supabase: any, invoice: any) {
       duration = 1;
     }
 
-    const hasMemberAccess = determineMembershipAccess(planType, amount);
+    const hasMemberAccess = determineMembershipAccess(planType);
 
     // サブスクリプション情報を更新（環境フィルタ付き）
     const { data: subData, error: subError } = await supabase
