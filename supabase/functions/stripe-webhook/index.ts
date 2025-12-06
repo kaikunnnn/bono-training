@@ -18,16 +18,10 @@ const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
 console.log(`🔍 [DEBUG] STRIPE_MODE env var: ${Deno.env.get('STRIPE_MODE')}`);
 console.log(`🔍 [DEBUG] ENVIRONMENT: ${ENVIRONMENT}`);
 
-// プランタイプと金額に基づいてメンバーアクセス権を判定
-function determineMembershipAccess(planType: string, amount?: number): boolean {
+// プランタイプに基づいてメンバーアクセス権を判定
+function determineMembershipAccess(planType: string): boolean {
   // standardとfeedbackプランはメンバーアクセス権あり
-  if (planType === "standard" || planType === "feedback") {
-    return true;
-  } else if (amount) {
-    // プランタイプが不明な場合は金額で判断（1000円以上）
-    return amount >= 1000;
-  }
-  return false;
+  return planType === "standard" || planType === "feedback";
 }
 
 serve(async (req) => {
@@ -291,7 +285,7 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
     }
     
     // メンバーアクセス権を判定
-    const hasMemberAccess = determineMembershipAccess(planType, amount);
+    const hasMemberAccess = determineMembershipAccess(planType);
 
     // ユーザーIDを取得
     const userId = session.metadata?.user_id || subscription.metadata?.user_id;
@@ -464,7 +458,7 @@ async function handleInvoicePaid(stripe: any, supabase: any, invoice: any) {
       duration = 1;
     }
 
-    const hasMemberAccess = determineMembershipAccess(planType, amount);
+    const hasMemberAccess = determineMembershipAccess(planType);
 
     // サブスクリプション情報を更新（環境フィルタ付き）
     const { data: subData, error: subError } = await supabase
