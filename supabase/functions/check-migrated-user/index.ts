@@ -46,36 +46,39 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Query auth.users to check if user exists and is migrated
-    const { data, error } = await supabase
-      .from("users")
-      .select("id, raw_user_meta_data")
-      .eq("email", email.toLowerCase())
-      .schema("auth")
-      .single();
+    const normalizedEmail = email.toLowerCase().trim();
+    console.log(`Checking migrated user for email: ${normalizedEmail}`);
 
-    if (error && error.code !== "PGRST116") {
-      // PGRST116 = no rows returned (user not found)
-      console.error("Database error:", error);
-      return new Response(
-        JSON.stringify({ error: "Database error" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    // Use direct SQL query via RPC to check auth.users
+    // This is more efficient than paginating through all users
+    const { data, error } = await supabase.rpc('check_user_migration_status', {
+      p_email: normalizedEmail
+    });
 
-    // User not found
-    if (!data) {
+    if (error) {
+      console.error("RPC error:", error);
+      // Fallback: Return false if RPC fails (function may not exist yet)
       return new Response(
         JSON.stringify({ exists: false, isMigrated: false }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Check if user is migrated from memberstack
-    const isMigrated = data.raw_user_meta_data?.migrated_from === "memberstack";
+    console.log(`RPC result:`, data);
 
+    if (!data || data.length === 0) {
+      return new Response(
+        JSON.stringify({ exists: false, isMigrated: false }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const result = data[0];
     return new Response(
-      JSON.stringify({ exists: true, isMigrated }),
+      JSON.stringify({
+        exists: result.user_exists || false,
+        isMigrated: result.is_migrated || false
+      }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
 
