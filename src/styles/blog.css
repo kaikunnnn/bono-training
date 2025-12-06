@@ -1,0 +1,383 @@
+/**
+ * BONO Blog - 専用スタイルシート
+ *
+ * 99frontend 仕様に基づくスタイル定義
+ * 参照: .claude/docs/blog/99frontend/
+ */
+
+/* ========================================
+   CSS カスタムプロパティ（Design Tokens）
+   ======================================== */
+
+:root {
+  /* カラー */
+  --blog-color-hero-bg: #E8E6EA;
+  --blog-color-white: #FFFFFF;
+  --blog-color-thumbnail-bg: #D6E3FF;
+  --blog-color-dark-blue: #0F172A;
+  --blog-color-ebony: #151834;
+  --blog-color-gray: #9CA3AF;
+  --blog-color-border: #E5E7EB;
+
+  /* シャドウ */
+  --blog-shadow-light: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  --blog-shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --blog-shadow-hover: 0px 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* フォント */
+  --blog-font-title: 'Noto Sans JP', sans-serif;
+  --blog-font-meta: 'Hind', sans-serif;
+
+  /* スペーシング */
+  --blog-header-height: 74.07px;
+  --blog-hero-height-desktop: 381px;
+  --blog-hero-height-tablet: 340px;
+  --blog-hero-height-mobile: 280px;
+  --blog-card-width: 1120px;
+  --blog-card-height: 159px;
+
+  /* トランジション */
+  --blog-transition-fast: 0.2s ease;
+  --blog-transition-normal: 0.3s ease;
+  --blog-transition-slow: 0.5s ease;
+}
+
+/* ========================================
+   グローバルスタイル
+   ======================================== */
+
+/* フォントスムージング */
+.blog-page {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* スクロールバーのスタイリング（Webkit） */
+.blog-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.blog-page::-webkit-scrollbar-track {
+  background: var(--blog-color-white);
+}
+
+.blog-page::-webkit-scrollbar-thumb {
+  background: var(--blog-color-gray);
+  border-radius: 4px;
+}
+
+.blog-page::-webkit-scrollbar-thumb:hover {
+  background: var(--blog-color-dark-blue);
+}
+
+/* ========================================
+   ホバー効果
+   ======================================== */
+
+/* カードホバー効果 */
+.blog-card-hover {
+  transition: all var(--blog-transition-normal);
+}
+
+.blog-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--blog-shadow-hover);
+}
+
+/* リンクホバー効果 */
+.blog-link-hover {
+  transition: opacity var(--blog-transition-fast);
+}
+
+.blog-link-hover:hover {
+  opacity: 0.8;
+}
+
+/* ボタンホバー効果 */
+.blog-button-hover {
+  transition: all var(--blog-transition-fast);
+}
+
+.blog-button-hover:hover {
+  background-color: var(--blog-color-dark-blue);
+  color: var(--blog-color-white);
+}
+
+/* ========================================
+   アニメーション
+   ======================================== */
+
+/* フェードイン */
+@keyframes blog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.blog-fade-in {
+  animation: blog-fade-in 0.5s ease-out;
+}
+
+/* スライドアップ */
+@keyframes blog-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.blog-slide-up {
+  animation: blog-slide-up 0.6s ease-out;
+}
+
+/* スケールイン */
+@keyframes blog-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.blog-scale-in {
+  animation: blog-scale-in 0.4s ease-out;
+}
+
+/* ========================================
+   ユーティリティクラス
+   ======================================== */
+
+/* テキスト切り詰め（1行） */
+.blog-text-truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* テキスト切り詰め（2行） */
+.blog-text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* テキスト切り詰め（3行） */
+.blog-text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* フォーカス可視化 */
+.blog-focus-visible:focus-visible {
+  outline: 2px solid var(--blog-color-dark-blue);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   レスポンシブユーティリティ
+   ======================================== */
+
+/* モバイルのみ表示 */
+@media (min-width: 768px) {
+  .blog-mobile-only {
+    display: none !important;
+  }
+}
+
+/* タブレット以上で表示 */
+@media (max-width: 767px) {
+  .blog-tablet-up {
+    display: none !important;
+  }
+}
+
+/* デスクトップのみ表示 */
+@media (max-width: 1919px) {
+  .blog-desktop-only {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   アクセシビリティ
+   ======================================== */
+
+/* スクリーンリーダー専用テキスト */
+.blog-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* 動きの軽減を望むユーザー向け */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .blog-card-hover:hover {
+    transform: none;
+  }
+}
+
+/* ========================================
+   マークダウンスタイル（記事本文用）
+   ======================================== */
+
+.blog-markdown {
+  font-family: var(--blog-font-title);
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--blog-color-dark-blue);
+}
+
+.blog-markdown h1,
+.blog-markdown h2,
+.blog-markdown h3,
+.blog-markdown h4,
+.blog-markdown h5,
+.blog-markdown h6 {
+  font-weight: 700;
+  margin-top: 2em;
+  margin-bottom: 1em;
+  line-height: 1.3;
+}
+
+.blog-markdown h1 {
+  font-size: 2.5em;
+}
+
+.blog-markdown h2 {
+  font-size: 2em;
+}
+
+.blog-markdown h3 {
+  font-size: 1.5em;
+}
+
+.blog-markdown h4 {
+  font-size: 1.25em;
+}
+
+.blog-markdown p {
+  margin-bottom: 1.5em;
+}
+
+.blog-markdown ul,
+.blog-markdown ol {
+  margin-bottom: 1.5em;
+  padding-left: 2em;
+}
+
+.blog-markdown li {
+  margin-bottom: 0.5em;
+}
+
+.blog-markdown a {
+  color: var(--blog-color-dark-blue);
+  text-decoration: underline;
+  transition: opacity var(--blog-transition-fast);
+}
+
+.blog-markdown a:hover {
+  opacity: 0.7;
+}
+
+.blog-markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 2em 0;
+}
+
+.blog-markdown code {
+  font-family: 'Courier New', monospace;
+  background-color: #f5f5f5;
+  padding: 0.2em 0.4em;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+
+.blog-markdown pre {
+  background-color: #f5f5f5;
+  padding: 1em;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin: 1.5em 0;
+}
+
+.blog-markdown pre code {
+  background-color: transparent;
+  padding: 0;
+}
+
+.blog-markdown blockquote {
+  border-left: 4px solid var(--blog-color-border);
+  padding-left: 1em;
+  margin: 1.5em 0;
+  color: var(--blog-color-gray);
+  font-style: italic;
+}
+
+.blog-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.blog-markdown th,
+.blog-markdown td {
+  border: 1px solid var(--blog-color-border);
+  padding: 0.75em;
+  text-align: left;
+}
+
+.blog-markdown th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+/* ========================================
+   プリント用スタイル
+   ======================================== */
+
+@media print {
+  .blog-no-print {
+    display: none !important;
+  }
+
+  .blog-page {
+    background: white;
+  }
+
+  .blog-card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
