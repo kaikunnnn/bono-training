@@ -8,9 +8,36 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Layout from '@/components/layout/Layout';
-import { Mail, Lock, UserPlus, LogIn, AlertCircle } from 'lucide-react';
+import { Mail, Lock, UserPlus, LogIn, AlertCircle, AlertTriangle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// 移行ユーザーかどうかをチェックする関数
+async function checkMigratedUser(email: string): Promise<{ exists: boolean; isMigrated: boolean }> {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/functions/v1/check-migrated-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({ email }),
+    });
+
+    if (!response.ok) {
+      console.error('Failed to check migrated user:', response.status);
+      return { exists: false, isMigrated: false };
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error checking migrated user:', error);
+    return { exists: false, isMigrated: false };
+  }
+}
 
 const Auth = () => {
   const [email, setEmail] = useState('');
@@ -18,6 +45,7 @@ const Auth = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [signupError, setSignupError] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [isMigratedUser, setIsMigratedUser] = useState(false);
   const { signUp, signIn, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -68,7 +96,8 @@ const Auth = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
-    
+    setIsMigratedUser(false);
+
     if (!email || !password) {
       setLoginError("メールアドレスとパスワードを入力してください");
       return;
@@ -80,7 +109,17 @@ const Auth = () => {
       const { error } = await signIn(email, password);
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
-          setLoginError("メールアドレスまたはパスワードが正しくありません。");
+          // ログイン失敗時、移行ユーザーかどうかをチェック
+          const { exists, isMigrated } = await checkMigratedUser(email);
+
+          if (exists && isMigrated) {
+            // 移行ユーザーの場合は専用メッセージを表示
+            setIsMigratedUser(true);
+            setLoginError(null);
+          } else {
+            // 通常のエラーメッセージ
+            setLoginError("メールアドレスまたはパスワードが正しくありません。");
+          }
         } else if (error.message.includes('Email not confirmed')) {
           setLoginError("メールアドレスの確認が完了していません。確認メールをご確認ください。");
         } else {
@@ -111,7 +150,32 @@ const Auth = () => {
               </CardHeader>
               <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
-                  {loginError && (
+                  {/* 移行ユーザー向け専用メッセージ */}
+                  {isMigratedUser && (
+                    <Alert className="border-amber-500 bg-amber-50">
+                      <AlertTriangle className="h-4 w-4 text-amber-600" />
+                      <AlertTitle className="text-amber-800">パスワードの再設定が必要です</AlertTitle>
+                      <AlertDescription className="text-amber-700">
+                        <p className="mb-3">
+                          システムの移行により、新しいパスワードを設定していただく必要があります。
+                        </p>
+                        <p className="mb-3 text-sm">
+                          ご利用中のサブスクリプション情報はそのまま引き継がれますのでご安心ください。
+                        </p>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="w-full border-amber-500 text-amber-700 hover:bg-amber-100"
+                          onClick={() => navigate('/forgot-password')}
+                        >
+                          パスワードを再設定する
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* 通常のエラーメッセージ */}
+                  {loginError && !isMigratedUser && (
                     <Alert variant="destructive">
                       <AlertCircle className="h-4 w-4" />
                       <AlertDescription>{loginError}</AlertDescription>
