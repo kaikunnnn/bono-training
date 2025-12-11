@@ -1,4 +1,5 @@
-import { Check, Star, Share2, ChevronRight } from "lucide-react";
+import { Check, Star, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface HeadingSectionProps {
   questNumber?: number;
@@ -7,7 +8,6 @@ interface HeadingSectionProps {
   description?: string;
   onComplete?: () => void;
   onFavorite?: () => void;
-  onShare?: () => void;
   onNext?: () => void;
   isBookmarked?: boolean;
   bookmarkLoading?: boolean;
@@ -32,7 +32,6 @@ const HeadingSection = ({
   description,
   onComplete,
   onFavorite,
-  onShare,
   onNext,
   isBookmarked = false,
   bookmarkLoading = false,
@@ -40,24 +39,24 @@ const HeadingSection = ({
   completionLoading = false,
 }: HeadingSectionProps) => {
   return (
-    <div className="w-full space-y-3">
+    <div className="w-full flex flex-col gap-[15px]">
       {/* Quest Info */}
       {(questNumber !== undefined || stepNumber !== undefined) && (
-        <div className="flex items-center gap-1 text-xs text-[#747474]">
+        <div className="flex items-center gap-1 text-[12px] leading-[16px] text-[#747474]" style={{ fontFamily: "'Noto Sans JP', sans-serif" }}>
           {questNumber !== undefined && (
-            <>
-              <span style={{ fontFamily: "Inter", letterSpacing: "-2.604%" }}>
-                クエスト{questNumber}
-              </span>
-            </>
+            <div className="flex">
+              <span>クエスト</span>
+              <span>{questNumber}</span>
+            </div>
           )}
           {questNumber !== undefined && stepNumber !== undefined && (
             <span className="text-[#C0C0C0]">/</span>
           )}
           {stepNumber !== undefined && (
-            <span style={{ fontFamily: "Inter", letterSpacing: "-2.604%" }}>
-              ステップ{stepNumber}
-            </span>
+            <div className="flex">
+              <span>ステップ</span>
+              <span>{stepNumber}</span>
+            </div>
           )}
         </div>
       )}
@@ -66,8 +65,8 @@ const HeadingSection = ({
       <h1
         className="text-[28px] font-bold leading-[32px] text-[#102028]"
         style={{
-          fontFamily: '"Noto Sans JP", sans-serif',
-          letterSpacing: "0.251%",
+          fontFamily: "'Hiragino Maru Gothic Pro', 'Hiragino Maru Gothic ProN', sans-serif",
+          fontWeight: 700,
         }}
       >
         {title}
@@ -87,72 +86,56 @@ const HeadingSection = ({
       )}
 
       {/* Action Area */}
-      <div className="flex items-center justify-between gap-3 pt-2">
+      <div className="flex items-center justify-between gap-3 py-[8px]">
         {/* Left Button Group */}
         <div className="flex items-center gap-2">
-          {/* Complete Button */}
-          <button
+          {/* Complete Button - action-secondary */}
+          <Button
+            variant="action-secondary"
+            size="action"
             onClick={onComplete}
             disabled={completionLoading}
-            className={`flex items-center gap-1 px-3 py-2 rounded-full transition-colors ${
-              isCompleted
-                ? 'bg-green-100 hover:bg-green-200 text-green-800'
-                : 'bg-[#F3F5F5] hover:bg-gray-200 text-[#34373D]'
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-            style={{ fontFamily: "Inter, sans-serif" }}
+            className={isCompleted ? 'bg-green-100 border-green-300 text-green-800' : ''}
+            style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
           >
-            <Check className="w-[18px] h-[18px]" strokeWidth={2} />
-            <span className="text-sm font-bold leading-5" style={{ letterSpacing: "-1.07421875%" }}>
-              {isCompleted ? '完了済み' : '完了にする'}
-            </span>
-          </button>
+            <Check className="w-4 h-4" strokeWidth={2} />
+            <span>{isCompleted ? '完了済み' : '完了にする'}</span>
+          </Button>
 
-          {/* Favorite Button */}
-          <button
+          {/* Favorite Button - action-tertiary */}
+          <Button
+            variant="action-tertiary"
+            size="action"
             onClick={onFavorite}
             disabled={bookmarkLoading}
-            className="flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            className={isBookmarked ? 'bg-yellow-100 text-yellow-800' : ''}
+            style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
             aria-label={isBookmarked ? 'ブックマークを解除' : 'ブックマークに追加'}
           >
             <Star
-              className={`w-[18px] h-[18px] transition-colors ${
+              className={`w-4 h-4 transition-colors ${
                 isBookmarked
                   ? 'fill-yellow-400 stroke-yellow-400'
-                  : 'stroke-[#6A7282]'
+                  : 'stroke-current'
               }`}
               strokeWidth={1.5}
             />
-            <span className="text-sm leading-5 text-[#6A7282]" style={{ letterSpacing: "-1.07421875%" }}>
-              お気に入り
-            </span>
-          </button>
-
-          {/* Share Button */}
-          <button
-            onClick={onShare}
-            className="flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            <Share2 className="w-[18px] h-[18px]" strokeWidth={1.5} />
-            <span className="text-sm leading-5 text-[#6A7282]" style={{ letterSpacing: "-1.07421875%" }}>
-              シェア
-            </span>
-          </button>
+            <span>お気に入り</span>
+          </Button>
         </div>
 
-        {/* Right: Next Content Button */}
+        {/* Right: Next Content Button - action-tertiary */}
         {onNext && (
-          <button
+          <Button
+            variant="action-tertiary"
+            size="action"
             onClick={onNext}
-            className="flex items-center gap-1 px-3 py-2 rounded-full hover:bg-gray-100 transition-colors h-9"
-            style={{ fontFamily: "Inter, sans-serif" }}
+            className="bg-[#F3F5F5] text-[#6A7282]"
+            style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
           >
-            <span className="text-sm leading-5 text-[#6A7282]" style={{ letterSpacing: "-1.07421875%" }}>
-              次の動画
-            </span>
-            <ChevronRight className="w-4 h-4 text-[#6A7282]" strokeWidth={2} />
-          </button>
+            <span>次へ</span>
+            <ChevronRight className="w-4 h-4" strokeWidth={2} />
+          </Button>
         )}
       </div>
     </div>
