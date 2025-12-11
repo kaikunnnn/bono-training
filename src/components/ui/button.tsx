@@ -18,12 +18,19 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        // カスタムボタンスタイル（HeadingSection等で使用）
+        "action-secondary":
+          "bg-white border border-[#E4E4E4] text-black shadow-[0px_1px_12px_0px_rgba(0,0,0,0.05)] hover:bg-[#FAFAFA] hover:border-[#D0D0D0] active:bg-[#F5F5F5] rounded-full",
+        "action-tertiary":
+          "bg-[#E9EBEB] text-[#5A616F] hover:bg-[#DFE1E1] active:bg-[#D5D7D7] rounded-full font-semibold",
       },
       size: {
         default: "h-10 px-4 py-2",
         sm: "h-9 rounded-md px-3",
         lg: "h-11 rounded-md px-8",
         icon: "h-10 w-10",
+        // カスタムサイズ（HeadingSection等で使用）
+        action: "px-[12px] py-[8px] text-[14px] leading-[20px]",
       },
     },
     defaultVariants: {

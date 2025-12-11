@@ -23,14 +23,27 @@ const ArticleDetail = () => {
   const [completionLoading, setCompletionLoading] = useState(false);
   const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
 
-  // 前後の記事を計算
+  // 前後の記事を計算（クエストをまたぐナビゲーション対応）
   const navigation = useMemo(() => {
-    if (!article || !article.questInfo?.articles) {
+    if (!article || !article.lessonInfo?.quests) {
       return { previous: undefined, next: undefined };
     }
 
-    const articles = article.questInfo.articles;
-    const currentIndex = articles.findIndex((a) => a._id === article._id);
+    // レッスン内の全記事をフラット化
+    const allArticles: { slug: string; title: string; questId: string }[] = [];
+    for (const quest of article.lessonInfo.quests) {
+      for (const art of quest.articles) {
+        allArticles.push({
+          slug: art.slug.current,
+          title: art.title,
+          questId: quest._id,
+        });
+      }
+    }
+
+    const currentIndex = allArticles.findIndex(
+      (a) => a.slug === article.slug.current
+    );
 
     if (currentIndex === -1) {
       return { previous: undefined, next: undefined };
@@ -39,16 +52,16 @@ const ArticleDetail = () => {
     const previousArticle =
       currentIndex > 0
         ? {
-            slug: articles[currentIndex - 1].slug.current,
-            title: articles[currentIndex - 1].title,
+            slug: allArticles[currentIndex - 1].slug,
+            title: allArticles[currentIndex - 1].title,
           }
         : undefined;
 
     const nextArticle =
-      currentIndex < articles.length - 1
+      currentIndex < allArticles.length - 1
         ? {
-            slug: articles[currentIndex + 1].slug.current,
-            title: articles[currentIndex + 1].title,
+            slug: allArticles[currentIndex + 1].slug,
+            title: allArticles[currentIndex + 1].title,
           }
         : undefined;
 
@@ -181,6 +194,24 @@ const ArticleDetail = () => {
 
         {/* メインコンテンツエリア */}
         <main className="flex-1 flex flex-col items-center">
+          {/* Heading Section - 独立ブロック、720px幅 */}
+          <div className="w-full max-w-[720px] pt-8 pb-4 px-4">
+            <HeadingSection
+              questNumber={article.questInfo?.questNumber}
+              stepNumber={article.articleNumber}
+              title={article.title}
+              description={article.excerpt}
+              onComplete={handleCompleteToggle}
+              onFavorite={handleBookmarkToggle}
+              onShare={() => console.log("Share clicked")}
+              onNext={navigation.next ? () => navigate(`/articles/${navigation.next.slug}`) : undefined}
+              isBookmarked={bookmarked}
+              bookmarkLoading={bookmarkLoading}
+              isCompleted={isCompleted}
+              completionLoading={completionLoading}
+            />
+          </div>
+
           {/* Video Section - 1680px以上の画面で最大1320px、センター揃え */}
           <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 min-[1680px]:pt-8">
             <VideoSection
@@ -194,22 +225,6 @@ const ArticleDetail = () => {
           {/* 記事コンテンツ - 720px幅 */}
           <div className="w-full max-w-[720px] py-8 px-4">
             <div className="space-y-6">
-              {/* Heading Section */}
-              <HeadingSection
-                questNumber={article.questInfo?.questNumber}
-                stepNumber={article.articleNumber}
-                title={article.title}
-                description={article.excerpt}
-                onComplete={handleCompleteToggle}
-                onFavorite={handleBookmarkToggle}
-                onShare={() => console.log("Share clicked")}
-                onNext={() => console.log("Next clicked")}
-                isBookmarked={bookmarked}
-                bookmarkLoading={bookmarkLoading}
-                isCompleted={isCompleted}
-                completionLoading={completionLoading}
-              />
-
               {/* TODO Section - learningObjectives がある場合のみ表示 */}
               <TodoSection items={article.learningObjectives} />
 
@@ -218,18 +233,6 @@ const ArticleDetail = () => {
 
               {/* Content Navigation - 前後の記事へのナビゲーション */}
               <ContentNavigation previous={navigation.previous} next={navigation.next} />
-
-              {/* デバッグ情報（後で削除） */}
-              <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-700 border border-gray-200">
-                <p className="font-mono text-xs">
-                  <strong>Debug Info:</strong>
-                </p>
-                <p><strong>Quest:</strong> {article.questInfo?.title}</p>
-                <p><strong>Lesson:</strong> {article.lessonInfo?.title}</p>
-                <p><strong>Learning Objectives:</strong> {article.learningObjectives?.length || 0} items</p>
-                <p><strong>Previous Article:</strong> {navigation.previous?.title || "N/A"}</p>
-                <p><strong>Next Article:</strong> {navigation.next?.title || "N/A"}</p>
-              </div>
             </div>
           </div>
         </main>

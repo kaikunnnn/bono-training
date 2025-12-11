@@ -7,74 +7,48 @@
 
 ## 🎯 現在の作業
 
-### Task 1: ナビゲーション表示バグ 🔴 CRITICAL
-
-**優先度**: 🔴 最高
-**ステータス**: ⏳ 調査中
-**担当**: Claude Code
-
-**問題**:
-記事詳細ページ(`/articles/{slug}`)で、左サイドナビにレッスン・クエスト・記事が表示されない
-
-**原因調査結果**:
-
-| 確認項目 | 状態 | 詳細 |
-|---------|------|------|
-| Sanityクエリ構造 | ✅ 正常 | `getArticleWithContext()`は正しく定義 |
-| スキーマ参照関係 | ⚠️ 要確認 | Quest→Lesson, Quest→Articleの実データ |
-| フロント描画ロジック | ✅ 正常 | ArticleSideNavは適切に実装 |
-
-**最も可能性が高い原因**:
-1. **Sanityの実データ**: 記事がQuestに参照されていない、またはQuestがLessonに参照されていない
-2. **警告ログ**: `questInfo` または `lessonInfo` が null
-
-**次のアクション**:
-1. [ ] Sanity Studioで実際のデータ構造を確認
-2. [ ] ブラウザコンソールで警告を確認
-3. [ ] クエリ結果をデバッグ出力
-
-**関連ファイル**:
-- `src/lib/sanity.ts:24-106` - getArticleWithContext
-- `src/components/article/sidebar/ArticleSideNav.tsx` - サイドナビ
+（現在アクティブなタスクなし）
 
 ---
 
-### Task 2: Markdown Import機能 🟡 MEDIUM
+## 💡 やりたいことリスト
 
-**優先度**: 🟡 中
-**ステータス**: ⏳ 調査中
-**担当**: Claude Code
+ここに実装したいアイデアや要望を追記してください。
 
-**問題**:
-1. 既存の`MarkdownImportInput`コンポーネントが動作しない
-2. 記事本文をMarkdownで管理したい
+| # | 内容 | 優先度 | メモ |
+|---|------|--------|------|
+| 1 | 記事部分のマークダウン実装 | ? | 詳細を決める |
+| 2 | | | |
+| 3 | | | |
 
-**調査結果**:
+---
 
-| 項目 | 現状 |
-|-----|------|
-| MarkdownImportInput | レッスンの`overview`フィールドのみに適用 |
-| 記事スキーマ | Portable Textのみ、Markdown Import未対応 |
-| 変換ロジック | marked.js + DOMParser使用 |
+## ✅ 完了タスク
 
-**対応プラン**:
+### Task 1: ナビゲーション表示バグ ✅ 完了
 
-**Phase A: 既存機能の修正**
-- [ ] MarkdownImportInputのデバッグ
-- [ ] 変換エラーの特定・修正
+**完了日**: 2025-12-11
+**原因**: Quest.lesson（所属レッスン）フィールドが未設定だった（データ問題）
 
-**Phase B: 記事への適用**
-- [ ] article.tsの`content`フィールドにMarkdownImport追加
-- [ ] 同じ変換ロジックを再利用
+**対応内容**:
+- 調査でデータ問題と特定
+- ユーザーがSanity Studioで所属レッスンを設定して解決
+- Quest UX改善（絵文字追加、所属レッスン必須化）
 
-**Phase C: (オプション) Markdown直接保存**
-- [ ] `contentMarkdown`フィールド追加検討
-- [ ] フロントでのMarkdown→HTML変換
+**関連ドキュメント**: `./navigation-bug.md`
 
-**関連ファイル**:
-- `sanity-studio/components/MarkdownImportInput.tsx`
-- `sanity-studio/schemaTypes/article.ts`
-- `sanity-studio/schemaTypes/lesson.ts`
+---
+
+### Task 2: Markdown Import機能 ✅ 完了
+
+**完了日**: 2025-12-11
+
+**対応内容**:
+- `article.ts` の `content` フィールドに `MarkdownImportInput` を追加
+- 本番 Sanity Studio にデプロイ済み
+- レッスン・記事の両方でMarkdown Importが使用可能に
+
+**関連ドキュメント**: `./markdown-import.md`
 
 ---
 
@@ -91,27 +65,29 @@
 - `.claude/docs/sanity-studio/` フォルダ作成
 - README.md, TASK-TRACKER.md 作成
 
+**11:00** - Markdown Import 実装
+- article.ts に MarkdownImportInput 追加
+- 本番デプロイ完了
+
+**11:30** - ナビゲーションバグ解決
+- Quest.lesson が未設定だったことを特定
+- ユーザーがデータ修正で解決
+
+**12:00** - Quest UX改善
+- フィールドタイトルに絵文字追加
+- 所属レッスンを必須化
+- 本番デプロイ完了
+
+**12:30** - コミット・プッシュ
+- `feature/article_markdown` ブランチにプッシュ
+
 ---
 
 ## ⚠️ 注意事項
 
-1. **Sanity Studioは別リポジトリ**: `sanity-studio/`は独立したgitリポジトリ
-2. **本番データに影響**: Sanity Studioの変更は即座に本番に反映される
+1. **Sanity Studio デプロイ**: 変更は `sanity deploy` で即座に本番に反映
+2. **双方向参照**: Lesson→Quest と Quest→Lesson の両方を設定する必要あり
 3. **MCPは本番**: Claude CodeのMCPツールは本番Supabaseに接続
-
----
-
-## 📝 チェックリスト
-
-### デバッグ前の確認
-- [ ] Sanity Studioを起動できるか
-- [ ] 本番のSanityデータにアクセスできるか
-- [ ] フロントエンドの記事詳細ページが開けるか
-
-### 修正後の確認
-- [ ] TypeScriptエラーなし
-- [ ] ローカルで動作確認
-- [ ] Sanity Studio デプロイ（必要な場合）
 
 ---
 
@@ -120,4 +96,3 @@
 - `./README.md` - プロジェクト概要
 - `./navigation-bug.md` - ナビゲーションバグ詳細
 - `./markdown-import.md` - Markdown Import詳細
-- `../.claude/PROJECT-RULES.md` - プロジェクトルール

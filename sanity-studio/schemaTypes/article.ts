@@ -138,6 +138,15 @@ export default defineType({
             },
           ],
         },
+        {
+          type: "customContainer",
+        },
+        {
+          type: "tableBlock",
+        },
+        {
+          type: "linkCard",
+        },
       ],
       options: {
         canvasApp: {

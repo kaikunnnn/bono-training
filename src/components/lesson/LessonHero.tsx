@@ -56,7 +56,7 @@ export default function LessonHero({
           >
             <ArrowLeft size={20} />
             <span className="font-rounded-mplus text-sm">
-              トレーニング一覧
+              レッスン一覧
             </span>
           </button>
         </div>

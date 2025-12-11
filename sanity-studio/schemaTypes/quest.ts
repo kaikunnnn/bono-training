@@ -31,13 +31,6 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
-      name: "description",
-      title: "📄 説明",
-      type: "text",
-      description: "クエストの概要説明",
-      rows: 3,
-    }),
-    defineField({
       name: "goal",
       title: "🎯 ゴール",
       type: "text",
