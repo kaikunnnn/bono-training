@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
-import { GuideLayout, GuideHero, CategorySection, CategoryFilter } from "@/components/guide";
+import { GuideHero, CategorySection, CategoryFilter } from "@/components/guide";
+import Layout from "@/components/layout/Layout";
 import ContentWrapper from "@/components/training/ContentWrapper";
 import { useGuides } from "@/hooks/useGuides";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,7 +33,7 @@ const GuidePage = () => {
   }, [filteredGuides]);
 
   return (
-    <GuideLayout>
+    <Layout>
       <GuideHero />
 
       <div className="bg-gray-50">
@@ -97,7 +98,7 @@ const GuidePage = () => {
           </div>
         )}
       </div>
-    </GuideLayout>
+    </Layout>
   );
 };
 
