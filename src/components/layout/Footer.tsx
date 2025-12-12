@@ -28,6 +28,9 @@ const Footer = ({ className }: FooterProps) => {
               <li>
                 <a href="#" className="hover:underline">料金</a>
               </li>
+              <li>
+                <a href="/blog" className="hover:underline">ブログ</a>
+              </li>
             </ul>
           </div>
           <div className="space-y-4">
