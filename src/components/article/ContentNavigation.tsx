@@ -32,12 +32,12 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
   }
 
   return (
-    <div className="w-full flex flex-col md:flex-row justify-between gap-6 md:gap-[216px] mt-12">
+    <div className="w-full flex flex-col md:flex-row justify-between gap-4 md:gap-8 mt-12">
       {/* 前の記事カード */}
       {previous ? (
         <button
           onClick={() => navigate(`/articles/${previous.slug}`)}
-          className="flex items-center gap-[11px] px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1"
+          className="flex items-center gap-3 px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1 min-w-0"
         >
           {/* 左矢印 */}
           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
@@ -45,7 +45,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
           </div>
 
           {/* テキストコンテナ */}
-          <div className="flex flex-col gap-1 text-left" style={{ width: "199px" }}>
+          <div className="flex flex-col gap-1 text-left flex-1 min-w-0">
             {/* ラベル */}
             <span
               className="text-[10px] font-medium leading-[10px] text-[#787878]"
@@ -59,7 +59,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
 
             {/* タイトル */}
             <span
-              className="text-xs font-semibold leading-4 text-[#101828]"
+              className="text-xs font-semibold leading-4 text-[#101828] truncate"
               style={{
                 fontFamily: "Hind, sans-serif",
               }}
@@ -69,17 +69,17 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
           </div>
         </button>
       ) : (
-        <div className="flex-1" /> // スペーサー
+        <div className="hidden md:block flex-1" /> // スペーサー（PC表示のみ）
       )}
 
       {/* 次の記事カード */}
       {next ? (
         <button
           onClick={() => navigate(`/articles/${next.slug}`)}
-          className="flex items-center gap-[11px] px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1"
+          className="flex items-center gap-3 px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1 min-w-0"
         >
           {/* テキストコンテナ */}
-          <div className="flex flex-col gap-1 text-left" style={{ width: "199px" }}>
+          <div className="flex flex-col gap-1 text-left flex-1 min-w-0">
             {/* ラベル */}
             <span
               className="text-[10px] font-medium leading-[10px] text-[#787878]"
@@ -93,7 +93,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
 
             {/* タイトル */}
             <span
-              className="text-xs font-semibold leading-4 text-[#101828]"
+              className="text-xs font-semibold leading-4 text-[#101828] truncate"
               style={{
                 fontFamily: "Hind, sans-serif",
               }}
@@ -108,7 +108,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
           </div>
         </button>
       ) : (
-        <div className="flex-1" /> // スペーサー
+        <div className="hidden md:block flex-1" /> // スペーサー（PC表示のみ）
       )}
     </div>
   );

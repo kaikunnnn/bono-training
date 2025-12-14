@@ -63,7 +63,7 @@ const HeadingSection = ({
 
       {/* Title */}
       <h1
-        className="text-[28px] font-bold leading-[32px] text-[#102028]"
+        className="text-[22px] md:text-[28px] font-bold leading-[28px] md:leading-[32px] text-[#102028]"
         style={{
           fontFamily: "'Hiragino Maru Gothic Pro', 'Hiragino Maru Gothic ProN', sans-serif",
           fontWeight: 700,
@@ -86,9 +86,9 @@ const HeadingSection = ({
       )}
 
       {/* Action Area */}
-      <div className="flex items-center justify-between gap-3 py-[8px]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 py-[8px]">
         {/* Left Button Group */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Complete Button - action-secondary */}
           <Button
             variant="action-secondary"
@@ -99,7 +99,8 @@ const HeadingSection = ({
             style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
           >
             <Check className="w-4 h-4" strokeWidth={2} />
-            <span>{isCompleted ? '完了済み' : '完了にする'}</span>
+            <span className="hidden sm:inline">{isCompleted ? '完了済み' : '完了にする'}</span>
+            <span className="sm:hidden">{isCompleted ? '完了' : '完了'}</span>
           </Button>
 
           {/* Favorite Button - action-tertiary */}
@@ -120,17 +121,31 @@ const HeadingSection = ({
               }`}
               strokeWidth={1.5}
             />
-            <span>お気に入り</span>
+            <span className="hidden sm:inline">お気に入り</span>
           </Button>
+
+          {/* Right: Next Content Button - action-tertiary (モバイルでは左グループに) */}
+          {onNext && (
+            <Button
+              variant="action-tertiary"
+              size="action"
+              onClick={onNext}
+              className="bg-[#F3F5F5] text-[#6A7282] sm:hidden"
+              style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
+            >
+              <span>次へ</span>
+              <ChevronRight className="w-4 h-4" strokeWidth={2} />
+            </Button>
+          )}
         </div>
 
-        {/* Right: Next Content Button - action-tertiary */}
+        {/* Right: Next Content Button - action-tertiary (PC表示) */}
         {onNext && (
           <Button
             variant="action-tertiary"
             size="action"
             onClick={onNext}
-            className="bg-[#F3F5F5] text-[#6A7282]"
+            className="bg-[#F3F5F5] text-[#6A7282] hidden sm:flex"
             style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
           >
             <span>次へ</span>

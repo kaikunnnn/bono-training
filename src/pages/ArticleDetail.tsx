@@ -8,6 +8,8 @@ import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
+import MobileMenuButton from "@/components/article/MobileMenuButton";
+import MobileSideNav from "@/components/article/MobileSideNav";
 import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
 import { toggleArticleCompletion, getArticleProgress } from "@/services/progress";
 
@@ -22,6 +24,7 @@ const ArticleDetail = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [completionLoading, setCompletionLoading] = useState(false);
   const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // 前後の記事を計算（クエストをまたぐナビゲーション対応）
   const navigation = useMemo(() => {
@@ -185,17 +188,34 @@ const ArticleDetail = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
+      {/* モバイルメニューボタン（スマホのみ表示） */}
+      <div className="fixed top-4 left-4 z-30 md:hidden">
+        <MobileMenuButton
+          isOpen={isMobileMenuOpen}
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        />
+      </div>
+
+      {/* モバイルサイドナビ（スマホのみ） */}
+      <MobileSideNav
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        article={article}
+        currentArticleId={article._id}
+        progressUpdateTrigger={progressUpdateTrigger}
+      />
+
       {/* 2カラムレイアウト: サイドナビゲーション (320px) + メインコンテンツ (720px) */}
       <div className="flex max-w-[1920px] mx-auto">
-        {/* サイドナビゲーション - 固定320px幅 */}
-        <aside className="w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-gray-200">
+        {/* サイドナビゲーション - 固定320px幅（PC表示のみ） */}
+        <aside className="hidden md:block w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-gray-200">
           <ArticleSideNav article={article} currentArticleId={article._id} progressUpdateTrigger={progressUpdateTrigger} />
         </aside>
 
         {/* メインコンテンツエリア */}
         <main className="flex-1 flex flex-col items-center">
           {/* Heading Section - 独立ブロック、720px幅 */}
-          <div className="w-full max-w-[720px] pt-8 pb-4 px-4">
+          <div className="w-full max-w-[720px] pt-16 md:pt-8 pb-4 px-4">
             <HeadingSection
               questNumber={article.questInfo?.questNumber}
               stepNumber={article.articleNumber}
