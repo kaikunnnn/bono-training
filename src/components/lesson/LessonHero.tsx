@@ -47,9 +47,9 @@ export default function LessonHero({
   return (
     <div className="w-full">
       {/* グラデーション領域 */}
-      <div className="h-[216px] bg-hero-gradient relative">
+      <div className="h-[180px] md:h-[216px] bg-hero-gradient relative">
         {/* バックナビゲーション */}
-        <div className="container mx-auto pt-6">
+        <div className="container mx-auto px-4 md:px-8 pt-4 md:pt-6">
           <button
             onClick={handleBackClick}
             className="flex items-center gap-2 text-lesson-hero-nav-text hover:text-lesson-hero-text transition"
@@ -69,13 +69,13 @@ export default function LessonHero({
 
       {/* 詳細情報領域 */}
       <div className="bg-white">
-        <div className="container mx-auto relative">
+        <div className="container mx-auto px-4 md:px-8 relative">
           {/* アイコン（絶対配置で上にはみ出させる） */}
           {iconUrl && (
             <div
               className="absolute left-1/2 transform -translate-x-1/2"
               style={{
-                top: "-120px",
+                top: "-100px",
                 zIndex: 3,
               }}
             >
@@ -83,28 +83,28 @@ export default function LessonHero({
                 <img
                   src={iconUrl}
                   alt={title}
-                  className="h-32 w-auto object-cover"
+                  className="h-24 md:h-32 w-auto object-cover"
                 />
               </div>
             </div>
           )}
 
           {/* コンテンツ */}
-          <div className="pt-20 pb-12 max-w-3xl mx-auto text-center">
+          <div className="pt-16 md:pt-20 pb-8 md:pb-12 max-w-3xl mx-auto text-center">
             {/* タイトル */}
-            <h1 className="font-rounded-mplus font-bold text-4xl text-lesson-hero-text mb-4">
+            <h1 className="font-rounded-mplus font-bold text-2xl md:text-4xl text-lesson-hero-text mb-3 md:mb-4">
               {title}
             </h1>
 
             {/* 説明 */}
             {description && (
-              <p className="font-noto-sans-jp text-base text-gray-600 mb-6">
+              <p className="font-noto-sans-jp text-sm md:text-base text-gray-600 mb-4 md:mb-6">
                 {description}
               </p>
             )}
 
             {/* インフォブロック */}
-            <div className="flex items-center justify-center gap-4 mb-8">
+            <div className="flex items-center justify-center gap-3 md:gap-4 mb-6 md:mb-8 flex-wrap">
               {category && <InfoBlock label="カテゴリ" values={[category]} />}
               {isPremium && <InfoBlock label="プラン" values={["プレミアム"]} />}
             </div>

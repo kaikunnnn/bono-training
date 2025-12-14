@@ -51,7 +51,7 @@ export default function ContentItem({
   return (
     <div
       onClick={handleClick}
-      className="flex items-center gap-4 px-8 py-3 hover:bg-gray-50 rounded-lg cursor-pointer transition"
+      className="flex items-center gap-3 md:gap-4 px-4 md:px-8 py-3 hover:bg-gray-50 rounded-lg cursor-pointer transition"
     >
       {/* 記事番号 */}
       <div className="flex-shrink-0">

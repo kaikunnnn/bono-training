@@ -77,7 +77,7 @@ export default function QuestCard({
       </div>
 
       {/* カードエリア全体（縦ボーダー + カード） */}
-      <div className="flex gap-5">
+      <div className="flex gap-3 md:gap-5">
         {/* 縦ボーダー */}
         <div className="px-[7px] flex items-center">
           <div
@@ -89,9 +89,9 @@ export default function QuestCard({
         </div>
 
         {/* カード */}
-        <div className="w-[743px] bg-lesson-quest-card-bg rounded-[24px] shadow-quest-card overflow-hidden" style={{ outline: '1px solid rgba(0, 0, 0, 0.06)', outlineOffset: '-1px' }}>
+        <div className="w-full max-w-[743px] bg-lesson-quest-card-bg rounded-[16px] md:rounded-[24px] shadow-quest-card overflow-hidden" style={{ outline: '1px solid rgba(0, 0, 0, 0.06)', outlineOffset: '-1px' }}>
         {/* ヘッダー */}
-        <div className="px-8 py-5 border-b border-lesson-quest-divider">
+        <div className="px-4 md:px-8 py-4 md:py-5 border-b border-lesson-quest-divider">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               {/* タイトル */}

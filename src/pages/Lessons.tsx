@@ -14,8 +14,8 @@ export default function Lessons() {
   if (loading) {
     return (
       <Layout>
-        <div className="p-8">
-          <h1 className="text-2xl font-bold mb-4">レッスン一覧</h1>
+        <div className="p-4 md:p-8">
+          <h1 className="text-xl md:text-2xl font-bold mb-4">レッスン一覧</h1>
           <p>読み込み中...</p>
         </div>
       </Layout>
@@ -25,8 +25,8 @@ export default function Lessons() {
   if (error) {
     return (
       <Layout>
-        <div className="p-8">
-          <h1 className="text-2xl font-bold mb-4">レッスン一覧</h1>
+        <div className="p-4 md:p-8">
+          <h1 className="text-xl md:text-2xl font-bold mb-4">レッスン一覧</h1>
           <p className="text-red-600">エラー: {error instanceof Error ? error.message : 'データの取得に失敗しました'}</p>
         </div>
       </Layout>
@@ -35,13 +35,13 @@ export default function Lessons() {
 
   return (
     <Layout>
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-6">レッスン一覧</h1>
+      <div className="p-4 md:p-8">
+        <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">レッスン一覧</h1>
 
         {lessons.length === 0 ? (
           <p>レッスンがありません。Sanity Studioでデータを追加してください。</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {lessons.map((lesson) => {
               // WebflowのカテゴリIDは表示しない（Sanityで手動入力したカテゴリは表示）
               const shouldShowCategory = lesson.category &&
