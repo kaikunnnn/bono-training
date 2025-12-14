@@ -13,6 +13,8 @@ interface SanityLesson {
   slug: { current: string };
   description?: string;
   coverImage?: any;
+  iconImage?: any;
+  iconImageUrl?: string;
   category?: string;
   isPremium: boolean;
   webflowSource?: string; // 🆕 Webflow Series ID
@@ -53,8 +55,9 @@ interface WebflowLesson {
  */
 export interface IntegratedLesson extends SanityLesson {
   webflowData?: WebflowLesson; // Webflowからのデータ
-  coverImageUrl?: string; // WebflowのカバーURL（文字列）
-  iconImageUrl?: string; // Webflowのアイコン画像URL（文字列）
+  coverImageUrl?: string; // カバーURL（文字列）
+  iconImage?: any; // Sanityアイコン画像
+  iconImageUrl?: string; // アイコン画像URL（文字列）
 }
 
 /**
@@ -97,6 +100,8 @@ async function fetchIntegratedLessons(): Promise<IntegratedLesson[]> {
     slug,
     description,
     coverImage,
+    iconImage,
+    iconImageUrl,
     category,
     isPremium,
     webflowSource

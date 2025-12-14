@@ -4,12 +4,15 @@ import {visionTool} from '@sanity/vision'
 import {presentationTool} from 'sanity/presentation'
 import {schemaTypes} from './schemaTypes'
 
+// 環境変数でデータセットを切り替え（デフォルトはdevelopment）
+const dataset = process.env.SANITY_STUDIO_DATASET || 'development'
+
 export default defineConfig({
   name: 'default',
-  title: 'BONO',
+  title: dataset === 'production' ? 'BONO (本番)' : 'BONO (開発)',
 
   projectId: 'cqszh4up',
-  dataset: 'production',
+  dataset: dataset,
 
   plugins: [
     structureTool(),

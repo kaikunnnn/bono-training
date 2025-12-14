@@ -73,21 +73,19 @@ export default function LessonHero({
           {/* アイコン（絶対配置で上にはみ出させる） */}
           {iconUrl && (
             <div
-              className="absolute left-1/2 transform -translate-x-1/2 bg-white overflow-hidden"
+              className="absolute left-1/2 transform -translate-x-1/2"
               style={{
                 top: "-120px",
-                width: "123px",
-                height: "184px",
-                borderRadius: "0px 4px 4px 0px",
-                boxShadow: "1px 1px 13.56px 0px rgba(0, 0, 0, 0.33)",
                 zIndex: 3,
               }}
             >
-              <img
-                src={iconUrl}
-                alt={title}
-                className="w-full h-full object-cover"
-              />
+              <div className="rounded-r-lg shadow-[1px_1px_12px_0_rgba(0,0,0,0.24)]">
+                <img
+                  src={iconUrl}
+                  alt={title}
+                  className="h-32 w-auto object-cover"
+                />
+              </div>
             </div>
           )}
 

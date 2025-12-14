@@ -67,7 +67,7 @@ export default function LessonDetail() {
             }
           },
           iconImageUrl,
-          category,
+          "category": category->title,
           isPremium,
           contentHeading,
           purposes,

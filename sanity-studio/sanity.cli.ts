@@ -1,9 +1,12 @@
 import {defineCliConfig} from 'sanity/cli'
 
+// 環境変数でデータセットを切り替え（デフォルトはdevelopment）
+const dataset = process.env.SANITY_STUDIO_DATASET || 'development'
+
 export default defineCliConfig({
   api: {
     projectId: 'cqszh4up',
-    dataset: 'production'
+    dataset: dataset
   },
   deployment: {
     /**

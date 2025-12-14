@@ -16,7 +16,10 @@
     "optimize-images": "node scripts/optimize-images.js",
     "mcp:disable": "node scripts/mcp-toggle.js disable",
     "mcp:enable": "node scripts/mcp-toggle.js enable",
-    "mcp:status": "node scripts/mcp-toggle.js status"
+    "mcp:status": "node scripts/mcp-toggle.js status",
+    "sanity:dev": "cd sanity-studio && SANITY_STUDIO_DATASET=development npm run dev",
+    "sanity:prod": "cd sanity-studio && SANITY_STUDIO_DATASET=production npm run dev",
+    "sanity:sync": "cd sanity-studio && npx sanity dataset export development dev-export.tar.gz && npx sanity dataset import dev-export.tar.gz production --replace && rm dev-export.tar.gz"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
