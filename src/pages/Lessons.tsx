@@ -71,7 +71,6 @@ export default function Lessons() {
                       <div className="w-16 h-24 bg-gray-200 rounded-r-lg" />
                     )}
                   </div>
-                  {/* 情報エリア */}
                   <div className="p-4">
                     {shouldShowCategory && (
                       <p className="text-sm text-gray-600 mb-2">{lesson.category}</p>

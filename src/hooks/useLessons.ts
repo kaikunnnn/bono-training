@@ -56,8 +56,7 @@ interface WebflowLesson {
 export interface IntegratedLesson extends SanityLesson {
   webflowData?: WebflowLesson; // Webflowからのデータ
   coverImageUrl?: string; // カバーURL（文字列）
-  iconImage?: any; // Sanityアイコン画像
-  iconImageUrl?: string; // アイコン画像URL（文字列）
+  // iconImage, iconImageUrl は SanityLesson から継承
 }
 
 /**

@@ -171,11 +171,10 @@ export default defineType({
     }),
     defineField({
       name: "quest",
-      title: "所属クエスト（参照用）",
+      title: "所属クエスト",
       type: "reference",
       to: [{ type: "quest" }],
-      description: "この記事が所属するクエスト（表示専用：実際の紐付けはクエスト側で設定）",
-      readOnly: true,
+      description: "この記事が所属するクエストを選択してください",
     }),
     defineField({
       name: "publishedAt",
@@ -210,15 +209,14 @@ export default defineType({
       media: "coverImage",
       author: "author",
       isPremium: "isPremium",
-      questTitle: "quest.title",
-      slug: "slug",
+      lessonTitle: "quest.lesson.title",
     },
-    prepare({ title, media, author, isPremium, questTitle, slug }) {
-      const location = questTitle ? `📝 ${questTitle}` : "未設定";
+    prepare({ title, media, author, isPremium, lessonTitle }) {
+      const lessonInfo = lessonTitle ? `📚 ${lessonTitle}` : "レッスン未設定";
       return {
         title,
         media,
-        subtitle: `${location} | ${author || "著者未設定"}${isPremium ? " 🔒" : ""}`,
+        subtitle: `${lessonInfo} | ${author || "著者未設定"}${isPremium ? " 🔒" : ""}`,
       };
     },
   },

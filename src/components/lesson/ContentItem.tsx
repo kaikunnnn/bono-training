@@ -40,7 +40,8 @@ export default function ContentItem({
       return thumbnailUrl;
     }
     if (thumbnail?.asset?._ref) {
-      return urlFor(thumbnail).width(57).height(32).url();
+      // Retina対応: 表示サイズ57x32の2倍で取得
+      return urlFor(thumbnail).width(114).height(64).url();
     }
     return null;
   };
