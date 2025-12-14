@@ -47,9 +47,9 @@ export default function Lessons() {
               const shouldShowCategory = lesson.category &&
                 lesson.category.length < 20; // IDっぽい長い文字列は除外
 
-              // アイコン画像のURL（URL優先、なければSanity画像オブジェクト）
+              // アイコン画像URL（Webflow優先、なければSanity）- 元の比率を維持
               const iconUrl = lesson.iconImageUrl ||
-                              (lesson.iconImage ? urlFor(lesson.iconImage).width(200).height(300).url() : null);
+                             (lesson.iconImage ? urlFor(lesson.iconImage).height(300).url() : null);
 
               return (
                 <div
@@ -57,16 +57,18 @@ export default function Lessons() {
                   onClick={() => handleLessonClick(lesson.slug.current)}
                   className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
                 >
-                  {/* 画像エリア - 薄いグレー背景にアイコン画像を中央表示 */}
+                  {/* 画像エリア - グレー背景 + アイコン中央配置 */}
                   <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-                    {iconUrl && (
-                      <div className="rounded-r-lg shadow-[1px_1px_12px_0_rgba(0,0,0,0.24)]">
+                    {iconUrl ? (
+                      <div className="rounded-r-lg shadow-[1px_1px_12px_0_rgba(0,0,0,0.24)] overflow-hidden">
                         <img
                           src={iconUrl}
                           alt={lesson.title}
-                          className="h-32 w-auto object-cover"
+                          className="h-32 w-auto object-cover block"
                         />
                       </div>
+                    ) : (
+                      <div className="w-16 h-24 bg-gray-200 rounded-r-lg" />
                     )}
                   </div>
                   <div className="p-4">
