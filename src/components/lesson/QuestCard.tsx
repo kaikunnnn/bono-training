@@ -1,4 +1,4 @@
-import { ChevronRight, Check } from "lucide-react";
+import { Check } from "lucide-react";
 import ContentItem from "./ContentItem";
 
 interface Article {
@@ -118,11 +118,6 @@ export default function QuestCard({
                 </span>
               </div>
             </div>
-
-            {/* 矢印ボタン */}
-            <button className="flex-shrink-0 ml-4 p-2 hover:bg-gray-100 rounded-full transition">
-              <ChevronRight size={20} className="text-gray-600" />
-            </button>
           </div>
         </div>
 

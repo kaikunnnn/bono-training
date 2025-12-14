@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
-import { Check, Lock } from "lucide-react";
+import { Check, Lock, ChevronRight } from "lucide-react";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 
 interface ContentItemProps {
@@ -91,6 +91,11 @@ export default function ContentItem({
             {videoDuration}分
           </p>
         )}
+      </div>
+
+      {/* 矢印アイコン */}
+      <div className="flex-shrink-0">
+        <ChevronRight className="w-5 h-5 text-gray-400" />
       </div>
     </div>
   );
