@@ -1,8 +1,7 @@
 import * as React from "react"
 import { Link } from "react-router-dom"
-import { Clock, Star } from "lucide-react"
+import { Star } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { urlFor } from "@/lib/sanity"
 import type { BookmarkedArticle } from "@/services/bookmarks"
 
 interface BookmarkListProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -15,6 +14,47 @@ interface BookmarkListProps extends React.HTMLAttributes<HTMLDivElement> {
 interface BookmarkListItemProps extends React.HTMLAttributes<HTMLDivElement> {
   article: BookmarkedArticle
   onRemoveBookmark?: (articleId: string) => void
+}
+
+// Figma仕様に基づくスタイル定数
+const styles = {
+  colors: {
+    cardBg: "#FFFFFF",
+    cardShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
+    cardShadowHover: "0px 4px 16px rgba(0, 0, 0, 0.12)",
+    titleText: "#000000",
+    lessonInfoText: "#4B5563",
+    thumbnailPlaceholder: "#F5F5F5",
+    favoriteActive: "#FFC107",
+    favoriteInactive: "#E0E0E0",
+    tooltipBg: "#1F2937",
+    tooltipText: "#FFFFFF",
+  },
+  sizes: {
+    cardWidth: "443px",
+    cardHeight: "68px",
+    cardBorderRadius: "12px",
+    thumbnailWidth: "85px",
+    thumbnailHeight: "48px",
+    thumbnailBorderRadius: "8px",
+    iconSize: "20px",
+  },
+  spacing: {
+    cardPadding: "16px",
+    cardGap: "12px",
+    contentGap: "12px",
+    buttonPadding: "8px",
+  },
+  typography: {
+    titleFontFamily: "'Rounded Mplus 1c', sans-serif",
+    titleFontSize: "14px",
+    titleFontWeight: 700,
+    titleLineHeight: "32px",
+    lessonFontFamily: "'Inter', 'Noto Sans JP', sans-serif",
+    lessonFontSize: "12px",
+    lessonFontWeight: 400,
+    lessonLineHeight: "20px",
+  },
 }
 
 /**
@@ -50,7 +90,7 @@ const BookmarkList = React.forwardRef<HTMLDivElement, BookmarkListProps>(
     return (
       <div
         ref={ref}
-        className={cn("space-y-3", className)}
+        className={cn("flex flex-col gap-3", className)}
         {...props}
       >
         {articles.map((article) => (
@@ -67,33 +107,29 @@ const BookmarkList = React.forwardRef<HTMLDivElement, BookmarkListProps>(
 BookmarkList.displayName = "BookmarkList"
 
 /**
- * BookmarkListItem - ブックマークリストの1アイテム
+ * BookmarkListItem - ブックマークリストの1アイテム（Figma仕様準拠）
+ * レスポンシブ対応: 768px以下で width: 100%
  */
 const BookmarkListItem = React.forwardRef<HTMLDivElement, BookmarkListItemProps>(
   ({ className, article, onRemoveBookmark, ...props }, ref) => {
     const [isBookmarked, setIsBookmarked] = React.useState(true)
+    const [isHovered, setIsHovered] = React.useState(false)
+    const [isFavoriteHovered, setIsFavoriteHovered] = React.useState(false)
 
-    const thumbnailUrl = article.thumbnail
-      ? urlFor(article.thumbnail).width(160).height(90).url()
-      : article.coverImage
-      ? urlFor(article.coverImage).width(160).height(90).url()
-      : "/placeholder-thumbnail.png"
+    // GROQで解決済みのURLを使用（優先順位: thumbnailUrl > thumbnail > coverImage）
+    const thumbnailUrl = article.resolvedThumbnailUrl
+      || article.thumbnailUrl
+      || "/placeholder-thumbnail.svg"
 
-    const durationMinutes = article.videoDuration
-      ? Math.ceil(article.videoDuration / 60)
-      : null
-
-    const questTitle = article.questInfo?.title
-    const lessonTitle = article.questInfo?.lessonInfo?.title
+    // レッスン名を取得
+    const lessonTitle = article.questInfo?.lessonInfo?.title || ""
 
     const handleToggleBookmark = (e: React.MouseEvent) => {
       e.preventDefault()
       e.stopPropagation()
 
-      // 見た目だけ変更（リストから消さない）
       setIsBookmarked(!isBookmarked)
 
-      // 実際のブックマーク状態を更新
       if (onRemoveBookmark) {
         onRemoveBookmark(article._id)
       }
@@ -103,71 +139,219 @@ const BookmarkListItem = React.forwardRef<HTMLDivElement, BookmarkListItemProps>
       <div
         ref={ref}
         className={cn(
-          "flex gap-4 p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-100 relative group",
+          // レスポンシブ対応: スマホでは幅100%、PCでは443px
+          "w-full md:w-[443px]",
           className
         )}
+        role="article"
+        aria-label={article.title}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{
+          minHeight: styles.sizes.cardHeight,
+          display: "flex",
+          alignItems: "center",
+          gap: styles.spacing.cardGap,
+          backgroundColor: styles.colors.cardBg,
+          borderRadius: styles.sizes.cardBorderRadius,
+          padding: styles.spacing.cardPadding,
+          boxShadow: isHovered ? styles.colors.cardShadowHover : styles.colors.cardShadow,
+          cursor: "pointer",
+          transition: "box-shadow 0.2s ease",
+        }}
         {...props}
       >
         {/* リンク部分（クリック可能エリア） */}
         <Link
           to={`/articles/${article.slug.current}`}
-          className="flex gap-4 flex-1 min-w-0"
+          style={{
+            display: "flex",
+            gap: styles.spacing.contentGap,
+            alignItems: "center",
+            flex: 1,
+            minWidth: 0,
+            textDecoration: "none",
+          }}
         >
           {/* サムネイル */}
-          <div className="flex-shrink-0 w-40 h-[90px] bg-gray-200 rounded overflow-hidden">
+          <div
+            style={{
+              width: styles.sizes.thumbnailWidth,
+              minWidth: styles.sizes.thumbnailWidth,
+              height: styles.sizes.thumbnailHeight,
+              borderRadius: styles.sizes.thumbnailBorderRadius,
+              position: "relative",
+              flexShrink: 0,
+              overflow: "hidden",
+              backgroundColor: styles.colors.thumbnailPlaceholder,
+            }}
+          >
             <img
               src={thumbnailUrl}
-              alt={article.title}
-              className="w-full h-full object-cover"
+              alt={`${article.title}のサムネイル`}
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                pointerEvents: "none",
+              }}
             />
           </div>
 
-          {/* テキスト情報 */}
-          <div className="flex-1 min-w-0">
-            {/* クエスト名・レッスン名 */}
-            {(questTitle || lessonTitle) && (
-              <p className="text-sm text-gray-600 mb-1">
-                {questTitle && lessonTitle
-                  ? `${questTitle} / ${lessonTitle}`
-                  : questTitle || lessonTitle}
-              </p>
-            )}
-
+          {/* テキストエリア */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-start",
+              flex: 1,
+              minWidth: 0,
+              overflow: "hidden",
+            }}
+          >
             {/* タイトル */}
-            <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-2">
+            <p
+              style={{
+                fontFamily: styles.typography.titleFontFamily,
+                fontWeight: styles.typography.titleFontWeight,
+                fontSize: styles.typography.titleFontSize,
+                fontStyle: "normal",
+                lineHeight: styles.typography.titleLineHeight,
+                color: styles.colors.titleText,
+                margin: 0,
+                width: "100%",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
               {article.title}
-            </h3>
+            </p>
 
-            {/* 推定時間 */}
-            {durationMinutes && (
-              <div className="flex items-center gap-1 text-sm text-gray-500">
-                <Clock className="w-4 h-4" />
-                <span>{durationMinutes}分</span>
+            {/* レッスン情報 */}
+            {lessonTitle && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  width: "100%",
+                  overflow: "hidden",
+                }}
+              >
+                {/* "by" */}
+                <span
+                  style={{
+                    fontFamily: "'Inter', sans-serif",
+                    fontWeight: styles.typography.lessonFontWeight,
+                    fontSize: styles.typography.lessonFontSize,
+                    fontStyle: "normal",
+                    lineHeight: styles.typography.lessonLineHeight,
+                    color: styles.colors.lessonInfoText,
+                    whiteSpace: "nowrap",
+                    flexShrink: 0,
+                  }}
+                >
+                  by&nbsp;
+                </span>
+
+                {/* レッスン名 */}
+                <span
+                  style={{
+                    fontFamily: styles.typography.lessonFontFamily,
+                    fontWeight: styles.typography.lessonFontWeight,
+                    fontSize: styles.typography.lessonFontSize,
+                    fontStyle: "normal",
+                    lineHeight: styles.typography.lessonLineHeight,
+                    color: styles.colors.lessonInfoText,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {lessonTitle}
+                </span>
               </div>
             )}
           </div>
         </Link>
 
-        {/* お気に入り解除ボタン */}
-        <div className="flex-shrink-0 flex items-start pt-1">
-          <button
-            onClick={handleToggleBookmark}
-            className="p-2 rounded-full hover:bg-gray-200 transition-colors group/button relative"
-            aria-label={isBookmarked ? "ブックマークを解除" : "ブックマークに追加"}
-            title={isBookmarked ? "ブックマークを解除" : "ブックマークに追加"}
-          >
-            <Star
-              className={`w-5 h-5 transition-colors ${
-                isBookmarked
-                  ? "fill-yellow-400 stroke-yellow-400"
-                  : "fill-transparent stroke-gray-400"
-              }`}
-            />
-            {/* ホバー時のツールチップ */}
-            <span className="absolute bottom-full right-0 mb-2 px-2 py-1 text-xs text-white bg-gray-800 rounded whitespace-nowrap opacity-0 group-hover/button:opacity-100 transition-opacity pointer-events-none">
-              {isBookmarked ? "解除" : "追加"}
-            </span>
-          </button>
+        {/* お気に入りボタン */}
+        <div
+          role="button"
+          aria-label={isBookmarked ? "お気に入りを解除" : "お気に入りに追加"}
+          aria-pressed={isBookmarked}
+          tabIndex={0}
+          onClick={handleToggleBookmark}
+          onMouseEnter={() => setIsFavoriteHovered(true)}
+          onMouseLeave={() => setIsFavoriteHovered(false)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              handleToggleBookmark(e as unknown as React.MouseEvent)
+            }
+          }}
+          style={{
+            padding: styles.spacing.buttonPadding,
+            borderRadius: "9999px",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            position: "relative",
+            flexShrink: 0,
+            cursor: "pointer",
+            transition: "transform 0.2s ease",
+            transform: isFavoriteHovered ? "scale(1.1)" : "scale(1)",
+          }}
+        >
+          {/* スターアイコン */}
+          <Star
+            style={{
+              width: styles.sizes.iconSize,
+              height: styles.sizes.iconSize,
+              flexShrink: 0,
+              transition: "all 0.2s ease",
+            }}
+            fill={isBookmarked ? styles.colors.favoriteActive : "transparent"}
+            stroke={isBookmarked ? styles.colors.favoriteActive : styles.colors.favoriteInactive}
+            strokeWidth={1.5}
+          />
+
+          {/* ツールチップ */}
+          {isBookmarked && (
+            <div
+              style={{
+                position: "absolute",
+                bottom: "110%",
+                right: "50%",
+                transform: "translateX(50%)",
+                backgroundColor: styles.colors.tooltipBg,
+                padding: "4px 8px",
+                borderRadius: "4px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                opacity: isFavoriteHovered ? 1 : 0,
+                transition: "opacity 0.2s ease",
+                pointerEvents: "none",
+                whiteSpace: "nowrap",
+              }}
+            >
+              <span
+                style={{
+                  fontFamily: styles.typography.lessonFontFamily,
+                  fontWeight: 400,
+                  fontSize: "11px",
+                  lineHeight: "16px",
+                  textAlign: "center",
+                  color: styles.colors.tooltipText,
+                }}
+              >
+                解除
+              </span>
+            </div>
+          )}
         </div>
       </div>
     )

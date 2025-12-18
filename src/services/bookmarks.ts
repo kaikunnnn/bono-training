@@ -130,6 +130,8 @@ export async function getBookmarks(): Promise<string[]> {
 }
 
 export interface BookmarkedArticle extends Article {
+  thumbnailUrl?: string;
+  resolvedThumbnailUrl?: string;
   questInfo?: {
     _id: string;
     questNumber: number;
@@ -158,6 +160,7 @@ export async function getBookmarkedArticles(): Promise<BookmarkedArticle[]> {
     }
 
     // 2. SanityからArticle情報を取得
+    // 画像ソース優先順位: thumbnailUrl (Webflow) > thumbnail (Sanity) > coverImage (Sanity)
     const query = `*[_type == "article" && _id in $ids] {
       _id,
       _type,
@@ -165,6 +168,12 @@ export async function getBookmarkedArticles(): Promise<BookmarkedArticle[]> {
       slug,
       thumbnail,
       coverImage,
+      thumbnailUrl,
+      "resolvedThumbnailUrl": coalesce(
+        thumbnailUrl,
+        thumbnail.asset->url,
+        coverImage.asset->url
+      ),
       videoDuration,
       articleNumber,
       excerpt,
