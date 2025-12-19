@@ -11,8 +11,18 @@ import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
 import MobileMenuButton from "@/components/article/MobileMenuButton";
 import MobileSideNav from "@/components/article/MobileSideNav";
 import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
-import { toggleArticleCompletion, getArticleProgress, getLessonProgress } from "@/services/progress";
+import { toggleArticleCompletion, getArticleProgress, getLessonProgress, getLessonStatus, removeLessonCompletion } from "@/services/progress";
 import { useCelebration } from "@/hooks/useCelebration";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { CelebrationModal } from "@/components/celebration/CelebrationModal";
 import { QuestCompletionModal } from "@/components/celebration/QuestCompletionModal";
 
@@ -28,6 +38,7 @@ const ArticleDetail = () => {
   const [completionLoading, setCompletionLoading] = useState(false);
   const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showUndoConfirmDialog, setShowUndoConfirmDialog] = useState(false);
 
   // セレブレーション管理
   const {
@@ -157,6 +168,29 @@ const ArticleDetail = () => {
   const handleCompleteToggle = async () => {
     if (!article || !article.lessonInfo?._id) return;
 
+    console.log('[handleCompleteToggle] isCompleted:', isCompleted, 'lessonId:', article.lessonInfo._id);
+
+    // 完了を解除しようとしている場合、レッスンが完了済みかチェック
+    if (isCompleted) {
+      const lessonStatus = await getLessonStatus(article.lessonInfo._id);
+      console.log('[handleCompleteToggle] lessonStatus:', lessonStatus);
+
+      if (lessonStatus === 'completed') {
+        // 確認ダイアログを表示
+        console.log('[handleCompleteToggle] Showing undo confirm dialog');
+        setShowUndoConfirmDialog(true);
+        return;
+      }
+    }
+
+    // 通常の完了トグル処理
+    await executeCompleteToggle();
+  };
+
+  // 実際の完了トグル処理（確認後にも呼ばれる）
+  const executeCompleteToggle = async () => {
+    if (!article || !article.lessonInfo?._id) return;
+
     setCompletionLoading(true);
     const result = await toggleArticleCompletion(
       article._id,
@@ -243,6 +277,32 @@ const ArticleDetail = () => {
     setCompletionLoading(false);
   };
 
+  // レッスン完了解除確認後のハンドラー
+  const handleConfirmUndo = async () => {
+    if (!article || !article.lessonInfo?._id) return;
+
+    console.log('[handleConfirmUndo] User confirmed undo');
+    setShowUndoConfirmDialog(false);
+    setCompletionLoading(true);
+
+    try {
+      // レッスン完了を解除（トーストなし）
+      const lessonResult = await removeLessonCompletion(article.lessonInfo._id, false);
+      console.log('[handleConfirmUndo] removeLessonCompletion result:', lessonResult);
+
+      // 記事の完了状態を解除
+      const articleResult = await toggleArticleCompletion(article._id, article.lessonInfo._id);
+      console.log('[handleConfirmUndo] toggleArticleCompletion result:', articleResult);
+
+      if (articleResult.success) {
+        setIsCompleted(articleResult.isCompleted);
+        setProgressUpdateTrigger(prev => prev + 1);
+      }
+    } finally {
+      setCompletionLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-white">
@@ -294,6 +354,22 @@ const ArticleDetail = () => {
           footer={lessonModalData.footer}
         />
       )}
+
+      {/* レッスン完了解除確認ダイアログ */}
+      <AlertDialog open={showUndoConfirmDialog} onOpenChange={setShowUndoConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>レッスン完了を解除しますか？</AlertDialogTitle>
+            <AlertDialogDescription>
+              このレッスンは完了済みです。記事の完了を解除すると、レッスン完了も解除されます。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>キャンセル</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmUndo}>解除する</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* モバイルメニューボタン（スマホのみ表示） */}
       <div className="fixed top-4 left-4 z-30 md:hidden">

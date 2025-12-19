@@ -361,3 +361,53 @@ export async function getMultipleLessonStatus(
     return statusMap;
   }
 }
+
+/**
+ * レッスンの完了状態を解除する
+ * @param lessonId レッスンID (Sanity lesson._id)
+ * @param showToast トーストを表示するかどうか（デフォルト: false）
+ * @returns {success: boolean}
+ */
+export async function removeLessonCompletion(
+  lessonId: string,
+  showToast: boolean = false
+): Promise<{ success: boolean }> {
+  try {
+    console.log('[removeLessonCompletion] Starting with lessonId:', lessonId);
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      console.log('[removeLessonCompletion] No user found');
+      return { success: false };
+    }
+
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from('lesson_progress')
+      .update({
+        status: 'in_progress',
+        completed_at: null,
+        updated_at: now,
+      })
+      .eq('user_id', user.id)
+      .eq('lesson_id', lessonId);
+
+    if (error) {
+      console.error('[removeLessonCompletion] Update error:', error);
+      throw error;
+    }
+
+    console.log('[removeLessonCompletion] Successfully removed lesson completion');
+
+    if (showToast) {
+      toast({
+        title: 'レッスン完了を解除しました',
+        description: '記事の完了状態を変更したため、レッスン完了も解除されました',
+      });
+    }
+    return { success: true };
+  } catch (error) {
+    console.error('Remove lesson completion error:', error);
+    return { success: false };
+  }
+}

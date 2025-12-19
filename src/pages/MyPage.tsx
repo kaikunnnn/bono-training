@@ -228,9 +228,26 @@ export default function MyPage() {
   }
 
   const allActiveLessons = [...inProgressLessonsData, ...readyToCompleteLessonsData];
-  const displayedInProgressLessons = activeTab === 'all'
-    ? allActiveLessons.slice(0, 2)
-    : allActiveLessons;
+  // 進行中セクションは常に2つまで表示
+  const displayedInProgressLessons = allActiveLessons.slice(0, 2);
+  // 3つ目以降 + 完了済みを「その他の進捗」セクションに統合
+  // 完了済み → 100%達成 → その他の順で表示
+  const overflowFromActive = allActiveLessons.slice(2);
+  const completedForOverflow = completedLessonsData.map(lesson => ({
+    ...lesson,
+    isCompleted: true,
+  }));
+  const overflowLessons = [...completedForOverflow, ...overflowFromActive].sort((a, b) => {
+    // 完了済みを最上位に
+    const aCompleted = 'isCompleted' in a && a.isCompleted;
+    const bCompleted = 'isCompleted' in b && b.isCompleted;
+    if (aCompleted && !bCompleted) return -1;
+    if (!aCompleted && bCompleted) return 1;
+    // 次に100%のものを上に
+    if (a.progress === 100 && b.progress !== 100) return -1;
+    if (a.progress !== 100 && b.progress === 100) return 1;
+    return 0;
+  });
 
   return (
     <Layout>
@@ -499,82 +516,148 @@ export default function MyPage() {
             </section>
           )}
 
-          {/* 完了したレッスン（進捗タブのみ） */}
-          {activeTab === 'progress' && completedLessonsData.length > 0 && (
-            <section
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: styles.spacing.sectionHeadingGap,
-                alignItems: "flex-start",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            >
-              <SectionHeading title="完了したレッスン" />
-              <div
+          {/* その他の進捗（進捗タブのみ、3つ目以降のレッスン + 完了済み） */}
+          {activeTab === 'progress' && overflowLessons.length > 0 && (() => {
+            const completedLessons = overflowLessons.filter(l => 'isCompleted' in l && l.isCompleted);
+            const inProgressLessons = overflowLessons.filter(l => !('isCompleted' in l && l.isCompleted));
+
+            return (
+              <section
                 style={{
                   display: "flex",
-                  gap: styles.spacing.lessonGridGap,
+                  flexDirection: "column",
+                  gap: styles.spacing.sectionHeadingGap,
                   alignItems: "flex-start",
                   width: "100%",
+                  flexShrink: 0,
                 }}
               >
-                {completedLessonsData.map((lesson) => (
-                  <div
-                    key={lesson.lessonSlug}
-                    onClick={() => navigate(`/lessons/${lesson.lessonSlug}`)}
-                    style={{
-                      flex: 1,
-                      minWidth: 0,
-                      backgroundColor: styles.colors.cardBg,
-                      borderRadius: "16px",
-                      padding: "16px",
-                      boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
-                      cursor: "pointer",
-                      transition: "box-shadow 0.2s",
-                    }}
-                  >
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <img
-                        src={lesson.iconImageUrl}
-                        alt={lesson.title}
-                        style={{
-                          width: "48px",
-                          height: "73px",
-                          objectFit: "cover",
-                          borderTopRightRadius: "8px",
-                          borderBottomRightRadius: "8px",
-                        }}
-                      />
-                      <div>
-                        <h3
+                <SectionHeading title="その他の進捗" />
+
+                {/* 完了ブロック */}
+                {completedLessons.length > 0 && (
+                  <div style={{ width: "100%" }}>
+                    <h3
+                      style={{
+                        fontFamily: styles.typography.fontFamily,
+                        fontWeight: 500,
+                        fontSize: "13px",
+                        lineHeight: "32px",
+                        color: styles.colors.titleText,
+                        margin: 0,
+                        marginBottom: "8px",
+                      }}
+                    >
+                      完了
+                    </h3>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))",
+                        gap: styles.spacing.lessonGridGap,
+                        width: "100%",
+                      }}
+                    >
+                      {completedLessons.map((lesson, index) => (
+                        <div
+                          key={`completed-${lesson.title}-${index}`}
+                          onClick={() => navigate(`/lessons/${lesson.lessonSlug}`)}
                           style={{
-                            fontFamily: styles.typography.fontFamily,
-                            fontSize: "16px",
-                            fontWeight: 700,
-                            color: styles.colors.titleText,
-                            margin: "0 0 4px 0",
+                            backgroundColor: styles.colors.cardBg,
+                            borderRadius: "16px",
+                            padding: "16px",
+                            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
+                            cursor: "pointer",
+                            transition: "box-shadow 0.2s",
                           }}
                         >
-                          {lesson.title}
-                        </h3>
-                        <span
-                          style={{
-                            fontSize: "14px",
-                            fontWeight: 600,
-                            color: "#22C55E",
-                          }}
-                        >
-                          ✓ 完了
-                        </span>
-                      </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                            <img
+                              src={lesson.iconImageUrl}
+                              alt={lesson.title}
+                              style={{
+                                width: "48px",
+                                height: "73px",
+                                objectFit: "cover",
+                                borderTopRightRadius: "8px",
+                                borderBottomRightRadius: "8px",
+                              }}
+                            />
+                            <div>
+                              <h4
+                                style={{
+                                  fontFamily: styles.typography.fontFamily,
+                                  fontSize: "16px",
+                                  fontWeight: 700,
+                                  color: styles.colors.titleText,
+                                  margin: "0 0 4px 0",
+                                }}
+                              >
+                                {lesson.title}
+                              </h4>
+                              <span
+                                style={{
+                                  fontSize: "14px",
+                                  fontWeight: 600,
+                                  color: "#22C55E",
+                                }}
+                              >
+                                ✓ 完了
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                ))}
-              </div>
-            </section>
-          )}
+                )}
+
+                {/* 取り組み中ブロック */}
+                {inProgressLessons.length > 0 && (
+                  <div style={{ width: "100%", marginTop: completedLessons.length > 0 ? "16px" : 0 }}>
+                    <h3
+                      style={{
+                        fontFamily: styles.typography.fontFamily,
+                        fontWeight: 500,
+                        fontSize: "13px",
+                        lineHeight: "32px",
+                        color: styles.colors.titleText,
+                        margin: 0,
+                        marginBottom: "8px",
+                      }}
+                    >
+                      取り組み中
+                    </h3>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 400px), 1fr))",
+                        gap: styles.spacing.lessonGridGap,
+                        width: "100%",
+                      }}
+                    >
+                      {inProgressLessons.map((lesson, index) => (
+                        <div key={`inprogress-${lesson.title}-${index}`}>
+                          <ProgressLesson
+                            title={lesson.title}
+                            progress={lesson.progress}
+                            currentStep={lesson.currentStep}
+                            iconImageUrl={lesson.iconImageUrl}
+                            nextArticleUrl={'nextArticleUrl' in lesson ? lesson.nextArticleUrl : undefined}
+                            onCardClick={() => handleCardClick(lesson.title)}
+                            onNextArticleClick={'nextArticleUrl' in lesson && lesson.nextArticleUrl ? () => handleNextArticleClick(lesson.nextArticleUrl!) : undefined}
+                            showCompleteButton={'showCompleteButton' in lesson ? lesson.showCompleteButton : false}
+                            onCompleteClick={'onCompleteClick' in lesson ? lesson.onCompleteClick : undefined}
+                            isCompleting={'isCompleting' in lesson ? lesson.isCompleting : false}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </section>
+            );
+          })()}
 
           {/* お気に入りセクション */}
           {(activeTab === 'all' || activeTab === 'favorite') && (
