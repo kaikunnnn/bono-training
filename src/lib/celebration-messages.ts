@@ -1,17 +1,17 @@
 /**
- * 熱血コーチング・メッセージ定義
- * 汗と涙の結晶を称えるコーチからの熱い激励
+ * セレブレーション・メッセージ定義
+ * 学習の達成を称えるメッセージ
  */
 
 /**
  * レベル1: 記事完了時のメッセージ（ランダム）
  */
 export const ARTICLE_COMPLETE_MESSAGES = [
-  { title: 'いい汗かいたな！', description: '一歩一歩、着実に前進してるぞ！' },
-  { title: '昨日の自分より強くなってるぞ！', description: 'その調子だ！' },
-  { title: 'ナイスバルク！', description: '知識という筋肉が育ってる！' },
-  { title: 'その意気だ！', description: '限界を超えろ！' },
-  { title: 'グッジョブ！', description: '次のステップへ進め！' },
+  { title: 'ナイスデザイン💪', description: 'デザイン筋に効いてるぅ〜' },
+  { title: 'ええやん！✨', description: '前進前進〜！' },
+  { title: 'やるぅ〜！🔥', description: 'うまいもん食べよう' },
+  { title: 'いい感じ！👏', description: 'この調子でいこ〜！' },
+  { title: 'おつかれ！👍', description: '首と肩のストレッチしてくれよな' },
 ];
 
 /**
@@ -19,8 +19,8 @@ export const ARTICLE_COMPLETE_MESSAGES = [
  */
 export function getQuestCompleteMessage(questTitle: string) {
   return {
-    title: 'ナイスマッスル！！',
-    description: `その調子だ！『${questTitle}』という高い壁を越えたな！`,
+    title: 'クエスト完了！✨',
+    description: `『${questTitle}』クリア！いい感じ〜！`,
   };
 }
 
@@ -29,10 +29,10 @@ export function getQuestCompleteMessage(questTitle: string) {
  */
 export function getLessonCompleteMessage(lessonTitle: string) {
   return {
-    mainTitle: '優勝だ！！お前がNo.1だ！！',
-    subTitle: `『${lessonTitle}』完全制覇！`,
-    body: '素晴らしい！その情熱が奇跡を起こしたんだ！\n今日は焼き肉だ！！とびきり高いやつな！',
-    footer: '限界を超えて全てのメニューを消化しました！',
+    mainTitle: 'レッスン完了！今日は優勝だ！🎉',
+    subTitle: `『${lessonTitle}』やりきった！`,
+    body: 'めっちゃええやん！最高！\n今日はうまいもん食べよう！',
+    footer: '',
   };
 }
 

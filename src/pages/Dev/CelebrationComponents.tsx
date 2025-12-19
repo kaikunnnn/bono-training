@@ -16,6 +16,7 @@ import {
 import {
   ARTICLE_COMPLETE_MESSAGES,
   getLessonCompleteMessage,
+  getQuestCompleteMessage,
   getRandomArticleMessage,
 } from '@/lib/celebration-messages';
 import { Button } from '@/components/ui/button';
@@ -49,6 +50,7 @@ export default function CelebrationComponents() {
   };
 
   const lessonModalData = getLessonCompleteMessage(sampleLessonTitle);
+  const questModalData = getQuestCompleteMessage(sampleQuestTitle);
 
   return (
     <div style={{ padding: '40px', backgroundColor: '#f5f5f5', minHeight: '100vh' }}>
@@ -188,13 +190,10 @@ export default function CelebrationComponents() {
               </div>
             </div>
             <p style={{ fontWeight: 'bold', color: '#111827', margin: 0, marginBottom: '8px', fontSize: '18px', textAlign: 'center' }}>
-              クエスト完了！
-            </p>
-            <p style={{ color: '#6B7280', margin: 0, marginBottom: '16px', fontSize: '14px', textAlign: 'center' }}>
-              『{sampleQuestTitle}』をクリアしました
+              {questModalData.title}
             </p>
             <p style={{ color: '#374151', margin: 0, fontSize: '16px', textAlign: 'center', fontWeight: '500' }}>
-              ナイスマッスル！その調子だ！
+              {questModalData.description}
             </p>
             {/* 自動閉じインジケーター */}
             <div style={{ marginTop: '24px', height: '4px', backgroundColor: '#F3F4F6', borderRadius: '2px', overflow: 'hidden' }}>
@@ -256,7 +255,7 @@ export default function CelebrationComponents() {
                 className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3 text-lg rounded-full"
                 onClick={() => setShowLessonModal(true)}
               >
-                次の大会へ！
+                閉じる
               </Button>
             </div>
           </div>

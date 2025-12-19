@@ -1,12 +1,13 @@
 /**
  * QuestCompletionModal - クエスト完了時のモーダル
  *
- * 熱血コーチング・セレブレーション機能 レベル2
+ * セレブレーション機能 レベル2
  * シンプルデザイン + 5秒後に自動で閉じる
  */
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, X } from 'lucide-react';
+import { getQuestCompleteMessage } from '@/lib/celebration-messages';
 
 interface QuestCompletionModalProps {
   isOpen: boolean;
@@ -21,6 +22,9 @@ export function QuestCompletionModal({
   questTitle,
   autoCloseDelay = 5000,
 }: QuestCompletionModalProps) {
+  // メッセージを取得
+  const message = getQuestCompleteMessage(questTitle);
+
   // 自動で閉じる
   useEffect(() => {
     if (isOpen) {
@@ -91,27 +95,17 @@ export function QuestCompletionModal({
                 transition={{ delay: 0.15 }}
                 className="text-lg font-bold text-gray-900 mb-2"
               >
-                クエスト完了！
+                {message.title}
               </motion.h3>
-
-              {/* クエスト名 */}
-              <motion.p
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-sm text-gray-600 mb-4"
-              >
-                『{questTitle}』をクリアしました
-              </motion.p>
 
               {/* メッセージ */}
               <motion.p
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.25 }}
+                transition={{ delay: 0.2 }}
                 className="text-base font-medium text-gray-800"
               >
-                ナイスマッスル！その調子だ！
+                {message.description}
               </motion.p>
 
               {/* プログレスバー（自動閉じインジケーター） */}

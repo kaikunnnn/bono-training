@@ -162,7 +162,7 @@ export function CelebrationModal({
                 onClick={onClose}
                 className="bg-red-600 hover:bg-red-700 text-white font-bold px-8 py-3 text-lg rounded-full shadow-lg hover:shadow-xl transition-all"
               >
-                次の大会へ！
+                閉じる
               </Button>
             </motion.div>
           </motion.div>
