@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progress Lesson Component - Demo</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      justify-items: center;
+    }
+
+    .demo-section {
+      margin-bottom: 60px;
+    }
+
+    .demo-section h2 {
+      color: white;
+      margin-bottom: 24px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Progress Lesson Component</h1>
+    
+    <div id="root"></div>
+  </div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // ProgressLessonコンポーネント
+    const ProgressLesson = ({
+      icon = 'COPY',
+      iconBgColor = '#FFE5E5',
+      title,
+      progress,
+      currentStep,
+      isStepCompleted,
+      onClick,
+    }) => {
+      const [isHovered, setIsHovered] = useState(false);
+
+      return (
+        <div
+          onClick={onClick}
+          role="article"
+          aria-label={`${title}の進捗状況`}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{
+            width: '360px',
+            height: '147px',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '16px',
+            padding: '20px',
+            boxShadow: isHovered && onClick
+              ? '0px 4px 16px rgba(0, 0, 0, 0.12)'
+              : '0px 2px 8px rgba(0, 0, 0, 0.08)',
+            cursor: onClick ? 'pointer' : 'default',
+            transition: 'box-shadow 0.2s ease',
+            position: 'relative',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            {/* アイコン */}
+            <div
+              style={{
+                width: '48px',
+                height: '48px',
+                backgroundColor: iconBgColor,
+                borderRadius: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                fontSize: '10px',
+                fontWeight: '600',
+                color: '#666',
+                overflow: 'hidden',
+              }}
+            >
+              {icon.startsWith('http') ? (
+                <img
+                  src={icon}
+                  alt=""
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              ) : (
+                <span>{icon}</span>
+              )}
+            </div>
+
+            {/* タイトル + プログレスバー */}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <h3
+                style={{
+                  margin: '0 0 8px 0',
+                  fontSize: '16px',
+                  fontWeight: '700',
+                  color: '#1A1A1A',
+                  lineHeight: '1.4',
+                }}
+              >
+                {title}
+              </h3>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div
+                  role="progressbar"
+                  aria-valuenow={progress}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                  style={{
+                    flex: 1,
+                    height: '6px',
+                    backgroundColor: '#E5E5E5',
+                    borderRadius: '3px',
+                    overflow: 'hidden',
+                    position: 'relative',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${progress}%`,
+                      height: '100%',
+                      backgroundColor: '#1A1A1A',
+                      borderRadius: '3px',
+                      transition: 'width 0.3s ease',
+                    }}
+                  />
+                </div>
+
+                <span
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#1A1A1A',
+                    minWidth: '42px',
+                    textAlign: 'right',
+                  }}
+                >
+                  {progress}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ステップ表示 */}
+          <div
+            style={{
+              marginTop: '16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+              color: '#666666',
+            }}
+          >
+            <span style={{ fontSize: '16px' }}>✨</span>
+            <span
+              style={{
+                fontSize: '14px',
+                color: isStepCompleted ? '#4CAF50' : '#999999',
+              }}
+            >
+              {isStepCompleted ? '✓' : '✕'}
+            </span>
+            <span>{currentStep}</span>
+          </div>
+        </div>
+      );
+    };
+
+    // デモアプリ
+    const App = () => {
+      const handleClick = (title) => {
+        alert(`クリック: ${title}`);
+      };
+
+      return (
+        <div>
+          {/* オリジナルのデザイン */}
+          <div className="demo-section">
+            <h2>Original Design</h2>
+            <div className="demo-grid">
+              <ProgressLesson
+                icon="COPY"
+                iconBgColor="#FFE5E5"
+                title="センスを盗む技術"
+                progress={25}
+                currentStep="送る視線①:ビジュアル"
+                isStepCompleted={false}
+                onClick={() => handleClick('センスを盗む技術')}
+              />
+            </div>
+          </div>
+
+          {/* バリエーション例 */}
+          <div className="demo-section">
+            <h2>Variations</h2>
+            <div className="demo-grid">
+              <ProgressLesson
+                icon="UI"
+                iconBgColor="#E3F2FD"
+                title="UIデザインの基礎"
+                progress={75}
+                currentStep="レイアウト設計の基本"
+                isStepCompleted={true}
+                onClick={() => handleClick('UIデザインの基礎')}
+              />
+
+              <ProgressLesson
+                icon="UX"
+                iconBgColor="#F3E5F5"
+                title="UXリサーチ入門"
+                progress={45}
+                currentStep="ユーザーインタビュー実践"
+                isStepCompleted={false}
+                onClick={() => handleClick('UXリサーチ入門')}
+              />
+
+              <ProgressLesson
+                icon="CODE"
+                iconBgColor="#FFF9C4"
+                title="フロントエンド開発"
+                progress={100}
+                currentStep="React基礎完了"
+                isStepCompleted={true}
+                onClick={() => handleClick('フロントエンド開発')}
+              />
+
+              <ProgressLesson
+                icon="🎨"
+                iconBgColor="#E8F5E9"
+                title="カラー理論"
+                progress={15}
+                currentStep="色彩の基礎知識"
+                isStepCompleted={false}
+              />
+
+              <ProgressLesson
+                icon="📐"
+                iconBgColor="#FBE9E7"
+                title="タイポグラフィ"
+                progress={60}
+                currentStep="フォント選定のコツ"
+                isStepCompleted={true}
+              />
+
+              <ProgressLesson
+                icon="🚀"
+                iconBgColor="#E0F2F1"
+                title="プロトタイピング"
+                progress={30}
+                currentStep="Figmaで作るプロトタイプ"
+                isStepCompleted={false}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // レンダリング
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+/* セクション */
+.section {
+  margin-bottom: 56px;
+}
+
+/* 見出し行 */
+.headingRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* メイン見出し */
+.heading {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* 「すべてみる」リンク */
+.viewAllLink {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1976d2;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.viewAllLink:hover {
+  opacity: 0.7;
+}
+
+/* サブ見出し */
+.subHeading {
+  font-size: 16px;
+  font-weight: 600;
+  color: #666666;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* カードグリッド（2列） */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .section {
+    margin-bottom: 40px;
+  }
+
+  .heading {
+    font-size: 18px;
+  }
+
+  .subHeading {
+    font-size: 14px;
+  }
+
+  /* スマホでは1列に */
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+}

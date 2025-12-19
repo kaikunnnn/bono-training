@@ -143,6 +143,7 @@ export interface LessonProgress {
   completedArticles: number;
   percentage: number; // 0-100
   completedArticleIds: string[];
+  lastUpdatedAt: string | null; // 最新の進捗更新日時
 }
 
 /**
@@ -165,21 +166,25 @@ export async function getLessonProgress(
         completedArticles: 0,
         percentage: 0,
         completedArticleIds: [],
+        lastUpdatedAt: null,
       };
     }
 
-    // そのレッスンの記事で完了しているものを取得
+    // そのレッスンの記事で完了しているものを取得（更新日時も含める）
     const { data } = await supabase
       .from('article_progress')
-      .select('article_id')
+      .select('article_id, updated_at')
       .eq('user_id', user.id)
       .eq('lesson_id', lessonId)
       .eq('status', 'completed')
-      .in('article_id', articleIds);
+      .in('article_id', articleIds)
+      .order('updated_at', { ascending: false });
 
     const completedArticleIds = data?.map(item => item.article_id) || [];
     const completedCount = completedArticleIds.length;
     const percentage = Math.round((completedCount / articleIds.length) * 100);
+    // 最新の更新日時を取得
+    const lastUpdatedAt = data && data.length > 0 ? data[0].updated_at : null;
 
     return {
       lessonId,
@@ -187,6 +192,7 @@ export async function getLessonProgress(
       completedArticles: completedCount,
       percentage,
       completedArticleIds,
+      lastUpdatedAt,
     };
   } catch (error) {
     console.error('Get lesson progress error:', error);
@@ -196,6 +202,7 @@ export async function getLessonProgress(
       completedArticles: 0,
       percentage: 0,
       completedArticleIds: [],
+      lastUpdatedAt: null,
     };
   }
 }
@@ -228,4 +235,129 @@ export async function getMultipleLessonProgress(
 export async function isArticleCompleted(articleId: string): Promise<boolean> {
   const status = await getArticleProgress(articleId);
   return status === 'completed';
+}
+
+/**
+ * レッスン進捗のステータス
+ */
+export type LessonStatus = 'not_started' | 'in_progress' | 'completed';
+
+/**
+ * レッスンを完了状態にする
+ * 100%達成後にユーザーが「レッスンを完了する」ボタンをクリックした時に呼ばれる
+ * @param lessonId レッスンID (Sanity lesson._id)
+ * @returns {success: boolean}
+ */
+export async function markLessonAsCompleted(
+  lessonId: string
+): Promise<{ success: boolean }> {
+  try {
+    // 1. 認証チェック
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: 'ログインが必要です',
+        description: '進捗を保存するにはログインしてください',
+        variant: 'destructive',
+      });
+      return { success: false };
+    }
+
+    // 2. lesson_progressをupsert（存在すれば更新、なければ作成）
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from('lesson_progress')
+      .upsert(
+        {
+          user_id: user.id,
+          lesson_id: lessonId,
+          status: 'completed',
+          completed_at: now,
+          updated_at: now,
+        },
+        {
+          onConflict: 'user_id,lesson_id',
+        }
+      );
+
+    if (error) throw error;
+
+    toast({
+      title: 'レッスンを完了しました！',
+      description: 'おめでとうございます！',
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Mark lesson as completed error:', error);
+    toast({
+      title: 'エラーが発生しました',
+      description: 'もう一度お試しください',
+      variant: 'destructive',
+    });
+    return { success: false };
+  }
+}
+
+/**
+ * レッスンの完了ステータスを取得
+ * @param lessonId レッスンID
+ * @returns レッスンのステータス
+ */
+export async function getLessonStatus(
+  lessonId: string
+): Promise<LessonStatus> {
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return 'not_started';
+
+    const { data } = await supabase
+      .from('lesson_progress')
+      .select('status')
+      .eq('user_id', user.id)
+      .eq('lesson_id', lessonId)
+      .maybeSingle();
+
+    return (data?.status as LessonStatus) || 'not_started';
+  } catch (error) {
+    console.error('Get lesson status error:', error);
+    return 'not_started';
+  }
+}
+
+/**
+ * 複数レッスンの完了ステータスを一括取得
+ * @param lessonIds レッスンIDの配列
+ * @returns レッスンIDとステータスのマップ
+ */
+export async function getMultipleLessonStatus(
+  lessonIds: string[]
+): Promise<Record<string, LessonStatus>> {
+  const statusMap: Record<string, LessonStatus> = {};
+
+  // デフォルト値を設定
+  lessonIds.forEach(id => {
+    statusMap[id] = 'not_started';
+  });
+
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user || lessonIds.length === 0) return statusMap;
+
+    const { data } = await supabase
+      .from('lesson_progress')
+      .select('lesson_id, status')
+      .eq('user_id', user.id)
+      .in('lesson_id', lessonIds);
+
+    if (data) {
+      data.forEach(item => {
+        statusMap[item.lesson_id] = item.status as LessonStatus;
+      });
+    }
+
+    return statusMap;
+  } catch (error) {
+    console.error('Get multiple lesson status error:', error);
+    return statusMap;
+  }
 }

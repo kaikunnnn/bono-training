@@ -30,6 +30,9 @@ const toastVariants = cva(
         default: "border bg-background text-foreground",
         destructive:
           "destructive group border-destructive bg-destructive text-destructive-foreground",
+        // 熱血セレブレーション用バリアント
+        celebration:
+          "border-2 border-red-500 bg-red-50 text-red-900 font-bold",
       },
     },
     defaultVariants: {

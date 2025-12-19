@@ -1,6 +1,6 @@
 # Claude Code プロジェクト指示
 
-**最終更新**: 2025-12-06
+**最終更新**: 2025-12-17
 
 ---
 
@@ -127,25 +127,15 @@ npm run mcp:status
 .claude/
 ├── PROJECT-RULES.md                    ← 開発ルール（必読）
 └── docs/
-    ├── progress/                       ← レッスン進捗機能（調査中）
-    │   ├── README.md                   ← ドキュメント索引
-    │   ├── INVESTIGATION-PLAN.md       ← 調査計画
-    │   ├── current-implementation.md   ← 現状の実装
-    │   ├── database-schema.md          ← DBスキーマ
-    │   ├── data-flow.md                ← データフロー
-    │   └── potential-issues.md         ← 潜在的問題
+    ├── features/                       ← ユーザー向け機能
+    │   ├── README.md                   ← 機能一覧・ステータス
+    │   ├── progress/                   ← 進捗管理機能（調査完了）
+    │   ├── favorites/                  ← お気に入り機能（仕様策定中）
+    │   └── history/                    ← 閲覧履歴機能（仕様策定中）
     └── subscription/
         ├── TASK-TRACKER.md             ← タスク管理（必読）
         ├── README.md                   ← ドキュメント索引
-        ├── specifications/
-        │   ├── system-specification.md ← システム仕様
-        │   └── ...
-        ├── guides/
-        │   ├── common-errors.md        ← よくある失敗
-        │   └── ...
-        └── plans/
-            ├── phase2-stripe-pricing-final.md
-            └── ...
+        └── ...
 ```
 
 ---
@@ -194,8 +184,8 @@ Phase 5: 本番デプロイ     ✅ 完了
 **レッスン完了機能の技術調査**
 
 - **プロジェクト**: レッスン・記事の完了機能の技術的問題調査
-  - **📋 調査結果**: `.claude/docs/progress/README.md`
-  - **📁 潜在的問題**: `.claude/docs/progress/potential-issues.md`
+  - **📋 調査結果**: `.claude/docs/features/progress/README.md`
+  - **📁 潜在的問題**: `.claude/docs/features/progress/potential-issues.md`
   - **ステータス**: ✅ 調査完了
   - **完了日**: 2025-12-06
 
@@ -222,11 +212,19 @@ Phase 5: 調査結果のまとめ             ✅ 完了
 
 ---
 
-### 4. 通常タスク
+### 4. お気に入り・閲覧履歴機能 📋 仕様策定中
+
+**ユーザー機能の追加実装**
+
+- **📋 機能ドキュメント**: `.claude/docs/features/README.md`
+- **お気に入り**: `.claude/docs/features/favorites/`
+- **閲覧履歴**: `.claude/docs/features/history/`
+
+---
+
+### 5. 通常タスク
 
 **その他の開発タスク**
-
-※ サブスクリプション実装が完了したため、通常タスクに戻れます
 
 ---
 
@@ -252,6 +250,7 @@ Phase 5: 調査結果のまとめ             ✅ 完了
 
 | 日付       | 更新内容                                                             |
 | ---------- | -------------------------------------------------------------------- |
+| 2025-12-17 | features/フォルダ作成（progress, favorites, history を統合）         |
 | 2025-12-06 | レッスン進捗機能の調査完了（RLS無効・レース条件など重大問題を発見）  |
 | 2025-12-06 | レッスン進捗機能の調査開始（.claude/docs/progress/ フォルダ作成）    |
 | 2025-12-03 | ENV-004対策: MCP運用ルールを追加（mcp:disable/enable/status）        |

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>マイページ - BONO Dashboard</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+    }
+
+    /* レスポンシブスタイル */
+    @media (max-width: 768px) {
+      .mypage-container {
+        padding: 20px !important;
+      }
+
+      .mypage-content {
+        padding: 20px !important;
+      }
+
+      .mypage-title {
+        font-size: 24px !important;
+      }
+
+      .tab-list {
+        gap: 16px !important;
+      }
+
+      .progress-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+      }
+
+      .section-title {
+        font-size: 18px !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // カテゴリカラー
+    const CATEGORY_COLORS = {
+      visual: { bg: '#E8F5E9', text: '#2E7D32' },
+    };
+
+    // ProgressLessonコンポーネント（簡易版）
+    const ProgressLesson = ({ title, progress, currentStep, isStepCompleted }) => {
+      return (
+        <div style={{
+          width: '100%',
+          height: '147px',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '16px',
+          padding: '20px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              backgroundColor: '#FFE5E5',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              fontSize: '10px',
+              fontWeight: '600',
+              color: '#666',
+            }}>COPY</div>
+            <div style={{ flex: 1 }}>
+              <h3 style={{
+                fontSize: '16px',
+                fontWeight: '700',
+                color: '#1A1A1A',
+                marginBottom: '8px',
+              }}>{title}</h3>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{
+                  flex: 1,
+                  height: '6px',
+                  backgroundColor: '#E5E5E5',
+                  borderRadius: '3px',
+                  overflow: 'hidden',
+                }}>
+                  <div style={{
+                    width: `${progress}%`,
+                    height: '100%',
+                    backgroundColor: '#1A1A1A',
+                  }} />
+                </div>
+                <span style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#1A1A1A',
+                }}>{progress}%</span>
+              </div>
+            </div>
+          </div>
+          <div style={{
+            marginTop: '16px',
+            display: 'flex',
+            gap: '8px',
+            fontSize: '14px',
+            color: '#666666',
+          }}>
+            <span>✨</span>
+            <span>{isStepCompleted ? '✓' : '✕'}</span>
+            <span>{currentStep}</span>
+          </div>
+        </div>
+      );
+    };
+
+    // FavoriteArticleCardコンポーネント（簡易版）
+    const FavoriteArticleCard = ({ category, title, description, isFavorite }) => {
+      const [favorite, setFavorite] = useState(isFavorite);
+      
+      return (
+        <div style={{
+          width: '100%',
+          height: '68px',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '12px',
+          padding: '16px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            backgroundColor: '#F5F5F5',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '14px',
+            fontWeight: '700',
+            color: '#999999',
+          }}>CC</div>
+          <div style={{
+            padding: '4px 12px',
+            backgroundColor: CATEGORY_COLORS.visual.bg,
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: CATEGORY_COLORS.visual.text,
+          }}>{category}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{
+              fontSize: '16px',
+              fontWeight: '700',
+              color: '#1A1A1A',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{title}</h3>
+            <p style={{
+              fontSize: '13px',
+              color: '#666666',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{description}</p>
+          </div>
+          <button
+            onClick={() => setFavorite(!favorite)}
+            style={{
+              width: '32px',
+              height: '32px',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '20px',
+              color: favorite ? '#FFC107' : '#E0E0E0',
+            }}
+          >⭐</button>
+        </div>
+      );
+    };
+
+    // ArticleCardコンポーネント（簡易版）
+    const ArticleCard = ({ category, title, description }) => {
+      return (
+        <div style={{
+          width: '100%',
+          height: '68px',
+          backgroundColor: '#FFFFFF',
+          borderRadius: '12px',
+          padding: '16px',
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+        }}>
+          <div style={{
+            width: '40px',
+            height: '40px',
+            backgroundColor: '#F5F5F5',
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: '14px',
+            fontWeight: '700',
+            color: '#999999',
+          }}>CC</div>
+          <div style={{
+            padding: '4px 12px',
+            backgroundColor: CATEGORY_COLORS.visual.bg,
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: CATEGORY_COLORS.visual.text,
+          }}>{category}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h3 style={{
+              fontSize: '16px',
+              fontWeight: '700',
+              color: '#1A1A1A',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{title}</h3>
+            <p style={{
+              fontSize: '13px',
+              color: '#666666',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{description}</p>
+          </div>
+        </div>
+      );
+    };
+
+    // マイページコンポーネント
+    const MyPage = () => {
+      const [activeTab, setActiveTab] = useState('all');
+
+      const tabs = [
+        { id: 'all', label: 'すべて' },
+        { id: 'progress', label: '進捗' },
+        { id: 'favorite', label: 'お気に入り' },
+        { id: 'history', label: '閲覧履歴' },
+      ];
+
+      return (
+        <div className="mypage-container" style={{
+          backgroundColor: '#F8F9FA',
+          minHeight: '100vh',
+          padding: '40px',
+        }}>
+          <div className="mypage-content" style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            padding: '32px',
+          }}>
+            {/* ヘッダー */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: '24px',
+            }}>
+              <h1 className="mypage-title" style={{
+                fontSize: '28px',
+                fontWeight: '700',
+                color: '#1A1A1A',
+              }}>マイページ</h1>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <button style={{
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#1976D2',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #1976D2',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                }}>⚙️ アカウント情報</button>
+                <button style={{
+                  padding: '8px 16px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#1976D2',
+                  backgroundColor: 'transparent',
+                  border: '1px solid #1976D2',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                }}>👤 プロフィール</button>
+              </div>
+            </div>
+
+            {/* タブナビゲーション */}
+            <div style={{
+              borderBottom: '1px solid #E5E5E5',
+              marginBottom: '40px',
+            }}>
+              <div className="tab-list" style={{ display: 'flex', gap: '32px' }}>
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: activeTab === tab.id ? '#1A1A1A' : '#999999',
+                      background: 'none',
+                      border: 'none',
+                      borderBottom: activeTab === tab.id ? '2px solid #1A1A1A' : '2px solid transparent',
+                      paddingBottom: '16px',
+                      cursor: 'pointer',
+                    }}
+                  >{tab.label}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* コンテンツ */}
+            <div>
+              {/* 進行中セクション */}
+              {(activeTab === 'all' || activeTab === 'progress') && (
+                <section style={{ marginBottom: '56px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                  }}>
+                    <h2 className="section-title" style={{
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      color: '#1A1A1A',
+                    }}>進行中</h2>
+                    <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('progress'); }} style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1976D2',
+                      textDecoration: 'none',
+                    }}>すべてみる</a>
+                  </div>
+                  <h3 style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#666666',
+                    marginBottom: '16px',
+                  }}>レッスン</h3>
+                  <div className="progress-grid" style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '24px',
+                  }}>
+                    <ProgressLesson
+                      title="センスを盗む技術"
+                      progress={25}
+                      currentStep="送る視線①:ビジュアル"
+                      isStepCompleted={false}
+                    />
+                    <ProgressLesson
+                      title="センスを盗む技術"
+                      progress={25}
+                      currentStep="送る視線①:ビジュアル"
+                      isStepCompleted={false}
+                    />
+                  </div>
+                </section>
+              )}
+
+              {/* お気に入りセクション */}
+              {(activeTab === 'all' || activeTab === 'favorite') && (
+                <section style={{ marginBottom: '56px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                  }}>
+                    <h2 style={{
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      color: '#1A1A1A',
+                    }}>お気に入り</h2>
+                    <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('favorite'); }} style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1976D2',
+                      textDecoration: 'none',
+                    }}>すべてみる</a>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {[1, 2, 3, 4].map((i) => (
+                      <FavoriteArticleCard
+                        key={i}
+                        category="ビジュアル"
+                        title="送る視線①：ビジュアル"
+                        description="by「3種盛」ではじめるUIデザイン入門"
+                        isFavorite={true}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {/* 閲覧履歴セクション */}
+              {(activeTab === 'all' || activeTab === 'history') && (
+                <section style={{ marginBottom: '56px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '20px',
+                  }}>
+                    <h2 style={{
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      color: '#1A1A1A',
+                    }}>閲覧履歴</h2>
+                    <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab('history'); }} style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1976D2',
+                      textDecoration: 'none',
+                    }}>すべてみる</a>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    {[1, 2].map((i) => (
+                      <ArticleCard
+                        key={i}
+                        category="ビジュアル"
+                        title="送る視線①：ビジュアル"
+                        description="by「3種盛」ではじめるUIデザイン入門"
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<MyPage />, document.getElementById('root'));
+  </script>
+</body>
+</html>

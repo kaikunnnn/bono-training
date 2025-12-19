@@ -1,0 +1,71 @@
+/*
+ * TabNavigationPill - Pill/Chip スタイルのタブナビゲーション
+ * Figma MCP取得の正確な仕様に基づく実装
+ * Figma Node ID: 2:2932
+ */
+
+/* コンテナ */
+.container {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 3px;
+  background-color: #F2F2F2;
+  border-radius: 8px;
+  position: relative;
+  width: fit-content;
+}
+
+/* 個別タブ */
+.tab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  /* リセット */
+  border: none;
+  background-color: transparent;
+  box-shadow: none;
+}
+
+/* 非アクティブなタブ - ホバー時 */
+.tab:hover:not(.tabActive) {
+  background-color: rgba(255, 255, 255, 0.5);
+}
+
+/* フォーカス時のアウトライン */
+.tab:focus-visible {
+  outline: 2px solid #1976D2;
+  outline-offset: 2px;
+}
+
+/* アクティブなタブ */
+.tabActive {
+  background-color: #FFFFFF;
+  box-shadow: 0px 2px 2px 0px rgba(0, 0, 0, 0.04);
+}
+
+/* タブラベル */
+.tabLabel {
+  font-family: 'Rounded Mplus 1c', sans-serif;
+  font-weight: 700;
+  font-size: 12px;
+  font-style: normal;
+  line-height: normal;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+
+  /* 非アクティブ時のテキスト色 */
+  color: rgba(0, 0, 0, 0.48);
+}
+
+/* アクティブなタブのラベル */
+.tabActive .tabLabel {
+  color: #000000;
+}
+

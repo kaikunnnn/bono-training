@@ -1,0 +1,66 @@
+/* タブナビゲーションコンテナ */
+.container {
+  border-bottom: 1px solid #E5E5E5;
+  margin-bottom: 40px;
+}
+
+/* タブリスト */
+.tabList {
+  display: flex;
+  gap: 32px;
+  padding-bottom: 0;
+}
+
+/* 個別タブ */
+.tab {
+  font-size: 16px;
+  font-weight: 600;
+  color: #999999;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0 0 16px 0;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: #666666;
+}
+
+/* アクティブなタブ */
+.tabActive {
+  color: #1A1A1A;
+  border-bottom-color: #1A1A1A;
+}
+
+.tabActive:hover {
+  color: #1A1A1A;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .container {
+    margin-bottom: 32px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+  }
+
+  .container::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+  }
+
+  .tabList {
+    gap: 16px;
+    padding-bottom: 0;
+    min-width: max-content;
+  }
+
+  .tab {
+    font-size: 14px;
+    padding: 0 0 12px 0;
+  }
+}

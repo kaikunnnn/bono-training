@@ -1,0 +1,238 @@
+/**
+ * マイページ - レスポンシブスタイル
+ */
+
+/* ========================================
+   デスクトップ（デフォルト）
+======================================== */
+
+.mypage-container {
+  background-color: #F8F9FA;
+  min-height: 100vh;
+  padding: 40px;
+}
+
+.mypage-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  background-color: #FFFFFF;
+  border-radius: 12px;
+  padding: 32px;
+}
+
+.mypage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.mypage-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+.mypage-actions {
+  display: flex;
+  gap: 16px;
+}
+
+/* タブナビゲーション */
+.tab-navigation {
+  border-bottom: 1px solid #E5E5E5;
+  margin-bottom: 40px;
+}
+
+.tab-list {
+  display: flex;
+  gap: 32px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none; /* Firefox */
+}
+
+.tab-list::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
+.tab-button {
+  font-size: 16px;
+  font-weight: 600;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 16px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+  white-space: nowrap;
+}
+
+.tab-button.active {
+  color: #1A1A1A;
+  border-bottom-color: #1A1A1A;
+}
+
+.tab-button:not(.active) {
+  color: #999999;
+}
+
+/* セクション */
+.section {
+  margin-bottom: 56px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1A1A1A;
+  margin: 0;
+}
+
+.section-subtitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #666666;
+  margin-bottom: 16px;
+}
+
+.view-all-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1976D2;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.view-all-link:hover {
+  opacity: 0.8;
+}
+
+/* カードグリッド */
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ========================================
+   タブレット（768px以下）
+======================================== */
+
+@media (max-width: 768px) {
+  .mypage-container {
+    padding: 20px;
+  }
+
+  .mypage-content {
+    padding: 20px;
+    border-radius: 8px;
+  }
+
+  .mypage-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .mypage-title {
+    font-size: 24px;
+  }
+
+  .mypage-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .mypage-actions button {
+    width: 100%;
+  }
+
+  /* タブ */
+  .tab-list {
+    gap: 16px;
+    padding-bottom: 8px;
+  }
+
+  .tab-button {
+    font-size: 14px;
+    padding-bottom: 12px;
+  }
+
+  .tab-navigation {
+    margin-bottom: 32px;
+  }
+
+  /* セクション */
+  .section {
+    margin-bottom: 40px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .section-subtitle {
+    font-size: 14px;
+  }
+
+  /* カードグリッド - 1列に */
+  .progress-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .card-list {
+    gap: 12px;
+  }
+}
+
+/* ========================================
+   モバイル（480px以下）
+======================================== */
+
+@media (max-width: 480px) {
+  .mypage-container {
+    padding: 16px;
+  }
+
+  .mypage-content {
+    padding: 16px;
+  }
+
+  .mypage-title {
+    font-size: 20px;
+  }
+
+  .tab-button {
+    font-size: 13px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .section-subtitle {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .view-all-link {
+    font-size: 13px;
+  }
+}

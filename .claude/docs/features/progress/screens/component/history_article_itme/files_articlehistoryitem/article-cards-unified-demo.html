@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Article Cards - Demo (統合版)</title>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 16px;
+      font-size: 32px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: rgba(255, 255, 255, 0.9);
+      text-align: center;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+
+    .section {
+      margin-bottom: 60px;
+    }
+
+    .section h2 {
+      color: white;
+      margin-bottom: 12px;
+      font-size: 24px;
+      font-weight: 600;
+    }
+
+    .section-description {
+      color: rgba(255, 255, 255, 0.9);
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .card-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(443px, 1fr));
+      gap: 24px;
+      justify-items: center;
+    }
+
+    .comparison-item h3 {
+      color: white;
+      margin-bottom: 12px;
+      font-size: 18px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Article Card Components</h1>
+    <p class="subtitle">基本版（スターなし）とお気に入り版（スターあり）の比較デモ</p>
+    
+    <div id="root"></div>
+  </div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // カテゴリカラー定義
+    const CATEGORY_COLORS = {
+      visual: { bg: '#E8F5E9', text: '#2E7D32' },
+      coding: { bg: '#E3F2FD', text: '#1565C0' },
+      design: { bg: '#F3E5F5', text: '#6A1B9A' },
+      typography: { bg: '#FBE9E7', text: '#D84315' },
+      ux: { bg: '#FFF9C4', text: '#F57F17' },
+    };
+
+    // ArticleCard（基本版 - スターなし）
+    const ArticleCard = ({
+      icon = 'CC',
+      iconBgColor = '#F5F5F5',
+      category,
+      categoryColor = CATEGORY_COLORS.visual,
+      title,
+      description,
+      onClick,
+    }) => {
+      const [isHovered, setIsHovered] = useState(false);
+      const isImageIcon = icon.startsWith('http');
+
+      return (
+        <div
+          role="article"
+          aria-label={`${title} - ${category}`}
+          onClick={onClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{
+            width: '443px',
+            height: '68px',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            padding: '16px',
+            boxShadow: isHovered && onClick
+              ? '0px 4px 16px rgba(0, 0, 0, 0.12)'
+              : '0px 2px 8px rgba(0, 0, 0, 0.08)',
+            cursor: onClick ? 'pointer' : 'default',
+            transition: 'box-shadow 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <div style={{
+            width: '40px',
+            height: '40px',
+            backgroundColor: iconBgColor,
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {isImageIcon ? (
+              <img src={icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <>
+                <span style={{
+                  position: 'absolute',
+                  fontSize: '8px',
+                  fontWeight: '600',
+                  color: '#CCCCCC',
+                  letterSpacing: '0.5px',
+                }}>COPY</span>
+                <span style={{
+                  position: 'relative',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  color: '#999999',
+                  zIndex: 1,
+                }}>{icon}</span>
+              </>
+            )}
+          </div>
+
+          <div style={{
+            padding: '4px 12px',
+            backgroundColor: categoryColor.bg,
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: categoryColor.text,
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}>
+            {category}
+          </div>
+
+          <div style={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: '16px',
+              fontWeight: '700',
+              color: '#1A1A1A',
+              lineHeight: '1.4',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{title}</h3>
+            <p style={{
+              margin: 0,
+              fontSize: '13px',
+              fontWeight: '400',
+              color: '#666666',
+              lineHeight: '1.4',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{description}</p>
+          </div>
+        </div>
+      );
+    };
+
+    // FavoriteArticleCard（お気に入り版 - スターあり）
+    const FavoriteArticleCard = ({
+      icon = 'CC',
+      iconBgColor = '#F5F5F5',
+      category,
+      categoryColor = CATEGORY_COLORS.visual,
+      title,
+      description,
+      isFavorite: initialFavorite = false,
+      onFavoriteToggle,
+      onClick,
+    }) => {
+      const [isFavorite, setIsFavorite] = useState(initialFavorite);
+      const [isHovered, setIsHovered] = useState(false);
+      const [isFavoriteHovered, setIsFavoriteHovered] = useState(false);
+
+      const handleFavoriteClick = (e) => {
+        e.stopPropagation();
+        const newState = !isFavorite;
+        setIsFavorite(newState);
+        onFavoriteToggle?.(newState);
+      };
+
+      const isImageIcon = icon.startsWith('http');
+
+      return (
+        <div
+          role="article"
+          aria-label={`${title} - ${category}`}
+          onClick={onClick}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          style={{
+            width: '443px',
+            height: '68px',
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            padding: '16px',
+            boxShadow: isHovered && onClick
+              ? '0px 4px 16px rgba(0, 0, 0, 0.12)'
+              : '0px 2px 8px rgba(0, 0, 0, 0.08)',
+            cursor: onClick ? 'pointer' : 'default',
+            transition: 'box-shadow 0.2s ease',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <div style={{
+            width: '40px',
+            height: '40px',
+            backgroundColor: iconBgColor,
+            borderRadius: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: 0,
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            {isImageIcon ? (
+              <img src={icon} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              <>
+                <span style={{
+                  position: 'absolute',
+                  fontSize: '8px',
+                  fontWeight: '600',
+                  color: '#CCCCCC',
+                  letterSpacing: '0.5px',
+                }}>COPY</span>
+                <span style={{
+                  position: 'relative',
+                  fontSize: '14px',
+                  fontWeight: '700',
+                  color: '#999999',
+                  zIndex: 1,
+                }}>{icon}</span>
+              </>
+            )}
+          </div>
+
+          <div style={{
+            padding: '4px 12px',
+            backgroundColor: categoryColor.bg,
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: '600',
+            color: categoryColor.text,
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+          }}>
+            {category}
+          </div>
+
+          <div style={{
+            flex: 1,
+            minWidth: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '4px',
+          }}>
+            <h3 style={{
+              margin: 0,
+              fontSize: '16px',
+              fontWeight: '700',
+              color: '#1A1A1A',
+              lineHeight: '1.4',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{title}</h3>
+            <p style={{
+              margin: 0,
+              fontSize: '13px',
+              fontWeight: '400',
+              color: '#666666',
+              lineHeight: '1.4',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>{description}</p>
+          </div>
+
+          <button
+            onClick={handleFavoriteClick}
+            onMouseEnter={() => setIsFavoriteHovered(true)}
+            onMouseLeave={() => setIsFavoriteHovered(false)}
+            aria-label={isFavorite ? 'お気に入りから削除' : 'お気に入りに追加'}
+            style={{
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '20px',
+              color: isFavorite ? '#FFC107' : '#E0E0E0',
+              transform: isFavoriteHovered ? 'scale(1.1)' : 'scale(1)',
+              transition: 'all 0.2s ease',
+              flexShrink: 0,
+              padding: 0,
+            }}
+          >
+            ⭐
+          </button>
+        </div>
+      );
+    };
+
+    // デモアプリ
+    const App = () => {
+      return (
+        <div>
+          {/* 比較セクション */}
+          <div className="section">
+            <h2>📊 基本版 vs お気に入り版の比較</h2>
+            <p className="section-description">同じデータで2つのバージョンを並べて表示</p>
+            <div className="comparison">
+              <div className="comparison-item">
+                <h3>基本版（スターなし）</h3>
+                <ArticleCard
+                  category="ビジュアル"
+                  title="送る視線①：ビジュアル"
+                  description="by「3種盛」ではじめるUIデザイン入門"
+                  onClick={() => alert('基本版: 記事をクリック')}
+                />
+              </div>
+              <div className="comparison-item">
+                <h3>お気に入り版（スターあり）</h3>
+                <FavoriteArticleCard
+                  category="ビジュアル"
+                  title="送る視線①：ビジュアル"
+                  description="by「3種盛」ではじめるUIデザイン入門"
+                  isFavorite={false}
+                  onFavoriteToggle={(isFav) => alert(`お気に入り: ${isFav}`)}
+                  onClick={() => alert('お気に入り版: 記事をクリック')}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 基本版リスト */}
+          <div className="section">
+            <h2>📄 ArticleCard（基本版）</h2>
+            <p className="section-description">シンプルな記事リスト表示用</p>
+            <div className="card-list">
+              <ArticleCard
+                icon="CC"
+                category="ビジュアル"
+                categoryColor={CATEGORY_COLORS.visual}
+                title="送る視線①：ビジュアル"
+                description="by「3種盛」ではじめるUIデザイン入門"
+                onClick={() => console.log('記事1')}
+              />
+              <ArticleCard
+                icon="UI"
+                category="コーディング"
+                categoryColor={CATEGORY_COLORS.coding}
+                title="React Hooks完全ガイド"
+                description="by フロントエンド実践講座"
+                onClick={() => console.log('記事2')}
+              />
+              <ArticleCard
+                icon="🎨"
+                category="デザイン"
+                categoryColor={CATEGORY_COLORS.design}
+                title="カラー理論の基礎"
+                description="by デザイン基礎シリーズ"
+                onClick={() => console.log('記事3')}
+              />
+            </div>
+          </div>
+
+          {/* お気に入り版リスト */}
+          <div className="section">
+            <h2>⭐ FavoriteArticleCard（お気に入り版）</h2>
+            <p className="section-description">お気に入り管理機能付き</p>
+            <div className="card-list">
+              <FavoriteArticleCard
+                icon="CC"
+                category="ビジュアル"
+                categoryColor={CATEGORY_COLORS.visual}
+                title="送る視線①：ビジュアル"
+                description="by「3種盛」ではじめるUIデザイン入門"
+                isFavorite={false}
+                onFavoriteToggle={(isFav) => console.log('お気に入り1:', isFav)}
+                onClick={() => console.log('記事1')}
+              />
+              <FavoriteArticleCard
+                icon="UI"
+                category="コーディング"
+                categoryColor={CATEGORY_COLORS.coding}
+                title="React Hooks完全ガイド"
+                description="by フロントエンド実践講座"
+                isFavorite={true}
+                onFavoriteToggle={(isFav) => console.log('お気に入り2:', isFav)}
+                onClick={() => console.log('記事2')}
+              />
+              <FavoriteArticleCard
+                icon="🎨"
+                category="デザイン"
+                categoryColor={CATEGORY_COLORS.design}
+                title="カラー理論の基礎"
+                description="by デザイン基礎シリーズ"
+                isFavorite={false}
+                onFavoriteToggle={(isFav) => console.log('お気に入り3:', isFav)}
+                onClick={() => console.log('記事3')}
+              />
+              <FavoriteArticleCard
+                icon="📐"
+                category="タイポグラフィ"
+                categoryColor={CATEGORY_COLORS.typography}
+                title="フォント選びの極意"
+                description="by タイポグラフィ実践講座"
+                isFavorite={true}
+                onFavoriteToggle={(isFav) => console.log('お気に入り4:', isFav)}
+                onClick={() => console.log('記事4')}
+              />
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
