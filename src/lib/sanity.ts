@@ -37,7 +37,16 @@ export async function getArticleWithContext(
       thumbnailUrl,
       videoUrl,
       videoDuration,
-      content,
+      content[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      },
       learningObjectives,
       publishedAt,
       author,
