@@ -37,6 +37,8 @@ import DevHome from "./pages/Dev/DevHome";
 import ComponentsReferencePage from "./pages/Dev/Components";
 import WebflowTest from "./pages/Dev/WebflowTest";
 import GuideManual from "./pages/Dev/GuideManual";
+import ProgressComponents from "./pages/Dev/ProgressComponents";
+import CelebrationComponents from "./pages/dev/CelebrationComponents";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -108,6 +110,8 @@ const AppContent = () => {
         <Route path="/dev/webflow-test" element={<DevRoute><WebflowTest /></DevRoute>} />
         <Route path="/dev/guide-manual" element={<DevRoute><GuideManual /></DevRoute>} />
         <Route path="/dev/blog" element={<DevRoute><BlogGuide /></DevRoute>} />
+        <Route path="/dev/progress-components" element={<DevRoute><ProgressComponents /></DevRoute>} />
+        <Route path="/dev/celebration" element={<DevRoute><CelebrationComponents /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />

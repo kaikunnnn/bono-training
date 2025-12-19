@@ -58,6 +58,13 @@ const config = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))'
         },
+        success: {
+          DEFAULT: '#22C55E',
+          light: '#86EFAC',
+          dark: '#16A34A',
+          foreground: '#FFFFFF',
+          background: '#F0FDF4',
+        },
         sidebar: {
           DEFAULT: 'hsl(var(--sidebar-background))',
           foreground: 'hsl(var(--sidebar-foreground))',

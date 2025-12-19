@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { getArticleWithContext } from "@/lib/sanity";
 import type { ArticleWithContext } from "@/types/sanity";
 import VideoSection from "@/components/article/VideoSection";
@@ -11,7 +11,10 @@ import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
 import MobileMenuButton from "@/components/article/MobileMenuButton";
 import MobileSideNav from "@/components/article/MobileSideNav";
 import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
-import { toggleArticleCompletion, getArticleProgress } from "@/services/progress";
+import { toggleArticleCompletion, getArticleProgress, getLessonProgress } from "@/services/progress";
+import { useCelebration } from "@/hooks/useCelebration";
+import { CelebrationModal } from "@/components/celebration/CelebrationModal";
+import { QuestCompletionModal } from "@/components/celebration/QuestCompletionModal";
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -25,6 +28,19 @@ const ArticleDetail = () => {
   const [completionLoading, setCompletionLoading] = useState(false);
   const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // セレブレーション管理
+  const {
+    showQuestModal,
+    questModalTitle,
+    closeQuestModal,
+    showLessonModal,
+    lessonModalData,
+    closeLessonModal,
+    celebrateArticleComplete,
+    celebrateQuestComplete,
+    celebrateLessonComplete,
+  } = useCelebration();
 
   // 前後の記事を計算（クエストをまたぐナビゲーション対応）
   const navigation = useMemo(() => {
@@ -151,6 +167,78 @@ const ArticleDetail = () => {
       setIsCompleted(result.isCompleted);
       // サイドナビの進捗を更新するトリガー
       setProgressUpdateTrigger(prev => prev + 1);
+
+      // 完了にした場合のみセレブレーション判定
+      if (result.isCompleted && article.lessonInfo?.quests) {
+        // レッスン内の全記事IDを取得
+        const allArticleIds: string[] = [];
+        const questArticleMap: Record<string, string[]> = {};
+
+        for (const quest of article.lessonInfo.quests) {
+          const questArticleIds = quest.articles.map(a => a._id);
+          allArticleIds.push(...questArticleIds);
+          questArticleMap[quest._id] = questArticleIds;
+        }
+
+        // 最新の進捗を取得
+        const progress = await getLessonProgress(article.lessonInfo._id, allArticleIds);
+
+        // 現在の記事が属するクエストを特定
+        const currentQuestId = article.questInfo?._id;
+        const currentQuestTitle = article.questInfo?.title || '';
+
+        // デバッグログ
+        console.log('[Celebration Debug]', {
+          currentArticleId: article._id,
+          currentQuestId,
+          currentQuestTitle,
+          questArticleMap,
+          progress,
+          lessonQuests: article.lessonInfo.quests.map(q => ({ id: q._id, title: q.title })),
+        });
+
+        if (currentQuestId && questArticleMap[currentQuestId]) {
+          const questArticleIds = questArticleMap[currentQuestId];
+          const completedInQuest = questArticleIds.filter(id =>
+            progress.completedArticleIds.includes(id)
+          );
+
+          console.log('[Celebration Debug] Quest progress:', {
+            questArticleIds,
+            completedInQuest,
+            isQuestComplete: completedInQuest.length === questArticleIds.length,
+            isLessonComplete: progress.percentage === 100,
+          });
+
+          // クエスト完了判定（全記事完了）
+          if (completedInQuest.length === questArticleIds.length) {
+            // レッスン完了判定（全クエスト完了）
+            if (progress.percentage === 100) {
+              console.log('[Celebration] 🎉 Lesson Complete!');
+              celebrateLessonComplete(article.lessonInfo.title);
+            } else {
+              // クエスト完了のみ
+              console.log('[Celebration] 🔥 Quest Complete!');
+              celebrateQuestComplete(currentQuestTitle);
+            }
+          } else {
+            // 記事完了のみ
+            console.log('[Celebration] ✅ Article Complete');
+            celebrateArticleComplete();
+          }
+        } else {
+          // クエスト情報がない場合は記事完了のみ
+          console.log('[Celebration] ⚠️ No quest info, showing article celebration');
+          celebrateArticleComplete();
+        }
+      } else if (result.isCompleted) {
+        // lessonInfo.quests がない場合もログ
+        console.log('[Celebration] ⚠️ No lesson quests data:', {
+          hasLessonInfo: !!article.lessonInfo,
+          hasQuests: !!article.lessonInfo?.quests,
+        });
+        celebrateArticleComplete();
+      }
     }
     setCompletionLoading(false);
   };
@@ -188,6 +276,25 @@ const ArticleDetail = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
+      {/* クエスト完了モーダル（5秒後に自動で閉じる） */}
+      <QuestCompletionModal
+        isOpen={showQuestModal}
+        onClose={closeQuestModal}
+        questTitle={questModalTitle}
+      />
+
+      {/* レッスン完了モーダル */}
+      {lessonModalData && (
+        <CelebrationModal
+          isOpen={showLessonModal}
+          onClose={closeLessonModal}
+          mainTitle={lessonModalData.mainTitle}
+          subTitle={lessonModalData.subTitle}
+          body={lessonModalData.body}
+          footer={lessonModalData.footer}
+        />
+      )}
+
       {/* モバイルメニューボタン（スマホのみ表示） */}
       <div className="fixed top-4 left-4 z-30 md:hidden">
         <MobileMenuButton
