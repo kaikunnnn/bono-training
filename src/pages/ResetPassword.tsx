@@ -15,15 +15,22 @@ const ResetPassword = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetSuccess, setIsResetSuccess] = useState(false);
-  const { updatePassword, user } = useAuth();
+  const { updatePassword, user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // ユーザーがリセットリンクからアクセスしたかを確認
   useEffect(() => {
-    // URLのハッシュに#access_tokenが含まれていれば、リセットリンク経由でアクセスしたと判断
-    const isFromResetLink = window.location.hash.includes('access_token');
-    
+    // Auth初期化前（URLからのセッション復元含む）は判定を待つ
+    if (loading) return;
+
+    // Supabaseの「implicit（#access_token...）」/「PKCE（?code=...）」どちらにも対応
+    const hash = window.location.hash ?? '';
+    const params = new URLSearchParams(window.location.search);
+    const hasAccessTokenInHash = hash.includes('access_token=');
+    const hasCodeInQuery = params.has('code');
+    const isFromResetLink = hasAccessTokenInHash || hasCodeInQuery;
+
     if (!isFromResetLink && !user) {
       // リセットリンク経由でなく、ログインもしていない場合はログインページにリダイレクト
       toast({
@@ -33,7 +40,7 @@ const ResetPassword = () => {
       });
       navigate('/auth');
     }
-  }, [navigate, toast, user]);
+  }, [loading, navigate, toast, user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
