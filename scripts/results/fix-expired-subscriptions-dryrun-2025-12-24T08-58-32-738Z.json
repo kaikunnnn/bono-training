@@ -1,0 +1,833 @@
+{
+  "executedAt": "2025-12-24T08:58:32.738Z",
+  "mode": "dry-run",
+  "summary": {
+    "deactivated": 52,
+    "updated": 30,
+    "skipped": 0,
+    "error": 0,
+    "total": 82
+  },
+  "results": [
+    {
+      "userId": "e775d6a3-5975-4b14-b6c9-fb3762a7a42f",
+      "email": "amiried@icloud.com",
+      "stripeSubscriptionId": "sub_1SUT5jKUVUnt8GtyKylbxQKz",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-17T14:07:39+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "c4d8dcc8-8fc9-4b32-a3e7-f76acb142ad2",
+      "email": "tangoayano32@gmail.com",
+      "stripeSubscriptionId": "sub_1S9O6UKUVUnt8GtyZeWSAh17",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-20T01:33:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "2f15172d-5abf-44af-888d-813ec75149e7",
+      "email": "ankzhr258048@gmail.com",
+      "stripeSubscriptionId": "sub_1SBUmeKUVUnt8GtyisX7EY7I",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-25T21:05:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "0f6c9da0-1c7c-449e-a288-a58d63d66592",
+      "email": "pandacopandaco13560@gmail.com",
+      "stripeSubscriptionId": "sub_1RzULbKUVUnt8Gty9PYUHi2T",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-22T05:17:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "b05e9af0-ee98-4cc1-905a-fd167c5e6887",
+      "email": "kota.katsumi@gmail.com",
+      "stripeSubscriptionId": "sub_1RaadcKUVUnt8GtyzEw15Wpw",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-16T01:51:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "a5df7425-5ab7-4a4f-8a75-4cbcbc675191",
+      "email": "po.chom.pom@gmail.com",
+      "stripeSubscriptionId": "sub_1RXhjgKUVUnt8GtyDoUaP4d1",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-08T02:50:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "2a1b9b3f-5a36-4e94-b963-f6f5c26a8064",
+      "email": "hashibiroko@littlehelp.co.jp",
+      "stripeSubscriptionId": "sub_1RQPGHKUVUnt8Gtykbazdwb9",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-18T23:41:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "811ca35b-7331-4155-bc9f-3a6e48118d82",
+      "email": "s.hoshino.creative@gmail.com",
+      "stripeSubscriptionId": "sub_1S5GtGKUVUnt8GtyuGwSendP",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-09T02:02:38+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "e5f5463b-64f6-41ee-9913-7e209b805197",
+      "email": "sec05re0t5@gmail.com",
+      "stripeSubscriptionId": "sub_1S3rYHKUVUnt8GtyJErYEtWA",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-04T19:47:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "5ed02acd-712b-486a-95b2-54a12f5a3b81",
+      "email": "lianggongcheng204@gmail.com",
+      "stripeSubscriptionId": "sub_1S39UCKUVUnt8GtyyRz6USoJ",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-02T20:44:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "5133004a-c5b5-40e6-be40-130d67eb4f7a",
+      "email": "junpy0428@gmail.com",
+      "stripeSubscriptionId": "sub_1S2je5KUVUnt8GtywROrOiih",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-01T17:08:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "75fd0a58-4cdb-49cd-86a9-5b943ee48f03",
+      "email": "myrn1026@gmail.com",
+      "stripeSubscriptionId": "sub_1RbDnCKUVUnt8GtyaMzhYFSH",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-17T19:40:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "f80f698d-5406-48df-aaa7-48d3426e746c",
+      "email": "n.design0509@gmail.com",
+      "stripeSubscriptionId": "sub_1RCoe3KUVUnt8GtyOCDky7aX",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-03T16:14:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "5ce1daa8-fee9-4cb4-bc43-9f32ffb0b927",
+      "email": "mogura83@gmail.com",
+      "stripeSubscriptionId": "sub_1RYGCoKUVUnt8GtyV6PhwHPH",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-09T15:38:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "bc1d2e6a-72a1-4d6e-89b0-a7d0bf657333",
+      "email": "s330049@yahoo.co.jp",
+      "stripeSubscriptionId": "sub_1RXdvRKUVUnt8GtyRuioeznA",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-07T22:45:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "0d6a97b3-f01f-4754-bdff-5b978b87a371",
+      "email": "ononoimoko1127@gmail.com",
+      "stripeSubscriptionId": "sub_1QbeVRKUVUnt8GtyJLxqNfIF",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-29T23:39:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "4771b0af-f73b-4a56-a811-7d34d3c95014",
+      "email": "tdp1185182413usui@gmail.com",
+      "stripeSubscriptionId": "sub_1R66EKKUVUnt8GtyZxemIPBC",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-24T08:19:32+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "dc403f7b-c723-4c09-becd-04497ffd8ab8",
+      "email": "westvillage815@gmail.com",
+      "stripeSubscriptionId": "sub_1SDTPYKUVUnt8GtyIZFRjKGq",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-12-01T08:01:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "e645fd28-e076-4ead-b6fa-cdb0778ab79a",
+      "email": "miku3953honey@icloud.com",
+      "stripeSubscriptionId": "sub_1S0ifUKUVUnt8Gtyrqwv7XdY",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-27T03:41:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "91ab727d-6c73-4d17-8c49-d5f20d465fd2",
+      "email": "saki.takama@exmed.io",
+      "stripeSubscriptionId": "sub_1RqlqAKUVUnt8GtycOA0C4Bh",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-28T17:28:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "aff95734-c47a-4545-9aad-ee4486fcb975",
+      "email": "kimamanaholiday@gmail.com",
+      "stripeSubscriptionId": "sub_1RJ93XKUVUnt8Gtyd1aIunfA",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-28T22:58:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "212cf792-8e0e-4d7b-b447-8616182c3ad6",
+      "email": "na73_ono@icloud.com",
+      "stripeSubscriptionId": "sub_1S0srlKUVUnt8GtydBwVzi4E",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-27T14:34:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "63e8abb8-7b8f-46e2-83db-353507d7d397",
+      "email": "momomot555@yahoo.co.jp",
+      "stripeSubscriptionId": "sub_1RV8UzKUVUnt8GtyuiJRohbx",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-12-01T00:48:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "1f10e97e-eeaf-49d2-9883-349933bf1bf0",
+      "email": "rsakata102@gmail.com",
+      "stripeSubscriptionId": "sub_1RSWU8KUVUnt8GtyhXZjdnEN",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-24T19:48:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "56fa1e39-fa4c-4a3b-8776-05fcb8eea94e",
+      "email": "rotgersekimura@gmail.com",
+      "stripeSubscriptionId": "sub_1S8dL5KUVUnt8GtyYFGhwZmp",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-18T08:37:15+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "c2872267-b79c-49fc-8182-178b9a8ccb1c",
+      "email": "racu0164@gmail.com",
+      "stripeSubscriptionId": "sub_1Ryi3KKUVUnt8GtyXyvke6U2",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-21T23:37:54+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "3e6707a0-83c7-4043-9c6b-a5377a9f7435",
+      "email": "maikinako.0508@gmail.com",
+      "stripeSubscriptionId": "sub_1S27StKUVUnt8GtyomFyivHk",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-30T00:22:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "a31d2e4a-6a93-4f9f-a95e-9efe05b6f49e",
+      "email": "tomoe7766@gmail.com",
+      "stripeSubscriptionId": "sub_1S1eKIKUVUnt8Gty6hL71kar",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-29T17:15:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "b5a625de-6cb0-4791-9137-cb77de070f0a",
+      "email": "m1s4tanaka@gmail.com",
+      "stripeSubscriptionId": "sub_1RzomWKUVUnt8GtyC4ddwDpJ",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-24T16:01:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "d18704c0-2f11-4c00-a793-891c06243f44",
+      "email": "02125011a+bono@gmail.com",
+      "stripeSubscriptionId": "sub_1ROuPoKUVUnt8Gtygc4MGg8M",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-14T20:33:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "45e70a7e-29cf-447c-b4dc-a6428f7d5b24",
+      "email": "naho.k032765@gmail.com",
+      "stripeSubscriptionId": "sub_1QVXPsKUVUnt8GtyvWxVHGug",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-13T02:52:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "ca70c290-e1a2-45ca-b541-e1a94070257f",
+      "email": "hello@creamandpuff-design.com",
+      "stripeSubscriptionId": "sub_1S86yHKUVUnt8Gty2fNxdHjT",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-12-16T13:03:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "01445033-4bf9-4b75-a35b-173ddf49080c",
+      "email": "tsubasa.hamano.biz@gmail.com",
+      "stripeSubscriptionId": "sub_1RzgIQKUVUnt8GtyrBxnrWTk",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-24T06:57:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "caea9c83-0932-494c-85c1-c9e51021ca54",
+      "email": "tanida@engineerforce.io",
+      "stripeSubscriptionId": "sub_1OMNFmKUVUnt8GtyDO9iDPkA",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-11T19:07:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "dd065705-7314-41c6-bea3-0ce717931b73",
+      "email": "kota77079@gmail.com",
+      "stripeSubscriptionId": "sub_1Rck7vKUVUnt8Gty8Lg1SfMk",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-22T00:23:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "1cde62b4-f14f-48ea-9a8c-dba5d2c05243",
+      "email": "haruchoco1220@gmail.com",
+      "stripeSubscriptionId": "sub_1QXgA4KUVUnt8GtydpNzQ8Sf",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-19T00:36:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "ef323fbd-b74e-4175-b599-5e02db1c66dd",
+      "email": "moonrainbow67s@gmail.com",
+      "stripeSubscriptionId": "sub_1M6oJoKUVUnt8GtyaF2EsXwP",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-21T19:42:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "cc6c9ffd-9515-4f07-bfce-3f822a1bf178",
+      "email": "sachi.u417@gmail.com",
+      "stripeSubscriptionId": "sub_1OEp6iKUVUnt8Gtyv96kiRpG",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-20T23:14:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "e21f176f-22be-4284-9478-1a7385cb5006",
+      "email": "ri_3o5yo@yahoo.co.jp",
+      "stripeSubscriptionId": "sub_1NDWnWKUVUnt8Gty6lzLCReX",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-30T08:57:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "3184f61b-fd65-4cd2-8aa0-901c5f3da970",
+      "email": "garden.letter.asuka@gmail.com",
+      "stripeSubscriptionId": "sub_1Nl4DHKUVUnt8GtyTrcmf33V",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-29T21:18:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "bc2c45be-edcb-4bc8-bd94-25575017c014",
+      "email": "risa.k.with@gmail.com",
+      "stripeSubscriptionId": "sub_1RhVunKUVUnt8GtyZfA2tJS9",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-05T04:14:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "4b76c653-2c47-4f09-9058-c5a72201e377",
+      "email": "karwehko1203@gmail.com",
+      "stripeSubscriptionId": "sub_1SOEXpKUVUnt8GtyGTMVGLXl",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-30T00:22:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "b553acfd-5376-4534-9d32-03f51141e335",
+      "email": "shi1yo2u2ta3@gmail.com",
+      "stripeSubscriptionId": "sub_1SNTFjKUVUnt8GtyS9cmo79a",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-28T21:53:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "a0888b57-795e-4293-95ab-90204111c710",
+      "email": "nanamori011@gmail.com",
+      "stripeSubscriptionId": "sub_1SMN9mKUVUnt8Gty4X7298Lc",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-25T21:10:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "389cd86a-fadc-47bb-bbef-c6dec495318d",
+      "email": "akagi1203kaiji@gmail.com",
+      "stripeSubscriptionId": "sub_1SMLQEKUVUnt8GtydYpK6xwc",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-25T19:19:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "31da0941-2371-4679-9840-25ee2c5cb1e7",
+      "email": "minejkjimina@gmail.com",
+      "stripeSubscriptionId": "sub_1SLFflKUVUnt8Gtyf0uvk22v",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-22T18:58:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "7f4a40a6-a691-4da3-9c1f-6a750c3cdcca",
+      "email": "r-hattori@ajike.co.jp",
+      "stripeSubscriptionId": "sub_1SFPg7KUVUnt8GtymQ1MroOU",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-06T16:26:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "70c8a724-54a6-498f-b0b8-4557d57e6f97",
+      "email": "s-ishikawa@ajike.co.jp",
+      "stripeSubscriptionId": "sub_1SFPGWKUVUnt8GtyK2CWeKbF",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-06T16:00:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "2a38a359-8b8e-421e-9916-7b5e1a78fc4d",
+      "email": "kaito12soccer@icloud.com",
+      "stripeSubscriptionId": "sub_1SSytSKUVUnt8GtyM5NFDjMZ",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-13T11:40:50+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "1c4bf4e6-6cc6-4b72-a040-6264169ca32e",
+      "email": "ja0292ek@gmail.com",
+      "stripeSubscriptionId": "sub_1SHHvjKUVUnt8GtyfdTlh8pd",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-12T05:34:51+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "f38717fd-d735-479a-95e5-1810ac7cee6a",
+      "email": "hitomiusuki2020@gmail.com",
+      "stripeSubscriptionId": "sub_1SCraFKUVUnt8Gtyp2lTyjPF",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-29T15:38:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "5bdae361-77a0-4c93-9931-1237fe2ab2a5",
+      "email": "ribooooooon38@gmail.com",
+      "stripeSubscriptionId": "sub_1S3bRiKUVUnt8GtyaSgoJYiB",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-04T02:35:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "c3536dad-0f73-4cc0-b849-3945c00c1d60",
+      "email": "chamo.guitar@gmail.com",
+      "stripeSubscriptionId": "sub_1S2AmkKUVUnt8GtyabvXKdHk",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-30T03:55:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "9bd6a308-c57d-4fea-a4ef-56ae91ba6ce5",
+      "email": "ngan.trinh2801@gmail.com",
+      "stripeSubscriptionId": "sub_1S1hpGKUVUnt8GtyCi2toe07",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-29T20:59:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "30f11dea-1fbe-4727-bcfd-7f93aa345dd9",
+      "email": "kotom6998@gmail.com",
+      "stripeSubscriptionId": "sub_1S0qsqKUVUnt8GtyFinF3Wzk",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-27T12:27:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "55c2ab08-c787-4633-a8ef-d0dd14c9c5d1",
+      "email": "jackie1103158@gmail.com",
+      "stripeSubscriptionId": "sub_1RzYaWKUVUnt8Gty7BQfVVrw",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-23T22:43:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "7a4d0a6f-071c-4dc5-9788-db9ba69f560c",
+      "email": "iamkakeru0925@gmail.com",
+      "stripeSubscriptionId": "sub_1RytjVKUVUnt8GtyKv2RL8u1",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-22T03:06:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "6d3bd4ab-c655-458c-8977-550292cf0a50",
+      "email": "boc.watyannn@gmail.com",
+      "stripeSubscriptionId": "sub_1RxrdFKUVUnt8GtyvzYudkET",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-19T06:39:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "6cc37bfa-5979-42cf-bda3-8f6c38e487cf",
+      "email": "fuma20202020@gmail.com",
+      "stripeSubscriptionId": "sub_1RcM9xKUVUnt8Gty1ZlX8WBG",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-20T22:48:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "ee0b4eb8-3b50-44e7-b8c2-6d7449ad87f6",
+      "email": "y.dream.nest@icloud.com",
+      "stripeSubscriptionId": "sub_1RZKIdKUVUnt8Gty45kk2fHl",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-12T14:12:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "7b0aba57-d6cd-4912-9926-e9093722e317",
+      "email": "tsukanta4050@gmail.com",
+      "stripeSubscriptionId": "sub_1RZA3VKUVUnt8Gty65osVmZA",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-12T03:16:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "74531375-ef74-4322-9995-d650cc4e8a0d",
+      "email": "mina.goto037@gmail.com",
+      "stripeSubscriptionId": "sub_1RVAxSKUVUnt8GtyCU2PPubb",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-12-01T03:25:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "853ec2fa-5ea2-4784-abc7-e1d1d5bfebb1",
+      "email": "ennennenn4@gmail.com",
+      "stripeSubscriptionId": "sub_1RTuAJKUVUnt8GtyOq6RKqLV",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-28T15:17:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "db55b70e-cf9c-480e-876d-073a0f2ff085",
+      "email": "misa.shukuwa@gmail.com",
+      "stripeSubscriptionId": "sub_1RTne8KUVUnt8Gtyjj8ReiW9",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-28T08:20:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "75e7c99c-a35a-49b6-a411-cbd6dc7d88da",
+      "email": "yukiko.miyamasa@gmail.com",
+      "stripeSubscriptionId": "sub_1RSvUpKUVUnt8GtyGxInPfTQ",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-30T12:20:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "e3d97bd5-8e26-425c-9548-c56acb7a8707",
+      "email": "natsumitsuna@gmail.com",
+      "stripeSubscriptionId": "sub_1RRMt7KUVUnt8GtyLb4U46gl",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-21T15:21:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "6c60c11a-7c62-47d5-a011-387f3619fcfb",
+      "email": "aka_denden0407@yahoo.co.jp",
+      "stripeSubscriptionId": "sub_1RN8xYKUVUnt8GtyzXm4JFPO",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-09T23:40:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "29267482-9b5e-4ed6-a011-edc5acf6d456",
+      "email": "hankyo@humour.jp",
+      "stripeSubscriptionId": "sub_1QuqEEKUVUnt8Gtyj8W9SF5b",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-20T22:00:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "c2449aa6-a15d-4f01-9e12-addd90b51bb4",
+      "email": "treasurecoming@gmail.com",
+      "stripeSubscriptionId": "sub_1RxIVvKUVUnt8Gtyeb7unnrV",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-17T15:00:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "c7e44ae0-7a1d-4535-b271-25d39a55c27a",
+      "email": "te7012@gmail.com",
+      "stripeSubscriptionId": "sub_1QXtXSKUVUnt8GtyKdcsr7X9",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-30T20:13:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "86640b9c-63ce-4987-a56d-af4d129b2d33",
+      "email": "yoshizawa.shota.85@gmail.com",
+      "stripeSubscriptionId": "sub_1QQ8JJKUVUnt8GtyOP3WZPjM",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-28T05:03:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "83660c96-02be-49cb-9218-a6a720c17831",
+      "email": "yui.work2121@gmail.com",
+      "stripeSubscriptionId": "sub_1QDexAKUVUnt8GtyyrITlVTf",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-24T19:16:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "abca6d6e-1f11-4f3a-9f4f-6525134b253a",
+      "email": "opataku8716@gmail.com",
+      "stripeSubscriptionId": "sub_1Q4vOWKUVUnt8Gty31KtCf8q",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-30T17:00:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "cb1ba159-1dee-4d22-a625-5f57e0737bc6",
+      "email": "a.kihara612@gmail.com",
+      "stripeSubscriptionId": "sub_1Pt78RKUVUnt8Gtyrh8DikRb",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-29T03:07:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "bff355a4-87e4-4be1-ba26-ad1d9491e5ea",
+      "email": "apricotpoodle1030@gmail.com",
+      "stripeSubscriptionId": "sub_1POBL7KUVUnt8GtyzRLkxNOx",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-04T19:20:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "245722e0-9f08-4f80-a660-f38cc4112f0a",
+      "email": "mimozanokoe@outlook.jp",
+      "stripeSubscriptionId": "sub_1OolWdKUVUnt8GtyItihyEAS",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-28T02:42:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "c79f2ae4-87db-440d-a9fd-910fe60cc956",
+      "email": "a.itokawa0328@gmail.com",
+      "stripeSubscriptionId": "sub_1Oo2H9KUVUnt8GtyC6ZIje67",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-26T02:23:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "d6444647-ea0b-44ab-98dd-81fde0fbc7f2",
+      "email": "km12yu@outlook.jp",
+      "stripeSubscriptionId": "sub_1O56DJKUVUnt8GtyHHCzAMEQ",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-25T03:29:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "07e7d0fb-2852-4c68-8f1c-a347ed2c43d3",
+      "email": "akihiro.k01@gmail.com",
+      "stripeSubscriptionId": "sub_1O4QTAKUVUnt8Gtyepw7rRTU",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-11-23T06:55:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "d6948858-d159-459d-a8f8-7173fdb46e6b",
+      "email": "hitomi.060222@gmail.com",
+      "stripeSubscriptionId": "sub_1NbMwvKUVUnt8GtyaEjpNZ2Y",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-29T16:44:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    },
+    {
+      "userId": "b1541297-e692-449a-89c8-ec70944d9c8a",
+      "email": "ssaoi0906@gmail.com",
+      "stripeSubscriptionId": "sub_1NKI3sKUVUnt8GtyPyFZQmPM",
+      "stripeStatus": "canceled",
+      "supabaseCurrentPeriodEnd": "2025-12-18T00:38:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "deactivated",
+      "reason": "キャンセル済み＆利用期間終了"
+    },
+    {
+      "userId": "e1d97f37-d982-48c4-92cf-ec203e9b26ca",
+      "email": "aomojimw@gmail.com",
+      "stripeSubscriptionId": "sub_1MKvGmKUVUnt8GtyLWeuH3Gq",
+      "stripeStatus": "active",
+      "supabaseCurrentPeriodEnd": "2025-11-29T17:58:00+00:00",
+      "stripeCurrentPeriodEnd": null,
+      "action": "updated",
+      "reason": "Stripeでアクティブ - current_period_end更新"
+    }
+  ]
+}
