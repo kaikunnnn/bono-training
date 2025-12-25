@@ -1,0 +1,376 @@
+{
+  "executedAt": "2025-12-24T09:43:13.228Z",
+  "mode": "live",
+  "summary": {
+    "created": 50,
+    "skipped": 201,
+    "error": 2,
+    "total": 52
+  },
+  "results": [
+    {
+      "customerId": "cus_Ter66RNl13CEZl",
+      "subscriptionId": "sub_1Shn8zKUVUnt8Gty2cbu50Om",
+      "email": "asunan1111@gmail.com",
+      "action": "created",
+      "userId": "5c6c4d70-04b9-4b0b-9268-fa8779d7d20a"
+    },
+    {
+      "customerId": "cus_TdBocxKUhGGb6P",
+      "subscriptionId": "sub_1ShOkqKUVUnt8GtyP6lNUuaq",
+      "email": "miwak.work@gmail.com",
+      "action": "created",
+      "userId": "d9069909-799a-4620-b1e6-d6dde9e8f5dc"
+    },
+    {
+      "customerId": "cus_TdvseK6SnQJjKC",
+      "subscriptionId": "sub_1Sge1BKUVUnt8Gty5UuqpO2y",
+      "email": "ak3668134@gmail.com",
+      "action": "created",
+      "userId": "f86b4568-c069-48ec-a7a4-7646c056dc58"
+    },
+    {
+      "customerId": "cus_TduQAa3hLLqt6T",
+      "subscriptionId": "sub_1SgcsQKUVUnt8GtyGRDi3Cl3",
+      "email": "mh16design@gmail.com",
+      "action": "created",
+      "userId": "41323e4e-526f-4a6c-9836-2e39ff7ef9a5"
+    },
+    {
+      "customerId": "cus_Tdq5cJOtSiLDye",
+      "subscriptionId": "sub_1SgarXKUVUnt8GtydYHOTcTn",
+      "email": "sweetbread1214@gmail.com",
+      "action": "created",
+      "userId": "d08ad21a-6e5b-4bab-a07a-f39856a9f48d"
+    },
+    {
+      "customerId": "cus_TdrNeWRO7V5Gck",
+      "subscriptionId": "sub_1SgZevKUVUnt8Gty6SOSan5a",
+      "email": "potepoteto.0327@gmail.com",
+      "action": "created",
+      "userId": "e493b036-8af3-469f-a59e-0423b19f286c"
+    },
+    {
+      "customerId": "cus_Tc4VuPb467sdHl",
+      "subscriptionId": "sub_1SeqPkKUVUnt8GtycpQeyII7",
+      "email": "rinka071898@gmail.com",
+      "action": "created",
+      "userId": "7e04fb87-4d71-4480-b9e1-62829388fe48"
+    },
+    {
+      "customerId": "cus_TbPNXDq1Zxj3Zx",
+      "subscriptionId": "sub_1SeCcnKUVUnt8GtylVjmspzV",
+      "email": "megumishinoda.design@gmail.com",
+      "action": "created",
+      "userId": "2771a058-150d-48fe-94bd-5ed71ec3efe8"
+    },
+    {
+      "customerId": "cus_TbKglrp7NGZxeg",
+      "subscriptionId": "sub_1Se80wKUVUnt8Gtyb5Kruqc3",
+      "email": "marino.morita.mmm@gmail.com",
+      "action": "created",
+      "userId": "b1f56d7c-7f04-47ec-9f16-c1cc5632a772"
+    },
+    {
+      "customerId": "cus_TUZY8QThAgtsUi",
+      "subscriptionId": "sub_1Sd8Y6KUVUnt8GtyxccHUOia",
+      "email": "noguyuki1004@gmail.com",
+      "action": "created",
+      "userId": "c73970fa-3b0a-401f-84ba-672204315a05"
+    },
+    {
+      "customerId": "cus_TZyYEuhdgyXTcF",
+      "subscriptionId": "sub_1Sczi6KUVUnt8Gty0DVQ9sxJ",
+      "email": "greyg7637@gmail.com",
+      "action": "created",
+      "userId": "bcdc95dd-13e3-4439-ac31-3c31048e50eb"
+    },
+    {
+      "customerId": "cus_Ta8aOlNmjqoE91",
+      "subscriptionId": "sub_1ScyLmKUVUnt8GtyN4BFl5sX",
+      "email": "okamotopon@gmail.com",
+      "action": "created",
+      "userId": "ae69dd8a-37fb-458a-a0b0-dea403842a21"
+    },
+    {
+      "customerId": "cus_TZQ3ygaIY3veqf",
+      "subscriptionId": "sub_1ScHDyKUVUnt8Gtya3LXsuDv",
+      "email": "pokoskoq@gmail.com",
+      "action": "created",
+      "userId": "2bcb6f50-4176-4ba9-8b00-4c4a60472ed8"
+    },
+    {
+      "customerId": "cus_TYolzbmxM1YAGL",
+      "subscriptionId": "sub_1SbjB7KUVUnt8GtyyFgtZLqG",
+      "email": "kawashima_ayaka@icloud.com",
+      "action": "created",
+      "userId": "b6ffba43-eebc-44d7-8440-0912d9e91317"
+    },
+    {
+      "customerId": "cus_TYhxfbYuGSzIdV",
+      "subscriptionId": "sub_1SbacQKUVUnt8Gty7GC2YMYq",
+      "email": "kyoko.komatsu0225@gmail.com",
+      "action": "created",
+      "userId": "4de8291b-c7d5-48bf-afa5-c0bf11e91359"
+    },
+    {
+      "customerId": "cus_TYgrWRvBZXYauo",
+      "subscriptionId": "sub_1SbZV2KUVUnt8GtyK3uZtBrt",
+      "email": "ricky7seventeen@gmail.com",
+      "action": "created",
+      "userId": "3b02491d-cf49-4d6b-8b1f-d1eee61dd481"
+    },
+    {
+      "customerId": "cus_TYc7EhUDdfarqW",
+      "subscriptionId": "sub_1SbUuhKUVUnt8GtyErEgUrf1",
+      "email": "ayatomato.k@gmail.com",
+      "action": "created",
+      "userId": "d2b0f922-8a08-41d8-a8ab-a3aaa5382f8f"
+    },
+    {
+      "customerId": "cus_TXwFIU7F7OCW4P",
+      "subscriptionId": "sub_1SaqOKKUVUnt8GtyI0jluvgj",
+      "email": "xiangzizongxiang@gmail.com",
+      "action": "created",
+      "userId": "0a4db46d-45be-40ed-95ec-84e5fd403324"
+    },
+    {
+      "customerId": "cus_TXsz32ShfoOF63",
+      "subscriptionId": "sub_1SanF5KUVUnt8GtyCPLxKk9H",
+      "email": "ides.esid@gmail.com",
+      "action": "created",
+      "userId": "a4bce27e-bac6-41b2-86c9-df1268cf99aa"
+    },
+    {
+      "customerId": "cus_TX8SMWY7N2nOl7",
+      "subscriptionId": "sub_1SamU8KUVUnt8GtyXfuWJNok",
+      "email": "maru.r2.09@gmail.com",
+      "action": "created",
+      "userId": "c35a9bf7-dbbd-4de6-aadb-2aaa27e7c751"
+    },
+    {
+      "customerId": "cus_TXfEbov1gTereJ",
+      "subscriptionId": "sub_1SaZuQKUVUnt8GtyMgBgiQfD",
+      "email": "taaiigaa150@gmail.com",
+      "action": "created",
+      "userId": "29b9fd71-7669-41b7-b94d-0691fb2d6f3f"
+    },
+    {
+      "customerId": "cus_TXYzR7PbWque5i",
+      "subscriptionId": "sub_1SaTtRKUVUnt8Gtyb4zCVzta",
+      "email": "tomopcherry@gmail.com",
+      "action": "created",
+      "userId": "0cc534d9-f93f-475f-9a03-0a822b342eed"
+    },
+    {
+      "customerId": "cus_TXGUKsnm2IDE9L",
+      "subscriptionId": "sub_1SaBy8KUVUnt8GtyDs1Hnjfc",
+      "email": "harukikondo520@gmail.com",
+      "action": "created",
+      "userId": "d8230cc4-67ef-4771-a382-18a4202f38a2"
+    },
+    {
+      "customerId": "cus_TXG2i6QZwxFa2w",
+      "subscriptionId": "sub_1SaBZBKUVUnt8GtybS9oUpWA",
+      "email": "masashi9750@gmail.com",
+      "action": "created",
+      "userId": "be242705-dcad-4595-83d7-e3c8873891fe"
+    },
+    {
+      "customerId": "cus_TXEVduCfnb4sIm",
+      "subscriptionId": "sub_1SaA5pKUVUnt8Gty0UaeYvtD",
+      "email": "haru-haru-harua.2005@ezweb.ne.jp",
+      "action": "created",
+      "userId": "eb0b8526-4c58-4ace-ac48-af7214cd8aaf"
+    },
+    {
+      "customerId": "cus_TWa42CXDQL2adQ",
+      "subscriptionId": "sub_1SZdkEKUVUnt8GtyNsJhptyg",
+      "email": "viola02sora@gamil.com",
+      "action": "created",
+      "userId": "16fcb303-c94b-40d1-9c8d-dbf52ba7cbb8"
+    },
+    {
+      "customerId": "cus_TTqSoyoLUjaSY8",
+      "subscriptionId": "sub_1SZRaKKUVUnt8Gty0ttliUqp",
+      "email": "ryo.bridges27@gmail.com",
+      "action": "created",
+      "userId": "7ce36544-1c0e-43be-9ec4-e390012cf8fe"
+    },
+    {
+      "customerId": "cus_TVP3z3S7Bqup4D",
+      "subscriptionId": "sub_1SYlObKUVUnt8Gtyl0vPvQz2",
+      "email": "akila.k268@gmail.com",
+      "action": "created",
+      "userId": "0ff93a9a-704c-4538-85aa-334772447344"
+    },
+    {
+      "customerId": "cus_TVketVgiV1PGeb",
+      "subscriptionId": "sub_1SYjDEKUVUnt8Gtyq2YfHD70",
+      "email": "kntshsgw11181813@gmail.com",
+      "action": "created",
+      "userId": "e1280485-5acc-4194-a7ba-37a8780274af"
+    },
+    {
+      "customerId": "cus_TUKyF9GzveRopo",
+      "subscriptionId": "sub_1SXMKfKUVUnt8GtylwdYinIv",
+      "email": "pepper.0nana.y.p3e2r1@gmail.com",
+      "action": "created",
+      "userId": "8c91f617-5872-4fcc-88ec-918ed3a69026"
+    },
+    {
+      "customerId": "cus_TUHhGa1MRKeau7",
+      "subscriptionId": "sub_1SXJIHKUVUnt8GtyjOC7ns6W",
+      "email": "kaji62045@gmail.com",
+      "action": "created",
+      "userId": "66cb97bb-3756-4b56-842b-b7a842f44d23"
+    },
+    {
+      "customerId": "cus_TUEVXbSCaH5Oon",
+      "subscriptionId": "sub_1SXHipKUVUnt8Gty42VfMPyG",
+      "email": "ensao1997@gmail.com",
+      "action": "created",
+      "userId": "ea0ecb74-6a26-4087-ad2b-7a7e9703d128"
+    },
+    {
+      "customerId": "cus_TT6hb3X40HXvPd",
+      "subscriptionId": "sub_1SWAVTKUVUnt8GtypLmn82gp",
+      "email": "takasu_fm@yahoo.co.jp",
+      "action": "created",
+      "userId": "34e71eb8-b517-4059-bab4-57aa5016adee"
+    },
+    {
+      "customerId": "cus_SJ9WVWiXLuSTDd",
+      "subscriptionId": "sub_1ROXEnKUVUnt8Gty4eupJHLI",
+      "email": "orange.april.0414@gmail.com",
+      "action": "created",
+      "userId": "5d0c683d-740b-474f-b603-af793ceda982"
+    },
+    {
+      "customerId": "cus_S9q17Aq1NHzRSE",
+      "subscriptionId": "sub_1RFWNmKUVUnt8GtyuQPIQZbL",
+      "email": "twinkling.aspiration@gmail.com",
+      "action": "created",
+      "userId": "529f6ed8-02ab-4f54-8751-d0fed594d13f"
+    },
+    {
+      "customerId": "cus_S3hcmJ4aBsUtXb",
+      "subscriptionId": "sub_1R9aDAKUVUnt8GtypbJGIHf9",
+      "email": "gongtiandahui78@gmail.com",
+      "action": "created",
+      "userId": "d2abd772-777a-43ce-9d2e-246f4b920044"
+    },
+    {
+      "customerId": "cus_S3E8lii296JGcK",
+      "subscriptionId": "sub_1R97hBKUVUnt8GtylxEBAJI1",
+      "email": "ryouhei325u@gmail.com",
+      "action": "created",
+      "userId": "17598829-cc9f-40d8-8cff-605b2009a354"
+    },
+    {
+      "customerId": "cus_RytRve61Ibs8s8",
+      "subscriptionId": "sub_1R4vhEKUVUnt8GtyE7EStK8H",
+      "email": "daisatoki10512@gmail.com",
+      "action": "created",
+      "userId": "6110692d-5e4b-42c9-923b-4c7fe301676a"
+    },
+    {
+      "customerId": "cus_PqbiReKbuanA4w",
+      "subscriptionId": "sub_1QyogiKUVUnt8GtyD0lScGI0",
+      "email": "nori8934@gmail.com",
+      "action": "created",
+      "userId": "40dcce54-2e15-447b-9266-f509430501de"
+    },
+    {
+      "customerId": "cus_RdrIERP0FH8BTz",
+      "subscriptionId": "sub_1QkZfKKUVUnt8GtyG9xECgmU",
+      "email": "itonanako1125@gmail.com",
+      "action": "created",
+      "userId": "41ab89cb-360c-4f95-94ff-de037a57f1a7"
+    },
+    {
+      "customerId": "cus_PA6KTqvMDolU25",
+      "subscriptionId": "sub_1Qh2fdKUVUnt8GtyzOKYZM53",
+      "email": "mio.0602@icloud.com",
+      "action": "created",
+      "userId": "df56fcf5-f416-4a6f-9f77-c6ea221e3c06"
+    },
+    {
+      "customerId": "cus_RXHGWMfZ5XTKOz",
+      "subscriptionId": "sub_1QeCjSKUVUnt8Gty0UwMqbzk",
+      "email": "mko803469@gmail.com",
+      "action": "created",
+      "userId": "2435f85b-effa-4b4f-ba73-fb177dbb01fa"
+    },
+    {
+      "customerId": "cus_RMTr13JY1TZkTU",
+      "subscriptionId": "sub_1QTv0GKUVUnt8GtyQrk7KzWP",
+      "email": "hamadas2117@gmail.com",
+      "action": "created",
+      "userId": "090abb5e-3866-4b1e-94ba-5cf79174d366"
+    },
+    {
+      "customerId": "cus_P2XuJleEpKToUR",
+      "subscriptionId": "sub_1Q6tHvKUVUnt8GtyhDuy35ce",
+      "email": "saikei779@gmail.com",
+      "action": "created",
+      "userId": "4f3eb126-8387-4053-a161-fba2b947e504"
+    },
+    {
+      "customerId": "cus_QWyPS9KoXwipNY",
+      "subscriptionId": "sub_1PfuU6KUVUnt8GtyQkvHVFPV",
+      "email": "minami.design12@gmail.com",
+      "action": "created",
+      "userId": "a3a8c4a3-1de4-4905-ba59-48a7a4c899bf"
+    },
+    {
+      "customerId": "cus_Q6nrwTt6ZkbkeF",
+      "subscriptionId": "sub_1PGaGSKUVUnt8GtyHj2XMtWV",
+      "email": "kymsm.20@gmail.com",
+      "action": "created",
+      "userId": "d0f83fd7-edba-40c6-8cbd-dd76c9c3e369"
+    },
+    {
+      "customerId": "cus_NoEA5T91BXXW9U",
+      "subscriptionId": "sub_1N2bmDKUVUnt8GtyPcIJWNVM",
+      "email": "wuyifang199221@gmail.com",
+      "action": "created",
+      "userId": "a4ac30db-4821-4d44-9eb5-6bbfed4cb1fc"
+    },
+    {
+      "customerId": "cus_N3yksioEheCE8L",
+      "subscriptionId": "sub_1MJqoMKUVUnt8Gtytg70wwMy",
+      "email": "bst1.anee@gmail.com",
+      "action": "created",
+      "userId": "42d9c1d2-b065-48d3-aefd-3c52daa36576"
+    },
+    {
+      "customerId": "cus_MxZ4SnpN9rcFSW",
+      "subscriptionId": "sub_1MDdxaKUVUnt8GtyovcWU1Hs",
+      "email": "axxxiixxxa.job@gmail.com",
+      "action": "created",
+      "userId": "f50e4867-ac33-4890-811c-d02aaeb845e4"
+    },
+    {
+      "customerId": "cus_Mqq7HN9VbVeF3S",
+      "subscriptionId": "sub_1M78SKKUVUnt8Gty6aH5OopN",
+      "email": "mamicof.mail@gmail.com",
+      "action": "created",
+      "userId": "039bd634-8a2d-4dc2-a07b-66589d1d6b12"
+    },
+    {
+      "customerId": "cus_MiITeWXsQko2zN",
+      "subscriptionId": "sub_1LysFrKUVUnt8GtyqJJfBm3t",
+      "email": null,
+      "action": "error",
+      "reason": "ユーザー作成失敗: A user with this email address has already been registered"
+    },
+    {
+      "customerId": "cus_MghjNBXnyDqkhq",
+      "subscriptionId": "sub_1LxKL0KUVUnt8GtyuH5ifdS0",
+      "email": null,
+      "action": "error",
+      "reason": "ユーザー作成失敗: A user with this email address has already been registered"
+    }
+  ]
+}

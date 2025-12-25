@@ -1,0 +1,376 @@
+{
+  "executedAt": "2025-12-24T09:21:40.770Z",
+  "mode": "dry-run",
+  "summary": {
+    "created": 52,
+    "skipped": 201,
+    "error": 0,
+    "total": 52
+  },
+  "results": [
+    {
+      "customerId": "cus_Ter66RNl13CEZl",
+      "subscriptionId": "sub_1Shn8zKUVUnt8Gty2cbu50Om",
+      "email": "asunan1111@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TdBocxKUhGGb6P",
+      "subscriptionId": "sub_1ShOkqKUVUnt8GtyP6lNUuaq",
+      "email": "miwak.work@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TdvseK6SnQJjKC",
+      "subscriptionId": "sub_1Sge1BKUVUnt8Gty5UuqpO2y",
+      "email": "ak3668134@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TduQAa3hLLqt6T",
+      "subscriptionId": "sub_1SgcsQKUVUnt8GtyGRDi3Cl3",
+      "email": "mh16design@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_Tdq5cJOtSiLDye",
+      "subscriptionId": "sub_1SgarXKUVUnt8GtydYHOTcTn",
+      "email": "sweetbread1214@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TdrNeWRO7V5Gck",
+      "subscriptionId": "sub_1SgZevKUVUnt8Gty6SOSan5a",
+      "email": "potepoteto.0327@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_Tc4VuPb467sdHl",
+      "subscriptionId": "sub_1SeqPkKUVUnt8GtycpQeyII7",
+      "email": "rinka071898@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TbPNXDq1Zxj3Zx",
+      "subscriptionId": "sub_1SeCcnKUVUnt8GtylVjmspzV",
+      "email": "megumishinoda.design@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TbKglrp7NGZxeg",
+      "subscriptionId": "sub_1Se80wKUVUnt8Gtyb5Kruqc3",
+      "email": "marino.morita.mmm@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TUZY8QThAgtsUi",
+      "subscriptionId": "sub_1Sd8Y6KUVUnt8GtyxccHUOia",
+      "email": "noguyuki1004@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TZyYEuhdgyXTcF",
+      "subscriptionId": "sub_1Sczi6KUVUnt8Gty0DVQ9sxJ",
+      "email": "greyg7637@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_Ta8aOlNmjqoE91",
+      "subscriptionId": "sub_1ScyLmKUVUnt8GtyN4BFl5sX",
+      "email": "okamotopon@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TZQ3ygaIY3veqf",
+      "subscriptionId": "sub_1ScHDyKUVUnt8Gtya3LXsuDv",
+      "email": "pokoskoq@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TYolzbmxM1YAGL",
+      "subscriptionId": "sub_1SbjB7KUVUnt8GtyyFgtZLqG",
+      "email": "kawashima_ayaka@icloud.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TYhxfbYuGSzIdV",
+      "subscriptionId": "sub_1SbacQKUVUnt8Gty7GC2YMYq",
+      "email": "kyoko.komatsu0225@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TYgrWRvBZXYauo",
+      "subscriptionId": "sub_1SbZV2KUVUnt8GtyK3uZtBrt",
+      "email": "ricky7seventeen@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TYc7EhUDdfarqW",
+      "subscriptionId": "sub_1SbUuhKUVUnt8GtyErEgUrf1",
+      "email": "ayatomato.k@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TXwFIU7F7OCW4P",
+      "subscriptionId": "sub_1SaqOKKUVUnt8GtyI0jluvgj",
+      "email": "xiangzizongxiang@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TXsz32ShfoOF63",
+      "subscriptionId": "sub_1SanF5KUVUnt8GtyCPLxKk9H",
+      "email": "ides.esid@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TX8SMWY7N2nOl7",
+      "subscriptionId": "sub_1SamU8KUVUnt8GtyXfuWJNok",
+      "email": "maru.r2.09@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TXfEbov1gTereJ",
+      "subscriptionId": "sub_1SaZuQKUVUnt8GtyMgBgiQfD",
+      "email": "taaiigaa150@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TXYzR7PbWque5i",
+      "subscriptionId": "sub_1SaTtRKUVUnt8Gtyb4zCVzta",
+      "email": "tomopcherry@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TXGUKsnm2IDE9L",
+      "subscriptionId": "sub_1SaBy8KUVUnt8GtyDs1Hnjfc",
+      "email": "harukikondo520@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TXG2i6QZwxFa2w",
+      "subscriptionId": "sub_1SaBZBKUVUnt8GtybS9oUpWA",
+      "email": "masashi9750@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TXEVduCfnb4sIm",
+      "subscriptionId": "sub_1SaA5pKUVUnt8Gty0UaeYvtD",
+      "email": "haru-haru-harua.2005@ezweb.ne.jp",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TWa42CXDQL2adQ",
+      "subscriptionId": "sub_1SZdkEKUVUnt8GtyNsJhptyg",
+      "email": "viola02sora@gamil.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TTqSoyoLUjaSY8",
+      "subscriptionId": "sub_1SZRaKKUVUnt8Gty0ttliUqp",
+      "email": "ryo.bridges27@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TVP3z3S7Bqup4D",
+      "subscriptionId": "sub_1SYlObKUVUnt8Gtyl0vPvQz2",
+      "email": "akila.k268@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TVketVgiV1PGeb",
+      "subscriptionId": "sub_1SYjDEKUVUnt8Gtyq2YfHD70",
+      "email": "kntshsgw11181813@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TUKyF9GzveRopo",
+      "subscriptionId": "sub_1SXMKfKUVUnt8GtylwdYinIv",
+      "email": "pepper.0nana.y.p3e2r1@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TUHhGa1MRKeau7",
+      "subscriptionId": "sub_1SXJIHKUVUnt8GtyjOC7ns6W",
+      "email": "kaji62045@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TUEVXbSCaH5Oon",
+      "subscriptionId": "sub_1SXHipKUVUnt8Gty42VfMPyG",
+      "email": "ensao1997@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_TT6hb3X40HXvPd",
+      "subscriptionId": "sub_1SWAVTKUVUnt8GtypLmn82gp",
+      "email": "takasu_fm@yahoo.co.jp",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_SJ9WVWiXLuSTDd",
+      "subscriptionId": "sub_1ROXEnKUVUnt8Gty4eupJHLI",
+      "email": "orange.april.0414@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_S9q17Aq1NHzRSE",
+      "subscriptionId": "sub_1RFWNmKUVUnt8GtyuQPIQZbL",
+      "email": "twinkling.aspiration@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_S3hcmJ4aBsUtXb",
+      "subscriptionId": "sub_1R9aDAKUVUnt8GtypbJGIHf9",
+      "email": "gongtiandahui78@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_S3E8lii296JGcK",
+      "subscriptionId": "sub_1R97hBKUVUnt8GtylxEBAJI1",
+      "email": "ryouhei325u@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_RytRve61Ibs8s8",
+      "subscriptionId": "sub_1R4vhEKUVUnt8GtyE7EStK8H",
+      "email": "daisatoki10512@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_PqbiReKbuanA4w",
+      "subscriptionId": "sub_1QyogiKUVUnt8GtyD0lScGI0",
+      "email": "nori8934@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_RdrIERP0FH8BTz",
+      "subscriptionId": "sub_1QkZfKKUVUnt8GtyG9xECgmU",
+      "email": "itonanako1125@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_PA6KTqvMDolU25",
+      "subscriptionId": "sub_1Qh2fdKUVUnt8GtyzOKYZM53",
+      "email": "mio.0602@icloud.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_RXHGWMfZ5XTKOz",
+      "subscriptionId": "sub_1QeCjSKUVUnt8Gty0UwMqbzk",
+      "email": "mko803469@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_RMTr13JY1TZkTU",
+      "subscriptionId": "sub_1QTv0GKUVUnt8GtyQrk7KzWP",
+      "email": "hamadas2117@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_P2XuJleEpKToUR",
+      "subscriptionId": "sub_1Q6tHvKUVUnt8GtyhDuy35ce",
+      "email": "saikei779@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_QWyPS9KoXwipNY",
+      "subscriptionId": "sub_1PfuU6KUVUnt8GtyQkvHVFPV",
+      "email": "minami.design12@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_Q6nrwTt6ZkbkeF",
+      "subscriptionId": "sub_1PGaGSKUVUnt8GtyHj2XMtWV",
+      "email": "kymsm.20@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_NoEA5T91BXXW9U",
+      "subscriptionId": "sub_1N2bmDKUVUnt8GtyPcIJWNVM",
+      "email": "wuyifang199221@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_N3yksioEheCE8L",
+      "subscriptionId": "sub_1MJqoMKUVUnt8Gtytg70wwMy",
+      "email": "bst1.anee@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_MxZ4SnpN9rcFSW",
+      "subscriptionId": "sub_1MDdxaKUVUnt8GtyovcWU1Hs",
+      "email": "axxxiixxxa.job@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_Mqq7HN9VbVeF3S",
+      "subscriptionId": "sub_1M78SKKUVUnt8Gty6aH5OopN",
+      "email": "mamicof.mail@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_MiITeWXsQko2zN",
+      "subscriptionId": "sub_1LysFrKUVUnt8GtyqJJfBm3t",
+      "email": "kyasya0000@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    },
+    {
+      "customerId": "cus_MghjNBXnyDqkhq",
+      "subscriptionId": "sub_1LxKL0KUVUnt8GtyuH5ifdS0",
+      "email": "kyasya000@gmail.com",
+      "action": "created",
+      "userId": "dry-run-user-id"
+    }
+  ]
+}

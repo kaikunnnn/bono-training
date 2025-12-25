@@ -1,39 +1,47 @@
 # サブスクリプション タスクトラッカー
 
-**最終更新**: 2025-12-06
+**最終更新**: 2025-12-24
 **ステータス**: アクティブ
 
 ---
 
 ## 🚀 リリース前タスク（必須）
 
-### Task: 差分ユーザー移行（Memberstack → Supabase）
-
-**優先度**: 高（リリース前に必須）
-**ステータス**: 未着手
-
-**背景**:
-- 2025-11-19にMemberstackからSupabaseへ2,034人のユーザーを移行済み
-- 11月19日以降にMemberstackで新規登録されたユーザーは未移行
-- リリース前に差分ユーザーを移行する必要あり
-
-**手順**:
-1. Memberstackから最新のCSVをエクスポート
-2. 既存の移行済みユーザー（2,034人）との差分を抽出
-3. 差分ユーザーを同じ移行スクリプトで処理
-4. 移行結果を確認
-
-**関連ドキュメント**:
-- `.claude/docs/migration/MIGRATION-PLAN.md`
-- `.claude/docs/migration/MIGRATED-USER-DETECTION-PLAN.md`
-
-**注意**:
-- 移行ユーザーには `raw_user_meta_data.migrated_from = 'memberstack'` が設定される
-- パスワードは移行されないため、ユーザーはパスワードリセットが必要
+現在、リリース前必須タスクはありません。
 
 ---
 
 ## ✅ 完了タスク（最新）
+
+### Task 7: サブスクリプション同期問題の修正 ✅ 完了
+
+**問題**: 複数のサブスクリプション同期問題が発生
+**完了日**: 2025-12-24
+
+**修正内容**:
+1. ✅ Phase 1: 既存ユーザーのStripeサブスク同期（3件）
+2. ✅ Phase 2: 期限切れユーザーの処理（82件）
+3. ✅ Phase 3: DBトリガー修正（plan_type: NULL対応）
+4. ✅ Phase 5: 新規課金ユーザー移行（50件）
+
+**作成スクリプト**:
+- `scripts/fix-subscription-sync.ts`
+- `scripts/fix-expired-subscriptions.ts`
+- `scripts/migrate-new-stripe-users.ts`
+
+**詳細**: `.claude/docs/subscription/issues/2025-12-24-FULL-PROBLEM-ANALYSIS.md`
+
+---
+
+### Task: 差分ユーザー移行（Memberstack → Supabase） ✅ 完了
+
+**完了日**: 2025-12-24（Task 7のPhase 5で対応）
+
+**結果**:
+- 50件の新規ユーザーを移行完了
+- ログイン時に移行ユーザー判定機能（Task 6）でパスワードリセットを案内
+
+---
 
 ### Task 6: 移行ユーザー判定機能 ✅ 完了
 
