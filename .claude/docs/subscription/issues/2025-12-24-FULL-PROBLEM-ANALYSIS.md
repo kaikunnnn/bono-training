@@ -134,18 +134,20 @@ plan_type: NULL  -- または 'free'
 
 ---
 
-### Phase 5: 新規課金ユーザーの移行 ⏳ 未実施
+### Phase 5: 新規課金ユーザーの移行 ✅ 完了（2025-12-24）
 
 **目的**: 移行後（2025-11-19以降）に課金開始したユーザーをSupabaseに追加
 
-**対象**: 約51件
+**実行結果**:
+- 作成完了: 50件
+- スキップ（既存）: 201件
+- エラー: 2件（テストアカウント、無視可）
 
-**処理内容**:
-1. Stripeから全アクティブサブスクを取得
-2. Supabase auth.users に存在しないユーザーを特定
-3. auth.users にユーザー作成
-4. stripe_customers に紐付け作成
-5. user_subscriptions に同期
+**スクリプト**: `scripts/migrate-new-stripe-users.ts`
+**結果ファイル**: `scripts/results/migrate-new-stripe-users-result-2025-12-24T09-43-13-228Z.json`
+
+**注意**: 新規作成されたユーザーはパスワードリセットが必要
+- https://bono.design/reset-password から案内
 
 ---
 
@@ -162,9 +164,10 @@ plan_type: NULL  -- または 'free'
 
 1. [x] Phase 1 実行
 2. [x] Phase 2 実行
-3. [ ] Phase 3: DBトリガー修正
-4. [ ] Phase 4: renrenkon.800@gmail.com に確認依頼
-5. [ ] Phase 5: 新規課金ユーザーの移行スクリプト作成・実行
+3. [x] Phase 3: DBトリガー修正
+4. [ ] Phase 4: renrenkon.800@gmail.com に確認依頼（依頼済み、回答待ち）
+5. [x] Phase 5: 新規課金ユーザーの移行（50件完了）
+6. [ ] 新規作成ユーザー50名へのパスワードリセット案内
 
 ---
 
@@ -172,5 +175,7 @@ plan_type: NULL  -- または 'free'
 
 | 日時 | 内容 |
 |------|------|
+| 2025-12-24 18:45 | Phase 5 完了（50件移行成功） |
+| 2025-12-24 18:30 | Phase 3 完了（DBトリガー・NOT NULL制約修正） |
 | 2025-12-24 18:00 | Phase 1, 2 完了。ステータス更新 |
 | 2025-12-24 | 全問題分析と対処計画を作成 |
