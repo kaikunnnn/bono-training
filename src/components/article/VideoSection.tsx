@@ -1,5 +1,6 @@
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import PremiumVideoLock from '@/components/premium/PremiumVideoLock';
+import { CustomVimeoPlayer } from '@/components/video';
 
 interface VideoSectionProps {
   videoUrl?: string | null | { url?: string; metadata?: any };
@@ -88,30 +89,29 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
     return null;
   }
 
+  // Vimeoの場合はカスタムプレーヤーを使用
+  if (videoInfo.platform === 'vimeo') {
+    return (
+      <div className="w-full">
+        <CustomVimeoPlayer vimeoId={videoInfo.id} />
+      </div>
+    );
+  }
+
+  // YouTubeの場合は従来のiframe埋め込み
   return (
     <div className="w-full">
       {/* 16:9 レスポンシブコンテナ */}
       <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
         {/* 56.25% = 9/16 * 100 (16:9のアスペクト比) */}
-        {videoInfo.platform === 'youtube' ? (
-          <iframe
-            src={`https://www.youtube.com/embed/${videoInfo.id}`}
-            className="absolute top-0 left-0 w-full h-full"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            title="YouTube video player"
-          />
-        ) : (
-          <iframe
-            src={`https://player.vimeo.com/video/${videoInfo.id}?title=0&byline=0&portrait=0`}
-            className="absolute top-0 left-0 w-full h-full"
-            frameBorder="0"
-            allow="autoplay; fullscreen; picture-in-picture"
-            allowFullScreen
-            title="Vimeo video player"
-          />
-        )}
+        <iframe
+          src={`https://www.youtube.com/embed/${videoInfo.id}`}
+          className="absolute top-0 left-0 w-full h-full"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          title="YouTube video player"
+        />
       </div>
     </div>
   );
