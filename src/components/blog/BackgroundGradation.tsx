@@ -91,6 +91,13 @@ export const BackgroundGradation: React.FC<BackgroundGradationProps> = ({
           loading="lazy"
         />
       </div>
+
+      {/* Layer 4: 白オーバーレイ 20% */}
+      <div
+        className="absolute inset-0 bg-white/20"
+        data-name="WhiteOverlay"
+        aria-hidden="true"
+      />
     </div>
   );
 };

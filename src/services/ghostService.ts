@@ -32,11 +32,14 @@ export const convertGhostToBlogPost = (ghostPost: GhostPost): BlogPost => {
     emoji = categoryEmojiMap[category] || categoryEmojiMap.uncategorized;
   }
 
+  // custom_excerpt（手動設定）のみを使用。自動生成excerptは使わない
+  const customExcerpt = ghostPost.custom_excerpt || '';
+
   return {
     id: ghostPost.id,
     slug: ghostPost.slug,
     title: ghostPost.title,
-    description: ghostPost.excerpt || ghostPost.custom_excerpt || '',
+    description: customExcerpt,
     content: ghostPost.html || '',
     author: ghostPost.primary_author?.name || 'Unknown',
     publishedAt: ghostPost.published_at,
@@ -48,7 +51,7 @@ export const convertGhostToBlogPost = (ghostPost: GhostPost): BlogPost => {
     emoji: emoji, // タイトルから自動抽出 or カスタムフィールド
     // 追加フィールド（既存のBlogPost型に合わせて）
     imageUrl: ghostPost.feature_image,
-    excerpt: ghostPost.excerpt || ghostPost.custom_excerpt || '',
+    excerpt: customExcerpt,
     categorySlug: ghostPost.primary_tag?.slug || 'uncategorized',
     readTime: ghostPost.reading_time || 5,
   };
@@ -205,5 +208,38 @@ export const checkGhostConnection = async (): Promise<boolean> => {
   } catch (error) {
     console.warn('Ghost API connection failed:', error);
     return false;
+  }
+};
+
+// タグの型定義
+export interface GhostTag {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  feature_image?: string;
+  count?: {
+    posts: number;
+  };
+}
+
+// 全タグを取得
+export const fetchGhostTags = async (): Promise<GhostTag[]> => {
+  const ghostApi = getGhostApi();
+  if (!ghostApi) {
+    throw new Error('Ghost API is not configured');
+  }
+
+  try {
+    const response = await ghostApi.tags.browse({
+      limit: 'all',
+      include: 'count.posts',
+    });
+
+    const tags = Array.isArray(response) ? response : (response as any)?.tags || [];
+    return tags;
+  } catch (error) {
+    console.error('Failed to fetch Ghost tags:', error);
+    throw error;
   }
 };

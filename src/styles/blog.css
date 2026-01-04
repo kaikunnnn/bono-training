@@ -248,119 +248,247 @@
 
 /* ========================================
    マークダウンスタイル（記事本文用）
+   /lesson の RichTextSection と統一
    ======================================== */
 
 .blog-markdown {
-  font-family: var(--blog-font-title);
-  font-size: 16px;
-  line-height: 1.8;
-  color: var(--blog-color-dark-blue);
+  font-family: 'Noto Sans JP', sans-serif;
+  color: #364153;
 }
 
+/* 見出し共通: M PLUS Rounded 1c, letter-spacing: -0.02em */
 .blog-markdown h1,
 .blog-markdown h2,
 .blog-markdown h3,
 .blog-markdown h4,
 .blog-markdown h5,
 .blog-markdown h6 {
-  font-weight: 700;
-  margin-top: 2em;
-  margin-bottom: 1em;
-  line-height: 1.3;
+  font-family: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
+  font-weight: 600;
+  color: #101828;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
 }
 
+/* H1: 記事タイトル用（通常は使わない） */
+/* 30px = 1.875rem */
 .blog-markdown h1 {
-  font-size: 2.5em;
+  font-size: 1.875rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
 }
 
+/* H2: 26px(desktop) / 24px(mobile) = 1.625rem / 1.5rem */
 .blog-markdown h2 {
-  font-size: 2em;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  margin-top: 6rem;
+  margin-bottom: 3rem;
 }
 
+@media (min-width: 768px) {
+  .blog-markdown h2 {
+    font-size: 1.625rem;
+  }
+}
+
+/* 最初のH2はmargin-topなし */
+.blog-markdown > h2:first-child {
+  margin-top: 0;
+}
+
+/* H3: 22px(desktop) / 20px(mobile) = 1.375rem / 1.25rem */
 .blog-markdown h3 {
-  font-size: 1.5em;
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  margin-top: 4rem;
+  margin-bottom: 2rem;
 }
 
+@media (min-width: 768px) {
+  .blog-markdown h3 {
+    font-size: 1.375rem;
+  }
+}
+
+/* H4: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem */
 .blog-markdown h4 {
-  font-size: 1.25em;
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
+@media (min-width: 768px) {
+  .blog-markdown h4 {
+    font-size: 1.25rem;
+  }
+}
+
+/* 段落: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem, lh:200%, letter-spacing:3% */
 .blog-markdown p {
-  margin-bottom: 1.5em;
+  font-size: 1.125rem;
+  line-height: 200%;
+  letter-spacing: 0.03em;
+  margin-bottom: 1.5rem;
+  color: #364153;
 }
 
+@media (min-width: 768px) {
+  .blog-markdown p {
+    font-size: 1.25rem;
+  }
+}
+
+/* リスト共通: mb:1.5rem, インデント:1.34rem */
 .blog-markdown ul,
 .blog-markdown ol {
-  margin-bottom: 1.5em;
-  padding-left: 2em;
+  margin-bottom: 1.5rem;
+  padding-left: 1.34rem;
 }
 
+.blog-markdown ul {
+  list-style-type: disc;
+}
+
+.blog-markdown ol {
+  list-style-type: decimal;
+}
+
+/* リストアイテム: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem, lh:200%, letter-spacing:3% */
 .blog-markdown li {
-  margin-bottom: 0.5em;
+  font-size: 1.125rem;
+  line-height: 200%;
+  letter-spacing: 0.03em;
+  color: #364153;
+  margin-bottom: 0.5rem;
 }
 
+@media (min-width: 768px) {
+  .blog-markdown li {
+    font-size: 1.25rem;
+  }
+}
+
+/* ネストされたリスト */
+.blog-markdown li > ul,
+.blog-markdown li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* リンク: 青色、アンダーライン */
 .blog-markdown a {
-  color: var(--blog-color-dark-blue);
+  color: #2563EB;
   text-decoration: underline;
-  transition: opacity var(--blog-transition-fast);
+  transition: color 0.2s ease;
 }
 
 .blog-markdown a:hover {
-  opacity: 0.7;
+  color: #1D4ED8;
 }
 
+/* 画像: レスポンシブ、角丸、余白 */
 .blog-markdown img {
   max-width: 100%;
   height: auto;
-  border-radius: 8px;
-  margin: 2em 0;
+  border-radius: 0.5rem;
+  margin: 2rem 0;
 }
 
+/* 太字: 黄色マーカー下線 60%透過 */
+.blog-markdown strong {
+  font-weight: 700;
+  background: linear-gradient(transparent 60%, rgba(236, 248, 76, 0.6) 60%);
+}
+
+/* 斜体 */
+.blog-markdown em {
+  font-style: italic;
+}
+
+/* インラインコード */
 .blog-markdown code {
-  font-family: 'Courier New', monospace;
-  background-color: #f5f5f5;
-  padding: 0.2em 0.4em;
-  border-radius: 4px;
-  font-size: 0.9em;
+  font-family: 'Courier New', Consolas, monospace;
+  background-color: #F3F4F6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
 }
 
+/* コードブロック */
 .blog-markdown pre {
-  background-color: #f5f5f5;
-  padding: 1em;
-  border-radius: 8px;
+  background-color: #1F2937;
+  color: #F9FAFB;
+  padding: 1rem;
+  border-radius: 0.5rem;
   overflow-x: auto;
-  margin: 1.5em 0;
+  margin: 1.5rem 0;
 }
 
 .blog-markdown pre code {
   background-color: transparent;
   padding: 0;
+  color: inherit;
+  font-size: 0.875rem;
 }
 
+/* 引用: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem */
 .blog-markdown blockquote {
-  border-left: 4px solid var(--blog-color-border);
-  padding-left: 1em;
-  margin: 1.5em 0;
-  color: var(--blog-color-gray);
-  font-style: italic;
+  border-left: 0.25rem solid #D0D5DD;
+  background-color: #F9FAFB;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  font-size: 1.125rem;
+  line-height: 200%;
+  letter-spacing: 0.03em;
+  color: #364153;
 }
 
+@media (min-width: 768px) {
+  .blog-markdown blockquote {
+    font-size: 1.25rem;
+  }
+}
+
+.blog-markdown blockquote p {
+  margin-bottom: 0;
+}
+
+.blog-markdown blockquote p + p {
+  margin-top: 1rem;
+}
+
+/* テーブル */
 .blog-markdown table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1.5em 0;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
 }
 
 .blog-markdown th,
 .blog-markdown td {
-  border: 1px solid var(--blog-color-border);
-  padding: 0.75em;
+  border: 1px solid #E5E7EB;
+  padding: 0.75rem 1rem;
   text-align: left;
 }
 
 .blog-markdown th {
-  background-color: #f5f5f5;
+  background-color: #F9FAFB;
   font-weight: 600;
+  color: #6B7280;
+}
+
+.blog-markdown tr:nth-child(even) {
+  background-color: #F9FAFB;
+}
+
+/* 水平線 */
+.blog-markdown hr {
+  border: none;
+  border-top: 1px solid #E5E7EB;
+  margin: 3rem 0;
 }
 
 /* ========================================
