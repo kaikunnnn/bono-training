@@ -195,7 +195,7 @@ export const resetPasswordService = async (
 
 // パスワード更新関数
 export const updatePasswordService = async (
-  password: string, 
+  password: string,
   toast: ToastFunction
 ): Promise<AuthResponse> => {
   try {
@@ -211,6 +211,29 @@ export const updatePasswordService = async (
         variant: "destructive",
       });
       return { error, data: null };
+    }
+
+    // パスワード更新成功後、移行ユーザーフラグを削除
+    // これにより、次回ログイン失敗時に「パスワード再設定が必要です」が表示されなくなる
+    try {
+      const session = await supabase.auth.getSession();
+      if (session.data.session?.access_token) {
+        const response = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/clear-migrated-flag`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${session.data.session.access_token}`,
+            },
+          }
+        );
+        const result = await response.json();
+        console.log('Clear migrated flag result:', result);
+      }
+    } catch (clearFlagError) {
+      // フラグ削除に失敗してもパスワード更新自体は成功しているので、エラーは無視
+      console.warn('Failed to clear migrated flag (non-critical):', clearFlagError);
     }
 
     toast({
