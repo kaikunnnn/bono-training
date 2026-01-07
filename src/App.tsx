@@ -38,7 +38,7 @@ import ComponentsReferencePage from "./pages/Dev/Components";
 import WebflowTest from "./pages/Dev/WebflowTest";
 import GuideManual from "./pages/Dev/GuideManual";
 import ProgressComponents from "./pages/Dev/ProgressComponents";
-import CelebrationComponents from "./pages/dev/CelebrationComponents";
+import CelebrationComponents from "./pages/Dev/CelebrationComponents";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -54,7 +54,7 @@ import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
 import TagsIndex from './pages/blog/tags';
 import TagDetail from './pages/blog/tag';
-import BlogGuide from './pages/dev/BlogGuide';
+import BlogGuide from './pages/Dev/BlogGuide';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);

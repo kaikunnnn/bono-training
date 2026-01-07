@@ -194,7 +194,7 @@ async function migrateNewStripeUsers() {
           .single();
 
         // 上記が動かない場合のフォールバック: getUserByEmail的な処理
-        let existingUserId: string | null = null;
+        const existingUserId: string | null = null;
 
         // メールでユーザーを検索（SQL直接実行）
         const { data: userLookup } = await supabase.rpc('get_user_id_by_email', { user_email: email }).single();
