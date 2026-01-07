@@ -1,7 +1,7 @@
 // src/components/blog/BlogPostHeader.tsx
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, User } from "lucide-react";
 import { BlogPost } from "@/types/blog";
 import { getFluentEmojiUrl, DEFAULT_EMOJI, removeEmojiFromText } from "@/utils/blog/emojiUtils";
 
@@ -10,17 +10,17 @@ interface BlogPostHeaderProps {
 }
 
 const categoryColors: Record<string, string> = {
-  tech: 'bg-blue-100 text-blue-800 border-blue-200',
-  design: 'bg-purple-100 text-purple-800 border-purple-200',
-  business: 'bg-green-100 text-green-800 border-green-200',
-  lifestyle: 'bg-pink-100 text-pink-800 border-pink-200',
+  tech: 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white',
+  design: 'bg-transparent text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white',
+  business: 'bg-transparent text-green-600 border-green-600 hover:bg-green-600 hover:text-white',
+  lifestyle: 'bg-transparent text-pink-600 border-pink-600 hover:bg-pink-600 hover:text-white',
 };
 
 export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post }) => {
-  const categoryColorClass = categoryColors[post.category] || 'bg-gray-100 text-gray-800 border-gray-200';
+  const categoryColorClass = categoryColors[post.category] || 'bg-transparent text-gray-600 border-gray-600 hover:bg-gray-600 hover:text-white';
 
   return (
-    <div className="text-center py-12">
+    <div className="text-center pt-6 pb-2">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -42,39 +42,27 @@ export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post }) => {
           {removeEmojiFromText(post.title)}
         </h1>
 
-        {/* 説明文 */}
-        <p className="text-xl text-gray-600 max-w-3xl leading-relaxed">
-          {post.description}
-        </p>
+        {/* 説明文（存在する場合のみ表示） */}
+        {post.description && (
+          <p className="text-xl text-gray-600 max-w-3xl leading-relaxed">
+            {post.description}
+          </p>
+        )}
 
         {/* メタ情報 */}
         <div className="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500">
-          <div className="flex items-center space-x-2">
-            <Calendar className="w-4 h-4" />
-            <span>{new Date(post.publishedAt).toLocaleDateString('ja-JP')}</span>
-          </div>
+          <span>{new Date(post.publishedAt).toLocaleDateString('ja-JP')}</span>
           <span>•</span>
-          <div className="flex items-center space-x-2">
-            <User className="w-4 h-4" />
-            <span>{post.author}</span>
-          </div>
-          <span>•</span>
-          <div className="flex items-center space-x-2">
-            <Clock className="w-4 h-4" />
-            <span>{post.readingTime}分で読める</span>
-          </div>
+          <span>{post.author}</span>
         </div>
 
-        {/* カテゴリとタグ */}
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Badge className={`text-sm px-4 py-2 rounded-full border font-medium ${categoryColorClass}`}>
-            {post.category}
-          </Badge>
-          {post.tags.map((tag) => (
-            <Badge key={tag} variant="outline" className="text-sm px-3 py-1 rounded-full">
-              {tag}
+        {/* カテゴリ（Primary Tagのみ） */}
+        <div className="flex items-center justify-center">
+          <Link to={`/blog/tag/${post.category}`}>
+            <Badge className={`text-sm px-4 py-2 rounded-full border font-medium transition-colors cursor-pointer ${categoryColorClass}`}>
+              {post.category}
             </Badge>
-          ))}
+          </Link>
         </div>
       </motion.div>
     </div>

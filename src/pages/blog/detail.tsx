@@ -2,21 +2,18 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowLeft } from 'lucide-react';
 import { BlogHeader } from '@/components/blog/BlogHeader';
 import { BackgroundGradation } from '@/components/blog/BackgroundGradation';
 import { ResponsiveSunDecoration } from '@/components/blog/SunDecoration';
 import Footer from '@/components/layout/Footer';
 import { BlogPostHeader } from '@/components/blog/BlogPostHeader';
 import { TableOfContents } from '@/components/blog/TableOfContents';
-import { ShareButtons } from '@/components/blog/ShareButtons';
 import { PostNavigation } from '@/components/blog/PostNavigation';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
 import { BlogContent } from '@/components/blog/BlogContent';
-import { getBlogPostBySlug, getNextPost, getPrevPost } from '@/utils/blog/blogUtils';
+import { getBlogPostBySlug, getNextPost, getPrevPost, getLatestPosts } from '@/utils/blog/blogUtils';
 import { BlogPost } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import SEO from '@/components/common/SEO';
 import { removeEmojiFromText } from '@/utils/blog/emojiUtils';
 
@@ -31,6 +28,7 @@ const BlogDetail: React.FC = () => {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [prevPost, setPrevPost] = useState<BlogPost | null>(null);
   const [nextPost, setNextPost] = useState<BlogPost | null>(null);
+  const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [tocItems, setTocItems] = useState<Array<{id: string, text: string, level: number}>>([]);
 
@@ -44,13 +42,15 @@ const BlogDetail: React.FC = () => {
         setPost(currentPost);
 
         if (currentPost) {
-          const [prevPostData, nextPostData] = await Promise.all([
+          const [prevPostData, nextPostData, latestPostsData] = await Promise.all([
             getPrevPost(currentPost.id),
-            getNextPost(currentPost.id)
+            getNextPost(currentPost.id),
+            getLatestPosts(currentPost.id, 4)
           ]);
 
           setPrevPost(prevPostData);
           setNextPost(nextPostData);
+          setLatestPosts(latestPostsData);
 
           // 実際のコンテンツから見出しを抽出して目次を生成
           const extractTocFromHTML = (html: string) => {
@@ -156,8 +156,7 @@ const BlogDetail: React.FC = () => {
               to="/blog"
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              ブログ一覧に戻る
+              ブログ一覧へ
             </Link>
           </div>
         </main>
@@ -166,8 +165,8 @@ const BlogDetail: React.FC = () => {
     );
   }
 
+  // パンくずリスト（記事タイトルのみ）
   const breadcrumbItems = [
-    { label: 'ブログ', href: '/blog' },
     { label: removeEmojiFromText(post.title) }
   ];
 
@@ -257,22 +256,6 @@ const BlogDetail: React.FC = () => {
             <Breadcrumb items={breadcrumbItems} className="mb-8" />
           </motion.div>
 
-          {/* ブログ一覧に戻るボタン */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-            className="mb-4"
-          >
-            <Link
-              to="/blog"
-              className="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
-            >
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              ブログ一覧に戻る
-            </Link>
-          </motion.div>
-
           {/* メインコンテンツ */}
           <motion.article
             className="space-y-8"
@@ -311,42 +294,10 @@ const BlogDetail: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                <BlogContent html={post.content} className="prose prose-lg max-w-none space-y-6" />
+                <BlogContent html={post.content} className="blog-markdown max-w-[720px] mx-auto" />
               </motion.div>
             </div>
 
-            {/* タグ */}
-            {post.tags && post.tags.length > 0 && (
-              <motion.div
-                className="pt-6 border-t border-gray-200"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-              >
-                <h3 className="text-sm font-medium text-gray-700 mb-3">タグ:</h3>
-                <div className="flex flex-wrap gap-2">
-                  {post.tags.map((tag, index) => (
-                    <Badge key={index} variant="outline">
-                      #{tag}
-                    </Badge>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {/* シェアボタン */}
-            <motion.div
-              className="pt-6 border-t border-gray-200"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-            >
-              <ShareButtons
-                url={`/blog/${post.slug}`}
-                title={removeEmojiFromText(post.title)}
-                description={post.excerpt}
-              />
-            </motion.div>
           </motion.article>
 
           {/* 前後の記事ナビゲーション */}
@@ -361,8 +312,54 @@ const BlogDetail: React.FC = () => {
               nextPost={nextPost}
             />
           </motion.div>
+
         </div>
       </main>
+
+      {/* 関連記事（最新4件） - 独立ブロック */}
+      {latestPosts.length > 0 && (
+        <section className="border-t">
+          <motion.div
+            className="container py-12 md:py-16"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2 text-center">
+                最新の記事
+              </h2>
+              <p className="text-gray-600 text-center mb-8">
+                こちらもよかったらどぞっ🍕
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {latestPosts.map((relatedPost) => (
+                  <Link
+                    key={relatedPost.id}
+                    to={`/blog/${relatedPost.slug}`}
+                    className="group block bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
+                  >
+                    <div className="flex items-start gap-4">
+                      {/* 絵文字サムネイル */}
+                      <div className="flex-shrink-0 w-14 h-14 rounded-lg bg-[#F5F5F4] flex items-center justify-center text-2xl">
+                        {relatedPost.emoji || '📝'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2 mb-2">
+                          {removeEmojiFromText(relatedPost.title)}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {new Date(relatedPost.publishedAt).toLocaleDateString('ja-JP')}
+                        </p>
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </section>
+      )}
 
       <Footer />
     </motion.div>

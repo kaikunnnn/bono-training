@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -29,6 +29,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/guide-manual',
     icon: <BookOpen className="w-8 h-8" />,
     tags: ['Guide', 'Writing', 'Markdown', 'Documentation']
+  },
+  {
+    title: 'Blog開発ガイド',
+    description: 'Ghost CMSを使用したブログ機能の開発・運用方法。Dockerセットアップ、記事公開、トラブルシューティングなど。',
+    path: '/dev/blog',
+    icon: <Rss className="w-8 h-8" />,
+    tags: ['Ghost', 'CMS', 'Blog', 'Docker']
   }
 ];
 
