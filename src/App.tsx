@@ -38,7 +38,7 @@ import ComponentsReferencePage from "./pages/Dev/Components";
 import WebflowTest from "./pages/Dev/WebflowTest";
 import GuideManual from "./pages/Dev/GuideManual";
 import ProgressComponents from "./pages/Dev/ProgressComponents";
-import CelebrationComponents from "./pages/dev/CelebrationComponents";
+import CelebrationComponents from "./pages/Dev/CelebrationComponents";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
