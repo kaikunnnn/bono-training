@@ -54,7 +54,7 @@ import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
 import TagsIndex from './pages/blog/tags';
 import TagDetail from './pages/blog/tag';
-import BlogGuide from './pages/dev/BlogGuide';
+import BlogGuide from './pages/Dev/BlogGuide';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
