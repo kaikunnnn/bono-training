@@ -25,30 +25,30 @@ MyPage.tsx 内の UI パターンを整理する。
 
 #### コンテナ
 
-| プロパティ | 値 | Tailwind |
-|-----------|-----|----------|
-| 背景色 | #FFFFFF | `bg-white` |
-| padding | 10px / 5px | `px-[10px] py-[5px]` |
-| border-radius | 12px | `rounded-[12px]` |
-| shadow | 0px 1px 1px rgba(0,0,0,0.04) | `shadow-[0px_1px_1px_0px_rgba(0,0,0,0.04)]` |
-| gap | 4px | `gap-[4px]` |
+| プロパティ    | 値                           | Tailwind                                    |
+| ------------- | ---------------------------- | ------------------------------------------- |
+| 背景色        | #FFFFFF                      | `bg-white`                                  |
+| padding       | 10px / 5px                   | `px-[10px] py-[5px]`                        |
+| border-radius | 12px                         | `rounded-[12px]`                            |
+| shadow        | 0px 1px 1px rgba(0,0,0,0.04) | `shadow-[0px_1px_1px_0px_rgba(0,0,0,0.04)]` |
+| gap           | 4px                          | `gap-[4px]`                                 |
 
 #### アイコン部分
 
-| プロパティ | 値 |
-|-----------|-----|
-| サイズ | 20x20px |
-| 背景色 | #E5E5E5 |
-| padding | 3px |
+| プロパティ | 値      |
+| ---------- | ------- |
+| サイズ     | 20x20px |
+| 背景色     | #E5E5E5 |
+| padding    | 3px     |
 
 #### テキスト
 
-| プロパティ | 値 | Tailwind |
-|-----------|-----|----------|
-| フォント | Inter Bold, Noto Sans JP Bold | `font-bold` |
-| サイズ | 13px | `text-[13px]` |
-| 色 | #020817 | `text-[#020817]` |
-| 行高 | 24px | `leading-[24px]` |
+| プロパティ | 値                            | Tailwind         |
+| ---------- | ----------------------------- | ---------------- |
+| フォント   | Inter Bold, Noto Sans JP Bold | `font-bold`      |
+| サイズ     | 13px                          | `text-[13px]`    |
+| 色         | #020817                       | `text-[#020817]` |
+| 行高       | 24px                          | `leading-[24px]` |
 
 ### 実装内容
 
@@ -153,15 +153,193 @@ MyPage.tsx 内の UI パターンを整理する。
 
 <!-- ここにFigmaリンクやスクリーンショットを追加 -->
 
+**成功！✅**
+
+---
+
+## HeadingSectionInner（セクション見出し）仕様
+
+### 概要
+
+セクションの見出し行。左にタイトル、右に「すべてみる」リンク（表示/非表示切替可能）
+
+---
+
+### 構造
+
+```
+HeadingSectionInner (w-[896px])
+├── left: タイトル（例: レッスン）
+└── right: リンク（例: すべてみる）← onoff で表示制御
+```
+
+---
+
+### レイアウト
+
+| 要素       | スタイル                                      |
+| ---------- | --------------------------------------------- |
+| コンテナ   | `w-[896px] flex items-center justify-between` |
+| 内部ラップ | `flex-1 flex items-center justify-between`    |
+
+---
+
+### 左側: タイトル
+
+| プロパティ | 値                 | Tailwind                              |
+| ---------- | ------------------ | ------------------------------------- |
+| フォント   | Rounded M+ 1c Bold | `font-['Rounded_Mplus_1c_Bold:Bold']` |
+| サイズ     | 13px               | `text-[13px]`                         |
+| 色         | #020817            | `text-[#020817]`                      |
+| Weight     | Bold               | (フォント名に含まれる)                |
+| 改行       | なし               | `text-nowrap`                         |
+
+---
+
+### 右側: リンク「すべてみる」
+
+| プロパティ | 値                 | Tailwind                              |
+| ---------- | ------------------ | ------------------------------------- |
+| フォント   | Rounded M+ 1c Bold | `font-['Rounded_Mplus_1c_Bold:Bold']` |
+| サイズ     | 12px               | `text-[12px]`                         |
+| 色         | rgba(2,8,23,0.64)  | `text-[rgba(2,8,23,0.64)]`            |
+| 行高       | 32px               | `leading-[32px]`                      |
+| 配置       | center             | `text-center`                         |
+| 改行       | なし               | `text-nowrap`                         |
+
+---
+
+### Props
+
+```tsx
+interface HeadingSectionInnerProps {
+  title: string; // 左側タイトル
+  showLink?: boolean; // 「すべてみる」表示（default: true）
+  linkText?: string; // リンクテキスト（default: "すべてみる"）
+  linkHref?: string; // リンク先URL
+  onLinkClick?: () => void;
+}
+```
+
+---
+
+### 実装コード
+
+```tsx
+// HeadingSectionInner.tsx
+interface HeadingSectionInnerProps {
+  title: string;
+  showLink?: boolean;
+  linkText?: string;
+  linkHref?: string;
+  onLinkClick?: () => void;
+}
+
+export function HeadingSectionInner({
+  title,
+  showLink = true,
+  linkText = "すべてみる",
+  linkHref,
+  onLinkClick,
+}: HeadingSectionInnerProps) {
+  return (
+    <div className="w-full flex items-center justify-between">
+      {/* 左側: タイトル */}
+      <div className="flex items-center">
+        <span className="font-['Rounded_Mplus_1c_Bold'] text-[13px] text-[#020817] whitespace-nowrap">
+          {title}
+        </span>
+      </div>
+
+      {/* 右側: リンク */}
+      {showLink && (
+        <div className="flex items-center">
+          {linkHref ? (
+
+              href={linkHref}
+              className="font-['Rounded_Mplus_1c_Bold'] text-[12px] text-[rgba(2,8,23,0.64)] leading-[32px] text-center whitespace-nowrap hover:opacity-80"
+            >
+              {linkText}
+            </a>
+          ) : (
+            <button
+              onClick={onLinkClick}
+              className="font-['Rounded_Mplus_1c_Bold'] text-[12px] text-[rgba(2,8,23,0.64)] leading-[32px] text-center whitespace-nowrap hover:opacity-80"
+            >
+              {linkText}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+### 使用例
+
+```tsx
+// 基本
+<HeadingSectionInner title="レッスン" />
+
+// リンクあり
+<HeadingSectionInner
+  title="進行中"
+  linkHref="/lessons/all"
+/>
+
+// リンクなし
+<HeadingSectionInner
+  title="お知らせ"
+  showLink={false}
+/>
+
+// カスタムリンクテキスト
+<HeadingSectionInner
+  title="お気に入り"
+  linkText="もっと見る"
+  onLinkClick={() => console.log('clicked')}
+/>
+```
+
+---
+
+### デザイントークン抽出
+
+```ts
+// tokens.ts に追加
+export const colors = {
+  text: {
+    primary: "#020817",
+    secondary: "rgba(2,8,23,0.64)",
+  },
+};
+
+export const fonts = {
+  heading: "font-['Rounded_Mplus_1c_Bold']",
+};
+
+export const fontSize = {
+  sectionTitle: "text-[13px]",
+  sectionLink: "text-[12px]",
+};
+```
+
+---
+
+この仕様で実装に迷いなく進められますか？他に確認したいコンポーネントがあれば共有してください。
+
 ### 実装内容
 
 <!-- 承認後に記載 -->
 
 ### 完了条件
 
-- [ ] コンポーネント作成
-- [ ] /dev/components の Heading カテゴリに登録
-- [ ] MyPage.tsx で使用
+- [x] コンポーネント作成
+- [x] /dev/components の Heading カテゴリに登録
+- [x] MyPage.tsx で使用
 
 ---
 
@@ -232,12 +410,12 @@ MyPage.tsx 内の UI パターンを整理する。
 
 ## 進捗
 
-| Step | 内容                       | 状態     |
-| ---- | -------------------------- | -------- |
-| 1    | IconButton                 | ✅ 完了  |
-| 2    | EmptyState                 | ✅ 完了  |
-| 3    | LessonCard グループ        | ✅ 完了  |
-| 4    | SubSectionTitle            | 未着手   |
-| 5    | ヘッダー要素の微調整       | 未着手   |
-| 6    | セクションの余白・ボーダー | 未着手   |
-| 7    | /dev/components 登録       | 未着手   |
+| Step | 内容                       | 状態    |
+| ---- | -------------------------- | ------- |
+| 1    | IconButton                 | ✅ 完了 |
+| 2    | EmptyState                 | ✅ 完了 |
+| 3    | LessonCard グループ        | ✅ 完了 |
+| 4    | HeadingSectionInner        | ✅ 完了 |
+| 5    | ヘッダー要素の微調整       | 未着手  |
+| 6    | セクションの余白・ボーダー | 未着手  |
+| 7    | /dev/components 登録       | 未着手  |

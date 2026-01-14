@@ -18,6 +18,7 @@ import {
 import { User } from "lucide-react";
 import { IconButton } from "@/components/ui/button/IconButton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { HeadingSectionInner } from "@/components/ui/heading-section-inner";
 
 // Figma仕様に基づくスタイル定数
 const styles = {
@@ -359,18 +360,7 @@ export default function MyPage() {
 
                 {/* サブタイトル */}
                 {allActiveLessons.length > 0 && (
-                  <h3
-                    style={{
-                      fontFamily: styles.typography.fontFamily,
-                      fontWeight: 500,
-                      fontSize: "13px",
-                      lineHeight: "32px",
-                      color: styles.colors.titleText,
-                      margin: 0,
-                    }}
-                  >
-                    レッスン
-                  </h3>
+                  <HeadingSectionInner title="レッスン" showLink={false} />
                 )}
               </div>
 
@@ -433,19 +423,9 @@ export default function MyPage() {
                 {/* 完了ブロック */}
                 {completedLessons.length > 0 && (
                   <div style={{ width: "100%" }}>
-                    <h3
-                      style={{
-                        fontFamily: styles.typography.fontFamily,
-                        fontWeight: 500,
-                        fontSize: "13px",
-                        lineHeight: "32px",
-                        color: styles.colors.titleText,
-                        margin: 0,
-                        marginBottom: "8px",
-                      }}
-                    >
-                      完了
-                    </h3>
+                    <div className="mb-2">
+                      <HeadingSectionInner title="完了" showLink={false} />
+                    </div>
                     <div
                       style={{
                         display: "grid",
@@ -469,19 +449,9 @@ export default function MyPage() {
                 {/* 取り組み中ブロック */}
                 {inProgressLessons.length > 0 && (
                   <div style={{ width: "100%", marginTop: completedLessons.length > 0 ? "16px" : 0 }}>
-                    <h3
-                      style={{
-                        fontFamily: styles.typography.fontFamily,
-                        fontWeight: 500,
-                        fontSize: "13px",
-                        lineHeight: "32px",
-                        color: styles.colors.titleText,
-                        margin: 0,
-                        marginBottom: "8px",
-                      }}
-                    >
-                      取り組み中
-                    </h3>
+                    <div className="mb-2">
+                      <HeadingSectionInner title="取り組み中" showLink={false} />
+                    </div>
                     <div
                       style={{
                         display: "grid",

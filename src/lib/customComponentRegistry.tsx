@@ -9,6 +9,7 @@ import CategoryBadge from '@/components/guide/CategoryBadge';
 import { IconButton } from '@/components/ui/button/IconButton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ProgressLesson, CompletedLessonCard } from '@/components/progress';
+import { HeadingSectionInner } from '@/components/ui/heading-section-inner';
 import { User, Settings, Heart } from 'lucide-react';
 import type { ComponentInfo } from '@/types/dev';
 
@@ -154,6 +155,26 @@ export const CUSTOM_COMPONENTS: Record<string, ComponentInfo[]> = {
         </div>
       ),
       path: '@/components/training/CategoryTag',
+    },
+  ],
+
+  Heading: [
+    {
+      name: 'HeadingSectionInner',
+      category: 'Heading',
+      description: 'セクション見出しコンポーネント（左タイトル、右リンク）',
+      example: (
+        <div className="flex flex-col gap-4 w-full">
+          <HeadingSectionInner title="レッスン" linkHref="/lessons" />
+          <HeadingSectionInner title="完了" showLink={false} />
+          <HeadingSectionInner
+            title="お気に入り"
+            linkText="もっと見る"
+            onLinkClick={() => alert('Clicked!')}
+          />
+        </div>
+      ),
+      path: '@/components/ui/heading-section-inner',
     },
   ],
 };
