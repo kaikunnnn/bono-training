@@ -8,6 +8,12 @@ export interface TextTrack {
   mode: 'showing' | 'disabled';
 }
 
+export interface Chapter {
+  startTime: number;
+  title: string;
+  index: number;
+}
+
 export interface VimeoPlayerState {
   isPlaying: boolean;
   currentTime: number;
@@ -19,6 +25,8 @@ export interface VimeoPlayerState {
   isPip: boolean;
   textTracks: TextTrack[];
   activeTextTrack: TextTrack | null;
+  chapters: Chapter[];
+  currentChapter: Chapter | null;
 }
 
 export interface UseVimeoPlayerReturn {
@@ -51,6 +59,8 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
     isPip: false,
     textTracks: [],
     activeTextTrack: null,
+    chapters: [],
+    currentChapter: null,
   });
 
   // プレーヤーの初期化
@@ -69,12 +79,12 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
 
     const player = new Player(containerRef.current, {
       id: parseInt(extractedId, 10),
-      controls: true,  // Vimeo標準UIを表示（controls: falseは制限あり）
+      controls: false,  // Vimeo標準UIを非表示（Plusプラン以上で有効）
       responsive: true,
       title: false,
       byline: false,
       portrait: false,
-      pip: true,  // Picture-in-Picture を有効化
+      pip: true,
     });
 
     playerRef.current = player;
@@ -92,7 +102,7 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
         const duration = await player.getDuration();
         const volume = await player.getVolume();
         const textTracks = await player.getTextTracks();
-        console.log('[VimeoPlayer] Duration:', duration, 'Volume:', volume, 'TextTracks:', textTracks);
+        console.log('[VimeoPlayer] Duration:', duration, 'Volume:', volume);
         setState(prev => ({
           ...prev,
           duration,
@@ -107,13 +117,23 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
       }
     });
 
-    // readyイベントで初期化を完了（広告ブロッカー対応）
+    // readyイベントで初期化を完了
     player.ready().then(async () => {
       console.log('[VimeoPlayer] Player ready');
       try {
         const duration = await player.getDuration();
         const volume = await player.getVolume();
         const textTracks = await player.getTextTracks();
+
+        // チャプター情報を取得
+        let chapters: Chapter[] = [];
+        try {
+          chapters = await player.getChapters() as Chapter[];
+          console.log('[VimeoPlayer] Chapters:', chapters);
+        } catch (chapterErr) {
+          console.log('[VimeoPlayer] No chapters available');
+        }
+
         console.log('[VimeoPlayer] Ready - Duration:', duration, 'Volume:', volume);
         setState(prev => {
           if (prev.isReady) return prev;
@@ -122,6 +142,7 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
             duration,
             volume,
             textTracks: textTracks as TextTrack[],
+            chapters,
             isLoading: false,
             isReady: true,
           };
@@ -135,17 +156,59 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
       setState(prev => ({ ...prev, isLoading: false }));
     });
 
+    // イベント方式（バックアップ）
     player.on('play', () => {
+      console.log('[VimeoPlayer] Play event fired');
       setState(prev => ({ ...prev, isPlaying: true }));
     });
 
     player.on('pause', () => {
+      console.log('[VimeoPlayer] Pause event fired');
       setState(prev => ({ ...prev, isPlaying: false }));
     });
 
     player.on('timeupdate', (data: { seconds: number }) => {
       setState(prev => ({ ...prev, currentTime: data.seconds }));
     });
+
+    // ポーリング方式（イベントが発火しない場合の対策）
+    const pollInterval = setInterval(async () => {
+      try {
+        const [currentTime, paused, volume, textTracks] = await Promise.all([
+          player.getCurrentTime(),
+          player.getPaused(),
+          player.getVolume(),
+          player.getTextTracks(),
+        ]);
+
+        // アクティブな字幕トラックを特定
+        const activeTrack = (textTracks as TextTrack[]).find(t => t.mode === 'showing') || null;
+
+        setState(prev => {
+          // 現在のチャプターを計算
+          let currentChapter: Chapter | null = null;
+          if (prev.chapters.length > 0) {
+            for (let i = prev.chapters.length - 1; i >= 0; i--) {
+              if (currentTime >= prev.chapters[i].startTime) {
+                currentChapter = prev.chapters[i];
+                break;
+              }
+            }
+          }
+
+          return {
+            ...prev,
+            currentTime,
+            volume,
+            isPlaying: !paused,
+            currentChapter,
+            activeTextTrack: activeTrack,
+          };
+        });
+      } catch (err) {
+        // プレーヤーが破棄された場合は無視
+      }
+    }, 100);
 
     player.on('volumechange', (data: { volume: number }) => {
       setState(prev => ({ ...prev, volume: data.volume }));
@@ -191,6 +254,7 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
     });
 
     return () => {
+      clearInterval(pollInterval);
       player.destroy();
       playerRef.current = null;
     };
@@ -211,6 +275,7 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
   const togglePlay = useCallback(async () => {
     if (playerRef.current) {
       const paused = await playerRef.current.getPaused();
+      console.log('[VimeoPlayer] togglePlay called, paused:', paused);
       if (paused) {
         await playerRef.current.play();
       } else {

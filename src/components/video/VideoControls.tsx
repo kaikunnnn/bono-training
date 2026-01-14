@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Volume1, Maximize, Minimize, Loader2, Subtitles, PictureInPicture2 } from 'lucide-react';
-import type { VimeoPlayerState, TextTrack } from './hooks/useVimeoPlayer';
+import { Play, Pause, Volume2, VolumeX, Volume1, Maximize, Minimize, Loader2, Subtitles, PictureInPicture2, List } from 'lucide-react';
+import type { VimeoPlayerState, TextTrack, Chapter } from './hooks/useVimeoPlayer';
 
 interface VideoControlsProps {
   state: VimeoPlayerState;
@@ -32,15 +32,18 @@ export function VideoControls({
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
+  const [showChapterMenu, setShowChapterMenu] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverPosition, setHoverPosition] = useState(0);
+  const [hoverChapter, setHoverChapter] = useState<Chapter | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const speedMenuRef = useRef<HTMLDivElement>(null);
   const subtitleMenuRef = useRef<HTMLDivElement>(null);
+  const chapterMenuRef = useRef<HTMLDivElement>(null);
 
-  const { isPlaying, currentTime, duration, volume, playbackRate, isLoading, isPip, textTracks, activeTextTrack } = state;
+  const { isPlaying, currentTime, duration, volume, playbackRate, isLoading, isPip, textTracks, activeTextTrack, chapters, currentChapter } = state;
 
   // 時間フォーマット (長い動画はH:MM:SS、短い動画はM:SS)
   const formatTime = (seconds: number) => {
@@ -72,8 +75,21 @@ export function VideoControls({
     if (!progressRef.current || duration === 0) return;
     const rect = progressRef.current.getBoundingClientRect();
     const pos = (e.clientX - rect.left) / rect.width;
+    const time = pos * duration;
     setHoverPosition(pos * 100);
-    setHoverTime(pos * duration);
+    setHoverTime(time);
+
+    // ホバー位置のチャプターを特定
+    if (chapters.length > 0) {
+      let foundChapter: Chapter | null = null;
+      for (let i = chapters.length - 1; i >= 0; i--) {
+        if (time >= chapters[i].startTime) {
+          foundChapter = chapters[i];
+          break;
+        }
+      }
+      setHoverChapter(foundChapter);
+    }
   };
 
   useEffect(() => {
@@ -109,16 +125,19 @@ export function VideoControls({
       if (subtitleMenuRef.current && !subtitleMenuRef.current.contains(e.target as Node)) {
         setShowSubtitleMenu(false);
       }
+      if (chapterMenuRef.current && !chapterMenuRef.current.contains(e.target as Node)) {
+        setShowChapterMenu(false);
+      }
     };
 
-    if (showSpeedMenu || showSubtitleMenu) {
+    if (showSpeedMenu || showSubtitleMenu || showChapterMenu) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showSpeedMenu, showSubtitleMenu]);
+  }, [showSpeedMenu, showSubtitleMenu, showChapterMenu]);
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
@@ -128,62 +147,123 @@ export function VideoControls({
   // 字幕が利用可能かどうか
   const hasSubtitles = textTracks.length > 0;
 
+  // チャプターが利用可能かどうか
+  const hasChapters = chapters.length > 0;
+
   return (
     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black via-black/50 to-transparent pt-16 pb-3 px-4">
       {/* プログレスバー */}
       <div
         ref={progressRef}
-        className="relative h-1 cursor-pointer mb-4 group"
+        className={`relative cursor-pointer mb-4 group transition-all duration-150 ${
+          isHoveringProgress || isSeeking ? 'h-1.5' : 'h-1'
+        }`}
         onMouseDown={handleProgressMouseDown}
         onMouseEnter={() => setIsHoveringProgress(true)}
         onMouseLeave={() => {
           setIsHoveringProgress(false);
           setHoverTime(null);
+          setHoverChapter(null);
         }}
         onMouseMove={handleProgressHover}
       >
-        {/* ベース（未再生部分）*/}
-        <div className="absolute inset-0 bg-white/30 rounded-full" />
+        {/* チャプターがある場合はセグメント分割、ない場合は従来の1本バー */}
+        {hasChapters ? (
+          // セグメント分割プログレスバー
+          <div className="flex h-full gap-0.5">
+            {chapters.map((chapter, index) => {
+              const nextChapter = chapters[index + 1];
+              const segmentStart = chapter.startTime;
+              const segmentEnd = nextChapter ? nextChapter.startTime : duration;
+              const segmentDuration = segmentEnd - segmentStart;
+              const segmentWidth = (segmentDuration / duration) * 100;
 
-        {/* ホバー時のプレビュー位置 */}
-        {isHoveringProgress && hoverTime !== null && (
-          <div
-            className="absolute top-0 h-full bg-white/20 rounded-full transition-all"
-            style={{ width: `${hoverPosition}%` }}
-          />
+              // このセグメント内での再生進捗を計算
+              let segmentProgress = 0;
+              if (currentTime >= segmentEnd) {
+                segmentProgress = 100;
+              } else if (currentTime > segmentStart) {
+                segmentProgress = ((currentTime - segmentStart) / segmentDuration) * 100;
+              }
+
+              // このセグメント内でのホバー進捗を計算
+              let hoverSegmentProgress = 0;
+              if (hoverTime !== null) {
+                if (hoverTime >= segmentEnd) {
+                  hoverSegmentProgress = 100;
+                } else if (hoverTime > segmentStart) {
+                  hoverSegmentProgress = ((hoverTime - segmentStart) / segmentDuration) * 100;
+                }
+              }
+
+              return (
+                <div
+                  key={chapter.index}
+                  className="relative h-full rounded-sm overflow-hidden"
+                  style={{ width: `${segmentWidth}%` }}
+                >
+                  {/* ベース（未再生部分）*/}
+                  <div className="absolute inset-0 bg-white/30" />
+
+                  {/* ホバー時のプレビュー位置 */}
+                  {isHoveringProgress && hoverTime !== null && hoverSegmentProgress > 0 && (
+                    <div
+                      className="absolute top-0 left-0 h-full bg-white/20"
+                      style={{ width: `${hoverSegmentProgress}%` }}
+                    />
+                  )}
+
+                  {/* 再生済み領域（白） */}
+                  <div
+                    className="absolute top-0 left-0 h-full bg-white transition-[width] duration-100"
+                    style={{ width: `${segmentProgress}%` }}
+                  />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          // 従来の1本プログレスバー（チャプターなし）
+          <>
+            {/* ベース（未再生部分）*/}
+            <div className="absolute inset-0 bg-white/30 rounded-full" />
+
+            {/* ホバー時のプレビュー位置 */}
+            {isHoveringProgress && hoverTime !== null && (
+              <div
+                className="absolute top-0 h-full bg-white/20 rounded-full"
+                style={{ width: `${hoverPosition}%` }}
+              />
+            )}
+
+            {/* 再生済み領域（白） */}
+            <div
+              className="absolute top-0 left-0 h-full bg-white rounded-full transition-[width] duration-100"
+              style={{ width: `${progress}%` }}
+            />
+          </>
         )}
-
-        {/* 再生済み領域（白） */}
-        <div
-          className="absolute top-0 left-0 h-full bg-white rounded-full transition-[width] duration-100"
-          style={{ width: `${progress}%` }}
-        />
 
         {/* ドラッグハンドル（白い丸） */}
         <div
-          className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg transition-all duration-150 ${
+          className={`absolute top-1/2 -translate-y-1/2 w-3 h-3 bg-white rounded-full shadow-lg transition-all duration-150 z-10 ${
             isHoveringProgress || isSeeking ? 'opacity-100 scale-100' : 'opacity-0 scale-75'
           }`}
           style={{ left: `calc(${progress}% - 6px)` }}
         />
 
-        {/* ホバー時の時間表示 */}
+        {/* ホバー時の時間・チャプター表示 */}
         {isHoveringProgress && hoverTime !== null && (
           <div
-            className="absolute -top-8 transform -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-1 rounded pointer-events-none"
-            style={{ left: `${hoverPosition}%` }}
+            className="absolute transform -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-1.5 rounded pointer-events-none whitespace-nowrap z-20"
+            style={{ left: `${hoverPosition}%`, bottom: 'calc(100% + 8px)' }}
           >
-            {formatTime(hoverTime)}
+            {hoverChapter && (
+              <div className="font-medium mb-0.5">{hoverChapter.title}</div>
+            )}
+            <div className={hoverChapter ? 'text-white/70' : ''}>{formatTime(hoverTime)}</div>
           </div>
         )}
-
-        {/* ホバー/シーク時にバーを太くする */}
-        <div
-          className={`absolute inset-0 transition-all duration-150 ${
-            isHoveringProgress || isSeeking ? 'scale-y-150' : 'scale-y-100'
-          }`}
-          style={{ transformOrigin: 'center' }}
-        />
       </div>
 
       {/* コントロールボタン */}
@@ -307,6 +387,46 @@ export function VideoControls({
                       {activeTextTrack?.language === track.language && (
                         <span className="text-white">✓</span>
                       )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* チャプター選択（チャプターがある場合のみ表示） */}
+          {hasChapters && (
+            <div ref={chapterMenuRef} className="relative">
+              <button
+                onClick={() => setShowChapterMenu(!showChapterMenu)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                  showChapterMenu ? 'bg-white text-black' : 'bg-white/20 hover:bg-white/30 text-white'
+                }`}
+                aria-label="チャプター"
+              >
+                <List className="w-5 h-5" />
+              </button>
+
+              {/* チャプター選択メニュー */}
+              {showChapterMenu && (
+                <div className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm rounded-lg shadow-xl py-2 min-w-[200px] max-h-[300px] overflow-y-auto border border-white/10">
+                  {chapters.map((chapter) => (
+                    <button
+                      key={chapter.index}
+                      onClick={() => {
+                        onSeek(chapter.startTime);
+                        setShowChapterMenu(false);
+                      }}
+                      className={`w-full px-4 py-2 text-sm text-left transition-colors flex items-center justify-between gap-3 ${
+                        currentChapter?.index === chapter.index
+                          ? 'text-white bg-white/10'
+                          : 'text-white/70 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <span className="truncate">{chapter.title}</span>
+                      <span className="text-white/50 text-xs tabular-nums flex-shrink-0">
+                        {formatTime(chapter.startTime)}
+                      </span>
                     </button>
                   ))}
                 </div>
