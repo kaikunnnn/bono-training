@@ -11,6 +11,8 @@
 
 @layer base {
   :root {
+    /* 基本背景色 - #F9F9F7 */
+    --base: 60 7% 97%;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -95,7 +97,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: #F9F9F7;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 

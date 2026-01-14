@@ -12,7 +12,7 @@ interface TrainingLayoutProps {
 
 const TrainingLayout = ({ children, className, noPaddingTop = false }: TrainingLayoutProps) => {
   return (
-    <div className={cn("min-h-screen flex flex-col bg-[#F8F9F5]", className)}>
+    <div className={cn("min-h-screen flex flex-col bg-[#F9F9F7]", className)}>
       <TrainingHeader />
       <main className={cn("flex-1", noPaddingTop ? "" : "pt-[88px]")}>
         {children}
