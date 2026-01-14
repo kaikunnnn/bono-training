@@ -155,3 +155,26 @@ export const getRelatedPosts = async (currentPost: BlogPost, limit = 3): Promise
     )
     .slice(0, limit);
 };
+
+// 最新記事を取得（現在の記事を除外）
+export const getLatestPosts = async (excludeId: string, limit = 4): Promise<BlogPost[]> => {
+  if (isGhostEnabled()) {
+    try {
+      const isConnected = await checkGhostConnection();
+      if (isConnected) {
+        // limit + 1 を取得して、現在の記事を除外した後にlimit件返す
+        const response = await fetchGhostPosts({ limit: limit + 1 });
+        return response.posts
+          .filter(post => post.id !== excludeId)
+          .slice(0, limit);
+      }
+    } catch (error) {
+      console.warn('Ghost API failed for latest posts, falling back to mock data:', error);
+    }
+  }
+
+  // フォールバック: mockPostsを使用
+  return mockPosts
+    .filter(post => post.id !== excludeId)
+    .slice(0, limit);
+};

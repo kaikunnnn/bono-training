@@ -52,6 +52,8 @@ import ComponentsPreview from './pages/blog/components-preview';
 import BlogIndex from './pages/blog/index';
 import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
+import TagsIndex from './pages/blog/tags';
+import TagDetail from './pages/blog/tag';
 import BlogGuide from './pages/Dev/BlogGuide';
 import VideoPlayerTest from './pages/Dev/VideoPlayerTest';
 
@@ -117,6 +119,8 @@ const AppContent = () => {
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
+        <Route path="/blog/tags" element={<TagsIndex />} />
+        <Route path="/blog/tag/:slug" element={<TagDetail />} />
         <Route path="/blog/category/:category" element={<CategoryPage />} />
         <Route path="/blog/:slug" element={<BlogDetail />} />
 

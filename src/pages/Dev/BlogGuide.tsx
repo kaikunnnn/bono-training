@@ -3,7 +3,7 @@ import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle2, AlertCircle, Terminal, FileText, Settings, Eye } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Terminal, FileText, Settings, Eye, Command, RotateCcw } from 'lucide-react';
 
 const BlogGuide: React.FC = () => {
   return (
@@ -382,6 +382,78 @@ const BlogGuide: React.FC = () => {
                   <strong>確認:</strong> ブラウザのコンソールに「Ghost API failed」というメッセージが表示されているか確認してください。
                 </p>
               </div>
+            </div>
+          </CardContent>
+        </Card>
+
+{/* NPMコマンド */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Command className="h-5 w-5" />
+              NPMコマンド一覧
+            </CardTitle>
+            <CardDescription>
+              Ghost CMSを操作するためのコマンド
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm space-y-4">
+              <div>
+                <p className="text-green-400"># Ghostを起動</p>
+                <p>npm run ghost:start</p>
+              </div>
+              <div>
+                <p className="text-green-400"># Ghostを停止</p>
+                <p>npm run ghost:stop</p>
+              </div>
+              <div>
+                <p className="text-green-400"># ログを確認（リアルタイム）</p>
+                <p>npm run ghost:logs</p>
+              </div>
+              <div>
+                <p className="text-green-400"># ダミー記事を作成（要Admin API Key）</p>
+                <p>npm run ghost:seed</p>
+              </div>
+              <div>
+                <p className="text-yellow-400"># ⚠️ 完全リセット（データ全削除）</p>
+                <p>npm run ghost:reset</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* パスワードを忘れた場合 */}
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RotateCcw className="h-5 w-5" />
+              パスワードを忘れた場合
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert className="bg-yellow-50 border-yellow-200">
+              <AlertCircle className="h-4 w-4 text-yellow-600" />
+              <AlertTitle className="text-yellow-800">注意</AlertTitle>
+              <AlertDescription className="text-yellow-700">
+                ローカル環境ではメールサーバーが設定されていないため、「Forgot password」機能は使えません。
+              </AlertDescription>
+            </Alert>
+            <p className="text-sm text-gray-600">
+              パスワードを忘れた場合は、Ghostを完全にリセットして再セットアップする必要があります。
+            </p>
+            <div className="bg-gray-900 text-gray-100 p-4 rounded-lg font-mono text-sm">
+              <p className="text-yellow-400"># 完全リセット（記事データは全て削除されます）</p>
+              <p className="mt-1">npm run ghost:reset</p>
+            </div>
+            <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="font-semibold text-blue-800 mb-2">リセット後の手順:</p>
+              <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1">
+                <li>http://localhost:2368/ghost にアクセス</li>
+                <li>新しいアカウントで初期セットアップ</li>
+                <li>Integrationを作成してAPI Keyを再取得</li>
+                <li>.envファイルのAPI Keyを更新</li>
+              </ol>
             </div>
           </CardContent>
         </Card>

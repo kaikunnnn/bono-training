@@ -8,11 +8,11 @@
  * @description ブログ一覧で表示される記事カードコンポーネント
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { BlogPost } from '@/types/blog';
 import { BLOG_COLORS, BLOG_FONTS, BLOG_SPACING } from '@/styles/design-tokens';
-import { getFluentEmojiUrl, getFluentEmojiFallbackUrl, DEFAULT_EMOJI, removeEmojiFromText } from '@/utils/blog/emojiUtils';
+import { DEFAULT_EMOJI, removeEmojiFromText } from '@/utils/blog/emojiUtils';
 
 interface BlogItemProps {
   /** 表示する記事データ */
@@ -24,43 +24,29 @@ interface BlogItemProps {
 /**
  * EmojiThumbnail Component
  *
- * 記事リスト用の絵文字表示コンポーネント（Fluent Emoji 3Dのみ）。
- * サムネイル画像は表示せず、常に絵文字を表示します。
+ * 記事リスト用の絵文字表示コンポーネント。
+ * テキスト絵文字をそのまま表示します。
  *
  * 表示ルール:
- * - post.emoji（タイトルから抽出）がある → その絵文字のFluent Emoji 3D
- * - post.emojiがない → デフォルト📝のFluent Emoji 3D
+ * - post.emoji（タイトルから抽出）がある → その絵文字を表示
+ * - post.emojiがない → デフォルト📝を表示
  */
 const EmojiThumbnail: React.FC<{ post: BlogPost }> = ({ post }) => {
   const emoji = post.emoji || DEFAULT_EMOJI;
-  const [imageError, setImageError] = useState(false);
-  const [currentUrl, setCurrentUrl] = useState(getFluentEmojiUrl(emoji));
 
   return (
-    <img
-      src={currentUrl}
-      alt=""
+    <span
       style={{
-        width: BLOG_SPACING.card.emojiSize,
-        height: BLOG_SPACING.card.emojiSize,
-        objectFit: 'contain',
-        maxWidth: '350.66px',
+        fontSize: BLOG_SPACING.card.emojiSize,
+        lineHeight: 1,
       }}
-      loading="lazy"
-      data-name="emoji Image"
+      data-name="emoji"
       data-node-id="14:20"
-      onError={() => {
-        // Fluent Emoji読み込み失敗時はフォールバックを試す
-        const fallbackUrl = getFluentEmojiFallbackUrl(emoji);
-        if (!imageError && currentUrl !== fallbackUrl) {
-          setCurrentUrl(fallbackUrl);
-        } else if (emoji !== DEFAULT_EMOJI) {
-          // それでも失敗したらデフォルト絵文字を表示
-          setCurrentUrl(getFluentEmojiUrl(DEFAULT_EMOJI));
-          setImageError(true);
-        }
-      }}
-    />
+      role="img"
+      aria-label="記事の絵文字"
+    >
+      {emoji}
+    </span>
   );
 };
 
@@ -131,7 +117,7 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
           style={{
             width: BLOG_SPACING.card.thumbnailWidth,
             height: BLOG_SPACING.card.thumbnailHeight,
-            backgroundColor: '#D8E7EF',
+            backgroundColor: '#F5F5F4',
             borderRadius: '12px',
             paddingTop: '40px',
             paddingBottom: '40px',
@@ -239,15 +225,13 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
             gap: 12px !important;
           }
 
-          a[role="article"] img,
           a[role="article"] > div > div:first-child {
             width: ${BLOG_SPACING.card.thumbnailWidthTablet} !important;
             height: ${BLOG_SPACING.card.thumbnailHeightTablet} !important;
           }
 
-          a[role="article"] img {
-            width: ${BLOG_SPACING.card.emojiSizeTablet} !important;
-            height: ${BLOG_SPACING.card.emojiSizeTablet} !important;
+          a[role="article"] span[role="img"] {
+            font-size: ${BLOG_SPACING.card.emojiSizeTablet} !important;
           }
 
           a[role="article"] h3 {
@@ -267,9 +251,8 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
             height: ${BLOG_SPACING.card.thumbnailHeightMobile} !important;
           }
 
-          a[role="article"] img {
-            width: ${BLOG_SPACING.card.emojiSizeMobile} !important;
-            height: ${BLOG_SPACING.card.emojiSizeMobile} !important;
+          a[role="article"] span[role="img"] {
+            font-size: ${BLOG_SPACING.card.emojiSizeMobile} !important;
           }
 
           a[role="article"] h3 {

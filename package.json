@@ -19,7 +19,12 @@
     "mcp:status": "node scripts/mcp-toggle.js status",
     "sanity:dev": "cd sanity-studio && SANITY_STUDIO_DATASET=development npm run dev",
     "sanity:prod": "cd sanity-studio && SANITY_STUDIO_DATASET=production npm run dev",
-    "sanity:sync": "cd sanity-studio && npx sanity dataset export development dev-export.tar.gz && npx sanity dataset import dev-export.tar.gz production --replace && rm dev-export.tar.gz"
+    "sanity:sync": "cd sanity-studio && npx sanity dataset export development dev-export.tar.gz && npx sanity dataset import dev-export.tar.gz production --replace && rm dev-export.tar.gz",
+    "ghost:start": "/Applications/Docker.app/Contents/Resources/bin/docker compose up -d ghost",
+    "ghost:stop": "/Applications/Docker.app/Contents/Resources/bin/docker compose down",
+    "ghost:reset": "/Applications/Docker.app/Contents/Resources/bin/docker compose down -v && /Applications/Docker.app/Contents/Resources/bin/docker compose up -d ghost",
+    "ghost:logs": "/Applications/Docker.app/Contents/Resources/bin/docker compose logs -f ghost",
+    "ghost:seed": "node scripts/ghost-seed.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
@@ -110,6 +115,7 @@
     "eslint-plugin-react-refresh": "^0.4.9",
     "globals": "^15.9.0",
     "jest-environment-jsdom": "^29.7.0",
+    "jsonwebtoken": "^9.0.3",
     "lovable-tagger": "^1.1.7",
     "postcss": "^8.4.47",
     "sharp": "^0.34.4",

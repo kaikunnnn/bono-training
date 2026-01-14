@@ -25,10 +25,10 @@ interface BlogHeaderProps {
  * ブログページのヘッダー。99frontend仕様に完全準拠した実装。
  *
  * 仕様:
- * - サイズ: 1920×74.07px
+ * - サイズ: 1920×56px
  * - パディング: 24px (デスクトップ/タブレット), 16px (モバイル)
  * - 背景: 透明（グラデーション上に直接表示）
- * - レイアウト: flex, justify-between
+ * - レイアウト: flex, justify-start
  * - BONOロゴ: SVG 88×26.074px、色#151834
  * - 右側スペース: 112px（将来の拡張用）
  *
@@ -40,10 +40,7 @@ interface BlogHeaderProps {
 export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
   return (
     <header
-      className={`box-border content-stretch flex items-center justify-between p-6 relative w-full ${className}`}
-      style={{
-        height: '74.07px',
-      }}
+      className={`box-border content-stretch flex h-14 items-center justify-start p-6 relative w-full ${className}`}
       data-name="header"
       data-node-id="3:207"
       role="banner"
@@ -56,9 +53,9 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
         data-node-id="3:208"
       >
         <Link
-          to="/"
+          to="/blog"
           className="content-stretch flex items-start relative shrink-0 w-full no-underline transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#151834] focus-visible:outline-offset-2 rounded"
-          aria-label="BONO ホームページへ"
+          aria-label="BONO Blog トップへ"
           data-name="Link"
           data-node-id="3:209"
         >
@@ -139,8 +136,8 @@ export const BlogHeaderWithNav: React.FC<BlogHeaderProps> = ({
       >
         {/* ロゴ */}
         <Link
-          to="/"
-          aria-label="BONO Home"
+          to="/blog"
+          aria-label="BONO Blog トップへ"
           className="flex items-center transition-opacity duration-300 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#151834] focus-visible:outline-offset-2"
           style={{
             width: BLOG_SPACING.header.logoWidth,

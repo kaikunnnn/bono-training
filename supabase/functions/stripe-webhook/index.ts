@@ -166,6 +166,9 @@ async function processWebhookAsync(
       case "checkout.session.completed":
         await handleCheckoutCompleted(stripe, supabase, event.data.object);
         break;
+      case "customer.subscription.created":
+        await handleSubscriptionCreated(stripe, supabase, event.data.object);
+        break;
       case "customer.subscription.updated":
         await handleSubscriptionUpdated(stripe, supabase, event.data.object);
         break;
@@ -287,11 +290,52 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
     // メンバーアクセス権を判定
     const hasMemberAccess = determineMembershipAccess(planType);
 
-    // ユーザーIDを取得
-    const userId = session.metadata?.user_id || subscription.metadata?.user_id;
+    // ユーザーIDを取得（メタデータから、または顧客メールから検索/作成）
+    let userId = session.metadata?.user_id || subscription.metadata?.user_id;
+
     if (!userId) {
-      console.error("ユーザーIDが見つかりません");
-      return;
+      // メタデータにuser_idがない場合（旧サイトからの課金など）
+      // 顧客のメールアドレスからユーザーを検索または作成
+      console.log("⚠️ [LIVE環境] メタデータにuser_idがありません。メールから検索します。");
+
+      const email = customer.email;
+      if (!email) {
+        console.error("❌ [LIVE環境] 顧客にメールアドレスがありません。処理をスキップします。");
+        return;
+      }
+
+      // Supabase auth.usersでメールからユーザーを検索
+      const { data: userListResult } = await supabase.auth.admin.listUsers({
+        page: 1,
+        perPage: 1000,
+      });
+
+      const existingUser = userListResult?.users?.find((u: any) => u.email === email);
+
+      if (existingUser) {
+        userId = existingUser.id;
+        console.log(`✅ [LIVE環境] 既存ユーザーを発見: ${userId}`);
+      } else {
+        // ユーザーが存在しない → 新規作成
+        console.log(`🔄 [LIVE環境] ユーザーを新規作成: ${email}`);
+
+        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+          email: email,
+          email_confirm: true,
+          user_metadata: {
+            migrated_from: "memberstack",
+            migrated_at: new Date().toISOString(),
+          },
+        });
+
+        if (createError) {
+          console.error("❌ [LIVE環境] ユーザー作成エラー:", createError);
+          return;
+        }
+
+        userId = newUser.user.id;
+        console.log(`✅ [LIVE環境] 新規ユーザー作成完了: ${userId} (migrated_from: memberstack)`);
+      }
     }
 
     // === 重複チェック: 既存のアクティブサブスクリプションを確認して非アクティブ化 ===
@@ -598,6 +642,198 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
       event_type: "customer.subscription.deleted",
       subscription_id: subscription.id,
       customer_id: subscription.customer,
+      status: subscription.status,
+      error_message: error.message,
+      error_stack: error.stack,
+    });
+  }
+}
+
+/**
+ * サブスクリプション作成イベントの処理
+ * 旧サイト（Memberstack）からの課金も含め、全てのサブスクリプション作成をキャッチ
+ */
+async function handleSubscriptionCreated(stripe: any, supabase: any, subscription: any) {
+  console.log("🚀 [LIVE環境] customer.subscription.createdイベントを処理中");
+
+  const subscriptionId = subscription.id;
+  const customerId = subscription.customer as string;
+
+  try {
+    // 1. まず既にstripe_customersに登録されているか確認
+    const { data: existingCustomer } = await supabase
+      .from("stripe_customers")
+      .select("user_id")
+      .eq("stripe_customer_id", customerId)
+      .eq("environment", ENVIRONMENT)
+      .single();
+
+    if (existingCustomer) {
+      // 既に登録済み → checkout.session.completedで処理されるはずなのでスキップ
+      console.log(`✅ [LIVE環境] 顧客 ${customerId} は既に登録済み。checkout.session.completedで処理されます。`);
+      return;
+    }
+
+    // 2. Stripe Customerからメールアドレスを取得
+    const customer = await stripe.customers.retrieve(customerId);
+    if (customer.deleted) {
+      console.error("❌ [LIVE環境] Stripe顧客が削除されています");
+      return;
+    }
+
+    const email = customer.email;
+    if (!email) {
+      console.error("❌ [LIVE環境] Stripe顧客にメールアドレスがありません");
+      return;
+    }
+
+    console.log(`🔍 [LIVE環境] 旧サイトからの課金を検出: ${email}`);
+
+    // 3. Supabase auth.usersでメールからユーザーを検索
+    let userId: string;
+
+    // まずlistUsersで検索（getUserByEmailは存在しない）
+    const { data: userListResult, error: listError } = await supabase.auth.admin.listUsers({
+      page: 1,
+      perPage: 1000,
+    });
+
+    const existingUser = userListResult?.users?.find((u: any) => u.email === email);
+
+    if (existingUser) {
+      // ユーザーが存在する
+      userId = existingUser.id;
+      console.log(`✅ [LIVE環境] 既存ユーザーを発見: ${userId}`);
+    } else {
+      // 4. ユーザーが存在しない → 新規作成（migrated_from: "memberstack"）
+      console.log(`🔄 [LIVE環境] ユーザーを新規作成: ${email}`);
+
+      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+        email: email,
+        email_confirm: true,
+        user_metadata: {
+          migrated_from: "memberstack",
+          migrated_at: new Date().toISOString(),
+        },
+      });
+
+      if (createError) {
+        console.error("❌ [LIVE環境] ユーザー作成エラー:", createError);
+        return;
+      }
+
+      userId = newUser.user.id;
+      console.log(`✅ [LIVE環境] 新規ユーザー作成完了: ${userId} (migrated_from: memberstack)`);
+    }
+
+    // 5. プラン情報を取得
+    const items = subscription.items.data;
+    if (!items || items.length === 0) {
+      console.error("❌ [LIVE環境] サブスクリプションにアイテムがありません");
+      return;
+    }
+
+    const priceId = items[0].price.id;
+
+    // Price IDからプランタイプと期間を判定
+    const envPrefix = ENVIRONMENT === 'test' ? 'STRIPE_TEST_' : 'STRIPE_';
+    const STANDARD_1M = Deno.env.get(`${envPrefix}STANDARD_1M_PRICE_ID`);
+    const STANDARD_3M = Deno.env.get(`${envPrefix}STANDARD_3M_PRICE_ID`);
+    const FEEDBACK_1M = Deno.env.get(`${envPrefix}FEEDBACK_1M_PRICE_ID`);
+    const FEEDBACK_3M = Deno.env.get(`${envPrefix}FEEDBACK_3M_PRICE_ID`);
+
+    let planType: string;
+    let duration: number;
+
+    if (priceId === STANDARD_1M) {
+      planType = "standard";
+      duration = 1;
+    } else if (priceId === STANDARD_3M) {
+      planType = "standard";
+      duration = 3;
+    } else if (priceId === FEEDBACK_1M) {
+      planType = "feedback";
+      duration = 1;
+    } else if (priceId === FEEDBACK_3M) {
+      planType = "feedback";
+      duration = 3;
+    } else {
+      console.warn(`⚠️ [LIVE環境] 未知のPrice ID: ${priceId}。デフォルトでstandardプランに設定`);
+      planType = "standard";
+      duration = 1;
+    }
+
+    const hasMemberAccess = determineMembershipAccess(planType);
+
+    // 6. stripe_customersに登録
+    const { error: customerError } = await supabase
+      .from("stripe_customers")
+      .upsert({
+        user_id: userId,
+        stripe_customer_id: customerId,
+        environment: ENVIRONMENT,
+      }, { onConflict: 'user_id,environment' });
+
+    if (customerError) {
+      console.error("❌ [LIVE環境] stripe_customers保存エラー:", customerError);
+    } else {
+      console.log(`✅ [LIVE環境] stripe_customers保存完了`);
+    }
+
+    // 7. user_subscriptionsに登録
+    const currentPeriodEnd = subscription.current_period_end
+      ? new Date(subscription.current_period_end * 1000).toISOString()
+      : null;
+
+    const { error: userSubError } = await supabase
+      .from("user_subscriptions")
+      .upsert({
+        user_id: userId,
+        is_active: subscription.status === "active" || subscription.status === "trialing",
+        plan_type: planType,
+        plan_members: hasMemberAccess,
+        stripe_subscription_id: subscriptionId,
+        stripe_customer_id: customerId,
+        duration: duration,
+        current_period_end: currentPeriodEnd,
+        cancel_at_period_end: subscription.cancel_at_period_end || false,
+        environment: ENVIRONMENT,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'user_id,environment' });
+
+    if (userSubError) {
+      console.error("❌ [LIVE環境] user_subscriptions保存エラー:", userSubError);
+    } else {
+      console.log(`✅ [LIVE環境] user_subscriptions保存完了`);
+    }
+
+    // 8. subscriptionsテーブルにも登録
+    const { error: subscriptionError } = await supabase
+      .from("subscriptions")
+      .insert({
+        user_id: userId,
+        stripe_subscription_id: subscriptionId,
+        start_timestamp: new Date(subscription.current_period_start * 1000).toISOString(),
+        end_timestamp: new Date(subscription.current_period_end * 1000).toISOString(),
+        plan_members: hasMemberAccess,
+        environment: ENVIRONMENT,
+      });
+
+    if (subscriptionError) {
+      // 重複の可能性があるのでエラーログのみ
+      console.warn("⚠️ [LIVE環境] subscriptions保存エラー（重複の可能性）:", subscriptionError);
+    } else {
+      console.log(`✅ [LIVE環境] subscriptions保存完了`);
+    }
+
+    console.log(`🎉 [LIVE環境] 旧サイトからの課金同期完了: ${email} → ${planType} (${duration}ヶ月)`);
+
+  } catch (error) {
+    console.error("❌ [LIVE環境] サブスクリプション作成処理エラー");
+    console.error(`📋 エラーコンテキスト:`, {
+      event_type: "customer.subscription.created",
+      subscription_id: subscriptionId,
+      customer_id: customerId,
       status: subscription.status,
       error_message: error.message,
       error_stack: error.stack,

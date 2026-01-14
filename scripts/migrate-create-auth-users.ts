@@ -75,7 +75,7 @@ async function createAuthUsers(csvFilePath: string) {
                 stripe_customer_id: customer.id,
                 memberstack_app_id: customer["msAppId (metadata)"],
                 memberstack_member_id: customer["msMemberId (metadata)"],
-                migrated_from: "stripe",
+                migrated_from: "memberstack", // 重要: "memberstack"でないとログイン時の移行ユーザー判定が動作しない
                 migrated_at: new Date().toISOString(),
               },
             });
