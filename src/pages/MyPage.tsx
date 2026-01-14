@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
 import { BookmarkList } from "@/components/ui/bookmark-list";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { ProgressLesson } from "@/components/progress";
+import { ProgressLesson, CompletedLessonCard } from "@/components/progress";
 import { TabNavigation, TabId } from "@/components/navigation";
 import { getBookmarkedArticles, toggleBookmark, type BookmarkedArticle } from "@/services/bookmarks";
 import { getAllLessonsWithArticles, getNextIncompleteArticle, type LessonWithArticles } from "@/services/lessons";
@@ -17,6 +17,7 @@ import {
 } from "@/services/progress";
 import { User } from "lucide-react";
 import { IconButton } from "@/components/ui/button/IconButton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 // Figma仕様に基づくスタイル定数
 const styles = {
@@ -402,59 +403,11 @@ export default function MyPage() {
                 </div>
               ) : (
                 /* Empty State - 進行中 */
-                <div
-                  style={{
-                    alignSelf: "stretch",
-                    padding: "32px 16px",
-                    backgroundColor: styles.colors.emptyStateBg,
-                    borderRadius: "16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "14px",
-                    color: "rgba(2, 8, 23, 1)",
-                  }}
-                >
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "#000000",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      fontFamily: styles.typography.fontFamily,
-                      lineHeight: "24px",
-                    }}
-                  >
-                    デザインスキルの獲得を<br />はじめよう
-                  </div>
-                  <Link
-                    to="/lessons"
-                    style={{
-                      padding: "5px 10px",
-                      backgroundColor: "#FFFFFF",
-                      borderRadius: "8px",
-                      border: "1px solid rgba(0, 0, 0, 0.1)",
-                      display: "inline-flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: "4px",
-                      textDecoration: "none",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#020817",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        fontFamily: styles.typography.buttonFontFamily,
-                        lineHeight: "24px",
-                      }}
-                    >
-                      身につけるレッスンを探す
-                    </span>
-                  </Link>
-                </div>
+                <EmptyState
+                  message={<>デザインスキルの獲得を<br />はじめよう</>}
+                  linkHref="/lessons"
+                  linkLabel="身につけるレッスンを探す"
+                />
               )}
             </section>
           )}
@@ -502,54 +455,12 @@ export default function MyPage() {
                       }}
                     >
                       {completedLessons.map((lesson, index) => (
-                        <div
+                        <CompletedLessonCard
                           key={`completed-${lesson.title}-${index}`}
-                          onClick={() => navigate(`/lessons/${lesson.lessonSlug}`)}
-                          style={{
-                            backgroundColor: styles.colors.cardBg,
-                            borderRadius: "16px",
-                            padding: "16px",
-                            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
-                            cursor: "pointer",
-                            transition: "box-shadow 0.2s",
-                          }}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                            <img
-                              src={lesson.iconImageUrl}
-                              alt={lesson.title}
-                              style={{
-                                width: "48px",
-                                height: "73px",
-                                objectFit: "cover",
-                                borderTopRightRadius: "8px",
-                                borderBottomRightRadius: "8px",
-                              }}
-                            />
-                            <div>
-                              <h4
-                                style={{
-                                  fontFamily: styles.typography.fontFamily,
-                                  fontSize: "16px",
-                                  fontWeight: 700,
-                                  color: styles.colors.titleText,
-                                  margin: "0 0 4px 0",
-                                }}
-                              >
-                                {lesson.title}
-                              </h4>
-                              <span
-                                style={{
-                                  fontSize: "14px",
-                                  fontWeight: 600,
-                                  color: "#22C55E",
-                                }}
-                              >
-                                ✓ 完了
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                          title={lesson.title}
+                          iconImageUrl={lesson.iconImageUrl}
+                          lessonSlug={lesson.lessonSlug}
+                        />
                       ))}
                     </div>
                   </div>
@@ -632,32 +543,9 @@ export default function MyPage() {
                 />
               ) : (
                 /* Empty State - お気に入り */
-                <div
-                  style={{
-                    alignSelf: "stretch",
-                    padding: "32px 16px",
-                    backgroundColor: styles.colors.emptyStateBg,
-                    borderRadius: "16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "14px",
-                  }}
-                >
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "#000000",
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      fontFamily: styles.typography.fontFamily,
-                      lineHeight: "24px",
-                    }}
-                  >
-                    記事をお気に入りすると<br />こちらに表示されます
-                  </div>
-                </div>
+                <EmptyState
+                  message={<>記事をお気に入りすると<br />こちらに表示されます</>}
+                />
               )}
             </section>
           )}
@@ -683,32 +571,9 @@ export default function MyPage() {
               />
 
               {/* Empty State - 閲覧履歴（機能未実装のため常にEmpty） */}
-              <div
-                style={{
-                  alignSelf: "stretch",
-                  padding: "32px 16px",
-                  backgroundColor: styles.colors.emptyStateBg,
-                  borderRadius: "16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "14px",
-                }}
-              >
-                <div
-                  style={{
-                    textAlign: "center",
-                    color: "#000000",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    fontFamily: styles.typography.fontFamily,
-                    lineHeight: "24px",
-                  }}
-                >
-                  記事を閲覧した履歴が<br />こちらに表示されます
-                </div>
-              </div>
+              <EmptyState
+                message={<>記事を閲覧した履歴が<br />こちらに表示されます</>}
+              />
             </section>
           )}
         </div>

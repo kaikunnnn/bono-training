@@ -93,9 +93,10 @@ MyPage.tsx 内の UI パターンを整理する。
 
 ### 完了条件
 
-- [ ] 方針決定
-- [ ] 実装
-- [ ] MyPage.tsx で使用
+- [x] 方針決定
+- [x] 実装
+- [x] MyPage.tsx で使用
+- [x] /dev/components に Pattern カテゴリとして登録
 
 ---
 
@@ -127,9 +128,10 @@ MyPage.tsx 内の UI パターンを整理する。
 
 ### 完了条件
 
-- [ ] CompletedLessonCard 作成
-- [ ] /dev/components の Progress カテゴリに登録
-- [ ] MyPage.tsx で使用
+- [x] CompletedLessonCard 作成
+- [x] /dev/components の Progress カテゴリに登録
+- [x] MyPage.tsx で使用
+- [x] ProgressLesson も Progress カテゴリに登録
 
 ---
 
@@ -233,8 +235,8 @@ MyPage.tsx 内の UI パターンを整理する。
 | Step | 内容                       | 状態     |
 | ---- | -------------------------- | -------- |
 | 1    | IconButton                 | ✅ 完了  |
-| 2    | EmptyState                 | 未着手   |
-| 3    | LessonCard グループ        | 未着手   |
+| 2    | EmptyState                 | ✅ 完了  |
+| 3    | LessonCard グループ        | ✅ 完了  |
 | 4    | SubSectionTitle            | 未着手   |
 | 5    | ヘッダー要素の微調整       | 未着手   |
 | 6    | セクションの余白・ボーダー | 未着手   |

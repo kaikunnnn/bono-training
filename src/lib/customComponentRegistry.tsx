@@ -7,6 +7,8 @@ import React from 'react';
 import DottedSeparator from '@/components/common/DottedSeparator';
 import CategoryBadge from '@/components/guide/CategoryBadge';
 import { IconButton } from '@/components/ui/button/IconButton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ProgressLesson, CompletedLessonCard } from '@/components/progress';
 import { User, Settings, Heart } from 'lucide-react';
 import type { ComponentInfo } from '@/types/dev';
 
@@ -36,6 +38,70 @@ export const CUSTOM_COMPONENTS: Record<string, ComponentInfo[]> = {
         </div>
       ),
       path: '@/components/ui/button/IconButton',
+    },
+  ],
+
+  Pattern: [
+    {
+      name: 'EmptyState',
+      category: 'Pattern',
+      description: '空状態表示パターン（マイページの「進行中がない」「お気に入りがない」などで使用）',
+      example: (
+        <div className="flex flex-col gap-4 w-full">
+          <EmptyState
+            message={<>デザインスキルの獲得を<br />はじめよう</>}
+            linkHref="/lessons"
+            linkLabel="身につけるレッスンを探す"
+          />
+          <EmptyState
+            message={<>記事をお気に入りすると<br />こちらに表示されます</>}
+          />
+        </div>
+      ),
+      path: '@/components/ui/empty-state',
+    },
+  ],
+
+  Progress: [
+    {
+      name: 'ProgressLesson',
+      category: 'Progress',
+      description: '進行中レッスンカード（プログレスバー付き）',
+      example: (
+        <div className="flex flex-col gap-4 w-full max-w-md">
+          <ProgressLesson
+            title="UIデザイン基礎"
+            progress={45}
+            currentStep="レイアウトの基本"
+            iconImageUrl="https://via.placeholder.com/48x73"
+            onCardClick={() => alert('Card clicked')}
+          />
+          <ProgressLesson
+            title="UIデザイン応用"
+            progress={100}
+            currentStep="完了"
+            iconImageUrl="https://via.placeholder.com/48x73"
+            showCompleteButton={true}
+            onCompleteClick={() => alert('Complete clicked')}
+          />
+        </div>
+      ),
+      path: '@/components/progress/ProgressLesson',
+    },
+    {
+      name: 'CompletedLessonCard',
+      category: 'Progress',
+      description: '完了済みレッスンカード',
+      example: (
+        <div className="w-full max-w-md">
+          <CompletedLessonCard
+            title="UIデザイン基礎"
+            iconImageUrl="https://via.placeholder.com/48x73"
+            lessonSlug="ui-design-basics"
+          />
+        </div>
+      ),
+      path: '@/components/progress/CompletedLessonCard',
     },
   ],
 
