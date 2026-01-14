@@ -38,7 +38,7 @@ import ComponentsReferencePage from "./pages/Dev/Components";
 import WebflowTest from "./pages/Dev/WebflowTest";
 import GuideManual from "./pages/Dev/GuideManual";
 import ProgressComponents from "./pages/Dev/ProgressComponents";
-import CelebrationComponents from "./pages/dev/CelebrationComponents";
+import CelebrationComponents from "./pages/Dev/CelebrationComponents";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -52,7 +52,8 @@ import ComponentsPreview from './pages/blog/components-preview';
 import BlogIndex from './pages/blog/index';
 import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
-import BlogGuide from './pages/dev/BlogGuide';
+import BlogGuide from './pages/Dev/BlogGuide';
+import VideoPlayerTest from './pages/Dev/VideoPlayerTest';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -112,6 +113,7 @@ const AppContent = () => {
         <Route path="/dev/blog" element={<DevRoute><BlogGuide /></DevRoute>} />
         <Route path="/dev/progress-components" element={<DevRoute><ProgressComponents /></DevRoute>} />
         <Route path="/dev/celebration" element={<DevRoute><CelebrationComponents /></DevRoute>} />
+        <Route path="/dev/video-player" element={<DevRoute><VideoPlayerTest /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
