@@ -13,7 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
  * サイドバーコンポーネント
  * 仕様:
  * - 幅: 200px（固定）
- * - 背景: #ffffff
+ * - 背景: 透過（ページ背景と同化）
+ * - 高さ: 100%（デスクトップ時）
  * - レイアウト: flexbox（縦並び）
  */
 const Sidebar: React.FC<SidebarProps> = ({ className }) => {
@@ -26,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   return (
     <nav
       className={cn(
-        "w-[200px] inline-flex flex-col justify-start items-start gap-4 bg-white",
+        "w-[200px] h-full inline-flex flex-col justify-start items-start gap-4",
         className
       )}
       role="navigation"
