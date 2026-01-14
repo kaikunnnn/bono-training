@@ -1,0 +1,96 @@
+{
+  "executedAt": "2026-01-13T03:56:15.664Z",
+  "mode": "live",
+  "summary": {
+    "created": 9,
+    "skipped": 230,
+    "error": 3,
+    "total": 12
+  },
+  "results": [
+    {
+      "customerId": "cus_TkLFzdnf1nNElZ",
+      "subscriptionId": "sub_1SmqZfKUVUnt8Gty1n9wC9lR",
+      "email": "aomame.kuru0529@gmail.com",
+      "action": "created",
+      "userId": "ad8ec10e-37a3-469c-aae4-5179836ce45a"
+    },
+    {
+      "customerId": "cus_TkHlE2w09raqAA",
+      "subscriptionId": "sub_1SmnCdKUVUnt8GtyBrnPRw7Y",
+      "email": "haruyasu111@gmail.com",
+      "action": "created",
+      "userId": "43d1bb26-d8ed-4d7e-80db-62baddadaa0c"
+    },
+    {
+      "customerId": "cus_TjsLFLsRTvDacu",
+      "subscriptionId": "sub_1SmObIKUVUnt8Gtyy6oTt8Pe",
+      "email": "s.miyahara@reicode.jp",
+      "action": "created",
+      "userId": "d50b52c7-0046-4f11-933d-0f6022a97c03"
+    },
+    {
+      "customerId": "cus_Tj8ggqiBWmZTxX",
+      "subscriptionId": "sub_1SlgSLKUVUnt8GtyyG4ol6xo",
+      "email": "lisanknis@gmail.com",
+      "action": "created",
+      "userId": "60c5ce48-b838-449a-b2b0-f67edc6d2cb4"
+    },
+    {
+      "customerId": "cus_TimL9OJ27ut7z0",
+      "subscriptionId": "sub_1SlKniKUVUnt8GtyfJtFBGmN",
+      "email": "wai936776@gmail.com",
+      "action": "created",
+      "userId": "fb15cc02-ba68-4dde-8492-08fe4cf6d283"
+    },
+    {
+      "customerId": "cus_Ti4EIBvrcE05WG",
+      "subscriptionId": "sub_1Ske6gKUVUnt8GtyRFzX07ny",
+      "email": "rem.hsm@gmail.com",
+      "action": "created",
+      "userId": "179601fa-0bcb-4fa1-8c53-2fc1e0e5e96d"
+    },
+    {
+      "customerId": "cus_ThQRDeJqrtf7O8",
+      "subscriptionId": "sub_1Sk1bcKUVUnt8GtypC4Qp69r",
+      "email": "da.mats1990@gmail.com",
+      "action": "created",
+      "userId": "b3615212-c2cd-4ce8-83d9-ce7c7c548bd0"
+    },
+    {
+      "customerId": "cus_ThLl2QNNwUJAi4",
+      "subscriptionId": "sub_1Sjx6mKUVUnt8GtyOZrE363K",
+      "email": "2huu.00ry@gmail.com",
+      "action": "created",
+      "userId": "ca0586ce-5ce3-48b2-8a57-ac4bb19e4907"
+    },
+    {
+      "customerId": "cus_TgyoekXFQdeswx",
+      "subscriptionId": "sub_1SjasaKUVUnt8GtyKG1NkA2p",
+      "email": "kusumoto.yuta2@gmail.com",
+      "action": "created",
+      "userId": "a13294d9-cf73-4a03-b565-9e34c321ac2a"
+    },
+    {
+      "customerId": "cus_TYFNRv0FoAa981",
+      "subscriptionId": "sub_1SbBAcKUVUnt8GtyNFXSRi8o",
+      "email": null,
+      "action": "error",
+      "reason": "ユーザー作成失敗: A user with this email address has already been registered"
+    },
+    {
+      "customerId": "cus_MiITeWXsQko2zN",
+      "subscriptionId": "sub_1LysFrKUVUnt8GtyqJJfBm3t",
+      "email": null,
+      "action": "error",
+      "reason": "ユーザー作成失敗: A user with this email address has already been registered"
+    },
+    {
+      "customerId": "cus_MghjNBXnyDqkhq",
+      "subscriptionId": "sub_1LxKL0KUVUnt8GtyuH5ifdS0",
+      "email": null,
+      "action": "error",
+      "reason": "ユーザー作成失敗: A user with this email address has already been registered"
+    }
+  ]
+}
