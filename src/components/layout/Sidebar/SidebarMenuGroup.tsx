@@ -5,20 +5,34 @@ import { cn } from "@/lib/utils";
 
 /**
  * サイドバーメニューグループコンポーネント
- * Figma仕様:
- * - padding: 8px
- * - width: 240px
- * - gap: 4px（メニュー項目間）
+ *
+ * 仕様:
+ * - セクションコンテナ: self-stretch
+ * - NavItemリストラッパー: px-2
+ * - itemGap: trueの場合、NavItem間にgap-1を追加（「その他」セクション用）
  */
 const SidebarMenuGroup: React.FC<SidebarMenuGroupProps> = ({
   label,
   children,
   className,
+  itemGap = false,
 }) => {
   return (
-    <div className={cn("flex flex-col p-2 w-60", className)}>
+    <div
+      className={cn(
+        "self-stretch flex flex-col justify-start items-start",
+        className
+      )}
+    >
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
-      <div className="flex flex-col gap-1">{children}</div>
+      <div
+        className={cn(
+          "self-stretch px-2 flex flex-col justify-start items-start",
+          itemGap && "gap-1"
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 };

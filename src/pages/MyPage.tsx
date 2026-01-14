@@ -41,7 +41,7 @@ const styles = {
     sectionGap: "24px",
     headerTitleTabGap: "16px",
     headerButtonGap: "12px",
-    sectionContentGap: "20px",
+    sectionContentGap: "8px",
     sectionHeadingGap: "16px",
     lessonGridGap: "10px",
   },
@@ -276,7 +276,7 @@ export default function MyPage() {
           {/* 上段: タイトル + プロフィール */}
           <div className="self-stretch flex justify-between items-center">
             <h1
-              className="text-slate-950 text-2xl font-bold leading-6"
+              className="text-slate-950 text-2xl font-semibold leading-6"
               style={{ fontFamily: "'Rounded Mplus 1c', sans-serif" }}
             >
               マイページ
@@ -314,7 +314,7 @@ export default function MyPage() {
         >
           {/* 進行中セクション */}
           {(activeTab === 'all' || activeTab === 'progress') && (
-            <section className="w-full py-8 flex flex-col items-start gap-3 border-b border-black/10">
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
               {/* セクション見出し */}
               <div
                 style={{
@@ -384,7 +384,7 @@ export default function MyPage() {
             const inProgressLessons = overflowLessons.filter(l => !('isCompleted' in l && l.isCompleted));
 
             return (
-              <section className="w-full py-8 flex flex-col items-start gap-3 border-b border-black/10">
+              <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
                 <SectionHeading title="その他の進捗" />
 
                 {/* 完了ブロック */}
@@ -452,7 +452,7 @@ export default function MyPage() {
 
           {/* お気に入りセクション */}
           {(activeTab === 'all' || activeTab === 'favorite') && (
-            <section className="w-full py-8 flex flex-col items-start gap-3 border-b border-black/10">
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
               {/* セクション見出し */}
               <SectionHeading
                 title="お気に入り"
@@ -480,7 +480,7 @@ export default function MyPage() {
 
           {/* 閲覧履歴セクション */}
           {(activeTab === 'all' || activeTab === 'history') && (
-            <section className="w-full py-8 flex flex-col items-start gap-3">
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3">
               {/* セクション見出し */}
               {/* TODO: 閲覧履歴の件数が取得できたら totalCount と displayLimit を設定 */}
               <SectionHeading

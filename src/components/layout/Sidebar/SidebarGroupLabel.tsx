@@ -4,12 +4,13 @@ import { cn } from "@/lib/utils";
 
 /**
  * サイドバーグループラベルコンポーネント
- * Figma仕様:
- * - サイズ: 224px × 32px
- * - フォント: Inter, 12px, 500
- * - カラー: rgba(10, 10, 10, 0.7)
- * - padding: 0px 8px
- * - 角丸: 8px
+ *
+ * 仕様:
+ * - padding: px-4
+ * - height: 32px (h-8)
+ * - フォント: Inter, 12px, Medium
+ * - カラー: text-black/70
+ * - 角丸: rounded-lg
  */
 const SidebarGroupLabel: React.FC<SidebarGroupLabelProps> = ({
   children,
@@ -18,8 +19,9 @@ const SidebarGroupLabel: React.FC<SidebarGroupLabelProps> = ({
   return (
     <div
       className={cn(
-        "flex flex-row items-center px-2 w-56 h-8 rounded-lg",
-        "text-xs font-medium leading-4 text-black/70",
+        "self-stretch h-8 px-4 rounded-lg",
+        "inline-flex justify-start items-center",
+        "text-black/70 text-xs font-medium leading-4",
         "select-none",
         className
       )}

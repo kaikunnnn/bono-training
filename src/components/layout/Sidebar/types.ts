@@ -43,6 +43,8 @@ export interface SidebarMenuGroupProps {
   label?: string;
   children: ReactNode;
   className?: string;
+  /** NavItemリスト間のgap（「その他」セクション用） */
+  itemGap?: boolean;
 }
 
 /**
