@@ -10,6 +10,7 @@ import { IconButton } from '@/components/ui/button/IconButton';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ProgressLesson, CompletedLessonCard } from '@/components/progress';
 import { HeadingSectionInner } from '@/components/ui/heading-section-inner';
+import { TabGroup } from '@/components/ui/tab-group';
 import { User, Settings, Heart } from 'lucide-react';
 import type { ComponentInfo } from '@/types/dev';
 
@@ -175,6 +176,28 @@ export const CUSTOM_COMPONENTS: Record<string, ComponentInfo[]> = {
         </div>
       ),
       path: '@/components/ui/heading-section-inner',
+    },
+  ],
+
+  Navigation: [
+    {
+      name: 'TabGroup',
+      category: 'Navigation',
+      description: 'タブグループコンポーネント（ピルスタイル）',
+      example: (
+        <div className="flex flex-col gap-4">
+          <TabGroup
+            tabs={[
+              { id: 'all', label: 'すべて' },
+              { id: 'progress', label: '進捗' },
+              { id: 'favorite', label: 'お気に入り' },
+            ]}
+            activeTabId="all"
+            onTabChange={(id) => alert(`Tab changed: ${id}`)}
+          />
+        </div>
+      ),
+      path: '@/components/ui/tab-group',
     },
   ],
 };

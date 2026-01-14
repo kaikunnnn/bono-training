@@ -355,16 +355,263 @@ export const fontSize = {
 
 ### デザイン仕様
 
-<!-- ここにFigmaリンクやスクリーンショットを追加 -->
+以下に共有します。今のヘッダー要素との違いをまずは明確にして下さい。その後に実装です。
 
+```## PageHeading コンポーネント - 詳細仕様
+
+### 全体構造
+
+```
+
+PageHeading (w-[864px], レスポンシブ化推奨)
+├── 上段 (justify-between)
+│ ├── 左: タイトル「マイページ」
+│ └── 右: プロフィールボタン
+├── gap-6 (24px)
+└── 下段: TabGroup
+
+````
+
+---
+
+### 1. コンテナ
+
+```tsx
+className="w-full inline-flex flex-col justify-start items-start gap-6"
+````
+
+| プロパティ   | 値           | Tailwind   |
+| ------------ | ------------ | ---------- |
+| 幅           | レスポンシブ | `w-full`   |
+| 方向         | 縦並び       | `flex-col` |
+| 上下段間 gap | 24px         | `gap-6`    |
+
+---
+
+### 2. 上段（タイトル + プロフィール）
+
+```tsx
+className = "self-stretch inline-flex justify-between items-center";
+```
+
+#### タイトル
+
+| プロパティ | 値                 | Tailwind                         |
+| ---------- | ------------------ | -------------------------------- |
+| フォント   | Rounded M+ 1c Bold | `font-['Rounded_Mplus_1c_Bold']` |
+| サイズ     | 24px               | `text-2xl`                       |
+| 色         | #020817            | `text-slate-950`                 |
+| Weight     | Bold               | `font-bold`                      |
+| 行高       | 24px               | `leading-6`                      |
+
+#### プロフィールボタン
+
+```tsx
+className =
+  "px-2.5 py-[5px] bg-white rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.04)] outline outline-1 outline-offset-[-1px] flex justify-start items-center gap-1";
+```
+
+| プロパティ       | 値                           | Tailwind                                    |
+| ---------------- | ---------------------------- | ------------------------------------------- |
+| padding          | 10px / 5px                   | `px-2.5 py-[5px]`                           |
+| 背景             | #FFFFFF                      | `bg-white`                                  |
+| 角丸             | 12px                         | `rounded-xl`                                |
+| shadow           | 0px 1px 1px rgba(0,0,0,0.04) | `shadow-[0px_1px_1px_0px_rgba(0,0,0,0.04)]` |
+| border           | 1px solid (色は要確認)       | `outline outline-1 outline-offset-[-1px]`   |
+| gap              | 4px                          | `gap-1`                                     |
+| アイコンサイズ   | 20x20px                      | `w-5 h-5`                                   |
+| テキストフォント | Inter Bold                   | `font-['Inter'] font-bold`                  |
+| テキストサイズ   | 12px                         | `text-xs`                                   |
+| テキスト色       | #020817                      | `text-slate-950`                            |
+| テキスト行高     | 24px                         | `leading-6`                                 |
+
+---
+
+### 3. 下段（TabGroup）
+
+#### TabGroup コンテナ
+
+```tsx
+className =
+  "p-[3px] bg-zinc-100 rounded-lg outline outline-1 outline-offset-[-1px] outline-black/5 inline-flex justify-start items-center gap-2";
+```
+
+| プロパティ | 値                         | Tailwind                                                  |
+| ---------- | -------------------------- | --------------------------------------------------------- |
+| padding    | 3px                        | `p-[3px]`                                                 |
+| 背景       | #F4F4F5                    | `bg-zinc-100`                                             |
+| 角丸       | 8px                        | `rounded-lg`                                              |
+| border     | 1px solid rgba(0,0,0,0.05) | `outline outline-1 outline-offset-[-1px] outline-black/5` |
+| タブ間 gap | 8px                        | `gap-2`                                                   |
+
+#### Tab（Active 状態）
+
+```tsx
+className =
+  "px-2 py-1.5 bg-white rounded-md shadow-[0px_2px_2px_0px_rgba(0,0,0,0.04)] flex justify-center items-center gap-2.5";
+```
+
+| プロパティ | 値                           | Tailwind                                    |
+| ---------- | ---------------------------- | ------------------------------------------- |
+| padding    | 8px / 6px                    | `px-2 py-1.5`                               |
+| 背景       | #FFFFFF                      | `bg-white`                                  |
+| 角丸       | 6px                          | `rounded-md`                                |
+| shadow     | 0px 2px 2px rgba(0,0,0,0.04) | `shadow-[0px_2px_2px_0px_rgba(0,0,0,0.04)]` |
+| テキスト色 | #000000                      | `text-black`                                |
+| フォント   | Rounded M+ 1c Bold           | `font-['Rounded_Mplus_1c_Bold']`            |
+| サイズ     | 12px                         | `text-xs`                                   |
+| Weight     | Bold                         | `font-bold`                                 |
+| 行高       | 12px                         | `leading-3`                                 |
+
+#### Tab（Default 状態）
+
+```tsx
+className =
+  "px-2 py-1.5 rounded-md shadow-[0px_2px_2px_0px_rgba(0,0,0,0.04)] flex justify-center items-center gap-2.5";
+```
+
+| プロパティ | 値                           | Tailwind                                    |
+| ---------- | ---------------------------- | ------------------------------------------- |
+| padding    | 8px / 6px                    | `px-2 py-1.5`                               |
+| 背景       | **なし**                     | -                                           |
+| 角丸       | 6px                          | `rounded-md`                                |
+| shadow     | 0px 2px 2px rgba(0,0,0,0.04) | `shadow-[0px_2px_2px_0px_rgba(0,0,0,0.04)]` |
+| テキスト色 | rgba(0,0,0,0.5)              | `text-black/50`                             |
+
+---
+
+### 4. 実装コード
+
+```tsx
+// PageHeading.tsx
+interface PageHeadingProps {
+  title: string;
+  tabs: { id: string; label: string }[];
+  activeTabId: string;
+  onTabChange: (tabId: string) => void;
+  onProfileClick?: () => void;
+}
+
+export function PageHeading({
+  title,
+  tabs,
+  activeTabId,
+  onTabChange,
+  onProfileClick,
+}: PageHeadingProps) {
+  return (
+    <div className="w-full flex flex-col items-start gap-6">
+      {/* 上段: タイトル + プロフィール */}
+      <div className="self-stretch flex justify-between items-center">
+        <h1 className="text-slate-950 text-2xl font-bold font-['Rounded_Mplus_1c_Bold'] leading-6">
+          {title}
+        </h1>
+        <ProfileButton onClick={onProfileClick} />
+      </div>
+
+      {/* 下段: タブ */}
+      <TabGroup
+        tabs={tabs}
+        activeTabId={activeTabId}
+        onTabChange={onTabChange}
+      />
+    </div>
+  );
+}
+```
+
+```tsx
+// TabGroup.tsx
+interface TabGroupProps {
+  tabs: { id: string; label: string }[];
+  activeTabId: string;
+  onTabChange: (tabId: string) => void;
+}
+
+export function TabGroup({ tabs, activeTabId, onTabChange }: TabGroupProps) {
+  return (
+    <div className="p-[3px] bg-zinc-100 rounded-lg outline outline-1 outline-offset-[-1px] outline-black/5 inline-flex items-center gap-2">
+      {tabs.map((tab) => (
+        <Tab
+          key={tab.id}
+          label={tab.label}
+          isActive={tab.id === activeTabId}
+          onClick={() => onTabChange(tab.id)}
+        />
+      ))}
+    </div>
+  );
+}
+```
+
+```tsx
+// Tab.tsx
+interface TabProps {
+  label: string;
+  isActive: boolean;
+  onClick: () => void;
+}
+
+export function Tab({ label, isActive, onClick }: TabProps) {
+  return (
+    <button
+      onClick={onClick}
+      className={`
+        px-2 py-1.5 rounded-md shadow-[0px_2px_2px_0px_rgba(0,0,0,0.04)]
+        flex justify-center items-center
+        text-xs font-bold font-['Rounded_Mplus_1c_Bold'] leading-3
+        ${
+          isActive ? "bg-white text-black" : "text-black/50 hover:text-black/70"
+        }
+      `}
+    >
+      {label}
+    </button>
+  );
+}
+```
+
+---
+
+### 5. 使用例
+
+```tsx
+const tabs = [
+  { id: "all", label: "すべて" },
+  { id: "progress", label: "進捗" },
+  { id: "favorites", label: "お気に入り" },
+  { id: "history", label: "閲覧履歴" },
+];
+
+<PageHeading
+  title="マイページ"
+  tabs={tabs}
+  activeTabId="all"
+  onTabChange={(id) => setActiveTab(id)}
+  onProfileClick={() => router.push("/profile")}
+/>;
+```
+
+---
+
+````
 ### 調整内容
 
-<!-- 承認後に記載 -->
+1. TabGroupコンポーネント作成 (`src/components/ui/tab-group.tsx`)
+   - pill スタイルのタブ（bg-zinc-100, rounded-lg）
+   - アクティブタブ: bg-white + shadow
+   - 非アクティブタブ: text-black/50
+
+2. MyPage.tsxヘッダー構造変更
+   - 左右並び → 縦並び（gap-6）
+   - 上段: タイトル(24px) + プロフィールボタン
+   - 下段: TabGroup
+   - TabNavigationからTabGroupに置き換え
 
 ### 完了条件
 
-- [ ] 余白調整
-- [ ] 配置確認
+- [x] 余白調整
+- [x] 配置確認
 
 ---
 
@@ -380,16 +627,92 @@ export const fontSize = {
 
 ### デザイン仕様
 
-<!-- ここにFigmaリンクやスクリーンショットを追加 -->
+以下のようにデスクトップの時のデザインを共有。
+
+### 幅のルール
+
+| プロパティ | 値                | Tailwind         |
+| ---------- | ----------------- | ---------------- |
+| 幅         | **レスポンシブ**  | `w-full`         |
+| max-width  | 896px（親で制御） | 親コンテナで設定 |
+
+---
+
+### 修正後の実装
+
+```tsx
+// Section.tsx
+export function Section({
+  primaryHeading,
+  primaryLink,
+  secondaryHeading,
+  secondaryLink,
+  children,
+  isLast = false,
+}: SectionProps) {
+  return (
+    <section
+      className={`
+        w-full py-8 flex flex-col items-start gap-3
+        ${isLast ? "" : "border-b border-black/10"}
+      `}
+    >
+      {/* 親見出し */}
+      <HeadingSectionInner
+        title={primaryHeading}
+        linkHref={primaryLink}
+        size="primary"
+      />
+
+      {/* 子見出し（任意） */}
+      {secondaryHeading && (
+        <HeadingSectionInner
+          title={secondaryHeading}
+          linkHref={secondaryLink}
+          size="secondary"
+        />
+      )}
+
+      {/* コンテンツ */}
+      {children}
+    </section>
+  );
+}
+````
+
+### 親コンテナ側で幅制御
+
+```tsx
+// MyPage.tsx
+<main className="flex-1">
+  <div className="max-w-[896px] mx-auto px-4">
+    <Section ... />
+    <Section ... />
+    <Section isLast ... />
+  </div>
+</main>
+```
+
+---
+
+これで OK ですか？
 
 ### 調整内容
 
-<!-- 承認後に記載 -->
+1. 各セクションにTailwindクラスを適用:
+   - `w-full py-8 flex flex-col items-start gap-3`
+   - 最後以外は `border-b border-black/10`
+
+2. 対象セクション:
+   - 進行中セクション（ボーダーあり）
+   - その他の進捗セクション（ボーダーあり）
+   - お気に入りセクション（ボーダーあり）
+   - 閲覧履歴セクション（ボーダーなし）
 
 ### 完了条件
 
-- [ ] セクション間の余白統一
-- [ ] ボーダー追加/調整（必要な場合）
+- [x] セクション間の余白統一
+- [x] ボーダー追加/調整（必要な場合）
 
 ---
 
@@ -416,6 +739,6 @@ export const fontSize = {
 | 2    | EmptyState                 | ✅ 完了 |
 | 3    | LessonCard グループ        | ✅ 完了 |
 | 4    | HeadingSectionInner        | ✅ 完了 |
-| 5    | ヘッダー要素の微調整       | 未着手  |
-| 6    | セクションの余白・ボーダー | 未着手  |
-| 7    | /dev/components 登録       | 未着手  |
+| 5    | ヘッダー要素の微調整       | ✅ 完了 |
+| 6    | セクションの余白・ボーダー | ✅ 完了 |
+| 7    | /dev/components 登録       | ✅ 完了 |

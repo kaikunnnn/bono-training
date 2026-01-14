@@ -5,7 +5,9 @@ import Layout from "@/components/layout/Layout";
 import { BookmarkList } from "@/components/ui/bookmark-list";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ProgressLesson, CompletedLessonCard } from "@/components/progress";
-import { TabNavigation, TabId } from "@/components/navigation";
+import { TabGroup } from "@/components/ui/tab-group";
+
+type TabId = 'all' | 'progress' | 'favorite' | 'history';
 import { getBookmarkedArticles, toggleBookmark, type BookmarkedArticle } from "@/services/bookmarks";
 import { getAllLessonsWithArticles, getNextIncompleteArticle, type LessonWithArticles } from "@/services/lessons";
 import {
@@ -270,49 +272,32 @@ export default function MyPage() {
         }}
       >
         {/* ヘッダーセクション */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            width: "100%",
-            flexShrink: 0,
-          }}
-        >
-          {/* 左側：タイトル + タブ */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: styles.spacing.headerTitleTabGap,
-              alignItems: "flex-start",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
+        <div className="w-full flex flex-col items-start gap-6">
+          {/* 上段: タイトル + プロフィール */}
+          <div className="self-stretch flex justify-between items-center">
             <h1
-              style={{
-                fontFamily: styles.typography.fontFamily,
-                fontWeight: 700,
-                fontSize: "20px",
-                lineHeight: "normal",
-                color: styles.colors.titleText,
-                margin: 0,
-              }}
+              className="text-slate-950 text-2xl font-bold leading-6"
+              style={{ fontFamily: "'Rounded Mplus 1c', sans-serif" }}
             >
               マイページ
             </h1>
-            <TabNavigation
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
+            <IconButton
+              to="/profile"
+              icon={<User size={14} color="#020817" />}
+              label="プロフィール"
             />
           </div>
 
-          {/* 右側：プロフィールボタン */}
-          <IconButton
-            to="/profile"
-            icon={<User size={14} color="#020817" />}
-            label="プロフィール"
+          {/* 下段: タブ */}
+          <TabGroup
+            tabs={[
+              { id: 'all', label: 'すべて' },
+              { id: 'progress', label: '進捗' },
+              { id: 'favorite', label: 'お気に入り' },
+              { id: 'history', label: '閲覧履歴' },
+            ]}
+            activeTabId={activeTab}
+            onTabChange={(id) => setActiveTab(id as TabId)}
           />
         </div>
 
@@ -329,16 +314,7 @@ export default function MyPage() {
         >
           {/* 進行中セクション */}
           {(activeTab === 'all' || activeTab === 'progress') && (
-            <section
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: styles.spacing.sectionHeadingGap,
-                alignItems: "flex-start",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            >
+            <section className="w-full py-8 flex flex-col items-start gap-3 border-b border-black/10">
               {/* セクション見出し */}
               <div
                 style={{
@@ -408,16 +384,7 @@ export default function MyPage() {
             const inProgressLessons = overflowLessons.filter(l => !('isCompleted' in l && l.isCompleted));
 
             return (
-              <section
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: styles.spacing.sectionHeadingGap,
-                  alignItems: "flex-start",
-                  width: "100%",
-                  flexShrink: 0,
-                }}
-              >
+              <section className="w-full py-8 flex flex-col items-start gap-3 border-b border-black/10">
                 <SectionHeading title="その他の進捗" />
 
                 {/* 完了ブロック */}
@@ -485,16 +452,7 @@ export default function MyPage() {
 
           {/* お気に入りセクション */}
           {(activeTab === 'all' || activeTab === 'favorite') && (
-            <section
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: styles.spacing.sectionHeadingGap,
-                alignItems: "flex-start",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            >
+            <section className="w-full py-8 flex flex-col items-start gap-3 border-b border-black/10">
               {/* セクション見出し */}
               <SectionHeading
                 title="お気に入り"
@@ -522,16 +480,7 @@ export default function MyPage() {
 
           {/* 閲覧履歴セクション */}
           {(activeTab === 'all' || activeTab === 'history') && (
-            <section
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: styles.spacing.sectionHeadingGap,
-                alignItems: "flex-start",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            >
+            <section className="w-full py-8 flex flex-col items-start gap-3">
               {/* セクション見出し */}
               {/* TODO: 閲覧履歴の件数が取得できたら totalCount と displayLimit を設定 */}
               <SectionHeading
