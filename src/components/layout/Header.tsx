@@ -212,7 +212,7 @@ const Header = () => {
                 <DropdownMenuItem onClick={() => navigate("/content")}>
                   コンテンツライブラリ
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate("/settings")}>
+                <DropdownMenuItem onClick={() => navigate("/account")}>
                   設定
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

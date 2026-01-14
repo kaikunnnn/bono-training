@@ -6,9 +6,39 @@
 import React from 'react';
 import DottedSeparator from '@/components/common/DottedSeparator';
 import CategoryBadge from '@/components/guide/CategoryBadge';
+import { IconButton } from '@/components/ui/button/IconButton';
+import { User, Settings, Heart } from 'lucide-react';
 import type { ComponentInfo } from '@/types/dev';
 
 export const CUSTOM_COMPONENTS: Record<string, ComponentInfo[]> = {
+  Button: [
+    {
+      name: 'IconButton',
+      category: 'Button',
+      description: 'アイコン付きボタン/リンクコンポーネント（マイページのプロフィールボタンなどで使用）',
+      example: (
+        <div className="flex gap-4 flex-wrap">
+          <IconButton
+            to="/profile"
+            icon={<User size={14} color="#020817" />}
+            label="プロフィール"
+          />
+          <IconButton
+            to="/settings"
+            icon={<Settings size={14} color="#020817" />}
+            label="設定"
+          />
+          <IconButton
+            onClick={() => alert('Clicked!')}
+            icon={<Heart size={14} color="#020817" />}
+            label="お気に入り"
+          />
+        </div>
+      ),
+      path: '@/components/ui/button/IconButton',
+    },
+  ],
+
   Common: [
     {
       name: 'DottedSeparator',

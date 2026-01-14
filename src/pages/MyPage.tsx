@@ -15,7 +15,8 @@ import {
   type LessonProgress,
   type LessonStatus,
 } from "@/services/progress";
-import { User, Settings } from "lucide-react";
+import { User } from "lucide-react";
+import { IconButton } from "@/components/ui/button/IconButton";
 
 // Figma仕様に基づくスタイル定数
 const styles = {
@@ -305,70 +306,12 @@ export default function MyPage() {
             />
           </div>
 
-          {/* 右側：アカウント情報 + プロフィール */}
-          <div
-            style={{
-              display: "flex",
-              gap: styles.spacing.headerButtonGap,
-              alignItems: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Link
-              to="/account"
-              style={{
-                backgroundColor: styles.colors.accountButtonBg,
-                display: "flex",
-                gap: "4px",
-                alignItems: "center",
-                padding: "5px 10px",
-                borderRadius: "8px",
-                textDecoration: "none",
-                cursor: "pointer",
-              }}
-            >
-              <Settings size={20} color={styles.colors.titleText} />
-              <span
-                style={{
-                  fontFamily: styles.typography.buttonFontFamily,
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  lineHeight: "24px",
-                  color: styles.colors.titleText,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                アカウント情報
-              </span>
-            </Link>
-            <Link
-              to="/profile"
-              style={{
-                backgroundColor: styles.colors.profileButtonBg,
-                display: "flex",
-                gap: "4px",
-                alignItems: "center",
-                padding: "5px 10px",
-                borderRadius: "8px",
-                textDecoration: "none",
-                cursor: "pointer",
-              }}
-            >
-              <User size={20} color={styles.colors.titleText} />
-              <span
-                style={{
-                  fontFamily: styles.typography.buttonFontFamily,
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  lineHeight: "24px",
-                  color: styles.colors.titleText,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                プロフィール
-              </span>
-            </Link>
-          </div>
+          {/* 右側：プロフィールボタン */}
+          <IconButton
+            to="/profile"
+            icon={<User size={14} color="#020817" />}
+            label="プロフィール"
+          />
         </div>
 
         {/* メインコンテンツ */}
