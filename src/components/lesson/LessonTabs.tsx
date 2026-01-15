@@ -23,7 +23,7 @@ export default function LessonTabs({
     return (
       <div className="w-full text-gray-900">
         <div className="border-b border-gray-200 mb-[32px]">
-          <span className="font-geist font-medium text-sm md:text-base px-4 md:px-6 py-2 md:py-3 inline-block border-b-2 border-black text-black">
+          <span className="font-noto-sans-jp font-bold text-sm md:text-base px-4 md:px-6 py-2 md:py-3 inline-block border-b-2 border-[#151834] text-[#151834]">
             コンテンツ
           </span>
         </div>
@@ -45,13 +45,13 @@ export default function LessonTabs({
         <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent rounded-none h-auto p-0 mb-[32px]">
           <TabsTrigger
             value="content"
-            className="font-geist font-medium text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:text-black data-[state=active]:bg-transparent data-[state=inactive]:text-gray-400 bg-transparent shadow-none"
+            className="font-noto-sans-jp font-bold text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-[#151834] data-[state=active]:text-[#151834] data-[state=active]:bg-transparent data-[state=inactive]:text-[#9ca3af] bg-transparent shadow-none"
           >
             コンテンツ
           </TabsTrigger>
           <TabsTrigger
             value="overview"
-            className="font-geist font-medium text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-black data-[state=active]:text-black data-[state=active]:bg-transparent data-[state=inactive]:text-gray-400 bg-transparent shadow-none"
+            className="font-noto-sans-jp font-bold text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent data-[state=active]:border-[#151834] data-[state=active]:text-[#151834] data-[state=active]:bg-transparent data-[state=inactive]:text-[#9ca3af] bg-transparent shadow-none"
           >
             概要・目的
           </TabsTrigger>

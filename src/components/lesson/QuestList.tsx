@@ -12,8 +12,8 @@ interface Article {
   };
   thumbnailUrl?: string;
   videoDuration?: number;
-  articleType: "video" | "text";
-  tag?: string;
+  /** Sanity記事タイプ（解説、イントロ、実践、チャレンジ） */
+  articleType?: "explain" | "intro" | "practice" | "challenge";
   isPremium?: boolean;
 }
 

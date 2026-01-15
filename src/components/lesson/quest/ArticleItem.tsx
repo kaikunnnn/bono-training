@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
 import { Play, FileText, ChevronRight, Check, Lock } from "lucide-react";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
+import { ArticleTag, type TagType } from "@/components/article/sidebar/ArticleTag";
 
 interface ArticleItemProps {
   /** 記事番号 (1, 2, 3...) */
@@ -18,14 +19,12 @@ interface ArticleItemProps {
   };
   /** サムネイルURL (直接指定) */
   thumbnailUrl?: string;
-  /** 記事タイプ */
-  articleType: "video" | "text";
+  /** Sanity記事タイプ（解説、イントロ、実践、チャレンジ） */
+  articleType?: TagType;
   /** 完了状態 */
   isCompleted: boolean;
   /** 動画時間 (秒数) ※videoの場合 */
   videoDuration?: number;
-  /** タグ (例: "解説") */
-  tag?: string;
   /** プレミアムコンテンツか */
   isPremium?: boolean;
 }
@@ -53,7 +52,6 @@ export function ArticleItem({
   articleType,
   isCompleted,
   videoDuration,
-  tag,
   isPremium = false,
 }: ArticleItemProps) {
   const navigate = useNavigate();
@@ -112,9 +110,9 @@ export function ArticleItem({
           />
         )}
 
-        {/* タイプアイコン（中央配置） */}
+        {/* タイプアイコン（中央配置）: 動画時間があれば動画、なければテキスト */}
         <div className="absolute inset-0 flex items-center justify-center">
-          {articleType === "video" ? (
+          {videoDuration ? (
             <div className="size-4 bg-white rounded-full flex items-center justify-center">
               <Play className="size-1 text-[#17102d]" fill="#17102d" />
             </div>
@@ -125,10 +123,10 @@ export function ArticleItem({
           )}
         </div>
 
-        {/* 動画時間バッジ (videoのみ) */}
-        {articleType === "video" && videoDuration && (
-          <div className="absolute bottom-1 right-1 bg-black/70 px-1.5 py-0.5 rounded-[3px]">
-            <span className="text-[8px] text-white font-inter leading-none">
+        {/* 動画時間バッジ (動画の場合のみ) */}
+        {videoDuration && (
+          <div className="absolute bottom-1 right-1 bg-black/70 px-1.5 pt-1 pb-[5px] rounded-[3px] h-fit w-fit overflow-visible leading-[100%] flex flex-wrap">
+            <span className="text-[8px] text-white font-noto-sans-jp leading-none h-fit w-fit">
               {formatDuration(videoDuration)}
             </span>
           </div>
@@ -140,13 +138,7 @@ export function ArticleItem({
         <div className="flex flex-col gap-1">
           {/* タグ + ロックアイコン */}
           <div className="flex items-center gap-1.5">
-            {tag && (
-              <div className="bg-[#f4f4f4] px-1 py-0.5 rounded-[6px]">
-                <span className="font-noto-sans-jp font-medium text-[10px] text-[#242b30] leading-none">
-                  {tag}
-                </span>
-              </div>
-            )}
+            {articleType && <ArticleTag type={articleType} />}
             {isLocked && (
               <Lock className="size-3 text-gray-400" strokeWidth={2} />
             )}

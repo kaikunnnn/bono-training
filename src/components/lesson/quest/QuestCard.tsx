@@ -13,8 +13,8 @@ interface Article {
   };
   thumbnailUrl?: string;
   videoDuration?: number;
-  articleType: "video" | "text";
-  tag?: string;
+  /** Sanity記事タイプ（解説、イントロ、実践、チャレンジ） */
+  articleType?: "explain" | "intro" | "practice" | "challenge";
   isPremium?: boolean;
 }
 
@@ -69,7 +69,6 @@ export function QuestCard({
               videoDuration={article.videoDuration}
               articleType={article.articleType}
               isCompleted={completedArticleIds.includes(article._id)}
-              tag={article.tag}
               isPremium={article.isPremium}
             />
           ))}

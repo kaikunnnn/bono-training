@@ -12,6 +12,7 @@ interface Article {
   _id: string;
   title: string;
   slug: { current: string };
+  articleType?: "explain" | "intro" | "practice" | "challenge";
   thumbnail?: any;
   thumbnailUrl?: string;
   videoDuration?: number;
@@ -84,6 +85,7 @@ export default function LessonDetail() {
               _id,
               title,
               slug,
+              articleType,
               thumbnail {
                 _type,
                 asset {
