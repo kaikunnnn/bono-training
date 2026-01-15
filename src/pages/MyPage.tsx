@@ -277,7 +277,7 @@ export default function MyPage() {
           <div className="self-stretch flex justify-between items-center">
             <h1
               className="text-slate-950 text-2xl font-semibold leading-6"
-              style={{ fontFamily: "'Rounded Mplus 1c', sans-serif" }}
+              style={{ fontFamily: "'M PLUS Rounded 1c', sans-serif" }}
             >
               マイページ
             </h1>

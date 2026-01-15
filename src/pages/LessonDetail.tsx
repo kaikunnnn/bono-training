@@ -195,7 +195,7 @@ export default function LessonDetail() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-base">
         <LessonHero
           title={lesson.title}
           description={lesson.description}

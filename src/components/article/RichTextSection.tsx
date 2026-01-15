@@ -420,8 +420,8 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
   };
 
   return (
-    <div className="w-full py-6">
-      <div className="max-w-none">
+    <div className="w-full px-6 py-4 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] flex flex-col justify-start items-start gap-3">
+      <div className="max-w-none w-full">
         <PortableText value={displayContent} components={components} />
       </div>
 

@@ -37,7 +37,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
       {previous ? (
         <button
           onClick={() => navigate(`/articles/${previous.slug}`)}
-          className="flex items-center gap-3 px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1 min-w-0"
+          className="flex items-center gap-3 px-6 py-4 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] hover:bg-gray-50 transition-colors flex-1 min-w-0"
         >
           {/* 左矢印 */}
           <div className="w-6 h-6 flex items-center justify-center flex-shrink-0">
@@ -76,7 +76,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
       {next ? (
         <button
           onClick={() => navigate(`/articles/${next.slug}`)}
-          className="flex items-center gap-3 px-4 py-4 rounded-2xl border border-[#DEDEDE] hover:bg-gray-50 transition-colors flex-1 min-w-0"
+          className="flex items-center gap-3 px-6 py-4 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] hover:bg-gray-50 transition-colors flex-1 min-w-0"
         >
           {/* テキストコンテナ */}
           <div className="flex flex-col gap-1 text-left flex-1 min-w-0">

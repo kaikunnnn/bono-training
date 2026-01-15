@@ -7,7 +7,7 @@ import HeadingSection from "@/components/article/HeadingSection";
 import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
-import ArticleSideNav from "@/components/article/sidebar/ArticleSideNav";
+import ArticleSideNavNew from "@/components/article/sidebar/ArticleSideNavNew";
 import MobileMenuButton from "@/components/article/MobileMenuButton";
 import MobileSideNav from "@/components/article/MobileSideNav";
 import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
@@ -305,7 +305,7 @@ const ArticleDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-base">
         <div className="text-center">
           <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]">
             <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
@@ -320,7 +320,7 @@ const ArticleDetail = () => {
 
   if (error || !article) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
+      <div className="min-h-screen flex items-center justify-center bg-base">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || "記事が見つかりませんでした"}</p>
           <button
@@ -335,7 +335,7 @@ const ArticleDetail = () => {
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
+    <div className="min-h-screen bg-base">
       {/* クエスト完了モーダル（5秒後に自動で閉じる） */}
       <QuestCompletionModal
         isOpen={showQuestModal}
@@ -391,17 +391,26 @@ const ArticleDetail = () => {
       {/* 2カラムレイアウト: サイドナビゲーション (320px) + メインコンテンツ (720px) */}
       <div className="flex max-w-[1920px] mx-auto">
         {/* サイドナビゲーション - 固定320px幅（PC表示のみ） */}
-        <aside className="hidden md:block w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto border-r border-gray-200">
-          <ArticleSideNav article={article} currentArticleId={article._id} progressUpdateTrigger={progressUpdateTrigger} />
+        <aside className="hidden md:block w-[320px] flex-shrink-0 sticky top-0 h-screen overflow-y-auto">
+          <ArticleSideNavNew article={article} currentArticleId={article._id} progressUpdateTrigger={progressUpdateTrigger} />
         </aside>
 
         {/* メインコンテンツエリア */}
         <main className="flex-1 flex flex-col items-center">
-          {/* Heading Section - 独立ブロック、720px幅 */}
-          <div className="w-full max-w-[720px] pt-16 md:pt-8 pb-4 px-4">
+          {/* Video Section - 1680px以上の画面で最大1320px、センター揃え */}
+          <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 min-[1680px]:pt-8 pt-16 md:pt-8">
+            <VideoSection
+              videoUrl={article.videoUrl}
+              thumbnail={article.thumbnail}
+              thumbnailUrl={article.thumbnailUrl}
+              isPremium={article.isPremium}
+            />
+          </div>
+
+          {/* Heading Section - 動画ブロックと同じ幅 */}
+          <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 pt-8 pb-4 px-4">
             <HeadingSection
-              questNumber={article.questInfo?.questNumber}
-              stepNumber={article.articleNumber}
+              tagType={article.articleType || "explain"}
               title={article.title}
               description={article.excerpt}
               onComplete={handleCompleteToggle}
@@ -415,18 +424,8 @@ const ArticleDetail = () => {
             />
           </div>
 
-          {/* Video Section - 1680px以上の画面で最大1320px、センター揃え */}
-          <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 min-[1680px]:pt-8">
-            <VideoSection
-              videoUrl={article.videoUrl}
-              thumbnail={article.thumbnail}
-              thumbnailUrl={article.thumbnailUrl}
-              isPremium={article.isPremium}
-            />
-          </div>
-
-          {/* 記事コンテンツ - 720px幅 */}
-          <div className="w-full max-w-[720px] py-8 px-4">
+          {/* 記事コンテンツ - 動画ブロックと同じ幅 */}
+          <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 py-8 px-4">
             <div className="space-y-6">
               {/* TODO Section - learningObjectives がある場合のみ表示 */}
               <TodoSection items={article.learningObjectives} />

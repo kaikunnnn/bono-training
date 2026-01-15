@@ -87,7 +87,10 @@ const BookmarkList = React.forwardRef<HTMLDivElement, BookmarkListProps>(
     return (
       <div
         ref={ref}
-        className={cn("flex w-full flex-col gap-0", className)}
+        className={cn(
+          "flex w-full flex-col gap-0 rounded-2xl overflow-hidden shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)]",
+          className
+        )}
         {...props}
       >
         {articles.map((article) => (

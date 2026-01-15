@@ -68,7 +68,7 @@ export default function LessonHero({
       </div>
 
       {/* 詳細情報領域 */}
-      <div className="bg-white">
+      <div className="bg-base">
         <div className="container mx-auto px-4 md:px-8 relative">
           {/* アイコン（絶対配置で上にはみ出させる） */}
           {iconUrl && (

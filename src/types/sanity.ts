@@ -28,6 +28,7 @@ export interface Article {
   _id: string;
   _type: "article";
   articleNumber?: number;
+  articleType?: "explain" | "intro" | "practice" | "challenge";
   title: string;
   slug: SanitySlug;
   excerpt?: string;
