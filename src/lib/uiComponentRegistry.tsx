@@ -23,16 +23,63 @@ import type { ComponentInfo } from '@/types/dev';
 export const UI_COMPONENTS: Record<string, ComponentInfo[]> = {
   Forms: [
     {
-      name: 'Button',
+      name: 'Button - Default (黒)',
       category: 'Forms',
-      description: 'Displays a button or a component that looks like a button',
+      description: 'プライマリアクション用。黒背景・白文字。',
+      example: (
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex items-end gap-3">
+            <div className="flex flex-col items-center gap-1">
+              <Button size="large">Large</Button>
+              <span className="text-[10px] text-gray-400">h-12 px-7</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Button size="medium">Medium</Button>
+              <span className="text-[10px] text-gray-400">h-10 px-5</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Button size="small">Small</Button>
+              <span className="text-[10px] text-gray-400">h-8 px-3.5</span>
+            </div>
+          </div>
+        </div>
+      ),
+      path: '@/components/ui/button',
+    },
+    {
+      name: 'Button - Outline (白枠)',
+      category: 'Forms',
+      description: 'セカンダリアクション用。白背景・黒枠。',
+      example: (
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex items-end gap-3">
+            <div className="flex flex-col items-center gap-1">
+              <Button variant="outline" size="large">Large</Button>
+              <span className="text-[10px] text-gray-400">h-12 px-7</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Button variant="outline" size="medium">Medium</Button>
+              <span className="text-[10px] text-gray-400">h-10 px-5</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Button variant="outline" size="small">Small</Button>
+              <span className="text-[10px] text-gray-400">h-8 px-3.5</span>
+            </div>
+          </div>
+        </div>
+      ),
+      path: '@/components/ui/button',
+    },
+    {
+      name: 'Button - Other Variants',
+      category: 'Forms',
+      description: 'その他のバリエーション（ghost, destructive, secondary等）',
       example: (
         <div className="flex gap-2 flex-wrap">
-          <Button>Default</Button>
-          <Button variant="outline">Outline</Button>
           <Button variant="ghost">Ghost</Button>
           <Button variant="destructive">Destructive</Button>
           <Button variant="secondary">Secondary</Button>
+          <Button variant="link">Link</Button>
         </div>
       ),
       path: '@/components/ui/button',

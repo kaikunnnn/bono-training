@@ -9,11 +9,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-primary text-primary-foreground shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-primary/90",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
-          "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+          "bg-white border border-[#EBEBEB] text-black shadow-[0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
@@ -31,6 +31,10 @@ const buttonVariants = cva(
         icon: "h-10 w-10",
         // カスタムサイズ（HeadingSection等で使用）
         action: "px-[12px] py-[8px] text-[14px] leading-[20px]",
+        // Figma準拠サイズ（レッスン詳細等で使用）
+        large: "h-12 px-7 py-3.5 rounded-[16px] text-sm",
+        medium: "h-10 px-5 py-2.5 rounded-xl text-sm",
+        small: "h-8 px-3.5 py-1.5 rounded-[10px] text-xs",
       },
     },
     defaultVariants: {

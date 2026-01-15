@@ -1,23 +1,65 @@
 # レッスン詳細ページ 実装仕様書
 
 **最終更新**: 2025-01-15
-**ステータス**: 仕様記入中
+**ステータス**: Step 7-8 実装完了
 
 ---
 
 ## 実装ステップ一覧
 
-| Step | コンポーネント | 状態 | 備考 |
-|------|---------------|------|------|
-| 1 | LessonHeader | ✅ 仕様完了 | 戻る + シェアボタン |
-| 2 | LessonSidebar | ✅ 仕様完了 | 左サイドバー全体 |
-| 3 | LessonTitleArea | ✅ 仕様完了 | 右側タイトルエリア（カテゴリ+タイトル+進捗+説明+CTA） |
-| 4 | ProgressBar（統一） | ✅ 仕様完了 | マイページ・記事・詳細画面で共通化 |
-| 5 | CategoryTag | 仕様待ち | カテゴリタグ |
-| 6 | Button（サイズ追加） | 仕様待ち | large/medium/small サイズバリエーション |
-| 7 | QuestCard（修正） | 仕様待ち | 矢印位置変更など |
-| 8 | ContentItem（修正） | 仕様待ち | 矢印削除など |
-| 9 | LessonDetail（統合） | 仕様待ち | ページ全体レイアウト |
+| Step | コンポーネント | 仕様 | 実装 | 備考 |
+|------|---------------|------|------|------|
+| 1 | LessonHeader | ✅ | ⏳ | 戻る + シェアボタン |
+| 2 | LessonSidebar | ✅ | ⏳ | 左サイドバー全体 |
+| 3 | LessonTitleArea | ✅ | ⏳ | カテゴリ+タイトル+進捗+説明+CTA |
+| 4 | ProgressBar（統一） | ✅ | ⏳ | マイページ・記事・詳細画面で共通化 |
+| 5 | CategoryTag | ✅ | ⏳ | カテゴリタグ |
+| 6 | Button（サイズ追加） | ✅ | ⏳ | large/medium/small サイズ |
+| 7 | SectionQuest / QuestCard | ✅ | ✅ | クエストブロック再構成（階層化） |
+| 8 | ArticleItem | ✅ | ✅ | 4状態 + ロック機能 |
+| 9 | LessonDetail（統合） | ⏳ | ⏳ | ページ全体レイアウト |
+
+---
+
+## Step 7-8 実装完了ファイル
+
+```
+src/components/
+├── ui/
+│   └── icon-check.tsx           ✅ 新規作成
+│
+└── lesson/
+    ├── QuestCard.tsx            既存（旧実装）
+    ├── ContentItem.tsx          既存（旧実装）
+    │
+    └── quest/                   ✅ 新規作成
+        ├── index.ts             エクスポート
+        ├── SectionQuest.tsx     クエストブロック全体
+        ├── QuestHeader.tsx      クエスト番号行
+        ├── QuestCard.tsx        カード全体
+        ├── QuestCardHeader.tsx  カードヘッダー
+        └── ArticleItem.tsx      記事アイテム（4状態+ロック）
+```
+
+### 使用方法
+
+```tsx
+import { SectionQuest } from "@/components/lesson/quest";
+
+<SectionQuest
+  questNumber={1}
+  title="UIデザインサイクル習得の旅をはじめよう"
+  goal="「UIデザインサイクル」を身に付ける..."
+  articles={articles}
+  completedArticleIds={['article-1', 'article-2']}
+/>
+```
+
+### 次のアクション
+
+1. **動作確認**: 開発サーバーで新コンポーネントの表示確認
+2. **統合**: 既存 LessonDetail ページに新コンポーネントを適用
+3. **Step 1-6 実装**: 残りのコンポーネントを実装
 
 ---
 
@@ -583,21 +625,33 @@ export function LessonProgressBar({
 
 **用途**: タイトル上のカテゴリ表示（例: UIデザイン）
 
+**Figmaリンク**: [node-id=418:7861](https://www.figma.com/design/oNJwxeYUNaRWggDGAUi94D?node-id=418:7861)
+
 ### Figma仕様
 
 ```
-【ここに仕様を記入】
-
 タグ:
-- 背景:
-- パディング:
-- 角丸:
-- ボーダー:
+- 背景: #EBECED（薄いグレー）
+- パディング: 上下 5px、左右 7px
+- 角丸: 10px
+- ボーダー: なし
 
 テキスト:
-- フォント:
-- サイズ:
-- 色:
+- フォント: Noto Sans JP Medium
+- サイズ: 12px
+- 行高: 10px
+- 色: #0D221D（濃い緑がかった黒）
+- 配置: 中央揃え
+```
+
+### Figma MCPから取得した生成コード
+
+```tsx
+<div className="bg-[#ebeced] flex items-center justify-center px-[7px] py-[5px] rounded-[10px]">
+  <span className="font-noto-medium text-[12px] text-[#0d221d] text-center leading-[10px]">
+    {category}
+  </span>
+</div>
 ```
 
 ### Props（予定）
@@ -605,9 +659,15 @@ export function LessonProgressBar({
 ```tsx
 interface CategoryTagProps {
   category: string;
-  variant?: "default" | "outline";
+  className?: string;
 }
 ```
+
+### 実装メモ
+
+- シンプルなタグコンポーネント
+- variantは不要（現時点では単一スタイル）
+- LessonTitleArea内で使用
 
 ---
 
@@ -619,31 +679,43 @@ interface CategoryTagProps {
 
 現在のButtonコンポーネントは単一サイズのみ。
 
-### 追加するサイズ
+### サイズバリエーション設計
+
+largeを基準（48px）として、8pxグリッドでバランスを調整：
 
 ```
 large:
 - 高さ: 48px
-- パディング: 上下14px、左右28px
+- パディング: 上下 14px、左右 28px
 - 角丸: 16px
 - フォントサイズ: 14px
 - 行高: 20px
 - 用途: CTAボタン（「スタートする」など）
 
 medium:
-- 高さ: 【要確認】
-- パディング: 【要確認】
-- 角丸: 【要確認】
-- フォントサイズ: 【要確認】
+- 高さ: 40px
+- パディング: 上下 10px、左右 20px
+- 角丸: 12px
+- フォントサイズ: 14px
+- 行高: 20px
 - 用途: 一般的なアクションボタン
 
 small:
-- 高さ: 【要確認】
-- パディング: 【要確認】
-- 角丸: 【要確認】
-- フォントサイズ: 【要確認】
-- 用途: コンパクトなボタン
+- 高さ: 32px
+- パディング: 上下 6px、左右 14px
+- 角丸: 10px
+- フォントサイズ: 12px
+- 行高: 20px
+- 用途: コンパクトなボタン、インラインアクション
 ```
+
+### サイズ比較表
+
+| サイズ | 高さ | padding-y | padding-x | 角丸 | font-size |
+|-------|------|-----------|-----------|------|-----------|
+| large | 48px | 14px | 28px | 16px | 14px |
+| medium | 40px | 10px | 20px | 12px | 14px |
+| small | 32px | 6px | 14px | 10px | 12px |
 
 ### Props（予定）
 
@@ -658,62 +730,225 @@ interface ButtonProps {
 }
 ```
 
+### 実装コード（案）
+
+```tsx
+const sizeStyles = {
+  large: "h-12 px-7 py-3.5 rounded-[16px] text-sm",
+  medium: "h-10 px-5 py-2.5 rounded-xl text-sm",
+  small: "h-8 px-3.5 py-1.5 rounded-[10px] text-xs",
+};
+
+// 使用例
+<Button size="large">スタートする</Button>
+<Button size="medium">確認する</Button>
+<Button size="small">詳細</Button>
+```
+
 ### 実装タスク
 
-1. **既存Buttonコンポーネントの調査**: `src/components/ui/Button.tsx`
+1. **既存Buttonコンポーネントの調査**: `src/components/ui/button.tsx`
 2. **sizeプロパティ追加**: large/medium/small
 3. **各サイズのスタイル定義**
-4. **既存使用箇所への影響確認**
+4. **既存使用箇所への影響確認**（デフォルトmediumで互換性維持）
 
 ---
 
-## Step 7: QuestCard（修正）
+## Step 7 & 8: クエストブロック（再構成）
 
-**用途**: 既存QuestCardのスタイル調整
+**用途**: クエスト1ブロック全体の構造を再設計
 
-### 変更点
+**詳細仕様**: 📁 [components/](./components/) フォルダを参照
 
-```
-【ここに変更仕様を記入】
+### コンポーネント一覧
 
-現在:
-- 個別記事に矢印アイコン
+| コンポーネント | 仕様ファイル | 説明 |
+|---------------|-------------|------|
+| SectionQuest | [SectionQuest.md](./components/SectionQuest.md) | クエスト1ブロック全体（**完了状態管理**） |
+| QuestHeader | [QuestHeader.md](./components/QuestHeader.md) | クエスト番号行（チェック + ラベル） |
+| IconCheck | [IconCheck.md](./components/IconCheck.md) | チェックアイコン（共通コンポーネント） |
+| QuestCard | [QuestCard.md](./components/QuestCard.md) | カード全体 |
+| QuestCardHeader | [QuestCardHeader.md](./components/QuestCardHeader.md) | カードヘッダー（タイトル + ゴール） |
+| ArticleItem | [ArticleItem.md](./components/ArticleItem.md) | 記事アイテム（4状態対応） |
 
-変更後:
--
-
-カードヘッダー:
--
-
-矢印アイコン:
-- 位置:
-- サイズ:
-
-展開/折りたたみ:
-- 有無:
-- 挙動:
-```
-
----
-
-## Step 8: ContentItem（修正）
-
-**用途**: 既存ContentItemのスタイル調整
-
-### 変更点
+### 階層構造
 
 ```
-【ここに変更仕様を記入】
-
-現在:
-- 右端に矢印アイコン
-
-変更後:
--
-
-その他変更:
--
+SectionQuest（クエスト1つ分のブロック全体）
+├── QuestHeader（クエスト番号 + チェックアイコン）
+│   ├── IconCheck（チェックアイコン: empty / on）
+│   └── QuestLabel（「クエスト 01」テキスト）
+│
+└── QuestBody（縦点線 + カード）
+    ├── VerticalDivider（縦の点線）
+    └── QuestCard（記事一覧カード）
+        ├── QuestCardHeader（タイトル + ゴール説明）
+        └── ArticleItem[]（個別記事 × n）
 ```
+
+### ファイル構成（予定）
+
+```
+src/components/
+├── lesson/quest/
+│   ├── SectionQuest.tsx
+│   ├── QuestHeader.tsx
+│   ├── QuestCard.tsx
+│   ├── QuestCardHeader.tsx
+│   └── ArticleItem.tsx
+│
+└── ui/
+    └── IconCheck.tsx（共通）
+```
+
+### クエスト完了状態
+
+**判定ロジック:**
+```tsx
+const isQuestCompleted = completedCount === totalCount && totalCount > 0;
+```
+
+**変化する要素:**
+| 要素 | 未完了 | 完了 |
+|------|--------|------|
+| チェックアイコン | グレー | グラデーション + 白チェック |
+| 縦点線 | `#E1E1E1` | `#10B981` |
+
+### 各コンポーネント仕様（概要）
+
+#### 7-1. SectionQuest（全体コンテナ）
+
+```
+コンテナ:
+- レイアウト: flex, flex-col
+- ギャップ: 12px
+- 幅: 100%
+```
+
+#### 7-2. QuestHeader（クエスト番号行）
+
+```
+コンテナ:
+- レイアウト: flex, items-center
+- ギャップ: 20px
+
+チェックアイコン (IconCheck):
+- サイズ: 16px × 16px
+- 状態: empty（未完了）/ on（完了）
+- empty時:
+  - ボーダー: 1px solid rgba(0,0,0,0.05)
+  - backdrop-blur: 2px
+  - 角丸: 9999px（円形）
+- on時:
+  - 背景: グラデーション（#FF4B6F → #26778F、68%透明度）
+  - チェックマーク: 白または緑
+
+クエストラベル:
+- レイアウト: flex, items-center, gap-4px
+- 「クエスト」:
+  - フォント: Noto Sans JP Bold
+  - サイズ: 14px
+  - 色: #151834
+- 番号「01」:
+  - フォント: Unbounded SemiBold
+  - サイズ: 13px
+  - 色: #151834
+```
+
+#### 7-3. QuestBody（縦点線 + カード）
+
+```
+コンテナ:
+- レイアウト: flex
+- ギャップ: 20px
+
+縦点線 (VerticalDivider):
+- 幅: 1px
+- スタイル: dashed
+- 色: #E1E1E1（未完了）/ #10B981（完了）
+- パディング: 左右 7px
+
+カードコンテナ:
+- 最大幅: 743px
+- 幅: 100%
+```
+
+#### 7-4. QuestCard（カード本体）
+
+```
+コンテナ:
+- 背景: 白
+- 角丸: 24px
+- シャドウ: 1px 1px 4px rgba(0,0,0,0.08)
+- ボーダー: 1px solid rgba(0,0,0,0.06)（内側オフセット）
+- オーバーフロー: hidden
+```
+
+#### 7-5. QuestCardHeader（カードヘッダー）
+
+```
+コンテナ:
+- パディング: 上20px、下15px、左右32px
+
+タイトル:
+- フォント: Noto Sans JP Bold
+- サイズ: 18px
+- 行高: 28px
+- 色: #151834
+
+ゴール説明:
+- フォント: Noto Sans JP Medium
+- サイズ: 14px
+- 行高: 20px
+- 色: #6F7178
+- マージン上: 8px
+```
+
+### Props設計
+
+#### SectionQuest
+
+```tsx
+interface SectionQuestProps {
+  questNumber: number;
+  title: string;
+  goal?: string;
+  articles: Article[];
+  completedArticleIds?: string[];
+  isQuestCompleted?: boolean;
+}
+```
+
+#### QuestHeader
+
+```tsx
+interface QuestHeaderProps {
+  questNumber: number;
+  isCompleted: boolean;
+}
+```
+
+#### QuestCard
+
+```tsx
+interface QuestCardProps {
+  title: string;
+  goal?: string;
+  articles: Article[];
+  completedArticleIds?: string[];
+}
+```
+
+### 現行との主な変更点
+
+| 項目 | 現行 | 新デザイン |
+|------|------|-----------|
+| フォルダ構成 | フラット | quest/サブフォルダに整理 |
+| チェックアイコン | 単色 | グラデーション背景 |
+| カード角丸 | 16px/24px | 24px統一 |
+| カードシャドウ | quest-card | 1px 1px 4px rgba |
+| ヘッダーパディング | px-4/px-8 | px-[32px] |
+| 縦点線位置 | px-[7px] | 同じ（維持） |
 
 ---
 
