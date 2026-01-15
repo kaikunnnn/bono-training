@@ -11,7 +11,7 @@
 ### ページ
 - `src/pages/ArticleDetail.tsx`
 
-### コンポーネント（15個）
+### コンポーネント（13個）
 
 | カテゴリ | コンポーネント | ファイルパス |
 |----------|---------------|-------------|
@@ -21,13 +21,13 @@
 | | RichTextSection | `src/components/article/RichTextSection.tsx` |
 | | ContentNavigation | `src/components/article/ContentNavigation.tsx` |
 | | TableOfContents | `src/components/article/TableOfContents.tsx` |
-| **サイドバー** | ArticleSideNav | `src/components/article/sidebar/ArticleSideNav.tsx` |
-| | BackNavigation | `src/components/article/sidebar/BackNavigation.tsx` |
-| | ContentItem | `src/components/article/sidebar/ContentItem.tsx` |
-| | LessonSection | `src/components/article/sidebar/LessonSection.tsx` |
+| **サイドバー** | ArticleSideNavNew | `src/components/article/sidebar/ArticleSideNavNew.tsx` |
+| | LessonDetailCard | `src/components/article/sidebar/LessonDetailCard.tsx` |
+| | QuestItem | `src/components/article/sidebar/QuestItem.tsx` |
+| | ArticleListItem | `src/components/article/sidebar/ArticleListItem.tsx` |
+| | ArticleTag | `src/components/article/sidebar/ArticleTag.tsx` |
+| | CheckIcon | `src/components/article/sidebar/CheckIcon.tsx` |
 | | LogoBlock | `src/components/article/sidebar/LogoBlock.tsx` |
-| | QuestBlock | `src/components/article/sidebar/QuestBlock.tsx` |
-| | QuestTitle | `src/components/article/sidebar/QuestTitle.tsx` |
 | **モバイル** | MobileMenuButton | `src/components/article/MobileMenuButton.tsx` |
 | | MobileSideNav | `src/components/article/MobileSideNav.tsx` |
 
@@ -39,22 +39,33 @@
 
 | # | コンポーネント | 状態 | 備考 |
 |---|---------------|------|------|
-| 1 | VideoSection | 未着手 | |
-| 2 | HeadingSection | 未着手 | |
+| 1 | VideoSection | ✅ 完了 | 上部に移動、スタイル調整 |
+| 2 | HeadingSection | ✅ 完了 | Figma仕様準拠、コンポーネント再利用 |
 | 3 | TodoSection | 未着手 | |
-| 4 | RichTextSection | 未着手 | |
-| 5 | ContentNavigation | 未着手 | |
+| 4 | RichTextSection | ✅ 完了 | 外側スタイル統一 |
+| 5 | ContentNavigation | ✅ 完了 | 外側スタイル統一 |
 | 6 | TableOfContents | 未着手 | |
-| 7 | ArticleSideNav | 未着手 | |
-| 8 | BackNavigation | 未着手 | |
-| 9 | ContentItem | 未着手 | |
-| 10 | LessonSection | 未着手 | |
-| 11 | LogoBlock | 未着手 | |
-| 12 | QuestBlock | 未着手 | |
-| 13 | QuestTitle | 未着手 | |
+| 7 | ArticleSideNavNew | ✅ 完了 | 新規作成（旧ArticleSideNav削除済み） |
+| 8 | LessonDetailCard | ✅ 完了 | 新規作成（旧LessonSection削除済み） |
+| 9 | QuestItem | ✅ 完了 | 新規作成（旧QuestBlock削除済み） |
+| 10 | ArticleListItem | ✅ 完了 | 新規作成（旧ContentItem削除済み） |
+| 11 | ArticleTag | ✅ 完了 | 新規作成 |
+| 12 | CheckIcon | ✅ 完了 | 新規作成 |
+| 13 | LogoBlock | 維持 | 新旧共通で使用 |
 | 14 | MobileMenuButton | 未着手 | |
-| 15 | MobileSideNav | 未着手 | |
-| 16 | ArticleDetail（レイアウト） | 未着手 | |
+| 15 | MobileSideNav | ✅ 完了 | ArticleSideNavNewに統一 |
+| 16 | ArticleDetail（レイアウト） | ✅ 完了 | 幅調整、セクション配置 |
+
+### 削除済みコンポーネント（リファクタリング）
+
+| ファイル | 削除日 | 理由 |
+|---------|-------|------|
+| ArticleSideNav.tsx | 2025-01-15 | ArticleSideNavNewに統合 |
+| BackNavigation.tsx | 2025-01-15 | 未使用 |
+| ContentItem.tsx | 2025-01-15 | ArticleListItemに置換 |
+| LessonSection.tsx | 2025-01-15 | LessonDetailCardに置換 |
+| QuestBlock.tsx | 2025-01-15 | QuestItemに置換 |
+| QuestTitle.tsx | 2025-01-15 | QuestItemに統合 |
 
 ---
 
