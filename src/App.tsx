@@ -41,6 +41,7 @@ import ProgressComponents from "./pages/Dev/ProgressComponents";
 import CelebrationComponents from "./pages/Dev/CelebrationComponents";
 import QuestComponents from "./pages/dev/QuestComponents";
 import LessonHeaderComponents from "./pages/dev/LessonHeaderComponents";
+import IconAnimations from "./pages/dev/IconAnimations";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -118,6 +119,7 @@ const AppContent = () => {
         <Route path="/dev/celebration" element={<DevRoute><CelebrationComponents /></DevRoute>} />
         <Route path="/dev/quest" element={<DevRoute><QuestComponents /></DevRoute>} />
         <Route path="/dev/lesson-header" element={<DevRoute><LessonHeaderComponents /></DevRoute>} />
+        <Route path="/dev/icon-animations" element={<DevRoute><IconAnimations /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
