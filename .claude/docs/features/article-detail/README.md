@@ -112,4 +112,14 @@
 
 - [ ] FigmaデザインURLを共有してもらう
 - [ ] Figma仕様を `FIGMA-SPEC.md` に記録
-- [ ] 各コンポーネントの仕様ドキュメント作成
+- [ ] 未完了コンポーネントの調整（詳細: `components/INCOMPLETE-COMPONENTS.md`）
+
+---
+
+## 関連ドキュメント
+
+| ドキュメント | 内容 |
+|-------------|------|
+| `components/INCOMPLETE-COMPONENTS.md` | 未完了コンポーネントの現状まとめ |
+| `components/sidebar/SIDEBAR-SPEC.md` | サイドバーコンポーネント仕様 |
+| `FIGMA-SPEC.md` | Figmaデザイン仕様 |
