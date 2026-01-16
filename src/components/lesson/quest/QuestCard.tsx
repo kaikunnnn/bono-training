@@ -48,8 +48,8 @@ export function QuestCard({
 }: QuestCardProps) {
   return (
     <div className="relative max-w-[743px] w-full">
-      {/* 内側ボーダー */}
-      <div className="absolute inset-px border border-black/[0.06] rounded-[23px] pointer-events-none" />
+      {/* オーバーレイ（角丸整合用） */}
+      <div className="absolute inset-px rounded-[23px] pointer-events-none" />
 
       {/* 背景 + シャドウ */}
       <div className="bg-white rounded-[24px] shadow-[1px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden w-full">

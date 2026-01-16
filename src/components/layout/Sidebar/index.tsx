@@ -38,20 +38,16 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
       {/* メインナビゲーション */}
       <SidebarMenuGroup>
-        {/* マイページ / ログイン */}
-        <SidebarMenuItem
-          href={user ? "/mypage" : "/auth"}
-          icon={
-            user ? (
-              <MenuIcons.mypage size={ICON_SIZE} />
-            ) : (
-              <MenuIcons.login size={ICON_SIZE} />
-            )
-          }
-          isActive={isActive(user ? "/mypage" : "/auth")}
-        >
-          {user ? "マイページ" : "ログイン"}
-        </SidebarMenuItem>
+        {/* マイページ（ログイン時のみ表示） */}
+        {user && (
+          <SidebarMenuItem
+            href="/mypage"
+            icon={<MenuIcons.mypage size={ICON_SIZE} />}
+            isActive={isActive("/mypage")}
+          >
+            マイページ
+          </SidebarMenuItem>
+        )}
 
         {/* ロードマップ */}
         <SidebarMenuItem
@@ -92,13 +88,27 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
       {/* その他メニュー */}
       <SidebarMenuGroup label="その他" itemGap>
-        <SidebarMenuItem
-          href="/account"
-          icon={<MenuIcons.settings size={ICON_SIZE} />}
-          isActive={isActive("/account")}
-        >
-          設定
-        </SidebarMenuItem>
+        {/* ログイン（ログオフ時のみ表示） */}
+        {!user && (
+          <SidebarMenuItem
+            href="/auth"
+            icon={<MenuIcons.login size={ICON_SIZE} />}
+            isActive={isActive("/auth")}
+          >
+            ログイン
+          </SidebarMenuItem>
+        )}
+        {/* 設定（ログイン時のみ表示） */}
+        {user && (
+          <SidebarMenuItem
+            href="/account"
+            icon={<MenuIcons.settings size={ICON_SIZE} />}
+            isActive={isActive("/account")}
+          >
+            設定
+          </SidebarMenuItem>
+        )}
+        {/* ログアウト（ログイン時のみ表示） */}
         {user && (
           <SidebarMenuItem
             href="#"

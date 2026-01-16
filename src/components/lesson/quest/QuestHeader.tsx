@@ -24,11 +24,11 @@ export function QuestHeader({ questNumber, isCompleted }: QuestHeaderProps) {
       <IconCheck status={isCompleted ? "on" : "empty"} />
 
       {/* クエストラベル */}
-      <div className="flex items-center gap-1 text-[#151834]">
+      <div className="flex items-center gap-0.5 text-[#151834]">
         <span className="font-noto-sans-jp font-bold text-[14px] leading-[14.4px]">
           クエスト
         </span>
-        <span className="font-luckiest text-[13px] leading-[15.6px]">
+        <span className="text-[13px] leading-[100%] text-center align-bottom font-['M_PLUS_Rounded_1c'] font-extrabold">
           {formattedNumber}
         </span>
       </div>

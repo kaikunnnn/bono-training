@@ -21,7 +21,7 @@ interface ArticleListItemProps {
  * - padding: 16px / 2px
  * - Default: 背景なし、テキスト gray-600、font-normal
  * - Hover: bg-slate-400/20、テキスト gray-600、font-bold
- * - Active: bg-slate-400/5、border-l-2 indigo-500、テキスト neutral-900、font-bold
+ * - Active: bg-[rgba(193,207,225,0.32)]、border-l-2 indigo-500、テキスト neutral-900、font-bold
  */
 export function ArticleListItem({
   title,
@@ -37,7 +37,7 @@ export function ArticleListItem({
         // 共通ベース
         "group w-72 pl-3 pr-3 py-0.5 inline-flex flex-col justify-start items-start gap-2.5",
         // Active状態
-        isActive && "bg-slate-400/5 border-l-2 border-indigo-500",
+        isActive && "bg-[rgba(193,207,225,0.32)] border-l-2 border-indigo-500",
         // Default → Hover
         !isActive && "hover:bg-slate-400/20"
       )}

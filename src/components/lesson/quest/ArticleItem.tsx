@@ -117,7 +117,7 @@ export function ArticleItem({
               <Play className="size-1 text-[#17102d]" fill="#17102d" />
             </div>
           ) : (
-            <div className="bg-white/70 rounded-[3px] p-px flex items-center justify-center">
+            <div className="bg-white/[0.72] rounded-[3px] box-border h-4 w-4 p-px flex items-center justify-center">
               <FileText className="size-2 text-black" />
             </div>
           )}
@@ -144,7 +144,7 @@ export function ArticleItem({
             )}
           </div>
           {/* タイトル */}
-          <span className="font-noto-sans-jp font-bold text-[14px] text-[#1e1b1b] leading-[20px]">
+          <span className="font-noto-sans-jp font-medium text-[14px] text-[#1e1b1b] leading-[20px]">
             {title}
           </span>
         </div>

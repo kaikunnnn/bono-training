@@ -194,4 +194,15 @@
   .bg-output {
     background-color: #10B981; /* Green for output */
   }
+
+  /* ブラウザ自動入力（autofill）のスタイル上書き */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: hsl(222.2 84% 4.9%) !important;
+    box-shadow: 0 0 0 30px white inset !important;
+    caret-color: hsl(222.2 84% 4.9%) !important;
+  }
 }

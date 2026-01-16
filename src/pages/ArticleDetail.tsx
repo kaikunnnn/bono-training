@@ -407,26 +407,24 @@ const ArticleDetail = () => {
             />
           </div>
 
-          {/* Heading Section - 動画ブロックと同じ幅 */}
-          <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 pt-8 pb-4 px-4">
-            <HeadingSection
-              tagType={article.articleType || "explain"}
-              title={article.title}
-              description={article.excerpt}
-              onComplete={handleCompleteToggle}
-              onFavorite={handleBookmarkToggle}
-              onShare={() => console.log("Share clicked")}
-              onNext={navigation.next ? () => navigate(`/articles/${navigation.next.slug}`) : undefined}
-              isBookmarked={bookmarked}
-              bookmarkLoading={bookmarkLoading}
-              isCompleted={isCompleted}
-              completionLoading={completionLoading}
-            />
-          </div>
-
           {/* 記事コンテンツ - 動画ブロックと同じ幅 */}
           <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 py-8 px-4">
-            <div className="space-y-6">
+            <div className="flex flex-col gap-2">
+              {/* Heading Section - 記事カード群の先頭へ移動 */}
+              <HeadingSection
+                tagType={article.articleType || "explain"}
+                title={article.title}
+                description={article.excerpt}
+                onComplete={handleCompleteToggle}
+                onFavorite={handleBookmarkToggle}
+                onShare={() => console.log("Share clicked")}
+                onNext={navigation.next ? () => navigate(`/articles/${navigation.next.slug}`) : undefined}
+                isBookmarked={bookmarked}
+                bookmarkLoading={bookmarkLoading}
+                isCompleted={isCompleted}
+                completionLoading={completionLoading}
+              />
+
               {/* TODO Section - learningObjectives がある場合のみ表示 */}
               <TodoSection items={article.learningObjectives} />
 

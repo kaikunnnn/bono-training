@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -36,6 +36,55 @@ const devResources: DevResourceCard[] = [
     path: '/dev/blog',
     icon: <Rss className="w-8 h-8" />,
     tags: ['Ghost', 'CMS', 'Blog', 'Docker']
+  },
+  {
+    title: 'Webflow Test',
+    description: 'Webflowからのコンテンツ取得テスト。API連携の確認用。',
+    path: '/dev/webflow-test',
+    icon: <Globe className="w-8 h-8" />,
+    tags: ['Webflow', 'API', 'Test']
+  },
+  {
+    title: 'Progress Components',
+    description: '進捗表示コンポーネントのプレビュー。プログレスバー、完了状態など。',
+    path: '/dev/progress-components',
+    icon: <CheckCircle className="w-8 h-8" />,
+    tags: ['Progress', 'UI', 'Components']
+  },
+  {
+    title: 'Celebration Components',
+    description: 'お祝い・達成時のアニメーションコンポーネント。紙吹雪、バッジなど。',
+    path: '/dev/celebration',
+    icon: <PartyPopper className="w-8 h-8" />,
+    tags: ['Animation', 'Celebration', 'UI']
+  },
+  {
+    title: 'Quest Components',
+    description: 'クエスト（レッスン内セクション）のコンポーネントプレビュー。',
+    path: '/dev/quest',
+    icon: <ListChecks className="w-8 h-8" />,
+    tags: ['Quest', 'Lesson', 'Components']
+  },
+  {
+    title: 'Lesson Header Components',
+    description: 'レッスンヘッダーのレイアウト・スタイルバリエーション。',
+    path: '/dev/lesson-header',
+    icon: <LayoutList className="w-8 h-8" />,
+    tags: ['Lesson', 'Header', 'Layout']
+  },
+  {
+    title: 'Icon Animations',
+    description: 'アイコンのアニメーションパターン。ホバー、クリック時の動きなど。',
+    path: '/dev/icon-animations',
+    icon: <Sparkles className="w-8 h-8" />,
+    tags: ['Icons', 'Animation', 'Interaction']
+  },
+  {
+    title: 'Quest Item Layouts',
+    description: 'クエストアイテムのレイアウト比較。タグ+タイトルの表示パターン。',
+    path: '/dev/quest-layouts',
+    icon: <LayoutGrid className="w-8 h-8" />,
+    tags: ['Quest', 'Layout', 'Comparison']
   }
 ];
 

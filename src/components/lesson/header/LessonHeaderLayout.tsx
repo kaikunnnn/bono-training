@@ -57,7 +57,7 @@ export function LessonHeaderLayout({
   children,
 }: LessonHeaderLayoutProps) {
   return (
-    <div className="w-full px-[20px] pt-[32px]">
+    <div className="w-full px-[20px] pt-[32px] lg:max-w-[1200px] lg:mx-auto">
       {/* ヘッダー（戻る + シェア） */}
       <LessonHeader onShare={onShare} />
 
