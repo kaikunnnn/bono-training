@@ -71,6 +71,30 @@ export const UI_COMPONENTS: Record<string, ComponentInfo[]> = {
       path: '@/components/ui/button',
     },
     {
+      name: 'Button - Secondary (グレー)',
+      category: 'Forms',
+      description: 'セカンダリアクション用。グレー背景のボタン（3サイズ）。',
+      example: (
+        <div className="flex flex-col gap-4 w-full">
+          <div className="flex items-end gap-3">
+            <div className="flex flex-col items-center gap-1">
+              <Button variant="secondary" size="large">Large</Button>
+              <span className="text-[10px] text-gray-400">h-12 px-7</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Button variant="secondary" size="medium">Medium</Button>
+              <span className="text-[10px] text-gray-400">h-10 px-5</span>
+            </div>
+            <div className="flex flex-col items-center gap-1">
+              <Button variant="secondary" size="small">Small</Button>
+              <span className="text-[10px] text-gray-400">h-8 px-3.5</span>
+            </div>
+          </div>
+        </div>
+      ),
+      path: '@/components/ui/button',
+    },
+    {
       name: 'Button - Other Variants',
       category: 'Forms',
       description: 'その他のバリエーション（ghost, destructive, secondary等）',

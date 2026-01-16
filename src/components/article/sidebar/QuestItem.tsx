@@ -4,7 +4,7 @@ import type { TagType } from "./ArticleTag";
 interface ArticleItemData {
   id: string;
   title: string;
-  tag: TagType;
+  tag?: TagType;
   isCompleted: boolean;
   href: string;
 }

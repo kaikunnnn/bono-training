@@ -406,7 +406,7 @@ const ArticleDetail = () => {
             <div className="flex flex-col gap-2">
               {/* Heading Section - 記事カード群の先頭へ移動 */}
               <HeadingSection
-                tagType={article.articleType || "explain"}
+                tagType={article.articleType}
                 title={article.title}
                 description={article.excerpt}
                 onComplete={handleCompleteToggle}

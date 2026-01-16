@@ -1,11 +1,11 @@
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import CheckIcon from "./CheckIcon";
+import { IconCheck } from "@/components/ui/icon-check";
 import ArticleTag, { type TagType } from "./ArticleTag";
 
 interface ArticleListItemProps {
   title: string;
-  tag: TagType;
+  tag?: TagType;
   isCompleted: boolean;
   isActive?: boolean;
   href: string;
@@ -44,7 +44,7 @@ export function ArticleListItem({
     >
       <div className="self-stretch py-2 rounded-md inline-flex justify-between items-center">
         {/* 完了状態アイコン */}
-        <CheckIcon isCompleted={isCompleted} />
+        <IconCheck isCompleted={isCompleted} />
 
         {/* コンテンツエリア */}
         <div className="flex-1 pl-2 flex justify-start items-center gap-0.5 min-w-0 overflow-hidden">

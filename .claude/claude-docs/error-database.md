@@ -1,6 +1,6 @@
 # エラーデータベース
 
-**最終更新**: 2025-11-28
+**最終更新**: 2025-01-16
 
 ---
 
@@ -91,9 +91,74 @@ Status: 500 Internal Server Error
 
 ---
 
-### [ERROR-002] エラータイトル
+### [ERROR-002] get-plan-prices Edge Function 500 Error（解決済み）
 
-（同じ形式で追加していく）
+**発生日**: 2025-01-13
+**頻度**: 複数回発生（Edge Function障害時）
+**深刻度**: 🔴 Critical → ✅ 解決済み
+
+**エラーメッセージ**:
+```
+FunctionsHttpError: Edge Function returned a non-2xx status code
+Status: 500 Internal Server Error
+Path: /functions/v1/get-plan-prices
+```
+
+**発生条件**:
+- サブスクリプションページ（/subscription）にアクセス
+- Edge Function `get-plan-prices` がStripe APIに接続できない時
+- ローカル開発環境でEdge FunctionがStripeに到達できない時
+
+**原因**:
+`src/services/pricing.ts` にフォールバック機構がなかった。
+Edge Functionが失敗した場合、エラーがそのままユーザーに表示されていた。
+
+**同様のフォールバック機構があった機能**:
+- `check-subscription` Edge Function → `user_subscriptions`テーブルから直接取得するフォールバックあり
+
+**なぜ pricing.ts には無かったか**:
+- 当初はEdge Functionの信頼性を前提として設計
+- 価格情報の取得は比較的シンプルと考えられていた
+- check-subscriptionのフォールバックパターンが共有されていなかった
+
+**解決方法**:
+`src/services/pricing.ts` に3段階フォールバック機構を実装
+
+1. **Edge Function呼び出し**（第1段階）
+   - 正常ケース: Stripeから最新価格を取得
+
+2. **DBフォールバック**（第2段階 - 新規追加）
+   - `price_cache`テーブルから価格を取得
+   - 環境に応じて`live`/`test`を切り替え
+   ```typescript
+   const isProduction = import.meta.env.PROD;
+   const environment = isProduction ? 'live' : 'test';
+   const { data } = await supabase
+     .from('price_cache')
+     .select('*')
+     .eq('environment', environment);
+   ```
+
+3. **ハードコードフォールバック**（第3段階 - 新規追加）
+   - 本番環境の価格をハードコード
+   - price_cacheテーブルの値と同期させる必要あり
+   ```typescript
+   const livePrices: PlanPrices = {
+     standard_1m: { id: 'price_1RStBiKUVUnt8GtynMfKweby', unit_amount: 6800, ... },
+     standard_3m: { id: 'price_1RStCiKUVUnt8GtyKJiieo6d', unit_amount: 17400, ... },
+     feedback_1m: { id: 'price_1RStgOKUVUnt8GtyVPVelPg3', unit_amount: 15800, ... },
+     feedback_3m: { id: 'price_1RSuB1KUVUnt8GtyAwgTK4Cp', unit_amount: 41400, ... },
+   };
+   ```
+
+**再発防止策**:
+1. **課金関連API呼び出しには必ずフォールバック機構を実装**
+2. **Stripe価格変更時は`pricing.ts`のハードコード値も更新**
+3. **ローカル開発でもサブスクリプション画面が表示できることを確認**
+
+**参考資料**:
+- [pricing.ts](../../src/services/pricing.ts) - 修正済みのコード
+- [price_cache テーブル](価格キャッシュ用テーブル)
 
 ---
 

@@ -1,11 +1,13 @@
-import { ChevronRight, Share2 } from "lucide-react";
+import { ArrowRight, Share2 } from "@/lib/icons";
+import { Star as LucideStar } from "lucide-react";
 import { ArticleTag, TagType } from "@/components/article/sidebar/ArticleTag";
-import { CheckIcon } from "@/components/article/sidebar/CheckIcon";
+import { IconCheck } from "@/components/ui/icon-check";
 import { IconButton } from "@/components/ui/button/IconButton";
+import { Button } from "@/components/ui/button";
 import { ShareDropdown } from "@/components/common/ShareDropdown";
 
 interface HeadingSectionProps {
-  tagType: TagType;
+  tagType?: TagType;
   title: string;
   description?: string;
   onComplete?: () => void;
@@ -71,23 +73,29 @@ const HeadingSection = ({
           <div className="self-stretch flex justify-start items-center gap-3">
             {/* Complete Button - IconButton コンポーネント使用 */}
             <IconButton
-              icon={<CheckIcon isCompleted={isCompleted} />}
+              icon={<IconCheck isCompleted={isCompleted} />}
               label={isCompleted ? "完了済み" : "完了にする"}
               onClick={onComplete}
             />
 
             {/* Favorite Button */}
-            <button
+            <Button
               onClick={onFavorite}
               disabled={bookmarkLoading}
-              className="px-3 py-2 bg-gray-200 rounded-xl flex justify-start items-center gap-1"
+              variant="secondary"
+              size="action"
+              className="gap-1"
               style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
               aria-label={isBookmarked ? "ブックマークを解除" : "ブックマークに追加"}
             >
               {/* Star Icon */}
-              <div className="w-4 h-4 relative flex-shrink-0">
-                <div className="w-3.5 h-3.5 left-[1.50px] top-[1.50px] absolute outline outline-1 outline-offset-[-0.56px] outline-gray-500" />
-              </div>
+              <LucideStar
+                size={16}
+                className="transition-all duration-200"
+                color={isBookmarked ? "#FFC107" : "#6B7280"}
+                fill={isBookmarked ? "#FFC107" : "transparent"}
+                strokeWidth={1.5}
+              />
 
               {/* Text */}
               <div className="inline-flex flex-col justify-start items-center">
@@ -95,17 +103,19 @@ const HeadingSection = ({
                   お気に入り
                 </div>
               </div>
-            </button>
+            </Button>
 
             {/* Share Button with Dropdown */}
             <ShareDropdown title={title}>
-              <button
-                className="px-3 py-2 bg-gray-200 rounded-xl flex justify-start items-center gap-1 hover:bg-gray-300 transition"
+              <Button
+                variant="secondary"
+                size="action"
+                className="gap-1"
                 style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
                 aria-label="シェア"
               >
                 {/* Share Icon */}
-                <Share2 className="w-4 h-4 text-gray-600" strokeWidth={2} />
+                <Share2 size={16} className="text-gray-600" />
 
                 {/* Text */}
                 <div className="inline-flex flex-col justify-start items-center">
@@ -113,16 +123,18 @@ const HeadingSection = ({
                     シェア
                   </div>
                 </div>
-              </button>
+              </Button>
             </ShareDropdown>
           </div>
         </div>
 
         {/* Right Button - Next Video */}
         {onNext && (
-          <button
+          <Button
             onClick={onNext}
-            className="px-3 py-2 bg-gray-200 rounded-xl flex justify-start items-center gap-1"
+            variant="secondary"
+            size="action"
+            className="gap-1"
             style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
             aria-label="次の動画へ"
           >
@@ -133,11 +145,9 @@ const HeadingSection = ({
               </div>
             </div>
 
-            {/* Chevron Icon */}
-            <div className="w-4 h-4 relative flex-shrink-0">
-              <div className="w-1 h-2 left-[6px] top-[4px] absolute outline outline-[1.33px] outline-offset-[-0.67px] outline-gray-500" />
-            </div>
-          </button>
+            {/* Arrow Icon */}
+            <ArrowRight size={16} className="text-gray-500" />
+          </Button>
         )}
       </div>
     </div>

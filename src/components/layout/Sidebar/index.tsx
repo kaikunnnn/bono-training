@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {user && (
           <SidebarMenuItem
             href="/mypage"
-            icon={<MenuIcons.mypage size={ICON_SIZE} />}
+            icon={<MenuIcons.mypage size={ICON_SIZE} variant="Outline"  />}
             isActive={isActive("/mypage")}
           >
             マイページ
@@ -52,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* ロードマップ */}
         <SidebarMenuItem
           href="/roadmap"
-          icon={<MenuIcons.roadmap size={ICON_SIZE} />}
+          icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline"  />}
           isActive={isActive("/roadmap")}
         >
           ロードマップ
@@ -61,7 +61,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* レッスン */}
         <SidebarMenuItem
           href="/lessons"
-          icon={<MenuIcons.lesson size={ICON_SIZE} />}
+          icon={<MenuIcons.lesson size={ICON_SIZE} variant="Outline"  />}
           isActive={isActive("/lessons")}
         >
           レッスン
@@ -70,7 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* ガイド */}
         <SidebarMenuItem
           href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} />}
+          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline"  />}
           isActive={isActive("/guide")}
         >
           ガイド
@@ -79,7 +79,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* トレーニング */}
         <SidebarMenuItem
           href="/training"
-          icon={<MenuIcons.training size={ICON_SIZE} />}
+          icon={<MenuIcons.training size={ICON_SIZE} variant="Outline"  />}
           isActive={isActive("/training")}
         >
           トレーニング
@@ -92,7 +92,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {!user && (
           <SidebarMenuItem
             href="/auth"
-            icon={<MenuIcons.login size={ICON_SIZE} />}
+            icon={<MenuIcons.login size={ICON_SIZE} variant="Outline"  />}
             isActive={isActive("/auth")}
           >
             ログイン
@@ -102,7 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {user && (
           <SidebarMenuItem
             href="/account"
-            icon={<MenuIcons.settings size={ICON_SIZE} />}
+            icon={<MenuIcons.settings size={ICON_SIZE} variant="Outline"  />}
             isActive={isActive("/account")}
           >
             設定
@@ -112,7 +112,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {user && (
           <SidebarMenuItem
             href="#"
-            icon={<MenuIcons.logout size={ICON_SIZE} />}
+            icon={<MenuIcons.logout size={ICON_SIZE} variant="Outline"  />}
             isActive={false}
             onClick={(e) => {
               e.preventDefault();

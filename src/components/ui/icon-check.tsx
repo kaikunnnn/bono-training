@@ -3,7 +3,9 @@ import { cn } from "@/lib/utils";
 
 interface IconCheckProps {
   /** 状態: empty(未完了) / on(完了) */
-  status: "empty" | "on";
+  status?: "empty" | "on";
+  /** 完了状態（statusの代替。CheckIconとの互換性のため） */
+  isCompleted?: boolean;
   /** カスタムクラス */
   className?: string;
 }
@@ -15,12 +17,16 @@ interface IconCheckProps {
  * - QuestHeader（クエスト番号行）
  * - 記事詳細サイドナビの記事一覧
  *
+ * Note: Iconsaxには単体のチェックマークアイコンがないため、
+ * このコンポーネントのみ lucide-react の Check を使用しています。
+ *
  * @example
  * <IconCheck status="empty" />  // 未完了
  * <IconCheck status="on" />     // 完了
  */
-export function IconCheck({ status, className }: IconCheckProps) {
-  const isCompleted = status === "on";
+export function IconCheck({ status, isCompleted: isCompletedProp, className }: IconCheckProps) {
+  // isCompleted または status のどちらかで完了状態を判定
+  const isCompleted = isCompletedProp ?? status === "on";
 
   return (
     <div

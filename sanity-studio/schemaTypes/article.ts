@@ -29,13 +29,13 @@ export default defineType({
       type: "string",
       options: {
         list: [
-          { title: "解説", value: "explain" },
+          { title: "知識", value: "explain" },
           { title: "イントロ", value: "intro" },
           { title: "実践", value: "practice" },
           { title: "チャレンジ", value: "challenge" },
+          { title: "実演解説", value: "demo" },
         ],
       },
-      initialValue: "explain",
       description: "この記事の種類を選択してください",
     }),
     defineField({

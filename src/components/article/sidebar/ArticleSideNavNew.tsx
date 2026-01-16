@@ -3,23 +3,12 @@ import LogoBlock from "./LogoBlock";
 import LessonDetailCard from "./LessonDetailCard";
 import QuestItem from "./QuestItem";
 import type { ArticleWithContext } from "@/types/sanity";
-import type { TagType } from "./ArticleTag";
 import { getLessonProgress, type LessonProgress } from "@/services/progress";
 
 interface ArticleSideNavNewProps {
   article: ArticleWithContext;
   currentArticleId: string;
   progressUpdateTrigger?: number;
-}
-
-/**
- * 記事タイプからTagTypeを推定
- * TODO: SanityスキーマにarticleTypeフィールドを追加した場合は直接使用
- */
-function getTagType(_article: { title: string }): TagType {
-  // 暫定的にすべて「解説」として扱う
-  // 将来的にはSanityのarticleTypeフィールドを参照
-  return "explain";
 }
 
 /**
@@ -83,7 +72,7 @@ export function ArticleSideNavNew({
       const articles = (quest.articles || []).map((a) => ({
         id: a._id,
         title: a.title,
-        tag: getTagType(a),
+        tag: a.articleType,
         isCompleted: completedArticleIds.includes(a._id),
         href: `/articles/${a.slug.current}`,
       }));

@@ -28,7 +28,7 @@ export interface Article {
   _id: string;
   _type: "article";
   articleNumber?: number;
-  articleType?: "explain" | "intro" | "practice" | "challenge";
+  articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
   title: string;
   slug: SanitySlug;
   excerpt?: string;
@@ -92,6 +92,7 @@ export interface ArticleWithContext extends Article {
       _id: string;
       slug: SanitySlug;
       title: string;
+      articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
       videoDuration?: number;
     }[];
   };
@@ -108,6 +109,7 @@ export interface ArticleWithContext extends Article {
         _id: string;
         slug: SanitySlug;
         title: string;
+        articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
         videoDuration?: number;
       }[];
     }[];

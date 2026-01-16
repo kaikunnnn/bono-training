@@ -29,6 +29,7 @@ export async function getArticleWithContext(
       _id,
       _type,
       articleNumber,
+      articleType,
       title,
       slug,
       excerpt,
@@ -60,6 +61,7 @@ export async function getArticleWithContext(
         title,
         "articles": articles[]-> {
           _id,
+          articleType,
           title,
           slug,
           videoDuration,
@@ -78,6 +80,7 @@ export async function getArticleWithContext(
             title,
             "articles": articles[]-> {
               _id,
+              articleType,
               title,
               slug,
               videoDuration,

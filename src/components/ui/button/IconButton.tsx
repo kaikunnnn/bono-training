@@ -23,7 +23,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   onClick,
 }) => {
   const className =
-    "bg-white px-[10px] py-[5px] rounded-[12px] shadow-[0px_1px_1px_0px_rgba(0,0,0,0.04)] inline-flex items-center gap-[4px] cursor-pointer";
+    "bg-white px-[10px] py-[5px] rounded-[12px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center gap-[4px] cursor-pointer";
 
   const content = (
     <>

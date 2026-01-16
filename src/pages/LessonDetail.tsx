@@ -13,7 +13,7 @@ interface Article {
   _id: string;
   title: string;
   slug: { current: string };
-  articleType?: "explain" | "intro" | "practice" | "challenge";
+  articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
   thumbnail?: any;
   thumbnailUrl?: string;
   videoDuration?: number;
