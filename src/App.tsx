@@ -61,6 +61,7 @@ import CategoryPage from './pages/blog/category';
 import TagsIndex from './pages/blog/tags';
 import TagDetail from './pages/blog/tag';
 import BlogGuide from './pages/dev/BlogGuide';
+import VideoPlayerTest from './pages/dev/VideoPlayerTest';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -125,6 +126,7 @@ const AppContent = () => {
         <Route path="/dev/icon-animations" element={<DevRoute><IconAnimations /></DevRoute>} />
         <Route path="/dev/quest-layouts" element={<DevRoute><QuestItemLayouts /></DevRoute>} />
         <Route path="/dev2" element={<DevRoute><IconComparison /></DevRoute>} />
+        <Route path="/dev/video-player" element={<DevRoute><VideoPlayerTest /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
