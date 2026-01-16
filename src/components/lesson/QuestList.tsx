@@ -1,12 +1,19 @@
-import QuestCard from "./QuestCard";
+import { SectionQuest } from "./quest";
 
 interface Article {
   _id: string;
   articleNumber: number; // ランタイムで付与
   title: string;
   slug: { current: string };
-  thumbnail?: any;
+  thumbnail?: {
+    asset?: {
+      _ref?: string;
+    };
+  };
+  thumbnailUrl?: string;
   videoDuration?: number;
+  /** Sanity記事タイプ（知識、イントロ、実践、チャレンジ、実演解説） */
+  articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
   isPremium?: boolean;
 }
 
@@ -28,7 +35,7 @@ interface QuestListProps {
 
 export default function QuestList({ contentHeading, quests, questProgressMap = {} }: QuestListProps) {
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full">
       {/* コンテンツ見出し */}
       {contentHeading && (
         <h2 className="font-rounded-mplus font-bold text-2xl text-lesson-quest-title mb-6">
@@ -37,11 +44,11 @@ export default function QuestList({ contentHeading, quests, questProgressMap = {
       )}
 
       {/* クエストカード一覧 */}
-      <div>
+      <div className="flex flex-col gap-[24px]">
         {quests.map((quest) => {
           const progress = questProgressMap[quest._id] || { completed: 0, total: quest.articles.length, completedArticleIds: [] };
           return (
-            <QuestCard
+            <SectionQuest
               key={quest._id}
               questNumber={quest.questNumber}
               title={quest.title}

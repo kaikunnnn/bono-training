@@ -74,13 +74,15 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
   if (!videoInfo) {
     if (thumbnailSrc) {
       return (
-        <div className="w-full">
-          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-            <img
-              src={thumbnailSrc}
-              alt="記事サムネイル"
-              className="absolute top-0 left-0 w-full h-full object-cover rounded-lg"
-            />
+        <div className="w-full px-6 pt-6 pb-4">
+          <div className="bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
+            <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+              <img
+                src={thumbnailSrc}
+                alt="記事サムネイル"
+                className="absolute top-0 left-0 w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       );
@@ -92,26 +94,30 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
   // Vimeoの場合はカスタムプレーヤーを使用
   if (videoInfo.platform === 'vimeo') {
     return (
-      <div className="w-full">
-        <CustomVimeoPlayer vimeoId={videoInfo.id} />
+      <div className="w-full px-6 pt-6 pb-4">
+        <div className="bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
+          <CustomVimeoPlayer vimeoId={videoInfo.id} />
+        </div>
       </div>
     );
   }
 
   // YouTubeの場合は従来のiframe埋め込み
   return (
-    <div className="w-full">
-      {/* 16:9 レスポンシブコンテナ */}
-      <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-        {/* 56.25% = 9/16 * 100 (16:9のアスペクト比) */}
-        <iframe
-          src={`https://www.youtube.com/embed/${videoInfo.id}`}
-          className="absolute top-0 left-0 w-full h-full"
-          frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          title="YouTube video player"
-        />
+    <div className="w-full px-6 pt-6 pb-4">
+      <div className="bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
+        {/* 16:9 レスポンシブコンテナ */}
+        <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+          {/* 56.25% = 9/16 * 100 (16:9のアスペクト比) */}
+          <iframe
+            src={`https://www.youtube.com/embed/${videoInfo.id}`}
+            className="absolute top-0 left-0 w-full h-full"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+            title="YouTube video player"
+          />
+        </div>
       </div>
     </div>
   );

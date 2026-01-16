@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
-import ArticleSideNav from "./sidebar/ArticleSideNav";
+import ArticleSideNavNew from "./sidebar/ArticleSideNavNew";
 import type { ArticleWithContext } from "@/types/sanity";
 
 interface MobileSideNavProps {
@@ -19,7 +19,7 @@ interface MobileSideNavProps {
  * - 画面左からスライドイン
  * - オーバーレイ背景（クリックで閉じる）
  * - 閉じるボタン
- * - ArticleSideNavをそのまま使用
+ * - ArticleSideNavNewを使用（PC版と統一）
  */
 const MobileSideNav = ({
   isOpen,
@@ -82,7 +82,7 @@ const MobileSideNav = ({
 
         {/* サイドナビコンテンツ */}
         <div className="h-full overflow-y-auto">
-          <ArticleSideNav
+          <ArticleSideNavNew
             article={article}
             currentArticleId={currentArticleId}
             progressUpdateTrigger={progressUpdateTrigger}

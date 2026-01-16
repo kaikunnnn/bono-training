@@ -3,3 +3,6 @@ export type { ProgressLessonProps } from './ProgressLesson';
 
 export { ProgressSection } from './ProgressSection';
 export type { ProgressSectionProps } from './ProgressSection';
+
+export { CompletedLessonCard } from './CompletedLessonCard';
+export type { CompletedLessonCardProps } from './CompletedLessonCard';

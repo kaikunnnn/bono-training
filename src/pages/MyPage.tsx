@@ -2,10 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { BookmarkList } from "@/components/ui/bookmark-list";
 import { SectionHeading } from "@/components/ui/section-heading";
-import { ProgressLesson } from "@/components/progress";
-import { TabNavigation, TabId } from "@/components/navigation";
+import { ProgressLesson, CompletedLessonCard } from "@/components/progress";
+import { TabGroup } from "@/components/ui/tab-group";
+
+type TabId = 'all' | 'progress' | 'favorite' | 'history';
 import { getBookmarkedArticles, toggleBookmark, type BookmarkedArticle } from "@/services/bookmarks";
 import { getAllLessonsWithArticles, getNextIncompleteArticle, type LessonWithArticles } from "@/services/lessons";
 import {
@@ -15,7 +18,10 @@ import {
   type LessonProgress,
   type LessonStatus,
 } from "@/services/progress";
-import { User, Settings } from "lucide-react";
+import { User } from "lucide-react";
+import { IconButton } from "@/components/ui/button/IconButton";
+import { EmptyState } from "@/components/ui/empty-state";
+import { HeadingSectionInner } from "@/components/ui/heading-section-inner";
 
 // Figma仕様に基づくスタイル定数
 const styles = {
@@ -36,7 +42,7 @@ const styles = {
     sectionGap: "24px",
     headerTitleTabGap: "16px",
     headerButtonGap: "12px",
-    sectionContentGap: "20px",
+    sectionContentGap: "8px",
     sectionHeadingGap: "16px",
     lessonGridGap: "10px",
   },
@@ -209,19 +215,8 @@ export default function MyPage() {
   if (loading) {
     return (
       <Layout>
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: styles.spacing.sectionGap,
-          alignItems: "flex-start",
-          paddingTop: styles.spacing.containerPaddingTop,
-          paddingBottom: styles.spacing.containerPaddingBottom,
-          paddingLeft: styles.spacing.containerPaddingHorizontal,
-          paddingRight: styles.spacing.containerPaddingHorizontal,
-          width: "100%",
-          minHeight: "100vh",
-        }}>
-          <p>読み込み中...</p>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );
@@ -267,108 +262,33 @@ export default function MyPage() {
         }}
       >
         {/* ヘッダーセクション */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "space-between",
-            width: "100%",
-            flexShrink: 0,
-          }}
-        >
-          {/* 左側：タイトル + タブ */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: styles.spacing.headerTitleTabGap,
-              alignItems: "flex-start",
-              justifyContent: "center",
-              flexShrink: 0,
-            }}
-          >
+        <div className="w-full flex flex-col items-start gap-6">
+          {/* 上段: タイトル + プロフィール */}
+          <div className="self-stretch flex justify-between items-center">
             <h1
-              style={{
-                fontFamily: styles.typography.fontFamily,
-                fontWeight: 700,
-                fontSize: "20px",
-                lineHeight: "normal",
-                color: styles.colors.titleText,
-                margin: 0,
-              }}
+              className="text-slate-950 text-2xl font-semibold leading-6"
+              style={{ fontFamily: "'M PLUS Rounded 1c', sans-serif" }}
             >
               マイページ
             </h1>
-            <TabNavigation
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
+            <IconButton
+              to="/profile"
+              icon={<User size={14} color="#020817" />}
+              label="プロフィール"
             />
           </div>
 
-          {/* 右側：アカウント情報 + プロフィール */}
-          <div
-            style={{
-              display: "flex",
-              gap: styles.spacing.headerButtonGap,
-              alignItems: "center",
-              flexShrink: 0,
-            }}
-          >
-            <Link
-              to="/account"
-              style={{
-                backgroundColor: styles.colors.accountButtonBg,
-                display: "flex",
-                gap: "4px",
-                alignItems: "center",
-                padding: "5px 10px",
-                borderRadius: "8px",
-                textDecoration: "none",
-                cursor: "pointer",
-              }}
-            >
-              <Settings size={20} color={styles.colors.titleText} />
-              <span
-                style={{
-                  fontFamily: styles.typography.buttonFontFamily,
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  lineHeight: "24px",
-                  color: styles.colors.titleText,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                アカウント情報
-              </span>
-            </Link>
-            <Link
-              to="/profile"
-              style={{
-                backgroundColor: styles.colors.profileButtonBg,
-                display: "flex",
-                gap: "4px",
-                alignItems: "center",
-                padding: "5px 10px",
-                borderRadius: "8px",
-                textDecoration: "none",
-                cursor: "pointer",
-              }}
-            >
-              <User size={20} color={styles.colors.titleText} />
-              <span
-                style={{
-                  fontFamily: styles.typography.buttonFontFamily,
-                  fontWeight: 700,
-                  fontSize: "13px",
-                  lineHeight: "24px",
-                  color: styles.colors.titleText,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                プロフィール
-              </span>
-            </Link>
-          </div>
+          {/* 下段: タブ */}
+          <TabGroup
+            tabs={[
+              { id: 'all', label: 'すべて' },
+              { id: 'progress', label: '進捗' },
+              { id: 'favorite', label: 'お気に入り' },
+              { id: 'history', label: '閲覧履歴' },
+            ]}
+            activeTabId={activeTab}
+            onTabChange={(id) => setActiveTab(id as TabId)}
+          />
         </div>
 
         {/* メインコンテンツ */}
@@ -384,16 +304,7 @@ export default function MyPage() {
         >
           {/* 進行中セクション */}
           {(activeTab === 'all' || activeTab === 'progress') && (
-            <section
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: styles.spacing.sectionHeadingGap,
-                alignItems: "flex-start",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            >
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
               {/* セクション見出し */}
               <div
                 style={{
@@ -415,18 +326,7 @@ export default function MyPage() {
 
                 {/* サブタイトル */}
                 {allActiveLessons.length > 0 && (
-                  <h3
-                    style={{
-                      fontFamily: styles.typography.fontFamily,
-                      fontWeight: 500,
-                      fontSize: "13px",
-                      lineHeight: "32px",
-                      color: styles.colors.titleText,
-                      margin: 0,
-                    }}
-                  >
-                    レッスン
-                  </h3>
+                  <HeadingSectionInner title="レッスン" showLink={false} />
                 )}
               </div>
 
@@ -459,59 +359,11 @@ export default function MyPage() {
                 </div>
               ) : (
                 /* Empty State - 進行中 */
-                <div
-                  style={{
-                    alignSelf: "stretch",
-                    padding: "32px 16px",
-                    backgroundColor: styles.colors.emptyStateBg,
-                    borderRadius: "16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "14px",
-                    color: "rgba(2, 8, 23, 1)",
-                  }}
-                >
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "#000000",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                      fontFamily: styles.typography.fontFamily,
-                      lineHeight: "24px",
-                    }}
-                  >
-                    デザインスキルの獲得を<br />はじめよう
-                  </div>
-                  <Link
-                    to="/lessons"
-                    style={{
-                      padding: "5px 10px",
-                      backgroundColor: "#FFFFFF",
-                      borderRadius: "8px",
-                      border: "1px solid rgba(0, 0, 0, 0.1)",
-                      display: "inline-flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      gap: "4px",
-                      textDecoration: "none",
-                    }}
-                  >
-                    <span
-                      style={{
-                        color: "#020817",
-                        fontSize: "12px",
-                        fontWeight: 700,
-                        fontFamily: styles.typography.buttonFontFamily,
-                        lineHeight: "24px",
-                      }}
-                    >
-                      身につけるレッスンを探す
-                    </span>
-                  </Link>
-                </div>
+                <EmptyState
+                  message={<>デザインスキルの獲得を<br />はじめよう</>}
+                  linkHref="/lessons"
+                  linkLabel="身につけるレッスンを探す"
+                />
               )}
             </section>
           )}
@@ -522,34 +374,15 @@ export default function MyPage() {
             const inProgressLessons = overflowLessons.filter(l => !('isCompleted' in l && l.isCompleted));
 
             return (
-              <section
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: styles.spacing.sectionHeadingGap,
-                  alignItems: "flex-start",
-                  width: "100%",
-                  flexShrink: 0,
-                }}
-              >
+              <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
                 <SectionHeading title="その他の進捗" />
 
                 {/* 完了ブロック */}
                 {completedLessons.length > 0 && (
                   <div style={{ width: "100%" }}>
-                    <h3
-                      style={{
-                        fontFamily: styles.typography.fontFamily,
-                        fontWeight: 500,
-                        fontSize: "13px",
-                        lineHeight: "32px",
-                        color: styles.colors.titleText,
-                        margin: 0,
-                        marginBottom: "8px",
-                      }}
-                    >
-                      完了
-                    </h3>
+                    <div className="mb-2">
+                      <HeadingSectionInner title="完了" showLink={false} />
+                    </div>
                     <div
                       style={{
                         display: "grid",
@@ -559,54 +392,12 @@ export default function MyPage() {
                       }}
                     >
                       {completedLessons.map((lesson, index) => (
-                        <div
+                        <CompletedLessonCard
                           key={`completed-${lesson.title}-${index}`}
-                          onClick={() => navigate(`/lessons/${lesson.lessonSlug}`)}
-                          style={{
-                            backgroundColor: styles.colors.cardBg,
-                            borderRadius: "16px",
-                            padding: "16px",
-                            boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
-                            cursor: "pointer",
-                            transition: "box-shadow 0.2s",
-                          }}
-                        >
-                          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                            <img
-                              src={lesson.iconImageUrl}
-                              alt={lesson.title}
-                              style={{
-                                width: "48px",
-                                height: "73px",
-                                objectFit: "cover",
-                                borderTopRightRadius: "8px",
-                                borderBottomRightRadius: "8px",
-                              }}
-                            />
-                            <div>
-                              <h4
-                                style={{
-                                  fontFamily: styles.typography.fontFamily,
-                                  fontSize: "16px",
-                                  fontWeight: 700,
-                                  color: styles.colors.titleText,
-                                  margin: "0 0 4px 0",
-                                }}
-                              >
-                                {lesson.title}
-                              </h4>
-                              <span
-                                style={{
-                                  fontSize: "14px",
-                                  fontWeight: 600,
-                                  color: "#22C55E",
-                                }}
-                              >
-                                ✓ 完了
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                          title={lesson.title}
+                          iconImageUrl={lesson.iconImageUrl}
+                          lessonSlug={lesson.lessonSlug}
+                        />
                       ))}
                     </div>
                   </div>
@@ -615,19 +406,9 @@ export default function MyPage() {
                 {/* 取り組み中ブロック */}
                 {inProgressLessons.length > 0 && (
                   <div style={{ width: "100%", marginTop: completedLessons.length > 0 ? "16px" : 0 }}>
-                    <h3
-                      style={{
-                        fontFamily: styles.typography.fontFamily,
-                        fontWeight: 500,
-                        fontSize: "13px",
-                        lineHeight: "32px",
-                        color: styles.colors.titleText,
-                        margin: 0,
-                        marginBottom: "8px",
-                      }}
-                    >
-                      取り組み中
-                    </h3>
+                    <div className="mb-2">
+                      <HeadingSectionInner title="取り組み中" showLink={false} />
+                    </div>
                     <div
                       style={{
                         display: "grid",
@@ -661,16 +442,7 @@ export default function MyPage() {
 
           {/* お気に入りセクション */}
           {(activeTab === 'all' || activeTab === 'favorite') && (
-            <section
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: styles.spacing.sectionHeadingGap,
-                alignItems: "flex-start",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            >
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
               {/* セクション見出し */}
               <SectionHeading
                 title="お気に入り"
@@ -689,48 +461,16 @@ export default function MyPage() {
                 />
               ) : (
                 /* Empty State - お気に入り */
-                <div
-                  style={{
-                    alignSelf: "stretch",
-                    padding: "32px 16px",
-                    backgroundColor: styles.colors.emptyStateBg,
-                    borderRadius: "16px",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    gap: "14px",
-                  }}
-                >
-                  <div
-                    style={{
-                      textAlign: "center",
-                      color: "#000000",
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      fontFamily: styles.typography.fontFamily,
-                      lineHeight: "24px",
-                    }}
-                  >
-                    記事をお気に入りすると<br />こちらに表示されます
-                  </div>
-                </div>
+                <EmptyState
+                  message={<>記事をお気に入りすると<br />こちらに表示されます</>}
+                />
               )}
             </section>
           )}
 
           {/* 閲覧履歴セクション */}
           {(activeTab === 'all' || activeTab === 'history') && (
-            <section
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: styles.spacing.sectionHeadingGap,
-                alignItems: "flex-start",
-                width: "100%",
-                flexShrink: 0,
-              }}
-            >
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3">
               {/* セクション見出し */}
               {/* TODO: 閲覧履歴の件数が取得できたら totalCount と displayLimit を設定 */}
               <SectionHeading
@@ -740,32 +480,9 @@ export default function MyPage() {
               />
 
               {/* Empty State - 閲覧履歴（機能未実装のため常にEmpty） */}
-              <div
-                style={{
-                  alignSelf: "stretch",
-                  padding: "32px 16px",
-                  backgroundColor: styles.colors.emptyStateBg,
-                  borderRadius: "16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: "14px",
-                }}
-              >
-                <div
-                  style={{
-                    textAlign: "center",
-                    color: "#000000",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    fontFamily: styles.typography.fontFamily,
-                    lineHeight: "24px",
-                  }}
-                >
-                  記事を閲覧した履歴が<br />こちらに表示されます
-                </div>
-              </div>
+              <EmptyState
+                message={<>記事を閲覧した履歴が<br />こちらに表示されます</>}
+              />
             </section>
           )}
         </div>

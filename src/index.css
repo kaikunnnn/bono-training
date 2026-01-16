@@ -11,6 +11,8 @@
 
 @layer base {
   :root {
+    /* 基本背景色 - #F9F9F7 */
+    --base: 60 7% 97%;
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -95,7 +97,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-color: #F9F9F7;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -142,7 +145,7 @@
     width: 103%;
     height: 200%;
     border-radius: 50%;
-    background: #ffffff;
+    background: #F9F9F7;
     position: absolute;
     top: 0;
     left: 50%;
@@ -190,5 +193,16 @@
 
   .bg-output {
     background-color: #10B981; /* Green for output */
+  }
+
+  /* ブラウザ自動入力（autofill）のスタイル上書き */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+    -webkit-text-fill-color: hsl(222.2 84% 4.9%) !important;
+    box-shadow: 0 0 0 30px white inset !important;
+    caret-color: hsl(222.2 84% 4.9%) !important;
   }
 }

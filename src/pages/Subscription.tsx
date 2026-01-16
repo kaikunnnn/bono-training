@@ -15,6 +15,7 @@ import { formatPlanDisplay } from '@/utils/planDisplay';
 import { PlanChangeConfirmModal, ModalState } from '@/components/subscription/PlanChangeConfirmModal';
 import { getPlanPrices, PlanPrices } from '@/services/pricing';
 import { supabase } from '@/integrations/supabase/client';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
@@ -283,10 +284,7 @@ const SubscriptionPage: React.FC = () => {
       <Layout>
         <div className="container py-8 max-w-5xl">
           <div className="flex items-center justify-center min-h-[400px]">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-              <p className="text-muted-foreground">料金プランを読み込み中...</p>
-            </div>
+            <LoadingSpinner size="lg" text="料金プランを読み込み中..." />
           </div>
         </div>
       </Layout>

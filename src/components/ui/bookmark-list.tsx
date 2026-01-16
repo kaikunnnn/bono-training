@@ -20,8 +20,6 @@ interface BookmarkListItemProps extends React.HTMLAttributes<HTMLDivElement> {
 const styles = {
   colors: {
     cardBg: "#FFFFFF",
-    cardShadow: "0px 2px 8px rgba(0, 0, 0, 0.08)",
-    cardShadowHover: "0px 4px 16px rgba(0, 0, 0, 0.12)",
     titleText: "#000000",
     lessonInfoText: "#4B5563",
     thumbnailPlaceholder: "#F5F5F5",
@@ -31,9 +29,8 @@ const styles = {
     tooltipText: "#FFFFFF",
   },
   sizes: {
-    cardWidth: "443px",
     cardHeight: "68px",
-    cardBorderRadius: "12px",
+    cardBorderRadius: "0px",
     thumbnailWidth: "85px",
     thumbnailHeight: "48px",
     thumbnailBorderRadius: "8px",
@@ -90,7 +87,10 @@ const BookmarkList = React.forwardRef<HTMLDivElement, BookmarkListProps>(
     return (
       <div
         ref={ref}
-        className={cn("flex flex-col gap-3", className)}
+        className={cn(
+          "flex w-full flex-col gap-0 rounded-2xl overflow-hidden shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)]",
+          className
+        )}
         {...props}
       >
         {articles.map((article) => (
@@ -108,12 +108,11 @@ BookmarkList.displayName = "BookmarkList"
 
 /**
  * BookmarkListItem - ブックマークリストの1アイテム（Figma仕様準拠）
- * レスポンシブ対応: 768px以下で width: 100%
+ * レスポンシブ対応: 常に width: 100%
  */
 const BookmarkListItem = React.forwardRef<HTMLDivElement, BookmarkListItemProps>(
   ({ className, article, onRemoveBookmark, ...props }, ref) => {
     const [isBookmarked, setIsBookmarked] = React.useState(true)
-    const [isHovered, setIsHovered] = React.useState(false)
     const [isFavoriteHovered, setIsFavoriteHovered] = React.useState(false)
 
     // GROQで解決済みのURLを使用（優先順位: thumbnailUrl > thumbnail > coverImage）
@@ -139,14 +138,11 @@ const BookmarkListItem = React.forwardRef<HTMLDivElement, BookmarkListItemProps>
       <div
         ref={ref}
         className={cn(
-          // レスポンシブ対応: スマホでは幅100%、PCでは443px
-          "w-full md:w-[443px]",
+          "w-full",
           className
         )}
         role="article"
         aria-label={article.title}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
         style={{
           minHeight: styles.sizes.cardHeight,
           display: "flex",
@@ -155,7 +151,7 @@ const BookmarkListItem = React.forwardRef<HTMLDivElement, BookmarkListItemProps>
           backgroundColor: styles.colors.cardBg,
           borderRadius: styles.sizes.cardBorderRadius,
           padding: styles.spacing.cardPadding,
-          boxShadow: isHovered ? styles.colors.cardShadowHover : styles.colors.cardShadow,
+          boxShadow: "none",
           cursor: "pointer",
           transition: "box-shadow 0.2s ease",
         }}

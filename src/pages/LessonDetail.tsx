@@ -1,17 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { client } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
-import LessonHero from "@/components/lesson/LessonHero";
+import { LessonHeaderLayout } from "@/components/lesson/header";
 import LessonTabs from "@/components/lesson/LessonTabs";
 import QuestList from "@/components/lesson/QuestList";
 import OverviewTab from "@/components/lesson/OverviewTab";
 import { getLessonProgress } from "@/services/progress";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface Article {
   _id: string;
   title: string;
   slug: { current: string };
+  articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
   thumbnail?: any;
   thumbnailUrl?: string;
   videoDuration?: number;
@@ -49,6 +51,8 @@ export default function LessonDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [questProgressMap, setQuestProgressMap] = useState<Record<string, { completed: number; total: number; completedArticleIds: string[] }>>({});
+  const [activeTab, setActiveTab] = useState<"content" | "overview">("content");
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchLesson = async () => {
@@ -82,6 +86,7 @@ export default function LessonDetail() {
               _id,
               title,
               slug,
+              articleType,
               thumbnail {
                 _type,
                 asset {
@@ -160,14 +165,39 @@ export default function LessonDetail() {
     }
   };
 
+  // 「概要・目的ですべてみる」クリック時にタブを切り替え
+  const handleViewAllDetails = () => {
+    setActiveTab("overview");
+    // タブ部分までスクロール
+    tabsRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 全体の進捗率を計算（完了記事数 / 全記事数 × 100）
+  const calculateOverallProgress = (): number => {
+    if (!lesson || !questProgressMap) return 0;
+
+    let totalArticles = 0;
+    let completedArticles = 0;
+
+    for (const quest of lesson.quests) {
+      const progress = questProgressMap[quest._id];
+      if (progress) {
+        totalArticles += progress.total;
+        completedArticles += progress.completed;
+      } else {
+        totalArticles += quest.articles.length;
+      }
+    }
+
+    if (totalArticles === 0) return 0;
+    return Math.round((completedArticles / totalArticles) * 100);
+  };
+
   if (loading) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">読み込み中...</p>
-          </div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );
@@ -191,32 +221,41 @@ export default function LessonDetail() {
     );
   }
 
-  const canStart = lesson.quests?.[0]?.articles?.[0] !== undefined;
+  const overallProgress = calculateOverallProgress();
+
+  // 概要・目的データがあるかチェック
+  const hasOverviewData = !!(
+    (lesson.purposes && lesson.purposes.length > 0) ||
+    (lesson.overview && lesson.overview.length > 0)
+  );
 
   return (
     <Layout>
-      <div className="min-h-screen bg-white">
-        <LessonHero
-          title={lesson.title}
-          description={lesson.description}
-          iconImage={lesson.iconImage}
-          iconImageUrl={lesson.iconImageUrl}
-          category={lesson.category}
-          isPremium={lesson.isPremium}
-          onStartClick={handleStart}
-          canStart={canStart}
-        />
-
-        <LessonTabs
-          contentTab={
-            <QuestList
-              contentHeading={lesson.contentHeading}
-              quests={lesson.quests || []}
-              questProgressMap={questProgressMap}
+      <div className="min-h-screen bg-base">
+        {/* 新デザインヘッダー + タブコンテンツ（右側ブロックに統合） */}
+        <LessonHeaderLayout
+          lesson={lesson}
+          progress={overallProgress}
+          onStart={handleStart}
+          onViewAllDetails={hasOverviewData ? handleViewAllDetails : undefined}
+        >
+          {/* タブコンテンツ（右側ブロック内に配置） */}
+          <div ref={tabsRef}>
+            <LessonTabs
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              showOverviewTab={hasOverviewData}
+              contentTab={
+                <QuestList
+                  contentHeading={lesson.contentHeading}
+                  quests={lesson.quests || []}
+                  questProgressMap={questProgressMap}
+                />
+              }
+              overviewTab={hasOverviewData ? <OverviewTab purposes={lesson.purposes} overview={lesson.overview} /> : undefined}
             />
-          }
-          overviewTab={<OverviewTab purposes={lesson.purposes} overview={lesson.overview} />}
-        />
+          </div>
+        </LessonHeaderLayout>
       </div>
     </Layout>
   );

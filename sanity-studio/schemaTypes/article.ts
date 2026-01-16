@@ -24,6 +24,21 @@ export default defineType({
       validation: (Rule) => Rule.min(1),
     }),
     defineField({
+      name: "articleType",
+      title: "記事タイプ",
+      type: "string",
+      options: {
+        list: [
+          { title: "知識", value: "explain" },
+          { title: "イントロ", value: "intro" },
+          { title: "実践", value: "practice" },
+          { title: "チャレンジ", value: "challenge" },
+          { title: "実演解説", value: "demo" },
+        ],
+      },
+      description: "この記事の種類を選択してください",
+    }),
+    defineField({
       name: "title",
       title: "タイトル",
       type: "string",

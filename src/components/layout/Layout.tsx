@@ -13,14 +13,14 @@ interface LayoutProps {
 
 /**
  * レイアウトコンポーネント
- * デスクトップ: 左にSidebar（240px）、右にメインコンテンツ
+ * デスクトップ: 左にSidebar（200px）、右にメインコンテンツ
  * モバイル: ハンバーガーメニューでSidebar開閉
  */
 const Layout = ({ children, className }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className={cn("min-h-screen flex bg-background", className)}>
+    <div className={cn("min-h-screen flex bg-base", className)}>
       {/* デスクトップ用サイドバー（1024px以上） */}
       <aside className="hidden lg:block fixed left-0 top-0 h-screen">
         <Sidebar />
@@ -40,14 +40,14 @@ const Layout = ({ children, className }: LayoutProps) => {
               <Menu size={20} />
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-[280px]">
+          <SheetContent side="left" className="p-0 w-[280px] h-full">
             <Sidebar />
           </SheetContent>
         </Sheet>
       </div>
 
       {/* メインコンテンツエリア */}
-      <div className="flex-1 flex flex-col lg:ml-60">
+      <div className="flex-1 flex flex-col lg:ml-[200px]">
         <main className="flex-1 pt-16 lg:pt-0">
           {children}
         </main>

@@ -20,12 +20,12 @@
     "@portabletext/block-tools": "^3.5.13",
     "@sanity/block-tools": "^3.70.0",
     "@sanity/presentation": "^2.0.0",
-    "@sanity/vision": "^4.11.0",
+    "@sanity/vision": "^4.22.0",
     "jsdom": "^27.0.1",
     "marked": "^16.4.1",
     "react": "^19.1",
     "react-dom": "^19.1",
-    "sanity": "^4.11.0",
+    "sanity": "^4.22.0",
     "styled-components": "^6.1.18"
   },
   "devDependencies": {

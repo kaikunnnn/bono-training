@@ -3,7 +3,7 @@ import React, { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import PremiumContentBanner from './PremiumContentBanner';
-import { Loader2 } from 'lucide-react';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface TrainingGuardProps {
   children: ReactNode;
@@ -32,8 +32,7 @@ const TrainingGuard: React.FC<TrainingGuardProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center p-12">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <span className="ml-2 text-gray-600">アクセス権限を確認中...</span>
+        <LoadingSpinner size="lg" text="アクセス権限を確認中..." />
       </div>
     );
   }

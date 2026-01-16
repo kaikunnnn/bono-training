@@ -22,16 +22,16 @@ const TodoSection = ({ items }: TodoSectionProps) => {
 
   return (
     <div
-      className="w-full bg-white rounded-xl p-[2px]"
+      className="w-full bg-white rounded-[20px] p-[2px]"
       style={{
         boxShadow: "1px 1px 4px 0px rgba(0, 0, 0, 0.08)",
       }}
     >
       {/* ヘッダーブロック */}
       <div
-        className="bg-[#F5F5F5] px-4 py-[5px] flex items-center gap-2.5"
+        className="bg-[#F5F5F5] px-6 py-[5px] flex items-center gap-2.5"
         style={{
-          borderRadius: "10px 10px 0px 0px",
+          borderRadius: "20px 20px 0px 0px",
         }}
       >
         <h3
@@ -43,7 +43,7 @@ const TodoSection = ({ items }: TodoSectionProps) => {
       </div>
 
       {/* コンテンツラッパー */}
-      <div className="px-2 py-3 flex flex-col gap-3">
+      <div className="px-6 py-3 flex flex-col gap-3">
         {items.map((item, index) => (
           <div key={index} className="flex items-start gap-2.5 px-2">
             {/* 6x6px 円マーカー */}

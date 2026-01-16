@@ -2,7 +2,7 @@
 import { cn } from "@/lib/utils";
 import { Mail } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 interface FooterProps {
   className?: string;
@@ -98,6 +98,9 @@ const Footer = ({ className }: FooterProps) => {
         )}
 
         <div className={cn("text-center text-sm text-muted-foreground", showNewsletterSignup && "mt-12 pt-8 border-t")}>
+          <div className="flex justify-center gap-4 mb-2">
+            <Link to="/subscription" className="hover:underline">サブスクリプション</Link>
+          </div>
           <p>© BONO. All rights reserved.</p>
         </div>
       </div>

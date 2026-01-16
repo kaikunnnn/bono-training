@@ -5,14 +5,17 @@ import { cn } from "@/lib/utils";
 
 /**
  * サイドバーメニュー項目コンポーネント
- * Figma仕様:
- * - サイズ: 224px × 32px
- * - フォント: Inter, 14px, 400（通常）/ 500（アクティブ）
- * - カラー: #0a0a0a（通常）/ #171717（アクティブ）
- * - 背景: transparent（通常）/ #f5f5f5（アクティブ）/ #f9fafb（ホバー）
- * - padding-left: 8px
- * - gap: 8px（アイコンとテキスト）
- * - 角丸: 8px
+ *
+ * 3つの状態:
+ * - Default: 背景なし、text-gray-500 (#666E7B)、font-medium
+ * - Hover: bg-white + shadow、text-gray-500
+ * - Active: bg-white、text-gray-800 (#2F3038)、font-extrabold
+ *
+ * 仕様:
+ * - padding: px-4 py-2.5
+ * - gap: 6px (gap-1.5)
+ * - フォント: M PLUS Rounded 1c, 12px
+ * - アイコン: 16x16px
  */
 const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   href,
@@ -22,40 +25,46 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   onClick,
 }) => {
   return (
-    <div
+    <Link
+      to={href}
+      onClick={onClick}
       className={cn(
-        "flex flex-col w-56",
-        isActive && "bg-[#f5f5f5] rounded-lg items-center pl-2 h-8"
+        // 共通スタイル
+        "self-stretch px-4 py-2.5 rounded-2xl",
+        "inline-flex justify-start items-center gap-1.5",
+        "no-underline transition-all duration-150 ease-in-out",
+        "focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2",
+        // 状態別スタイル
+        isActive
+          ? "bg-white"
+          : "hover:bg-white hover:shadow-[0px_1px_1px_0px_rgba(0,0,0,0.04)]"
       )}
+      aria-current={isActive ? "page" : undefined}
     >
-      <Link
-        to={href}
-        onClick={onClick}
+      {/* アイコン */}
+      <span
         className={cn(
-          "flex flex-row items-center gap-2 w-56 h-8 rounded-lg",
-          "text-sm font-normal leading-5 tracking-tight",
-          "text-[#0a0a0a] no-underline transition-all duration-150 ease-in-out",
-          !isActive && "pl-2 hover:bg-[#f9fafb]",
-          isActive && "font-medium text-[#171717] p-0",
-          "focus-visible:outline-2 focus-visible:outline-blue-500 focus-visible:outline-offset-2"
+          "w-4 h-4 flex-shrink-0 inline-flex flex-col justify-center items-center overflow-hidden",
+          "transition-colors duration-150",
+          isActive ? "text-gray-800" : "text-gray-500"
         )}
-        aria-current={isActive ? "page" : undefined}
-        role="link"
+        aria-hidden="true"
       >
-        <span
-          className={cn(
-            "w-4 h-4 flex-shrink-0 transition-colors duration-150",
-            isActive ? "text-[#171717]" : "text-[#0a0a0a]"
-          )}
-          aria-hidden="true"
-        >
-          {icon}
-        </span>
-        <span className="whitespace-nowrap overflow-hidden text-ellipsis">
-          {children}
-        </span>
-      </Link>
-    </div>
+        {icon}
+      </span>
+
+      {/* テキスト */}
+      <span
+        className={cn(
+          "text-xs leading-5 whitespace-nowrap overflow-hidden text-ellipsis",
+          isActive
+            ? "text-gray-800 font-extrabold"
+            : "text-gray-500 font-medium"
+        )}
+      >
+        {children}
+      </span>
+    </Link>
   );
 };
 

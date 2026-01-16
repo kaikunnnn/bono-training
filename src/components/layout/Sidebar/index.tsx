@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import { SidebarProps } from "./types";
 import { cn } from "@/lib/utils";
 import SidebarLogo from "./SidebarLogo";
-import SidebarSearch from "./SidebarSearch";
 import SidebarMenuGroup from "./SidebarMenuGroup";
 import SidebarMenuItem from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
@@ -12,9 +11,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 /**
  * サイドバーコンポーネント
- * Figma仕様:
- * - 幅: 240px（固定）
- * - 背景: #ffffff
+ * 仕様:
+ * - 幅: 200px（固定）
+ * - 背景: 透過（ページ背景と同化）
+ * - 高さ: 100%（デスクトップ時）
  * - レイアウト: flexbox（縦並び）
  */
 const Sidebar: React.FC<SidebarProps> = ({ className }) => {
@@ -24,106 +24,105 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   // 現在のパスがメニュー項目のhrefと一致するかチェック
   const isActive = (href: string) => location.pathname === href;
 
-  const handleSearch = (query: string) => {
-    console.log("Search query:", query);
-    // TODO: 検索機能の実装
-  };
-
   return (
     <nav
       className={cn(
-        "flex flex-col items-center w-60 h-screen bg-white",
+        "w-[200px] h-full inline-flex flex-col justify-start items-start gap-4",
         className
       )}
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      {/* 上部コンテンツグループ */}
-      <div className="flex flex-col w-full">
-        {/* トップセクション */}
-        <div className="flex flex-col w-full gap-4 pt-2">
-          {/* ロゴ */}
-          <SidebarLogo />
+      {/* ロゴセクション */}
+      <SidebarLogo />
 
-          {/* 検索 */}
-          <SidebarSearch onSearch={handleSearch} />
+      {/* メインナビゲーション */}
+      <SidebarMenuGroup>
+        {/* マイページ（ログイン時のみ表示） */}
+        {user && (
+          <SidebarMenuItem
+            href="/mypage"
+            icon={<MenuIcons.mypage size={ICON_SIZE} variant="Outline"  />}
+            isActive={isActive("/mypage")}
+          >
+            マイページ
+          </SidebarMenuItem>
+        )}
 
-          {/* ユーザーメニュー */}
-          <SidebarMenuGroup>
-            <SidebarMenuItem
-              href={user ? "/mypage" : "/auth"}
-              icon={
-                user ? (
-                  <MenuIcons.mypage size={ICON_SIZE} />
-                ) : (
-                  <MenuIcons.login size={ICON_SIZE} />
-                )
-              }
-              isActive={isActive(user ? "/mypage" : "/auth")}
-            >
-              {user ? "マイページ" : "ログイン"}
-            </SidebarMenuItem>
-          </SidebarMenuGroup>
-        </div>
+        {/* ロードマップ */}
+        <SidebarMenuItem
+          href="/roadmap"
+          icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline"  />}
+          isActive={isActive("/roadmap")}
+        >
+          ロードマップ
+        </SidebarMenuItem>
 
-        {/* メインメニュー */}
-        <SidebarMenuGroup label="メイン">
-          <SidebarMenuItem
-            href="/roadmap"
-            icon={<MenuIcons.roadmap size={ICON_SIZE} />}
-            isActive={isActive("/roadmap")}
-          >
-            ロードマップ
-          </SidebarMenuItem>
-          <SidebarMenuItem
-            href="/lessons"
-            icon={<MenuIcons.lesson size={ICON_SIZE} />}
-            isActive={isActive("/lessons")}
-          >
-            レッスン
-          </SidebarMenuItem>
-          <SidebarMenuItem
-            href="/guide"
-            icon={<MenuIcons.guide size={ICON_SIZE} />}
-            isActive={isActive("/guide")}
-          >
-            ガイド
-          </SidebarMenuItem>
-          <SidebarMenuItem
-            href="/training"
-            icon={<MenuIcons.training size={ICON_SIZE} />}
-            isActive={isActive("/training")}
-          >
-            トレーニング
-          </SidebarMenuItem>
-        </SidebarMenuGroup>
-      </div>
+        {/* レッスン */}
+        <SidebarMenuItem
+          href="/lessons"
+          icon={<MenuIcons.lesson size={ICON_SIZE} variant="Outline"  />}
+          isActive={isActive("/lessons")}
+        >
+          レッスン
+        </SidebarMenuItem>
 
-      {/* その他メニュー（下部固定） */}
-      <div className="mt-auto w-full">
-        <SidebarMenuGroup label="その他">
+        {/* ガイド */}
+        <SidebarMenuItem
+          href="/guide"
+          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline"  />}
+          isActive={isActive("/guide")}
+        >
+          ガイド
+        </SidebarMenuItem>
+
+        {/* トレーニング */}
+        <SidebarMenuItem
+          href="/training"
+          icon={<MenuIcons.training size={ICON_SIZE} variant="Outline"  />}
+          isActive={isActive("/training")}
+        >
+          トレーニング
+        </SidebarMenuItem>
+      </SidebarMenuGroup>
+
+      {/* その他メニュー */}
+      <SidebarMenuGroup label="その他" itemGap>
+        {/* ログイン（ログオフ時のみ表示） */}
+        {!user && (
           <SidebarMenuItem
-            href="/settings"
-            icon={<MenuIcons.settings size={ICON_SIZE} />}
-            isActive={isActive("/settings")}
+            href="/auth"
+            icon={<MenuIcons.login size={ICON_SIZE} variant="Outline"  />}
+            isActive={isActive("/auth")}
+          >
+            ログイン
+          </SidebarMenuItem>
+        )}
+        {/* 設定（ログイン時のみ表示） */}
+        {user && (
+          <SidebarMenuItem
+            href="/account"
+            icon={<MenuIcons.settings size={ICON_SIZE} variant="Outline"  />}
+            isActive={isActive("/account")}
           >
             設定
           </SidebarMenuItem>
-          {user && (
-            <SidebarMenuItem
-              href="#"
-              icon={<MenuIcons.logout size={ICON_SIZE} />}
-              isActive={false}
-              onClick={(e) => {
-                e.preventDefault();
-                signOut();
-              }}
-            >
-              ログアウト
-            </SidebarMenuItem>
-          )}
-        </SidebarMenuGroup>
-      </div>
+        )}
+        {/* ログアウト（ログイン時のみ表示） */}
+        {user && (
+          <SidebarMenuItem
+            href="#"
+            icon={<MenuIcons.logout size={ICON_SIZE} variant="Outline"  />}
+            isActive={false}
+            onClick={(e) => {
+              e.preventDefault();
+              signOut();
+            }}
+          >
+            ログアウト
+          </SidebarMenuItem>
+        )}
+      </SidebarMenuGroup>
     </nav>
   );
 };

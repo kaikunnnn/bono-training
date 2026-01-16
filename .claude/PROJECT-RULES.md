@@ -128,6 +128,58 @@ console.log('なんかエラーあるけど後で見る');  // ❌ 記録され�
 
 ---
 
+### 5. サブスクリプション・課金機能の開発ルール
+
+**ルール**: 課金関連機能はユーザーにとって最も重要。必ずフォールバック機構を実装する
+
+**背景（ERROR-002）**:
+- 2025-01-13: `get-plan-prices` Edge Functionの500エラーでサブスクリプションページが表示できなくなった
+- 原因: フォールバック機構がなく、Edge Functionの失敗がそのままエラー表示になった
+- 同様の機能（check-subscription）にはフォールバックがあったが、パターンが共有されていなかった
+
+**必須: フォールバック機構の実装**
+
+課金関連のAPI呼び出しには必ず以下の3段階フォールバックを実装:
+
+```typescript
+// 1. Edge Function呼び出し（第1段階）
+try {
+  const result = await supabase.functions.invoke('xxx');
+  if (result.error) throw result.error;
+  return result.data;
+} catch (error) {
+  // 2. DBフォールバック（第2段階）
+  try {
+    const dbResult = await fetchFromDatabase();
+    if (dbResult) return dbResult;
+  } catch (dbError) {
+    // 3. ハードコードフォールバック（第3段階）
+    return getHardcodedValues();
+  }
+}
+```
+
+**対象となる機能**:
+- `getPlanPrices()` - 価格取得 ✅ 実装済み
+- `checkSubscription()` - サブスクリプション確認 ✅ 実装済み
+- `createCheckout()` - チェックアウト作成
+- `cancelSubscription()` - キャンセル処理
+
+**Stripe価格変更時の同期手順**:
+
+Stripeで価格を変更した場合、以下を必ず更新:
+1. `price_cache`テーブル（DBキャッシュ）
+2. `src/services/pricing.ts`のハードコード値
+3. 環境変数（該当する場合）
+
+**チェックリスト（課金機能の実装時）**:
+- [ ] Edge Function失敗時のフォールバックがあるか
+- [ ] DBフォールバック → ハードコードフォールバックの順で実装しているか
+- [ ] ローカル環境でも動作するか（Edge Functionが使えない場合でも）
+- [ ] 本番環境での動作を確認したか
+
+---
+
 ## 📂 ドキュメント管理ルール
 
 ### ドキュメント作成時のルール
@@ -499,6 +551,7 @@ SELECT DISTINCT environment FROM user_subscriptions;
 
 | 日付 | 更新内容 | 更新者 |
 |------|---------|--------|
+| 2025-01-16 | サブスクリプション・課金機能の開発ルール追加（ERROR-002対策） | AI開発チーム |
 | 2025-11-28 | 初版作成 | AI開発チーム |
 
 ---
