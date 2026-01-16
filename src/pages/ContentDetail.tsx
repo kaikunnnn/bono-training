@@ -8,7 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowLeft, Calendar, Clock, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Clock, Lock } from 'lucide-react';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { format } from 'date-fns';
 import VimeoPlayer from '@/components/content/VimeoPlayer';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
@@ -44,7 +45,7 @@ const ContentDetail: React.FC = () => {
       <Layout>
         <div className="container py-8">
           <div className="flex justify-center items-center min-h-[50vh]">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <LoadingSpinner size="lg" />
           </div>
         </div>
       </Layout>

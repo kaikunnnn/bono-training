@@ -7,7 +7,7 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { getContentById } from '@/services/content';
 import { getContentById as getMockContentById } from '@/data/mockContent';
 import { ContentItem } from '@/types/content';
-import { Loader2 } from 'lucide-react';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { toast } from 'sonner';
 import { CONTENT_PERMISSIONS } from '@/utils/subscriptionPlans';
 
@@ -77,7 +77,7 @@ const VideoDetailTest = () => {
     return (
       <Layout>
         <div className="flex min-h-[50vh] items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

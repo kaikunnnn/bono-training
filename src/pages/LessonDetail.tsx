@@ -7,6 +7,7 @@ import LessonTabs from "@/components/lesson/LessonTabs";
 import QuestList from "@/components/lesson/QuestList";
 import OverviewTab from "@/components/lesson/OverviewTab";
 import { getLessonProgress } from "@/services/progress";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 interface Article {
   _id: string;
@@ -196,10 +197,7 @@ export default function LessonDetail() {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
-            <p className="text-gray-600">読み込み中...</p>
-          </div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

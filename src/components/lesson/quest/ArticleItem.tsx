@@ -94,7 +94,7 @@ export function ArticleItem({
         </div>
       ) : (
         <div className="size-4 flex items-center justify-center flex-shrink-0">
-          <span className="font-luckiest text-[12px] text-[#414141] text-center leading-none">
+          <span className="font-rounded-mplus font-bold text-[13px] text-[#414141] text-center leading-none">
             {articleNumber}
           </span>
         </div>

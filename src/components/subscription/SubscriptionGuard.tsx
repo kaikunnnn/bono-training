@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { checkSubscriptionStatus } from '@/services/stripe';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SubscriptionButton } from '@/components/subscription/SubscriptionButton';
-import { Loader2 } from 'lucide-react';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface SubscriptionGuardProps {
   children: ReactNode;
@@ -71,7 +71,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center p-12">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+        <LoadingSpinner size="lg" />
       </div>
     );
   }

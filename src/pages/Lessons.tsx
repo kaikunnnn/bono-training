@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
 import { useLessons } from "@/hooks/useLessons";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 export default function Lessons() {
   const navigate = useNavigate();
@@ -14,9 +15,8 @@ export default function Lessons() {
   if (loading) {
     return (
       <Layout>
-        <div className="p-4 md:p-8">
-          <h1 className="text-xl md:text-2xl font-bold mb-4">レッスン一覧</h1>
-          <p>読み込み中...</p>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

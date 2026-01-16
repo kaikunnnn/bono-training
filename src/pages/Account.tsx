@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import Layout from '@/components/layout/Layout';
 import SubscriptionInfo from '@/components/account/SubscriptionInfo';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 /**
  * Account ページ
@@ -31,14 +32,7 @@ export default function Account() {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
-          <div className="text-center">
-            <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]">
-              <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-                Loading...
-              </span>
-            </div>
-            <p className="mt-4 font-noto-sans-jp text-gray-600">読み込み中...</p>
-          </div>
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

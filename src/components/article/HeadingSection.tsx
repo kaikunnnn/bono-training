@@ -1,7 +1,8 @@
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Share2 } from "lucide-react";
 import { ArticleTag, TagType } from "@/components/article/sidebar/ArticleTag";
 import { CheckIcon } from "@/components/article/sidebar/CheckIcon";
 import { IconButton } from "@/components/ui/button/IconButton";
+import { ShareDropdown } from "@/components/common/ShareDropdown";
 
 interface HeadingSectionProps {
   tagType: TagType;
@@ -9,7 +10,6 @@ interface HeadingSectionProps {
   description?: string;
   onComplete?: () => void;
   onFavorite?: () => void;
-  onShare?: () => void;
   onNext?: () => void;
   isBookmarked?: boolean;
   bookmarkLoading?: boolean;
@@ -34,7 +34,6 @@ const HeadingSection = ({
   description,
   onComplete,
   onFavorite,
-  onShare,
   onNext,
   isBookmarked = false,
   bookmarkLoading = false,
@@ -98,29 +97,24 @@ const HeadingSection = ({
               </div>
             </button>
 
-            {/* Share Button */}
-            <button
-              onClick={onShare}
-              className="px-3 py-2 bg-gray-200 rounded-xl flex justify-start items-center gap-1"
-              style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
-              aria-label="シェア"
-            >
-              {/* Share Icon - 3 dots with lines */}
-              <div className="w-4 h-4 relative flex-shrink-0">
-                <div className="w-1 h-1 left-[11.25px] top-[1.50px] absolute outline outline-1 outline-offset-[-0.56px] outline-slate-950" />
-                <div className="w-1 h-1 left-[2.25px] top-[6.75px] absolute outline outline-1 outline-offset-[-0.56px] outline-slate-950" />
-                <div className="w-1 h-1 left-[11.25px] top-[12px] absolute outline outline-1 outline-offset-[-0.56px] outline-slate-950" />
-                <div className="w-[5.12px] h-[2.98px] left-[6.44px] top-[10.13px] absolute outline outline-1 outline-offset-[-0.56px] outline-slate-950" />
-                <div className="w-[5.11px] h-[2.98px] left-[6.44px] top-[4.88px] absolute outline outline-1 outline-offset-[-0.56px] outline-slate-950" />
-              </div>
+            {/* Share Button with Dropdown */}
+            <ShareDropdown title={title}>
+              <button
+                className="px-3 py-2 bg-gray-200 rounded-xl flex justify-start items-center gap-1 hover:bg-gray-300 transition"
+                style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
+                aria-label="シェア"
+              >
+                {/* Share Icon */}
+                <Share2 className="w-4 h-4 text-gray-600" strokeWidth={2} />
 
-              {/* Text */}
-              <div className="inline-flex flex-col justify-start items-center">
-                <div className="text-center justify-center text-gray-600 text-sm font-semibold font-['Hiragino_Sans'] leading-5">
-                  シェア
+                {/* Text */}
+                <div className="inline-flex flex-col justify-start items-center">
+                  <div className="text-center justify-center text-gray-600 text-sm font-semibold font-['Hiragino_Sans'] leading-5">
+                    シェア
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+            </ShareDropdown>
           </div>
         </div>
 

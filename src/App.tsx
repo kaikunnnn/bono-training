@@ -32,13 +32,13 @@ import TrainingDebug from '@/pages/Training/Debug';
 import Lessons from "./pages/Lessons";
 import GuidePage from "./pages/Guide";
 import GuideDetailPage from "./pages/Guide/GuideDetail";
-import DevRoute from "./pages/Dev";
-import DevHome from "./pages/Dev/DevHome";
-import ComponentsReferencePage from "./pages/Dev/Components";
-import WebflowTest from "./pages/Dev/WebflowTest";
-import GuideManual from "./pages/Dev/GuideManual";
-import ProgressComponents from "./pages/Dev/ProgressComponents";
-import CelebrationComponents from "./pages/Dev/CelebrationComponents";
+import DevRoute from "./pages/dev";
+import DevHome from "./pages/dev/DevHome";
+import ComponentsReferencePage from "./pages/dev/Components";
+import WebflowTest from "./pages/dev/WebflowTest";
+import GuideManual from "./pages/dev/GuideManual";
+import ProgressComponents from "./pages/dev/ProgressComponents";
+import CelebrationComponents from "./pages/dev/CelebrationComponents";
 import QuestComponents from "./pages/dev/QuestComponents";
 import LessonHeaderComponents from "./pages/dev/LessonHeaderComponents";
 import IconAnimations from "./pages/dev/IconAnimations";
@@ -48,6 +48,7 @@ import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
 import MyPage from "./pages/MyPage";
 import Account from "./pages/Account";
+import Roadmap from "./pages/Roadmap";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionUpdated from "./pages/SubscriptionUpdated";
 import DevEnvironmentBanner from "./components/dev/DevEnvironmentBanner";
@@ -58,7 +59,7 @@ import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
 import TagsIndex from './pages/blog/tags';
 import TagDetail from './pages/blog/tag';
-import BlogGuide from './pages/Dev/BlogGuide';
+import BlogGuide from './pages/dev/BlogGuide';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -136,6 +137,8 @@ const AppContent = () => {
         <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
         <Route path="/mypage" element={<PrivateRoute><MyPage /></PrivateRoute>} />
         <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
+
+        <Route path="/roadmap" element={<Roadmap />} />
 
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />

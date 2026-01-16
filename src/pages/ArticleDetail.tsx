@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CelebrationModal } from "@/components/celebration/CelebrationModal";
 import { QuestCompletionModal } from "@/components/celebration/QuestCompletionModal";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 
 const ArticleDetail = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -306,14 +307,7 @@ const ArticleDetail = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-base">
-        <div className="text-center">
-          <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]">
-            <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-              Loading...
-            </span>
-          </div>
-          <p className="mt-4 text-gray-600">読み込み中...</p>
-        </div>
+        <LoadingSpinner size="lg" />
       </div>
     );
   }
@@ -417,7 +411,6 @@ const ArticleDetail = () => {
                 description={article.excerpt}
                 onComplete={handleCompleteToggle}
                 onFavorite={handleBookmarkToggle}
-                onShare={() => console.log("Share clicked")}
                 onNext={navigation.next ? () => navigate(`/articles/${navigation.next.slug}`) : undefined}
                 isBookmarked={bookmarked}
                 bookmarkLoading={bookmarkLoading}

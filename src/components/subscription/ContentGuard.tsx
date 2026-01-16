@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ContentAccessType, hasAccessToContent, UserPlanInfo } from '@/utils/subscriptionPlans';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import FallbackContent from './FallbackContent';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface ContentGuardProps {
   children: React.ReactNode;
@@ -83,7 +84,7 @@ const ContentGuard: React.FC<ContentGuardProps> = ({
       // リダイレクト中の表示
       return (
         <div className="flex justify-center items-center p-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+          <LoadingSpinner size="lg" />
         </div>
       );
     }

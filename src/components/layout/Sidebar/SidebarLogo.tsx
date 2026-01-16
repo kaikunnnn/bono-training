@@ -18,7 +18,7 @@ const SidebarLogo: React.FC<SidebarLogoProps> = ({ className }) => {
         <Link to="/" className="flex items-center gap-2">
           <Logo className="w-[67.51px] h-5" />
           <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
-            α版
+            工事中
           </span>
         </Link>
       </div>

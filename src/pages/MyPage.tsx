@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
+import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { BookmarkList } from "@/components/ui/bookmark-list";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ProgressLesson, CompletedLessonCard } from "@/components/progress";
@@ -214,19 +215,8 @@ export default function MyPage() {
   if (loading) {
     return (
       <Layout>
-        <div style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: styles.spacing.sectionGap,
-          alignItems: "flex-start",
-          paddingTop: styles.spacing.containerPaddingTop,
-          paddingBottom: styles.spacing.containerPaddingBottom,
-          paddingLeft: styles.spacing.containerPaddingHorizontal,
-          paddingRight: styles.spacing.containerPaddingHorizontal,
-          width: "100%",
-          minHeight: "100vh",
-        }}>
-          <p>読み込み中...</p>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
         </div>
       </Layout>
     );

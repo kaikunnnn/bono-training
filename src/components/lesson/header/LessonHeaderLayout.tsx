@@ -22,8 +22,6 @@ interface LessonHeaderLayoutProps {
   onStart?: () => void;
   /** 「概要・目的ですべてみる」クリック時のコールバック（タブ切替） */
   onViewAllDetails?: () => void;
-  /** シェアボタンクリック時のコールバック */
-  onShare?: () => void;
   /** 右側ブロックに追加するコンテンツ（タブなど） */
   children?: React.ReactNode;
 }
@@ -53,13 +51,12 @@ export function LessonHeaderLayout({
   progress,
   onStart,
   onViewAllDetails,
-  onShare,
   children,
 }: LessonHeaderLayoutProps) {
   return (
     <div className="w-full px-[20px] pt-[32px] lg:max-w-[1200px] lg:mx-auto">
       {/* ヘッダー（戻る + シェア） */}
-      <LessonHeader onShare={onShare} />
+      <LessonHeader shareTitle={lesson.title} />
 
       {/* メインコンテンツエリア */}
       {/* モバイル: 縦並び（サイドバー上、コンテンツ下） */}
