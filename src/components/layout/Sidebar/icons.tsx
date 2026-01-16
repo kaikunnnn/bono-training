@@ -1,6 +1,6 @@
 /**
  * サイドバーで使用するアイコンマッピング
- * lucide-reactを使用
+ * iconsax-react を使用
  *
  * Note: react-refresh/only-export-components 警告を回避するため、
  * このファイルはコンポーネント（アイコン）のみをエクスポートします。
@@ -9,15 +9,16 @@
 
 import {
   Map,
-  BookOpen,
-  Compass,
-  Settings,
+  Book,
+  LocationDiscover,
+  Setting2,
   User,
-  LogIn,
-  LogOut,
-  Search,
+  Login,
+  LogoutCurve,
+  SearchNormal1,
   Play,
-} from "lucide-react";
+  ExportCurve,
+} from "iconsax-react";
 
 /**
  * メニュー項目用アイコンコンポーネント
@@ -26,22 +27,24 @@ export const MenuIcons = {
   // ロードマップ
   roadmap: Map,
   // レッスン
-  lesson: BookOpen,
+  lesson: Book,
   // トレーニング
   training: Play,
   // ガイド
-  guide: Compass,
+  guide: LocationDiscover,
   // 設定
-  settings: Settings,
+  settings: Setting2,
   // マイページ
   mypage: User,
   user: User,
   // ログイン
-  login: LogIn,
+  login: Login,
   // ログアウト
-  logout: LogOut,
+  logout: LogoutCurve,
   // 検索
-  search: Search,
+  search: SearchNormal1,
+  // シェア
+  share: ExportCurve,
 } as const;
 
 /**
