@@ -312,9 +312,15 @@ const BlogDetail: React.FC = () => {
                 transition={{ delay: 0.4 }}
               >
                 {Array.isArray(post.content) ? (
-                  <BlogRichText content={post.content} className="blog-markdown max-w-[720px] mx-auto" />
+                  <BlogRichText
+                    content={post.content}
+                    className="blog-markdown w-full mx-auto lg:max-w-[648px]"
+                  />
                 ) : (
-                  <BlogContent html={post.content} className="blog-markdown max-w-[720px] mx-auto" />
+                  <BlogContent
+                    html={post.content}
+                    className="blog-markdown w-full mx-auto lg:max-w-[648px]"
+                  />
                 )}
               </motion.div>
             </div>
