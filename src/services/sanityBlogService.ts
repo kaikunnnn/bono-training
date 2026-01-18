@@ -19,7 +19,7 @@ type SanityBlogPost = {
   thumbnailUrl?: string
 }
 
-const DEFAULT_THUMBNAIL = '/blog/images/default.jpg'
+const DEFAULT_THUMBNAIL = '/placeholder-thumbnail.svg'
 
 function estimateReadingTimeFromHtml(html: string): number {
   // 超簡易: タグ除去して文字数から概算（日本語前提で 600文字/分 を目安）

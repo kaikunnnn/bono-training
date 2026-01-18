@@ -77,7 +77,7 @@ export const generateRSSFeed = (options: RSSOptions): string => {
       <pubDate>${toRFC822Date(post.publishedAt)}</pubDate>
       ${post.category ? `<category>${escapeXML(post.category)}</category>` : ''}
       ${post.tags?.map(tag => `<category>${escapeXML(tag)}</category>`).join('\n      ') || ''}
-      ${post.thumbnail && post.thumbnail !== '/blog/images/default.jpg' ? `
+      ${post.thumbnail && post.thumbnail !== '/placeholder-thumbnail.svg' ? `
       <enclosure url="${escapeXML(post.thumbnail.startsWith('http') ? post.thumbnail : `${siteUrl}${post.thumbnail}`)}" type="image/jpeg" />` : ''}
     </item>`).join('')}
   </channel>

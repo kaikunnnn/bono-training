@@ -173,7 +173,7 @@ const BlogDetail: React.FC = () => {
   // OGP用の画像URL（Ghost CMSのfeature_imageを優先）
   const getOgImage = () => {
     // Ghost CMSのfeature_image（thumbnail）を最優先
-    if (post.thumbnail && post.thumbnail !== '/blog/images/default.jpg') {
+    if (post.thumbnail && post.thumbnail !== '/placeholder-thumbnail.svg') {
       return post.thumbnail;
     }
     // 次にimageUrlをチェック

@@ -47,7 +47,7 @@ export const convertGhostToBlogPost = (ghostPost: GhostPost): BlogPost => {
     publishedAt: ghostPost.published_at,
     category: ghostPost.primary_tag?.slug || 'uncategorized',
     tags: ghostPost.tags?.map(tag => tag.name) || [],
-    thumbnail: ghostPost.feature_image || '/blog/images/default.jpg',
+    thumbnail: ghostPost.feature_image || '/placeholder-thumbnail.svg',
     featured: ghostPost.featured || false,
     readingTime: ghostPost.reading_time || 5,
     emoji: emoji, // タイトルから自動抽出 or カスタムフィールド
