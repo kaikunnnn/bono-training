@@ -1,5 +1,6 @@
 import type { BlogPost, BlogPostsResponse } from '@/types/blog'
 import { client } from '@/lib/sanity'
+import { urlFor } from '@/lib/sanity'
 import { extractEmojiFromText } from '@/utils/blog/emojiUtils'
 
 type SanityBlogPost = {
@@ -14,6 +15,7 @@ type SanityBlogPost = {
   category?: string
   tags?: string[]
   featured?: boolean
+  thumbnail?: unknown
   thumbnailUrl?: string
 }
 
@@ -34,7 +36,9 @@ function toBlogPost(doc: SanityBlogPost): BlogPost & { imageUrl?: string; excerp
   const extractedEmoji = extractEmojiFromText(doc.title)
   const emoji = doc.emoji || extractedEmoji
 
-  const thumbnail = doc.thumbnailUrl || DEFAULT_THUMBNAIL
+  const uploadedThumbnail =
+    doc.thumbnail ? urlFor(doc.thumbnail).width(1200).height(675).fit('crop').url() : null
+  const thumbnail = doc.thumbnailUrl || uploadedThumbnail || DEFAULT_THUMBNAIL
   const contentHtml = doc.contentHtml ?? ''
 
   return {
@@ -83,6 +87,7 @@ export async function fetchSanityBlogPosts(params?: {
       category,
       tags,
       featured,
+      thumbnail,
       thumbnailUrl
     }
   }`
@@ -123,6 +128,7 @@ export async function fetchSanityBlogPostBySlug(slug: string): Promise<(BlogPost
     category,
     tags,
     featured,
+    thumbnail,
     thumbnailUrl
   }`
 
@@ -144,6 +150,7 @@ export async function fetchSanityFeaturedPosts(limit = 3): Promise<(BlogPost & {
     category,
     tags,
     featured,
+    thumbnail,
     thumbnailUrl
   }`
   const docs = await client.fetch<SanityBlogPost[]>(query, { limit })
@@ -163,6 +170,7 @@ export async function fetchSanityLatestPosts(excludeId: string, limit = 4): Prom
     category,
     tags,
     featured,
+    thumbnail,
     thumbnailUrl
   }`
   const docs = await client.fetch<SanityBlogPost[]>(query, { excludeId, limit })
@@ -179,7 +187,7 @@ export async function fetchSanityPrevPost(currentId: string): Promise<(BlogPost 
 
   const prev = await client.fetch<SanityBlogPost | null>(
     `*[_type == "blogPost" && publishedAt < $publishedAt] | order(publishedAt desc)[0]{
-      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnailUrl
+      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnail,thumbnailUrl
     }`,
     { publishedAt: currentPublishedAt }
   )
@@ -196,7 +204,7 @@ export async function fetchSanityNextPost(currentId: string): Promise<(BlogPost 
 
   const next = await client.fetch<SanityBlogPost | null>(
     `*[_type == "blogPost" && publishedAt > $publishedAt] | order(publishedAt asc)[0]{
-      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnailUrl
+      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnail,thumbnailUrl
     }`,
     { publishedAt: currentPublishedAt }
   )
@@ -215,7 +223,7 @@ export async function fetchSanityRelatedPosts(
       category == $category ||
       count(tags[@ in $tags]) > 0
     )] | order(publishedAt desc) [0...$limit]{
-      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnailUrl
+      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnail,thumbnailUrl
     }`
 
   const docs = await client.fetch<SanityBlogPost[]>(query, {

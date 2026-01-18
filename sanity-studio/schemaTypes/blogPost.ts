@@ -99,11 +99,19 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: 'thumbnail',
+      title: 'サムネイル画像（アップロード）',
+      type: 'image',
+      options: {hotspot: true},
+      description:
+        'Sanityのアセットとして画像をアップロードできます（推奨）。未設定の場合はURL/デフォルトへフォールバックします。',
+    }),
+    defineField({
       name: 'thumbnailUrl',
       title: 'サムネイルURL（任意）',
       type: 'url',
       description:
-        'BlogCardの画像に使用。未設定の場合は既定の画像/emoji表示にフォールバックします。',
+        '外部URLを使いたい場合のフォールバック。アップロード画像（thumbnail）がある場合はそちらが優先されます。',
     }),
   ],
   preview: {
@@ -113,11 +121,13 @@ export default defineType({
       publishedAt: 'publishedAt',
       category: 'category',
       featured: 'featured',
+      media: 'thumbnail',
     },
-    prepare({title, slug, publishedAt, category, featured}) {
+    prepare({title, slug, publishedAt, category, featured, media}) {
       const date = publishedAt ? new Date(publishedAt).toLocaleDateString('ja-JP') : '日付未設定'
       return {
         title,
+        media,
         subtitle: `${category || 'カテゴリ未設定'} | ${date}${featured ? ' ⭐️' : ''} | /blog/${slug ?? ''}`,
       }
     },
