@@ -8,7 +8,15 @@ import {
   fetchRelatedGhostPosts,
   checkGhostConnection
 } from '@/services/ghostService';
-import { fetchSanityBlogPostBySlug, fetchSanityBlogPosts } from '@/services/sanityBlogService';
+import {
+  fetchSanityBlogPostBySlug,
+  fetchSanityBlogPosts,
+  fetchSanityFeaturedPosts,
+  fetchSanityLatestPosts,
+  fetchSanityNextPost,
+  fetchSanityPrevPost,
+  fetchSanityRelatedPosts,
+} from '@/services/sanityBlogService';
 
 // データソースの設定
 const isGhostEnabled = () => {
@@ -134,8 +142,20 @@ export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> 
 };
 
 export const getPrevPost = async (currentId: string): Promise<BlogPost | null> => {
+  if (isSanityEnabled()) {
+    try {
+      return await fetchSanityPrevPost(currentId)
+    } catch (error) {
+      console.warn('Sanity Blog API failed for prev post, falling back to mock data:', error);
+    }
+  }
+
   // Note: Ghost APIでは前後の記事を直接取得する機能がないため、
   // 現在はmockPostsのロジックを使用（将来的に改善予定）
+  if (isProd && import.meta.env.VITE_BLOG_DATA_SOURCE && import.meta.env.VITE_BLOG_DATA_SOURCE !== 'mock') {
+    return null
+  }
+
   const currentIndex = mockPosts.findIndex(post => post.id === currentId);
   if (currentIndex > 0) {
     return mockPosts[currentIndex - 1];
@@ -144,8 +164,20 @@ export const getPrevPost = async (currentId: string): Promise<BlogPost | null> =
 };
 
 export const getNextPost = async (currentId: string): Promise<BlogPost | null> => {
+  if (isSanityEnabled()) {
+    try {
+      return await fetchSanityNextPost(currentId)
+    } catch (error) {
+      console.warn('Sanity Blog API failed for next post, falling back to mock data:', error);
+    }
+  }
+
   // Note: Ghost APIでは前後の記事を直接取得する機能がないため、
   // 現在はmockPostsのロジックを使用（将来的に改善予定）
+  if (isProd && import.meta.env.VITE_BLOG_DATA_SOURCE && import.meta.env.VITE_BLOG_DATA_SOURCE !== 'mock') {
+    return null
+  }
+
   const currentIndex = mockPosts.findIndex(post => post.id === currentId);
   if (currentIndex !== -1 && currentIndex < mockPosts.length - 1) {
     return mockPosts[currentIndex + 1];
@@ -169,6 +201,14 @@ export const getCurrentDataSource = (): 'ghost' | 'mock' | 'sanity' => {
 };
 
 export const getFeaturedPosts = async (limit = 3): Promise<BlogPost[]> => {
+  if (isSanityEnabled()) {
+    try {
+      return await fetchSanityFeaturedPosts(limit)
+    } catch (error) {
+      console.warn('Sanity Blog API failed for featured posts, falling back to mock data:', error);
+    }
+  }
+
   if (isGhostEnabled()) {
     try {
       const isConnected = await checkGhostConnection();
@@ -181,10 +221,21 @@ export const getFeaturedPosts = async (limit = 3): Promise<BlogPost[]> => {
   }
 
   // フォールバック: mockPostsを使用
+  if (isProd && import.meta.env.VITE_BLOG_DATA_SOURCE && import.meta.env.VITE_BLOG_DATA_SOURCE !== 'mock') {
+    return []
+  }
   return mockPosts.filter(post => post.featured).slice(0, limit);
 };
 
 export const getRelatedPosts = async (currentPost: BlogPost, limit = 3): Promise<BlogPost[]> => {
+  if (isSanityEnabled()) {
+    try {
+      return await fetchSanityRelatedPosts(currentPost, limit)
+    } catch (error) {
+      console.warn('Sanity Blog API failed for related posts, falling back to mock data:', error);
+    }
+  }
+
   if (isGhostEnabled()) {
     try {
       const isConnected = await checkGhostConnection();
@@ -197,6 +248,9 @@ export const getRelatedPosts = async (currentPost: BlogPost, limit = 3): Promise
   }
 
   // フォールバック: mockPostsを使用
+  if (isProd && import.meta.env.VITE_BLOG_DATA_SOURCE && import.meta.env.VITE_BLOG_DATA_SOURCE !== 'mock') {
+    return []
+  }
   return mockPosts
     .filter(post =>
       post.id !== currentPost.id &&
@@ -208,6 +262,14 @@ export const getRelatedPosts = async (currentPost: BlogPost, limit = 3): Promise
 
 // 最新記事を取得（現在の記事を除外）
 export const getLatestPosts = async (excludeId: string, limit = 4): Promise<BlogPost[]> => {
+  if (isSanityEnabled()) {
+    try {
+      return await fetchSanityLatestPosts(excludeId, limit)
+    } catch (error) {
+      console.warn('Sanity Blog API failed for latest posts, falling back to mock data:', error);
+    }
+  }
+
   if (isGhostEnabled()) {
     try {
       const isConnected = await checkGhostConnection();
@@ -224,6 +286,9 @@ export const getLatestPosts = async (excludeId: string, limit = 4): Promise<Blog
   }
 
   // フォールバック: mockPostsを使用
+  if (isProd && import.meta.env.VITE_BLOG_DATA_SOURCE && import.meta.env.VITE_BLOG_DATA_SOURCE !== 'mock') {
+    return []
+  }
   return mockPosts
     .filter(post => post.id !== excludeId)
     .slice(0, limit);

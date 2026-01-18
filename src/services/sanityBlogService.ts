@@ -19,6 +19,13 @@ type SanityBlogPost = {
 
 const DEFAULT_THUMBNAIL = '/blog/images/default.jpg'
 
+function estimateReadingTimeFromHtml(html: string): number {
+  // 超簡易: タグ除去して文字数から概算（日本語前提で 600文字/分 を目安）
+  const text = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
+  const chars = text.length
+  return Math.max(1, Math.round(chars / 600))
+}
+
 function toBlogPost(doc: SanityBlogPost): BlogPost & { imageUrl?: string; excerpt?: string } {
   const slug = doc.slug?.current ?? ''
   const publishedAt = doc.publishedAt ?? new Date().toISOString()
@@ -28,20 +35,21 @@ function toBlogPost(doc: SanityBlogPost): BlogPost & { imageUrl?: string; excerp
   const emoji = doc.emoji || extractedEmoji
 
   const thumbnail = doc.thumbnailUrl || DEFAULT_THUMBNAIL
+  const contentHtml = doc.contentHtml ?? ''
 
   return {
     id: doc._id,
     slug,
     title: doc.title,
     description: doc.description ?? '',
-    content: doc.contentHtml ?? '',
+    content: contentHtml,
     author: doc.author ?? 'BONO',
     publishedAt,
     category,
     tags: doc.tags ?? [],
     thumbnail,
     featured: !!doc.featured,
-    readingTime: 5,
+    readingTime: estimateReadingTimeFromHtml(contentHtml),
     emoji,
     // UI側で参照されることがあるため互換用に付与（types/blog.ts には無いが既存実装が参照）
     imageUrl: thumbnail,
@@ -121,6 +129,102 @@ export async function fetchSanityBlogPostBySlug(slug: string): Promise<(BlogPost
   const doc = await client.fetch<SanityBlogPost | null>(query, { slug })
   if (!doc?._id) return null
   return toBlogPost(doc)
+}
+
+export async function fetchSanityFeaturedPosts(limit = 3): Promise<(BlogPost & { imageUrl?: string; excerpt?: string })[]> {
+  const query = `*[_type == "blogPost" && featured == true] | order(publishedAt desc) [0...$limit]{
+    _id,
+    title,
+    slug,
+    publishedAt,
+    author,
+    description,
+    contentHtml,
+    emoji,
+    category,
+    tags,
+    featured,
+    thumbnailUrl
+  }`
+  const docs = await client.fetch<SanityBlogPost[]>(query, { limit })
+  return (docs ?? []).map(toBlogPost)
+}
+
+export async function fetchSanityLatestPosts(excludeId: string, limit = 4): Promise<(BlogPost & { imageUrl?: string; excerpt?: string })[]> {
+  const query = `*[_type == "blogPost" && _id != $excludeId] | order(publishedAt desc) [0...$limit]{
+    _id,
+    title,
+    slug,
+    publishedAt,
+    author,
+    description,
+    contentHtml,
+    emoji,
+    category,
+    tags,
+    featured,
+    thumbnailUrl
+  }`
+  const docs = await client.fetch<SanityBlogPost[]>(query, { excludeId, limit })
+  return (docs ?? []).map(toBlogPost)
+}
+
+export async function fetchSanityPrevPost(currentId: string): Promise<(BlogPost & { imageUrl?: string; excerpt?: string }) | null> {
+  const current = await client.fetch<{ publishedAt?: string } | null>(
+    `*[_type == "blogPost" && _id == $id][0]{ publishedAt }`,
+    { id: currentId }
+  )
+  const currentPublishedAt = current?.publishedAt
+  if (!currentPublishedAt) return null
+
+  const prev = await client.fetch<SanityBlogPost | null>(
+    `*[_type == "blogPost" && publishedAt < $publishedAt] | order(publishedAt desc)[0]{
+      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnailUrl
+    }`,
+    { publishedAt: currentPublishedAt }
+  )
+  return prev?._id ? toBlogPost(prev) : null
+}
+
+export async function fetchSanityNextPost(currentId: string): Promise<(BlogPost & { imageUrl?: string; excerpt?: string }) | null> {
+  const current = await client.fetch<{ publishedAt?: string } | null>(
+    `*[_type == "blogPost" && _id == $id][0]{ publishedAt }`,
+    { id: currentId }
+  )
+  const currentPublishedAt = current?.publishedAt
+  if (!currentPublishedAt) return null
+
+  const next = await client.fetch<SanityBlogPost | null>(
+    `*[_type == "blogPost" && publishedAt > $publishedAt] | order(publishedAt asc)[0]{
+      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnailUrl
+    }`,
+    { publishedAt: currentPublishedAt }
+  )
+  return next?._id ? toBlogPost(next) : null
+}
+
+export async function fetchSanityRelatedPosts(
+  current: BlogPost,
+  limit = 3
+): Promise<(BlogPost & { imageUrl?: string; excerpt?: string })[]> {
+  const tags = current.tags ?? []
+  const category = current.category
+
+  // 同カテゴリ or タグが1つでも一致する記事を取得（自分は除外）
+  const query = `*[_type == "blogPost" && _id != $excludeId && (
+      category == $category ||
+      count(tags[@ in $tags]) > 0
+    )] | order(publishedAt desc) [0...$limit]{
+      _id,title,slug,publishedAt,author,description,contentHtml,emoji,category,tags,featured,thumbnailUrl
+    }`
+
+  const docs = await client.fetch<SanityBlogPost[]>(query, {
+    excludeId: current.id,
+    category,
+    tags,
+    limit,
+  })
+  return (docs ?? []).map(toBlogPost)
 }
 
 /**
