@@ -5,6 +5,7 @@ import { GhostPost, GhostPostsResponse } from '@/types/ghost';
 import { extractEmojiFromText } from '@/utils/blog/emojiUtils';
 import { categories } from '@/data/blog/categories';
 import { fetchSanityBlogPosts, fetchSanityCategoryCounts } from '@/services/sanityBlogService';
+import { isSanityEnabled } from '@/utils/blog/dataSource';
 
 // カテゴリベースのデフォルト絵文字マッピング
 const categoryEmojiMap: Record<string, string> = {
@@ -239,7 +240,7 @@ export interface GhostTag {
 // 全タグを取得
 export const fetchGhostTags = async (): Promise<GhostTag[]> => {
   // Sanity運用時: “タグ一覧”画面はカテゴリ一覧として返す（既存UIのルーティング/フィルタに整合）
-  if (import.meta.env.VITE_BLOG_DATA_SOURCE === 'sanity') {
+  if (isSanityEnabled()) {
     const counts = await fetchSanityCategoryCounts()
     return categories.map((c) => ({
       id: c.id,

@@ -1,6 +1,7 @@
 // src/utils/blog/blogUtils.ts
 import { BlogPost, BlogPostsResponse } from '@/types/blog';
 import { mockPosts } from '@/data/blog/mockPosts';
+import { isGhostEnabled, isSanityEnabled } from '@/utils/blog/dataSource';
 import {
   fetchGhostPosts,
   fetchGhostPostBySlug,
@@ -17,19 +18,6 @@ import {
   fetchSanityPrevPost,
   fetchSanityRelatedPosts,
 } from '@/services/sanityBlogService';
-
-// データソースの設定
-const isGhostEnabled = () => {
-  return import.meta.env.VITE_BLOG_DATA_SOURCE === 'ghost' &&
-         import.meta.env.VITE_GHOST_URL &&
-         import.meta.env.VITE_GHOST_KEY;
-};
-
-const isSanityEnabled = () => {
-  return import.meta.env.VITE_BLOG_DATA_SOURCE === 'sanity' &&
-    import.meta.env.VITE_SANITY_PROJECT_ID &&
-    import.meta.env.VITE_SANITY_DATASET;
-}
 
 const isProd = import.meta.env.MODE === 'production'
 

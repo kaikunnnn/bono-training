@@ -14,7 +14,7 @@ import { Pagination } from '@/components/blog/Pagination';
 import { ResponsiveSunDecoration } from '@/components/blog/SunDecoration';
 import Footer from '@/components/layout/Footer';
 import SEO from '@/components/common/SEO';
-import { fetchGhostPostsByCategory } from '@/services/ghostService';
+import { getBlogPosts } from '@/utils/blog/blogUtils';
 import { BlogPostsResponse } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -48,9 +48,10 @@ const TagDetail: React.FC = () => {
     const loadPosts = async () => {
       setIsLoading(true);
       try {
-        const data = await fetchGhostPostsByCategory(slug, {
+        const data = await getBlogPosts({
           page: currentPage,
           limit: 9,
+          category: slug,
         });
         setBlogData(data);
       } catch (error) {
