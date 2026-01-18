@@ -16,7 +16,7 @@ export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className = "" })
   return (
     <nav aria-label="パンくずリスト" className={`flex items-center space-x-1 text-sm ${className}`}>
       <Link
-        to="/"
+        to="/blog"
         className="flex items-center text-gray-500 hover:text-gray-700 transition-colors"
       >
         <Home className="w-4 h-4" />
