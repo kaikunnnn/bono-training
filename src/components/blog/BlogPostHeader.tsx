@@ -9,16 +9,7 @@ interface BlogPostHeaderProps {
   post: BlogPost;
 }
 
-const categoryColors: Record<string, string> = {
-  tech: 'bg-transparent text-blue-600 border-blue-600 hover:bg-blue-600 hover:text-white',
-  design: 'bg-transparent text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white',
-  business: 'bg-transparent text-green-600 border-green-600 hover:bg-green-600 hover:text-white',
-  lifestyle: 'bg-transparent text-pink-600 border-pink-600 hover:bg-pink-600 hover:text-white',
-};
-
 export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post }) => {
-  const categoryColorClass = categoryColors[post.category] || 'bg-transparent text-gray-600 border-gray-600 hover:bg-gray-600 hover:text-white';
-
   return (
     <div className="text-center pt-6 pb-2">
       <motion.div
@@ -59,7 +50,7 @@ export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post }) => {
         {/* カテゴリ（Primary Tagのみ） */}
         <div className="flex items-center justify-center">
           <Link to={`/blog/tag/${post.category}`}>
-            <Badge className={`text-sm px-4 py-2 rounded-full border font-medium transition-colors cursor-pointer ${categoryColorClass}`}>
+            <Badge className="text-sm px-4 py-2 rounded-full border font-medium transition-colors cursor-pointer bg-transparent text-gray-900 border-black/10 hover:bg-black/5 hover:text-gray-900">
               {post.category}
             </Badge>
           </Link>
