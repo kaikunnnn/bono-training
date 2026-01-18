@@ -35,7 +35,7 @@ export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post }) => {
 
         {/* 説明文（存在する場合のみ表示） */}
         {post.description && (
-          <p className="text-xl text-gray-600 max-w-3xl leading-relaxed">
+          <p className="text-xl text-gray-600 max-w-3xl leading-relaxed text-balance">
             {post.description}
           </p>
         )}

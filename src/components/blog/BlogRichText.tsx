@@ -4,6 +4,12 @@ import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import { LinkCard } from '@/components/blog/LinkCard'
 import { fetchOgpForUrl, type OgpData } from '@/services/ogp'
 
+type BlogPortableTextImageValue = {
+  asset?: { url?: string }
+  alt?: string
+  caption?: string
+}
+
 function isProbablyUrl(text: string): boolean {
   const t = text.trim()
   if (!t) return false
@@ -127,9 +133,21 @@ export function BlogRichText({
       },
       types: {
         image: ({ value }) => {
-          const url = (value as any)?.asset?.url
+          const v = value as unknown as BlogPortableTextImageValue
+          const url = v.asset?.url
           if (!url) return null
-          const alt = (value as any)?.alt || ''
+          const alt = v.alt || ''
+          const caption = v.caption
+
+          if (caption) {
+            return (
+              <figure>
+                <img src={url} alt={alt} loading="lazy" />
+                <figcaption>{caption}</figcaption>
+              </figure>
+            )
+          }
+
           return <img src={url} alt={alt} loading="lazy" />
         },
       },

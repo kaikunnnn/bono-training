@@ -201,7 +201,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#2563EB] underline hover:text-[#1D4ED8] transition-colors"
+            className="text-[#2563EB] underline hover:text-[#1D4ED8] transition-colors [overflow-wrap:anywhere]"
           >
             {children}
           </a>

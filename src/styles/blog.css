@@ -325,7 +325,7 @@
   }
 }
 
-/* 段落: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem, lh:200%, letter-spacing:3% */
+/* 段落: 18px(desktop) / 18px(mobile) = 1.125rem / 1.125rem, lh:200%, letter-spacing:3% */
 .blog-markdown p {
   font-size: 1.125rem;
   line-height: 200%;
@@ -336,7 +336,7 @@
 
 @media (min-width: 768px) {
   .blog-markdown p {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
   }
 }
 
@@ -394,6 +394,23 @@
   height: auto;
   border-radius: 0.5rem;
   margin: 2rem 0;
+}
+
+/* 画像キャプション: 画像下にグレー文字で表示 */
+.blog-markdown figure {
+  margin: 2rem 0;
+}
+
+.blog-markdown figure img {
+  margin: 0;
+}
+
+.blog-markdown figure figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #6B7280;
+  text-align: center;
 }
 
 /* 太字: 黄色マーカー下線 60%透過 */
