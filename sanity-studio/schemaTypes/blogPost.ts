@@ -1,4 +1,5 @@
 import {defineField, defineType} from 'sanity'
+import { MarkdownImportInput } from "../components/MarkdownImportInput";
 
 /**
  * blogPost
@@ -53,13 +54,68 @@ export default defineType({
       description: 'BlogPostHeaderで表示される説明文（任意）',
     }),
     defineField({
-      name: 'contentHtml',
-      title: '本文（HTML）',
-      type: 'text',
-      rows: 20,
+      name: 'content',
+      title: '本文（リッチテキスト）',
+      type: 'array',
+      of: [
+        {
+          type: 'block',
+          styles: [
+            { title: 'Normal', value: 'normal' },
+            { title: 'H2', value: 'h2' },
+            { title: 'H3', value: 'h3' },
+            { title: 'H4', value: 'h4' },
+            { title: 'Quote', value: 'blockquote' },
+          ],
+          marks: {
+            decorators: [
+              { title: '太字', value: 'strong' },
+              { title: '斜体', value: 'em' },
+              { title: 'コード', value: 'code' },
+            ],
+            annotations: [
+              {
+                title: 'リンク',
+                name: 'link',
+                type: 'object',
+                fields: [
+                  {
+                    title: 'URL',
+                    name: 'href',
+                    type: 'url',
+                  },
+                ],
+              },
+            ],
+          },
+        },
+        {
+          type: 'image',
+          options: { hotspot: true },
+          fields: [
+            { name: 'alt', type: 'string', title: '代替テキスト' },
+            { name: 'caption', type: 'string', title: 'キャプション' },
+          ],
+        },
+        { type: 'tableBlock' },
+        { type: 'customContainer' },
+        { type: 'linkCard' },
+      ],
+      components: {
+        input: MarkdownImportInput,
+      },
       validation: (Rule) => Rule.required(),
       description:
-        '現行フロントはHTML文字列をそのままレンダリングします（BookmarkカードもHTMLから抽出）。',
+        '本文はリッチテキスト（Portable Text）で管理します。「Import from Markdown」でMarkdown貼り付け→一括変換も可能です。',
+    }),
+    // 移行用: 旧HTML本文（フロント互換のため残すが、Studioでは表示しない）
+    defineField({
+      name: 'contentHtml',
+      title: '本文（HTML・移行用）',
+      type: 'text',
+      rows: 20,
+      hidden: true,
+      description: '旧データ移行用フィールド（非表示）。',
     }),
     defineField({
       name: 'emoji',

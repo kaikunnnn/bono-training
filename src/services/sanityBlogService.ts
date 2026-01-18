@@ -2,6 +2,7 @@ import type { BlogPost, BlogPostsResponse } from '@/types/blog'
 import { client } from '@/lib/sanity'
 import { urlFor } from '@/lib/sanity'
 import { extractEmojiFromText } from '@/utils/blog/emojiUtils'
+import type { PortableTextBlock } from '@portabletext/types'
 
 type SanityBlogPost = {
   _id: string
@@ -10,6 +11,7 @@ type SanityBlogPost = {
   publishedAt?: string
   author?: string
   description?: string
+  content?: PortableTextBlock[]
   contentHtml?: string
   emoji?: string
   category?: string
@@ -28,6 +30,21 @@ function estimateReadingTimeFromHtml(html: string): number {
   return Math.max(1, Math.round(chars / 600))
 }
 
+function estimateReadingTimeFromPortableText(blocks: PortableTextBlock[]): number {
+  const text = blocks
+    .map((b) => {
+      if ((b as any)?._type !== 'block') return ''
+      const children = ((b as any).children ?? []) as Array<{ text?: string }>
+      return children.map((c) => c.text ?? '').join(' ')
+    })
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+  const chars = text.length
+  return Math.max(1, Math.round(chars / 600))
+}
+
 function toBlogPost(doc: SanityBlogPost): BlogPost & { imageUrl?: string; excerpt?: string } {
   const slug = doc.slug?.current ?? ''
   const publishedAt = doc.publishedAt ?? new Date().toISOString()
@@ -39,21 +56,23 @@ function toBlogPost(doc: SanityBlogPost): BlogPost & { imageUrl?: string; excerp
   const uploadedThumbnail =
     doc.thumbnail ? urlFor(doc.thumbnail).width(1200).height(675).fit('crop').url() : null
   const thumbnail = doc.thumbnailUrl || uploadedThumbnail || DEFAULT_THUMBNAIL
-  const contentHtml = doc.contentHtml ?? ''
+  const content = doc.content ?? doc.contentHtml ?? ''
 
   return {
     id: doc._id,
     slug,
     title: doc.title,
     description: doc.description ?? '',
-    content: contentHtml,
+    content,
     author: doc.author ?? 'BONO',
     publishedAt,
     category,
     tags: doc.tags ?? [],
     thumbnail,
     featured: !!doc.featured,
-    readingTime: estimateReadingTimeFromHtml(contentHtml),
+    readingTime: Array.isArray(content)
+      ? estimateReadingTimeFromPortableText(content)
+      : estimateReadingTimeFromHtml(content),
     emoji,
     // UI側で参照されることがあるため互換用に付与（types/blog.ts には無いが既存実装が参照）
     imageUrl: thumbnail,
@@ -82,6 +101,16 @@ export async function fetchSanityBlogPosts(params?: {
       publishedAt,
       author,
       description,
+      content[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset->{
+            _id,
+            url
+          }
+        }
+      },
       contentHtml,
       emoji,
       category,
@@ -123,6 +152,16 @@ export async function fetchSanityBlogPostBySlug(slug: string): Promise<(BlogPost
     publishedAt,
     author,
     description,
+    content[] {
+      ...,
+      _type == "image" => {
+        ...,
+        "asset": asset->{
+          _id,
+          url
+        }
+      }
+    },
     contentHtml,
     emoji,
     category,
@@ -145,6 +184,16 @@ export async function fetchSanityFeaturedPosts(limit = 3): Promise<(BlogPost & {
     publishedAt,
     author,
     description,
+    content[] {
+      ...,
+      _type == "image" => {
+        ...,
+        "asset": asset->{
+          _id,
+          url
+        }
+      }
+    },
     contentHtml,
     emoji,
     category,
@@ -165,6 +214,16 @@ export async function fetchSanityLatestPosts(excludeId: string, limit = 4): Prom
     publishedAt,
     author,
     description,
+    content[] {
+      ...,
+      _type == "image" => {
+        ...,
+        "asset": asset->{
+          _id,
+          url
+        }
+      }
+    },
     contentHtml,
     emoji,
     category,
