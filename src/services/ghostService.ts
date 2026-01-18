@@ -3,6 +3,8 @@ import { getGhostApi } from '@/lib/ghost';
 import { BlogPost, BlogPostsResponse } from '@/types/blog';
 import { GhostPost, GhostPostsResponse } from '@/types/ghost';
 import { extractEmojiFromText } from '@/utils/blog/emojiUtils';
+import { categories } from '@/data/blog/categories';
+import { fetchSanityBlogPosts, fetchSanityCategoryCounts } from '@/services/sanityBlogService';
 
 // カテゴリベースのデフォルト絵文字マッピング
 const categoryEmojiMap: Record<string, string> = {
@@ -63,6 +65,17 @@ export const fetchGhostPosts = async (options?: {
   limit?: number;
   filter?: string;
 }): Promise<BlogPostsResponse> => {
+  // Sanity運用時は、既存の呼び出し側（/blog/tag 等）を変えずにSanityへ委譲する
+  if (import.meta.env.VITE_BLOG_DATA_SOURCE === 'sanity') {
+    // filter: `tag:<slug>` を category として解釈（既存のUIが /blog/tag/:slug をカテゴリ扱いしているため）
+    const category = options?.filter?.startsWith('tag:') ? options.filter.replace(/^tag:/, '') : undefined
+    return await fetchSanityBlogPosts({
+      page: options?.page,
+      limit: options?.limit,
+      category,
+    })
+  }
+
   const ghostApi = getGhostApi();
   if (!ghostApi) {
     throw new Error('Ghost API is not configured');
@@ -225,6 +238,18 @@ export interface GhostTag {
 
 // 全タグを取得
 export const fetchGhostTags = async (): Promise<GhostTag[]> => {
+  // Sanity運用時: “タグ一覧”画面はカテゴリ一覧として返す（既存UIのルーティング/フィルタに整合）
+  if (import.meta.env.VITE_BLOG_DATA_SOURCE === 'sanity') {
+    const counts = await fetchSanityCategoryCounts()
+    return categories.map((c) => ({
+      id: c.id,
+      name: c.name,
+      slug: c.slug,
+      description: c.description,
+      count: { posts: counts[c.slug] ?? 0 },
+    }))
+  }
+
   const ghostApi = getGhostApi();
   if (!ghostApi) {
     throw new Error('Ghost API is not configured');

@@ -8,6 +8,7 @@ import {
   fetchRelatedGhostPosts,
   checkGhostConnection
 } from '@/services/ghostService';
+import { fetchSanityBlogPostBySlug, fetchSanityBlogPosts } from '@/services/sanityBlogService';
 
 // データソースの設定
 const isGhostEnabled = () => {
@@ -16,11 +17,31 @@ const isGhostEnabled = () => {
          import.meta.env.VITE_GHOST_KEY;
 };
 
+const isSanityEnabled = () => {
+  return import.meta.env.VITE_BLOG_DATA_SOURCE === 'sanity' &&
+    import.meta.env.VITE_SANITY_PROJECT_ID &&
+    import.meta.env.VITE_SANITY_DATASET;
+}
+
+const isProd = import.meta.env.MODE === 'production'
+
 export const getBlogPosts = async (params?: {
   page?: number;
   category?: string;
   limit?: number;
 }): Promise<BlogPostsResponse> => {
+  if (isSanityEnabled()) {
+    try {
+      return await fetchSanityBlogPosts({
+        page: params?.page,
+        limit: params?.limit,
+        category: params?.category,
+      })
+    } catch (error) {
+      console.warn('Sanity Blog API failed, falling back to mock data:', error);
+    }
+  }
+
   if (isGhostEnabled()) {
     try {
       const isConnected = await checkGhostConnection();
@@ -38,6 +59,21 @@ export const getBlogPosts = async (params?: {
   }
 
   // フォールバック: mockPostsを使用
+  // 本番では「気づかずmock表示」を避けたいので、明示的にmock運用する時だけ使用する
+  if (isProd && import.meta.env.VITE_BLOG_DATA_SOURCE && import.meta.env.VITE_BLOG_DATA_SOURCE !== 'mock') {
+    return {
+      posts: [],
+      pagination: {
+        currentPage: params?.page || 1,
+        totalPages: 1,
+        totalPosts: 0,
+        postsPerPage: params?.limit || 9,
+        hasNextPage: false,
+        hasPrevPage: false,
+      },
+    }
+  }
+
   let posts = [...mockPosts];
 
   // カテゴリフィルター
@@ -70,6 +106,14 @@ export const getBlogPost = async (slug: string): Promise<BlogPost | null> => {
 };
 
 export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> => {
+  if (isSanityEnabled()) {
+    try {
+      return await fetchSanityBlogPostBySlug(slug)
+    } catch (error) {
+      console.warn(`Sanity Blog API failed for slug ${slug}, falling back to mock data:`, error);
+    }
+  }
+
   if (isGhostEnabled()) {
     try {
       const isConnected = await checkGhostConnection();
@@ -82,6 +126,10 @@ export const getBlogPostBySlug = async (slug: string): Promise<BlogPost | null> 
   }
 
   // フォールバック: mockPostsから取得
+  if (isProd && import.meta.env.VITE_BLOG_DATA_SOURCE && import.meta.env.VITE_BLOG_DATA_SOURCE !== 'mock') {
+    return null
+  }
+
   return mockPosts.find(post => post.slug === slug) || null;
 };
 
@@ -114,8 +162,10 @@ export const testGhostConnection = async (): Promise<boolean> => {
 };
 
 // データソースの表示用関数
-export const getCurrentDataSource = (): 'ghost' | 'mock' => {
-  return isGhostEnabled() ? 'ghost' : 'mock';
+export const getCurrentDataSource = (): 'ghost' | 'mock' | 'sanity' => {
+  if (isSanityEnabled()) return 'sanity'
+  if (isGhostEnabled()) return 'ghost'
+  return 'mock'
 };
 
 export const getFeaturedPosts = async (limit = 3): Promise<BlogPost[]> => {
