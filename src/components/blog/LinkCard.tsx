@@ -25,6 +25,16 @@ export interface LinkCardProps {
   className?: string;
 }
 
+function getImgSrcFromAttribute(el: Element | null): string | undefined {
+  if (!el) return undefined;
+  // DOMParserでパースしたHTMLは `.src` を参照すると `about:blank` 等に解決されうるため、
+  // 生の属性値を優先して取得する（空文字は無効扱い）
+  const raw = el.getAttribute('src')?.trim();
+  if (!raw) return undefined;
+  if (raw.startsWith('about:')) return undefined;
+  return raw;
+}
+
 /**
  * LinkCard Component
  *
@@ -98,7 +108,7 @@ export const LinkCard: React.FC<LinkCardProps> = ({
               alt={title}
               onError={(e) => {
                 // サムネイル読み込み失敗時は親要素を非表示
-                e.currentTarget.parentElement!.style.display = 'none';
+                e.currentTarget.parentElement?.style.setProperty('display', 'none');
               }}
             />
           </div>
@@ -122,18 +132,18 @@ export const extractBookmarkCards = (html: string): LinkCardProps[] => {
   const bookmarkCards = doc.querySelectorAll('.kg-bookmark-card');
 
   return Array.from(bookmarkCards).map((card) => {
-    const container = card.querySelector('.kg-bookmark-container') as HTMLAnchorElement;
+    const container = card.querySelector('.kg-bookmark-container') as HTMLAnchorElement | null;
     const title = card.querySelector('.kg-bookmark-title')?.textContent || '';
     const description = card.querySelector('.kg-bookmark-description')?.textContent || '';
-    const thumbnail = (card.querySelector('.kg-bookmark-thumbnail img') as HTMLImageElement)?.src;
-    const icon = (card.querySelector('.kg-bookmark-icon') as HTMLImageElement)?.src;
+    const thumbnail = getImgSrcFromAttribute(card.querySelector('.kg-bookmark-thumbnail img'));
+    const icon = getImgSrcFromAttribute(card.querySelector('.kg-bookmark-icon'));
     const publisher =
       card.querySelector('.kg-bookmark-publisher')?.textContent ||
       card.querySelector('.kg-bookmark-author')?.textContent ||
       '';
 
     return {
-      href: container?.href || '',
+      href: container?.getAttribute('href')?.trim() || '',
       title,
       description,
       thumbnail,

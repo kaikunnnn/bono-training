@@ -1,10 +1,12 @@
 // src/types/blog.ts
+import type { PortableTextBlock } from '@portabletext/types'
+
 export interface BlogPost {
   id: string;
   slug: string;
   title: string;
   description: string;
-  content: string;         // 静的HTML文字列
+  content: string | PortableTextBlock[]; // HTML文字列 or Sanity Portable Text
   author: string;           // 単純な名前文字列
   publishedAt: string;      // ISO日付文字列
   category: string;         // カテゴリスラッグ

@@ -11,6 +11,7 @@ import { TableOfContents } from '@/components/blog/TableOfContents';
 import { PostNavigation } from '@/components/blog/PostNavigation';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
 import { BlogContent } from '@/components/blog/BlogContent';
+import { BlogRichText } from '@/components/blog/BlogRichText';
 import { getBlogPostBySlug, getNextPost, getPrevPost, getLatestPosts } from '@/utils/blog/blogUtils';
 import { BlogPost } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -53,20 +54,36 @@ const BlogDetail: React.FC = () => {
           setLatestPosts(latestPostsData);
 
           // 実際のコンテンツから見出しを抽出して目次を生成
-          const extractTocFromHTML = (html: string) => {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6');
+          const extractToc = (content: BlogPost['content']) => {
+            // Portable Text
+            if (Array.isArray(content)) {
+              const items: Array<{ id: string; text: string; level: number }> = []
+              let idx = 0
+              for (const b of content) {
+                if ((b as any)?._type !== 'block') continue
+                const style = (b as any)?.style
+                if (!style || style === 'normal') continue
+                const level = typeof style === 'string' && /^h[1-6]$/.test(style) ? parseInt(style.charAt(1)) : 0
+                if (!level) continue
+                const text = ((b as any)?.children ?? []).map((c: any) => c?.text ?? '').join('')
+                items.push({ id: (b as any)?._key || `heading-${idx}`, text, level })
+                idx += 1
+              }
+              return items
+            }
 
+            // HTML
+            const parser = new DOMParser()
+            const doc = parser.parseFromString(content || '', 'text/html')
+            const headings = doc.querySelectorAll('h1, h2, h3, h4, h5, h6')
             return Array.from(headings).map((heading, index) => ({
               id: heading.id || `heading-${index}`,
               text: heading.textContent || '',
-              level: parseInt(heading.tagName.charAt(1))
-            }));
-          };
+              level: parseInt(heading.tagName.charAt(1)),
+            }))
+          }
 
-          const tocItems = extractTocFromHTML(currentPost.content);
-          setTocItems(tocItems);
+          setTocItems(extractToc(currentPost.content))
         }
       } catch (error) {
         console.error(`Failed to load post with slug ${slug}:`, error);
@@ -173,7 +190,7 @@ const BlogDetail: React.FC = () => {
   // OGP用の画像URL（Ghost CMSのfeature_imageを優先）
   const getOgImage = () => {
     // Ghost CMSのfeature_image（thumbnail）を最優先
-    if (post.thumbnail && post.thumbnail !== '/blog/images/default.jpg') {
+    if (post.thumbnail && post.thumbnail !== '/placeholder-thumbnail.svg') {
       return post.thumbnail;
     }
     // 次にimageUrlをチェック
@@ -294,7 +311,17 @@ const BlogDetail: React.FC = () => {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.4 }}
               >
-                <BlogContent html={post.content} className="blog-markdown max-w-[720px] mx-auto" />
+                {Array.isArray(post.content) ? (
+                  <BlogRichText
+                    content={post.content}
+                    className="blog-markdown w-full mx-auto lg:max-w-[648px]"
+                  />
+                ) : (
+                  <BlogContent
+                    html={post.content}
+                    className="blog-markdown w-full mx-auto lg:max-w-[648px]"
+                  />
+                )}
               </motion.div>
             </div>
 
