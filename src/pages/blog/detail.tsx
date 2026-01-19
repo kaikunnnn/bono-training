@@ -17,6 +17,7 @@ import { BlogPost } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
 import SEO from '@/components/common/SEO';
 import { removeEmojiFromText } from '@/utils/blog/emojiUtils';
+import { ShareDropdown } from '@/components/common/ShareDropdown';
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -324,6 +325,25 @@ const BlogDetail: React.FC = () => {
                 )}
               </motion.div>
             </div>
+
+            {/* シェアセクション */}
+            <motion.div
+              className="mt-12 flex flex-col items-center gap-3"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <p className="text-gray-600 text-sm">よかったらシェアしてね🙋</p>
+              <ShareDropdown title={post.title} align="center">
+                <button
+                  className="bg-white border border-[#EBEBEB] flex gap-1 items-center px-4 py-2 rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
+                >
+                  <span className="font-noto-sans-jp font-semibold text-sm text-black">
+                    シェア
+                  </span>
+                </button>
+              </ShareDropdown>
+            </motion.div>
 
           </motion.article>
 

@@ -18,7 +18,9 @@ const Footer = ({ className }: FooterProps) => {
   const [message, setMessage] = useState('');
 
   // /blog 以下のページでのみメール登録セクションを表示
-  const showNewsletterSignup = location.pathname.startsWith('/blog');
+  // TODO: メルマガ機能が準備できたら有効にする
+  // const showNewsletterSignup = location.pathname.startsWith('/blog');
+  const showNewsletterSignup = false;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
