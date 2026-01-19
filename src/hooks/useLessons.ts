@@ -12,7 +12,8 @@ interface SanityLesson {
   title: string;
   slug: { current: string };
   description?: string;
-  coverImage?: any;
+  thumbnail?: any;
+  thumbnailUrl?: string;
   iconImage?: any;
   iconImageUrl?: string;
   category?: string;
@@ -41,7 +42,7 @@ interface WebflowLesson {
   title: string;
   slug: string;
   description?: string; // 🆕 説明文
-  coverImage?: string; // 🆕 カバー画像URL
+  thumbnailUrl?: string; // 🆕 サムネイル画像URL
   iconImage?: string; // 🆕 アイコン画像URL
   category?: string; // 🆕 カテゴリ
   overview?: string; // 🆕 詳細説明（HTML）
@@ -55,7 +56,6 @@ interface WebflowLesson {
  */
 export interface IntegratedLesson extends SanityLesson {
   webflowData?: WebflowLesson; // Webflowからのデータ
-  coverImageUrl?: string; // カバーURL（文字列）
   // iconImage, iconImageUrl は SanityLesson から継承
 }
 
@@ -98,7 +98,8 @@ async function fetchIntegratedLessons(): Promise<IntegratedLesson[]> {
     title,
     slug,
     description,
-    coverImage,
+    thumbnail,
+    thumbnailUrl,
     iconImage,
     iconImageUrl,
     category,
@@ -131,8 +132,8 @@ async function fetchIntegratedLessons(): Promise<IntegratedLesson[]> {
         title: webflowData.title, // 🔄 Webflowのタイトルで上書き
         slug: { current: webflowData.slug }, // 🔄 Webflowのスラッグで上書き
         description: webflowData.description || lesson.description || '', // 🔄 Webflowの説明を優先
-        coverImage: webflowData.coverImage ? undefined : lesson.coverImage, // SanityのcoverImageはWebflowの場合undefined
-        coverImageUrl: webflowData.coverImage, // 🆕 WebflowのカバーURL（文字列）
+        thumbnail: webflowData.thumbnailUrl ? undefined : lesson.thumbnail, // SanityのthumbnailはWebflowの場合undefined
+        thumbnailUrl: webflowData.thumbnailUrl, // 🆕 WebflowのサムネURL（文字列）
         iconImageUrl: webflowData.iconImage, // 🆕 WebflowのアイコンURL（文字列）
         category: webflowData.category || lesson.category, // 🔄 Webflowのカテゴリを優先
         webflowData, // Webflowの全データを保持（quests, iconImage, overview含む）

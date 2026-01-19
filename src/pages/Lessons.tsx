@@ -47,9 +47,13 @@ export default function Lessons() {
               const shouldShowCategory = lesson.category &&
                 lesson.category.length < 20; // IDっぽい長い文字列は除外
 
-              // アイコン画像URL（Webflow優先、なければSanity）- 元の比率を維持
-              const iconUrl = lesson.iconImageUrl ||
-                             (lesson.iconImage ? urlFor(lesson.iconImage).height(300).url() : null);
+              // レッスン画像URL（サムネ優先）
+              // 優先順位: thumbnailUrl (Webflow) > thumbnail (Sanity image) > iconImageUrl > iconImage
+              const thumbnailUrl =
+                lesson.thumbnailUrl ||
+                (lesson.thumbnail ? urlFor(lesson.thumbnail).width(1200).height(630).url() : null) ||
+                lesson.iconImageUrl ||
+                (lesson.iconImage ? urlFor(lesson.iconImage).width(400).height(400).url() : null);
 
               return (
                 <div
@@ -57,18 +61,17 @@ export default function Lessons() {
                   onClick={() => handleLessonClick(lesson.slug.current)}
                   className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
                 >
-                  {/* 画像エリア - グレー背景 + アイコン中央配置 */}
-                  <div className="w-full h-48 bg-gray-100 flex items-center justify-center">
-                    {iconUrl ? (
-                      <div className="rounded-r-lg shadow-[1px_1px_12px_0_rgba(0,0,0,0.24)] overflow-hidden">
-                        <img
-                          src={iconUrl}
-                          alt={lesson.title}
-                          className="h-32 w-auto object-cover block"
-                        />
-                      </div>
+                  {/* 画像エリア - サムネイル（cover）優先 */}
+                  <div className="w-full h-48 bg-gray-100">
+                    {thumbnailUrl ? (
+                      <img
+                        src={thumbnailUrl}
+                        alt={lesson.title}
+                        className="w-full h-full object-cover block"
+                        loading="lazy"
+                      />
                     ) : (
-                      <div className="w-16 h-24 bg-gray-200 rounded-r-lg" />
+                      <div className="w-full h-full bg-gray-200" />
                     )}
                   </div>
                   <div className="p-4">

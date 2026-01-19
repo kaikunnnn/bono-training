@@ -34,8 +34,8 @@ const LessonCard: React.FC<LessonCardProps> = ({
         <div className="flex justify-center items-center p-[10.33px] w-full h-40 bg-white rounded-t-xl">
           <div className="rounded-r-[8.77px] shadow-[1px_1px_12px_0_rgba(0,0,0,0.24)]">
             <img
-              src={lesson.coverImage}
-              alt={`${lesson.title}のカバー画像`}
+              src={lesson.thumbnail}
+              alt={`${lesson.title}のサムネイル`}
               className="w-[85.55px] h-32 object-cover block"
             />
           </div>

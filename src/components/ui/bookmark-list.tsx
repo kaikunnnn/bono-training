@@ -115,7 +115,7 @@ const BookmarkListItem = React.forwardRef<HTMLDivElement, BookmarkListItemProps>
     const [isBookmarked, setIsBookmarked] = React.useState(true)
     const [isFavoriteHovered, setIsFavoriteHovered] = React.useState(false)
 
-    // GROQで解決済みのURLを使用（優先順位: thumbnailUrl > thumbnail > coverImage）
+    // GROQで解決済みのURLを使用（優先順位: thumbnailUrl > thumbnail）
     const thumbnailUrl = article.resolvedThumbnailUrl
       || article.thumbnailUrl
       || "/placeholder-thumbnail.svg"

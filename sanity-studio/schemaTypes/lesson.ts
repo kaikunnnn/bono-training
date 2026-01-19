@@ -45,8 +45,8 @@ export default defineType({
       description: "Webflowから自動取得されるアイコン画像URL（手動更新も可能）",
     }),
     defineField({
-      name: "coverImage",
-      title: "カバー画像（OGP/サムネイル）",
+      name: "thumbnail",
+      title: "サムネイル画像（OGP/一覧）",
       type: "image",
       options: {
         hotspot: true,
@@ -54,10 +54,10 @@ export default defineType({
       description: "レッスン一覧のサムネイルやOGP画像として使用（推奨サイズ: 1200×630px）",
     }),
     defineField({
-      name: "coverImageUrl",
-      title: "カバー画像URL",
+      name: "thumbnailUrl",
+      title: "サムネイル画像URL",
       type: "url",
-      description: "Webflowから自動取得されるカバー画像URL（手動更新も可能）",
+      description: "Webflowから自動取得されるサムネイル画像URL（手動更新も可能）",
     }),
     defineField({
       name: "category",
@@ -165,7 +165,7 @@ export default defineType({
   preview: {
     select: {
       title: "title",
-      media: "coverImage",
+      media: "thumbnail",
       category: "category",
       isPremium: "isPremium",
       webflowSource: "webflowSource",

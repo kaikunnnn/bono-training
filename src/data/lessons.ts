@@ -11,7 +11,7 @@ export const lessons: Lesson[] = [
     category: '情報設計',
     title: 'ゼロからはじめるUI情報設計',
     description: '「どこに何をなぜ置くべきか？」の情報設計基礎をトレースしながら身につけられます。必須!',
-    coverImage: '/assets/lesson-covers/lesson-01.jpg',
+    thumbnail: '/assets/lesson-covers/lesson-01.jpg',
     slug: 'ui-information-architecture',
   },
   {
@@ -19,7 +19,7 @@ export const lessons: Lesson[] = [
     category: 'UIデザイン',
     title: 'UIデザインの基本原則',
     description: 'デザインの4大原則を実践的に学び、美しく使いやすいUIを作るスキルを習得できます。',
-    coverImage: '/assets/lesson-covers/lesson-02.jpg',
+    thumbnail: '/assets/lesson-covers/lesson-02.jpg',
     slug: 'ui-design-principles',
   },
   {
@@ -27,7 +27,7 @@ export const lessons: Lesson[] = [
     category: '情報設計',
     title: 'ナビゲーション設計入門',
     description: 'ユーザーが迷わないナビゲーション設計の考え方と実装方法を学びます。',
-    coverImage: '/assets/lesson-covers/lesson-03.jpg',
+    thumbnail: '/assets/lesson-covers/lesson-03.jpg',
     slug: 'navigation-design',
   },
 ];

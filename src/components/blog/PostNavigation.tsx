@@ -15,6 +15,12 @@ export const PostNavigation: React.FC<PostNavigationProps> = ({
   nextPost,
   className = ""
 }) => {
+  // TODO: 前後の記事ナビゲーションが必要になったら有効にする
+  // eslint-disable-next-line no-constant-condition
+  if (true) {
+    return null;
+  }
+
   if (!prevPost && !nextPost) {
     return null;
   }

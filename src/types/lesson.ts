@@ -10,8 +10,8 @@ export interface Lesson {
   title: string;
   /** 説明文（2-3行程度） */
   description: string;
-  /** カバー画像のパス */
-  coverImage: string;
+  /** サムネイル画像のパス */
+  thumbnail: string;
   /** URL用のスラッグ（将来の詳細ページ用） */
   slug: string;
 }

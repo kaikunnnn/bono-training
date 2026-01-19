@@ -14,9 +14,9 @@ interface LessonProgressCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const LessonProgressCard = React.forwardRef<HTMLDivElement, LessonProgressCardProps>(
   ({ className, lesson, progress, isCompleted = false, ...props }, ref) => {
-    const thumbnailUrl = lesson.coverImage
-      ? urlFor(lesson.coverImage).width(120).height(120).url()
-      : "/placeholder-lesson.png"
+    const thumbnailUrl = lesson.thumbnailUrl
+      || (lesson.thumbnail ? urlFor(lesson.thumbnail).width(120).height(120).url() : null)
+      || "/placeholder-lesson.png"
 
     return (
       <Link to={`/lessons/${lesson.slug.current}`}>

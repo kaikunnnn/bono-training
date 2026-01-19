@@ -160,19 +160,17 @@ export async function getBookmarkedArticles(): Promise<BookmarkedArticle[]> {
     }
 
     // 2. SanityからArticle情報を取得
-    // 画像ソース優先順位: thumbnailUrl (Webflow) > thumbnail (Sanity) > coverImage (Sanity)
+    // 画像ソース優先順位: thumbnailUrl (Webflow) > thumbnail (Sanity)
     const query = `*[_type == "article" && _id in $ids] {
       _id,
       _type,
       title,
       slug,
       thumbnail,
-      coverImage,
       thumbnailUrl,
       "resolvedThumbnailUrl": coalesce(
         thumbnailUrl,
-        thumbnail.asset->url,
-        coverImage.asset->url
+        thumbnail.asset->url
       ),
       videoDuration,
       articleNumber,

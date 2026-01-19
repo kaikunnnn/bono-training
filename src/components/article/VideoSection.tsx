@@ -1,6 +1,7 @@
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import PremiumVideoLock from '@/components/premium/PremiumVideoLock';
 import { CustomVimeoPlayer } from '@/components/video';
+import { urlFor } from '@/lib/sanity';
 
 interface VideoSectionProps {
   videoUrl?: string | null | { url?: string; metadata?: any };
@@ -62,8 +63,8 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
       return thumbnailUrl;
     }
     if (thumbnail?.asset?._ref) {
-      // urlForをインポートする必要がある
-      return null; // 後で実装
+      // 16:9の表示枠に合わせて大きめに取得（CDNで最適化）
+      return urlFor(thumbnail).width(1320).height(743).url();
     }
     return null;
   };
