@@ -3,6 +3,7 @@ import type { PortableTextBlock } from '@portabletext/types'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
 import { LinkCard } from '@/components/blog/LinkCard'
 import { fetchOgpForUrl, type OgpData } from '@/services/ogp'
+import TableOfContents from '@/components/article/TableOfContents'
 
 type BlogPortableTextImageValue = {
   asset?: { url?: string }
@@ -150,9 +151,22 @@ export function BlogRichText({
 
           return <img src={url} alt={alt} loading="lazy" />
         },
+        // 目次ブロック（本文内に配置可能、見出しから自動生成）
+        tableOfContents: ({ value }) => {
+          const tocTitle = (value as any)?.title || '目次'
+          const tocMaxDepth = (value as any)?.maxDepth || 2
+
+          return (
+            <TableOfContents
+              content={content}
+              title={tocTitle}
+              maxDepth={tocMaxDepth}
+            />
+          )
+        },
       },
     }),
-    [ogpMap]
+    [ogpMap, content]
   )
 
   return (

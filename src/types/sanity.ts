@@ -32,7 +32,6 @@ export interface Article {
   title: string;
   slug: SanitySlug;
   excerpt?: string;
-  coverImage?: SanityImage;
   thumbnail?: SanityImage;
   thumbnailUrl?: string;
   videoUrl?: string;
@@ -74,7 +73,8 @@ export interface Lesson {
   slug: SanitySlug;
   description?: string;
   iconImage?: SanityImage;
-  coverImage?: SanityImage;
+  thumbnail?: SanityImage;
+  thumbnailUrl?: string;
   category?: "情報設計" | "UI" | "UX";
   isPremium?: boolean;
   overview?: PortableTextBlock[];

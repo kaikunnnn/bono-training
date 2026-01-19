@@ -24,6 +24,20 @@ export default defineType({
       validation: (Rule) => Rule.min(1),
     }),
     defineField({
+      name: "contentType",
+      title: "コンテンツタイプ",
+      type: "string",
+      options: {
+        list: [
+          { title: "テキスト", value: "text" },
+          { title: "動画", value: "video" },
+        ],
+        layout: "radio",
+      },
+      initialValue: "text",
+      description: "テキスト記事か動画記事かを選択",
+    }),
+    defineField({
       name: "articleType",
       title: "記事タイプ",
       type: "string",
@@ -37,6 +51,13 @@ export default defineType({
         ],
       },
       description: "この記事の種類を選択してください",
+    }),
+    defineField({
+      name: "isPremium",
+      title: "有料記事",
+      type: "boolean",
+      initialValue: false,
+      description: "有料会員限定の記事にする場合はオン",
     }),
     defineField({
       name: "title",
@@ -63,14 +84,6 @@ export default defineType({
       validation: (Rule) => Rule.max(200),
     }),
     defineField({
-      name: "coverImage",
-      title: "カバー画像",
-      type: "image",
-      options: {
-        hotspot: true,
-      },
-    }),
-    defineField({
       name: "thumbnail",
       title: "サムネイル画像",
       type: "image",
@@ -83,7 +96,13 @@ export default defineType({
       name: "videoUrl",
       title: "動画URL",
       type: "url",
-      description: "Vimeo動画のURL（任意）",
+      description: "Vimeo動画のURL",
+      // 動画タイプ選択時、または既存の動画URLがある場合に表示
+      hidden: ({ document }) => {
+        if (document?.contentType === "video") return false;
+        if (document?.videoUrl) return false; // 既存データがあれば表示
+        return document?.contentType === "text";
+      },
       validation: (Rule) =>
         Rule.uri({
           scheme: ["https"],
@@ -93,7 +112,13 @@ export default defineType({
       name: "videoDuration",
       title: "動画の長さ",
       type: "string",
-      description: "動画の長さ（例: 36:21 または text）",
+      description: "動画の長さ（例: 36:21）",
+      // 動画タイプ選択時、または既存の動画データがある場合に表示
+      hidden: ({ document }) => {
+        if (document?.contentType === "video") return false;
+        if (document?.videoUrl || document?.videoDuration) return false; // 既存データがあれば表示
+        return document?.contentType === "text";
+      },
     }),
     defineField({
       name: "thumbnailUrl",
@@ -162,6 +187,9 @@ export default defineType({
         {
           type: "linkCard",
         },
+        {
+          type: "tableOfContents",
+        },
       ],
       options: {
         canvasApp: {
@@ -211,17 +239,11 @@ export default defineType({
         layout: "tags",
       },
     }),
-    defineField({
-      name: "isPremium",
-      title: "有料記事",
-      type: "boolean",
-      initialValue: false,
-    }),
   ],
   preview: {
     select: {
       title: "title",
-      media: "coverImage",
+      media: "thumbnail",
       author: "author",
       isPremium: "isPremium",
       lessonTitle: "quest.lesson.title",

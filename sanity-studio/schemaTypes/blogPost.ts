@@ -100,6 +100,7 @@ export default defineType({
         { type: 'tableBlock' },
         { type: 'customContainer' },
         { type: 'linkCard' },
+        { type: 'tableOfContents' },
       ],
       components: {
         input: MarkdownImportInput,

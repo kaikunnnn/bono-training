@@ -33,7 +33,6 @@ export async function getArticleWithContext(
       title,
       slug,
       excerpt,
-      coverImage,
       thumbnail,
       thumbnailUrl,
       videoUrl,

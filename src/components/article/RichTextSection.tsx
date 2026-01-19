@@ -2,7 +2,7 @@ import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { PortableTextBlock } from "@portabletext/types";
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import ContentPreviewOverlay from '@/components/premium/ContentPreviewOverlay';
-import { useMemo } from 'react';
+import TableOfContents from '@/components/article/TableOfContents';
 
 interface RichTextSectionProps {
   content: PortableTextBlock[];
@@ -62,6 +62,7 @@ const generateHeadingId = (children: React.ReactNode, index: number): string => 
 const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: RichTextSectionProps) => {
   const { canAccessContent } = useSubscriptionContext();
   const hasAccess = canAccessContent(isPremium);
+  const textContainerClassName = "w-full max-w-[60ch] md:max-w-[66ch]";
 
   // プレミアムコンテンツで未契約の場合、最初のブロックのみ表示
   const displayContent = isPremium && !hasAccess
@@ -72,7 +73,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
 
   const components: PortableTextComponents = {
     block: {
-      // Heading 2: 24px(desktop) / 22px(mobile), semibold, lh:32px
+      // Heading 2: 24px(desktop) / 20px(mobile), semibold, lh:32px
       // font: M PLUS Rounded 1c (rounded-mplus)
       // margin: 48px 0 24px (VitePress + 読みやすさ調整)
       h2: ({ children, value }) => {
@@ -80,7 +81,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
         return (
           <h2
             id={id}
-            className="!text-[22px] md:!text-[24px] !font-semibold !leading-[32px] !text-[#101828] !mt-[96px] !mb-[48px] first:!mt-0 !font-rounded-mplus scroll-mt-20"
+            className={`!text-[20px] md:!text-[24px] !font-semibold !leading-[32px] !text-[#101828] !mt-[96px] !mb-[48px] first:!mt-0 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
@@ -95,7 +96,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
         return (
           <h3
             id={id}
-            className="!text-[18px] md:!text-[20px] !font-semibold !leading-[28px] !text-[#101828] !mt-[64px] !mb-[32px] !font-rounded-mplus scroll-mt-20"
+            className={`!text-[18px] md:!text-[20px] !font-semibold !leading-[28px] !text-[#101828] !mt-[64px] !mb-[32px] !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
@@ -110,7 +111,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
         return (
           <h4
             id={id}
-            className="!text-[16px] md:!text-[18px] !font-semibold !leading-[24px] !text-[#101828] !mt-6 !mb-3 !font-rounded-mplus scroll-mt-20"
+            className={`!text-[16px] md:!text-[18px] !font-semibold !leading-[24px] !text-[#101828] !mt-6 !mb-3 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
@@ -121,7 +122,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
       // font: Noto Sans JP (noto-sans-jp)
       blockquote: ({ children }) => (
         <blockquote
-          className="!border-l-4 !border-[#D0D5DD] !bg-[#F9FAFB] !py-4 !px-6 !my-6 !text-[16px] md:!text-[18px] !leading-[200%] !text-[#364153] !font-noto-sans-jp"
+          className={`!border-l-4 !border-[#D0D5DD] !bg-[#F9FAFB] !py-4 !px-6 !my-6 !text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !font-noto-sans-jp ${textContainerClassName}`}
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -132,7 +133,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
       // margin 24px 0 (VitePress + 読みやすさ調整)
       normal: ({ children }) => (
         <p
-          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#364153] !mb-6 !font-noto-sans-jp"
+          className={`!text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !mb-6 !font-noto-sans-jp ${textContainerClassName}`}
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -142,13 +143,13 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
     list: {
       // 箇条書きリスト: margin 24px 0 (VitePress + 読みやすさ調整)
       bullet: ({ children }) => (
-        <ul className="!list-disc !mb-6 !space-y-2" style={{ paddingLeft: "21.5px" }}>
+        <ul className={`!list-disc !mb-6 !space-y-2 ${textContainerClassName}`} style={{ paddingLeft: "21.5px" }}>
           {children}
         </ul>
       ),
       // 番号付きリスト: margin 24px 0 (VitePress + 読みやすさ調整)
       number: ({ children }) => (
-        <ol className="!list-decimal !mb-6 !space-y-2" style={{ paddingLeft: "21.5px" }}>
+        <ol className={`!list-decimal !mb-6 !space-y-2 ${textContainerClassName}`} style={{ paddingLeft: "21.5px" }}>
           {children}
         </ol>
       ),
@@ -158,7 +159,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
       // font: Noto Sans JP (noto-sans-jp)
       bullet: ({ children }) => (
         <li
-          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#364153] !font-noto-sans-jp"
+          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !font-noto-sans-jp"
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -166,7 +167,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
       ),
       number: ({ children }) => (
         <li
-          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#364153] !font-noto-sans-jp"
+          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !font-noto-sans-jp"
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -214,11 +215,11 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
         if (!value?.asset) return null;
 
         return (
-          <figure className="my-8">
+          <figure className="my-8 w-full">
             <img
               src={value.asset.url}
               alt={value.alt || ''}
-              className="w-full h-auto rounded-lg"
+              className="w-full max-w-none h-auto rounded-lg"
               loading="lazy"
             />
             {value.caption && (
@@ -234,7 +235,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
         if (!value?.rows || value.rows.length === 0) return null;
 
         return (
-          <div className="my-6 overflow-x-auto">
+          <div className={`my-6 overflow-x-auto ${textContainerClassName}`}>
             <table className="w-full border-collapse text-[14px]">
               {value.caption && (
                 <caption className="text-left text-[14px] text-[#6B7280] mb-2 italic">
@@ -270,7 +271,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
                         return (
                           <td
                             key={cellIndex}
-                            className="border border-[#E5E7EB] px-4 py-2 text-[#364153]"
+                            className="border border-[#E5E7EB] px-4 py-2 text-[#182033]"
                           >
                             {cell}
                           </td>
@@ -341,7 +342,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
 
         return (
           <div
-            className={`my-6 rounded-lg border-l-4 ${style.border} ${style.bg} p-4`}
+            className={`my-6 rounded-lg border-l-4 ${style.border} ${style.bg} p-4 ${textContainerClassName}`}
           >
             <div className="flex items-start gap-3">
               <span
@@ -353,7 +354,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
                 <p className="font-semibold text-[#101828] mb-2 text-[16px] md:text-[18px] font-noto-sans-jp">
                   {displayTitle}
                 </p>
-                <div className="text-[14px] md:text-[16px] leading-[180%] text-[#364153] font-noto-sans-jp [&>p]:mb-2 [&>p:last-child]:mb-0">
+                <div className="text-[14px] md:text-[16px] leading-[180%] text-[#182033] font-noto-sans-jp [&>p]:mb-2 [&>p:last-child]:mb-0">
                   <PortableText value={value.content} components={components} />
                 </div>
               </div>
@@ -381,7 +382,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
             href={value.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="my-6 block rounded-lg border border-[#E5E7EB] overflow-hidden hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 no-underline"
+            className={`my-6 block rounded-lg border border-[#E5E7EB] overflow-hidden hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 no-underline ${textContainerClassName}`}
           >
             <div className="flex flex-col md:flex-row">
               {/* テキスト部分 */}
@@ -416,12 +417,25 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
           </a>
         );
       },
+      // 目次ブロック（本文内に配置可能、見出しから自動生成）
+      tableOfContents: ({ value }) => {
+        const tocTitle = value?.title || '目次';
+        const tocMaxDepth = value?.maxDepth || 2;
+
+        return (
+          <TableOfContents
+            content={content}
+            title={tocTitle}
+            maxDepth={tocMaxDepth}
+          />
+        );
+      },
     },
   };
 
   return (
-    <div className="w-full px-6 py-6 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] flex flex-col justify-start items-start gap-3">
-      <div className="max-w-none w-full">
+    <div className="w-full px-6 py-6 bg-white text-[#1D253A] rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] flex flex-col justify-start items-start gap-3">
+      <div className="w-full">
         <PortableText value={displayContent} components={components} />
       </div>
 
