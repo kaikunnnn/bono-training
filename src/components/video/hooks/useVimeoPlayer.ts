@@ -319,11 +319,17 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
     if (playerRef.current) {
       try {
         if (state.isPip) {
+          // 即座にUIを更新（optimistic update）
+          setState(prev => ({ ...prev, isPip: false }));
           await playerRef.current.exitPictureInPicture();
         } else {
+          // 即座にUIを更新（optimistic update）
+          setState(prev => ({ ...prev, isPip: true }));
           await playerRef.current.requestPictureInPicture();
         }
       } catch (err) {
+        // エラー時は状態を元に戻す
+        setState(prev => ({ ...prev, isPip: !prev.isPip }));
         console.error('[VimeoPlayer] PiP error:', err);
       }
     }
