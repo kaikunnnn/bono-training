@@ -53,7 +53,7 @@ const HeadingSection = ({
           </div>
 
           {/* Title */}
-          <div className="self-stretch justify-center text-gray-900 text-2xl md:text-[30px] font-medium font-['Noto_Sans_JP'] leading-[148%]">
+          <div className="self-stretch justify-center text-gray-900 text-2xl md:text-[30px] font-semibold font-['Noto_Sans_JP'] leading-[148%]">
             {title}
           </div>
         </div>

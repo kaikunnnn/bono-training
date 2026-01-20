@@ -1,6 +1,17 @@
 {
   "rewrites": [
     {
+      "source": "/blog/:slug*",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
+        }
+      ],
+      "destination": "/api/og/:slug*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }
