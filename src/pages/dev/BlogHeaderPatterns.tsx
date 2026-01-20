@@ -23,7 +23,7 @@ const HeaderPatternC1: React.FC = () => {
         {/* 左側: タイトル + 区切り + サブタイトル */}
         <Link to="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
           <h1
-            className="text-lg font-semibold tracking-[-1px] text-gray-900"
+            className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
             style={{ fontFamily: '"Kiwi Maru", serif' }}
           >
             ダンシング・マージン
@@ -62,7 +62,7 @@ const HeaderPatternC2: React.FC = () => {
         {/* 左側: タイトル + 区切り + サブタイトル */}
         <Link to="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
           <h1
-            className="text-lg font-semibold tracking-[-1px] text-gray-900"
+            className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
             style={{ fontFamily: '"Zen Maru Gothic", sans-serif' }}
           >
             ダンシング・マージン
@@ -101,7 +101,7 @@ const HeaderPatternC3: React.FC = () => {
         {/* 左側: タイトル + 区切り + サブタイトル */}
         <Link to="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
           <h1
-            className="text-lg font-semibold tracking-[-1px] text-gray-900"
+            className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
             style={{ fontFamily: '"Kiwi Maru", serif' }}
           >
             ダンシング・マージン
@@ -140,7 +140,7 @@ const HeaderPatternC4: React.FC = () => {
         {/* 左側: タイトル + 区切り + サブタイトル */}
         <Link to="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
           <h1
-            className="text-lg font-semibold tracking-[-1px] text-gray-900"
+            className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
             style={{ fontFamily: '"Zen Maru Gothic", sans-serif' }}
           >
             ダンシング・マージン
