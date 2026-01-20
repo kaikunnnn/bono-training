@@ -1,52 +1,24 @@
 /**
- * OGP Meta Tags Serverless Function
+ * OGP静的HTML生成スクリプト
  *
- * SNSクローラー用にブログ記事のOGPタグを返すServerless Function
+ * ビルド時にSanityから全ブログ記事を取得し、
+ * 各記事のOGP用静的HTMLファイルを生成します。
  */
 
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { createClient } from '@sanity/client';
-import imageUrlBuilder from '@sanity/image-url';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Sanity Client - VITE_プレフィックス付き環境変数を使用
-const sanityClient = createClient({
-  projectId: process.env.VITE_SANITY_PROJECT_ID,
-  dataset: process.env.VITE_SANITY_DATASET || 'production',
-  apiVersion: '2024-01-01',
-  useCdn: true,
-});
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const rootDir = path.resolve(__dirname, '..');
 
-const imageBuilder = imageUrlBuilder(sanityClient);
+// 環境変数読み込み
+const projectId = process.env.VITE_SANITY_PROJECT_ID;
+const dataset = process.env.VITE_SANITY_DATASET || 'production';
+const siteUrl = process.env.VITE_SITE_URL || 'https://bono-training.vercel.app';
 
-function urlFor(source: any) {
-  return imageBuilder.image(source);
-}
-
-// 絵文字を除去
-function removeEmoji(text: string): string {
-  return text.replace(/[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F02F}]|[\u{1F0A0}-\u{1F0FF}]|[\u{1F100}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu, '').trim();
-}
-
-// Sanityからブログ記事を取得
-async function getBlogPost(slug: string) {
-  const query = `*[_type == "blogPost" && slug.current == $slug][0]{
-    _id,
-    title,
-    description,
-    slug,
-    thumbnail {
-      ...,
-      asset->
-    },
-    thumbnailUrl,
-    author,
-    publishedAt
-  }`;
-
-  return sanityClient.fetch(query, { slug });
-}
-
-function escapeHtml(text: string): string {
+function escapeHtml(text) {
+  if (!text) return '';
   return text
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -55,16 +27,17 @@ function escapeHtml(text: string): string {
     .replace(/'/g, '&#039;');
 }
 
-function generateOgHtml(params: {
-  title: string;
-  description: string;
-  imageUrl: string;
-  pageUrl: string;
-  siteUrl: string;
-  author: string;
-}) {
-  const { title, description, imageUrl, pageUrl, author } = params;
+function removeEmoji(text) {
+  if (!text) return '';
+  return text
+    .replace(
+      /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]|[\u{1F000}-\u{1F02F}]|[\u{1F0A0}-\u{1F0FF}]|[\u{1F100}-\u{1F64F}]|[\u{1F680}-\u{1F6FF}]/gu,
+      ''
+    )
+    .trim();
+}
 
+function generateOgpHtml({ title, description, imageUrl, pageUrl, author }) {
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -89,7 +62,6 @@ function generateOgHtml(params: {
   <meta name="twitter:description" content="${escapeHtml(description)}">
   <meta name="twitter:image" content="${escapeHtml(imageUrl)}">
 
-  <!-- Redirect for JavaScript-enabled browsers -->
   <script>window.location.href = "${escapeHtml(pageUrl)}";</script>
   <noscript>
     <meta http-equiv="refresh" content="0;url=${escapeHtml(pageUrl)}">
@@ -101,7 +73,7 @@ function generateOgHtml(params: {
 </html>`;
 }
 
-function generateDefaultHtml(siteUrl: string) {
+function generateDefaultOgpHtml() {
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -136,50 +108,81 @@ function generateDefaultHtml(siteUrl: string) {
 </html>`;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const slug = req.query.slug as string;
-  const siteUrl = process.env.VITE_SITE_URL || 'https://bono-training.vercel.app';
+async function fetchAllBlogPosts() {
+  if (!projectId) {
+    console.error('Error: VITE_SANITY_PROJECT_ID is not set');
+    return [];
+  }
+
+  const query = `*[_type == "blogPost"]{
+    _id,
+    title,
+    description,
+    "slug": slug.current,
+    "thumbnailUrl": thumbnail.asset->url,
+    author,
+    publishedAt
+  }`;
+
+  const url = `https://${projectId}.api.sanity.io/v2024-01-01/data/query/${dataset}?query=${encodeURIComponent(query)}`;
 
   try {
-    const post = await getBlogPost(slug);
-
-    if (!post) {
-      res.setHeader('Content-Type', 'text/html; charset=utf-8');
-      return res.status(200).send(generateDefaultHtml(siteUrl));
+    const response = await fetch(url);
+    if (!response.ok) {
+      console.error('Sanity API error:', response.status);
+      return [];
     }
+    const data = await response.json();
+    return data.result || [];
+  } catch (error) {
+    console.error('Failed to fetch blog posts:', error);
+    return [];
+  }
+}
 
-    // サムネイル画像URL（Sanityアップロード画像を優先）
-    let thumbnailUrl = `${siteUrl}/og-default.svg`;
-    if (post.thumbnail) {
-      thumbnailUrl = urlFor(post.thumbnail).width(1200).height(630).fit('crop').url();
-    } else if (post.thumbnailUrl) {
-      thumbnailUrl = post.thumbnailUrl;
-    }
+async function main() {
+  console.log('🚀 Generating OGP HTML files...');
 
-    // 相対URLの場合は絶対URLに変換
-    if (!thumbnailUrl.startsWith('http')) {
-      thumbnailUrl = `${siteUrl}${thumbnailUrl}`;
-    }
+  // 出力ディレクトリ作成
+  const ogpDir = path.join(rootDir, 'dist', 'ogp');
+  fs.mkdirSync(ogpDir, { recursive: true });
+
+  // ブログ一覧用のデフォルトOGP
+  const defaultHtml = generateDefaultOgpHtml();
+  fs.writeFileSync(path.join(ogpDir, 'index.html'), defaultHtml);
+  console.log('✅ Generated: /ogp/index.html (default)');
+
+  // 全ブログ記事を取得
+  const posts = await fetchAllBlogPosts();
+  console.log(`📝 Found ${posts.length} blog posts`);
+
+  // 各記事のOGP HTMLを生成
+  for (const post of posts) {
+    if (!post.slug) continue;
 
     const title = removeEmoji(post.title || 'BONO Blog');
     const description = post.description || 'BONOのブログ記事';
-    const pageUrl = `${siteUrl}/blog/${slug}`;
+    const pageUrl = `${siteUrl}/blog/${post.slug}`;
 
-    const html = generateOgHtml({
+    let imageUrl = `${siteUrl}/og-default.svg`;
+    if (post.thumbnailUrl) {
+      imageUrl = post.thumbnailUrl;
+    }
+
+    const html = generateOgpHtml({
       title,
       description,
-      imageUrl: thumbnailUrl,
+      imageUrl,
       pageUrl,
-      siteUrl,
       author: post.author || 'BONO',
     });
 
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
-    return res.status(200).send(html);
-  } catch (error) {
-    console.error('OGP Function Error:', error);
-    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    return res.status(200).send(generateDefaultHtml(siteUrl));
+    const filePath = path.join(ogpDir, `${post.slug}.html`);
+    fs.writeFileSync(filePath, html);
+    console.log(`✅ Generated: /ogp/${post.slug}.html`);
   }
+
+  console.log(`\n🎉 Done! Generated ${posts.length + 1} OGP files.`);
 }
+
+main().catch(console.error);
