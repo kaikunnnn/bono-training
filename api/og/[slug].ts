@@ -1,22 +1,17 @@
 /**
- * OGP Meta Tags Edge Function
+ * OGP Meta Tags Serverless Function
  *
- * SNSクローラー用にブログ記事のOGPタグを返すEdge Function
- * - クローラーの場合: OGPタグ入りHTMLを返す
- * - 通常ユーザーの場合: SPAにリダイレクト
+ * SNSクローラー用にブログ記事のOGPタグを返すServerless Function
  */
 
+import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@sanity/client';
 import imageUrlBuilder from '@sanity/image-url';
 
-export const config = {
-  runtime: 'edge',
-};
-
-// Sanity Client (Edge Function用)
+// Sanity Client - VITE_プレフィックス付き環境変数を使用
 const sanityClient = createClient({
-  projectId: process.env.VITE_SANITY_PROJECT_ID || process.env.SANITY_PROJECT_ID,
-  dataset: process.env.VITE_SANITY_DATASET || process.env.SANITY_DATASET || 'production',
+  projectId: process.env.VITE_SANITY_PROJECT_ID,
+  dataset: process.env.VITE_SANITY_DATASET || 'production',
   apiVersion: '2024-01-01',
   useCdn: true,
 });
@@ -25,28 +20,6 @@ const imageBuilder = imageUrlBuilder(sanityClient);
 
 function urlFor(source: any) {
   return imageBuilder.image(source);
-}
-
-// SNSクローラーのUser-Agent判定
-const CRAWLER_USER_AGENTS = [
-  'Twitterbot',
-  'facebookexternalhit',
-  'LinkedInBot',
-  'Slackbot',
-  'Discordbot',
-  'TelegramBot',
-  'WhatsApp',
-  'Line',
-  'Googlebot',
-  'bingbot',
-  'Applebot',
-];
-
-function isCrawler(userAgent: string | null): boolean {
-  if (!userAgent) return false;
-  return CRAWLER_USER_AGENTS.some(crawler =>
-    userAgent.toLowerCase().includes(crawler.toLowerCase())
-  );
 }
 
 // 絵文字を除去
@@ -73,62 +46,13 @@ async function getBlogPost(slug: string) {
   return sanityClient.fetch(query, { slug });
 }
 
-export default async function handler(request: Request) {
-  const url = new URL(request.url);
-  const slug = url.pathname.replace('/api/og/', '').replace('/blog/', '');
-  const userAgent = request.headers.get('user-agent');
-  const siteUrl = process.env.VITE_SITE_URL || process.env.SITE_URL || 'https://app.bo-no.design';
-
-  // クローラーでない場合はSPAにリダイレクト
-  if (!isCrawler(userAgent)) {
-    return Response.redirect(`${siteUrl}/blog/${slug}`, 302);
-  }
-
-  try {
-    const post = await getBlogPost(slug);
-
-    if (!post) {
-      // 記事が見つからない場合はデフォルトOGPを返す
-      return new Response(generateDefaultHtml(siteUrl), {
-        headers: { 'Content-Type': 'text/html; charset=utf-8' },
-      });
-    }
-
-    // サムネイル画像URL（Sanityアップロード画像を優先）
-    let thumbnailUrl = '/og-default.svg';
-    if (post.thumbnail) {
-      thumbnailUrl = urlFor(post.thumbnail).width(1200).height(630).fit('crop').url();
-    } else if (post.thumbnailUrl) {
-      thumbnailUrl = post.thumbnailUrl;
-    }
-
-    // 絶対URLに変換
-    if (!thumbnailUrl.startsWith('http')) {
-      thumbnailUrl = `${siteUrl}${thumbnailUrl}`;
-    }
-
-    const title = removeEmoji(post.title || 'BONO Blog');
-    const description = post.description || 'BONOのブログ記事';
-    const pageUrl = `${siteUrl}/blog/${slug}`;
-
-    const html = generateOgHtml({
-      title,
-      description,
-      imageUrl: thumbnailUrl,
-      pageUrl,
-      siteUrl,
-      author: post.author || 'BONO',
-    });
-
-    return new Response(html, {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    });
-  } catch (error) {
-    console.error('OGP Edge Function Error:', error);
-    return new Response(generateDefaultHtml(siteUrl), {
-      headers: { 'Content-Type': 'text/html; charset=utf-8' },
-    });
-  }
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }
 
 function generateOgHtml(params: {
@@ -139,7 +63,7 @@ function generateOgHtml(params: {
   siteUrl: string;
   author: string;
 }) {
-  const { title, description, imageUrl, pageUrl, siteUrl, author } = params;
+  const { title, description, imageUrl, pageUrl, author } = params;
 
   return `<!DOCTYPE html>
 <html lang="ja">
@@ -212,11 +136,50 @@ function generateDefaultHtml(siteUrl: string) {
 </html>`;
 }
 
-function escapeHtml(text: string): string {
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const slug = req.query.slug as string;
+  const siteUrl = process.env.VITE_SITE_URL || 'https://bono-training.vercel.app';
+
+  try {
+    const post = await getBlogPost(slug);
+
+    if (!post) {
+      res.setHeader('Content-Type', 'text/html; charset=utf-8');
+      return res.status(200).send(generateDefaultHtml(siteUrl));
+    }
+
+    // サムネイル画像URL（Sanityアップロード画像を優先）
+    let thumbnailUrl = `${siteUrl}/og-default.svg`;
+    if (post.thumbnail) {
+      thumbnailUrl = urlFor(post.thumbnail).width(1200).height(630).fit('crop').url();
+    } else if (post.thumbnailUrl) {
+      thumbnailUrl = post.thumbnailUrl;
+    }
+
+    // 相対URLの場合は絶対URLに変換
+    if (!thumbnailUrl.startsWith('http')) {
+      thumbnailUrl = `${siteUrl}${thumbnailUrl}`;
+    }
+
+    const title = removeEmoji(post.title || 'BONO Blog');
+    const description = post.description || 'BONOのブログ記事';
+    const pageUrl = `${siteUrl}/blog/${slug}`;
+
+    const html = generateOgHtml({
+      title,
+      description,
+      imageUrl: thumbnailUrl,
+      pageUrl,
+      siteUrl,
+      author: post.author || 'BONO',
+    });
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
+    return res.status(200).send(html);
+  } catch (error) {
+    console.error('OGP Function Error:', error);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(generateDefaultHtml(siteUrl));
+  }
 }
