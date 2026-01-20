@@ -298,6 +298,8 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
 
   const setPlaybackRate = useCallback(async (rate: number) => {
     if (playerRef.current) {
+      // 即座にUIを更新（optimistic update）
+      setState(prev => ({ ...prev, playbackRate: rate }));
       await playerRef.current.setPlaybackRate(rate);
     }
   }, []);
