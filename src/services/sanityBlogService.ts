@@ -53,9 +53,10 @@ function toBlogPost(doc: SanityBlogPost): BlogPost & { imageUrl?: string; excerp
   const extractedEmoji = extractEmojiFromText(doc.title)
   const emoji = doc.emoji || extractedEmoji
 
+  // Sanityアップロード画像を優先、なければ外部URL、それもなければデフォルト
   const uploadedThumbnail =
     doc.thumbnail ? urlFor(doc.thumbnail).width(1200).height(675).fit('crop').url() : null
-  const thumbnail = doc.thumbnailUrl || uploadedThumbnail || DEFAULT_THUMBNAIL
+  const thumbnail = uploadedThumbnail || doc.thumbnailUrl || DEFAULT_THUMBNAIL
   const content = doc.content ?? doc.contentHtml ?? ''
 
   return {
@@ -116,7 +117,10 @@ export async function fetchSanityBlogPosts(params?: {
       category,
       tags,
       featured,
-      thumbnail,
+      thumbnail {
+        ...,
+        asset->
+      },
       thumbnailUrl
     }
   }`
@@ -167,7 +171,10 @@ export async function fetchSanityBlogPostBySlug(slug: string): Promise<(BlogPost
     category,
     tags,
     featured,
-    thumbnail,
+    thumbnail {
+      ...,
+      asset->
+    },
     thumbnailUrl
   }`
 
@@ -199,7 +206,10 @@ export async function fetchSanityFeaturedPosts(limit = 3): Promise<(BlogPost & {
     category,
     tags,
     featured,
-    thumbnail,
+    thumbnail {
+      ...,
+      asset->
+    },
     thumbnailUrl
   }`
   const docs = await client.fetch<SanityBlogPost[]>(query, { limit })
@@ -229,7 +239,10 @@ export async function fetchSanityLatestPosts(excludeId: string, limit = 4): Prom
     category,
     tags,
     featured,
-    thumbnail,
+    thumbnail {
+      ...,
+      asset->
+    },
     thumbnailUrl
   }`
   const docs = await client.fetch<SanityBlogPost[]>(query, { excludeId, limit })

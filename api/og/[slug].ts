@@ -61,7 +61,10 @@ async function getBlogPost(slug: string) {
     title,
     description,
     slug,
-    thumbnail,
+    thumbnail {
+      ...,
+      asset->
+    },
     thumbnailUrl,
     author,
     publishedAt
@@ -91,12 +94,12 @@ export default async function handler(request: Request) {
       });
     }
 
-    // サムネイル画像URL
+    // サムネイル画像URL（Sanityアップロード画像を優先）
     let thumbnailUrl = '/og-default.svg';
-    if (post.thumbnailUrl) {
-      thumbnailUrl = post.thumbnailUrl;
-    } else if (post.thumbnail) {
+    if (post.thumbnail) {
       thumbnailUrl = urlFor(post.thumbnail).width(1200).height(630).fit('crop').url();
+    } else if (post.thumbnailUrl) {
+      thumbnailUrl = post.thumbnailUrl;
     }
 
     // 絶対URLに変換

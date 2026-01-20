@@ -328,7 +328,7 @@ const BlogDetail: React.FC = () => {
 
             {/* シェアセクション */}
             <motion.div
-              className="mt-12 flex flex-col items-center gap-3 pt-8 pb-8 overflow-hidden w-fit h-[37px] bg-[var(--blog-color-white)] rounded-[36px]"
+              className="mt-12 flex flex-col items-center gap-3 px-6 py-5 w-fit bg-[var(--blog-color-white)] rounded-[36px]"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
