@@ -1,7 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/blog/:slug*",
+      "source": "/blog/:slug",
       "has": [
         {
           "type": "header",
@@ -9,17 +9,24 @@
           "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
         }
       ],
-      "destination": "/api/og/:slug*"
+      "destination": "/ogp/:slug.html"
+    },
+    {
+      "source": "/blog",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
+        }
+      ],
+      "destination": "/ogp/index.html"
     },
     {
       "source": "/(.*)",
       "destination": "/index.html"
     }
   ],
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "installCommand": "npm ci",
-  "framework": "vite",
   "headers": [
     {
       "source": "/assets/(.*)",
