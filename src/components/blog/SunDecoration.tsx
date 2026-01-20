@@ -93,7 +93,7 @@ export const SunDecoration: React.FC<SunDecorationProps> = ({
 export const ResponsiveSunDecoration: React.FC = () => {
   return (
     <motion.div
-      className="fixed right-[5%] md:right-[3%] sm:right-[2%] w-[260px] h-[260px] pointer-events-none"
+      className="fixed right-[3%] md:right-[3%] sm:right-[2%] w-[260px] h-[260px] pointer-events-none"
       style={{
         bottom: '-130px', // 太陽が半分見える位置（260pxの半分 = 130px下にオフセット）
         zIndex: -1, // 他のすべての要素の下、背景グラデーション（-10）より上
@@ -131,7 +131,7 @@ export const ResponsiveSunDecoration: React.FC = () => {
 export const AnimatedSunDecoration: React.FC = () => {
   return (
     <motion.div
-      className="fixed right-[5%] md:right-[3%] sm:right-[2%] w-[260px] h-[260px] pointer-events-none"
+      className="fixed right-[3%] md:right-[3%] sm:right-[2%] w-[260px] h-[260px] pointer-events-none"
       aria-hidden="true"
       style={{
         bottom: '-130px', // 太陽が半分見える位置（260pxの半分 = 130px下にオフセット）

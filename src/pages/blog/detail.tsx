@@ -289,8 +289,8 @@ const BlogDetail: React.FC = () => {
 
             {/* 記事コンテンツ */}
             <div className="prose prose-lg max-w-none">
-              {/* アイキャッチ画像 */}
-              {post.imageUrl && (
+              {/* アイキャッチ画像（プレースホルダーの場合は非表示） */}
+              {post.imageUrl && post.imageUrl !== '/placeholder-thumbnail.svg' && (
                 <motion.div
                   className="mb-8 w-full rounded-xl overflow-hidden shadow-md"
                   style={{ aspectRatio: '16 / 9' }}
@@ -328,7 +328,7 @@ const BlogDetail: React.FC = () => {
 
             {/* シェアセクション */}
             <motion.div
-              className="mt-12 flex flex-col items-center gap-3"
+              className="mt-12 flex flex-col items-center gap-3 pt-8 pb-8 overflow-hidden w-fit h-[37px] bg-[var(--blog-color-white)] rounded-[36px]"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}

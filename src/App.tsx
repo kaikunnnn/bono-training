@@ -62,6 +62,7 @@ import TagsIndex from './pages/blog/tags';
 import TagDetail from './pages/blog/tag';
 import BlogGuide from './pages/dev/BlogGuide';
 import VideoPlayerTest from './pages/dev/VideoPlayerTest';
+import BlogHeaderPatterns from './pages/dev/BlogHeaderPatterns';
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -119,6 +120,7 @@ const AppContent = () => {
         <Route path="/dev/webflow-test" element={<DevRoute><WebflowTest /></DevRoute>} />
         <Route path="/dev/guide-manual" element={<DevRoute><GuideManual /></DevRoute>} />
         <Route path="/dev/blog" element={<DevRoute><BlogGuide /></DevRoute>} />
+        <Route path="/dev/blog-header" element={<DevRoute><BlogHeaderPatterns /></DevRoute>} />
         <Route path="/dev/progress-components" element={<DevRoute><ProgressComponents /></DevRoute>} />
         <Route path="/dev/celebration" element={<DevRoute><CelebrationComponents /></DevRoute>} />
         <Route path="/dev/quest" element={<DevRoute><QuestComponents /></DevRoute>} />

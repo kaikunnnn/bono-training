@@ -1,18 +1,19 @@
 /**
  * BONO Blog - Header Component
  *
- * 99frontend 仕様に基づくヘッダーコンポーネント
- * 参照: .claude/docs/blog/99frontend/navigation-blog.md
+ * ダンシング・マージン | BONOブログ のヘッダー
  *
  * @component BlogHeader
- * @description ブログページ専用のヘッダー。BONOロゴSVGを表示し、ホームページへのリンクを提供します。
+ * @description ブログページ専用のヘッダー。タイトルとBONOロゴを表示し、本サイトへのリンクを提供。
  */
 
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { ArrowUp } from 'iconsax-react';
 
 // BONOロゴSVGのパス
-const imgLogoSvg = '/assets/blog/d6495cc76015bd725cb662d469f2c31129d53e32.svg';
+const BONO_LOGO = '/assets/blog/d6495cc76015bd725cb662d469f2c31129d53e32.svg';
+const BONO_MAIN_SITE = 'https://bo-no.design';
 
 interface BlogHeaderProps {
   /** 追加のカスタムクラス名 */
@@ -22,15 +23,13 @@ interface BlogHeaderProps {
 /**
  * BlogHeader Component
  *
- * ブログページのヘッダー。99frontend仕様に完全準拠した実装。
+ * ブログページのヘッダー。C2パターン: Zen Maru Gothic + 通常カラー
  *
  * 仕様:
- * - サイズ: 1920×56px
- * - パディング: 24px (デスクトップ/タブレット), 16px (モバイル)
- * - 背景: 透明（グラデーション上に直接表示）
- * - レイアウト: flex, justify-start
- * - BONOロゴ: SVG 88×26.074px、色#151834
- * - 右側スペース: 112px（将来の拡張用）
+ * - 左側: タイトル「ダンシング・マージン」+ 区切り「|」+ BONOロゴ + ブログ
+ * - 右側: BONOへ（外部リンク）
+ * - フォント: Zen Maru Gothic
+ * - 背景: 白、下線あり
  *
  * @example
  * ```tsx
@@ -40,144 +39,44 @@ interface BlogHeaderProps {
 export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
   return (
     <header
-      className={`box-border content-stretch flex h-14 items-center justify-start p-6 relative w-full ${className}`}
-      data-name="header"
-      data-node-id="3:207"
+      className={`w-full px-3 py-3 ${className}`}
       role="banner"
       aria-label="サイトヘッダー"
     >
-      {/* 左側: ロゴ */}
-      <div
-        className="content-stretch flex flex-col items-start relative shrink-0 w-[112px]"
-        data-name="left"
-        data-node-id="3:208"
-      >
-        <Link
-          to="/blog"
-          className="content-stretch flex items-start relative shrink-0 w-full no-underline transition-opacity duration-200 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#151834] focus-visible:outline-offset-2 rounded"
-          aria-label="BONO Blog トップへ"
-          data-name="Link"
-          data-node-id="3:209"
-        >
-          <div
-            className="content-stretch flex flex-col items-start max-w-[112px] overflow-clip relative shrink-0 w-[88px]"
-            data-name="BONO"
-            data-node-id="3:210"
-          >
-            <div
-              className="content-stretch flex flex-col h-[26.07px] items-center justify-center overflow-clip relative shrink-0 w-[88px]"
-              data-name="logo.svg fill"
-              data-node-id="3:211"
-            >
-              <div
-                className="h-[26.074px] opacity-100 relative shrink-0 w-[88px]"
-                data-name="logo.svg"
-                data-node-id="3:212"
-              >
-                <img
-                  alt="BONO"
-                  className="block max-w-none size-full"
-                  src={imgLogoSvg}
-                />
-              </div>
-            </div>
-          </div>
-        </Link>
-      </div>
-
-      {/* 右側: 将来の拡張用スペース */}
-      <div
-        className="h-[26.07px] shrink-0 w-[112px]"
-        data-name="right"
-        data-node-id="27:139"
+      {/* Google Fonts読み込み */}
+      <link
+        href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap"
+        rel="stylesheet"
       />
 
-      {/* レスポンシブ用のスタイル */}
-      <style>{`
-        @media (max-width: 375px) {
-          header[data-name="header"] {
-            padding: 16px !important;
-          }
-        }
-      `}</style>
-    </header>
-  );
-};
-
-/**
- * BlogHeaderWithNav Component (拡張版)
- *
- * ナビゲーションリンクを含むヘッダーバージョン。
- * 将来的にメニューが必要な場合に使用。
- *
- * @example
- * ```tsx
- * <BlogHeaderWithNav />
- * ```
- */
-export const BlogHeaderWithNav: React.FC<BlogHeaderProps> = ({
-  className = '',
-}) => {
-  return (
-    <header
-      className={`w-full bg-white shadow-md sticky top-0 z-[100] ${className}`}
-      style={{
-        height: BLOG_SPACING.header.height,
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-      }}
-      role="banner"
-    >
-      <div
-        className="flex items-center justify-between h-full px-6 md:px-4 lg:px-6"
-        style={{
-          paddingLeft: BLOG_SPACING.header.padding,
-          paddingRight: BLOG_SPACING.header.padding,
-        }}
-      >
-        {/* ロゴ */}
-        <Link
-          to="/blog"
-          aria-label="BONO Blog トップへ"
-          className="flex items-center transition-opacity duration-300 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#151834] focus-visible:outline-offset-2"
-          style={{
-            width: BLOG_SPACING.header.logoWidth,
-            height: BLOG_SPACING.header.logoHeight,
-          }}
-        >
-          <div
-            className="flex items-center justify-center"
-            style={{
-              width: BLOG_SPACING.header.logoImageWidth,
-              height: BLOG_SPACING.header.logoImageHeight,
-            }}
+      <div className="w-full mx-auto flex items-center justify-between">
+        {/* 左側: タイトル + 区切り + サブタイトル */}
+        <Link to="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
+          <h1
+            className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
+            style={{ fontFamily: '"Zen Maru Gothic", sans-serif' }}
           >
-            <span
-              className="font-noto font-bold text-[#151834]"
-              style={{
-                fontSize: '20px',
-                letterSpacing: '0.05em',
-              }}
-            >
-              BONO
-            </span>
+            ダンシング・マージン
+          </h1>
+          <span className="text-gray-300">|</span>
+          <div className="flex items-center gap-[3px] mt-[2px]">
+            <img src={BONO_LOGO} alt="BONO" className="w-[48px] h-[14px]" />
+            <span className="text-xs text-gray-600 font-semibold leading-3">ブログ</span>
           </div>
         </Link>
 
-        {/* ナビゲーション（オプション） */}
-        <nav className="hidden md:flex items-center gap-8" role="navigation">
-          <Link
-            to="/blog"
-            className="font-hind text-sm font-medium text-[#9CA3AF] hover:text-[#0F172A] transition-colors duration-200"
-          >
-            Blog
-          </Link>
-          <Link
-            to="/training"
-            className="font-hind text-sm font-medium text-[#9CA3AF] hover:text-[#0F172A] transition-colors duration-200"
-          >
-            Training
-          </Link>
-        </nav>
+        {/* 右側: 本サイトリンク */}
+        <a
+          href={BONO_MAIN_SITE}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+        >
+          <span>BONOへ</span>
+          <span className="[&_path]:[stroke-width:2.5] rotate-45">
+            <ArrowUp size={14} />
+          </span>
+        </a>
       </div>
     </header>
   );
