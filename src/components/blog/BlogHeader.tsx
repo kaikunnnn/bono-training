@@ -52,12 +52,25 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
       <div className="w-full mx-auto flex items-center justify-between">
         {/* 左側: タイトル + 区切り + サブタイトル */}
         <Link to="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
-          <h1
-            className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
-            style={{ fontFamily: '"Zen Maru Gothic", sans-serif' }}
-          >
-            ダンシング・マージン
-          </h1>
+          <span className="relative group">
+            <h1
+              className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
+              style={{ fontFamily: '"Zen Maru Gothic", sans-serif' }}
+              title="狂った世で踊れ!"
+            >
+              ダンシング・マージン
+            </h1>
+
+            {/* hover/focus 時のフキダシ */}
+            <span className="pointer-events-none absolute left-1/2 top-full z-20 mt-2 -translate-x-1/2 translate-y-1 opacity-0 scale-[0.98] transition-all duration-300 ease-out group-hover:opacity-100 group-hover:scale-100 group-hover:translate-y-0 group-focus-within:opacity-100 group-focus-within:scale-100 group-focus-within:translate-y-0">
+              <span className="relative block whitespace-nowrap rounded-xl bg-white px-3 py-2 text-[12px] font-semibold text-gray-900 shadow-lg ring-1 ring-black/10">
+                狂った世で踊れ!
+                {/* 矢印（ひし形に見えないよう三角形で描画） */}
+                <span className="absolute left-1/2 -top-[9px] -translate-x-1/2 h-0 w-0 border-x-[9px] border-x-transparent border-b-[9px] border-b-black/10" />
+                <span className="absolute left-1/2 -top-[8px] -translate-x-1/2 h-0 w-0 border-x-[8px] border-x-transparent border-b-[8px] border-b-white" />
+              </span>
+            </span>
+          </span>
           <span className="text-gray-300">|</span>
           <div className="flex items-center gap-[3px] mt-[2px]">
             <img src={BONO_LOGO} alt="BONO" className="w-[48px] h-[14px]" />

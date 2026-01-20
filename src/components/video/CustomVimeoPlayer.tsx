@@ -229,7 +229,10 @@ export function CustomVimeoPlayer({ vimeoId, className = '' }: CustomVimeoPlayer
       {state.isReady && !state.isPlaying && showControls && (
         <button
           onClick={handleVideoClick}
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm z-10"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full flex items-center justify-center transition-all hover:scale-105 hover:brightness-110 z-10"
+          style={{
+            background: 'linear-gradient(135deg, hsla(348, 100%, 65%, 1) 0%, hsla(194, 58%, 36%, 1) 100%)',
+          }}
           aria-label="再生"
         >
           <Play className="w-10 h-10 text-white ml-1" />

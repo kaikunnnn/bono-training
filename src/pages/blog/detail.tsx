@@ -1,5 +1,5 @@
 // src/pages/blog/detail.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, type ReactNode } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { BlogHeader } from '@/components/blog/BlogHeader';
@@ -17,7 +17,42 @@ import { BlogPost } from '@/types/blog';
 import { Skeleton } from '@/components/ui/skeleton';
 import SEO from '@/components/common/SEO';
 import { removeEmojiFromText } from '@/utils/blog/emojiUtils';
-import { ShareDropdown } from '@/components/common/ShareDropdown';
+import { useToast } from '@/components/ui/use-toast';
+import { Copy, ICON_SIZES } from '@/lib/icons';
+
+// X (Twitter) ロゴ
+const XIcon = ({ className }: { className?: string }) => (
+  <svg
+    viewBox="0 0 24 24"
+    className={className}
+    fill="currentColor"
+    aria-hidden="true"
+  >
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+  </svg>
+);
+
+interface ShareActionButtonProps {
+  icon: ReactNode;
+  label: string;
+  onClick: () => void | Promise<void>;
+}
+
+const ShareActionButton = ({ icon, label, onClick }: ShareActionButtonProps) => {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="bg-white border border-[#EBEBEB] flex gap-2 items-center px-4 py-2 rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
+      aria-label={label}
+    >
+      <span className="text-black">{icon}</span>
+      <span className="font-noto-sans-jp font-semibold text-sm text-black">
+        {label}
+      </span>
+    </button>
+  );
+};
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -33,6 +68,7 @@ const BlogDetail: React.FC = () => {
   const [latestPosts, setLatestPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [tocItems, setTocItems] = useState<Array<{id: string, text: string, level: number}>>([]);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!slug) return;
@@ -96,6 +132,33 @@ const BlogDetail: React.FC = () => {
 
     loadPost();
   }, [slug]);
+
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+  const handleCopyShareUrl = async () => {
+    if (!shareUrl) return;
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast({
+        title: 'コピーしました',
+        description: 'URLをクリップボードにコピーしました',
+      });
+    } catch (err: unknown) {
+      console.error('Failed to copy URL:', err);
+      toast({
+        title: 'コピーに失敗しました',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleShareToX = () => {
+    if (!shareUrl || !post?.title) return;
+    const tweetText = encodeURIComponent(`${post.title}`);
+    const tweetUrl = encodeURIComponent(shareUrl);
+    const xShareUrl = `https://x.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`;
+    window.open(xShareUrl, '_blank', 'width=600,height=400');
+  };
 
   // ローディングスケルトン
   const LoadingSkeleton = () => (
@@ -333,16 +396,21 @@ const BlogDetail: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <p className="text-gray-600 text-sm">よかったらシェアしてね🙋</p>
-              <ShareDropdown title={post.title} align="center">
-                <button
-                  className="bg-white border border-[#EBEBEB] flex gap-1 items-center px-4 py-2 rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
-                >
-                  <span className="font-noto-sans-jp font-semibold text-sm text-black">
-                    シェア
-                  </span>
-                </button>
-              </ShareDropdown>
+              <p className="text-gray-600 text-sm font-noto-sans-jp font-semibold">
+                よかったらシェアしてね🙋
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <ShareActionButton
+                  icon={<Copy size={ICON_SIZES.md} />}
+                  label="URLをコピー"
+                  onClick={handleCopyShareUrl}
+                />
+                <ShareActionButton
+                  icon={<XIcon className="h-4 w-4" />}
+                  label="シェアする"
+                  onClick={handleShareToX}
+                />
+              </div>
             </motion.div>
 
           </motion.article>
