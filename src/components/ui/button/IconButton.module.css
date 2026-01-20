@@ -1,0 +1,246 @@
+.burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 220%;
+  height: 220%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.burst::before,
+.burst::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  /* ドットを散りばめたレイヤー */
+  background:
+    radial-gradient(circle, rgba(84, 174, 255, 0.95) 0 2px, transparent 3px) 12% 18% / 24px 24px,
+    radial-gradient(circle, rgba(84, 174, 255, 0.85) 0 3px, transparent 4px) 82% 22% / 28px 28px,
+    radial-gradient(circle, rgba(84, 174, 255, 0.85) 0 2px, transparent 3px) 70% 78% / 26px 26px,
+    radial-gradient(circle, rgba(84, 174, 255, 0.75) 0 2px, transparent 3px) 22% 74% / 22px 22px,
+    radial-gradient(circle, rgba(84, 174, 255, 0.65) 0 2px, transparent 3px) 42% 10% / 20px 20px,
+    radial-gradient(circle, rgba(84, 174, 255, 0.65) 0 2px, transparent 3px) 92% 58% / 20px 20px,
+    radial-gradient(circle, rgba(84, 174, 255, 0.55) 0 2px, transparent 3px) 8% 52% / 18px 18px;
+  background-repeat: no-repeat;
+  opacity: 0;
+  transform: rotate(var(--burst-rotate, 0deg)) scale(0.2);
+  animation: burst-pop 520ms ease-out forwards;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.06));
+}
+
+.burst::after {
+  --burst-rotate: 22deg;
+}
+
+@keyframes burst-pop {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--burst-rotate, 0deg)) scale(0.2);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--burst-rotate, 0deg)) scale(1);
+  }
+}
+
+/* Following-style burst (particles fly outward) */
+.followingBurst {
+  position: absolute;
+  inset: calc(-56px * var(--spread, 1));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.followingDot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s, 8px);
+  height: var(--s, 8px);
+  border-radius: 9999px;
+  /* 祝祭感のある配色を粒ごとに注入（devで比較しやすくする） */
+  background: var(--bg, #4CC9F0);
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 18px)) scale(0.45);
+  filter:
+    drop-shadow(0 8px 18px var(--glow, rgba(120, 200, 255, 0.35)))
+    drop-shadow(0 0 10px var(--glow, rgba(120, 200, 255, 0.25)));
+  animation-name: following-pop;
+  animation-duration: var(--dur, 560ms);
+  animation-timing-function: cubic-bezier(0.16, 0.9, 0.22, 1);
+  animation-fill-mode: forwards;
+  animation-delay: var(--dly, 0ms);
+}
+
+@keyframes following-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 18px)) scale(0.40);
+  }
+  16% {
+    opacity: calc(var(--a2, 1) * 1);
+  }
+  /* 終盤で「残ってから消える」感じにならないよう、徐々にフェード */
+  58% {
+    opacity: calc(var(--a2, 1) * 0.85);
+  }
+  78% {
+    opacity: calc(var(--a2, 1) * 0.45);
+  }
+  92% {
+    opacity: calc(var(--a2, 1) * 0.18);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r1, 72px)) scale(0.92);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .followingDot {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Candy burst (confetti dots + pills) */
+.candyBurst {
+  position: absolute;
+  inset: calc(-68px * var(--spread, 1));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.candyDot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s, 6px);
+  height: var(--s, 6px);
+  border-radius: 9999px;
+  background: var(--bg, #4CC9F0);
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 14px)) scale(0.35);
+  filter:
+    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.10))
+    drop-shadow(0 0 12px var(--glow, rgba(255, 255, 255, 0.22)));
+  animation: candy-dot-pop var(--dur, 980ms) cubic-bezier(0.16, 0.9, 0.22, 1) forwards;
+  animation-delay: var(--dly, 0ms);
+}
+
+@keyframes candy-dot-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 14px)) scale(0.35);
+  }
+  14% {
+    opacity: calc(var(--a2, 1) * 1);
+  }
+  58% {
+    opacity: calc(var(--a2, 1) * 0.85);
+  }
+  78% {
+    opacity: calc(var(--a2, 1) * 0.45);
+  }
+  92% {
+    opacity: calc(var(--a2, 1) * 0.18);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r1, 92px)) scale(0.88);
+  }
+}
+
+.candyPill {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--s, 6px) * 1.45);
+  height: calc(var(--s, 6px) * 0.62);
+  border-radius: 9999px;
+  background: var(--bg, #F9C74F);
+  opacity: 0;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--a, 0deg))
+    translateX(var(--r0, 12px))
+    rotate(var(--rot, 0deg))
+    scale(0.4);
+  filter:
+    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.10))
+    drop-shadow(0 0 12px var(--glow, rgba(255, 255, 255, 0.22)));
+  animation: candy-pill-pop var(--dur, 1180ms) cubic-bezier(0.16, 0.95, 0.22, 1) forwards;
+  animation-delay: var(--dly, 0ms);
+}
+
+@keyframes candy-pill-pop {
+  0% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--a, 0deg))
+      translateX(var(--r0, 12px))
+      rotate(var(--rot, 0deg))
+      scale(0.4);
+  }
+  16% {
+    opacity: calc(var(--a2, 1) * 1);
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--a, 0deg))
+      translateX(var(--r1, 96px))
+      rotate(calc(var(--rot, 0deg) + 220deg))
+      scale(0.95);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .candyDot,
+  .candyPill {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Press bounce (凹む→膨れる→戻る) */
+.pressDown {
+  will-change: transform;
+  transform-origin: center;
+  transform: scale(var(--press-down-scale, 0.96));
+  transition: transform var(--press-down-ms, 160ms) cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.pressRelease {
+  will-change: transform;
+  transform-origin: center;
+  animation: press-release var(--press-up-ms, 680ms) cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes press-release {
+  0% {
+    transform: scale(var(--press-down-scale, 0.96));
+  }
+  55% {
+    transform: scale(var(--press-up-scale, 1.02));
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pressDown,
+  .pressRelease {
+    animation: none;
+    transition: none;
+  }
+}

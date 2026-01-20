@@ -22,7 +22,6 @@ export interface VimeoPlayerState {
   playbackRate: number;
   isLoading: boolean;
   isReady: boolean;
-  isPip: boolean;
   textTracks: TextTrack[];
   activeTextTrack: TextTrack | null;
   chapters: Chapter[];
@@ -39,7 +38,6 @@ export interface UseVimeoPlayerReturn {
   setVolume: (volume: number) => Promise<void>;
   setPlaybackRate: (rate: number) => Promise<void>;
   toggleFullscreen: () => void;
-  togglePip: () => Promise<void>;
   enableTextTrack: (language: string) => Promise<void>;
   disableTextTrack: () => Promise<void>;
 }
@@ -56,7 +54,6 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
     playbackRate: 1,
     isLoading: true,
     isReady: false,
-    isPip: false,
     textTracks: [],
     activeTextTrack: null,
     chapters: [],
@@ -84,7 +81,6 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
       title: false,
       byline: false,
       portrait: false,
-      pip: true,
     });
 
     playerRef.current = player;
@@ -226,15 +222,6 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
       setState(prev => ({ ...prev, isLoading: false }));
     });
 
-    // PiP イベント
-    player.on('enterpictureinpicture', () => {
-      setState(prev => ({ ...prev, isPip: true }));
-    });
-
-    player.on('leavepictureinpicture', () => {
-      setState(prev => ({ ...prev, isPip: false }));
-    });
-
     // 字幕変更イベント
     player.on('texttrackchange', (data: any) => {
       console.log('[VimeoPlayer] Text track changed:', data);
@@ -314,27 +301,6 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
     }
   }, []);
 
-  // Picture-in-Picture トグル
-  const togglePip = useCallback(async () => {
-    if (playerRef.current) {
-      try {
-        if (state.isPip) {
-          // 即座にUIを更新（optimistic update）
-          setState(prev => ({ ...prev, isPip: false }));
-          await playerRef.current.exitPictureInPicture();
-        } else {
-          // 即座にUIを更新（optimistic update）
-          setState(prev => ({ ...prev, isPip: true }));
-          await playerRef.current.requestPictureInPicture();
-        }
-      } catch (err) {
-        // エラー時は状態を元に戻す
-        setState(prev => ({ ...prev, isPip: !prev.isPip }));
-        console.error('[VimeoPlayer] PiP error:', err);
-      }
-    }
-  }, [state.isPip]);
-
   // 字幕を有効化
   const enableTextTrack = useCallback(async (language: string) => {
     if (playerRef.current) {
@@ -369,7 +335,6 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
     setVolume,
     setPlaybackRate,
     toggleFullscreen,
-    togglePip,
     enableTextTrack,
     disableTextTrack,
   };

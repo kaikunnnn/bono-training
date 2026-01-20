@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -80,11 +80,25 @@ const devResources: DevResourceCard[] = [
     tags: ['Icons', 'Animation', 'Interaction']
   },
   {
+    title: 'IconButton Burst Playground',
+    description: '「完了にする」ボタンの弾けるアニメーションを複数パターンで比較・調整。',
+    path: '/dev/icon-button-burst',
+    icon: <MousePointerClick className="w-8 h-8" />,
+    tags: ['IconButton', 'Burst', 'Animation', 'Experiment']
+  },
+  {
     title: 'Quest Item Layouts',
     description: 'クエストアイテムのレイアウト比較。タグ+タイトルの表示パターン。',
     path: '/dev/quest-layouts',
     icon: <LayoutGrid className="w-8 h-8" />,
     tags: ['Quest', 'Layout', 'Comparison']
+  },
+  {
+    title: 'Email Templates',
+    description: 'BONOのトランザクションメールテンプレートのプレビュー。パスワードリセット、メール確認など。',
+    path: '/dev/email-templates',
+    icon: <Mail className="w-8 h-8" />,
+    tags: ['Email', 'Templates', 'Transactional']
   }
 ];
 

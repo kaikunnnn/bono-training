@@ -1,0 +1,294 @@
+.stageButton {
+  position: relative;
+  background: white;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.06);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: box-shadow 150ms ease, border-color 150ms ease;
+}
+
+.stageButton:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.10);
+}
+
+.stageButton:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.20), 0px 2px 6px 0px rgba(0, 0, 0, 0.10);
+}
+
+.stageContent {
+  position: relative;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.burstRoot {
+  position: absolute;
+  inset: -40px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ========== Experimental overlays (cute & pop) ========== */
+.overlayRoot {
+  position: absolute;
+  inset: calc(-68px * var(--spread, 1));
+  pointer-events: none;
+  z-index: 3;
+}
+
+.dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s, 6px);
+  height: var(--s, 6px);
+  border-radius: 9999px;
+  background: var(--bg, #4CC9F0);
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 14px)) scale(0.35);
+  filter:
+    drop-shadow(0 8px 18px rgba(0, 0, 0, 0.10))
+    drop-shadow(0 0 12px rgba(255, 255, 255, 0.25));
+  animation: dot-pop var(--dur, 760ms) cubic-bezier(0.16, 0.9, 0.22, 1) forwards;
+  animation-delay: var(--dly, 0ms);
+}
+
+@keyframes dot-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 14px)) scale(0.35);
+  }
+  14% {
+    opacity: 1;
+  }
+  52% {
+    opacity: 0.92;
+  }
+  78% {
+    opacity: 0.45;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r1, 84px)) scale(0.88);
+  }
+}
+
+/* Candy confetti: まる + ちいさいカプセル */
+.pill {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: calc(var(--s, 6px) * 1.45);
+  height: calc(var(--s, 6px) * 0.62);
+  border-radius: 9999px;
+  background: var(--bg, #F9C74F);
+  opacity: 0;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--a, 0deg))
+    translateX(var(--r0, 12px))
+    rotate(var(--rot, 0deg))
+    scale(0.4);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.10));
+  animation: pill-pop var(--dur, 860ms) cubic-bezier(0.16, 0.95, 0.22, 1) forwards;
+  animation-delay: var(--dly, 0ms);
+}
+
+@keyframes pill-pop {
+  0% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--a, 0deg))
+      translateX(var(--r0, 12px))
+      rotate(var(--rot, 0deg))
+      scale(0.4);
+  }
+  16% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--a, 0deg))
+      translateX(var(--r1, 96px))
+      rotate(calc(var(--rot, 0deg) + 220deg))
+      scale(0.95);
+  }
+}
+
+/* Sparkle stars: ちいさい星（4-point） */
+.star {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s, 7px);
+  height: var(--s, 7px);
+  background: var(--bg, #4CC9F0);
+  opacity: 0;
+  transform:
+    translate(-50%, -50%)
+    rotate(var(--a, 0deg))
+    translateX(var(--r0, 10px))
+    rotate(45deg)
+    scale(0.25);
+  clip-path: polygon(50% 0%, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0% 50%, 38% 38%);
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.10));
+  animation: star-pop var(--dur, 980ms) cubic-bezier(0.16, 1, 0.24, 1) forwards;
+  animation-delay: var(--dly, 0ms);
+}
+
+@keyframes star-pop {
+  0% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--a, 0deg))
+      translateX(var(--r0, 10px))
+      rotate(45deg)
+      scale(0.25);
+  }
+  18% {
+    opacity: 1;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--a, 0deg))
+      translateX(calc(var(--r1, 92px) * 0.55))
+      rotate(45deg)
+      scale(1.05);
+  }
+  55% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate(-50%, -50%)
+      rotate(var(--a, 0deg))
+      translateX(var(--r1, 92px))
+      rotate(45deg)
+      scale(0.85);
+  }
+}
+
+/* Bubble pop: しゃぼん玉（輪郭＋透明） */
+.bubble {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s, 10px);
+  height: var(--s, 10px);
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.2) 18%, transparent 46%);
+  border: 1px solid color-mix(in srgb, var(--bg, #4CC9F0) 55%, white 45%);
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 10px)) scale(0.3);
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.08));
+  animation: bubble-float var(--dur, 1200ms) cubic-bezier(0.12, 0.9, 0.18, 1) forwards;
+  animation-delay: var(--dly, 0ms);
+}
+
+@keyframes bubble-float {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r0, 10px)) scale(0.25);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  65% {
+    opacity: 0.65;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--r1, 110px)) scale(1.05);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot,
+  .pill,
+  .star,
+  .bubble {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Pattern: POP (particles fly out) */
+.popParticle {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: var(--s, 6px);
+  height: var(--s, 6px);
+  border-radius: 9999px;
+  background: var(--c, rgba(84, 174, 255, 0.95));
+  transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(0px) scale(0.2);
+  opacity: 0;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.12));
+  animation: pop-particle 520ms cubic-bezier(0.18, 0.9, 0.25, 1) forwards;
+}
+
+.popRing {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  transform: translate(-50%, -50%) scale(0.2);
+  opacity: 0;
+  border: 2px solid rgba(84, 174, 255, 0.35);
+  animation: pop-ring 520ms cubic-bezier(0.18, 0.9, 0.25, 1) forwards;
+}
+
+@keyframes pop-particle {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(0px) scale(0.2);
+  }
+  12% {
+    opacity: 1;
+  }
+  65% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(calc(var(--d, 44px) * 0.9)) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(var(--a, 0deg)) translateX(var(--d, 44px)) scale(0.9);
+  }
+}
+
+@keyframes pop-ring {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.15);
+  }
+  10% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(5.2);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .popParticle,
+  .popRing {
+    animation: none;
+    opacity: 0;
+  }
+}

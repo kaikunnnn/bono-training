@@ -1,8 +1,8 @@
 import { ArrowRight, Share2 } from "@/lib/icons";
 import { Star as LucideStar } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { ArticleTag, TagType } from "@/components/article/sidebar/ArticleTag";
-import { IconCheck } from "@/components/ui/icon-check";
-import { IconButton } from "@/components/ui/button/IconButton";
+import { ArticleCompleteButton } from "@/components/article/ArticleCompleteButton";
 import { Button } from "@/components/ui/button";
 import { ShareDropdown } from "@/components/common/ShareDropdown";
 
@@ -42,6 +42,19 @@ const HeadingSection = ({
   isCompleted = false,
   completionLoading = false,
 }: HeadingSectionProps) => {
+  const [completeBurstKey, setCompleteBurstKey] = useState(0);
+  const prevIsCompletedRef = useRef(isCompleted);
+
+  // 完了状態が false -> true に切り替わった瞬間だけ burst を発火
+  useEffect(() => {
+    const prev = prevIsCompletedRef.current;
+    prevIsCompletedRef.current = isCompleted;
+
+    if (!prev && isCompleted) {
+      setCompleteBurstKey((k) => k + 1);
+    }
+  }, [isCompleted]);
+
   return (
     <div className="w-full px-6 py-4 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] inline-flex flex-col justify-start items-start gap-3">
       {/* Header Section - Tag, Title, Description */}
@@ -53,7 +66,7 @@ const HeadingSection = ({
           </div>
 
           {/* Title */}
-          <div className="self-stretch justify-center text-gray-900 text-2xl md:text-[30px] font-semibold font-['Noto_Sans_JP'] leading-[148%]">
+          <div className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-['Noto_Sans_JP'] leading-[148%]">
             {title}
           </div>
         </div>
@@ -71,11 +84,10 @@ const HeadingSection = ({
         {/* Left Button Group - Complete, Favorite, Share */}
         <div className="flex justify-start items-center gap-2">
           <div className="self-stretch flex justify-start items-center gap-3">
-            {/* Complete Button - IconButton コンポーネント使用 */}
-            <IconButton
-              icon={<IconCheck isCompleted={isCompleted} />}
-              label={isCompleted ? "完了済み" : "完了にする"}
+            <ArticleCompleteButton
+              isCompleted={isCompleted}
               onClick={onComplete}
+              burstKey={completeBurstKey}
             />
 
             {/* Favorite Button */}

@@ -12,6 +12,7 @@ import MobileMenuButton from "@/components/article/MobileMenuButton";
 import MobileSideNav from "@/components/article/MobileSideNav";
 import { toggleBookmark, isBookmarked } from "@/services/bookmarks";
 import { toggleArticleCompletion, getArticleProgress, getLessonProgress, getLessonStatus, removeLessonCompletion } from "@/services/progress";
+import { recordViewHistory } from "@/services/viewHistory";
 import { useCelebration } from "@/hooks/useCelebration";
 import {
   AlertDialog,
@@ -150,6 +151,13 @@ const ArticleDetail = () => {
       }
     };
     checkProgress();
+  }, [article?._id]);
+
+  // 閲覧履歴を記録
+  useEffect(() => {
+    if (article?._id) {
+      recordViewHistory(article._id);
+    }
   }, [article?._id]);
 
   // ブックマークトグル処理
@@ -390,9 +398,9 @@ const ArticleDetail = () => {
         </aside>
 
         {/* メインコンテンツエリア */}
-        <main className="flex-1 flex flex-col items-center">
+        <main className="flex-1 flex flex-col items-center gap-4">
           {/* Video Section - 1680px以上の画面で最大1320px、センター揃え */}
-          <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 min-[1680px]:pt-8 pt-16 md:pt-8">
+          <div className="w-full px-0 min-[1680px]:px-2 min-[1680px]:pt-8 pt-16 md:pt-8">
             <VideoSection
               videoUrl={article.videoUrl}
               thumbnail={article.thumbnail}
@@ -402,8 +410,8 @@ const ArticleDetail = () => {
           </div>
 
           {/* 記事コンテンツ - 動画ブロックと同じ幅 */}
-          <div className="w-full min-[1680px]:max-w-[1320px] min-[1680px]:px-8 py-8 px-4">
-            <div className="flex flex-col gap-2">
+          <div className="w-full px-0 py-0 min-[1680px]:px-2">
+            <div className="flex flex-col gap-3">
               {/* Heading Section - 記事カード群の先頭へ移動 */}
               <HeadingSection
                 tagType={article.articleType}
