@@ -40,6 +40,7 @@
 
 | ドキュメント | 説明 | 状態 |
 |--------------|------|------|
+| **[supabase-to-memberstack-sync.md](./supabase-to-memberstack-sync.md)** | 逆方向同期（Supabase→Memberstack） | ★ 調査完了・実装待ち |
 | **[MIGRATED-USER-DETECTION-PLAN.md](./MIGRATED-USER-DETECTION-PLAN.md)** | 移行ユーザー判定機能 | ★ 実装予定 |
 | [VERIFICATION-TEST-PLAN.md](./VERIFICATION-TEST-PLAN.md) | 検証テスト計画 | Phase A 完了 |
 | [MEMBER-TEST-FLOW.md](./MEMBER-TEST-FLOW.md) | メンバーテストフロー | Phase B 用 |
