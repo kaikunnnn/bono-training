@@ -231,7 +231,6 @@ function ExperimentalPopBurst({ burstKey }: { burstKey: number }) {
       <span className={styles.popRing} onAnimationEnd={() => setIsBursting(false)} />
       {particles.map((p, i) => (
         <span
-          // eslint-disable-next-line react/no-array-index-key
           key={i}
           className={styles.popParticle}
           style={{
