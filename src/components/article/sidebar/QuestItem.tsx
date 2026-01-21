@@ -1,4 +1,4 @@
-import ArticleListItem from "./ArticleListItem";
+import ArticleListItem, { type QuestArticleItemLayoutVariant } from "./ArticleListItem";
 import type { TagType } from "./ArticleTag";
 
 interface ArticleItemData {
@@ -14,6 +14,7 @@ interface QuestItemProps {
   questTitle: string;
   articles: ArticleItemData[];
   activeArticleId?: string;
+  articleItemLayoutVariant?: QuestArticleItemLayoutVariant;
 }
 
 /**
@@ -75,6 +76,7 @@ export function QuestItem({
   questTitle,
   articles,
   activeArticleId,
+  articleItemLayoutVariant = "C",
 }: QuestItemProps) {
   return (
     <div className="w-72 bg-white rounded-[20px] shadow-none outline outline-1 outline-offset-[-1px] outline-black/5 flex flex-col items-center overflow-hidden">
@@ -90,6 +92,7 @@ export function QuestItem({
             isCompleted={article.isCompleted}
             isActive={article.id === activeArticleId}
             href={article.href}
+            layoutVariant={articleItemLayoutVariant}
           />
         ))}
       </div>

@@ -278,11 +278,12 @@ export default function MyPage() {
             >
               マイページ
             </h1>
-            <IconButton
-              to="/profile"
-              icon={<User size={14} color="#020817" />}
-              label="プロフィール"
-            />
+            <div className="flex items-center gap-2">
+              <IconButton
+                to="/profile"
+                label="プロフィール"
+              />
+            </div>
           </div>
 
           {/* 下段: タブ */}

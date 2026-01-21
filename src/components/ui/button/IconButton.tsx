@@ -4,7 +4,7 @@ import styles from "./IconButton.module.css";
 
 export interface IconButtonProps {
   /** アイコン要素 */
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
   /** ボタンラベル */
   label: string;
   /** 遷移先URL（指定時はLinkとして動作） */
@@ -88,8 +88,9 @@ export const IconButton: React.FC<IconButtonProps> = ({
   pressBounce = false,
   pressBounceConfig,
 }) => {
+  const hasIcon = Boolean(icon);
   const className =
-    "relative bg-white px-[12px] py-[8px] rounded-[12px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center gap-[4px] cursor-pointer transition-[box-shadow,border-color] duration-150 hover:border-black/15 hover:shadow-[0px_2px_6px_0px_rgba(0,0,0,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2";
+    `relative bg-white px-[12px] py-[8px] rounded-[12px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center ${hasIcon ? "gap-[4px]" : "gap-0"} cursor-pointer transition-[box-shadow,border-color] duration-150 hover:border-black/15 hover:shadow-[0px_2px_6px_0px_rgba(0,0,0,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2`;
 
   const [isBursting, setIsBursting] = useState(false);
   const [burstId, setBurstId] = useState(0);
@@ -391,9 +392,11 @@ export const IconButton: React.FC<IconButtonProps> = ({
 
   const content = (
     <>
-      <div className="w-5 h-5 flex items-center justify-center relative z-10">
-        {icon}
-      </div>
+      {hasIcon && (
+        <div className="w-5 h-5 flex items-center justify-center relative z-10">
+          {icon}
+        </div>
+      )}
       <span className="font-semibold text-[14px] text-[#020817] leading-[20px] relative z-10">
         {label}
       </span>

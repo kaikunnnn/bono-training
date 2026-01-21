@@ -6,14 +6,22 @@
 import React, { useState } from 'react';
 import { Mail } from 'lucide-react';
 
-type TemplateType = 'password-reset' | 'confirm-signup' | 'change-email';
+type TemplateType = 'password-reset' | 'confirm-signup' | 'change-email' | 'welcome' | 'cancellation' | 'plan-change';
 
 interface TemplateConfig {
   title: string;
   heading: string;
   body: string;
-  buttonText: string;
-  note: string;
+  buttonText?: string;
+  buttonUrl?: string;
+  note?: string;
+  sections?: Array<{
+    title: string;
+    content: string;
+    buttonText?: string;
+    buttonUrl?: string;
+  }>;
+  footer?: string;
 }
 
 const templates: Record<TemplateType, TemplateConfig> = {
@@ -22,14 +30,14 @@ const templates: Record<TemplateType, TemplateConfig> = {
     heading: 'パスワードをリセット',
     body: 'パスワードリセットのリクエストを受け付けました。<br><br>以下のボタンをクリックして、新しいパスワードを設定してください。',
     buttonText: 'パスワードを再設定する',
-    note: 'このリンクは24時間有効です。<br>リクエストに心当たりがない場合は、このメールを無視してください。',
+    note: 'このリンクは1時間有効です。<br>リクエストに心当たりがない場合は、このメールを無視してください。',
   },
   'confirm-signup': {
     title: 'メールアドレス確認',
     heading: 'BONOへようこそ！',
     body: 'BONOにご登録いただきありがとうございます。<br><br>以下のボタンをクリックして、メールアドレスの確認を完了してください。',
     buttonText: 'メールアドレスを確認する',
-    note: 'このリンクは24時間有効です。',
+    note: 'このリンクは1時間有効です。',
   },
   'change-email': {
     title: 'メールアドレス変更',
@@ -37,6 +45,41 @@ const templates: Record<TemplateType, TemplateConfig> = {
     body: 'メールアドレスの変更リクエストを受け付けました。<br><br>以下のボタンをクリックして、新しいメールアドレスを確認してください。',
     buttonText: '変更を確認する',
     note: 'リクエストに心当たりがない場合は、このメールを無視してください。',
+  },
+  'welcome': {
+    title: 'メンバーシップ登録完了',
+    heading: 'BONOへようこそ！🎉',
+    body: 'メンバーシップ登録ありがとうございます！<br><br>BONOを有効活用してデザインスキルを伸ばすため、まず以下のコンテンツを見て、実行してみてください。',
+    sections: [
+      {
+        title: '① BONOを使う準備',
+        content: 'まずはBONOを利用するための準備をしましょう。<br>・コミュニティへの参加<br>・取り組むコンテンツの決定<br>・2週間でやるべきことを決める',
+        buttonText: 'BONOを使う準備をはじめる →',
+        buttonUrl: 'https://www.bo-no.design/howtouse',
+      },
+      {
+        title: '② BONOの使い方ガイド',
+        content: '学習の進め方、コミュニティの使い方など、BONOでデザインスキルを身につけるためのガイドページをチェックしてデザインを進めましょう。',
+        buttonText: 'BONO 使い方ガイドへ →',
+        buttonUrl: 'https://www.bo-no.design/bono-guide',
+      },
+    ],
+    note: 'ボタンがない場合はページを再読み込みしていただくか、プラン登録状況をマイページよりご確認ください。',
+  },
+  'cancellation': {
+    title: '解約手続き完了',
+    heading: '解約手続きが完了しました',
+    body: 'BONOのメンバーシッププランの解約登録が完了されました。<br><br>ご利用ありがとうございました。',
+    note: '・解約日まではコンテンツにアクセスすることができます<br>・コミュニティにはアクセスできなくなります',
+    footer: 'BONOに関する質問はコミュニティか、カイクンのTwitterのDMからおねがいします。<br><br>カイクン<br>・<a href="https://twitter.com/takumii_kai" style="color: #151834;">https://twitter.com/takumii_kai</a><br>・takumi.kai.skywalker@gmail.com',
+  },
+  'plan-change': {
+    title: 'プラン変更完了',
+    heading: 'プランが変更されました',
+    body: 'BONOのメンバーシッププランが変更されました。<br><br>【変更後のプラン】<br><strong style="font-size: 20px;">{{plan_name}}</strong>',
+    buttonText: 'マイページを確認する',
+    buttonUrl: 'https://www.bo-no.design/mypage',
+    note: 'ご不明な点がございましたら、お気軽にお問い合わせください。',
   },
 };
 
@@ -78,6 +121,14 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
         width: '100%',
       }}
     >
+      <style>{`
+        @media only screen and (max-width: 480px) {
+          .email-pad-x {
+            padding-left: 24px !important;
+            padding-right: 24px !important;
+          }
+        }
+      `}</style>
       {/* 白いカード */}
       <div
         style={{
@@ -100,6 +151,7 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
                   {/* ヘッダー（ロゴ・左寄せ） */}
                   <tr>
                     <td
+                      className="email-pad-x"
                       style={{
                         padding: '32px 48px 24px 48px',
                         textAlign: 'left',
@@ -111,7 +163,7 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
 
                   {/* メインコンテンツ（左寄せ） */}
                   <tr>
-                    <td style={{ padding: '0 48px' }}>
+                    <td className="email-pad-x" style={{ padding: '0 48px' }}>
                       {/* タイトル */}
                       <h1
                         style={{
@@ -139,49 +191,126 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
                         dangerouslySetInnerHTML={{ __html: config.body }}
                       />
 
-                      {/* ボタン（左寄せ） */}
-                      <table cellPadding={0} cellSpacing={0} style={{ marginBottom: '24px' }}>
-                        <tbody>
-                          <tr>
-                            <td>
-                              <a
-                                href="#"
-                                style={{
-                                  display: 'inline-block',
-                                  padding: '14px 24px',
-                                  backgroundColor: BRAND.primary,
-                                  color: '#FFFFFF',
-                                  fontSize: '16px',
-                                  fontWeight: 600,
-                                  textDecoration: 'none',
-                                  borderRadius: '8px',
-                                }}
-                              >
-                                {config.buttonText}
-                              </a>
-                            </td>
-                          </tr>
-                        </tbody>
-                      </table>
+                      {/* セクション（ウェルカムメール用） */}
+                      {config.sections && config.sections.map((section, index) => (
+                        <div key={index} style={{ marginBottom: '32px' }}>
+                          <h2
+                            style={{
+                              margin: '0 0 12px 0',
+                              fontSize: '18px',
+                              fontWeight: 700,
+                              color: BRAND.text,
+                              lineHeight: '24px',
+                            }}
+                          >
+                            {section.title}
+                          </h2>
+                          <p
+                            style={{
+                              margin: '0 0 16px 0',
+                              fontSize: '16px',
+                              color: BRAND.text,
+                              lineHeight: '24px',
+                            }}
+                            dangerouslySetInnerHTML={{ __html: section.content }}
+                          />
+                          {section.buttonText && (
+                            <table cellPadding={0} cellSpacing={0}>
+                              <tbody>
+                                <tr>
+                                  <td>
+                                    <a
+                                      href={section.buttonUrl || '#'}
+                                      style={{
+                                        display: 'inline-block',
+                                        padding: '14px 24px',
+                                        backgroundColor: BRAND.primary,
+                                        color: '#FFFFFF',
+                                        fontSize: '16px',
+                                        fontWeight: 600,
+                                        textDecoration: 'none',
+                                        borderRadius: '8px',
+                                      }}
+                                    >
+                                      {section.buttonText}
+                                    </a>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          )}
+                        </div>
+                      ))}
+
+                      {/* ボタン（通常テンプレート用） */}
+                      {config.buttonText && !config.sections && (
+                        <table cellPadding={0} cellSpacing={0} style={{ marginBottom: '24px' }}>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <a
+                                  href={config.buttonUrl || '#'}
+                                  style={{
+                                    display: 'inline-block',
+                                    padding: '14px 24px',
+                                    backgroundColor: BRAND.primary,
+                                    color: '#FFFFFF',
+                                    fontSize: '16px',
+                                    fontWeight: 600,
+                                    textDecoration: 'none',
+                                    borderRadius: '8px',
+                                  }}
+                                >
+                                  {config.buttonText}
+                                </a>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      )}
 
                       {/* 補足テキスト */}
-                      <p
-                        style={{
-                          margin: '0 0 24px 0',
-                          fontSize: '14px',
-                          color: BRAND.textSecondary,
-                          lineHeight: '20px',
-                          textAlign: 'left',
-                          fontWeight: 400,
-                        }}
-                        dangerouslySetInnerHTML={{ __html: config.note }}
-                      />
+                      {config.note && (
+                        <p
+                          style={{
+                            margin: '0 0 24px 0',
+                            fontSize: '14px',
+                            color: BRAND.textSecondary,
+                            lineHeight: '20px',
+                            textAlign: 'left',
+                            fontWeight: 400,
+                          }}
+                          dangerouslySetInnerHTML={{ __html: config.note }}
+                        />
+                      )}
+
+                      {/* カスタムフッター（解約メール用） */}
+                      {config.footer && (
+                        <div
+                          style={{
+                            margin: '24px 0',
+                            padding: '24px',
+                            backgroundColor: BRAND.background,
+                            borderRadius: '12px',
+                          }}
+                        >
+                          <p
+                            style={{
+                              margin: 0,
+                              fontSize: '14px',
+                              color: BRAND.text,
+                              lineHeight: '22px',
+                            }}
+                            dangerouslySetInnerHTML={{ __html: config.footer }}
+                          />
+                        </div>
+                      )}
                     </td>
                   </tr>
 
                   {/* 区切り線 */}
                   <tr>
-                    <td style={{ padding: '0 48px' }}>
+                    <td className="email-pad-x" style={{ padding: '0 48px' }}>
                       <hr style={{
                         border: 'none',
                         borderTop: `1px solid ${BRAND.border}`,
@@ -192,7 +321,7 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
 
                   {/* フッター */}
                   <tr>
-                    <td style={{ padding: '32px 48px' }}>
+                    <td className="email-pad-x" style={{ padding: '32px 48px' }}>
                       {/* ロゴ */}
                       <div style={{ marginBottom: '32px' }}>
                         <BonoLogo />
@@ -201,13 +330,14 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
                       <p
                         style={{
                           margin: 0,
-                          fontSize: '14px',
-                          color: BRAND.text,
-                          lineHeight: '18px',
+                          fontSize: '12px',
+                          color: BRAND.textSecondary,
+                          lineHeight: '16px',
                           fontWeight: 400,
+                          fontStyle: 'italic',
                         }}
                       >
-                        BONO
+                        BONO lights the path. The dawn is yours.
                       </p>
                     </td>
                   </tr>
@@ -237,23 +367,48 @@ const EmailTemplates: React.FC = () => {
       <div className="max-w-6xl mx-auto px-8 py-8">
         {/* テンプレート選択 */}
         <div className="mb-8">
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-            テンプレートを選択
-          </h2>
-          <div className="flex gap-3">
-            {(Object.keys(templates) as TemplateType[]).map((key) => (
-              <button
-                key={key}
-                onClick={() => setSelectedTemplate(key)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                  selectedTemplate === key
-                    ? 'bg-[#151834] text-white'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                {templates[key].title}
-              </button>
-            ))}
+          {/* Supabase Auth メール */}
+          <div className="mb-6">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              Supabase Auth メール
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {(['password-reset', 'confirm-signup', 'change-email'] as TemplateType[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedTemplate(key)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    selectedTemplate === key
+                      ? 'bg-[#151834] text-white'
+                      : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {templates[key].title}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* サブスクリプション通知メール */}
+          <div>
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+              サブスクリプション通知メール（Resend）
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {(['welcome', 'plan-change', 'cancellation'] as TemplateType[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedTemplate(key)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    selectedTemplate === key
+                      ? 'bg-[#151834] text-white'
+                      : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {templates[key].title}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -320,30 +475,88 @@ const EmailTemplates: React.FC = () => {
           </div>
         </div>
 
-        {/* Supabase設定用HTML */}
+        {/* Supabase Auth用HTML */}
         <div className="mt-12">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
             Supabase Email Template用HTML
           </h2>
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-sm text-gray-600 mb-6">
             以下のHTMLをSupabaseのEmail Templatesにコピーしてください。
             <code className="mx-1 px-2 py-0.5 bg-gray-100 rounded text-xs">{'{{ .ConfirmationURL }}'}</code>
             はSupabaseが自動的に置換します。
           </p>
-          <div className="bg-gray-900 rounded-xl p-4 overflow-x-auto">
-            <pre className="text-sm text-gray-300 whitespace-pre-wrap">
-              {generateSupabaseTemplate(templates[selectedTemplate])}
-            </pre>
+
+          <div className="space-y-8">
+            {(['password-reset', 'confirm-signup', 'change-email'] as TemplateType[]).map((key) => (
+              <div key={key} className="border border-gray-200 rounded-xl overflow-hidden">
+                <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{templates[key].title}</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {key === 'password-reset' && 'Supabase: Reset Password'}
+                      {key === 'confirm-signup' && 'Supabase: Confirm Signup'}
+                      {key === 'change-email' && 'Supabase: Change Email Address'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateSupabaseTemplate(templates[key]));
+                      alert(`${templates[key].title}のHTMLをコピーしました！`);
+                    }}
+                    className="px-4 py-2 bg-[#151834] text-white text-sm rounded-lg font-medium hover:bg-[#1a1f42] transition-colors"
+                  >
+                    HTMLをコピー
+                  </button>
+                </div>
+                <div className="bg-gray-900 p-4 overflow-x-auto max-h-[300px] overflow-y-auto">
+                  <pre className="text-xs text-gray-300 whitespace-pre-wrap">
+                    {generateSupabaseTemplate(templates[key])}
+                  </pre>
+                </div>
+              </div>
+            ))}
           </div>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(generateSupabaseTemplate(templates[selectedTemplate]));
-              alert('コピーしました！');
-            }}
-            className="mt-4 px-4 py-2 bg-[#151834] text-white rounded-lg font-medium hover:bg-[#1a1f42] transition-colors"
-          >
-            HTMLをコピー
-          </button>
+        </div>
+
+        {/* サブスクリプション通知用HTML（Resend Edge Function用） */}
+        <div className="mt-12">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
+            サブスクリプション通知メール用HTML（Edge Function用）
+          </h2>
+          <p className="text-sm text-gray-600 mb-6">
+            以下のHTMLはEdge Functionで使用します。変数はコード側で置換されます。
+          </p>
+
+          <div className="space-y-8">
+            {(['welcome', 'plan-change', 'cancellation'] as TemplateType[]).map((key) => (
+              <div key={key} className="border border-gray-200 rounded-xl overflow-hidden">
+                <div className="bg-gray-50 px-4 py-3 flex items-center justify-between border-b border-gray-200">
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{templates[key].title}</h3>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {key === 'welcome' && 'トリガー: checkout.session.completed'}
+                      {key === 'plan-change' && 'トリガー: customer.subscription.updated'}
+                      {key === 'cancellation' && 'トリガー: customer.subscription.deleted'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(generateResendTemplate(templates[key]));
+                      alert(`${templates[key].title}のHTMLをコピーしました！`);
+                    }}
+                    className="px-4 py-2 bg-[#151834] text-white text-sm rounded-lg font-medium hover:bg-[#1a1f42] transition-colors"
+                  >
+                    HTMLをコピー
+                  </button>
+                </div>
+                <div className="bg-gray-900 p-4 overflow-x-auto max-h-[300px] overflow-y-auto">
+                  <pre className="text-xs text-gray-300 whitespace-pre-wrap">
+                    {generateResendTemplate(templates[key])}
+                  </pre>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -359,6 +572,14 @@ function generateSupabaseTemplate(config: TemplateConfig): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 480px) {
+      .email-pad-x {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+      }
+    }
+  </style>
 </head>
 <body style="margin: 0; padding: 0; background-color: #F9F9F7; font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F9F9F7; padding: 12px 12px;">
@@ -367,13 +588,13 @@ function generateSupabaseTemplate(config: TemplateConfig): string {
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 640px; background-color: #FFFFFF; border-radius: 32px; overflow: hidden; border: 1px solid #F5F5F5; box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.04);">
           <!-- ロゴ -->
           <tr>
-            <td style="padding: 32px 48px 24px 48px; text-align: left;">
+            <td class="email-pad-x" style="padding: 32px 48px 24px 48px; text-align: left;">
               <img src="data:image/svg+xml;base64,${logoBase64}" alt="BONO" width="68" height="20" style="display: block;" />
             </td>
           </tr>
           <!-- コンテンツ -->
           <tr>
-            <td style="padding: 0 48px;">
+            <td class="email-pad-x" style="padding: 0 48px;">
               <h1 style="margin: 0 0 24px 0; font-size: 32px; font-weight: 700; color: #222222; line-height: 36px; text-align: left;">
                 ${config.heading}
               </h1>
@@ -384,27 +605,153 @@ function generateSupabaseTemplate(config: TemplateConfig): string {
                 <tr>
                   <td>
                     <a href="{{ .ConfirmationURL }}" style="display: inline-block; padding: 14px 24px; background-color: #151834; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px;">
-                      ${config.buttonText}
+                      ${config.buttonText || ''}
                     </a>
                   </td>
                 </tr>
               </table>
               <p style="margin: 0 0 24px 0; font-size: 14px; color: #717171; line-height: 20px; text-align: left; font-weight: 400;">
-                ${config.note}
+                ${config.note || ''}
               </p>
             </td>
           </tr>
           <!-- 区切り線 -->
           <tr>
-            <td style="padding: 0 48px;">
+            <td class="email-pad-x" style="padding: 0 48px;">
               <hr style="border: none; border-top: 1px solid #F5F5F5; margin: 0;" />
             </td>
           </tr>
           <!-- フッター -->
           <tr>
-            <td style="padding: 32px 48px;">
+            <td class="email-pad-x" style="padding: 32px 48px;">
               <img src="data:image/svg+xml;base64,${logoBase64}" alt="BONO" width="68" height="20" style="display: block; margin-bottom: 32px;" />
-              <p style="margin: 0; font-size: 14px; color: #222222; line-height: 18px; font-weight: 400;">BONO</p>
+              <p style="margin: 0; font-size: 12px; color: #717171; line-height: 16px; font-weight: 400; font-style: italic;">BONO lights the path. The dawn is yours.</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`;
+}
+
+function generateResendTemplate(config: TemplateConfig): string {
+  // SVGをBase64エンコード（メールクライアント互換性のため）
+  const logoBase64 = btoa(BONO_LOGO_SVG);
+
+  // セクションHTML生成
+  let sectionsHtml = '';
+  if (config.sections) {
+    sectionsHtml = config.sections.map(section => `
+              <!-- セクション -->
+              <div style="margin-bottom: 32px;">
+                <h2 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #222222; line-height: 24px;">
+                  ${section.title}
+                </h2>
+                <p style="margin: 0 0 16px 0; font-size: 16px; color: #222222; line-height: 24px;">
+                  ${section.content}
+                </p>
+                ${section.buttonText ? `
+                <table cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td>
+                      <a href="${section.buttonUrl || '#'}" style="display: inline-block; padding: 14px 24px; background-color: #151834; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px;">
+                        ${section.buttonText}
+                      </a>
+                    </td>
+                  </tr>
+                </table>` : ''}
+              </div>`
+    ).join('\n');
+  }
+
+  // ボタンHTML生成（セクションがない場合のみ）
+  let buttonHtml = '';
+  if (config.buttonText && !config.sections) {
+    buttonHtml = `
+              <table cellpadding="0" cellspacing="0" style="margin-bottom: 24px;">
+                <tr>
+                  <td>
+                    <a href="${config.buttonUrl || '#'}" style="display: inline-block; padding: 14px 24px; background-color: #151834; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px;">
+                      ${config.buttonText}
+                    </a>
+                  </td>
+                </tr>
+              </table>`;
+  }
+
+  // 補足テキストHTML
+  let noteHtml = '';
+  if (config.note) {
+    noteHtml = `
+              <p style="margin: 0 0 24px 0; font-size: 14px; color: #717171; line-height: 20px; text-align: left; font-weight: 400;">
+                ${config.note}
+              </p>`;
+  }
+
+  // カスタムフッターHTML
+  let customFooterHtml = '';
+  if (config.footer) {
+    customFooterHtml = `
+              <div style="margin: 24px 0; padding: 24px; background-color: #F9F9F7; border-radius: 12px;">
+                <p style="margin: 0; font-size: 14px; color: #222222; line-height: 22px;">
+                  ${config.footer}
+                </p>
+              </div>`;
+  }
+
+  return `<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    @media only screen and (max-width: 480px) {
+      .email-pad-x {
+        padding-left: 24px !important;
+        padding-right: 24px !important;
+      }
+    }
+  </style>
+</head>
+<body style="margin: 0; padding: 0; background-color: #F9F9F7; font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', Meiryo, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F9F9F7; padding: 12px 12px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 640px; background-color: #FFFFFF; border-radius: 32px; overflow: hidden; border: 1px solid #F5F5F5; box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.04);">
+          <!-- ロゴ -->
+          <tr>
+            <td class="email-pad-x" style="padding: 32px 48px 24px 48px; text-align: left;">
+              <img src="data:image/svg+xml;base64,${logoBase64}" alt="BONO" width="68" height="20" style="display: block;" />
+            </td>
+          </tr>
+          <!-- コンテンツ -->
+          <tr>
+            <td class="email-pad-x" style="padding: 0 48px;">
+              <h1 style="margin: 0 0 24px 0; font-size: 32px; font-weight: 700; color: #222222; line-height: 36px; text-align: left;">
+                ${config.heading}
+              </h1>
+              <p style="margin: 0 0 24px 0; font-size: 18px; color: #222222; line-height: 28px; text-align: left; font-weight: 400;">
+                ${config.body}
+              </p>
+${sectionsHtml}
+${buttonHtml}
+${noteHtml}
+${customFooterHtml}
+            </td>
+          </tr>
+          <!-- 区切り線 -->
+          <tr>
+            <td class="email-pad-x" style="padding: 0 48px;">
+              <hr style="border: none; border-top: 1px solid #F5F5F5; margin: 0;" />
+            </td>
+          </tr>
+          <!-- フッター -->
+          <tr>
+            <td class="email-pad-x" style="padding: 32px 48px;">
+              <img src="data:image/svg+xml;base64,${logoBase64}" alt="BONO" width="68" height="20" style="display: block; margin-bottom: 32px;" />
+              <p style="margin: 0; font-size: 12px; color: #717171; line-height: 16px; font-weight: 400; font-style: italic;">BONO lights the path. The dawn is yours.</p>
             </td>
           </tr>
         </table>

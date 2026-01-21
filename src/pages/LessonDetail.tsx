@@ -16,6 +16,7 @@ interface Article {
   articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
   thumbnail?: any;
   thumbnailUrl?: string;
+  videoUrl?: string;
   videoDuration?: number;
   isPremium?: boolean;
 }
@@ -95,6 +96,7 @@ export default function LessonDetail() {
                 }
               },
               thumbnailUrl,
+              videoUrl,
               videoDuration,
               isPremium
             }

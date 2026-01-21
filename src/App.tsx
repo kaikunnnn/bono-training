@@ -65,6 +65,7 @@ import VideoPlayerTest from './pages/dev/VideoPlayerTest';
 import BlogHeaderPatterns from './pages/dev/BlogHeaderPatterns';
 import IconButtonBurstPlayground from "./pages/dev/IconButtonBurstPlayground";
 import EmailTemplates from "./pages/dev/EmailTemplates";
+import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -133,6 +134,8 @@ const AppContent = () => {
         <Route path="/dev2" element={<DevRoute><IconComparison /></DevRoute>} />
         <Route path="/dev/video-player" element={<DevRoute><VideoPlayerTest /></DevRoute>} />
         <Route path="/dev/email-templates" element={<DevRoute><EmailTemplates /></DevRoute>} />
+        <Route path="/dev/article-layout-compare" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
+        <Route path="/dev/article-layout-compare/:slug" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />

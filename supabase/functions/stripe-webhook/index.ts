@@ -7,6 +7,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { createStripeClient, getWebhookSecret } from "../_shared/stripe-helpers.ts";
 import Stripe from "https://esm.sh/stripe@17.7.0";
+import { sendEmailSafe } from "../_shared/resend.ts";
+import { generateWelcomeEmail, generateCancellationEmail, generatePlanChangeEmail, getPlanDisplayName } from "../_shared/email-templates.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -428,6 +430,22 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       console.log(`✅ [LIVE環境] ${planType}プラン（${duration}ヶ月）のサブスクリプション情報を正常に保存しました`);
     }
 
+    // ========================================
+    // 📧 ウェルカムメール送信
+    // ========================================
+    const customerEmail = customer.email;
+    if (customerEmail) {
+      console.log(`📧 [LIVE環境] ウェルカムメール送信: ${customerEmail}`);
+      const welcomeEmail = generateWelcomeEmail();
+      await sendEmailSafe({
+        to: customerEmail,
+        subject: welcomeEmail.subject,
+        html: welcomeEmail.html,
+      });
+    } else {
+      console.warn(`⚠️ [LIVE環境] 顧客メールアドレスがないためウェルカムメールをスキップ`);
+    }
+
     console.log("🚀 [LIVE環境] 新しいサブスクリプションが作成されました。既存サブスクリプションは上記で処理済みです。");
 
   } catch (error) {
@@ -633,6 +651,25 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
       console.error("🚀 [LIVE環境] ユーザーサブスクリプション情報の更新エラー:", userSubError);
     } else {
       console.log("✅ [LIVE環境] サブスクリプション削除を正常に処理しました");
+    }
+
+    // ========================================
+    // 📧 解約完了メール送信
+    // ========================================
+    const customerId = subscription.customer;
+    try {
+      const customer = await stripe.customers.retrieve(customerId);
+      if (!customer.deleted && customer.email) {
+        console.log(`📧 [LIVE環境] 解約メール送信: ${customer.email}`);
+        const cancellationEmail = generateCancellationEmail();
+        await sendEmailSafe({
+          to: customer.email,
+          subject: cancellationEmail.subject,
+          html: cancellationEmail.html,
+        });
+      }
+    } catch (emailError) {
+      console.warn(`⚠️ [LIVE環境] 解約メール送信失敗（続行）:`, emailError);
     }
 
   } catch (error) {
@@ -867,6 +904,17 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
 
     const userId = customerData.user_id;
 
+    // 現在のプラン情報を取得（プラン変更検知用）
+    const { data: currentSubData } = await supabase
+      .from("user_subscriptions")
+      .select("plan_type, duration")
+      .eq("user_id", userId)
+      .eq("environment", ENVIRONMENT)
+      .single();
+
+    const previousPlanType = currentSubData?.plan_type;
+    const previousDuration = currentSubData?.duration;
+
     // 新しいプラン情報を取得
     const items = subscription.items.data;
     if (!items || items.length === 0) {
@@ -959,6 +1007,32 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
 
     if (subUpdateError) {
       console.error("🚀 [LIVE環境] subscriptions更新エラー:", subUpdateError);
+    }
+
+    // ========================================
+    // 📧 プラン変更メール送信（実際にプランが変わった場合のみ）
+    // ========================================
+    const planActuallyChanged = previousPlanType !== planType || previousDuration !== duration;
+
+    if (planActuallyChanged && previousPlanType) {
+      console.log(`📧 [LIVE環境] プラン変更検知: ${previousPlanType}(${previousDuration}ヶ月) → ${planType}(${duration}ヶ月)`);
+
+      try {
+        const customer = await stripe.customers.retrieve(customerId);
+        if (!customer.deleted && customer.email) {
+          const planDisplayName = getPlanDisplayName(planType, duration);
+          const planChangeEmail = generatePlanChangeEmail(planDisplayName);
+          await sendEmailSafe({
+            to: customer.email,
+            subject: planChangeEmail.subject,
+            html: planChangeEmail.html,
+          });
+        }
+      } catch (emailError) {
+        console.warn(`⚠️ [LIVE環境] プラン変更メール送信失敗（続行）:`, emailError);
+      }
+    } else {
+      console.log(`📧 [LIVE環境] プラン変更なし（メール送信スキップ）: cancel_at_period_end=${cancelAtPeriodEnd}`);
     }
 
   } catch (error) {
