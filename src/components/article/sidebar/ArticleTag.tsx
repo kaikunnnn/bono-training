@@ -9,12 +9,15 @@ const tagLabels: Record<TagType, string> = {
 };
 
 // 将来的に色を追加する想定
-const tagStyles: Record<TagType, { bg: string; text: string }> = {
-  explain: { bg: "bg-zinc-100", text: "text-slate-500" },
-  intro: { bg: "bg-zinc-100", text: "text-slate-500" },
-  practice: { bg: "bg-zinc-100", text: "text-slate-500" },
-  challenge: { bg: "bg-zinc-100", text: "text-slate-500" },
-  demo: { bg: "bg-zinc-100", text: "text-slate-500" },
+const tagStyles: Record<TagType, { container: string; text: string }> = {
+  explain: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
+  intro: {
+    container: "border border-[#878A92] rounded-full text-[#878A92]",
+    text: "text-[#878A92] tracking-[-1px]",
+  },
+  practice: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
+  challenge: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
+  demo: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
 };
 
 interface ArticleTagProps {
@@ -39,7 +42,7 @@ export function ArticleTag({ type }: ArticleTagProps) {
 
   return (
     <div
-      className={`px-1 py-0.5 rounded-md flex justify-center items-center flex-shrink-0 ${style.bg}`}
+      className={`px-1 py-0.5 flex justify-center items-center flex-shrink-0 bg-transparent ${style.container}`}
     >
       <span
         className={`text-[10px] font-medium font-noto-sans-jp leading-[10px] ${style.text}`}

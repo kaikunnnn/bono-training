@@ -50,7 +50,7 @@ function baseTemplate(content: string): string {
           </tr>
           <!-- コンテンツ -->
           <tr>
-            <td style="padding: 0 48px;">
+            <td style="padding: 0 24px; width: 100%;">
 ${content}
             </td>
           </tr>
@@ -149,14 +149,7 @@ export function generateCancellationEmail(): { subject: string; html: string } {
 
               <p style="margin: 0 0 24px 0; font-size: 14px; color: #717171; line-height: 20px; text-align: left; font-weight: 400;">
                 ・解約日まではコンテンツにアクセスすることができます<br>・コミュニティにはアクセスできなくなります
-              </p>
-
-              <!-- カスタムフッター -->
-              <div style="margin: 24px 0; padding: 24px; background-color: #F9F9F7; border-radius: 12px;">
-                <p style="margin: 0; font-size: 14px; color: #222222; line-height: 22px;">
-                  BONOに関する質問はコミュニティか、カイクンのTwitterのDMからおねがいします。<br><br>カイクン<br>・<a href="https://twitter.com/takumii_kai" style="color: #151834;">https://twitter.com/takumii_kai</a><br>・takumi.kai.skywalker@gmail.com
-                </p>
-              </div>`;
+              </p>`;
 
   return {
     subject: 'BONOメンバーシップの解約手続きが完了しました',

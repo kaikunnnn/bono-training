@@ -6,6 +6,11 @@
  */
 
 import { useState } from 'react';
+import { DirectInbox } from 'iconsax-react';
+import { Button } from '@/components/ui/button';
+
+// 意見箱のリンク先URL
+const FEEDBACK_URL = 'https://forms.gle/Y5LorStnPm4jzFv77';
 
 export const DevEnvironmentBanner = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -23,14 +28,30 @@ export const DevEnvironmentBanner = () => {
   const isLocal = supabaseUrl.includes('127.0.0.1') || supabaseUrl.includes('localhost');
 
   return (
-    <div
-      className="fixed bottom-2 left-2 z-50 flex items-center gap-2 bg-yellow-500 text-yellow-900 text-xs font-mono px-2 py-1 rounded shadow-lg cursor-pointer hover:bg-yellow-400 transition-colors"
-      onClick={() => setIsVisible(false)}
-      title={`Supabase: ${supabaseUrl}\nClick to hide`}
-    >
-      <span>🔧</span>
-      <span>DEV</span>
-      {isLocal && <span className="text-yellow-700">(local)</span>}
+    <div className="hidden lg:flex fixed bottom-2 left-2 z-50 items-center gap-2">
+      {/* DEVバッジ */}
+      <div
+        className="flex items-center gap-2 bg-yellow-500 text-yellow-900 text-xs font-mono px-2 py-1 rounded shadow-lg cursor-pointer hover:bg-yellow-400 transition-colors"
+        onClick={() => setIsVisible(false)}
+        title={`Supabase: ${supabaseUrl}\nClick to hide`}
+      >
+        <span>🔧</span>
+        <span>DEV</span>
+        {isLocal && <span className="text-yellow-700">(local)</span>}
+      </div>
+
+      {/* 意見箱リンク */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="h-7 w-fit gap-1 px-2 rounded-xl text-xs bg-white/90 backdrop-blur-sm shadow-lg"
+        asChild
+      >
+        <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
+          <DirectInbox size={14} className="mr-1" />
+          意見箱
+        </a>
+      </Button>
     </div>
   );
 };

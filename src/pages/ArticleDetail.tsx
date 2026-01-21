@@ -417,6 +417,13 @@ const ArticleDetail = () => {
                 tagType={article.articleType}
                 title={article.title}
                 description={article.excerpt}
+                questInfo={article.questInfo ? {
+                  questNumber: article.questInfo.questNumber,
+                  title: article.questInfo.title,
+                } : undefined}
+                articleIndex={article.questInfo?.articles
+                  ? article.questInfo.articles.findIndex(a => a._id === article._id) + 1
+                  : undefined}
                 onComplete={handleCompleteToggle}
                 onFavorite={handleBookmarkToggle}
                 onNext={navigation.next ? () => navigate(`/articles/${navigation.next.slug}`) : undefined}

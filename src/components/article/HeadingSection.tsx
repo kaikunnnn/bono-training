@@ -10,6 +10,11 @@ interface HeadingSectionProps {
   tagType?: TagType;
   title: string;
   description?: string;
+  questInfo?: {
+    questNumber: number;
+    title: string;
+  };
+  articleIndex?: number; // クエスト内での記事の順番（1始まり）
   onComplete?: () => void;
   onFavorite?: () => void;
   onNext?: () => void;
@@ -34,6 +39,8 @@ const HeadingSection = ({
   tagType,
   title,
   description,
+  questInfo,
+  articleIndex,
   onComplete,
   onFavorite,
   onNext,
@@ -67,8 +74,15 @@ const HeadingSection = ({
 
           {/* Title */}
           <div className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-['Noto_Sans_JP'] leading-[148%]">
-            {title}
+            {articleIndex ? `${articleIndex}. ` : ''}{title}
           </div>
+
+          {/* Quest Info */}
+          {questInfo && (
+            <div className="text-slate-500 text-sm font-normal font-['Hiragino_Sans']">
+              クエスト{questInfo.questNumber}: {questInfo.title}
+            </div>
+          )}
         </div>
 
         {/* Description */}

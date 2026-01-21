@@ -21,7 +21,6 @@ interface TemplateConfig {
     buttonText?: string;
     buttonUrl?: string;
   }>;
-  footer?: string;
 }
 
 const templates: Record<TemplateType, TemplateConfig> = {
@@ -71,7 +70,6 @@ const templates: Record<TemplateType, TemplateConfig> = {
     heading: '解約手続きが完了しました',
     body: 'BONOのメンバーシッププランの解約登録が完了されました。<br><br>ご利用ありがとうございました。',
     note: '・解約日まではコンテンツにアクセスすることができます<br>・コミュニティにはアクセスできなくなります',
-    footer: 'BONOに関する質問はコミュニティか、カイクンのTwitterのDMからおねがいします。<br><br>カイクン<br>・<a href="https://twitter.com/takumii_kai" style="color: #151834;">https://twitter.com/takumii_kai</a><br>・takumi.kai.skywalker@gmail.com',
   },
   'plan-change': {
     title: 'プラン変更完了',
@@ -163,7 +161,7 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
 
                   {/* メインコンテンツ（左寄せ） */}
                   <tr>
-                    <td className="email-pad-x" style={{ padding: '0 48px' }}>
+                    <td className="email-pad-x" style={{ padding: '0 24px', width: '100%' }}>
                       {/* タイトル */}
                       <h1
                         style={{
@@ -282,28 +280,6 @@ const EmailTemplate: React.FC<{ config: TemplateConfig }> = ({ config }) => {
                           }}
                           dangerouslySetInnerHTML={{ __html: config.note }}
                         />
-                      )}
-
-                      {/* カスタムフッター（解約メール用） */}
-                      {config.footer && (
-                        <div
-                          style={{
-                            margin: '24px 0',
-                            padding: '24px',
-                            backgroundColor: BRAND.background,
-                            borderRadius: '12px',
-                          }}
-                        >
-                          <p
-                            style={{
-                              margin: 0,
-                              fontSize: '14px',
-                              color: BRAND.text,
-                              lineHeight: '22px',
-                            }}
-                            dangerouslySetInnerHTML={{ __html: config.footer }}
-                          />
-                        </div>
                       )}
                     </td>
                   </tr>
@@ -465,7 +441,14 @@ const EmailTemplates: React.FC = () => {
                         {templates[selectedTemplate].title}のご案内
                       </div>
                     </div>
-                    <div style={{ transform: 'scale(0.9)', transformOrigin: 'top center', width: '100%' }}>
+                    <div
+                      style={{
+                        transform: 'scale(0.9)',
+                        transformOrigin: 'top center',
+                        width: '100%',
+                        height: 'fit-content',
+                      }}
+                    >
                       <EmailTemplate config={templates[selectedTemplate]} />
                     </div>
                   </div>
@@ -594,7 +577,7 @@ function generateSupabaseTemplate(config: TemplateConfig): string {
           </tr>
           <!-- コンテンツ -->
           <tr>
-            <td class="email-pad-x" style="padding: 0 48px;">
+            <td class="email-pad-x" style="padding: 0 24px; width: 100%;">
               <h1 style="margin: 0 0 24px 0; font-size: 32px; font-weight: 700; color: #222222; line-height: 36px; text-align: left;">
                 ${config.heading}
               </h1>
@@ -690,17 +673,6 @@ function generateResendTemplate(config: TemplateConfig): string {
               </p>`;
   }
 
-  // カスタムフッターHTML
-  let customFooterHtml = '';
-  if (config.footer) {
-    customFooterHtml = `
-              <div style="margin: 24px 0; padding: 24px; background-color: #F9F9F7; border-radius: 12px;">
-                <p style="margin: 0; font-size: 14px; color: #222222; line-height: 22px;">
-                  ${config.footer}
-                </p>
-              </div>`;
-  }
-
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -728,7 +700,7 @@ function generateResendTemplate(config: TemplateConfig): string {
           </tr>
           <!-- コンテンツ -->
           <tr>
-            <td class="email-pad-x" style="padding: 0 48px;">
+            <td class="email-pad-x" style="padding: 0 24px; width: 100%;">
               <h1 style="margin: 0 0 24px 0; font-size: 32px; font-weight: 700; color: #222222; line-height: 36px; text-align: left;">
                 ${config.heading}
               </h1>
@@ -738,7 +710,6 @@ function generateResendTemplate(config: TemplateConfig): string {
 ${sectionsHtml}
 ${buttonHtml}
 ${noteHtml}
-${customFooterHtml}
             </td>
           </tr>
           <!-- 区切り線 -->

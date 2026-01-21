@@ -127,7 +127,7 @@ export function ArticleItem({
             <div className="size-4 bg-white rounded-full flex items-center justify-center">
               <Play
                 size={12}
-                style={{ width: 12, height: 12 }}
+                className="w-3 h-3"
                 variant="Linear"
                 color="#17102d"
               />
