@@ -43,7 +43,7 @@ export default function PremiumVideoLock() {
           className="inline-flex items-center gap-2 bg-blue-600 text-white font-medium px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md hover:shadow-lg"
         >
           <Lock className="w-4 h-4" />
-          <span className="font-noto-sans-jp text-sm">プランを見る</span>
+          <span className="font-noto-sans-jp text-sm">ログインする</span>
         </button>
 
         {/* 補足テキスト */}

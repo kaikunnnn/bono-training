@@ -75,8 +75,8 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
   if (!videoInfo) {
     if (thumbnailSrc) {
       return (
-        <div className="w-full px-6 pt-6 pb-4">
-          <div className="bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
+        <div className="w-full">
+          <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
             <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
               <img
                 src={thumbnailSrc}
@@ -95,8 +95,8 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
   // Vimeoの場合はカスタムプレーヤーを使用
   if (videoInfo.platform === 'vimeo') {
     return (
-      <div className="w-full px-6 pt-6 pb-4">
-        <div className="bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
+      <div className="w-full">
+        <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
           <CustomVimeoPlayer vimeoId={videoInfo.id} />
         </div>
       </div>
@@ -105,8 +105,8 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
 
   // YouTubeの場合は従来のiframe埋め込み
   return (
-    <div className="w-full px-6 pt-6 pb-4">
-      <div className="bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
+    <div className="w-full">
+      <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
         {/* 16:9 レスポンシブコンテナ */}
         <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
           {/* 56.25% = 9/16 * 100 (16:9のアスペクト比) */}

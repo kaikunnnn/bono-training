@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -80,11 +80,32 @@ const devResources: DevResourceCard[] = [
     tags: ['Icons', 'Animation', 'Interaction']
   },
   {
+    title: 'IconButton Burst Playground',
+    description: '「完了にする」ボタンの弾けるアニメーションを複数パターンで比較・調整。',
+    path: '/dev/icon-button-burst',
+    icon: <MousePointerClick className="w-8 h-8" />,
+    tags: ['IconButton', 'Burst', 'Animation', 'Experiment']
+  },
+  {
     title: 'Quest Item Layouts',
     description: 'クエストアイテムのレイアウト比較。タグ+タイトルの表示パターン。',
     path: '/dev/quest-layouts',
     icon: <LayoutGrid className="w-8 h-8" />,
     tags: ['Quest', 'Layout', 'Comparison']
+  },
+  {
+    title: 'Email Templates',
+    description: 'BONOのトランザクションメールテンプレートのプレビュー。パスワードリセット、メール確認など。',
+    path: '/dev/email-templates',
+    icon: <Mail className="w-8 h-8" />,
+    tags: ['Email', 'Templates', 'Transactional']
+  },
+  {
+    title: 'Article Layout Compare',
+    description: '記事詳細ページのレイアウト比較。左サイド（現行）と右サイド（ロゴはメイン左上）のデザインを切り替えて確認できます。',
+    path: '/dev/article-layout-compare',
+    icon: <LayoutGrid className="w-8 h-8" />,
+    tags: ['Article', 'Layout', 'Experiment', 'Compare']
   }
 ];
 
@@ -162,6 +183,61 @@ const DevHome = () => {
               </div>
             </Link>
           ))}
+        </div>
+
+        {/* Email Notification Test */}
+        <div className="mt-12 p-6 bg-white rounded-xl border border-gray-200">
+          <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+            <Mail className="w-5 h-5" />
+            メール通知機能テスト手順
+          </h3>
+          <p className="text-gray-600 mb-4">
+            Resend経由でメール送信が正しく動作するか確認するためのテスト手順です。
+          </p>
+          <div className="space-y-4">
+            <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+              <h4 className="font-bold text-blue-900 mb-2">1. ウェルカムメール</h4>
+              <p className="text-blue-800 text-sm mb-2">トリガー: <code className="px-1 bg-blue-100 rounded">checkout.session.completed</code></p>
+              <ul className="text-blue-700 text-sm list-disc list-inside space-y-1">
+                <li>テスト用アカウントで新規サブスクリプション登録</li>
+                <li>登録メールアドレスにウェルカムメールが届くか確認</li>
+                <li>件名: 「BONOへようこそ！メンバーシップ登録が完了しました」</li>
+              </ul>
+            </div>
+            <div className="p-4 bg-amber-50 rounded-lg border border-amber-100">
+              <h4 className="font-bold text-amber-900 mb-2">2. プラン変更メール</h4>
+              <p className="text-amber-800 text-sm mb-2">トリガー: <code className="px-1 bg-amber-100 rounded">customer.subscription.updated</code>（プラン変更時のみ）</p>
+              <ul className="text-amber-700 text-sm list-disc list-inside space-y-1">
+                <li>Customer Portalでプランを変更（例: スタンダード → グロース）</li>
+                <li>プラン変更メールが届くか確認</li>
+                <li>件名: 「BONOメンバーシップのプランが変更されました」</li>
+                <li>※キャンセル予約のみの場合はメール送信されません</li>
+              </ul>
+            </div>
+            <div className="p-4 bg-red-50 rounded-lg border border-red-100">
+              <h4 className="font-bold text-red-900 mb-2">3. 解約メール</h4>
+              <p className="text-red-800 text-sm mb-2">トリガー: <code className="px-1 bg-red-100 rounded">customer.subscription.deleted</code></p>
+              <ul className="text-red-700 text-sm list-disc list-inside space-y-1">
+                <li>Customer Portalで解約を実行</li>
+                <li>解約完了メールが届くか確認</li>
+                <li>件名: 「BONOメンバーシップの解約手続きが完了しました」</li>
+              </ul>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+              <h4 className="font-bold text-gray-900 mb-2">ログ確認</h4>
+              <p className="text-gray-700 text-sm">
+                <a
+                  href="https://supabase.com/dashboard/project/fryogvfhymnpiqwssmuu/functions/stripe-webhook/logs"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  Supabase Dashboard → Edge Functions → stripe-webhook → Logs
+                </a>
+                でメール送信のログを確認できます。
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Quick Links */}

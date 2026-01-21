@@ -8,6 +8,11 @@ import SidebarMenuItem from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
 import { ICON_SIZE } from "./icon-utils";
 import { useAuth } from "@/contexts/AuthContext";
+import { DirectInbox } from "iconsax-react";
+import { Button } from "@/components/ui/button";
+
+// 意見箱のリンク先URL（開発環境のみ）
+const FEEDBACK_URL = 'https://forms.gle/Y5LorStnPm4jzFv77';
 
 /**
  * サイドバーコンポーネント
@@ -123,6 +128,23 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </SidebarMenuItem>
         )}
       </SidebarMenuGroup>
+
+      {/* 意見箱（開発環境のみ・モバイル用） */}
+      {import.meta.env.DEV && (
+        <div className="mt-auto pt-4 lg:hidden">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full gap-1 text-xs"
+            asChild
+          >
+            <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
+              <DirectInbox size={14} />
+              意見箱
+            </a>
+          </Button>
+        </div>
+      )}
     </nav>
   );
 };

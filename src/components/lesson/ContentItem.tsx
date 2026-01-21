@@ -47,6 +47,9 @@ export default function ContentItem({
   };
 
   const thumbnailSrc = getThumbnailUrl();
+  const durationMinutes =
+    typeof videoDuration === "number" ? videoDuration : Number(videoDuration);
+  const hasValidDuration = Number.isFinite(durationMinutes) && durationMinutes > 0;
 
   return (
     <div
@@ -86,9 +89,9 @@ export default function ContentItem({
             {title}
           </p>
         </div>
-        {videoDuration && (
+        {hasValidDuration && (
           <p className="font-geist text-xs text-lesson-item-duration mt-0.5">
-            {videoDuration}分
+            {durationMinutes}分
           </p>
         )}
       </div>

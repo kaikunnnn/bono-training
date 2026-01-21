@@ -3,12 +3,16 @@ import { cn } from "@/lib/utils";
 import { IconCheck } from "@/components/ui/icon-check";
 import ArticleTag, { type TagType } from "./ArticleTag";
 
+export type QuestArticleItemLayoutVariant = "A" | "B" | "C";
+
 interface ArticleListItemProps {
   title: string;
   tag?: TagType;
   isCompleted: boolean;
   isActive?: boolean;
   href: string;
+  /** クエストアイテムのレイアウト比較（/dev/quest-layouts と合わせる） */
+  layoutVariant?: QuestArticleItemLayoutVariant;
 }
 
 /**
@@ -29,7 +33,13 @@ export function ArticleListItem({
   isCompleted,
   isActive = false,
   href,
+  layoutVariant = "C",
 }: ArticleListItemProps) {
+  const titleClassName = cn(
+    "text-xs font-noto-sans-jp leading-5",
+    isActive ? "text-neutral-900 font-medium" : "text-gray-600 font-normal",
+  );
+
   return (
     <Link
       to={href}
@@ -47,24 +57,36 @@ export function ArticleListItem({
         <IconCheck isCompleted={isCompleted} />
 
         {/* コンテンツエリア */}
-        <div className="flex-1 pl-2 flex justify-start items-center gap-0.5 min-w-0 overflow-hidden">
-          {/* 記事タイプタグ */}
-          <ArticleTag type={tag} />
+        {layoutVariant === "A" && (
+          <div className="flex-1 pl-2 flex flex-col justify-center gap-0.5 min-w-0 overflow-hidden">
+            <div className="flex items-center gap-1">
+              <ArticleTag type={tag} />
+            </div>
+            <span className={cn("whitespace-nowrap overflow-hidden text-ellipsis", titleClassName)}>
+              {title}
+            </span>
+          </div>
+        )}
 
-          {/* タイトル（1行省略） */}
-          <span
-            className={cn(
-              // 共通ベース - 1行でブロック端で切る（...なし）
-              "flex-1 text-xs font-noto-sans-jp leading-5 whitespace-nowrap overflow-hidden",
-              // Active状態
-              isActive && "text-neutral-900 font-medium",
-              // Default → Hover
-              !isActive && "text-gray-600 font-normal"
-            )}
-          >
-            {title}
-          </span>
-        </div>
+        {layoutVariant === "B" && (
+          <div className="flex-1 pl-2 flex flex-col justify-center gap-0.5 min-w-0 overflow-hidden">
+            <div className="flex items-center gap-1">
+              <ArticleTag type={tag} />
+            </div>
+            <span className={cn("line-clamp-2", titleClassName)}>
+              {title}
+            </span>
+          </div>
+        )}
+
+        {layoutVariant === "C" && (
+          <div className="flex-1 pl-2 flex justify-start items-center gap-0.5 min-w-0 overflow-hidden">
+            <ArticleTag type={tag} />
+            <span className={cn("flex-1 whitespace-nowrap overflow-hidden text-ellipsis", titleClassName)}>
+              {title}
+            </span>
+          </div>
+        )}
       </div>
     </Link>
   );

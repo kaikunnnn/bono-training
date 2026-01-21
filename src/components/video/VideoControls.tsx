@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Play, Pause, Volume2, VolumeX, Volume1, Maximize, Minimize, Loader2, Subtitles, PictureInPicture2, List } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, Volume1, Maximize, Minimize, Loader2, Subtitles, List } from 'lucide-react';
 import type { VimeoPlayerState, TextTrack, Chapter } from './hooks/useVimeoPlayer';
 
 interface VideoControlsProps {
@@ -9,7 +9,6 @@ interface VideoControlsProps {
   onVolumeChange: (volume: number) => void;
   onPlaybackRateChange: (rate: number) => void;
   onToggleFullscreen: () => void;
-  onTogglePip: () => void;
   onEnableTextTrack: (language: string) => void;
   onDisableTextTrack: () => void;
   isFullscreen?: boolean;
@@ -24,7 +23,6 @@ export function VideoControls({
   onVolumeChange,
   onPlaybackRateChange,
   onToggleFullscreen,
-  onTogglePip,
   onEnableTextTrack,
   onDisableTextTrack,
   isFullscreen = false,
@@ -43,7 +41,7 @@ export function VideoControls({
   const subtitleMenuRef = useRef<HTMLDivElement>(null);
   const chapterMenuRef = useRef<HTMLDivElement>(null);
 
-  const { isPlaying, currentTime, duration, volume, playbackRate, isLoading, isPip, textTracks, activeTextTrack, chapters, currentChapter } = state;
+  const { isPlaying, currentTime, duration, volume, playbackRate, isLoading, textTracks, activeTextTrack, chapters, currentChapter } = state;
 
   // 時間フォーマット (長い動画はH:MM:SS、短い動画はM:SS)
   const formatTime = (seconds: number) => {
@@ -468,17 +466,6 @@ export function VideoControls({
               </div>
             )}
           </div>
-
-          {/* Picture-in-Picture */}
-          <button
-            onClick={onTogglePip}
-            className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-              isPip ? 'bg-white text-black' : 'bg-white/20 hover:bg-white/30 text-white'
-            }`}
-            aria-label={isPip ? 'ピクチャーインピクチャーを終了' : 'ピクチャーインピクチャー'}
-          >
-            <PictureInPicture2 className="w-5 h-5" />
-          </button>
 
           {/* フルスクリーン */}
           <button

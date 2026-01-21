@@ -17,7 +17,6 @@ export function CustomVimeoPlayer({ vimeoId, className = '' }: CustomVimeoPlayer
     setVolume,
     setPlaybackRate,
     toggleFullscreen,
-    togglePip,
     enableTextTrack,
     disableTextTrack,
   } = useVimeoPlayer(vimeoId);
@@ -132,11 +131,6 @@ export function CustomVimeoPlayer({ vimeoId, className = '' }: CustomVimeoPlayer
     resetControlsTimer();
   }, [resetControlsTimer]);
 
-  const handleTogglePip = useCallback(() => {
-    togglePip();
-    resetControlsTimer();
-  }, [togglePip, resetControlsTimer]);
-
   const handleEnableTextTrack = useCallback((language: string) => {
     enableTextTrack(language);
     resetControlsTimer();
@@ -196,7 +190,7 @@ export function CustomVimeoPlayer({ vimeoId, className = '' }: CustomVimeoPlayer
   return (
     <div
       ref={playerWrapperRef}
-      className={`relative bg-black rounded-lg overflow-hidden ${className}`}
+      className={`relative bg-black rounded-lg overflow-hidden w-full ${className}`}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
     >
@@ -253,7 +247,6 @@ export function CustomVimeoPlayer({ vimeoId, className = '' }: CustomVimeoPlayer
             onVolumeChange={handleVolumeChange}
             onPlaybackRateChange={handlePlaybackRateChange}
             onToggleFullscreen={handleToggleFullscreen}
-            onTogglePip={handleTogglePip}
             onEnableTextTrack={handleEnableTextTrack}
             onDisableTextTrack={handleDisableTextTrack}
             isFullscreen={isFullscreen}

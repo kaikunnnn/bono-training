@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
-import { Play, FileText, ChevronRight, Check, Lock } from "lucide-react";
+import { ChevronRight, Check, Lock } from "lucide-react";
+import { Play, FileText } from "@/lib/icons";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 import { ArticleTag, type TagType } from "@/components/article/sidebar/ArticleTag";
 
@@ -23,6 +24,8 @@ interface ArticleItemProps {
   articleType?: TagType;
   /** 完了状態 */
   isCompleted: boolean;
+  /** 動画URL（あれば動画コンテンツとして扱う） */
+  videoUrl?: string;
   /** 動画時間 (秒数) ※videoの場合 */
   videoDuration?: number;
   /** プレミアムコンテンツか */
@@ -51,6 +54,7 @@ export function ArticleItem({
   thumbnailUrl,
   articleType,
   isCompleted,
+  videoUrl,
   videoDuration,
   isPremium = false,
 }: ArticleItemProps) {
@@ -60,10 +64,17 @@ export function ArticleItem({
   // プレミアムコンテンツで未契約の場合、ロック状態
   const isLocked = isPremium && !canAccessContent(isPremium);
 
-  // 動画時間をmm:ss形式に変換
-  const formatDuration = (seconds: number) => {
+  const durationSeconds =
+    typeof videoDuration === "number" ? videoDuration : Number(videoDuration);
+  const hasValidDuration = Number.isFinite(durationSeconds) && durationSeconds > 0;
+  const isVideo =
+    (typeof videoUrl === "string" && videoUrl.trim().length > 0) || hasValidDuration;
+
+  // 動画時間をmm:ss形式に変換（不正値は null）
+  const formatDuration = (seconds: number): string | null => {
+    if (!Number.isFinite(seconds) || seconds <= 0) return null;
     const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
+    const secs = Math.floor(seconds % 60);
     return `${mins}:${String(secs).padStart(2, "0")}`;
   };
 
@@ -110,24 +121,34 @@ export function ArticleItem({
           />
         )}
 
-        {/* タイプアイコン（中央配置）: 動画時間があれば動画、なければテキスト */}
+        {/* タイプアイコン（中央配置）: videoUrl があれば動画、それ以外はテキスト */}
         <div className="absolute inset-0 flex items-center justify-center">
-          {videoDuration ? (
+          {isVideo ? (
             <div className="size-4 bg-white rounded-full flex items-center justify-center">
-              <Play className="size-1 text-[#17102d]" fill="#17102d" />
+              <Play
+                size={12}
+                className="w-3 h-3"
+                variant="Linear"
+                color="#17102d"
+              />
             </div>
           ) : (
             <div className="bg-white/[0.72] rounded-[3px] box-border h-4 w-4 p-px flex items-center justify-center">
-              <FileText className="size-2 text-black" />
+              <FileText
+                size={12}
+                style={{ width: 12, height: 12 }}
+                variant="Linear"
+                color="#111827"
+              />
             </div>
           )}
         </div>
 
-        {/* 動画時間バッジ (動画の場合のみ) */}
-        {videoDuration && (
+        {/* 動画時間バッジ（時間が取れている場合のみ） */}
+        {hasValidDuration && (
           <div className="absolute bottom-1 right-1 bg-black/70 px-1.5 pt-1 pb-[5px] rounded-[3px] h-fit w-fit overflow-visible leading-[100%] flex flex-wrap">
             <span className="text-[8px] text-white font-noto-sans-jp leading-none h-fit w-fit">
-              {formatDuration(videoDuration)}
+              {formatDuration(durationSeconds)}
             </span>
           </div>
         )}

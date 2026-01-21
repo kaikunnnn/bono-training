@@ -4,12 +4,14 @@ import { useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/layout/Layout";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { BookmarkList } from "@/components/ui/bookmark-list";
+import { HistoryList } from "@/components/ui/history-list";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ProgressLesson, CompletedLessonCard } from "@/components/progress";
 import { TabGroup } from "@/components/ui/tab-group";
 
 type TabId = 'all' | 'progress' | 'favorite' | 'history';
 import { getBookmarkedArticles, toggleBookmark, type BookmarkedArticle } from "@/services/bookmarks";
+import { getViewHistory, type ViewedArticle } from "@/services/viewHistory";
 import { getAllLessonsWithArticles, getNextIncompleteArticle, type LessonWithArticles } from "@/services/lessons";
 import {
   getMultipleLessonProgress,
@@ -58,6 +60,7 @@ export default function MyPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabId>('all');
   const [bookmarks, setBookmarks] = useState<BookmarkedArticle[]>([]);
+  const [viewHistory, setViewHistory] = useState<ViewedArticle[]>([]);
   const [lessons, setLessons] = useState<LessonWithArticles[]>([]);
   const [progressMap, setProgressMap] = useState<Record<string, LessonProgress>>({});
   const [lessonStatusMap, setLessonStatusMap] = useState<Record<string, LessonStatus>>({});
@@ -73,8 +76,12 @@ export default function MyPage() {
     const fetchData = async () => {
       setLoading(true);
 
-      const articles = await getBookmarkedArticles();
+      const [articles, history] = await Promise.all([
+        getBookmarkedArticles(),
+        getViewHistory(),
+      ]);
       setBookmarks(articles);
+      setViewHistory(history);
 
       const allLessons = await getAllLessonsWithArticles();
       setLessons(allLessons);
@@ -271,11 +278,12 @@ export default function MyPage() {
             >
               マイページ
             </h1>
-            <IconButton
-              to="/profile"
-              icon={<User size={14} color="#020817" />}
-              label="プロフィール"
-            />
+            <div className="flex items-center gap-2">
+              <IconButton
+                to="/profile"
+                label="プロフィール"
+              />
+            </div>
           </div>
 
           {/* 下段: タブ */}
@@ -472,17 +480,24 @@ export default function MyPage() {
           {(activeTab === 'all' || activeTab === 'history') && (
             <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3">
               {/* セクション見出し */}
-              {/* TODO: 閲覧履歴の件数が取得できたら totalCount と displayLimit を設定 */}
               <SectionHeading
                 title="閲覧履歴"
                 onSeeAllClick={handleViewAllHistory}
+                totalCount={viewHistory.length}
+                displayLimit={4}
                 hideSeeAll={activeTab !== 'all'}
               />
 
-              {/* Empty State - 閲覧履歴（機能未実装のため常にEmpty） */}
-              <EmptyState
-                message={<>記事を閲覧した履歴が<br />こちらに表示されます</>}
-              />
+              {/* 閲覧履歴リスト or Empty State */}
+              {viewHistory.length > 0 ? (
+                <HistoryList
+                  articles={activeTab === 'all' ? viewHistory.slice(0, 4) : viewHistory}
+                />
+              ) : (
+                <EmptyState
+                  message={<>記事を閲覧した履歴が<br />こちらに表示されます</>}
+                />
+              )}
             </section>
           )}
         </div>

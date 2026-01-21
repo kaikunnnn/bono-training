@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from "react";
 import LogoBlock from "./LogoBlock";
 import LessonDetailCard from "./LessonDetailCard";
 import QuestItem from "./QuestItem";
+import type { QuestArticleItemLayoutVariant } from "./ArticleListItem";
 import type { ArticleWithContext } from "@/types/sanity";
 import { getLessonProgress, type LessonProgress } from "@/services/progress";
 
@@ -9,6 +10,10 @@ interface ArticleSideNavNewProps {
   article: ArticleWithContext;
   currentArticleId: string;
   progressUpdateTrigger?: number;
+  /** 右サイド配置などでロゴをメイン側に出したい場合にfalse */
+  showLogo?: boolean;
+  /** QuestItem 内の記事行の表示パターン（/dev/quest-layouts と合わせる） */
+  questArticleItemLayoutVariant?: QuestArticleItemLayoutVariant;
 }
 
 /**
@@ -25,6 +30,8 @@ export function ArticleSideNavNew({
   article,
   currentArticleId,
   progressUpdateTrigger,
+  showLogo = true,
+  questArticleItemLayoutVariant = "B",
 }: ArticleSideNavNewProps) {
   const [progress, setProgress] = useState<LessonProgress | null>(null);
 
@@ -106,7 +113,7 @@ export function ArticleSideNavNew({
   return (
     <div className="flex flex-col items-center gap-4 p-4 rounded-2xl overflow-hidden shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)]">
       {/* ロゴブロック */}
-      <LogoBlock />
+      {showLogo && <LogoBlock />}
 
       {/* レッスン情報カード */}
       <LessonDetailCard
@@ -126,6 +133,7 @@ export function ArticleSideNavNew({
             questTitle={quest.questTitle}
             articles={quest.articles}
             activeArticleId={currentArticleId}
+            articleItemLayoutVariant={questArticleItemLayoutVariant}
           />
         ))}
       </div>
