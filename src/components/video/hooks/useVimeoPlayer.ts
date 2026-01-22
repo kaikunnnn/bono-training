@@ -42,7 +42,12 @@ export interface UseVimeoPlayerReturn {
   disableTextTrack: () => Promise<void>;
 }
 
-export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
+export interface VimeoPlayerOptions {
+  autoPlay?: boolean;
+  muted?: boolean;
+}
+
+export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}): UseVimeoPlayerReturn {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
 
@@ -81,6 +86,8 @@ export function useVimeoPlayer(vimeoId: string): UseVimeoPlayerReturn {
       title: false,
       byline: false,
       portrait: false,
+      autoplay: options.autoPlay ?? false,
+      muted: options.muted ?? false,
     });
 
     playerRef.current = player;

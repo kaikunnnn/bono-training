@@ -108,7 +108,7 @@ const ModalHeader = ({
     className={cn('flex items-start justify-between gap-4', className)}
     {...props}
   >
-    <div className="flex flex-col space-y-3 text-left flex-1">
+    <div className="flex flex-col gap-3 text-left flex-1">
       {badge && (
         <span
           className={cn(
@@ -119,7 +119,9 @@ const ModalHeader = ({
           {badge}
         </span>
       )}
-      {children}
+      <div className="flex flex-col space-y-3 text-left w-full h-fit">
+        {children}
+      </div>
     </div>
     {!hideCloseButton && (
       <DialogPrimitive.Close asChild>
@@ -147,7 +149,7 @@ const ModalTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      'text-[22px] font-semibold leading-[1.4] tracking-tight text-foreground/90 font-noto-sans-jp',
+      'mt-0 text-[22px] font-semibold leading-[1.4] tracking-tight text-foreground/90 font-noto-sans-jp',
       className
     )}
     {...props}

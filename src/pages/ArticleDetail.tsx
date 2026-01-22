@@ -459,19 +459,21 @@ const ArticleDetail = () => {
             style={{ width: sideNavWidth }}
           >
             <div className="relative h-full">
-              {/* デスクトップ：サイドナビ内の「閉じる」ボタン */}
-              <div className="absolute top-4 right-4 z-30">
-                <MobileMenuButton
-                  isOpen={true}
-                  onClick={() => setIsDesktopSideNavOpen(false)}
-                />
-              </div>
-
               <div
                 className="absolute top-0 right-0 h-full w-2 cursor-col-resize z-20 bg-transparent hover:bg-black/5 focus:bg-black/5 outline-none"
                 {...sideNavResizeHandleProps}
               />
-              <ArticleSideNavNew article={article} currentArticleId={article._id} progressUpdateTrigger={progressUpdateTrigger} />
+              <ArticleSideNavNew
+                article={article}
+                currentArticleId={article._id}
+                progressUpdateTrigger={progressUpdateTrigger}
+                logoRightAction={
+                  <MobileMenuButton
+                    isOpen={true}
+                    onClick={() => setIsDesktopSideNavOpen(false)}
+                  />
+                }
+              />
             </div>
           </aside>
         )}
@@ -485,6 +487,7 @@ const ArticleDetail = () => {
               thumbnail={article.thumbnail}
               thumbnailUrl={article.thumbnailUrl}
               isPremium={article.isPremium}
+              autoPlay
             />
           </div>
 

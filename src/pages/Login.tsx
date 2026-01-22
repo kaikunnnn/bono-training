@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -41,7 +41,12 @@ async function checkMigratedUser(email: string): Promise<{ exists: boolean; isMi
 type TabId = 'login' | 'first-time';
 
 const Login = () => {
-  const [activeTab, setActiveTab] = useState<TabId>('login');
+  const location = useLocation();
+
+  const [activeTab, setActiveTab] = useState<TabId>(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    return tab === 'first-time' ? 'first-time' : 'login';
+  });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [firstTimeEmail, setFirstTimeEmail] = useState('');
@@ -52,8 +57,15 @@ const Login = () => {
   const [isMigratedUser, setIsMigratedUser] = useState(false);
   const { signIn, resetPassword, user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const { toast } = useToast();
+
+  // URLクエリで「はじめての方」タブを指定できるようにする
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    if (tab === 'first-time') {
+      setActiveTab('first-time');
+    }
+  }, [location.search]);
 
   // リダイレクト元のパスがあれば取得
   const from = location.state?.from?.pathname || '/';

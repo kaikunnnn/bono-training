@@ -43,7 +43,7 @@ const ForgotPassword = () => {
   return (
     <Layout>
       <div className="container max-w-md mx-auto py-10">
-        <Card>
+        <Card className="rounded-3xl">
           <CardHeader>
             <CardTitle>パスワードリセット</CardTitle>
             <CardDescription>
@@ -76,12 +76,13 @@ const ForgotPassword = () => {
                 <Button
                   type="button"
                   variant="outline"
+                  size="large"
                   onClick={() => navigate('/login')}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   戻る
                 </Button>
-                <Button type="submit" disabled={isSubmitting}>
+                <Button type="submit" size="large" disabled={isSubmitting}>
                   {isSubmitting ? 'リセットリンク送信中...' : 'リセットリンクを送信'}
                 </Button>
               </CardFooter>
@@ -91,6 +92,7 @@ const ForgotPassword = () => {
               <Button
                 onClick={() => navigate('/login')}
                 variant="outline"
+                size="large"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 ログインページに戻る

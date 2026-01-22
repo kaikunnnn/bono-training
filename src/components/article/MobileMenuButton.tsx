@@ -26,7 +26,7 @@ const MobileMenuButton = ({ isOpen, onClick, showLogoWhenClosed = false }: Mobil
 
   if (showLogo) {
     return (
-      <div className="flex items-center gap-3 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm">
+      <div className="flex w-fit items-center gap-3 pl-4 pr-2 py-2 bg-white border border-gray-200 rounded-[20px] shadow-sm">
         <Link to="/" aria-label="トップへ" className="flex items-center">
           <Logo className="w-[67.51px] h-5" />
         </Link>
@@ -46,22 +46,32 @@ const MobileMenuButton = ({ isOpen, onClick, showLogoWhenClosed = false }: Mobil
     );
   }
 
+  // 開いている状態（=閉じる導線）は「アイコンだけ」を確実に出す
+  if (isOpen) {
+    return (
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        onClick={onClick}
+        aria-label="メニューを閉じる"
+        className="h-10 w-10 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-black/5"
+      >
+        <SidebarRight size={ICON_SIZES.lg} variant="Linear" color="currentColor" />
+      </Button>
+    );
+  }
+
   return (
     <button
       onClick={onClick}
       className={
-        isOpen
-          ? "flex items-center justify-center p-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition"
-          : "flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition"
+        "flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition"
       }
-      aria-label={isOpen ? "メニューを閉じる" : "メニューを開く"}
+      aria-label="メニューを開く"
     >
-      {isOpen ? (
-        <SidebarRight size={ICON_SIZES.lg} variant="Linear" className="text-gray-600" color="currentColor" />
-      ) : (
-        <SidebarLeft size={ICON_SIZES.lg} variant="Linear" className="text-gray-600" color="currentColor" />
-      )}
-      {!isOpen && <span className="text-sm font-medium text-gray-700">一覧</span>}
+      <SidebarLeft size={ICON_SIZES.lg} variant="Linear" className="text-gray-600" color="currentColor" />
+      <span className="text-sm font-medium text-gray-700">一覧</span>
     </button>
   );
 };

@@ -345,6 +345,7 @@ export default function ArticleLayoutCompare() {
                 thumbnail={article.thumbnail}
                 thumbnailUrl={article.thumbnailUrl}
                 isPremium={article.isPremium}
+                autoPlay
               />
             </div>
 

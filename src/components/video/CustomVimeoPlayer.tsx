@@ -6,9 +6,18 @@ import { VideoControls } from './VideoControls';
 interface CustomVimeoPlayerProps {
   vimeoId: string;
   className?: string;
+  /** 自動再生（ブラウザ制約によりミュート推奨） */
+  autoPlay?: boolean;
+  /** 初期ミュート */
+  muted?: boolean;
 }
 
-export function CustomVimeoPlayer({ vimeoId, className = '' }: CustomVimeoPlayerProps) {
+export function CustomVimeoPlayer({
+  vimeoId,
+  className = '',
+  autoPlay = false,
+  muted = false,
+}: CustomVimeoPlayerProps) {
   const {
     containerRef,
     state,
@@ -19,7 +28,7 @@ export function CustomVimeoPlayer({ vimeoId, className = '' }: CustomVimeoPlayer
     toggleFullscreen,
     enableTextTrack,
     disableTextTrack,
-  } = useVimeoPlayer(vimeoId);
+  } = useVimeoPlayer(vimeoId, { autoPlay, muted });
 
   const [showControls, setShowControls] = useState(true);
   const [isFullscreen, setIsFullscreen] = useState(false);

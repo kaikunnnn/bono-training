@@ -8,6 +8,11 @@ interface VideoSectionProps {
   thumbnail?: any;
   thumbnailUrl?: string;
   isPremium?: boolean;
+  /**
+   * 自動再生（ブラウザ制約によりミュートでの再生を前提とする）
+   * 既定は false
+   */
+  autoPlay?: boolean;
 }
 
 /**
@@ -22,7 +27,13 @@ interface VideoSectionProps {
  * - 動画がない場合、サムネイル画像があれば表示
  * - プレミアムコンテンツのアクセス制御
  */
-const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: VideoSectionProps) => {
+const VideoSection = ({
+  videoUrl,
+  thumbnail,
+  thumbnailUrl,
+  isPremium = false,
+  autoPlay = false,
+}: VideoSectionProps) => {
   const { canAccessContent } = useSubscriptionContext();
 
   // プレミアムコンテンツで未契約の場合、ロック表示
@@ -97,13 +108,14 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
     return (
       <div className="w-full">
         <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
-          <CustomVimeoPlayer vimeoId={videoInfo.id} />
+          <CustomVimeoPlayer vimeoId={videoInfo.id} autoPlay={autoPlay} muted={autoPlay} />
         </div>
       </div>
     );
   }
 
   // YouTubeの場合は従来のiframe埋め込み
+  const youtubeParams = autoPlay ? "?autoplay=1&mute=1&playsinline=1" : "";
   return (
     <div className="w-full">
       <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
@@ -111,7 +123,7 @@ const VideoSection = ({ videoUrl, thumbnail, thumbnailUrl, isPremium = false }: 
         <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
           {/* 56.25% = 9/16 * 100 (16:9のアスペクト比) */}
           <iframe
-            src={`https://www.youtube.com/embed/${videoInfo.id}`}
+            src={`https://www.youtube.com/embed/${videoInfo.id}${youtubeParams}`}
             className="absolute top-0 left-0 w-full h-full"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

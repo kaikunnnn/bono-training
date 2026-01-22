@@ -90,7 +90,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
 }) => {
   const hasIcon = Boolean(icon);
   const className =
-    `relative bg-white px-[12px] py-[8px] rounded-[12px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center ${hasIcon ? "gap-[4px]" : "gap-0"} cursor-pointer transition-[box-shadow,border-color] duration-150 hover:border-black/15 hover:shadow-[0px_2px_6px_0px_rgba(0,0,0,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2`;
+    `relative bg-white px-[12px] py-[8px] rounded-[16px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center ${hasIcon ? "gap-[4px]" : "gap-0"} cursor-pointer transition-[box-shadow,border-color] duration-150 hover:border-black/15 hover:shadow-[0px_2px_6px_0px_rgba(0,0,0,0.10)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2`;
 
   const [isBursting, setIsBursting] = useState(false);
   const [burstId, setBurstId] = useState(0);

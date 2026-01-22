@@ -77,7 +77,7 @@ const ResetPassword = () => {
   return (
     <Layout>
       <div className="container max-w-md mx-auto py-10">
-        <Card>
+        <Card className="rounded-3xl">
           <CardHeader>
             <CardTitle>新しいパスワード設定</CardTitle>
             <CardDescription>
@@ -125,14 +125,14 @@ const ResetPassword = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button type="submit" className="w-full" disabled={isSubmitting}>
+                <Button type="submit" size="large" className="w-full" disabled={isSubmitting}>
                   {isSubmitting ? 'パスワード更新中...' : 'パスワードを更新'}
                 </Button>
               </CardFooter>
             </form>
           ) : (
             <CardFooter className="flex justify-center">
-              <Button onClick={() => navigate('/login')}>
+              <Button onClick={() => navigate('/login')} size="large">
                 ログインページに移動
               </Button>
             </CardFooter>

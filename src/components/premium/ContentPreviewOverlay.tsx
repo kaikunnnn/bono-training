@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Lock, LogIn, UserPlus, ExternalLink } from 'lucide-react';
+import { Lock, LogIn, UserPlus, ExternalLink, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ export default function ContentPreviewOverlay() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalStep, setModalStep] = useState<'pre-register' | 'post-register'>('pre-register');
 
   const isLoggedIn = !!user;
 
@@ -37,6 +38,7 @@ export default function ContentPreviewOverlay() {
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
+    setModalStep('pre-register');
   };
 
   const handleMemberRegister = () => {
@@ -72,7 +74,8 @@ export default function ContentPreviewOverlay() {
               /* ログイン済み・サブスクなし */
               <Button
                 onClick={handleMemberRegister}
-                className="flex-1 font-noto-sans-jp"
+                size="large"
+                className="flex-1 font-noto-sans-jp text-base"
               >
                 メンバーシップ登録へ
                 <ExternalLink className="ml-2 h-4 w-4" />
@@ -82,7 +85,8 @@ export default function ContentPreviewOverlay() {
               <>
                 <Button
                   onClick={handleLogin}
-                  className="flex-1 font-noto-sans-jp"
+                  size="large"
+                  className="flex-1 font-noto-sans-jp text-base"
                 >
                   <LogIn className="mr-2 h-4 w-4" />
                   ログインする
@@ -90,7 +94,8 @@ export default function ContentPreviewOverlay() {
                 <Button
                   onClick={handleOpenModal}
                   variant="outline"
-                  className="flex-1 font-noto-sans-jp"
+                  size="large"
+                  className="flex-1 font-noto-sans-jp text-base"
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
                   メンバーシップ登録へ
@@ -102,22 +107,47 @@ export default function ContentPreviewOverlay() {
       </div>
 
       {/* 初めての方向けモーダル */}
-      <Modal open={isModalOpen} onOpenChange={setIsModalOpen}>
+      <Modal
+        open={isModalOpen}
+        onOpenChange={(open) => {
+          setIsModalOpen(open);
+          if (!open) setModalStep('pre-register');
+        }}
+      >
         <ModalContainer>
-          <ModalHeader badge="はじめての方へ">
+          <ModalHeader badge={modalStep === 'post-register' ? 'メンバー登録完了後' : 'はじめての方へ'}>
+            {modalStep === 'post-register' && (
+              <div className="mb-4">
+                <CheckCircle className="w-12 h-12 text-green-500" />
+              </div>
+            )}
             <ModalTitle>
-              BONO本サイトで
-              <br />
-              メンバー登録をすると
-              <br />
-              <span className="font-bold">コンテンツが閲覧できます</span>
+              {modalStep === 'post-register' ? (
+                <>
+                  ログインページから
+                  <br />
+                  <span className="font-bold">パスワードを設定しましょう</span>
+                </>
+              ) : (
+                <>
+                  BONO本サイトで
+                  <br />
+                  メンバー登録をすると
+                  <br />
+                  <span className="font-bold">コンテンツが閲覧できます</span>
+                </>
+              )}
             </ModalTitle>
             <ModalDescription className="sr-only">
               bo-no.designでの会員登録手順を説明します
             </ModalDescription>
           </ModalHeader>
           <ModalContent>
-            <RegistrationFlowGuide variant="modal" showLoginLink />
+            <RegistrationFlowGuide
+              variant="modal"
+              showLoginLink
+              onStepChange={(step) => setModalStep(step)}
+            />
           </ModalContent>
         </ModalContainer>
       </Modal>
