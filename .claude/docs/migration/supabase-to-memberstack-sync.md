@@ -1,8 +1,9 @@
 # Supabase → Memberstack 逆方向同期
 
 **作成日**: 2025-01-21
-**ステータス**: 調査完了 / 実装待ち
-**関連ブランチ**: 別ブランチで実装予定
+**更新日**: 2025-01-21
+**ステータス**: ✅ 実装完了
+**関連ブランチ**: `feat/memberstack-account-sync`
 
 ---
 
@@ -186,26 +187,30 @@ Memberstack API 呼び出し
 
 ---
 
-## 実装タスク（別ブランチで実施）
+## 実装タスク
 
-### Phase 1: 準備
-- [ ] Memberstack Admin API キーを取得
-- [ ] 環境変数に追加（`MEMBERSTACK_SECRET_KEY`）
-- [ ] Memberstack側で無料プランを作成
-- [ ] プランIDを環境変数に追加
+### Phase 1: 準備 ✅ 完了
+- [x] Memberstack Admin API キーを取得
+- [x] 環境変数に追加（`MEMBERSTACK_SECRET_KEY`）
+- [x] Memberstack側で無料プランを作成
+  - `API Sync - Standard`: `pln_api-sync-standard--g741f0nsv`
+  - `API Sync - Feedback`: `pln_api-sync-feedback--q641i0nfl`
+- [x] プランIDを環境変数に追加
 
-### Phase 2: Edge Function 拡張
-- [ ] `stripe-webhook/index.ts` にMemberstack同期ロジックを追加
-- [ ] 以下のイベントでMemberstack APIを呼び出す:
+### Phase 2: Edge Function 拡張 ✅ 完了
+- [x] `supabase/functions/_shared/memberstack.ts` 作成
+- [x] `stripe-webhook/index.ts` にMemberstack同期ロジックを追加
+- [x] 以下のイベントでMemberstack APIを呼び出す:
   - `checkout.session.completed` → メンバー作成 + プラン追加
   - `customer.subscription.updated` → プラン変更対応
   - `customer.subscription.deleted` → プラン削除
+- [x] Edge Functionデプロイ完了
 
 ### Phase 3: データマッピング
-- [ ] Supabase user_id ↔ Memberstack member_id のマッピングテーブル作成
-- [ ] または user_metadata に memberstack_member_id を保存
+- 実装方式: メールアドレスで紐付け（マッピングテーブル不要）
+- Memberstack側でメタデータとして `supabaseUserId`, `stripeCustomerId` を保存
 
-### Phase 4: テスト
+### Phase 4: テスト 🔄 進行中
 - [ ] テスト環境で動作確認
 - [ ] 本番環境でのテスト
 

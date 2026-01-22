@@ -204,6 +204,8 @@ serve(async (req) => {
       success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl,
       metadata: sessionMetadata,
+      locale: "ja", // 日本語UI
+      allow_promotion_codes: true, // クーポンコード入力欄を表示
     };
 
     // 【重要】既存サブスクリプションのキャンセルはWebhook（checkout.session.completed）で実行

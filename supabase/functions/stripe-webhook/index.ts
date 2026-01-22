@@ -9,6 +9,7 @@ import { createStripeClient, getWebhookSecret } from "../_shared/stripe-helpers.
 import Stripe from "https://esm.sh/stripe@17.7.0";
 import { sendEmailSafe } from "../_shared/resend.ts";
 import { generateWelcomeEmail, generateCancellationEmail, generatePlanChangeEmail, getPlanDisplayName } from "../_shared/email-templates.ts";
+import { syncToMemberstack, removePlanFromMemberstack, changePlanInMemberstack } from "../_shared/memberstack.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -431,9 +432,36 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
     }
 
     // ========================================
-    // 📧 ウェルカムメール送信
+    // 🔄 Memberstack同期（新サイトからの課金のみ）
+    // ※ メール送信より先に実行（event loop errorで中断されないように）
     // ========================================
     const customerEmail = customer.email;
+    const isFromNewSite = !!session.metadata?.user_id;
+
+    if (isFromNewSite && customerEmail) {
+      try {
+        console.log(`🔄 [LIVE環境] Memberstack同期開始: ${customerEmail} → ${planType}`);
+        const syncResult = await syncToMemberstack(
+          customerEmail,
+          planType,
+          userId,
+          customerId
+        );
+        if (syncResult.success) {
+          console.log(`✅ [LIVE環境] Memberstack同期完了: member=${syncResult.memberId}`);
+        } else {
+          console.warn(`⚠️ [LIVE環境] Memberstack同期失敗（続行）: ${syncResult.error}`);
+        }
+      } catch (memberstackError) {
+        console.error(`❌ [LIVE環境] Memberstack同期例外（続行）:`, memberstackError);
+      }
+    } else if (!isFromNewSite) {
+      console.log(`⏭️ [LIVE環境] 旧サイトからの課金のためMemberstack同期をスキップ`);
+    }
+
+    // ========================================
+    // 📧 ウェルカムメール送信
+    // ========================================
     if (customerEmail) {
       console.log(`📧 [LIVE環境] ウェルカムメール送信: ${customerEmail}`);
       const welcomeEmail = generateWelcomeEmail();
@@ -657,9 +685,11 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
     // 📧 解約完了メール送信
     // ========================================
     const customerId = subscription.customer;
+    let customerEmail: string | null = null;
     try {
       const customer = await stripe.customers.retrieve(customerId);
       if (!customer.deleted && customer.email) {
+        customerEmail = customer.email;
         console.log(`📧 [LIVE環境] 解約メール送信: ${customer.email}`);
         const cancellationEmail = generateCancellationEmail();
         await sendEmailSafe({
@@ -670,6 +700,29 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
       }
     } catch (emailError) {
       console.warn(`⚠️ [LIVE環境] 解約メール送信失敗（続行）:`, emailError);
+    }
+
+    // ========================================
+    // 🔄 Memberstack同期（プラン削除）
+    // ========================================
+    if (customerEmail) {
+      // ユーザーのプランタイプを取得
+      const { data: userSubData } = await supabase
+        .from("user_subscriptions")
+        .select("plan_type")
+        .eq("user_id", userId)
+        .eq("environment", ENVIRONMENT)
+        .single();
+
+      const planType = userSubData?.plan_type || 'standard';
+      console.log(`🔄 [LIVE環境] Memberstackプラン削除開始: ${customerEmail} → ${planType}`);
+
+      const removeResult = await removePlanFromMemberstack(customerEmail, planType);
+      if (removeResult.success) {
+        console.log(`✅ [LIVE環境] Memberstackプラン削除完了`);
+      } else {
+        console.warn(`⚠️ [LIVE環境] Memberstackプラン削除失敗（続行）: ${removeResult.error}`);
+      }
     }
 
   } catch (error) {
@@ -1013,6 +1066,7 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
     // 📧 プラン変更メール送信（実際にプランが変わった場合のみ）
     // ========================================
     const planActuallyChanged = previousPlanType !== planType || previousDuration !== duration;
+    const planTypeChanged = previousPlanType !== planType;
 
     if (planActuallyChanged && previousPlanType) {
       console.log(`📧 [LIVE環境] プラン変更検知: ${previousPlanType}(${previousDuration}ヶ月) → ${planType}(${duration}ヶ月)`);
@@ -1027,6 +1081,24 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
             subject: planChangeEmail.subject,
             html: planChangeEmail.html,
           });
+
+          // ========================================
+          // 🔄 Memberstack同期（プラン変更）
+          // ========================================
+          // プランタイプが変わった場合のみ（standard ↔ feedback）
+          if (planTypeChanged) {
+            console.log(`🔄 [LIVE環境] Memberstackプラン変更: ${previousPlanType} → ${planType}`);
+            const changeResult = await changePlanInMemberstack(
+              customer.email,
+              previousPlanType,
+              planType
+            );
+            if (changeResult.success) {
+              console.log(`✅ [LIVE環境] Memberstackプラン変更完了`);
+            } else {
+              console.warn(`⚠️ [LIVE環境] Memberstackプラン変更失敗（続行）: ${changeResult.error}`);
+            }
+          }
         }
       } catch (emailError) {
         console.warn(`⚠️ [LIVE環境] プラン変更メール送信失敗（続行）:`, emailError);
