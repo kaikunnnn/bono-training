@@ -13,9 +13,11 @@ features/
 ├── history/           ← 閲覧履歴機能（実装済み）
 │   ├── README.md
 │   └── specification.md
-└── email/             ← メール機能（実装準備中）
-    ├── README.md
-    └── specification.md
+├── email/             ← メール機能（実装準備中）
+│   ├── README.md
+│   └── specification.md
+└── onboarding/        ← サブスク完了後オンボーディング（計画中）
+    └── README.md
 ```
 
 ## 各機能のドキュメント構成（推奨）
@@ -36,3 +38,4 @@ features/
 | お気に入り | ✅ 実装済み | - |
 | 閲覧履歴 | ✅ 実装済み | 最大50件保存、20件表示 |
 | メール | 🔧 実装準備中 | Resend採用、Phase1から開始 |
+| オンボーディング | ✅ 実装完了 | アルファ版運用計画（bono-training側5/7タスク完了、残りはWebflow側） |
