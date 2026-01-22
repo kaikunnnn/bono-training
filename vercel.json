@@ -1,7 +1,10 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/blog/:slug",
+      "handle": "filesystem"
+    },
+    {
+      "src": "/blog/(.*)",
       "has": [
         {
           "type": "header",
@@ -9,10 +12,10 @@
           "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
         }
       ],
-      "destination": "/ogp/:slug.html"
+      "dest": "/ogp/$1.html"
     },
     {
-      "source": "/blog",
+      "src": "/blog",
       "has": [
         {
           "type": "header",
@@ -20,15 +23,11 @@
           "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
         }
       ],
-      "destination": "/ogp/index.html"
+      "dest": "/ogp/index.html"
     },
     {
-      "source": "/images/:path*",
-      "destination": "/images/:path*"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ],
   "headers": [
