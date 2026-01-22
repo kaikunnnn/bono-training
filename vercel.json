@@ -1,10 +1,7 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/blog/(.*)",
+      "source": "/blog/:slug",
       "has": [
         {
           "type": "header",
@@ -12,10 +9,10 @@
           "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
         }
       ],
-      "dest": "/ogp/$1.html"
+      "destination": "/ogp/:slug.html"
     },
     {
-      "src": "/blog",
+      "source": "/blog",
       "has": [
         {
           "type": "header",
@@ -23,16 +20,25 @@
           "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
         }
       ],
-      "dest": "/ogp/index.html"
+      "destination": "/ogp/index.html"
     },
     {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/:path((?!images/).*)",
+      "destination": "/index.html"
     }
   ],
   "headers": [
     {
       "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/images/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
