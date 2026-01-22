@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { Mail } from 'lucide-react';
 
-type TemplateType = 'password-reset' | 'confirm-signup' | 'change-email' | 'welcome' | 'cancellation' | 'plan-change';
+type TemplateType = 'password-reset' | 'confirm-signup' | 'change-email' | 'welcome' | 'welcome-v2-a' | 'welcome-v2-b' | 'welcome-v2-c' | 'cancellation' | 'plan-change';
 
 interface TemplateConfig {
   title: string;
@@ -64,6 +64,79 @@ const templates: Record<TemplateType, TemplateConfig> = {
       },
     ],
     note: 'ボタンがない場合はページを再読み込みしていただくか、プラン登録状況をマイページよりご確認ください。',
+  },
+  // 案1: 新サイト案内セクションを追加
+  'welcome-v2-a': {
+    title: '【案1】新サイト案内追加',
+    heading: 'BONOへようこそ！🎉',
+    body: 'メンバーシップ登録ありがとうございます！<br><br>BONOを有効活用してデザインスキルを伸ばすため、まず以下のコンテンツを見て、実行してみてください。',
+    sections: [
+      {
+        title: '① BONOを使う準備',
+        content: 'まずはBONOを利用するための準備をしましょう。<br>・コミュニティへの参加<br>・取り組むコンテンツの決定<br>・2週間でやるべきことを決める',
+        buttonText: 'BONOを使う準備をはじめる →',
+        buttonUrl: 'https://www.bo-no.design/howtouse',
+      },
+      {
+        title: '② BONOの使い方ガイド',
+        content: '学習の進め方、コミュニティの使い方など、BONOでデザインスキルを身につけるためのガイドページをチェックしてデザインを進めましょう。',
+        buttonText: 'BONO 使い方ガイドへ →',
+        buttonUrl: 'https://www.bo-no.design/bono-guide',
+      },
+      {
+        title: '③ 新しい学習サイトもご利用いただけます',
+        content: '新しい学習サイト training.bo-no.design では、レッスンやトレーニングコンテンツを体系的に学ぶことができます。<br><br>ご登録のメールアドレスでログインできます。',
+        buttonText: '新しい学習サイトを開く →',
+        buttonUrl: 'https://training.bo-no.design',
+      },
+    ],
+    note: 'ボタンがない場合はページを再読み込みしていただくか、プラン登録状況をマイページよりご確認ください。',
+  },
+  // 案2: 両サイトの使い分けを説明
+  'welcome-v2-b': {
+    title: '【案2】両サイト使い分け説明',
+    heading: 'BONOへようこそ！🎉',
+    body: 'メンバーシップ登録ありがとうございます！<br><br>BONOを有効活用してデザインスキルを伸ばすため、まず以下のコンテンツを見て、実行してみてください。',
+    sections: [
+      {
+        title: '① BONOを使う準備',
+        content: 'まずはBONOを利用するための準備をしましょう。<br>・コミュニティへの参加<br>・取り組むコンテンツの決定<br>・2週間でやるべきことを決める',
+        buttonText: 'BONOを使う準備をはじめる →',
+        buttonUrl: 'https://www.bo-no.design/howtouse',
+      },
+      {
+        title: '② BONOの使い方ガイド',
+        content: '学習の進め方、コミュニティの使い方など、BONOでデザインスキルを身につけるためのガイドページをチェックしてデザインを進めましょう。',
+        buttonText: 'BONO 使い方ガイドへ →',
+        buttonUrl: 'https://www.bo-no.design/bono-guide',
+      },
+      {
+        title: '③ 2つのサイトをご利用いただけます',
+        content: '【新サイト training.bo-no.design】<br>・レッスン一覧・トレーニング<br>・ご登録時のメールアドレスでそのままログイン可能<br><br>【旧サイト bo-no.design】<br>・コミュニティ・ガイドページ<br>・初回ログイン時は「パスワードを忘れた方」からパスワードリセットをお願いします<br><br>両サイトとも同じメールアドレスでご利用いただけます。',
+      },
+    ],
+    note: 'ボタンがない場合はページを再読み込みしていただくか、プラン登録状況をマイページよりご確認ください。',
+  },
+  // 案3: 補足テキストに追記（シンプル版）
+  'welcome-v2-c': {
+    title: '【案3】補足テキスト追記',
+    heading: 'BONOへようこそ！🎉',
+    body: 'メンバーシップ登録ありがとうございます！<br><br>BONOを有効活用してデザインスキルを伸ばすため、まず以下のコンテンツを見て、実行してみてください。',
+    sections: [
+      {
+        title: '① BONOを使う準備',
+        content: 'まずはBONOを利用するための準備をしましょう。<br>・コミュニティへの参加<br>・取り組むコンテンツの決定<br>・2週間でやるべきことを決める',
+        buttonText: 'BONOを使う準備をはじめる →',
+        buttonUrl: 'https://www.bo-no.design/howtouse',
+      },
+      {
+        title: '② BONOの使い方ガイド',
+        content: '学習の進め方、コミュニティの使い方など、BONOでデザインスキルを身につけるためのガイドページをチェックしてデザインを進めましょう。',
+        buttonText: 'BONO 使い方ガイドへ →',
+        buttonUrl: 'https://www.bo-no.design/bono-guide',
+      },
+    ],
+    note: 'ボタンがない場合はページを再読み込みしていただくか、プラン登録状況をマイページよりご確認ください。<br><br>※新しい学習サイト（training.bo-no.design）でも同じメールアドレスでログインできます。旧サイト（bo-no.design）に初めてログインする場合は、「パスワードを忘れた方」からパスワードリセットをお願いします。',
   },
   'cancellation': {
     title: '解約手続き完了',
@@ -366,7 +439,7 @@ const EmailTemplates: React.FC = () => {
           </div>
 
           {/* サブスクリプション通知メール */}
-          <div>
+          <div className="mb-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
               サブスクリプション通知メール（Resend）
             </h2>
@@ -379,6 +452,28 @@ const EmailTemplates: React.FC = () => {
                     selectedTemplate === key
                       ? 'bg-[#151834] text-white'
                       : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
+                  }`}
+                >
+                  {templates[key].title}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* ウェルカムメール改善案 */}
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+            <h2 className="text-sm font-semibold text-amber-700 uppercase tracking-wide mb-3">
+              🆕 ウェルカムメール改善案（新旧サイト案内追加）
+            </h2>
+            <div className="flex flex-wrap gap-3">
+              {(['welcome-v2-a', 'welcome-v2-b', 'welcome-v2-c'] as TemplateType[]).map((key) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedTemplate(key)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    selectedTemplate === key
+                      ? 'bg-amber-600 text-white'
+                      : 'bg-white text-gray-700 border border-amber-300 hover:bg-amber-100'
                   }`}
                 >
                   {templates[key].title}
