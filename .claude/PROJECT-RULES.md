@@ -180,6 +180,43 @@ Stripeで価格を変更した場合、以下を必ず更新:
 
 ---
 
+## 🎨 UI/デザインルール
+
+### アイコンライブラリの統一（Iconsax）
+
+**ルール**: アイコンは必ず `@/lib/icons` から import する。`lucide-react` などを直接使わない。
+
+**背景**:
+- このプロジェクトでは `iconsax-react` を標準アイコンライブラリとして採用
+- `src/lib/icons.ts` で Lucide 風の名前にマッピングして使いやすくしている
+- 統一することでデザインの一貫性を保つ
+
+**やること**:
+```typescript
+// ✅ 正しい
+import { CheckCircle2, Settings, Globe } from '@/lib/icons';
+
+// または
+import { icons } from '@/lib/icons';
+<icons.check size={16} />
+```
+
+**やってはいけないこと**:
+```typescript
+// ❌ 間違い - lucide-react を直接使う
+import { Check, Settings } from 'lucide-react';
+
+// ❌ 間違い - iconsax-react を直接使う
+import { TickCircle } from 'iconsax-react';
+```
+
+**新しいアイコンが必要な場合**:
+1. `src/lib/icons.ts` を確認し、既存のエクスポートを探す
+2. なければ `iconsax-react` から追加してエクスポートする
+3. Lucide 風の名前でエイリアスを付ける（例: `Global as Globe`）
+
+---
+
 ## 📂 ドキュメント管理ルール
 
 ### ドキュメント作成時のルール
@@ -551,6 +588,7 @@ SELECT DISTINCT environment FROM user_subscriptions;
 
 | 日付 | 更新内容 | 更新者 |
 |------|---------|--------|
+| 2025-01-21 | UI/デザインルール追加（Iconsax統一ルール） | AI開発チーム |
 | 2025-01-16 | サブスクリプション・課金機能の開発ルール追加（ERROR-002対策） | AI開発チーム |
 | 2025-11-28 | 初版作成 | AI開発チーム |
 
