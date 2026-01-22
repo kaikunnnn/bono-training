@@ -111,7 +111,7 @@ export function ArticleSideNavNew({
   }
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4 rounded-2xl overflow-hidden shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)]">
+    <div className="flex flex-col items-stretch w-full gap-4 p-4 rounded-2xl overflow-hidden shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)]">
       {/* ロゴブロック */}
       {showLogo && <LogoBlock />}
 

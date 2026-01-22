@@ -1,9 +1,10 @@
 import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
-import { ChevronRight, Check, Lock } from "lucide-react";
+import { ChevronRight, Check } from "lucide-react";
 import { Play, FileText } from "@/lib/icons";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 import { ArticleTag, type TagType } from "@/components/article/sidebar/ArticleTag";
+import { GradientLockIcon } from "@/components/ui/icon-lock-gradient";
 
 interface ArticleItemProps {
   /** 記事番号 (1, 2, 3...) */
@@ -161,7 +162,7 @@ export function ArticleItem({
           <div className="flex items-center gap-1.5">
             {articleType && <ArticleTag type={articleType} />}
             {isLocked && (
-              <Lock className="size-3 text-gray-400" strokeWidth={2} />
+              <GradientLockIcon size={12} />
             )}
           </div>
           {/* タイトル */}

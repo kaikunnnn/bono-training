@@ -21,7 +21,7 @@ interface ArticleListItemProps {
  * 3つの状態（Default / Hover / Active）を持つ。
  *
  * Figma仕様（SIDEBAR-SPEC.md準拠）:
- * - 幅: 288px (w-72)
+ * - 幅: 親要素に追従（レスポンシブ）
  * - padding: 16px / 2px
  * - Default: 背景なし、テキスト gray-600、font-normal
  * - Hover: bg-slate-400/20、テキスト gray-600、font-bold
@@ -45,7 +45,7 @@ export function ArticleListItem({
       to={href}
       className={cn(
         // 共通ベース
-        "group w-72 pl-3 pr-3 py-0.5 inline-flex flex-col justify-start items-start gap-2.5",
+        "group w-full pl-3 pr-3 py-0.5 inline-flex flex-col justify-start items-start gap-2.5",
         // Active状態
         isActive && "bg-[rgba(193,207,225,0.32)] border-l-2 border-indigo-500",
         // Default → Hover

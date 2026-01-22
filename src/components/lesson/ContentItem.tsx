@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { urlFor } from "@/lib/sanity";
-import { Check, Lock, ChevronRight } from "lucide-react";
+import { Check, ChevronRight } from "lucide-react";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
+import { GradientLockIcon } from "@/components/ui/icon-lock-gradient";
 
 interface ContentItemProps {
   articleNumber: number; // ランタイムで付与
@@ -83,7 +84,7 @@ export default function ContentItem({
           )}
           {/* ロックアイコン（プレミアムで未契約の場合） */}
           {isLocked && (
-            <Lock className="w-4 h-4 text-gray-400 flex-shrink-0" strokeWidth={2} />
+            <GradientLockIcon size={16} />
           )}
           <p className="font-noto-sans-jp text-sm text-lesson-item-title font-medium truncate">
             {title}

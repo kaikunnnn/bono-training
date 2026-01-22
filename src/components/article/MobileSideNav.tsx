@@ -3,12 +3,21 @@ import { X } from "lucide-react";
 import ArticleSideNavNew from "./sidebar/ArticleSideNavNew";
 import type { ArticleWithContext } from "@/types/sanity";
 
+type SideNavDisplay = "mobile" | "desktop";
+
 interface MobileSideNavProps {
   isOpen: boolean;
   onClose: () => void;
   article: ArticleWithContext;
   currentArticleId: string;
   progressUpdateTrigger?: number;
+  /** 表示対象: mobile(〜md) / desktop(md〜) */
+  display?: SideNavDisplay;
+  /**
+   * デスクトップ用: 「サイドバー表示に戻す」などの導線
+   * 指定された場合、メニュー内に復帰ボタンを表示する
+   */
+  onRestoreSidebar?: () => void;
 }
 
 /**
@@ -27,6 +36,8 @@ const MobileSideNav = ({
   article,
   currentArticleId,
   progressUpdateTrigger,
+  display = "mobile",
+  onRestoreSidebar,
 }: MobileSideNavProps) => {
   // スクロールロック
   useEffect(() => {
@@ -55,11 +66,13 @@ const MobileSideNav = ({
     };
   }, [isOpen, onClose]);
 
+  const visibilityClass = display === "mobile" ? "md:hidden" : "hidden md:block";
+
   return (
     <>
       {/* オーバーレイ */}
       <div
-        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 md:hidden ${
+        className={`fixed inset-0 bg-black/50 z-40 transition-opacity duration-300 ${visibilityClass} ${
           isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
         onClick={onClose}
@@ -67,7 +80,7 @@ const MobileSideNav = ({
 
       {/* サイドナビパネル */}
       <div
-        className={`fixed top-0 left-0 h-full w-[300px] max-w-[85vw] bg-white z-50 shadow-xl transform transition-transform duration-300 ease-out md:hidden ${
+        className={`fixed top-0 left-0 h-full w-[300px] max-w-[85vw] bg-white z-50 shadow-xl transform transition-transform duration-300 ease-out ${visibilityClass} ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -82,6 +95,16 @@ const MobileSideNav = ({
 
         {/* サイドナビコンテンツ */}
         <div className="h-full overflow-y-auto">
+          {onRestoreSidebar && (
+            <div className="px-4 pt-4">
+              <button
+                onClick={onRestoreSidebar}
+                className="w-full flex items-center justify-center px-3 py-2 bg-white border border-gray-200 rounded-lg shadow-sm hover:bg-gray-50 transition text-sm font-medium text-gray-700"
+              >
+                サイドバー表示に戻す
+              </button>
+            </div>
+          )}
           <ArticleSideNavNew
             article={article}
             currentArticleId={currentArticleId}

@@ -44,14 +44,14 @@ function QuestNumber({ number }: { number: number }) {
  * クエストの見出し部分
  *
  * Figma仕様:
- * - 幅: 288px
+ * - 幅: 親要素に追従（レスポンシブ）
  * - padding: 14px
  * - border-bottom: 1px solid rgba(0,0,0,0.05)
  * - gap: 8px
  */
 function HeadingQuest({ number, title }: { number: number; title: string }) {
   return (
-    <div className="w-72 p-3.5 border-b border-black/5 inline-flex items-center gap-2">
+    <div className="w-full p-3.5 border-b border-black/5 inline-flex items-center gap-2">
       <QuestNumber number={number} />
       <span className="flex-1 text-gray-900 text-xs font-bold font-rounded-mplus leading-3 truncate">
         {title}
@@ -65,7 +65,7 @@ function HeadingQuest({ number, title }: { number: number; title: string }) {
  * クエスト（学習単元）を表示するカード
  *
  * Figma仕様（SIDEBAR-SPEC.md準拠）:
- * - 幅: 288px (w-72)
+ * - 幅: 親要素に追従（レスポンシブ）
  * - 背景: #FFFFFF
  * - 角丸: 20px
  * - shadow: 0px 0px 4px rgba(0,0,0,0.08)
@@ -79,7 +79,7 @@ export function QuestItem({
   articleItemLayoutVariant = "C",
 }: QuestItemProps) {
   return (
-    <div className="w-72 bg-white rounded-[20px] shadow-none outline outline-1 outline-offset-[-1px] outline-black/5 flex flex-col items-center overflow-hidden">
+    <div className="w-full bg-white rounded-[20px] shadow-none outline outline-1 outline-offset-[-1px] outline-black/5 flex flex-col items-stretch overflow-hidden">
       <HeadingQuest number={questNumber} title={questTitle} />
 
       {/* 記事リスト */}
