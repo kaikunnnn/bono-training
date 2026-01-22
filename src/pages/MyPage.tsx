@@ -69,7 +69,7 @@ export default function MyPage() {
 
   useEffect(() => {
     if (!user) {
-      navigate("/auth");
+      navigate("/login");
       return;
     }
 

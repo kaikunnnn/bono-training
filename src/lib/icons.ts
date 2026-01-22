@@ -68,6 +68,14 @@ export {
   Minus,
 } from "iconsax-react";
 
+// サイドバー（記事の「一覧」開閉などで使用）
+export {
+  SidebarLeft,
+  SidebarRight,
+  ArrowSquareLeft,
+  ArrowSquareRight,
+} from "iconsax-react";
+
 // アクション
 export {
   TickCircle as Check,

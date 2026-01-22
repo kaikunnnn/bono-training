@@ -9,7 +9,7 @@ interface ProtectedPremiumRouteProps {
   children: React.ReactNode;
   /**
    * 非ログイン時のリダイレクト先
-   * デフォルト: "/auth"
+   * デフォルト: "/login"
    */
   authRedirectPath?: string;
   /**
@@ -27,7 +27,7 @@ interface ProtectedPremiumRouteProps {
  */
 const ProtectedPremiumRoute: React.FC<ProtectedPremiumRouteProps> = ({
   children,
-  authRedirectPath = "/auth",
+  authRedirectPath = "/login",
   subscriptionRedirectPath
 }) => {
   const { user, loading } = useAuth();

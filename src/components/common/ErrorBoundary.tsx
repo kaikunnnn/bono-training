@@ -27,8 +27,8 @@ const LoginPrompt: React.FC<{ onReset?: () => void }> = ({ onReset }) => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
-        <Button 
-          onClick={() => navigate('/auth')} 
+        <Button
+          onClick={() => navigate('/login')}
           className="w-full"
         >
           ログインページへ

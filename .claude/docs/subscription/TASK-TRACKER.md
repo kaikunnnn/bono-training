@@ -1,17 +1,81 @@
 # サブスクリプション タスクトラッカー
 
-**最終更新**: 2025-12-24
+**最終更新**: 2025-01-22
 **ステータス**: アクティブ
 
 ---
 
 ## 🚀 リリース前タスク（必須）
 
-現在、リリース前必須タスクはありません。
+### 🧪 テスト必須項目
+
+以下の機能は本番デプロイ前にテストが必要です：
+
+#### 1. オンボーディングフロー（優先度: 高）
+- [ ] 新規登録 → メール確認 → サブスク購入 → 完了ページの一連フロー
+- [ ] サブスク完了ページのオンボーディングコンテンツ表示
+- [ ] RegistrationFlowGuideコンポーネントの表示・動作
+
+#### 2. ペイウォール・認証（優先度: 高）
+- [ ] ペイウォールのユーザー状態分岐（未認証/無料/有料）
+- [ ] ペイウォールモーダルの表示・閉じる動作
+- [ ] Auth.tsx 3タブ構成の切り替え（通常ログイン/初めての方/新規登録）
+
+#### 3. Memberstack同期（優先度: 中）
+- [ ] bono-training → bo-no.design への同期動作
+- [ ] 同期後のbo-no.design側でのログイン確認
+
+#### 4. UI/UX改善（優先度: 低）
+- [ ] リサイズ可能サイドバーの動作（ドラッグ、最小/最大幅）
+- [ ] フッターdev用リンクの表示（開発環境のみ）
 
 ---
 
 ## ✅ 完了タスク（最新）
+
+### Task 8: オンボーディング・UX改善実装 ✅ 完了
+
+**完了日**: 2025-01-22
+**ブランチ**: feat/memberstack-account-sync
+
+**実装内容**:
+
+1. ✅ **ペイウォール改修**
+   - ユーザー状態分岐（未認証/無料/有料）
+   - モーダル表示対応
+
+2. ✅ **Auth.tsx 3タブ構成**
+   - 通常ログイン
+   - 初めての方（RegistrationFlowGuide）
+   - 新規登録
+
+3. ✅ **RegistrationFlowGuideコンポーネント**
+   - 登録フローの案内UI
+
+4. ✅ **フッターdev用リンク**
+   - 開発環境でのみ表示されるリンク
+
+5. ✅ **Memberstack同期（新サイト→旧サイト）**
+   - `scripts/sync-memberstack.ts`
+   - bono-trainingからbo-no.designへの同期
+
+6. ✅ **リサイズ可能サイドバー**
+   - 記事詳細ページで幅調整可能
+
+7. ✅ **サブスク完了ページオンボーディング**
+   - 購入完了後の案内コンテンツ
+
+8. ✅ **bo-no.design登録完了後の案内**
+   - メールテンプレートプレビュー改善
+
+**関連コミット**:
+- `f33da07` feat: implement alpha version onboarding flow
+- `9b25ade` feat: add Memberstack sync from bono-training to bo-no.design
+- `971afe9` feat: add resizable sidebar for article detail page
+- `87a0996` feat: enhance subscription success page with onboarding content
+- `e4b1025` feat: enhance email templates preview page
+
+---
 
 ### Task 7: サブスクリプション同期問題の修正 ✅ 完了
 

@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
 import { PlanType } from "@/utils/subscriptionPlans";
@@ -12,6 +12,8 @@ import PrivateRoute from "@/components/auth/PrivateRoute";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -66,6 +68,7 @@ import BlogHeaderPatterns from './pages/dev/BlogHeaderPatterns';
 import IconButtonBurstPlayground from "./pages/dev/IconButtonBurstPlayground";
 import EmailTemplates from "./pages/dev/EmailTemplates";
 import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
+import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -102,7 +105,9 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/auth" element={<Auth />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/auth" element={<Navigate to="/login" replace />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
 
@@ -136,6 +141,7 @@ const AppContent = () => {
         <Route path="/dev/email-templates" element={<DevRoute><EmailTemplates /></DevRoute>} />
         <Route path="/dev/article-layout-compare" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
         <Route path="/dev/article-layout-compare/:slug" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
+        <Route path="/dev/mobile-menu-button" element={<DevRoute><MobileMenuButtonPatterns /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />

@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+  Modal,
+  ModalContainer,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalContent,
+} from '@/components/ui/modal';
 import { RegistrationFlowGuide } from '@/components/auth/RegistrationFlowGuide';
 
 // bo-no.designのプランページURL
@@ -31,7 +32,7 @@ export default function PremiumVideoLock() {
   const isLoggedIn = !!user;
 
   const handleLogin = () => {
-    navigate('/auth');
+    navigate('/login');
   };
 
   const handleOpenModal = () => {
@@ -64,9 +65,7 @@ export default function PremiumVideoLock() {
             プレミアムコンテンツ
           </h3>
           <p className="font-noto-sans-jp text-sm text-gray-600 mb-6 leading-relaxed">
-            {isLoggedIn
-              ? 'この動画を視聴するにはメンバー登録が必要です'
-              : 'この動画を視聴するにはログインが必要です'}
+            この動画を視聴するにはメンバーシップの登録が必要です
           </p>
 
           {/* CTAボタン - ユーザー状態で分岐 */}
@@ -77,7 +76,7 @@ export default function PremiumVideoLock() {
                 onClick={handleMemberRegister}
                 className="font-noto-sans-jp"
               >
-                メンバー登録する
+                メンバーシップ登録へ
                 <ExternalLink className="ml-2 h-4 w-4" />
               </Button>
             ) : (
@@ -96,31 +95,35 @@ export default function PremiumVideoLock() {
                   className="font-noto-sans-jp bg-white/80"
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
-                  初めての方はこちら
+                  メンバーシップ登録へ
                 </Button>
               </>
             )}
           </div>
 
-          {/* 補足テキスト */}
-          <p className="font-noto-sans-jp text-xs text-gray-500 mt-4">
-            スタンダードプランで全ての動画とコンテンツにアクセス
-          </p>
         </div>
       </div>
 
       {/* 初めての方向けモーダル */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-noto-sans-jp">会員登録の流れ</DialogTitle>
-            <DialogDescription className="sr-only">
+      <Modal open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <ModalContainer>
+          <ModalHeader badge="はじめての方へ">
+            <ModalTitle>
+              BONO本サイトで
+              <br />
+              メンバー登録をすると
+              <br />
+              <span className="font-bold">コンテンツが閲覧できます</span>
+            </ModalTitle>
+            <ModalDescription className="sr-only">
               bo-no.designでの会員登録手順を説明します
-            </DialogDescription>
-          </DialogHeader>
-          <RegistrationFlowGuide variant="modal" />
-        </DialogContent>
-      </Dialog>
+            </ModalDescription>
+          </ModalHeader>
+          <ModalContent>
+            <RegistrationFlowGuide variant="modal" showLoginLink />
+          </ModalContent>
+        </ModalContainer>
+      </Modal>
     </>
   );
 }

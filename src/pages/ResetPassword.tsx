@@ -38,7 +38,7 @@ const ResetPassword = () => {
         description: "パスワードリセットのリンクが無効です。再度リセットをリクエストしてください。",
         variant: "destructive",
       });
-      navigate('/auth');
+      navigate('/login');
     }
   }, [loading, navigate, toast, user]);
 
@@ -132,7 +132,7 @@ const ResetPassword = () => {
             </form>
           ) : (
             <CardFooter className="flex justify-center">
-              <Button onClick={() => navigate('/auth')}>
+              <Button onClick={() => navigate('/login')}>
                 ログインページに移動
               </Button>
             </CardFooter>

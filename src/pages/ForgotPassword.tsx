@@ -76,7 +76,7 @@ const ForgotPassword = () => {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => navigate('/auth')}
+                  onClick={() => navigate('/login')}
                 >
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   戻る
@@ -89,7 +89,7 @@ const ForgotPassword = () => {
           ) : (
             <CardFooter className="flex justify-center">
               <Button
-                onClick={() => navigate('/auth')}
+                onClick={() => navigate('/login')}
                 variant="outline"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />

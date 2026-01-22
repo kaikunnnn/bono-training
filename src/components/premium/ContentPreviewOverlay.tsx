@@ -4,12 +4,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+  Modal,
+  ModalContainer,
+  ModalHeader,
+  ModalTitle,
+  ModalDescription,
+  ModalContent,
+} from '@/components/ui/modal';
 import { RegistrationFlowGuide } from '@/components/auth/RegistrationFlowGuide';
 
 // bo-no.designのプランページURL
@@ -31,7 +32,7 @@ export default function ContentPreviewOverlay() {
   const isLoggedIn = !!user;
 
   const handleLogin = () => {
-    navigate('/auth');
+    navigate('/login');
   };
 
   const handleOpenModal = () => {
@@ -44,32 +45,26 @@ export default function ContentPreviewOverlay() {
 
   return (
     <>
-      <div className="relative -mt-20">
-        {/* グラデーション */}
+      <div className="relative w-full">
+        {/* グラデーション（コンテンツにかぶせる） */}
         <div
-          className="absolute inset-x-0 top-0 h-40 pointer-events-none z-10"
+          className="absolute inset-x-0 -top-20 h-20 pointer-events-none"
           style={{
-            background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,1) 100%)'
+            background: 'linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 100%)'
           }}
         />
 
         {/* CTA */}
-        <div className="relative bg-white pt-24 pb-16 text-center z-20 border-t-2 border-gray-100">
+        <div className="bg-white py-12 text-center">
           {/* ロックアイコン */}
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-4">
             <Lock className="w-8 h-8 text-blue-600" strokeWidth={2} />
           </div>
 
           {/* メッセージ */}
-          <h3 className="font-noto-sans-jp font-bold text-xl text-gray-800 mb-2">
-            {isLoggedIn
-              ? '続きを読むにはメンバー登録が必要です'
-              : '続きを読むにはログインが必要です'}
+          <h3 className="font-noto-sans-jp font-bold text-xl text-gray-800 mb-6">
+            続きを読むにはメンバーシップの登録が必要です
           </h3>
-          <p className="font-noto-sans-jp text-sm text-gray-600 mb-6 leading-relaxed max-w-md mx-auto">
-            スタンダードプラン以上で、<br />
-            全てのレッスンと記事コンテンツにアクセスできます
-          </p>
 
           {/* CTAボタン - ユーザー状態で分岐 */}
           <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto px-4">
@@ -79,7 +74,7 @@ export default function ContentPreviewOverlay() {
                 onClick={handleMemberRegister}
                 className="flex-1 font-noto-sans-jp"
               >
-                メンバー登録する
+                メンバーシップ登録へ
                 <ExternalLink className="ml-2 h-4 w-4" />
               </Button>
             ) : (
@@ -98,47 +93,34 @@ export default function ContentPreviewOverlay() {
                   className="flex-1 font-noto-sans-jp"
                 >
                   <UserPlus className="mr-2 h-4 w-4" />
-                  初めての方はこちら
+                  メンバーシップ登録へ
                 </Button>
               </>
             )}
-          </div>
-
-          {/* 補足テキスト */}
-          <div className="mt-6 pt-6 border-t border-gray-200 max-w-md mx-auto">
-            <p className="font-noto-sans-jp text-xs text-gray-500">
-              スタンダードプランの特典
-            </p>
-            <ul className="mt-3 space-y-2 text-left px-4">
-              <li className="flex items-start gap-2 text-xs text-gray-600">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span>全ての動画レッスンとテキストコンテンツ</span>
-              </li>
-              <li className="flex items-start gap-2 text-xs text-gray-600">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span>進捗管理とTODO機能</span>
-              </li>
-              <li className="flex items-start gap-2 text-xs text-gray-600">
-                <span className="text-green-500 mt-0.5">✓</span>
-                <span>新規コンテンツの優先アクセス</span>
-              </li>
-            </ul>
           </div>
         </div>
       </div>
 
       {/* 初めての方向けモーダル */}
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="font-noto-sans-jp">会員登録の流れ</DialogTitle>
-            <DialogDescription className="sr-only">
+      <Modal open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <ModalContainer>
+          <ModalHeader badge="はじめての方へ">
+            <ModalTitle>
+              BONO本サイトで
+              <br />
+              メンバー登録をすると
+              <br />
+              <span className="font-bold">コンテンツが閲覧できます</span>
+            </ModalTitle>
+            <ModalDescription className="sr-only">
               bo-no.designでの会員登録手順を説明します
-            </DialogDescription>
-          </DialogHeader>
-          <RegistrationFlowGuide variant="modal" />
-        </DialogContent>
-      </Dialog>
+            </ModalDescription>
+          </ModalHeader>
+          <ModalContent>
+            <RegistrationFlowGuide variant="modal" showLoginLink />
+          </ModalContent>
+        </ModalContainer>
+      </Modal>
     </>
   );
 }

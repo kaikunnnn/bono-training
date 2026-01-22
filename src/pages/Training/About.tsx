@@ -57,7 +57,7 @@ const TrainingAbout: React.FC = () => {
                       <h3 className="font-medium text-lg">アカウント登録</h3>
                       <p className="text-gray-600 mt-1">
                         メールアドレスとパスワードで無料アカウントを作成します。
-                        <Link to="/auth" className="text-primary ml-2 inline-flex items-center">
+                        <Link to="/signup" className="text-primary ml-2 inline-flex items-center">
                           登録する <ChevronRight className="h-4 w-4" />
                         </Link>
                       </p>

@@ -3,11 +3,14 @@
  *
  * bo-no.designでの会員登録を案内するための共通コンポーネント
  * ペイウォールのモーダルと新規登録ページで使用
+ *
+ * デザイン: Amie風のクリーンなリストスタイル
  */
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ExternalLink } from 'lucide-react';
+import { ArrowUpRight, ArrowLeft } from 'lucide-react';
 
 // bo-no.designのプランページURL
 const BO_NO_DESIGN_PLAN_URL = 'https://www.bo-no.design/plan';
@@ -17,6 +20,8 @@ interface RegistrationFlowGuideProps {
   variant?: 'modal' | 'page';
   /** bo-no.designに遷移時のコールバック（トラッキング等） */
   onNavigate?: () => void;
+  /** ログインリンクを表示するか（モーダルで使用） */
+  showLoginLink?: boolean;
 }
 
 /**
@@ -25,53 +30,187 @@ interface RegistrationFlowGuideProps {
 export const RegistrationFlowGuide: React.FC<RegistrationFlowGuideProps> = ({
   variant = 'page',
   onNavigate,
+  showLoginLink = false,
 }) => {
+  // モーダル内でのみ状態切り替えを有効にする
+  const [showNextStep, setShowNextStep] = useState(false);
+
   const handleClick = () => {
     onNavigate?.();
     window.open(BO_NO_DESIGN_PLAN_URL, '_blank');
+    // モーダル内の場合は次のステップを表示
+    if (variant === 'modal') {
+      setShowNextStep(true);
+    }
   };
 
-  return (
-    <div className={variant === 'modal' ? '' : 'p-6 border rounded-lg bg-muted/30'}>
-      <h3 className="font-bold text-lg mb-4 font-noto-sans-jp">会員登録の流れ</h3>
+  const handleBack = () => {
+    setShowNextStep(false);
+  };
 
-      <ol className="space-y-4 mb-6">
-        <li className="flex gap-3">
-          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+  // 次のステップ表示（登録後）
+  if (showNextStep && variant === 'modal') {
+    return (
+      <div>
+        {/* 説明文 */}
+        <p className="text-sm text-muted-foreground mb-5 font-noto-sans-jp">
+          メンバーシップ登録が完了したら、こちらでパスワードを設定してください
+        </p>
+
+        {/* ステップリスト */}
+        <div className="space-y-4">
+          {/* Step 1 */}
+          <div className="flex gap-3">
+            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
+              1
+            </div>
+            <div className="flex-1 pt-1">
+              <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
+                <span>🔑</span>
+                ログイン画面で「はじめての方」を選択
+              </p>
+              <p className="text-sm text-muted-foreground font-noto-sans-jp mt-0.5">
+                登録したメールアドレスを入力
+              </p>
+            </div>
+          </div>
+
+          {/* Step 2 */}
+          <div className="flex gap-3">
+            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
+              2
+            </div>
+            <div className="flex-1 pt-1">
+              <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
+                <span>📧</span>
+                届いたメールからパスワードを設定
+              </p>
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div className="flex gap-3">
+            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
+              3
+            </div>
+            <div className="flex-1 pt-1">
+              <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
+                <span>🎉</span>
+                ログインしてコンテンツを楽しもう！
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* セパレーター */}
+        <div className="border-t border-dashed border-gray-200 my-6" />
+
+        {/* ボタンセクション */}
+        <div className="space-y-3">
+          <Button
+            asChild
+            size="large"
+            className="w-full font-noto-sans-jp text-base"
+          >
+            <Link to="/login">
+              ログイン画面へ
+            </Link>
+          </Button>
+
+          <Button
+            onClick={handleBack}
+            variant="ghost"
+            size="large"
+            className="w-full font-noto-sans-jp text-base text-muted-foreground"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            戻る
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // 初期表示
+  return (
+    <div className={variant === 'modal' ? '' : 'p-6 border rounded-3xl bg-white'}>
+      {/* 説明文 */}
+      <p className="text-sm text-muted-foreground mb-5 font-noto-sans-jp">
+        このサイトはアルファ版のため、BONO本サイトでの登録が必要です
+      </p>
+
+      {/* ステップリスト */}
+      <div className="space-y-4">
+        {/* Step 1 */}
+        <div className="flex gap-3">
+          <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
             1
-          </span>
-          <div>
-            <p className="font-medium font-noto-sans-jp">bo-no.design で会員登録</p>
-            <p className="text-sm text-muted-foreground font-noto-sans-jp">
+          </div>
+          <div className="flex-1 pt-1">
+            <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
+              <span>🌐</span>
+              BONO本サイトでメンバーシップ登録
+            </p>
+            <p className="text-sm text-muted-foreground font-noto-sans-jp mt-0.5">
               決済もこちらで完了します
             </p>
           </div>
-        </li>
-        <li className="flex gap-3">
-          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
+        </div>
+
+        {/* Step 2 */}
+        <div className="flex gap-3">
+          <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
             2
-          </span>
-          <div>
-            <p className="font-medium font-noto-sans-jp">このページに戻ってログイン</p>
-            <p className="text-sm text-muted-foreground font-noto-sans-jp">
-              同じメールアドレスでログインできます
+          </div>
+          <div className="flex-1 pt-1">
+            <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
+              <span>🔑</span>
+              パスワードを設定してログイン
+            </p>
+            <p className="text-sm text-muted-foreground font-noto-sans-jp mt-0.5">
+              このサイトに戻り「はじめての方へ」から設定
             </p>
           </div>
-        </li>
-        <li className="flex gap-3">
-          <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold">
-            3
-          </span>
-          <div>
-            <p className="font-medium font-noto-sans-jp">すべてのレッスンが見れるようになります</p>
-          </div>
-        </li>
-      </ol>
+        </div>
 
-      <Button onClick={handleClick} className="w-full font-noto-sans-jp">
-        bo-no.design で会員登録する
-        <ExternalLink className="ml-2 h-4 w-4" />
-      </Button>
+        {/* Step 3 */}
+        <div className="flex gap-3">
+          <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
+            3
+          </div>
+          <div className="flex-1 pt-1">
+            <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
+              <span>🎉</span>
+              すべてのコンテンツを楽しもう！
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* セパレーター */}
+      <div className="border-t border-dashed border-gray-200 my-6" />
+
+      {/* ボタンセクション */}
+      <div>
+        <Button
+          onClick={handleClick}
+          size="large"
+          className="w-full font-noto-sans-jp text-base"
+        >
+          BONO本サイトで登録する
+          <ArrowUpRight className="ml-2 h-4 w-4" />
+        </Button>
+
+        {/* ログインリンク（オプション） */}
+        {showLoginLink && (
+          <p className="text-center mt-4 text-sm text-muted-foreground font-noto-sans-jp">
+            アカウントをお持ちの方は{' '}
+            <Link to="/login" className="text-primary hover:underline">
+              ログイン
+            </Link>
+          </p>
+        )}
+      </div>
     </div>
   );
 };

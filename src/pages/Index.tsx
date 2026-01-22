@@ -19,7 +19,7 @@ const Index = () => {
   }
 
   // 未ログイン → ログインページ
-  return <Navigate to="/auth" replace />;
+  return <Navigate to="/login" replace />;
 };
 
 export default Index;

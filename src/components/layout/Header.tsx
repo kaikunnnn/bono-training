@@ -182,7 +182,7 @@ const Header = () => {
           {!user ? (
             <Button
               variant="default"
-              onClick={() => navigate("/auth")}
+              onClick={() => navigate("/login")}
               size="sm"
             >
               ログイン

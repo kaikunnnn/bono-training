@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -106,7 +106,14 @@ const devResources: DevResourceCard[] = [
     path: '/dev/article-layout-compare',
     icon: <LayoutGrid className="w-8 h-8" />,
     tags: ['Article', 'Layout', 'Experiment', 'Compare']
-  }
+  },
+  {
+    title: 'MobileMenuButton Patterns',
+    description: 'サイドバー開閉（iconsax風）のアイコン表現を3パターンで比較。',
+    path: '/dev/mobile-menu-button',
+    icon: <PanelLeft className="w-8 h-8" />,
+    tags: ['Sidebar', 'Icon', 'Interaction', 'Compare']
+  },
 ];
 
 const DevHome = () => {

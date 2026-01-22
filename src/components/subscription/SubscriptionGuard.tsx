@@ -3,8 +3,8 @@ import React, { useEffect, useState, ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { checkSubscriptionStatus } from '@/services/stripe';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { SubscriptionButton } from '@/components/subscription/SubscriptionButton';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { RegistrationFlowGuide } from '@/components/auth/RegistrationFlowGuide';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 interface SubscriptionGuardProps {
@@ -39,13 +39,13 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
       setLoading(true);
       try {
         const { isSubscribed, error } = await checkSubscriptionStatus();
-        
+
         if (error) {
           throw error;
         }
-        
+
         setIsSubscribed(isSubscribed);
-        
+
         // リダイレクト指定があり、サブスクリプションがない場合はリダイレクト
         if (!isSubscribed && redirectTo) {
           navigate(redirectTo);
@@ -63,7 +63,7 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
         setLoading(false);
       }
     };
-    
+
     checkSubscription();
   }, [redirectTo, navigate, toast]);
 
@@ -86,40 +86,12 @@ const SubscriptionGuard: React.FC<SubscriptionGuardProps> = ({
     return <>{fallbackComponent}</>;
   }
 
-  // デフォルトのサブスクリプション促進画面
+  // デフォルトのサブスクリプション促進画面（RegistrationFlowGuide使用）
   return (
     <Card className="max-w-md mx-auto my-8">
-      <CardHeader>
-        <CardTitle className="text-center">メンバーシップが必要です</CardTitle>
-        <CardDescription className="text-center">
-          このコンテンツはメンバー限定です。サブスクリプションに登録して、すべてのコンテンツにアクセスしましょう。
-        </CardDescription>
-      </CardHeader>
+      <CardHeader className="pb-0" />
       <CardContent>
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              すべてのプレミアムコンテンツへのアクセス
-            </div>
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              限定機能の利用
-            </div>
-            <div className="flex items-center">
-              <svg className="h-5 w-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-              優先サポート
-            </div>
-          </div>
-
-          <SubscriptionButton returnUrl={window.location.href} label="メンバーシップに登録する" />
-        </div>
+        <RegistrationFlowGuide variant="modal" showLoginLink />
       </CardContent>
     </Card>
   );

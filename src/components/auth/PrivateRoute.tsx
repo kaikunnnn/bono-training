@@ -21,7 +21,7 @@ const PrivateRoute = ({ children }: PrivateRouteProps) => {
 
   // ユーザーがログインしていない場合、ログインページにリダイレクト
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location }} replace />;
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
   // ユーザーがログインしている場合、子コンポーネントをレンダリング

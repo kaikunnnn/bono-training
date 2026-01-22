@@ -96,9 +96,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* ログイン（ログオフ時のみ表示） */}
         {!user && (
           <SidebarMenuItem
-            href="/auth"
+            href="/login"
             icon={<MenuIcons.login size={ICON_SIZE} variant="Outline"  />}
-            isActive={isActive("/auth")}
+            isActive={isActive("/login")}
           >
             ログイン
           </SidebarMenuItem>

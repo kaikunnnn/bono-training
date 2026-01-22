@@ -1,7 +1,7 @@
 import { useEffect } from "react";
-import { X } from "lucide-react";
 import ArticleSideNavNew from "./sidebar/ArticleSideNavNew";
 import type { ArticleWithContext } from "@/types/sanity";
+import { ICON_SIZES, SidebarRight } from "@/lib/icons";
 
 type SideNavDisplay = "mobile" | "desktop";
 
@@ -90,7 +90,7 @@ const MobileSideNav = ({
           className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition z-10"
           aria-label="メニューを閉じる"
         >
-          <X className="w-5 h-5 text-gray-600" />
+          <SidebarRight size={ICON_SIZES.lg} variant="Linear" className="text-gray-600" color="currentColor" />
         </button>
 
         {/* サイドナビコンテンツ */}
