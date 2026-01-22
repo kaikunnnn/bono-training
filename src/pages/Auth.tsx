@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,9 +7,10 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Layout from '@/components/layout/Layout';
-import { Mail, Lock, UserPlus, LogIn, AlertCircle, AlertTriangle } from 'lucide-react';
+import { Mail, Lock, LogIn, AlertCircle, AlertTriangle, Send, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { RegistrationFlowGuide } from '@/components/auth/RegistrationFlowGuide';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -42,11 +42,13 @@ async function checkMigratedUser(email: string): Promise<{ exists: boolean; isMi
 const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstTimeEmail, setFirstTimeEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [signupError, setSignupError] = useState<string | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [firstTimeError, setFirstTimeError] = useState<string | null>(null);
+  const [firstTimeSuccess, setFirstTimeSuccess] = useState(false);
   const [isMigratedUser, setIsMigratedUser] = useState(false);
-  const { signUp, signIn, user } = useAuth();
+  const { signIn, resetPassword, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -60,33 +62,28 @@ const Auth = () => {
     return null;
   }
 
-  const handleSignUp = async (e: React.FormEvent) => {
+  // 初めての方向け: パスワード設定メール送信
+  const handleFirstTimeSetup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSignupError(null);
-    
-    if (!email || !password) {
-      setSignupError("メールアドレスとパスワードを入力してください");
-      return;
-    }
+    setFirstTimeError(null);
+    setFirstTimeSuccess(false);
 
-    if (password.length < 6) {
-      setSignupError("パスワードは6文字以上で設定してください");
+    if (!firstTimeEmail) {
+      setFirstTimeError("メールアドレスを入力してください");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      console.log(`サインアップ試行: ${email}`);
-      const { error } = await signUp(email, password);
+      const { error } = await resetPassword(firstTimeEmail);
       if (error) {
-        // エラーの内容に基づいてエラーメッセージを設定
-        if (error.message.includes('already registered') || 
-            error.message.includes('already taken') ||
-            error.message.includes('User already registered')) {
-          setSignupError("このメールアドレスはすでに登録されています。ログインしてください。");
-        } else {
-          setSignupError(error.message);
-        }
+        setFirstTimeError("メールの送信に失敗しました。メールアドレスを確認してください。");
+      } else {
+        setFirstTimeSuccess(true);
+        toast({
+          title: "メール送信完了",
+          description: "パスワード設定用のメールを送信しました。",
+        });
       }
     } finally {
       setIsSubmitting(false);
@@ -137,16 +134,17 @@ const Auth = () => {
     <Layout>
       <div className="container max-w-md mx-auto py-10">
         <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">ログイン</TabsTrigger>
-            <TabsTrigger value="signup">新規登録</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="login" className="text-xs sm:text-sm">通常ログイン</TabsTrigger>
+            <TabsTrigger value="first-time" className="text-xs sm:text-sm">初めての方</TabsTrigger>
+            <TabsTrigger value="signup" className="text-xs sm:text-sm">新規登録</TabsTrigger>
           </TabsList>
           
           <TabsContent value="login">
             <Card>
               <CardHeader>
-                <CardTitle>ログイン</CardTitle>
-                <CardDescription>登録済みのアカウントでログインしてください</CardDescription>
+                <CardTitle className="font-noto-sans-jp">ログイン</CardTitle>
+                <CardDescription className="font-noto-sans-jp">登録済みのアカウントでログインしてください</CardDescription>
               </CardHeader>
               <form onSubmit={handleSignIn}>
                 <CardContent className="space-y-4">
@@ -231,62 +229,85 @@ const Auth = () => {
               </form>
             </Card>
           </TabsContent>
-          
+
+          {/* 初めての方タブ: bo-no.designで登録済み、初回ログイン */}
+          <TabsContent value="first-time">
+            <Card>
+              <CardHeader>
+                <CardTitle className="font-noto-sans-jp">初めての方</CardTitle>
+                <CardDescription className="font-noto-sans-jp">
+                  bo-no.designで会員登録済みの方は、こちらからパスワードを設定してください
+                </CardDescription>
+              </CardHeader>
+              <form onSubmit={handleFirstTimeSetup}>
+                <CardContent className="space-y-4">
+                  {firstTimeSuccess ? (
+                    <Alert className="border-green-500 bg-green-50">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      <AlertTitle className="text-green-800 font-noto-sans-jp">メール送信完了</AlertTitle>
+                      <AlertDescription className="text-green-700 font-noto-sans-jp">
+                        <p className="mb-2">
+                          パスワード設定用のメールを送信しました。
+                        </p>
+                        <p className="text-sm">
+                          メールに記載されたリンクからパスワードを設定してください。
+                          設定完了後、「通常ログイン」タブからログインできます。
+                        </p>
+                      </AlertDescription>
+                    </Alert>
+                  ) : (
+                    <>
+                      {firstTimeError && (
+                        <Alert variant="destructive">
+                          <AlertCircle className="h-4 w-4" />
+                          <AlertDescription className="font-noto-sans-jp">{firstTimeError}</AlertDescription>
+                        </Alert>
+                      )}
+                      <div className="space-y-2">
+                        <Label htmlFor="first-time-email" className="font-noto-sans-jp">メールアドレス</Label>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            id="first-time-email"
+                            type="email"
+                            placeholder="bo-no.designで登録したメールアドレス"
+                            className="pl-10"
+                            value={firstTimeEmail}
+                            onChange={(e) => setFirstTimeEmail(e.target.value)}
+                            required
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground font-noto-sans-jp">
+                          bo-no.designで会員登録に使用したメールアドレスを入力してください
+                        </p>
+                      </div>
+                    </>
+                  )}
+                </CardContent>
+                {!firstTimeSuccess && (
+                  <CardFooter>
+                    <Button type="submit" className="w-full font-noto-sans-jp" disabled={isSubmitting}>
+                      <Send className="mr-2 h-4 w-4" />
+                      {isSubmitting ? '送信中...' : 'パスワード設定メールを送信'}
+                    </Button>
+                  </CardFooter>
+                )}
+              </form>
+            </Card>
+          </TabsContent>
+
+          {/* 新規登録タブ: bo-no.designへの案内 */}
           <TabsContent value="signup">
             <Card>
               <CardHeader>
-                <CardTitle>新規登録</CardTitle>
-                <CardDescription>新しいアカウントを作成してください</CardDescription>
+                <CardTitle className="font-noto-sans-jp">新規登録</CardTitle>
+                <CardDescription className="font-noto-sans-jp">
+                  会員登録はbo-no.designで行います
+                </CardDescription>
               </CardHeader>
-              <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4">
-                  {signupError && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{signupError}</AlertDescription>
-                    </Alert>
-                  )}
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">メールアドレス</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-email"
-                        type="email"
-                        placeholder="your@email.com"
-                        className="pl-10"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">パスワード</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="signup-password"
-                        type="password"
-                        placeholder="••••••••"
-                        className="pl-10"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      パスワードは6文字以上で設定してください
-                    </p>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isSubmitting}>
-                    <UserPlus className="mr-2 h-4 w-4" />
-                    {isSubmitting ? '登録中...' : 'アカウント作成'}
-                  </Button>
-                </CardFooter>
-              </form>
+              <CardContent>
+                <RegistrationFlowGuide variant="page" />
+              </CardContent>
             </Card>
           </TabsContent>
         </Tabs>

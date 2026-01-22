@@ -103,6 +103,17 @@ const Footer = ({ className }: FooterProps) => {
           <div className="flex justify-center gap-4 mb-2">
             <Link to="/subscription" className="hover:underline">サブスクリプション</Link>
           </div>
+
+          {/* 開発環境のみ: 隠しページへのリンク */}
+          {import.meta.env.DEV && (
+            <div className="flex justify-center gap-4 mb-2 text-xs text-gray-400">
+              <span className="text-gray-500">[Dev]</span>
+              <Link to="/my" className="hover:underline">マイページ</Link>
+              <Link to="/subscription/complete" className="hover:underline">サブスク完了</Link>
+              <Link to="/dev" className="hover:underline">開発ページ</Link>
+            </div>
+          )}
+
           <p>© BONO. All rights reserved.</p>
         </div>
       </div>
