@@ -133,6 +133,7 @@ export {
   Home2 as Home,
   Notification as Bell,
   Folder2 as Folder,
+  Global as Globe,
 } from "iconsax-react";
 
 // =============================================================================
