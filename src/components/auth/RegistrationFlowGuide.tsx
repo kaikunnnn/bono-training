@@ -17,6 +17,39 @@ const BO_NO_DESIGN_PLAN_URL = 'https://www.bo-no.design/plan';
 
 export type RegistrationFlowStep = 'pre-register' | 'post-register';
 
+interface RegistrationStepItemProps {
+  stepNumber: number;
+  icon: string;
+  title: string;
+  description?: string;
+}
+
+const RegistrationStepItem: React.FC<RegistrationStepItemProps> = ({
+  stepNumber,
+  icon,
+  title,
+  description,
+}) => {
+  return (
+    <div className="flex gap-3 items-start">
+      <div className="w-9 h-9 mt-0.5 rounded-full border border-zinc-300 flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
+        {stepNumber}
+      </div>
+      <div className="flex-1">
+        <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
+          <span>{icon}</span>
+          {title}
+        </p>
+        {description && (
+          <p className="text-sm text-muted-foreground font-noto-sans-jp mt-0.5">
+            {description}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
+
 interface RegistrationFlowGuideProps {
   /** 表示バリエーション: modal=モーダル内、page=ページ内 */
   variant?: 'modal' | 'page';
@@ -91,6 +124,26 @@ export const RegistrationFlowGuide: React.FC<RegistrationFlowGuideProps> = ({
   }
 
   // 初期表示
+  const steps: RegistrationStepItemProps[] = [
+    {
+      stepNumber: 1,
+      icon: '🌐',
+      title: 'BONO本サイトでメンバーシップ登録',
+      description: '決済もこちらで完了します',
+    },
+    {
+      stepNumber: 2,
+      icon: '🔑',
+      title: 'パスワードを設定してログイン',
+      description: 'このサイトに戻り「はじめての方へ」から設定',
+    },
+    {
+      stepNumber: 3,
+      icon: '🎉',
+      title: 'すべてのコンテンツを楽しもう！',
+    },
+  ];
+
   return (
     <div
       className={
@@ -106,50 +159,15 @@ export const RegistrationFlowGuide: React.FC<RegistrationFlowGuideProps> = ({
 
       {/* ステップリスト */}
       <div className="space-y-4">
-        {/* Step 1 */}
-        <div className="flex gap-3">
-          <div className="w-9 h-9 rounded-full border border-zinc-300 flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
-            1
-          </div>
-          <div className="flex-1 pt-1">
-            <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
-              <span>🌐</span>
-              BONO本サイトでメンバーシップ登録
-            </p>
-            <p className="text-sm text-muted-foreground font-noto-sans-jp mt-0.5">
-              決済もこちらで完了します
-            </p>
-          </div>
-        </div>
-
-        {/* Step 2 */}
-        <div className="flex gap-3">
-          <div className="w-9 h-9 mt-1 rounded-full border border-zinc-300 flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
-            2
-          </div>
-          <div className="flex-1 pt-1">
-            <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
-              <span>🔑</span>
-              パスワードを設定してログイン
-            </p>
-            <p className="text-sm text-muted-foreground font-noto-sans-jp mt-0.5">
-              このサイトに戻り「はじめての方へ」から設定
-            </p>
-          </div>
-        </div>
-
-        {/* Step 3 */}
-        <div className="flex gap-3">
-          <div className="w-9 h-9 rounded-full border border-zinc-300 flex items-center justify-center flex-shrink-0 text-sm font-bold text-foreground/70">
-            3
-          </div>
-          <div className="flex-1 pt-1">
-            <p className="font-medium font-noto-sans-jp text-[15px] text-foreground/90 flex items-center gap-2">
-              <span>🎉</span>
-              すべてのコンテンツを楽しもう！
-            </p>
-          </div>
-        </div>
+        {steps.map((step) => (
+          <RegistrationStepItem
+            key={step.stepNumber}
+            stepNumber={step.stepNumber}
+            icon={step.icon}
+            title={step.title}
+            description={step.description}
+          />
+        ))}
       </div>
 
       {/* セパレーター */}
