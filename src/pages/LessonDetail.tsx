@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { client } from "@/lib/sanity";
+import { client, urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
 import { LessonHeaderLayout } from "@/components/lesson/header";
 import LessonTabs from "@/components/lesson/LessonTabs";
@@ -8,6 +8,7 @@ import QuestList from "@/components/lesson/QuestList";
 import OverviewTab from "@/components/lesson/OverviewTab";
 import { getLessonProgress } from "@/services/progress";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import { SEO } from "@/components/common/SEO";
 
 interface Article {
   _id: string;
@@ -37,6 +38,8 @@ interface Lesson {
   description?: string;
   iconImage?: any;
   iconImageUrl?: string;
+  thumbnail?: any;
+  thumbnailUrl?: string;
   category?: string;
   isPremium?: boolean;
   contentHeading?: string;
@@ -72,6 +75,14 @@ export default function LessonDetail() {
             }
           },
           iconImageUrl,
+          thumbnail {
+            _type,
+            asset {
+              _ref,
+              _type
+            }
+          },
+          thumbnailUrl,
           "category": category->title,
           isPremium,
           contentHeading,
@@ -231,8 +242,22 @@ export default function LessonDetail() {
     (lesson.overview && lesson.overview.length > 0)
   );
 
+  // OGP画像URLを生成（サムネイル画像を優先使用）
+  const ogImageUrl = lesson.thumbnail
+    ? urlFor(lesson.thumbnail).width(1200).height(630).url()
+    : lesson.thumbnailUrl || undefined;
+
   return (
     <Layout>
+      <SEO
+        title={lesson.title}
+        description={lesson.description || `${lesson.title}のレッスン詳細ページです。`}
+        ogTitle={lesson.title}
+        ogDescription={lesson.description || `${lesson.title}のレッスン詳細ページです。`}
+        ogImage={ogImageUrl}
+        ogUrl={`/lessons/${lesson.slug.current}`}
+        ogType="article"
+      />
       <div className="min-h-screen bg-base">
         {/* 新デザインヘッダー + タブコンテンツ（右側ブロックに統合） */}
         <LessonHeaderLayout
