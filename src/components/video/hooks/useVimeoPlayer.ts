@@ -19,6 +19,7 @@ export interface VimeoPlayerState {
   currentTime: number;
   duration: number;
   volume: number;
+  muted: boolean;
   playbackRate: number;
   isLoading: boolean;
   isReady: boolean;
@@ -56,6 +57,7 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
     currentTime: 0,
     duration: 0,
     volume: 1,
+    muted: options.muted ?? false,
     playbackRate: 1,
     isLoading: true,
     isReady: false,
@@ -287,6 +289,9 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
   const setVolume = useCallback(async (volume: number) => {
     if (playerRef.current) {
       await playerRef.current.setVolume(volume);
+      // 音量変更時にmuted状態も更新
+      // Vimeo PlayerのsetVolumeは自動的にミュートを解除する
+      setState(prev => ({ ...prev, muted: volume === 0 }));
     }
   }, []);
 

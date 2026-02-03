@@ -61,7 +61,7 @@ export function LessonHeaderLayout({
       {/* メインコンテンツエリア */}
       {/* モバイル: 縦並び（サイドバー上、コンテンツ下） */}
       {/* デスクトップ: 横並び（サイドバー左、コンテンツ右） */}
-      <div className="flex flex-col md:flex-row gap-[24px] md:gap-[32px]">
+      <div className="flex flex-col md:flex-row gap-[24px] md:gap-[32px] pb-20">
         {/* サイドバー（モバイル: 上部、デスクトップ: 左側） */}
         <LessonSidebar lesson={lesson} />
 

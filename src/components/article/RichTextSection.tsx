@@ -1,31 +1,40 @@
 import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { PortableTextBlock } from "@portabletext/types";
-import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import ContentPreviewOverlay from '@/components/premium/ContentPreviewOverlay';
-import TableOfContents from '@/components/article/TableOfContents';
+import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
+import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
+import TableOfContents from "@/components/article/TableOfContents";
 
 interface RichTextSectionProps {
   content: PortableTextBlock[];
   isPremium?: boolean;
   previewBlockCount?: number; // プレビューで表示するブロック数（デフォルト: 3）
+  afterContent?: React.ReactNode;
 }
 
 /**
  * 見出しテキストからIDを生成するヘルパー関数
  */
-const generateHeadingId = (children: React.ReactNode, index: number): string => {
-  const text = typeof children === 'string'
-    ? children
-    : Array.isArray(children)
-      ? children.map(child =>
-          typeof child === 'string' ? child : (child as { props?: { text?: string } })?.props?.text || ''
-        ).join('')
-      : '';
+const generateHeadingId = (
+  children: React.ReactNode,
+  index: number
+): string => {
+  const text =
+    typeof children === "string"
+      ? children
+      : Array.isArray(children)
+      ? children
+          .map((child) =>
+            typeof child === "string"
+              ? child
+              : (child as { props?: { text?: string } })?.props?.text || ""
+          )
+          .join("")
+      : "";
 
   return `heading-${index}-${text
     .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf-]/g, '')}`;
+    .replace(/\s+/g, "-")
+    .replace(/[^\w\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf-]/g, "")}`;
 };
 
 /**
@@ -59,15 +68,19 @@ const generateHeadingId = (children: React.ReactNode, index: number): string => 
  * - isPremium=true かつ未契約の場合、最初のpreviewBlockCountブロックのみ表示
  * - それ以降はContentPreviewOverlayでロック
  */
-const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: RichTextSectionProps) => {
+const RichTextSection = ({
+  content,
+  isPremium = false,
+  previewBlockCount = 3,
+  afterContent,
+}: RichTextSectionProps) => {
   const { canAccessContent } = useSubscriptionContext();
   const hasAccess = canAccessContent(isPremium);
   const textContainerClassName = "w-full max-w-[60ch] md:max-w-[66ch]";
 
   // プレミアムコンテンツで未契約の場合、最初のブロックのみ表示
-  const displayContent = isPremium && !hasAccess
-    ? content.slice(0, previewBlockCount)
-    : content;
+  const displayContent =
+    isPremium && !hasAccess ? content.slice(0, previewBlockCount) : content;
   // 見出しのインデックスを追跡するためのカウンター
   let headingIndex = 0;
 
@@ -143,13 +156,19 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
     list: {
       // 箇条書きリスト: margin 24px 0 (VitePress + 読みやすさ調整)
       bullet: ({ children }) => (
-        <ul className={`!list-disc !mb-6 !space-y-2 ${textContainerClassName}`} style={{ paddingLeft: "21.5px" }}>
+        <ul
+          className={`!list-disc !mb-6 !space-y-2 ${textContainerClassName}`}
+          style={{ paddingLeft: "21.5px" }}
+        >
           {children}
         </ul>
       ),
       // 番号付きリスト: margin 24px 0 (VitePress + 読みやすさ調整)
       number: ({ children }) => (
-        <ol className={`!list-decimal !mb-6 !space-y-2 ${textContainerClassName}`} style={{ paddingLeft: "21.5px" }}>
+        <ol
+          className={`!list-decimal !mb-6 !space-y-2 ${textContainerClassName}`}
+          style={{ paddingLeft: "21.5px" }}
+        >
           {children}
         </ol>
       ),
@@ -196,7 +215,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
       ),
       // リンク
       link: ({ children, value }) => {
-        const href = value?.href || '#';
+        const href = value?.href || "#";
         return (
           <a
             href={href}
@@ -218,7 +237,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
           <figure className="my-8 w-full">
             <img
               src={value.asset.url}
-              alt={value.alt || ''}
+              alt={value.alt || ""}
               className="w-full max-w-none h-auto rounded-lg"
               loading="lazy"
             />
@@ -243,43 +262,48 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
                 </caption>
               )}
               <tbody>
-                {value.rows.map((row: { isHeader?: boolean; cells?: string[] }, rowIndex: number) => {
-                  const isHeader = row.isHeader;
-                  const isEvenRow = !isHeader && rowIndex % 2 === 0;
+                {value.rows.map(
+                  (
+                    row: { isHeader?: boolean; cells?: string[] },
+                    rowIndex: number
+                  ) => {
+                    const isHeader = row.isHeader;
+                    const isEvenRow = !isHeader && rowIndex % 2 === 0;
 
-                  return (
-                    <tr
-                      key={rowIndex}
-                      className={`
+                    return (
+                      <tr
+                        key={rowIndex}
+                        className={`
                         border-t border-[#E5E7EB]
-                        ${isHeader ? 'bg-[#F9FAFB]' : ''}
-                        ${isEvenRow && !isHeader ? 'bg-[#F9FAFB]' : 'bg-white'}
+                        ${isHeader ? "bg-[#F9FAFB]" : ""}
+                        ${isEvenRow && !isHeader ? "bg-[#F9FAFB]" : "bg-white"}
                         transition-colors duration-200
                       `}
-                    >
-                      {row.cells?.map((cell: string, cellIndex: number) => {
-                        if (isHeader) {
+                      >
+                        {row.cells?.map((cell: string, cellIndex: number) => {
+                          if (isHeader) {
+                            return (
+                              <th
+                                key={cellIndex}
+                                className="border border-[#E5E7EB] px-4 py-2 text-left font-semibold text-[#6B7280] bg-[#F9FAFB]"
+                              >
+                                {cell}
+                              </th>
+                            );
+                          }
                           return (
-                            <th
+                            <td
                               key={cellIndex}
-                              className="border border-[#E5E7EB] px-4 py-2 text-left font-semibold text-[#6B7280] bg-[#F9FAFB]"
+                              className="border border-[#E5E7EB] px-4 py-2 text-[#182033]"
                             >
                               {cell}
-                            </th>
+                            </td>
                           );
-                        }
-                        return (
-                          <td
-                            key={cellIndex}
-                            className="border border-[#E5E7EB] px-4 py-2 text-[#182033]"
-                          >
-                            {cell}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
+                        })}
+                      </tr>
+                    );
+                  }
+                )}
               </tbody>
             </table>
           </div>
@@ -289,51 +313,54 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
       customContainer: ({ value }) => {
         if (!value?.content) return null;
 
-        const containerType = value.containerType || 'info';
+        const containerType = value.containerType || "info";
         const title = value.title;
 
         // コンテナタイプ別のスタイル設定
-        const containerStyles: Record<string, {
-          bg: string;
-          border: string;
-          icon: string;
-          iconBg: string;
-          defaultTitle: string;
-        }> = {
+        const containerStyles: Record<
+          string,
+          {
+            bg: string;
+            border: string;
+            icon: string;
+            iconBg: string;
+            defaultTitle: string;
+          }
+        > = {
           tip: {
-            bg: 'bg-[#ECFDF5]',
-            border: 'border-[#10B981]',
-            icon: '💡',
-            iconBg: 'bg-[#D1FAE5]',
-            defaultTitle: 'ヒント',
+            bg: "bg-[#ECFDF5]",
+            border: "border-[#10B981]",
+            icon: "💡",
+            iconBg: "bg-[#D1FAE5]",
+            defaultTitle: "ヒント",
           },
           info: {
-            bg: 'bg-[#EFF6FF]',
-            border: 'border-[#3B82F6]',
-            icon: 'ℹ️',
-            iconBg: 'bg-[#DBEAFE]',
-            defaultTitle: '情報',
+            bg: "bg-[#EFF6FF]",
+            border: "border-[#3B82F6]",
+            icon: "ℹ️",
+            iconBg: "bg-[#DBEAFE]",
+            defaultTitle: "情報",
           },
           warning: {
-            bg: 'bg-[#FFFBEB]',
-            border: 'border-[#F59E0B]',
-            icon: '⚠️',
-            iconBg: 'bg-[#FEF3C7]',
-            defaultTitle: '注意',
+            bg: "bg-[#FFFBEB]",
+            border: "border-[#F59E0B]",
+            icon: "⚠️",
+            iconBg: "bg-[#FEF3C7]",
+            defaultTitle: "注意",
           },
           danger: {
-            bg: 'bg-[#FEF2F2]',
-            border: 'border-[#EF4444]',
-            icon: '🚨',
-            iconBg: 'bg-[#FEE2E2]',
-            defaultTitle: '危険',
+            bg: "bg-[#FEF2F2]",
+            border: "border-[#EF4444]",
+            icon: "🚨",
+            iconBg: "bg-[#FEE2E2]",
+            defaultTitle: "危険",
           },
           note: {
-            bg: 'bg-[#F9FAFB]',
-            border: 'border-[#6B7280]',
-            icon: '📝',
-            iconBg: 'bg-[#F3F4F6]',
-            defaultTitle: 'ノート',
+            bg: "bg-[#F9FAFB]",
+            border: "border-[#6B7280]",
+            icon: "📝",
+            iconBg: "bg-[#F3F4F6]",
+            defaultTitle: "ノート",
           },
         };
 
@@ -370,9 +397,9 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
         const imageUrl = value.image?.asset?.url || value.imageUrl;
 
         // ドメイン名を抽出
-        let domain = '';
+        let domain = "";
         try {
-          domain = new URL(value.url).hostname.replace('www.', '');
+          domain = new URL(value.url).hostname.replace("www.", "");
         } catch {
           domain = value.url;
         }
@@ -396,8 +423,18 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
                   </p>
                 )}
                 <div className="flex items-center gap-2 text-[12px] text-[#9CA3AF]">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    />
                   </svg>
                   <span>{domain}</span>
                 </div>
@@ -419,7 +456,7 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
       },
       // 目次ブロック（本文内に配置可能、見出しから自動生成）
       tableOfContents: ({ value }) => {
-        const tocTitle = value?.title || '目次';
+        const tocTitle = value?.title || "目次";
         const tocMaxDepth = value?.maxDepth || 2;
 
         return (
@@ -434,10 +471,12 @@ const RichTextSection = ({ content, isPremium = false, previewBlockCount = 3 }: 
   };
 
   return (
-    <div className="w-full px-6 py-6 bg-white text-[#1D253A] rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] flex flex-col justify-start items-start gap-3">
+    <div className="w-full px-6 py-6 bg-white text-[#1D253A] rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] flex flex-col justify-start items-start gap-1">
       <div className="w-full">
         <PortableText value={displayContent} components={components} />
       </div>
+
+      {afterContent}
 
       {/* プレミアムコンテンツで未契約の場合、オーバーレイを表示 */}
       {isPremium && !hasAccess && <ContentPreviewOverlay />}

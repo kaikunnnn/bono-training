@@ -41,7 +41,7 @@ export function VideoControls({
   const subtitleMenuRef = useRef<HTMLDivElement>(null);
   const chapterMenuRef = useRef<HTMLDivElement>(null);
 
-  const { isPlaying, currentTime, duration, volume, playbackRate, isLoading, textTracks, activeTextTrack, chapters, currentChapter } = state;
+  const { isPlaying, currentTime, duration, volume, muted, playbackRate, isLoading, textTracks, activeTextTrack, chapters, currentChapter } = state;
 
   // 時間フォーマット (長い動画はH:MM:SS、短い動画はM:SS)
   const formatTime = (seconds: number) => {
@@ -139,8 +139,8 @@ export function VideoControls({
 
   const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
-  // 音量アイコンの選択
-  const VolumeIcon = volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
+  // 音量アイコンの選択（muted状態も考慮）
+  const VolumeIcon = (muted || volume === 0) ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
 
   // 字幕が利用可能かどうか
   const hasSubtitles = textTracks.length > 0;
@@ -290,9 +290,13 @@ export function VideoControls({
             onMouseLeave={() => setShowVolumeSlider(false)}
           >
             <button
-              onClick={() => onVolumeChange(volume > 0 ? 0 : 1)}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-              aria-label={volume > 0 ? 'ミュート' : 'ミュート解除'}
+              onClick={() => onVolumeChange((muted || volume === 0) ? 1 : 0)}
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                (muted || volume === 0)
+                  ? 'bg-destructive hover:bg-destructive/90'
+                  : 'bg-white/20 hover:bg-white/30'
+              }`}
+              aria-label={(muted || volume === 0) ? 'ミュート解除' : 'ミュート'}
             >
               <VolumeIcon className="w-5 h-5 text-white" />
             </button>
