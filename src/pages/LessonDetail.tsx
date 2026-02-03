@@ -38,6 +38,8 @@ interface Lesson {
   description?: string;
   iconImage?: any;
   iconImageUrl?: string;
+  thumbnail?: any;
+  thumbnailUrl?: string;
   category?: string;
   isPremium?: boolean;
   contentHeading?: string;
@@ -73,6 +75,14 @@ export default function LessonDetail() {
             }
           },
           iconImageUrl,
+          thumbnail {
+            _type,
+            asset {
+              _ref,
+              _type
+            }
+          },
+          thumbnailUrl,
           "category": category->title,
           isPremium,
           contentHeading,
@@ -232,10 +242,10 @@ export default function LessonDetail() {
     (lesson.overview && lesson.overview.length > 0)
   );
 
-  // OGP画像URLを生成
-  const ogImageUrl = lesson.iconImage
-    ? urlFor(lesson.iconImage).width(1200).height(630).url()
-    : lesson.iconImageUrl || undefined;
+  // OGP画像URLを生成（サムネイル画像を優先使用）
+  const ogImageUrl = lesson.thumbnail
+    ? urlFor(lesson.thumbnail).width(1200).height(630).url()
+    : lesson.thumbnailUrl || undefined;
 
   return (
     <Layout>

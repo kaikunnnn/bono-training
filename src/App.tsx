@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { SubscriptionProvider } from "@/contexts/SubscriptionContext";
+import { trackPageView } from "@/lib/analytics";
 import { PlanType } from "@/utils/subscriptionPlans";
 import PrivateRoute from "@/components/auth/PrivateRoute";
 import ProtectedPremiumRoute from "@/components/subscription/ProtectedPremiumRoute";
@@ -77,10 +78,11 @@ const AppContent = () => {
   const location = useLocation();
   const urlPlan = new URLSearchParams(location.search).get('plan');
 
-  // ページ遷移時にスクロール位置をリセット
+  // ページ遷移時にスクロール位置をリセット & GA4ページビュー送信
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [location.pathname]);
+    trackPageView(location.pathname + location.search);
+  }, [location.pathname, location.search]);
 
   // クエリパラメータに基づいてモックのサブスクリプション状態を生成
   const mockSubscription = urlPlan ? {

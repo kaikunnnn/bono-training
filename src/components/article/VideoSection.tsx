@@ -13,6 +13,10 @@ interface VideoSectionProps {
    * 既定は false
    */
   autoPlay?: boolean;
+  /** 再生開始時のコールバック（初回のみ発火） */
+  onPlay?: () => void;
+  /** 動画終了時のコールバック */
+  onEnded?: () => void;
 }
 
 /**
@@ -33,6 +37,8 @@ const VideoSection = ({
   thumbnailUrl,
   isPremium = false,
   autoPlay = false,
+  onPlay,
+  onEnded,
 }: VideoSectionProps) => {
   const { canAccessContent } = useSubscriptionContext();
 
@@ -108,7 +114,13 @@ const VideoSection = ({
     return (
       <div className="w-full">
         <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
-          <CustomVimeoPlayer vimeoId={videoInfo.id} autoPlay={autoPlay} muted={autoPlay} />
+          <CustomVimeoPlayer
+            vimeoId={videoInfo.id}
+            autoPlay={autoPlay}
+            muted={autoPlay}
+            onPlay={onPlay}
+            onEnded={onEnded}
+          />
         </div>
       </div>
     );

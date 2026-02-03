@@ -10,6 +10,10 @@ interface CustomVimeoPlayerProps {
   autoPlay?: boolean;
   /** 初期ミュート */
   muted?: boolean;
+  /** 再生開始時のコールバック（初回のみ発火） */
+  onPlay?: () => void;
+  /** 動画終了時のコールバック */
+  onEnded?: () => void;
 }
 
 export function CustomVimeoPlayer({
@@ -17,6 +21,8 @@ export function CustomVimeoPlayer({
   className = '',
   autoPlay = false,
   muted = false,
+  onPlay,
+  onEnded,
 }: CustomVimeoPlayerProps) {
   const {
     containerRef,
@@ -34,6 +40,8 @@ export function CustomVimeoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
+  const hasPlayedRef = useRef(false);
+  const hasEndedRef = useRef(false);
 
   // デバッグ: state変化を監視
   useEffect(() => {
@@ -45,6 +53,26 @@ export function CustomVimeoPlayer({
       showControls,
     });
   }, [state.isPlaying, state.currentTime, state.duration, state.isReady, showControls]);
+
+  // GA4: 初回再生イベント
+  useEffect(() => {
+    if (state.isPlaying && !hasPlayedRef.current) {
+      hasPlayedRef.current = true;
+      onPlay?.();
+    }
+  }, [state.isPlaying, onPlay]);
+
+  // GA4: 動画終了イベント（95%以上再生で発火）
+  useEffect(() => {
+    if (
+      state.duration > 0 &&
+      state.currentTime >= state.duration * 0.95 &&
+      !hasEndedRef.current
+    ) {
+      hasEndedRef.current = true;
+      onEnded?.();
+    }
+  }, [state.currentTime, state.duration, onEnded]);
 
   // タイマーをクリアする共通関数
   const clearControlsTimer = useCallback(() => {

@@ -44,10 +44,9 @@ export default function Lessons() {
         <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">
           レッスン一覧
         </h1>
-        <p className="text-sm md:text-base text-black mb-6">
-          学びたいテーマのレッスンを選んで、順番に進めていきましょう。
-          <br />
+        <p className="text-sm md:text-base !text-black mb-6">
           工事中です👷
+          <br />
           デザインサイクルと一部、AI×リサーチ＆プロトタイプだけ見れます。
         </p>
 

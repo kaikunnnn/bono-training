@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { getArticleWithContext } from "@/lib/sanity";
+import { trackArticleComplete, trackVideoPlay, trackVideoComplete } from "@/lib/analytics";
 import type { ArticleWithContext } from "@/types/sanity";
 import VideoSection from "@/components/article/VideoSection";
 import HeadingSection from "@/components/article/HeadingSection";
@@ -282,6 +283,11 @@ const ArticleDetail = () => {
       // サイドナビの進捗を更新するトリガー
       setProgressUpdateTrigger((prev) => prev + 1);
 
+      // GA4: 記事完了イベント送信
+      if (result.isCompleted) {
+        trackArticleComplete(article._id, article.title);
+      }
+
       // 完了にした場合のみセレブレーション判定
       if (result.isCompleted && article.lessonInfo?.quests) {
         // レッスン内の全記事IDを取得
@@ -540,6 +546,8 @@ const ArticleDetail = () => {
               thumbnailUrl={article.thumbnailUrl}
               isPremium={article.isPremium}
               autoPlay
+              onPlay={() => trackVideoPlay(article._id, article.title)}
+              onEnded={() => trackVideoComplete(article._id, article.title)}
             />
           </div>
 
