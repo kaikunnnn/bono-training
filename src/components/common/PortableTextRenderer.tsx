@@ -21,22 +21,26 @@ const components = {
   },
   list: {
     bullet: ({ children }: any) => (
-      <ul className="list-disc list-inside space-y-2 mb-4 ml-4 text-lesson-overview-text">
+      <ul className="list-disc list-outside pl-5 space-y-2 mb-4 text-lesson-overview-text marker:text-lesson-overview-text">
         {children}
       </ul>
     ),
     number: ({ children }: any) => (
-      <ol className="list-decimal list-inside space-y-2 mb-4 ml-4 text-lesson-overview-text">
+      <ol className="list-decimal list-outside pl-5 space-y-2 mb-4 text-lesson-overview-text marker:text-lesson-overview-text">
         {children}
       </ol>
     ),
   },
   listItem: {
     bullet: ({ children }: any) => (
-      <li className="text-base leading-relaxed">{children}</li>
+      <li className="text-base leading-relaxed text-lesson-overview-text">
+        {children}
+      </li>
     ),
     number: ({ children }: any) => (
-      <li className="text-base leading-relaxed">{children}</li>
+      <li className="text-base leading-relaxed text-lesson-overview-text">
+        {children}
+      </li>
     ),
   },
   marks: {

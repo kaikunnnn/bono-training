@@ -587,8 +587,8 @@ const ArticleDetail = () => {
                 content={article.content}
                 isPremium={article.isPremium}
                 afterContent={
-                  <div className="w-full px-6 py-4 rounded-[20px] bg-[#F9F9F7] shadow-none flex flex-col justify-center items-center text-left gap-3">
-                    <h3 className="self-stretch text-left text-[18px] md:text-[20px] font-semibold leading-[28px] text-[#101828] font-rounded-mplus">
+                  <div className="w-full px-6 py-4 rounded-[20px] bg-[#F9F9F7] shadow-none flex flex-col justify-center items-center text-left gap-1">
+                    <h3 className="self-stretch text-left text-[16px] md:text-[16px] font-semibold leading-[28px] text-[#101828] font-rounded-mplus">
                       次にできること
                     </h3>
                     <ArticleActionButtons
