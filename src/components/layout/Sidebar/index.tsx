@@ -129,8 +129,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         )}
       </SidebarMenuGroup>
 
-      {/* 意見箱（モバイル用） */}
-      <div className="mt-auto pt-4 lg:hidden">
+      {/* 意見箱 */}
+      <div className="mt-auto pt-4">
           <Button
             variant="outline"
             size="sm"
