@@ -1,6 +1,28 @@
 {
   "rewrites": [
     {
+      "source": "/lessons/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
+        }
+      ],
+      "destination": "/ogp/lessons/:slug.html"
+    },
+    {
+      "source": "/articles/:slug",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
+        }
+      ],
+      "destination": "/ogp/articles/:slug.html"
+    },
+    {
       "source": "/blog/:slug",
       "has": [
         {
