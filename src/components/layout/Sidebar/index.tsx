@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { DirectInbox } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 
-// 意見箱のリンク先URL（開発環境のみ）
+// 意見箱のリンク先URL
 const FEEDBACK_URL = 'https://forms.gle/Y5LorStnPm4jzFv77';
 
 /**
@@ -129,9 +129,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         )}
       </SidebarMenuGroup>
 
-      {/* 意見箱（開発環境のみ・モバイル用） */}
-      {import.meta.env.DEV && (
-        <div className="mt-auto pt-4 lg:hidden">
+      {/* 意見箱（モバイル用） */}
+      <div className="mt-auto pt-4 lg:hidden">
           <Button
             variant="outline"
             size="sm"
@@ -144,7 +143,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             </a>
           </Button>
         </div>
-      )}
     </nav>
   );
 };
