@@ -114,6 +114,13 @@ const devResources: DevResourceCard[] = [
     icon: <PanelLeft className="w-8 h-8" />,
     tags: ['Sidebar', 'Icon', 'Interaction', 'Compare']
   },
+  {
+    title: 'Navigation Sidebar States',
+    description: 'デスクトップのグローバルナビを、Figma準拠案とアクセシビリティ重視案で比較。',
+    path: '/dev/nav-sidebar',
+    icon: <Palette className="w-8 h-8" />,
+    tags: ['Navigation', 'Sidebar', 'States', 'A11y']
+  },
 ];
 
 const DevHome = () => {
