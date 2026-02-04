@@ -73,6 +73,13 @@ const devResources: DevResourceCard[] = [
     tags: ['Lesson', 'Header', 'Layout']
   },
   {
+    title: 'Navigation Sidebar States',
+    description: 'デスクトップのグローバルナビを、Figma準拠案とアクセシビリティ重視案で比較。',
+    path: '/dev/nav-sidebar',
+    icon: <Palette className="w-8 h-8" />,
+    tags: ['Navigation', 'Sidebar', 'States', 'A11y']
+  },
+  {
     title: 'Icon Animations',
     description: 'アイコンのアニメーションパターン。ホバー、クリック時の動きなど。',
     path: '/dev/icon-animations',

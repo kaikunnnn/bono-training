@@ -70,6 +70,7 @@ import IconButtonBurstPlayground from "./pages/dev/IconButtonBurstPlayground";
 import EmailTemplates from "./pages/dev/EmailTemplates";
 import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
 import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
+import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -144,6 +145,7 @@ const AppContent = () => {
         <Route path="/dev/article-layout-compare" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
         <Route path="/dev/article-layout-compare/:slug" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
         <Route path="/dev/mobile-menu-button" element={<DevRoute><MobileMenuButtonPatterns /></DevRoute>} />
+        <Route path="/dev/nav-sidebar" element={<DevRoute><NavigationSidebarStates /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
