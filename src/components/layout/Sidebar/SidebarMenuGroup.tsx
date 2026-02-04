@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
  * サイドバーメニューグループコンポーネント
  *
  * 仕様:
- * - セクションコンテナ: self-stretch
- * - NavItemリストラッパー: px-2
- * - itemGap: trueの場合、NavItem間にgap-1を追加（「その他」セクション用）
+ * - セクションコンテナ: w-full
+ * - NavItemリストラッパー: px-[15px]
+ * - NavItem間: gap-[8px]
  */
 const SidebarMenuGroup: React.FC<SidebarMenuGroupProps> = ({
   label,
@@ -20,15 +20,15 @@ const SidebarMenuGroup: React.FC<SidebarMenuGroupProps> = ({
   return (
     <div
       className={cn(
-        "self-stretch flex flex-col justify-start items-start",
+        "w-full flex flex-col items-start px-[15px]",
         className
       )}
     >
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
       <div
         className={cn(
-          "self-stretch px-2 flex flex-col justify-start items-start",
-          itemGap && "gap-1"
+          "w-full flex flex-col items-start gap-[8px]",
+          itemGap && "gap-[8px]"
         )}
       >
         {children}

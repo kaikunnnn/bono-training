@@ -8,11 +8,8 @@ import SidebarMenuItem from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
 import { ICON_SIZE } from "./icon-utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { DirectInbox } from "iconsax-react";
-import { Button } from "@/components/ui/button";
-
 // 意見箱のリンク先URL
-const FEEDBACK_URL = 'https://forms.gle/Y5LorStnPm4jzFv77';
+const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
 
 /**
  * サイドバーコンポーネント
@@ -32,117 +29,119 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
   return (
     <nav
       className={cn(
-        "w-[200px] h-full inline-flex flex-col justify-start items-start gap-4",
+        "w-[200px] h-full inline-flex flex-col justify-between items-start",
         className
       )}
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      {/* ロゴセクション */}
-      <SidebarLogo />
+      <div className="w-full flex flex-col gap-px">
+        {/* ロゴセクション */}
+        <SidebarLogo />
 
-      {/* メインナビゲーション */}
-      <SidebarMenuGroup>
-        {/* マイページ（ログイン時のみ表示） */}
-        {user && (
-          <SidebarMenuItem
-            href="/mypage"
-            icon={<MenuIcons.mypage size={ICON_SIZE} variant="Outline"  />}
-            isActive={isActive("/mypage")}
-          >
-            マイページ
-          </SidebarMenuItem>
-        )}
+        <div className="w-full flex flex-col gap-[15px]">
+          {/* メインナビゲーション */}
+          <SidebarMenuGroup>
+            {/* マイページ（ログイン時のみ表示） */}
+            {user && (
+              <SidebarMenuItem
+                href="/mypage"
+                icon={<MenuIcons.mypage size={ICON_SIZE} variant="Outline" />}
+                isActive={isActive("/mypage")}
+              >
+                マイページ
+              </SidebarMenuItem>
+            )}
 
-        {/* ロードマップ */}
-        <SidebarMenuItem
-          href="/roadmap"
-          icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline"  />}
-          isActive={isActive("/roadmap")}
-        >
-          ロードマップ
-        </SidebarMenuItem>
+            {/* ロードマップ */}
+            <SidebarMenuItem
+              href="/roadmap"
+              icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline" />}
+              isActive={isActive("/roadmap")}
+            >
+              ロードマップ
+            </SidebarMenuItem>
 
-        {/* レッスン */}
-        <SidebarMenuItem
-          href="/lessons"
-          icon={<MenuIcons.lesson size={ICON_SIZE} variant="Outline"  />}
-          isActive={isActive("/lessons")}
-        >
-          レッスン
-        </SidebarMenuItem>
+            {/* レッスン */}
+            <SidebarMenuItem
+              href="/lessons"
+              icon={<MenuIcons.lesson size={ICON_SIZE} variant="Outline" />}
+              isActive={isActive("/lessons")}
+            >
+              レッスン
+            </SidebarMenuItem>
 
-        {/* ガイド */}
-        <SidebarMenuItem
-          href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline"  />}
-          isActive={isActive("/guide")}
-        >
-          ガイド
-        </SidebarMenuItem>
+            {/* トレーニング */}
+            <SidebarMenuItem
+              href="/training"
+              icon={<MenuIcons.training size={ICON_SIZE} variant="Outline" />}
+              isActive={isActive("/training")}
+            >
+              トレーニング
+            </SidebarMenuItem>
+          </SidebarMenuGroup>
 
-        {/* トレーニング */}
-        <SidebarMenuItem
-          href="/training"
-          icon={<MenuIcons.training size={ICON_SIZE} variant="Outline"  />}
-          isActive={isActive("/training")}
-        >
-          トレーニング
-        </SidebarMenuItem>
-      </SidebarMenuGroup>
+          <SidebarMenuGroup label="探す">
+            {/* ガイド */}
+            <SidebarMenuItem
+              href="/guide"
+              icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
+              isActive={isActive("/guide")}
+            >
+              ガイド
+            </SidebarMenuItem>
+          </SidebarMenuGroup>
 
-      {/* その他メニュー */}
-      <SidebarMenuGroup label="その他" itemGap>
-        {/* ログイン（ログオフ時のみ表示） */}
-        {!user && (
-          <SidebarMenuItem
-            href="/login"
-            icon={<MenuIcons.login size={ICON_SIZE} variant="Outline"  />}
-            isActive={isActive("/login")}
-          >
-            ログイン
-          </SidebarMenuItem>
-        )}
-        {/* 設定（ログイン時のみ表示） */}
-        {user && (
-          <SidebarMenuItem
-            href="/account"
-            icon={<MenuIcons.settings size={ICON_SIZE} variant="Outline"  />}
-            isActive={isActive("/account")}
-          >
-            設定
-          </SidebarMenuItem>
-        )}
-        {/* ログアウト（ログイン時のみ表示） */}
-        {user && (
-          <SidebarMenuItem
-            href="#"
-            icon={<MenuIcons.logout size={ICON_SIZE} variant="Outline"  />}
-            isActive={false}
-            onClick={(e) => {
-              e.preventDefault();
-              signOut();
-            }}
-          >
-            ログアウト
-          </SidebarMenuItem>
-        )}
-      </SidebarMenuGroup>
-
-      {/* 意見箱 */}
-      <div className="mt-auto pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full gap-1 text-xs"
-            asChild
-          >
-            <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
-              <DirectInbox size={14} />
-              意見箱
-            </a>
-          </Button>
+          <SidebarMenuGroup label="コミュニティ">
+            <SidebarMenuItem
+              href={FEEDBACK_URL}
+              icon={<MenuIcons.share size={ICON_SIZE} variant="Outline" />}
+              isActive={false}
+            >
+              フィードバック
+            </SidebarMenuItem>
+          </SidebarMenuGroup>
         </div>
+      </div>
+
+      <div className="w-full py-[22px]">
+        <SidebarMenuGroup>
+          {/* ログイン（ログオフ時のみ表示） */}
+          {!user && (
+            <SidebarMenuItem
+              href="/login"
+              icon={<MenuIcons.login size={ICON_SIZE} variant="Outline" />}
+              isActive={isActive("/login")}
+            >
+              ログイン
+            </SidebarMenuItem>
+          )}
+          {/* 設定（ログイン時のみ表示） */}
+          {user && (
+            <SidebarMenuItem
+              href="/account"
+              icon={<MenuIcons.settings size={ICON_SIZE} variant="Outline" />}
+              isActive={isActive("/account")}
+            >
+              設定
+            </SidebarMenuItem>
+          )}
+          {/* ログアウト（ログイン時のみ表示） */}
+          {user && (
+            <SidebarMenuItem
+              href="#"
+              icon={<MenuIcons.logout size={ICON_SIZE} variant="Outline" />}
+              isActive={false}
+              onClick={(e) => {
+                e.preventDefault();
+                signOut();
+              }}
+            >
+              ログアウト
+            </SidebarMenuItem>
+          )}
+        </SidebarMenuGroup>
+      </div>
     </nav>
   );
 };

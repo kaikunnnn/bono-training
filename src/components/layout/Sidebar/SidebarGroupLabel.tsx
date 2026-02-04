@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
  * サイドバーグループラベルコンポーネント
  *
  * 仕様:
- * - padding: px-4
- * - height: 32px (h-8)
- * - フォント: Inter, 12px, Medium
- * - カラー: text-black/70
- * - 角丸: rounded-lg
+ * - padding: px-[6px]
+ * - height: 32px
+ * - フォント: 10px, Bold
+ * - カラー: #74798B
+ * - 角丸: 8px
  */
 const SidebarGroupLabel: React.FC<SidebarGroupLabelProps> = ({
   children,
@@ -19,9 +19,9 @@ const SidebarGroupLabel: React.FC<SidebarGroupLabelProps> = ({
   return (
     <div
       className={cn(
-        "self-stretch h-8 px-4 rounded-lg",
+        "w-full h-[32px] px-[6px] rounded-[8px]",
         "inline-flex justify-start items-center",
-        "text-black/70 text-xs font-medium leading-4",
+        "text-[#74798B] text-[10px] font-bold leading-[16px]",
         "select-none",
         className
       )}
