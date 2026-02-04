@@ -13,7 +13,9 @@ interface SanityLesson {
   thumbnailUrl?: string;
   iconImage?: any;
   iconImageUrl?: string;
-  category?: string;
+  category?: { title?: string } | string;
+  categoryTitle?: string;
+  tags?: string[];
   isPremium: boolean;
   webflowSource?: string;
 }
@@ -44,6 +46,8 @@ async function fetchLessons(): Promise<SanityLesson[]> {
     iconImage,
     iconImageUrl,
     category,
+    "categoryTitle": category->title,
+    tags,
     isPremium,
     webflowSource
   }`;

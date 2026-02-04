@@ -12,7 +12,7 @@ interface LessonCardProps {
  * レッスンカードコンポーネント
  *
  * レッスン一覧で表示されるカード
- * Figma仕様: item_lesson
+ * Figma仕様: lesson-item (30:2293)
  */
 const LessonCard: React.FC<LessonCardProps> = ({
   lesson,
@@ -22,38 +22,51 @@ const LessonCard: React.FC<LessonCardProps> = ({
   return (
     <article
       className={cn(
-        'flex w-full border border-black/5 rounded-xl overflow-hidden cursor-pointer',
-        'transition-all duration-200 hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(0,0,0,0.12)]',
-        'hover:border-black/10 active:translate-y-[-2px]',
+        'bg-white flex flex-col p-5 rounded-[29px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]',
+        'cursor-pointer transition-all duration-200',
+        'hover:shadow-[0px_1px_12px_0px_rgba(0,0,0,0.12)]',
+        'w-full h-full aspect-[298/357] text-[#0d221d] opacity-100',
         className
       )}
       onClick={onClick}
     >
-      <div className="flex flex-col w-full bg-black/[0.04]">
-        {/* 画像エリア */}
-        <div className="flex justify-center items-center p-[10.33px] w-full h-40 bg-white rounded-t-xl">
-          <div className="rounded-r-[8.77px] shadow-[1px_1px_12px_0_rgba(0,0,0,0.24)]">
-            <img
-              src={lesson.thumbnail}
-              alt={`${lesson.title}のサムネイル`}
-              className="w-[85.55px] h-32 object-cover block"
-            />
+      <div className="flex h-full flex-col justify-between gap-4">
+        {/* カテゴリバッジ */}
+        {lesson.category && (
+          <div className="flex items-center">
+            <span className="inline-flex items-center justify-center px-2 py-[6px] border border-black rounded-[30px]">
+              <span className="font-noto-sans-jp text-[12px] font-medium text-[#0d221d] leading-[10px]">
+                {lesson.category}
+              </span>
+            </span>
           </div>
+        )}
+
+        {/* 画像エリア */}
+        <div className="flex justify-center items-center py-2">
+          {lesson.thumbnail ? (
+            <div className="w-[108px] h-[163px] rounded-tr-[4px] rounded-br-[4px] shadow-[0px_0px_32px_0px_rgba(0,0,0,0.16)] overflow-hidden">
+              <img
+                src={lesson.thumbnail}
+                alt={`${lesson.title}のサムネイル`}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          ) : (
+            <div className="w-[108px] h-[163px] rounded-tr-[4px] rounded-br-[4px] bg-gray-200" />
+          )}
         </div>
 
-        {/* 情報エリア */}
-        <div className="flex flex-col gap-1 px-5 py-4 bg-[#F3F3F4]">
-          <div className="flex flex-col gap-0.5">
-            <p className="font-noto-sans-jp text-[13px] font-light leading-[1.938em] tracking-[1px] text-[#151834] m-0">
-              {lesson.category}
+        {/* タイトル・説明エリア */}
+        <div className="flex flex-col gap-1">
+          <h3 className="font-rounded-mplus-bold text-base font-bold !text-[#0d221d] !opacity-100 leading-[1.5]">
+            {lesson.title}
+          </h3>
+          {lesson.description && (
+            <p className="font-noto-sans-jp text-xs font-medium text-[rgba(13,34,29,0.48)] leading-[1.5] line-clamp-2">
+              {lesson.description}
             </p>
-            <h3 className="font-noto-sans-jp text-base font-bold leading-[1.48em] tracking-[0.75px] text-[#151834] m-0">
-              {lesson.title}
-            </h3>
-          </div>
-          <p className="font-noto-sans-jp text-[13px] font-light leading-[1.6em] tracking-[1px] text-[#151834] m-0">
-            {lesson.description}
-          </p>
+          )}
         </div>
       </div>
     </article>

@@ -5,13 +5,13 @@ export interface Lesson {
   /** 一意のID */
   id: string;
   /** カテゴリー（例: "情報設計", "UIデザイン"） */
-  category: string;
+  category?: string;
   /** レッスンタイトル */
   title: string;
   /** 説明文（2-3行程度） */
-  description: string;
+  description?: string;
   /** サムネイル画像のパス */
-  thumbnail: string;
+  thumbnail?: string;
   /** URL用のスラッグ（将来の詳細ページ用） */
   slug: string;
 }
