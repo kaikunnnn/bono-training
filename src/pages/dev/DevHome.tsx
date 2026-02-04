@@ -143,6 +143,14 @@ const DevHome = () => {
           <p className="text-xl text-gray-600 mb-4">
             デザインシステム、コンポーネントライブラリ、開発ドキュメントへのアクセス
           </p>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/dev/nav-sidebar"
+              className="inline-flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+            >
+              Navigation Sidebar States
+            </Link>
+          </div>
           <div className="inline-block px-4 py-2 bg-yellow-100 text-yellow-800 text-sm rounded-lg border border-yellow-200">
             ⚠️ このページは開発環境でのみ利用可能です
           </div>
