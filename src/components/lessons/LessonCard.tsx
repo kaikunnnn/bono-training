@@ -25,7 +25,9 @@ const LessonCard: React.FC<LessonCardProps> = ({
         'bg-white flex flex-col p-5 rounded-[29px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]',
         'cursor-pointer transition-all duration-200',
         'hover:shadow-[0px_1px_12px_0px_rgba(0,0,0,0.12)]',
-        'w-full h-full aspect-[298/357] text-[#0d221d] opacity-100',
+        'w-full h-full text-[#0d221d] opacity-100',
+        'sm:min-h-[320px] md:min-h-[340px] lg:min-h-0',
+        'lg:aspect-[298/357]',
         className
       )}
       onClick={onClick}
@@ -43,9 +45,9 @@ const LessonCard: React.FC<LessonCardProps> = ({
         )}
 
         {/* 画像エリア */}
-        <div className="flex justify-center items-center py-2">
+        <div className="flex justify-center items-center py-2 min-h-[40%]">
           {lesson.thumbnail ? (
-            <div className="w-[108px] h-[163px] rounded-tr-[4px] rounded-br-[4px] shadow-[0px_0px_32px_0px_rgba(0,0,0,0.16)] overflow-hidden">
+            <div className="w-[108px] h-[163px] sm:w-[120px] sm:h-[180px] md:w-[132px] md:h-[198px] lg:w-[108px] lg:h-[163px] rounded-tr-[4px] rounded-br-[4px] shadow-[0px_0px_32px_0px_rgba(0,0,0,0.16)] overflow-hidden">
               <img
                 src={lesson.thumbnail}
                 alt={`${lesson.title}のサムネイル`}
@@ -53,7 +55,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
               />
             </div>
           ) : (
-            <div className="w-[108px] h-[163px] rounded-tr-[4px] rounded-br-[4px] bg-gray-200" />
+            <div className="w-[108px] h-[163px] sm:w-[120px] sm:h-[180px] md:w-[132px] md:h-[198px] lg:w-[108px] lg:h-[163px] rounded-tr-[4px] rounded-br-[4px] bg-gray-200" />
           )}
         </div>
 
