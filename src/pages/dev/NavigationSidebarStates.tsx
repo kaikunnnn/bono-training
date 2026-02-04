@@ -3,7 +3,7 @@ import { MenuIcons } from "@/components/layout/Sidebar/icons";
 import { cn } from "@/lib/utils";
 
 type NavItemState = "default" | "hover" | "pressed" | "focus" | "active" | "disabled";
-type Variant = "figma" | "a11y";
+type Variant = "figma" | "a11y" | "hybrid";
 
 const PREVIEW_ICON_SIZE = 20;
 
@@ -42,27 +42,31 @@ const STATE_LABELS: { state: NavItemState; label: string }[] = [
   { state: "disabled", label: "Disabled" },
 ];
 
-const FIGMA_IA = [
-  { label: "マイページ", icon: MenuIcons.mypage },
-  { label: "発見", icon: MenuIcons.search },
-  { label: "コース", icon: MenuIcons.lesson },
-  { label: "トレーニング", icon: MenuIcons.training },
-  { label: "設定", icon: MenuIcons.settings },
-  { label: "ログアウト", icon: MenuIcons.logout },
+const CURRENT_IA_SECTIONS = [
+  {
+    title: "探す",
+    items: [
+      { label: "ロードマップ", icon: MenuIcons.roadmap },
+      { label: "レッスン", icon: MenuIcons.lesson },
+      { label: "ガイド", icon: MenuIcons.guide },
+      { label: "トレーニング", icon: MenuIcons.training },
+    ],
+  },
+  {
+    title: "アカウント",
+    items: [
+      { label: "ログイン", icon: MenuIcons.login },
+      { label: "設定", icon: MenuIcons.settings },
+      { label: "ログアウト", icon: MenuIcons.logout },
+    ],
+  },
 ];
 
-const CURRENT_IA = [
-  { label: "ロードマップ", icon: MenuIcons.roadmap },
-  { label: "レッスン", icon: MenuIcons.lesson },
-  { label: "ガイド", icon: MenuIcons.guide },
-  { label: "トレーニング", icon: MenuIcons.training },
-  { label: "ログイン", icon: MenuIcons.login },
-  { label: "設定", icon: MenuIcons.settings },
-  { label: "ログアウト", icon: MenuIcons.logout },
-];
-
-const getStateClasses = (variant: Variant, state: NavItemState) =>
-  variant === "a11y" ? A11Y_STATE_CLASSES[state] : FIGMA_STATE_CLASSES[state];
+const getStateClasses = (variant: Variant, state: NavItemState) => {
+  if (variant === "a11y") return A11Y_STATE_CLASSES[state];
+  if (variant === "hybrid") return state === "focus" ? A11Y_STATE_CLASSES[state] : FIGMA_STATE_CLASSES[state];
+  return FIGMA_STATE_CLASSES[state];
+};
 
 const NavItemPreview = ({
   label,
@@ -121,23 +125,32 @@ const StateColumn = ({ title, variant }: { title: string; variant: Variant }) =>
 
 const IAPreview = ({
   title,
-  items,
+  sections,
 }: {
   title: string;
-  items: { label: string; icon: React.ElementType }[];
+  sections: { title: string; items: { label: string; icon: React.ElementType }[] }[];
 }) => {
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-4">
       <h3 className="text-sm font-semibold text-gray-700">{title}</h3>
-      <div className="flex flex-col gap-2 w-[200px]">
-        {items.map((item, index) => (
-          <NavItemPreview
-            key={`${item.label}-${index}`}
-            label={item.label}
-            Icon={item.icon}
-            variant="figma"
-            state={index === 1 ? "active" : "default"}
-          />
+      <div className="flex flex-col gap-6 w-[240px]">
+        {sections.map((section, sectionIndex) => (
+          <div key={`${section.title}-${sectionIndex}`} className="flex flex-col gap-3">
+            <div className="text-[16px] font-semibold text-gray-500">
+              {section.title}
+            </div>
+            <div className="flex flex-col gap-2">
+              {section.items.map((item, index) => (
+                <NavItemPreview
+                  key={`${section.title}-${item.label}-${index}`}
+                  label={item.label}
+                  Icon={item.icon}
+                  variant="figma"
+                  state={sectionIndex === 0 && index === 1 ? "active" : "default"}
+                />
+              ))}
+            </div>
+          </div>
         ))}
       </div>
     </div>
@@ -153,19 +166,17 @@ const NavigationSidebarStates = () => {
             Desktop Navigation – State Ideas
           </h1>
           <p className="text-sm text-gray-600">
-            Figma準拠のベース案と、アクセシビリティ重視案を並べて比較します。
+            Figma準拠のベース案に、フォーカス状態だけアクセシビリティ重視の表現を採用しています。
             状態は固定表示です（実際のホバー/フォーカス動作ではありません）。
           </p>
         </header>
 
         <section className="grid gap-8 md:grid-cols-2">
-          <StateColumn title="Figma Baseline (Draft)" variant="figma" />
-          <StateColumn title="Accessibility Enhanced (Draft)" variant="a11y" />
+          <StateColumn title="Figma Baseline + A11y Focus (Draft)" variant="hybrid" />
         </section>
 
         <section className="grid gap-8 md:grid-cols-2">
-          <IAPreview title="現行IA（案）" items={CURRENT_IA} />
-          <IAPreview title="Figma IA（案）" items={FIGMA_IA} />
+          <IAPreview title="現行IA（案）" sections={CURRENT_IA_SECTIONS} />
         </section>
 
         <section className="grid gap-6 md:grid-cols-2">
