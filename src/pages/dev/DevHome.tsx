@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -113,6 +113,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/mobile-menu-button',
     icon: <PanelLeft className="w-8 h-8" />,
     tags: ['Sidebar', 'Icon', 'Interaction', 'Compare']
+  },
+  {
+    title: 'Lesson Card Motion',
+    description: 'レッスンカードのアニメーション案を比較・調整するための検証ページ。',
+    path: '/dev/lesson-card-motion',
+    icon: <Waves className="w-8 h-8" />,
+    tags: ['Lesson', 'Motion', 'Experiment']
   },
 ];
 

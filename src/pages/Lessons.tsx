@@ -1,4 +1,6 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import { urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
 import { useLessons } from "@/hooks/useLessons";
@@ -9,6 +11,28 @@ import { Lesson } from "@/types/lesson";
 export default function Lessons() {
   const navigate = useNavigate();
   const { data: lessons, isLoading: loading, error } = useLessons();
+  const reduceMotion = useReducedMotion();
+
+  const motionConfig = useMemo(() => {
+    const ease = [0.22, 1, 0.36, 1] as const;
+    const baseTransition = reduceMotion ? { duration: 0 } : { duration: 0.5, ease };
+    const hidden = reduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 };
+
+    return {
+      container: {
+        hidden: {},
+        show: {
+          transition: reduceMotion
+            ? { staggerChildren: 0, delayChildren: 0 }
+            : { staggerChildren: 0.06, delayChildren: 0.04 },
+        },
+      },
+      item: {
+        hidden,
+        show: { opacity: 1, y: 0, transition: baseTransition },
+      },
+    };
+  }, [reduceMotion]);
 
   const handleLessonClick = (slug: string) => {
     navigate(`/lessons/${slug}`);
@@ -55,7 +79,12 @@ export default function Lessons() {
         {lessons.length === 0 ? (
           <p>レッスンがありません。Sanity Studioでデータを追加してください。</p>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch">
+          <motion.div
+            variants={motionConfig.container}
+            initial="hidden"
+            animate="show"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
+          >
             {lessons.map((sanityLesson) => {
               // バッジ表示テキスト（カテゴリ > タグ）
               const categoryValue =
@@ -89,14 +118,15 @@ export default function Lessons() {
               };
 
               return (
-                <LessonCard
-                  key={lesson.id}
-                  lesson={lesson}
-                  onClick={() => handleLessonClick(lesson.slug)}
-                />
+                <motion.div key={lesson.id} variants={motionConfig.item}>
+                  <LessonCard
+                    lesson={lesson}
+                    onClick={() => handleLessonClick(lesson.slug)}
+                  />
+                </motion.div>
               );
             })}
-          </div>
+          </motion.div>
         )}
       </div>
     </Layout>
