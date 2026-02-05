@@ -6,6 +6,6 @@
 
 /**
  * アイコンサイズの定数
- * Figma仕様: 16×16px
+ * Figma仕様: 20×20px
  */
-export const ICON_SIZE = 16;
+export const ICON_SIZE = 20;

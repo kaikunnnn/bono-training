@@ -10,9 +10,8 @@ import { ICON_SIZE } from "./icon-utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { DirectInbox } from "iconsax-react";
 import { Button } from "@/components/ui/button";
-
 // 意見箱のリンク先URL
-const FEEDBACK_URL = 'https://forms.gle/Y5LorStnPm4jzFv77';
+const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
 
 /**
  * サイドバーコンポーネント
@@ -47,7 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {user && (
           <SidebarMenuItem
             href="/mypage"
-            icon={<MenuIcons.mypage size={ICON_SIZE} variant="Outline"  />}
+            icon={<MenuIcons.mypage size={ICON_SIZE} variant="Outline" />}
             isActive={isActive("/mypage")}
           >
             マイページ
@@ -57,7 +56,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* ロードマップ */}
         <SidebarMenuItem
           href="/roadmap"
-          icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline"  />}
+          icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline" />}
           isActive={isActive("/roadmap")}
         >
           ロードマップ
@@ -66,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* レッスン */}
         <SidebarMenuItem
           href="/lessons"
-          icon={<MenuIcons.lesson size={ICON_SIZE} variant="Outline"  />}
+          icon={<MenuIcons.lesson size={ICON_SIZE} variant="Outline" />}
           isActive={isActive("/lessons")}
         >
           レッスン
@@ -75,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* ガイド */}
         <SidebarMenuItem
           href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline"  />}
+          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
           isActive={isActive("/guide")}
         >
           ガイド
@@ -84,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {/* トレーニング */}
         <SidebarMenuItem
           href="/training"
-          icon={<MenuIcons.training size={ICON_SIZE} variant="Outline"  />}
+          icon={<MenuIcons.training size={ICON_SIZE} variant="Outline" />}
           isActive={isActive("/training")}
         >
           トレーニング
@@ -97,7 +96,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {!user && (
           <SidebarMenuItem
             href="/login"
-            icon={<MenuIcons.login size={ICON_SIZE} variant="Outline"  />}
+            icon={<MenuIcons.login size={ICON_SIZE} variant="Outline" />}
             isActive={isActive("/login")}
           >
             ログイン
@@ -107,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {user && (
           <SidebarMenuItem
             href="/account"
-            icon={<MenuIcons.settings size={ICON_SIZE} variant="Outline"  />}
+            icon={<MenuIcons.settings size={ICON_SIZE} variant="Outline" />}
             isActive={isActive("/account")}
           >
             設定
@@ -117,7 +116,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         {user && (
           <SidebarMenuItem
             href="#"
-            icon={<MenuIcons.logout size={ICON_SIZE} variant="Outline"  />}
+            icon={<MenuIcons.logout size={ICON_SIZE} variant="Outline" />}
             isActive={false}
             onClick={(e) => {
               e.preventDefault();
@@ -131,18 +130,13 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
       {/* 意見箱 */}
       <div className="mt-auto pt-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="w-full gap-1 text-xs"
-            asChild
-          >
-            <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
-              <DirectInbox size={14} />
-              意見箱
-            </a>
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" className="w-full gap-1 text-xs" asChild>
+          <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
+            <DirectInbox size={14} />
+            意見箱
+          </a>
+        </Button>
+      </div>
     </nav>
   );
 };

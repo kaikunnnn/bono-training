@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, MouseEventHandler } from "react";
 
 /**
  * メニュー項目の型定義
@@ -33,7 +33,7 @@ export interface SidebarMenuItemProps {
   icon: ReactNode;
   children: ReactNode;
   isActive?: boolean;
-  onClick?: () => void;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
 }
 
 /**
