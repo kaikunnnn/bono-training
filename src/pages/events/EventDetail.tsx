@@ -7,8 +7,8 @@ import RichTextSection from "@/components/article/RichTextSection";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
 import Logo from "@/components/common/Logo";
-import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
+import EventRegistrationButton from "@/components/event/EventRegistrationButton";
 
 // アニメーション設定
 const fadeInUp = {
@@ -227,7 +227,7 @@ const EventDetail = () => {
 
             {/* タイトル */}
             <motion.h1
-              className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#101828] font-rounded-mplus leading-tight max-w-[720px]"
+              className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#101828] font-rounded-mplus leading-[148%] max-w-[720px] text-balance"
               variants={fadeInUp}
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
@@ -241,7 +241,7 @@ const EventDetail = () => {
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
               {event.summary && (
-                <p className="text-base md:text-lg text-[#4B5563] leading-relaxed max-w-[560px]">
+                <p className="text-base md:text-lg text-[#4B5563] leading-relaxed max-w-[560px] text-balance">
                   {event.summary}
                 </p>
               )}
@@ -254,35 +254,7 @@ const EventDetail = () => {
                 variants={fadeInUp}
                 transition={{ duration: 0.5, ease: "easeOut" }}
               >
-                <motion.div
-                  className="relative overflow-hidden rounded-lg"
-                  whileHover="hover"
-                  initial="rest"
-                >
-                  <Button
-                    variant="default"
-                    size="large"
-                    asChild
-                    className="relative"
-                  >
-                    <a
-                      href={event.registrationUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span>参加申し込みフォームへ</span>
-                      <ExternalLink className="w-4 h-4" />
-                      {/* シマー効果（キラン） */}
-                      <motion.span
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]"
-                        variants={{
-                          rest: { x: "-150%", transition: { duration: 0 } },
-                          hover: { x: "150%", transition: { duration: 0.6, ease: "easeInOut" } },
-                        }}
-                      />
-                    </a>
-                  </Button>
-                </motion.div>
+                <EventRegistrationButton registrationUrl={event.registrationUrl} />
               </motion.div>
             )}
 
@@ -324,35 +296,7 @@ const EventDetail = () => {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
               >
-                <motion.div
-                  className="relative overflow-hidden rounded-lg"
-                  whileHover="hover"
-                  initial="rest"
-                >
-                  <Button
-                    variant="default"
-                    size="large"
-                    asChild
-                    className="relative"
-                  >
-                    <a
-                      href={event.registrationUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <span>参加申し込みフォームへ</span>
-                      <ExternalLink className="w-4 h-4" />
-                      {/* シマー効果（キラン） */}
-                      <motion.span
-                        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-[-20deg]"
-                        variants={{
-                          rest: { x: "-150%", transition: { duration: 0 } },
-                          hover: { x: "150%", transition: { duration: 0.6, ease: "easeInOut" } },
-                        }}
-                      />
-                    </a>
-                  </Button>
-                </motion.div>
+                <EventRegistrationButton registrationUrl={event.registrationUrl} />
               </motion.div>
             )}
         </div>
