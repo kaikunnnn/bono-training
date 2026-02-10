@@ -25,7 +25,6 @@ const config = {
     },
     extend: {
       colors: {
-        base: 'hsl(var(--base))',
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -125,6 +124,13 @@ const config = {
           'overview-checkbox-bg': '#FAFAFA',
           'overview-image-bg': '#F3F3F3',
         }
+      },
+      // NOTE:
+      // `colors.base` を定義すると Tailwind が `.text-base { color: ... }` を生成し、
+      // フォントサイズ用の `text-base` と衝突して本番で色が上書きされ得る。
+      // `bg-base` だけ欲しいので backgroundColor に分離して衝突を避ける。
+      backgroundColor: {
+        base: 'hsl(var(--base))',
       },
       borderRadius: {
         lg: 'var(--radius)',
