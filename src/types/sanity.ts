@@ -157,3 +157,19 @@ export interface ArticleNavigation {
     title: string;
   };
 }
+
+// Event型
+export interface Event {
+  _id: string;
+  _type: "event";
+  title: string;
+  slug: SanitySlug;
+  summary?: string;
+  registrationUrl?: string;
+  thumbnail?: SanityImage & { asset?: { _id: string; url: string } };
+  thumbnailUrl?: string;
+  eventMonth?: number;
+  eventPeriod?: "early" | "mid" | "late";
+  content: PortableTextBlock[];
+  publishedAt?: string;
+}
