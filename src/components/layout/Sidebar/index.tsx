@@ -9,6 +9,7 @@ import { MenuIcons } from "./icons";
 import { ICON_SIZE } from "./icon-utils";
 import { useAuth } from "@/contexts/AuthContext";
 import { DirectInbox } from "iconsax-react";
+import { HelpCircle } from "@/lib/icons";
 import { Button } from "@/components/ui/button";
 // 意見箱のリンク先URL
 const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
@@ -87,6 +88,14 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           isActive={isActive("/training")}
         >
           トレーニング
+        </SidebarMenuItem>
+
+        <SidebarMenuItem
+          href="/questions"
+          icon={<HelpCircle size={ICON_SIZE} variant="Outline" />}
+          isActive={location.pathname.startsWith("/questions")}
+        >
+          みんなの掲示板
         </SidebarMenuItem>
       </SidebarMenuGroup>
 

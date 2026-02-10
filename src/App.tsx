@@ -72,6 +72,10 @@ import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
 import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
 import LessonCardMotion from "./pages/dev/LessonCardMotion";
 import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
+import QuestionsIndex from "./pages/questions";
+import QuestionDetail from "./pages/questions/detail";
+import QuestionNew from "./pages/questions/new";
+import EventDetail from "./pages/events/EventDetail";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -164,6 +168,12 @@ const AppContent = () => {
         <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
 
         <Route path="/roadmap" element={<Roadmap />} />
+
+        <Route path="/questions" element={<PrivateRoute><QuestionsIndex /></PrivateRoute>} />
+        <Route path="/questions/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
+        <Route path="/questions/:questionId" element={<PrivateRoute><QuestionDetail /></PrivateRoute>} />
+
+        <Route path="/events/:slug" element={<EventDetail />} />
 
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />
