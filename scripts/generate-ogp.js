@@ -17,6 +17,12 @@ const projectId = process.env.VITE_SANITY_PROJECT_ID;
 const dataset = process.env.VITE_SANITY_DATASET || 'production';
 const siteUrl = process.env.VITE_SITE_URL || 'https://bono-training.vercel.app';
 
+// 環境変数のチェックとログ出力
+console.log('📋 Environment variables:');
+console.log(`   VITE_SANITY_PROJECT_ID: ${projectId || '❌ NOT SET'}`);
+console.log(`   VITE_SANITY_DATASET: ${dataset}`);
+console.log(`   VITE_SITE_URL: ${siteUrl}`);
+
 function escapeHtml(text) {
   if (!text) return '';
   return text
