@@ -35,6 +35,13 @@ export default defineType({
       description: 'フィードバック対象の成果物名（任意）',
     }),
     defineField({
+      name: 'excerpt',
+      title: '概要',
+      type: 'text',
+      rows: 3,
+      description: '一覧ページに表示する概要文（100文字程度推奨）',
+    }),
+    defineField({
       name: 'publishedAt',
       title: '公開日',
       type: 'datetime',

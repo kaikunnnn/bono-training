@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves, MessageSquare } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -129,11 +129,11 @@ const devResources: DevResourceCard[] = [
     tags: ['Lesson', 'Motion', 'Experiment']
   },
   {
-    title: 'Navigation Sidebar States',
-    description: 'デスクトップのグローバルナビを、Figma準拠案とアクセシビリティ重視案で比較。',
-    path: '/dev/nav-sidebar',
-    icon: <Palette className="w-8 h-8" />,
-    tags: ['Navigation', 'Sidebar', 'States', 'A11y']
+    title: 'Feedback Detail Patterns',
+    description: 'フィードバック詳細ページのデザインパターン。OpenAI・Vercel風のリッチなレイアウトを比較。',
+    path: '/dev/feedback-detail-patterns',
+    icon: <MessageSquare className="w-8 h-8" />,
+    tags: ['Feedback', 'Design', 'OpenAI', 'Vercel', 'Premium']
   },
 ];
 

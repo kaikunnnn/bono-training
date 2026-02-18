@@ -361,7 +361,7 @@ export async function getAllFeedbacks(): Promise<Feedback[]> {
         slug
       },
       targetOutput,
-      "feedbackExcerpt": pt::text(feedbackContent)[0..150],
+      "excerpt": coalesce(excerpt, pt::text(feedbackContent)[0..150]),
       publishedAt
     }
   `;
@@ -383,7 +383,7 @@ export async function getFeedbacksByCategory(categorySlug: string): Promise<Feed
         slug
       },
       targetOutput,
-      "feedbackExcerpt": pt::text(feedbackContent)[0..150],
+      "excerpt": coalesce(excerpt, pt::text(feedbackContent)[0..150]),
       publishedAt
     }
   `;

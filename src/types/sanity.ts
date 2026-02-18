@@ -211,11 +211,11 @@ export interface Feedback {
   slug: SanitySlug;
   category?: FeedbackCategory;
   targetOutput?: string;
+  excerpt?: string; // 手動入力の概要文
   publishedAt?: string;
   vimeoUrl?: string;
   figmaUrl?: string;
   reviewPoints?: PortableTextBlock[];
   requestContent?: PortableTextBlock[];
   feedbackContent?: PortableTextBlock[];
-  feedbackExcerpt?: string; // 一覧用の抜粋
 }

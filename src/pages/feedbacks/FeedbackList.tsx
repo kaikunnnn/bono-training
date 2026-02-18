@@ -89,9 +89,16 @@ const FeedbackCard = ({ feedback }: { feedback: Feedback }) => {
               {feedback.title}
             </h3>
 
+            {/* 概要 */}
+            {feedback.excerpt && (
+              <p className="font-noto-sans-jp text-[13px] text-muted-foreground leading-[1.6] line-clamp-2">
+                {feedback.excerpt}
+              </p>
+            )}
+
             {/* 対象アウトプット */}
             {feedback.targetOutput && (
-              <p className="font-noto-sans-jp text-xs text-muted-foreground leading-[1.5] line-clamp-1">
+              <p className="font-noto-sans-jp text-xs text-muted-foreground/70 leading-[1.5] line-clamp-1">
                 📎 {feedback.targetOutput}
               </p>
             )}
