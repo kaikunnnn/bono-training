@@ -10,6 +10,7 @@ import type { Question, QuestionCategory } from "@/types/sanity";
 import Layout from "@/components/layout/Layout";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
+import SEO from "@/components/common/SEO";
 
 // アニメーション設定
 const fadeInUp = {
@@ -148,6 +149,12 @@ const QuestionList = () => {
 
   return (
     <Layout>
+      <SEO
+        title="みんなの質問"
+        description="BONOメンバーから寄せられた質問と回答をまとめています。Figmaの使い方、キャリア相談、デザイン全般など様々なカテゴリの質問が閲覧できます。"
+        ogUrl="/questions"
+        ogType="website"
+      />
       <div className="min-h-screen w-full bg-base">
         {/* メインコンテンツ */}
         <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-8">

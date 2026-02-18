@@ -12,6 +12,7 @@ import { PortableText } from "@portabletext/react";
 import Layout from "@/components/layout/Layout";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { Button } from "@/components/ui/button";
+import SEO from "@/components/common/SEO";
 
 // アニメーション設定
 const fadeInUp = {
@@ -238,6 +239,12 @@ const QuestionDetail = () => {
 
   return (
     <Layout>
+      <SEO
+        title={question.title}
+        description={`${question.category?.title || "質問"}：${question.title}`}
+        ogUrl={`/questions/${slug}`}
+        ogType="article"
+      />
       <div className="min-h-screen w-full bg-base">
         {/* メインコンテンツ */}
         <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-8">
