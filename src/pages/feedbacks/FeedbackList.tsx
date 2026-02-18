@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import { MessageSquare } from "lucide-react";
 import {
   getAllFeedbacks,
   getFeedbackCategories,
@@ -14,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import SEO from "@/components/common/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
+import { cn } from "@/lib/utils";
 
 // アニメーション設定
 const fadeInUp = {
@@ -29,7 +31,15 @@ const staggerContainer = {
   },
 };
 
-// フィードバックカード
+// カテゴリごとのアイコン/絵文字マッピング
+const categoryEmoji: Record<string, string> = {
+  "portfolio": "💼",
+  "user-value-design": "🎯",
+  "ui-style": "🎨",
+  "career": "🚀",
+};
+
+// フィードバックカード（LessonCard風）
 const FeedbackCard = ({ feedback }: { feedback: Feedback }) => {
   const publishedDate = feedback.publishedAt
     ? new Date(feedback.publishedAt).toLocaleDateString("ja-JP", {
@@ -39,51 +49,60 @@ const FeedbackCard = ({ feedback }: { feedback: Feedback }) => {
       })
     : null;
 
+  const categorySlug = feedback.category?.slug?.current || "";
+  const emoji = categoryEmoji[categorySlug] || "📝";
+
   return (
     <motion.div variants={fadeInUp}>
       <Link
         to={`/feedbacks/${feedback.slug.current}`}
-        className="block p-5 bg-white rounded-xl border border-[#E5E7EB] hover:border-primary hover:shadow-lg transition-all group"
+        className={cn(
+          "bg-white flex flex-col p-5 rounded-[24px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]",
+          "cursor-pointer transition-all duration-200",
+          "hover:shadow-[0px_1px_12px_0px_rgba(0,0,0,0.12)] hover:translate-y-[-2px]",
+          "w-full h-full",
+          "min-h-[240px]"
+        )}
       >
-        <div className="flex items-start gap-4">
-          {/* アイコン */}
-          <div className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-lg flex-shrink-0">
-            📝
+        <div className="flex h-full flex-col gap-4">
+          {/* カテゴリバッジ */}
+          {feedback.category && (
+            <div className="flex items-center">
+              <span className="inline-flex items-center justify-center px-2.5 py-1.5 bg-primary/10 rounded-full">
+                <span className="font-noto-sans-jp text-[12px] font-medium text-primary leading-none">
+                  {feedback.category.title}
+                </span>
+              </span>
+            </div>
+          )}
+
+          {/* アイコンエリア */}
+          <div className="flex justify-center items-center py-4">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-3xl shadow-inner">
+              {emoji}
+            </div>
           </div>
 
-          {/* コンテンツ */}
-          <div className="flex-1 min-w-0">
-            {/* タイトル + カテゴリ・対象アウトプット・日付 */}
-            <div className="flex flex-col gap-2">
-              <h3 className="text-[16px] font-medium text-foreground group-hover:text-primary transition-colors line-clamp-2 mb-0">
-                {feedback.title}
-              </h3>
-              <div className="flex items-center gap-2 flex-wrap">
-                {feedback.category && (
-                  <span className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full font-medium">
-                    {feedback.category.title}
-                  </span>
-                )}
-                {feedback.targetOutput && (
-                  <span className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded-full">
-                    {feedback.targetOutput}
-                  </span>
-                )}
-                {publishedDate && (
-                  <span className="text-xs text-muted-foreground">
-                    {publishedDate}
-                  </span>
-                )}
-              </div>
-            </div>
+          {/* タイトル・説明エリア */}
+          <div className="flex flex-col gap-2 flex-1">
+            <h3 className="font-rounded-mplus text-[15px] font-bold text-foreground leading-[1.5] line-clamp-2">
+              {feedback.title}
+            </h3>
 
-            {/* 抜粋 */}
-            {feedback.feedbackExcerpt && (
-              <p className="text-[14px] text-muted-foreground line-clamp-2 mt-2">
-                {feedback.feedbackExcerpt}
+            {/* 対象アウトプット */}
+            {feedback.targetOutput && (
+              <p className="font-noto-sans-jp text-xs text-muted-foreground leading-[1.5] line-clamp-1">
+                📎 {feedback.targetOutput}
               </p>
             )}
           </div>
+
+          {/* 日付 */}
+          {publishedDate && (
+            <div className="pt-2 border-t border-gray-100">
+              <p className="text-xs text-muted-foreground">{publishedDate}</p>
+            </div>
+          )}
         </div>
       </Link>
     </motion.div>
@@ -216,7 +235,7 @@ const FeedbackList = () => {
       />
       <div className="min-h-screen w-full bg-base">
         {/* メインコンテンツ */}
-        <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-8">
+        <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
           {/* ページヘッダー */}
           <PageHeader
             label="Feedback"
@@ -256,18 +275,21 @@ const FeedbackList = () => {
             ))}
           </motion.div>
 
-          {/* フィードバックリスト */}
+          {/* フィードバックグリッド */}
           {loading ? (
             <div className="flex justify-center py-12">
               <LoadingSpinner size="lg" />
             </div>
           ) : feedbacks.length === 0 ? (
             <div className="text-center py-12">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                <MessageSquare className="w-8 h-8 text-gray-400" />
+              </div>
               <p className="text-muted-foreground">フィードバックがまだありません</p>
             </div>
           ) : (
             <motion.div
-              className="flex flex-col gap-4"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6"
               variants={staggerContainer}
               initial="initial"
               animate="animate"
