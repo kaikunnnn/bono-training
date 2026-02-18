@@ -69,7 +69,82 @@ BONOのSlackコミュニティで回答した質問を載せていきたい。�
 
 ## フィードバック機能
 
-**質問**: フィードバックプラン限定の範囲は？一覧は見せる？
+**ステータス**: 実装計画確定 ✅
+
+### カテゴリ（確定）
+
+| カテゴリ | 説明 |
+|---------|------|
+| ポートフォリオ | ポートフォリオ全体のフィードバック |
+| ユーザー価値設計 | ユーザー課題の特定、解決策の妥当性 |
+| UIスタイル | 基本的なUIパターン、スタイルの正しさ |
+| キャリア | キャリア相談 |
+
+### 一覧ページ `/feedback`
+
+**レイアウト**: 質問ページと同じ幅・レスポンシブ
+
+**ページタイトル**: 共通コンポーネント化（質問ページから抽出）
+- ラベル: "Feedback"
+- タイトル: "みんなのフィードバック"
+- ボタン: 状態により出し分け
+
+**ボタン出し分けロジック**:
+| 状態 | 表示 |
+|------|------|
+| 未ログイン | ログイン促すボタン |
+| ログイン済み（グロースプラン以外） | 「プランの変更が必要です」+ 「プランを変更する」ボタン |
+| グロースプラン | 「フィードバックを依頼する」ボタン |
+
+**フィードバックカード**:
+- テイスト: LessonCardを参考
+- タイトル（必須）
+- カテゴリ（必須）
+- 対象アウトプット/コース名（任意、なければ非表示）
+- 概要文（最大2行、必須）
+
+### 詳細ページ `/feedback/:slug`
+
+**構成（上から順に）**:
+
+| # | セクション | 内容 | アクセス |
+|---|-----------|------|----------|
+| 1 | ヘッダー | タイトル・カテゴリ・対象アウトプット・日付 | 全員 |
+| 2 | 動画 | Vimeo埋め込み（ある場合のみ、ブログ詳細のサムネ位置） | **課金者限定**（VideoSection使用） |
+| 3 | 依頼内容 | FigmaURL（リンクのみ）・見てほしいポイント・依頼文 | 全員 |
+| 4 | 本文 | Kaiのフィードバック（リッチテキスト、ブログ風） | **課金者限定** |
+
+### Sanity Schema設計
+
+**feedbackCategory**:
+- title: string
+- slug: slug
+
+**feedback**:
+- title: string（必須）
+- slug: slug（必須）
+- category: reference → feedbackCategory（必須）
+- targetOutput: string（任意、対象コース/アウトプット名）
+- excerpt: text（概要、最大2行分）
+- videoUrl: url（任意、Vimeo）
+- figmaUrl: url（任意）
+- requestPoints: text（見てほしいポイント）
+- requestContent: blockContent（依頼内容リッチテキスト）
+- feedbackContent: blockContent（本文リッチテキスト）
+- publishedAt: datetime
+
+### 実装で使用する既存コンポーネント
+
+- `VideoSection`: 動画表示 + アクセス制限（src/components/article/VideoSection.tsx）
+- `PremiumVideoLock`: 動画ロック表示（src/components/premium/PremiumVideoLock.tsx）
+- `useSubscriptionContext`: サブスクリプション状態取得
+- `canAccessContent`: アクセス判定（src/utils/premiumAccess.ts）
+- `LessonCard`: カードデザイン参考（src/components/lessons/LessonCard.tsx）
+- `Button`: ボタン（variant="default", size="medium"）
+
+---
+
+### 旧メモ（参考）
 
 ```
 考え:
