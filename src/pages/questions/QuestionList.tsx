@@ -165,6 +165,9 @@ const QuestionList = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
+            <span className="text-sm text-muted-foreground mb-2 block">
+              Q&A
+            </span>
             <h1 className="text-[28px] md:text-[36px] font-bold text-foreground font-rounded-mplus mb-4">
               みんなの質問
             </h1>
