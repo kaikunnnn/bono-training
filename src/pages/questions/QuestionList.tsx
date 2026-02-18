@@ -160,20 +160,26 @@ const QuestionList = () => {
         <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-8">
           {/* ページヘッダー */}
           <motion.div
-            className="text-center mb-10"
+            className="text-center mb-12"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <span className="text-sm text-muted-foreground mb-2 block">
-              Q&A
-            </span>
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground font-rounded-mplus mb-3">
+            <h1 className="text-[28px] md:text-[36px] font-bold text-foreground font-rounded-mplus mb-4">
               みんなの質問
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-[15px] text-muted-foreground mb-8">
               BONOメンバーから寄せられた質問と回答をまとめています
             </p>
+            <a
+              href="https://bo-no.slack.com/archives/C02GNBK4EGR"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button variant="default" size="medium">
+                質問する
+              </Button>
+            </a>
           </motion.div>
 
           {/* カテゴリフィルター */}
