@@ -72,9 +72,11 @@ import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
 import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
 import LessonCardMotion from "./pages/dev/LessonCardMotion";
 import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
-import QuestionsIndex from "./pages/questions";
-import QuestionDetail from "./pages/questions/detail";
+import QuestionsIndexOld from "./pages/questions";
+import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
+import QuestionList from "./pages/questions/QuestionList";
+import QuestionDetail from "./pages/questions/QuestionDetail";
 import EventDetail from "./pages/events/EventDetail";
 
 // コンソールログでインポートの確認
@@ -169,9 +171,13 @@ const AppContent = () => {
 
         <Route path="/roadmap" element={<Roadmap />} />
 
-        <Route path="/questions" element={<PrivateRoute><QuestionsIndex /></PrivateRoute>} />
-        <Route path="/questions/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
-        <Route path="/questions/:questionId" element={<PrivateRoute><QuestionDetail /></PrivateRoute>} />
+        {/* 新しい質問ページ（Sanityベース） */}
+        <Route path="/questions" element={<QuestionList />} />
+        <Route path="/questions/:slug" element={<QuestionDetail />} />
+        {/* 旧質問ページ（テスト用 - 後で削除） */}
+        <Route path="/questions-old" element={<PrivateRoute><QuestionsIndexOld /></PrivateRoute>} />
+        <Route path="/questions-old/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
+        <Route path="/questions-old/:questionId" element={<PrivateRoute><QuestionDetailOld /></PrivateRoute>} />
 
         <Route path="/events/:slug" element={<EventDetail />} />
 

@@ -90,6 +90,17 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         </SidebarMenuItem>
       </SidebarMenuGroup>
 
+      {/* コミュニティ */}
+      <SidebarMenuGroup label="コミュニティ" itemGap>
+        <SidebarMenuItem
+          href="/questions"
+          icon={<MenuIcons.question size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/questions") || location.pathname.startsWith("/questions/")}
+        >
+          質問
+        </SidebarMenuItem>
+      </SidebarMenuGroup>
+
       {/* その他メニュー */}
       <SidebarMenuGroup label="その他" itemGap>
         {/* ログイン（ログオフ時のみ表示） */}

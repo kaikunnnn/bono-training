@@ -1,6 +1,6 @@
 import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
-import type { ArticleWithContext, Event } from "@/types/sanity";
+import type { ArticleWithContext, Event, Question, QuestionCategory } from "@/types/sanity";
 
 export const client = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
@@ -168,4 +168,162 @@ export async function getEvent(slug: string): Promise<Event | null> {
   const event = await client.fetch<Event | null>(eventQuery, { slug });
   console.log("[getEvent] Result:", event);
   return event;
+}
+
+// ============================================
+// Question 関連のクエリ
+// ============================================
+
+/**
+ * 質問カテゴリ一覧を取得
+ */
+export async function getQuestionCategories(): Promise<QuestionCategory[]> {
+  const query = `
+    *[_type == "questionCategory"] | order(title asc) {
+      _id,
+      title,
+      slug
+    }
+  `;
+  return client.fetch<QuestionCategory[]>(query);
+}
+
+/**
+ * 質問一覧を取得
+ */
+export async function getAllQuestions(): Promise<Question[]> {
+  const query = `
+    *[_type == "question"] | order(publishedAt desc) {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      "questionExcerpt": pt::text(questionContent)[0..150],
+      publishedAt
+    }
+  `;
+  return client.fetch<Question[]>(query);
+}
+
+/**
+ * カテゴリ別の質問一覧を取得
+ */
+export async function getQuestionsByCategory(categorySlug: string): Promise<Question[]> {
+  const query = `
+    *[_type == "question" && category->slug.current == $categorySlug] | order(publishedAt desc) {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      "questionExcerpt": pt::text(questionContent)[0..150],
+      publishedAt
+    }
+  `;
+  return client.fetch<Question[]>(query, { categorySlug });
+}
+
+/**
+ * 質問詳細を取得
+ */
+export async function getQuestion(slug: string): Promise<Question | null> {
+  const query = `
+    *[_type == "question" && slug.current == $slug][0] {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      questionContent[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      },
+      answerContent[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      },
+      publishedAt
+    }
+  `;
+  return client.fetch<Question | null>(query, { slug });
+}
+
+/**
+ * 最近の質問を取得（詳細ページの下部に表示）
+ */
+export async function getRecentQuestions(limit: number = 3, excludeSlug?: string): Promise<Question[]> {
+  const query = excludeSlug
+    ? `
+      *[_type == "question" && slug.current != $excludeSlug] | order(publishedAt desc)[0...$limit] {
+        _id,
+        title,
+        slug,
+        "category": category-> {
+          _id,
+          title,
+          slug
+        },
+        publishedAt
+      }
+    `
+    : `
+      *[_type == "question"] | order(publishedAt desc)[0...$limit] {
+        _id,
+        title,
+        slug,
+        "category": category-> {
+          _id,
+          title,
+          slug
+        },
+        publishedAt
+      }
+    `;
+  return client.fetch<Question[]>(query, { limit, excludeSlug });
+}
+
+/**
+ * 関連質問を取得（同じカテゴリの質問）
+ */
+export async function getRelatedQuestions(
+  categorySlug: string,
+  excludeSlug: string,
+  limit: number = 3
+): Promise<Question[]> {
+  const query = `
+    *[_type == "question" && category->slug.current == $categorySlug && slug.current != $excludeSlug] | order(publishedAt desc)[0...$limit] {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      publishedAt
+    }
+  `;
+  return client.fetch<Question[]>(query, { categorySlug, excludeSlug, limit });
 }

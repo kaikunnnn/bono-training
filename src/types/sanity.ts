@@ -173,3 +173,24 @@ export interface Event {
   content: PortableTextBlock[];
   publishedAt?: string;
 }
+
+// QuestionCategory型
+export interface QuestionCategory {
+  _id: string;
+  _type?: "questionCategory";
+  title: string;
+  slug: SanitySlug;
+}
+
+// Question型
+export interface Question {
+  _id: string;
+  _type?: "question";
+  title: string;
+  slug: SanitySlug;
+  category?: QuestionCategory;
+  questionContent?: PortableTextBlock[];
+  answerContent?: PortableTextBlock[];
+  questionExcerpt?: string; // 一覧用の抜粋
+  publishedAt?: string;
+}

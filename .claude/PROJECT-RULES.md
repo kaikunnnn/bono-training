@@ -182,6 +182,91 @@ Stripeで価格を変更した場合、以下を必ず更新:
 
 ## 🎨 UI/デザインルール
 
+### ページレイアウト（グローバルナビゲーション）
+
+**ルール**: 新規ページ作成時は必ず `Layout` コンポーネントを使用する
+
+**背景**:
+- `Layout` コンポーネント（`@/components/layout/Layout`）はサイドバーナビゲーションを含むグローバルレイアウト
+- デスクトップでは左にSidebar（200px）、モバイルではハンバーガーメニュー
+- これを使わないと、サイドバーナビゲーションが表示されない
+
+**やること**:
+```typescript
+// ✅ 正しい - Layoutでラップする
+import Layout from "@/components/layout/Layout";
+
+export default function MyPage() {
+  return (
+    <Layout>
+      <div className="...">
+        {/* ページコンテンツ */}
+      </div>
+    </Layout>
+  );
+}
+```
+
+**やってはいけないこと**:
+```typescript
+// ❌ 間違い - Layoutを使わない独自構造
+export default function MyPage() {
+  return (
+    <div className="min-h-screen">
+      <header>...</header>  {/* 独自ヘッダー */}
+      <main>...</main>
+    </div>
+  );
+}
+```
+
+**例外**:
+- ランディングページ（`/`）
+- 認証ページ（`/login`, `/signup`）
+- 特別なスタンドアロンページ（イベント詳細など、意図的にLayoutを使わない場合）
+
+---
+
+### UIコンポーネント（デザインシステム）
+
+**ルール**: UIコンポーネントは必ず `@/components/ui/` の既存コンポーネントを使用する
+
+**背景**:
+- `@/components/ui/button.tsx` などにデザインシステムに準拠したコンポーネントがある
+- 独自のTailwindクラスでスタイリングすると、デザインの一貫性が崩れる
+
+**特に重要なコンポーネント**:
+- `Button` - ボタン（variant: default, outline, secondary, ghost等）
+- `Card` - カード
+- `Input` - 入力フィールド
+- `Badge` - バッジ
+- `Skeleton` - ローディング状態
+
+**やること**:
+```typescript
+// ✅ 正しい - デザインシステムのButtonを使う
+import { Button } from "@/components/ui/button";
+
+<Button variant="outline" size="sm">
+  フィルター
+</Button>
+```
+
+**やってはいけないこと**:
+```typescript
+// ❌ 間違い - 独自のTailwindクラスでボタンを作る
+<button className="px-4 py-2 rounded-full bg-blue-500 text-white">
+  フィルター
+</button>
+```
+
+**新しいスタイルが必要な場合**:
+1. `@/components/ui/button.tsx` を確認し、既存のvariantを探す
+2. なければ、button.tsxに新しいvariantを追加する
+3. 独自のTailwindクラスでスタイリングしない
+
+---
+
 ### アイコンライブラリの統一（Iconsax）
 
 **ルール**: アイコンは必ず `@/lib/icons` から import する。`lucide-react` などを直接使わない。
