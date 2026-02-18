@@ -194,3 +194,28 @@ export interface Question {
   questionExcerpt?: string; // 一覧用の抜粋
   publishedAt?: string;
 }
+
+// FeedbackCategory型
+export interface FeedbackCategory {
+  _id: string;
+  _type?: "feedbackCategory";
+  title: string;
+  slug: SanitySlug;
+}
+
+// Feedback型
+export interface Feedback {
+  _id: string;
+  _type?: "feedback";
+  title: string;
+  slug: SanitySlug;
+  category?: FeedbackCategory;
+  targetOutput?: string;
+  publishedAt?: string;
+  vimeoUrl?: string;
+  figmaUrl?: string;
+  reviewPoints?: PortableTextBlock[];
+  requestContent?: PortableTextBlock[];
+  feedbackContent?: PortableTextBlock[];
+  feedbackExcerpt?: string; // 一覧用の抜粋
+}

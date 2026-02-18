@@ -97,7 +97,14 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           icon={<MenuIcons.question size={ICON_SIZE} variant="Outline" />}
           isActive={isActive("/questions") || location.pathname.startsWith("/questions/")}
         >
-          質問
+          みんなの質問
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/feedbacks"
+          icon={<MenuIcons.feedback size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/feedbacks") || location.pathname.startsWith("/feedbacks/")}
+        >
+          フィードバック
         </SidebarMenuItem>
       </SidebarMenuGroup>
 

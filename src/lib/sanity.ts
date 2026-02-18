@@ -1,6 +1,6 @@
 import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
-import type { ArticleWithContext, Event, Question, QuestionCategory } from "@/types/sanity";
+import type { ArticleWithContext, Event, Question, QuestionCategory, Feedback, FeedbackCategory } from "@/types/sanity";
 
 export const client = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
@@ -326,4 +326,180 @@ export async function getRelatedQuestions(
     }
   `;
   return client.fetch<Question[]>(query, { categorySlug, excludeSlug, limit });
+}
+
+// ============================================
+// Feedback 関連のクエリ
+// ============================================
+
+/**
+ * フィードバックカテゴリ一覧を取得
+ */
+export async function getFeedbackCategories(): Promise<FeedbackCategory[]> {
+  const query = `
+    *[_type == "feedbackCategory"] | order(title asc) {
+      _id,
+      title,
+      slug
+    }
+  `;
+  return client.fetch<FeedbackCategory[]>(query);
+}
+
+/**
+ * フィードバック一覧を取得
+ */
+export async function getAllFeedbacks(): Promise<Feedback[]> {
+  const query = `
+    *[_type == "feedback"] | order(publishedAt desc) {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      targetOutput,
+      "feedbackExcerpt": pt::text(feedbackContent)[0..150],
+      publishedAt
+    }
+  `;
+  return client.fetch<Feedback[]>(query);
+}
+
+/**
+ * カテゴリ別のフィードバック一覧を取得
+ */
+export async function getFeedbacksByCategory(categorySlug: string): Promise<Feedback[]> {
+  const query = `
+    *[_type == "feedback" && category->slug.current == $categorySlug] | order(publishedAt desc) {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      targetOutput,
+      "feedbackExcerpt": pt::text(feedbackContent)[0..150],
+      publishedAt
+    }
+  `;
+  return client.fetch<Feedback[]>(query, { categorySlug });
+}
+
+/**
+ * フィードバック詳細を取得
+ */
+export async function getFeedback(slug: string): Promise<Feedback | null> {
+  const query = `
+    *[_type == "feedback" && slug.current == $slug][0] {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      targetOutput,
+      publishedAt,
+      vimeoUrl,
+      figmaUrl,
+      reviewPoints[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      },
+      requestContent[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      },
+      feedbackContent[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      }
+    }
+  `;
+  return client.fetch<Feedback | null>(query, { slug });
+}
+
+/**
+ * 最近のフィードバックを取得（詳細ページの下部に表示）
+ */
+export async function getRecentFeedbacks(limit: number = 3, excludeSlug?: string): Promise<Feedback[]> {
+  const query = excludeSlug
+    ? `
+      *[_type == "feedback" && slug.current != $excludeSlug] | order(publishedAt desc)[0...$limit] {
+        _id,
+        title,
+        slug,
+        "category": category-> {
+          _id,
+          title,
+          slug
+        },
+        targetOutput,
+        publishedAt
+      }
+    `
+    : `
+      *[_type == "feedback"] | order(publishedAt desc)[0...$limit] {
+        _id,
+        title,
+        slug,
+        "category": category-> {
+          _id,
+          title,
+          slug
+        },
+        targetOutput,
+        publishedAt
+      }
+    `;
+  return client.fetch<Feedback[]>(query, { limit, excludeSlug });
+}
+
+/**
+ * 関連フィードバックを取得（同じカテゴリのフィードバック）
+ */
+export async function getRelatedFeedbacks(
+  categorySlug: string,
+  excludeSlug: string,
+  limit: number = 3
+): Promise<Feedback[]> {
+  const query = `
+    *[_type == "feedback" && category->slug.current == $categorySlug && slug.current != $excludeSlug] | order(publishedAt desc)[0...$limit] {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      targetOutput,
+      publishedAt
+    }
+  `;
+  return client.fetch<Feedback[]>(query, { categorySlug, excludeSlug, limit });
 }

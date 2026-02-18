@@ -20,6 +20,7 @@ import {
   ExportCurve,
   People,
   MessageQuestion,
+  Messages1,
 } from "iconsax-react";
 
 /**
@@ -51,6 +52,8 @@ export const MenuIcons = {
   community: People,
   // 質問
   question: MessageQuestion,
+  // フィードバック
+  feedback: Messages1,
 } as const;
 
 /**

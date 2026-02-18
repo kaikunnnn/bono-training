@@ -77,6 +77,8 @@ import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
 import QuestionList from "./pages/questions/QuestionList";
 import QuestionDetail from "./pages/questions/QuestionDetail";
+import FeedbackList from "./pages/feedbacks/FeedbackList";
+import FeedbackDetail from "./pages/feedbacks/FeedbackDetail";
 import EventDetail from "./pages/events/EventDetail";
 
 // コンソールログでインポートの確認
@@ -178,6 +180,10 @@ const AppContent = () => {
         <Route path="/questions-old" element={<PrivateRoute><QuestionsIndexOld /></PrivateRoute>} />
         <Route path="/questions-old/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
         <Route path="/questions-old/:questionId" element={<PrivateRoute><QuestionDetailOld /></PrivateRoute>} />
+
+        {/* フィードバックページ（Sanityベース） */}
+        <Route path="/feedbacks" element={<FeedbackList />} />
+        <Route path="/feedbacks/:slug" element={<FeedbackDetail />} />
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
