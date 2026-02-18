@@ -21,6 +21,7 @@ import {
   People,
   MessageQuestion,
   Messages1,
+  Lamp,
 } from "iconsax-react";
 
 /**
@@ -54,6 +55,8 @@ export const MenuIcons = {
   question: MessageQuestion,
   // フィードバック
   feedback: Messages1,
+  // ナレッジ
+  knowledge: Lamp,
 } as const;
 
 /**

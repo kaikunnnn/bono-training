@@ -1,6 +1,6 @@
 import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
-import type { ArticleWithContext, Event, Question, QuestionCategory, Feedback, FeedbackCategory } from "@/types/sanity";
+import type { ArticleWithContext, Event, Question, QuestionCategory, Feedback, FeedbackCategory, Knowledge, KnowledgeCategory } from "@/types/sanity";
 
 export const client = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
@@ -502,4 +502,159 @@ export async function getRelatedFeedbacks(
     }
   `;
   return client.fetch<Feedback[]>(query, { categorySlug, excludeSlug, limit });
+}
+
+// ======================
+// ナレッジ（Knowledge）
+// ======================
+
+/**
+ * ナレッジカテゴリ一覧を取得
+ */
+export async function getKnowledgeCategories(): Promise<KnowledgeCategory[]> {
+  const query = `
+    *[_type == "knowledgeCategory"] | order(order asc) {
+      _id,
+      title,
+      slug,
+      description,
+      emoji,
+      order
+    }
+  `;
+  return client.fetch<KnowledgeCategory[]>(query);
+}
+
+/**
+ * ナレッジ一覧を取得
+ */
+export async function getAllKnowledge(): Promise<Knowledge[]> {
+  const query = `
+    *[_type == "knowledge"] | order(featured desc, publishedAt desc) {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug,
+        emoji
+      },
+      excerpt,
+      "thumbnailUrl": thumbnail.asset->url,
+      tags,
+      publishedAt,
+      featured
+    }
+  `;
+  return client.fetch<Knowledge[]>(query);
+}
+
+/**
+ * カテゴリ別のナレッジ一覧を取得
+ */
+export async function getKnowledgeByCategory(categorySlug: string): Promise<Knowledge[]> {
+  const query = `
+    *[_type == "knowledge" && category->slug.current == $categorySlug] | order(featured desc, publishedAt desc) {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug,
+        emoji
+      },
+      excerpt,
+      "thumbnailUrl": thumbnail.asset->url,
+      tags,
+      publishedAt,
+      featured
+    }
+  `;
+  return client.fetch<Knowledge[]>(query, { categorySlug });
+}
+
+/**
+ * ナレッジ詳細を取得
+ */
+export async function getKnowledge(slug: string): Promise<Knowledge | null> {
+  const query = `
+    *[_type == "knowledge" && slug.current == $slug][0] {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug,
+        emoji
+      },
+      excerpt,
+      "thumbnailUrl": thumbnail.asset->url,
+      content[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      },
+      tags,
+      publishedAt,
+      featured
+    }
+  `;
+  return client.fetch<Knowledge | null>(query, { slug });
+}
+
+/**
+ * 関連ナレッジを取得（同じカテゴリのナレッジ）
+ */
+export async function getRelatedKnowledge(
+  categorySlug: string,
+  excludeSlug: string,
+  limit: number = 3
+): Promise<Knowledge[]> {
+  const query = `
+    *[_type == "knowledge" && category->slug.current == $categorySlug && slug.current != $excludeSlug] | order(publishedAt desc)[0...$limit] {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug,
+        emoji
+      },
+      excerpt,
+      publishedAt
+    }
+  `;
+  return client.fetch<Knowledge[]>(query, { categorySlug, excludeSlug, limit });
+}
+
+/**
+ * 最近のナレッジを取得
+ */
+export async function getRecentKnowledge(limit: number = 3, excludeSlug?: string): Promise<Knowledge[]> {
+  const excludeCondition = excludeSlug ? `&& slug.current != $excludeSlug` : '';
+  const query = `
+    *[_type == "knowledge" ${excludeCondition}] | order(publishedAt desc)[0...$limit] {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug,
+        emoji
+      },
+      excerpt,
+      publishedAt
+    }
+  `;
+  return client.fetch<Knowledge[]>(query, { limit, excludeSlug });
 }

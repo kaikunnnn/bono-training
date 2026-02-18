@@ -219,3 +219,30 @@ export interface Feedback {
   requestContent?: PortableTextBlock[];
   feedbackContent?: PortableTextBlock[];
 }
+
+// KnowledgeCategory型
+export interface KnowledgeCategory {
+  _id: string;
+  _type?: "knowledgeCategory";
+  title: string;
+  slug: SanitySlug;
+  description?: string;
+  emoji?: string;
+  order?: number;
+}
+
+// Knowledge型
+export interface Knowledge {
+  _id: string;
+  _type?: "knowledge";
+  title: string;
+  slug: SanitySlug;
+  category?: KnowledgeCategory;
+  excerpt: string;
+  thumbnail?: SanityImage;
+  thumbnailUrl?: string;
+  content?: PortableTextBlock[];
+  tags?: string[];
+  publishedAt?: string;
+  featured?: boolean;
+}

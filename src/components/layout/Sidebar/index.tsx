@@ -106,6 +106,13 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         >
           フィードバック
         </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/knowledge"
+          icon={<MenuIcons.knowledge size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/knowledge") || location.pathname.startsWith("/knowledge/")}
+        >
+          お役立ち
+        </SidebarMenuItem>
       </SidebarMenuGroup>
 
       {/* その他メニュー */}

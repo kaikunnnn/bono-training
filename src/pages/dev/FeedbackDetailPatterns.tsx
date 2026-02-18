@@ -15,8 +15,10 @@ import {
   Calendar,
   Layers,
   Sparkles,
-  CheckCircle2,
   FileText,
+  MapPin,
+  Clock,
+  CalendarDays,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +36,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 // モックデータ
 const MOCK_FEEDBACK = {
@@ -42,9 +45,147 @@ const MOCK_FEEDBACK = {
   targetOutput: "情報設計コースのお題：出張申請システム",
   publishedDate: "2026.02.18",
   author: "T.K.",
+  reviewer: "BONO Reviewer",
   requestSummary:
     "申請一覧と新規作成画面のUIを添削していただきたいです。情報設計の観点から、ユーザビリティや視認性についてフィードバックをお願いします。特にテーブルのレイアウトと、SP時の表示崩れが気になっています。",
 };
+
+/**
+ * Pattern C: Luma Style (Event Page Inspired)
+ * 特徴: 大きなカバー画像、カレンダーアイコン、ホスト情報、スティッキーなアクションバー
+ */
+const PatternLuma: React.FC = () => {
+  return (
+    <div className="relative min-h-[900px] bg-white rounded-3xl overflow-hidden border border-border shadow-sm font-sans">
+      {/* Cover Image Area */}
+      <div className="w-full h-[320px] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 relative">
+        <div className="absolute inset-0 bg-black/10" />
+        <div className="absolute bottom-6 left-6 md:left-10 text-white">
+          <Badge className="bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-md mb-3">
+            Premium Feedback
+          </Badge>
+          {/* Luma-style Date Badge (large overlay) */}
+        </div>
+      </div>
+
+      <div className="max-w-[720px] mx-auto px-6 md:px-10 -mt-12 relative z-10 pb-24">
+        {/* Main Card */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8 mb-8">
+          <div className="flex flex-col gap-6">
+            
+            {/* Title & Date */}
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4 font-rounded-mplus">
+                {MOCK_FEEDBACK.title}
+              </h1>
+              
+              <div className="flex items-start gap-4 text-gray-600">
+                <div className="flex-shrink-0 w-12 h-12 bg-gray-50 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center overflow-hidden">
+                  <span className="text-[10px] uppercase font-bold text-red-500 bg-red-50 w-full py-0.5">FEB</span>
+                  <span className="text-lg font-bold text-gray-900">18</span>
+                </div>
+                <div className="pt-0.5">
+                  <p className="font-bold text-gray-900">Wednesday, February 18</p>
+                  <p className="text-sm text-gray-500">2026 • 12:45 PM</p>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Host / Reviewer */}
+            <div className="flex items-center gap-3">
+               <Avatar className="w-10 h-10 border border-gray-200">
+                 <AvatarFallback className="bg-black text-white font-bold">B</AvatarFallback>
+               </Avatar>
+               <div>
+                 <p className="text-sm font-medium text-gray-900">Hosted by</p>
+                 <p className="text-sm text-gray-600">{MOCK_FEEDBACK.reviewer}</p>
+               </div>
+            </div>
+
+            <Separator />
+
+            {/* Location / Platform */}
+             <div className="flex items-center gap-3">
+               <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
+                 <MapPin className="size-5" />
+               </div>
+               <div>
+                 <p className="text-sm font-medium text-gray-900">Location</p>
+                 <p className="text-sm text-gray-600">Online • Figma Review</p>
+               </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Content Body (2 Columns on Desktop) */}
+        <div className="grid md:grid-cols-[1fr_300px] gap-10">
+          
+          {/* Left: Description */}
+          <div className="space-y-8">
+            <div className="prose prose-gray max-w-none">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 font-rounded-mplus">About Feedback</h3>
+              <p className="text-gray-600 leading-relaxed">
+                今回のレビューでは、主に情報設計の観点からUIを拝見しました。
+                特に業務システムにおいて重要なのは「一覧性」と「操作性」のバランスです。
+              </p>
+              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 my-4">
+                <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Request from Member</h4>
+                <p className="text-sm text-gray-600 italic">"{MOCK_FEEDBACK.requestSummary}"</p>
+              </div>
+              <p className="text-gray-600">
+                動画内で具体的なFigmaの操作を見せながら解説しています。
+              </p>
+            </div>
+            
+            {/* Video Placeholder (Inline) */}
+            <div className="rounded-xl overflow-hidden border border-gray-200 relative group cursor-pointer">
+               <div className="aspect-video bg-gray-100 flex items-center justify-center">
+                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                   <Play className="size-6 text-black ml-1 fill-black" />
+                 </div>
+               </div>
+               <div className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+                 <Lock className="size-4 text-amber-500" />
+                 <span className="text-sm font-medium text-gray-900">Premium Content</span>
+               </div>
+            </div>
+          </div>
+
+          {/* Right: Sticky Sidebar (Desktop) / Bottom Bar (Mobile) Simulation */}
+          <div className="hidden md:block">
+            <div className="sticky top-6 p-6 rounded-2xl border border-gray-200 bg-white shadow-sm space-y-4">
+              <div className="text-center">
+                <p className="text-sm text-gray-500 mb-1">Access Required</p>
+                <p className="text-2xl font-bold text-gray-900">Growth Plan</p>
+              </div>
+              <Button className="w-full rounded-xl h-12 font-bold text-base" size="lg">
+                Watch Full Video
+              </Button>
+              <p className="text-xs text-center text-gray-400">
+                Includes Figma file access
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+      
+      {/* Mobile Sticky Action Bar */}
+      <div className="md:hidden absolute bottom-0 inset-x-0 p-4 bg-white border-t border-gray-200 flex items-center justify-between z-20">
+         <div>
+           <p className="text-xs text-gray-500">Access</p>
+           <p className="font-bold text-gray-900">Growth Plan</p>
+         </div>
+         <Button className="rounded-xl font-bold">Watch Video</Button>
+      </div>
+
+    </div>
+  );
+};
+
 
 /**
  * Pattern A: Editorial (System Components)
@@ -353,6 +494,18 @@ const FeedbackDetailPatterns: React.FC = () => {
             </div>
           </div>
           <PatternModernSaaS />
+        </section>
+
+        {/* Pattern C */}
+        <section className="mb-20">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500 to-purple-500 text-white flex items-center justify-center font-bold shadow-lg shadow-indigo-200">C</div>
+             <div>
+               <h2 className="text-xl font-bold text-foreground font-rounded-mplus">Luma Event Style</h2>
+               <p className="text-sm text-muted-foreground">Lu.ma風。大きなアイキャッチ、カレンダー表示、イベントページのような情報整理。</p>
+            </div>
+          </div>
+          <PatternLuma />
         </section>
 
       </div>

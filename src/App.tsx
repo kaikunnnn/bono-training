@@ -80,6 +80,8 @@ import QuestionList from "./pages/questions/QuestionList";
 import QuestionDetail from "./pages/questions/QuestionDetail";
 import FeedbackList from "./pages/feedbacks/FeedbackList";
 import FeedbackDetail from "./pages/feedbacks/FeedbackDetail";
+import KnowledgeList from "./pages/knowledge/KnowledgeList";
+import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
 
 // コンソールログでインポートの確認
@@ -186,6 +188,10 @@ const AppContent = () => {
         {/* フィードバックページ（Sanityベース） */}
         <Route path="/feedbacks" element={<FeedbackList />} />
         <Route path="/feedbacks/:slug" element={<FeedbackDetail />} />
+
+        {/* ナレッジページ（Sanityベース） */}
+        <Route path="/knowledge" element={<KnowledgeList />} />
+        <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
