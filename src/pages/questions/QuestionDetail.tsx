@@ -267,36 +267,41 @@ const QuestionDetail = () => {
             initial="initial"
             animate="animate"
           >
-            {/* ヘッダー部分：タイトル */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-4">
-              <div className="flex flex-col gap-4 border-b border-[#d0d5dd] pb-8 text-[#d0d5dd]">
-                <h1 className="text-2xl md:text-3xl font-bold text-black font-rounded-mplus leading-tight">
-                  {question.title}
-                </h1>
+            {/* ヘッダー部分：タイトル + カテゴリ・日付 */}
+            <motion.div variants={fadeInUp} className="flex flex-col gap-4 border-b border-[#d0d5dd] pb-8">
+              <h1 className="text-2xl md:text-3xl font-bold text-black font-rounded-mplus leading-tight">
+                {question.title}
+              </h1>
+              <div className="flex items-center gap-3 text-sm">
+                {question.category && (
+                  <span className="px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                    {question.category.title}
+                  </span>
+                )}
+                {publishedDate && (
+                  <span className="text-muted-foreground">{publishedDate}</span>
+                )}
               </div>
             </motion.div>
-
-            {/* カテゴリ・日付 */}
-            <div className="flex items-center gap-3 text-sm">
-              {question.category && (
-                <span className="px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
-                  {question.category.title}
-                </span>
-              )}
-              {publishedDate && (
-                <span className="text-muted-foreground">{publishedDate}</span>
-              )}
-            </div>
 
             {/* 質問ブロック */}
             <motion.div variants={fadeInUp} className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-lg">
-                  👤
+                <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
+                  <img
+                    src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Neutral%20face/3D/neutral_face_3d.png"
+                    alt="BONOメンバー"
+                    className="w-7 h-7 object-contain"
+                  />
                 </div>
-                <span className="text-[15px] font-medium text-foreground">
-                  BONOメンバー
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-medium text-foreground">
+                    BONOメンバー
+                  </span>
+                  <span className="px-2 py-0.5 text-[11px] font-medium bg-blue-100 text-blue-700 rounded">
+                    質問
+                  </span>
+                </div>
               </div>
               <div className="ml-[52px] p-5 bg-white rounded-2xl border border-border">
                 {question.questionContent &&
@@ -314,12 +319,26 @@ const QuestionDetail = () => {
             {/* 回答ブロック */}
             <motion.div variants={fadeInUp} className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#FF6B4A] flex items-center justify-center text-white text-sm font-bold">
-                  K
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-[#FF6B4A] flex items-center justify-center">
+                  <img
+                    src="/images/authors/kaikun.jpg"
+                    alt="カイクン"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // 画像が読み込めない場合はフォールバック表示
+                      e.currentTarget.style.display = 'none';
+                      e.currentTarget.parentElement!.innerHTML = '<span class="text-white text-sm font-bold">K</span>';
+                    }}
+                  />
                 </div>
-                <span className="text-[15px] font-medium text-foreground">
-                  Kai
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[15px] font-medium text-foreground">
+                    カイクン
+                  </span>
+                  <span className="px-2 py-0.5 text-[11px] font-medium bg-orange-100 text-orange-700 rounded">
+                    回答
+                  </span>
+                </div>
               </div>
               <div className="ml-[52px] p-5 bg-white rounded-2xl shadow-sm">
                 {question.answerContent && question.answerContent.length > 0 ? (

@@ -5,6 +5,7 @@ import { urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
 import { useLessons } from "@/hooks/useLessons";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
+import PageHeader from "@/components/common/PageHeader";
 import LessonCard from "@/components/lessons/LessonCard";
 import { Lesson } from "@/types/lesson";
 
@@ -66,15 +67,12 @@ export default function Lessons() {
 
   return (
     <Layout>
-      <div className="p-4 md:p-8">
-        <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-6">
-          レッスン一覧
-        </h1>
-        <p className="text-sm md:text-base !text-black mb-6">
-          工事中です👷
-          <br />
-          デザインサイクルと一部、AI×リサーチ＆プロトタイプだけ見れます。
-        </p>
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+        <PageHeader
+          label="Lesson"
+          title="レッスン一覧"
+          description="工事中です👷 デザインサイクルと一部、AI×リサーチ＆プロトタイプだけ見れます。"
+        />
 
         {lessons.length === 0 ? (
           <p>レッスンがありません。Sanity Studioでデータを追加してください。</p>

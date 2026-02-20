@@ -19,6 +19,7 @@ import {
   MapPin,
   Clock,
   CalendarDays,
+  CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,140 +52,144 @@ const MOCK_FEEDBACK = {
 };
 
 /**
- * Pattern C: Luma Style (Event Page Inspired)
- * 特徴: 大きなカバー画像、カレンダーアイコン、ホスト情報、スティッキーなアクションバー
+ * Pattern C: Luma Case Study Style (Refined)
+ * 特徴: やわらかいグラデーション背景、シングルカラム、記事のような読みやすさ
  */
 const PatternLuma: React.FC = () => {
   return (
     <div className="relative min-h-[900px] bg-white rounded-3xl overflow-hidden border border-border shadow-sm font-sans">
-      {/* Cover Image Area */}
-      <div className="w-full h-[320px] bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 relative">
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute bottom-6 left-6 md:left-10 text-white">
-          <Badge className="bg-white/20 hover:bg-white/30 text-white border-none backdrop-blur-md mb-3">
-            Premium Feedback
-          </Badge>
-          {/* Luma-style Date Badge (large overlay) */}
-        </div>
-      </div>
+      {/* Ambient Gradient Background */}
+      <div className="absolute top-0 inset-x-0 h-[400px] bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-purple-100/60 via-pink-50/40 to-transparent pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-[400px] bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-blue-100/50 via-transparent to-transparent pointer-events-none" />
 
-      <div className="max-w-[720px] mx-auto px-6 md:px-10 -mt-12 relative z-10 pb-24">
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 md:p-8 mb-8">
-          <div className="flex flex-col gap-6">
-            
-            {/* Title & Date */}
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight mb-4 font-rounded-mplus">
-                {MOCK_FEEDBACK.title}
-              </h1>
-              
-              <div className="flex items-start gap-4 text-gray-600">
-                <div className="flex-shrink-0 w-12 h-12 bg-gray-50 rounded-xl border border-gray-100 flex flex-col items-center justify-center text-center overflow-hidden">
-                  <span className="text-[10px] uppercase font-bold text-red-500 bg-red-50 w-full py-0.5">FEB</span>
-                  <span className="text-lg font-bold text-gray-900">18</span>
-                </div>
-                <div className="pt-0.5">
-                  <p className="font-bold text-gray-900">Wednesday, February 18</p>
-                  <p className="text-sm text-gray-500">2026 • 12:45 PM</p>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Host / Reviewer */}
-            <div className="flex items-center gap-3">
-               <Avatar className="w-10 h-10 border border-gray-200">
-                 <AvatarFallback className="bg-black text-white font-bold">B</AvatarFallback>
-               </Avatar>
-               <div>
-                 <p className="text-sm font-medium text-gray-900">Hosted by</p>
-                 <p className="text-sm text-gray-600">{MOCK_FEEDBACK.reviewer}</p>
-               </div>
-            </div>
-
-            <Separator />
-
-            {/* Location / Platform */}
-             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500">
-                 <MapPin className="size-5" />
-               </div>
-               <div>
-                 <p className="text-sm font-medium text-gray-900">Location</p>
-                 <p className="text-sm text-gray-600">Online • Figma Review</p>
-               </div>
-            </div>
-
+      <div className="max-w-3xl mx-auto px-6 md:px-10 py-12 relative z-10">
+        
+        {/* Header Section */}
+        <div className="mb-12">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-100 shadow-sm mb-6">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+              Feedback Review
+            </span>
           </div>
-        </div>
-
-        {/* Content Body (2 Columns on Desktop) */}
-        <div className="grid md:grid-cols-[1fr_300px] gap-10">
           
-          {/* Left: Description */}
-          <div className="space-y-8">
-            <div className="prose prose-gray max-w-none">
-              <h3 className="text-xl font-bold text-gray-900 mb-4 font-rounded-mplus">About Feedback</h3>
-              <p className="text-gray-600 leading-relaxed">
-                今回のレビューでは、主に情報設計の観点からUIを拝見しました。
-                特に業務システムにおいて重要なのは「一覧性」と「操作性」のバランスです。
-              </p>
-              <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 my-4">
-                <h4 className="font-bold text-gray-900 mb-2 text-sm uppercase tracking-wide">Request from Member</h4>
-                <p className="text-sm text-gray-600 italic">"{MOCK_FEEDBACK.requestSummary}"</p>
-              </div>
-              <p className="text-gray-600">
-                動画内で具体的なFigmaの操作を見せながら解説しています。
-              </p>
+          <h1 className="text-3xl md:text-4xl lg:text-[44px] font-bold text-gray-900 leading-[1.2] tracking-tight font-rounded-mplus mb-6">
+            {MOCK_FEEDBACK.title}
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <Avatar className="w-6 h-6 border border-white shadow-sm">
+                <AvatarFallback className="bg-gray-900 text-white text-[10px]">B</AvatarFallback>
+              </Avatar>
+              <span className="font-medium text-gray-900">{MOCK_FEEDBACK.reviewer}</span>
             </div>
-            
-            {/* Video Placeholder (Inline) */}
-            <div className="rounded-xl overflow-hidden border border-gray-200 relative group cursor-pointer">
-               <div className="aspect-video bg-gray-100 flex items-center justify-center">
-                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                   <Play className="size-6 text-black ml-1 fill-black" />
+            <span className="text-gray-300">•</span>
+            <span>{MOCK_FEEDBACK.publishedDate}</span>
+            <span className="text-gray-300">•</span>
+            <Badge variant="secondary" className="font-normal bg-gray-100 hover:bg-gray-200 border-transparent text-gray-600">
+              {MOCK_FEEDBACK.category}
+            </Badge>
+          </div>
+        </div>
+
+        {/* Request Context (Card) */}
+        <div className="mb-12">
+          <div className="bg-white/60 backdrop-blur-sm rounded-2xl border border-gray-200/60 p-6 shadow-sm">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-1.5 bg-gray-100 rounded-lg">
+                <User className="size-4 text-gray-500" />
+              </div>
+              <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">
+                Member's Request
+              </h3>
+            </div>
+            <p className="text-gray-700 leading-relaxed">
+              {MOCK_FEEDBACK.requestSummary}
+            </p>
+          </div>
+        </div>
+
+        <Separator className="mb-12 opacity-50" />
+
+        {/* Main Content Body */}
+        <div className="space-y-10">
+          
+          {/* Section: Text Feedback */}
+          <div className="prose prose-gray max-w-none">
+            <h3 className="text-2xl font-bold text-gray-900 font-rounded-mplus">
+              情報設計の観点からの改善案
+            </h3>
+            <p className="text-gray-600 leading-8">
+              今回のデザインで特に良かった点は、申請一覧の「ステータス」の視認性です。
+              一方で、モバイル表示時のテーブルレイアウトには課題があります。
+              横スクロールは一つの解ですが、ユーザーの操作負荷を考えると、カード形式への変形（Reflow）が望ましいでしょう。
+            </p>
+          </div>
+
+          {/* Section: Video (Optional) */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                <Play className="size-4 text-indigo-500 fill-indigo-500" />
+                Video Review
+              </h4>
+              <Badge variant="outline" className="text-xs font-normal text-gray-500">
+                12:45
+              </Badge>
+            </div>
+            <div className="rounded-2xl overflow-hidden border border-gray-200 shadow-sm relative group cursor-pointer bg-gray-50">
+               <div className="aspect-video flex items-center justify-center relative">
+                 {/* Premium Overlay */}
+                 <div className="absolute inset-0 bg-white/5 backdrop-blur-[1px] flex flex-col items-center justify-center z-10">
+                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-xl mb-4 group-hover:scale-105 transition-transform">
+                      <Lock className="size-6 text-gray-900" />
+                    </div>
+                    <p className="font-bold text-gray-900">Unlock Full Review</p>
+                    <p className="text-sm text-gray-500 mt-1">Available on Growth Plan</p>
                  </div>
-               </div>
-               <div className="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
-                 <Lock className="size-4 text-amber-500" />
-                 <span className="text-sm font-medium text-gray-900">Premium Content</span>
+                 {/* Placeholder Content */}
+                 <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 opacity-50" />
                </div>
             </div>
           </div>
 
-          {/* Right: Sticky Sidebar (Desktop) / Bottom Bar (Mobile) Simulation */}
-          <div className="hidden md:block">
-            <div className="sticky top-6 p-6 rounded-2xl border border-gray-200 bg-white shadow-sm space-y-4">
-              <div className="text-center">
-                <p className="text-sm text-gray-500 mb-1">Access Required</p>
-                <p className="text-2xl font-bold text-gray-900">Growth Plan</p>
+          {/* Section: Figma Link */}
+          <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 flex items-center justify-between hover:border-gray-300 transition-colors cursor-pointer group">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white rounded-lg border border-gray-200 flex items-center justify-center shadow-sm text-[#F24E1E]">
+                <FileText className="size-5" />
               </div>
-              <Button className="w-full rounded-xl h-12 font-bold text-base" size="lg">
-                Watch Full Video
-              </Button>
-              <p className="text-xs text-center text-gray-400">
-                Includes Figma file access
-              </p>
+              <div>
+                <p className="font-bold text-gray-900 text-sm group-hover:text-indigo-600 transition-colors">Open in Figma</p>
+                <p className="text-xs text-gray-500">Review file with comments</p>
+              </div>
             </div>
+            <Button variant="ghost" size="icon" className="text-gray-400 group-hover:text-gray-600">
+              <ArrowLeft className="size-4 rotate-180" />
+            </Button>
           </div>
 
         </div>
-      </div>
-      
-      {/* Mobile Sticky Action Bar */}
-      <div className="md:hidden absolute bottom-0 inset-x-0 p-4 bg-white border-t border-gray-200 flex items-center justify-between z-20">
-         <div>
-           <p className="text-xs text-gray-500">Access</p>
-           <p className="font-bold text-gray-900">Growth Plan</p>
-         </div>
-         <Button className="rounded-xl font-bold">Watch Video</Button>
-      </div>
 
+        {/* Bottom CTA (Sticky-ish feel without being intrusive) */}
+        <div className="mt-20 p-8 bg-gray-50 rounded-2xl border border-gray-200 text-center">
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            もっと詳しく学びたいですか？
+          </h3>
+          <p className="text-gray-600 text-sm mb-6 max-w-md mx-auto">
+            Growthプランに参加すると、すべての動画レビューとFigmaデータにアクセスできます。
+          </p>
+          <Button size="lg" className="rounded-full px-8 font-bold shadow-lg shadow-indigo-200 bg-gray-900 hover:bg-gray-800">
+            プランを確認する
+          </Button>
+        </div>
+
+      </div>
     </div>
   );
 };
+
 
 
 /**

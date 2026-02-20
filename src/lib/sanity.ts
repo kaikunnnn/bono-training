@@ -202,7 +202,7 @@ export async function getAllQuestions(): Promise<Question[]> {
         title,
         slug
       },
-      "questionExcerpt": pt::text(questionContent)[0..150],
+      "questionExcerpt": pt::text(questionContent),
       publishedAt
     }
   `;
@@ -223,7 +223,7 @@ export async function getQuestionsByCategory(categorySlug: string): Promise<Ques
         title,
         slug
       },
-      "questionExcerpt": pt::text(questionContent)[0..150],
+      "questionExcerpt": pt::text(questionContent),
       publishedAt
     }
   `;

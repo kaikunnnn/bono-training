@@ -46,7 +46,7 @@ const QuestionCard = ({ question }: { question: Question }) => {
         <div className="flex items-start gap-4">
           {/* アイコン */}
           <div className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-lg flex-shrink-0">
-            💬
+            💭
           </div>
 
           {/* コンテンツ */}
@@ -70,9 +70,9 @@ const QuestionCard = ({ question }: { question: Question }) => {
               </div>
             </div>
 
-            {/* 抜粋 */}
+            {/* 質問内容プレビュー */}
             {question.questionExcerpt && (
-              <p className="text-[14px] text-muted-foreground line-clamp-2">
+              <p className="text-[14px] text-muted-foreground line-clamp-2 mt-2">
                 {question.questionExcerpt}
               </p>
             )}

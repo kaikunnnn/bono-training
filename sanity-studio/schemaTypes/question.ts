@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { MarkdownImportInput } from "../components/MarkdownImportInput";
 
 export default defineType({
   name: 'question',
@@ -79,6 +80,9 @@ export default defineType({
           ],
         },
       ],
+      components: {
+        input: MarkdownImportInput,
+      },
       description: '質問の内容（Slackからコピペ）',
     }),
     defineField({
@@ -134,6 +138,9 @@ export default defineType({
           ],
         },
       ],
+      components: {
+        input: MarkdownImportInput,
+      },
       description: 'Kaiくんの回答（マークダウンで記述）',
       validation: (Rule) => Rule.required(),
     }),

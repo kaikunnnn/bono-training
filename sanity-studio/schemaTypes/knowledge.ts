@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { MarkdownImportInput } from "../components/MarkdownImportInput";
 
 export default defineType({
   name: 'knowledge',
@@ -102,6 +103,9 @@ export default defineType({
           ],
         },
       ],
+      components: {
+        input: MarkdownImportInput,
+      },
       validation: (Rule) => Rule.required(),
     }),
     defineField({

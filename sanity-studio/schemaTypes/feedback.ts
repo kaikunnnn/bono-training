@@ -1,4 +1,5 @@
 import { defineType, defineField } from 'sanity';
+import { MarkdownImportInput } from "../components/MarkdownImportInput";
 
 export default defineType({
   name: 'feedback',
@@ -185,6 +186,9 @@ export default defineType({
           ],
         },
       ],
+      components: {
+        input: MarkdownImportInput,
+      },
       description: 'フィードバック本文（有料ユーザーのみ閲覧可能）',
       validation: (Rule) => Rule.required(),
     }),

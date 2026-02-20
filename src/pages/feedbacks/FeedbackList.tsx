@@ -31,15 +31,34 @@ const staggerContainer = {
   },
 };
 
-// カテゴリごとのアイコン/絵文字マッピング
+// カテゴリごとのFluentEmoji 3D URLマッピング
+const categoryEmojiUrl: Record<string, string> = {
+  "portfolio": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Briefcase/3D/briefcase_3d.png",
+  "user-value-design": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Bullseye/3D/bullseye_3d.png",
+  "ui-style": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Artist%20palette/3D/artist_palette_3d.png",
+  "career": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Rocket/3D/rocket_3d.png",
+  "default": "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Memo/3D/memo_3d.png",
+};
+
+// カテゴリごとのフォールバック絵文字（FluentEmoji読み込み失敗時）
 const categoryEmoji: Record<string, string> = {
   "portfolio": "💼",
   "user-value-design": "🎯",
   "ui-style": "🎨",
   "career": "🚀",
+  "default": "📝",
 };
 
-// フィードバックカード（LessonCard風）
+// カテゴリごとのグラデーションマッピング
+const categoryGradient: Record<string, string> = {
+  portfolio: "from-blue-100/50 via-indigo-50/50 to-white",
+  "user-value-design": "from-orange-100/50 via-amber-50/50 to-white",
+  "ui-style": "from-pink-100/50 via-rose-50/50 to-white",
+  career: "from-emerald-100/50 via-teal-50/50 to-white",
+  default: "from-gray-100/50 via-slate-50/50 to-white",
+};
+
+// フィードバックカード（改善版）
 const FeedbackCard = ({ feedback }: { feedback: Feedback }) => {
   const publishedDate = feedback.publishedAt
     ? new Date(feedback.publishedAt).toLocaleDateString("ja-JP", {
@@ -49,67 +68,70 @@ const FeedbackCard = ({ feedback }: { feedback: Feedback }) => {
       })
     : null;
 
-  const categorySlug = feedback.category?.slug?.current || "";
-  const emoji = categoryEmoji[categorySlug] || "📝";
+  const categorySlug = feedback.category?.slug?.current || "default";
+  const emojiUrl = categoryEmojiUrl[categorySlug] || categoryEmojiUrl["default"];
+  const emojiAlt = categoryEmoji[categorySlug] || categoryEmoji["default"];
+  const gradientClass = categoryGradient[categorySlug] || categoryGradient["default"];
 
   return (
-    <motion.div variants={fadeInUp}>
+    <motion.div variants={fadeInUp} className="h-full">
       <Link
         to={`/feedbacks/${feedback.slug.current}`}
-        className={cn(
-          "bg-white flex flex-col p-5 rounded-[24px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]",
-          "cursor-pointer transition-all duration-200",
-          "hover:shadow-[0px_1px_12px_0px_rgba(0,0,0,0.12)] hover:translate-y-[-2px]",
-          "w-full h-full",
-          "min-h-[240px]"
-        )}
+        className="group block h-full bg-white rounded-[24px] border border-border/50 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300"
       >
-        <div className="flex h-full flex-col gap-4">
-          {/* カテゴリバッジ */}
+        {/* ビジュアルエリア (Top Half) */}
+        <div className={cn("h-[180px] w-full bg-gradient-to-br flex items-center justify-center relative overflow-hidden", gradientClass)}>
+          {/* 装飾的な円 (Blur) */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white/40 rounded-full blur-2xl" />
+          
+          {/* アイコン - FluentEmoji 3D */}
+          <div className="relative z-10 transform group-hover:scale-110 transition-transform duration-300">
+            <img
+              src={emojiUrl}
+              alt={emojiAlt}
+              className="w-16 h-16 object-contain drop-shadow-sm"
+              loading="lazy"
+            />
+          </div>
+
+          {/* カテゴリバッジ (右上) */}
           {feedback.category && (
-            <div className="flex items-center">
-              <span className="inline-flex items-center justify-center px-2.5 py-1.5 bg-primary/10 rounded-full">
-                <span className="font-noto-sans-jp text-[12px] font-medium text-primary leading-none">
+            <div className="absolute top-4 right-4">
+              <span className="inline-flex items-center justify-center px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full border border-white/50 shadow-sm">
+                <span className="font-noto-sans-jp text-[11px] font-bold text-foreground/80">
                   {feedback.category.title}
                 </span>
               </span>
             </div>
           )}
+        </div>
 
-          {/* アイコンエリア */}
-          <div className="flex justify-center items-center py-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-3xl shadow-inner">
-              {emoji}
-            </div>
-          </div>
+        {/* コンテンツエリア (Bottom Half) */}
+        <div className="p-6 flex flex-col gap-3">
+          <h3 className="font-rounded-mplus text-[17px] font-bold text-foreground leading-[1.6] line-clamp-2 group-hover:text-primary transition-colors">
+            {feedback.title}
+          </h3>
 
-          {/* タイトル・説明エリア */}
-          <div className="flex flex-col gap-2 flex-1">
-            <h3 className="font-rounded-mplus text-[15px] font-bold text-foreground leading-[1.5] line-clamp-2">
-              {feedback.title}
-            </h3>
-
-            {/* 概要 */}
-            {feedback.excerpt && (
-              <p className="font-noto-sans-jp text-[13px] text-muted-foreground leading-[1.6] line-clamp-2">
-                {feedback.excerpt}
-              </p>
-            )}
-
-            {/* 対象アウトプット */}
-            {feedback.targetOutput && (
-              <p className="font-noto-sans-jp text-xs text-muted-foreground/70 leading-[1.5] line-clamp-1">
-                📎 {feedback.targetOutput}
-              </p>
-            )}
-          </div>
-
-          {/* 日付 */}
-          {publishedDate && (
-            <div className="pt-2 border-t border-gray-100">
-              <p className="text-xs text-muted-foreground">{publishedDate}</p>
+          {/* 対象アウトプット - タイトル下に独立ブロックで表示 */}
+          {feedback.targetOutput && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg">
+              <span className="text-muted-foreground">📎</span>
+              <span className="font-noto-sans-jp text-[12px] font-medium text-foreground/80 line-clamp-1">
+                {feedback.targetOutput}
+              </span>
             </div>
           )}
+
+          {/* 概要 */}
+          {feedback.excerpt && (
+            <p className="font-noto-sans-jp text-[13px] text-muted-foreground leading-[1.8] line-clamp-2">
+              {feedback.excerpt}
+            </p>
+          )}
+
+          <div className="mt-auto pt-4 flex items-center text-xs text-muted-foreground/70">
+            {publishedDate && <span>{publishedDate}</span>}
+          </div>
         </div>
       </Link>
     </motion.div>
@@ -166,6 +188,29 @@ const FeedbackRequestButton = () => {
     </a>
   );
 };
+
+// カテゴリタブコンポーネント
+const CategoryTab = ({
+  active,
+  children,
+  onClick,
+}: {
+  active: boolean;
+  children: React.ReactNode;
+  onClick: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "px-5 py-2.5 rounded-full text-sm font-medium transition-all duration-200 border",
+      active
+        ? "bg-foreground text-background border-foreground shadow-md scale-105"
+        : "bg-white text-muted-foreground border-border hover:border-gray-300 hover:text-foreground hover:bg-gray-50/50"
+    )}
+  >
+    {children}
+  </button>
+);
 
 const FeedbackList = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
@@ -254,31 +299,30 @@ const FeedbackList = () => {
 
           {/* カテゴリフィルター */}
           <motion.div
-            className="flex flex-wrap gap-2 mb-8 justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
+            className="flex flex-wrap gap-3 mb-16 justify-center"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Button
-              variant={selectedCategory === null ? "default" : "outline"}
-              size="sm"
-              className="rounded-full"
+            <CategoryTab
+              active={selectedCategory === null}
               onClick={() => setSelectedCategory(null)}
             >
               すべて
-            </Button>
+            </CategoryTab>
             {categories.map((cat) => (
-              <Button
+              <CategoryTab
                 key={cat._id}
-                variant={
-                  selectedCategory === cat.slug.current ? "default" : "outline"
-                }
-                size="sm"
-                className="rounded-full"
+                active={selectedCategory === cat.slug.current}
                 onClick={() => setSelectedCategory(cat.slug.current)}
               >
+                <img
+                  src={categoryEmojiUrl[cat.slug.current] || categoryEmojiUrl["default"]}
+                  alt={categoryEmoji[cat.slug.current] || "📝"}
+                  className="w-5 h-5 object-contain inline-block mr-2"
+                />
                 {cat.title}
-              </Button>
+              </CategoryTab>
             ))}
           </motion.div>
 

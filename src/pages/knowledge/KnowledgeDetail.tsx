@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Tag } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   getKnowledge,
   getRelatedKnowledge,
@@ -28,64 +28,55 @@ const staggerContainer = {
   },
 };
 
-// PortableText用のコンポーネント
+// PortableText用のコンポーネント - スクショ参考のクリーンなスタイル
 const portableTextComponents = {
   block: {
     h2: ({ children }: any) => (
-      <h2 className="text-[20px] md:text-[24px] font-semibold leading-[32px] text-foreground mt-8 mb-4 first:mt-0 font-rounded-mplus">
+      <h2 className="text-[24px] md:text-[28px] font-bold leading-[1.3] text-[#1a1a1a] mt-12 mb-4 first:mt-0 font-rounded-mplus">
         {children}
       </h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-[18px] md:text-[20px] font-semibold leading-[28px] text-foreground mt-6 mb-3 font-rounded-mplus">
+      <h3 className="text-[20px] md:text-[22px] font-bold leading-[1.4] text-[#1a1a1a] mt-10 mb-3 font-rounded-mplus">
         {children}
       </h3>
     ),
     h4: ({ children }: any) => (
-      <h4 className="text-[16px] md:text-[18px] font-semibold leading-[26px] text-foreground mt-5 mb-2 font-rounded-mplus">
+      <h4 className="text-[18px] md:text-[20px] font-semibold leading-[1.4] text-[#1a1a1a] mt-8 mb-2 font-rounded-mplus">
         {children}
       </h4>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-border bg-muted py-4 px-6 my-4 text-[16px] md:text-[18px] leading-[200%] text-foreground">
+      <blockquote className="border-l-4 border-[#E0E0E0] bg-[#FAFAFA] py-4 px-6 my-6 text-[16px] md:text-[18px] leading-[1.8] text-[#444444] rounded-r-lg">
         {children}
       </blockquote>
     ),
     normal: ({ children }: any) => (
-      <p
-        className="text-[16px] md:text-[18px] leading-[200%] text-foreground mb-4"
-        style={{ letterSpacing: "0.03em" }}
-      >
+      <p className="text-[16px] md:text-[18px] leading-[1.9] text-[#333333] mb-5 tracking-[0.02em]">
         {children}
       </p>
     ),
   },
   list: {
     bullet: ({ children }: any) => (
-      <ul
-        className="list-disc mb-4 space-y-2"
-        style={{ paddingLeft: "21.5px" }}
-      >
+      <ul className="list-disc mb-5 space-y-2 pl-6 text-[#333333]">
         {children}
       </ul>
     ),
     number: ({ children }: any) => (
-      <ol
-        className="list-decimal mb-4 space-y-2"
-        style={{ paddingLeft: "21.5px" }}
-      >
+      <ol className="list-decimal mb-5 space-y-2 pl-6 text-[#333333]">
         {children}
       </ol>
     ),
   },
   listItem: {
     bullet: ({ children }: any) => (
-      <li className="text-[16px] md:text-[18px] leading-[200%] text-foreground">
+      <li className="text-[16px] md:text-[18px] leading-[1.8] text-[#333333]">
         {children}
       </li>
     ),
     number: ({ children }: any) => (
-      <li className="text-[16px] md:text-[18px] leading-[200%] text-foreground">
+      <li className="text-[16px] md:text-[18px] leading-[1.8] text-[#333333]">
         {children}
       </li>
     ),
@@ -93,7 +84,7 @@ const portableTextComponents = {
   marks: {
     strong: ({ children }: any) => (
       <strong
-        className="font-bold"
+        className="font-bold text-[#1a1a1a]"
         style={{ background: "linear-gradient(transparent 60%, #FED7AA 60%)" }}
       >
         {children}
@@ -101,7 +92,7 @@ const portableTextComponents = {
     ),
     em: ({ children }: any) => <em className="italic">{children}</em>,
     code: ({ children }: any) => (
-      <code className="bg-muted px-1.5 py-0.5 rounded text-sm font-mono">
+      <code className="bg-[#F5F5F5] px-1.5 py-0.5 rounded text-[15px] font-mono text-[#E53E3E]">
         {children}
       </code>
     ),
@@ -110,7 +101,7 @@ const portableTextComponents = {
         href={value?.href || "#"}
         target="_blank"
         rel="noopener noreferrer"
-        className="text-primary underline hover:text-primary/80"
+        className="text-[#2563EB] underline decoration-[#2563EB]/30 hover:decoration-[#2563EB] transition-colors"
       >
         {children}
       </a>
@@ -120,15 +111,15 @@ const portableTextComponents = {
     image: ({ value }: any) => {
       if (!value?.asset) return null;
       return (
-        <figure className="my-6">
+        <figure className="my-8 md:my-10">
           <img
             src={value.asset.url}
             alt={value.alt || ""}
-            className="w-full h-auto rounded-lg"
+            className="w-full h-auto rounded-xl"
             loading="lazy"
           />
           {value.caption && (
-            <figcaption className="mt-2 text-sm text-muted-foreground text-center italic">
+            <figcaption className="mt-3 text-[14px] text-[#888888] text-center">
               {value.caption}
             </figcaption>
           )}
@@ -138,16 +129,17 @@ const portableTextComponents = {
   },
 };
 
-// ナレッジカード（関連ナレッジ用）
+// ナレッジカード（関連ナレッジ用）- クリーンなスタイル
 const KnowledgeCard = ({ knowledge }: { knowledge: Knowledge }) => (
   <Link
     to={`/knowledge/${knowledge.slug.current}`}
-    className="block p-4 bg-white rounded-lg border border-border hover:border-primary hover:shadow-md transition-all"
+    className="group block p-5 bg-white rounded-xl border border-[#EBEBEB] hover:border-[#D0D0D0] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-200"
   >
-    <span className="inline-block px-2 py-1 text-xs bg-primary/10 text-primary rounded-full mb-2">
-      {knowledge.category?.emoji} {knowledge.category?.title || "カテゴリなし"}
+    <span className="inline-flex items-center gap-1 px-2 py-1 text-[11px] bg-[#F5F5F5] text-[#666666] rounded-md mb-3 font-medium">
+      {knowledge.category?.emoji && <span>{knowledge.category.emoji}</span>}
+      <span>{knowledge.category?.title || "カテゴリなし"}</span>
     </span>
-    <h3 className="text-[15px] font-medium text-foreground line-clamp-2">
+    <h3 className="text-[15px] font-semibold text-[#1a1a1a] leading-[1.5] line-clamp-2 group-hover:text-[#2563EB] transition-colors">
       {knowledge.title}
     </h3>
   </Link>
@@ -252,9 +244,9 @@ const KnowledgeDetail = () => {
       />
       <div className="min-h-screen w-full bg-base">
         {/* メインコンテンツ */}
-        <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-8">
+        <main className="max-w-[880px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           {/* 戻るボタン */}
-          <div className="mb-12">
+          <div className="mb-8 md:mb-12">
             <button
               onClick={() => navigate("/knowledge")}
               className="bg-white border border-[#EBEBEB] flex gap-2 items-center px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
@@ -267,47 +259,48 @@ const KnowledgeDetail = () => {
           </div>
 
           <motion.div
-            className="flex flex-col gap-8"
+            className="flex flex-col"
             variants={staggerContainer}
             initial="initial"
             animate="animate"
           >
-            {/* ヘッダー部分 */}
-            <motion.div variants={fadeInUp} className="flex flex-col gap-4">
-              {/* サムネイル */}
-              {knowledge.thumbnailUrl && (
-                <div className="w-full h-48 md:h-64 rounded-2xl overflow-hidden mb-4">
-                  <img
-                    src={knowledge.thumbnailUrl}
-                    alt={knowledge.title}
-                    className="w-full h-full object-cover"
-                  />
+            {/* ヘッダー部分 - スクショ参考のレイアウト */}
+            <motion.header variants={fadeInUp} className="mb-12 md:mb-16">
+              {/* カテゴリバッジ（最上部） */}
+              {knowledge.category && (
+                <div className="mb-4 md:mb-5">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#E8F4FD] text-[#1E6BB8] rounded-md text-xs font-medium tracking-wide">
+                    {knowledge.category.emoji && (
+                      <span className="text-sm">{knowledge.category.emoji}</span>
+                    )}
+                    <span className="uppercase">{knowledge.category.title}</span>
+                  </span>
                 </div>
               )}
 
-              <div className="flex flex-col gap-4 border-b border-[#d0d5dd] pb-8">
-                <h1 className="text-2xl md:text-3xl font-bold text-black font-rounded-mplus leading-tight">
-                  {knowledge.title}
-                </h1>
-                {/* カテゴリ・日付 */}
-                <div className="flex items-center gap-3 text-sm flex-wrap">
-                  {knowledge.category && (
-                    <span className="px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
-                      {knowledge.category.emoji} {knowledge.category.title}
-                    </span>
-                  )}
-                  {publishedDate && (
-                    <span className="text-muted-foreground">{publishedDate}</span>
-                  )}
-                </div>
-                {/* タグ */}
+              {/* メインタイトル */}
+              <h1 className="text-[28px] md:text-[40px] lg:text-[44px] font-bold text-[#1a1a1a] font-rounded-mplus leading-[1.2] md:leading-[1.15] tracking-tight mb-5 md:mb-6">
+                {knowledge.title}
+              </h1>
+
+              {/* 説明文（excerpt） */}
+              {knowledge.excerpt && (
+                <p className="text-[16px] md:text-[18px] lg:text-[20px] text-[#555555] leading-[1.7] max-w-[640px] mb-6 md:mb-8">
+                  {knowledge.excerpt}
+                </p>
+              )}
+
+              {/* メタ情報（日付・タグ） */}
+              <div className="flex flex-wrap items-center gap-4 pt-6 border-t border-[#E5E5E5]">
+                {publishedDate && (
+                  <span className="text-[14px] text-[#888888]">{publishedDate}</span>
+                )}
                 {knowledge.tags && knowledge.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 items-center">
-                    <Tag className="w-4 h-4 text-muted-foreground" />
                     {knowledge.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="px-2 py-1 text-xs bg-gray-100 text-muted-foreground rounded"
+                        className="px-2.5 py-1 text-xs bg-[#F5F5F5] text-[#666666] rounded-md"
                       >
                         {tag}
                       </span>
@@ -315,11 +308,24 @@ const KnowledgeDetail = () => {
                   </div>
                 )}
               </div>
-            </motion.div>
+            </motion.header>
+
+            {/* サムネイル（ヘッダーとコンテンツの間） */}
+            {knowledge.thumbnailUrl && (
+              <motion.div variants={fadeInUp} className="mb-10 md:mb-14">
+                <div className="w-full aspect-video rounded-2xl overflow-hidden bg-[#F0F0F0]">
+                  <img
+                    src={knowledge.thumbnailUrl}
+                    alt={knowledge.title}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </motion.div>
+            )}
 
             {/* 本文 */}
-            <motion.div variants={fadeInUp}>
-              <div className="bg-white border border-border rounded-2xl p-6 md:p-8 shadow-sm">
+            <motion.article variants={fadeInUp}>
+              <div className="prose-container">
                 {knowledge.content && knowledge.content.length > 0 ? (
                   <PortableText
                     value={knowledge.content}
@@ -329,15 +335,15 @@ const KnowledgeDetail = () => {
                   <p className="text-muted-foreground">コンテンツがありません</p>
                 )}
               </div>
-            </motion.div>
+            </motion.article>
 
             {/* 関連ナレッジ */}
             {relatedKnowledge.length > 0 && (
-              <motion.div
+              <motion.section
                 variants={fadeInUp}
-                className="mt-8 pt-8 border-t border-border"
+                className="mt-16 md:mt-20 pt-10 md:pt-12 border-t border-[#E5E5E5]"
               >
-                <h2 className="text-lg font-bold text-foreground mb-4 font-rounded-mplus">
+                <h2 className="text-[20px] md:text-[24px] font-bold text-[#1a1a1a] mb-6 font-rounded-mplus">
                   関連するナレッジ
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -345,16 +351,16 @@ const KnowledgeDetail = () => {
                     <KnowledgeCard key={k._id} knowledge={k} />
                   ))}
                 </div>
-              </motion.div>
+              </motion.section>
             )}
 
             {/* 最近のナレッジ */}
             {recentKnowledge.length > 0 && (
-              <motion.div
+              <motion.section
                 variants={fadeInUp}
-                className="mt-4 pt-8 border-t border-border"
+                className="mt-10 md:mt-12 pt-10 md:pt-12 border-t border-[#E5E5E5]"
               >
-                <h2 className="text-lg font-bold text-foreground mb-4 font-rounded-mplus">
+                <h2 className="text-[20px] md:text-[24px] font-bold text-[#1a1a1a] mb-6 font-rounded-mplus">
                   最近のナレッジ
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -362,7 +368,7 @@ const KnowledgeDetail = () => {
                     <KnowledgeCard key={k._id} knowledge={k} />
                   ))}
                 </div>
-              </motion.div>
+              </motion.section>
             )}
           </motion.div>
         </main>
