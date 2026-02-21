@@ -182,6 +182,20 @@ export interface QuestionCategory {
   slug: SanitySlug;
 }
 
+// QuestionAuthor型（ユーザー投稿者情報）
+export interface QuestionAuthor {
+  userId?: string;
+  displayName?: string;
+  avatarUrl?: string;
+}
+
+// QuestionReferenceUrl型
+export interface QuestionReferenceUrl {
+  _key: string;
+  title?: string;
+  url: string;
+}
+
 // Question型
 export interface Question {
   _id: string;
@@ -193,6 +207,13 @@ export interface Question {
   answerContent?: PortableTextBlock[];
   questionExcerpt?: string; // 一覧用の抜粋
   publishedAt?: string;
+  // ユーザー投稿関連
+  author?: QuestionAuthor;
+  figmaUrl?: string;
+  referenceUrls?: QuestionReferenceUrl[];
+  status?: "pending" | "answered" | "hidden";
+  isPublic?: boolean;
+  submittedAt?: string;
 }
 
 // FeedbackCategory型

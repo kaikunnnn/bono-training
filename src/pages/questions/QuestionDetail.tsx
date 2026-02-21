@@ -1,7 +1,7 @@
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ExternalLink, Figma, Link2 } from "lucide-react";
 import {
   getQuestion,
   getRelatedQuestions,
@@ -288,15 +288,23 @@ const QuestionDetail = () => {
             <motion.div variants={fadeInUp} className="flex flex-col gap-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-muted border border-border flex items-center justify-center overflow-hidden">
-                  <img
-                    src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Neutral%20face/3D/neutral_face_3d.png"
-                    alt="BONOメンバー"
-                    className="w-7 h-7 object-contain"
-                  />
+                  {question.author?.avatarUrl ? (
+                    <img
+                      src={question.author.avatarUrl}
+                      alt={question.author.displayName || "投稿者"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Neutral%20face/3D/neutral_face_3d.png"
+                      alt="BONOメンバー"
+                      className="w-7 h-7 object-contain"
+                    />
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-[15px] font-medium text-foreground">
-                    BONOメンバー
+                    {question.author?.displayName || "BONOメンバー"}
                   </span>
                   <span className="px-2 py-0.5 text-[11px] font-medium bg-blue-100 text-blue-700 rounded">
                     質問
@@ -312,6 +320,44 @@ const QuestionDetail = () => {
                   />
                 ) : (
                   <p className="text-muted-foreground">質問内容がありません</p>
+                )}
+
+                {/* Figmaリンク・参考URL */}
+                {(question.figmaUrl || (question.referenceUrls && question.referenceUrls.length > 0)) && (
+                  <div className="mt-6 pt-4 border-t border-border/60">
+                    {question.figmaUrl && (
+                      <a
+                        href={question.figmaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-[#1E1E1E] text-white rounded-lg text-sm hover:bg-[#333] transition-colors mr-2 mb-2"
+                      >
+                        <Figma className="h-4 w-4" />
+                        Figmaを開く
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    )}
+                    {question.referenceUrls && question.referenceUrls.length > 0 && (
+                      <div className="mt-3">
+                        <p className="text-xs text-muted-foreground mb-2">参考URL:</p>
+                        <div className="flex flex-wrap gap-2">
+                          {question.referenceUrls.map((ref, index) => (
+                            <a
+                              key={ref._key || index}
+                              href={ref.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-muted rounded-lg text-sm text-foreground hover:bg-muted/80 transition-colors"
+                            >
+                              <Link2 className="h-3 w-3" />
+                              {ref.title || new URL(ref.url).hostname}
+                              <ExternalLink className="h-3 w-3" />
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>

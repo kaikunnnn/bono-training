@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves, MessageSquare } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves, MessageSquare, HelpCircle } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -134,6 +134,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/feedback-detail-patterns',
     icon: <MessageSquare className="w-8 h-8" />,
     tags: ['Feedback', 'Design', 'OpenAI', 'Vercel', 'Premium']
+  },
+  {
+    title: 'Question Form Patterns',
+    description: '質問投稿フォームのデザインパターン比較。ステップ形式、投稿後体験強化、会話型UIの3パターン。',
+    path: '/dev/question-form-patterns',
+    icon: <HelpCircle className="w-8 h-8" />,
+    tags: ['Question', 'Form', 'UX', 'Patterns', 'PM Review']
   },
 ];
 

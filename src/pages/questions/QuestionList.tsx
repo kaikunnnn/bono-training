@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { PenSquare } from "lucide-react";
 import { motion } from "framer-motion";
 import {
   getAllQuestions,
@@ -165,15 +166,12 @@ const QuestionList = () => {
             title="みんなの質問"
             description="BONOメンバーから寄せられた質問と回答をまとめています"
           >
-            <a
-              href="https://bo-no.slack.com/archives/C02GNBK4EGR"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <Link to="/questions/new">
               <Button variant="default" size="medium">
+                <PenSquare className="mr-2 h-4 w-4" />
                 質問する
               </Button>
-            </a>
+            </Link>
           </PageHeader>
 
           {/* カテゴリフィルター */}

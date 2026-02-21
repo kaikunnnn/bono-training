@@ -189,11 +189,11 @@ export async function getQuestionCategories(): Promise<QuestionCategory[]> {
 }
 
 /**
- * 質問一覧を取得
+ * 質問一覧を取得（公開済み・回答済みのみ）
  */
 export async function getAllQuestions(): Promise<Question[]> {
   const query = `
-    *[_type == "question"] | order(publishedAt desc) {
+    *[_type == "question" && (isPublic == true || !defined(isPublic))] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -203,18 +203,20 @@ export async function getAllQuestions(): Promise<Question[]> {
         slug
       },
       "questionExcerpt": pt::text(questionContent),
-      publishedAt
+      publishedAt,
+      status,
+      author
     }
   `;
   return client.fetch<Question[]>(query);
 }
 
 /**
- * カテゴリ別の質問一覧を取得
+ * カテゴリ別の質問一覧を取得（公開済みのみ）
  */
 export async function getQuestionsByCategory(categorySlug: string): Promise<Question[]> {
   const query = `
-    *[_type == "question" && category->slug.current == $categorySlug] | order(publishedAt desc) {
+    *[_type == "question" && category->slug.current == $categorySlug && (isPublic == true || !defined(isPublic))] | order(publishedAt desc) {
       _id,
       title,
       slug,
@@ -224,7 +226,9 @@ export async function getQuestionsByCategory(categorySlug: string): Promise<Ques
         slug
       },
       "questionExcerpt": pt::text(questionContent),
-      publishedAt
+      publishedAt,
+      status,
+      author
     }
   `;
   return client.fetch<Question[]>(query, { categorySlug });
@@ -264,7 +268,13 @@ export async function getQuestion(slug: string): Promise<Question | null> {
           }
         }
       },
-      publishedAt
+      publishedAt,
+      author,
+      figmaUrl,
+      referenceUrls,
+      status,
+      isPublic,
+      submittedAt
     }
   `;
   return client.fetch<Question | null>(query, { slug });

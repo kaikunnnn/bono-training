@@ -73,6 +73,7 @@ import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
 import LessonCardMotion from "./pages/dev/LessonCardMotion";
 import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
 import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
+import QuestionFormPatterns from "./pages/dev/QuestionFormPatterns";
 import QuestionsIndexOld from "./pages/questions";
 import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
@@ -160,6 +161,7 @@ const AppContent = () => {
         <Route path="/dev/lesson-card-motion" element={<DevRoute><LessonCardMotion /></DevRoute>} />
         <Route path="/dev/nav-sidebar" element={<DevRoute><NavigationSidebarStates /></DevRoute>} />
         <Route path="/dev/feedback-detail-patterns" element={<DevRoute><FeedbackDetailPatterns /></DevRoute>} />
+        <Route path="/dev/question-form-patterns" element={<DevRoute><QuestionFormPatterns /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
