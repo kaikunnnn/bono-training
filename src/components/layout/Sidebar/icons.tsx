@@ -18,6 +18,10 @@ import {
   SearchNormal1,
   Play,
   ExportCurve,
+  People,
+  MessageQuestion,
+  Messages1,
+  Lamp,
 } from "iconsax-react";
 
 /**
@@ -45,6 +49,14 @@ export const MenuIcons = {
   search: SearchNormal1,
   // シェア
   share: ExportCurve,
+  // コミュニティ
+  community: People,
+  // 質問
+  question: MessageQuestion,
+  // フィードバック
+  feedback: Messages1,
+  // ナレッジ
+  knowledge: Lamp,
 } as const;
 
 /**

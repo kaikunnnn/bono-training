@@ -72,9 +72,17 @@ import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
 import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
 import LessonCardMotion from "./pages/dev/LessonCardMotion";
 import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
-import QuestionsIndex from "./pages/questions";
-import QuestionDetail from "./pages/questions/detail";
+import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
+import QuestionFormPatterns from "./pages/dev/QuestionFormPatterns";
+import QuestionsIndexOld from "./pages/questions";
+import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
+import QuestionList from "./pages/questions/QuestionList";
+import QuestionDetail from "./pages/questions/QuestionDetail";
+import FeedbackList from "./pages/feedbacks/FeedbackList";
+import FeedbackDetail from "./pages/feedbacks/FeedbackDetail";
+import KnowledgeList from "./pages/knowledge/KnowledgeList";
+import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
 
 // コンソールログでインポートの確認
@@ -152,6 +160,8 @@ const AppContent = () => {
         <Route path="/dev/mobile-menu-button" element={<DevRoute><MobileMenuButtonPatterns /></DevRoute>} />
         <Route path="/dev/lesson-card-motion" element={<DevRoute><LessonCardMotion /></DevRoute>} />
         <Route path="/dev/nav-sidebar" element={<DevRoute><NavigationSidebarStates /></DevRoute>} />
+        <Route path="/dev/feedback-detail-patterns" element={<DevRoute><FeedbackDetailPatterns /></DevRoute>} />
+        <Route path="/dev/question-form-patterns" element={<DevRoute><QuestionFormPatterns /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
@@ -169,9 +179,21 @@ const AppContent = () => {
 
         <Route path="/roadmap" element={<Roadmap />} />
 
-        <Route path="/questions" element={<PrivateRoute><QuestionsIndex /></PrivateRoute>} />
-        <Route path="/questions/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
-        <Route path="/questions/:questionId" element={<PrivateRoute><QuestionDetail /></PrivateRoute>} />
+        {/* 新しい質問ページ（Sanityベース） */}
+        <Route path="/questions" element={<QuestionList />} />
+        <Route path="/questions/:slug" element={<QuestionDetail />} />
+        {/* 旧質問ページ（テスト用 - 後で削除） */}
+        <Route path="/questions-old" element={<PrivateRoute><QuestionsIndexOld /></PrivateRoute>} />
+        <Route path="/questions-old/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
+        <Route path="/questions-old/:questionId" element={<PrivateRoute><QuestionDetailOld /></PrivateRoute>} />
+
+        {/* フィードバックページ（Sanityベース） */}
+        <Route path="/feedbacks" element={<FeedbackList />} />
+        <Route path="/feedbacks/:slug" element={<FeedbackDetail />} />
+
+        {/* ナレッジページ（Sanityベース） */}
+        <Route path="/knowledge" element={<KnowledgeList />} />
+        <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
 
         <Route path="/events/:slug" element={<EventDetail />} />
 

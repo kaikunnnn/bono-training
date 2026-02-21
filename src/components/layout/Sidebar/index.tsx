@@ -90,6 +90,31 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         </SidebarMenuItem>
       </SidebarMenuGroup>
 
+      {/* コミュニティ */}
+      <SidebarMenuGroup label="コミュニティ" itemGap>
+        <SidebarMenuItem
+          href="/questions"
+          icon={<MenuIcons.question size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/questions") || location.pathname.startsWith("/questions/")}
+        >
+          みんなの質問
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/feedbacks"
+          icon={<MenuIcons.feedback size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/feedbacks") || location.pathname.startsWith("/feedbacks/")}
+        >
+          フィードバック
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/knowledge"
+          icon={<MenuIcons.knowledge size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/knowledge") || location.pathname.startsWith("/knowledge/")}
+        >
+          お役立ち
+        </SidebarMenuItem>
+      </SidebarMenuGroup>
+
       {/* その他メニュー */}
       <SidebarMenuGroup label="その他" itemGap>
         {/* ログイン（ログオフ時のみ表示） */}
