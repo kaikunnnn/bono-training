@@ -37,3 +37,5 @@ migration-errors-*.json
 supabase/.temp/
 supabase/functions/.env
 supabase/functions/.env.local
+.vercel
+.env*.local

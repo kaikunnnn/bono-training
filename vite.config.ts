@@ -1,8 +1,72 @@
 
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+
+// 開発用ローカルAPIプラグイン
+function localApiPlugin(): Plugin {
+  return {
+    name: 'local-api',
+    configureServer(server) {
+      server.middlewares.use(async (req, res, next) => {
+        // /api/feedback-apply/submit への POST リクエストを処理
+        if (req.url === '/api/feedback-apply/submit' && req.method === 'POST') {
+          let body = '';
+          req.on('data', chunk => { body += chunk; });
+          req.on('end', () => {
+            try {
+              const payload = JSON.parse(body);
+              console.log('📝 [DEV API] feedback-apply/submit received:', payload);
+
+              // バリデーション
+              if (!payload.articleUrl || !/^https?:\/\/.+/.test(payload.articleUrl)) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: '有効な記事URLを入力してください' }));
+                return;
+              }
+              if (!payload.slackAccountName?.trim()) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: 'Slackアカウント名を入力してください' }));
+                return;
+              }
+              if (!payload.bonoContent?.trim()) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: '学んだBONOコンテンツを入力してください' }));
+                return;
+              }
+              if (!payload.checkedItems?.length) {
+                res.statusCode = 400;
+                res.setHeader('Content-Type', 'application/json');
+                res.end(JSON.stringify({ error: '該当する項目を1つ以上選択してください' }));
+                return;
+              }
+
+              // 成功レスポンス（開発時はSlack通知をスキップ）
+              console.log('✅ [DEV API] Validation passed, returning success');
+              res.statusCode = 200;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({
+                success: true,
+                message: '応募を受け付けました（開発モード - Slack通知はスキップ）'
+              }));
+            } catch (e) {
+              console.error('❌ [DEV API] Error:', e);
+              res.statusCode = 500;
+              res.setHeader('Content-Type', 'application/json');
+              res.end(JSON.stringify({ error: 'サーバーエラーが発生しました' }));
+            }
+          });
+          return;
+        }
+        next();
+      });
+    }
+  };
+}
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -42,11 +106,12 @@ export default defineConfig(({ mode }) => {
     server: {
       host: "::",
       port: 8080,
+      // プロキシは削除し、localApiPluginでAPIを処理
     },
     plugins: [
       react(),
-      mode === 'development' &&
-      componentTagger(),
+      mode === 'development' && localApiPlugin(),
+      mode === 'development' && componentTagger(),
     ].filter(Boolean),
     resolve: {
       alias: {

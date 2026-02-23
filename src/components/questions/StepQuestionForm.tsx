@@ -51,21 +51,50 @@ export interface SubmitResult {
 interface StepQuestionFormProps {
   onSuccess: (result: SubmitResult) => void;
   onCancel?: () => void;
+  /** プレビュー用: 初期ステップを指定 */
+  initialStep?: number;
+  /** プレビュー用: ダミーデータを入れる */
+  previewMode?: boolean;
 }
 
-export function StepQuestionForm({ onSuccess, onCancel }: StepQuestionFormProps) {
+// プレビュー用ダミーデータ
+const PREVIEW_DATA = {
+  categoryId: "preview-cat-1",
+  title: "ポートフォリオのヒーローセクションについて",
+  questionContent: `## 背景・状況
+現在、自分のポートフォリオサイトを作成しています。ヒーローセクションのレイアウトで悩んでいます。
+
+## 困っていること・質問
+左側にテキスト、右側に画像を配置したいのですが、スマホ表示にしたときにどのような順序で並べるのがベストか迷っています。
+
+## 試したこと
+・テキスト→画像の順（読みやすさ重視）
+・画像→テキストの順（インパクト重視）`,
+  figmaUrl: "https://www.figma.com/file/abc123...",
+};
+
+const PREVIEW_CATEGORIES: QuestionCategory[] = [
+  { _id: "preview-cat-1", title: "UIデザイン", emoji: "🎨", slug: "ui-design", order: 1 },
+  { _id: "preview-cat-2", title: "レイアウト", emoji: "📐", slug: "layout", order: 2 },
+  { _id: "preview-cat-3", title: "配色・カラー", emoji: "🌈", slug: "color", order: 3 },
+  { _id: "preview-cat-4", title: "タイポグラフィ", emoji: "✒️", slug: "typography", order: 4 },
+  { _id: "preview-cat-5", title: "UX・体験設計", emoji: "💡", slug: "ux", order: 5 },
+  { _id: "preview-cat-6", title: "その他", emoji: "📝", slug: "other", order: 6 },
+];
+
+export function StepQuestionForm({ onSuccess, onCancel, initialStep, previewMode }: StepQuestionFormProps) {
   const { session } = useAuth();
 
   // カテゴリ
-  const [categories, setCategories] = useState<QuestionCategory[]>([]);
-  const [isLoadingCategories, setIsLoadingCategories] = useState(true);
+  const [categories, setCategories] = useState<QuestionCategory[]>(previewMode ? PREVIEW_CATEGORIES : []);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(!previewMode);
 
   // フォーム状態
-  const [step, setStep] = useState(1);
-  const [categoryId, setCategoryId] = useState("");
-  const [title, setTitle] = useState("");
-  const [questionContent, setQuestionContent] = useState(QUESTION_TEMPLATE);
-  const [figmaUrl, setFigmaUrl] = useState("");
+  const [step, setStep] = useState(initialStep || 1);
+  const [categoryId, setCategoryId] = useState(previewMode ? PREVIEW_DATA.categoryId : "");
+  const [title, setTitle] = useState(previewMode ? PREVIEW_DATA.title : "");
+  const [questionContent, setQuestionContent] = useState(previewMode ? PREVIEW_DATA.questionContent : QUESTION_TEMPLATE);
+  const [figmaUrl, setFigmaUrl] = useState(previewMode ? PREVIEW_DATA.figmaUrl : "");
 
   // UI状態
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -132,6 +161,18 @@ export function StepQuestionForm({ onSuccess, onCancel }: StepQuestionFormProps)
   // 送信処理
   const handleSubmit = async () => {
     setError(null);
+
+    // プレビューモードの場合はモックの成功レスポンスを返す
+    if (previewMode) {
+      onSuccess({
+        questionId: "preview-question-id",
+        slug: "preview-question-slug",
+        title,
+        categoryTitle: selectedCategory?.title || "UIデザイン",
+        categoryEmoji: selectedCategory?.emoji || "🎨",
+      });
+      return;
+    }
 
     const validationError = validate();
     if (validationError) {

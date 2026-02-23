@@ -101,6 +101,7 @@ const Footer = ({ className }: FooterProps) => {
 
         <div className={cn("text-center text-sm text-muted-foreground", showNewsletterSignup && "mt-12 pt-8 border-t")}>
           <div className="flex justify-center gap-4 mb-2">
+            <Link to="/feedback-apply" className="hover:underline">15分フィードバック</Link>
             <Link to="/subscription" className="hover:underline">サブスクリプション</Link>
           </div>
 

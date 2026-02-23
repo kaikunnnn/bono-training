@@ -710,3 +710,47 @@ export async function getUserQuestions(userId: string): Promise<UserQuestion[]> 
   `;
   return client.fetch<UserQuestion[]>(query, { userId });
 }
+
+// ============================================
+// 思考シェア記事（articleSubmission）
+// ============================================
+
+export interface ArticleSubmission {
+  _id: string;
+  authorName: string;
+  articleUrl: string;
+  articleTitle: string | null;
+  articleImage: string | null;
+  mainPoint: string;
+  categories: string[];
+  bonoContent: string | null;
+  status: 'pending' | 'approved' | 'needs-improvement' | 'rejected';
+  isPublic: boolean;
+  submittedAt: string;
+  approvedAt: string | null;
+  adminComment: string | null;
+}
+
+/**
+ * 承認済みの記事提出を取得（一覧表示用）
+ */
+export async function getApprovedArticleSubmissions(): Promise<ArticleSubmission[]> {
+  const query = `
+    *[_type == "articleSubmission" && status == "approved" && isPublic == true] | order(approvedAt desc) {
+      _id,
+      authorName,
+      articleUrl,
+      articleTitle,
+      "articleImage": articleImage.asset->url,
+      mainPoint,
+      categories,
+      bonoContent,
+      status,
+      isPublic,
+      submittedAt,
+      approvedAt,
+      adminComment
+    }
+  `;
+  return client.fetch<ArticleSubmission[]>(query);
+}

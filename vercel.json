@@ -1,4 +1,6 @@
 {
+  "devCommand": "vite --port 3000",
+  "framework": "vite",
   "rewrites": [
     {
       "source": "/lessons/:slug",

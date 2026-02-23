@@ -75,6 +75,7 @@ import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
 import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
 import QuestionFormPatterns from "./pages/dev/QuestionFormPatterns";
 import KnowledgeDetailPatterns from "./pages/dev/KnowledgeDetailPatterns";
+import ShareSubmitPatterns from "./pages/dev/ShareSubmitPatterns";
 import QuestionsIndexOld from "./pages/questions";
 import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
@@ -85,6 +86,10 @@ import FeedbackDetail from "./pages/feedbacks/FeedbackDetail";
 import KnowledgeList from "./pages/knowledge/KnowledgeList";
 import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
+import ShareIndex from "./pages/share";
+import ShareSubmit from "./pages/share/submit";
+import FeedbackApplyIndex from "./pages/feedback-apply";
+import FeedbackApplySubmit from "./pages/feedback-apply/submit";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -164,6 +169,7 @@ const AppContent = () => {
         <Route path="/dev/feedback-detail-patterns" element={<DevRoute><FeedbackDetailPatterns /></DevRoute>} />
         <Route path="/dev/question-form-patterns" element={<DevRoute><QuestionFormPatterns /></DevRoute>} />
         <Route path="/dev/knowledge-detail-patterns" element={<DevRoute><KnowledgeDetailPatterns /></DevRoute>} />
+        <Route path="/dev/share-submit-patterns" element={<DevRoute><ShareSubmitPatterns /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
@@ -181,21 +187,29 @@ const AppContent = () => {
 
         <Route path="/roadmap" element={<Roadmap />} />
 
-        {/* 新しい質問ページ（Sanityベース） */}
+        {/* 質問ページ（Sanityベース） */}
         <Route path="/questions" element={<QuestionList />} />
+        <Route path="/questions/new" element={<QuestionNew />} />
         <Route path="/questions/:slug" element={<QuestionDetail />} />
         {/* 旧質問ページ（テスト用 - 後で削除） */}
         <Route path="/questions-old" element={<PrivateRoute><QuestionsIndexOld /></PrivateRoute>} />
-        <Route path="/questions-old/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
         <Route path="/questions-old/:questionId" element={<PrivateRoute><QuestionDetailOld /></PrivateRoute>} />
 
         {/* フィードバックページ（Sanityベース） */}
         <Route path="/feedbacks" element={<FeedbackList />} />
         <Route path="/feedbacks/:slug" element={<FeedbackDetail />} />
 
+        {/* 15分フィードバック応募 */}
+        <Route path="/feedback-apply" element={<FeedbackApplyIndex />} />
+        <Route path="/feedback-apply/submit" element={<FeedbackApplySubmit />} />
+
         {/* ナレッジページ（Sanityベース） */}
         <Route path="/knowledge" element={<KnowledgeList />} />
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
+
+        {/* 思考シェア記事（みんなの学びのアウトプット） */}
+        <Route path="/share" element={<ShareIndex />} />
+        <Route path="/share/submit" element={<ShareSubmit />} />
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
