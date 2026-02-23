@@ -668,3 +668,45 @@ export async function getRecentKnowledge(limit: number = 3, excludeSlug?: string
   `;
   return client.fetch<Knowledge[]>(query, { limit, excludeSlug });
 }
+
+// ============================================
+// ユーザー固有の質問取得
+// ============================================
+
+export interface UserQuestion {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  category: {
+    _id: string;
+    title: string;
+    slug: { current: string };
+  } | null;
+  status: 'pending' | 'answered' | 'hidden';
+  isPublic: boolean;
+  submittedAt: string;
+  questionExcerpt?: string;
+}
+
+/**
+ * ユーザーの投稿した質問を取得
+ */
+export async function getUserQuestions(userId: string): Promise<UserQuestion[]> {
+  const query = `
+    *[_type == "question" && author.userId == $userId] | order(submittedAt desc) {
+      _id,
+      title,
+      slug,
+      "category": category-> {
+        _id,
+        title,
+        slug
+      },
+      status,
+      isPublic,
+      submittedAt,
+      "questionExcerpt": pt::text(questionContent)[0..100]
+    }
+  `;
+  return client.fetch<UserQuestion[]>(query, { userId });
+}

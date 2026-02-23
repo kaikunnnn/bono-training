@@ -4,29 +4,33 @@ import Layout from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
-import { QuestionForm } from "@/components/questions/QuestionForm";
-import { ArrowLeft, CheckCircle2, Lock } from "lucide-react";
+import { StepQuestionForm, type SubmitResult } from "@/components/questions/StepQuestionForm";
+import { QuestionSubmitSuccess } from "@/components/questions/QuestionSubmitSuccess";
+import { ArrowLeft, Lock } from "lucide-react";
 
 const QuestionNew = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const { hasActiveSubscription, loading: subLoading } = useSubscriptionContext();
-  const [submitted, setSubmitted] = useState(false);
+  const [submitResult, setSubmitResult] = useState<SubmitResult | null>(null);
 
   const currentUserName =
     user?.user_metadata?.name || user?.email?.split("@")[0] || "ゲスト";
   const currentUserAvatar =
     user?.user_metadata?.avatar_url || "/avatars/avatar-06.svg";
 
-  const handleSuccess = (questionId: string, slug: string) => {
-    setSubmitted(true);
+  const handleSuccess = (result: SubmitResult) => {
+    setSubmitResult(result);
   };
 
   const handleCancel = () => {
     navigate("/questions");
+  };
+
+  const handleNewQuestion = () => {
+    setSubmitResult(null);
   };
 
   // ローディング中
@@ -91,36 +95,22 @@ const QuestionNew = () => {
   }
 
   // 投稿完了
-  if (submitted) {
+  if (submitResult) {
     return (
       <Layout>
         <div className="container py-8">
-          <Card className="mx-auto max-w-lg">
-            <CardContent className="pt-6 text-center">
-              <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-green-500" />
-              <h2 className="mb-2 text-lg font-semibold">
-                質問を投稿しました！
-              </h2>
-              <p className="mb-4 text-sm text-muted-foreground">
-                カイくんが確認後、回答とともに公開されます。
-                <br />
-                回答までしばらくお待ちください。
-              </p>
-              <div className="flex justify-center gap-3">
-                <Button asChild variant="outline">
-                  <Link to="/questions">質問一覧へ</Link>
-                </Button>
-                <Button onClick={() => setSubmitted(false)}>
-                  もう1つ質問する
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mx-auto max-w-2xl">
+            <QuestionSubmitSuccess
+              result={submitResult}
+              onNewQuestion={handleNewQuestion}
+            />
+          </div>
         </div>
       </Layout>
     );
   }
 
+  // 質問投稿フォーム
   return (
     <Layout>
       <div className="container py-8">
@@ -154,7 +144,7 @@ const QuestionNew = () => {
                 </div>
               </div>
 
-              <QuestionForm onSuccess={handleSuccess} onCancel={handleCancel} />
+              <StepQuestionForm onSuccess={handleSuccess} onCancel={handleCancel} />
             </CardContent>
           </Card>
         </div>

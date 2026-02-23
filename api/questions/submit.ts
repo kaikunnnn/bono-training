@@ -100,10 +100,38 @@ async function sendSlackNotification(data: {
   const message = {
     blocks: [
       {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: '📝 新しい質問が投稿されました',
+          emoji: true,
+        },
+      },
+      {
+        type: 'section',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: `*タイトル:*\n${data.title}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*カテゴリ:*\n${data.category}`,
+          },
+          {
+            type: 'mrkdwn',
+            text: `*投稿者:*\n${data.author}`,
+          },
+        ],
+      },
+      {
+        type: 'divider',
+      },
+      {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `📝 *新しい質問が投稿されました*\n\n*タイトル:* ${data.title}\n*カテゴリ:* ${data.category}\n*投稿者:* ${data.author}`,
+          text: '*回答手順:*\n1. 下のボタンでSanity Studioを開く\n2. 「コンテンツ」タブで回答を入力\n3. 「管理情報」タブでステータスを「回答済み」に\n4. 公開をONにして保存',
         },
       },
       {
@@ -111,8 +139,9 @@ async function sendSlackNotification(data: {
         elements: [
           {
             type: 'button',
-            text: { type: 'plain_text', text: 'Sanity Studioで確認' },
+            text: { type: 'plain_text', text: '🔗 Sanity Studioで回答する', emoji: true },
             url: sanityStudioUrl,
+            style: 'primary',
           },
         ],
       },

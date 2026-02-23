@@ -8,8 +8,10 @@ import { HistoryList } from "@/components/ui/history-list";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ProgressLesson, CompletedLessonCard } from "@/components/progress";
 import { TabGroup } from "@/components/ui/tab-group";
+import { getUserQuestions, type UserQuestion } from "@/lib/sanity";
+import { MessageCircle, Clock, CheckCircle2 } from "lucide-react";
 
-type TabId = 'all' | 'progress' | 'favorite' | 'history';
+type TabId = 'all' | 'progress' | 'favorite' | 'history' | 'questions';
 import { getBookmarkedArticles, toggleBookmark, type BookmarkedArticle } from "@/services/bookmarks";
 import { getViewHistory, type ViewedArticle } from "@/services/viewHistory";
 import { getAllLessonsWithArticles, getNextIncompleteArticle, type LessonWithArticles } from "@/services/lessons";
@@ -65,6 +67,7 @@ export default function MyPage() {
   const [progressMap, setProgressMap] = useState<Record<string, LessonProgress>>({});
   const [lessonStatusMap, setLessonStatusMap] = useState<Record<string, LessonStatus>>({});
   const [completingLessonId, setCompletingLessonId] = useState<string | null>(null);
+  const [userQuestions, setUserQuestions] = useState<UserQuestion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -76,12 +79,14 @@ export default function MyPage() {
     const fetchData = async () => {
       setLoading(true);
 
-      const [articles, history] = await Promise.all([
+      const [articles, history, questions] = await Promise.all([
         getBookmarkedArticles(),
         getViewHistory(),
+        getUserQuestions(user.id),
       ]);
       setBookmarks(articles);
       setViewHistory(history);
+      setUserQuestions(questions);
 
       const allLessons = await getAllLessonsWithArticles();
       setLessons(allLessons);
@@ -207,6 +212,10 @@ export default function MyPage() {
     setActiveTab('history');
   };
 
+  const handleViewAllQuestions = () => {
+    setActiveTab('questions');
+  };
+
   const handleCompleteLesson = async (lessonId: string) => {
     setCompletingLessonId(lessonId);
     const result = await markLessonAsCompleted(lessonId);
@@ -293,6 +302,7 @@ export default function MyPage() {
               { id: 'progress', label: '進捗' },
               { id: 'favorite', label: 'お気に入り' },
               { id: 'history', label: '閲覧履歴' },
+              { id: 'questions', label: 'あなたの質問' },
             ]}
             activeTabId={activeTab}
             onTabChange={(id) => setActiveTab(id as TabId)}
@@ -478,7 +488,7 @@ export default function MyPage() {
 
           {/* 閲覧履歴セクション */}
           {(activeTab === 'all' || activeTab === 'history') && (
-            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3">
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
               {/* セクション見出し */}
               <SectionHeading
                 title="閲覧履歴"
@@ -496,6 +506,86 @@ export default function MyPage() {
               ) : (
                 <EmptyState
                   message={<>記事を閲覧した履歴が<br />こちらに表示されます</>}
+                />
+              )}
+            </section>
+          )}
+
+          {/* あなたの質問セクション */}
+          {(activeTab === 'all' || activeTab === 'questions') && (
+            <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3">
+              {/* セクション見出し */}
+              <SectionHeading
+                title="あなたの質問"
+                onSeeAllClick={handleViewAllQuestions}
+                totalCount={userQuestions.length}
+                displayLimit={3}
+                hideSeeAll={activeTab !== 'all'}
+              />
+
+              {/* 質問リスト or Empty State */}
+              {userQuestions.length > 0 ? (
+                <div className="w-full flex flex-col gap-2">
+                  {(activeTab === 'all' ? userQuestions.slice(0, 3) : userQuestions).map((question) => (
+                    <Link
+                      key={question._id}
+                      to={question.isPublic ? `/questions/${question.slug.current}` : '#'}
+                      className={`w-full p-4 bg-white rounded-xl border border-black/5 flex flex-col gap-2 transition-all ${
+                        question.isPublic ? 'hover:border-indigo-200 hover:shadow-sm cursor-pointer' : 'cursor-default opacity-80'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-slate-900 font-medium text-sm line-clamp-2">
+                            {question.title}
+                          </h3>
+                          {question.questionExcerpt && (
+                            <p className="text-slate-500 text-xs mt-1 line-clamp-1">
+                              {question.questionExcerpt}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex-shrink-0">
+                          {question.status === 'answered' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full">
+                              <CheckCircle2 size={12} />
+                              回答済み
+                            </span>
+                          ) : question.status === 'pending' ? (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-amber-50 text-amber-700 text-xs font-medium rounded-full">
+                              <Clock size={12} />
+                              回答待ち
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-slate-100 text-slate-500 text-xs font-medium rounded-full">
+                              非公開
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 text-xs text-slate-400">
+                        {question.category && (
+                          <span className="flex items-center gap-1">
+                            <MessageCircle size={12} />
+                            {question.category.title}
+                          </span>
+                        )}
+                        <span>
+                          {new Date(question.submittedAt).toLocaleDateString('ja-JP', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <EmptyState
+                  message={<>質問を投稿すると<br />こちらに表示されます</>}
+                  linkHref="/questions/new"
+                  linkLabel="質問を投稿する"
                 />
               )}
             </section>

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves, MessageSquare, HelpCircle } from 'lucide-react';
+import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves, MessageSquare, HelpCircle, Library } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -141,6 +141,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/question-form-patterns',
     icon: <HelpCircle className="w-8 h-8" />,
     tags: ['Question', 'Form', 'UX', 'Patterns', 'PM Review']
+  },
+  {
+    title: 'Knowledge Detail Patterns',
+    description: 'お役立ち（ナレッジ）詳細ページのデザインパターン比較。Medium風、Notion風、シンプル最適化の3パターン。',
+    path: '/dev/knowledge-detail-patterns',
+    icon: <Library className="w-8 h-8" />,
+    tags: ['Knowledge', 'Article', 'Layout', 'UX', 'PM Review']
   },
 ];
 
