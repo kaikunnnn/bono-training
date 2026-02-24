@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
+import TopPage from "./pages/top";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
@@ -76,6 +77,10 @@ import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
 import QuestionFormPatterns from "./pages/dev/QuestionFormPatterns";
 import KnowledgeDetailPatterns from "./pages/dev/KnowledgeDetailPatterns";
 import ShareSubmitPatterns from "./pages/dev/ShareSubmitPatterns";
+import TopPagePatternB from "./pages/dev/TopPagePatternB";
+import TopPagePatternC from "./pages/dev/TopPagePatternC";
+import TopPagePatternD from "./pages/dev/TopPagePatternD";
+import TopPagePatternE from "./pages/dev/TopPagePatternE";
 import QuestionsIndexOld from "./pages/questions";
 import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
@@ -127,6 +132,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/top" element={<TopPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -170,6 +176,10 @@ const AppContent = () => {
         <Route path="/dev/question-form-patterns" element={<DevRoute><QuestionFormPatterns /></DevRoute>} />
         <Route path="/dev/knowledge-detail-patterns" element={<DevRoute><KnowledgeDetailPatterns /></DevRoute>} />
         <Route path="/dev/share-submit-patterns" element={<DevRoute><ShareSubmitPatterns /></DevRoute>} />
+        <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
+        <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
+        <Route path="/dev/top-pattern-d" element={<DevRoute><TopPagePatternD /></DevRoute>} />
+        <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
