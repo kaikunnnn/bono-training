@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
+import TopPage from "./pages/top";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
@@ -72,6 +73,8 @@ import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
 import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
 import LessonCardMotion from "./pages/dev/LessonCardMotion";
 import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
+import TopPagePatternB from "./pages/dev/TopPagePatternB";
+import TopPagePatternC from "./pages/dev/TopPagePatternC";
 import QuestionsIndex from "./pages/questions";
 import QuestionDetail from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
@@ -113,6 +116,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/top" element={<TopPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -152,6 +156,8 @@ const AppContent = () => {
         <Route path="/dev/mobile-menu-button" element={<DevRoute><MobileMenuButtonPatterns /></DevRoute>} />
         <Route path="/dev/lesson-card-motion" element={<DevRoute><LessonCardMotion /></DevRoute>} />
         <Route path="/dev/nav-sidebar" element={<DevRoute><NavigationSidebarStates /></DevRoute>} />
+        <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
+        <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
