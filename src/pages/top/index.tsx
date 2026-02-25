@@ -1,523 +1,656 @@
 /**
- * BONOトップページ プロトタイプ
- * パターンA: Stripe風グリッド重視
+ * BONO トップページ
+ * Stripe.com レイアウト準拠 + BONO 実コンテンツ
+ *
+ * 参考: https://stripe.com/jp
+ * リサーチ: .claude/docs/features/top-page/RESEARCH.md
  */
 
-import { motion } from "framer-motion";
-import { ArrowRight, Play, Users, BookOpen, Award, MessageCircle, Check } from "lucide-react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import {
+  ArrowRight,
+  ChevronDown,
+  Play,
+  BookOpen,
+  Users,
+  MessageSquare,
+  Target,
+  Sparkles,
+  GraduationCap,
+  Briefcase,
+  TrendingUp,
+  CheckCircle,
+  Menu,
+  X
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import SEO from "@/components/common/SEO";
 
 // ============================================
-// アニメーション設定
+// ヘッダー（Stripe準拠）
 // ============================================
-const fadeInUp = {
-  initial: { opacity: 0, y: 30 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.6 }
-};
+const Header = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-const stagger = {
-  animate: {
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
+  const navItems = [
+    { label: "コース", href: "/lessons" },
+    { label: "学習パス", href: "/roadmap" },
+    { label: "コミュニティ", href: "/questions" },
+    { label: "ガイド", href: "/guide" },
+  ];
 
-// ============================================
-// ヒーローセクション
-// ============================================
-const HeroSection = () => (
-  <section className="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-900 text-white">
-    <div className="absolute inset-0 bg-[url('/images/grid-pattern.svg')] opacity-10" />
-    <div className="container mx-auto px-6 py-24 lg:py-32 relative">
-      <motion.div
-        className="max-w-4xl mx-auto text-center"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <span className="inline-block px-4 py-1.5 mb-6 text-sm font-medium bg-white/10 rounded-full border border-white/20">
-          UI/UXデザインを学ぶなら
-        </span>
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-          すべての人に
-          <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400">
-            創造性の夜明けを
-          </span>
-        </h1>
-        <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl mx-auto">
-          未経験からUI/UXデザイナーへ。体系的なカリキュラムと実践的なフィードバックで、
-          あなたのキャリアチェンジをサポートします。
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="h-14 px-8 text-base bg-white text-slate-900 hover:bg-slate-100 rounded-xl">
-            無料で始める
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
-          <Button size="lg" variant="outline" className="h-14 px-8 text-base border-white/30 text-white hover:bg-white/10 rounded-xl">
-            <Play className="mr-2 h-5 w-5" />
-            紹介動画を見る
-          </Button>
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">B</span>
+            </div>
+            <span className="font-bold text-xl text-gray-900">BONO</span>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                to={item.href}
+                className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+            <Link
+              to="/subscription"
+              className="text-gray-600 hover:text-gray-900 text-sm font-medium transition-colors"
+            >
+              料金
+            </Link>
+          </nav>
+
+          {/* Desktop CTA */}
+          <div className="hidden md:flex items-center gap-4">
+            <Link to="/login" className="text-gray-600 hover:text-gray-900 text-sm font-medium">
+              ログイン
+            </Link>
+            <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-6">
+              <Link to="/signup">無料で始める</Link>
+            </Button>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="md:hidden p-2"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
         </div>
-      </motion.div>
-    </div>
-    {/* 装飾 */}
-    <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[#f9fafb] to-transparent" />
-  </section>
-);
 
-// ============================================
-// 統計セクション
-// ============================================
-const stats = [
-  { number: "5,000+", label: "受講者数", icon: Users },
-  { number: "200+", label: "動画レッスン", icon: BookOpen },
-  { number: "92%", label: "満足度", icon: Award },
-  { number: "500+", label: "コミュニティ", icon: MessageCircle },
-];
-
-const StatsSection = () => (
-  <section className="py-16 bg-white border-b">
-    <div className="container mx-auto px-6">
-      <motion.div
-        className="grid grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12"
-        variants={stagger}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-      >
-        {stats.map((stat, index) => (
-          <motion.div
-            key={index}
-            className="text-center"
-            variants={fadeInUp}
-          >
-            <stat.icon className="w-8 h-8 mx-auto mb-3 text-indigo-600" />
-            <div className="text-3xl lg:text-4xl font-bold text-slate-900 mb-1">
-              {stat.number}
-            </div>
-            <div className="text-sm text-slate-500 uppercase tracking-wide">
-              {stat.label}
-            </div>
-          </motion.div>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
-
-// ============================================
-// 学習パスセクション
-// ============================================
-const learningPaths = [
-  {
-    title: "UI/UXデザイナー転職",
-    description: "未経験から6ヶ月でデザイナーへ。実践的なカリキュラムで転職を実現。",
-    duration: "6ヶ月",
-    color: "from-indigo-500 to-purple-500",
-    features: ["ポートフォリオ制作", "転職サポート", "1on1メンタリング"]
-  },
-  {
-    title: "ビジュアルデザイン基礎",
-    description: "色彩、タイポグラフィ、レイアウトの基礎を1ヶ月で習得。",
-    duration: "1ヶ月",
-    color: "from-emerald-500 to-teal-500",
-    features: ["36本の動画", "実践課題", "添削フィードバック"]
-  },
-  {
-    title: "情報設計マスター",
-    description: "ユーザー体験を設計する力を身につける。UXの本質を学ぶ。",
-    duration: "1ヶ月",
-    color: "from-orange-500 to-red-500",
-    features: ["ワイヤーフレーム", "ユーザーリサーチ", "プロトタイピング"]
-  },
-];
-
-const LearningPathsSection = () => (
-  <section className="py-24 bg-[#f9fafb]">
-    <div className="container mx-auto px-6">
-      <motion.div
-        className="text-center mb-16"
-        {...fadeInUp}
-        viewport={{ once: true }}
-      >
-        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-          あなたに合った学習パス
-        </h2>
-        <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-          目標に合わせて選べる体系的なカリキュラム。段階的にスキルアップできます。
-        </p>
-      </motion.div>
-
-      <motion.div
-        className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-        variants={stagger}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-      >
-        {learningPaths.map((path, index) => (
-          <motion.div
-            key={index}
-            className="bg-white rounded-3xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-slate-100"
-            variants={fadeInUp}
-          >
-            <div className={`inline-block px-3 py-1 rounded-full text-xs font-medium text-white bg-gradient-to-r ${path.color} mb-4`}>
-              {path.duration}
-            </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-3">{path.title}</h3>
-            <p className="text-slate-600 mb-6">{path.description}</p>
-            <ul className="space-y-2 mb-6">
-              {path.features.map((feature, i) => (
-                <li key={i} className="flex items-center text-sm text-slate-600">
-                  <Check className="w-4 h-4 mr-2 text-emerald-500" />
-                  {feature}
-                </li>
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden py-4 border-t border-gray-100">
+            <nav className="flex flex-col gap-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  className="text-gray-600 hover:text-gray-900 font-medium"
+                >
+                  {item.label}
+                </Link>
               ))}
-            </ul>
-            <Button variant="outline" className="w-full rounded-xl">
-              詳しく見る
-              <ArrowRight className="ml-2 h-4 w-4" />
+              <Link to="/subscription" className="text-gray-600 hover:text-gray-900 font-medium">
+                料金
+              </Link>
+              <hr className="border-gray-100" />
+              <Link to="/login" className="text-gray-600 hover:text-gray-900 font-medium">
+                ログイン
+              </Link>
+              <Button asChild className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full">
+                <Link to="/signup">無料で始める</Link>
+              </Button>
+            </nav>
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
+
+// ============================================
+// ヒーローセクション（Stripe準拠）
+// ============================================
+const HeroSection = () => {
+  return (
+    <section className="pt-32 pb-20 bg-gradient-to-b from-slate-50 to-white overflow-hidden">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-4xl mx-auto text-center">
+          {/* Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50 text-indigo-700 text-sm font-medium mb-8"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>60社以上の転職実績</span>
+          </motion.div>
+
+          {/* Main Title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-4xl md:text-6xl font-bold text-gray-900 leading-tight mb-6"
+          >
+            プロから学ぶ、
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+              実践的UIデザイン
+            </span>
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto"
+          >
+            10年の実務経験を持つプロが作ったカリキュラム。
+            <br className="hidden md:block" />
+            未経験からUI/UXデザイナーへの転職を実現。
+          </motion.p>
+
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          >
+            <Button asChild size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-8 h-14 text-lg">
+              <Link to="/signup">
+                無料で始める
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </Button>
+            <Button asChild size="lg" variant="outline" className="rounded-full px-8 h-14 text-lg border-gray-300">
+              <Link to="/guide">
+                <Play className="w-5 h-5 mr-2" />
+                コースを見る
+              </Link>
             </Button>
           </motion.div>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ============================================
-// コースグリッドセクション
+// Bento Grid セクション（Stripe準拠）
 // ============================================
-const courses = [
-  { title: "はじめてのFigma", videos: 24, category: "Figma", image: "/images/course-figma.jpg" },
-  { title: "UIデザインの教科書", videos: 36, category: "UI", image: "/images/course-ui.jpg" },
-  { title: "UXリサーチ入門", videos: 28, category: "UX", image: "/images/course-ux.jpg" },
-  { title: "ポートフォリオ制作", videos: 18, category: "キャリア", image: "/images/course-portfolio.jpg" },
-];
+const BentoGridSection = () => {
+  const cards = [
+    {
+      title: "UIデザイン基礎",
+      description: "配色、タイポグラフィ、レイアウトの基本原則をマスター。デザインの「なぜ」を理解できるようになる。",
+      icon: <BookOpen className="w-6 h-6" />,
+      size: "large", // 2x2
+      color: "bg-gradient-to-br from-blue-500 to-indigo-600",
+      link: "/lessons",
+    },
+    {
+      title: "転職ロードマップ",
+      description: "未経験からUI/UXデザイナーになるまでの道筋を明確に。",
+      icon: <Target className="w-6 h-6" />,
+      size: "medium",
+      color: "bg-gradient-to-br from-purple-500 to-pink-600",
+      link: "/roadmap",
+    },
+    {
+      title: "コミュニティ",
+      description: "仲間と学び、質問し放題。挫折しない環境。",
+      icon: <Users className="w-6 h-6" />,
+      size: "medium",
+      color: "bg-gradient-to-br from-amber-500 to-orange-600",
+      link: "/questions",
+    },
+    {
+      title: "プロからのフィードバック",
+      description: "あなたのデザインを10年経験のプロがレビュー。実務で通用するレベルに。",
+      icon: <MessageSquare className="w-6 h-6" />,
+      size: "wide",
+      color: "bg-gradient-to-br from-emerald-500 to-teal-600",
+      link: "/feedbacks",
+    },
+  ];
 
-const CoursesSection = () => (
-  <section className="py-24 bg-white">
-    <div className="container mx-auto px-6">
-      <motion.div
-        className="flex flex-col md:flex-row md:items-end md:justify-between mb-12"
-        {...fadeInUp}
-        viewport={{ once: true }}
-      >
-        <div>
-          <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-            人気のコース
+  return (
+    <section className="py-20 bg-white">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            必要なすべてが、ここに
           </h2>
-          <p className="text-lg text-slate-600">
-            実践的なスキルが身につく厳選コンテンツ
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            基礎学習からキャリア支援まで。体系的なカリキュラムで確実にスキルアップ。
           </p>
         </div>
-        <Link to="/courses" className="mt-4 md:mt-0 text-indigo-600 font-medium flex items-center hover:underline">
-          すべてのコースを見る
-          <ArrowRight className="ml-1 h-4 w-4" />
-        </Link>
-      </motion.div>
 
-      <motion.div
-        className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6"
-        variants={stagger}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-      >
-        {courses.map((course, index) => (
+        {/* Bento Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* Large Card (2x2) */}
           <motion.div
-            key={index}
-            className="group cursor-pointer"
-            variants={fadeInUp}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="md:col-span-2 md:row-span-2"
           >
-            <div className="relative aspect-video rounded-2xl bg-slate-200 mb-4 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/20 to-purple-500/20" />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Play className="w-5 h-5 text-slate-900 ml-0.5" />
+            <Link to={cards[0].link} className="block h-full">
+              <div className={`${cards[0].color} rounded-3xl p-8 h-full min-h-[400px] text-white flex flex-col justify-between hover:scale-[1.02] transition-transform`}>
+                <div>
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mb-6">
+                    {cards[0].icon}
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-bold mb-4">{cards[0].title}</h3>
+                  <p className="text-white/80 text-lg">{cards[0].description}</p>
+                </div>
+                <div className="flex items-center gap-2 text-white/80 hover:text-white transition-colors">
+                  <span>詳しく見る</span>
+                  <ArrowRight className="w-4 h-4" />
                 </div>
               </div>
-            </div>
-            <span className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
-              {course.category}
-            </span>
-            <h3 className="text-lg font-semibold text-slate-900 mt-1 group-hover:text-indigo-600 transition-colors">
-              {course.title}
-            </h3>
-            <p className="text-sm text-slate-500 mt-1">{course.videos}本の動画</p>
+            </Link>
           </motion.div>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
 
-// ============================================
-// 成功事例セクション
-// ============================================
-const testimonials = [
-  {
-    name: "田中 美咲",
-    role: "元教師 → UIデザイナー",
-    company: "IT企業",
-    quote: "教師を辞めてデザイナーになるなんて無理だと思っていました。でもBONOで体系的に学び、半年で転職できました。",
-    image: "/images/testimonial-1.jpg"
-  },
-  {
-    name: "鈴木 健太",
-    role: "元営業 → UXデザイナー",
-    company: "スタートアップ",
-    quote: "営業経験がUXリサーチに活きています。BONOのフィードバックのおかげで、自信を持ってキャリアチェンジできました。",
-    image: "/images/testimonial-2.jpg"
-  },
-];
+          {/* Medium Cards (1x1) */}
+          {cards.slice(1, 3).map((card, index) => (
+            <motion.div
+              key={card.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Link to={card.link} className="block h-full">
+                <div className={`${card.color} rounded-3xl p-6 h-full min-h-[200px] text-white flex flex-col justify-between hover:scale-[1.02] transition-transform`}>
+                  <div>
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-4">
+                      {card.icon}
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">{card.title}</h3>
+                    <p className="text-white/80 text-sm">{card.description}</p>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
 
-const TestimonialsSection = () => (
-  <section className="py-24 bg-slate-900 text-white">
-    <div className="container mx-auto px-6">
-      <motion.div
-        className="text-center mb-16"
-        {...fadeInUp}
-        viewport={{ once: true }}
-      >
-        <h2 className="text-3xl lg:text-4xl font-bold mb-4">
-          キャリアチェンジを実現した先輩たち
-        </h2>
-        <p className="text-lg text-slate-400">
-          異業種からデザイナーへ。あなたも次のステップへ。
-        </p>
-      </motion.div>
-
-      <motion.div
-        className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto"
-        variants={stagger}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-      >
-        {testimonials.map((t, index) => (
+          {/* Wide Card (2x1) */}
           <motion.div
-            key={index}
-            className="bg-white/5 backdrop-blur rounded-3xl p-8 border border-white/10"
-            variants={fadeInUp}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="md:col-span-2"
           >
-            <p className="text-lg text-slate-300 mb-6 leading-relaxed">
-              "{t.quote}"
-            </p>
-            <div className="flex items-center">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-500 mr-4" />
-              <div>
-                <div className="font-semibold">{t.name}</div>
-                <div className="text-sm text-slate-400">{t.role} @ {t.company}</div>
+            <Link to={cards[3].link} className="block h-full">
+              <div className={`${cards[3].color} rounded-3xl p-6 h-full min-h-[200px] text-white flex flex-col justify-between hover:scale-[1.02] transition-transform`}>
+                <div>
+                  <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-4">
+                    {cards[3].icon}
+                  </div>
+                  <h3 className="text-xl font-bold mb-2">{cards[3].title}</h3>
+                  <p className="text-white/80">{cards[3].description}</p>
+                </div>
               </div>
-            </div>
+            </Link>
           </motion.div>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ============================================
-// 料金プランセクション
+// 統計セクション（Stripe準拠）
 // ============================================
-const plans = [
-  {
-    name: "Starter",
-    price: "5,800",
-    description: "まずは始めてみたい方に",
-    features: ["動画コンテンツ視聴", "コミュニティ参加", "月1回のQ&A"],
-    highlighted: false
-  },
-  {
-    name: "Growth",
-    price: "9,800",
-    description: "本気でスキルアップしたい方に",
-    features: ["全コンテンツ視聴", "課題添削", "月2回のメンタリング", "転職サポート"],
-    highlighted: true
-  },
-  {
-    name: "Pro",
-    price: "15,800",
-    description: "プロを目指す方に",
-    features: ["全機能利用可能", "無制限メンタリング", "ポートフォリオレビュー", "企業紹介"],
-    highlighted: false
-  },
-];
+const StatsSection = () => {
+  const stats = [
+    { value: "60+", label: "転職実績", description: "社" },
+    { value: "36+", label: "動画コンテンツ", description: "本" },
+    { value: "10", label: "プロ経験", description: "年" },
+    { value: "無制限", label: "質問対応", description: "" },
+  ];
 
-const PricingSection = () => (
-  <section className="py-24 bg-[#f9fafb]">
-    <div className="container mx-auto px-6">
-      <motion.div
-        className="text-center mb-16"
-        {...fadeInUp}
-        viewport={{ once: true }}
-      >
-        <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-          シンプルな料金プラン
-        </h2>
-        <p className="text-lg text-slate-600">
-          目標に合わせて選べる3つのプラン
-        </p>
-      </motion.div>
+  return (
+    <section className="py-20 bg-slate-900 text-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
+          {stats.map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="text-center"
+            >
+              <div className="text-4xl md:text-5xl font-bold text-white mb-2">
+                {stat.value}
+                <span className="text-2xl md:text-3xl text-gray-400">{stat.description}</span>
+              </div>
+              <div className="text-gray-400 text-sm md:text-base">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
-      <motion.div
-        className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto"
-        variants={stagger}
-        initial="initial"
-        whileInView="animate"
-        viewport={{ once: true }}
-      >
-        {plans.map((plan, index) => (
-          <motion.div
-            key={index}
-            className={`rounded-3xl p-8 ${
-              plan.highlighted
-                ? "bg-slate-900 text-white ring-4 ring-indigo-500/50 scale-105"
-                : "bg-white border border-slate-200"
-            }`}
-            variants={fadeInUp}
-          >
-            {plan.highlighted && (
-              <span className="inline-block px-3 py-1 text-xs font-medium bg-indigo-500 rounded-full mb-4">
-                おすすめ
-              </span>
-            )}
-            <h3 className="text-xl font-bold mb-2">{plan.name}</h3>
-            <p className={`text-sm mb-4 ${plan.highlighted ? "text-slate-400" : "text-slate-500"}`}>
-              {plan.description}
-            </p>
-            <div className="mb-6">
-              <span className="text-4xl font-bold">¥{plan.price}</span>
-              <span className={`text-sm ${plan.highlighted ? "text-slate-400" : "text-slate-500"}`}>/月</span>
-            </div>
-            <ul className="space-y-3 mb-8">
-              {plan.features.map((feature, i) => (
-                <li key={i} className="flex items-center text-sm">
-                  <Check className={`w-4 h-4 mr-2 ${plan.highlighted ? "text-indigo-400" : "text-emerald-500"}`} />
-                  {feature}
-                </li>
-              ))}
-            </ul>
-            <Button
-              className={`w-full rounded-xl ${
+// ============================================
+// ターゲット別セクション（Stripe準拠）
+// ============================================
+const TargetSection = () => {
+  const targets = [
+    {
+      icon: <GraduationCap className="w-8 h-8" />,
+      title: "未経験からデザイナーへ",
+      description: "プログラミングや他業界からの転職を目指す方。基礎から体系的に学べるカリキュラムで、確実にスキルを身につけます。",
+      features: ["基礎から学べる", "転職ロードマップ付き", "ポートフォリオ作成支援"],
+    },
+    {
+      icon: <Briefcase className="w-8 h-8" />,
+      title: "デザイナーとして転職したい",
+      description: "Web/グラフィックデザイナーからUI/UXデザイナーへ。実務で通用するスキルと作品を作れるようになります。",
+      features: ["実践的な課題", "プロからのフィードバック", "面接対策"],
+    },
+    {
+      icon: <TrendingUp className="w-8 h-8" />,
+      title: "スキルアップしたい",
+      description: "ジュニアデザイナーとして働いている方。より高いレベルのスキルを身につけ、キャリアアップを目指します。",
+      features: ["上級テクニック", "論理的なデザイン思考", "業界最新トレンド"],
+    },
+  ];
+
+  return (
+    <section className="py-20 bg-gray-50">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            あなたの目標に合わせて
+          </h2>
+          <p className="text-lg text-gray-600">
+            それぞれのステージに最適な学習パスを用意
+          </p>
+        </div>
+
+        {/* Target Cards */}
+        <div className="grid md:grid-cols-3 gap-8">
+          {targets.map((target, index) => (
+            <motion.div
+              key={target.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.1 }}
+              className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <div className="w-14 h-14 bg-indigo-100 rounded-xl flex items-center justify-center text-indigo-600 mb-6">
+                {target.icon}
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-4">{target.title}</h3>
+              <p className="text-gray-600 mb-6">{target.description}</p>
+              <ul className="space-y-3">
+                {target.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3 text-gray-700">
+                    <CheckCircle className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ============================================
+// 料金セクション
+// ============================================
+const PricingSection = () => {
+  const plans = [
+    {
+      name: "スタンダード",
+      price: "5,800",
+      period: "月額（3ヶ月継続）",
+      description: "すべての動画コンテンツにアクセス",
+      features: [
+        "全コース見放題",
+        "コミュニティ参加",
+        "質問し放題",
+        "学習ロードマップ",
+      ],
+      cta: "スタンダードで始める",
+      highlighted: false,
+    },
+    {
+      name: "フィードバック",
+      price: "13,800",
+      period: "月額（3ヶ月継続）",
+      description: "プロからの直接フィードバック付き",
+      features: [
+        "スタンダードの全機能",
+        "月2回のフィードバック",
+        "ポートフォリオレビュー",
+        "キャリア相談",
+      ],
+      cta: "フィードバックで始める",
+      highlighted: true,
+    },
+  ];
+
+  return (
+    <section className="py-20 bg-white">
+      <div className="max-w-5xl mx-auto px-6">
+        {/* Section Header */}
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            シンプルな料金プラン
+          </h2>
+          <p className="text-lg text-gray-600">
+            広告費ゼロだから、質と価格を両立
+          </p>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className="grid md:grid-cols-2 gap-8">
+          {plans.map((plan) => (
+            <motion.div
+              key={plan.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className={`rounded-2xl p-8 ${
                 plan.highlighted
-                  ? "bg-white text-slate-900 hover:bg-slate-100"
-                  : "bg-slate-900 text-white hover:bg-slate-800"
+                  ? "bg-indigo-600 text-white ring-4 ring-indigo-600 ring-offset-4"
+                  : "bg-gray-50 text-gray-900"
               }`}
             >
-              始める
-            </Button>
-          </motion.div>
-        ))}
-      </motion.div>
-    </div>
-  </section>
-);
+              <h3 className={`text-xl font-bold mb-2 ${plan.highlighted ? "text-white" : "text-gray-900"}`}>
+                {plan.name}
+              </h3>
+              <p className={`text-sm mb-6 ${plan.highlighted ? "text-indigo-200" : "text-gray-600"}`}>
+                {plan.description}
+              </p>
+              <div className="mb-6">
+                <span className="text-4xl font-bold">¥{plan.price}</span>
+                <span className={`text-sm ml-2 ${plan.highlighted ? "text-indigo-200" : "text-gray-500"}`}>
+                  {plan.period}
+                </span>
+              </div>
+              <ul className="space-y-3 mb-8">
+                {plan.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle className={`w-5 h-5 flex-shrink-0 ${plan.highlighted ? "text-indigo-200" : "text-emerald-500"}`} />
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Button
+                asChild
+                className={`w-full h-12 rounded-full ${
+                  plan.highlighted
+                    ? "bg-white text-indigo-600 hover:bg-gray-100"
+                    : "bg-indigo-600 text-white hover:bg-indigo-700"
+                }`}
+              >
+                <Link to="/subscription">{plan.cta}</Link>
+              </Button>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
 
 // ============================================
-// CTAセクション
+// CTA セクション
 // ============================================
-const CTASection = () => (
-  <section className="py-24 bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-    <div className="container mx-auto px-6">
-      <motion.div
-        className="max-w-3xl mx-auto text-center"
-        {...fadeInUp}
-        viewport={{ once: true }}
-      >
-        <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-          今日から、デザイナーへの第一歩を
-        </h2>
-        <p className="text-lg text-white/80 mb-10">
-          5,000人以上が選んだBONOで、あなたも新しいキャリアをスタートしませんか？
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button size="lg" className="h-14 px-8 bg-white text-indigo-600 hover:bg-slate-100 rounded-xl">
-            無料で始める
-            <ArrowRight className="ml-2 h-5 w-5" />
+const CTASection = () => {
+  return (
+    <section className="py-20 bg-gradient-to-r from-indigo-600 to-purple-600">
+      <div className="max-w-4xl mx-auto px-6 text-center">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-3xl md:text-4xl font-bold text-white mb-6"
+        >
+          今日から、デザイナーへの一歩を
+        </motion.h2>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.1 }}
+          className="text-lg text-indigo-100 mb-10"
+        >
+          まずは無料でコンテンツを体験。あなたのペースで学習を始められます。
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2 }}
+        >
+          <Button asChild size="lg" className="bg-white text-indigo-600 hover:bg-gray-100 rounded-full px-10 h-14 text-lg">
+            <Link to="/signup">
+              無料で始める
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Link>
           </Button>
-          <Button size="lg" variant="outline" className="h-14 px-8 border-white/30 text-white hover:bg-white/10 rounded-xl">
-            資料をダウンロード
-          </Button>
-        </div>
-      </motion.div>
-    </div>
-  </section>
-);
+        </motion.div>
+      </div>
+    </section>
+  );
+};
 
 // ============================================
 // フッター
 // ============================================
-const Footer = () => (
-  <footer className="py-12 bg-slate-900 text-white">
-    <div className="container mx-auto px-6">
-      <div className="grid md:grid-cols-4 gap-8 mb-8">
-        <div>
-          <div className="text-xl font-bold mb-4">BONO</div>
-          <p className="text-sm text-slate-400">
-            すべての人に創造性の夜明けを
-          </p>
+const Footer = () => {
+  const links = {
+    コンテンツ: [
+      { label: "コース一覧", href: "/lessons" },
+      { label: "ロードマップ", href: "/roadmap" },
+      { label: "ガイド", href: "/guide" },
+    ],
+    コミュニティ: [
+      { label: "Q&A", href: "/questions" },
+      { label: "フィードバック", href: "/feedbacks" },
+      { label: "ナレッジ", href: "/knowledge" },
+    ],
+    サポート: [
+      { label: "料金プラン", href: "/subscription" },
+      { label: "よくある質問", href: "/guide" },
+    ],
+  };
+
+  return (
+    <footer className="bg-gray-900 text-gray-400 py-16">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+          {/* Logo */}
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">B</span>
+              </div>
+              <span className="font-bold text-xl text-white">BONO</span>
+            </div>
+            <p className="text-sm">
+              すべての人に創造性の夜明けを
+            </p>
+          </div>
+
+          {/* Links */}
+          {Object.entries(links).map(([category, items]) => (
+            <div key={category}>
+              <h4 className="text-white font-semibold mb-4">{category}</h4>
+              <ul className="space-y-2">
+                {items.map((item) => (
+                  <li key={item.href}>
+                    <Link to={item.href} className="hover:text-white transition-colors text-sm">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
-        <div>
-          <div className="font-medium mb-4">学ぶ</div>
-          <ul className="space-y-2 text-sm text-slate-400">
-            <li><Link to="#" className="hover:text-white">コース一覧</Link></li>
-            <li><Link to="#" className="hover:text-white">学習パス</Link></li>
-            <li><Link to="#" className="hover:text-white">料金プラン</Link></li>
-          </ul>
-        </div>
-        <div>
-          <div className="font-medium mb-4">コミュニティ</div>
-          <ul className="space-y-2 text-sm text-slate-400">
-            <li><Link to="#" className="hover:text-white">Slack</Link></li>
-            <li><Link to="#" className="hover:text-white">イベント</Link></li>
-            <li><Link to="#" className="hover:text-white">ブログ</Link></li>
-          </ul>
-        </div>
-        <div>
-          <div className="font-medium mb-4">サポート</div>
-          <ul className="space-y-2 text-sm text-slate-400">
-            <li><Link to="#" className="hover:text-white">ヘルプ</Link></li>
-            <li><Link to="#" className="hover:text-white">お問い合わせ</Link></li>
-            <li><Link to="#" className="hover:text-white">利用規約</Link></li>
-          </ul>
+
+        <div className="border-t border-gray-800 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-sm">© 2024 BONO. All rights reserved.</p>
+          <div className="flex gap-6 text-sm">
+            <a href="#" className="hover:text-white transition-colors">利用規約</a>
+            <a href="#" className="hover:text-white transition-colors">プライバシーポリシー</a>
+            <a href="#" className="hover:text-white transition-colors">特定商取引法</a>
+          </div>
         </div>
       </div>
-      <div className="pt-8 border-t border-slate-800 text-center text-sm text-slate-500">
-        © 2025 BONO. All rights reserved.
-      </div>
-    </div>
-  </footer>
-);
+    </footer>
+  );
+};
 
 // ============================================
 // メインコンポーネント
 // ============================================
 const TopPage = () => {
   return (
-    <>
-      <SEO
-        title="BONO - すべての人に創造性の夜明けを"
-        description="未経験からUI/UXデザイナーへ。体系的なカリキュラムと実践的なフィードバックで、あなたのキャリアチェンジをサポートします。"
-        ogUrl="/"
-      />
-      <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
+      <Header />
+      <main>
         <HeroSection />
+        <BentoGridSection />
         <StatsSection />
-        <LearningPathsSection />
-        <CoursesSection />
-        <TestimonialsSection />
+        <TargetSection />
         <PricingSection />
         <CTASection />
-        <Footer />
-      </div>
-    </>
+      </main>
+      <Footer />
+    </div>
   );
 };
 

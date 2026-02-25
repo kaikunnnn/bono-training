@@ -38,16 +38,11 @@ import GuidePage from "./pages/Guide";
 import GuideDetailPage from "./pages/Guide/GuideDetail";
 import DevRoute from "./pages/dev";
 import DevHome from "./pages/dev/DevHome";
-import ComponentsReferencePage from "./pages/dev/Components";
-import WebflowTest from "./pages/dev/WebflowTest";
-import GuideManual from "./pages/dev/GuideManual";
-import ProgressComponents from "./pages/dev/ProgressComponents";
-import CelebrationComponents from "./pages/dev/CelebrationComponents";
-import QuestComponents from "./pages/dev/QuestComponents";
-import LessonHeaderComponents from "./pages/dev/LessonHeaderComponents";
-import IconAnimations from "./pages/dev/IconAnimations";
-import QuestItemLayouts from "./pages/dev/QuestItemLayouts";
-import IconComparison from "./pages/dev/IconComparison";
+import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
+import TopPagePatterns from "./pages/dev/TopPagePatterns";
+import TopPagePatternA from "./pages/dev/TopPagePatternA";
+import TopPagePatternB from "./pages/dev/TopPagePatternB";
+import TopPagePatternC from "./pages/dev/TopPagePatternC";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -64,23 +59,6 @@ import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
 import TagsIndex from './pages/blog/tags';
 import TagDetail from './pages/blog/tag';
-import BlogGuide from './pages/dev/BlogGuide';
-import VideoPlayerTest from './pages/dev/VideoPlayerTest';
-import BlogHeaderPatterns from './pages/dev/BlogHeaderPatterns';
-import IconButtonBurstPlayground from "./pages/dev/IconButtonBurstPlayground";
-import EmailTemplates from "./pages/dev/EmailTemplates";
-import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
-import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
-import LessonCardMotion from "./pages/dev/LessonCardMotion";
-import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
-import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
-import QuestionFormPatterns from "./pages/dev/QuestionFormPatterns";
-import KnowledgeDetailPatterns from "./pages/dev/KnowledgeDetailPatterns";
-import ShareSubmitPatterns from "./pages/dev/ShareSubmitPatterns";
-import TopPagePatternB from "./pages/dev/TopPagePatternB";
-import TopPagePatternC from "./pages/dev/TopPagePatternC";
-import TopPagePatternD from "./pages/dev/TopPagePatternD";
-import TopPagePatternE from "./pages/dev/TopPagePatternE";
 import QuestionsIndexOld from "./pages/questions";
 import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
@@ -152,34 +130,11 @@ const AppContent = () => {
         <Route path="/guide/:slug" element={<GuideDetailPage />} />
 
         <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
-        <Route path="/dev/components" element={<DevRoute><ComponentsReferencePage /></DevRoute>} />
-        <Route path="/dev/webflow-test" element={<DevRoute><WebflowTest /></DevRoute>} />
-        <Route path="/dev/guide-manual" element={<DevRoute><GuideManual /></DevRoute>} />
-        <Route path="/dev/blog" element={<DevRoute><BlogGuide /></DevRoute>} />
-        <Route path="/dev/blog-header" element={<DevRoute><BlogHeaderPatterns /></DevRoute>} />
-        <Route path="/dev/progress-components" element={<DevRoute><ProgressComponents /></DevRoute>} />
-        <Route path="/dev/celebration" element={<DevRoute><CelebrationComponents /></DevRoute>} />
-        <Route path="/dev/quest" element={<DevRoute><QuestComponents /></DevRoute>} />
-        <Route path="/dev/lesson-header" element={<DevRoute><LessonHeaderComponents /></DevRoute>} />
-        <Route path="/dev/icon-animations" element={<DevRoute><IconAnimations /></DevRoute>} />
-        <Route path="/dev/icon-button-burst" element={<DevRoute><IconButtonBurstPlayground /></DevRoute>} />
-        <Route path="/dev/quest-layouts" element={<DevRoute><QuestItemLayouts /></DevRoute>} />
-        <Route path="/dev2" element={<DevRoute><IconComparison /></DevRoute>} />
-        <Route path="/dev/video-player" element={<DevRoute><VideoPlayerTest /></DevRoute>} />
-        <Route path="/dev/email-templates" element={<DevRoute><EmailTemplates /></DevRoute>} />
-        <Route path="/dev/article-layout-compare" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
-        <Route path="/dev/article-layout-compare/:slug" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
-        <Route path="/dev/mobile-menu-button" element={<DevRoute><MobileMenuButtonPatterns /></DevRoute>} />
-        <Route path="/dev/lesson-card-motion" element={<DevRoute><LessonCardMotion /></DevRoute>} />
-        <Route path="/dev/nav-sidebar" element={<DevRoute><NavigationSidebarStates /></DevRoute>} />
         <Route path="/dev/feedback-detail-patterns" element={<DevRoute><FeedbackDetailPatterns /></DevRoute>} />
-        <Route path="/dev/question-form-patterns" element={<DevRoute><QuestionFormPatterns /></DevRoute>} />
-        <Route path="/dev/knowledge-detail-patterns" element={<DevRoute><KnowledgeDetailPatterns /></DevRoute>} />
-        <Route path="/dev/share-submit-patterns" element={<DevRoute><ShareSubmitPatterns /></DevRoute>} />
+        <Route path="/dev/top-patterns" element={<DevRoute><TopPagePatterns /></DevRoute>} />
+        <Route path="/dev/top-pattern-a" element={<DevRoute><TopPagePatternA /></DevRoute>} />
         <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
         <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
-        <Route path="/dev/top-pattern-d" element={<DevRoute><TopPagePatternD /></DevRoute>} />
-        <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />

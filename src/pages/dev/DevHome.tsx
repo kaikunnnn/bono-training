@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, Palette, FileText, Layers, BookOpen, Rss, Globe, CheckCircle, PartyPopper, ListChecks, LayoutList, Sparkles, LayoutGrid, MousePointerClick, Mail, PanelLeft, Waves, MessageSquare, HelpCircle, Library } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -17,116 +17,11 @@ interface DevResourceCard {
 
 const devResources: DevResourceCard[] = [
   {
-    title: 'Component Reference',
-    description: 'デザインシステムとコンポーネントライブラリの完全なリファレンス。カラー、タイポグラフィ、アニメーション、UIコンポーネントなど。',
-    path: '/dev/components',
-    icon: <Layers className="w-8 h-8" />,
-    tags: ['Colors', 'Typography', 'Animations', 'UI', 'Custom Components']
-  },
-  {
-    title: 'ガイド記事執筆マニュアル',
-    description: '/guideセクションで記事を書くための完全ガイド。Frontmatter、Markdown記法、画像管理、カテゴリ追加方法など。',
-    path: '/dev/guide-manual',
-    icon: <BookOpen className="w-8 h-8" />,
-    tags: ['Guide', 'Writing', 'Markdown', 'Documentation']
-  },
-  {
-    title: 'Blog開発ガイド',
-    description: 'Ghost CMSを使用したブログ機能の開発・運用方法。Dockerセットアップ、記事公開、トラブルシューティングなど。',
-    path: '/dev/blog',
-    icon: <Rss className="w-8 h-8" />,
-    tags: ['Ghost', 'CMS', 'Blog', 'Docker']
-  },
-  {
-    title: 'Webflow Test',
-    description: 'Webflowからのコンテンツ取得テスト。API連携の確認用。',
-    path: '/dev/webflow-test',
-    icon: <Globe className="w-8 h-8" />,
-    tags: ['Webflow', 'API', 'Test']
-  },
-  {
-    title: 'Progress Components',
-    description: '進捗表示コンポーネントのプレビュー。プログレスバー、完了状態など。',
-    path: '/dev/progress-components',
-    icon: <CheckCircle className="w-8 h-8" />,
-    tags: ['Progress', 'UI', 'Components']
-  },
-  {
-    title: 'Celebration Components',
-    description: 'お祝い・達成時のアニメーションコンポーネント。紙吹雪、バッジなど。',
-    path: '/dev/celebration',
-    icon: <PartyPopper className="w-8 h-8" />,
-    tags: ['Animation', 'Celebration', 'UI']
-  },
-  {
-    title: 'Quest Components',
-    description: 'クエスト（レッスン内セクション）のコンポーネントプレビュー。',
-    path: '/dev/quest',
-    icon: <ListChecks className="w-8 h-8" />,
-    tags: ['Quest', 'Lesson', 'Components']
-  },
-  {
-    title: 'Lesson Header Components',
-    description: 'レッスンヘッダーのレイアウト・スタイルバリエーション。',
-    path: '/dev/lesson-header',
-    icon: <LayoutList className="w-8 h-8" />,
-    tags: ['Lesson', 'Header', 'Layout']
-  },
-  {
-    title: 'Navigation Sidebar States',
-    description: 'デスクトップのグローバルナビを、Figma準拠案とアクセシビリティ重視案で比較。',
-    path: '/dev/nav-sidebar',
-    icon: <Palette className="w-8 h-8" />,
-    tags: ['Navigation', 'Sidebar', 'States', 'A11y']
-  },
-  {
-    title: 'Icon Animations',
-    description: 'アイコンのアニメーションパターン。ホバー、クリック時の動きなど。',
-    path: '/dev/icon-animations',
-    icon: <Sparkles className="w-8 h-8" />,
-    tags: ['Icons', 'Animation', 'Interaction']
-  },
-  {
-    title: 'IconButton Burst Playground',
-    description: '「完了にする」ボタンの弾けるアニメーションを複数パターンで比較・調整。',
-    path: '/dev/icon-button-burst',
-    icon: <MousePointerClick className="w-8 h-8" />,
-    tags: ['IconButton', 'Burst', 'Animation', 'Experiment']
-  },
-  {
-    title: 'Quest Item Layouts',
-    description: 'クエストアイテムのレイアウト比較。タグ+タイトルの表示パターン。',
-    path: '/dev/quest-layouts',
-    icon: <LayoutGrid className="w-8 h-8" />,
-    tags: ['Quest', 'Layout', 'Comparison']
-  },
-  {
-    title: 'Email Templates',
-    description: 'BONOのトランザクションメールテンプレートのプレビュー。パスワードリセット、メール確認など。',
-    path: '/dev/email-templates',
-    icon: <Mail className="w-8 h-8" />,
-    tags: ['Email', 'Templates', 'Transactional']
-  },
-  {
-    title: 'Article Layout Compare',
-    description: '記事詳細ページのレイアウト比較。左サイド（現行）と右サイド（ロゴはメイン左上）のデザインを切り替えて確認できます。',
-    path: '/dev/article-layout-compare',
-    icon: <LayoutGrid className="w-8 h-8" />,
-    tags: ['Article', 'Layout', 'Experiment', 'Compare']
-  },
-  {
-    title: 'MobileMenuButton Patterns',
-    description: 'サイドバー開閉（iconsax風）のアイコン表現を3パターンで比較。',
-    path: '/dev/mobile-menu-button',
-    icon: <PanelLeft className="w-8 h-8" />,
-    tags: ['Sidebar', 'Icon', 'Interaction', 'Compare']
-  },
-  {
-    title: 'Lesson Card Motion',
-    description: 'レッスンカードのアニメーション案を比較・調整するための検証ページ。',
-    path: '/dev/lesson-card-motion',
-    icon: <Waves className="w-8 h-8" />,
-    tags: ['Lesson', 'Motion', 'Experiment']
+    title: 'Top Page Patterns',
+    description: 'トップページの5つのデザインパターン。Stripe、Airbnb、Linear、Notionスタイル。',
+    path: '/dev/top-patterns',
+    icon: <Layout className="w-8 h-8" />,
+    tags: ['Top', 'Landing', 'Stripe', 'Airbnb', 'Linear', 'Notion']
   },
   {
     title: 'Feedback Detail Patterns',
@@ -134,20 +29,6 @@ const devResources: DevResourceCard[] = [
     path: '/dev/feedback-detail-patterns',
     icon: <MessageSquare className="w-8 h-8" />,
     tags: ['Feedback', 'Design', 'OpenAI', 'Vercel', 'Premium']
-  },
-  {
-    title: 'Question Form Patterns',
-    description: '質問投稿フォームのデザインパターン比較。ステップ形式、投稿後体験強化、会話型UIの3パターン。',
-    path: '/dev/question-form-patterns',
-    icon: <HelpCircle className="w-8 h-8" />,
-    tags: ['Question', 'Form', 'UX', 'Patterns', 'PM Review']
-  },
-  {
-    title: 'Knowledge Detail Patterns',
-    description: 'お役立ち（ナレッジ）詳細ページのデザインパターン比較。Medium風、Notion風、シンプル最適化の3パターン。',
-    path: '/dev/knowledge-detail-patterns',
-    icon: <Library className="w-8 h-8" />,
-    tags: ['Knowledge', 'Article', 'Layout', 'UX', 'PM Review']
   },
 ];
 
