@@ -35,7 +35,7 @@ export interface Article {
   thumbnail?: SanityImage;
   thumbnailUrl?: string;
   videoUrl?: string;
-  videoDuration?: number;
+  videoDuration?: string | number;
   content: PortableTextBlock[];
   learningObjectives?: string[];
   quest?: {
@@ -93,7 +93,7 @@ export interface ArticleWithContext extends Article {
       slug: SanitySlug;
       title: string;
       articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
-      videoDuration?: number;
+      videoDuration?: string | number;
     }[];
   };
   lessonInfo?: {
@@ -110,7 +110,7 @@ export interface ArticleWithContext extends Article {
         slug: SanitySlug;
         title: string;
         articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
-        videoDuration?: number;
+        videoDuration?: string | number;
       }[];
     }[];
   };

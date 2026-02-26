@@ -17,7 +17,7 @@ export interface ContentItem {
   // 動画コンテンツの場合
   videoUrl?: string;
   freeVideoUrl?: string; // 無料プレビュー動画URL
-  videoDuration?: number; // 秒単位
+  videoDuration?: string | number; // "MM:SS" format or minutes
   // 記事コンテンツの場合
   content?: string;
   freeContent?: string; // 無料プレビューコンテンツ

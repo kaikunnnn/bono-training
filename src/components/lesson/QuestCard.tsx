@@ -8,7 +8,7 @@ interface Article {
   slug: { current: string };
   thumbnail?: any;
   thumbnailUrl?: string;
-  videoDuration?: number;
+  videoDuration?: string | number;
   isPremium?: boolean;
 }
 

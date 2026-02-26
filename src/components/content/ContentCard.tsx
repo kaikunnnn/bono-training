@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge';
 import { Lock, File, Video, Bookmark } from 'lucide-react';
 import { ContentItem } from '@/types/content';
+import { formatVideoDuration } from '@/lib/utils';
 
 interface ContentCardProps {
   content: ContentItem;
@@ -48,16 +49,6 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, isAccessible = true 
     }
   };
 
-  // 動画の長さを表示用にフォーマット
-  const formatDuration = (seconds?: number): string => {
-    if (!seconds) return '';
-    
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
   // アクセスレベルを表示用にフォーマット
   const getAccessLevelLabel = (accessLevel: string): string => {
     switch (accessLevel) {
@@ -95,9 +86,9 @@ const ContentCard: React.FC<ContentCardProps> = ({ content, isAccessible = true 
         )}
         
         {/* 動画の長さ */}
-        {content.type === 'video' && content.videoDuration && (
+        {content.type === 'video' && formatVideoDuration(content.videoDuration) && (
           <div className="absolute bottom-2 right-2 rounded bg-black/70 px-2 py-1 text-xs text-white">
-            {formatDuration(content.videoDuration)}
+            {formatVideoDuration(content.videoDuration)}
           </div>
         )}
       </div>
