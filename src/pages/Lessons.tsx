@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { urlFor } from "@/lib/sanity";
@@ -13,6 +13,36 @@ export default function Lessons() {
   const navigate = useNavigate();
   const { data: lessons, isLoading: loading, error } = useLessons();
   const reduceMotion = useReducedMotion();
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  // カテゴリ一覧を抽出
+  const categories = useMemo(() => {
+    if (!lessons) return [];
+    const categorySet = new Set<string>();
+    lessons.forEach((lesson) => {
+      const categoryValue =
+        typeof lesson.category === "string"
+          ? lesson.category
+          : lesson.categoryTitle || "";
+      if (categoryValue) {
+        categorySet.add(categoryValue);
+      }
+    });
+    return Array.from(categorySet).sort();
+  }, [lessons]);
+
+  // フィルタリングされたレッスン
+  const filteredLessons = useMemo(() => {
+    if (!lessons) return [];
+    if (!selectedCategory) return lessons;
+    return lessons.filter((lesson) => {
+      const categoryValue =
+        typeof lesson.category === "string"
+          ? lesson.category
+          : lesson.categoryTitle || "";
+      return categoryValue === selectedCategory;
+    });
+  }, [lessons, selectedCategory]);
 
   const motionConfig = useMemo(() => {
     const ease = [0.22, 1, 0.36, 1] as const;
@@ -71,11 +101,53 @@ export default function Lessons() {
         <PageHeader
           label="Lesson"
           title="レッスン一覧"
-          description="工事中です👷 デザインサイクルと一部、AI×リサーチ＆プロトタイプだけ見れます。"
+          description="UIデザインを学ぶためのレッスン一覧です。カテゴリで絞り込めます。"
         />
 
-        {lessons.length === 0 ? (
-          <p>レッスンがありません。Sanity Studioでデータを追加してください。</p>
+        {/* カテゴリフィルター */}
+        {categories.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-6">
+            <button
+              onClick={() => setSelectedCategory(null)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedCategory === null
+                  ? "bg-zinc-900 text-white"
+                  : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+              }`}
+            >
+              すべて ({lessons.length})
+            </button>
+            {categories.map((category) => {
+              const count = lessons.filter((l) => {
+                const catValue =
+                  typeof l.category === "string"
+                    ? l.category
+                    : l.categoryTitle || "";
+                return catValue === category;
+              }).length;
+              return (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    selectedCategory === category
+                      ? "bg-zinc-900 text-white"
+                      : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                  }`}
+                >
+                  {category} ({count})
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {filteredLessons.length === 0 ? (
+          <p className="text-zinc-500">
+            {selectedCategory
+              ? `「${selectedCategory}」カテゴリのレッスンはありません。`
+              : "レッスンがありません。"}
+          </p>
         ) : (
           <motion.div
             variants={motionConfig.container}
@@ -83,7 +155,7 @@ export default function Lessons() {
             animate="show"
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
           >
-            {lessons.map((sanityLesson) => {
+            {filteredLessons.map((sanityLesson) => {
               // バッジ表示テキスト（カテゴリ > タグ）
               const categoryValue =
                 typeof sanityLesson.category === "string"
