@@ -43,6 +43,12 @@ import TopPagePatterns from "./pages/dev/TopPagePatterns";
 import TopPagePatternA from "./pages/dev/TopPagePatternA";
 import TopPagePatternB from "./pages/dev/TopPagePatternB";
 import TopPagePatternC from "./pages/dev/TopPagePatternC";
+import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
+import RoadmapPattern1 from "./pages/dev/RoadmapPattern1";
+import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
+import RoadmapPattern3 from "./pages/dev/RoadmapPattern3";
+import RoadmapPattern4 from "./pages/dev/RoadmapPattern4";
+import RoadmapPattern5 from "./pages/dev/RoadmapPattern5";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -135,6 +141,12 @@ const AppContent = () => {
         <Route path="/dev/top-pattern-a" element={<DevRoute><TopPagePatternA /></DevRoute>} />
         <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
         <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
+        <Route path="/dev/roadmap-patterns" element={<DevRoute><RoadmapPatterns /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-1" element={<DevRoute><RoadmapPattern1 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-2" element={<DevRoute><RoadmapPattern2 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-3" element={<DevRoute><RoadmapPattern3 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-4" element={<DevRoute><RoadmapPattern4 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5" element={<DevRoute><RoadmapPattern5 /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />

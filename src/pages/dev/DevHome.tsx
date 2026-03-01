@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -29,6 +29,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/feedback-detail-patterns',
     icon: <MessageSquare className="w-8 h-8" />,
     tags: ['Feedback', 'Design', 'OpenAI', 'Vercel', 'Premium']
+  },
+  {
+    title: 'Roadmap Patterns',
+    description: '学習ロードマップのUIパターン。コース一覧、縦タイムライン、アコーディオン型を比較。',
+    path: '/dev/roadmap-patterns',
+    icon: <Map className="w-8 h-8" />,
+    tags: ['Roadmap', 'Course', 'Timeline', 'Progress', 'Learning']
   },
 ];
 
