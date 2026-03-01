@@ -47,7 +47,7 @@
       "destination": "/ogp/index.html"
     },
     {
-      "source": "/:path((?!images/).*)",
+      "source": "/:path((?!api/)(?!images/).*)",
       "destination": "/index.html"
     }
   ],
