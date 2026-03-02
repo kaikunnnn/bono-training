@@ -5,6 +5,7 @@ import { Play, FileText } from "@/lib/icons";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 import { ArticleTag, type TagType } from "@/components/article/sidebar/ArticleTag";
 import { GradientLockIcon } from "@/components/ui/icon-lock-gradient";
+import { formatVideoDuration } from "@/lib/utils";
 
 interface ArticleItemProps {
   /** 記事番号 (1, 2, 3...) */
@@ -27,8 +28,8 @@ interface ArticleItemProps {
   isCompleted: boolean;
   /** 動画URL（あれば動画コンテンツとして扱う） */
   videoUrl?: string;
-  /** 動画時間 (秒数) ※videoの場合 */
-  videoDuration?: number;
+  /** 動画時間 ("MM:SS" or "H:MM:SS" or number) ※videoの場合 */
+  videoDuration?: string | number;
   /** プレミアムコンテンツか */
   isPremium?: boolean;
 }
@@ -65,19 +66,10 @@ export function ArticleItem({
   // プレミアムコンテンツで未契約の場合、ロック状態
   const isLocked = isPremium && !canAccessContent(isPremium);
 
-  const durationSeconds =
-    typeof videoDuration === "number" ? videoDuration : Number(videoDuration);
-  const hasValidDuration = Number.isFinite(durationSeconds) && durationSeconds > 0;
+  const formattedDuration = formatVideoDuration(videoDuration);
+  const hasValidDuration = formattedDuration !== null;
   const isVideo =
     (typeof videoUrl === "string" && videoUrl.trim().length > 0) || hasValidDuration;
-
-  // 動画時間をmm:ss形式に変換（不正値は null）
-  const formatDuration = (seconds: number): string | null => {
-    if (!Number.isFinite(seconds) || seconds <= 0) return null;
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${String(secs).padStart(2, "0")}`;
-  };
 
   // サムネイルURL取得
   const getThumbnailUrl = () => {
@@ -149,7 +141,7 @@ export function ArticleItem({
         {hasValidDuration && (
           <div className="absolute bottom-1 right-1 bg-black/70 px-1.5 pt-1 pb-[5px] rounded-[3px] h-fit w-fit overflow-visible leading-[100%] flex flex-wrap">
             <span className="text-[8px] text-white font-noto-sans-jp leading-none h-fit w-fit">
-              {formatDuration(durationSeconds)}
+              {formattedDuration}
             </span>
           </div>
         )}

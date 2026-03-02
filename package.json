@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "node scripts/check-mcp-status.js && vite",
+    "dev:vercel": "vercel dev --listen 8080",
     "build": "vite build && node scripts/generate-ogp.js",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",

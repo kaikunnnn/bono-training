@@ -35,7 +35,7 @@ export interface Article {
   thumbnail?: SanityImage;
   thumbnailUrl?: string;
   videoUrl?: string;
-  videoDuration?: number;
+  videoDuration?: string | number;
   content: PortableTextBlock[];
   learningObjectives?: string[];
   quest?: {
@@ -93,7 +93,7 @@ export interface ArticleWithContext extends Article {
       slug: SanitySlug;
       title: string;
       articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
-      videoDuration?: number;
+      videoDuration?: string | number;
     }[];
   };
   lessonInfo?: {
@@ -110,7 +110,7 @@ export interface ArticleWithContext extends Article {
         slug: SanitySlug;
         title: string;
         articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
-        videoDuration?: number;
+        videoDuration?: string | number;
       }[];
     }[];
   };
@@ -172,4 +172,98 @@ export interface Event {
   eventPeriod?: "early" | "mid" | "late";
   content: PortableTextBlock[];
   publishedAt?: string;
+}
+
+// QuestionCategory型
+export interface QuestionCategory {
+  _id: string;
+  _type?: "questionCategory";
+  title: string;
+  slug: SanitySlug;
+}
+
+// QuestionAuthor型（ユーザー投稿者情報）
+export interface QuestionAuthor {
+  userId?: string;
+  displayName?: string;
+  avatarUrl?: string;
+}
+
+// QuestionReferenceUrl型
+export interface QuestionReferenceUrl {
+  _key: string;
+  title?: string;
+  url: string;
+}
+
+// Question型
+export interface Question {
+  _id: string;
+  _type?: "question";
+  title: string;
+  slug: SanitySlug;
+  category?: QuestionCategory;
+  questionContent?: PortableTextBlock[];
+  answerContent?: PortableTextBlock[];
+  questionExcerpt?: string; // 一覧用の抜粋
+  publishedAt?: string;
+  // ユーザー投稿関連
+  author?: QuestionAuthor;
+  figmaUrl?: string;
+  referenceUrls?: QuestionReferenceUrl[];
+  status?: "pending" | "answered" | "hidden";
+  isPublic?: boolean;
+  submittedAt?: string;
+}
+
+// FeedbackCategory型
+export interface FeedbackCategory {
+  _id: string;
+  _type?: "feedbackCategory";
+  title: string;
+  slug: SanitySlug;
+}
+
+// Feedback型
+export interface Feedback {
+  _id: string;
+  _type?: "feedback";
+  title: string;
+  slug: SanitySlug;
+  category?: FeedbackCategory;
+  targetOutput?: string;
+  excerpt?: string; // 手動入力の概要文
+  publishedAt?: string;
+  vimeoUrl?: string;
+  figmaUrl?: string;
+  reviewPoints?: PortableTextBlock[];
+  requestContent?: PortableTextBlock[];
+  feedbackContent?: PortableTextBlock[];
+}
+
+// KnowledgeCategory型
+export interface KnowledgeCategory {
+  _id: string;
+  _type?: "knowledgeCategory";
+  title: string;
+  slug: SanitySlug;
+  description?: string;
+  emoji?: string;
+  order?: number;
+}
+
+// Knowledge型
+export interface Knowledge {
+  _id: string;
+  _type?: "knowledge";
+  title: string;
+  slug: SanitySlug;
+  category?: KnowledgeCategory;
+  excerpt: string;
+  thumbnail?: SanityImage;
+  thumbnailUrl?: string;
+  content?: PortableTextBlock[];
+  tags?: string[];
+  publishedAt?: string;
+  featured?: boolean;
 }

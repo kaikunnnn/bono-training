@@ -71,15 +71,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           レッスン
         </SidebarMenuItem>
 
-        {/* ガイド */}
-        <SidebarMenuItem
-          href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/guide")}
-        >
-          ガイド
-        </SidebarMenuItem>
-
         {/* トレーニング */}
         <SidebarMenuItem
           href="/training"
@@ -87,6 +78,31 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           isActive={isActive("/training")}
         >
           トレーニング
+        </SidebarMenuItem>
+      </SidebarMenuGroup>
+
+      {/* コミュニティ - 一時的に非表示（TODO: 公開時に hidden を削除） */}
+      <SidebarMenuGroup label="コミュニティ" itemGap className="hidden">
+        <SidebarMenuItem
+          href="/questions"
+          icon={<MenuIcons.question size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/questions") || location.pathname.startsWith("/questions/")}
+        >
+          みんなの質問
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/feedbacks"
+          icon={<MenuIcons.feedback size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/feedbacks") || location.pathname.startsWith("/feedbacks/")}
+        >
+          フィードバック
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/knowledge"
+          icon={<MenuIcons.knowledge size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/knowledge") || location.pathname.startsWith("/knowledge/")}
+        >
+          お役立ち
         </SidebarMenuItem>
       </SidebarMenuGroup>
 

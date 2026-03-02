@@ -213,13 +213,6 @@ export default defineType({
       },
     }),
     defineField({
-      name: "quest",
-      title: "所属クエスト",
-      type: "reference",
-      to: [{ type: "quest" }],
-      description: "この記事が所属するクエストを選択してください",
-    }),
-    defineField({
       name: "publishedAt",
       title: "公開日",
       type: "datetime",

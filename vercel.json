@@ -1,4 +1,6 @@
 {
+  "devCommand": "vite --port 3000",
+  "framework": "vite",
   "rewrites": [
     {
       "source": "/lessons/:slug",
@@ -45,7 +47,7 @@
       "destination": "/ogp/index.html"
     },
     {
-      "source": "/:path((?!images/).*)",
+      "source": "/:path((?!api/)(?!images/).*)",
       "destination": "/index.html"
     }
   ],

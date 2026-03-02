@@ -3,6 +3,7 @@ import { urlFor } from "@/lib/sanity";
 import { Check, ChevronRight } from "lucide-react";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 import { GradientLockIcon } from "@/components/ui/icon-lock-gradient";
+import { formatVideoDuration } from "@/lib/utils";
 
 interface ContentItemProps {
   articleNumber: number; // ランタイムで付与
@@ -10,7 +11,7 @@ interface ContentItemProps {
   slug: string;
   thumbnail?: any;
   thumbnailUrl?: string;
-  videoDuration?: number;
+  videoDuration?: string | number;
   isCompleted?: boolean;
   isPremium?: boolean;
 }
@@ -48,9 +49,8 @@ export default function ContentItem({
   };
 
   const thumbnailSrc = getThumbnailUrl();
-  const durationMinutes =
-    typeof videoDuration === "number" ? videoDuration : Number(videoDuration);
-  const hasValidDuration = Number.isFinite(durationMinutes) && durationMinutes > 0;
+  const formattedDuration = formatVideoDuration(videoDuration);
+  const hasValidDuration = formattedDuration !== null;
 
   return (
     <div
@@ -92,7 +92,7 @@ export default function ContentItem({
         </div>
         {hasValidDuration && (
           <p className="font-geist text-xs text-lesson-item-duration mt-0.5">
-            {durationMinutes}分
+            {formattedDuration}
           </p>
         )}
       </div>

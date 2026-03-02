@@ -16,6 +16,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
+import TopPage from "./pages/top";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
@@ -37,16 +38,17 @@ import GuidePage from "./pages/Guide";
 import GuideDetailPage from "./pages/Guide/GuideDetail";
 import DevRoute from "./pages/dev";
 import DevHome from "./pages/dev/DevHome";
-import ComponentsReferencePage from "./pages/dev/Components";
-import WebflowTest from "./pages/dev/WebflowTest";
-import GuideManual from "./pages/dev/GuideManual";
-import ProgressComponents from "./pages/dev/ProgressComponents";
-import CelebrationComponents from "./pages/dev/CelebrationComponents";
-import QuestComponents from "./pages/dev/QuestComponents";
-import LessonHeaderComponents from "./pages/dev/LessonHeaderComponents";
-import IconAnimations from "./pages/dev/IconAnimations";
-import QuestItemLayouts from "./pages/dev/QuestItemLayouts";
-import IconComparison from "./pages/dev/IconComparison";
+import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
+import TopPagePatterns from "./pages/dev/TopPagePatterns";
+import TopPagePatternA from "./pages/dev/TopPagePatternA";
+import TopPagePatternB from "./pages/dev/TopPagePatternB";
+import TopPagePatternC from "./pages/dev/TopPagePatternC";
+import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
+import RoadmapPattern1 from "./pages/dev/RoadmapPattern1";
+import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
+import RoadmapPattern3 from "./pages/dev/RoadmapPattern3";
+import RoadmapPattern4 from "./pages/dev/RoadmapPattern4";
+import RoadmapPattern5 from "./pages/dev/RoadmapPattern5";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -63,19 +65,20 @@ import BlogDetail from './pages/blog/detail';
 import CategoryPage from './pages/blog/category';
 import TagsIndex from './pages/blog/tags';
 import TagDetail from './pages/blog/tag';
-import BlogGuide from './pages/dev/BlogGuide';
-import VideoPlayerTest from './pages/dev/VideoPlayerTest';
-import BlogHeaderPatterns from './pages/dev/BlogHeaderPatterns';
-import IconButtonBurstPlayground from "./pages/dev/IconButtonBurstPlayground";
-import EmailTemplates from "./pages/dev/EmailTemplates";
-import ArticleLayoutCompare from "./pages/dev/ArticleLayoutCompare";
-import MobileMenuButtonPatterns from "./pages/dev/MobileMenuButtonPatterns";
-import LessonCardMotion from "./pages/dev/LessonCardMotion";
-import NavigationSidebarStates from "./pages/dev/NavigationSidebarStates";
-import QuestionsIndex from "./pages/questions";
-import QuestionDetail from "./pages/questions/detail";
+import QuestionsIndexOld from "./pages/questions";
+import QuestionDetailOld from "./pages/questions/detail";
 import QuestionNew from "./pages/questions/new";
+import QuestionList from "./pages/questions/QuestionList";
+import QuestionDetail from "./pages/questions/QuestionDetail";
+import FeedbackList from "./pages/feedbacks/FeedbackList";
+import FeedbackDetail from "./pages/feedbacks/FeedbackDetail";
+import KnowledgeList from "./pages/knowledge/KnowledgeList";
+import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
+import ShareIndex from "./pages/share";
+import ShareSubmit from "./pages/share/submit";
+import FeedbackApplyIndex from "./pages/feedback-apply";
+import FeedbackApplySubmit from "./pages/feedback-apply/submit";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -113,6 +116,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/top" element={<TopPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -132,26 +136,17 @@ const AppContent = () => {
         <Route path="/guide/:slug" element={<GuideDetailPage />} />
 
         <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
-        <Route path="/dev/components" element={<DevRoute><ComponentsReferencePage /></DevRoute>} />
-        <Route path="/dev/webflow-test" element={<DevRoute><WebflowTest /></DevRoute>} />
-        <Route path="/dev/guide-manual" element={<DevRoute><GuideManual /></DevRoute>} />
-        <Route path="/dev/blog" element={<DevRoute><BlogGuide /></DevRoute>} />
-        <Route path="/dev/blog-header" element={<DevRoute><BlogHeaderPatterns /></DevRoute>} />
-        <Route path="/dev/progress-components" element={<DevRoute><ProgressComponents /></DevRoute>} />
-        <Route path="/dev/celebration" element={<DevRoute><CelebrationComponents /></DevRoute>} />
-        <Route path="/dev/quest" element={<DevRoute><QuestComponents /></DevRoute>} />
-        <Route path="/dev/lesson-header" element={<DevRoute><LessonHeaderComponents /></DevRoute>} />
-        <Route path="/dev/icon-animations" element={<DevRoute><IconAnimations /></DevRoute>} />
-        <Route path="/dev/icon-button-burst" element={<DevRoute><IconButtonBurstPlayground /></DevRoute>} />
-        <Route path="/dev/quest-layouts" element={<DevRoute><QuestItemLayouts /></DevRoute>} />
-        <Route path="/dev2" element={<DevRoute><IconComparison /></DevRoute>} />
-        <Route path="/dev/video-player" element={<DevRoute><VideoPlayerTest /></DevRoute>} />
-        <Route path="/dev/email-templates" element={<DevRoute><EmailTemplates /></DevRoute>} />
-        <Route path="/dev/article-layout-compare" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
-        <Route path="/dev/article-layout-compare/:slug" element={<DevRoute><ArticleLayoutCompare /></DevRoute>} />
-        <Route path="/dev/mobile-menu-button" element={<DevRoute><MobileMenuButtonPatterns /></DevRoute>} />
-        <Route path="/dev/lesson-card-motion" element={<DevRoute><LessonCardMotion /></DevRoute>} />
-        <Route path="/dev/nav-sidebar" element={<DevRoute><NavigationSidebarStates /></DevRoute>} />
+        <Route path="/dev/feedback-detail-patterns" element={<DevRoute><FeedbackDetailPatterns /></DevRoute>} />
+        <Route path="/dev/top-patterns" element={<DevRoute><TopPagePatterns /></DevRoute>} />
+        <Route path="/dev/top-pattern-a" element={<DevRoute><TopPagePatternA /></DevRoute>} />
+        <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
+        <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
+        <Route path="/dev/roadmap-patterns" element={<DevRoute><RoadmapPatterns /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-1" element={<DevRoute><RoadmapPattern1 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-2" element={<DevRoute><RoadmapPattern2 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-3" element={<DevRoute><RoadmapPattern3 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-4" element={<DevRoute><RoadmapPattern4 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5" element={<DevRoute><RoadmapPattern5 /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
@@ -169,9 +164,29 @@ const AppContent = () => {
 
         <Route path="/roadmap" element={<Roadmap />} />
 
-        <Route path="/questions" element={<PrivateRoute><QuestionsIndex /></PrivateRoute>} />
-        <Route path="/questions/new" element={<PrivateRoute><QuestionNew /></PrivateRoute>} />
-        <Route path="/questions/:questionId" element={<PrivateRoute><QuestionDetail /></PrivateRoute>} />
+        {/* 質問ページ（Sanityベース） */}
+        <Route path="/questions" element={<QuestionList />} />
+        <Route path="/questions/new" element={<QuestionNew />} />
+        <Route path="/questions/:slug" element={<QuestionDetail />} />
+        {/* 旧質問ページ（テスト用 - 後で削除） */}
+        <Route path="/questions-old" element={<PrivateRoute><QuestionsIndexOld /></PrivateRoute>} />
+        <Route path="/questions-old/:questionId" element={<PrivateRoute><QuestionDetailOld /></PrivateRoute>} />
+
+        {/* フィードバックページ（Sanityベース） */}
+        <Route path="/feedbacks" element={<FeedbackList />} />
+        <Route path="/feedbacks/:slug" element={<FeedbackDetail />} />
+
+        {/* 15分フィードバック応募 */}
+        <Route path="/feedback-apply" element={<FeedbackApplyIndex />} />
+        <Route path="/feedback-apply/submit" element={<FeedbackApplySubmit />} />
+
+        {/* ナレッジページ（Sanityベース） */}
+        <Route path="/knowledge" element={<KnowledgeList />} />
+        <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
+
+        {/* 思考シェア記事（みんなの学びのアウトプット） */}
+        <Route path="/share" element={<ShareIndex />} />
+        <Route path="/share/submit" element={<ShareSubmit />} />
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
