@@ -3,7 +3,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" id="favicon" />
+    <script>
+      // 開発環境ではオレンジの「D」faviconを使用
+      if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        var link = document.getElementById('favicon');
+        link.type = 'image/svg+xml';
+        link.href = '/favicon-dev.svg';
+      }
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>BONO β版</title>
 
