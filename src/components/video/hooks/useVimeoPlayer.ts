@@ -140,18 +140,16 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
         }
 
         console.log('[VimeoPlayer] Ready - Duration:', duration, 'Volume:', volume);
-        setState(prev => {
-          if (prev.isReady) return prev;
-          return {
-            ...prev,
-            duration,
-            volume,
-            textTracks: textTracks as TextTrack[],
-            chapters,
-            isLoading: false,
-            isReady: true,
-          };
-        });
+        // 注意: isReadyが既にtrueでもchaptersは常にマージする（レースコンディション対策）
+        setState(prev => ({
+          ...prev,
+          duration: prev.duration || duration,
+          volume: prev.volume !== 1 ? prev.volume : volume,
+          textTracks: prev.textTracks.length > 0 ? prev.textTracks : textTracks as TextTrack[],
+          chapters, // チャプターは常に更新（loadedイベントでは取得されないため）
+          isLoading: false,
+          isReady: true,
+        }));
       } catch (err) {
         console.error('[VimeoPlayer] Ready error getting info:', err);
         setState(prev => ({ ...prev, isLoading: false, isReady: true }));
