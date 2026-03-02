@@ -71,15 +71,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           レッスン
         </SidebarMenuItem>
 
-        {/* ガイド */}
-        <SidebarMenuItem
-          href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/guide")}
-        >
-          ガイド
-        </SidebarMenuItem>
-
         {/* トレーニング */}
         <SidebarMenuItem
           href="/training"
@@ -90,8 +81,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         </SidebarMenuItem>
       </SidebarMenuGroup>
 
-      {/* コミュニティ */}
-      <SidebarMenuGroup label="コミュニティ" itemGap>
+      {/* コミュニティ - 一時的に非表示（TODO: 公開時に hidden を削除） */}
+      <SidebarMenuGroup label="コミュニティ" itemGap className="hidden">
         <SidebarMenuItem
           href="/questions"
           icon={<MenuIcons.question size={ICON_SIZE} variant="Outline" />}

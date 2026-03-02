@@ -6,7 +6,7 @@ export const client = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
   dataset: import.meta.env.VITE_SANITY_DATASET,
   apiVersion: import.meta.env.VITE_SANITY_API_VERSION || "2024-01-01",
-  useCdn: true,
+  useCdn: false, // リアルタイム更新のためCDNを無効化
 });
 
 const builder = imageUrlBuilder(client);
@@ -53,8 +53,10 @@ export async function getArticleWithContext(
       tags,
       isPremium,
 
-      // 記事が所属するQuestを取得
-      "questInfo": *[_type == "quest" && references(^._id)][0] {
+      // クエストの articles[] 配列を正として、この記事を含むクエストを取得
+      // ※ articles[] 配列に含まれているかを明示的にチェック
+      // ※ 記事側の quest フィールドは使用しない（クエスト側だけで管理）
+      "questInfo": *[_type == "quest" && ^._id in articles[]._ref][0] {
         _id,
         questNumber,
         title,
@@ -97,6 +99,13 @@ export async function getArticleWithContext(
   if (!article) {
     return null;
   }
+
+  // デバッグ: どのクエストが返されたか確認
+  console.log(`[getArticleWithContext] Article "${slug}" questInfo:`, {
+    questId: article.questInfo?._id,
+    questNumber: article.questInfo?.questNumber,
+    questTitle: article.questInfo?.title,
+  });
 
   // questInfo がない場合はそのまま返す（lessonInfo なし）
   if (!article.questInfo) {

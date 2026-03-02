@@ -1,10 +1,23 @@
 /**
  * 15分フィードバック応募 API
  * - 応募データを受け取る
+ * - OG情報を取得
+ * - Sanityに保存
  * - Slackに通知を送信
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { createClient } from '@sanity/client';
+import { fetchOgData } from '../lib/ogParser';
+
+// Sanity client with write token
+const sanityClient = createClient({
+  projectId: process.env.SANITY_PROJECT_ID || process.env.VITE_SANITY_PROJECT_ID,
+  dataset: process.env.SANITY_DATASET || process.env.VITE_SANITY_DATASET || 'production',
+  apiVersion: '2024-01-01',
+  token: process.env.SANITY_WRITE_TOKEN,
+  useCdn: false,
+});
 
 // Slack Webhook URL（環境変数から取得）
 const SLACK_WEBHOOK_URL = process.env.SLACK_FEEDBACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
@@ -21,12 +34,16 @@ interface SubmitPayload {
   slackAccountName: string;
   bonoContent: string;
   checkedItems: string[];
+  lessonId?: string; // フォームで選択されたレッスンID
   userId?: string;
   userEmail?: string;
 }
 
 // Slackに通知を送信
-async function sendSlackNotification(payload: SubmitPayload): Promise<void> {
+async function sendSlackNotification(
+  payload: SubmitPayload,
+  sanityDocId?: string
+): Promise<void> {
   if (!SLACK_WEBHOOK_URL) {
     console.warn('Slack Webhook URL is not configured');
     return;
@@ -36,6 +53,11 @@ async function sendSlackNotification(payload: SubmitPayload): Promise<void> {
   const checkedLabels = payload.checkedItems
     .map((id) => CRITERIA_LABELS[id] || id)
     .join('\n• ');
+
+  // Sanity Studio へのリンク（ドキュメントIDがある場合）
+  const sanityLink = sanityDocId
+    ? `\n\n<https://bono-training.sanity.studio/structure/userOutput;${sanityDocId}|📋 Sanity Studioで確認>`
+    : '';
 
   // Slackメッセージを構築
   const slackMessage = {
@@ -83,7 +105,7 @@ async function sendSlackNotification(payload: SubmitPayload): Promise<void> {
         elements: [
           {
             type: 'mrkdwn',
-            text: `応募日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}`,
+            text: `応募日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}${sanityLink}`,
           },
         ],
       },
@@ -130,6 +152,52 @@ function validatePayload(payload: SubmitPayload): string | null {
   return null;
 }
 
+// Sanityにユーザーアウトプットを保存
+async function saveToSanity(
+  payload: SubmitPayload,
+  ogData: { title: string | null; image: string | null; description: string | null }
+): Promise<string | null> {
+  // SANITY_WRITE_TOKEN がない場合はスキップ（開発環境対応）
+  if (!process.env.SANITY_WRITE_TOKEN) {
+    console.warn('SANITY_WRITE_TOKEN not configured, skipping Sanity save');
+    return null;
+  }
+
+  try {
+    const doc = {
+      _type: 'userOutput',
+      articleUrl: payload.articleUrl,
+      articleTitle: ogData.title || null,
+      articleImage: ogData.image || null,
+      articleDescription: ogData.description || null,
+      // relatedLesson: ユーザーがフォームで選択したレッスンを紐付け
+      ...(payload.lessonId && {
+        relatedLesson: { _type: 'reference', _ref: payload.lessonId },
+      }),
+      author: {
+        userId: payload.userId || null,
+        displayName: payload.slackAccountName,
+        slackAccountName: payload.slackAccountName,
+        email: payload.userEmail || null,
+      },
+      bonoContent: payload.bonoContent,
+      checkedItems: payload.checkedItems,
+      source: 'user_submission',
+      submittedAt: new Date().toISOString(),
+      isPublished: false, // 承認制：管理者がStudioで公開
+      displayOrder: 0,
+    };
+
+    const result = await sanityClient.create(doc);
+    console.log('Saved to Sanity:', result._id);
+    return result._id;
+  } catch (error) {
+    console.error('Failed to save to Sanity:', error);
+    // Sanity保存に失敗しても、Slack通知は継続
+    return null;
+  }
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORSヘッダー
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -153,13 +221,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: validationError });
     }
 
-    // Slack通知を送信
-    await sendSlackNotification(payload);
+    // OG情報を取得
+    console.log('Fetching OG data from:', payload.articleUrl);
+    const ogData = await fetchOgData(payload.articleUrl);
+    console.log('OG data:', ogData);
+
+    // Sanityに保存
+    const sanityDocId = await saveToSanity(payload, ogData);
+
+    // Slack通知を送信（Sanity DocIDをリンクに含める）
+    await sendSlackNotification(payload, sanityDocId || undefined);
 
     // 成功レスポンス
     return res.status(200).json({
       success: true,
       message: '応募を受け付けました',
+      outputId: sanityDocId,
     });
   } catch (error) {
     console.error('Error processing feedback application:', error);

@@ -6,7 +6,7 @@
  * - 完了画面: アニメーション + Slack説明 + 内容確認
  */
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -17,6 +17,8 @@ import {
   Lock,
   ExternalLink,
   X,
+  ChevronDown,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import SEO from "@/components/common/SEO";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
+import { useLessons } from "@/hooks/useLessons";
 
 // ============================================
 // 型定義
@@ -31,6 +34,7 @@ import { useSubscriptionContext } from "@/contexts/SubscriptionContext";
 interface FormData {
   articleUrl: string;
   slackAccountName: string;
+  lessonId: string;
   bonoContent: string;
   checkedItems: string[];
 }
@@ -196,9 +200,11 @@ const SuccessCheckAnimation = () => (
 // 完了画面
 const SuccessScreen = ({
   formData,
+  lessonTitle,
   onBack,
 }: {
   formData: FormData;
+  lessonTitle?: string;
   onBack: () => void;
 }) => {
   const navigate = useNavigate();
@@ -267,6 +273,16 @@ const SuccessScreen = ({
             </p>
           </div>
 
+          {/* 関連レッスン */}
+          {lessonTitle && (
+            <div>
+              <p className="text-xs text-slate-500 mb-1">関連レッスン</p>
+              <p className="text-sm font-medium text-slate-800">
+                {lessonTitle}
+              </p>
+            </div>
+          )}
+
           {/* 学んだBONOコンテンツ */}
           <div>
             <p className="text-xs text-slate-500 mb-1">学んだBONOコンテンツ</p>
@@ -313,14 +329,19 @@ const FeedbackApplySubmit = () => {
   const { user, loading: authLoading } = useAuth();
   const { planType, loading: subLoading } = useSubscriptionContext();
 
+  // レッスン一覧を取得
+  const { data: lessons, isLoading: lessonsLoading } = useLessons();
+
   // フォーム状態
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
     articleUrl: "",
     slackAccountName: "",
+    lessonId: "",
     bonoContent: "",
     checkedItems: [],
   });
+  const [lessonSearchQuery, setLessonSearchQuery] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -329,6 +350,24 @@ const FeedbackApplySubmit = () => {
 
   // アクセス権限チェック
   const canApply = planType === "growth" || planType === "feedback";
+
+  // レッスン検索結果
+  const filteredLessons = useMemo(() => {
+    if (!lessons) return [];
+    if (!lessonSearchQuery.trim()) return lessons;
+    const query = lessonSearchQuery.toLowerCase();
+    return lessons.filter(
+      (lesson) =>
+        lesson.title.toLowerCase().includes(query) ||
+        (lesson.categoryTitle && lesson.categoryTitle.toLowerCase().includes(query))
+    );
+  }, [lessons, lessonSearchQuery]);
+
+  // 選択中のレッスン
+  const selectedLesson = useMemo(() => {
+    if (!formData.lessonId || !lessons) return null;
+    return lessons.find((l) => l._id === formData.lessonId) || null;
+  }, [formData.lessonId, lessons]);
 
   // 現在のステップで次に進めるか
   const canProceed = (): boolean => {
@@ -341,6 +380,7 @@ const FeedbackApplySubmit = () => {
         );
       case 2:
         return (
+          formData.lessonId !== "" &&
           formData.bonoContent.trim() !== "" &&
           formData.checkedItems.length > 0
         );
@@ -376,6 +416,7 @@ const FeedbackApplySubmit = () => {
         body: JSON.stringify({
           articleUrl: formData.articleUrl,
           slackAccountName: formData.slackAccountName,
+          lessonId: formData.lessonId,
           bonoContent: formData.bonoContent,
           checkedItems: formData.checkedItems,
           userId: user?.id,
@@ -412,7 +453,7 @@ const FeedbackApplySubmit = () => {
   );
 
   // ローディング中
-  if (authLoading || subLoading) {
+  if (authLoading || subLoading || lessonsLoading) {
     return (
       <div className="min-h-screen bg-base">
         <ModeHeader />
@@ -500,6 +541,7 @@ const FeedbackApplySubmit = () => {
                 {isSubmitted ? (
                   <SuccessScreen
                     formData={formData}
+                    lessonTitle={selectedLesson?.title}
                     onBack={() => navigate("/feedback-apply")}
                   />
                 ) : (
@@ -583,6 +625,93 @@ const FeedbackApplySubmit = () => {
                           </div>
 
                           <div className="space-y-8">
+                            {/* レッスン選択 */}
+                            <FormField
+                              label="関連するレッスン"
+                              required
+                              description="このアウトプットに関連するレッスンを選択してください"
+                            >
+                              <div className="space-y-2">
+                                {/* 検索入力 */}
+                                <div className="relative">
+                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                  <Input
+                                    type="text"
+                                    value={lessonSearchQuery}
+                                    onChange={(e) => setLessonSearchQuery(e.target.value)}
+                                    placeholder="レッスン名で検索..."
+                                    className="h-10 pl-9 rounded-xl border-gray-300 text-sm"
+                                  />
+                                </div>
+
+                                {/* 選択中のレッスン表示 */}
+                                {selectedLesson && (
+                                  <div className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                    <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                    <span className="text-sm font-medium text-slate-800 truncate">
+                                      {selectedLesson.title}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setFormData({ ...formData, lessonId: "" })}
+                                      className="ml-auto text-slate-400 hover:text-slate-600"
+                                    >
+                                      <X className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* レッスン一覧 */}
+                                <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-xl">
+                                  {lessonsLoading ? (
+                                    <div className="flex items-center justify-center py-8">
+                                      <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+                                    </div>
+                                  ) : filteredLessons.length === 0 ? (
+                                    <div className="py-6 text-center text-sm text-gray-500">
+                                      {lessonSearchQuery ? "該当するレッスンがありません" : "レッスンがありません"}
+                                    </div>
+                                  ) : (
+                                    <div className="divide-y divide-gray-100">
+                                      {filteredLessons.slice(0, 20).map((lesson) => (
+                                        <button
+                                          key={lesson._id}
+                                          type="button"
+                                          onClick={() => {
+                                            setFormData({ ...formData, lessonId: lesson._id });
+                                            setLessonSearchQuery("");
+                                            setError(null);
+                                          }}
+                                          className={`w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors ${
+                                            formData.lessonId === lesson._id ? "bg-slate-50" : ""
+                                          }`}
+                                        >
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium text-slate-800 truncate">
+                                              {lesson.title}
+                                            </p>
+                                            {lesson.categoryTitle && (
+                                              <p className="text-xs text-slate-500 truncate">
+                                                {lesson.categoryTitle}
+                                              </p>
+                                            )}
+                                          </div>
+                                          {formData.lessonId === lesson._id && (
+                                            <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
+                                          )}
+                                        </button>
+                                      ))}
+                                      {filteredLessons.length > 20 && (
+                                        <div className="px-3 py-2 text-xs text-gray-500 text-center">
+                                          他 {filteredLessons.length - 20} 件（検索で絞り込めます）
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </FormField>
+
                             <FormField
                               label="学んだBONOコンテンツ"
                               required

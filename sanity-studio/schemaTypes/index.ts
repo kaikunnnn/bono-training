@@ -11,9 +11,10 @@ import feedbackCategory from "./feedbackCategory";
 import knowledge from "./knowledge";
 import knowledgeCategory from "./knowledgeCategory";
 import articleSubmission from "./articleSubmission";
+import userOutput from "./userOutput";
 import customContainer from "./objects/customContainer";
 import tableBlock from "./objects/tableBlock";
 import linkCard from "./objects/linkCard";
 import tableOfContents from "./objects/tableOfContents";
 
-export const schemaTypes = [category, lesson, quest, article, blogPost, event, question, questionCategory, feedback, feedbackCategory, knowledge, knowledgeCategory, articleSubmission, customContainer, tableBlock, linkCard, tableOfContents];
+export const schemaTypes = [category, lesson, quest, article, blogPost, event, question, questionCategory, feedback, feedbackCategory, knowledge, knowledgeCategory, articleSubmission, userOutput, customContainer, tableBlock, linkCard, tableOfContents];
