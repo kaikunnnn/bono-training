@@ -164,7 +164,7 @@ function htmlToPortableText(html: string): PortableTextBlock[] {
       const el = node as Element;
       const tag = el.tagName.toLowerCase();
 
-      let newMarks = [...marks];
+      const newMarks = [...marks];
       if (tag === 'strong' || tag === 'b') newMarks.push('strong');
       if (tag === 'em' || tag === 'i') newMarks.push('em');
 
