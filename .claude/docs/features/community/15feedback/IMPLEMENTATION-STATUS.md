@@ -44,8 +44,8 @@
 
 ### 設定
 - 環境変数: `SLACK_FEEDBACK_WEBHOOK_URL`
-- 現在の値: `[REDACTED]`
-- 注意: 古いWebhook URLの可能性あり。通知が届かない場合は新しいURLに更新が必要
+- 設定場所: Vercel環境変数（本番のみ）
+- 注意: Webhook URLは秘密情報のためリポジトリに含めないこと
 
 ### 通知フォーマット
 ```
