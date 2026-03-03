@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -36,6 +36,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/roadmap-patterns',
     icon: <Map className="w-8 h-8" />,
     tags: ['Roadmap', 'Course', 'Timeline', 'Progress', 'Learning']
+  },
+  {
+    title: 'Lesson Detail Patterns',
+    description: 'レッスン詳細ページの20のUIパターン。入口設計・進行中ガイド・出口設計で学習体験を向上。',
+    path: '/dev/lesson-detail-patterns',
+    icon: <BookOpen className="w-8 h-8" />,
+    tags: ['Lesson', 'Gamification', 'Progress', 'Duolingo', 'MasterClass']
   },
 ];
 

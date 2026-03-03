@@ -49,6 +49,27 @@ import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
 import RoadmapPattern3 from "./pages/dev/RoadmapPattern3";
 import RoadmapPattern4 from "./pages/dev/RoadmapPattern4";
 import RoadmapPattern5 from "./pages/dev/RoadmapPattern5";
+import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
+import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
+import LessonIdea2 from "./pages/dev/lesson-ideas/LessonIdea2";
+import LessonIdea3 from "./pages/dev/lesson-ideas/LessonIdea3";
+import LessonIdea4 from "./pages/dev/lesson-ideas/LessonIdea4";
+import LessonIdea5 from "./pages/dev/lesson-ideas/LessonIdea5";
+import LessonIdea6 from "./pages/dev/lesson-ideas/LessonIdea6";
+import LessonIdea7 from "./pages/dev/lesson-ideas/LessonIdea7";
+import LessonIdea8 from "./pages/dev/lesson-ideas/LessonIdea8";
+import LessonIdea9 from "./pages/dev/lesson-ideas/LessonIdea9";
+import LessonIdea10 from "./pages/dev/lesson-ideas/LessonIdea10";
+import LessonIdea11 from "./pages/dev/lesson-ideas/LessonIdea11";
+import LessonIdea12 from "./pages/dev/lesson-ideas/LessonIdea12";
+import LessonIdea13 from "./pages/dev/lesson-ideas/LessonIdea13";
+import LessonIdea14 from "./pages/dev/lesson-ideas/LessonIdea14";
+import LessonIdea15 from "./pages/dev/lesson-ideas/LessonIdea15";
+import LessonIdea16 from "./pages/dev/lesson-ideas/LessonIdea16";
+import LessonIdea17 from "./pages/dev/lesson-ideas/LessonIdea17";
+import LessonIdea18 from "./pages/dev/lesson-ideas/LessonIdea18";
+import LessonIdea19 from "./pages/dev/lesson-ideas/LessonIdea19";
+import LessonIdea20 from "./pages/dev/lesson-ideas/LessonIdea20";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -147,6 +168,27 @@ const AppContent = () => {
         <Route path="/dev/roadmap-pattern-3" element={<DevRoute><RoadmapPattern3 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-4" element={<DevRoute><RoadmapPattern4 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-5" element={<DevRoute><RoadmapPattern5 /></DevRoute>} />
+        <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
+        <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-3" element={<DevRoute><LessonIdea3 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-4" element={<DevRoute><LessonIdea4 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-5" element={<DevRoute><LessonIdea5 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-6" element={<DevRoute><LessonIdea6 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-7" element={<DevRoute><LessonIdea7 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-8" element={<DevRoute><LessonIdea8 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-9" element={<DevRoute><LessonIdea9 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-10" element={<DevRoute><LessonIdea10 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-11" element={<DevRoute><LessonIdea11 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-12" element={<DevRoute><LessonIdea12 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-13" element={<DevRoute><LessonIdea13 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-14" element={<DevRoute><LessonIdea14 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-15" element={<DevRoute><LessonIdea15 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-16" element={<DevRoute><LessonIdea16 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-17" element={<DevRoute><LessonIdea17 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-18" element={<DevRoute><LessonIdea18 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-19" element={<DevRoute><LessonIdea19 /></DevRoute>} />
+        <Route path="/dev/lesson-idea-20" element={<DevRoute><LessonIdea20 /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />
