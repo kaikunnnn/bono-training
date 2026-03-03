@@ -47,6 +47,28 @@
       "destination": "/ogp/index.html"
     },
     {
+      "source": "/feedback-apply",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
+        }
+      ],
+      "destination": "/ogp/feedback-apply.html"
+    },
+    {
+      "source": "/feedback-apply/submit",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(Twitterbot|facebookexternalhit|LinkedInBot|Slackbot|Discordbot|TelegramBot|WhatsApp|Line).*"
+        }
+      ],
+      "destination": "/ogp/feedback-apply-submit.html"
+    },
+    {
       "source": "/:path((?!api/)(?!images/).*)",
       "destination": "/index.html"
     }

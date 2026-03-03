@@ -191,6 +191,40 @@ async function main() {
 
   let totalGenerated = 1;
 
+  // ========== 静的ページ ==========
+  const staticPages = [
+    {
+      slug: 'feedback-apply',
+      title: '15分フィードバック',
+      description: 'コンテンツの学びをシェアしてフィードバックを受けよう',
+      imageUrl: `${siteUrl}/assets/feedback/og-image.png`,
+      pageUrl: `${siteUrl}/feedback-apply`,
+    },
+    {
+      slug: 'feedback-apply-submit',
+      title: '15分フィードバック 応募',
+      description: 'コンテンツの学びをシェアしてフィードバックを受けよう',
+      imageUrl: `${siteUrl}/assets/feedback/og-image.png`,
+      pageUrl: `${siteUrl}/feedback-apply/submit`,
+    },
+  ];
+
+  for (const page of staticPages) {
+    const html = generateOgpHtml({
+      title: page.title,
+      description: page.description,
+      imageUrl: page.imageUrl,
+      pageUrl: page.pageUrl,
+      siteName: 'BONO',
+      type: 'website',
+    });
+
+    const filePath = path.join(ogpDir, `${page.slug}.html`);
+    fs.writeFileSync(filePath, html);
+    console.log(`✅ Generated: /ogp/${page.slug}.html`);
+    totalGenerated++;
+  }
+
   // ========== ブログ記事 ==========
   const posts = await fetchAllBlogPosts();
   console.log(`📝 Found ${posts.length} blog posts`);
