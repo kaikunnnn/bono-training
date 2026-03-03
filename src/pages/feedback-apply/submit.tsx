@@ -1,7 +1,7 @@
 /**
  * 15分フィードバック 応募フォームページ
  * - ステップ形式で入力
- * - Step 1: 記事URL + Slackアカウント名
+ * - Step 1: アウトプットURL + アカウント名
  * - Step 2: 学んだBONOコンテンツ + 該当項目チェック
  * - 完了画面: アニメーション + Slack説明 + 内容確認
  */
@@ -250,9 +250,9 @@ const SuccessScreen = ({
       <div className="bg-slate-50 rounded-2xl p-5 mb-8">
         <h3 className="text-sm font-bold text-slate-700 mb-4">応募内容</h3>
         <div className="space-y-4">
-          {/* 記事URL */}
+          {/* アウトプットURL */}
           <div>
-            <p className="text-xs text-slate-500 mb-1">記事URL</p>
+            <p className="text-xs text-slate-500 mb-1">アウトプットURL</p>
             <a
               href={formData.articleUrl}
               target="_blank"
@@ -264,9 +264,9 @@ const SuccessScreen = ({
             </a>
           </div>
 
-          {/* Slackアカウント名 */}
+          {/* アカウント名 */}
           <div>
-            <p className="text-xs text-slate-500 mb-1">Slackアカウント名</p>
+            <p className="text-xs text-slate-500 mb-1">アカウント名</p>
             <p className="text-sm font-medium text-slate-800">
               {formData.slackAccountName}
             </p>
@@ -542,7 +542,7 @@ const FeedbackApplySubmit = () => {
                     )}
 
                     <AnimatePresence mode="wait">
-                      {/* Step 1: 記事URL + Slackアカウント名 */}
+                      {/* Step 1: アウトプットURL + アカウント名 */}
                       {step === 1 && (
                         <motion.div
                           key="step1"
@@ -554,15 +554,15 @@ const FeedbackApplySubmit = () => {
                           <div className="space-y-2">
                             <StepBadge step={1} />
                             <h2 className="text-xl font-bold text-slate-900">
-                              記事URLとアカウント名を教えてください
+                              アウトプットURLとアカウント名を教えてください
                             </h2>
                           </div>
 
                           <div className="space-y-6">
                             <FormField
-                              label="記事URL"
+                              label="アウトプットURL"
                               required
-                              description="フィードバックの連絡をする際に利用します。判別できるように確認してください"
+                              description="書いたアウトプットのURLを貼りましょう"
                             >
                               <Input
                                 type="url"
@@ -579,7 +579,7 @@ const FeedbackApplySubmit = () => {
                             <FormField
                               label="アカウント名"
                               required
-                              description="フィードバックの連絡をする際に利用します。判別できるように確認してください"
+                              description="※Slackと同じアカウント名"
                             >
                               <Input
                                 type="text"

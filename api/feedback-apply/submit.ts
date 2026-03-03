@@ -8,7 +8,7 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@sanity/client';
-import { fetchOgData } from '../lib/ogParser';
+import { fetchOgData } from '../lib/ogParser.js';
 
 // Sanity client with write token
 const sanityClient = createClient({
