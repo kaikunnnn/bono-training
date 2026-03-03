@@ -35,7 +35,6 @@ interface FormData {
   articleUrl: string;
   slackAccountName: string;
   lessonId: string;
-  bonoContent: string;
   checkedItems: string[];
 }
 
@@ -276,20 +275,12 @@ const SuccessScreen = ({
           {/* 関連レッスン */}
           {lessonTitle && (
             <div>
-              <p className="text-xs text-slate-500 mb-1">関連レッスン</p>
+              <p className="text-xs text-slate-500 mb-1">学んだBONOコンテンツ</p>
               <p className="text-sm font-medium text-slate-800">
                 {lessonTitle}
               </p>
             </div>
           )}
-
-          {/* 学んだBONOコンテンツ */}
-          <div>
-            <p className="text-xs text-slate-500 mb-1">学んだBONOコンテンツ</p>
-            <p className="text-sm font-medium text-slate-800">
-              {formData.bonoContent}
-            </p>
-          </div>
 
           {/* 該当項目 */}
           <div>
@@ -338,7 +329,6 @@ const FeedbackApplySubmit = () => {
     articleUrl: "",
     slackAccountName: "",
     lessonId: "",
-    bonoContent: "",
     checkedItems: [],
   });
   const [lessonSearchQuery, setLessonSearchQuery] = useState("");
@@ -356,10 +346,8 @@ const FeedbackApplySubmit = () => {
     if (!lessons) return [];
     if (!lessonSearchQuery.trim()) return lessons;
     const query = lessonSearchQuery.toLowerCase();
-    return lessons.filter(
-      (lesson) =>
-        lesson.title.toLowerCase().includes(query) ||
-        (lesson.categoryTitle && lesson.categoryTitle.toLowerCase().includes(query))
+    return lessons.filter((lesson) =>
+      lesson.title.toLowerCase().includes(query)
     );
   }, [lessons, lessonSearchQuery]);
 
@@ -381,7 +369,6 @@ const FeedbackApplySubmit = () => {
       case 2:
         return (
           formData.lessonId !== "" &&
-          formData.bonoContent.trim() !== "" &&
           formData.checkedItems.length > 0
         );
       default:
@@ -417,7 +404,7 @@ const FeedbackApplySubmit = () => {
           articleUrl: formData.articleUrl,
           slackAccountName: formData.slackAccountName,
           lessonId: formData.lessonId,
-          bonoContent: formData.bonoContent,
+          lessonTitle: selectedLesson?.title || "",
           checkedItems: formData.checkedItems,
           userId: user?.id,
           userEmail: user?.email,
@@ -439,7 +426,7 @@ const FeedbackApplySubmit = () => {
 
   // モード用ヘッダー（キャンセルボタン）
   const ModeHeader = () => (
-    <header className="sticky top-0 z-50 bg-base border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-base">
       <div className="container py-3">
         <button
           onClick={() => navigate("/feedback-apply")}
@@ -516,11 +503,12 @@ const FeedbackApplySubmit = () => {
     <div className="min-h-screen bg-base">
       <SEO
         title="15分フィードバック 応募"
-        description="15分フィードバックに応募する"
+        description="コンテンツの学びをシェアしてフィードバックを受けよう"
         ogUrl="/feedback-apply/submit"
+        ogImage="/assets/feedback/og-image.png"
       />
 
-      <ModeHeader />
+      {!isSubmitted && <ModeHeader />}
 
       <div className="container py-8">
         <div className="mx-auto max-w-2xl space-y-6">
@@ -625,27 +613,15 @@ const FeedbackApplySubmit = () => {
                           </div>
 
                           <div className="space-y-8">
-                            {/* レッスン選択 */}
+                            {/* 学んだBONOコンテンツ（レッスン選択） */}
                             <FormField
-                              label="関連するレッスン"
+                              label="学んだBONOコンテンツ"
                               required
-                              description="このアウトプットに関連するレッスンを選択してください"
+                              description="このアウトプットで参照したレッスンを選択してください"
                             >
                               <div className="space-y-2">
-                                {/* 検索入力 */}
-                                <div className="relative">
-                                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                  <Input
-                                    type="text"
-                                    value={lessonSearchQuery}
-                                    onChange={(e) => setLessonSearchQuery(e.target.value)}
-                                    placeholder="レッスン名で検索..."
-                                    className="h-10 pl-9 rounded-xl border-gray-300 text-sm"
-                                  />
-                                </div>
-
                                 {/* 選択中のレッスン表示 */}
-                                {selectedLesson && (
+                                {selectedLesson ? (
                                   <div className="flex items-center gap-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
                                     <Check className="w-4 h-4 text-green-600 flex-shrink-0" />
                                     <span className="text-sm font-medium text-slate-800 truncate">
@@ -659,10 +635,22 @@ const FeedbackApplySubmit = () => {
                                       <X className="w-4 h-4" />
                                     </button>
                                   </div>
-                                )}
+                                ) : (
+                                  <>
+                                    {/* 検索入力 */}
+                                    <div className="relative">
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                      <Input
+                                        type="text"
+                                        value={lessonSearchQuery}
+                                        onChange={(e) => setLessonSearchQuery(e.target.value)}
+                                        placeholder="レッスン名で検索..."
+                                        className="h-10 pl-9 rounded-xl border-gray-300 text-sm"
+                                      />
+                                    </div>
 
-                                {/* レッスン一覧 */}
-                                <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-xl">
+                                    {/* レッスン一覧 */}
+                                    <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-xl">
                                   {lessonsLoading ? (
                                     <div className="flex items-center justify-center py-8">
                                       <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
@@ -708,25 +696,10 @@ const FeedbackApplySubmit = () => {
                                       )}
                                     </div>
                                   )}
-                                </div>
+                                    </div>
+                                  </>
+                                )}
                               </div>
-                            </FormField>
-
-                            <FormField
-                              label="学んだBONOコンテンツ"
-                              required
-                              description="記事を書いたコースなどの名称を記入してください"
-                            >
-                              <Input
-                                type="text"
-                                value={formData.bonoContent}
-                                onChange={(e) => {
-                                  setFormData({ ...formData, bonoContent: e.target.value });
-                                  setError(null);
-                                }}
-                                placeholder="例：ゼロからはじめる情報設計"
-                                className="h-12 rounded-2xl border-gray-300 text-base"
-                              />
                             </FormField>
 
                             <FormField

@@ -96,8 +96,6 @@ import FeedbackDetail from "./pages/feedbacks/FeedbackDetail";
 import KnowledgeList from "./pages/knowledge/KnowledgeList";
 import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
-import ShareIndex from "./pages/share";
-import ShareSubmit from "./pages/share/submit";
 import FeedbackApplyIndex from "./pages/feedback-apply";
 import FeedbackApplySubmit from "./pages/feedback-apply/submit";
 
@@ -227,8 +225,6 @@ const AppContent = () => {
         <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
 
         {/* 思考シェア記事（みんなの学びのアウトプット） */}
-        <Route path="/share" element={<ShareIndex />} />
-        <Route path="/share/submit" element={<ShareSubmit />} />
 
         <Route path="/events/:slug" element={<EventDetail />} />
 

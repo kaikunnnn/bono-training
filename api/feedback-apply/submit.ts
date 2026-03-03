@@ -22,17 +22,11 @@ const sanityClient = createClient({
 // Slack Webhook URL（環境変数から取得）
 const SLACK_WEBHOOK_URL = process.env.SLACK_FEEDBACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
 
-// 該当項目のラベルマッピング
-const CRITERIA_LABELS: Record<string, string> = {
-  'notice': 'Notice（気づき・変化）',
-  'before-after': 'Before/After（修正過程）',
-  'why': 'Why（なぜそうしたか）',
-};
-
 interface SubmitPayload {
   articleUrl: string;
   slackAccountName: string;
-  bonoContent: string;
+  bonoContent?: string; // 後方互換性のため残す（オプショナル）
+  lessonTitle?: string; // 選択されたレッスンのタイトル
   checkedItems: string[];
   lessonId?: string; // フォームで選択されたレッスンID
   userId?: string;
@@ -49,52 +43,40 @@ async function sendSlackNotification(
     return;
   }
 
-  // 該当項目のラベルを取得
-  const checkedLabels = payload.checkedItems
-    .map((id) => CRITERIA_LABELS[id] || id)
-    .join('\n• ');
-
   // Sanity Studio へのリンク（ドキュメントIDがある場合）
   const sanityLink = sanityDocId
-    ? `\n\n<https://bono-training.sanity.studio/structure/userOutput;${sanityDocId}|📋 Sanity Studioで確認>`
+    ? `\n<https://bono-training.sanity.studio/structure/userOutput;${sanityDocId}|📋 Sanity Studioで確認>`
     : '';
 
   // Slackメッセージを構築
   const slackMessage = {
     blocks: [
       {
-        type: 'header',
-        text: {
-          type: 'plain_text',
-          text: '📝 15分フィードバック新規応募',
-          emoji: true,
-        },
-      },
-      {
-        type: 'section',
-        fields: [
-          {
-            type: 'mrkdwn',
-            text: `*👤 Slackアカウント名:*\n${payload.slackAccountName}`,
-          },
-          {
-            type: 'mrkdwn',
-            text: `*📚 学んだBONOコンテンツ:*\n${payload.bonoContent}`,
-          },
-        ],
-      },
-      {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*🔗 記事URL:*\n<${payload.articleUrl}|${payload.articleUrl}>`,
+          text: '*【🔸15分フィードバック新規応募がきたよ】*',
         },
       },
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: `*✅ 該当項目:*\n• ${checkedLabels}`,
+          text: `👩‍💻Slackアカウント名:\n${payload.slackAccountName}`,
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `🗺️学んだBONOコンテンツ:\n${payload.lessonTitle || payload.bonoContent || '未選択'}`,
+        },
+      },
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `🔗アウトプットURL:\n<${payload.articleUrl}|${payload.articleUrl}>`,
         },
       },
       {
@@ -141,8 +123,9 @@ function validatePayload(payload: SubmitPayload): string | null {
     return 'Slackアカウント名を入力してください';
   }
 
-  if (!payload.bonoContent || payload.bonoContent.trim() === '') {
-    return '学んだBONOコンテンツを入力してください';
+  // lessonId または bonoContent のどちらかが必要（後方互換性）
+  if (!payload.lessonId && (!payload.bonoContent || payload.bonoContent.trim() === '')) {
+    return '学んだBONOコンテンツを選択してください';
   }
 
   if (!payload.checkedItems || payload.checkedItems.length === 0) {
@@ -180,7 +163,7 @@ async function saveToSanity(
         slackAccountName: payload.slackAccountName,
         email: payload.userEmail || null,
       },
-      bonoContent: payload.bonoContent,
+      bonoContent: payload.lessonTitle || payload.bonoContent || null,
       checkedItems: payload.checkedItems,
       source: 'user_submission',
       submittedAt: new Date().toISOString(),
