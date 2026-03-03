@@ -163,10 +163,6 @@ function localApiPlugin(): Plugin {
               // Slack通知を送信
               if (SLACK_WEBHOOK_URL) {
                 try {
-                  const sanityLink = sanityDocId
-                    ? `\n<https://bono-training.sanity.studio/structure/userOutput;${sanityDocId}|📋 Sanity Studioで確認>`
-                    : '';
-
                   const slackMessage = {
                     blocks: [
                       {
@@ -205,7 +201,7 @@ function localApiPlugin(): Plugin {
                         elements: [
                           {
                             type: 'mrkdwn',
-                            text: `応募日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}${sanityLink}`,
+                            text: `応募日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}`,
                           },
                         ],
                       },

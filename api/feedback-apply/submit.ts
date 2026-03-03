@@ -35,18 +35,12 @@ interface SubmitPayload {
 
 // Slackに通知を送信
 async function sendSlackNotification(
-  payload: SubmitPayload,
-  sanityDocId?: string
+  payload: SubmitPayload
 ): Promise<void> {
   if (!SLACK_WEBHOOK_URL) {
     console.warn('Slack Webhook URL is not configured');
     return;
   }
-
-  // Sanity Studio へのリンク（ドキュメントIDがある場合）
-  const sanityLink = sanityDocId
-    ? `\n<https://bono-training.sanity.studio/structure/userOutput;${sanityDocId}|📋 Sanity Studioで確認>`
-    : '';
 
   // Slackメッセージを構築
   const slackMessage = {
@@ -87,7 +81,7 @@ async function sendSlackNotification(
         elements: [
           {
             type: 'mrkdwn',
-            text: `応募日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}${sanityLink}`,
+            text: `応募日時: ${new Date().toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}`,
           },
         ],
       },
@@ -213,7 +207,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const sanityDocId = await saveToSanity(payload, ogData);
 
     // Slack通知を送信（Sanity DocIDをリンクに含める）
-    await sendSlackNotification(payload, sanityDocId || undefined);
+    await sendSlackNotification(payload);
 
     // 成功レスポンス
     return res.status(200).json({
