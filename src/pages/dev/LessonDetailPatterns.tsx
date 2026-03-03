@@ -363,15 +363,15 @@ const LessonDetailPatterns = () => {
               UI
             </div>
             <div>
-              <p className="font-semibold text-gray-900">UIデザインサイクル</p>
+              <p className="font-semibold text-gray-900">UIが上手くなる人の"デザインサイクル" ─ 入門編β</p>
               <p className="text-sm text-gray-500">
-                3クエスト • 全12記事 • 約60分
+                6クエスト • 全23記事 • 約9時間
               </p>
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-gray-100">
             <Link
-              to="/lessons/ui-design-cycle"
+              to="/lessons/ui-design-flow-lv1"
               className="text-sm text-blue-600 hover:underline inline-flex items-center gap-1"
             >
               現在のレッスン詳細ページを見る
