@@ -71,7 +71,7 @@ function localApiPlugin(): Plugin {
               if (SANITY_WRITE_TOKEN && SANITY_PROJECT_ID) {
                 try {
                   // OG情報を取得
-                  let ogData = { title: null as string | null, image: null as string | null, description: null as string | null };
+                  const ogData = { title: null as string | null, image: null as string | null, description: null as string | null };
                   try {
                     const controller = new AbortController();
                     const timeoutId = setTimeout(() => controller.abort(), 10000);
