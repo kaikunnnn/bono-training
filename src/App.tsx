@@ -49,6 +49,17 @@ import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
 import RoadmapPattern3 from "./pages/dev/RoadmapPattern3";
 import RoadmapPattern4 from "./pages/dev/RoadmapPattern4";
 import RoadmapPattern5 from "./pages/dev/RoadmapPattern5";
+import RoadmapPattern5A from "./pages/dev/RoadmapPattern5A";
+import RoadmapPattern5B from "./pages/dev/RoadmapPattern5B";
+import RoadmapPattern5C from "./pages/dev/RoadmapPattern5C";
+import RoadmapPattern10 from "./pages/dev/RoadmapPattern10";
+import RoadmapPattern11 from "./pages/dev/RoadmapPattern11";
+import RoadmapPattern12 from "./pages/dev/RoadmapPattern12";
+import RoadmapPattern13 from "./pages/dev/RoadmapPattern13";
+import RoadmapPattern14 from "./pages/dev/RoadmapPattern14";
+import RoadmapPattern15 from "./pages/dev/RoadmapPattern15";
+import RoadmapPattern16 from "./pages/dev/RoadmapPattern16";
+import RoadmapTest from "./pages/dev/RoadmapTest";
 import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
 import LessonIdea2 from "./pages/dev/lesson-ideas/LessonIdea2";
@@ -166,6 +177,17 @@ const AppContent = () => {
         <Route path="/dev/roadmap-pattern-3" element={<DevRoute><RoadmapPattern3 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-4" element={<DevRoute><RoadmapPattern4 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-5" element={<DevRoute><RoadmapPattern5 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5a" element={<DevRoute><RoadmapPattern5A /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5b" element={<DevRoute><RoadmapPattern5B /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5c" element={<DevRoute><RoadmapPattern5C /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-10" element={<DevRoute><RoadmapPattern10 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-11" element={<DevRoute><RoadmapPattern11 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-12" element={<DevRoute><RoadmapPattern12 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-13" element={<DevRoute><RoadmapPattern13 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-14" element={<DevRoute><RoadmapPattern14 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-15" element={<DevRoute><RoadmapPattern15 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-16" element={<DevRoute><RoadmapPattern16 /></DevRoute>} />
+        <Route path="/dev/roadmap-test" element={<DevRoute><RoadmapTest /></DevRoute>} />
         <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
