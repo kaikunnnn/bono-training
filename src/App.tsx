@@ -70,6 +70,17 @@ import LessonIdea17 from "./pages/dev/lesson-ideas/LessonIdea17";
 import LessonIdea18 from "./pages/dev/lesson-ideas/LessonIdea18";
 import LessonIdea19 from "./pages/dev/lesson-ideas/LessonIdea19";
 import LessonIdea20 from "./pages/dev/lesson-ideas/LessonIdea20";
+import CourseListPatterns from "./pages/dev/CourseListPatterns";
+import CourseListIdea1 from "./pages/dev/lesson-ideas/CourseListIdea1";
+import CourseListIdea2 from "./pages/dev/lesson-ideas/CourseListIdea2";
+import CourseListIdea3 from "./pages/dev/lesson-ideas/CourseListIdea3";
+import CourseListIdea4 from "./pages/dev/lesson-ideas/CourseListIdea4";
+import CourseListIdea5 from "./pages/dev/lesson-ideas/CourseListIdea5";
+import CourseListIdea6 from "./pages/dev/lesson-ideas/CourseListIdea6";
+import CourseListIdea7 from "./pages/dev/lesson-ideas/CourseListIdea7";
+import CourseListIdea8 from "./pages/dev/lesson-ideas/CourseListIdea8";
+import CourseListIdea9 from "./pages/dev/lesson-ideas/CourseListIdea9";
+import CourseListIdea9Category from "./pages/dev/lesson-ideas/CourseListIdea9Category";
 import LessonDetail from "./pages/LessonDetail";
 import ArticleDetail from "./pages/ArticleDetail";
 import SanityTest from "./pages/SanityTest";
@@ -187,6 +198,17 @@ const AppContent = () => {
         <Route path="/dev/lesson-idea-18" element={<DevRoute><LessonIdea18 /></DevRoute>} />
         <Route path="/dev/lesson-idea-19" element={<DevRoute><LessonIdea19 /></DevRoute>} />
         <Route path="/dev/lesson-idea-20" element={<DevRoute><LessonIdea20 /></DevRoute>} />
+        <Route path="/dev/course-list-patterns" element={<DevRoute><CourseListPatterns /></DevRoute>} />
+        <Route path="/dev/course-list-idea-1" element={<DevRoute><CourseListIdea1 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-2" element={<DevRoute><CourseListIdea2 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-3" element={<DevRoute><CourseListIdea3 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-4" element={<DevRoute><CourseListIdea4 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-5" element={<DevRoute><CourseListIdea5 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-6" element={<DevRoute><CourseListIdea6 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-7" element={<DevRoute><CourseListIdea7 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-8" element={<DevRoute><CourseListIdea8 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-9" element={<DevRoute><CourseListIdea9 /></DevRoute>} />
+        <Route path="/dev/course-list-idea-9/category/:categoryId" element={<DevRoute><CourseListIdea9Category /></DevRoute>} />
 
         <Route path="/blog" element={<BlogIndex />} />
         <Route path="/blog/components-preview" element={<ComponentsPreview />} />

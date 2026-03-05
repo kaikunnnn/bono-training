@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Layers } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -43,6 +43,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/lesson-detail-patterns',
     icon: <BookOpen className="w-8 h-8" />,
     tags: ['Lesson', 'Gamification', 'Progress', 'Duolingo', 'MasterClass']
+  },
+  {
+    title: 'Course List Patterns',
+    description: 'コース一覧ページの8つのUIパターン。カテゴリ構造の見せ方を検討。Airbnb的プロダクト思考。',
+    path: '/dev/course-list-patterns',
+    icon: <Layers className="w-8 h-8" />,
+    tags: ['CourseList', 'Category', 'Navigation', 'Airbnb', 'Filter']
   },
 ];
 
