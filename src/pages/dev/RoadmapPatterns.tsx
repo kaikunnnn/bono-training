@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Copy, Sparkles, Heart, Folder } from 'lucide-react';
+import { ArrowRight, Copy, Sparkles, Heart, Folder, Figma, Palette, Zap, Minus, LayoutGrid } from 'lucide-react';
 
 interface PatternCard {
   id: string;
@@ -62,6 +62,69 @@ const patterns: PatternCard[] = [
     concept: '詳細ページ: Bento Grid & Apple-like UI',
     icon: <Folder className="w-6 h-6" />,
     preview: 'bg-gradient-to-br from-blue-50 to-indigo-50',
+  },
+  {
+    id: '10',
+    title: 'Pattern 10: 情報構造ベース',
+    description: 'フック→誰向け→得られるもの→ステップ概要→詳細→CTA。シンプルに情報設計だけ。',
+    path: '/dev/roadmap-pattern-10',
+    concept: '情報構造: ユーザーの意思決定フローに沿った設計',
+    icon: <Sparkles className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-gray-100 to-gray-200',
+  },
+  {
+    id: '11',
+    title: 'Pattern 11: Figma準拠版',
+    description: 'Figmaデザインを忠実に再現。ヘッダー、得られるもの、進め方サマリー、ステップ詳細カード。再利用可能なコンポーネント構成。',
+    path: '/dev/roadmap-pattern-11',
+    concept: 'Figmaデザイン準拠: コンポーネント分割 & 再利用性',
+    icon: <Figma className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-violet-50 to-purple-50',
+  },
+  {
+    id: '12',
+    title: 'Pattern 12: gaaboo.jpスタイル準拠版',
+    description: 'gaaboo.jp/recruit/から抽出したスタイルルールを全面適用。15px本文/28px見出し/80px余白/12px角丸など、洗練されたスタイルシステム。',
+    path: '/dev/roadmap-pattern-12',
+    concept: 'gaabooスタイル: 繊細なタイポグラフィ & スペーシングシステム',
+    icon: <Palette className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-red-50 to-orange-50',
+  },
+  {
+    id: '13',
+    title: 'Pattern 13: Bold Impact',
+    description: '大胆なグラデーションヒーロー、超大型タイポグラフィ、ダークセクションとのコントラスト。視覚的インパクトを最大化。',
+    path: '/dev/roadmap-pattern-13',
+    concept: 'gaaboo応用: ダイナミック & インパクト重視',
+    icon: <Zap className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-indigo-900 to-blue-900',
+  },
+  {
+    id: '14',
+    title: 'Pattern 14: Elegant Minimal',
+    description: '極限の余白活用、エディトリアルなタイポグラフィ、細い線と繊細なボーダー。削ぎ落としの美学。',
+    path: '/dev/roadmap-pattern-14',
+    concept: 'gaaboo応用: ミニマル & 余白の美学',
+    icon: <Minus className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-gray-50 to-white',
+  },
+  {
+    id: '15',
+    title: 'Pattern 15: Structured Visual',
+    description: 'Bento Grid的モジュラーレイアウト、データビジュアライゼーション、カード中心の視覚的情報階層。',
+    path: '/dev/roadmap-pattern-15',
+    concept: 'gaaboo応用: 構造的カード & Bento Grid',
+    icon: <LayoutGrid className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-gray-100 to-gray-200',
+  },
+  {
+    id: '16',
+    title: 'Pattern 16: Elegant + Information Dense',
+    description: 'Pattern 14の洗練さを維持しつつ情報密度UP。Stats、詳細なレッスンリスト、強化されたCTA。余白美学と実用性の両立。',
+    path: '/dev/roadmap-pattern-16',
+    concept: 'gaaboo応用: ミニマル美学 + 情報充実',
+    icon: <Minus className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-white to-gray-50',
   },
 ];
 
