@@ -124,18 +124,23 @@ export interface ViewedArticle extends Article {
 
 /**
  * 閲覧履歴の記事詳細を取得（最新20件）
+ * @param userId オプション: 認証済みユーザーID（渡すと認証チェックをスキップ）
  * @returns 閲覧した記事の配列（Sanityから取得、閲覧日時順）
  */
-export async function getViewHistory(): Promise<ViewedArticle[]> {
+export async function getViewHistory(userId?: string): Promise<ViewedArticle[]> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    let uid = userId;
+    if (!uid) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      uid = user.id;
+    }
 
     // 1. Supabaseから閲覧履歴を取得（ID + 閲覧日時）
     const { data: historyData, error } = await supabase
       .from('article_view_history')
       .select('article_id, viewed_at')
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .order('viewed_at', { ascending: false })
       .limit(DISPLAY_LIMIT);
 

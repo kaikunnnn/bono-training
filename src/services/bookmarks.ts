@@ -107,17 +107,22 @@ export async function isBookmarked(articleId: string): Promise<boolean> {
 
 /**
  * ユーザーのブックマーク一覧を取得
+ * @param userId オプション: 認証済みユーザーID（渡すと認証チェックをスキップ）
  * @returns ブックマークした記事ID一覧
  */
-export async function getBookmarks(): Promise<string[]> {
+export async function getBookmarks(userId?: string): Promise<string[]> {
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return [];
+    let uid = userId;
+    if (!uid) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+      uid = user.id;
+    }
 
     const { data, error } = await supabase
       .from('article_bookmarks')
       .select('article_id')
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
@@ -148,12 +153,13 @@ export interface BookmarkedArticle extends Article {
 
 /**
  * ブックマークした記事の詳細情報を取得
+ * @param userId オプション: 認証済みユーザーID（渡すと認証チェックをスキップ）
  * @returns ブックマーク済み記事の配列（Sanityから取得）
  */
-export async function getBookmarkedArticles(): Promise<BookmarkedArticle[]> {
+export async function getBookmarkedArticles(userId?: string): Promise<BookmarkedArticle[]> {
   try {
     // 1. Supabaseからブックマークした記事IDを取得
-    const bookmarkIds = await getBookmarks();
+    const bookmarkIds = await getBookmarks(userId);
 
     if (bookmarkIds.length === 0) {
       return [];

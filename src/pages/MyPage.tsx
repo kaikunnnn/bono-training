@@ -68,7 +68,14 @@ export default function MyPage() {
   const [lessonStatusMap, setLessonStatusMap] = useState<Record<string, LessonStatus>>({});
   const [completingLessonId, setCompletingLessonId] = useState<string | null>(null);
   const [userQuestions, setUserQuestions] = useState<UserQuestion[]>([]);
-  const [loading, setLoading] = useState(true);
+
+  // セクションごとのローディング状態
+  const [loadingStates, setLoadingStates] = useState({
+    bookmarks: true,
+    history: true,
+    questions: true,
+    progress: true,
+  });
 
   useEffect(() => {
     if (!user) {
@@ -76,37 +83,47 @@ export default function MyPage() {
       return;
     }
 
-    const fetchData = async () => {
-      setLoading(true);
+    const userId = user.id;
 
-      const [articles, history, questions] = await Promise.all([
-        getBookmarkedArticles(),
-        getViewHistory(),
-        getUserQuestions(user.id),
-      ]);
+    // 各セクションを独立して取得（完了次第表示）
+
+    // ブックマーク取得
+    getBookmarkedArticles(userId).then(articles => {
       setBookmarks(articles);
-      setViewHistory(history);
-      setUserQuestions(questions);
+      setLoadingStates(prev => ({ ...prev, bookmarks: false }));
+    });
 
-      const allLessons = await getAllLessonsWithArticles();
+    // 閲覧履歴取得
+    getViewHistory(userId).then(history => {
+      setViewHistory(history);
+      setLoadingStates(prev => ({ ...prev, history: false }));
+    });
+
+    // 質問取得
+    getUserQuestions(userId).then(questions => {
+      setUserQuestions(questions);
+      setLoadingStates(prev => ({ ...prev, questions: false }));
+    });
+
+    // 進捗取得（レッスン → 進捗・ステータスの2段階だが、ここで完結）
+    getAllLessonsWithArticles().then(async allLessons => {
       setLessons(allLessons);
 
       const lessonData = allLessons.map(lesson => ({
         lessonId: lesson._id,
         articleIds: lesson.articleIds,
       }));
-
-      const progress = await getMultipleLessonProgress(lessonData);
-      setProgressMap(progress);
-
       const lessonIds = allLessons.map(lesson => lesson._id);
-      const statuses = await getMultipleLessonStatus(lessonIds);
+
+      const [progress, statuses] = await Promise.all([
+        getMultipleLessonProgress(lessonData, userId),
+        getMultipleLessonStatus(lessonIds, userId),
+      ]);
+
+      setProgressMap(progress);
       setLessonStatusMap(statuses);
-
-      setLoading(false);
-    };
-
-    fetchData();
+      setLoadingStates(prev => ({ ...prev, progress: false }));
+    });
   }, [user, navigate]);
 
   const handleRemoveBookmark = async (articleId: string) => {
@@ -228,7 +245,8 @@ export default function MyPage() {
     setCompletingLessonId(null);
   };
 
-  if (loading) {
+  // 認証チェック中のみローディング表示
+  if (!user) {
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
@@ -348,8 +366,33 @@ export default function MyPage() {
                 )}
               </div>
 
-              {/* レッスングリッド or Empty State */}
-              {allActiveLessons.length > 0 ? (
+              {/* レッスングリッド or スケルトン or Empty State */}
+              {loadingStates.progress ? (
+                /* スケルトン - 進行中 */
+                <div
+                  style={{
+                    display: "flex",
+                    gap: styles.spacing.lessonGridGap,
+                    alignItems: "flex-start",
+                    width: "100%",
+                  }}
+                >
+                  {[1, 2].map((i) => (
+                    <div key={i} style={{ flex: 1, minWidth: 0 }}>
+                      <div className="bg-white rounded-xl p-4 animate-pulse">
+                        <div className="flex gap-3">
+                          <div className="w-12 h-[73px] bg-gray-200 rounded-lg" />
+                          <div className="flex-1">
+                            <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                            <div className="h-3 bg-gray-100 rounded w-1/2 mb-3" />
+                            <div className="h-2 bg-gray-100 rounded-full w-full" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : allActiveLessons.length > 0 ? (
                 <div
                   style={{
                     display: "flex",
@@ -470,8 +513,21 @@ export default function MyPage() {
                 hideSeeAll={activeTab !== 'all'}
               />
 
-              {/* お気に入りリスト or Empty State */}
-              {bookmarks.length > 0 ? (
+              {/* お気に入りリスト or スケルトン or Empty State */}
+              {loadingStates.bookmarks ? (
+                /* スケルトン - お気に入り */
+                <div className="w-full space-y-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bg-white rounded-xl p-3 animate-pulse flex gap-3">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0" />
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                        <div className="h-3 bg-gray-100 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : bookmarks.length > 0 ? (
                 <BookmarkList
                   articles={activeTab === 'all' ? bookmarks.slice(0, 4) : bookmarks}
                   emptyMessage=""
@@ -498,8 +554,21 @@ export default function MyPage() {
                 hideSeeAll={activeTab !== 'all'}
               />
 
-              {/* 閲覧履歴リスト or Empty State */}
-              {viewHistory.length > 0 ? (
+              {/* 閲覧履歴リスト or スケルトン or Empty State */}
+              {loadingStates.history ? (
+                /* スケルトン - 閲覧履歴 */
+                <div className="w-full space-y-2">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="bg-white rounded-xl p-3 animate-pulse flex gap-3">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex-shrink-0" />
+                      <div className="flex-1">
+                        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                        <div className="h-3 bg-gray-100 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : viewHistory.length > 0 ? (
                 <HistoryList
                   articles={activeTab === 'all' ? viewHistory.slice(0, 4) : viewHistory}
                 />
@@ -523,8 +592,23 @@ export default function MyPage() {
                 hideSeeAll={activeTab !== 'all'}
               />
 
-              {/* 質問リスト or Empty State */}
-              {userQuestions.length > 0 ? (
+              {/* 質問リスト or スケルトン or Empty State */}
+              {loadingStates.questions ? (
+                /* スケルトン - 質問 */
+                <div className="w-full flex flex-col gap-2">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="w-full p-4 bg-white rounded-xl border border-black/5 animate-pulse">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex-1">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                          <div className="h-3 bg-gray-100 rounded w-1/2" />
+                        </div>
+                        <div className="w-16 h-6 bg-gray-100 rounded-full" />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : userQuestions.length > 0 ? (
                 <div className="w-full flex flex-col gap-2">
                   {(activeTab === 'all' ? userQuestions.slice(0, 3) : userQuestions).map((question) => (
                     <Link
