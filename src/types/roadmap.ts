@@ -35,6 +35,8 @@ export interface Roadmap {
   description: string;
   /** 統計情報 */
   stats: RoadmapStats;
+  /** 対象者（誰向けか） */
+  audience?: RoadmapAudience[];
   /** このロードマップで得られるもの */
   benefits: RoadmapBenefit[];
   /** ステップ一覧 */
@@ -134,6 +136,14 @@ export interface RoadmapBenefit {
   /** タイトル */
   title: string;
   /** 説明文 */
+  description: string;
+}
+
+/** 対象者（誰向けか） */
+export interface RoadmapAudience {
+  /** ラベル（例: "UI未経験者"） */
+  label: string;
+  /** 説明（例: "デザインツールを触ったことがない方"） */
   description: string;
 }
 

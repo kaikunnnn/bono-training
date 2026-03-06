@@ -55,9 +55,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
         {/* ロードマップ */}
         <SidebarMenuItem
-          href="/roadmap"
+          href="/roadmaps"
           icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/roadmap")}
+          isActive={isActive("/roadmaps") || location.pathname.startsWith("/roadmaps/")}
         >
           ロードマップ
         </SidebarMenuItem>

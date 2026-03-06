@@ -60,6 +60,8 @@ import RoadmapPattern14 from "./pages/dev/RoadmapPattern14";
 import RoadmapPattern15 from "./pages/dev/RoadmapPattern15";
 import RoadmapPattern16 from "./pages/dev/RoadmapPattern16";
 import RoadmapTest from "./pages/dev/RoadmapTest";
+import RoadmapListPage from "./pages/roadmaps";
+import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
 import LessonIdea2 from "./pages/dev/lesson-ideas/LessonIdea2";
@@ -225,6 +227,8 @@ const AppContent = () => {
         <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
 
         <Route path="/roadmap" element={<Roadmap />} />
+        <Route path="/roadmaps" element={<RoadmapListPage />} />
+        <Route path="/roadmaps/:slug" element={<RoadmapDetail />} />
 
         {/* 質問ページ（Sanityベース） */}
         <Route path="/questions" element={<QuestionList />} />
