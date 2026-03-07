@@ -43,6 +43,8 @@ import TopPagePatterns from "./pages/dev/TopPagePatterns";
 import TopPagePatternA from "./pages/dev/TopPagePatternA";
 import TopPagePatternB from "./pages/dev/TopPagePatternB";
 import TopPagePatternC from "./pages/dev/TopPagePatternC";
+import TopPagePatternD from "./pages/dev/TopPagePatternD";
+import TopPagePatternE from "./pages/dev/TopPagePatternE";
 import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
 import RoadmapPattern1 from "./pages/dev/RoadmapPattern1";
 import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
@@ -173,6 +175,8 @@ const AppContent = () => {
         <Route path="/dev/top-pattern-a" element={<DevRoute><TopPagePatternA /></DevRoute>} />
         <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
         <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
+        <Route path="/dev/top-pattern-d" element={<DevRoute><TopPagePatternD /></DevRoute>} />
+        <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
         <Route path="/dev/roadmap-patterns" element={<DevRoute><RoadmapPatterns /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-1" element={<DevRoute><RoadmapPattern1 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-2" element={<DevRoute><RoadmapPattern2 /></DevRoute>} />

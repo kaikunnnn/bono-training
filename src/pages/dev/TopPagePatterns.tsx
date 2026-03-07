@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Grid3X3, Layers, GitBranch } from 'lucide-react';
+import { ArrowRight, Grid3X3, Layers, GitBranch, LayoutDashboard, Sun } from 'lucide-react';
 
 interface PatternCard {
   id: string;
@@ -44,6 +44,24 @@ const patterns: PatternCard[] = [
     concept: 'Step1:悩み → Step2:トレーニング → Step3:実践',
     icon: <GitBranch className="w-6 h-6" />,
     preview: 'bg-gradient-to-br from-green-50 to-teal-50',
+  },
+  {
+    id: 'D',
+    title: 'Pattern D: ダーク構成型',
+    description: 'ダーク背景ベース。ロードマップ3枚+ガイド+転職事例+レッスン+新着の6セクション構成。',
+    path: '/dev/top-pattern-d',
+    concept: 'Hero → Guide → Case → Support → Lesson → New',
+    icon: <LayoutDashboard className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-gray-800 to-gray-900',
+  },
+  {
+    id: 'E',
+    title: 'Pattern E: ライト構成型',
+    description: 'Pattern Dの6セクション構成 + Pattern Aの明るいスタイル。Dreelio風の温かみのあるデザイン。',
+    path: '/dev/top-pattern-e',
+    concept: 'D構成 + Aスタイル（明るい背景・柔らかい色調）',
+    icon: <Sun className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-amber-50 to-orange-50',
   },
 ];
 
