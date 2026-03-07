@@ -72,13 +72,16 @@ export interface Lesson {
   title: string;
   slug: SanitySlug;
   description?: string;
+  lessonNumber?: number;
   iconImage?: SanityImage;
+  iconImageUrl?: string;
   thumbnail?: SanityImage;
   thumbnailUrl?: string;
   category?: "情報設計" | "UI" | "UX";
   isPremium?: boolean;
   overview?: PortableTextBlock[];
   contentHeading?: string;
+  tags?: string[];
   quests?: Quest[];
 }
 
@@ -266,4 +269,32 @@ export interface Knowledge {
   tags?: string[];
   publishedAt?: string;
   featured?: boolean;
+}
+
+// Lesson詳細ページ用の拡張型
+export interface LessonWithDetails extends Lesson {
+  quests: {
+    _id: string;
+    questNumber: number;
+    title: string;
+    goal: string;
+    articles: {
+      _id: string;
+      title: string;
+      slug: SanitySlug;
+      articleType?: string;
+      videoDuration?: string | number;
+      isPremium?: boolean;
+    }[];
+  }[];
+  totalArticles: number;
+  totalDuration: number;
+}
+
+// OGP用メタデータ
+export interface LessonMetadata {
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  iconImageUrl?: string;
 }
