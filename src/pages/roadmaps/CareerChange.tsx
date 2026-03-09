@@ -450,7 +450,7 @@ function StepCard({ step, lessons, loading }: StepCardProps) {
           <div className="flex-shrink-0">
             <span
               className={`text-[48px] font-bold ${
-                isSpecial ? 'text-[#f5533e]/30' : 'text-[#e8e8e8]'
+                isSpecial ? 'text-[#f5533e]/30' : 'text-[var(--blog-color-dark-blue)]'
               }`}
               style={{ fontFamily: "'Inter', sans-serif" }}
             >

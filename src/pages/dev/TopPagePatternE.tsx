@@ -5,8 +5,9 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronRight, FileText, Clock } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
+import { useLessons } from '@/hooks/useLessons';
 
 // ============================================
 // デザインシステム カラーパレット
@@ -43,43 +44,43 @@ const fonts = {
 const heroRoadmaps = [
   {
     id: 'career-change',
-    label: 'UIデザイナー転職ロードマップ',
-    title: 'UI/UXデザイナーになるロードマップ',
-    titleEn: 'UI Designer Road Map',
-    subtitle: '1年間でUIデザイナーになる勉強法',
+    label: '未経験から転職ロードマップ',
+    title: '未経験から転職ロードマップ',
+    titleEn: '未経験からUIUXデザイナーへ',
+    subtitle: '6ヶ月で転職を実現',
     bullets: [
-      '転職実績のある学習ロードマップ!',
+      '転職実績のある学習ロードマップ',
       'UI/UXの3つの基礎を身につけます',
       'ポートフォリオ作成がゴールです',
     ],
-    ctaText: '転職ロードマップへ',
+    ctaText: 'ロードマップを見る',
     link: '/roadmaps/career-change',
   },
   {
     id: 'ux-design',
-    label: 'UXデザイン基礎コース',
-    title: 'UXデザイン基礎コース',
-    titleEn: 'DEEP PEOPLE DIVE',
+    label: 'UXデザイン基礎',
+    title: 'UXデザイン基礎',
+    titleEn: '顧客中心のデザイン',
     subtitle: '顧客理解から課題解決まで',
     bullets: [
       '顧客理解から課題解決の基礎を身につけます',
       'プロダクトデザインに必須な価値デザインを習得',
     ],
-    ctaText: 'コースを見る',
+    ctaText: 'ロードマップを見る',
     link: '/roadmaps/ux-design',
   },
   {
     id: 'information-architecture',
     label: '情報設計基礎',
-    title: 'WebデザイナーからUI/UXへ転職',
-    titleEn: 'はじめよう UIUXデザイン',
-    subtitle: 'スキル習得ロードマップ',
+    title: '情報設計基礎',
+    titleEn: '使いやすいUIを設計する',
+    subtitle: '論理的なUI設計スキル',
     bullets: [
-      'WebとUIUXは何が違うのか？',
-      '身につけるべきスキルべきスキル',
-      'スキル習得ロードマップ',
+      '使いやすいUIの設計力を習得',
+      'OOUIとナビゲーション設計の基本',
+      '「なぜここに配置するか」を説明できる力',
     ],
-    ctaText: '転職ロードマップへ',
+    ctaText: 'ロードマップを見る',
     link: '/roadmaps/information-architecture',
   },
 ];
@@ -89,19 +90,28 @@ const heroRoadmaps = [
 // ============================================
 const guideContents = [
   {
-    id: 'guide-1',
+    id: 'from-webdesigner',
     title: 'WebデザイナーからUIUXデザイナーに転向するには',
-    link: '/guide/web-to-uiux',
+    description: 'Webデザインの経験を活かしてUIUXへ転向。違いを理解して最短で転向できます。',
+    link: '/guide/from-webdesigner',
+    emoji: '🔀',
+    color: '#E3F2FD',
   },
   {
-    id: 'guide-2',
+    id: 'from-zero',
     title: '未経験からUIUXデザイナーになるには',
-    link: '/guide/beginner-to-uiux',
+    description: 'デザイン経験ゼロからUIUXデザイナーを目指す方へ。ロードマップで一歩ずつ進めます。',
+    link: '/guide/from-zero',
+    emoji: '🌱',
+    color: '#E8F5E9',
   },
   {
-    id: 'guide-3',
+    id: 'portfolio',
     title: 'ポートフォリオのつくり方',
+    description: 'ポートフォリオが必要な理由、掲載すべき内容、転職成功者の実例',
     link: '/guide/portfolio',
+    icon: <FileText size={32} />,
+    color: '#F3E5F5',
   },
 ];
 
@@ -149,72 +159,32 @@ const careerGuides = [
     id: 'career-guide-1',
     icon: '🚀',
     title: 'ポートフォリオの作り方',
-    description: '学習目的であるポートフォリオについて解説します',
+    description: '転職に必須のポートフォリオ。学習目的である理由、掲載すべき内容、転職成功者の実例を解説',
     link: '/guide/portfolio',
+    readTime: '15分',
   },
   {
     id: 'career-guide-2',
     icon: '👩',
     title: '面接で何が見られるのか',
-    description: '採用から逆算して必要なスキルを知ろう',
+    description: '採用担当が見ているポイント、よくある質問と回答例、ポートフォリオの説明の仕方',
     link: '/guide/interview',
+    readTime: '12分',
   },
   {
     id: 'career-guide-3',
     icon: '🏢',
     title: '会社の探し方・選び方',
-    description: 'UI/UX系の会社の探し方',
+    description: '事業会社vs制作会社、UI/UX系の求人の探し方、会社選びで見るべきポイント',
     link: '/guide/company',
+    readTime: '10分',
   },
 ];
 
 // ============================================
 // セクション5: 人気のレッスン データ
 // ============================================
-const popularLessons = [
-  {
-    id: 'lesson-1',
-    category: 'UIデザインの基本の進め方',
-    title: 'UIタイポグラフィ入門',
-    description: 'UIデザインの基本になるフォント選び・サイズ・選択の法則',
-    link: '/lessons/ui-typography',
-  },
-  {
-    id: 'lesson-2',
-    category: '使いやすいUIデザインの基本',
-    title: '「3構造」ではじめるUIデザイン入門',
-    description: 'UI設計がラクになる3つの役割を知ろう',
-    link: '/lessons/three-structures-ui-design',
-  },
-  {
-    id: 'lesson-3',
-    category: 'UIデザインの基本の進め方',
-    title: 'センスを盗む技術',
-    description: 'デザイン上達に必須な「良いものを見る」を学ぶレッスン',
-    link: '/lessons/steel-design-sense',
-  },
-  {
-    id: 'lesson-4',
-    category: 'UIデザインの基本の進め方',
-    title: 'ゼロからはじめるUIビジュアル',
-    description: 'ステップバイステップでUIデザインを一緒にしていくコンテンツ。',
-    link: '/lessons/tutorial-uivisual',
-  },
-  {
-    id: 'lesson-5',
-    category: '顧客価値をUIで実現する',
-    title: 'ゼロからはじめるUI情報設計',
-    description: '「どこに何をなぜ置くべきか？」の情報設計基礎をトレースしながら身につけられます。',
-    link: '/lessons/ui-architect-beginner',
-  },
-  {
-    id: 'lesson-6',
-    category: 'UIデザインの基本の進め方',
-    title: 'グラフィック入門',
-    description: 'Webサイトデザインのプロセスをトレース。見た目を作るテクニックを身につけます。',
-    link: '/lessons/graphicbeginner',
-  },
-];
+// Sanityから取得するため、静的データは削除
 
 // ============================================
 // セクション6: 新着コンテンツ データ
@@ -255,6 +225,12 @@ const newContents = [
 // ============================================
 
 const TopPagePatternE = () => {
+  // Sanityからレッスンデータを取得
+  const { data: lessons, isLoading: lessonsLoading } = useLessons();
+
+  // 最初の6件を人気のレッスンとして表示
+  const popularLessons = lessons?.slice(0, 6) || [];
+
   return (
     <Layout>
       <div
@@ -518,7 +494,7 @@ const TopPagePatternE = () => {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
+            gridTemplateColumns: 'repeat(3, 1fr)',
             gap: '24px',
           }}
         >
@@ -528,37 +504,75 @@ const TopPagePatternE = () => {
               to={guide.link}
               style={{
                 display: 'flex',
-                gap: '20px',
-                textDecoration: 'none',
-                color: colors.text,
-                padding: '16px',
+                flexDirection: 'column',
                 backgroundColor: colors.bgCard,
                 borderRadius: '16px',
                 border: `1px solid ${colors.border}`,
+                textDecoration: 'none',
+                color: colors.text,
+                transition: 'all 0.2s',
+                overflow: 'hidden',
+                height: '100%',
               }}
             >
-              {/* サムネイル（プレースホルダー） */}
+              {/* サムネイル */}
               <div
                 style={{
-                  width: '180px',
-                  height: '100px',
-                  backgroundColor: colors.bgPlaceholder,
-                  borderRadius: '12px',
-                  flexShrink: 0,
+                  width: '100%',
+                  aspectRatio: '16/9',
+                  backgroundColor: guide.color || colors.bgPlaceholder,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: colors.textMuted,
                 }}
-              />
-              {/* テキスト */}
-              <div style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+              >
+                {guide.emoji ? (
+                  <span style={{ fontSize: '40px' }}>{guide.emoji}</span>
+                ) : (
+                  guide.icon
+                )}
+              </div>
+
+              {/* コンテンツ */}
+              <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <h3
                   style={{
-                    fontSize: '15px',
-                    fontWeight: 600,
-                    lineHeight: 1.5,
+                    fontSize: '16px',
+                    fontWeight: 700,
+                    marginBottom: '12px',
                     fontFamily: fonts.heading,
+                    lineHeight: 1.4,
                   }}
                 >
                   {guide.title}
                 </h3>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: colors.textMuted,
+                    lineHeight: 1.6,
+                    marginBottom: '16px',
+                    flex: 1,
+                  }}
+                >
+                  {guide.description}
+                </p>
+                
+                {/* 読むボタン */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginTop: 'auto' }}>
+                  <span style={{ 
+                    fontSize: '13px', 
+                    color: colors.accent,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    読む
+                    <ArrowRight size={14} />
+                  </span>
+                </div>
               </div>
             </Link>
           ))}
@@ -769,12 +783,12 @@ const TopPagePatternE = () => {
           UI/UX転職ガイドをみる
         </Link>
 
-        {/* 転職ガイドカード */}
+        {/* 転職ガイドカード（/guideと同じデザイン） */}
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '20px',
+            gap: '24px',
           }}
         >
           {careerGuides.map((guide) => (
@@ -783,41 +797,83 @@ const TopPagePatternE = () => {
               to={guide.link}
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '24px',
+                flexDirection: 'column',
                 backgroundColor: colors.bgCard,
                 borderRadius: '16px',
+                border: `1px solid ${colors.border}`,
                 textDecoration: 'none',
                 color: colors.text,
-                border: `1px solid ${colors.border}`,
+                transition: 'all 0.2s',
+                overflow: 'hidden',
+                height: '100%',
               }}
             >
-              <div>
+              {/* サムネイル */}
+              <div
+                style={{
+                  width: '100%',
+                  aspectRatio: '16/9',
+                  backgroundColor: colors.bgPlaceholder,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <span style={{ fontSize: '40px' }}>{guide.icon}</span>
+              </div>
+
+              {/* コンテンツ */}
+              <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <h3
                   style={{
-                    fontSize: '16px',
-                    fontWeight: 600,
-                    marginBottom: '8px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
+                    fontSize: '18px',
+                    fontWeight: 700,
+                    marginBottom: '12px',
                     fontFamily: fonts.heading,
+                    lineHeight: 1.4,
                   }}
                 >
-                  <span style={{ fontSize: '20px' }}>{guide.icon}</span>
                   {guide.title}
                 </h3>
                 <p
                   style={{
-                    fontSize: '13px',
+                    fontSize: '14px',
                     color: colors.textMuted,
+                    lineHeight: 1.6,
+                    marginBottom: '16px',
+                    flex: 1,
                   }}
                 >
                   {guide.description}
                 </p>
+
+                {/* メタ情報 */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 'auto' }}>
+                  <span
+                    style={{
+                      fontSize: '12px',
+                      color: colors.textLight,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}
+                  >
+                    <Clock size={14} />
+                    {guide.readTime}
+                  </span>
+                  <span style={{
+                    fontSize: '13px',
+                    color: colors.accent,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    読む
+                    <ArrowRight size={14} />
+                  </span>
+                </div>
               </div>
-              <ChevronRight size={20} style={{ color: colors.textLight, flexShrink: 0 }} />
             </Link>
           ))}
         </div>
@@ -892,79 +948,111 @@ const TopPagePatternE = () => {
             gap: '24px',
           }}
         >
-          {popularLessons.map((lesson) => (
-            <Link
-              key={lesson.id}
-              to={lesson.link}
-              style={{
-                display: 'flex',
-                flexDirection: 'column',
-                textDecoration: 'none',
-                color: colors.text,
-              }}
-            >
-              {/* サムネイル（プレースホルダー） */}
-              <div
+          {lessonsLoading ? (
+            // ローディング時のスケルトン
+            [...Array(6)].map((_, idx) => (
+              <div key={idx} style={{ opacity: 0.5 }}>
+                <div
+                  style={{
+                    backgroundColor: colors.bgPlaceholder,
+                    borderRadius: '16px',
+                    aspectRatio: '4/3',
+                    marginBottom: '16px',
+                  }}
+                />
+                <div style={{ height: '16px', backgroundColor: colors.bgPlaceholder, borderRadius: '4px', marginBottom: '8px', width: '60%' }} />
+                <div style={{ height: '20px', backgroundColor: colors.bgPlaceholder, borderRadius: '4px', marginBottom: '8px' }} />
+                <div style={{ height: '14px', backgroundColor: colors.bgPlaceholder, borderRadius: '4px', width: '80%' }} />
+              </div>
+            ))
+          ) : (
+            popularLessons.map((lesson) => (
+              <Link
+                key={lesson._id}
+                to={`/lessons/${lesson.slug?.current || ''}`}
                 style={{
-                  backgroundColor: colors.bgPlaceholder,
-                  borderRadius: '16px',
-                  aspectRatio: '4/3',
-                  marginBottom: '16px',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  padding: '24px',
+                  flexDirection: 'column',
+                  textDecoration: 'none',
+                  color: colors.text,
                 }}
               >
-                <span
+                {/* サムネイル（Sanityアイコン画像表示） */}
+                <div
                   style={{
-                    fontSize: '14px',
+                    backgroundColor: colors.bgPlaceholder,
+                    borderRadius: '16px',
+                    aspectRatio: '4/3',
+                    marginBottom: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {lesson.iconImageUrl ? (
+                    <img
+                      src={lesson.iconImageUrl}
+                      alt={lesson.title}
+                      style={{
+                        width: '96px',
+                        height: '96px',
+                        objectFit: 'contain',
+                        filter: 'drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2))',
+                      }}
+                    />
+                  ) : lesson.thumbnailUrl ? (
+                    <img
+                      src={lesson.thumbnailUrl}
+                      alt={lesson.title}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        borderRadius: '16px',
+                      }}
+                    />
+                  ) : (
+                    <span style={{ fontSize: '64px', color: colors.textMuted }}>📚</span>
+                  )}
+                </div>
+
+                {/* カテゴリ */}
+                <p
+                  style={{
+                    fontSize: '12px',
+                    color: colors.accent,
+                    marginBottom: '4px',
+                  }}
+                >
+                  {lesson.categoryTitle || ''}
+                </p>
+
+                {/* タイトル */}
+                <h3
+                  style={{
+                    fontSize: '16px',
                     fontWeight: 600,
-                    textAlign: 'center',
-                    color: colors.textMuted,
+                    marginBottom: '8px',
+                    lineHeight: 1.4,
                     fontFamily: fonts.heading,
                   }}
                 >
                   {lesson.title}
-                </span>
-              </div>
+                </h3>
 
-              {/* カテゴリ */}
-              <p
-                style={{
-                  fontSize: '12px',
-                  color: colors.accent,
-                  marginBottom: '4px',
-                }}
-              >
-                {lesson.category}
-              </p>
-
-              {/* タイトル */}
-              <h3
-                style={{
-                  fontSize: '16px',
-                  fontWeight: 600,
-                  marginBottom: '8px',
-                  lineHeight: 1.4,
-                  fontFamily: fonts.heading,
-                }}
-              >
-                {lesson.title}
-              </h3>
-
-              {/* 説明 */}
-              <p
-                style={{
-                  fontSize: '13px',
-                  color: colors.textMuted,
-                  lineHeight: 1.6,
-                }}
-              >
-                {lesson.description}
-              </p>
-            </Link>
-          ))}
+                {/* 説明 */}
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: colors.textMuted,
+                    lineHeight: 1.6,
+                  }}
+                >
+                  {lesson.description || ''}
+                </p>
+              </Link>
+            ))
+          )}
         </div>
       </section>
 

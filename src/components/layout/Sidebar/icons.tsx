@@ -22,12 +22,15 @@ import {
   MessageQuestion,
   Messages1,
   Lamp,
+  Home,
 } from "iconsax-react";
 
 /**
  * メニュー項目用アイコンコンポーネント
  */
 export const MenuIcons = {
+  // トップ
+  top: Home,
   // ロードマップ
   roadmap: Map,
   // レッスン

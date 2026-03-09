@@ -43,6 +43,8 @@ export interface Roadmap {
   steps: RoadmapStep[];
   /** 「詳しく知る」リンク先（例: "/roadmaps/career-change/about"） */
   aboutPageUrl?: string;
+  /** 関連するガイド記事のスラッグ（例: "skills-requirements"） */
+  relatedGuideSlug?: string;
   /** サムネイル画像URL */
   thumbnailUrl?: string;
   /** グラデーション背景色（例: "from-blue-500 to-purple-600"） */
@@ -66,10 +68,16 @@ export interface RoadmapStepCourse {
   title: string;
   /** ステップ説明 */
   description: string;
+  /** このステップのゴール（何を達成するか） */
+  goal?: string;
+  /** このステップで身につくスキル一覧 */
+  skills?: string[];
   /** リンク先コースのスラッグ */
   linkedCourseSlug: string;
   /** このステップに含まれるレッスンのスラッグ一覧（Sanity連携用） */
   lessonSlugs: string[];
+  /** 別のロードマップへのリンク（指定時はロードマップカードを表示） */
+  linkedRoadmapSlug?: string;
 }
 
 /** 特殊ステップ（Step 0: リンク集・心構え） */

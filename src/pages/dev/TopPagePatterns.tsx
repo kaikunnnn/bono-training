@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Grid3X3, Layers, GitBranch, LayoutDashboard, Sun } from 'lucide-react';
+import { ArrowRight, Grid3X3, Layers, GitBranch, LayoutDashboard, Sun, Users, Map } from 'lucide-react';
 
 interface PatternCard {
   id: string;
@@ -62,6 +62,24 @@ const patterns: PatternCard[] = [
     concept: 'D構成 + Aスタイル（明るい背景・柔らかい色調）',
     icon: <Sun className="w-6 h-6" />,
     preview: 'bg-gradient-to-br from-amber-50 to-orange-50',
+  },
+  {
+    id: 'F',
+    title: 'Pattern F: 3ニーズ訴求型',
+    description: '「悩みの言葉」でユーザーを3つのニーズ別に導く。未経験/Webから/現職の3ペルソナ対応。',
+    path: '/dev/top-pattern-f',
+    concept: 'Hero → ニーズ別入口 → 学べること → アウトプット → 特徴 → 料金',
+    icon: <Users className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-green-50 to-blue-50',
+  },
+  {
+    id: 'G',
+    title: 'Pattern G: ロードマップ+ガイド型',
+    description: '3ニーズにロードマップとガイド記事を配置。Fの派生パターンで、コンテンツカード中心の構成。',
+    path: '/dev/top-pattern-g',
+    concept: 'Hero → ニーズ別（ロードマップ+ガイド記事）→ 学べること → 料金',
+    icon: <Map className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-blue-50 to-purple-50',
   },
 ];
 

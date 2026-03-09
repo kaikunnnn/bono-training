@@ -50,6 +50,13 @@ const steps: RoadmapStep[] = [
     type: 'course',
     title: 'ゴールと進め方の確認',
     description: 'UXデザインとは何かを理解し、コースのゴールと進め方を確認。期間: 3日',
+    goal: 'UXデザインの本質と学習のゴールを理解する',
+    skills: [
+      'UXデザインの定義と役割',
+      'UIデザインとUXデザインの違い',
+      '顧客中心設計の考え方',
+      '学習ロードマップの全体像',
+    ],
     linkedCourseSlug: 'ux-beginner-2',
     lessonSlugs: ['ux-beginner-2'], // UXデザインってなに？
   },
@@ -58,6 +65,13 @@ const steps: RoadmapStep[] = [
     type: 'course',
     title: '架空サービスの「価値定義」仮説をつくろう',
     description: 'ゴールダイレクテッドデザインを習得し、サービスの価値を定義。期間: 1週間',
+    goal: 'サービスの価値を明確に定義できるようになる',
+    skills: [
+      'ゴールダイレクテッドデザインの手法',
+      'ユーザーのゴール設定',
+      '価値仮説の立て方',
+      'サービスコンセプトの言語化',
+    ],
     linkedCourseSlug: 'uxdezaintohahe-ka-copy',
     lessonSlugs: [
       'uxdezaintohahe-ka-copy', // UX入門/顧客体験デザインの基本
@@ -69,6 +83,13 @@ const steps: RoadmapStep[] = [
     type: 'course',
     title: 'インタビューで"顧客理解"に挑戦',
     description: 'ユーザーインタビューで課題要因を特定するスキルを習得。期間: 2週間',
+    goal: 'ユーザーの本当の課題を発見できるようになる',
+    skills: [
+      'インタビュー設計の方法',
+      '質問の組み立て方',
+      'インタビューの実施と進行',
+      '発言から課題を抽出する分析力',
+    ],
     linkedCourseSlug: 'zerokara-userinterview',
     lessonSlugs: ['zerokara-userinterview'], // ゼロからユーザーインタビュー
   },
@@ -77,6 +98,13 @@ const steps: RoadmapStep[] = [
     type: 'course',
     title: '架空サービスを完成させよう',
     description: 'ユーザーの課題解決するサービスをデザイン。総合的な実践課題。期間: 1ヶ月',
+    goal: '課題解決するサービスを一貫してデザインできる',
+    skills: [
+      'UXデザインプロセスの総合実践',
+      '仮説検証サイクルの回し方',
+      'プロトタイピングとフィードバック',
+      'ポートフォリオに使える成果物作成',
+    ],
     linkedCourseSlug: 'designyourownservice',
     lessonSlugs: ['designyourownservice'], // チャレンジ課題
   },
@@ -99,6 +127,7 @@ export const uxDesignRoadmap: Roadmap = {
   benefits,
   steps,
   aboutPageUrl: '/roadmaps/ux-design/about',
+  relatedGuideSlug: 'roadmap-ux',
   gradientColors: 'from-orange-500 to-red-600',
 };
 

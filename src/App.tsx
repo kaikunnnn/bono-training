@@ -16,7 +16,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
-import TopPage from "./pages/top";
+import TopPagePatternEMain from "./pages/dev/TopPagePatternE";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
@@ -45,6 +45,10 @@ import TopPagePatternB from "./pages/dev/TopPagePatternB";
 import TopPagePatternC from "./pages/dev/TopPagePatternC";
 import TopPagePatternD from "./pages/dev/TopPagePatternD";
 import TopPagePatternE from "./pages/dev/TopPagePatternE";
+import TopPagePatternF from "./pages/dev/TopPagePatternF";
+import TopPagePatternG from "./pages/dev/TopPagePatternG";
+import GuideHubPatternF from "./pages/dev/GuideHubPatternF";
+import GuideDetailPatternF from "./pages/dev/GuideDetailPatternF";
 import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
 import RoadmapPattern1 from "./pages/dev/RoadmapPattern1";
 import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
@@ -150,7 +154,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/top" element={<TopPage />} />
+        <Route path="/top" element={<TopPagePatternEMain />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -177,6 +181,11 @@ const AppContent = () => {
         <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
         <Route path="/dev/top-pattern-d" element={<DevRoute><TopPagePatternD /></DevRoute>} />
         <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
+        <Route path="/dev/top-pattern-f" element={<DevRoute><TopPagePatternF /></DevRoute>} />
+        <Route path="/dev/top-pattern-g" element={<DevRoute><TopPagePatternG /></DevRoute>} />
+        <Route path="/dev/guide-pattern-f" element={<DevRoute><GuideHubPatternF /></DevRoute>} />
+        <Route path="/dev/guide-pattern-f/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
+        <Route path="/dev/guide-pattern-f/:category/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
         <Route path="/dev/roadmap-patterns" element={<DevRoute><RoadmapPatterns /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-1" element={<DevRoute><RoadmapPattern1 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-2" element={<DevRoute><RoadmapPattern2 /></DevRoute>} />
@@ -259,6 +268,7 @@ const AppContent = () => {
         <Route path="/events/:slug" element={<EventDetail />} />
 
         <Route path="/lessons" element={<Lessons />} />
+        <Route path="/lessons/category/:categoryId" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />
         <Route path="/articles/:slug" element={<ArticleDetail />} />
         <Route path="/sanity-test" element={<SanityTest />} />

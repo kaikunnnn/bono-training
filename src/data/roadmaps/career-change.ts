@@ -74,6 +74,12 @@ const steps: RoadmapStep[] = [
     title: "転職条件と学習準備",
     description:
       "デザイナーとして転職するために必要なことを理解しよう。独学の心構えと注意点を確認してからスタート。",
+    goal: "転職に必要なスキルと学習計画の全体像を把握する",
+    skills: [
+      "UIUXデザイナーの仕事内容の理解",
+      "転職に必要なスキルセットの把握",
+      "効果的な独学の進め方",
+    ],
     linkedCourseSlug: "wayofuiuxdesigner",
     lessonSlugs: [
       "wayofuiuxdesigner", // UI/UXデザイナー転職ガイド
@@ -87,7 +93,14 @@ const steps: RoadmapStep[] = [
     title: "デザインツール習得",
     description:
       "まずはFigmaの使い方をマスターしよう。デザインツールを使えることが全ての土台になる。期間: 1ヶ月",
+    goal: "Figmaを使って基本的なUIを自力で作れるようになる",
+    skills: [
+      "Figmaの基本操作（フレーム、シェイプ、テキスト）",
+      "Auto Layoutによる効率的なデザイン",
+      "UIトレースによる観察力",
+    ],
     linkedCourseSlug: "uidezainru-men",
+    linkedRoadmapSlug: "ui-design-beginner",
     lessonSlugs: [
       "figmabeginner",    // Figmaの使い方入門
       "figma-elementary", // Figmaの使い方初級
@@ -102,7 +115,15 @@ const steps: RoadmapStep[] = [
     title: "UIビジュアル基礎",
     description:
       "UIの見た目の基礎を学ぶ。サイズ、色、タイポグラフィなど、デザインの根幹となるスキルを習得。期間: 1-2ヶ月",
+    goal: "デザインの「見た目」を論理的に説明できるようになる",
+    skills: [
+      "サイズと余白の設計（8の倍数ルール）",
+      "配色とカラーシステムの構築",
+      "タイポグラフィの基本原則",
+      "UIコンポーネントの設計",
+    ],
     linkedCourseSlug: "uivisual-course",
+    linkedRoadmapSlug: "ui-visual",
     lessonSlugs: [
       "ui-design-flow-lv1",        // UIデザインサイクル入門
       "steel-design-sense",        // センスを盗む技術
@@ -122,7 +143,15 @@ const steps: RoadmapStep[] = [
     title: "情報設計基礎",
     description:
       "使いやすいUIを設計するための考え方を学ぶ。「どこに、何を、なぜ配置するか」を論理的に説明できるようになる。期間: 2ヶ月",
+    goal: "「使いやすさ」を設計できるようになる",
+    skills: [
+      "OOUI（オブジェクト指向UI）の考え方",
+      "ナビゲーション設計",
+      "情報の優先順位と構造化",
+      "ユーザーの行動フローに沿ったUI設計",
+    ],
     linkedCourseSlug: "infomationarchitect-beginner",
+    linkedRoadmapSlug: "information-architecture",
     lessonSlugs: [
       "ui-layout-basic",                       // つかいやすいUIの秘密
       "navigation-basics",                     // ナビゲーションUIの基本
@@ -139,7 +168,15 @@ const steps: RoadmapStep[] = [
     title: "UXデザイン基礎",
     description:
       "ユーザー中心の課題解決アプローチを学ぶ。インタビュー、価値定義、プロトタイピングの基本を習得。期間: 2ヶ月",
+    goal: "ユーザーの課題を発見し、解決策を提案できるようになる",
+    skills: [
+      "ユーザーインタビューの設計と実施",
+      "課題の発見と定義",
+      "サービスの価値定義",
+      "仮説検証のプロセス",
+    ],
     linkedCourseSlug: "ux-beginner-2",
+    linkedRoadmapSlug: "ux-design",
     lessonSlugs: [
       "ux-beginner-2",            // UXデザインってなに？
       "uxdezaintohahe-ka-copy",   // UX入門/顧客体験デザインの基本
@@ -156,6 +193,13 @@ const steps: RoadmapStep[] = [
     title: "転職準備",
     description:
       "転職活動に向けて、学んだスキルをまとめたポートフォリオを作成する。",
+    goal: "転職活動で使えるポートフォリオを完成させる",
+    skills: [
+      "ポートフォリオの構成設計",
+      "ケーススタディの書き方",
+      "デザインプロセスの言語化",
+      "採用担当者に響く見せ方",
+    ],
     linkedCourseSlug: "portfolio",
     lessonSlugs: [
       "portfolio", // ポートフォリオの作り方
@@ -184,6 +228,7 @@ export const careerChangeRoadmap: Roadmap = {
   benefits,
   steps,
   aboutPageUrl: "/roadmaps/career-change/about",
+  relatedGuideSlug: "roadmap-career-change",
   gradientColors: "from-blue-600 to-purple-600",
 };
 

@@ -24,13 +24,16 @@ import {
   Users,
 } from 'lucide-react';
 import LayoutComponent from '@/components/layout/Layout';
-import { careerChangeRoadmap } from '@/data/roadmaps/career-change';
-import { uiDesignBeginnerRoadmap } from '@/data/roadmaps/ui-design-beginner';
-import { uiVisualRoadmap } from '@/data/roadmaps/ui-visual';
-import { informationArchitectureRoadmap } from '@/data/roadmaps/information-architecture';
-import { uxDesignRoadmap } from '@/data/roadmaps/ux-design';
+import {
+  careerChangeRoadmap,
+  uiDesignBeginnerRoadmap,
+  uiVisualRoadmap,
+  informationArchitectureRoadmap,
+  uxDesignRoadmap,
+  getRoadmapBySlug,
+} from '@/data/roadmaps';
 import { getLessonsBySlugs } from '@/services/roadmapService';
-import type { Roadmap, RoadmapLesson, RoadmapStep } from '@/types/roadmap';
+import type { Roadmap, RoadmapLesson, RoadmapStep, RoadmapStepCourse } from '@/types/roadmap';
 
 // ロードマップマッピング
 const roadmapMap: Record<string, Roadmap> = {
@@ -207,7 +210,93 @@ export default function RoadmapDetail() {
         </section>
 
         {/* ============================================
-            AUDIENCE: 誰向けか
+            ABOUT: このロードマップについて
+        ============================================ */}
+        <section className="px-8 md:px-16 py-20 bg-gradient-to-br from-[#fafafa] to-[#f5f5f5]">
+          <div className="max-w-[1100px] mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
+              {/* 左: 誰向けか */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-[#f5533e]/10 flex items-center justify-center">
+                    <Users className="w-5 h-5 text-[#f5533e]" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-medium tracking-[0.2em] text-[#999] uppercase block">
+                      Who is this for
+                    </span>
+                    <h3 className="text-[18px] font-bold text-[#1a1a1a]">こんな方におすすめ</h3>
+                  </div>
+                </div>
+                {roadmap.audience && roadmap.audience.length > 0 ? (
+                  <ul className="space-y-4">
+                    {roadmap.audience.map((item, i) => (
+                      <li key={i} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-[#f5533e] flex-shrink-0 mt-0.5" />
+                        <div>
+                          <span className="text-[15px] font-medium text-[#1a1a1a]">{item.label}</span>
+                          <p className="text-[13px] text-[#666] mt-0.5">{item.description}</p>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[14px] text-[#666]">UIデザインを学びたいすべての方</p>
+                )}
+              </div>
+
+              {/* 右: 得られるもの */}
+              <div className="bg-white rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-xl bg-[#3b82f6]/10 flex items-center justify-center">
+                    <Target className="w-5 h-5 text-[#3b82f6]" />
+                  </div>
+                  <div>
+                    <span className="text-[11px] font-medium tracking-[0.2em] text-[#999] uppercase block">
+                      What you'll gain
+                    </span>
+                    <h3 className="text-[18px] font-bold text-[#1a1a1a]">得られるスキル</h3>
+                  </div>
+                </div>
+                <ul className="space-y-4">
+                  {roadmap.benefits.slice(0, 4).map((benefit, i) => {
+                    const IconComponent = iconMap[benefit.icon] || Check;
+                    return (
+                      <li key={i} className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-full bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <IconComponent className="w-3 h-3 text-[#3b82f6]" />
+                        </div>
+                        <div>
+                          <span className="text-[15px] font-medium text-[#1a1a1a]">{benefit.title}</span>
+                          <p className="text-[13px] text-[#666] mt-0.5">{benefit.description}</p>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </div>
+
+            {/* 詳しく知るボタン → Guide記事へリンク */}
+            {roadmap.relatedGuideSlug && (
+              <div className="mt-10 text-center">
+                <Link
+                  to={`/guide/${roadmap.relatedGuideSlug}`}
+                  className="inline-flex items-center gap-3 bg-white hover:bg-[#1a1a1a] text-[#1a1a1a] hover:text-white border-2 border-[#1a1a1a] font-semibold text-[15px] px-8 py-4 rounded-full transition-all hover:-translate-y-0.5 shadow-sm"
+                >
+                  目指せるスキルについて詳しく知る
+                  <ArrowRight className="w-4 h-4" />
+                </Link>
+                <p className="text-[13px] text-[#999] mt-3">
+                  このロードマップで身につくスキルを解説
+                </p>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ============================================
+            AUDIENCE: 誰向けか（詳細版）
         ============================================ */}
         {roadmap.audience && roadmap.audience.length > 0 && (
           <section className="px-8 md:px-16 py-20 border-b border-[#eee]">
@@ -259,12 +348,12 @@ export default function RoadmapDetail() {
                 <p className="text-[15px] leading-[1.8] text-[#666] max-w-[500px]">
                   このロードマップを完了することで、実践的なデザインスキルを身につけられます。
                 </p>
-                {roadmap.aboutPageUrl && (
+                {roadmap.relatedGuideSlug && (
                   <Link
-                    to={roadmap.aboutPageUrl}
+                    to={`/guide/${roadmap.relatedGuideSlug}`}
                     className="inline-flex items-center gap-2 text-[14px] font-medium text-[#1a1a1a] hover:text-[#f5533e] transition-colors"
                   >
-                    詳しく知る
+                    スキル詳細を見る
                     <ArrowRight className="w-4 h-4" />
                   </Link>
                 )}
@@ -408,9 +497,10 @@ interface StepCardProps {
 
 function StepCard({ step, lessons, loading }: StepCardProps) {
   const isSpecial = step.type === 'special';
+  const courseStep = step.type === 'course' ? step : null;
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow">
+    <div className="bg-white rounded-2xl overflow-hidden hover:shadow-[0_8px_30px_rgba(0,0,0,0.04)] transition-shadow border border-[#f0f0f0]">
       {/* ステップヘッダー */}
       <div className="p-8 border-b border-[#f0f0f0]">
         <div className="flex items-start gap-8">
@@ -418,7 +508,7 @@ function StepCard({ step, lessons, loading }: StepCardProps) {
           <div className="flex-shrink-0">
             <span
               className={`text-[48px] font-bold ${
-                isSpecial ? 'text-[#f5533e]/30' : 'text-[#e8e8e8]'
+                isSpecial ? 'text-[#f5533e]/30' : 'text-[var(--blog-color-dark-blue)]'
               }`}
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
@@ -439,6 +529,50 @@ function StepCard({ step, lessons, loading }: StepCardProps) {
             <p className="text-[14px] leading-[1.8] text-[#666] max-w-[600px]">
               {step.description}
             </p>
+
+            {/* ゴールと身につくスキル */}
+            {courseStep && (courseStep.goal || courseStep.skills) && (
+              <div className="mt-6 pt-5 border-t border-[#f5f5f5] space-y-5">
+                {/* ゴール */}
+                {courseStep.goal && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-[#f5533e]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Target className="w-4 h-4 text-[#f5533e]" />
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[#999] block mb-1">
+                        ゴール
+                      </span>
+                      <p className="text-[14px] font-medium text-[#1a1a1a] leading-[1.5]">
+                        {courseStep.goal}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* 身につくスキル */}
+                {courseStep.skills && courseStep.skills.length > 0 && (
+                  <div className="flex items-start gap-3">
+                    <div className="w-7 h-7 rounded-lg bg-[#3b82f6]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <BookOpenCheck className="w-4 h-4 text-[#3b82f6]" />
+                    </div>
+                    <div>
+                      <span className="text-[11px] font-medium text-[#999] block mb-1">
+                        身につくスキル
+                      </span>
+                      <ul className="space-y-1">
+                        {courseStep.skills.map((skill, i) => (
+                          <li key={i} className="text-[13px] text-[#666] flex items-start gap-2">
+                            <Check className="w-3.5 h-3.5 text-[#3b82f6] flex-shrink-0 mt-0.5" />
+                            {skill}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -446,6 +580,8 @@ function StepCard({ step, lessons, loading }: StepCardProps) {
       {/* コンテンツ部分 */}
       {isSpecial && step.type === 'special' ? (
         <SpecialStepContent content={step.content} />
+      ) : step.type === 'course' && step.linkedRoadmapSlug ? (
+        <LinkedRoadmapCard linkedRoadmapSlug={step.linkedRoadmapSlug} lessons={lessons} loading={loading} />
       ) : (
         <LessonList lessons={lessons} loading={loading} />
       )}
@@ -550,6 +686,147 @@ function SpecialStepContent({ content }: SpecialStepContentProps) {
 }
 
 // ============================================
+// リンク先ロードマップカード（Step内に表示）
+// ============================================
+interface LinkedRoadmapCardProps {
+  linkedRoadmapSlug: string;
+  lessons: RoadmapLesson[];
+  loading: boolean;
+}
+
+function LinkedRoadmapCard({ linkedRoadmapSlug, lessons, loading }: LinkedRoadmapCardProps) {
+  const linkedRoadmap = getRoadmapBySlug(linkedRoadmapSlug);
+
+  if (!linkedRoadmap) {
+    return (
+      <div className="px-8 py-6">
+        <div className="pl-[72px] text-[14px] text-[#999]">
+          ロードマップが見つかりません
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="px-8 py-6">
+      <div className="pl-[72px]">
+        {/* ロードマップカード */}
+        <Link
+          to={`/roadmaps/${linkedRoadmapSlug}`}
+          className="block group"
+        >
+          <div className="relative border border-[#e8e8e8] rounded-2xl overflow-hidden transition-all hover:border-[#d0d0d0] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+            {/* ヘッダー: グラデーション背景 */}
+            <div className={`bg-gradient-to-br ${linkedRoadmap.gradientColors || 'from-gray-600 to-gray-800'} px-6 py-5`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-[10px] font-medium tracking-[0.2em] text-white/70 uppercase block mb-1">
+                    Roadmap
+                  </span>
+                  <h4 className="text-[18px] font-bold text-white">
+                    {linkedRoadmap.title}
+                  </h4>
+                  {linkedRoadmap.subtitle && (
+                    <p className="text-[13px] text-white/80 mt-1">{linkedRoadmap.subtitle}</p>
+                  )}
+                </div>
+                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
+                  <ArrowRight className="w-5 h-5 text-white group-hover:translate-x-0.5 transition-transform" />
+                </div>
+              </div>
+            </div>
+
+            {/* コンテンツ部分 */}
+            <div className="bg-white px-6 py-5">
+              {/* Stats */}
+              <div className="flex items-center gap-6 mb-4">
+                <div className="flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-[#999]" />
+                  <span className="text-[13px] text-[#666]">
+                    <strong className="text-[#1a1a1a]">{linkedRoadmap.stats.stepsCount}</strong> ステップ
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <BookOpenCheck className="w-4 h-4 text-[#999]" />
+                  <span className="text-[13px] text-[#666]">
+                    <strong className="text-[#1a1a1a]">{loading ? '-' : lessons.length || linkedRoadmap.stats.lessonsCount}</strong> レッスン
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-[#999]" />
+                  <span className="text-[13px] text-[#666]">
+                    <strong className="text-[#1a1a1a]">{linkedRoadmap.stats.duration}</strong>
+                  </span>
+                </div>
+              </div>
+
+              {/* 説明 */}
+              <p className="text-[14px] text-[#666] leading-[1.7] line-clamp-2">
+                {linkedRoadmap.description}
+              </p>
+
+              {/* 得られるもの（最初の2つだけ表示） */}
+              {linkedRoadmap.benefits.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-[#f0f0f0]">
+                  <div className="flex items-center gap-4">
+                    {linkedRoadmap.benefits.slice(0, 2).map((benefit, i) => {
+                      const IconComponent = iconMap[benefit.icon] || Check;
+                      return (
+                        <div key={i} className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full bg-[#f5533e]/10 flex items-center justify-center">
+                            <IconComponent className="w-3 h-3 text-[#f5533e]" />
+                          </div>
+                          <span className="text-[12px] text-[#666]">{benefit.title}</span>
+                        </div>
+                      );
+                    })}
+                    {linkedRoadmap.benefits.length > 2 && (
+                      <span className="text-[12px] text-[#999]">
+                        +{linkedRoadmap.benefits.length - 2}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </Link>
+
+        {/* レッスンプレビュー（オプション: 折りたたみ表示） */}
+        {lessons.length > 0 && (
+          <div className="mt-4">
+            <details className="group">
+              <summary className="flex items-center gap-2 text-[12px] font-medium text-[#999] cursor-pointer hover:text-[#666] transition-colors list-none">
+                <ChevronRight className="w-3.5 h-3.5 group-open:rotate-90 transition-transform" />
+                含まれるレッスン（{lessons.length}件）を見る
+              </summary>
+              <div className="mt-3 pl-5 space-y-0 border-l border-[#eee]">
+                {lessons.slice(0, 5).map((lesson, j) => (
+                  <div
+                    key={lesson._id}
+                    className="flex items-center gap-3 py-2 text-[13px] text-[#666]"
+                  >
+                    <span className="text-[11px] font-mono text-[#ccc] w-5 text-right">
+                      {String(j + 1).padStart(2, '0')}
+                    </span>
+                    {lesson.title}
+                  </div>
+                ))}
+                {lessons.length > 5 && (
+                  <div className="py-2 text-[12px] text-[#999]">
+                    ...他 {lessons.length - 5} レッスン
+                  </div>
+                )}
+              </div>
+            </details>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ============================================
 // レッスンリストコンポーネント
 // ============================================
 interface LessonListProps {
@@ -563,11 +840,12 @@ function LessonList({ lessons, loading }: LessonListProps) {
       <div className="px-8 py-6">
         <div className="pl-[72px] space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="animate-pulse flex items-center gap-4 py-4">
-              <div className="w-12 h-12 bg-gray-200 rounded-lg" />
+            <div key={i} className="animate-pulse flex items-center gap-6 py-6">
+              <div className="w-24 h-32 md:w-32 md:h-44 bg-gray-200 rounded-xl flex-shrink-0" />
               <div className="flex-1">
-                <div className="h-4 bg-gray-200 rounded w-1/3 mb-2" />
-                <div className="h-3 bg-gray-100 rounded w-1/2" />
+                <div className="h-5 bg-gray-200 rounded w-1/3 mb-3" />
+                <div className="h-4 bg-gray-100 rounded w-2/3" />
+                <div className="h-4 bg-gray-100 rounded w-1/2 mt-2" />
               </div>
             </div>
           ))}
@@ -597,39 +875,41 @@ function LessonList({ lessons, loading }: LessonListProps) {
           <Link
             key={lesson._id}
             to={`/lessons/${lesson.slug}`}
-            className="flex items-center justify-between py-4 border-b border-[#f5f5f5] last:border-b-0 group cursor-pointer hover:bg-[#fafafa] -mx-4 px-4 rounded-lg transition-colors"
+            className="flex items-center justify-between py-6 border-b border-[#f5f5f5] last:border-b-0 group cursor-pointer hover:bg-[#fafafa] -mx-4 px-4 rounded-xl transition-colors"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6 flex-1">
               {/* サムネイル or 番号 */}
               {lesson.iconImageUrl || lesson.thumbnailUrl ? (
                 <img
                   src={lesson.iconImageUrl || lesson.thumbnailUrl}
                   alt=""
-                  className="w-12 h-12 rounded-lg object-cover"
+                  className="w-24 h-32 md:w-32 md:h-44 rounded-xl object-cover bg-gray-50 shadow-sm flex-shrink-0"
                 />
               ) : (
-                <span className="text-[12px] font-mono text-[#ccc] w-12 text-center">
-                  {String(j + 1).padStart(2, '0')}
-                </span>
+                <div className="w-24 h-32 md:w-32 md:h-44 rounded-xl bg-gray-50 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[16px] font-mono text-[#ccc]">
+                    {String(j + 1).padStart(2, '0')}
+                  </span>
+                </div>
               )}
-              <div>
-                <span className="text-[15px] font-medium text-[#333] group-hover:text-[#f5533e] transition-colors">
+              <div className="flex-1 min-w-0 pr-4">
+                <h4 className="text-[16px] md:text-[18px] font-bold text-[#1a1a1a] group-hover:text-[#f5533e] transition-colors mb-2 line-clamp-2 leading-tight">
                   {lesson.title}
-                </span>
+                </h4>
                 {lesson.description && (
-                  <p className="text-[13px] text-[#999] mt-0.5 line-clamp-1 max-w-[400px]">
+                  <p className="text-[13px] md:text-[14px] text-[#666] leading-relaxed line-clamp-2 md:line-clamp-3">
                     {lesson.description}
                   </p>
                 )}
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-shrink-0 self-center">
               {lesson.isPremium && (
-                <span className="text-[11px] text-[#999] bg-[#f5f5f5] px-2 py-1 rounded">
+                <span className="text-[11px] text-[#999] bg-[#f5f5f5] px-2 py-1 rounded hidden sm:inline-block">
                   Premium
                 </span>
               )}
-              <ChevronRight className="w-4 h-4 text-[#ccc] group-hover:text-[#f5533e] group-hover:translate-x-1 transition-all" />
+              <ChevronRight className="w-5 h-5 text-[#ccc] group-hover:text-[#f5533e] group-hover:translate-x-1 transition-all" />
             </div>
           </Link>
         ))}
