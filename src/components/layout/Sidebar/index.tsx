@@ -53,13 +53,46 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </SidebarMenuItem>
         )}
 
+        {/* トップ */}
+        <SidebarMenuItem
+          href="/top"
+          icon={<MenuIcons.top size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/top")}
+        >
+          <span className="flex items-center gap-1">
+            トップ
+            <span className="text-[7px] px-0.5 py-px rounded bg-[#f5533e]/10 text-[#f5533e]">
+              テスト
+            </span>
+          </span>
+        </SidebarMenuItem>
+
         {/* ロードマップ */}
         <SidebarMenuItem
-          href="/roadmap"
+          href="/roadmaps"
           icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/roadmap")}
+          isActive={isActive("/roadmaps") || location.pathname.startsWith("/roadmaps/")}
         >
-          ロードマップ
+          <span className="flex items-center gap-1">
+            ロードマップ
+            <span className="text-[7px] px-0.5 py-px rounded bg-[#f5533e]/10 text-[#f5533e]">
+              テスト
+            </span>
+          </span>
+        </SidebarMenuItem>
+
+        {/* ガイド */}
+        <SidebarMenuItem
+          href="/guide"
+          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/guide") || location.pathname.startsWith("/guide/")}
+        >
+          <span className="flex items-center gap-1">
+            ガイド
+            <span className="text-[7px] px-0.5 py-px rounded bg-[#f5533e]/10 text-[#f5533e]">
+              テスト
+            </span>
+          </span>
         </SidebarMenuItem>
 
         {/* レッスン */}

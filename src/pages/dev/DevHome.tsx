@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -43,6 +43,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/lesson-detail-patterns',
     icon: <BookOpen className="w-8 h-8" />,
     tags: ['Lesson', 'Gamification', 'Progress', 'Duolingo', 'MasterClass']
+  },
+  {
+    title: 'Guide Patterns',
+    description: '転職ガイドのUIパターン。キャリアの基本・デザイナーの視点・出発点別の記事構成。',
+    path: '/dev/guide-pattern-f',
+    icon: <Compass className="w-8 h-8" />,
+    tags: ['Guide', 'Career', 'Articles', 'FAQ', 'Pattern-E']
   },
 ];
 

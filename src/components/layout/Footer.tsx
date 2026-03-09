@@ -100,6 +100,14 @@ const Footer = ({ className }: FooterProps) => {
         )}
 
         <div className={cn("text-center text-sm text-muted-foreground", showNewsletterSignup && "mt-12 pt-8 border-t")}>
+          {/* コミュニティ */}
+          <div className="flex justify-center gap-4 mb-3">
+            <Link to="/questions" className="hover:underline">みんなの質問</Link>
+            <Link to="/feedbacks" className="hover:underline">フィードバック</Link>
+            <Link to="/knowledge" className="hover:underline">お役立ち</Link>
+          </div>
+
+          {/* サービス */}
           <div className="flex justify-center gap-4 mb-2">
             <Link to="/feedback-apply" className="hover:underline">15分フィードバック</Link>
             <Link to="/subscription" className="hover:underline">サブスクリプション</Link>

@@ -208,23 +208,94 @@ export async function getLessonProgress(
 }
 
 /**
- * 複数のレッスンの進捗を一括取得
+ * 複数のレッスンの進捗を一括取得（バッチクエリ版）
  * @param lessons レッスン情報の配列 { lessonId, articleIds }
+ * @param userId オプション: 認証済みユーザーID（渡すと認証チェックをスキップ）
  * @returns レッスン進捗のマップ
  */
 export async function getMultipleLessonProgress(
-  lessons: Array<{ lessonId: string; articleIds: string[] }>
+  lessons: Array<{ lessonId: string; articleIds: string[] }>,
+  userId?: string
 ): Promise<Record<string, LessonProgress>> {
   const progressMap: Record<string, LessonProgress> = {};
 
-  await Promise.all(
-    lessons.map(async (lesson) => {
-      const progress = await getLessonProgress(lesson.lessonId, lesson.articleIds);
-      progressMap[lesson.lessonId] = progress;
-    })
-  );
+  // デフォルト値を設定
+  lessons.forEach(lesson => {
+    progressMap[lesson.lessonId] = {
+      lessonId: lesson.lessonId,
+      totalArticles: lesson.articleIds.length,
+      completedArticles: 0,
+      percentage: 0,
+      completedArticleIds: [],
+      lastUpdatedAt: null,
+    };
+  });
 
-  return progressMap;
+  try {
+    // ユーザーIDが渡されていない場合のみ認証チェック
+    let uid = userId;
+    if (!uid) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return progressMap;
+      uid = user.id;
+    }
+
+    // 全レッスンIDを取得
+    const lessonIds = lessons.map(l => l.lessonId);
+    if (lessonIds.length === 0) return progressMap;
+
+    // 1回のクエリで全レッスンの完了記事を取得
+    const { data } = await supabase
+      .from('article_progress')
+      .select('lesson_id, article_id, updated_at')
+      .eq('user_id', uid)
+      .eq('status', 'completed')
+      .in('lesson_id', lessonIds)
+      .order('updated_at', { ascending: false });
+
+    if (!data) return progressMap;
+
+    // レッスンごとにグループ化
+    const groupedByLesson: Record<string, Array<{ article_id: string; updated_at: string }>> = {};
+    data.forEach(item => {
+      if (!groupedByLesson[item.lesson_id]) {
+        groupedByLesson[item.lesson_id] = [];
+      }
+      groupedByLesson[item.lesson_id].push({
+        article_id: item.article_id,
+        updated_at: item.updated_at,
+      });
+    });
+
+    // 各レッスンの進捗を計算
+    lessons.forEach(lesson => {
+      const completedItems = groupedByLesson[lesson.lessonId] || [];
+      // そのレッスンに属する記事のみをフィルタ
+      const validCompleted = completedItems.filter(item =>
+        lesson.articleIds.includes(item.article_id)
+      );
+      const completedArticleIds = validCompleted.map(item => item.article_id);
+      const completedCount = completedArticleIds.length;
+      const percentage = lesson.articleIds.length > 0
+        ? Math.round((completedCount / lesson.articleIds.length) * 100)
+        : 0;
+      const lastUpdatedAt = validCompleted.length > 0 ? validCompleted[0].updated_at : null;
+
+      progressMap[lesson.lessonId] = {
+        lessonId: lesson.lessonId,
+        totalArticles: lesson.articleIds.length,
+        completedArticles: completedCount,
+        percentage,
+        completedArticleIds,
+        lastUpdatedAt,
+      };
+    });
+
+    return progressMap;
+  } catch (error) {
+    console.error('Get multiple lesson progress error:', error);
+    return progressMap;
+  }
 }
 
 /**
@@ -327,10 +398,12 @@ export async function getLessonStatus(
 /**
  * 複数レッスンの完了ステータスを一括取得
  * @param lessonIds レッスンIDの配列
+ * @param userId オプション: 認証済みユーザーID（渡すと認証チェックをスキップ）
  * @returns レッスンIDとステータスのマップ
  */
 export async function getMultipleLessonStatus(
-  lessonIds: string[]
+  lessonIds: string[],
+  userId?: string
 ): Promise<Record<string, LessonStatus>> {
   const statusMap: Record<string, LessonStatus> = {};
 
@@ -340,13 +413,20 @@ export async function getMultipleLessonStatus(
   });
 
   try {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user || lessonIds.length === 0) return statusMap;
+    // ユーザーIDが渡されていない場合のみ認証チェック
+    let uid = userId;
+    if (!uid) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return statusMap;
+      uid = user.id;
+    }
+
+    if (lessonIds.length === 0) return statusMap;
 
     const { data } = await supabase
       .from('lesson_progress')
       .select('lesson_id, status')
-      .eq('user_id', user.id)
+      .eq('user_id', uid)
       .in('lesson_id', lessonIds);
 
     if (data) {

@@ -16,7 +16,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
-import TopPage from "./pages/top";
+import TopPagePatternEMain from "./pages/dev/TopPagePatternE";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
@@ -43,12 +43,31 @@ import TopPagePatterns from "./pages/dev/TopPagePatterns";
 import TopPagePatternA from "./pages/dev/TopPagePatternA";
 import TopPagePatternB from "./pages/dev/TopPagePatternB";
 import TopPagePatternC from "./pages/dev/TopPagePatternC";
+import TopPagePatternD from "./pages/dev/TopPagePatternD";
+import TopPagePatternE from "./pages/dev/TopPagePatternE";
+import TopPagePatternF from "./pages/dev/TopPagePatternF";
+import TopPagePatternG from "./pages/dev/TopPagePatternG";
+import GuideHubPatternF from "./pages/dev/GuideHubPatternF";
+import GuideDetailPatternF from "./pages/dev/GuideDetailPatternF";
 import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
 import RoadmapPattern1 from "./pages/dev/RoadmapPattern1";
 import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
 import RoadmapPattern3 from "./pages/dev/RoadmapPattern3";
 import RoadmapPattern4 from "./pages/dev/RoadmapPattern4";
 import RoadmapPattern5 from "./pages/dev/RoadmapPattern5";
+import RoadmapPattern5A from "./pages/dev/RoadmapPattern5A";
+import RoadmapPattern5B from "./pages/dev/RoadmapPattern5B";
+import RoadmapPattern5C from "./pages/dev/RoadmapPattern5C";
+import RoadmapPattern10 from "./pages/dev/RoadmapPattern10";
+import RoadmapPattern11 from "./pages/dev/RoadmapPattern11";
+import RoadmapPattern12 from "./pages/dev/RoadmapPattern12";
+import RoadmapPattern13 from "./pages/dev/RoadmapPattern13";
+import RoadmapPattern14 from "./pages/dev/RoadmapPattern14";
+import RoadmapPattern15 from "./pages/dev/RoadmapPattern15";
+import RoadmapPattern16 from "./pages/dev/RoadmapPattern16";
+import RoadmapTest from "./pages/dev/RoadmapTest";
+import RoadmapListPage from "./pages/roadmaps";
+import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
 import LessonIdea2 from "./pages/dev/lesson-ideas/LessonIdea2";
@@ -135,7 +154,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/top" element={<TopPage />} />
+        <Route path="/top" element={<TopPagePatternEMain />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -160,12 +179,30 @@ const AppContent = () => {
         <Route path="/dev/top-pattern-a" element={<DevRoute><TopPagePatternA /></DevRoute>} />
         <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
         <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
+        <Route path="/dev/top-pattern-d" element={<DevRoute><TopPagePatternD /></DevRoute>} />
+        <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
+        <Route path="/dev/top-pattern-f" element={<DevRoute><TopPagePatternF /></DevRoute>} />
+        <Route path="/dev/top-pattern-g" element={<DevRoute><TopPagePatternG /></DevRoute>} />
+        <Route path="/dev/guide-pattern-f" element={<DevRoute><GuideHubPatternF /></DevRoute>} />
+        <Route path="/dev/guide-pattern-f/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
+        <Route path="/dev/guide-pattern-f/:category/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
         <Route path="/dev/roadmap-patterns" element={<DevRoute><RoadmapPatterns /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-1" element={<DevRoute><RoadmapPattern1 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-2" element={<DevRoute><RoadmapPattern2 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-3" element={<DevRoute><RoadmapPattern3 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-4" element={<DevRoute><RoadmapPattern4 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-5" element={<DevRoute><RoadmapPattern5 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5a" element={<DevRoute><RoadmapPattern5A /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5b" element={<DevRoute><RoadmapPattern5B /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-5c" element={<DevRoute><RoadmapPattern5C /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-10" element={<DevRoute><RoadmapPattern10 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-11" element={<DevRoute><RoadmapPattern11 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-12" element={<DevRoute><RoadmapPattern12 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-13" element={<DevRoute><RoadmapPattern13 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-14" element={<DevRoute><RoadmapPattern14 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-15" element={<DevRoute><RoadmapPattern15 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-16" element={<DevRoute><RoadmapPattern16 /></DevRoute>} />
+        <Route path="/dev/roadmap-test" element={<DevRoute><RoadmapTest /></DevRoute>} />
         <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
@@ -203,6 +240,8 @@ const AppContent = () => {
         <Route path="/account" element={<PrivateRoute><Account /></PrivateRoute>} />
 
         <Route path="/roadmap" element={<Roadmap />} />
+        <Route path="/roadmaps" element={<RoadmapListPage />} />
+        <Route path="/roadmaps/:slug" element={<RoadmapDetail />} />
 
         {/* 質問ページ（Sanityベース） */}
         <Route path="/questions" element={<QuestionList />} />
@@ -229,6 +268,7 @@ const AppContent = () => {
         <Route path="/events/:slug" element={<EventDetail />} />
 
         <Route path="/lessons" element={<Lessons />} />
+        <Route path="/lessons/category/:categoryId" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />
         <Route path="/articles/:slug" element={<ArticleDetail />} />
         <Route path="/sanity-test" element={<SanityTest />} />
