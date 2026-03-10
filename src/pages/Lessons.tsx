@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { motion, useReducedMotion } from "framer-motion";
@@ -122,16 +122,6 @@ export default function Lessons() {
 
   // URLパラメータからアクティブなタブを決定（デフォルトは"all"）
   const activeTab = categoryId || 'all';
-
-  // 各セクションの「もっと見る」状態を管理
-  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({});
-
-  const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [sectionId]: !prev[sectionId]
-    }));
-  };
 
   // カテゴリごとにグルーピング
   const groupedLessons = useMemo(() => {
@@ -384,7 +374,7 @@ export default function Lessons() {
                 >
                   {/* すべて: 8件まで表示 / カテゴリ別: 全件表示 */}
                   {groupedLessons[section.id]
-                    .slice(0, activeTab === 'all' && !expandedSections[section.id] ? 8 : undefined)
+                    .slice(0, activeTab === 'all' ? 8 : undefined)
                     .map((sanityLesson) => {
                     // バッジ表示テキスト（本来のカテゴリ名を表示）
                     const categoryValue =
@@ -423,16 +413,18 @@ export default function Lessons() {
                   })}
                 </motion.div>
 
-                {/* もっと見るボタン（すべて表示時 & 8件以上ある場合のみ） */}
+                {/* もっと見るボタン（すべて表示時 & 8件以上ある場合のみ） → カテゴリページへ遷移 */}
                 {activeTab === 'all' && groupedLessons[section.id].length > 8 && (
                   <div className="mt-8 text-center">
                     <Button
                       variant="outline"
                       size="lg"
-                      onClick={() => toggleSection(section.id)}
+                      asChild
                       className="min-w-[200px] rounded-full"
                     >
-                      {expandedSections[section.id] ? '閉じる' : `もっと見る（${groupedLessons[section.id].length - 8}件）`}
+                      <Link to={`/lessons/category/${section.id}`}>
+                        もっと見る（{groupedLessons[section.id].length - 8}件）
+                      </Link>
                     </Button>
                   </div>
                 )}

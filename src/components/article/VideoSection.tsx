@@ -117,7 +117,7 @@ const VideoSection = ({
           <CustomVimeoPlayer
             vimeoId={videoInfo.id}
             autoPlay={autoPlay}
-            muted={autoPlay}
+            muted={false}
             onPlay={onPlay}
             onEnded={onEnded}
           />
@@ -127,7 +127,7 @@ const VideoSection = ({
   }
 
   // YouTubeの場合は従来のiframe埋め込み
-  const youtubeParams = autoPlay ? "?autoplay=1&mute=1&playsinline=1" : "";
+  const youtubeParams = autoPlay ? "?autoplay=1&playsinline=1" : "";
   return (
     <div className="w-full">
       <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">

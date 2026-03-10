@@ -545,7 +545,6 @@ const ArticleDetail = () => {
               thumbnail={article.thumbnail}
               thumbnailUrl={article.thumbnailUrl}
               isPremium={article.isPremium}
-              autoPlay
               onPlay={() => trackVideoPlay(article._id, article.title)}
               onEnded={() => trackVideoComplete(article._id, article.title)}
             />
