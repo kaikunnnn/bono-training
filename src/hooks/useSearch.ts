@@ -1,0 +1,317 @@
+import { useQuery } from "@tanstack/react-query";
+import { client } from "@/lib/sanity";
+import {
+  SearchResult,
+  LessonSearchResult,
+  ArticleSearchResult,
+  GuideSearchResult,
+  SearchContentType,
+} from "@/types/search";
+
+// ============================================
+// Sanityデータ型
+// ============================================
+
+interface SanityLessonForSearch {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  description?: string;
+  thumbnailUrl?: string;
+  category?: string;
+  categoryTitle?: string;
+  tags?: string[];
+  isPremium?: boolean;
+  articleCount: number;
+}
+
+interface SanityArticleForSearch {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  excerpt?: string;
+  thumbnailUrl?: string;
+  tags?: string[];
+  isPremium?: boolean;
+  videoDuration?: string | number;
+  lessonTitle?: string;
+  lessonSlug?: string;
+}
+
+interface SanityGuideForSearch {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  excerpt?: string;
+  thumbnailUrl?: string;
+  category?: {
+    title: string;
+    slug: { current: string };
+  };
+  tags?: string[];
+  publishedAt?: string;
+}
+
+// ============================================
+// Sanityクエリ
+// ============================================
+
+/**
+ * 検索用のレッスンデータを取得
+ */
+async function fetchLessonsForSearch(): Promise<SanityLessonForSearch[]> {
+  const query = `*[_type == "lesson"] | order(_createdAt desc) {
+    _id,
+    title,
+    slug,
+    description,
+    thumbnailUrl,
+    "categoryTitle": category->title,
+    tags,
+    isPremium,
+    "articleCount": count(quests[]->articles[])
+  }`;
+  return client.fetch(query);
+}
+
+/**
+ * 検索用の記事データを取得（Lesson→Quest→Articleの構造をフラット化）
+ */
+async function fetchArticlesForSearch(): Promise<SanityArticleForSearch[]> {
+  const query = `*[_type == "lesson"] {
+    "lessonTitle": title,
+    "lessonSlug": slug.current,
+    "articles": quests[]->articles[]-> {
+      _id,
+      title,
+      slug,
+      excerpt,
+      thumbnailUrl,
+      tags,
+      isPremium,
+      videoDuration
+    }
+  }`;
+
+  const lessons = await client.fetch<
+    {
+      lessonTitle: string;
+      lessonSlug: string;
+      articles: SanityArticleForSearch[];
+    }[]
+  >(query);
+
+  // フラット化して親レッスン情報を付与
+  const allArticles: SanityArticleForSearch[] = [];
+  for (const lesson of lessons) {
+    if (lesson.articles) {
+      for (const article of lesson.articles) {
+        if (article) {
+          allArticles.push({
+            ...article,
+            lessonTitle: lesson.lessonTitle,
+            lessonSlug: lesson.lessonSlug,
+          });
+        }
+      }
+    }
+  }
+  return allArticles;
+}
+
+/**
+ * 検索用のナレッジ（ガイド相当）データを取得
+ */
+async function fetchKnowledgeForSearch(): Promise<SanityGuideForSearch[]> {
+  const query = `*[_type == "knowledge"] | order(publishedAt desc) {
+    _id,
+    title,
+    slug,
+    excerpt,
+    "thumbnailUrl": thumbnail.asset->url,
+    "category": category-> {
+      title,
+      slug
+    },
+    tags,
+    publishedAt
+  }`;
+  return client.fetch(query);
+}
+
+// ============================================
+// 変換関数
+// ============================================
+
+function convertLessonToSearchResult(
+  lesson: SanityLessonForSearch
+): LessonSearchResult {
+  return {
+    id: lesson._id,
+    type: "lesson",
+    title: lesson.title,
+    description: lesson.description || "",
+    slug: lesson.slug?.current || "",
+    thumbnail: lesson.thumbnailUrl,
+    category: lesson.categoryTitle,
+    tags: lesson.tags,
+    isPremium: lesson.isPremium,
+    lessonCount: lesson.articleCount,
+  };
+}
+
+function convertArticleToSearchResult(
+  article: SanityArticleForSearch
+): ArticleSearchResult {
+  // videoDurationを分に変換
+  let readingTime: number | undefined;
+  if (article.videoDuration) {
+    if (typeof article.videoDuration === "number") {
+      readingTime = Math.ceil(article.videoDuration / 60);
+    } else if (typeof article.videoDuration === "string") {
+      // "MM:SS" or "HH:MM:SS" 形式をパース
+      const parts = article.videoDuration.split(":").map(Number);
+      if (parts.length === 2) {
+        readingTime = parts[0] + Math.ceil(parts[1] / 60);
+      } else if (parts.length === 3) {
+        readingTime = parts[0] * 60 + parts[1] + Math.ceil(parts[2] / 60);
+      }
+    }
+  }
+
+  return {
+    id: article._id,
+    type: "article",
+    title: article.title,
+    description: article.excerpt || "",
+    slug: article.slug?.current || "",
+    thumbnail: article.thumbnailUrl,
+    tags: article.tags,
+    isPremium: article.isPremium,
+    parentLessonTitle: article.lessonTitle,
+    parentLessonSlug: article.lessonSlug,
+    readingTime,
+  };
+}
+
+function convertKnowledgeToSearchResult(
+  knowledge: SanityGuideForSearch
+): GuideSearchResult {
+  return {
+    id: knowledge._id,
+    type: "guide",
+    title: knowledge.title,
+    description: knowledge.excerpt || "",
+    slug: knowledge.slug?.current || "",
+    thumbnail: knowledge.thumbnailUrl,
+    category: knowledge.category?.slug?.current,
+    tags: knowledge.tags,
+    publishedAt: knowledge.publishedAt,
+    isPremium: false, // ナレッジは無料
+  };
+}
+
+// ============================================
+// 統合検索データ取得
+// ============================================
+
+async function fetchAllSearchData(): Promise<SearchResult[]> {
+  const [lessons, articles, knowledge] = await Promise.all([
+    fetchLessonsForSearch(),
+    fetchArticlesForSearch(),
+    fetchKnowledgeForSearch(),
+  ]);
+
+  const results: SearchResult[] = [
+    ...lessons.map(convertLessonToSearchResult),
+    ...articles.map(convertArticleToSearchResult),
+    ...knowledge.map(convertKnowledgeToSearchResult),
+  ];
+
+  return results;
+}
+
+// ============================================
+// 検索ロジック
+// ============================================
+
+function filterSearchResults(
+  data: SearchResult[],
+  query: string,
+  contentTypes: SearchContentType[]
+): SearchResult[] {
+  let results = data;
+
+  // コンテンツタイプでフィルタ
+  if (contentTypes.length > 0) {
+    results = results.filter((item) => contentTypes.includes(item.type));
+  }
+
+  // テキスト検索
+  if (query.trim()) {
+    const normalizedQuery = query.toLowerCase().trim();
+    results = results.filter((item) => {
+      const searchableText = [
+        item.title,
+        item.description,
+        item.category || "",
+        ...(item.tags || []),
+      ]
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedQuery);
+    });
+  }
+
+  return results;
+}
+
+// ============================================
+// React Query Hook
+// ============================================
+
+/**
+ * 検索データを取得するフック
+ */
+export function useSearchData() {
+  return useQuery({
+    queryKey: ["searchData"],
+    queryFn: fetchAllSearchData,
+    staleTime: 5 * 60 * 1000, // 5分
+    gcTime: 10 * 60 * 1000, // 10分
+    refetchOnWindowFocus: false,
+  });
+}
+
+/**
+ * 検索を実行するフック
+ */
+export function useSearch(query: string, contentTypes: SearchContentType[]) {
+  const { data: allData, isLoading, error } = useSearchData();
+
+  const results = allData
+    ? filterSearchResults(allData, query, contentTypes)
+    : [];
+
+  return {
+    results,
+    isLoading,
+    error,
+    totalCount: results.length,
+  };
+}
+
+/**
+ * 検索候補を取得する関数（オートコンプリート用）
+ */
+export function searchFromCache(
+  data: SearchResult[],
+  query: string,
+  limit: number = 8
+): SearchResult[] {
+  if (!query.trim()) return [];
+
+  const results = filterSearchResults(data, query, []);
+  return results.slice(0, limit);
+}

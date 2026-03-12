@@ -27,7 +27,7 @@ interface LessonHeaderProps {
  * <LessonHeader backLabel="コース一覧へ" backHref="/courses" />
  */
 export function LessonHeader({
-  backLabel = "レッスン一覧へ",
+  backLabel = "戻る",
   backHref = "/lessons",
   showShare = true,
   shareTitle,
@@ -35,7 +35,16 @@ export function LessonHeader({
   const navigate = useNavigate();
 
   const handleBack = () => {
-    navigate(backHref);
+    // アプリ内から遷移してきた場合は履歴を戻る、そうでなければフォールバック先へ
+    const referrer = document.referrer;
+    const isInternalReferrer = referrer &&
+      new URL(referrer).origin === window.location.origin;
+
+    if (isInternalReferrer) {
+      navigate(-1);
+    } else {
+      navigate(backHref);
+    }
   };
 
   // シェア用タイトル（指定がなければdocument.titleを使用）
