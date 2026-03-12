@@ -65,6 +65,7 @@ import RoadmapPattern13 from "./pages/dev/RoadmapPattern13";
 import RoadmapPattern14 from "./pages/dev/RoadmapPattern14";
 import RoadmapPattern15 from "./pages/dev/RoadmapPattern15";
 import RoadmapPattern16 from "./pages/dev/RoadmapPattern16";
+import RoadmapPattern17 from "./pages/dev/RoadmapPattern17";
 import RoadmapTest from "./pages/dev/RoadmapTest";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
@@ -95,6 +96,7 @@ import SanityTest from "./pages/SanityTest";
 import MyPage from "./pages/MyPage";
 import Account from "./pages/Account";
 import Roadmap from "./pages/Roadmap";
+import Search from "./pages/Search";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionUpdated from "./pages/SubscriptionUpdated";
 import DevEnvironmentBanner from "./components/dev/DevEnvironmentBanner";
@@ -202,6 +204,7 @@ const AppContent = () => {
         <Route path="/dev/roadmap-pattern-14" element={<DevRoute><RoadmapPattern14 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-15" element={<DevRoute><RoadmapPattern15 /></DevRoute>} />
         <Route path="/dev/roadmap-pattern-16" element={<DevRoute><RoadmapPattern16 /></DevRoute>} />
+        <Route path="/dev/roadmap-pattern-17" element={<DevRoute><RoadmapPattern17 /></DevRoute>} />
         <Route path="/dev/roadmap-test" element={<DevRoute><RoadmapTest /></DevRoute>} />
         <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
@@ -267,6 +270,7 @@ const AppContent = () => {
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
+        <Route path="/search" element={<Search />} />
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/category/:categoryId" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />

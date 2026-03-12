@@ -1,19 +1,23 @@
 /**
- * ロードマップ一覧ページ
+ * RoadmapPattern17: パターンA「なりたい状態」で分類
  *
- * カテゴリ別にロードマップを一覧表示する
+ * 検討者が「自分のゴール」から逆引きで選べる構造
+ * - 転職・キャリアチェンジしたい
+ * - スキルの不安を解消したい
+ * - 実務で成果を出したい
  */
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Clock, BookOpen, BookOpenCheck, Check, Palette, Layout as LayoutIcon, Users, Target, FolderOpen, Briefcase } from 'lucide-react';
+import { ArrowRight, Clock, BookOpen, BookOpenCheck, Target, Briefcase, Palette, Users, Sparkles, Check, Layout as LayoutIcon, FolderOpen } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
-import PageHeader from '@/components/common/PageHeader';
-import { careerChangeRoadmap } from '@/data/roadmaps/career-change';
-import { uiDesignBeginnerRoadmap } from '@/data/roadmaps/ui-design-beginner';
-import { uiVisualRoadmap } from '@/data/roadmaps/ui-visual';
-import { informationArchitectureRoadmap } from '@/data/roadmaps/information-architecture';
-import { uxDesignRoadmap } from '@/data/roadmaps/ux-design';
+import {
+  careerChangeRoadmap,
+  uiVisualRoadmap,
+  informationArchitectureRoadmap,
+  uiDesignBeginnerRoadmap,
+  uxDesignRoadmap,
+} from '@/data/roadmaps';
 import type { Roadmap } from '@/types/roadmap';
 
 // アイコンマッピング
@@ -35,8 +39,10 @@ const iconMap: Record<string, React.ElementType> = {
 interface RoadmapCategory {
   id: string;
   title: string;
+  subtitle: string;
   description: string;
   icon: React.ElementType;
+  iconBg: string;
   roadmaps: (Roadmap | ComingSoonRoadmap)[];
 }
 
@@ -50,8 +56,10 @@ const categories: RoadmapCategory[] = [
   {
     id: 'career',
     title: '転職・キャリアチェンジしたい',
+    subtitle: 'Career Change',
     description: '未経験からデザイナーへ、または更なるキャリアアップを目指す方向け',
     icon: Briefcase,
+    iconBg: 'bg-blue-500',
     roadmaps: [
       careerChangeRoadmap,
       {
@@ -64,8 +72,10 @@ const categories: RoadmapCategory[] = [
   {
     id: 'user-centered',
     title: 'ユーザー目線でデザインしたい',
+    subtitle: 'User-Centered Design',
     description: 'ユーザーの課題を理解し、本当に使われるデザインを作りたい方向け',
     icon: Users,
+    iconBg: 'bg-green-500',
     roadmaps: [
       uxDesignRoadmap,
       informationArchitectureRoadmap,
@@ -79,8 +89,10 @@ const categories: RoadmapCategory[] = [
   {
     id: 'skill',
     title: 'スキルの不安を解消したい',
+    subtitle: 'Skill Up',
     description: 'デザインの基礎力を固め、苦手を克服したい方向け',
     icon: Palette,
+    iconBg: 'bg-orange-500',
     roadmaps: [
       uiVisualRoadmap,
       uiDesignBeginnerRoadmap,
@@ -89,84 +101,12 @@ const categories: RoadmapCategory[] = [
 ];
 
 // ============================================
-// ヘルパー関数
+// コンポーネント
 // ============================================
 
 function isComingSoon(roadmap: Roadmap | ComingSoonRoadmap): roadmap is ComingSoonRoadmap {
   return 'isComingSoon' in roadmap && roadmap.isComingSoon === true;
 }
-
-// ============================================
-// メインコンポーネント
-// ============================================
-
-export default function RoadmapListPage() {
-  return (
-    <Layout>
-      <div className="min-h-screen bg-base">
-        {/* メインコンテンツ */}
-        <main className="max-w-[1000px] mx-auto px-4 sm:px-6 py-8">
-          {/* ページヘッダー */}
-          <PageHeader
-            label="Roadmap"
-            title="ロードマップ"
-            description="目標に合わせて体系的に学べるロードマップ。何から始めればいいか迷ったら、ロードマップに沿って進めましょう。"
-          />
-
-          {/* カテゴリ別ロードマップ一覧 */}
-          <div>
-            {categories.map((category, index) => (
-              <CategorySection key={category.id} category={category} />
-            ))}
-          </div>
-        </main>
-      </div>
-    </Layout>
-  );
-}
-
-// ============================================
-// カテゴリセクション
-// ============================================
-
-interface CategorySectionProps {
-  category: RoadmapCategory;
-}
-
-function CategorySection({ category }: CategorySectionProps) {
-  const Icon = category.icon;
-
-  return (
-    <section className="mb-12">
-      {/* カテゴリヘッダー */}
-      <div className="mb-5">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className="w-5 h-5 text-gray-400" />
-          <h2 className="text-[18px] font-bold text-gray-900">
-            {category.title}
-          </h2>
-        </div>
-        <p className="text-[14px] text-gray-500 ml-7">
-          {category.description}
-        </p>
-      </div>
-
-      {/* ロードマップカード */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {category.roadmaps.map((roadmap, i) => (
-          <RoadmapCard
-            key={isComingSoon(roadmap) ? `coming-${i}` : (roadmap as Roadmap).id}
-            roadmap={roadmap}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ============================================
-// ロードマップカード
-// ============================================
 
 interface RoadmapCardProps {
   roadmap: Roadmap | ComingSoonRoadmap;
@@ -276,5 +216,148 @@ function RoadmapCard({ roadmap }: RoadmapCardProps) {
         </div>
       </div>
     </Link>
+  );
+}
+
+interface CategorySectionProps {
+  category: RoadmapCategory;
+  index: number;
+}
+
+function CategorySection({ category, index }: CategorySectionProps) {
+  const Icon = category.icon;
+
+  return (
+    <section className="mb-12">
+      {/* カテゴリヘッダー */}
+      <div className="mb-5">
+        <div className="flex items-center gap-2 mb-1">
+          <Icon className="w-5 h-5 text-gray-400" />
+          <h2 className="text-[18px] font-bold text-gray-900">
+            {category.title}
+          </h2>
+        </div>
+        <p className="text-[14px] text-gray-500 ml-7">
+          {category.description}
+        </p>
+      </div>
+
+      {/* ロードマップカード */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {category.roadmaps.map((roadmap, i) => (
+          <RoadmapCard
+            key={isComingSoon(roadmap) ? `coming-${i}` : (roadmap as Roadmap).id}
+            roadmap={roadmap}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+// ============================================
+// メインコンポーネント
+// ============================================
+
+export default function RoadmapPattern17() {
+  return (
+    <Layout>
+      <div className="min-h-screen bg-white">
+        {/* ============================================
+            HERO
+        ============================================ */}
+        <section className="px-6 md:px-12 pt-16 pb-16 border-b border-gray-100">
+          <div className="max-w-[1200px] mx-auto">
+            {/* ブレッドクラム */}
+            <div className="flex items-center gap-2 text-[13px] text-gray-400 mb-8">
+              <Link to="/" className="hover:text-gray-600 transition-colors">
+                Home
+              </Link>
+              <span>/</span>
+              <span className="text-gray-600">ロードマップ</span>
+            </div>
+
+            {/* メインコピー */}
+            <div className="max-w-[700px]">
+              <h1 className="text-[40px] md:text-[52px] font-bold text-gray-900 leading-[1.15] mb-6">
+                あなたの目標に合った<br />
+                ロードマップを選ぼう
+              </h1>
+              <p className="text-[17px] leading-[1.9] text-gray-600 mb-8">
+                「なりたい状態」から逆引きで、最適な学習パスを見つけましょう。
+                どのロードマップも、実践的なスキルを身につけるためのステップバイステップの学習プランです。
+              </p>
+
+              {/* クイックナビ */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="text-[13px] text-gray-500">探す:</span>
+                {categories.map((cat) => (
+                  <a
+                    key={cat.id}
+                    href={`#${cat.id}`}
+                    className="text-[13px] font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-full transition-colors"
+                  >
+                    {cat.title}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================
+            カテゴリセクション
+        ============================================ */}
+        <section className="px-6 md:px-12 py-16">
+          <div className="max-w-[1200px] mx-auto">
+            {categories.map((category, index) => (
+              <div key={category.id} id={category.id}>
+                <CategorySection category={category} index={index} />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ============================================
+            CTA
+        ============================================ */}
+        <section className="px-6 md:px-12 py-20 bg-gray-50 border-t border-gray-100">
+          <div className="max-w-[700px] mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#f5533e]/10 rounded-2xl mb-6">
+              <Sparkles className="w-8 h-8 text-[#f5533e]" />
+            </div>
+            <h2 className="text-[32px] font-bold text-gray-900 mb-4">
+              どれを選べばいいか迷ったら？
+            </h2>
+            <p className="text-[16px] leading-[1.8] text-gray-600 mb-8">
+              まずは「未経験からUI/UXデザイナーに転職する」ロードマップがおすすめです。
+              基礎から応用まで、体系的にスキルを身につけることができます。
+            </p>
+            <Link
+              to="/roadmaps/career-change"
+              className="inline-flex items-center gap-3 bg-[#f5533e] hover:bg-[#e04a35] text-white font-bold text-[15px] px-8 py-4 rounded-full transition-all hover:-translate-y-0.5 shadow-[0_8px_24px_rgba(245,83,62,0.25)]"
+            >
+              おすすめロードマップを見る
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+        </section>
+
+        {/* デバッグリンク */}
+        <div className="px-6 md:px-12 py-8 border-t border-gray-100">
+          <div className="max-w-[1200px] mx-auto flex items-center justify-between">
+            <Link
+              to="/dev/roadmap-patterns"
+              className="text-[13px] text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              ← パターン一覧に戻る
+            </Link>
+            <span className="text-[11px] text-gray-400">
+              Pattern 17: 「なりたい状態」で分類
+            </span>
+          </div>
+        </div>
+      </div>
+    </Layout>
   );
 }

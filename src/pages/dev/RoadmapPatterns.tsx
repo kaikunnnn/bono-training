@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Copy, Sparkles, Heart, Folder, Figma, Palette, Zap, Minus, LayoutGrid } from 'lucide-react';
+import { ArrowRight, Copy, Sparkles, Heart, Folder, Figma, Palette, Zap, Minus, LayoutGrid, Users } from 'lucide-react';
 
 interface PatternCard {
   id: string;
@@ -125,6 +125,15 @@ const patterns: PatternCard[] = [
     concept: 'gaaboo応用: ミニマル美学 + 情報充実',
     icon: <Minus className="w-6 h-6" />,
     preview: 'bg-gradient-to-br from-white to-gray-50',
+  },
+  {
+    id: '17',
+    title: 'Pattern 17: 「なりたい状態」で分類（一覧ページ）',
+    description: '検討者が「自分のゴール」から逆引きで選べる構造。転職・キャリアチェンジ / スキルの不安解消 / 実務で成果の3カテゴリ。',
+    path: '/dev/roadmap-pattern-17',
+    concept: '一覧ページ: パターンA「なりたい状態」分類',
+    icon: <Users className="w-6 h-6" />,
+    preview: 'bg-gradient-to-br from-blue-50 to-indigo-50',
   },
 ];
 
