@@ -153,8 +153,8 @@ const FeedbackApplyIndex = () => {
   const { user } = useAuth();
   const { planType, loading } = useSubscriptionContext();
 
-  // Growthプラン or feedbackプランかどうか
-  const canApply = planType === "growth" || planType === "feedback";
+  // Growth / Standard / feedbackプランかどうか
+  const canApply = planType === "growth" || planType === "standard" || planType === "feedback";
 
   const handleApplyClick = () => {
     if (!user) {
@@ -369,7 +369,7 @@ const FeedbackApplyIndex = () => {
             {/* アクセス制限メッセージ */}
             {!loading && user && !canApply && (
               <p className="mt-4 text-sm text-muted-foreground">
-                15分フィードバックはGrowthプラン限定の機能です。
+                15分フィードバックはStandard・Growthプラン限定の機能です。
                 <Link to="/subscription" className="text-primary underline ml-1">
                   プランを確認する
                 </Link>
