@@ -339,7 +339,7 @@ const FeedbackApplySubmit = () => {
   const totalSteps = 2;
 
   // アクセス権限チェック
-  const canApply = planType === "growth" || planType === "feedback";
+  const canApply = planType === "growth" || planType === "standard" || planType === "feedback";
 
   // レッスン検索結果
   const filteredLessons = useMemo(() => {
@@ -485,10 +485,10 @@ const FeedbackApplySubmit = () => {
           <div className="mx-auto max-w-lg bg-white border rounded-[40px] p-8 text-center">
             <Lock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
             <h2 className="mb-2 text-lg font-semibold">
-              Growthプラン限定の機能です
+              Standard・Growthプラン限定の機能です
             </h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              15分フィードバックはGrowthプランでご利用いただけます
+              15分フィードバックはStandard・Growthプランでご利用いただけます
             </p>
             <Button asChild>
               <Link to="/subscription">プランを確認する</Link>
