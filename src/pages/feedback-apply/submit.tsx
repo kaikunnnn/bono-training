@@ -181,13 +181,13 @@ const CheckboxItem = ({
 // 完了画面のチェックアニメーション
 const SuccessCheckAnimation = () => (
   <motion.div
-    initial={{ scale: 0 }}
-    animate={{ scale: 1 }}
+    initial={{ scale: 0.8, opacity: 0.8 }}
+    animate={{ scale: 1, opacity: 1 }}
     transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.1 }}
     className="w-20 h-20 mx-auto mb-6 bg-green-100 rounded-full flex items-center justify-center"
   >
     <motion.div
-      initial={{ scale: 0, opacity: 0 }}
+      initial={{ scale: 0.8, opacity: 0.8 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.3, duration: 0.3 }}
     >
@@ -215,7 +215,7 @@ const SuccessScreen = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
+      initial={{ opacity: 1 }}
       animate={{ opacity: 1 }}
       className="py-8"
     >
