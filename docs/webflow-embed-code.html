@@ -1,187 +1,213 @@
 <!--
-  Webflow埋め込み用コード: Sanity最新コンテンツ表示
+  Webflow埋め込み用コード: 最新コンテンツ表示（手動指定版）
 
   使い方:
-  1. このコード全体をWebflowのEmbedエレメントに貼り付け
-  2. BASE_URLを新サイトのURLに変更
-  3. MAX_ITEMS, SHOW_LESSONS等の設定を調整
+  1. ITEMS配列に表示したいコンテンツを指定（type + slug）
+  2. このコード全体をWebflowのEmbedエレメントに貼り付け
 -->
 
-<!-- コンテナ（Webflowで好きな場所に配置） -->
+<!-- コンテナ -->
 <div id="sanity-updates-container"></div>
 
 <style>
-  /* 最新コンテンツセクション */
   .sanity-updates {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-
-  .sanity-updates__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif;
   }
 
   .sanity-updates__title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: #1a1a1a;
-    margin: 0;
+    margin: 0 0 16px 0;
   }
 
-  .sanity-updates__more {
-    font-size: 14px;
-    color: #666;
-    text-decoration: none;
+  /* リストコンテナ */
+  .sanity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
   }
 
-  .sanity-updates__more:hover {
-    color: #f5533e;
-  }
-
-  /* カードグリッド */
-  .sanity-updates__grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-  }
-
-  /* カード */
-  .sanity-card {
-    display: block;
+  /* リストアイテム */
+  .sanity-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px;
     background: #fff;
-    border: 1px solid #e5e5e5;
+    border: 1px solid #e8e8e8;
     border-radius: 12px;
-    overflow: hidden;
     text-decoration: none;
-    transition: all 0.2s ease;
+    transition: all 0.15s ease;
   }
 
-  .sanity-card:hover {
-    border-color: #ccc;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    transform: translateY(-2px);
+  .sanity-item:hover {
+    border-color: #d0d0d0;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
 
   /* サムネイル */
-  .sanity-card__thumbnail {
-    width: 100%;
-    aspect-ratio: 16/9;
+  .sanity-item__thumb {
+    flex-shrink: 0;
+    width: 72px;
+    height: 48px;
+    border-radius: 8px;
     object-fit: cover;
     background: #f5f5f5;
   }
 
-  .sanity-card__thumbnail--placeholder {
+  .sanity-item__thumb--placeholder {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
     color: white;
-    font-size: 24px;
+    font-size: 18px;
   }
 
-  /* カード本文 */
-  .sanity-card__body {
-    padding: 16px;
+  /* コンテンツ部分 */
+  .sanity-item__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* バッジ + 日付の行 */
+  .sanity-item__meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
   }
 
   /* タイプバッジ */
-  .sanity-card__badge {
-    display: inline-block;
-    font-size: 11px;
+  .sanity-item__badge {
+    font-size: 10px;
     font-weight: 600;
-    padding: 3px 8px;
+    padding: 2px 6px;
     border-radius: 4px;
-    margin-bottom: 8px;
   }
 
-  .sanity-card__badge--lesson {
-    background: #e3f2fd;
-    color: #1976d2;
+  .sanity-item__badge--lesson {
+    background: #dbeafe;
+    color: #1d4ed8;
   }
 
-  .sanity-card__badge--article {
-    background: #fce4ec;
-    color: #c2185b;
+  .sanity-item__badge--article {
+    background: #fce7f3;
+    color: #be185d;
   }
 
-  .sanity-card__badge--knowledge {
-    background: #e8f5e9;
-    color: #388e3c;
+  .sanity-item__badge--blogPost {
+    background: #d1fae5;
+    color: #047857;
+  }
+
+  /* 日付 */
+  .sanity-item__date {
+    font-size: 11px;
+    color: #999;
   }
 
   /* タイトル */
-  .sanity-card__title {
-    font-size: 15px;
+  .sanity-item__title {
+    font-size: 14px;
     font-weight: 600;
     color: #1a1a1a;
     line-height: 1.4;
     margin: 0;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
     overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
-  /* 更新日 */
-  .sanity-card__date {
-    font-size: 12px;
-    color: #999;
-    margin-top: 8px;
-  }
-
-  /* ローディング */
-  .sanity-updates__loading {
-    text-align: center;
-    padding: 40px;
-    color: #666;
-  }
-
-  /* エラー */
+  /* ローディング・エラー */
+  .sanity-updates__loading,
   .sanity-updates__error {
     text-align: center;
-    padding: 40px;
-    color: #e53935;
+    padding: 32px;
+    color: #666;
+    font-size: 14px;
+  }
+
+  .sanity-updates__error {
+    color: #dc2626;
+  }
+
+  /* レスポンシブ */
+  @media (max-width: 480px) {
+    .sanity-item {
+      padding: 10px;
+      gap: 12px;
+    }
+    .sanity-item__thumb {
+      width: 60px;
+      height: 40px;
+    }
+    .sanity-item__title {
+      font-size: 13px;
+    }
   }
 </style>
 
 <script>
 (function() {
   // ============================================
-  // 設定（必要に応じて変更）
+  // 設定
   // ============================================
   const CONFIG = {
-    // 新サイトのベースURL（末尾スラッシュなし）
     BASE_URL: 'https://bono-training.vercel.app',
-
-    // Sanity設定
     SANITY_PROJECT_ID: 'cqszh4up',
     SANITY_DATASET: 'production',
     SANITY_API_VERSION: '2024-01-01',
-
-    // 表示設定
-    MAX_ITEMS: 6,           // 最大表示件数
-    SHOW_LESSONS: true,     // レッスンを表示
-    SHOW_ARTICLES: false,   // 記事を表示（現在は無効）
-    SHOW_KNOWLEDGE: false,  // ナレッジを表示（現在は無効）
-
-    // セクションタイトル
     SECTION_TITLE: '最新コンテンツ',
-    MORE_LINK_TEXT: 'すべて見る →',
+  };
+
+  // ============================================
+  // 表示するコンテンツ（手動指定）
+  // type: 'lesson' | 'article' | 'blogPost'
+  // slug: コンテンツのスラッグ
+  // ============================================
+  const ITEMS = [
+    { type: 'lesson', slug: 'ui-design-flow-lv1' },
+    { type: 'lesson', slug: 'failurepoint' },
+    { type: 'lesson', slug: 'zerokara-userinterview' },
+    { type: 'lesson', slug: 'bannerbeginner' },
+    { type: 'lesson', slug: 'rookiesaction' },
+    { type: 'lesson', slug: 'figma-elementary' },
+  ];
+
+  // ============================================
+  // タイプ別設定
+  // ============================================
+  const TYPE_CONFIG = {
+    lesson: {
+      label: 'レッスン',
+      badgeClass: 'sanity-item__badge--lesson',
+      pathPrefix: '/lessons/',
+      emoji: '📚',
+    },
+    article: {
+      label: '記事',
+      badgeClass: 'sanity-item__badge--article',
+      pathPrefix: '/articles/',
+      emoji: '📝',
+    },
+    blogPost: {
+      label: 'ブログ',
+      badgeClass: 'sanity-item__badge--blogPost',
+      pathPrefix: '/blog/',
+      emoji: '✏️',
+    },
   };
 
   // ============================================
   // Sanity画像URL生成
   // ============================================
-  function getSanityImageUrl(image, width = 400) {
+  function getSanityImageUrl(image, width = 200) {
     if (!image?.asset?._ref) return null;
-
     const ref = image.asset._ref;
-    // image-xxx-widthxheight-format から抽出
     const match = ref.match(/^image-(\w+)-(\d+x\d+)-(\w+)$/);
     if (!match) return null;
-
     const [, id, dimensions, format] = match;
     return `https://cdn.sanity.io/images/${CONFIG.SANITY_PROJECT_ID}/${CONFIG.SANITY_DATASET}/${id}-${dimensions}.${format}?w=${width}&fit=crop&auto=format`;
   }
@@ -189,18 +215,17 @@
   // ============================================
   // データ取得
   // ============================================
-  async function fetchLatestContent() {
-    const types = [];
-    if (CONFIG.SHOW_LESSONS) types.push('"lesson"');
-    if (CONFIG.SHOW_ARTICLES) types.push('"article"');
-    if (CONFIG.SHOW_KNOWLEDGE) types.push('"knowledge"');
+  async function fetchItems() {
+    // タイプ別にslugをグループ化
+    const byType = {};
+    ITEMS.forEach(item => {
+      if (!byType[item.type]) byType[item.type] = [];
+      byType[item.type].push(`"${item.slug}"`);
+    });
 
-    if (types.length === 0) {
-      throw new Error('表示するコンテンツタイプが選択されていません');
-    }
-
-    const query = `
-      *[_type in [${types.join(',')}]] | order(_updatedAt desc)[0...${CONFIG.MAX_ITEMS}] {
+    // 各タイプのクエリを結合
+    const queries = Object.entries(byType).map(([type, slugs]) => {
+      return `*[_type == "${type}" && slug.current in [${slugs.join(',')}]] {
         _id,
         _type,
         _updatedAt,
@@ -208,21 +233,29 @@
         "slug": slug.current,
         thumbnail,
         thumbnailUrl,
-        iconImageUrl,
-        excerpt,
-        description
-      }
-    `;
+        ${type === 'lesson' ? 'iconImageUrl,' : ''}
+        ${type === 'blogPost' ? 'emoji,' : ''}
+      }`;
+    });
 
-    const url = `https://${CONFIG.SANITY_PROJECT_ID}.api.sanity.io/v${CONFIG.SANITY_API_VERSION}/data/query/${CONFIG.SANITY_DATASET}?query=${encodeURIComponent(query)}`;
+    // 全クエリを配列として取得
+    const fullQuery = `[${queries.join(',')}]`;
+    const url = `https://${CONFIG.SANITY_PROJECT_ID}.api.sanity.io/v${CONFIG.SANITY_API_VERSION}/data/query/${CONFIG.SANITY_DATASET}?query=${encodeURIComponent(fullQuery)}`;
 
     const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('データの取得に失敗しました');
-    }
+    if (!response.ok) throw new Error('データの取得に失敗しました');
 
     const data = await response.json();
-    return data.result;
+
+    // 結果をフラット化してマップ化
+    const allItems = data.result.flat();
+    const itemMap = {};
+    allItems.forEach(item => {
+      itemMap[`${item._type}:${item.slug}`] = item;
+    });
+
+    // ITEMSの順序で並べ直す
+    return ITEMS.map(item => itemMap[`${item.type}:${item.slug}`]).filter(Boolean);
   }
 
   // ============================================
@@ -239,55 +272,30 @@
     if (diffDays < 7) return `${diffDays}日前`;
     if (diffDays < 30) return `${Math.floor(diffDays / 7)}週間前`;
 
-    return date.toLocaleDateString('ja-JP', { month: 'short', day: 'numeric' });
+    return `${date.getMonth() + 1}/${date.getDate()}`;
   }
 
   // ============================================
-  // タイプ別設定
+  // アイテムHTML生成
   // ============================================
-  function getTypeConfig(type) {
-    const configs = {
-      lesson: {
-        label: 'レッスン',
-        badgeClass: 'sanity-card__badge--lesson',
-        pathPrefix: '/lessons/',
-        emoji: '📚',
-      },
-      article: {
-        label: '記事',
-        badgeClass: 'sanity-card__badge--article',
-        pathPrefix: '/articles/',
-        emoji: '📝',
-      },
-      knowledge: {
-        label: 'ナレッジ',
-        badgeClass: 'sanity-card__badge--knowledge',
-        pathPrefix: '/knowledge/',
-        emoji: '💡',
-      },
-    };
-    return configs[type] || configs.lesson;
-  }
-
-  // ============================================
-  // カードHTML生成
-  // ============================================
-  function createCard(item) {
-    const typeConfig = getTypeConfig(item._type);
+  function createItemHtml(item) {
+    const typeConfig = TYPE_CONFIG[item._type] || TYPE_CONFIG.lesson;
     const thumbnailUrl = getSanityImageUrl(item.thumbnail) || item.thumbnailUrl || item.iconImageUrl;
     const link = `${CONFIG.BASE_URL}${typeConfig.pathPrefix}${item.slug}`;
 
-    const thumbnailHtml = thumbnailUrl
-      ? `<img class="sanity-card__thumbnail" src="${thumbnailUrl}" alt="${item.title}" loading="lazy">`
-      : `<div class="sanity-card__thumbnail sanity-card__thumbnail--placeholder">${typeConfig.emoji}</div>`;
+    const thumbHtml = thumbnailUrl
+      ? `<img class="sanity-item__thumb" src="${thumbnailUrl}" alt="" loading="lazy">`
+      : `<div class="sanity-item__thumb sanity-item__thumb--placeholder">${typeConfig.emoji}</div>`;
 
     return `
-      <a href="${link}" target="_blank" rel="noopener" class="sanity-card">
-        ${thumbnailHtml}
-        <div class="sanity-card__body">
-          <span class="sanity-card__badge ${typeConfig.badgeClass}">${typeConfig.label}</span>
-          <h3 class="sanity-card__title">${item.title}</h3>
-          <div class="sanity-card__date">${formatDate(item._updatedAt)}</div>
+      <a href="${link}" target="_blank" rel="noopener" class="sanity-item">
+        ${thumbHtml}
+        <div class="sanity-item__content">
+          <div class="sanity-item__meta">
+            <span class="sanity-item__badge ${typeConfig.badgeClass}">${typeConfig.label}</span>
+            <span class="sanity-item__date">${formatDate(item._updatedAt)}</span>
+          </div>
+          <h3 class="sanity-item__title">${item.title}</h3>
         </div>
       </a>
     `;
@@ -300,7 +308,6 @@
     const container = document.getElementById('sanity-updates-container');
     if (!container) return;
 
-    // ローディング表示
     container.innerHTML = `
       <div class="sanity-updates">
         <div class="sanity-updates__loading">読み込み中...</div>
@@ -308,7 +315,7 @@
     `;
 
     try {
-      const items = await fetchLatestContent();
+      const items = await fetchItems();
 
       if (!items || items.length === 0) {
         container.innerHTML = `
@@ -319,23 +326,18 @@
         return;
       }
 
-      const cardsHtml = items.map(createCard).join('');
+      const itemsHtml = items.map(createItemHtml).join('');
 
       container.innerHTML = `
         <div class="sanity-updates">
-          <div class="sanity-updates__header">
-            <h2 class="sanity-updates__title">${CONFIG.SECTION_TITLE}</h2>
-            <a href="${CONFIG.BASE_URL}/lessons" target="_blank" rel="noopener" class="sanity-updates__more">
-              ${CONFIG.MORE_LINK_TEXT}
-            </a>
-          </div>
-          <div class="sanity-updates__grid">
-            ${cardsHtml}
+          <h2 class="sanity-updates__title">${CONFIG.SECTION_TITLE}</h2>
+          <div class="sanity-list">
+            ${itemsHtml}
           </div>
         </div>
       `;
     } catch (error) {
-      console.error('Sanity更新取得エラー:', error);
+      console.error('Sanity取得エラー:', error);
       container.innerHTML = `
         <div class="sanity-updates">
           <div class="sanity-updates__error">コンテンツの読み込みに失敗しました</div>
@@ -344,7 +346,6 @@
     }
   }
 
-  // ページ読み込み完了時に実行
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', render);
   } else {
