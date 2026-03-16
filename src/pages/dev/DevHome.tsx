@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -50,6 +50,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/guide-pattern-f',
     icon: <Compass className="w-8 h-8" />,
     tags: ['Guide', 'Career', 'Articles', 'FAQ', 'Pattern-E']
+  },
+  {
+    title: 'Webflow Embed',
+    description: 'Webflow（bo-no.design）に埋め込む最新コンテンツ表示コード。設定確認とプレビュー。',
+    path: '/dev/webflow-embed',
+    icon: <Globe className="w-8 h-8" />,
+    tags: ['Webflow', 'Sanity', 'Embed', 'Integration']
   },
 ];
 
