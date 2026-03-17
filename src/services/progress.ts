@@ -13,6 +13,7 @@ export interface ArticleProgress {
 
 /**
  * 記事を完了状態にする（トグル）
+ * upsertパターンを使用してレース条件を防止
  * @param articleId 記事ID (Sanity article._id)
  * @param lessonId レッスンID (Sanity lesson._id)
  * @returns {success: boolean, isCompleted: boolean}
@@ -36,61 +37,42 @@ export async function toggleArticleCompletion(
     // 2. 既存の進捗を確認
     const { data: existing } = await supabase
       .from('article_progress')
-      .select('*')
+      .select('status')
       .eq('user_id', user.id)
       .eq('article_id', articleId)
       .maybeSingle();
 
-    if (existing && existing.status === 'completed') {
-      // 既に完了済み → 未完了に戻す
-      const { error } = await supabase
-        .from('article_progress')
-        .update({
-          status: 'not_started',
-          completed_at: null,
-        })
-        .eq('user_id', user.id)
-        .eq('article_id', articleId);
+    const now = new Date().toISOString();
+    const isCurrentlyCompleted = existing?.status === 'completed';
+    const newStatus = isCurrentlyCompleted ? 'not_started' : 'completed';
+    const newCompletedAt = isCurrentlyCompleted ? null : now;
 
-      if (error) throw error;
+    // 3. upsertで原子的に更新/挿入（レース条件を防止）
+    const { error } = await supabase
+      .from('article_progress')
+      .upsert(
+        {
+          user_id: user.id,
+          article_id: articleId,
+          lesson_id: lessonId,
+          status: newStatus,
+          completed_at: newCompletedAt,
+          updated_at: now,
+        },
+        {
+          onConflict: 'user_id,article_id',
+        }
+      );
 
+    if (error) throw error;
+
+    if (isCurrentlyCompleted) {
       toast({
         title: '未完了に戻しました',
         description: 'この記事を未完了にしました',
       });
       return { success: true, isCompleted: false };
-    } else if (existing) {
-      // 進行中 → 完了にする
-      const { error } = await supabase
-        .from('article_progress')
-        .update({
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-        })
-        .eq('user_id', user.id)
-        .eq('article_id', articleId);
-
-      if (error) throw error;
-
-      toast({
-        title: '完了にしました',
-        description: 'この記事を完了にしました',
-      });
-      return { success: true, isCompleted: true };
     } else {
-      // 未記録 → 完了として新規作成
-      const { error } = await supabase
-        .from('article_progress')
-        .insert({
-          user_id: user.id,
-          article_id: articleId,
-          lesson_id: lessonId,
-          status: 'completed',
-          completed_at: new Date().toISOString(),
-        });
-
-      if (error) throw error;
-
       toast({
         title: '完了にしました',
         description: 'この記事を完了にしました',
