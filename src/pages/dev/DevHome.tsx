@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe, CreditCard } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -57,6 +57,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/webflow-embed',
     icon: <Globe className="w-8 h-8" />,
     tags: ['Webflow', 'Sanity', 'Embed', 'Integration']
+  },
+  {
+    title: 'Roadmap Card',
+    description: 'ロードマップ一覧で使用するカードコンポーネント。グラデーションカラーのバリエーション付き。',
+    path: '/dev/roadmap-card',
+    icon: <CreditCard className="w-8 h-8" />,
+    tags: ['Roadmap', 'Card', 'Component', 'Gradient']
   },
 ];
 

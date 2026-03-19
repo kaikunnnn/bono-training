@@ -68,6 +68,7 @@ import RoadmapPattern16 from "./pages/dev/RoadmapPattern16";
 import RoadmapPattern17 from "./pages/dev/RoadmapPattern17";
 import RoadmapTest from "./pages/dev/RoadmapTest";
 import WebflowEmbed from "./pages/dev/WebflowEmbed";
+import RoadmapCardPreview from "./pages/dev/RoadmapCardPreview";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
@@ -208,6 +209,7 @@ const AppContent = () => {
         <Route path="/dev/roadmap-pattern-17" element={<DevRoute><RoadmapPattern17 /></DevRoute>} />
         <Route path="/dev/roadmap-test" element={<DevRoute><RoadmapTest /></DevRoute>} />
         <Route path="/dev/webflow-embed" element={<DevRoute><WebflowEmbed /></DevRoute>} />
+        <Route path="/dev/roadmap-card" element={<DevRoute><RoadmapCardPreview /></DevRoute>} />
         <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
