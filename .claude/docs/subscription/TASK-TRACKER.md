@@ -1,11 +1,37 @@
 # タスクトラッカー
 
-**最終更新**: 2026-03-17
+**最終更新**: 2026-03-19
 **ステータス**: アクティブ
 
 ---
 
 ## 🔥 現在進行中のプロジェクト
+
+### ロードマップ機能プロジェクト
+
+**ステータス**: 🚀 実装中
+**ブランチ**: `feature/roadmap`
+**開始日**: 2026-03-16
+
+**概要**: 学習ロードマップの一覧・詳細ページ、トップページのUI構成
+
+**ドキュメント**: `.claude/docs/features/roadmap/`
+- [README.md](../features/roadmap/README.md) - 機能概要
+- [components-list.md](../features/roadmap/components-list.md) - 一覧ページ仕様
+- [components-detail.md](../features/roadmap/components-detail.md) - 詳細ページ仕様
+
+**完了タスク**:
+- ~~[x] RoadmapCardコンポーネント実装（6種類グラデーション対応）~~
+- ~~[x] 開発プレビューページ作成（/dev/roadmap-card）~~
+- ~~[x] コンポーネント仕様ドキュメント作成~~
+
+**進行中タスク**:
+- [ ] Figmaデザイン分析・コンポーネント設計
+- [ ] 一覧ページ実装
+- [ ] 詳細ページ実装
+- [ ] トップページUI実装
+
+---
 
 ### セキュリティ監査・改善プロジェクト
 
