@@ -75,7 +75,7 @@ const TrainingGuideSection: React.FC<TrainingGuideSectionProps> = ({
         </div>
 
         {/* Content sections */}
-        <div className="space-y-16">
+        <div className="space-y-16 h-fit">
           {/* Lesson section */}
           {lessonCard && (
             <div className="space-y-3">

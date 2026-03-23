@@ -9,6 +9,8 @@ import { Menu } from "lucide-react";
 interface LayoutProps {
   children: React.ReactNode;
   className?: string;
+  /** ヒーロー背景グラデーション（サイドバー含む全幅に適用） */
+  heroBackground?: boolean;
 }
 
 /**
@@ -16,13 +18,23 @@ interface LayoutProps {
  * デスクトップ: 左にSidebar（200px）、右にメインコンテンツ
  * モバイル: ハンバーガーメニューでSidebar開閉
  */
-const Layout = ({ children, className }: LayoutProps) => {
+const Layout = ({ children, className, heroBackground }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   return (
-    <div className={cn("min-h-screen flex bg-base", className)}>
+    <div className={cn("min-h-screen flex bg-base relative", className)}>
+      {/* ヒーロー背景グラデーション（サイドバー含む全幅） */}
+      {heroBackground && (
+        <div
+          className="absolute inset-x-0 top-0 h-[600px] sm:h-[700px] lg:h-[800px] pointer-events-none z-0"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(226, 232, 228, 0.6) 0%, rgba(242, 243, 240, 0.3) 50%, transparent 100%)",
+          }}
+        />
+      )}
       {/* デスクトップ用サイドバー（1024px以上） */}
-      <aside className="hidden lg:block fixed left-0 top-0 h-screen">
+      <aside className="hidden lg:block fixed left-0 top-0 h-screen z-10">
         <Sidebar />
       </aside>
 
@@ -46,8 +58,8 @@ const Layout = ({ children, className }: LayoutProps) => {
         </Sheet>
       </div>
 
-      {/* メインコンテンツエリア */}
-      <div className="flex-1 flex flex-col lg:ml-[200px]">
+      {/* メインコンテンツエリア（グラデーションの上に配置） */}
+      <div className="flex-1 flex flex-col lg:ml-[200px] relative z-[1]">
         <main className="flex-1 pt-16 lg:pt-0">
           {children}
         </main>

@@ -6,6 +6,126 @@
 
 import { client } from "@/lib/sanity";
 import type { RoadmapLesson } from "@/types/roadmap";
+import type {
+  SanityRoadmapDetail,
+  SanityRoadmapListItem,
+  SanityRelatedRoadmap,
+} from "@/types/sanity-roadmap";
+
+// ============================================
+// ロードマップ取得（Sanityスキーマ対応）
+// ============================================
+
+/**
+ * スラッグからロードマップ詳細を取得
+ *
+ * @param slug - ロードマップのスラッグ
+ * @returns ロードマップ詳細情報
+ */
+export async function getSanityRoadmapBySlug(
+  slug: string
+): Promise<SanityRoadmapDetail | null> {
+  const query = `
+    *[_type == "roadmap" && slug.current == $slug && isPublished == true][0] {
+      _id,
+      title,
+      slug,
+      description,
+      tagline,
+      "thumbnailUrl": thumbnail.asset->url,
+      gradientPreset,
+      estimatedDuration,
+      howToNavigate,
+      changingLandscape {
+        description,
+        items[] {
+          title,
+          description
+        }
+      },
+      interestingPerspectives {
+        description,
+        items[] {
+          title,
+          description
+        }
+      },
+      steps[] {
+        _key,
+        title,
+        goals,
+        sections[] {
+          _key,
+          title,
+          description,
+          contents[]-> {
+            _id,
+            _type,
+            title,
+            slug,
+            description,
+            "thumbnailUrl": thumbnail.asset->url,
+            "iconImageUrl": iconImage.asset->url,
+            gradientPreset,
+            estimatedDuration,
+            "stepCount": count(steps)
+          }
+        }
+      }
+    }
+  `;
+
+  return client.fetch<SanityRoadmapDetail | null>(query, { slug });
+}
+
+/**
+ * 全ロードマップを取得（一覧用）
+ *
+ * @returns ロードマップ一覧
+ */
+export async function getAllSanityRoadmaps(): Promise<SanityRoadmapListItem[]> {
+  const query = `
+    *[_type == "roadmap" && isPublished == true] | order(order asc) {
+      _id,
+      title,
+      slug,
+      description,
+      "thumbnailUrl": thumbnail.asset->url,
+      gradientPreset,
+      estimatedDuration,
+      "stepCount": count(steps)
+    }
+  `;
+
+  return client.fetch<SanityRoadmapListItem[]>(query);
+}
+
+/**
+ * 関連ロードマップを取得（現在のロードマップを除外）
+ *
+ * @param excludeId - 除外するロードマップID
+ * @param limit - 取得件数（デフォルト: 3）
+ * @returns 関連ロードマップ一覧
+ */
+export async function getRelatedRoadmaps(
+  excludeId: string,
+  limit: number = 3
+): Promise<SanityRelatedRoadmap[]> {
+  const query = `
+    *[_type == "roadmap" && isPublished == true && _id != $excludeId] | order(order asc) [0...$limit] {
+      _id,
+      title,
+      slug,
+      description,
+      "thumbnailUrl": thumbnail.asset->url,
+      gradientPreset,
+      estimatedDuration,
+      "stepCount": count(steps)
+    }
+  `;
+
+  return client.fetch<SanityRelatedRoadmap[]>(query, { excludeId, limit });
+}
 
 // ============================================
 // レッスン取得

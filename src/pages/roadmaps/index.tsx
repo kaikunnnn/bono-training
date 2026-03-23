@@ -2,279 +2,185 @@
  * ロードマップ一覧ページ
  *
  * カテゴリ別にロードマップを一覧表示する
+ * URL遷移型のカテゴリフィルタリング対応
  */
 
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Clock, BookOpen, BookOpenCheck, Check, Palette, Layout as LayoutIcon, Users, Target, FolderOpen, Briefcase } from 'lucide-react';
+import { useParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import PageHeader from '@/components/common/PageHeader';
-import { careerChangeRoadmap } from '@/data/roadmaps/career-change';
-import { uiDesignBeginnerRoadmap } from '@/data/roadmaps/ui-design-beginner';
-import { uiVisualRoadmap } from '@/data/roadmaps/ui-visual';
-import { informationArchitectureRoadmap } from '@/data/roadmaps/information-architecture';
-import { uxDesignRoadmap } from '@/data/roadmaps/ux-design';
-import type { Roadmap } from '@/types/roadmap';
-
-// アイコンマッピング
-const iconMap: Record<string, React.ElementType> = {
-  Target,
-  Palette,
-  Layout: LayoutIcon,
-  Users,
-  BookOpen,
-  BookOpenCheck,
-  Briefcase: FolderOpen,
-  Check,
-};
+import CategoryNav from '@/components/common/CategoryNav';
+import SectionHeading from '@/components/common/SectionHeading';
+import RoadmapCard from '@/components/roadmap/RoadmapCard';
+import DottedDivider from '@/components/common/DottedDivider';
+import type { GradientType } from '@/components/roadmap/RoadmapCard';
 
 // ============================================
-// カテゴリ定義
+// データ定義
 // ============================================
 
-interface RoadmapCategory {
+interface RoadmapData {
+  slug: string;
+  title: string;
+  description: string;
+  thumbnailUrl?: string;
+  stepCount: number;
+  estimatedDuration: string;
+  gradientType: GradientType;
+}
+
+interface CategoryData {
   id: string;
   title: string;
   description: string;
-  icon: React.ElementType;
-  roadmaps: (Roadmap | ComingSoonRoadmap)[];
+  emoji: string;
+  roadmaps: RoadmapData[];
 }
 
-interface ComingSoonRoadmap {
-  isComingSoon: true;
-  title: string;
-  description: string;
-}
-
-const categories: RoadmapCategory[] = [
+// カテゴリデータ
+const CATEGORIES: CategoryData[] = [
   {
     id: 'career',
     title: '転職・キャリアチェンジしたい',
-    description: '未経験からデザイナーへ、または更なるキャリアアップを目指す方向け',
-    icon: Briefcase,
+    description: '未経験からデザイナーへ、キャリアアップを目指したい方向けの地図',
+    emoji: '🚀',
     roadmaps: [
-      careerChangeRoadmap,
       {
-        isComingSoon: true,
-        title: '現役デザイナーのステップアップ転職',
-        description: 'ポートフォリオ強化と面接対策で、より良い環境への転職を実現',
+        slug: 'career-change',
+        title: 'UIUXデザイナー転職ロードマップ',
+        description: '使いやすいUI体験をつくるための表現の基礎を身につけよう。',
+        stepCount: 4,
+        estimatedDuration: '6-9',
+        gradientType: 'galaxy',
       },
     ],
   },
   {
     id: 'user-centered',
-    title: 'ユーザー目線でデザインしたい',
-    description: 'ユーザーの課題を理解し、本当に使われるデザインを作りたい方向け',
-    icon: Users,
+    title: 'ユーザー中心デザインを体系的に身につけたい',
+    description: 'サービス価値とユーザーをつなげるデザインを学ぶ',
+    emoji: '🎯',
     roadmaps: [
-      uxDesignRoadmap,
-      informationArchitectureRoadmap,
       {
-        isComingSoon: true,
-        title: '事業に貢献するデザイン思考',
-        description: 'ビジネス視点でデザインを考え、事業成果に繋げる力を養う',
+        slug: 'ux-design',
+        title: 'UXデザイン基礎習得ロードマップ',
+        description: 'ユーザーの課題を理解し、本当に使われるデザインを作る力を養う。',
+        stepCount: 4,
+        estimatedDuration: '2-3',
+        gradientType: 'sunset',
+      },
+      {
+        slug: 'information-architecture',
+        title: '情報設計ロードマップ',
+        description: '迷わない画面構造を設計する力を身につける。',
+        stepCount: 4,
+        estimatedDuration: '1-2',
+        gradientType: 'ocean',
       },
     ],
   },
   {
     id: 'skill',
-    title: 'スキルの不安を解消したい',
-    description: 'デザインの基礎力を固め、苦手を克服したい方向け',
-    icon: Palette,
+    title: '基礎スキルを体系的に身につけたい',
+    description: 'デザインの基礎を固めたい方向け',
+    emoji: '📚',
     roadmaps: [
-      uiVisualRoadmap,
-      uiDesignBeginnerRoadmap,
+      {
+        slug: 'ui-visual',
+        title: 'UIデザインビジュアル基礎習得ロードマップ',
+        description: '使いやすいUI体験をつくるための表現の基礎を身につけよう。',
+        stepCount: 4,
+        estimatedDuration: '1-2',
+        gradientType: 'teal',
+      },
+      {
+        slug: 'ui-design-beginner',
+        title: 'Figma基礎習得ロードマップ',
+        description: 'Figmaの基本操作から応用テクニックまで。',
+        stepCount: 4,
+        estimatedDuration: '1-2',
+        gradientType: 'rose',
+      },
     ],
   },
 ];
 
-// ============================================
-// ヘルパー関数
-// ============================================
-
-function isComingSoon(roadmap: Roadmap | ComingSoonRoadmap): roadmap is ComingSoonRoadmap {
-  return 'isComingSoon' in roadmap && roadmap.isComingSoon === true;
-}
+// ナビゲーションアイテム生成（カウントなし）
+const NAV_ITEMS = [
+  { label: 'すべて', href: '/roadmaps' },
+  ...CATEGORIES.map((cat) => ({
+    label: cat.title,
+    href: `/roadmaps/category/${cat.id}`,
+  })),
+];
 
 // ============================================
 // メインコンポーネント
 // ============================================
 
 export default function RoadmapListPage() {
+  const { categoryId } = useParams<{ categoryId?: string }>();
+
+  // フィルタリング
+  const displayCategories = categoryId
+    ? CATEGORIES.filter((cat) => cat.id === categoryId)
+    : CATEGORIES;
+
   return (
     <Layout>
-      <div className="min-h-screen bg-base">
-        {/* メインコンテンツ */}
-        <main className="max-w-[1000px] mx-auto px-4 sm:px-6 py-8">
+      <div className="min-h-screen bg-[#f9f9f7]">
+        <main className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8">
           {/* ページヘッダー */}
           <PageHeader
-            label="Roadmap"
+            label="変化への地図"
             title="ロードマップ"
-            description="目標に合わせて体系的に学べるロードマップ。何から始めればいいか迷ったら、ロードマップに沿って進めましょう。"
+            description="目標に合ったロードマップを選んで、デザインの探求をはじめよう！"
           />
 
-          {/* カテゴリ別ロードマップ一覧 */}
-          <div>
-            {categories.map((category, index) => (
-              <CategorySection key={category.id} category={category} />
+          {/* カテゴリナビゲーション */}
+          <div className="mb-8">
+            <CategoryNav items={NAV_ITEMS} />
+          </div>
+
+          {/* カテゴリ別セクション */}
+          <div className="flex flex-col gap-12">
+            {displayCategories.map((category, index) => (
+              <React.Fragment key={category.id}>
+                {/* セクション区切り線（最初以外） */}
+                {index > 0 && <DottedDivider />}
+
+                {/* セクション */}
+                <section className="flex flex-col gap-8">
+                  <SectionHeading
+                    title={category.title}
+                    description={category.description}
+                    descriptionStyle="badge"
+                    showUnderline={false}
+                  />
+
+                  {/* カードグリッド */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
+                    {category.roadmaps.map((roadmap) => (
+                      <RoadmapCard
+                        key={roadmap.slug}
+                        slug={roadmap.slug}
+                        title={roadmap.title}
+                        description={roadmap.description}
+                        thumbnailUrl={roadmap.thumbnailUrl}
+                        stepCount={roadmap.stepCount}
+                        stepUnit="つ"
+                        estimatedDuration={roadmap.estimatedDuration}
+                        durationUnit="ヶ月"
+                        gradientType={roadmap.gradientType}
+                      />
+                    ))}
+                  </div>
+                </section>
+              </React.Fragment>
             ))}
           </div>
         </main>
       </div>
     </Layout>
-  );
-}
-
-// ============================================
-// カテゴリセクション
-// ============================================
-
-interface CategorySectionProps {
-  category: RoadmapCategory;
-}
-
-function CategorySection({ category }: CategorySectionProps) {
-  const Icon = category.icon;
-
-  return (
-    <section className="mb-12">
-      {/* カテゴリヘッダー */}
-      <div className="mb-5">
-        <div className="flex items-center gap-2 mb-1">
-          <Icon className="w-5 h-5 text-gray-400" />
-          <h2 className="text-[18px] font-bold text-gray-900">
-            {category.title}
-          </h2>
-        </div>
-        <p className="text-[14px] text-gray-500 ml-7">
-          {category.description}
-        </p>
-      </div>
-
-      {/* ロードマップカード */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        {category.roadmaps.map((roadmap, i) => (
-          <RoadmapCard
-            key={isComingSoon(roadmap) ? `coming-${i}` : (roadmap as Roadmap).id}
-            roadmap={roadmap}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-// ============================================
-// ロードマップカード
-// ============================================
-
-interface RoadmapCardProps {
-  roadmap: Roadmap | ComingSoonRoadmap;
-}
-
-function RoadmapCard({ roadmap }: RoadmapCardProps) {
-  if (isComingSoon(roadmap)) {
-    return (
-      <div className="bg-gray-50 border border-gray-200 border-dashed rounded-2xl p-6 relative overflow-hidden">
-        <div className="absolute top-4 right-4">
-          <span className="text-[11px] font-medium text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
-            Coming Soon
-          </span>
-        </div>
-        <div className="pt-4">
-          <h3 className="text-[18px] font-bold text-gray-400 mb-2">
-            {roadmap.title}
-          </h3>
-          <p className="text-[14px] text-gray-400 leading-relaxed">
-            {roadmap.description}
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  const rm = roadmap as Roadmap;
-
-  return (
-    <Link
-      to={`/roadmaps/${rm.slug}`}
-      className="block group"
-    >
-      <div className="relative border border-[#e8e8e8] rounded-2xl overflow-hidden transition-all hover:border-[#d0d0d0] hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
-        {/* ヘッダー: グラデーション背景 */}
-        <div className={`bg-gradient-to-br ${rm.gradientColors || 'from-gray-600 to-gray-800'} px-6 py-5`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <span className="text-[10px] font-medium tracking-[0.2em] text-white/70 uppercase block mb-1">
-                Roadmap
-              </span>
-              <h2 className="text-[20px] md:text-[22px] font-bold text-white">
-                {rm.title}
-              </h2>
-              {rm.subtitle && (
-                <p className="text-[13px] text-white/80 mt-1">{rm.subtitle}</p>
-              )}
-            </div>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-              <ArrowRight className="w-5 h-5 text-white group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </div>
-        </div>
-
-        {/* コンテンツ部分 */}
-        <div className="bg-white px-6 py-5">
-          {/* Stats */}
-          <div className="flex items-center gap-6 mb-4">
-            <div className="flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-[#999]" />
-              <span className="text-[13px] text-[#666]">
-                <strong className="text-[#1a1a1a]">{rm.stats.stepsCount}</strong> ステップ
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <BookOpenCheck className="w-4 h-4 text-[#999]" />
-              <span className="text-[13px] text-[#666]">
-                <strong className="text-[#1a1a1a]">{rm.stats.lessonsCount}</strong> レッスン
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-[#999]" />
-              <span className="text-[13px] text-[#666]">
-                <strong className="text-[#1a1a1a]">{rm.stats.duration}</strong>
-              </span>
-            </div>
-          </div>
-
-          {/* 説明 */}
-          <p className="text-[14px] text-[#666] leading-[1.7] line-clamp-2">
-            {rm.description}
-          </p>
-
-          {/* 得られるもの（最初の2つだけ表示） */}
-          {rm.benefits && rm.benefits.length > 0 && (
-            <div className="mt-4 pt-4 border-t border-[#f0f0f0]">
-              <div className="flex items-center gap-4 flex-wrap">
-                {rm.benefits.slice(0, 2).map((benefit, i) => {
-                  const IconComponent = iconMap[benefit.icon] || Check;
-                  return (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full bg-[#f5533e]/10 flex items-center justify-center">
-                        <IconComponent className="w-3 h-3 text-[#f5533e]" />
-                      </div>
-                      <span className="text-[12px] text-[#666]">{benefit.title}</span>
-                    </div>
-                  );
-                })}
-                {rm.benefits.length > 2 && (
-                  <span className="text-[12px] text-[#999]">
-                    +{rm.benefits.length - 2}
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </Link>
   );
 }
