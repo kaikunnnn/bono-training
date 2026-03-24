@@ -13,6 +13,8 @@ interface SectionHeadingProps {
   descriptionStyle?: "text" | "badge";
   /** 下線を表示するか（デフォルト: true） */
   showUnderline?: boolean;
+  /** テキストの配置（デフォルト: left） */
+  align?: "left" | "center";
   /** 追加のクラス名 */
   className?: string;
 }
@@ -38,10 +40,13 @@ export default function SectionHeading({
   description,
   descriptionStyle = "text",
   showUnderline = true,
+  align = "left",
   className,
 }: SectionHeadingProps) {
+  const alignClass = align === "center" ? "items-center text-center" : "items-start";
+
   return (
-    <div className={cn("flex flex-col gap-3", className)}>
+    <div className={cn("flex flex-col gap-3", alignClass, className)}>
       {/* ラベル + タイトル */}
       <div className="flex flex-col gap-2">
         {/* ラベル（任意） */}
