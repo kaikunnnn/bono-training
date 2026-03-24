@@ -78,17 +78,28 @@ async function fetchRoadmapBySlug(slug: string): Promise<SanityRoadmapDetail | n
         _key,
         title,
         description,
-        contents[]-> {
-          _id,
-          _type,
-          title,
-          slug,
-          description,
-          "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-          "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
-          // ロードマップ用フィールド
-          gradientPreset,
-          estimatedDuration
+        contents[]{
+          // 参照型（lesson, roadmap）の場合
+          _type == "reference" => @->{
+            _id,
+            _type,
+            title,
+            slug,
+            description,
+            "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+            "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+            gradientPreset,
+            estimatedDuration
+          },
+          // 外部リンクの場合
+          _type == "externalLink" => {
+            _key,
+            _type,
+            url,
+            title,
+            description,
+            thumbnailUrl
+          }
         }
       }
     }
@@ -136,17 +147,28 @@ async function fetchAllRoadmapsWithDetails(): Promise<SanityRoadmapDetail[]> {
         _key,
         title,
         description,
-        contents[]-> {
-          _id,
-          _type,
-          title,
-          slug,
-          description,
-          "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-          "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
-          // ロードマップ用フィールド
-          gradientPreset,
-          estimatedDuration
+        contents[]{
+          // 参照型（lesson, roadmap）の場合
+          _type == "reference" => @->{
+            _id,
+            _type,
+            title,
+            slug,
+            description,
+            "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+            "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+            gradientPreset,
+            estimatedDuration
+          },
+          // 外部リンクの場合
+          _type == "externalLink" => {
+            _key,
+            _type,
+            url,
+            title,
+            description,
+            thumbnailUrl
+          }
         }
       }
     }

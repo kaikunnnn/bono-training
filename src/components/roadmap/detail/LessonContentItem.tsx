@@ -6,11 +6,11 @@
 
 import { Link } from "react-router-dom";
 import { ChevronRight, BookOpen } from "lucide-react";
-import type { SanitySectionContent } from "@/types/sanity-roadmap";
+import type { SanityReferenceContent } from "@/types/sanity-roadmap";
 
 interface LessonContentItemProps {
   /** コンテンツデータ */
-  content: SanitySectionContent;
+  content: SanityReferenceContent;
 }
 
 export default function LessonContentItem({ content }: LessonContentItemProps) {

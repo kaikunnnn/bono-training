@@ -62,8 +62,8 @@ export interface SanityInterestingPerspectives {
 // カリキュラム構造
 // ============================================
 
-/** セクション内のコンテンツ（レッスンまたはロードマップ参照） */
-export interface SanitySectionContent {
+/** Sanity参照コンテンツ（レッスンまたはロードマップ） */
+export interface SanityReferenceContent {
   _id: string;
   _type: "lesson" | "roadmap";
   title: string;
@@ -79,6 +79,19 @@ export interface SanitySectionContent {
   /** ロードマップの場合のステップ数 */
   stepCount?: number;
 }
+
+/** 外部リンクコンテンツ */
+export interface SanityExternalLink {
+  _key: string;
+  _type: "externalLink";
+  url: string;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+}
+
+/** セクション内のコンテンツ（参照または外部リンク） */
+export type SanitySectionContent = SanityReferenceContent | SanityExternalLink;
 
 /** セクション */
 export interface SanityRoadmapSection {

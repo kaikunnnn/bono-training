@@ -265,9 +265,56 @@ export default defineType({
                           type: "reference",
                           to: [{ type: "lesson" }, { type: "roadmap" }],
                         },
+                        {
+                          type: "object",
+                          name: "externalLink",
+                          title: "外部リンク",
+                          icon: () => "🔗",
+                          fields: [
+                            defineField({
+                              name: "url",
+                              title: "URL",
+                              type: "url",
+                              description: "リンク先URL（外部サイト・内部ページ両方可）",
+                              validation: (Rule) => Rule.required(),
+                            }),
+                            defineField({
+                              name: "title",
+                              title: "タイトル",
+                              type: "string",
+                              description: "表示するタイトル",
+                              validation: (Rule) => Rule.required(),
+                            }),
+                            defineField({
+                              name: "description",
+                              title: "説明文",
+                              type: "text",
+                              rows: 2,
+                              description: "リンクの説明（任意）",
+                            }),
+                            defineField({
+                              name: "thumbnailUrl",
+                              title: "サムネイルURL",
+                              type: "url",
+                              description: "サムネイル画像のURL（任意）",
+                            }),
+                          ],
+                          preview: {
+                            select: {
+                              title: "title",
+                              url: "url",
+                            },
+                            prepare({ title, url }) {
+                              return {
+                                title: title || "リンク未設定",
+                                subtitle: url || "",
+                              };
+                            },
+                          },
+                        },
                       ],
                       description:
-                        "このセクションに含まれるレッスンまたはロードマップ（特大ロードマップ用）",
+                        "レッスン・ロードマップの参照、または外部リンクを追加",
                     }),
                   ],
                   preview: {

@@ -4,8 +4,13 @@
  * Figma: PRD🏠_Roadmap_2026 node-id 1-5598
  */
 
-import type { SanityRoadmapSection } from "@/types/sanity-roadmap";
+import type {
+  SanityRoadmapSection,
+  SanityReferenceContent,
+  SanityExternalLink,
+} from "@/types/sanity-roadmap";
 import LessonContentItem from "./LessonContentItem";
+import ExternalLinkCard from "./ExternalLinkCard";
 import RoadmapCardV2, { type GradientPreset } from "@/components/roadmap/RoadmapCardV2";
 
 interface CurriculumSectionBlockProps {
@@ -46,24 +51,39 @@ export default function CurriculumSectionBlock({
       {section.contents && section.contents.length > 0 && (
         <div className="space-y-4">
           {section.contents.map((content) => {
-            if (content._type === "roadmap") {
+            // 外部リンクの場合
+            if (content._type === "externalLink") {
+              return (
+                <ExternalLinkCard
+                  key={content._key}
+                  link={content as SanityExternalLink}
+                />
+              );
+            }
+
+            // 参照型の場合（lesson, roadmap）
+            const refContent = content as SanityReferenceContent;
+
+            if (refContent._type === "roadmap") {
               return (
                 <RoadmapCardV2
-                  key={content._id}
-                  slug={content.slug.current}
-                  title={content.title}
-                  description={content.description || ""}
-                  thumbnailUrl={content.thumbnailUrl}
-                  estimatedDuration={content.estimatedDuration || "1-2"}
-                  gradientPreset={(content.gradientPreset as GradientPreset) || "teal"}
+                  key={refContent._id}
+                  slug={refContent.slug.current}
+                  title={refContent.title}
+                  description={refContent.description || ""}
+                  thumbnailUrl={refContent.thumbnailUrl}
+                  estimatedDuration={refContent.estimatedDuration || "1-2"}
+                  gradientPreset={(refContent.gradientPreset as GradientPreset) || "teal"}
                   orientation="horizontal"
                 />
               );
             }
+
+            // レッスンの場合
             return (
               <LessonContentItem
-                key={content._id}
-                content={content}
+                key={refContent._id}
+                content={refContent}
               />
             );
           })}
