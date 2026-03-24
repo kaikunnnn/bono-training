@@ -30,8 +30,8 @@ export default function ExternalLinkCard({ link }: ExternalLinkCardProps) {
 
   const cardContent = (
     <>
-      {/* サムネイル画像 */}
-      <div className="flex-shrink-0 w-[106px] h-[106px] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200">
+      {/* サムネイル画像 - OGP比率 1.91:1 */}
+      <div className="flex-shrink-0 w-[160px] aspect-[1.91/1] overflow-hidden rounded-lg bg-gradient-to-br from-gray-100 to-gray-200">
         {link.thumbnailUrl ? (
           <img
             src={link.thumbnailUrl}
