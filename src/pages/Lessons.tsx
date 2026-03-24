@@ -8,109 +8,172 @@ import { useLessons } from "@/hooks/useLessons";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import PageHeader from "@/components/common/PageHeader";
 import LessonCard from "@/components/lessons/LessonCard";
+import SectionHeading from "@/components/common/SectionHeading";
 import { Lesson } from "@/types/lesson";
 import { SanityLesson } from "@/types/sanity";
 
-// セクション定義（親カテゴリ：分野、中カテゴリ：なりたい状態）
-const SECTIONS = [
+// セクション定義
+// タブ順序: すべて → 進め方 → UIデザイン → UXデザイン → キャリア → AI → ビジュアル → Figma → ラジオ
+interface SubSection {
+  id: string;
+  label: string;  // 補足（例: "実務・プロセス"）
+  title: string;  // セクション名（例: "1本目立ち回り / デザインサイクル"）
+  lessonTitles: string[];  // このセクションに属するレッスンタイトル（部分一致）
+}
+
+interface Section {
+  id: string;
+  label: string;
+  subSections: SubSection[];
+  categories: string[];  // Sanityカテゴリとのマッチング用
+}
+
+const SECTIONS: Section[] = [
   {
-    id: 'visual',
-    label: 'UIデザイン',
-    title: '魅力的なビジュアルを作れるようになる',
-    description: 'UIデザインの基礎、タイポグラフィ、配色など、美しい見た目を作るためのスキル。',
-    priorityTitles: [
-      'UI Visual 基礎',
-      '0から始まる UI Visual',
-      'グラフィック入門',
-      'UIがうまくなる人のデザインサイクル',
-      'センスを盗む技術',
-      'UIタイポグラフィ入門'
+    id: 'process',
+    label: '進め方',
+    subSections: [
+      {
+        id: 'cycle',
+        label: '実務・プロセス',
+        title: '1本目立ち回り / デザインサイクル',
+        lessonTitles: ['デザインサイクル', '1年目の立ち回り']
+      },
+      {
+        id: 'basics',
+        label: '入門・基礎',
+        title: 'ゼロから情報・デザインの基本の進め方を習得',
+        lessonTitles: ['ゼロからはじめる', 'はじめての']
+      }
     ],
-    categories: [
-      'UIデザイン', 'UI', 'ui', 'Ui', 
-      'ビジュアル', 'Visual', 'visual', 
-      'グラフィック', 'Graphic', 'graphic', 
-      '配色', 'Color', 'color', 
-      'タイポグラフィ', 'Typography', 'typography', 
-      '文字', 'フォント', 
-      'あしらい', '装飾', 
-      'UIビジュアル', '見た目', '表現',
-      '基本の進め方'
-    ]
+    categories: []  // BONOカテゴリは「その他」へ
   },
   {
-    id: 'ia',
-    label: '情報設計',
-    title: '迷わない画面構造を作れるようになる',
-    description: 'ユーザーが迷わず目的を達成できる画面遷移や、情報の整理整頓（IA）を学ぶスキル。',
-    priorityTitles: [
-      '使いやすい UI の秘密',
-      '3 構造で始める UI デザイン入門',
-      '0から始める UI 情報設計',
-      'コンテンツ中心の UI 設計',
-      'UIデザインの基本',
-      'ナビゲーション UI の基本'
+    id: 'ui',
+    label: 'UIデザイン',
+    subSections: [
+      {
+        id: 'style',
+        label: 'スタイル',
+        title: 'UIのつくり方をはじめよう',
+        lessonTitles: ['UIビジュアル', 'UIタイポグラフィ', 'UIトレース', 'Webデザインの組み立て', '実装とデザイン']
+      },
+      {
+        id: 'ia',
+        label: '情報設計・IA',
+        title: '情報設計・使いやすいUIづくりの方法論',
+        lessonTitles: ['使いやすいUI', '3構造', 'OOUI', 'UIデザインの基本', 'ナビゲーションUI', 'UIアイデア', 'UI PATTERN', '目的達成', '情報設計']
+      },
+      {
+        id: 'components',
+        label: 'コンポーネント・構造',
+        title: 'UIの詳細・UIの仕組みと構造',
+        lessonTitles: ['マテリアルデザイン', 'Material Design', 'Material You']
+      },
+      {
+        id: 'practice',
+        label: 'ハンズオン',
+        title: '実践・課題',
+        lessonTitles: ['DailyUI', '賃貸アプリ', '出張申請']
+      }
     ],
-    categories: [
-      '情報設計', 'IA', 'Information', 'アーキテクチャ',
-      'ワイヤーフレーム', 'Wireframe', 'wireframe',
-      'プロトタイピング', 'Prototyping', 'prototype',
-      '画面設計', '構造', '骨組み', 'UI設計',
-      '遷移', 'ナビゲーション'
-    ]
+    categories: ['UI', '情報設計']
   },
   {
     id: 'ux',
     label: 'UXデザイン',
-    title: 'ユーザー体験を設計できるようになる',
-    description: 'ユーザーインタビューやリサーチを通じて、本当に求められる価値を見つけ出すスキル。',
-    priorityTitles: [
-      'ゼロから始めるユーザーインタビュー',
-      'UXデザインって何',
-      '初めてのUXデザイン'
+    subSections: [
+      {
+        id: 'experience',
+        label: '体験設計',
+        title: 'UXデザイン・ユーザーに合った体験を設計',
+        lessonTitles: ['UXデザイン', '顧客体験', 'サービスをデザイン']
+      },
+      {
+        id: 'research',
+        label: 'リサーチ・分析',
+        title: 'UXリサーチ / 課題分析・ユーザー理解で問いを解こう',
+        lessonTitles: ['ユーザーインタビュー', 'FAILURE POINT', '商品ページ改善']
+      }
     ],
-    categories: [
-      'UXデザイン', 'UX', 'ux', 'Ux', 
-      'リサーチ', 'Research', 'research', 
-      'ユーザー', '体験', '顧客価値', 'ユーザー理解',
-      '課題発見', '仮説検証', 'ペルソナ', 'ジャーニーマップ'
-    ]
-  },
-  {
-    id: 'figma',
-    label: 'Figma',
-    title: 'プロの道具を使いこなせるようになる',
-    description: 'Figmaの基本操作から応用テクニックまで、効率的にデザインするためのツールスキル。',
-    priorityTitles: [], // 指定があれば追加
-    categories: [
-      'Figma', 'figma', 'FIGMA', 
-      'ツール', 'Tool', 'tool', 
-      '操作', '使い方', 
-      'プロトタイプ', 
-      '実装', 'ハンドオフ', 'オートレイアウト'
-    ]
+    categories: ['UX']
   },
   {
     id: 'career',
     label: 'キャリア',
-    title: 'デザイナーとしてキャリアを切り開く',
-    description: 'ポートフォリオ制作、面接対策、マインドセットなど、プロとして活躍するための知識。',
-    priorityTitles: [], // 指定があれば追加
-    categories: [
-      'キャリア', 'Career', 'career', 
-      'ポートフォリオ', 'Portfolio', 'portfolio', 
-      '未経験', '転職', '就職', '採用', 
-      '面接', 'マインドセット', '考え方', 
-      '働き方', '仕事'
-    ]
+    subSections: [
+      {
+        id: 'job',
+        label: '転職・キャリア',
+        title: 'ポートフォリオ / 会社の選び方・転職に必要なヒント',
+        lessonTitles: ['ポートフォリオ', 'デザイナーになる条件', 'キャリア相談', '勉強会']
+      }
+    ],
+    categories: ['キャリア']
+  },
+  {
+    id: 'ai',
+    label: 'AI',
+    subSections: [
+      {
+        id: 'ai-design',
+        label: 'AI関連',
+        title: 'AI×デザイン',
+        lessonTitles: ['AI×UI', 'AIリサーチ', 'プロトタイプ']
+      }
+    ],
+    categories: []
+  },
+  {
+    id: 'visual',
+    label: 'ビジュアル',
+    subSections: [
+      {
+        id: 'graphic',
+        label: 'グラフィック・訴求',
+        title: 'バナー・すべてに通じる伝え方を磨く',
+        lessonTitles: ['グラフィック入門', 'バナーデザイン']
+      },
+      {
+        id: 'mood',
+        label: 'ムード・トーン',
+        title: '空気のつくり方・雰囲気のつくり方',
+        lessonTitles: ['センスを盗む']
+      }
+    ],
+    categories: []
+  },
+  {
+    id: 'figma',
+    label: 'Figma',
+    subSections: [
+      {
+        id: 'figma-basics',
+        label: 'ツール操作',
+        title: 'Figmaの使い方',
+        lessonTitles: ['Figmaの使い方']
+      }
+    ],
+    categories: ['Figma']
+  },
+  {
+    id: 'radio',
+    label: 'ラジオ',
+    subSections: [
+      {
+        id: 'radio-content',
+        label: '',  // セクション名なし（README仕様）
+        title: '',  // カテゴリ直下にレッスン表示
+        lessonTitles: ['BONOラジオ']
+      }
+    ],
+    categories: []
   },
   {
     id: 'others',
     label: 'その他',
-    title: 'Other Topics',
-    description: 'その他のトピック',
-    priorityTitles: [],
-    categories: [] 
+    subSections: [],
+    categories: []
   }
 ];
 
@@ -123,102 +186,105 @@ export default function Lessons() {
   // URLパラメータからアクティブなタブを決定（デフォルトは"all"）
   const activeTab = categoryId || 'all';
 
-  // カテゴリごとにグルーピング
+  // レッスンをセクション・サブセクションごとにグルーピング
   const groupedLessons = useMemo(() => {
     if (!lessons) return {};
-    
-    const groups: Record<string, SanityLesson[]> = {};
-    
-    // セクションIDで初期化
+
+    // セクションID -> サブセクションID -> レッスン配列
+    const groups: Record<string, Record<string, SanityLesson[]>> = {};
+
+    // 初期化
     SECTIONS.forEach(section => {
-      groups[section.id] = [];
+      groups[section.id] = {};
+      section.subSections.forEach(sub => {
+        groups[section.id][sub.id] = [];
+      });
+      // サブセクションがない場合のフォールバック
+      if (section.subSections.length === 0) {
+        groups[section.id]['_default'] = [];
+      }
     });
-    
+
     lessons.forEach((lesson) => {
       const categoryValue =
         typeof lesson.category === "string"
           ? lesson.category
           : lesson.categoryTitle || "";
-          
-      // カテゴリがない場合はその他へ
-      if (!categoryValue) {
-        groups['others'].push(lesson);
-        return;
-      }
 
-      // どのセクションに属するか判定
-      let matchedSectionId = 'others';
-      
-      // 1. 優先タイトルでのマッチングを試行
+      const lessonTitle = lesson.title;
+      let matched = false;
+
+      // 1. サブセクションのlessonTitlesでマッチング
       for (const section of SECTIONS) {
         if (section.id === 'others') continue;
-        
-        // タイトルが部分一致するかチェック（スペース除去や小文字化で柔軟に）
-        const normalizedTitle = lesson.title.toLowerCase().replace(/\s+/g, '');
-        const isPriority = section.priorityTitles?.some(priorityTitle => {
-          const normalizedPriority = priorityTitle.toLowerCase().replace(/\s+/g, '');
-          return normalizedTitle.includes(normalizedPriority);
-        });
 
-        if (isPriority) {
-          matchedSectionId = section.id;
-          break;
+        for (const sub of section.subSections) {
+          const isMatch = sub.lessonTitles.some(t =>
+            lessonTitle.toLowerCase().includes(t.toLowerCase())
+          );
+          if (isMatch) {
+            groups[section.id][sub.id].push(lesson);
+            matched = true;
+            break;
+          }
         }
+        if (matched) break;
       }
 
-      // 2. 優先タイトルでマッチしなかった場合、カテゴリでマッチング
-      if (matchedSectionId === 'others') {
+      // 2. カテゴリでマッチング（サブセクションの最初に追加）
+      if (!matched && categoryValue) {
         for (const section of SECTIONS) {
           if (section.id === 'others') continue;
-          
-          // 部分一致で判定（大文字小文字を区別しない比較も考慮）
-          if (section.categories.some(c => categoryValue.toLowerCase().includes(c.toLowerCase()))) {
-            matchedSectionId = section.id;
+
+          const categoryMatch = section.categories.some(c =>
+            categoryValue.toLowerCase().includes(c.toLowerCase())
+          );
+          if (categoryMatch) {
+            // 最初のサブセクションに追加
+            const firstSubId = section.subSections[0]?.id || '_default';
+            if (groups[section.id][firstSubId]) {
+              groups[section.id][firstSubId].push(lesson);
+            }
+            matched = true;
             break;
           }
         }
       }
-      
-      groups[matchedSectionId].push(lesson);
+
+      // 3. マッチしない場合はその他へ
+      if (!matched) {
+        if (!groups['others']['_default']) {
+          groups['others']['_default'] = [];
+        }
+        groups['others']['_default'].push(lesson);
+      }
     });
-    
-    // 各グループ内でソート（優先タイトル順 → その他の順）
-    SECTIONS.forEach(section => {
-      if (!section.priorityTitles || section.priorityTitles.length === 0) return;
-      
-      groups[section.id].sort((a, b) => {
-        const titleA = a.title.toLowerCase().replace(/\s+/g, '');
-        const titleB = b.title.toLowerCase().replace(/\s+/g, '');
-        
-        const indexA = section.priorityTitles!.findIndex(pt => 
-          titleA.includes(pt.toLowerCase().replace(/\s+/g, ''))
-        );
-        const indexB = section.priorityTitles!.findIndex(pt => 
-          titleB.includes(pt.toLowerCase().replace(/\s+/g, ''))
-        );
-        
-        // 両方とも優先リストにある場合、リスト順に並べる
-        if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-        // 片方だけ優先リストにある場合、優先リストにある方を前に
-        if (indexA !== -1) return -1;
-        if (indexB !== -1) return 1;
-        // 両方とも優先リストにない場合、元の順序（作成日など）を維持
-        return 0;
-      });
-    });
-    
+
     return groups;
   }, [lessons]);
 
+  // セクションごとの総レッスン数を計算
+  const sectionCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    SECTIONS.forEach(section => {
+      let total = 0;
+      Object.values(groupedLessons[section.id] || {}).forEach(lessons => {
+        total += lessons.length;
+      });
+      counts[section.id] = total;
+    });
+    return counts;
+  }, [groupedLessons]);
+
   // 表示すべきセクション（レッスンがあるものだけ）
   const activeSections = useMemo(() => {
-    return SECTIONS.filter(section => groupedLessons[section.id]?.length > 0);
-  }, [groupedLessons]);
+    return SECTIONS.filter(section => sectionCounts[section.id] > 0);
+  }, [sectionCounts]);
 
   // 「その他」に含まれるカテゴリ名のリストを作成（デバッグ・確認用）
   const otherCategories = useMemo(() => {
-    const others = groupedLessons['others'] || [];
-    const categories = new Set(others.map(l => 
+    const others = groupedLessons['others']?.['_default'] || [];
+    const categories = new Set(others.map(l =>
       typeof l.category === "string" ? l.category : l.categoryTitle || "未設定"
     ));
     return Array.from(categories);
@@ -249,6 +315,42 @@ export default function Lessons() {
     navigate(`/lessons/${slug}`);
   };
 
+  // レッスンカードをレンダリング
+  const renderLessonCard = (sanityLesson: SanityLesson) => {
+    const categoryValue =
+      typeof sanityLesson.category === "string"
+        ? sanityLesson.category
+        : sanityLesson.categoryTitle || "";
+
+    const thumbnailUrl =
+      sanityLesson.iconImageUrl ||
+      (sanityLesson.iconImage
+        ? urlFor(sanityLesson.iconImage).width(216).height(326).url()
+        : null) ||
+      sanityLesson.thumbnailUrl ||
+      (sanityLesson.thumbnail
+        ? urlFor(sanityLesson.thumbnail).width(600).height(450).url()
+        : null) ||
+      "";
+
+    const lesson: Lesson = {
+      id: sanityLesson._id,
+      title: sanityLesson.title,
+      description: sanityLesson.description || "",
+      category: categoryValue,
+      thumbnail: thumbnailUrl,
+      slug: sanityLesson.slug.current,
+    };
+
+    return (
+      <motion.div key={lesson.id} variants={motionConfig.item}>
+        <LessonCard
+          lesson={lesson}
+          onClick={() => handleLessonClick(lesson.slug)}
+        />
+      </motion.div>
+    );
+  };
 
   if (loading) {
     return (
@@ -287,7 +389,7 @@ export default function Lessons() {
 
         {/* セクションナビゲーション（カテゴリ別URL） */}
         {activeSections.length > 0 && (
-          <div className="sticky top-16 z-10 pt-4 mb-8 border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+          <div className="sticky top-16 z-10 pt-4 mb-8 border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto bg-white">
             <div className="flex flex-nowrap gap-6 min-w-max sm:min-w-0 px-2">
               {/* すべてタブ */}
               <Link
@@ -317,7 +419,7 @@ export default function Lessons() {
                 >
                   {section.label}
                   <span className={`ml-2 text-xs font-normal px-2 py-0.5 rounded-full ${activeTab === section.id ? 'bg-black text-white' : 'bg-gray-100 text-gray-500'}`}>
-                    {groupedLessons[section.id].length}
+                    {sectionCounts[section.id]}
                   </span>
                 </Link>
               ))}
@@ -334,14 +436,14 @@ export default function Lessons() {
               .filter((section) => activeTab === 'all' || section.id === activeTab)
               .map((section) => (
               <section key={section.id} id={`section-${section.id}`}>
-                <div className="mb-8 border-b border-gray-100 pb-6">
-                  {/* 親カテゴリ（分野） */}
-                  <div className="flex items-center gap-3 mb-2">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 tracking-tight">
+                {/* カテゴリ見出し（30px） */}
+                <div className="mb-8">
+                  <div className="flex items-center gap-3 mb-6">
+                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight font-rounded-mplus">
                       {section.label}
                     </h2>
                     <span className="text-sm font-medium text-gray-500 px-2 py-1 bg-gray-100 rounded-full flex-shrink-0">
-                      {groupedLessons[section.id].length}
+                      {sectionCounts[section.id]}
                     </span>
                     {/* その他の場合のみ、含まれるカテゴリを表示（デバッグ用） */}
                     {section.id === 'others' && otherCategories.length > 0 && (
@@ -351,70 +453,72 @@ export default function Lessons() {
                     )}
                   </div>
 
-                  {/* 中カテゴリ（なりたい状態） */}
-                  <div className="mb-3">
-                    <h3 className="text-lg md:text-xl font-bold text-gray-800 flex items-center gap-2">
-                      <span className="w-1 h-6 bg-blue-500 rounded-full inline-block"></span>
-                      {section.title}
-                    </h3>
-                  </div>
+                  {/* サブセクションごとにレッスンを表示 */}
+                  <div className="space-y-12">
+                    {section.subSections.length > 0 ? (
+                      section.subSections.map((sub) => {
+                        const subLessons = groupedLessons[section.id]?.[sub.id] || [];
+                        if (subLessons.length === 0) return null;
 
-                  {/* 説明文 */}
-                  <p className="text-gray-600 text-sm md:text-base ml-3 pl-1">
-                    {section.description}
-                  </p>
+                        return (
+                          <div key={sub.id}>
+                            {/* セクション見出し（SectionHeading使用） - label/titleがある場合のみ */}
+                            {(sub.label || sub.title) && (
+                              <div className="mb-6">
+                                <SectionHeading
+                                  label={sub.label}
+                                  title={sub.title}
+                                  showUnderline={false}
+                                />
+                              </div>
+                            )}
+
+                            <motion.div
+                              variants={motionConfig.container}
+                              initial="hidden"
+                              whileInView="show"
+                              viewport={{ once: true, margin: "-50px" }}
+                              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
+                            >
+                              {/* すべて: 4件まで表示 / カテゴリ別: 全件表示 */}
+                              {subLessons
+                                .slice(0, activeTab === 'all' ? 4 : undefined)
+                                .map(renderLessonCard)}
+                            </motion.div>
+
+                            {/* もっと見るボタン */}
+                            {activeTab === 'all' && subLessons.length > 4 && (
+                              <div className="mt-4 text-right">
+                                <Link
+                                  to={`/lessons/category/${section.id}`}
+                                  className="text-sm text-gray-500 hover:text-gray-800"
+                                >
+                                  もっと見る（+{subLessons.length - 4}件）→
+                                </Link>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })
+                    ) : (
+                      // サブセクションがない場合（その他など）
+                      <motion.div
+                        variants={motionConfig.container}
+                        initial="hidden"
+                        whileInView="show"
+                        viewport={{ once: true, margin: "-50px" }}
+                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
+                      >
+                        {(groupedLessons[section.id]?.['_default'] || [])
+                          .slice(0, activeTab === 'all' ? 8 : undefined)
+                          .map(renderLessonCard)}
+                      </motion.div>
+                    )}
+                  </div>
                 </div>
 
-                <motion.div
-                  variants={motionConfig.container}
-                  initial="hidden"
-                  whileInView="show"
-                  viewport={{ once: true, margin: "-50px" }}
-                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
-                >
-                  {/* すべて: 8件まで表示 / カテゴリ別: 全件表示 */}
-                  {groupedLessons[section.id]
-                    .slice(0, activeTab === 'all' ? 8 : undefined)
-                    .map((sanityLesson) => {
-                    // バッジ表示テキスト（本来のカテゴリ名を表示）
-                    const categoryValue =
-                      typeof sanityLesson.category === "string"
-                        ? sanityLesson.category
-                        : sanityLesson.categoryTitle || "";
-
-                    const thumbnailUrl =
-                      sanityLesson.iconImageUrl ||
-                      (sanityLesson.iconImage
-                        ? urlFor(sanityLesson.iconImage).width(216).height(326).url()
-                        : null) ||
-                      sanityLesson.thumbnailUrl ||
-                      (sanityLesson.thumbnail
-                        ? urlFor(sanityLesson.thumbnail).width(600).height(450).url()
-                        : null) ||
-                      "";
-
-                    const lesson: Lesson = {
-                      id: sanityLesson._id,
-                      title: sanityLesson.title,
-                      description: sanityLesson.description || "",
-                      category: categoryValue, // 元のカテゴリ名を表示
-                      thumbnail: thumbnailUrl,
-                      slug: sanityLesson.slug.current,
-                    };
-
-                    return (
-                      <motion.div key={lesson.id} variants={motionConfig.item}>
-                        <LessonCard
-                          lesson={lesson}
-                          onClick={() => handleLessonClick(lesson.slug)}
-                        />
-                      </motion.div>
-                    );
-                  })}
-                </motion.div>
-
-                {/* もっと見るボタン（すべて表示時 & 8件以上ある場合のみ） → カテゴリページへ遷移 */}
-                {activeTab === 'all' && groupedLessons[section.id].length > 8 && (
+                {/* カテゴリ全体のもっと見るボタン（すべて表示時） */}
+                {activeTab === 'all' && sectionCounts[section.id] > 8 && (
                   <div className="mt-8 text-center">
                     <Button
                       variant="outline"
@@ -423,7 +527,7 @@ export default function Lessons() {
                       className="min-w-[200px] rounded-full"
                     >
                       <Link to={`/lessons/category/${section.id}`}>
-                        もっと見る（{groupedLessons[section.id].length - 8}件）
+                        {section.label}をもっと見る
                       </Link>
                     </Button>
                   </div>
