@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe, CreditCard } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe, CreditCard, Eye } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -64,6 +64,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/roadmap-card',
     icon: <CreditCard className="w-8 h-8" />,
     tags: ['Roadmap', 'Card', 'Component', 'Gradient']
+  },
+  {
+    title: 'Roadmap Preview',
+    description: '5つのロードマップのコンテンツプレビュー。詳細ページの全セクション（ヒーロー、変わる景色、面白くなる視点、カリキュラム）を確認。',
+    path: '/dev/roadmap-preview',
+    icon: <Eye className="w-8 h-8" />,
+    tags: ['Roadmap', 'Preview', 'Content', 'Detail']
   },
 ];
 

@@ -33,7 +33,8 @@ export type GradientType =
   | 'rose'           // Rose Gold: ローズゴールド×ダーク
   | 'ocean'          // Ocean Deep: 深海ブルー
   | 'lavender'       // Lavender Dream: ラベンダー×パープル
-  | 'coral';         // Coral Reef: コーラル×ピーチ
+  | 'coral'          // Coral Reef: コーラル×ピーチ
+  | 'infoarch';      // Information Architecture: 構造的なブルー
 
 // グラデーション定義
 // 2025-2026 トレンド: Soft Gradients 2.0, Cinematic/Sci-Fi, Thermal Glow
@@ -63,6 +64,7 @@ const GRADIENTS: Record<GradientType, { from: string; to: string; mid?: string }
   emerald: { from: '#2d3835', to: '#303538', mid: '#354038' },    // エメラルド
   ocean: { from: '#2d3540', to: '#353d48', mid: '#384550' },      // オーシャンブルー
   lavender: { from: '#353040', to: '#302a38', mid: '#3a3545' },   // ラベンダー
+  infoarch: { from: '#2a3545', to: '#3d4555', mid: '#354050' },   // 情報設計ブルー
 };
 
 export interface RoadmapCardProps {
