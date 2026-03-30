@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe, CreditCard, Eye } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe, CreditCard, Eye, Layers } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -78,6 +78,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/roadmap-gradient-preview',
     icon: <Eye className="w-8 h-8" />,
     tags: ['Roadmap', 'Gradient', 'Color', 'Hero', 'Card']
+  },
+  {
+    title: 'Header Blur Patterns',
+    description: 'ヘッダー + カテゴリタブのブラー/透過一体化パターン比較。2つのsticky要素を視覚的に統一する方法。',
+    path: '/dev/header-blur-patterns',
+    icon: <Layers className="w-8 h-8" />,
+    tags: ['Header', 'Blur', 'Sticky', 'Navigation', 'Mobile']
   },
 ];
 

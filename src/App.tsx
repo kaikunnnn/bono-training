@@ -87,6 +87,8 @@ import TopPagePreview from "./pages/dev/TopPagePreview";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
+import HeaderBlurPatterns from "./pages/dev/HeaderBlurPatterns";
+import HeaderBlurImpact from "./pages/dev/HeaderBlurImpact";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
 import LessonIdea2 from "./pages/dev/lesson-ideas/LessonIdea2";
 import LessonIdea3 from "./pages/dev/lesson-ideas/LessonIdea3";
@@ -243,6 +245,8 @@ const AppContent = () => {
         <Route path="/dev/goal-section" element={<DevRoute><GoalSectionPreview /></DevRoute>} />
         <Route path="/dev/top-page-preview" element={<DevRoute><TopPagePreview /></DevRoute>} />
         <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
+        <Route path="/dev/header-blur-patterns" element={<DevRoute><HeaderBlurPatterns /></DevRoute>} />
+        <Route path="/dev/header-blur-impact" element={<DevRoute><HeaderBlurImpact /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
         <Route path="/dev/lesson-idea-3" element={<DevRoute><LessonIdea3 /></DevRoute>} />

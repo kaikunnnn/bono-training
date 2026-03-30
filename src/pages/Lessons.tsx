@@ -1,19 +1,19 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
-import { useLessons } from "@/hooks/useLessons";
+import { useLessons, SanityLesson } from "@/hooks/useLessons";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import PageHeader from "@/components/common/PageHeader";
 import LessonCard from "@/components/lessons/LessonCard";
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
 import { Lesson } from "@/types/lesson";
-import { SanityLesson } from "@/types/sanity";
 
 // セクション定義
-// タブ順序: おすすめ → 進め方 → UIデザイン → UXデザイン → キャリア → AI → ビジュアル → Figma → ラジオ
+// タブ順序: おすすめ → 進め方 → UIデザイン → 情報設計 → UXデザイン → キャリア → AI → ビジュアル → Figma → ラジオ
 interface SubSection {
   id: string;
   label: string;  // 補足（例: "実務・プロセス"）
@@ -48,7 +48,7 @@ const SECTIONS: Section[] = [
         lessonTitles: ['ゼロからはじめるUIビジュアル', 'ゼロからはじめるUI情報設計', 'はじめてのUIデザイン']
       }
     ],
-    categories: []
+    categories: ['進め方']
   },
   {
     id: 'ui',
@@ -59,23 +59,15 @@ const SECTIONS: Section[] = [
         label: 'スタイル',
         title: 'UIのつくり方をはじめよう',
         // 順序: UIビジュアル基礎 → センスを盗む → UIタイポグラフィ → UIデザインの基本 → UIトレース → 実装とデザイン
-        // ※ Webデザインの組み立て方は除外（その他へ）
         lessonTitles: ['UIビジュアル基礎', 'センスを盗む', 'UIタイポグラフィ', 'UIデザインの基本', 'UIトレース', '実装とデザイン']
-      },
-      {
-        id: 'ia',
-        label: '情報設計・IA',
-        title: '情報設計・使いやすいUIづくりの方法論',
-        // 順序: ゼロからUI情報設計 → OOUI → UIアイデア → UI PATTERN → 目的達成
-        // ※ 3構造・ナビゲーションUIはUIの仕組みへ移動、テストデータは除外
-        lessonTitles: ['ゼロからはじめるUI情報設計', 'OOUI', 'UIアイデア', 'UI PATTERN', '目的達成']
       },
       {
         id: 'structure',
         label: 'UIの仕組み',
         title: 'UIの詳細・UIの仕組みと構造',
-        // 順序: 3構造 → ナビゲーションUI → 使いやすいUI → マテリアルデザイン → Material Design → Material You
-        lessonTitles: ['3構造', 'ナビゲーションUI', '使いやすいUI', 'マテリアルデザイン', 'Material Design', 'Material You']
+        // 順序: 3構造 → マテリアルデザイン → Material Design → Material You
+        // ※ 使いやすいUI・ナビゲーションUIは情報設計カテゴリへ移動
+        lessonTitles: ['3構造', 'マテリアルデザイン', 'Material Design', 'Material You']
       },
       {
         id: 'practice',
@@ -86,6 +78,27 @@ const SECTIONS: Section[] = [
       }
     ],
     categories: ['UI']
+  },
+  {
+    id: 'ia',
+    label: '情報設計',
+    subSections: [
+      {
+        id: 'methodology',
+        label: '方法論',
+        title: '使いやすいUIの方法論',
+        // 順序: OOUI → 使いやすいUI → ナビゲーションUI
+        lessonTitles: ['OOUI', '使いやすいUI', 'ナビゲーションUI']
+      },
+      {
+        id: 'organize',
+        label: '情報整理',
+        title: '情報を整理してデザインする方法',
+        // 順序: ゼロからUI情報設計（優先）→ UIアイデア → UI PATTERN → 目的達成
+        lessonTitles: ['ゼロからはじめるUI情報設計', 'UIアイデア', 'UI PATTERN', '目的達成']
+      }
+    ],
+    categories: ['情報設計']
   },
   {
     id: 'ux',
@@ -135,7 +148,7 @@ const SECTIONS: Section[] = [
         lessonTitles: ['AI×UIリサーチ']
       }
     ],
-    categories: []
+    categories: ['AI']
   },
   {
     id: 'visual',
@@ -149,7 +162,7 @@ const SECTIONS: Section[] = [
         lessonTitles: ['グラフィック入門', 'バナーデザイン']
       }
     ],
-    categories: []
+    categories: ['ビジュアル']
   },
   {
     id: 'figma',
@@ -176,13 +189,13 @@ const SECTIONS: Section[] = [
         lessonTitles: ['BONOラジオ']
       }
     ],
-    categories: []
+    categories: ['ラジオ']
   },
   {
     id: 'others',
     label: 'その他',
     subSections: [],
-    categories: []
+    categories: ['その他']
   }
 ];
 
@@ -248,10 +261,12 @@ export default function Lessons() {
     });
 
     lessons.forEach((lesson) => {
-      const categoryValue =
-        typeof lesson.category === "string"
-          ? lesson.category
-          : lesson.categoryTitle || "";
+      // 複数カテゴリ対応: categoryTitles（配列）またはcategoryTitle（単一）を使用
+      const lessonCategories: string[] = lesson.categoryTitles && lesson.categoryTitles.length > 0
+        ? lesson.categoryTitles
+        : lesson.categoryTitle
+          ? [lesson.categoryTitle]
+          : [];
 
       const lessonTitle = lesson.title;
       let matched = false;
@@ -273,13 +288,16 @@ export default function Lessons() {
         if (matched) break;
       }
 
-      // 2. カテゴリでマッチング（サブセクションの最初に追加）
-      if (!matched && categoryValue) {
+      // 2. カテゴリでマッチング（複数カテゴリ対応）
+      if (!matched && lessonCategories.length > 0) {
         for (const section of SECTIONS) {
           if (section.id === 'others') continue;
 
-          const categoryMatch = section.categories.some(c =>
-            categoryValue.toLowerCase().includes(c.toLowerCase())
+          // レッスンのカテゴリのいずれかがセクションのカテゴリと一致するかチェック
+          const categoryMatch = section.categories.some(sectionCat =>
+            lessonCategories.some(lessonCat =>
+              lessonCat.toLowerCase().includes(sectionCat.toLowerCase())
+            )
           );
           if (categoryMatch) {
             // 最初のサブセクションに追加
@@ -403,6 +421,43 @@ export default function Lessons() {
     navigate(`/lessons/${slug}`);
   };
 
+  // タブナビゲーション用のスクロール制御
+  const tabScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkTabScroll = useCallback(() => {
+    const el = tabScrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+  }, []);
+
+  useEffect(() => {
+    checkTabScroll();
+    const el = tabScrollRef.current;
+    if (el) {
+      el.addEventListener('scroll', checkTabScroll);
+      window.addEventListener('resize', checkTabScroll);
+    }
+    return () => {
+      if (el) {
+        el.removeEventListener('scroll', checkTabScroll);
+        window.removeEventListener('resize', checkTabScroll);
+      }
+    };
+  }, [checkTabScroll, activeSections]);
+
+  const scrollTabs = (direction: 'left' | 'right') => {
+    const el = tabScrollRef.current;
+    if (!el) return;
+    const scrollAmount = 200;
+    el.scrollBy({
+      left: direction === 'left' ? -scrollAmount : scrollAmount,
+      behavior: 'smooth'
+    });
+  };
+
   // レッスンカードをレンダリング
   const renderLessonCard = (sanityLesson: SanityLesson) => {
     const categoryValue =
@@ -431,7 +486,11 @@ export default function Lessons() {
     };
 
     return (
-      <motion.div key={lesson.id} variants={motionConfig.item}>
+      <motion.div
+        key={lesson.id}
+        variants={motionConfig.item}
+        className="w-[232px] flex-shrink-0 sm:w-auto"
+      >
         <LessonCard
           lesson={lesson}
           onClick={() => handleLessonClick(lesson.slug)}
@@ -466,46 +525,79 @@ export default function Lessons() {
     );
   }
 
+  // タブナビゲーションの内容（モバイル・デスクトップ共通）
+  const tabNavContent = activeSections.length > 0 ? (
+    <div className="relative flex items-center w-full overflow-hidden">
+      {/* 左矢印ボタン（md以上でスクロール可能時のみ表示） */}
+      {canScrollLeft && (
+        <button
+          onClick={() => scrollTabs('left')}
+          className="hidden md:flex absolute left-0 z-10 w-10 h-10 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-md transition-all"
+          aria-label="左にスクロール"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-600" />
+        </button>
+      )}
+
+      {/* タブコンテナ */}
+      <div
+        ref={tabScrollRef}
+        className="flex flex-nowrap gap-4 md:gap-6 overflow-x-auto scrollbar-hide px-2 md:px-12 w-full"
+      >
+        {/* おすすめタブ */}
+        <Link
+          to="/lessons"
+          className={`
+            pb-3 px-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2 flex-shrink-0
+            ${activeTab === 'recommended'
+              ? 'border-black text-black'
+              : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'}
+          `}
+        >
+          おすすめ
+        </Link>
+        {activeSections.map((section) => (
+          <Link
+            key={section.id}
+            to={`/lessons/category/${section.id}`}
+            className={`
+              pb-3 px-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2 flex-shrink-0
+              ${activeTab === section.id
+                ? 'border-black text-black'
+                : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'}
+            `}
+          >
+            {section.label}
+          </Link>
+        ))}
+      </div>
+
+      {/* 右矢印ボタン（md以上でスクロール可能時のみ表示） */}
+      {canScrollRight && (
+        <button
+          onClick={() => scrollTabs('right')}
+          className="hidden md:flex absolute right-0 z-10 w-10 h-10 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-md transition-all"
+          aria-label="右にスクロール"
+        >
+          <ChevronRight className="w-5 h-5 text-gray-600" />
+        </button>
+      )}
+    </div>
+  ) : null;
+
   return (
     <Layout>
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-8 min-w-0">
         <PageHeader
           label="Lesson"
           title="レッスン一覧"
           description="UIデザインを学ぶためのレッスン一覧です。なりたい状態に合わせてコンテンツを選べます。"
         />
 
-        {/* セクションナビゲーション（カテゴリ別URL） */}
+        {/* タブナビゲーション（sticky: スクロールで固定）- Pattern D: backdrop-blur-sm bg-white/50 */}
         {activeSections.length > 0 && (
-          <div className="sticky top-16 z-10 pt-4 mb-8 border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
-            <div className="flex flex-nowrap gap-6 min-w-max sm:min-w-0 px-2 justify-center">
-              {/* おすすめタブ */}
-              <Link
-                to="/lessons"
-                className={`
-                  pb-3 px-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2
-                  ${activeTab === 'recommended'
-                    ? 'border-black text-black'
-                    : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'}
-                `}
-              >
-                おすすめ
-              </Link>
-              {activeSections.map((section) => (
-                <Link
-                  key={section.id}
-                  to={`/lessons/category/${section.id}`}
-                  className={`
-                    pb-3 px-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2
-                    ${activeTab === section.id
-                      ? 'border-black text-black'
-                      : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'}
-                  `}
-                >
-                  {section.label}
-                </Link>
-              ))}
-            </div>
+          <div className="sticky top-14 xl:top-0 z-10 pt-4 pb-3 mb-8 border-b border-gray-200/50 backdrop-blur-sm bg-white/50">
+            {tabNavContent}
           </div>
         )}
 
@@ -539,7 +631,7 @@ export default function Lessons() {
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true, margin: "-50px" }}
-                    className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
+                    className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-x-hidden"
                   >
                     {sectionLessons.map(renderLessonCard)}
                   </motion.div>
@@ -569,7 +661,7 @@ export default function Lessons() {
                     </span>
                     {/* その他の場合のみ、含まれるカテゴリを表示（デバッグ用） */}
                     {section.id === 'others' && otherCategories.length > 0 && (
-                      <div className="text-xs text-gray-400 font-mono overflow-x-auto whitespace-nowrap max-w-full">
+                      <div className="text-xs text-gray-400 font-mono overflow-x-auto max-w-full min-w-0">
                         [{otherCategories.join(', ')}]
                       </div>
                     )}
@@ -605,7 +697,7 @@ export default function Lessons() {
                                 initial="hidden"
                                 whileInView="show"
                                 viewport={{ once: true, margin: "-50px" }}
-                                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
+                                className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-x-hidden"
                               >
                                 {/* カテゴリ別: 全件表示 */}
                                 {subLessons.map(renderLessonCard)}
@@ -621,7 +713,7 @@ export default function Lessons() {
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: "-50px" }}
-                        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 auto-rows-fr items-stretch"
+                        className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-x-hidden"
                       >
                         {(groupedLessons[section.id]?.['_default'] || [])
                           .map(renderLessonCard)}
