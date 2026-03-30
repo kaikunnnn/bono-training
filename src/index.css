@@ -96,6 +96,13 @@
     --border-light: #D4D6CC;
     --border-default: #C3C5BB;
     --border-strong: #A8AAA0;
+
+    /* トップページ専用トークン */
+    --cta-primary-bg: #102720;
+    --cta-primary-hover: #1a3a30;
+    --accent-orange: #F95A16;
+    --label-olive: #77850e;
+    --bg-warm: #f5efe7;
   }
 
   .dark {
@@ -264,5 +271,15 @@
     -webkit-text-fill-color: hsl(222.2 84% 4.9%) !important;
     box-shadow: 0 0 0 30px white inset !important;
     caret-color: hsl(222.2 84% 4.9%) !important;
+  }
+
+  /* ロードマップヒーロー: 上下波形・左右直線の柔軟なSVGマスク */
+  .roadmap-hero-mask {
+    -webkit-mask-image: url('/shapes/roadmap-hero-shape-flexible.svg');
+    mask-image: url('/shapes/roadmap-hero-shape-flexible.svg');
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
   }
 }

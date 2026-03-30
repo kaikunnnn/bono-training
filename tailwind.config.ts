@@ -10,6 +10,17 @@ const config = {
     "./src/**/*.{ts,tsx}",
     "./src/training/**/*.{js,ts,jsx,tsx}",
   ],
+  // 動的に使用されるグラデーションクラスをsafelist
+  safelist: [
+    // ロードマップグラデーション
+    'from-[#667eea]', 'to-[#764ba2]',  // galaxy
+    'from-[#6b7280]', 'to-[#92400e]',  // infoarch
+    'from-[#f97316]', 'to-[#ec4899]',  // sunset
+    'from-[#3b82f6]', 'to-[#0ea5e9]',  // ocean
+    'from-[#14b8a6]', 'to-[#06b6d4]',  // teal
+    'from-[#f43f5e]', 'to-[#fb7185]',  // rose
+    'from-[#304750]', 'to-[#5D5B65]',  // uivisual
+  ],
   prefix: "",
   theme: {
     container: {
@@ -103,6 +114,13 @@ const config = {
           'error': 'var(--text-error)',
           'inverse': 'var(--text-inverse)',
         },
+        // トップページ専用トークン
+        'cta': {
+          'primary-bg': 'var(--cta-primary-bg)',
+          'primary-hover': 'var(--cta-primary-hover)',
+        },
+        'accent-orange': 'var(--accent-orange)',
+        'label-olive': 'var(--label-olive)',
         'lesson': {
           // Hero Section
           'hero-gradient-start': 'rgba(253, 251, 245, 0.88)',
@@ -144,6 +162,10 @@ const config = {
       // `bg-base` だけ欲しいので backgroundColor に分離して衝突を避ける。
       backgroundColor: {
         base: 'hsl(var(--base))',
+        // トップページ専用
+        'warm': 'var(--bg-warm)',
+        'cta-primary-bg': 'var(--cta-primary-bg)',
+        'cta-primary-hover': 'var(--cta-primary-hover)',
         // 背景カラートークン（Figma定義）
         // 基本レイヤー
         'surface': 'var(--bg-surface)',
