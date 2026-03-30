@@ -72,6 +72,13 @@ const devResources: DevResourceCard[] = [
     icon: <Eye className="w-8 h-8" />,
     tags: ['Roadmap', 'Preview', 'Content', 'Detail']
   },
+  {
+    title: 'Roadmap Gradient Preview',
+    description: 'RoadmapHero（詳細ページ）とRoadmapCardV2（カード）のグラデーション比較。Hero背景画像の確認も可能。',
+    path: '/dev/roadmap-gradient-preview',
+    icon: <Eye className="w-8 h-8" />,
+    tags: ['Roadmap', 'Gradient', 'Color', 'Hero', 'Card']
+  },
 ];
 
 const DevHome = () => {

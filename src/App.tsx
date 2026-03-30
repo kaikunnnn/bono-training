@@ -47,6 +47,7 @@ import TopPagePatternD from "./pages/dev/TopPagePatternD";
 import TopPagePatternE from "./pages/dev/TopPagePatternE";
 import TopPagePatternF from "./pages/dev/TopPagePatternF";
 import TopPagePatternG from "./pages/dev/TopPagePatternG";
+import TopPageNew from "./pages/dev/TopPageNew";
 import GuideHubPatternF from "./pages/dev/GuideHubPatternF";
 import GuideDetailPatternF from "./pages/dev/GuideDetailPatternF";
 import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
@@ -79,6 +80,7 @@ import ContentCardPreview from "./pages/dev/ContentCardPreview";
 import RoadmapHeroPreview from "./pages/dev/RoadmapHeroPreview";
 import RoadmapDetailPreview from "./pages/dev/RoadmapDetailPreview";
 import RoadmapPreview from "./pages/dev/RoadmapPreview";
+import RoadmapGradientPreview from "./pages/dev/RoadmapGradientPreview";
 import TopHeroSectionPreview from "./pages/dev/TopHeroSectionPreview";
 import GoalSectionPreview from "./pages/dev/GoalSectionPreview";
 import TopPagePreview from "./pages/dev/TopPagePreview";
@@ -200,6 +202,7 @@ const AppContent = () => {
         <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
         <Route path="/dev/top-pattern-f" element={<DevRoute><TopPagePatternF /></DevRoute>} />
         <Route path="/dev/top-pattern-g" element={<DevRoute><TopPagePatternG /></DevRoute>} />
+        <Route path="/dev/top-new" element={<DevRoute><TopPageNew /></DevRoute>} />
         <Route path="/dev/guide-pattern-f" element={<DevRoute><GuideHubPatternF /></DevRoute>} />
         <Route path="/dev/guide-pattern-f/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
         <Route path="/dev/guide-pattern-f/:category/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
@@ -235,6 +238,7 @@ const AppContent = () => {
         <Route path="/dev/roadmap-detail" element={<DevRoute><RoadmapDetailPreview /></DevRoute>} />
         <Route path="/dev/roadmap-preview" element={<DevRoute><RoadmapPreview /></DevRoute>} />
         <Route path="/dev/roadmap-preview/:slug" element={<DevRoute><RoadmapPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-gradient-preview" element={<DevRoute><RoadmapGradientPreview /></DevRoute>} />
         <Route path="/dev/top-hero" element={<DevRoute><TopHeroSectionPreview /></DevRoute>} />
         <Route path="/dev/goal-section" element={<DevRoute><GoalSectionPreview /></DevRoute>} />
         <Route path="/dev/top-page-preview" element={<DevRoute><TopPagePreview /></DevRoute>} />
