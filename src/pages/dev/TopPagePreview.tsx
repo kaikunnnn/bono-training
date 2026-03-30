@@ -33,7 +33,7 @@ export default function TopPagePreview() {
   ];
 
   return (
-    <Layout heroBackground>
+    <Layout headerGradient="top">
       <div className="min-h-screen">
         {/* ============================================
             ヒーローセクション

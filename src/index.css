@@ -282,4 +282,13 @@
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
   }
+
+  /* スクロールバー非表示（横スクロールUI用） */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }
