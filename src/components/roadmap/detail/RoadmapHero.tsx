@@ -7,7 +7,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import type { GradientPreset } from "@/types/sanity-roadmap";
-import { getGradientClass } from "@/types/sanity-roadmap";
+import { getGradientStyle } from "@/types/sanity-roadmap";
+import { formatTitleWithLineBreaks, stripLineBreakMarker } from "@/utils/textFormat";
 
 interface RoadmapHeroProps {
   /** ロードマップタイトル */
@@ -33,7 +34,7 @@ export default function RoadmapHero({
   thumbnailUrl,
 }: RoadmapHeroProps) {
   const navigate = useNavigate();
-  const gradientClass = getGradientClass(gradientPreset);
+  const gradientStyle = getGradientStyle(gradientPreset);
 
   const handleBack = () => {
     // 履歴がある場合は戻る、なければロードマップ一覧へ
@@ -46,24 +47,37 @@ export default function RoadmapHero({
 
   return (
     <section className="relative">
-      {/* 背景エリア */}
+      {/* 背景エリア - 有機的な形状（SVGマスク）、コンテンツに合わせて高さ可変 */}
       <div
-        className={`relative bg-gradient-to-b ${gradientClass} rounded-[32px] border-4 border-white shadow-[0_1px_24px_rgba(0,0,0,0.16)] mx-4 md:mx-8 overflow-hidden`}
+        className="roadmap-hero-mask relative mx-4 md:mx-8 overflow-hidden"
+        style={gradientStyle}
       >
-        {/* ドット模様（装飾） */}
-        <div className="absolute inset-0 opacity-[0.04] pointer-events-none">
-          <div className="grid grid-cols-10 gap-[45px] p-8">
-            {Array.from({ length: 100 }).map((_, i) => (
-              <div
-                key={i}
-                className="w-10 h-10 rounded-full bg-white"
-              />
-            ))}
-          </div>
-        </div>
+        {/* 背景画像 */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url('/images/roadmap/hero-bg.png')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 1.0,
+          }}
+          aria-hidden="true"
+        />
+
+        {/* ノイズオーバーレイ */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url('/textures/noise.svg')`,
+            backgroundRepeat: 'repeat',
+            opacity: 1,
+            mixBlendMode: 'overlay',
+          }}
+          aria-hidden="true"
+        />
 
         {/* ナビゲーション */}
-        <div className="relative flex items-center justify-between px-8 py-5">
+        <div className="relative flex items-center justify-between px-8 pt-10 pb-5">
           <div className="flex items-center gap-8">
             {/* 戻るボタン */}
             <button
@@ -83,7 +97,7 @@ export default function RoadmapHero({
                 ロードマップ
               </Link>
               <span className="mx-2">/</span>
-              <span className="text-white/80">{title}</span>
+              <span className="text-white/80">{stripLineBreakMarker(title)}</span>
             </nav>
           </div>
         </div>
@@ -95,9 +109,9 @@ export default function RoadmapHero({
             <span className="text-[13px] text-white">ロードマップ</span>
           </div>
 
-          {/* タイトル */}
+          {/* タイトル（|マーカーで改行） */}
           <h1 className="text-[32px] md:text-[40px] font-bold text-white text-center leading-[1.6]">
-            {title}
+            {formatTitleWithLineBreaks(title)}
           </h1>
 
           {/* サブタイトル（tagline） */}
@@ -168,12 +182,12 @@ export default function RoadmapHero({
           </div>
         </div>
 
-        {/* 下部画像セクション */}
+        {/* 下部画像セクション - アスペクト比固定 + 高さ上限 + センター揃え + 下端に配置 */}
         {thumbnailUrl && (
-          <div className="relative mx-8 mb-8 h-[200px] md:h-[308px] rounded-[40px] overflow-hidden">
+          <div className="relative mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] max-w-[1049px] aspect-[1049/308] max-h-[308px] overflow-hidden">
             <img
               src={thumbnailUrl}
-              alt={title}
+              alt={stripLineBreakMarker(title)}
               className="w-full h-full object-cover opacity-90"
             />
           </div>

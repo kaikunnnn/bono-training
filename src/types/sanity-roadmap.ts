@@ -14,7 +14,8 @@ export type GradientPreset =
   | "sunset"
   | "ocean"
   | "teal"
-  | "rose";
+  | "rose"
+  | "uivisual";
 
 /** グラデーションプリセットのCSS値 */
 export const GRADIENT_PRESETS: Record<GradientPreset, string> = {
@@ -24,6 +25,7 @@ export const GRADIENT_PRESETS: Record<GradientPreset, string> = {
   ocean: "linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%)",
   teal: "linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%)",
   rose: "linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)",
+  uivisual: "linear-gradient(180deg, #304750 0%, #5D5B65 100%)",
 };
 
 /** グラデーションプリセットのTailwindクラス */
@@ -34,6 +36,7 @@ export const GRADIENT_CLASSES: Record<GradientPreset, string> = {
   ocean: "from-[#3b82f6] to-[#0ea5e9]",
   teal: "from-[#14b8a6] to-[#06b6d4]",
   rose: "from-[#f43f5e] to-[#fb7185]",
+  uivisual: "from-[#304750] to-[#5D5B65]",
 };
 
 // ============================================
