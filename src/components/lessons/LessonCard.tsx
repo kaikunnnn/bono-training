@@ -22,22 +22,20 @@ const LessonCard: React.FC<LessonCardProps> = ({
   return (
     <article
       className={cn(
-        'bg-white flex flex-col p-5 rounded-[29px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]',
+        'bg-white flex flex-col p-3 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[24px] md:rounded-[29px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]',
         'cursor-pointer transition-all duration-200',
         'hover:shadow-[0px_1px_12px_0px_rgba(0,0,0,0.12)]',
         'w-full h-full text-[#0d221d] opacity-100',
-        'sm:min-h-[320px] md:min-h-[340px] lg:min-h-0',
-        'lg:aspect-[298/357]',
         className
       )}
       onClick={onClick}
     >
-      <div className="flex h-full flex-col justify-between gap-4">
+      <div className="flex h-full flex-col justify-between gap-2 sm:gap-3 md:gap-4">
         {/* カテゴリバッジ */}
         {lesson.category && (
           <div className="flex items-center">
-            <span className="inline-flex items-center justify-center px-2 py-[6px] border border-black rounded-[30px]">
-              <span className="font-noto-sans-jp text-[12px] font-medium text-[#0d221d] leading-[10px]">
+            <span className="inline-flex items-center justify-center px-2 py-1 border border-black rounded-[30px]">
+              <span className="font-noto-sans-jp text-[10px] sm:text-[11px] md:text-[12px] font-medium text-[#0d221d] leading-[10px]">
                 {lesson.category}
               </span>
             </span>
@@ -45,9 +43,9 @@ const LessonCard: React.FC<LessonCardProps> = ({
         )}
 
         {/* 画像エリア */}
-        <div className="flex justify-center items-center py-2 min-h-[40%]">
+        <div className="flex justify-center items-center py-1 sm:py-2 flex-1">
           {lesson.thumbnail ? (
-            <div className="w-[108px] h-[163px] sm:w-[120px] sm:h-[180px] md:w-[132px] md:h-[198px] lg:w-[108px] lg:h-[163px] rounded-tr-[4px] rounded-br-[4px] shadow-[0px_0px_32px_0px_rgba(0,0,0,0.16)] overflow-hidden">
+            <div className="w-[90px] sm:w-[45%] sm:max-w-[120px] aspect-[2/3] rounded-tr-[4px] rounded-br-[4px] shadow-[0px_0px_32px_0px_rgba(0,0,0,0.16)] overflow-hidden">
               <img
                 src={lesson.thumbnail}
                 alt={`${lesson.title}のサムネイル`}
@@ -55,17 +53,17 @@ const LessonCard: React.FC<LessonCardProps> = ({
               />
             </div>
           ) : (
-            <div className="w-[108px] h-[163px] sm:w-[120px] sm:h-[180px] md:w-[132px] md:h-[198px] lg:w-[108px] lg:h-[163px] rounded-tr-[4px] rounded-br-[4px] bg-gray-200" />
+            <div className="w-[90px] sm:w-[45%] sm:max-w-[120px] aspect-[2/3] rounded-tr-[4px] rounded-br-[4px] bg-gray-200" />
           )}
         </div>
 
         {/* タイトル・説明エリア */}
-        <div className="flex flex-col gap-1">
-          <h3 className="font-rounded-mplus-bold text-base font-bold !text-[#0d221d] !opacity-100 leading-[1.5]">
+        <div className="flex flex-col gap-0.5 sm:gap-1">
+          <h3 className="font-rounded-mplus-bold text-[13px] sm:text-sm md:text-base font-bold !text-[#0d221d] !opacity-100 leading-[1.4]">
             {lesson.title}
           </h3>
           {lesson.description && (
-            <p className="font-noto-sans-jp text-xs font-medium text-[rgba(13,34,29,0.48)] leading-[1.5] line-clamp-2">
+            <p className="font-noto-sans-jp text-[10px] sm:text-[11px] md:text-xs font-medium text-[rgba(13,34,29,0.48)] leading-[1.4] line-clamp-2">
               {lesson.description}
             </p>
           )}

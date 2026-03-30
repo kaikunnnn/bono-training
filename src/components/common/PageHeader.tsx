@@ -29,16 +29,16 @@ const PageHeader = ({
 }: PageHeaderProps) => {
   return (
     <motion.div
-      className="text-center -mt-12 md:mt-12 mb-10 md:mb-[88px] flex flex-col items-center"
+      className="text-center -mt-12 md:mt-12 mb-10 md:mb-[88px] flex flex-col items-center gap-5"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <span className="text-sm text-text-muted mb-1 block">{label}</span>
-      <h1 className="text-[28px] md:text-[48px] font-bold text-text-primary font-rounded-mplus mb-2">
+      <span className="text-sm text-text-muted leading-snug">{label}</span>
+      <h1 className="text-[28px] md:text-[48px] font-bold text-text-primary font-rounded-mplus leading-tight">
         {title}
       </h1>
-      <p className="text-[15px] text-[#202328] mb-6 max-w-fit">{description}</p>
+      <p className="text-[15px] text-text-muted leading-normal max-w-[367px]">{description}</p>
       {children && <div className="flex justify-center">{children}</div>}
     </motion.div>
   );

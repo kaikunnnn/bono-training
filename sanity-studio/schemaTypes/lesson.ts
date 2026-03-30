@@ -61,10 +61,17 @@ export default defineType({
     }),
     defineField({
       name: "category",
-      title: "カテゴリ",
+      title: "カテゴリ（メイン）",
       type: "reference",
       to: [{ type: "category" }],
-      description: "レッスンのカテゴリを選択してください",
+      description: "レッスンのメインカテゴリ（LessonCardに表示）",
+    }),
+    defineField({
+      name: "categories",
+      title: "カテゴリ（複数選択）",
+      type: "array",
+      of: [{ type: "reference", to: [{ type: "category" }] }],
+      description: "レッスンが属する全てのカテゴリ（タブ分類に使用）",
     }),
     defineField({
       name: "isPremium",

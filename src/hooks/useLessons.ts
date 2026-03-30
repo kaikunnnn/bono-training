@@ -4,7 +4,7 @@ import { client } from '@/lib/sanity';
 /**
  * Sanity Lesson型
  */
-interface SanityLesson {
+export interface SanityLesson {
   _id: string;
   title: string;
   slug: { current: string };
@@ -13,8 +13,12 @@ interface SanityLesson {
   thumbnailUrl?: string;
   iconImage?: any;
   iconImageUrl?: string;
+  /** メインカテゴリ（LessonCardに表示） */
   category?: { title?: string } | string;
   categoryTitle?: string;
+  /** 複数カテゴリ（タブ分類に使用） */
+  categories?: { title?: string }[];
+  categoryTitles?: string[];
   tags?: string[];
   isPremium: boolean;
   webflowSource?: string;
@@ -47,6 +51,8 @@ async function fetchLessons(): Promise<SanityLesson[]> {
     iconImageUrl,
     category,
     "categoryTitle": category->title,
+    categories[]->{title},
+    "categoryTitles": categories[]->title,
     tags,
     isPremium,
     webflowSource
