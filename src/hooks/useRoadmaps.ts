@@ -3,6 +3,67 @@ import { client } from "@/lib/sanity";
 import type { SanityRoadmapDetail, SanityRoadmapStep } from "@/types/sanity-roadmap";
 
 /**
+ * コンテンツ取得用の共通GROQフラグメント
+ *
+ * Sanityには2つのデータ構造が存在:
+ * 1. 直接参照型: { _type: "reference", _ref: "..." }
+ * 2. contentItem型: { _type: "contentItem", itemType: "lesson|roadmap|externalLink", lesson/roadmap: { _ref: "..." } }
+ */
+const CONTENTS_PROJECTION = `contents[]{
+  // 直接参照型（lesson, roadmap）の場合
+  _type == "reference" => @->{
+    _id,
+    _type,
+    title,
+    slug,
+    description,
+    "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+    "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+    gradientPreset,
+    estimatedDuration
+  },
+  // contentItem型（lessonへのネスト参照）の場合
+  _type == "contentItem" && itemType == "lesson" => lesson->{
+    _id,
+    _type,
+    title,
+    slug,
+    description,
+    "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+    "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url)
+  },
+  // contentItem型（roadmapへのネスト参照）の場合
+  _type == "contentItem" && itemType == "roadmap" => roadmap->{
+    _id,
+    _type,
+    title,
+    slug,
+    description,
+    "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+    gradientPreset,
+    estimatedDuration
+  },
+  // contentItem型（外部リンク）の場合
+  _type == "contentItem" && itemType == "externalLink" => {
+    "_key": _key,
+    "_type": "externalLink",
+    "url": externalUrl,
+    "title": externalTitle,
+    "description": externalDescription,
+    "thumbnailUrl": externalThumbnailUrl
+  },
+  // 外部リンクの場合（直接型）
+  _type == "externalLink" => {
+    _key,
+    _type,
+    url,
+    title,
+    description,
+    thumbnailUrl
+  }
+}`;
+
+/**
  * ロードマップ一覧用の軽量データ型
  */
 export interface RoadmapListItem {
@@ -72,35 +133,15 @@ async function fetchRoadmapBySlug(slug: string): Promise<SanityRoadmapDetail | n
     isPublished,
     steps[] {
       _key,
-      title,
-      goals,
+      // 両方のフィールド名に対応: title/stepTitle, goals/stepGoals
+      "title": coalesce(title, stepTitle),
+      "goals": coalesce(goals, stepGoals),
       sections[] {
         _key,
-        title,
+        // 両方のフィールド名に対応: title/sectionTitle
+        "title": coalesce(title, sectionTitle),
         description,
-        contents[]{
-          // 参照型（lesson, roadmap）の場合
-          _type == "reference" => @->{
-            _id,
-            _type,
-            title,
-            slug,
-            description,
-            "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-            "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
-            gradientPreset,
-            estimatedDuration
-          },
-          // 外部リンクの場合
-          _type == "externalLink" => {
-            _key,
-            _type,
-            url,
-            title,
-            description,
-            thumbnailUrl
-          }
-        }
+        ${CONTENTS_PROJECTION}
       }
     }
   }`;
@@ -141,35 +182,15 @@ async function fetchAllRoadmapsWithDetails(): Promise<SanityRoadmapDetail[]> {
     isPublished,
     steps[] {
       _key,
-      title,
-      goals,
+      // 両方のフィールド名に対応: title/stepTitle, goals/stepGoals
+      "title": coalesce(title, stepTitle),
+      "goals": coalesce(goals, stepGoals),
       sections[] {
         _key,
-        title,
+        // 両方のフィールド名に対応: title/sectionTitle
+        "title": coalesce(title, sectionTitle),
         description,
-        contents[]{
-          // 参照型（lesson, roadmap）の場合
-          _type == "reference" => @->{
-            _id,
-            _type,
-            title,
-            slug,
-            description,
-            "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-            "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
-            gradientPreset,
-            estimatedDuration
-          },
-          // 外部リンクの場合
-          _type == "externalLink" => {
-            _key,
-            _type,
-            url,
-            title,
-            description,
-            thumbnailUrl
-          }
-        }
+        ${CONTENTS_PROJECTION}
       }
     }
   }`;

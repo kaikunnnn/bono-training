@@ -14,7 +14,9 @@ interface LessonContentItemProps {
 }
 
 export default function LessonContentItem({ content }: LessonContentItemProps) {
-  const lessonUrl = `/lessons/${content.slug.current}`;
+  // slugが存在しない場合はフォールバック
+  const slugValue = content.slug?.current || content._id || "";
+  const lessonUrl = `/lessons/${slugValue}`;
   // レッスンはiconImageUrlを優先的に使用
   const imageUrl = content.iconImageUrl || content.thumbnailUrl;
 

@@ -21,6 +21,9 @@ interface CurriculumSectionBlockProps {
 export default function CurriculumSectionBlock({
   section,
 }: CurriculumSectionBlockProps) {
+  const sectionTitle = section.title || "";
+  const startsWithSection = sectionTitle.startsWith("セクション");
+
   return (
     <div className="space-y-4">
       {/* セクションヘッダー */}
@@ -28,14 +31,14 @@ export default function CurriculumSectionBlock({
         {/* セクションバッジ */}
         <div className="inline-flex items-center px-2 py-0.5 border border-text-black rounded-full">
           <span className="text-[10px] font-bold text-text-black">
-            {section.title.startsWith("セクション") ? section.title : `セクション`}
+            {startsWithSection ? sectionTitle : `セクション`}
           </span>
         </div>
 
         {/* セクションタイトル */}
-        {!section.title.startsWith("セクション") && (
+        {sectionTitle && !startsWithSection && (
           <h4 className="text-lg font-bold text-text-black leading-[1.4] px-1.5">
-            {section.title}
+            {sectionTitle}
           </h4>
         )}
 
@@ -50,26 +53,29 @@ export default function CurriculumSectionBlock({
       {/* コンテンツ一覧 */}
       {section.contents && section.contents.length > 0 && (
         <div className="space-y-4">
-          {section.contents.map((content) => {
+          {section.contents.map((content, index) => {
             // 外部リンクの場合
             if (content._type === "externalLink") {
+              const extLink = content as SanityExternalLink;
               return (
                 <ExternalLinkCard
-                  key={content._key}
-                  link={content as SanityExternalLink}
+                  key={extLink._key || `external-${index}`}
+                  link={extLink}
                 />
               );
             }
 
             // 参照型の場合（lesson, roadmap）
             const refContent = content as SanityReferenceContent;
+            const itemKey = refContent._id || refContent._key || `content-${index}`;
 
             if (refContent._type === "roadmap") {
+              const slugValue = refContent.slug?.current || refContent._id || "";
               return (
                 <RoadmapCardV2
-                  key={refContent._id}
-                  slug={refContent.slug.current}
-                  title={refContent.title}
+                  key={itemKey}
+                  slug={slugValue}
+                  title={refContent.title || ""}
                   description={refContent.description || ""}
                   thumbnailUrl={refContent.thumbnailUrl}
                   estimatedDuration={refContent.estimatedDuration || "1-2"}
@@ -82,7 +88,7 @@ export default function CurriculumSectionBlock({
             // レッスンの場合
             return (
               <LessonContentItem
-                key={refContent._id}
+                key={itemKey}
                 content={refContent}
               />
             );
