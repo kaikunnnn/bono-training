@@ -258,7 +258,7 @@ export default function LessonDetail() {
         ogUrl={`/lessons/${lesson.slug.current}`}
         ogType="article"
       />
-      <div className="min-h-screen bg-base">
+      <div className="min-h-screen">
         {/* 新デザインヘッダー + タブコンテンツ（右側ブロックに統合） */}
         <LessonHeaderLayout
           lesson={lesson}

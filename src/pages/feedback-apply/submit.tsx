@@ -442,7 +442,7 @@ const FeedbackApplySubmit = () => {
   // ローディング中
   if (authLoading || subLoading || lessonsLoading) {
     return (
-      <div className="min-h-screen bg-base">
+      <div className="min-h-screen">
         <ModeHeader />
         <div className="container py-8">
           <div className="flex justify-center">
@@ -456,7 +456,7 @@ const FeedbackApplySubmit = () => {
   // 未ログイン
   if (!user) {
     return (
-      <div className="min-h-screen bg-base">
+      <div className="min-h-screen">
         <ModeHeader />
         <div className="container py-8">
           <div className="mx-auto max-w-lg bg-white border rounded-[40px] p-8 text-center">
@@ -479,7 +479,7 @@ const FeedbackApplySubmit = () => {
   // アクセス権限なし
   if (!canApply) {
     return (
-      <div className="min-h-screen bg-base">
+      <div className="min-h-screen">
         <ModeHeader />
         <div className="container py-8">
           <div className="mx-auto max-w-lg bg-white border rounded-[40px] p-8 text-center">
@@ -500,7 +500,7 @@ const FeedbackApplySubmit = () => {
   }
 
   return (
-    <div className="min-h-screen bg-base">
+    <div className="min-h-screen">
       <SEO
         title="15分フィードバック 応募"
         description="コンテンツの学びをシェアしてフィードバックを受けよう"

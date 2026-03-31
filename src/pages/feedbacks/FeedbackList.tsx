@@ -285,7 +285,7 @@ const FeedbackList = () => {
         ogUrl="/feedbacks"
         ogType="website"
       />
-      <div className="min-h-screen w-full bg-base">
+      <div className="min-h-screen w-full">
         {/* メインコンテンツ */}
         <main className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
           {/* ページヘッダー */}

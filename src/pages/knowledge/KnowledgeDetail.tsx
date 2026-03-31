@@ -242,7 +242,7 @@ const KnowledgeDetail = () => {
         ogUrl={`/knowledge/${slug}`}
         ogType="article"
       />
-      <div className="min-h-screen w-full bg-base">
+      <div className="min-h-screen w-full">
         {/* メインコンテンツ */}
         <main className="max-w-[880px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
           {/* 戻るボタン */}

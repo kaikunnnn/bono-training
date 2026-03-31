@@ -245,7 +245,7 @@ const QuestionDetail = () => {
         ogUrl={`/questions/${slug}`}
         ogType="article"
       />
-      <div className="min-h-screen w-full bg-base">
+      <div className="min-h-screen w-full">
         {/* メインコンテンツ */}
         <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-8">
           {/* 戻るボタン */}

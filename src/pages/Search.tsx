@@ -62,7 +62,7 @@ const Search: React.FC = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#F9F9F7]">
+      <div className="min-h-screen">
         {/* ヘッダー */}
         <div className="bg-white border-b border-gray-100">
           <div className="max-w-4xl mx-auto px-4 py-8 sm:py-12">

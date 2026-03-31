@@ -317,7 +317,7 @@ const FeedbackDetail = () => {
         ogUrl={`/feedbacks/${slug}`}
         ogType="article"
       />
-      <div className="relative min-h-screen w-full bg-base font-sans overflow-hidden">
+      <div className="relative min-h-screen w-full font-sans overflow-hidden">
         {/* Ambient Gradient Background - カテゴリ色連動 */}
         {(() => {
           const categorySlug = feedback.category?.slug?.current || "default";
