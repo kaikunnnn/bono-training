@@ -16,6 +16,7 @@ import { ArrowUpRight } from 'lucide-react';
 export type GradientType =
   // === Classic (オリジナルベース) ===
   | 'teal'           // UIビジュアル基礎 (デフォルト)
+  | 'uivisual'       // UIビジュアル (tealのエイリアス)
   | 'blue'           // UXデザイン系
   | 'purple'         // 上級・応用系
   | 'orange'         // 実践・アウトプット系
@@ -41,6 +42,7 @@ export type GradientType =
 const GRADIENTS: Record<GradientType, { from: string; to: string; mid?: string }> = {
   // === Classic (低彩度・洗練) ===
   teal: { from: '#304750', to: '#5d5b65' },
+  uivisual: { from: '#304750', to: '#5d5b65' },  // tealのエイリアス
   blue: { from: '#354a5f', to: '#565a65' },
   purple: { from: '#4a4058', to: '#5d5b65' },
   orange: { from: '#5a4235', to: '#5d5960' },
@@ -178,7 +180,8 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({
   gradientType = 'teal',
   basePath = '/roadmaps/',
 }) => {
-  const gradient = GRADIENTS[gradientType];
+  // フォールバック: 未定義のgradientTypeの場合はtealを使用
+  const gradient = GRADIENTS[gradientType] || GRADIENTS.teal;
   const linkPath = `${basePath}${slug}`;
   const gradientStyle = getGradientStyle(gradient);
 
