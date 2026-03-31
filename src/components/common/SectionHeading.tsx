@@ -48,16 +48,16 @@ export default function SectionHeading({
   return (
     <div className={cn("flex flex-col gap-3", alignClass, className)}>
       {/* ラベル + タイトル */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-0">
         {/* ラベル（任意） */}
         {label && (
-          <p className="font-bold text-sm leading-[27px] text-[#293525]">
+          <p className="font-bold text-sm leading-[27px] text-[var(--text-muted)] w-fit">
             {label}
           </p>
         )}
 
         {/* タイトル */}
-        <h2 className="font-rounded-mplus font-extrabold text-[20px] leading-9 text-[#293525]">
+        <h2 className="font-rounded-mplus font-extrabold text-[18px] md:text-[20px] leading-9 text-[#293525]">
           {title}
         </h2>
       </div>

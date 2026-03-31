@@ -1,4 +1,5 @@
 import React from 'react';
+import { Map } from 'lucide-react';
 import { Lesson } from '@/types/lesson';
 import { cn } from '@/lib/utils';
 
@@ -19,6 +20,8 @@ const LessonCard: React.FC<LessonCardProps> = ({
   onClick,
   className,
 }) => {
+  const hasRoadmap = lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0;
+
   return (
     <article
       className={cn(
@@ -63,9 +66,23 @@ const LessonCard: React.FC<LessonCardProps> = ({
             {lesson.title}
           </h3>
           {lesson.description && (
-            <p className="font-noto-sans-jp text-[10px] sm:text-[11px] md:text-xs font-medium text-[rgba(13,34,29,0.48)] leading-[1.4] line-clamp-2">
+            <p className="font-noto-sans-jp text-[10px] sm:text-[11px] md:text-[13px] font-medium text-[var(--text-muted)] leading-[1.6] line-clamp-2">
               {lesson.description}
             </p>
+          )}
+          {/* ロードマップ紐づき表示 - パターン#5: 個別バッジ */}
+          {hasRoadmap && (
+            <div className="flex flex-wrap items-center gap-1 mt-2">
+              {lesson.linkedRoadmaps!.map((roadmap) => (
+                <span
+                  key={roadmap.slug}
+                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-[rgba(13,34,29,0.06)] rounded-md text-[9px] sm:text-[10px] font-medium text-[rgba(13,34,29,0.56)]"
+                >
+                  <Map className="w-2 h-2 sm:w-2.5 sm:h-2.5" />
+                  {roadmap.shortTitle || roadmap.title}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>

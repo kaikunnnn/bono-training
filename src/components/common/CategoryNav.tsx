@@ -133,7 +133,7 @@ export default function CategoryNav({
   return (
     <nav
       className={cn(
-        "border-b border-gray-200 relative",
+        "border-b border-gray-200 relative h-full",
         sticky && "sticky top-16 z-10 bg-inherit pt-4 -mx-4 px-4 sm:mx-0 sm:px-0",
         className
       )}
@@ -168,8 +168,8 @@ export default function CategoryNav({
                   to={item.href}
                   ref={(el) => (itemRefs.current[index] = el)}
                   className={cn(
-                    // 高さ34px相当のベーススタイル
-                    "inline-flex items-center gap-1.5 py-[9px] px-3 text-sm font-bold leading-none whitespace-nowrap transition-colors",
+                    // 高さ調整: 上下16pxの余白
+                    "inline-flex items-center gap-1.5 py-4 px-3 text-sm font-bold leading-none whitespace-nowrap transition-colors",
                     active
                       ? "text-black"
                       : "text-gray-500 hover:text-gray-800"

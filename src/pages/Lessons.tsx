@@ -4,7 +4,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
-import { useLessons, SanityLesson } from "@/hooks/useLessons";
+import { useLessons, useRoadmapLessonMappings, buildLessonToRoadmapsMap, SanityLesson } from "@/hooks/useLessons";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import PageHeader from "@/components/common/PageHeader";
 import LessonCard from "@/components/lessons/LessonCard";
@@ -237,10 +237,17 @@ export default function Lessons() {
   const navigate = useNavigate();
   const { categoryId } = useParams<{ categoryId?: string }>();
   const { data: lessons, isLoading: loading, error } = useLessons();
+  const { data: roadmapMappings } = useRoadmapLessonMappings();
   const reduceMotion = useReducedMotion();
 
   // URLパラメータからアクティブなタブを決定（デフォルトは"recommended"）
   const activeTab = categoryId || 'recommended';
+
+  // レッスンID→ロードマップのマップを作成
+  const lessonToRoadmapsMap = useMemo(() => {
+    if (!roadmapMappings) return new Map();
+    return buildLessonToRoadmapsMap(roadmapMappings);
+  }, [roadmapMappings]);
 
   // レッスンをセクション・サブセクションごとにグルーピング
   const groupedLessons = useMemo(() => {
@@ -479,6 +486,7 @@ export default function Lessons() {
       category: categoryValue,
       thumbnail: thumbnailUrl,
       slug: sanityLesson.slug.current,
+      linkedRoadmaps: lessonToRoadmapsMap.get(sanityLesson._id) || [],
     };
 
     return (
@@ -527,7 +535,7 @@ export default function Lessons() {
         <PageHeader
           label="Lesson"
           title="レッスン一覧"
-          description="UIデザインを学ぶためのレッスン一覧です。なりたい状態に合わせてコンテンツを選べます。"
+          description="ワクワクするものづくりのために必要なコンテンツを選んでトレーニングしよう。"
         />
 
         {/* タブナビゲーションのsticky検知用sentinel */}
@@ -537,7 +545,8 @@ export default function Lessons() {
         {activeSections.length > 0 && (
           <div
             className={cn(
-              "sticky top-14 xl:top-0 z-10 pt-4 mb-8 transition-all duration-200",
+              // タブレット以下では横幅いっぱいに広げるためにコンテナのパディングを打ち消しつつ、背景ブラーを適用
+              "sticky top-14 xl:top-0 z-10 mb-8 transition-all duration-200 -mx-4 sm:-mx-6 px-2 sm:px-4 md:px-6",
               isTabSticky
                 ? "backdrop-blur-sm bg-white/50"
                 : "bg-transparent"
@@ -581,7 +590,7 @@ export default function Lessons() {
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true, margin: "-50px" }}
-                    className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-x-hidden"
+                    className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-visible"
                   >
                     {sectionLessons.map(renderLessonCard)}
                   </motion.div>
@@ -600,15 +609,12 @@ export default function Lessons() {
                 {index > 0 && (
                   <DottedDivider className="mb-12" />
                 )}
-                {/* カテゴリ見出し（30px） */}
+                {/* カテゴリ見出し（sp:22px / md+:28pxデザインシステム） */}
                 <div className="mb-8">
                   <div className="flex items-center gap-3 mb-6">
-                    <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight font-rounded-mplus">
+                    <h2 className="text-[22px] md:text-[24px] font-extrabold text-gray-900 tracking-tight font-rounded-mplus">
                       {section.label}
                     </h2>
-                    <span className="text-sm font-medium text-gray-500 px-2 py-1 bg-gray-100 rounded-full flex-shrink-0">
-                      {sectionCounts[section.id]}
-                    </span>
                     {/* その他の場合のみ、含まれるカテゴリを表示（デバッグ用） */}
                     {section.id === 'others' && otherCategories.length > 0 && (
                       <div className="text-xs text-gray-400 font-mono overflow-x-auto max-w-full min-w-0">
@@ -647,7 +653,7 @@ export default function Lessons() {
                                 initial="hidden"
                                 whileInView="show"
                                 viewport={{ once: true, margin: "-50px" }}
-                                className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-x-hidden"
+                                className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-visible"
                               >
                                 {/* カテゴリ別: 全件表示 */}
                                 {subLessons.map(renderLessonCard)}
@@ -663,7 +669,7 @@ export default function Lessons() {
                         initial="hidden"
                         whileInView="show"
                         viewport={{ once: true, margin: "-50px" }}
-                        className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-x-hidden"
+                        className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-visible"
                       >
                         {(groupedLessons[section.id]?.['_default'] || [])
                           .map(renderLessonCard)}

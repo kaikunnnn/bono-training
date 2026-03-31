@@ -23,6 +23,13 @@ export default defineType({
       validation: (Rule) => Rule.required(),
     }),
     defineField({
+      name: "shortTitle",
+      title: "短縮タイトル",
+      type: "string",
+      group: "basic",
+      description: "レッスンカード等で表示する短い名称（例: 転職、Figma入門、UIビジュアル）",
+    }),
+    defineField({
       name: "slug",
       title: "スラッグ",
       type: "slug",

@@ -2,6 +2,15 @@ import { useQuery } from '@tanstack/react-query';
 import { client } from '@/lib/sanity';
 
 /**
+ * レッスンに紐づくロードマップ情報
+ */
+export interface LinkedRoadmap {
+  slug: string;
+  title: string;
+  shortTitle?: string;
+}
+
+/**
  * Sanity Lesson型
  */
 export interface SanityLesson {
@@ -22,6 +31,8 @@ export interface SanityLesson {
   tags?: string[];
   isPremium: boolean;
   webflowSource?: string;
+  /** 紐づくロードマップ（フロントエンドで結合） */
+  linkedRoadmaps?: LinkedRoadmap[];
 }
 
 /**
@@ -76,4 +87,73 @@ export function useLessons() {
     retry: 1,
     refetchOnWindowFocus: false,
   });
+}
+
+/**
+ * ロードマップ→レッスンIDのマッピング型
+ */
+export interface RoadmapLessonMapping {
+  roadmapSlug: string;
+  roadmapTitle: string;
+  roadmapShortTitle?: string;
+  lessonIds: string[];
+}
+
+/**
+ * ロードマップに紐づくレッスンIDのマッピングを取得
+ *
+ * Sanityのデータ構造:
+ * - 直接参照型: steps[].sections[].contents[] が { _type: "reference", _ref: "lessonId" }
+ * - contentItem型: steps[].sections[].contents[] が { _type: "contentItem", lesson: { _ref: "lessonId" } }
+ */
+async function fetchRoadmapLessonMappings(): Promise<RoadmapLessonMapping[]> {
+  const query = `*[_type == "roadmap" && isPublished == true] {
+    "roadmapSlug": slug.current,
+    "roadmapTitle": title,
+    "roadmapShortTitle": shortTitle,
+    "lessonIds": steps[].sections[].contents[]{
+      // 直接参照型
+      _type == "reference" => @->{ _id, _type },
+      // contentItem型
+      _type == "contentItem" && itemType == "lesson" => lesson->{ _id, _type }
+    }[_type == "lesson"]._id
+  }`;
+
+  return client.fetch(query);
+}
+
+/**
+ * ロードマップ→レッスンマッピング取得フック
+ */
+export function useRoadmapLessonMappings() {
+  return useQuery({
+    queryKey: ['roadmap-lesson-mappings'],
+    queryFn: fetchRoadmapLessonMappings,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+}
+
+/**
+ * レッスンID→紐づくロードマップのマップを作成
+ */
+export function buildLessonToRoadmapsMap(
+  mappings: RoadmapLessonMapping[]
+): Map<string, LinkedRoadmap[]> {
+  const map = new Map<string, LinkedRoadmap[]>();
+
+  for (const mapping of mappings) {
+    const uniqueLessonIds = [...new Set(mapping.lessonIds.filter(Boolean))];
+    for (const lessonId of uniqueLessonIds) {
+      const existing = map.get(lessonId) || [];
+      existing.push({
+        slug: mapping.roadmapSlug,
+        title: mapping.roadmapTitle,
+        shortTitle: mapping.roadmapShortTitle,
+      });
+      map.set(lessonId, existing);
+    }
+  }
+
+  return map;
 }

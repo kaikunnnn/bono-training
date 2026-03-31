@@ -3,6 +3,12 @@ import { LessonHeader } from "./LessonHeader";
 import { LessonSidebar } from "./LessonSidebar";
 import { LessonTitleArea } from "./LessonTitleArea";
 
+interface LinkedRoadmap {
+  slug: string;
+  title: string;
+  shortTitle?: string;
+}
+
 interface Lesson {
   _id: string;
   title: string;
@@ -12,6 +18,7 @@ interface Lesson {
   iconImageUrl?: string;
   category?: string;
   isPremium?: boolean;
+  linkedRoadmaps?: LinkedRoadmap[];
 }
 
 interface LessonHeaderLayoutProps {
