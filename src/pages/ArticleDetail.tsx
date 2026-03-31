@@ -411,7 +411,7 @@ const ArticleDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base">
+      <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner size="lg" />
       </div>
     );
@@ -419,7 +419,7 @@ const ArticleDetail = () => {
 
   if (error || !article) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base">
+      <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">
             {error || "記事が見つかりませんでした"}
@@ -436,7 +436,7 @@ const ArticleDetail = () => {
   }
 
   return (
-    <div className="min-h-screen bg-base">
+    <div className="min-h-screen">
       {/* クエスト完了モーダル（5秒後に自動で閉じる） */}
       <QuestCompletionModal
         isOpen={showQuestModal}

@@ -16,7 +16,7 @@ import Auth from "./pages/Auth";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
-import TopPagePatternEMain from "./pages/dev/TopPagePatternE";
+import TopPage from "./pages/top";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
 import Subscription from "./pages/Subscription";
@@ -47,6 +47,7 @@ import TopPagePatternD from "./pages/dev/TopPagePatternD";
 import TopPagePatternE from "./pages/dev/TopPagePatternE";
 import TopPagePatternF from "./pages/dev/TopPagePatternF";
 import TopPagePatternG from "./pages/dev/TopPagePatternG";
+import TopPageNew from "./pages/dev/TopPageNew";
 import GuideHubPatternF from "./pages/dev/GuideHubPatternF";
 import GuideDetailPatternF from "./pages/dev/GuideDetailPatternF";
 import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
@@ -68,9 +69,26 @@ import RoadmapPattern16 from "./pages/dev/RoadmapPattern16";
 import RoadmapPattern17 from "./pages/dev/RoadmapPattern17";
 import RoadmapTest from "./pages/dev/RoadmapTest";
 import WebflowEmbed from "./pages/dev/WebflowEmbed";
+import RoadmapCardPreview from "./pages/dev/RoadmapCardPreview";
+import RoadmapCardV2Preview from "./pages/dev/RoadmapCardV2Preview";
+import SectionHeadingPreview from "./pages/dev/SectionHeadingPreview";
+import CategoryNavPreview from "./pages/dev/CategoryNavPreview";
+import ColorTokenPreview from "./pages/dev/ColorTokenPreview";
+import BgTokenPreview from "./pages/dev/BgTokenPreview";
+import DottedDividerPreview from "./pages/dev/DottedDividerPreview";
+import ContentCardPreview from "./pages/dev/ContentCardPreview";
+import RoadmapHeroPreview from "./pages/dev/RoadmapHeroPreview";
+import RoadmapDetailPreview from "./pages/dev/RoadmapDetailPreview";
+import RoadmapPreview from "./pages/dev/RoadmapPreview";
+import RoadmapGradientPreview from "./pages/dev/RoadmapGradientPreview";
+import TopHeroSectionPreview from "./pages/dev/TopHeroSectionPreview";
+import GoalSectionPreview from "./pages/dev/GoalSectionPreview";
+import TopPagePreview from "./pages/dev/TopPagePreview";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
+import HeaderBlurPatterns from "./pages/dev/HeaderBlurPatterns";
+import HeaderBlurImpact from "./pages/dev/HeaderBlurImpact";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
 import LessonIdea2 from "./pages/dev/lesson-ideas/LessonIdea2";
 import LessonIdea3 from "./pages/dev/lesson-ideas/LessonIdea3";
@@ -157,7 +175,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/top" element={<TopPagePatternEMain />} />
+        <Route path="/top" element={<TopPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />
@@ -186,6 +204,7 @@ const AppContent = () => {
         <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
         <Route path="/dev/top-pattern-f" element={<DevRoute><TopPagePatternF /></DevRoute>} />
         <Route path="/dev/top-pattern-g" element={<DevRoute><TopPagePatternG /></DevRoute>} />
+        <Route path="/dev/top-new" element={<DevRoute><TopPageNew /></DevRoute>} />
         <Route path="/dev/guide-pattern-f" element={<DevRoute><GuideHubPatternF /></DevRoute>} />
         <Route path="/dev/guide-pattern-f/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
         <Route path="/dev/guide-pattern-f/:category/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
@@ -208,7 +227,26 @@ const AppContent = () => {
         <Route path="/dev/roadmap-pattern-17" element={<DevRoute><RoadmapPattern17 /></DevRoute>} />
         <Route path="/dev/roadmap-test" element={<DevRoute><RoadmapTest /></DevRoute>} />
         <Route path="/dev/webflow-embed" element={<DevRoute><WebflowEmbed /></DevRoute>} />
+        <Route path="/dev/roadmap-card" element={<DevRoute><RoadmapCardPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-card-v2" element={<DevRoute><RoadmapCardV2Preview /></DevRoute>} />
+        <Route path="/dev/section-heading" element={<DevRoute><SectionHeadingPreview /></DevRoute>} />
+        <Route path="/dev/category-nav" element={<DevRoute><CategoryNavPreview /></DevRoute>} />
+        <Route path="/dev/category-nav/:category" element={<DevRoute><CategoryNavPreview /></DevRoute>} />
+        <Route path="/dev/color-token" element={<DevRoute><ColorTokenPreview /></DevRoute>} />
+        <Route path="/dev/bg-token" element={<DevRoute><BgTokenPreview /></DevRoute>} />
+        <Route path="/dev/dotted-divider" element={<DevRoute><DottedDividerPreview /></DevRoute>} />
+        <Route path="/dev/content-card" element={<DevRoute><ContentCardPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-hero" element={<DevRoute><RoadmapHeroPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-detail" element={<DevRoute><RoadmapDetailPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-preview" element={<DevRoute><RoadmapPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-preview/:slug" element={<DevRoute><RoadmapPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-gradient-preview" element={<DevRoute><RoadmapGradientPreview /></DevRoute>} />
+        <Route path="/dev/top-hero" element={<DevRoute><TopHeroSectionPreview /></DevRoute>} />
+        <Route path="/dev/goal-section" element={<DevRoute><GoalSectionPreview /></DevRoute>} />
+        <Route path="/dev/top-page-preview" element={<DevRoute><TopPagePreview /></DevRoute>} />
         <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
+        <Route path="/dev/header-blur-patterns" element={<DevRoute><HeaderBlurPatterns /></DevRoute>} />
+        <Route path="/dev/header-blur-impact" element={<DevRoute><HeaderBlurImpact /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
         <Route path="/dev/lesson-idea-3" element={<DevRoute><LessonIdea3 /></DevRoute>} />
@@ -246,6 +284,7 @@ const AppContent = () => {
 
         <Route path="/roadmap" element={<Roadmap />} />
         <Route path="/roadmaps" element={<RoadmapListPage />} />
+        <Route path="/roadmaps/category/:categoryId" element={<RoadmapListPage />} />
         <Route path="/roadmaps/:slug" element={<RoadmapDetail />} />
 
         {/* 質問ページ（Sanityベース） */}

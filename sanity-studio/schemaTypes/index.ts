@@ -2,6 +2,7 @@ import lesson from "./lesson";
 import article from "./article";
 import quest from "./quest";
 import category from "./category";
+import roadmap from "./roadmap";
 import blogPost from "./blogPost";
 import event from "./event";
 import question from "./question";
@@ -16,4 +17,4 @@ import tableBlock from "./objects/tableBlock";
 import linkCard from "./objects/linkCard";
 import tableOfContents from "./objects/tableOfContents";
 
-export const schemaTypes = [category, lesson, quest, article, blogPost, event, question, questionCategory, feedback, feedbackCategory, knowledge, knowledgeCategory, userOutput, customContainer, tableBlock, linkCard, tableOfContents];
+export const schemaTypes = [category, lesson, quest, article, roadmap, blogPost, event, question, questionCategory, feedback, feedbackCategory, knowledge, knowledgeCategory, userOutput, customContainer, tableBlock, linkCard, tableOfContents];

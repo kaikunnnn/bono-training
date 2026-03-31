@@ -126,7 +126,7 @@ export const uiVisualRoadmap: Roadmap = {
   steps,
   aboutPageUrl: '/roadmaps/ui-visual/about',
   relatedGuideSlug: 'roadmap-ui-visual',
-  gradientColors: 'from-purple-500 to-pink-600',
+  gradientColors: 'from-[#304750] to-[#5D5B65]',
 };
 
 export default uiVisualRoadmap;

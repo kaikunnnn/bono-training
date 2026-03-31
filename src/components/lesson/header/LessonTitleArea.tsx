@@ -1,12 +1,20 @@
+import { Map } from "lucide-react";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { LessonProgressBar } from "@/components/ui/LessonProgressBar";
 import { Button } from "@/components/ui/button";
+
+interface LinkedRoadmap {
+  slug: string;
+  title: string;
+  shortTitle?: string;
+}
 
 interface LessonTitleAreaProps {
   lesson: {
     title: string;
     category?: string;
     description?: string;
+    linkedRoadmaps?: LinkedRoadmap[];
   };
   /** 進捗率 0-100 */
   progress: number;
@@ -47,10 +55,19 @@ export function LessonTitleArea({
       )}
 
       {/* タイトル */}
-      <div className="flex flex-col items-start w-full">
+      <div className="flex flex-col gap-1.5 items-start w-full">
         <h1 className="font-rounded-mplus font-bold text-[32px] text-[#0d221d] leading-[40px] w-full">
           {lesson.title}
         </h1>
+        {/* ロードマップ紐づき表示 */}
+        {lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0 && (
+          <div className="flex items-center gap-1 text-[rgba(13,34,29,0.48)]">
+            <Map className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="font-noto-sans-jp text-[13px] font-medium">
+              {lesson.linkedRoadmaps.map((r) => r.shortTitle || r.title).join(', ')}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 進捗バー（レスポンシブ: 64%幅） */}

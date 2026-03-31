@@ -1,4 +1,13 @@
 /**
+ * 紐づくロードマップ情報
+ */
+export interface LinkedRoadmap {
+  slug: string;
+  title: string;
+  shortTitle?: string;
+}
+
+/**
  * レッスンの型定義
  */
 export interface Lesson {
@@ -14,4 +23,6 @@ export interface Lesson {
   thumbnail?: string;
   /** URL用のスラッグ（将来の詳細ページ用） */
   slug: string;
+  /** 紐づくロードマップ */
+  linkedRoadmaps?: LinkedRoadmap[];
 }

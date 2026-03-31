@@ -59,6 +59,50 @@
     --training-text-primary: 29 45% 15%;         /* #1d382f */
     --training-text-secondary: 215 16% 47%;      /* #475569 */
     --training-dark: 213 45% 15%;                /* #1d2631 */
+
+    /* テキストカラートークン（Figma定義） */
+    --text-primary: #021710;
+    --text-secondary: #354540;
+    --text-muted: #677470;
+    --text-disabled: #9AA29F;
+    --text-link: #0829BF;
+    --text-link-hover: #3306E8;
+    --text-success: #047A53;
+    --text-warning: #9E6608;
+    --text-error: #C42626;
+    --text-inverse: #FAFBFB;
+
+    /* 背景カラートークン（Figma定義） */
+    /* 基本レイヤー */
+    --bg-base: #F9F9F7;
+    --bg-surface: #FFFFFF;
+    --bg-surface-raised: #FFFFFF;
+    --bg-overlay: rgba(5, 16, 12, 0.72);
+
+    /* インタラクティブ */
+    --bg-muted: #F2F3F0;
+    --bg-muted-strong: #E9EAE6;
+    --bg-hover: #F2F3F0;
+    --bg-active: #E0E1DC;
+    --bg-disabled: #F9FAFB;
+
+    /* セマンティック */
+    --bg-success: rgba(138, 204, 161, 0.12);
+    --bg-warning: rgba(255, 183, 33, 0.12);
+    --bg-error: #FDEFF2;
+    --bg-info: #FFFFFF;
+
+    /* ボーダーカラー（Figma定義） */
+    --border-light: #D4D6CC;
+    --border-default: #C3C5BB;
+    --border-strong: #A8AAA0;
+
+    /* トップページ専用トークン */
+    --cta-primary-bg: #102720;
+    --cta-primary-hover: #1a3a30;
+    --accent-orange: #F95A16;
+    --label-olive: #77850e;
+    --bg-warm: #f5efe7;
   }
 
   .dark {
@@ -89,6 +133,28 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
+
+    /* 背景カラートークン（ダークモード） */
+    --bg-base: #0a0a0a;
+    --bg-surface: #1a1a1a;
+    --bg-surface-raised: #252525;
+    --bg-overlay: rgba(0, 0, 0, 0.7);
+
+    --bg-muted: #2a2a2a;
+    --bg-muted-strong: #3a3a3a;
+    --bg-hover: #2a2a2a;
+    --bg-active: #333333;
+    --bg-disabled: #1f1f1f;
+
+    --bg-success: #052e16;
+    --bg-warning: #422006;
+    --bg-error: #450a0a;
+    --bg-info: #1e3a5f;
+
+    /* ボーダーカラー（ダークモード） */
+    --border-light: #3a3a3a;
+    --border-default: #4a4a4a;
+    --border-strong: #5a5a5a;
   }
 }
 
@@ -205,5 +271,24 @@
     -webkit-text-fill-color: hsl(222.2 84% 4.9%) !important;
     box-shadow: 0 0 0 30px white inset !important;
     caret-color: hsl(222.2 84% 4.9%) !important;
+  }
+
+  /* ロードマップヒーロー: 上下波形・左右直線の柔軟なSVGマスク */
+  .roadmap-hero-mask {
+    -webkit-mask-image: url('/shapes/roadmap-hero-shape-flexible.svg');
+    mask-image: url('/shapes/roadmap-hero-shape-flexible.svg');
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
+  /* スクロールバー非表示（横スクロールUI用） */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

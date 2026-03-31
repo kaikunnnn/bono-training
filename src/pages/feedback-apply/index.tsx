@@ -178,7 +178,7 @@ const FeedbackApplyIndex = () => {
         ogImage="/assets/feedback/og-image.png"
       />
 
-      <div className="min-h-screen bg-base">
+      <div className="min-h-screen">
         <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
           {/* ヘッダーセクション */}
           <motion.section

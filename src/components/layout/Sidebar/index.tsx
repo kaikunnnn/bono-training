@@ -53,7 +53,8 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </SidebarMenuItem>
         )}
 
-        {/* トップ */}
+        {/* TODO: リリース後に復活 - トップ、ロードマップ、ガイド */}
+        {/*
         <SidebarMenuItem
           href="/top"
           icon={<MenuIcons.top size={ICON_SIZE} variant="Outline" />}
@@ -67,7 +68,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </span>
         </SidebarMenuItem>
 
-        {/* ロードマップ */}
         <SidebarMenuItem
           href="/roadmaps"
           icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline" />}
@@ -81,7 +81,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </span>
         </SidebarMenuItem>
 
-        {/* ガイド */}
         <SidebarMenuItem
           href="/guide"
           icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
@@ -94,6 +93,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             </span>
           </span>
         </SidebarMenuItem>
+        */}
 
         {/* レッスン */}
         <SidebarMenuItem

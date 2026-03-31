@@ -31,6 +31,12 @@ interface Quest {
   articles: Article[];
 }
 
+interface LinkedRoadmap {
+  slug: string;
+  title: string;
+  shortTitle?: string;
+}
+
 interface Lesson {
   _id: string;
   title: string;
@@ -46,6 +52,7 @@ interface Lesson {
   purposes?: string[];
   overview?: any;
   quests: Quest[];
+  linkedRoadmaps?: LinkedRoadmap[];
 }
 
 export default function LessonDetail() {
@@ -55,6 +62,7 @@ export default function LessonDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [questProgressMap, setQuestProgressMap] = useState<Record<string, { completed: number; total: number; completedArticleIds: string[] }>>({});
+  const [linkedRoadmaps, setLinkedRoadmaps] = useState<LinkedRoadmap[]>([]);
   const [activeTab, setActiveTab] = useState<"content" | "overview">("content");
   const tabsRef = useRef<HTMLDivElement>(null);
 
@@ -171,6 +179,32 @@ export default function LessonDetail() {
     fetchQuestProgress();
   }, [lesson]);
 
+  // このレッスンが含まれるロードマップを取得
+  useEffect(() => {
+    const fetchLinkedRoadmaps = async () => {
+      if (!lesson || !lesson._id) return;
+
+      try {
+        // ロードマップのcontentsでこのレッスンを参照しているものを検索
+        const query = `*[_type == "roadmap" && isPublished == true && (
+          count(steps[].sections[].contents[@._type == "reference" && @._ref == $lessonId]) > 0 ||
+          count(steps[].sections[].contents[@._type == "contentItem" && @.itemType == "lesson" && @.lesson._ref == $lessonId]) > 0
+        )] {
+          "slug": slug.current,
+          title,
+          shortTitle
+        }`;
+
+        const roadmaps = await client.fetch(query, { lessonId: lesson._id });
+        setLinkedRoadmaps(roadmaps || []);
+      } catch (err) {
+        console.error("Error fetching linked roadmaps:", err);
+      }
+    };
+
+    fetchLinkedRoadmaps();
+  }, [lesson]);
+
   const handleStart = () => {
     if (lesson?.quests?.[0]?.articles?.[0]) {
       const firstArticle = lesson.quests[0].articles[0];
@@ -258,10 +292,10 @@ export default function LessonDetail() {
         ogUrl={`/lessons/${lesson.slug.current}`}
         ogType="article"
       />
-      <div className="min-h-screen bg-base">
+      <div className="min-h-screen">
         {/* 新デザインヘッダー + タブコンテンツ（右側ブロックに統合） */}
         <LessonHeaderLayout
-          lesson={lesson}
+          lesson={{ ...lesson, linkedRoadmaps }}
           progress={overallProgress}
           onStart={handleStart}
           onViewAllDetails={hasOverviewData ? handleViewAllDetails : undefined}

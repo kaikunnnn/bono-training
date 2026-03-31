@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe } from 'lucide-react';
+import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe, CreditCard, Eye, Layers } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -57,6 +57,34 @@ const devResources: DevResourceCard[] = [
     path: '/dev/webflow-embed',
     icon: <Globe className="w-8 h-8" />,
     tags: ['Webflow', 'Sanity', 'Embed', 'Integration']
+  },
+  {
+    title: 'Roadmap Card',
+    description: 'ロードマップ一覧で使用するカードコンポーネント。グラデーションカラーのバリエーション付き。',
+    path: '/dev/roadmap-card',
+    icon: <CreditCard className="w-8 h-8" />,
+    tags: ['Roadmap', 'Card', 'Component', 'Gradient']
+  },
+  {
+    title: 'Roadmap Preview',
+    description: '5つのロードマップのコンテンツプレビュー。詳細ページの全セクション（ヒーロー、変わる景色、面白くなる視点、カリキュラム）を確認。',
+    path: '/dev/roadmap-preview',
+    icon: <Eye className="w-8 h-8" />,
+    tags: ['Roadmap', 'Preview', 'Content', 'Detail']
+  },
+  {
+    title: 'Roadmap Gradient Preview',
+    description: 'RoadmapHero（詳細ページ）とRoadmapCardV2（カード）のグラデーション比較。Hero背景画像の確認も可能。',
+    path: '/dev/roadmap-gradient-preview',
+    icon: <Eye className="w-8 h-8" />,
+    tags: ['Roadmap', 'Gradient', 'Color', 'Hero', 'Card']
+  },
+  {
+    title: 'Header Blur Patterns',
+    description: 'ヘッダー + カテゴリタブのブラー/透過一体化パターン比較。2つのsticky要素を視覚的に統一する方法。',
+    path: '/dev/header-blur-patterns',
+    icon: <Layers className="w-8 h-8" />,
+    tags: ['Header', 'Blur', 'Sticky', 'Navigation', 'Mobile']
   },
 ];
 

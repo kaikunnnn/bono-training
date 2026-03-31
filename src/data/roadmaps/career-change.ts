@@ -212,9 +212,9 @@ const steps: RoadmapStep[] = [
 // ============================================
 
 export const careerChangeRoadmap: Roadmap = {
-  id: "career-change",
-  slug: "career-change",
-  title: "未経験から転職ロードマップ",
+  id: "uiux-career-change",
+  slug: "uiux-career-change",
+  title: "UIUXデザイナー転職ロードマップ",
   subtitle: "未経験からUIUXデザイナーへ",
   description:
     "UIデザインの基礎から、情報設計、UXデザインまで。転職に必要なスキルを6ヶ月で体系的に学ぶロードマップ。",
