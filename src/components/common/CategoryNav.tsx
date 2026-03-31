@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export interface CategoryNavItem {
@@ -21,6 +22,10 @@ interface CategoryNavProps {
   className?: string;
   /** sticky配置にするか（デフォルト: false） */
   sticky?: boolean;
+  /** 配置: 左揃え or 中央揃え（デフォルト: left） */
+  align?: "left" | "center";
+  /** 矢印ボタンを表示するか（デフォルト: false） */
+  showArrows?: boolean;
 }
 
 /**
@@ -49,11 +54,54 @@ export default function CategoryNav({
   items,
   className,
   sticky = false,
+  align = "left",
+  showArrows = false,
 }: CategoryNavProps) {
   const location = useLocation();
   const navRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  // 矢印ボタン用のスクロール状態
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  // スクロール可能かチェック
+  const checkScroll = useCallback(() => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 0);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
+  }, []);
+
+  // スクロールイベント監視
+  useEffect(() => {
+    if (!showArrows) return;
+    checkScroll();
+    const el = scrollContainerRef.current;
+    if (el) {
+      el.addEventListener("scroll", checkScroll);
+      window.addEventListener("resize", checkScroll);
+    }
+    return () => {
+      if (el) {
+        el.removeEventListener("scroll", checkScroll);
+        window.removeEventListener("resize", checkScroll);
+      }
+    };
+  }, [checkScroll, showArrows, items]);
+
+  // スクロール実行
+  const scrollNav = (direction: "left" | "right") => {
+    const el = scrollContainerRef.current;
+    if (!el) return;
+    const scrollAmount = 200;
+    el.scrollBy({
+      left: direction === "left" ? -scrollAmount : scrollAmount,
+      behavior: "smooth",
+    });
+  };
 
   // アクティブ判定（完全一致 or パス先頭一致）
   const isActive = (href: string) => {
@@ -85,50 +133,85 @@ export default function CategoryNav({
   return (
     <nav
       className={cn(
-        "border-b border-gray-200 overflow-x-auto relative",
+        "border-b border-gray-200 relative",
         sticky && "sticky top-16 z-10 bg-inherit pt-4 -mx-4 px-4 sm:mx-0 sm:px-0",
         className
       )}
     >
-      <div ref={navRef} className="flex gap-4 min-w-max">
-        {items.map((item, index) => {
-          const active = isActive(item.href);
-          return (
-            <Link
-              key={item.href}
-              to={item.href}
-              ref={(el) => (itemRefs.current[index] = el)}
-              className={cn(
-                "pb-3 md:px-2 text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-1.5",
-                active
-                  ? "text-black"
-                  : "text-gray-500 hover:text-gray-800"
-              )}
-            >
-              {item.icon && <item.icon className="h-4 w-4" />}
-              {item.label}
-              {item.count !== undefined && (
-                <span
+      <div className="relative flex items-center w-full">
+        {/* 左矢印ボタン */}
+        {showArrows && canScrollLeft && (
+          <button
+            onClick={() => scrollNav("left")}
+            className="hidden md:flex absolute left-0 z-10 w-8 h-8 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-md transition-all"
+            aria-label="左にスクロール"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
+          </button>
+        )}
+
+        {/* タブコンテナ */}
+        <div
+          ref={scrollContainerRef}
+          className={cn(
+            "flex gap-4 overflow-x-auto scrollbar-hide w-full",
+            showArrows && "px-2 md:px-10",
+            align === "center" && "justify-center"
+          )}
+        >
+          <div ref={navRef} className="relative flex gap-4 min-w-max">
+            {items.map((item, index) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  to={item.href}
+                  ref={(el) => (itemRefs.current[index] = el)}
                   className={cn(
-                    "ml-1 text-xs font-normal px-2 py-0.5 rounded-full",
-                    active ? "bg-black text-white" : "bg-gray-100 text-gray-500"
+                    // 高さ34px相当のベーススタイル
+                    "inline-flex items-center gap-1.5 py-[9px] px-3 text-sm font-bold leading-none whitespace-nowrap transition-colors",
+                    active
+                      ? "text-black"
+                      : "text-gray-500 hover:text-gray-800"
                   )}
                 >
-                  {item.count}
-                </span>
-              )}
-            </Link>
-          );
-        })}
+                  {item.icon && <item.icon className="h-4 w-4" />}
+                  {item.label}
+                  {item.count !== undefined && (
+                    <span
+                      className={cn(
+                        "text-xs font-normal px-1.5 py-0.5 rounded-full",
+                        active ? "bg-black text-white" : "bg-gray-100 text-gray-500"
+                      )}
+                    >
+                      {item.count}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+            {/* スライドするインジケーター（タブコンテナ内） */}
+            <div
+              className="absolute bottom-0 h-0.5 bg-black rounded-full transition-all duration-300 ease-out"
+              style={{
+                left: indicatorStyle.left,
+                width: indicatorStyle.width,
+              }}
+            />
+          </div>
+        </div>
+
+        {/* 右矢印ボタン */}
+        {showArrows && canScrollRight && (
+          <button
+            onClick={() => scrollNav("right")}
+            className="hidden md:flex absolute right-0 z-10 w-8 h-8 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-md transition-all"
+            aria-label="右にスクロール"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-600" />
+          </button>
+        )}
       </div>
-      {/* スライドするインジケーター */}
-      <div
-        className="absolute bottom-0 h-0.5 bg-black rounded-full transition-all duration-300 ease-out"
-        style={{
-          left: indicatorStyle.left,
-          width: indicatorStyle.width,
-        }}
-      />
     </nav>
   );
 }

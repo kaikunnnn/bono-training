@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState, useEffect, useCallback } from "react";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { useMemo, useRef, useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { urlFor } from "@/lib/sanity";
 import Layout from "@/components/layout/Layout";
 import { useLessons, SanityLesson } from "@/hooks/useLessons";
@@ -10,6 +10,7 @@ import PageHeader from "@/components/common/PageHeader";
 import LessonCard from "@/components/lessons/LessonCard";
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
+import CategoryNav, { type CategoryNavItem } from "@/components/common/CategoryNav";
 import { Lesson } from "@/types/lesson";
 
 // セクション定義
@@ -271,7 +272,8 @@ export default function Lessons() {
       const lessonTitle = lesson.title;
       let matched = false;
 
-      // 1. サブセクションのlessonTitlesでマッチング
+      // 1. サブセクションのlessonTitlesでマッチング（複数セクション対応）
+      // 同じレッスンが複数のセクション/サブセクションに属することを許可
       for (const section of SECTIONS) {
         if (section.id === 'others') continue;
 
@@ -282,13 +284,13 @@ export default function Lessons() {
           if (isMatch) {
             groups[section.id][sub.id].push(lesson);
             matched = true;
-            break;
+            // break しない → 他のセクション/サブセクションもチェック継続
           }
         }
-        if (matched) break;
+        // break しない → 他のセクションもチェック継続
       }
 
-      // 2. カテゴリでマッチング（複数カテゴリ対応）
+      // 2. カテゴリでマッチング（lessonTitlesでマッチしなかった場合のみ）
       if (!matched && lessonCategories.length > 0) {
         for (const section of SECTIONS) {
           if (section.id === 'others') continue;
@@ -306,7 +308,7 @@ export default function Lessons() {
               groups[section.id][firstSubId].push(lesson);
             }
             matched = true;
-            break;
+            // break しない → 複数カテゴリにマッチする可能性を許可
           }
         }
       }
@@ -421,42 +423,36 @@ export default function Lessons() {
     navigate(`/lessons/${slug}`);
   };
 
-  // タブナビゲーション用のスクロール制御
-  const tabScrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const checkTabScroll = useCallback(() => {
-    const el = tabScrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 0);
-    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 1);
-  }, []);
+  // タブナビのsticky状態を検知
+  const tabSentinelRef = useRef<HTMLDivElement>(null);
+  const [isTabSticky, setIsTabSticky] = useState(false);
 
   useEffect(() => {
-    checkTabScroll();
-    const el = tabScrollRef.current;
-    if (el) {
-      el.addEventListener('scroll', checkTabScroll);
-      window.addEventListener('resize', checkTabScroll);
-    }
-    return () => {
-      if (el) {
-        el.removeEventListener('scroll', checkTabScroll);
-        window.removeEventListener('resize', checkTabScroll);
-      }
-    };
-  }, [checkTabScroll, activeSections]);
+    const sentinel = tabSentinelRef.current;
+    if (!sentinel) return;
 
-  const scrollTabs = (direction: 'left' | 'right') => {
-    const el = tabScrollRef.current;
-    if (!el) return;
-    const scrollAmount = 200;
-    el.scrollBy({
-      left: direction === 'left' ? -scrollAmount : scrollAmount,
-      behavior: 'smooth'
-    });
-  };
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // sentinelがビューポートから消えたらsticky状態
+        setIsTabSticky(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
+
+  // CategoryNav用のナビゲーションアイテムを生成
+  const navItems: CategoryNavItem[] = useMemo(() => {
+    return [
+      { label: "おすすめ", href: "/lessons" },
+      ...activeSections.map((section) => ({
+        label: section.label,
+        href: `/lessons/category/${section.id}`,
+      })),
+    ];
+  }, [activeSections]);
 
   // レッスンカードをレンダリング
   const renderLessonCard = (sanityLesson: SanityLesson) => {
@@ -525,66 +521,6 @@ export default function Lessons() {
     );
   }
 
-  // タブナビゲーションの内容（モバイル・デスクトップ共通）
-  const tabNavContent = activeSections.length > 0 ? (
-    <div className="relative flex items-center w-full overflow-hidden">
-      {/* 左矢印ボタン（md以上でスクロール可能時のみ表示） */}
-      {canScrollLeft && (
-        <button
-          onClick={() => scrollTabs('left')}
-          className="hidden md:flex absolute left-0 z-10 w-10 h-10 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-md transition-all"
-          aria-label="左にスクロール"
-        >
-          <ChevronLeft className="w-5 h-5 text-gray-600" />
-        </button>
-      )}
-
-      {/* タブコンテナ */}
-      <div
-        ref={tabScrollRef}
-        className="flex flex-nowrap gap-4 md:gap-6 overflow-x-auto scrollbar-hide px-2 md:px-12 w-full"
-      >
-        {/* おすすめタブ */}
-        <Link
-          to="/lessons"
-          className={`
-            pb-3 px-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2 flex-shrink-0
-            ${activeTab === 'recommended'
-              ? 'border-black text-black'
-              : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'}
-          `}
-        >
-          おすすめ
-        </Link>
-        {activeSections.map((section) => (
-          <Link
-            key={section.id}
-            to={`/lessons/category/${section.id}`}
-            className={`
-              pb-3 px-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2 flex-shrink-0
-              ${activeTab === section.id
-                ? 'border-black text-black'
-                : 'border-transparent text-gray-500 hover:text-gray-800 hover:border-gray-300'}
-            `}
-          >
-            {section.label}
-          </Link>
-        ))}
-      </div>
-
-      {/* 右矢印ボタン（md以上でスクロール可能時のみ表示） */}
-      {canScrollRight && (
-        <button
-          onClick={() => scrollTabs('right')}
-          className="hidden md:flex absolute right-0 z-10 w-10 h-10 items-center justify-center bg-white/90 hover:bg-white rounded-full shadow-md transition-all"
-          aria-label="右にスクロール"
-        >
-          <ChevronRight className="w-5 h-5 text-gray-600" />
-        </button>
-      )}
-    </div>
-  ) : null;
-
   return (
     <Layout>
       <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-8 min-w-0">
@@ -594,10 +530,24 @@ export default function Lessons() {
           description="UIデザインを学ぶためのレッスン一覧です。なりたい状態に合わせてコンテンツを選べます。"
         />
 
-        {/* タブナビゲーション（sticky: スクロールで固定）- Pattern D: backdrop-blur-sm bg-white/50 */}
+        {/* タブナビゲーションのsticky検知用sentinel */}
+        <div ref={tabSentinelRef} className="h-0" aria-hidden="true" />
+
+        {/* タブナビゲーション（sticky: スクロールで固定）- 通常時は透明、sticky時はPattern D */}
         {activeSections.length > 0 && (
-          <div className="sticky top-14 xl:top-0 z-10 pt-4 pb-3 mb-8 border-b border-gray-200/50 backdrop-blur-sm bg-white/50">
-            {tabNavContent}
+          <div
+            className={cn(
+              "sticky top-14 xl:top-0 z-10 pt-4 mb-8 transition-all duration-200",
+              isTabSticky
+                ? "backdrop-blur-sm bg-white/50"
+                : "bg-transparent"
+            )}
+          >
+            <CategoryNav
+              items={navItems}
+              showArrows
+              className="border-gray-200/50"
+            />
           </div>
         )}
 

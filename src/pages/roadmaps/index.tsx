@@ -105,7 +105,7 @@ export default function RoadmapListPage() {
   if (isLoading) {
     return (
       <Layout>
-        <div className="min-h-screen bg-[#f9f9f7]">
+        <div className="min-h-screen">
           <main className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8">
             <PageHeader
               label="変化への地図"
@@ -125,7 +125,7 @@ export default function RoadmapListPage() {
   if (error) {
     return (
       <Layout>
-        <div className="min-h-screen bg-[#f9f9f7]">
+        <div className="min-h-screen">
           <main className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8">
             <PageHeader
               label="変化への地図"
@@ -154,7 +154,7 @@ export default function RoadmapListPage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#f9f9f7]">
+      <div className="min-h-screen">
         <main className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8">
           {/* ページヘッダー */}
           <PageHeader
@@ -165,7 +165,7 @@ export default function RoadmapListPage() {
 
           {/* カテゴリナビゲーション */}
           <div className="mb-8">
-            <CategoryNav items={NAV_ITEMS} />
+            <CategoryNav items={NAV_ITEMS} align="center" />
           </div>
 
           {/* カテゴリ別セクション */}
