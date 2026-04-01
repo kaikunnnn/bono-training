@@ -38,36 +38,7 @@ import GuidePage from "./pages/Guide";
 import GuideDetailPage from "./pages/Guide/GuideDetail";
 import DevRoute from "./pages/dev";
 import DevHome from "./pages/dev/DevHome";
-import FeedbackDetailPatterns from "./pages/dev/FeedbackDetailPatterns";
-import TopPagePatterns from "./pages/dev/TopPagePatterns";
-import TopPagePatternA from "./pages/dev/TopPagePatternA";
-import TopPagePatternB from "./pages/dev/TopPagePatternB";
-import TopPagePatternC from "./pages/dev/TopPagePatternC";
-import TopPagePatternD from "./pages/dev/TopPagePatternD";
-import TopPagePatternE from "./pages/dev/TopPagePatternE";
-import TopPagePatternF from "./pages/dev/TopPagePatternF";
-import TopPagePatternG from "./pages/dev/TopPagePatternG";
 import TopPageNew from "./pages/dev/TopPageNew";
-import GuideHubPatternF from "./pages/dev/GuideHubPatternF";
-import GuideDetailPatternF from "./pages/dev/GuideDetailPatternF";
-import RoadmapPatterns from "./pages/dev/RoadmapPatterns";
-import RoadmapPattern1 from "./pages/dev/RoadmapPattern1";
-import RoadmapPattern2 from "./pages/dev/RoadmapPattern2";
-import RoadmapPattern3 from "./pages/dev/RoadmapPattern3";
-import RoadmapPattern4 from "./pages/dev/RoadmapPattern4";
-import RoadmapPattern5 from "./pages/dev/RoadmapPattern5";
-import RoadmapPattern5A from "./pages/dev/RoadmapPattern5A";
-import RoadmapPattern5B from "./pages/dev/RoadmapPattern5B";
-import RoadmapPattern5C from "./pages/dev/RoadmapPattern5C";
-import RoadmapPattern10 from "./pages/dev/RoadmapPattern10";
-import RoadmapPattern11 from "./pages/dev/RoadmapPattern11";
-import RoadmapPattern12 from "./pages/dev/RoadmapPattern12";
-import RoadmapPattern13 from "./pages/dev/RoadmapPattern13";
-import RoadmapPattern14 from "./pages/dev/RoadmapPattern14";
-import RoadmapPattern15 from "./pages/dev/RoadmapPattern15";
-import RoadmapPattern16 from "./pages/dev/RoadmapPattern16";
-import RoadmapPattern17 from "./pages/dev/RoadmapPattern17";
-import RoadmapTest from "./pages/dev/RoadmapTest";
 import WebflowEmbed from "./pages/dev/WebflowEmbed";
 import RoadmapCardPreview from "./pages/dev/RoadmapCardPreview";
 import RoadmapCardV2Preview from "./pages/dev/RoadmapCardV2Preview";
@@ -81,14 +52,13 @@ import RoadmapHeroPreview from "./pages/dev/RoadmapHeroPreview";
 import RoadmapDetailPreview from "./pages/dev/RoadmapDetailPreview";
 import RoadmapPreview from "./pages/dev/RoadmapPreview";
 import RoadmapGradientPreview from "./pages/dev/RoadmapGradientPreview";
+import RoadmapGradientCompare from "./pages/dev/RoadmapGradientCompare";
+import ClearBlockPreview from "./pages/dev/ClearBlockPreview";
 import TopHeroSectionPreview from "./pages/dev/TopHeroSectionPreview";
 import GoalSectionPreview from "./pages/dev/GoalSectionPreview";
 import TopPagePreview from "./pages/dev/TopPagePreview";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
-import LessonDetailPatterns from "./pages/dev/LessonDetailPatterns";
-import HeaderBlurPatterns from "./pages/dev/HeaderBlurPatterns";
-import HeaderBlurImpact from "./pages/dev/HeaderBlurImpact";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
 import LessonIdea2 from "./pages/dev/lesson-ideas/LessonIdea2";
 import LessonIdea3 from "./pages/dev/lesson-ideas/LessonIdea3";
@@ -195,37 +165,7 @@ const AppContent = () => {
         <Route path="/guide/:slug" element={<GuideDetailPage />} />
 
         <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
-        <Route path="/dev/feedback-detail-patterns" element={<DevRoute><FeedbackDetailPatterns /></DevRoute>} />
-        <Route path="/dev/top-patterns" element={<DevRoute><TopPagePatterns /></DevRoute>} />
-        <Route path="/dev/top-pattern-a" element={<DevRoute><TopPagePatternA /></DevRoute>} />
-        <Route path="/dev/top-pattern-b" element={<DevRoute><TopPagePatternB /></DevRoute>} />
-        <Route path="/dev/top-pattern-c" element={<DevRoute><TopPagePatternC /></DevRoute>} />
-        <Route path="/dev/top-pattern-d" element={<DevRoute><TopPagePatternD /></DevRoute>} />
-        <Route path="/dev/top-pattern-e" element={<DevRoute><TopPagePatternE /></DevRoute>} />
-        <Route path="/dev/top-pattern-f" element={<DevRoute><TopPagePatternF /></DevRoute>} />
-        <Route path="/dev/top-pattern-g" element={<DevRoute><TopPagePatternG /></DevRoute>} />
         <Route path="/dev/top-new" element={<DevRoute><TopPageNew /></DevRoute>} />
-        <Route path="/dev/guide-pattern-f" element={<DevRoute><GuideHubPatternF /></DevRoute>} />
-        <Route path="/dev/guide-pattern-f/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
-        <Route path="/dev/guide-pattern-f/:category/:slug" element={<DevRoute><GuideDetailPatternF /></DevRoute>} />
-        <Route path="/dev/roadmap-patterns" element={<DevRoute><RoadmapPatterns /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-1" element={<DevRoute><RoadmapPattern1 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-2" element={<DevRoute><RoadmapPattern2 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-3" element={<DevRoute><RoadmapPattern3 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-4" element={<DevRoute><RoadmapPattern4 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-5" element={<DevRoute><RoadmapPattern5 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-5a" element={<DevRoute><RoadmapPattern5A /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-5b" element={<DevRoute><RoadmapPattern5B /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-5c" element={<DevRoute><RoadmapPattern5C /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-10" element={<DevRoute><RoadmapPattern10 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-11" element={<DevRoute><RoadmapPattern11 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-12" element={<DevRoute><RoadmapPattern12 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-13" element={<DevRoute><RoadmapPattern13 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-14" element={<DevRoute><RoadmapPattern14 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-15" element={<DevRoute><RoadmapPattern15 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-16" element={<DevRoute><RoadmapPattern16 /></DevRoute>} />
-        <Route path="/dev/roadmap-pattern-17" element={<DevRoute><RoadmapPattern17 /></DevRoute>} />
-        <Route path="/dev/roadmap-test" element={<DevRoute><RoadmapTest /></DevRoute>} />
         <Route path="/dev/webflow-embed" element={<DevRoute><WebflowEmbed /></DevRoute>} />
         <Route path="/dev/roadmap-card" element={<DevRoute><RoadmapCardPreview /></DevRoute>} />
         <Route path="/dev/roadmap-card-v2" element={<DevRoute><RoadmapCardV2Preview /></DevRoute>} />
@@ -241,12 +181,11 @@ const AppContent = () => {
         <Route path="/dev/roadmap-preview" element={<DevRoute><RoadmapPreview /></DevRoute>} />
         <Route path="/dev/roadmap-preview/:slug" element={<DevRoute><RoadmapPreview /></DevRoute>} />
         <Route path="/dev/roadmap-gradient-preview" element={<DevRoute><RoadmapGradientPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-gradient-compare" element={<DevRoute><RoadmapGradientCompare /></DevRoute>} />
+        <Route path="/dev/clear-block" element={<DevRoute><ClearBlockPreview /></DevRoute>} />
         <Route path="/dev/top-hero" element={<DevRoute><TopHeroSectionPreview /></DevRoute>} />
         <Route path="/dev/goal-section" element={<DevRoute><GoalSectionPreview /></DevRoute>} />
         <Route path="/dev/top-page-preview" element={<DevRoute><TopPagePreview /></DevRoute>} />
-        <Route path="/dev/lesson-detail-patterns" element={<DevRoute><LessonDetailPatterns /></DevRoute>} />
-        <Route path="/dev/header-blur-patterns" element={<DevRoute><HeaderBlurPatterns /></DevRoute>} />
-        <Route path="/dev/header-blur-impact" element={<DevRoute><HeaderBlurImpact /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
         <Route path="/dev/lesson-idea-3" element={<DevRoute><LessonIdea3 /></DevRoute>} />

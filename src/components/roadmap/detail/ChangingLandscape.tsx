@@ -1,7 +1,8 @@
 /**
  * ロードマップ詳細ページ - ロードマップで変わる「景色」セクション
  *
- * Figma: PRD🏠_Roadmap_2026 node-id 1-5841
+ * Figma: PRD🏠_Roadmap_2026 node-id 97-11643
+ * 2026-04-01: 横型レイアウトに変更（タイトル | 説明 を横並び）
  */
 
 import { MessageQuestion } from "iconsax-react";
@@ -18,7 +19,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
   }
 
   return (
-    <section className="py-16 px-4 md:px-8">
+    <section id="changing-landscape" className="py-16 px-4 md:px-8 scroll-mt-24">
       <div className="max-w-[1100px] mx-auto">
         {/* ヘッダー */}
         <div className="mb-9">
@@ -47,16 +48,16 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
           悩みが楽しみになる「変化」を獲得しよう
         </p>
 
-        {/* カードグリッド */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* カードリスト */}
+        <div className="flex flex-col gap-3">
           {data.items.map((item, index) => (
             <div
               key={index}
-              className="bg-white/60 border-l-4 border-[#939993] py-4 px-0.5"
+              className="bg-white border-l-4 border-[#E8ECE8] py-4 pl-0.5 pr-2 md:pr-5 min-h-[72px] flex items-center rounded-r-lg"
             >
-              <div className="flex items-start">
+              <div className="flex items-center">
                 {/* アイコン */}
-                <div className="flex items-center justify-center px-8 pt-1">
+                <div className="flex items-center justify-center px-8">
                   <MessageQuestion
                     size={24}
                     color="#939993"
@@ -64,16 +65,16 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
                   />
                 </div>
 
-                {/* テキストコンテンツ */}
-                <div className="flex-1 pr-4">
+                {/* テキストコンテンツ（横並び: タイトル | 説明） */}
+                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-8 flex-1">
                   {/* タイトル（悩み・課題） */}
-                  <p className="text-[16px] font-extrabold text-[#1a1a1a] leading-[1.575] mb-2">
+                  <p className="text-[16px] font-extrabold text-[#1a1a1a] leading-[1.575] md:w-[425px] md:flex-shrink-0">
                     {item.title}
                   </p>
 
                   {/* 説明（解決後の姿） */}
                   {item.description && (
-                    <p className="text-[16px] text-[#0f172a]/60 leading-[1.575]">
+                    <p className="text-[16px] text-[#0f172a]/60 leading-[1.575] flex-1">
                       {item.description}
                     </p>
                   )}

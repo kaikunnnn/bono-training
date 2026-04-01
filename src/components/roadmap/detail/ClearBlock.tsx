@@ -8,6 +8,7 @@ import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { Cup, Edit, MessageText1, ArrowRight } from "iconsax-react";
+import { Button } from "@/components/ui/button";
 
 interface ClearBlockProps {
   /** ロードマップタイトル */
@@ -73,23 +74,7 @@ export default function ClearBlock({ roadmapTitle }: ClearBlockProps) {
     <section className="py-16 px-4 md:px-8">
       <div className="max-w-[1100px] mx-auto">
         {/* メインカード */}
-        <div className="relative bg-gradient-to-br from-[#f8f9f7] to-[#e8ebe6] rounded-3xl border border-[#d4dbd1] overflow-hidden">
-          {/* 装飾的な背景パターン */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-full">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-8 h-8 rounded-full bg-[#52674e]"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    transform: `scale(${0.5 + Math.random() * 1.5})`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+        <div className="relative bg-[#F9F9F7] rounded-3xl border border-[#E8ECE8] overflow-hidden">
 
           <div className="relative px-8 py-12 md:px-16 md:py-16">
             {/* ステップバッジ */}
@@ -127,25 +112,19 @@ export default function ClearBlock({ roadmapTitle }: ClearBlockProps) {
 
             {/* お祝いボタン */}
             <div className="flex justify-center mb-12">
-              <button
+              <Button
                 onClick={fireCelebration}
                 disabled={celebrated}
-                className={`
-                  flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-[16px] transition-all
-                  ${
-                    celebrated
-                      ? "bg-[#52674e]/10 text-[#52674e] cursor-default"
-                      : "bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white shadow-[0_4px_16px_rgba(102,126,234,0.4)] hover:shadow-[0_6px_24px_rgba(102,126,234,0.5)] hover:scale-[1.02] active:scale-[0.98]"
-                  }
-                `}
+                variant={celebrated ? "secondary" : "default"}
+                size="large"
+                className="gap-3"
               >
                 <Cup
-                  size={24}
+                  size={20}
                   variant={celebrated ? "Bold" : "Outline"}
-                  color={celebrated ? "#52674e" : "white"}
                 />
                 {celebrated ? "おめでとう！" : "クリアをお祝いする！"}
-              </button>
+              </Button>
             </div>
 
             {/* 次のアクション */}

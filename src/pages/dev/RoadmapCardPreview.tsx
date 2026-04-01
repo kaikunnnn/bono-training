@@ -1,49 +1,32 @@
 /**
- * RoadmapCard プレビューページ
+ * RoadmapCard 統合プレビューページ
  *
- * ロードマップカードコンポーネントの開発・確認用ページ
- * - 各グラデーションバリエーションの表示
- * - 実装仕様の確認
+ * RoadmapCard (v1) と RoadmapCardV2 を並べて比較
+ * - 両バージョンの違いを確認
+ * - 統合の方針を決定するための参照
  */
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Palette, Info } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import RoadmapCard, { GradientType } from '@/components/roadmap/RoadmapCard';
+import RoadmapCardV2, { GradientPreset } from '@/components/roadmap/RoadmapCardV2';
 
-// グラデーション情報（コンポーネントと同期）
-const GRADIENT_INFO: Record<GradientType, {
-  name: string;
-  from: string;
-  to: string;
-  mid?: string;
-  category: 'classic' | 'cinematic' | 'warm' | 'cool';
-  useCase: string;
-}> = {
-  // Classic
-  teal: { name: 'Teal', from: '#304750', to: '#5d5b65', category: 'classic', useCase: 'UIビジュアル基礎' },
-  blue: { name: 'Blue', from: '#354a5f', to: '#565a65', category: 'classic', useCase: 'UXデザイン系' },
-  purple: { name: 'Purple', from: '#4a4058', to: '#5d5b65', category: 'classic', useCase: '上級・応用系' },
-  orange: { name: 'Orange', from: '#5a4235', to: '#5d5960', category: 'classic', useCase: '実践系' },
-  green: { name: 'Green', from: '#3a4d42', to: '#585d5a', category: 'classic', useCase: '入門系' },
-  pink: { name: 'Pink', from: '#504050', to: '#605a62', category: 'classic', useCase: 'キャリア系' },
-  // Modern Cinematic/Sci-Fi (低彩度・落ち着き)
-  cyber: { name: 'Cyber', from: '#2a2535', to: '#363040', mid: '#302a3a', category: 'cinematic', useCase: 'テック/AI系' },
-  galaxy: { name: 'Galaxy', from: '#35303f', to: '#2d2a35', mid: '#3a3545', category: 'cinematic', useCase: 'クリエイティブ系' },
-  neon: { name: 'Neon Tech', from: '#2a3038', to: '#353a42', mid: '#303540', category: 'cinematic', useCase: 'SaaS/プロダクト系' },
-  midnight: { name: 'Midnight', from: '#282535', to: '#35324a', mid: '#302d40', category: 'cinematic', useCase: 'プレミアム系' },
-  // Modern Warm (低彩度・落ち着き)
-  sunset: { name: 'Sunset', from: '#3d3035', to: '#352a30', mid: '#453540', category: 'warm', useCase: 'エモーショナル系' },
-  thermal: { name: 'Thermal', from: '#3a3032', to: '#302a30', mid: '#453538', category: 'warm', useCase: 'インパクト系' },
-  coral: { name: 'Coral', from: '#403535', to: '#352d32', mid: '#4a3a3d', category: 'warm', useCase: 'フレンドリー系' },
-  rose: { name: 'Rose Gold', from: '#3a3238', to: '#322a30', mid: '#453840', category: 'warm', useCase: 'ラグジュアリー系' },
-  // Modern Cool/Fresh (低彩度・落ち着き)
-  aurora: { name: 'Aurora', from: '#2a3538', to: '#303a3d', mid: '#354042', category: 'cool', useCase: '自然/サステナ系' },
-  emerald: { name: 'Emerald', from: '#2d3835', to: '#303538', mid: '#354038', category: 'cool', useCase: '成長/進化系' },
-  ocean: { name: 'Ocean', from: '#2d3540', to: '#353d48', mid: '#384550', category: 'cool', useCase: '信頼/安定系' },
-  lavender: { name: 'Lavender', from: '#353040', to: '#302a38', mid: '#3a3545', category: 'cool', useCase: 'リラックス系' },
+// 共通サンプルデータ
+const SAMPLE_DATA = {
+  slug: 'ui-visual-basics',
+  title: 'UIデザインビジュアル基礎',
+  description: '使いやすいUI体験をつくるための表現の基礎を身につけよう。',
+  thumbnailUrl: 'https://images.unsplash.com/photo-1586717791821-3f44a563fa4c?w=800&q=80',
+  estimatedDuration: '1-2',
+  stepCount: 4,
 };
 
+// v1 グラデーション（代表的なもの）
+const V1_GRADIENTS: GradientType[] = ['teal', 'galaxy', 'ocean', 'sunset', 'rose', 'infoarch'];
+
+// v2 グラデーションプリセット
+const V2_PRESETS: GradientPreset[] = ['galaxy', 'infoarch', 'sunset', 'ocean', 'teal', 'rose'];
 
 export default function RoadmapCardPreview() {
   return (
@@ -59,356 +42,318 @@ export default function RoadmapCardPreview() {
             開発メニューに戻る
           </Link>
           <h1 className="text-3xl font-bold text-gray-900">
-            RoadmapCard コンポーネント
+            RoadmapCard 統合プレビュー
           </h1>
           <p className="text-gray-600 mt-2">
-            ロードマップ一覧で使用するカードコンポーネントのプレビュー
+            v1（現行）とv2（Figma準拠）を並べて比較し、統合方針を検討
           </p>
         </div>
 
-        {/* Figma参照 */}
+        {/* ============================================ */}
+        {/* 比較サマリー */}
+        {/* ============================================ */}
         <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <Info className="w-5 h-5" />
-            Figma参照
-          </h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="text-xs text-gray-500 mb-1">Figma URL</div>
-              <a
-                href="https://www.figma.com/design/oNJwxeYUNaRWggDGAUi94D/product---new-BONO-ui-2026?node-id=900-39673"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline break-all"
-              >
-                node-id=900-39673
-              </a>
-            </div>
-            <div className="bg-gray-50 rounded-xl p-4">
-              <div className="text-xs text-gray-500 mb-1">コンポーネントパス</div>
-              <code className="text-sm text-gray-700">
-                src/components/roadmap/RoadmapCard.tsx
-              </code>
-            </div>
-          </div>
-        </section>
-
-        {/* グラデーションカラー一覧 */}
-        <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
-          <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-            <Palette className="w-5 h-5" />
-            グラデーションバリエーション（18種類）
-          </h2>
-
-          {/* Classic */}
-          <div className="mb-8">
-            <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">Classic</span>
-              オリジナルベース（低彩度・洗練）
-            </h3>
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'classic')
-                .map(([type, info]) => (
-                  <div key={type} className="text-center">
-                    <div
-                      className="w-full aspect-[4/3] rounded-xl mb-2 border border-gray-200"
-                      style={{
-                        background: `linear-gradient(to bottom, ${info.from}, ${info.to})`,
-                      }}
-                    />
-                    <div className="text-xs font-bold text-gray-900">{info.name}</div>
-                    <div className="text-[10px] text-gray-500">{info.useCase}</div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Cinematic/Sci-Fi */}
-          <div className="mb-8">
-            <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">Cinematic</span>
-              Sci-Fi / テック風（2025-2026トレンド）
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'cinematic')
-                .map(([type, info]) => (
-                  <div key={type} className="text-center">
-                    <div
-                      className="w-full aspect-[4/3] rounded-xl mb-2 border border-gray-200"
-                      style={{
-                        background: info.mid
-                          ? `linear-gradient(135deg, ${info.from} 0%, ${info.mid} 50%, ${info.to} 100%)`
-                          : `linear-gradient(to bottom, ${info.from}, ${info.to})`,
-                      }}
-                    />
-                    <div className="text-xs font-bold text-gray-900">{info.name}</div>
-                    <div className="text-[10px] text-gray-500">{info.useCase}</div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Warm/Vibrant */}
-          <div className="mb-8">
-            <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs">Warm</span>
-              ウォーム / エモーショナル
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'warm')
-                .map(([type, info]) => (
-                  <div key={type} className="text-center">
-                    <div
-                      className="w-full aspect-[4/3] rounded-xl mb-2 border border-gray-200"
-                      style={{
-                        background: info.mid
-                          ? `linear-gradient(135deg, ${info.from} 0%, ${info.mid} 50%, ${info.to} 100%)`
-                          : `linear-gradient(to bottom, ${info.from}, ${info.to})`,
-                      }}
-                    />
-                    <div className="text-xs font-bold text-gray-900">{info.name}</div>
-                    <div className="text-[10px] text-gray-500">{info.useCase}</div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Cool/Fresh */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-700 mb-3 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-cyan-100 text-cyan-700 rounded text-xs">Cool</span>
-              クール / フレッシュ
-            </h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'cool')
-                .map(([type, info]) => (
-                  <div key={type} className="text-center">
-                    <div
-                      className="w-full aspect-[4/3] rounded-xl mb-2 border border-gray-200"
-                      style={{
-                        background: info.mid
-                          ? `linear-gradient(135deg, ${info.from} 0%, ${info.mid} 50%, ${info.to} 100%)`
-                          : `linear-gradient(to bottom, ${info.from}, ${info.to})`,
-                      }}
-                    />
-                    <div className="text-xs font-bold text-gray-900">{info.name}</div>
-                    <div className="text-[10px] text-gray-500">{info.useCase}</div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </section>
-
-        {/* カードプレビュー - カテゴリ別比較 */}
-        <section className="bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-2">
-            カードプレビュー（同一コンテンツ・カラバリ比較）
-          </h2>
-          <p className="text-sm text-gray-500 mb-6">
-            同じロードマップを異なるグラデーションで表示して比較
-          </p>
-
-          {/* Classic */}
-          <div className="mb-10">
-            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-gray-100 rounded text-xs">Classic</span>
-              オリジナルベース
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'classic')
-                .map(([type]) => (
-                  <div key={type}>
-                    <RoadmapCard
-                      slug="ui-visual-basics"
-                      title="UIデザインビジュアル基礎"
-                      description="使いやすいUI体験をつくるための表現の基礎を身につけよう。"
-                      stepCount={4}
-                      estimatedDuration="1-2"
-                      gradientType={type}
-                    />
-                    <div className="mt-2 text-center text-sm text-gray-500">
-                      <code className="bg-gray-100 px-2 py-0.5 rounded">{type}</code>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Cinematic */}
-          <div className="mb-10">
-            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded text-xs">Cinematic</span>
-              Sci-Fi / テック風
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'cinematic')
-                .map(([type]) => (
-                  <div key={type}>
-                    <RoadmapCard
-                      slug="ui-visual-basics"
-                      title="UIデザインビジュアル基礎"
-                      description="使いやすいUI体験をつくるための表現の基礎を身につけよう。"
-                      stepCount={4}
-                      estimatedDuration="1-2"
-                      gradientType={type}
-                    />
-                    <div className="mt-2 text-center text-sm text-gray-500">
-                      <code className="bg-gray-100 px-2 py-0.5 rounded">{type}</code>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Warm */}
-          <div className="mb-10">
-            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-xs">Warm</span>
-              ウォーム / エモーショナル
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'warm')
-                .map(([type]) => (
-                  <div key={type}>
-                    <RoadmapCard
-                      slug="ui-visual-basics"
-                      title="UIデザインビジュアル基礎"
-                      description="使いやすいUI体験をつくるための表現の基礎を身につけよう。"
-                      stepCount={4}
-                      estimatedDuration="1-2"
-                      gradientType={type}
-                    />
-                    <div className="mt-2 text-center text-sm text-gray-500">
-                      <code className="bg-gray-100 px-2 py-0.5 rounded">{type}</code>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-
-          {/* Cool */}
-          <div>
-            <h3 className="text-sm font-bold text-gray-700 mb-4 flex items-center gap-2">
-              <span className="px-2 py-0.5 bg-cyan-100 text-cyan-700 rounded text-xs">Cool</span>
-              クール / フレッシュ
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {(Object.entries(GRADIENT_INFO) as [GradientType, typeof GRADIENT_INFO[GradientType]][])
-                .filter(([, info]) => info.category === 'cool')
-                .map(([type]) => (
-                  <div key={type}>
-                    <RoadmapCard
-                      slug="ui-visual-basics"
-                      title="UIデザインビジュアル基礎"
-                      description="使いやすいUI体験をつくるための表現の基礎を身につけよう。"
-                      stepCount={4}
-                      estimatedDuration="1-2"
-                      gradientType={type}
-                    />
-                    <div className="mt-2 text-center text-sm text-gray-500">
-                      <code className="bg-gray-100 px-2 py-0.5 rounded">{type}</code>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Props仕様 */}
-        <section className="mt-8 bg-white rounded-2xl border border-gray-200 p-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Props仕様</h2>
+          <h2 className="text-lg font-bold text-gray-900 mb-4">コンポーネント比較</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-2 px-3 font-bold text-gray-700">Prop</th>
-                  <th className="text-left py-2 px-3 font-bold text-gray-700">Type</th>
-                  <th className="text-left py-2 px-3 font-bold text-gray-700">Required</th>
-                  <th className="text-left py-2 px-3 font-bold text-gray-700">Default</th>
-                  <th className="text-left py-2 px-3 font-bold text-gray-700">説明</th>
+                  <th className="text-left py-2 px-3 font-bold text-gray-700">項目</th>
+                  <th className="text-left py-2 px-3 font-bold text-blue-600">RoadmapCard (v1)</th>
+                  <th className="text-left py-2 px-3 font-bold text-purple-600">RoadmapCardV2</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">slug</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-red-600">Yes</td>
-                  <td className="py-2 px-3 text-gray-400">-</td>
-                  <td className="py-2 px-3 text-gray-700">URLスラッグ</td>
+                  <td className="py-2 px-3 text-gray-700">使用場所</td>
+                  <td className="py-2 px-3">/roadmaps 一覧</td>
+                  <td className="py-2 px-3">Figmaデザイン（未使用）</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">title</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-red-600">Yes</td>
-                  <td className="py-2 px-3 text-gray-400">-</td>
-                  <td className="py-2 px-3 text-gray-700">タイトル</td>
+                  <td className="py-2 px-3 text-gray-700">グラデーション数</td>
+                  <td className="py-2 px-3">18種類</td>
+                  <td className="py-2 px-3">6種類</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">description</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-red-600">Yes</td>
-                  <td className="py-2 px-3 text-gray-400">-</td>
-                  <td className="py-2 px-3 text-gray-700">説明文</td>
+                  <td className="py-2 px-3 text-gray-700">variant</td>
+                  <td className="py-2 px-3">なし（gradient固定）</td>
+                  <td className="py-2 px-3">gradient / white</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">thumbnailUrl</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-gray-400">No</td>
-                  <td className="py-2 px-3 text-gray-400">undefined</td>
-                  <td className="py-2 px-3 text-gray-700">サムネイル画像URL</td>
+                  <td className="py-2 px-3 text-gray-700">orientation</td>
+                  <td className="py-2 px-3">なし（vertical固定）</td>
+                  <td className="py-2 px-3">vertical / horizontal</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">stepCount</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">number</td>
-                  <td className="py-2 px-3 text-red-600">Yes</td>
-                  <td className="py-2 px-3 text-gray-400">-</td>
-                  <td className="py-2 px-3 text-gray-700">ステップ数</td>
+                  <td className="py-2 px-3 text-gray-700">角丸</td>
+                  <td className="py-2 px-3">24px (rounded-3xl)</td>
+                  <td className="py-2 px-3">32-64px (レスポンシブ)</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">stepUnit</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-gray-400">No</td>
-                  <td className="py-2 px-3 font-mono text-gray-500">"ヶ月"</td>
-                  <td className="py-2 px-3 text-gray-700">ステップ単位</td>
+                  <td className="py-2 px-3 text-gray-700">サムネイル形状</td>
+                  <td className="py-2 px-3">特殊形状（SVG clipPath）</td>
+                  <td className="py-2 px-3">角丸長方形</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">estimatedDuration</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-red-600">Yes</td>
-                  <td className="py-2 px-3 text-gray-400">-</td>
-                  <td className="py-2 px-3 text-gray-700">目安期間（例: "1-2"）</td>
+                  <td className="py-2 px-3 text-gray-700">ラベルバッジ</td>
+                  <td className="py-2 px-3">なし</td>
+                  <td className="py-2 px-3">あり（「ロードマップ」）</td>
                 </tr>
                 <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">durationUnit</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-gray-400">No</td>
-                  <td className="py-2 px-3 font-mono text-gray-500">"ヶ月"</td>
-                  <td className="py-2 px-3 text-gray-700">期間単位</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">gradientType</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">GradientType</td>
-                  <td className="py-2 px-3 text-gray-400">No</td>
-                  <td className="py-2 px-3 font-mono text-gray-500">"teal"</td>
-                  <td className="py-2 px-3 text-gray-700">グラデーション（18種類）</td>
-                </tr>
-                <tr>
-                  <td className="py-2 px-3 font-mono text-blue-600">basePath</td>
-                  <td className="py-2 px-3 font-mono text-gray-600">string</td>
-                  <td className="py-2 px-3 text-gray-400">No</td>
-                  <td className="py-2 px-3 font-mono text-gray-500">"/roadmaps/"</td>
-                  <td className="py-2 px-3 text-gray-700">リンク先ベースパス</td>
+                  <td className="py-2 px-3 text-gray-700">CTA</td>
+                  <td className="py-2 px-3">「詳細を見る」ボタン</td>
+                  <td className="py-2 px-3">矢印アイコン</td>
                 </tr>
               </tbody>
             </table>
           </div>
+        </section>
+
+        {/* ============================================ */}
+        {/* 並列比較: 縦型 */}
+        {/* ============================================ */}
+        <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-2">縦型カード比較</h2>
+          <p className="text-sm text-gray-500 mb-6">同じデータで両バージョンを並べて表示</p>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* v1 */}
+            <div>
+              <h3 className="text-sm font-bold text-blue-600 mb-3 flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-blue-100 rounded text-xs">v1</span>
+                RoadmapCard（現行）
+              </h3>
+              <RoadmapCard
+                slug={SAMPLE_DATA.slug}
+                title={SAMPLE_DATA.title}
+                description={SAMPLE_DATA.description}
+                thumbnailUrl={SAMPLE_DATA.thumbnailUrl}
+                stepCount={SAMPLE_DATA.stepCount}
+                estimatedDuration={SAMPLE_DATA.estimatedDuration}
+                gradientType="galaxy"
+              />
+            </div>
+
+            {/* v2 gradient */}
+            <div>
+              <h3 className="text-sm font-bold text-purple-600 mb-3 flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-purple-100 rounded text-xs">v2</span>
+                RoadmapCardV2（gradient）
+              </h3>
+              <RoadmapCardV2
+                slug={SAMPLE_DATA.slug}
+                title={SAMPLE_DATA.title}
+                description={SAMPLE_DATA.description}
+                thumbnailUrl={SAMPLE_DATA.thumbnailUrl}
+                estimatedDuration={SAMPLE_DATA.estimatedDuration}
+                gradientPreset="galaxy"
+                variant="gradient"
+                orientation="vertical"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================ */}
+        {/* v2 バリアント展開 */}
+        {/* ============================================ */}
+        <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-2">v2 バリアント展開</h2>
+          <p className="text-sm text-gray-500 mb-6">variant × orientation の組み合わせ</p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* gradient × vertical */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="gradient" × orientation="vertical"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="gradient"
+                orientation="vertical"
+              />
+            </div>
+
+            {/* white × vertical */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="white" × orientation="vertical"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="white"
+                orientation="vertical"
+              />
+            </div>
+          </div>
+
+          {/* horizontal */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="gradient" × orientation="horizontal"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="gradient"
+                orientation="horizontal"
+              />
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="white" × orientation="horizontal"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="white"
+                orientation="horizontal"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================ */}
+        {/* v2 波形サムネイル展開 */}
+        {/* ============================================ */}
+        <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-2">v2 波形サムネイル展開</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            thumbnailStyle="wave" を適用（詳細ページHeroと同様の波形マスク）
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {/* gradient × vertical × wave */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="gradient" × orientation="vertical" × thumbnailStyle="wave"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="gradient"
+                orientation="vertical"
+                thumbnailStyle="wave"
+              />
+            </div>
+
+            {/* white × vertical × wave */}
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="white" × orientation="vertical" × thumbnailStyle="wave"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="white"
+                orientation="vertical"
+                thumbnailStyle="wave"
+              />
+            </div>
+          </div>
+
+          {/* horizontal × wave */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="gradient" × orientation="horizontal" × thumbnailStyle="wave"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="gradient"
+                orientation="horizontal"
+                thumbnailStyle="wave"
+              />
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold text-gray-500 mb-2">
+                variant="white" × orientation="horizontal" × thumbnailStyle="wave"
+              </h3>
+              <RoadmapCardV2
+                {...SAMPLE_DATA}
+                gradientPreset="galaxy"
+                variant="white"
+                orientation="horizontal"
+                thumbnailStyle="wave"
+              />
+            </div>
+          </div>
+        </section>
+
+        {/* ============================================ */}
+        {/* グラデーション比較 */}
+        {/* ============================================ */}
+        <section className="bg-white rounded-2xl border border-gray-200 p-6 mb-8">
+          <h2 className="text-lg font-bold text-gray-900 mb-2">グラデーション比較</h2>
+          <p className="text-sm text-gray-500 mb-6">同名プリセットの色味の違い</p>
+
+          <div className="space-y-8">
+            {V2_PRESETS.map((preset) => (
+              <div key={preset} className="border-b border-gray-100 pb-6 last:border-0">
+                <h3 className="text-sm font-bold text-gray-700 mb-3">
+                  <code className="bg-gray-100 px-2 py-0.5 rounded">{preset}</code>
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* v1 */}
+                  <div>
+                    <p className="text-xs text-blue-600 mb-2">v1 RoadmapCard</p>
+                    <RoadmapCard
+                      slug={SAMPLE_DATA.slug}
+                      title={SAMPLE_DATA.title}
+                      description={SAMPLE_DATA.description}
+                      stepCount={SAMPLE_DATA.stepCount}
+                      estimatedDuration={SAMPLE_DATA.estimatedDuration}
+                      gradientType={preset as GradientType}
+                    />
+                  </div>
+                  {/* v2 */}
+                  <div>
+                    <p className="text-xs text-purple-600 mb-2">v2 RoadmapCardV2</p>
+                    <RoadmapCardV2
+                      slug={SAMPLE_DATA.slug}
+                      title={SAMPLE_DATA.title}
+                      description={SAMPLE_DATA.description}
+                      estimatedDuration={SAMPLE_DATA.estimatedDuration}
+                      gradientPreset={preset}
+                      variant="gradient"
+                      orientation="vertical"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* ============================================ */}
+        {/* v1のみのグラデーション */}
+        {/* ============================================ */}
+        <section className="bg-white rounded-2xl border border-gray-200 p-6">
+          <h2 className="text-lg font-bold text-gray-900 mb-2">v1のみのグラデーション</h2>
+          <p className="text-sm text-gray-500 mb-6">v2に存在しないプリセット（統合時に追加検討）</p>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {(['blue', 'purple', 'orange', 'green', 'pink', 'cyber', 'neon', 'midnight', 'thermal', 'coral', 'aurora', 'emerald', 'lavender'] as GradientType[]).map((type) => (
+              <div key={type} className="text-center">
+                <div
+                  className="w-full aspect-[3/4] rounded-xl mb-2 border border-gray-200"
+                  style={{
+                    background: `linear-gradient(135deg, var(--gradient-${type}-from, #333) 0%, var(--gradient-${type}-to, #555) 100%)`,
+                  }}
+                />
+                <code className="text-xs bg-gray-100 px-1 rounded">{type}</code>
+              </div>
+            ))}
+          </div>
+          <p className="text-xs text-gray-400 mt-4">
+            ※ 上記は参考表示。実際の色は RoadmapCard コンポーネント内で定義
+          </p>
         </section>
       </div>
     </div>

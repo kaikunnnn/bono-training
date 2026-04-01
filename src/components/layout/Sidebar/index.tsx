@@ -53,47 +53,14 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </SidebarMenuItem>
         )}
 
-        {/* TODO: リリース後に復活 - トップ、ロードマップ、ガイド */}
-        {/*
-        <SidebarMenuItem
-          href="/top"
-          icon={<MenuIcons.top size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/top")}
-        >
-          <span className="flex items-center gap-1">
-            トップ
-            <span className="text-[7px] px-0.5 py-px rounded bg-[#f5533e]/10 text-[#f5533e]">
-              テスト
-            </span>
-          </span>
-        </SidebarMenuItem>
-
+        {/* ロードマップ */}
         <SidebarMenuItem
           href="/roadmaps"
           icon={<MenuIcons.roadmap size={ICON_SIZE} variant="Outline" />}
           isActive={isActive("/roadmaps") || location.pathname.startsWith("/roadmaps/")}
         >
-          <span className="flex items-center gap-1">
-            ロードマップ
-            <span className="text-[7px] px-0.5 py-px rounded bg-[#f5533e]/10 text-[#f5533e]">
-              テスト
-            </span>
-          </span>
+          ロードマップ
         </SidebarMenuItem>
-
-        <SidebarMenuItem
-          href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/guide") || location.pathname.startsWith("/guide/")}
-        >
-          <span className="flex items-center gap-1">
-            ガイド
-            <span className="text-[7px] px-0.5 py-px rounded bg-[#f5533e]/10 text-[#f5533e]">
-              テスト
-            </span>
-          </span>
-        </SidebarMenuItem>
-        */}
 
         {/* レッスン */}
         <SidebarMenuItem

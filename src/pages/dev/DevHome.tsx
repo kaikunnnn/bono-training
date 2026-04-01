@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, MessageSquare, Mail, Layout, Map, BookOpen, Compass, Globe, CreditCard, Eye, Layers } from 'lucide-react';
+import { Code2, FileText, Mail, Globe, CreditCard, Eye } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -16,41 +16,6 @@ interface DevResourceCard {
 }
 
 const devResources: DevResourceCard[] = [
-  {
-    title: 'Top Page Patterns',
-    description: 'トップページの5つのデザインパターン。Stripe、Airbnb、Linear、Notionスタイル。',
-    path: '/dev/top-patterns',
-    icon: <Layout className="w-8 h-8" />,
-    tags: ['Top', 'Landing', 'Stripe', 'Airbnb', 'Linear', 'Notion']
-  },
-  {
-    title: 'Feedback Detail Patterns',
-    description: 'フィードバック詳細ページのデザインパターン。OpenAI・Vercel風のリッチなレイアウトを比較。',
-    path: '/dev/feedback-detail-patterns',
-    icon: <MessageSquare className="w-8 h-8" />,
-    tags: ['Feedback', 'Design', 'OpenAI', 'Vercel', 'Premium']
-  },
-  {
-    title: 'Roadmap Patterns',
-    description: '学習ロードマップのUIパターン。コース一覧、縦タイムライン、アコーディオン型を比較。',
-    path: '/dev/roadmap-patterns',
-    icon: <Map className="w-8 h-8" />,
-    tags: ['Roadmap', 'Course', 'Timeline', 'Progress', 'Learning']
-  },
-  {
-    title: 'Lesson Detail Patterns',
-    description: 'レッスン詳細ページの20のUIパターン。入口設計・進行中ガイド・出口設計で学習体験を向上。',
-    path: '/dev/lesson-detail-patterns',
-    icon: <BookOpen className="w-8 h-8" />,
-    tags: ['Lesson', 'Gamification', 'Progress', 'Duolingo', 'MasterClass']
-  },
-  {
-    title: 'Guide Patterns',
-    description: '転職ガイドのUIパターン。キャリアの基本・デザイナーの視点・出発点別の記事構成。',
-    path: '/dev/guide-pattern-f',
-    icon: <Compass className="w-8 h-8" />,
-    tags: ['Guide', 'Career', 'Articles', 'FAQ', 'Pattern-E']
-  },
   {
     title: 'Webflow Embed',
     description: 'Webflow（bo-no.design）に埋め込む最新コンテンツ表示コード。設定確認とプレビュー。',
@@ -74,17 +39,24 @@ const devResources: DevResourceCard[] = [
   },
   {
     title: 'Roadmap Gradient Preview',
-    description: 'RoadmapHero（詳細ページ）とRoadmapCardV2（カード）のグラデーション比較。Hero背景画像の確認も可能。',
+    description: 'Sanityから取得したロードマップごとにグラデーションを比較。Hero/Card両方の色、サムネイル、公開ステータスを確認。',
     path: '/dev/roadmap-gradient-preview',
     icon: <Eye className="w-8 h-8" />,
-    tags: ['Roadmap', 'Gradient', 'Color', 'Hero', 'Card']
+    tags: ['Roadmap', 'Gradient', 'Sanity', 'Hero', 'Card']
   },
   {
-    title: 'Header Blur Patterns',
-    description: 'ヘッダー + カテゴリタブのブラー/透過一体化パターン比較。2つのsticky要素を視覚的に統一する方法。',
-    path: '/dev/header-blur-patterns',
-    icon: <Layers className="w-8 h-8" />,
-    tags: ['Header', 'Blur', 'Sticky', 'Navigation', 'Mobile']
+    title: 'Gradient Compare (現在 vs 提案)',
+    description: '現在のグラデーションと提案されたグラデーションを並べて比較。修正が必要な箇所を視覚的に確認。',
+    path: '/dev/roadmap-gradient-compare',
+    icon: <Eye className="w-8 h-8" />,
+    tags: ['Roadmap', 'Gradient', 'Compare', 'Review']
+  },
+  {
+    title: 'ClearBlock Preview',
+    description: 'ロードマップクリア祝福ブロックのプレビュー。水玉背景削除・背景色変更・ボタン統一の確認。',
+    path: '/dev/clear-block',
+    icon: <Eye className="w-8 h-8" />,
+    tags: ['Roadmap', 'ClearBlock', 'Component']
   },
 ];
 

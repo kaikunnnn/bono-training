@@ -11,6 +11,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowUpRight } from 'lucide-react';
+import { stripLineBreakMarker } from '@/utils/textFormat';
 
 // グラデーションカラータイプ
 export type GradientType =
@@ -234,7 +235,7 @@ const RoadmapCard: React.FC<RoadmapCardProps> = ({
 
         {/* 説明文 */}
         <p className="px-7 mt-4 text-base text-white/80 font-noto-sans leading-[1.8]">
-          {description}
+          {stripLineBreakMarker(description)}
         </p>
 
         {/* CTAボタン */}

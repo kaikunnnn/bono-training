@@ -69,6 +69,7 @@ const CONTENTS_PROJECTION = `contents[]{
 export interface RoadmapListItem {
   _id: string;
   title: string;
+  shortTitle?: string;
   slug: { current: string };
   description: string;
   tagline?: string;
@@ -82,11 +83,14 @@ export interface RoadmapListItem {
 
 /**
  * ロードマップ一覧を取得
+ * NOTE: 開発中は全ロードマップを表示（本番リリース時にisPublishedフィルタを有効化）
  */
 async function fetchRoadmaps(): Promise<RoadmapListItem[]> {
-  const query = `*[_type == "roadmap" && isPublished == true] | order(order asc) {
+  // TODO: 本番リリース時に isPublished == true フィルタを復活させる
+  const query = `*[_type == "roadmap"] | order(order asc) {
     _id,
     title,
+    shortTitle,
     slug,
     description,
     tagline,
@@ -120,6 +124,7 @@ async function fetchRoadmapBySlug(slug: string): Promise<SanityRoadmapDetail | n
   const query = `*[_type == "roadmap" && slug.current == $slug][0] {
     _id,
     title,
+    shortTitle,
     slug,
     description,
     tagline,
@@ -169,6 +174,7 @@ async function fetchAllRoadmapsWithDetails(): Promise<SanityRoadmapDetail[]> {
   const query = `*[_type == "roadmap"] | order(order asc) {
     _id,
     title,
+    shortTitle,
     slug,
     description,
     tagline,

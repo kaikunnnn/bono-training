@@ -283,6 +283,16 @@
     mask-repeat: no-repeat;
   }
 
+  /* カード用の波形サムネイルマスク */
+  .roadmap-card-wave-mask {
+    -webkit-mask-image: url('/shapes/roadmap-card-thumbnail-wave.svg');
+    mask-image: url('/shapes/roadmap-card-thumbnail-wave.svg');
+    -webkit-mask-size: 100% 100%;
+    mask-size: 100% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+  }
+
   /* スクロールバー非表示（横スクロールUI用） */
   .scrollbar-hide {
     -ms-overflow-style: none;

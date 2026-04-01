@@ -9,34 +9,28 @@
 // ============================================
 
 export type GradientPreset =
-  | "galaxy"
-  | "infoarch"
-  | "sunset"
-  | "ocean"
-  | "teal"
-  | "rose"
-  | "uivisual";
+  | "career-change"  // UIUXデザイナー転職
+  | "ui-beginner"    // UIデザイン入門（Figma基礎）
+  | "ui-visual"      // UIビジュアル入門
+  | "info-arch"      // 情報設計基礎
+  | "ux-design";     // UXデザイン基礎
 
-/** グラデーションプリセットのCSS値 */
+/** グラデーションプリセットのCSS値（RoadmapCardV2と統一、方向: 下から上 0deg） */
 export const GRADIENT_PRESETS: Record<GradientPreset, string> = {
-  galaxy: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-  infoarch: "linear-gradient(135deg, #6b7280 0%, #92400e 100%)",
-  sunset: "linear-gradient(135deg, #f97316 0%, #ec4899 100%)",
-  ocean: "linear-gradient(135deg, #3b82f6 0%, #0ea5e9 100%)",
-  teal: "linear-gradient(135deg, #14b8a6 0%, #06b6d4 100%)",
-  rose: "linear-gradient(135deg, #f43f5e 0%, #fb7185 100%)",
-  uivisual: "linear-gradient(180deg, #304750 0%, #5D5B65 100%)",
+  "career-change": "linear-gradient(0deg, #4E2D4D 0%, #292B41 19%, #0E0E16 100%)",
+  "ui-beginner": "linear-gradient(0deg, #684B4B 0%, #231C26 81%, #F59EAF 100%)",
+  "ui-visual": "linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2)), linear-gradient(0deg, #304750 0%, #5D5B65 100%)",
+  "info-arch": "linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3)), linear-gradient(0deg, #8D7746 0%, #214234 100%)",
+  "ux-design": "linear-gradient(0deg, rgba(0,0,0,0.4), rgba(0,0,0,0.4)), linear-gradient(0deg, #2F3F6D 0%, #764749 46%, #E27979 88%, #F1BAC1 100%)",
 };
 
-/** グラデーションプリセットのTailwindクラス */
+/** グラデーションプリセットのTailwindクラス（RoadmapCardV2と統一） */
 export const GRADIENT_CLASSES: Record<GradientPreset, string> = {
-  galaxy: "from-[#667eea] to-[#764ba2]",
-  infoarch: "from-[#6b7280] to-[#92400e]",
-  sunset: "from-[#f97316] to-[#ec4899]",
-  ocean: "from-[#3b82f6] to-[#0ea5e9]",
-  teal: "from-[#14b8a6] to-[#06b6d4]",
-  rose: "from-[#f43f5e] to-[#fb7185]",
-  uivisual: "from-[#304750] to-[#5D5B65]",
+  "career-change": "from-[#4E2D4D] via-[#292B41] to-[#0E0E16]",
+  "ui-beginner": "from-[#684B4B] via-[#231C26] to-[#F59EAF]",
+  "ui-visual": "from-[#304750] to-[#5D5B65]",
+  "info-arch": "from-[#8D7746] to-[#214234]",
+  "ux-design": "from-[#2F3F6D] to-[#F1BAC1]",
 };
 
 // ============================================
@@ -120,6 +114,7 @@ export interface SanityRoadmapStep {
 export interface SanityRoadmapListItem {
   _id: string;
   title: string;
+  shortTitle?: string;
   slug: { current: string };
   description: string;
   thumbnailUrl?: string;
@@ -132,6 +127,7 @@ export interface SanityRoadmapListItem {
 export interface SanityRoadmapDetail {
   _id: string;
   title: string;
+  shortTitle?: string;
   slug: { current: string };
   description: string;
   tagline?: string;
@@ -195,7 +191,7 @@ export function getGradientStyle(
   preset?: GradientPreset
 ): React.CSSProperties {
   if (!preset || !GRADIENT_PRESETS[preset]) {
-    return { background: GRADIENT_PRESETS.galaxy };
+    return { background: GRADIENT_PRESETS['career-change'] };
   }
   return { background: GRADIENT_PRESETS[preset] };
 }
@@ -205,7 +201,7 @@ export function getGradientStyle(
  */
 export function getGradientClass(preset?: GradientPreset): string {
   if (!preset || !GRADIENT_CLASSES[preset]) {
-    return GRADIENT_CLASSES.galaxy;
+    return GRADIENT_CLASSES['career-change'];
   }
   return GRADIENT_CLASSES[preset];
 }

@@ -78,17 +78,15 @@ export default defineType({
       group: "basic",
       options: {
         list: [
-          { title: "Galaxy（紫系 - 転職用）", value: "galaxy" },
-          { title: "Infoarch（グレー/茶系 - 情報設計用）", value: "infoarch" },
-          { title: "Sunset（オレンジ/ピンク系 - UXデザイン用）", value: "sunset" },
-          { title: "Ocean（ブルー系 - Figma基礎用）", value: "ocean" },
-          { title: "Teal（ティール系）", value: "teal" },
-          { title: "Rose（ローズ系 - その他）", value: "rose" },
-          { title: "UIビジュアル（ダークグレー系）", value: "uivisual" },
+          { title: "転職ロードマップ", value: "career-change" },
+          { title: "UIデザイン入門", value: "ui-beginner" },
+          { title: "UIビジュアル入門", value: "ui-visual" },
+          { title: "情報設計基礎", value: "info-arch" },
+          { title: "UXデザイン基礎", value: "ux-design" },
         ],
         layout: "radio",
       },
-      initialValue: "galaxy",
+      initialValue: "career-change",
       description: "カード背景のグラデーション色（プリセットはコンポーネントで管理）",
     }),
 

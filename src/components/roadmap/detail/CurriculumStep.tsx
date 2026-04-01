@@ -25,7 +25,10 @@ export default function CurriculumStep({
   const formattedNumber = stepNumber.toString().padStart(2, "0");
 
   return (
-    <div className="relative bg-white rounded-2xl overflow-hidden mb-8 last:mb-0">
+    <div
+      id={`curriculum-step-${stepNumber}`}
+      className="relative bg-white rounded-2xl overflow-hidden mb-8 last:mb-0 scroll-mt-24"
+    >
       {/* ステップヘッダー */}
       <div className="flex flex-col md:flex-row md:items-start gap-4 md:gap-6 p-4 md:p-6">
         {/* ステップ番号バッジ */}

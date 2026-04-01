@@ -20,7 +20,7 @@ export default function InterestingPerspectives({
   }
 
   return (
-    <section className="py-16 px-4 md:px-8">
+    <section id="interesting-perspectives" className="py-16 px-4 md:px-8 scroll-mt-24">
       <div className="max-w-[1100px] mx-auto">
         {/* ヘッダー */}
         <div className="mb-[30px]">
