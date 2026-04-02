@@ -1,5 +1,5 @@
 /**
- * ロードマップ詳細ページ - デザインが面白くなる「視点」セクション
+ * ロードマップ詳細ページ - 獲得する、デザインを楽しむ「力」セクション
  *
  * Figma: PRD🏠_Roadmap_2026 node-id 1-5906
  */
@@ -25,20 +25,20 @@ export default function InterestingPerspectives({
         {/* ヘッダー */}
         <div className="mb-[30px]">
           {/* バッジ */}
-          <div className="inline-flex items-center justify-center border border-[#52674e] rounded-full px-2.5 py-1.5 mb-4">
+          <div className="inline-flex items-center justify-center border border-[#52674e] rounded-full px-[8px] py-[2px] mb-4">
             <span className="text-[12px] font-bold text-[#52674e] uppercase">
               身につくこと
             </span>
           </div>
 
           {/* タイトル */}
-          <h2 className="text-[24px] font-extrabold text-[#293525] leading-[1.5] mb-4">
-            デザインが面白くなる「視点」
+          <h2 className="text-[24px] font-extrabold text-[#293525] leading-[36px] mb-4">
+            獲得する、デザインを楽しむ「力」
           </h2>
 
           {/* 説明文 */}
           {data.description && (
-            <p className="text-[20px] text-[#293525]/80 leading-[1.35]">
+            <p className="text-[20px] text-[rgba(41,53,37,0.8)] leading-[27px]">
               {data.description}
             </p>
           )}

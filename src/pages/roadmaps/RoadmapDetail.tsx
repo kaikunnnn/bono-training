@@ -8,11 +8,13 @@
 import { useParams, Navigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import RoadmapHero from "@/components/roadmap/detail/RoadmapHero";
+import RoadmapPathway from "@/components/roadmap/detail/RoadmapPathway";
 import SectionNav, { type SectionNavItem } from "@/components/roadmap/detail/SectionNav";
 import ChangingLandscape from "@/components/roadmap/detail/ChangingLandscape";
 import InterestingPerspectives from "@/components/roadmap/detail/InterestingPerspectives";
 import CurriculumSection from "@/components/roadmap/detail/CurriculumSection";
 import ClearBlock from "@/components/roadmap/detail/ClearBlock";
+import DottedDivider from "@/components/common/DottedDivider";
 import { useRoadmap } from "@/hooks/useRoadmaps";
 
 // ============================================
@@ -90,6 +92,14 @@ export default function RoadmapDetail() {
           thumbnailUrl={roadmap.thumbnailUrl}
         />
 
+        {/* 道のりセクション */}
+        {hasCurriculum && (
+          <RoadmapPathway
+            description={roadmap.description}
+            steps={roadmap.steps!}
+          />
+        )}
+
         {/* セクションナビゲーション */}
         {sectionNavItems.length > 0 && (
           <SectionNav items={sectionNavItems} />
@@ -97,18 +107,32 @@ export default function RoadmapDetail() {
 
         {/* 変わる景色セクション */}
         {hasChangingLandscape && (
-          <ChangingLandscape data={roadmap.changingLandscape} />
+          <>
+            <ChangingLandscape data={roadmap.changingLandscape} />
+            {/* ゴールと「身につくこと / カリキュラム」の間にドットボーダー */}
+            {(hasInterestingPerspectives || hasCurriculum) && (
+              <div className="max-w-[1100px] mx-auto">
+                <DottedDivider />
+              </div>
+            )}
+          </>
         )}
 
         {/* 面白くなる視点セクション */}
         {hasInterestingPerspectives && (
-          <InterestingPerspectives data={roadmap.interestingPerspectives} />
+          <>
+            <InterestingPerspectives data={roadmap.interestingPerspectives} />
+            {/* 「身につくこと」とカリキュラムの間にドットボーダー */}
+            {hasCurriculum && (
+              <div className="max-w-[1100px] mx-auto">
+                <DottedDivider />
+              </div>
+            )}
+          </>
         )}
 
         {/* カリキュラムセクション */}
-        {hasCurriculum && (
-          <CurriculumSection steps={roadmap.steps!} />
-        )}
+        {hasCurriculum && <CurriculumSection steps={roadmap.steps!} />}
 
         {/* CTAブロック */}
         <ClearBlock roadmapTitle={roadmap.title} />
