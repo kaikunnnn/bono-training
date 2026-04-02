@@ -6,8 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
+import Layout from '@/components/layout/Layout';
 import { Mail, Lock, LogIn, AlertCircle, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
@@ -99,8 +98,7 @@ const TrainingLogin = () => {
   };
 
   return (
-    <TrainingLayout>
-      <TrainingHeader />
+    <Layout>
       <div className="container max-w-md mx-auto py-10">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold mb-2">トレーニングにログイン</h1>
@@ -208,7 +206,7 @@ const TrainingLogin = () => {
           </Link>
         </div>
       </div>
-    </TrainingLayout>
+    </Layout>
   );
 };
 

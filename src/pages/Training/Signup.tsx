@@ -7,8 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
+import Layout from '@/components/layout/Layout';
 import { getPlanSession, clearPlanSession, PlanSessionData } from '@/utils/planSession';
 import { useToast } from '@/hooks/use-toast';
 import { createCheckoutSession } from '@/services/stripe';
@@ -148,8 +147,7 @@ const TrainingSignup = () => {
   };
 
   return (
-    <TrainingLayout>
-      <TrainingHeader />
+    <Layout>
       <div className="container max-w-md mx-auto py-10">
         <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold mb-2">BONOトレーニングをはじめる</h1>
@@ -261,7 +259,7 @@ const TrainingSignup = () => {
           </Link>
         </div>
       </div>
-    </TrainingLayout>
+    </Layout>
   );
 };
 

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import TrainingLayout from '@/components/training/TrainingLayout';
+import Layout from '@/components/layout/Layout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { createCheckoutSession } from '@/services/stripe';
@@ -102,7 +102,7 @@ const TrainingPlan: React.FC = () => {
   };
   
   return (
-    <TrainingLayout>
+    <Layout>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-4">トレーニングプラン</h1>
@@ -244,7 +244,7 @@ const TrainingPlan: React.FC = () => {
           </Button>
         </div>}
       </div>
-    </TrainingLayout>
+    </Layout>
   );
 };
 

@@ -1,11 +1,11 @@
 
 import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import TrainingLayout from '@/components/training/TrainingLayout';
+import Layout from '@/components/layout/Layout';
 import TaskCollectionBlock from '@/components/training/TaskCollectionBlock';
 import SimpleMarkdownRenderer from '@/components/training/SimpleMarkdownRenderer';
 import { useTrainingDetail } from '@/hooks/useTrainingCache';
-import { Skeleton } from '@/components/ui/skeleton';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 import ErrorDisplay from '@/components/common/ErrorBoundary';
 import { TrainingError } from '@/utils/errors';
 import { TrainingFrontmatter } from '@/types/training';
@@ -18,6 +18,7 @@ import TrainingGuideSection from '@/components/training/TrainingGuideSection';
 import { HalfCircleBg } from '@/components/training/HalfCircleBg';
 import IconBlock from '@/components/training/IconBlock';
 import ContentWrapper from '@/components/training/ContentWrapper';
+import { BackButton } from '@/components/common/BackButton';
 
 /**
  * トレーニング詳細ページ（React Query対応版）
@@ -84,56 +85,52 @@ const TrainingDetail = () => {
 
   if (isLoading) {
     return (
-      <TrainingLayout>
-        <div className="container mx-auto px-4 py-8 max-w-4xl">
-          <div className="space-y-6">
-            <Skeleton className="h-12 w-3/4" />
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-2/3" />
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <Skeleton key={i} className="h-16 w-full" />
-              ))}
-            </div>
-          </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
         </div>
-      </TrainingLayout>
+      </Layout>
     );
   }
 
   if (error) {
     return (
-      <TrainingLayout>
+      <Layout>
         <div className="container mx-auto px-4 py-8">
-          <ErrorDisplay 
+          <ErrorDisplay
             error={error instanceof Error ? new TrainingError(error.message, 'FETCH_ERROR') : new TrainingError('不明なエラー', 'UNKNOWN_ERROR')}
             onRetry={() => window.location.reload()}
             onReset={() => window.location.href = '/training'}
           />
         </div>
-      </TrainingLayout>
+      </Layout>
     );
   }
 
   if (!training) {
     return (
-      <TrainingLayout>
+      <Layout>
         <div className="container mx-auto px-4 py-8">
-          <ErrorDisplay 
+          <ErrorDisplay
             error={new TrainingError('トレーニングが見つかりませんでした', 'NOT_FOUND', 404)}
             onReset={() => window.location.href = '/training'}
           />
         </div>
-      </TrainingLayout>
+      </Layout>
     );
   }
 
   return (
-    <TrainingLayout noPaddingTop={true}>
+    <Layout>
+      {/* 戻るボタン - モバイルヘッダーとの間隔を確保 */}
+      <div className="pt-4 px-4 sm:px-6 lg:px-8 relative z-10">
+        <BackButton href="/training" />
+      </div>
+
       {/* Figmaデザインベースのeyecatchセクション - 全幅 */}
       {frontmatter && (
         <div
-          className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative w-full mb-8 border-b border-slate-200"
+          className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-12 px-0 relative w-full mb-8 border-b border-slate-200"
           data-name="training-overview"
         >
             
@@ -340,7 +337,7 @@ const TrainingDetail = () => {
             />
           )}
         </ContentWrapper>
-    </TrainingLayout>
+    </Layout>
   );
 };
 

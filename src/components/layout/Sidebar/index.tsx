@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           <SidebarMenuItem
             href="/mypage"
             icon={<MenuIcons.mypage size={ICON_SIZE} variant="Outline" />}
-            isActive={isActive("/mypage")}
+            isActive={isActive("/mypage") || location.pathname.startsWith("/mypage/")}
           >
             マイページ
           </SidebarMenuItem>
@@ -66,7 +66,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         <SidebarMenuItem
           href="/lessons"
           icon={<MenuIcons.lesson size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/lessons")}
+          isActive={isActive("/lessons") || location.pathname.startsWith("/lessons/")}
         >
           レッスン
         </SidebarMenuItem>
@@ -75,7 +75,7 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         <SidebarMenuItem
           href="/training"
           icon={<MenuIcons.training size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/training")}
+          isActive={isActive("/training") || location.pathname.startsWith("/training/")}
         >
           トレーニング
         </SidebarMenuItem>

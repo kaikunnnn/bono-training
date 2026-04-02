@@ -1,8 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
+import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
@@ -14,8 +13,7 @@ const TaskDetailError = () => {
   };
 
   return (
-    <TrainingLayout>
-      <TrainingHeader />
+    <Layout>
       <div className="container py-8">
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold mb-4">タスクが見つかりませんでした</h2>
@@ -28,7 +26,7 @@ const TaskDetailError = () => {
           </Button>
         </div>
       </div>
-    </TrainingLayout>
+    </Layout>
   );
 };
 
