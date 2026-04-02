@@ -52,7 +52,9 @@ import RoadmapHeroPreview from "./pages/dev/RoadmapHeroPreview";
 import RoadmapDetailPreview from "./pages/dev/RoadmapDetailPreview";
 import RoadmapPreview from "./pages/dev/RoadmapPreview";
 import RoadmapGradientPreview from "./pages/dev/RoadmapGradientPreview";
+import RoadmapCardWavePreview from "./pages/dev/RoadmapCardWavePreview";
 import RoadmapGradientCompare from "./pages/dev/RoadmapGradientCompare";
+import HeroWaveCompare from "./pages/dev/HeroWaveCompare";
 import ClearBlockPreview from "./pages/dev/ClearBlockPreview";
 import TopHeroSectionPreview from "./pages/dev/TopHeroSectionPreview";
 import GoalSectionPreview from "./pages/dev/GoalSectionPreview";
@@ -169,6 +171,7 @@ const AppContent = () => {
         <Route path="/dev/webflow-embed" element={<DevRoute><WebflowEmbed /></DevRoute>} />
         <Route path="/dev/roadmap-card" element={<DevRoute><RoadmapCardPreview /></DevRoute>} />
         <Route path="/dev/roadmap-card-v2" element={<DevRoute><RoadmapCardV2Preview /></DevRoute>} />
+        <Route path="/dev/roadmap-card-wave" element={<DevRoute><RoadmapCardWavePreview /></DevRoute>} />
         <Route path="/dev/section-heading" element={<DevRoute><SectionHeadingPreview /></DevRoute>} />
         <Route path="/dev/category-nav" element={<DevRoute><CategoryNavPreview /></DevRoute>} />
         <Route path="/dev/category-nav/:category" element={<DevRoute><CategoryNavPreview /></DevRoute>} />
@@ -182,6 +185,7 @@ const AppContent = () => {
         <Route path="/dev/roadmap-preview/:slug" element={<DevRoute><RoadmapPreview /></DevRoute>} />
         <Route path="/dev/roadmap-gradient-preview" element={<DevRoute><RoadmapGradientPreview /></DevRoute>} />
         <Route path="/dev/roadmap-gradient-compare" element={<DevRoute><RoadmapGradientCompare /></DevRoute>} />
+        <Route path="/dev/hero-wave-compare" element={<DevRoute><HeroWaveCompare /></DevRoute>} />
         <Route path="/dev/clear-block" element={<DevRoute><ClearBlockPreview /></DevRoute>} />
         <Route path="/dev/top-hero" element={<DevRoute><TopHeroSectionPreview /></DevRoute>} />
         <Route path="/dev/goal-section" element={<DevRoute><GoalSectionPreview /></DevRoute>} />

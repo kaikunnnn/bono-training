@@ -4,11 +4,18 @@
  * Figma: PRD🏠_Roadmap_2026 node-id 35-12022
  */
 
-import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
+import { BackButton } from "@/components/common/BackButton";
 import type { GradientPreset } from "@/types/sanity-roadmap";
 import { getGradientStyle } from "@/types/sanity-roadmap";
 import { formatTitleWithLineBreaks, stripLineBreakMarker } from "@/utils/textFormat";
+
+// SVGマスクパス
+const MASK_DESKTOP = "/shapes/roadmap-hero-shape-flexible.svg"; // 振幅2.1%
+const MASK_MOBILE = "/shapes/roadmap-hero-mobile.svg"; // 振幅0.5% + 角丸強め
+const MOBILE_BREAKPOINT = 640;
 
 interface RoadmapHeroProps {
   /** ロードマップタイトル */
@@ -25,6 +32,33 @@ interface RoadmapHeroProps {
   thumbnailUrl?: string;
 }
 
+const PrimaryCTAButton: React.FC<{ to: string; children: React.ReactNode }> = ({
+  to,
+  children,
+}) => (
+  <Link
+    to={to}
+    className="w-full sm:flex-1 flex items-center justify-center h-12 bg-[#081c17] border border-white/[0.02] rounded-[14px] text-[14px] font-bold text-white tracking-[0.35px] shadow-[0_4px_4px_rgba(0,0,0,0.25)] hover:opacity-90 transition-opacity"
+  >
+    {children}
+  </Link>
+);
+
+const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
+  href,
+  children,
+}) => (
+  <a
+    href={href}
+    className="flex items-center justify-center w-full sm:w-[170px] h-12 rounded-[14px] text-[14px] font-bold text-white tracking-[0.35px] hover:bg-white/10 transition-colors"
+    style={{
+      boxShadow: "inset 0 0 0 1px rgba(255,255,255,1)",
+    }}
+  >
+    {children}
+  </a>
+);
+
 export default function RoadmapHero({
   title,
   tagline,
@@ -33,25 +67,47 @@ export default function RoadmapHero({
   gradientPreset,
   thumbnailUrl,
 }: RoadmapHeroProps) {
-  const navigate = useNavigate();
   const gradientStyle = getGradientStyle(gradientPreset);
 
-  const handleBack = () => {
-    // 履歴がある場合は戻る、なければロードマップ一覧へ
-    if (window.history.length > 1) {
-      navigate(-1);
-    } else {
-      navigate("/roadmaps");
-    }
+  // モバイル判定（リサイズ対応 + 初回マウント時にも確認）
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // マスクスタイル（モバイルとデスクトップで切り替え）
+  const maskSvg = isMobile ? MASK_MOBILE : MASK_DESKTOP;
+  const maskStyle: React.CSSProperties = {
+    WebkitMaskImage: `url('${maskSvg}')`,
+    maskImage: `url('${maskSvg}')`,
+    WebkitMaskSize: '100% 100%',
+    maskSize: '100% 100%',
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
   };
 
   return (
-    <section className="relative">
+    <section className="relative pt-4 px-4">
       {/* 背景エリア - 有機的な形状（SVGマスク）、コンテンツに合わせて高さ可変 */}
-      <div
-        className="roadmap-hero-mask relative mx-4 md:mx-8 overflow-hidden"
-        style={gradientStyle}
+      <motion.div
+        className="relative"
+        style={{
+          filter: "drop-shadow(0px 12px 24px rgba(0,0,0,0.2))",
+        }}
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
+        <div
+          className="relative overflow-hidden"
+          style={{ ...gradientStyle, ...maskStyle }}
+        >
         {/* 背景画像 */}
         <div
           className="absolute inset-0 pointer-events-none"
@@ -79,14 +135,8 @@ export default function RoadmapHero({
         {/* ナビゲーション */}
         <div className="relative flex items-center justify-between px-8 pt-10 pb-5">
           <div className="flex items-center gap-8">
-            {/* 戻るボタン */}
-            <button
-              onClick={handleBack}
-              className="flex items-center gap-2 bg-white border border-[#ebebeb] rounded-xl px-3 py-2 shadow-[0_1px_1px_rgba(0,0,0,0.08),0_0_3px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-[12px] font-bold">戻る</span>
-            </button>
+            {/* 戻るボタン（共通コンポーネント） */}
+            <BackButton href="/roadmaps" />
 
             {/* パンくずリスト */}
             <nav className="text-[12px] font-bold text-white/60">
@@ -102,8 +152,13 @@ export default function RoadmapHero({
           </div>
         </div>
 
-        {/* タイトル周り */}
-        <div className="relative flex flex-col items-center gap-6 px-8 pt-4 pb-8">
+        {/* タイトル周り（ゆっくりふわっと表示） */}
+        <motion.div
+          className="relative flex flex-col items-center gap-6 px-8 pt-4 pb-8"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+        >
           {/* バッジ */}
           <div className="border border-white rounded-full px-4 py-1.5">
             <span className="text-[13px] text-white">ロードマップ</span>
@@ -164,35 +219,35 @@ export default function RoadmapHero({
               </div>
 
               {/* CTAボタン */}
-              <div className="flex gap-4">
-                <Link
-                  to="/subscription"
-                  className="flex-1 flex items-center justify-center h-12 bg-[#081c17] border border-white/[0.02] rounded-[14px] text-[14px] font-bold text-white tracking-[0.35px] shadow-[0_4px_4px_rgba(0,0,0,0.25)] hover:opacity-90 transition-opacity"
-                >
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+                <PrimaryCTAButton to="/subscription">
                   メンバーになってはじめる
-                </Link>
-                <a
-                  href="#curriculum"
-                  className="flex items-center justify-center w-[170px] h-12 border border-white rounded-[14px] text-[14px] font-bold text-white tracking-[0.35px] hover:bg-white/10 transition-colors"
-                >
+                </PrimaryCTAButton>
+                <SecondaryCTAButton href="#curriculum">
                   カリキュラムへ
-                </a>
+                </SecondaryCTAButton>
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* 下部画像セクション - アスペクト比固定 + 高さ上限 + センター揃え + 下端に配置 */}
         {thumbnailUrl && (
-          <div className="relative mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] max-w-[1049px] aspect-[1049/308] max-h-[308px] overflow-hidden">
+          <motion.div
+            className="relative mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] max-w-[1049px] aspect-[1049/308] max-h-[308px] overflow-hidden"
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          >
             <img
               src={thumbnailUrl}
               alt={stripLineBreakMarker(title)}
               className="w-full h-full object-cover opacity-90"
             />
-          </div>
+          </motion.div>
         )}
-      </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

@@ -38,11 +38,11 @@ const devResources: DevResourceCard[] = [
     tags: ['Roadmap', 'Preview', 'Content', 'Detail']
   },
   {
-    title: 'Roadmap Gradient Preview',
-    description: 'Sanityから取得したロードマップごとにグラデーションを比較。Hero/Card両方の色、サムネイル、公開ステータスを確認。',
-    path: '/dev/roadmap-gradient-preview',
+    title: 'Roadmap Card Wave',
+    description: '波型RoadmapCardV2のプレビュー。/roadmapsで使用するカードの現在のデザイン確認。',
+    path: '/dev/roadmap-card-wave',
     icon: <Eye className="w-8 h-8" />,
-    tags: ['Roadmap', 'Gradient', 'Sanity', 'Hero', 'Card']
+    tags: ['Roadmap', 'Card', 'Wave', 'V2']
   },
   {
     title: 'Gradient Compare (現在 vs 提案)',
@@ -57,6 +57,13 @@ const devResources: DevResourceCard[] = [
     path: '/dev/clear-block',
     icon: <Eye className="w-8 h-8" />,
     tags: ['Roadmap', 'ClearBlock', 'Component']
+  },
+  {
+    title: 'Hero Wave Compare',
+    description: 'ロードマップ詳細ヒーローの波形振幅を比較。スマホ用の緩やかな波形を検討。',
+    path: '/dev/hero-wave-compare',
+    icon: <Eye className="w-8 h-8" />,
+    tags: ['Roadmap', 'Hero', 'Wave', 'Mobile']
   },
 ];
 

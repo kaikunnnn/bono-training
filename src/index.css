@@ -274,6 +274,7 @@
   }
 
   /* ロードマップヒーロー: 上下波形・左右直線の柔軟なSVGマスク */
+  /* デスクトップ: 振幅2.1% / モバイル: 振幅1.0% */
   .roadmap-hero-mask {
     -webkit-mask-image: url('/shapes/roadmap-hero-shape-flexible.svg');
     mask-image: url('/shapes/roadmap-hero-shape-flexible.svg');
@@ -281,6 +282,14 @@
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
+  }
+
+  /* モバイル用: 振幅1.0%の緩やかな波形に切り替え */
+  @media screen and (max-width: 640px) {
+    .roadmap-hero-mask {
+      -webkit-mask-image: url('/shapes/roadmap-hero-wave-amp-1.0.svg') !important;
+      mask-image: url('/shapes/roadmap-hero-wave-amp-1.0.svg') !important;
+    }
   }
 
   /* カード用の波形サムネイルマスク */
@@ -291,6 +300,11 @@
     mask-size: 100% 100%;
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
+  }
+
+  /* 波形マスクの親要素に適用するシャドウ（マスク形状に沿う） */
+  .roadmap-card-wave-shadow {
+    filter: drop-shadow(0px 4px 12px rgba(0, 0, 0, 0.15));
   }
 
   /* スクロールバー非表示（横スクロールUI用） */
