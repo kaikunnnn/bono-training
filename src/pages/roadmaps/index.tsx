@@ -44,7 +44,7 @@ const CATEGORY_DEFINITIONS: CategoryDefinition[] = [
     title: 'ユーザー中心デザインを体系的に身につけたい',
     description: 'サービス価値とユーザーをつなげるデザインを学ぶ',
     emoji: '🎯',
-    roadmapSlugs: ['ux-design', 'information-architecture'],
+    roadmapSlugs: ['ux-design-basic', 'information-architecture'],
   },
   {
     id: 'skill',
