@@ -1,6 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
 import { ShareDropdown } from "@/components/common/ShareDropdown";
+import { BackButton } from "@/components/common/BackButton";
 
 interface LessonHeaderProps {
   /** 戻るボタンのラベル */
@@ -32,21 +31,6 @@ export function LessonHeader({
   showShare = true,
   shareTitle,
 }: LessonHeaderProps) {
-  const navigate = useNavigate();
-
-  const handleBack = () => {
-    // アプリ内から遷移してきた場合は履歴を戻る、そうでなければフォールバック先へ
-    const referrer = document.referrer;
-    const isInternalReferrer = referrer &&
-      new URL(referrer).origin === window.location.origin;
-
-    if (isInternalReferrer) {
-      navigate(-1);
-    } else {
-      navigate(backHref);
-    }
-  };
-
   // シェア用タイトル（指定がなければdocument.titleを使用）
   const title = shareTitle || (typeof document !== "undefined" ? document.title : "");
 
@@ -54,17 +38,7 @@ export function LessonHeader({
     <div className="flex items-start justify-between w-full mb-[24px]">
       {/* 左側：戻るボタン */}
       <div className="flex items-start">
-        <button
-          onClick={handleBack}
-          className="bg-white border border-[#EBEBEB] flex gap-2 items-center px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
-        >
-          {/* 矢印アイコン */}
-          <ArrowLeft className="size-5 text-black" strokeWidth={2} />
-          {/* テキスト */}
-          <span className="font-noto-sans-jp font-semibold text-sm text-black">
-            {backLabel}
-          </span>
-        </button>
+        <BackButton label={backLabel} href={backHref} />
       </div>
 
       {/* 右側：シェアボタン（ドロップダウン付き） */}

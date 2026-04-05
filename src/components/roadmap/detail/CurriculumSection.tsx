@@ -6,7 +6,6 @@
 
 import type { SanityRoadmapStep } from "@/types/sanity-roadmap";
 import CurriculumStep from "./CurriculumStep";
-import CurriculumStepNav from "./CurriculumStepNav";
 
 interface CurriculumSectionProps {
   /** ステップ配列 */
@@ -40,9 +39,6 @@ export default function CurriculumSection({ steps }: CurriculumSectionProps) {
             ステップに沿って、順番にスキル習得を目指しましょう
           </p>
         </div>
-
-        {/* ステップナビゲーション */}
-        <CurriculumStepNav steps={steps} />
 
         {/* ステップ一覧 */}
         <div className="relative">

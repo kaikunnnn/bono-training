@@ -1,4 +1,5 @@
 import { Map } from "lucide-react";
+import { Link } from "react-router-dom";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { LessonProgressBar } from "@/components/ui/LessonProgressBar";
 import { Button } from "@/components/ui/button";
@@ -63,9 +64,19 @@ export function LessonTitleArea({
         {lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0 && (
           <div className="flex items-center gap-1 text-[rgba(13,34,29,0.48)]">
             <Map className="w-3.5 h-3.5 flex-shrink-0" />
-            <span className="font-noto-sans-jp text-[13px] font-medium">
-              {lesson.linkedRoadmaps.map((r) => r.shortTitle || r.title).join(', ')}
-            </span>
+            <div className="font-noto-sans-jp text-[13px] font-medium flex items-center flex-wrap gap-x-1">
+              {lesson.linkedRoadmaps.map((roadmap, index) => (
+                <span key={roadmap.slug} className="flex items-center gap-1">
+                  <Link
+                    to={`/roadmaps/${roadmap.slug}`}
+                    className="underline hover:text-[rgba(13,34,29,0.7)] transition-colors"
+                  >
+                    {roadmap.shortTitle || roadmap.title}
+                  </Link>
+                  {index < lesson.linkedRoadmaps!.length - 1 && <span>,</span>}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>

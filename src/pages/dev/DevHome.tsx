@@ -45,6 +45,13 @@ const devResources: DevResourceCard[] = [
     tags: ['Roadmap', 'Card', 'Wave', 'V2']
   },
   {
+    title: 'Training Card Preview 🎯',
+    description: 'トップページのトレーニングカードプレビュー。Figmaデザインとの比較チェックリスト付き。4枚のカード（情報設計・UIUX転職・UXデザイン・UIビジュアル）を確認。',
+    path: '/dev/training-card',
+    icon: <CreditCard className="w-8 h-8" />,
+    tags: ['Training', 'Card', 'Top', 'Checklist', 'NEW']
+  },
+  {
     title: 'Gradient Compare (現在 vs 提案)',
     description: '現在のグラデーションと提案されたグラデーションを並べて比較。修正が必要な箇所を視覚的に確認。',
     path: '/dev/roadmap-gradient-compare',

@@ -46,17 +46,19 @@ const COMPARISONS: ComparisonItem[] = [
     stepCount: 5,
     estimatedDuration: "6~",
     current: {
-      from: "#412731",
-      mid: "#382D28",
-      to: "#22202B",
-    },
-    proposed: {
       from: "#482B4B",
+      mid: "#2A2C42",
       to: "#141520",
       customGradient: "linear-gradient(0deg, #482B4B 0%, #2A2C42 27%, #141520 100%)",
     },
-    note: "#482B4B(100%) → #2A2C42(73%) → #141520(0%)。CSS変換: 0%→27%→100%",
-    hasChange: true,
+    proposed: {
+      from: "#482B4B",
+      mid: "#2A2C42",
+      to: "#141520",
+      customGradient: "linear-gradient(0deg, #482B4B 0%, #2A2C42 27%, #141520 100%)",
+    },
+    note: "✅ 適用済み - #482B4B(0%) → #2A2C42(27%) → #141520(100%)",
+    hasChange: false,
   },
   {
     name: "ui-beginner",
@@ -66,19 +68,21 @@ const COMPARISONS: ComparisonItem[] = [
     stepCount: 4,
     estimatedDuration: "1-2",
     current: {
-      from: "#BB5F70",
-      to: "#494717",
-      overlay: "rgba(0, 0, 0, 0.38)",
-    },
-    proposed: {
       from: "#684B4B",
-      to: "#F59EAF",
       mid: "#231C26",
+      to: "#F59EAF",
       customGradient:
         "linear-gradient(0deg, rgba(104, 75, 75, 1) 0%, rgba(35, 28, 38, 1) 81%, rgba(245, 158, 175, 1) 100%)",
     },
-    note: "新UIデザイン入門用の3点グラデーションに変更。",
-    hasChange: true,
+    proposed: {
+      from: "#684B4B",
+      mid: "#231C26",
+      to: "#F59EAF",
+      customGradient:
+        "linear-gradient(0deg, rgba(104, 75, 75, 1) 0%, rgba(35, 28, 38, 1) 81%, rgba(245, 158, 175, 1) 100%)",
+    },
+    note: "✅ 適用済み - #684B4B(0%) → #231C26(81%) → #F59EAF(100%)",
+    hasChange: false,
   },
   {
     name: "ui-visual",
@@ -108,8 +112,8 @@ const COMPARISONS: ComparisonItem[] = [
     stepCount: 3,
     estimatedDuration: "1-2",
     current: {
-      from: "#8D7746",
-      to: "#214234",
+      from: "#214234",
+      to: "#8D7746",
       overlay: "rgba(0, 0, 0, 0.3)",
     },
     proposed: {
@@ -117,8 +121,8 @@ const COMPARISONS: ComparisonItem[] = [
       to: "#8D7746",
       overlay: "rgba(0, 0, 0, 0.3)",
     },
-    note: "向きが逆。#214234 → #8D7746 に変更。",
-    hasChange: true,
+    note: "✅ 適用済み - 向き反転 #214234(0%) → #8D7746(100%)",
+    hasChange: false,
   },
   {
     name: "ux-design",
@@ -128,10 +132,10 @@ const COMPARISONS: ComparisonItem[] = [
     stepCount: 4,
     estimatedDuration: "2-3",
     current: {
-      from: "#2F3F6D",
-      to: "#F1BAC1",
+      from: "#F1BAC1",
+      to: "#2F3F6D",
       overlay: "rgba(0, 0, 0, 0.4)",
-      customGradient: "linear-gradient(0deg, #2F3F6D 0%, #764749 46%, #E27979 88%, #F1BAC1 100%)",
+      customGradient: "linear-gradient(0deg, #F1BAC1 0%, #E27979 12%, #764749 54%, #2F3F6D 100%)",
     },
     proposed: {
       from: "#F1BAC1",
@@ -139,8 +143,8 @@ const COMPARISONS: ComparisonItem[] = [
       overlay: "rgba(0, 0, 0, 0.4)",
       customGradient: "linear-gradient(0deg, #F1BAC1 0%, #E27979 12%, #764749 54%, #2F3F6D 100%)",
     },
-    note: "向きが逆かも。暗い色が上、明るい色が下に。",
-    hasChange: true,
+    note: "✅ 適用済み - 向き反転 #F1BAC1(0%) → #E27979(12%) → #764749(54%) → #2F3F6D(100%)",
+    hasChange: false,
   },
 ];
 

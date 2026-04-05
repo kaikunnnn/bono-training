@@ -35,7 +35,6 @@ export async function getSanityRoadmapBySlug(
       "thumbnailUrl": thumbnail.asset->url,
       gradientPreset,
       estimatedDuration,
-      howToNavigate,
       changingLandscape {
         description,
         items[] {

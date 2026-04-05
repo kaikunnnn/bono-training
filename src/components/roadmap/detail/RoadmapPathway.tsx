@@ -59,7 +59,7 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
                   type="button"
                   onClick={() => scrollToStep(index + 1)}
                   aria-label={`ステップ${index + 1}「${step.title}」へ移動`}
-                  className="flex items-center gap-4 w-full text-left group p-5"
+                  className="flex items-center gap-4 w-full text-left group p-5 rounded-xl hover:bg-gray-50 transition-colors duration-200"
                 >
                   {/* ステップ番号バッジ */}
                   <div className="flex-shrink-0 w-[50px] h-[43px] bg-white rounded-xl shadow-[0_1px_5px_rgba(0,0,0,0.08)] overflow-hidden">
@@ -87,7 +87,9 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
 
                   {/* 下矢印アイコン */}
                   <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#f3f4f6]">
-                    <ArrowDown2 size={16} color="#9ca3af" variant="Linear" />
+                    <div className="transition-transform duration-500 group-hover:rotate-[360deg]">
+                      <ArrowDown2 size={16} color="#9ca3af" variant="Linear" />
+                    </div>
                   </div>
                 </button>
 

@@ -13,18 +13,14 @@ import { ChevronRight } from "lucide-react";
 import Layout from "@/components/layout/Layout";
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
+import { useRoadmaps } from "@/hooks/useRoadmaps";
+import RoadmapCardV2 from "@/components/roadmap/RoadmapCardV2";
+import type { GradientPreset } from "@/components/roadmap/RoadmapCardV2";
+import TrainingCard, { TRAINING_CARDS_DATA } from "@/components/top/TrainingCard";
 
 // ============================================
 // 型定義
 // ============================================
-
-interface RoadmapCardMiniProps {
-  slug: string;
-  label: string;
-  title: string;
-  eyecatchUrl?: string;
-  gradientStyle?: string;
-}
 
 interface GoalButtonProps {
   icon: string;
@@ -39,9 +35,12 @@ interface GoalButtonProps {
 /** NEWバッジ */
 function NewBadge({ text }: { text: string }) {
   return (
-    <div className="inline-flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 py-1.5 sm:py-[7px] bg-surface border border-text-primary rounded-full">
-      <span className="text-[10px] sm:text-xs font-bold text-accent-orange">NEW!</span>
-      <span className="text-[11px] sm:text-[13px] font-bold text-text-primary">{text}</span>
+    <div className="inline-flex items-center gap-2.5 px-4 py-[7px] bg-white rounded-full">
+      <span className="text-xs font-bold text-[#f95a16]">NEW!</span>
+      <div className="flex items-baseline gap-0">
+        <span className="text-[13px] font-bold text-[#0f172a]">{text}</span>
+        <span className="text-xs font-normal text-[#0f172a]">！</span>
+      </div>
     </div>
   );
 }
@@ -57,7 +56,7 @@ function CTAButtonPrimary({
   external?: boolean;
 }) {
   const className =
-    "inline-flex items-center justify-center h-11 sm:h-14 px-4 sm:px-6 rounded-[14px] bg-cta-primary-bg text-white text-xs sm:text-sm font-bold tracking-wide shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] hover:bg-cta-primary-hover transition-colors w-full sm:w-auto";
+    "inline-flex items-center justify-center h-14 px-6 rounded-[14px] bg-[#102720] text-white text-sm font-bold leading-5 tracking-[0.35px] text-center shadow-[0px_4px_12px_0px_rgba(0,0,0,0.12)] hover:bg-[#1a3a30] transition-colors w-full sm:w-auto sm:min-w-[174px]";
 
   if (external) {
     return (
@@ -85,56 +84,13 @@ function CTAButtonSecondary({
   return (
     <Link
       to={href}
-      className="inline-flex items-center justify-center h-11 sm:h-14 px-4 sm:px-6 rounded-[14px] border border-text-primary text-text-primary text-xs sm:text-sm font-bold tracking-wide hover:bg-hover transition-colors w-full sm:w-auto"
+      className="inline-flex items-center justify-center h-14 px-[25px] py-px rounded-[14px] border border-[#0f172a] text-[#0f172a] text-sm font-bold leading-5 tracking-[0.35px] text-center hover:bg-gray-50 transition-colors w-full sm:w-auto sm:min-w-[154px]"
     >
       {children}
     </Link>
   );
 }
 
-/** ロードマップカード（ミニ版・トップページ用） */
-function RoadmapCardMini({
-  slug,
-  label,
-  title,
-  eyecatchUrl,
-  gradientStyle = "linear-gradient(180deg, #110D49 11%, #773F6B 69%, #F5D7C7 95%)",
-}: RoadmapCardMiniProps) {
-  return (
-    <Link
-      to={`/roadmaps/${slug}`}
-      className="block group flex-shrink-0 w-[200px] sm:w-[230px] lg:w-[263px]"
-    >
-      <div className="bg-surface border-4 border-white rounded-[28px] sm:rounded-[32px] lg:rounded-[40px] shadow-[0px_1px_24px_0px_rgba(0,0,0,0.16)] overflow-hidden transition-all group-hover:shadow-lg group-hover:scale-[1.02]">
-        {/* ヘッダー部分 */}
-        <div className="px-5 sm:px-6 lg:px-8 pt-4 sm:pt-5 lg:pt-6 pb-1">
-          <div className="inline-flex items-center py-1 sm:py-1.5">
-            <span className="text-[10px] sm:text-[11px] font-bold text-label-olive">{label}</span>
-          </div>
-          <h3 className="text-base sm:text-lg lg:text-[22px] font-bold leading-[1.52] text-black">
-            {title}
-          </h3>
-        </div>
-
-        {/* アイキャッチ部分 */}
-        <div
-          className="h-[160px] sm:h-[180px] lg:h-[223px] rounded-lg mx-0 flex items-center justify-center overflow-hidden"
-          style={{ background: gradientStyle }}
-        >
-          {eyecatchUrl ? (
-            <img
-              src={eyecatchUrl}
-              alt={title}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="text-white/60 text-sm">Eyecatch</div>
-          )}
-        </div>
-      </div>
-    </Link>
-  );
-}
 
 /** ゴール選択ボタン */
 function GoalButton({ icon, text, href }: GoalButtonProps) {
@@ -177,37 +133,8 @@ function GoalSectionHeader({
 }
 
 // ============================================
-// ロードマップデータ（仮データ）
+// ゴールボタンデータ
 // ============================================
-
-const ROADMAP_CARDS_DATA = [
-  {
-    slug: "uiux-career-change",
-    label: "ロードマップ",
-    title: "UIUXデザイナーに転職する",
-    gradientStyle:
-      "linear-gradient(180deg, #110D49 11%, #773F6B 69%, #F5D7C7 95%)",
-  },
-  {
-    slug: "information-architecture",
-    label: "ロードマップ",
-    title: "目的に沿った使いやすいUI提案",
-    gradientStyle: "linear-gradient(180deg, #3d494e 0%, #696356 100%)",
-  },
-  {
-    slug: "ux-design",
-    label: "ロードマップ",
-    title: "ユーザー課題を解決する",
-    gradientStyle:
-      "linear-gradient(180deg, #2f3f6d 8%, #66465f 24%, #e27979 68%, #f1bac1 100%)",
-  },
-  {
-    slug: "ui-design-beginner",
-    label: "ロードマップ",
-    title: "UIデザインをはじめる",
-    gradientStyle: "linear-gradient(180deg, #304750 0%, #5d5b65 100%)",
-  },
-];
 
 const GOAL_BUTTONS_DATA = [
   { icon: "✨", text: "UIUXデザイナーに転職", href: "#section-career" },
@@ -220,68 +147,94 @@ const GOAL_BUTTONS_DATA = [
 // ============================================
 
 export default function TopPageNew() {
+  // Sanityからロードマップデータを取得（セクション4で使用）
+  const { data: roadmaps } = useRoadmaps();
+
+  // 特定slugのロードマップを取得するヘルパー
+  const getRoadmapBySlug = (slug: string) =>
+    roadmaps?.find((rm) => rm.slug.current === slug);
+
+  // 各セクション用のロードマップ
+  const careerRoadmap = getRoadmapBySlug("uiux-career-change");
+  const uxRoadmap = getRoadmapBySlug("ux-design");
+  const uiRoadmap = getRoadmapBySlug("information-architecture");
+  const uiVisualRoadmap = getRoadmapBySlug("ui-visual-design");
+
   return (
     <Layout>
-      <div className="min-h-screen bg-warm">
+      <div className="min-h-screen">
         {/* ================================================
             セクション1: Hero Section
         ================================================ */}
-        <section className="pt-10 sm:pt-16 lg:pt-20 pb-6 sm:pb-8 px-4 sm:px-6">
-          <div className="max-w-[1116px] mx-auto">
-            {/* NEWバッジ */}
-            <div className="mb-4 sm:mb-6">
-              <NewBadge text="AIプロトタイピングコースがリリース！" />
-            </div>
+        <section className="relative pt-0 pb-0">
+          {/* コンテナ全体（h-[1186px] をベースにレスポンシブ調整） */}
+          <div className="relative h-auto min-h-[900px] sm:min-h-[1100px] lg:h-[1186px]">
+            {/* 上部: NEWバッジ + キャッチコピー + CTAボタン */}
+            <div className="absolute left-1/2 -translate-x-1/2 top-0 w-full max-w-[950px] flex flex-col items-center gap-8 px-4 sm:px-6 lg:px-0">
+              {/* コンテンツグループ */}
+              <div className="flex flex-col items-center gap-8">
+                {/* NEWバッジ */}
+                <div className="mt-8 sm:mt-12 lg:mt-0">
+                  <NewBadge text="AIプロトタイピングコースがリリース" />
+                </div>
 
-            {/* メインコンテンツ（モバイル: 1カラム、デスクトップ: 2カラム） */}
-            <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 lg:items-end mb-6 sm:mb-10">
-              {/* 左: キャッチコピー */}
-              <div className="lg:flex-1">
-                <h1 className="text-[32px] sm:text-[40px] lg:text-[56px] font-bold leading-[1.32] text-text-primary font-noto-sans-jp">
-                  はじめよう
-                  <br />
-                  キモチがうごく
-                  <br />
-                  ものづくり
-                </h1>
+                {/* メインキャッチコピー + サブキャッチコピー */}
+                <div className="flex flex-col items-center gap-4 text-center leading-none">
+                  {/* メインキャッチコピー */}
+                  <h1 className="font-[LINE_Seed_JP,sans-serif] text-[40px] sm:text-[56px] lg:text-[74px] font-bold text-[#0f172a] leading-[1.32]">
+                    はじめよう！
+                    <br />
+                    キモチがうごく
+                    <br />
+                    ものづくり
+                  </h1>
+
+                  {/* サブキャッチコピー */}
+                  <div className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl lg:text-2xl text-[#0f172a] leading-[1.76]">
+                    <p className="mb-0">ボノはユーザー起点で未来のワクワクを</p>
+                    <p className="mb-0">
+                      "つくる"力を磨く<span className="font-bold">デザイントレーニングサービス</span>です。
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              {/* 右: 説明文 */}
-              <div className="lg:flex-1">
-                <p className="text-base sm:text-lg lg:text-[23px] leading-[1.6] text-text-primary">
-                  ボノはユーザー価値から考えてデジタルプロダクトをつくりたい人向けのデザイントレーニングサービスです。
-                </p>
+              {/* CTAボタン */}
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto justify-center">
+                <CTAButtonPrimary href="https://www.bo-no.design/plan" external>
+                  メンバーになってはじめる
+                </CTAButtonPrimary>
+                <CTAButtonSecondary href="/roadmaps">
+                  ロードマップをを見る
+                </CTAButtonSecondary>
               </div>
             </div>
 
-            {/* CTAボタン */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <CTAButtonPrimary href="https://www.bo-no.design/plan" external>
-                メンバーになってはじめる
-              </CTAButtonPrimary>
-              <CTAButtonSecondary href="/roadmaps">
-                ロードマップを見る
-              </CTAButtonSecondary>
+            {/* 下部: トレーニングカード（absolute配置） */}
+            <div className="absolute left-0 top-[500px] sm:top-[550px] lg:top-[616px] w-full overflow-x-auto scrollbar-hide pb-4">
+              <div className="flex gap-5 px-4 sm:px-6 lg:px-0 min-w-max">
+                {TRAINING_CARDS_DATA.map((cardData) => (
+                  <TrainingCard key={cardData.id} data={cardData} />
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
         {/* ================================================
-            セクション2: Roadmap Cards Section
+            セクション2: Partnership Section
         ================================================ */}
-        <section className="py-6 sm:py-8 px-4 sm:px-6">
-          <div className="max-w-[1116px] mx-auto">
-            {/* カード4枚を横並び */}
-            <div className="flex gap-3 sm:gap-4 lg:gap-5 overflow-x-auto pb-4 scrollbar-hide -mx-4 sm:-mx-6 px-4 sm:px-6">
-              {ROADMAP_CARDS_DATA.map((card) => (
-                <RoadmapCardMini
-                  key={card.slug}
-                  slug={card.slug}
-                  label={card.label}
-                  title={card.title.replace(/\n/g, " ")}
-                  gradientStyle={card.gradientStyle}
-                />
-              ))}
+        <section className="border-b border-[#dfdfdf] py-6 px-4 sm:px-6">
+          <div className="flex items-center justify-center gap-2">
+            <p className="text-[13px] font-bold text-[rgba(41,53,37,0.8)] leading-[27px] whitespace-nowrap">
+              キャリアパートナーシップ
+            </p>
+            <div className="w-[149px] h-[61px]">
+              <img
+                src="/images/partners/gmo-beauty.png"
+                alt="GMO BEAUTY"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </section>
@@ -339,20 +292,27 @@ export default function TopPageNew() {
 
               <div className="flex flex-col lg:flex-row gap-4 mt-6">
                 {/* ロードマップカード */}
-                <Link to="/roadmaps/uiux-career-change" className="flex-1 group">
-                  <div className="bg-gradient-to-b from-[#1b1a2e] to-[#26202b] rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] p-2 sm:p-2.5 min-h-[320px] sm:min-h-[360px] lg:min-h-[400px] transition-all group-hover:shadow-lg group-hover:scale-[1.02]">
-                    <div className="h-[180px] sm:h-[220px] lg:h-[280px] rounded-[24px] sm:rounded-[40px] lg:rounded-[52px] border border-white/10 shadow-[0px_1px_24px_0px_rgba(0,0,0,0.16)] bg-gradient-to-b from-[#211f38] via-[#66465f] to-[#2e2734] flex items-center justify-center">
-                      <span className="text-white/40 text-sm">サムネイル</span>
-                    </div>
-                    <div className="p-4 sm:p-5 lg:p-6">
-                      <div className="inline-flex px-2.5 sm:px-3 py-1 sm:py-1.5 mb-2 border border-white rounded-full">
-                        <span className="text-[10px] sm:text-[11px] font-bold text-white">ロードマップ</span>
-                      </div>
-                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white leading-[1.65] mb-2">UIUXデザイナー転職ロードマップ</h3>
-                      <p className="text-sm sm:text-base text-white/80">ユーザーと目的から逆算して使いやすいUIデザインの構築方法を習得</p>
-                    </div>
+                {careerRoadmap ? (
+                  <div className="flex-1">
+                    <RoadmapCardV2
+                      slug={careerRoadmap.slug.current}
+                      title={careerRoadmap.title}
+                      description={careerRoadmap.description}
+                      thumbnailUrl={careerRoadmap.thumbnailUrl}
+                      stepCount={careerRoadmap.stepCount}
+                      estimatedDuration={careerRoadmap.estimatedDuration}
+                      shortTitle={careerRoadmap.shortTitle}
+                      gradientPreset={careerRoadmap.gradientPreset as GradientPreset}
+                      variant="gradient"
+                      orientation="vertical"
+                      thumbnailStyle="wave"
+                    />
                   </div>
-                </Link>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center min-h-[320px] bg-gray-100 rounded-[32px]">
+                    <p className="text-gray-500">読み込み中...</p>
+                  </div>
+                )}
 
                 {/* ガイドカード */}
                 <Link to="/lessons/career-guide-uiux" className="flex-1 group">
@@ -428,32 +388,39 @@ export default function TopPageNew() {
           <div className="max-w-[1120px] mx-auto bg-[rgba(70,87,83,0.04)] rounded-[24px] sm:rounded-[32px] lg:rounded-[40px]">
             <GoalSectionHeader
               icon="🔧"
-              title="ユーザー課題を解決する"
-              description="UXデザインの考え方でユーザーの課題を発見し、解決策をデザインする方法を学ぶよ"
+              title="ユーザー課題を解決するデザインをはじめよう"
+              description="なんのためにUIは必要か？それはユーザーが満足する「体験」のためです"
             />
 
             <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-16">
               <SectionHeading
                 label="ロードマップ"
-                title="UXデザインでユーザー中心の設計を身につけよう"
+                title="デザインスキルを獲得して転職を目指そう"
               />
 
               <div className="flex flex-col lg:flex-row gap-4 mt-6">
                 {/* ロードマップカード */}
-                <Link to="/roadmaps/ux-design" className="flex-1 group">
-                  <div className="bg-gradient-to-b from-[#2f3f6d] via-[#66465f] to-[#f1bac1] rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] p-2 sm:p-2.5 min-h-[320px] sm:min-h-[360px] lg:min-h-[400px] transition-all group-hover:shadow-lg group-hover:scale-[1.02]">
-                    <div className="h-[180px] sm:h-[220px] lg:h-[280px] rounded-[24px] sm:rounded-[40px] lg:rounded-[52px] border border-white/10 shadow-[0px_1px_24px_0px_rgba(0,0,0,0.16)] flex items-center justify-center">
-                      <span className="text-white/40 text-sm">サムネイル</span>
-                    </div>
-                    <div className="p-4 sm:p-5 lg:p-6">
-                      <div className="inline-flex px-2.5 sm:px-3 py-1 sm:py-1.5 mb-2 border border-white rounded-full">
-                        <span className="text-[10px] sm:text-[11px] font-bold text-white">ロードマップ</span>
-                      </div>
-                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white leading-[1.65] mb-2">UXデザインロードマップ</h3>
-                      <p className="text-sm sm:text-base text-white/80">ユーザー理解から課題解決までのプロセスを習得</p>
-                    </div>
+                {uxRoadmap ? (
+                  <div className="flex-1">
+                    <RoadmapCardV2
+                      slug={uxRoadmap.slug.current}
+                      title={uxRoadmap.title}
+                      description={uxRoadmap.description}
+                      thumbnailUrl={uxRoadmap.thumbnailUrl}
+                      stepCount={uxRoadmap.stepCount}
+                      estimatedDuration={uxRoadmap.estimatedDuration}
+                      shortTitle={uxRoadmap.shortTitle}
+                      gradientPreset={uxRoadmap.gradientPreset as GradientPreset}
+                      variant="gradient"
+                      orientation="vertical"
+                      thumbnailStyle="wave"
+                    />
                   </div>
-                </Link>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center min-h-[320px] bg-gray-100 rounded-[32px]">
+                    <p className="text-gray-500">読み込み中...</p>
+                  </div>
+                )}
 
                 {/* レッスンカード */}
                 <Link to="/lessons/ux-design-basics" className="flex-1 group">
@@ -470,6 +437,57 @@ export default function TopPageNew() {
                 </Link>
               </div>
             </div>
+
+            <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+
+            {/* サブセクション: 読みもの */}
+            <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-16">
+              <SectionHeading
+                label="読みもの"
+                title="お役立ちコンテンツ"
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                <Link to="/lessons/information-architecture" className="group">
+                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
+                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
+                      <span className="text-3xl sm:text-4xl">📐</span>
+                    </div>
+                    <div className="p-4 sm:p-5 lg:p-6">
+                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">UIデザイン</span>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">ゼロから始める情報設計</h3>
+                      <p className="text-sm sm:text-base text-gray-500 mt-2">UI設計がラクになる3つの役割を知ろう</p>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link to="/lessons/cx-design-basics" className="group">
+                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
+                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
+                      <span className="text-3xl sm:text-4xl">🎨</span>
+                    </div>
+                    <div className="p-4 sm:p-5 lg:p-6">
+                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">UIデザイン</span>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">顧客体験デザイン入門</h3>
+                      <p className="text-sm sm:text-base text-gray-500 mt-2">UI設計がラクになる3つの役割を知ろう</p>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link to="/lessons/user-interview-basics" className="group sm:col-span-2 lg:col-span-1">
+                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
+                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
+                      <span className="text-3xl sm:text-4xl">🎤</span>
+                    </div>
+                    <div className="p-4 sm:p-5 lg:p-6">
+                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">UIデザイン</span>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">ゼロから始めるユーザーインタビュー</h3>
+                      <p className="text-sm sm:text-base text-gray-500 mt-2">UI設計がラクになる3つの役割を知ろう</p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -478,43 +496,110 @@ export default function TopPageNew() {
           <div className="max-w-[1120px] mx-auto bg-[rgba(70,87,83,0.04)] rounded-[24px] sm:rounded-[32px] lg:rounded-[40px]">
             <GoalSectionHeader
               icon="🛸"
-              title="使いやすいUIをデザインする"
-              description="情報設計とUIパターンを理解して、使いやすいUIを提案できるようになろう"
+              title="使いやすいUI体験を提案できるようになろう"
+              description="ユーザーに受け入れられるUI体験のための、表現の&quot;ふつう&quot;の構築方法を学ぶよ"
             />
 
             <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-16">
               <SectionHeading
                 label="ロードマップ"
-                title="情報設計でUIの使いやすさをデザインしよう"
+                title="デザインスキルを獲得して転職を目指そう"
               />
 
               <div className="flex flex-col lg:flex-row gap-4 mt-6">
                 {/* ロードマップカード */}
-                <Link to="/roadmaps/information-architecture" className="flex-1 group">
-                  <div className="bg-gradient-to-b from-[#3d494e] to-[#696356] rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] p-2 sm:p-2.5 min-h-[320px] sm:min-h-[360px] lg:min-h-[400px] transition-all group-hover:shadow-lg group-hover:scale-[1.02]">
-                    <div className="h-[180px] sm:h-[220px] lg:h-[280px] rounded-[24px] sm:rounded-[40px] lg:rounded-[52px] border border-white/10 shadow-[0px_1px_24px_0px_rgba(0,0,0,0.16)] flex items-center justify-center">
-                      <span className="text-white/40 text-sm">サムネイル</span>
+                {uiRoadmap ? (
+                  <div className="flex-1">
+                    <RoadmapCardV2
+                      slug={uiRoadmap.slug.current}
+                      title={uiRoadmap.title}
+                      description={uiRoadmap.description}
+                      thumbnailUrl={uiRoadmap.thumbnailUrl}
+                      stepCount={uiRoadmap.stepCount}
+                      estimatedDuration={uiRoadmap.estimatedDuration}
+                      shortTitle={uiRoadmap.shortTitle}
+                      gradientPreset={uiRoadmap.gradientPreset as GradientPreset}
+                      variant="gradient"
+                      orientation="vertical"
+                      thumbnailStyle="wave"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center min-h-[320px] bg-gray-100 rounded-[32px]">
+                    <p className="text-gray-500">読み込み中...</p>
+                  </div>
+                )}
+
+                {/* UIビジュアルロードマップカード */}
+                {uiVisualRoadmap ? (
+                  <div className="flex-1">
+                    <RoadmapCardV2
+                      slug={uiVisualRoadmap.slug.current}
+                      title={uiVisualRoadmap.title}
+                      description={uiVisualRoadmap.description}
+                      thumbnailUrl={uiVisualRoadmap.thumbnailUrl}
+                      stepCount={uiVisualRoadmap.stepCount}
+                      estimatedDuration={uiVisualRoadmap.estimatedDuration}
+                      shortTitle={uiVisualRoadmap.shortTitle}
+                      gradientPreset={uiVisualRoadmap.gradientPreset as GradientPreset}
+                      variant="gradient"
+                      orientation="vertical"
+                      thumbnailStyle="wave"
+                    />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center min-h-[320px] bg-gray-100 rounded-[32px]">
+                    <p className="text-gray-500">読み込み中...</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+
+            {/* サブセクション: 読みもの */}
+            <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-16">
+              <SectionHeading
+                label="読みもの"
+                title="お役立ちコンテンツ"
+              />
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                <Link to="/lessons/ui-visual-basics" className="group">
+                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
+                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
+                      <span className="text-3xl sm:text-4xl">🎨</span>
                     </div>
                     <div className="p-4 sm:p-5 lg:p-6">
-                      <div className="inline-flex px-2.5 sm:px-3 py-1 sm:py-1.5 mb-2 border border-white rounded-full">
-                        <span className="text-[10px] sm:text-[11px] font-bold text-white">ロードマップ</span>
-                      </div>
-                      <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white leading-[1.65] mb-2">情報設計ロードマップ</h3>
-                      <p className="text-sm sm:text-base text-white/80">OOUIとナビゲーション設計の基本を習得</p>
+                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">UIデザイン</span>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">ゼロから始めるUIビジュアル入門</h3>
+                      <p className="text-sm sm:text-base text-gray-500 mt-2">UI設計がラクになる3つの役割を知ろう</p>
                     </div>
                   </div>
                 </Link>
 
-                {/* レッスンカード */}
-                <Link to="/lessons/ui-information-design" className="flex-1 group">
-                  <div className="bg-surface rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] border-2 border-white shadow-sm min-h-[320px] sm:min-h-[360px] lg:min-h-[400px] overflow-hidden transition-all group-hover:shadow-lg group-hover:scale-[1.02]">
-                    <div className="h-[140px] sm:h-[170px] lg:h-[209px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
-                      <span className="text-3xl sm:text-4xl">🧩</span>
+                <Link to="/lessons/design-cycle" className="group">
+                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
+                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
+                      <span className="text-3xl sm:text-4xl">🔄</span>
                     </div>
-                    <div className="p-5 sm:p-6 lg:p-8">
-                      <span className="text-[10px] sm:text-[11px] font-bold text-text-primary">レッスン</span>
-                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">ゼロからはじめるUI情報設計</h3>
-                      <p className="text-sm sm:text-base text-text-primary/80 mt-2">使いやすいUIの構造とナビゲーションを学ぶ</p>
+                    <div className="p-4 sm:p-5 lg:p-6">
+                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">UIデザイン</span>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">デザインが上手くなる「デザインサイクル」</h3>
+                      <p className="text-sm sm:text-base text-gray-500 mt-2">UI設計がラクになる3つの役割を知ろう</p>
+                    </div>
+                  </div>
+                </Link>
+
+                <Link to="/lessons/ui-visual-foundation" className="group sm:col-span-2 lg:col-span-1">
+                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
+                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
+                      <span className="text-3xl sm:text-4xl">✨</span>
+                    </div>
+                    <div className="p-4 sm:p-5 lg:p-6">
+                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">UIデザイン</span>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">UIデザインビジュアル基礎</h3>
+                      <p className="text-sm sm:text-base text-gray-500 mt-2">UI設計がラクになる3つの役割を知ろう</p>
                     </div>
                   </div>
                 </Link>

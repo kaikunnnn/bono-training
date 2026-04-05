@@ -14,6 +14,7 @@ import ChangingLandscape from "@/components/roadmap/detail/ChangingLandscape";
 import InterestingPerspectives from "@/components/roadmap/detail/InterestingPerspectives";
 import CurriculumSection from "@/components/roadmap/detail/CurriculumSection";
 import ClearBlock from "@/components/roadmap/detail/ClearBlock";
+import OtherRoadmapsSection from "@/components/roadmap/detail/OtherRoadmapsSection";
 import DottedDivider from "@/components/common/DottedDivider";
 import { useRoadmap } from "@/hooks/useRoadmaps";
 
@@ -85,24 +86,21 @@ export default function RoadmapDetail() {
         {/* ヒーローセクション */}
         <RoadmapHero
           title={roadmap.title}
+          shortTitle={roadmap.shortTitle}
           tagline={roadmap.tagline || roadmap.description}
           stepCount={stepCount}
           estimatedDuration={estimatedDuration}
           gradientPreset={gradientPreset}
+          heroImageUrl={roadmap.heroImageUrl}
           thumbnailUrl={roadmap.thumbnailUrl}
         />
 
-        {/* 道のりセクション */}
+        {/* ロードマップの流れセクション */}
         {hasCurriculum && (
           <RoadmapPathway
             description={roadmap.description}
             steps={roadmap.steps!}
           />
-        )}
-
-        {/* セクションナビゲーション */}
-        {sectionNavItems.length > 0 && (
-          <SectionNav items={sectionNavItems} />
         )}
 
         {/* 変わる景色セクション */}
@@ -131,11 +129,21 @@ export default function RoadmapDetail() {
           </>
         )}
 
+        {/* セクションナビゲーション */}
+        {sectionNavItems.length > 0 && (
+          <SectionNav items={sectionNavItems} />
+        )}
+
         {/* カリキュラムセクション */}
         {hasCurriculum && <CurriculumSection steps={roadmap.steps!} />}
 
         {/* CTAブロック */}
-        <ClearBlock roadmapTitle={roadmap.title} />
+        <ClearBlock roadmapTitle={roadmap.title} roadmapSlug={slug} />
+
+        {/* 他のロードマップセクション（UIUX転職以外のみ） */}
+        {slug !== "uiux-career-change" && (
+          <OtherRoadmapsSection currentRoadmapSlug={slug} />
+        )}
       </div>
     </Layout>
   );

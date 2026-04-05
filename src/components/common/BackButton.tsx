@@ -14,8 +14,7 @@ interface BackButtonProps {
 /**
  * 戻るボタン（白背景＋グレー枠＋影）
  *
- * - 可能なら history.back()
- * - 外部から直接来た場合などは href へ遷移
+ * - ブラウザの履歴で前の画面に戻る
  */
 export function BackButton({
   label = "戻る",
@@ -25,15 +24,7 @@ export function BackButton({
   const navigate = useNavigate();
 
   const handleBack = () => {
-    const referrer = document.referrer;
-    const isInternalReferrer =
-      referrer && new URL(referrer).origin === window.location.origin;
-
-    if (isInternalReferrer) {
-      navigate(-1);
-    } else {
-      navigate(href);
-    }
+    navigate(-1);
   };
 
   return (

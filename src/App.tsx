@@ -40,7 +40,6 @@ import DevRoute from "./pages/dev";
 import DevHome from "./pages/dev/DevHome";
 import TopPageNew from "./pages/dev/TopPageNew";
 import WebflowEmbed from "./pages/dev/WebflowEmbed";
-import RoadmapCardPreview from "./pages/dev/RoadmapCardPreview";
 import RoadmapCardV2Preview from "./pages/dev/RoadmapCardV2Preview";
 import SectionHeadingPreview from "./pages/dev/SectionHeadingPreview";
 import CategoryNavPreview from "./pages/dev/CategoryNavPreview";
@@ -52,13 +51,15 @@ import RoadmapHeroPreview from "./pages/dev/RoadmapHeroPreview";
 import RoadmapDetailPreview from "./pages/dev/RoadmapDetailPreview";
 import RoadmapPreview from "./pages/dev/RoadmapPreview";
 import RoadmapGradientPreview from "./pages/dev/RoadmapGradientPreview";
-import RoadmapCardWavePreview from "./pages/dev/RoadmapCardWavePreview";
 import RoadmapGradientCompare from "./pages/dev/RoadmapGradientCompare";
 import HeroWaveCompare from "./pages/dev/HeroWaveCompare";
+import TrainingCardPreview from "./pages/dev/TrainingCardPreview";
 import ClearBlockPreview from "./pages/dev/ClearBlockPreview";
 import TopHeroSectionPreview from "./pages/dev/TopHeroSectionPreview";
 import GoalSectionPreview from "./pages/dev/GoalSectionPreview";
 import TopPagePreview from "./pages/dev/TopPagePreview";
+import ListingLayoutPreview from "./pages/dev/ListingLayoutPreview";
+import RoadmapPathwayPatterns from "./pages/dev/RoadmapPathwayPatterns";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
@@ -169,9 +170,8 @@ const AppContent = () => {
         <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
         <Route path="/dev/top-new" element={<DevRoute><TopPageNew /></DevRoute>} />
         <Route path="/dev/webflow-embed" element={<DevRoute><WebflowEmbed /></DevRoute>} />
-        <Route path="/dev/roadmap-card" element={<DevRoute><RoadmapCardPreview /></DevRoute>} />
         <Route path="/dev/roadmap-card-v2" element={<DevRoute><RoadmapCardV2Preview /></DevRoute>} />
-        <Route path="/dev/roadmap-card-wave" element={<DevRoute><RoadmapCardWavePreview /></DevRoute>} />
+        <Route path="/dev/training-card" element={<DevRoute><TrainingCardPreview /></DevRoute>} />
         <Route path="/dev/section-heading" element={<DevRoute><SectionHeadingPreview /></DevRoute>} />
         <Route path="/dev/category-nav" element={<DevRoute><CategoryNavPreview /></DevRoute>} />
         <Route path="/dev/category-nav/:category" element={<DevRoute><CategoryNavPreview /></DevRoute>} />
@@ -190,6 +190,8 @@ const AppContent = () => {
         <Route path="/dev/top-hero" element={<DevRoute><TopHeroSectionPreview /></DevRoute>} />
         <Route path="/dev/goal-section" element={<DevRoute><GoalSectionPreview /></DevRoute>} />
         <Route path="/dev/top-page-preview" element={<DevRoute><TopPagePreview /></DevRoute>} />
+        <Route path="/dev/listing-layout" element={<DevRoute><ListingLayoutPreview /></DevRoute>} />
+        <Route path="/dev/roadmap-pathway-patterns" element={<DevRoute><RoadmapPathwayPatterns /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
         <Route path="/dev/lesson-idea-3" element={<DevRoute><LessonIdea3 /></DevRoute>} />

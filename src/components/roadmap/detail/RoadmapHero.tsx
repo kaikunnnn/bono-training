@@ -20,6 +20,8 @@ const MOBILE_BREAKPOINT = 640;
 interface RoadmapHeroProps {
   /** ロードマップタイトル */
   title: string;
+  /** 短縮タイトル（バッジ表示用） */
+  shortTitle?: string;
   /** キャッチコピー */
   tagline?: string;
   /** ステップ数 */
@@ -28,20 +30,22 @@ interface RoadmapHeroProps {
   estimatedDuration: string;
   /** グラデーションプリセット */
   gradientPreset?: GradientPreset;
-  /** サムネイル画像URL */
+  /** ヒーロー用画像URL（優先） */
+  heroImageUrl?: string;
+  /** サムネイル画像URL（フォールバック） */
   thumbnailUrl?: string;
 }
 
-const PrimaryCTAButton: React.FC<{ to: string; children: React.ReactNode }> = ({
-  to,
+const PrimaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
+  href,
   children,
 }) => (
-  <Link
-    to={to}
-    className="w-full sm:flex-1 flex items-center justify-center h-12 bg-[#081c17] border border-white/[0.02] rounded-[14px] text-[14px] font-bold text-white tracking-[0.35px] shadow-[0_4px_4px_rgba(0,0,0,0.25)] hover:opacity-90 transition-opacity"
+  <a
+    href={href}
+    className="w-full sm:flex-1 flex items-center justify-center h-12 bg-white border border-white/90 rounded-[14px] text-[14px] font-bold text-[#081c17] tracking-[0.35px] shadow-[0_4px_8px_rgba(0,0,0,0.25)] hover:bg-gray-50 transition-colors"
   >
     {children}
-  </Link>
+  </a>
 );
 
 const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
@@ -61,10 +65,12 @@ const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> 
 
 export default function RoadmapHero({
   title,
+  shortTitle,
   tagline,
   stepCount,
   estimatedDuration,
   gradientPreset,
+  heroImageUrl,
   thumbnailUrl,
 }: RoadmapHeroProps) {
   const gradientStyle = getGradientStyle(gradientPreset);
@@ -93,7 +99,9 @@ export default function RoadmapHero({
   };
 
   return (
-    <section className="relative pt-4 px-4">
+    // モバイルでは左右の余白を少しだけ（px-1）、上も0にして高さを稼ぐ
+    // タブレット以上では従来どおり pt-4 px-4
+    <section className="relative pt-0 px-1 sm:pt-4 sm:px-4">
       {/* 背景エリア - 有機的な形状（SVGマスク）、コンテンツに合わせて高さ可変 */}
       <motion.div
         className="relative"
@@ -161,7 +169,7 @@ export default function RoadmapHero({
         >
           {/* バッジ */}
           <div className="border border-white rounded-full px-4 py-1.5">
-            <span className="text-[13px] text-white">ロードマップ</span>
+            <span className="text-[13px] text-white">{shortTitle || 'ロードマップ'}</span>
           </div>
 
           {/* タイトル（|マーカーで改行） */}
@@ -220,7 +228,7 @@ export default function RoadmapHero({
 
               {/* CTAボタン */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <PrimaryCTAButton to="/subscription">
+                <PrimaryCTAButton href="https://www.bo-no.design/plan">
                   メンバーになってはじめる
                 </PrimaryCTAButton>
                 <SecondaryCTAButton href="#curriculum">
@@ -231,18 +239,18 @@ export default function RoadmapHero({
           </div>
         </motion.div>
 
-        {/* 下部画像セクション - アスペクト比固定 + 高さ上限 + センター揃え + 下端に配置 */}
-        {thumbnailUrl && (
+        {/* 下部画像セクション - heroImageが設定されている場合のみ表示 */}
+        {heroImageUrl && (
           <motion.div
-            className="relative mx-auto w-[calc(100%-2rem)] md:w-[calc(100%-4rem)] max-w-[1049px] aspect-[1049/308] max-h-[308px] overflow-hidden"
+            className="relative mx-auto max-w-[1200px] aspect-[5/1] max-h-[240px] overflow-hidden"
             initial={{ opacity: 0, y: 30, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           >
             <img
-              src={thumbnailUrl}
+              src={heroImageUrl}
               alt={stripLineBreakMarker(title)}
-              className="w-full h-full object-cover opacity-90"
+              className="w-full h-full object-cover object-center opacity-90"
             />
           </motion.div>
         )}

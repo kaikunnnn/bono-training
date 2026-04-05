@@ -46,34 +46,36 @@ interface GradientDef {
 
 const GRADIENTS: Record<GradientPreset, GradientDef> = {
   'career-change': {
-    from: '#4E2D4D',
-    mid: '#292B41',
-    to: '#0E0E16',
+    from: '#482B4B',
+    mid: '#2A2C42',
+    to: '#141520',
+    // 3点グラデーション + 12%黒オーバーレイ
+    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #482B4B 0%, #2A2C42 27%, #141520 100%)',
   },
   'ui-beginner': {
     from: '#684B4B',
-    mid: '#231C26',
-    to: '#F59EAF',
-    // 3点グラデーション: 0% #684B4B, 81% #231C26, 100% #F59EAF
+    to: '#231C26',
+    // 2点グラデーション + 12%黒オーバーレイ
     customGradient:
-      'linear-gradient(0deg, rgba(104, 75, 75, 1) 0%, rgba(35, 28, 38, 1) 81%, rgba(245, 158, 175, 1) 100%)',
+      'linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, rgba(104, 75, 75, 1) 0%, rgba(35, 28, 38, 1) 100%)',
   },
   'ui-visual': {
     from: '#304750',
     to: '#5D5B65',
-    overlay: 'rgba(0, 0, 0, 0.2)',
+    // 既存0.2 + 追加0.12 = 0.32
+    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.32), rgba(0,0,0,0.32)), linear-gradient(0deg, #304750 0%, #5D5B65 100%)',
   },
   'info-arch': {
-    from: '#8D7746',
-    to: '#214234',
-    overlay: 'rgba(0, 0, 0, 0.3)',
+    from: '#214234',
+    to: '#8D7746',
+    // 既存0.3 + 追加0.12 = 0.42
+    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.42), rgba(0,0,0,0.42)), linear-gradient(0deg, #214234 0%, #8D7746 100%)',
   },
   'ux-design': {
-    from: '#2F3F6D',
-    to: '#F1BAC1',
-    overlay: 'rgba(0, 0, 0, 0.4)',
-    // 4点グラデーション: 0% #2F3F6D, 46% #764749, 88% #E27979, 100% #F1BAC1
-    customGradient: 'linear-gradient(0deg, #2F3F6D 0%, #764749 46%, #E27979 88%, #F1BAC1 100%)',
+    from: '#F1BAC1',
+    to: '#2F3F6D',
+    // 既存0.4 + 追加0.12 = 0.52、4点グラデーション（反転）
+    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.52), rgba(0,0,0,0.52)), linear-gradient(0deg, #F1BAC1 0%, #E27979 12%, #764749 54%, #2F3F6D 100%)',
   },
 };
 
@@ -120,24 +122,27 @@ export interface RoadmapCardV2Props {
 
 /**
  * グラデーションCSSを生成
- * 方向: 下から上 (0deg)
+ * @param gradient グラデーション定義
+ * @param direction 方向 - 'vertical'(0deg: 下→上) または 'horizontal'(270deg: 右→左)
  */
-function getGradientCSS(gradient: GradientDef): string {
+function getGradientCSS(gradient: GradientDef, direction: 'vertical' | 'horizontal' = 'vertical'): string {
   const { from, to, mid, overlay, customGradient } = gradient;
+  const deg = direction === 'horizontal' ? '270deg' : '0deg';
 
-  // カスタムグラデーションがある場合はそれを使用
+  // カスタムグラデーションがある場合は方向を差し替えて使用
   let gradientPart: string;
   if (customGradient) {
-    gradientPart = customGradient;
+    // customGradientの0degを指定方向に置換
+    gradientPart = customGradient.replace(/0deg/g, deg);
   } else if (mid) {
     // 3点グラデーション (career-change用)
-    gradientPart = `linear-gradient(0deg, ${from} 0%, ${mid} 19%, ${to} 100%)`;
+    gradientPart = `linear-gradient(${deg}, ${from} 0%, ${mid} 19%, ${to} 100%)`;
   } else {
-    gradientPart = `linear-gradient(0deg, ${from} 0%, ${to} 100%)`;
+    gradientPart = `linear-gradient(${deg}, ${from} 0%, ${to} 100%)`;
   }
 
   if (overlay) {
-    return `linear-gradient(0deg, ${overlay} 0%, ${overlay} 100%), ${gradientPart}`;
+    return `linear-gradient(${deg}, ${overlay} 0%, ${overlay} 100%), ${gradientPart}`;
   }
   return gradientPart;
 }
@@ -280,7 +285,8 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
 }) => {
   // フォールバック: 未知のプリセットの場合はcareer-changeを使用
   const gradient = customGradient || GRADIENTS[gradientPreset] || GRADIENTS['career-change'];
-  const gradientCSS = getGradientCSS(gradient);
+  // 縦型: 下→上、横型: 左→右
+  const gradientCSS = getGradientCSS(gradient, orientation === 'horizontal' ? 'horizontal' : 'vertical');
   const linkPath = `${basePath}${slug}`;
   const textVariant = variant === 'gradient' ? 'light' : 'dark';
   const isWaveStyle = thumbnailStyle === 'wave';
@@ -297,7 +303,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
             'group-hover:shadow-lg group-hover:scale-[1.02]',
             // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
             isWaveStyle
-              ? 'rounded-[24px] border-4 border-white'
+              ? 'rounded-[32px] border-4 border-white'
               : 'rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] p-1.5 sm:p-2 lg:p-2.5',
             variant === 'white' ? 'bg-white' : ''
           )}
@@ -307,7 +313,8 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
           {isWaveStyle ? (
             // Wave スタイル: Figma仕様 - 内側コンテナは padding 16px、角丸はマスク形状に任せる
             // アスペクト比 800/433 ≈ 1.85:1
-            <div className="p-4 overflow-hidden">
+            // drop-shadowは親要素に適用してマスク形状に沿ったシャドウを実現
+            <div className="p-4 overflow-hidden roadmap-card-wave-shadow">
               <div
                 className="relative w-full aspect-[800/433] overflow-hidden roadmap-card-wave-mask"
                 style={{ background: gradientCSS }}
@@ -398,7 +405,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
           'group-hover:shadow-lg group-hover:scale-[1.01]',
           // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
           isWaveStyle
-            ? 'rounded-[24px] border-4 border-white'
+            ? 'rounded-[32px] border-4 border-white'
             : 'rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] p-1.5 sm:p-2 lg:p-2.5',
           variant === 'white' ? 'bg-white' : ''
         )}
@@ -408,7 +415,8 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
         {isWaveStyle ? (
           // Wave スタイル: Figma仕様 - 内側コンテナは角丸16px + padding 16px
           // 横型: デスクトップでは固定幅、モバイルではアスペクト比維持
-          <div className="w-full lg:flex-shrink-0 lg:w-[320px] xl:w-[435px] p-4 lg:pr-0 overflow-hidden">
+          // drop-shadowは親要素に適用してマスク形状に沿ったシャドウを実現
+          <div className="w-full lg:flex-shrink-0 lg:w-[320px] xl:w-[435px] p-4 lg:pr-0 overflow-hidden roadmap-card-wave-shadow">
             <div
               className="relative w-full aspect-[800/433] lg:h-[300px] lg:aspect-auto overflow-hidden rounded-[16px] roadmap-card-wave-mask"
               style={{ background: gradientCSS }}

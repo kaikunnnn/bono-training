@@ -20,7 +20,9 @@ const CONTENTS_PROJECTION = `contents[]{
     "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
     "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
     gradientPreset,
-    estimatedDuration
+    estimatedDuration,
+    shortTitle,
+    "stepCount": count(steps)
   },
   // contentItem型（lessonへのネスト参照）の場合
   _type == "contentItem" && itemType == "lesson" => lesson->{
@@ -43,7 +45,7 @@ const CONTENTS_PROJECTION = `contents[]{
     gradientPreset,
     estimatedDuration
   },
-  // contentItem型（外部リンク）の場合
+  // contentItem型（外部リンク - 新型）の場合
   _type == "contentItem" && itemType == "externalLink" => {
     "_key": _key,
     "_type": "externalLink",
@@ -51,6 +53,15 @@ const CONTENTS_PROJECTION = `contents[]{
     "title": externalTitle,
     "description": externalDescription,
     "thumbnailUrl": externalThumbnailUrl
+  },
+  // contentItem型（外部リンク - 旧型: itemType="link"）の場合
+  _type == "contentItem" && itemType == "link" => {
+    "_key": _key,
+    "_type": "externalLink",
+    "url": linkUrl,
+    "title": linkLabel,
+    "description": null,
+    "thumbnailUrl": null
   },
   // 外部リンクの場合（直接型）
   _type == "externalLink" => {
@@ -129,9 +140,9 @@ async function fetchRoadmapBySlug(slug: string): Promise<SanityRoadmapDetail | n
     description,
     tagline,
     "thumbnailUrl": thumbnail.asset->url,
+    "heroImageUrl": heroImage.asset->url,
     gradientPreset,
     estimatedDuration,
-    howToNavigate,
     changingLandscape,
     interestingPerspectives,
     order,
@@ -179,9 +190,9 @@ async function fetchAllRoadmapsWithDetails(): Promise<SanityRoadmapDetail[]> {
     description,
     tagline,
     "thumbnailUrl": thumbnail.asset->url,
+    "heroImageUrl": heroImage.asset->url,
     gradientPreset,
     estimatedDuration,
-    howToNavigate,
     changingLandscape,
     interestingPerspectives,
     order,

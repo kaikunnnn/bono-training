@@ -15,22 +15,22 @@ export type GradientPreset =
   | "info-arch"      // 情報設計基礎
   | "ux-design";     // UXデザイン基礎
 
-/** グラデーションプリセットのCSS値（RoadmapCardV2と統一、方向: 下から上 0deg） */
+/** グラデーションプリセットのCSS値（RoadmapCardV2と統一、方向: 下から上 0deg、+12%黒オーバーレイ） */
 export const GRADIENT_PRESETS: Record<GradientPreset, string> = {
-  "career-change": "linear-gradient(0deg, #4E2D4D 0%, #292B41 19%, #0E0E16 100%)",
-  "ui-beginner": "linear-gradient(0deg, #684B4B 0%, #231C26 81%, #F59EAF 100%)",
-  "ui-visual": "linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2)), linear-gradient(0deg, #304750 0%, #5D5B65 100%)",
-  "info-arch": "linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3)), linear-gradient(0deg, #8D7746 0%, #214234 100%)",
-  "ux-design": "linear-gradient(0deg, rgba(0,0,0,0.4), rgba(0,0,0,0.4)), linear-gradient(0deg, #2F3F6D 0%, #764749 46%, #E27979 88%, #F1BAC1 100%)",
+  "career-change": "linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #482B4B 0%, #2A2C42 27%, #141520 100%)",
+  "ui-beginner": "linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #684B4B 0%, #231C26 81%, #C9A0A6 100%)",
+  "ui-visual": "linear-gradient(0deg, rgba(0,0,0,0.32), rgba(0,0,0,0.32)), linear-gradient(0deg, #304750 0%, #5D5B65 100%)",
+  "info-arch": "linear-gradient(0deg, rgba(0,0,0,0.42), rgba(0,0,0,0.42)), linear-gradient(0deg, #214234 0%, #8D7746 100%)",
+  "ux-design": "linear-gradient(0deg, rgba(0,0,0,0.52), rgba(0,0,0,0.52)), linear-gradient(0deg, #F1BAC1 0%, #E27979 12%, #764749 54%, #2F3F6D 100%)",
 };
 
 /** グラデーションプリセットのTailwindクラス（RoadmapCardV2と統一） */
 export const GRADIENT_CLASSES: Record<GradientPreset, string> = {
-  "career-change": "from-[#4E2D4D] via-[#292B41] to-[#0E0E16]",
-  "ui-beginner": "from-[#684B4B] via-[#231C26] to-[#F59EAF]",
+  "career-change": "from-[#482B4B] via-[#2A2C42] to-[#141520]",
+  "ui-beginner": "from-[#684B4B] via-[#231C26] to-[#C9A0A6]",
   "ui-visual": "from-[#304750] to-[#5D5B65]",
-  "info-arch": "from-[#8D7746] to-[#214234]",
-  "ux-design": "from-[#2F3F6D] to-[#F1BAC1]",
+  "info-arch": "from-[#214234] to-[#8D7746]",
+  "ux-design": "from-[#F1BAC1] to-[#2F3F6D]",
 };
 
 // ============================================
@@ -75,6 +75,8 @@ export interface SanityReferenceContent {
   estimatedDuration?: string;
   /** ロードマップの場合のステップ数 */
   stepCount?: number;
+  /** ロードマップの場合の短縮タイトル */
+  shortTitle?: string;
 }
 
 /** 外部リンクコンテンツ */
@@ -132,9 +134,10 @@ export interface SanityRoadmapDetail {
   description: string;
   tagline?: string;
   thumbnailUrl?: string;
+  /** 詳細ページヒーロー用画像（優先）、未設定の場合はthumbnailUrlを使用 */
+  heroImageUrl?: string;
   gradientPreset?: GradientPreset;
   estimatedDuration: string;
-  howToNavigate?: string[];
   changingLandscape?: SanityChangingLandscape;
   interestingPerspectives?: SanityInterestingPerspectives;
   steps?: SanityRoadmapStep[];

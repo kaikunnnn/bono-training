@@ -53,10 +53,10 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
           {data.items.map((item, index) => (
             <div
               key={index}
-              className="bg-white border-l-4 border-[#d3d3d3] flex items-center justify-between pl-9 pr-8 py-4 rounded-br-lg rounded-tr-lg"
+              className="group bg-white hover:bg-gray-50 border-l-4 border-[#d3d3d3] flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 pl-6 md:pl-9 pr-6 md:pr-8 py-6 md:py-4 rounded-br-lg rounded-tr-lg transition-colors duration-200 cursor-pointer"
             >
               {/* 左側: アイコン + 課題テキスト */}
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-3 shrink-0 w-full md:w-[425px]">
                 {/* アイコン */}
                 <div className="flex items-center justify-center w-6 h-6 shrink-0">
                   <MessageQuestion
@@ -67,19 +67,19 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
                 </div>
 
                 {/* タイトル（悩み・課題） */}
-                <p className="text-[16px] font-bold text-[#1a1a1a] leading-[25.2px] w-[425px]">
+                <p className="text-[16px] font-bold text-[#1a1a1a] leading-[25.2px]">
                   {item.title}
                 </p>
               </div>
 
-              {/* 中央: 矢印アイコン */}
-              <div className="shrink-0 w-8 h-8 flex items-center justify-center">
+              {/* 中央: 矢印アイコン（デスクトップのみ） */}
+              <div className="hidden md:flex shrink-0 w-8 h-8 items-center justify-center transition-transform duration-500 group-hover:rotate-[360deg]">
                 <ArrowRight2 size={32} color="#939993" variant="Linear" />
               </div>
 
               {/* 右側: 解決テキスト */}
               {item.description && (
-                <p className="text-[16px] text-[#0f172a] leading-[25.2px] w-[427px]">
+                <p className="text-[16px] text-[#0f172a] leading-[25.2px] w-full md:w-[427px]">
                   {item.description}
                 </p>
               )}
