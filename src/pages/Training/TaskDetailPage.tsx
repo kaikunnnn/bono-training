@@ -3,19 +3,18 @@ import React from 'react';
 import { useParams, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import TrainingLayout from '@/components/training/TrainingLayout';
+import Layout from '@/components/layout/Layout';
 import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
-import LessonHeader from '@/components/training/LessonHeader';
-import MarkdownRenderer from '@/components/training/MarkdownRenderer';
 import ErrorDisplay from '@/components/common/ErrorBoundary';
 import { useTaskDetail } from '@/hooks/useTrainingCache';
 import { TaskFrontmatter } from '@/types/training';
-import { Skeleton } from '@/components/ui/skeleton';
-import { parseContentSections, extractSubSections, type ContentSectionData, type StructuredSection } from '@/utils/parseContentSections';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { parseContentSections, type ContentSectionData, type StructuredSection } from '@/utils/parseContentSections';
 import ContentSection from '@/components/training/ContentSection';
 import DesignSolutionSection from '@/components/training/DesignSolutionSection';
 import NavigationHeader from '@/components/training/NavigationHeader';
+import { BackButton } from '@/components/common/BackButton';
 
 /**
  * 安全にbooleanを変換するヘルパー関数
@@ -93,22 +92,11 @@ const TaskDetailPage = () => {
 
   if (isLoading) {
     return (
-      <TrainingLayout>
-        <div className="container max-w-4xl mx-auto py-8">
-          <div className="space-y-8">
-            <div className="space-y-4">
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-4 w-1/2" />
-            </div>
-            <Skeleton className="h-64 w-full rounded-lg" />
-            <div className="space-y-4">
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
-            </div>
-          </div>
+      <Layout>
+        <div className="min-h-screen flex items-center justify-center">
+          <LoadingSpinner size="lg" />
         </div>
-      </TrainingLayout>
+      </Layout>
     );
   }
 
@@ -133,14 +121,16 @@ const TaskDetailPage = () => {
     });
 
     return (
-      <TrainingLayout>
+      <Layout>
         <div className="container max-w-4xl mx-auto py-8">
           <div className="box-border content-stretch flex flex-col items-start justify-start p-0 relative size-full">
-            {/* Navigation Section */}
-            <NavigationHeader 
-              trainingSlug={trainingSlug} 
-              orderIndex={1} 
-            />
+            {/* 戻るボタン */}
+            <div className="pt-4 px-4 sm:px-6 w-full">
+              <BackButton href={`/training/${trainingSlug}`} />
+            </div>
+
+            {/* Navigation Section - TRAINING番号表示 */}
+            <NavigationHeader orderIndex={1} />
 
             {/* Error Content */}
             <div className="relative rounded-[66px] shrink-0 w-full">
@@ -238,20 +228,20 @@ const TaskDetailPage = () => {
             </div>
           </div>
         </div>
-      </TrainingLayout>
+      </Layout>
     );
   }
 
   if (!task) {
     return (
-      <TrainingLayout>
+      <Layout>
         <div className="container py-8">
           <ErrorDisplay 
             error={new Error('タスクが見つかりませんでした')}
             onReset={() => navigate(`/training/${trainingSlug}`)}
           />
         </div>
-      </TrainingLayout>
+      </Layout>
     );
   }
 
@@ -343,13 +333,17 @@ const TaskDetailPage = () => {
   }
 
   return (
-    <TrainingLayout>
+    <Layout>
       <div className="box-border content-stretch flex flex-col items-start justify-start p-0 relative size-full">
-        {/* Navigation Section */}
-        <NavigationHeader 
-          trainingSlug={trainingSlug} 
-          orderIndex={frontmatter.order_index} 
-        />
+        {/* 戻るボタン - モバイルヘッダーとの間隔を確保 */}
+        <div className="pt-4 px-4 sm:px-6 w-full">
+          <BackButton href={`/training/${trainingSlug}`} />
+        </div>
+
+        {/* Navigation Section - TRAINING番号表示 */}
+        <div className="w-full">
+          <NavigationHeader orderIndex={frontmatter.order_index} />
+        </div>
         
         {/* Main Content Section */}
         <div className="relative rounded-[66px] shrink-0 w-full">
@@ -466,7 +460,7 @@ const TaskDetailPage = () => {
           </div>
         </div>
       </div>
-    </TrainingLayout>
+    </Layout>
   );
 };
 

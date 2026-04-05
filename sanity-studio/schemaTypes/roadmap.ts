@@ -63,13 +63,23 @@ export default defineType({
     // ============================================
     defineField({
       name: "thumbnail",
-      title: "サムネイル画像",
+      title: "サムネイル画像（一覧用）",
       type: "image",
       group: "basic",
       options: {
         hotspot: true,
       },
-      description: "カード・詳細ページのアイキャッチに使用",
+      description: "一覧ページのカード表示で使用される画像",
+    }),
+    defineField({
+      name: "heroImage",
+      title: "ヒーロー画像（詳細ページ用）",
+      type: "image",
+      group: "basic",
+      options: {
+        hotspot: true,
+      },
+      description: "詳細ページのヒーローセクションで表示される画像。未設定の場合はサムネイルが使用されます。",
     }),
     defineField({
       name: "gradientPreset",
@@ -78,17 +88,15 @@ export default defineType({
       group: "basic",
       options: {
         list: [
-          { title: "Galaxy（紫系 - 転職用）", value: "galaxy" },
-          { title: "Infoarch（グレー/茶系 - 情報設計用）", value: "infoarch" },
-          { title: "Sunset（オレンジ/ピンク系 - UXデザイン用）", value: "sunset" },
-          { title: "Ocean（ブルー系 - Figma基礎用）", value: "ocean" },
-          { title: "Teal（ティール系）", value: "teal" },
-          { title: "Rose（ローズ系 - その他）", value: "rose" },
-          { title: "UIビジュアル（ダークグレー系）", value: "uivisual" },
+          { title: "転職ロードマップ", value: "career-change" },
+          { title: "UIデザイン入門", value: "ui-beginner" },
+          { title: "UIビジュアル入門", value: "ui-visual" },
+          { title: "情報設計基礎", value: "info-arch" },
+          { title: "UXデザイン基礎", value: "ux-design" },
         ],
         layout: "radio",
       },
-      initialValue: "galaxy",
+      initialValue: "career-change",
       description: "カード背景のグラデーション色（プリセットはコンポーネントで管理）",
     }),
 
@@ -231,7 +239,12 @@ export default defineType({
               title: "ステップタイトル",
               type: "string",
               description: "例: UIづくりの感覚を真似して覚える",
-              validation: (Rule) => Rule.required(),
+            }),
+            // 後方互換性: 旧フィールド名（非表示）
+            defineField({
+              name: "stepTitle",
+              type: "string",
+              hidden: true,
             }),
             defineField({
               name: "goals",
@@ -239,6 +252,13 @@ export default defineType({
               type: "array",
               of: [{ type: "string" }],
               description: "このステップで達成する目標（箇条書き）",
+            }),
+            // 後方互換性: 旧フィールド名（非表示）
+            defineField({
+              name: "stepGoals",
+              type: "array",
+              of: [{ type: "string" }],
+              hidden: true,
             }),
             defineField({
               name: "sections",
@@ -255,7 +275,12 @@ export default defineType({
                       title: "セクションタイトル",
                       type: "string",
                       description: "例: デザインツールの使い方を習得しよう",
-                      validation: (Rule) => Rule.required(),
+                    }),
+                    // 後方互換性: 旧フィールド名（非表示）
+                    defineField({
+                      name: "sectionTitle",
+                      type: "string",
+                      hidden: true,
                     }),
                     defineField({
                       name: "description",
@@ -263,6 +288,12 @@ export default defineType({
                       type: "text",
                       rows: 2,
                       description: "セクションの補足説明（任意）",
+                    }),
+                    // 後方互換性: 旧フィールド名（非表示）
+                    defineField({
+                      name: "sectionDescription",
+                      type: "text",
+                      hidden: true,
                     }),
                     defineField({
                       name: "contents",
@@ -320,6 +351,37 @@ export default defineType({
                             },
                           },
                         },
+                        // 後方互換性: 旧contentItem型（非表示）
+                        {
+                          type: "object",
+                          name: "contentItem",
+                          title: "コンテンツアイテム（旧型）",
+                          hidden: true,
+                          fields: [
+                            defineField({
+                              name: "itemType",
+                              type: "string",
+                            }),
+                            defineField({
+                              name: "lesson",
+                              type: "reference",
+                              to: [{ type: "lesson" }],
+                            }),
+                            defineField({
+                              name: "roadmap",
+                              type: "reference",
+                              to: [{ type: "roadmap" }],
+                            }),
+                            defineField({
+                              name: "linkLabel",
+                              type: "string",
+                            }),
+                            defineField({
+                              name: "linkUrl",
+                              type: "url",
+                            }),
+                          ],
+                        },
                       ],
                       description:
                         "レッスン・ロードマップの参照、または外部リンクを追加",
@@ -328,12 +390,13 @@ export default defineType({
                   preview: {
                     select: {
                       title: "title",
+                      sectionTitle: "sectionTitle",
                       contents: "contents",
                     },
-                    prepare({ title, contents }) {
+                    prepare({ title, sectionTitle, contents }) {
                       const contentCount = contents ? contents.length : 0;
                       return {
-                        title: title || "セクション未設定",
+                        title: title || sectionTitle || "セクション未設定",
                         subtitle: `${contentCount} コンテンツ`,
                       };
                     },
@@ -345,14 +408,17 @@ export default defineType({
           preview: {
             select: {
               title: "title",
+              stepTitle: "stepTitle",
               goals: "goals",
+              stepGoals: "stepGoals",
               sections: "sections",
             },
-            prepare({ title, goals, sections }) {
+            prepare({ title, stepTitle, goals, stepGoals, sections }) {
               const sectionCount = sections ? sections.length : 0;
-              const goalCount = goals ? goals.length : 0;
+              const finalGoals = goals || stepGoals || [];
+              const goalCount = finalGoals.length;
               return {
-                title: title || "ステップ未設定",
+                title: title || stepTitle || "ステップ未設定",
                 subtitle: `${sectionCount} セクション | ${goalCount} ゴール`,
               };
             },

@@ -1,15 +1,13 @@
 
 import React from 'react';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
+import Layout from '@/components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 
 const TrainingAbout: React.FC = () => {
   return (
-    <TrainingLayout>
-      <TrainingHeader />
+    <Layout>
       <div className="max-w-4xl mx-auto px-4 py-12">
         <div className="text-center mb-10">
           <h1 className="text-3xl font-bold mb-4">BONOトレーニングの遊び方</h1>
@@ -153,7 +151,7 @@ const TrainingAbout: React.FC = () => {
           </Link>
         </div>
       </div>
-    </TrainingLayout>
+    </Layout>
   );
 };
 

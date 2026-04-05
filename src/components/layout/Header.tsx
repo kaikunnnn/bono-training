@@ -129,7 +129,7 @@ const Header = () => {
               <ListItem href="/content" title="コンテンツライブラリ">
                 動画や記事でスキルアップ
               </ListItem>
-              <ListItem href="/roadmap" title="学習ロードマップ">
+              <ListItem href="/roadmaps" title="学習ロードマップ">
                 UIUXデザイナーへの近道
               </ListItem>
               <ListItem href="/tips" title="デザインのヒント">

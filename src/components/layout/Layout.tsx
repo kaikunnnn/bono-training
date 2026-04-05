@@ -28,6 +28,16 @@ interface LayoutProps {
 const Layout = ({ children, className, headerGradient = 'default' }: LayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isGradientVisible, setIsGradientVisible] = useState(false);
+
+  // グラデーションのフェードインアニメーション
+  useEffect(() => {
+    // マウント後に少し遅延させてからフェードイン開始
+    const timer = setTimeout(() => {
+      setIsGradientVisible(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   // スクロール検知（タブレット以下でヘッダー背景を切り替え）
   useEffect(() => {
@@ -43,22 +53,24 @@ const Layout = ({ children, className, headerGradient = 'default' }: LayoutProps
 
   return (
     <div className={cn("min-h-screen flex bg-base relative", className)}>
-      {/* ヘッダーグラデーション（fixed: スクロールしても固定表示） */}
+      {/* ヘッダーグラデーション（fixed: スクロールしても固定表示 + フェードインアニメーション） */}
       {headerGradient === 'default' && (
         <div
-          className="fixed inset-x-0 top-0 h-[148px] pointer-events-none z-0"
+          className="fixed inset-x-0 top-0 h-[148px] pointer-events-none z-0 transition-opacity duration-1000 ease-out"
           style={{
             background:
               "linear-gradient(180deg, rgb(230, 230, 239) 0%, rgb(250, 242, 237) 44.3%, rgb(249, 248, 246) 84.3%, rgba(249, 248, 246, 0) 100%)",
+            opacity: isGradientVisible ? 1 : 0,
           }}
         />
       )}
       {headerGradient === 'top' && (
         <div
-          className="fixed inset-x-0 top-0 h-[600px] sm:h-[700px] lg:h-[800px] pointer-events-none z-0"
+          className="fixed inset-x-0 top-0 h-[600px] sm:h-[700px] lg:h-[800px] pointer-events-none z-0 transition-opacity duration-1000 ease-out"
           style={{
             background:
               "linear-gradient(180deg, rgba(226, 232, 228, 0.6) 0%, rgba(242, 243, 240, 0.3) 50%, transparent 100%)",
+            opacity: isGradientVisible ? 1 : 0,
           }}
         />
       )}

@@ -79,8 +79,12 @@ export default function CurriculumSectionBlock({
                   description={refContent.description || ""}
                   thumbnailUrl={refContent.thumbnailUrl}
                   estimatedDuration={refContent.estimatedDuration || "1-2"}
+                  stepCount={refContent.stepCount}
+                  shortTitle={refContent.shortTitle}
                   gradientPreset={(refContent.gradientPreset as GradientPreset) || "teal"}
+                  variant="gradient"
                   orientation="horizontal"
+                  thumbnailStyle="wave"
                 />
               );
             }

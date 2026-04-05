@@ -23,7 +23,7 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
   return (
     <Link
       to={lessonUrl}
-      className="group flex items-center gap-6 p-6 bg-white rounded-2xl shadow-[0_1px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)] transition-all"
+      className="group flex items-center gap-6 p-6 bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-400 shadow-[0_1px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)] transition-all duration-200"
     >
       {/* アイコン画像 - 右側のみ角丸 */}
       <div className="flex-shrink-0 w-[106px] h-[160px] overflow-hidden rounded-r-lg shadow-[0_1px_24px_rgba(0,0,0,0.16)]">
@@ -64,7 +64,7 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
       {/* 矢印アイコン */}
       <div className="flex-shrink-0">
         <div className="w-8 h-8 flex items-center justify-center rounded-full border border-gray-200 group-hover:border-gray-300 group-hover:bg-gray-50 transition-colors">
-          <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600" />
+          <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform duration-500 group-hover:translate-x-0.5 group-hover:rotate-[360deg]" />
         </div>
       </div>
     </Link>

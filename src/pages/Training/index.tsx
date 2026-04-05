@@ -1,11 +1,9 @@
 import React, { useMemo } from "react";
-import TrainingLayout from "@/components/training/TrainingLayout";
+import Layout from "@/components/layout/Layout";
 import TrainingHero from "@/components/training/TrainingHero";
 import TrainingGrid from "@/components/training/TrainingGrid";
 import SectionHeading from "@/components/training/SectionHeading";
-import ContentWrapper from "@/components/training/ContentWrapper";
 import { useTrainings } from "@/hooks/useTrainingCache";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Training } from "@/types/training";
 
@@ -15,19 +13,6 @@ const CATEGORIES = {
   UX_DESIGN: "UXデザイン",
 } as const;
 
-// ローディング用スケルトンコンポーネント
-const SkeletonGrid = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {[...Array(3)].map((_, i) => (
-      <div key={i} className="space-y-4">
-        <Skeleton className="h-48 w-full rounded-lg" />
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-      </div>
-    ))}
-  </div>
-);
-
 // カテゴリセクション表示コンポーネント
 const CategorySection = ({
   category,
@@ -36,16 +21,20 @@ const CategorySection = ({
   trainings: categoryTrainings,
   linkText,
   linkHref,
+  isLoading = false,
+  skeletonCount = 3,
 }: {
   category: string;
   title: string;
   description: string;
-  trainings: Training[];
+  trainings?: Training[];
   linkText?: string;
   linkHref?: string;
+  isLoading?: boolean;
+  skeletonCount?: number;
 }) => {
-  // 空のカテゴリは非表示
-  if (!categoryTrainings || categoryTrainings.length === 0) {
+  // ローディング中でなく、かつ空のカテゴリは非表示
+  if (!isLoading && (!categoryTrainings || categoryTrainings.length === 0)) {
     return null;
   }
 
@@ -60,13 +49,18 @@ const CategorySection = ({
           linkHref={linkHref}
         />
       </div>
-      <TrainingGrid trainings={categoryTrainings} />
+      <TrainingGrid
+        trainings={categoryTrainings}
+        isLoading={isLoading}
+        skeletonCount={skeletonCount}
+      />
     </div>
   );
 };
 
 /**
  * トレーニングホームページ（React Query対応版）
+ * 段階的読み込み: Hero・セクション見出しは即表示、コンテンツはスケルトン→実データ
  */
 const TrainingHome = () => {
   const { data: trainings, isLoading, error } = useTrainings();
@@ -86,67 +80,50 @@ const TrainingHome = () => {
   }, [trainings]);
 
   return (
-    <TrainingLayout>
-      <ContentWrapper>
+    <Layout>
+      <div className="max-w-[1120px] mx-auto w-[88%] sm:w-[85%] lg:w-[88%]">
+        {/* Hero は即時表示 */}
         <TrainingHero />
 
-        <div>
-          {/* ローディング状態 */}
-          {isLoading && (
-            <div className="space-y-12">
-              <div>
-                <div className="mb-6">
-                  <Skeleton className="h-8 w-64 mb-2" />
-                  <Skeleton className="h-4 w-96" />
-                </div>
-                <SkeletonGrid />
-              </div>
-              <div>
-                <div className="mb-6">
-                  <Skeleton className="h-8 w-64 mb-2" />
-                  <Skeleton className="h-4 w-96" />
-                </div>
-                <SkeletonGrid />
-              </div>
-            </div>
-          )}
+        {/* エラー表示（エラー時のみ） */}
+        {error && (
+          <div className="text-center py-8">
+            <p className="text-red-600">
+              トレーニング一覧の読み込みでエラーが発生しました
+            </p>
+          </div>
+        )}
 
-          {/* エラー状態 */}
-          {error && (
-            <div className="text-center py-8">
-              <p className="text-red-600">
-                トレーニング一覧の読み込みでエラーが発生しました
-              </p>
-            </div>
-          )}
+        {/* カテゴリ別セクション表示 - ローディング中はスケルトン */}
+        {!error && (
+          <div>
+            <CategorySection
+              category={CATEGORIES.INFO_DESIGN}
+              title="情報設計のお題"
+              description="コースの基礎を使って、要件からユーザーに必要な情報を整理してデザインしよう！"
+              trainings={groupedTrainings[CATEGORIES.INFO_DESIGN]}
+              linkText="情報設計基礎コースを見る"
+              linkHref="https://www.bo-no.design/rdm/infomationarchitect-beginner"
+              isLoading={isLoading}
+              skeletonCount={3}
+            />
 
-          {/* カテゴリ別セクション表示 */}
-          {trainings && (
-            <div>
-              <CategorySection
-                category={CATEGORIES.INFO_DESIGN}
-                title="情報設計のお題"
-                description="コースの基礎を使って、要件からユーザーに必要な情報を整理してデザインしよう！"
-                trainings={groupedTrainings[CATEGORIES.INFO_DESIGN]}
-                linkText="情報設計基礎コースを見る"
-                linkHref="https://www.bo-no.design/rdm/infomationarchitect-beginner"
-              />
+            <Separator />
 
-              <Separator />
-
-              <CategorySection
-                category={CATEGORIES.UX_DESIGN}
-                title="UXデザイントレーニング"
-                description="コースの基礎を使って、ユーザー心理の背景に感情を把握して課題解決しよう"
-                trainings={groupedTrainings[CATEGORIES.UX_DESIGN]}
-                linkText="UXデザイン基礎コースを見る"
-                linkHref="https://www.bo-no.design/rdm/ux-beginner"
-              />
-            </div>
-          )}
-        </div>
-      </ContentWrapper>
-    </TrainingLayout>
+            <CategorySection
+              category={CATEGORIES.UX_DESIGN}
+              title="UXデザイントレーニング"
+              description="コースの基礎を使って、ユーザー心理の背景に感情を把握して課題解決しよう"
+              trainings={groupedTrainings[CATEGORIES.UX_DESIGN]}
+              linkText="UXデザイン基礎コースを見る"
+              linkHref="https://www.bo-no.design/rdm/ux-beginner"
+              isLoading={isLoading}
+              skeletonCount={2}
+            />
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 };
 

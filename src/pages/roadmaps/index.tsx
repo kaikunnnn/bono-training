@@ -6,16 +6,17 @@
  * データはSanityから取得
  */
 
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 import Layout from '@/components/layout/Layout';
 import PageHeader from '@/components/common/PageHeader';
 import CategoryNav from '@/components/common/CategoryNav';
 import SectionHeading from '@/components/common/SectionHeading';
-import RoadmapCard from '@/components/roadmap/RoadmapCard';
+import RoadmapCardV2 from '@/components/roadmap/RoadmapCardV2';
 import DottedDivider from '@/components/common/DottedDivider';
 import { useRoadmaps, type RoadmapListItem } from '@/hooks/useRoadmaps';
-import type { GradientType } from '@/components/roadmap/RoadmapCard';
+import type { GradientPreset } from '@/components/roadmap/RoadmapCardV2';
 
 // ============================================
 // カテゴリ定義
@@ -69,18 +70,21 @@ const NAV_ITEMS = [
 
 /**
  * Sanityデータからカテゴリ別にロードマップをグループ化
+ * isPublished: true のロードマップのみ表示
  */
 function groupRoadmapsByCategory(
   roadmaps: RoadmapListItem[],
   categories: CategoryDefinition[]
 ): Array<CategoryDefinition & { roadmaps: RoadmapListItem[] }> {
-  // slugでロードマップをマップ化
+  // 公開済みのロードマップのみをslugでマップ化
   const roadmapMap = new Map<string, RoadmapListItem>();
-  roadmaps.forEach((rm) => {
-    if (rm.slug?.current) {
-      roadmapMap.set(rm.slug.current, rm);
-    }
-  });
+  roadmaps
+    .filter((rm) => rm.isPublished)
+    .forEach((rm) => {
+      if (rm.slug?.current) {
+        roadmapMap.set(rm.slug.current, rm);
+      }
+    });
 
   // 各カテゴリにロードマップを割り当て
   return categories.map((cat) => ({
@@ -100,6 +104,26 @@ export default function RoadmapListPage() {
 
   // Sanityからロードマップデータを取得
   const { data: roadmaps, isLoading, error } = useRoadmaps();
+
+  // タブナビのsticky状態を検知
+  const tabSentinelRef = useRef<HTMLDivElement>(null);
+  const [isTabSticky, setIsTabSticky] = useState(false);
+
+  useEffect(() => {
+    const sentinel = tabSentinelRef.current;
+    if (!sentinel) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // sentinelがビューポートから消えたらsticky状態
+        setIsTabSticky(!entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, []);
 
   // ローディング中
   if (isLoading) {
@@ -163,41 +187,59 @@ export default function RoadmapListPage() {
             description="目標に合ったロードマップを選んで、デザインの探求をはじめよう！"
           />
 
-          {/* カテゴリナビゲーション */}
-          <div className="mb-8">
-            <CategoryNav items={NAV_ITEMS} align="center" />
+          {/* タブナビゲーションのsticky検知用sentinel */}
+          <div ref={tabSentinelRef} className="h-0" aria-hidden="true" />
+
+          {/* カテゴリナビゲーション（sticky: スクロールで固定）- 通常時は透明、sticky時は背景ブラー */}
+          <div
+            className={cn(
+              "sticky top-14 xl:top-0 z-10 mb-8 transition-all duration-200 -mx-4 sm:-mx-6 px-2 sm:px-4 md:px-6",
+              isTabSticky
+                ? "backdrop-blur-sm bg-white/50"
+                : "bg-transparent"
+            )}
+          >
+            <CategoryNav
+              items={NAV_ITEMS}
+              align="center"
+              className="border-gray-200/50"
+            />
           </div>
 
           {/* カテゴリ別セクション */}
-          <div className="flex flex-col gap-12">
+          <div className="space-y-16">
             {displayCategories.map((category, index) => (
               <React.Fragment key={category.id}>
                 {/* セクション区切り線（最初以外） */}
-                {index > 0 && <DottedDivider />}
+                {index > 0 && <DottedDivider className="mb-12" />}
 
                 {/* セクション */}
-                <section className="flex flex-col gap-8">
-                  <SectionHeading
-                    title={category.title}
-                    description={category.description}
-                    descriptionStyle="badge"
-                    showUnderline={false}
-                  />
+                <section>
+                  <div className="mb-6">
+                    <SectionHeading
+                      title={category.title}
+                      description={category.description}
+                      descriptionStyle="text"
+                      showUnderline={false}
+                    />
+                  </div>
 
                   {/* カードグリッド */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
                     {category.roadmaps.map((roadmap) => (
-                      <RoadmapCard
+                      <RoadmapCardV2
                         key={roadmap.slug.current}
                         slug={roadmap.slug.current}
                         title={roadmap.title}
                         description={roadmap.description}
                         thumbnailUrl={roadmap.thumbnailUrl}
                         stepCount={roadmap.stepCount}
-                        stepUnit="つ"
                         estimatedDuration={roadmap.estimatedDuration}
-                        durationUnit="ヶ月"
-                        gradientType={roadmap.gradientPreset as GradientType}
+                        shortTitle={roadmap.shortTitle}
+                        gradientPreset={roadmap.gradientPreset as GradientPreset}
+                        variant="gradient"
+                        orientation="vertical"
+                        thumbnailStyle="wave"
                       />
                     ))}
                   </div>

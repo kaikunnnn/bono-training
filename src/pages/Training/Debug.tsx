@@ -2,8 +2,7 @@
 import React from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
-import TrainingLayout from '@/components/training/TrainingLayout';
-import TrainingHeader from '@/components/training/TrainingHeader';
+import Layout from '@/components/layout/Layout';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -40,8 +39,7 @@ const TrainingDebug = () => {
   };
 
   return (
-    <TrainingLayout>
-      <TrainingHeader />
+    <Layout>
       <div className="container mx-auto px-6 py-8">
         <div className="max-w-4xl mx-auto space-y-6">
           <Card>
@@ -270,7 +268,7 @@ const TrainingDebug = () => {
           </Card>
         </div>
       </div>
-    </TrainingLayout>
+    </Layout>
   );
 };
 

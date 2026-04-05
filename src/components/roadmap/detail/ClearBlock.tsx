@@ -8,14 +8,18 @@ import { useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { Cup, Edit, MessageText1, ArrowRight } from "iconsax-react";
+import { Button } from "@/components/ui/button";
 
 interface ClearBlockProps {
   /** ロードマップタイトル */
   roadmapTitle?: string;
+  /** ロードマップスラッグ（転職ロードマップ判定用） */
+  roadmapSlug?: string;
 }
 
-export default function ClearBlock({ roadmapTitle }: ClearBlockProps) {
+export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProps) {
   const [celebrated, setCelebrated] = useState(false);
+  const isCareerChange = roadmapSlug === "uiux-career-change";
 
   // 紙吹雪を発射する関数
   const fireCelebration = useCallback(() => {
@@ -73,23 +77,7 @@ export default function ClearBlock({ roadmapTitle }: ClearBlockProps) {
     <section className="py-16 px-4 md:px-8">
       <div className="max-w-[1100px] mx-auto">
         {/* メインカード */}
-        <div className="relative bg-gradient-to-br from-[#f8f9f7] to-[#e8ebe6] rounded-3xl border border-[#d4dbd1] overflow-hidden">
-          {/* 装飾的な背景パターン */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-full">
-              {Array.from({ length: 20 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute w-8 h-8 rounded-full bg-[#52674e]"
-                  style={{
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    transform: `scale(${0.5 + Math.random() * 1.5})`,
-                  }}
-                />
-              ))}
-            </div>
-          </div>
+        <div className="relative bg-white rounded-3xl border border-[#E8ECE8] overflow-hidden">
 
           <div className="relative px-8 py-12 md:px-16 md:py-16">
             {/* ステップバッジ */}
@@ -109,43 +97,52 @@ export default function ClearBlock({ roadmapTitle }: ClearBlockProps) {
             {/* 祝福メッセージ */}
             <div className="text-center mb-8">
               <h2 className="text-[28px] md:text-[32px] font-extrabold text-[#293525] leading-[1.4] mb-4">
-                ロードマップクリア 🎉
+                {isCareerChange ? "👏 ロードマップクリア 👏" : "ロードマップクリア 🎉"}
               </h2>
-              {roadmapTitle && (
-                <p className="text-[16px] text-[#52674e] mb-2">
-                  「{roadmapTitle}」を完了しました！
-                </p>
+              {isCareerChange ? (
+                <>
+                  <h3 className="text-[24px] font-bold text-[#293525] mb-4">
+                    転職活動へ
+                  </h3>
+                  <p className="text-[18px] text-[#293525]/70 leading-[1.8] max-w-[600px] mx-auto">
+                    クリアおめでとうございます！
+                    <br />
+                    学びの過程と成果をポートフォリオにまとめて面接に挑みましょう
+                  </p>
+                </>
+              ) : (
+                <>
+                  {roadmapTitle && (
+                    <p className="text-[16px] text-[#52674e] mb-2">
+                      「{roadmapTitle}」を完了しました！
+                    </p>
+                  )}
+                  <p className="text-[18px] text-[#293525]/70 leading-[1.8] max-w-[600px] mx-auto">
+                    お疲れさまでした！
+                    <br />
+                    学びの旅を一緒に歩んでくれてありがとう。
+                    <br />
+                    お茶でも一息ついてください 🍵
+                  </p>
+                </>
               )}
-              <p className="text-[18px] text-[#293525]/70 leading-[1.8] max-w-[600px] mx-auto">
-                お疲れさまでした！
-                <br />
-                学びの旅を一緒に歩んでくれてありがとう。
-                <br />
-                お茶でも一息ついてください 🍵
-              </p>
             </div>
 
             {/* お祝いボタン */}
             <div className="flex justify-center mb-12">
-              <button
+              <Button
                 onClick={fireCelebration}
                 disabled={celebrated}
-                className={`
-                  flex items-center gap-3 px-8 py-4 rounded-2xl font-bold text-[16px] transition-all
-                  ${
-                    celebrated
-                      ? "bg-[#52674e]/10 text-[#52674e] cursor-default"
-                      : "bg-gradient-to-r from-[#667eea] to-[#764ba2] text-white shadow-[0_4px_16px_rgba(102,126,234,0.4)] hover:shadow-[0_6px_24px_rgba(102,126,234,0.5)] hover:scale-[1.02] active:scale-[0.98]"
-                  }
-                `}
+                variant={celebrated ? "secondary" : "default"}
+                size="large"
+                className="gap-3"
               >
                 <Cup
-                  size={24}
+                  size={20}
                   variant={celebrated ? "Bold" : "Outline"}
-                  color={celebrated ? "#52674e" : "white"}
                 />
                 {celebrated ? "おめでとう！" : "クリアをお祝いする！"}
-              </button>
+              </Button>
             </div>
 
             {/* 次のアクション */}
@@ -154,59 +151,115 @@ export default function ClearBlock({ roadmapTitle }: ClearBlockProps) {
                 次のステップ
               </p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
-                {/* ブログにまとめる */}
-                <div className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group">
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-[#f0f4ee] rounded-xl flex items-center justify-center group-hover:bg-[#52674e]/10 transition-colors">
-                      <Edit size={24} color="#52674e" variant="Linear" />
+              {isCareerChange ? (
+                // 転職ロードマップ専用のアクション
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
+                  {/* ポートフォリオ作成 */}
+                  <Link
+                    to="/lessons/creating-portfolio"
+                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group block"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-[#f0f4ee] rounded-xl flex items-center justify-center group-hover:bg-[#52674e]/10 transition-colors">
+                        <Edit size={24} color="#52674e" variant="Linear" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                          ポートフォリオを作成しよう
+                        </h3>
+                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                          学びの過程と成果をまとめて、採用担当者にアピールしましょう。
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#52674e] group-hover:text-[#3d4d3a] transition-colors">
+                          ポートフォリオガイドを見る
+                          <ArrowRight size={16} />
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-[16px] font-bold text-[#293525] mb-2">
-                        学びをブログにまとめよう
-                      </h3>
-                      <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
-                        学んだことをアウトプットすることで、知識が定着します。
-                        自分の言葉でまとめてみましょう。
-                      </p>
-                      <a
-                        href="https://note.com/new"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 text-[14px] font-bold text-[#52674e] hover:text-[#3d4d3a] transition-colors"
-                      >
-                        noteで書く
-                        <ArrowRight size={16} />
-                      </a>
-                    </div>
-                  </div>
-                </div>
+                  </Link>
 
-                {/* フィードバックを受ける */}
-                <Link
-                  to="/feedback-apply"
-                  className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group block"
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-[#f0f0fa] rounded-xl flex items-center justify-center group-hover:bg-[#667eea]/10 transition-colors">
-                      <MessageText1 size={24} color="#667eea" variant="Linear" />
+                  {/* 転職ガイド */}
+                  <a
+                    href="https://kaikun.bo-no.design/career/beginner"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group block"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-[#f0f0fa] rounded-xl flex items-center justify-center group-hover:bg-[#667eea]/10 transition-colors">
+                        <MessageText1 size={24} color="#667eea" variant="Linear" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                          転職ガイドを確認しよう
+                        </h3>
+                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                          面接対策や企業選びのポイントを確認して、転職活動を始めましょう。
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#667eea] group-hover:text-[#5468d4] transition-colors">
+                          転職ガイドを見る
+                          <ArrowRight size={16} />
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h3 className="text-[16px] font-bold text-[#293525] mb-2">
-                        15分フィードバックを受けよう
-                      </h3>
-                      <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
-                        ブログにまとめたら、プロのフィードバックを受けてみませんか？
-                        新しい視点が得られます。
-                      </p>
-                      <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#667eea] group-hover:text-[#5468d4] transition-colors">
-                        フィードバックに申し込む
-                        <ArrowRight size={16} />
-                      </span>
+                  </a>
+                </div>
+              ) : (
+                // 通常のロードマップのアクション
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
+                  {/* ブログにまとめる */}
+                  <div className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group">
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-[#f0f4ee] rounded-xl flex items-center justify-center group-hover:bg-[#52674e]/10 transition-colors">
+                        <Edit size={24} color="#52674e" variant="Linear" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                          学びをブログにまとめよう
+                        </h3>
+                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                          学んだことをアウトプットすることで、知識が定着します。
+                          自分の言葉でまとめてみましょう。
+                        </p>
+                        <a
+                          href="https://note.com/new"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-2 text-[14px] font-bold text-[#52674e] hover:text-[#3d4d3a] transition-colors"
+                        >
+                          noteで書く
+                          <ArrowRight size={16} />
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </Link>
-              </div>
+
+                  {/* フィードバックを受ける */}
+                  <Link
+                    to="/feedback-apply"
+                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group block"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-12 h-12 bg-[#f0f0fa] rounded-xl flex items-center justify-center group-hover:bg-[#667eea]/10 transition-colors">
+                        <MessageText1 size={24} color="#667eea" variant="Linear" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                          15分フィードバックを受けよう
+                        </h3>
+                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                          ブログにまとめたら、プロのフィードバックを受けてみませんか？
+                          新しい視点が得られます。
+                        </p>
+                        <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#667eea] group-hover:text-[#5468d4] transition-colors">
+                          フィードバックに申し込む
+                          <ArrowRight size={16} />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
             </div>
 
             {/* 励ましメッセージ */}
