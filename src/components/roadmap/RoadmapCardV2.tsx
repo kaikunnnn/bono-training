@@ -19,204 +19,23 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { stripLineBreakMarker } from '@/utils/textFormat';
+import { type GradientPreset, GRADIENTS } from '@/styles/gradients';
 import {
-  type GradientPreset,
-  type GradientDef,
-  GRADIENTS,
-} from '@/styles/gradients';
+  type RoadmapCardV2Props,
+  LabelBadge,
+  StepCountDisplay,
+  DurationDisplay,
+  Divider,
+  ArrowButton,
+  buildGradientCSS,
+  renderTitleWithLineBreaks,
+} from './card';
 
 // re-export for backward compatibility
 export type { GradientPreset };
-
-// ============================================
-// 型定義
-// ============================================
-
-export interface RoadmapCardV2Props {
-  /** ロードマップのスラッグ（URLに使用） */
-  slug: string;
-  /** ロードマップのタイトル */
-  title: string;
-  /** ロードマップの説明文 */
-  description: string;
-  /** サムネイル画像URL */
-  thumbnailUrl?: string;
-  /** 目安期間（例: "1-2", "6~"） */
-  estimatedDuration: string;
-  /** ステップ数 */
-  stepCount?: number;
-  /** 短縮タイトル（バッジ表示用、例: "UXデザイン"） */
-  shortTitle?: string;
-  /** グラデーションプリセット */
-  gradientPreset?: GradientPreset;
-  /** カスタムグラデーション（プリセットより優先） */
-  customGradient?: GradientDef;
-  /** カードのバリアント */
-  variant?: 'gradient' | 'white';
-  /** レイアウト方向 */
-  orientation?: 'vertical' | 'horizontal';
-  /** サムネイルスタイル */
-  thumbnailStyle?: 'default' | 'wave';
-  /** リンク先のベースパス */
-  basePath?: string;
-  /** ラベルテキスト（shortTitleがない場合のフォールバック） */
-  label?: string;
-  /** 追加のクラス名 */
-  className?: string;
-}
-
-// ============================================
-// ヘルパー関数
-// ============================================
-
-/**
- * グラデーションCSSを生成（方向指定付き）
- * @param gradient グラデーション定義
- * @param direction 方向 - 'vertical'(0deg: 下→上) または 'horizontal'(270deg: 右→左)
- */
-function buildGradientCSS(gradient: GradientDef, direction: 'vertical' | 'horizontal' = 'vertical'): string {
-  const { from, to, mid, overlay, customGradient } = gradient;
-  const deg = direction === 'horizontal' ? '270deg' : '0deg';
-
-  // カスタムグラデーションがある場合は方向を差し替えて使用
-  let gradientPart: string;
-  if (customGradient) {
-    // customGradientの0degを指定方向に置換
-    gradientPart = customGradient.replace(/0deg/g, deg);
-  } else if (mid) {
-    // 3点グラデーション (career-change用)
-    gradientPart = `linear-gradient(${deg}, ${from} 0%, ${mid} 19%, ${to} 100%)`;
-  } else {
-    gradientPart = `linear-gradient(${deg}, ${from} 0%, ${to} 100%)`;
-  }
-
-  if (overlay) {
-    return `linear-gradient(${deg}, ${overlay} 0%, ${overlay} 100%), ${gradientPart}`;
-  }
-  return gradientPart;
-}
-
-// ============================================
-// サブコンポーネント
-// ============================================
-
-/** ラベルバッジ */
-const LabelBadge: React.FC<{
-  children: React.ReactNode;
-  variant: 'light' | 'dark';
-}> = ({ children, variant }) => (
-  <div
-    className={cn(
-      'inline-flex items-center justify-center px-[6px] py-1 rounded-[70px] border text-xs font-normal leading-[1] whitespace-nowrap',
-      variant === 'light'
-        ? 'border-white text-white'
-        : 'border-[#293525] text-[#293525]'
-    )}
-  >
-    {children}
-  </div>
-);
-
-/** ステップ数表示 */
-const StepCountDisplay: React.FC<{
-  count: number;
-  variant: 'light' | 'dark';
-}> = ({ count, variant }) => (
-  <div
-    className={cn(
-      'flex flex-col gap-0.5',
-      variant === 'light' ? 'text-white' : 'text-[#293525]'
-    )}
-  >
-    <span
-      className={cn(
-        'text-[10px] font-bold opacity-72 leading-[1.3]',
-        variant === 'dark' ? 'text-[color:var(--text-disabled)]' : undefined
-      )}
-    >
-      ステップ
-    </span>
-    <div className="flex items-center gap-[5px]">
-      <span className="text-base font-bold leading-none">{count}</span>
-      <span className="text-[13px] font-normal leading-[1.5]">つ</span>
-    </div>
-  </div>
-);
-
-/** 期間表示 */
-const DurationDisplay: React.FC<{
-  duration: string;
-  variant: 'light' | 'dark';
-}> = ({ duration, variant }) => (
-  <div
-    className={cn(
-      'flex flex-col gap-0.5',
-      variant === 'light' ? 'text-white' : 'text-[#293525]'
-    )}
-  >
-    <span
-      className={cn(
-        'text-[10px] font-bold opacity-72 leading-[1.3]',
-        variant === 'dark' ? 'text-[color:var(--text-disabled)]' : undefined
-      )}
-    >
-      目安
-    </span>
-    <div className="flex items-center gap-[5px]">
-      <span className="text-base font-bold leading-none">{duration}</span>
-      <span className="text-[13px] font-normal leading-[1.5]">ヶ月</span>
-    </div>
-  </div>
-);
-
-/** 区切り線 */
-const Divider: React.FC<{ variant: 'light' | 'dark' }> = ({ variant }) => (
-  <div
-    className={cn(
-      'w-px h-[43px]',
-      variant === 'light' ? 'bg-white/10' : 'bg-[#293525]/10'
-    )}
-  />
-);
-
-/** 矢印ボタン */
-const ArrowButton: React.FC<{
-  variant: 'light' | 'dark';
-}> = ({ variant }) => (
-  <div
-    className={cn(
-      'flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full border',
-      variant === 'light'
-        ? 'border-white/30 text-white'
-        : 'border-[#293525]/30 text-[#293525]'
-    )}
-  >
-    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-  </div>
-);
-
-// ============================================
-// メインコンポーネント
-// ============================================
-
-/**
- * タイトルを「｜」または「|」で分割してspan要素の配列として返す
- */
-function renderTitleWithLineBreaks(title: string): React.ReactNode {
-  // 全角「｜」または半角「|」で分割
-  const parts = title.split(/[｜|]/);
-  if (parts.length === 1) {
-    return title;
-  }
-  return parts.map((part, index) => (
-    <span key={index} className="block">
-      {part}
-    </span>
-  ));
-}
+export type { RoadmapCardV2Props };
 
 const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   slug,
