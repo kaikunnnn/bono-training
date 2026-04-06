@@ -1,5 +1,6 @@
 import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
+import type { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import type { ArticleWithContext, Event, Question, QuestionCategory, Feedback, FeedbackCategory, Knowledge, KnowledgeCategory } from "@/types/sanity";
 
 export const client = createClient({
@@ -11,7 +12,7 @@ export const client = createClient({
 
 const builder = imageUrlBuilder(client);
 
-export function urlFor(source: any) {
+export function urlFor(source: SanityImageSource) {
   return builder.image(source);
 }
 
@@ -93,7 +94,7 @@ export async function getArticleWithContext(
     }
   `;
 
-  const article = await client.fetch<any>(articleQuery, { slug });
+  const article = await client.fetch<ArticleWithContext | null>(articleQuery, { slug });
 
   // 記事が見つからない場合
   if (!article) {
