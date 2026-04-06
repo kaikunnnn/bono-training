@@ -24,16 +24,11 @@ import RoadmapCardV2 from "@/components/roadmap/RoadmapCardV2";
 import type { GradientPreset } from "@/components/roadmap/RoadmapCardV2";
 import TrainingCard, { TRAINING_CARDS_DATA } from "@/components/top/TrainingCard";
 import LessonCard from "@/components/lessons/LessonCard";
+import GoalButton from "@/components/top/GoalButton";
 
 // ============================================
 // 型定義
 // ============================================
-
-interface GoalButtonProps {
-  icon: string;
-  text: string;
-  href: string;
-}
 
 // ============================================
 // アニメーション設定
@@ -130,41 +125,6 @@ function CTAButtonSecondary({
 }
 
 
-/** ゴール選択ボタン */
-function GoalButton({ icon, text, href }: GoalButtonProps) {
-  const isUiSection = href === "#section-ui";
-  const isUxSection = href === "#section-ux";
-  return (
-    <Link
-      to={href}
-      className={cn(
-        "flex-1 flex flex-col items-center justify-center h-[90px] sm:h-[100px] lg:h-[117px] px-4 sm:px-6 lg:px-8 py-1 border border-black/12 hover:shadow-md transition-all group",
-        isUiSection
-          ? "bg-info-feedback rounded-[200px]"
-          : isUxSection
-            ? "bg-surface rounded-[200px]"
-            : "bg-surface rounded-[32px] sm:rounded-[40px] lg:rounded-[50px]",
-      )}
-    >
-      <span className="text-2xl sm:text-[28px] lg:text-[32px] mb-1">{icon}</span>
-      <div className="flex items-center gap-1.5">
-        <span
-          className={cn(
-            "text-base text-text-primary",
-            isUiSection
-              ? "font-extrabold font-['Noto_Sans_JP',sans-serif]"
-              : isUxSection
-                ? "font-extrabold font-noto-sans-jp"
-                : "font-medium",
-          )}
-        >
-          {text}
-        </span>
-        <ChevronRight className="w-3 h-3 text-text-primary rotate-90 group-hover:translate-x-0.5 transition-transform" />
-      </div>
-    </Link>
-  );
-}
 
 /** セクションヘッダー（ゴール別セクション用） */
 function GoalSectionHeader({
