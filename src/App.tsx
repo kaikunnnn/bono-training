@@ -148,7 +148,7 @@ const AppContent = () => {
     <SubscriptionProvider overrideValue={mockSubscription}>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/top" element={<TopPage />} />
+        <Route path="/top" element={<TopPageNew />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/auth" element={<Navigate to="/login" replace />} />

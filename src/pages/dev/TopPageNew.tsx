@@ -157,7 +157,7 @@ export default function TopPageNew() {
 
   // 各セクション用のロードマップ
   const careerRoadmap = getRoadmapBySlug("uiux-career-change");
-  const uxRoadmap = getRoadmapBySlug("ux-design");
+  const uxRoadmap = getRoadmapBySlug("ux-design-basic");
   const uiRoadmap = getRoadmapBySlug("information-architecture");
   const uiVisualRoadmap = getRoadmapBySlug("ui-visual-design");
 
@@ -207,7 +207,7 @@ export default function TopPageNew() {
   }, []);
 
   return (
-    <Layout headerGradient="top">
+    <Layout headerGradient="default">
       <div className="min-h-screen">
         {/* ================================================
             セクション1: Hero Section
@@ -407,6 +407,7 @@ export default function TopPageNew() {
               <SectionHeading
                 label="読みもの"
                 title="お役立ちコンテンツ"
+                showUnderline={false}
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">

@@ -267,6 +267,104 @@ import { Button } from "@/components/ui/button";
 
 ---
 
+### デザインシステムドキュメント化（重要）
+
+**ルール**: コンポーネント実装完了後は、必ず `.claude/design-system/components/` にドキュメントを作成する
+
+**目的**:
+- AIが次回から自動的にコンポーネントを再利用できるようにする
+- 「このコンポーネントをいつ使うか」をAIが判断できるようにする
+- 実装しながらデザインシステムを自動的に蓄積する
+
+**タイミング**:
+```
+① コンポーネント実装完了
+    ↓
+② 動作確認OK
+    ↓
+③ ドキュメント自動生成（Claude Codeが提案）
+    ↓
+④ ユーザーレビュー・調整
+    ↓
+⑤ .claude/design-system/components/に保存
+```
+
+**ドキュメント形式（必須3要素）**:
+
+1. **WHY（なぜ）**: このコンポーネントの目的・役割
+2. **WHEN（いつ）**: 使う場面・使わない場面（✅/❌で明記）
+3. **HOW（どう）**: 具体的な使用例（コピペ可能なコード）
+
+**テンプレート**: `.claude/design-system/components/_template.md` を使用
+
+**ドキュメント作成プロセス**:
+
+```typescript
+// ステップ1: コンポーネント実装
+// 例: TrainingCard.tsx を作成・実装
+
+// ステップ2: 動作確認
+// 例: /dev/training-card で確認
+
+// ステップ3: Claude Codeに依頼
+"TrainingCard の実装が完了しました。
+.claude/design-system/components/TrainingCard.md を作成して、
+次回からAIが自動で使えるようにドキュメント化してください。
+
+実装ファイル: src/components/top/TrainingCard.tsx"
+
+// ステップ4: 生成されたドキュメントをレビュー
+// WHY, WHEN, HOWが明確か確認
+
+// ステップ5: 保存完了
+// 次回から「TrainingCardを使って〜」と指示するだけで再利用可能
+```
+
+**ドキュメント化の判断基準**:
+
+以下のコンポーネントは**必ずドキュメント化**:
+- ✅ 再利用可能なコンポーネント（Button, Card等）
+- ✅ ページ固有でも重要なコンポーネント（TrainingCard等）
+- ✅ レイアウトコンポーネント（Layout等）
+
+以下は**ドキュメント不要**:
+- ❌ 1回限りの使い捨てコンポーネント
+- ❌ 非常にシンプルなラッパー（divだけ等）
+
+**AIへの指示例**:
+
+```
+✅ 良い例:
+「新しいLPを作って。TrainingCard（.claude/design-system/components/TrainingCard.md参照）
+を4枚横スクロールで並べて」
+
+❌ 悪い例:
+「新しいLPを作って。カード4枚並べて」
+（どのカード？どう並べる？AIが推測してしまう）
+```
+
+**運用フロー**:
+
+```
+Week 1: TrainingCard, RoadmapCard, CTAButton をドキュメント化
+    ↓
+Week 2: 新規ページ作成時、既存コンポーネントを自動再利用
+    ↓
+Week 3: 新しいコンポーネント追加 → すぐドキュメント化
+    ↓
+継続的にデザインシステムが成長
+```
+
+**チェックリスト（コンポーネント実装完了時）**:
+- [ ] コードが正しく動作する
+- [ ] 動作確認完了
+- [ ] `.claude/design-system/components/[ComponentName].md` 作成
+- [ ] WHY, WHEN, HOWが明記されている
+- [ ] 具体的な使用例がある
+- [ ] Git commit完了
+
+---
+
 ### アイコンライブラリの統一（Iconsax）
 
 **ルール**: アイコンは必ず `@/lib/icons` から import する。`lucide-react` などを直接使わない。
@@ -673,6 +771,7 @@ SELECT DISTINCT environment FROM user_subscriptions;
 
 | 日付 | 更新内容 | 更新者 |
 |------|---------|--------|
+| 2026-04-06 | デザインシステムドキュメント化ルール追加（実装→自動ドキュメント化） | AI開発チーム |
 | 2025-01-21 | UI/デザインルール追加（Iconsax統一ルール） | AI開発チーム |
 | 2025-01-16 | サブスクリプション・課金機能の開発ルール追加（ERROR-002対策） | AI開発チーム |
 | 2025-11-28 | 初版作成 | AI開発チーム |

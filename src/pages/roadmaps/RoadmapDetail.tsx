@@ -95,6 +95,11 @@ export default function RoadmapDetail() {
           thumbnailUrl={roadmap.thumbnailUrl}
         />
 
+        {/* セクションナビゲーション */}
+        {sectionNavItems.length > 0 && (
+          <SectionNav items={sectionNavItems} />
+        )}
+
         {/* ロードマップの流れセクション */}
         {hasCurriculum && (
           <RoadmapPathway
@@ -127,11 +132,6 @@ export default function RoadmapDetail() {
               </div>
             )}
           </>
-        )}
-
-        {/* セクションナビゲーション */}
-        {sectionNavItems.length > 0 && (
-          <SectionNav items={sectionNavItems} />
         )}
 
         {/* カリキュラムセクション */}

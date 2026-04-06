@@ -69,7 +69,7 @@ const Layout = ({ children, className, headerGradient = 'default' }: LayoutProps
           className="fixed inset-x-0 top-0 h-[600px] sm:h-[700px] lg:h-[800px] pointer-events-none z-0 transition-opacity duration-1000 ease-out"
           style={{
             background:
-              "linear-gradient(180deg, rgba(226, 232, 228, 0.6) 0%, rgba(242, 243, 240, 0.3) 50%, transparent 100%)",
+              "linear-gradient(180deg, rgb(226, 232, 228) 0%, rgb(242, 243, 240) 50%, rgba(249, 248, 246, 0) 100%)",
             opacity: isGradientVisible ? 1 : 0,
           }}
         />

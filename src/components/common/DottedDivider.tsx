@@ -33,7 +33,7 @@ export default function DottedDivider({
 
   return (
     <div
-      className={cn("w-full", className)}
+      className={className}
       style={{
         height: dotSize,
         backgroundImage: `radial-gradient(circle, ${color} ${dotSize / 2}px, transparent ${dotSize / 2}px)`,
