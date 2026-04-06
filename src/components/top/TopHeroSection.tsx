@@ -14,7 +14,7 @@
 import { Link } from "react-router-dom";
 import { Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { GradientPreset } from "@/components/roadmap/RoadmapCardV2";
+import { type GradientPreset, getGradientCSS } from "@/styles/gradients";
 
 // ============================================
 // 型定義
@@ -40,20 +40,7 @@ interface TopHeroSectionProps {
   className?: string;
 }
 
-// ============================================
-// グラデーション定義（Figmaから）
-// ============================================
-
-const HERO_GRADIENTS: Record<GradientPreset, string> = {
-  galaxy:
-    "linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.2) 100%), linear-gradient(180deg, rgb(43,40,72) 7.8%, rgb(75,57,22) 100%)",
-  teal: "linear-gradient(180deg, #304750 0%, #5d5b65 100%)",
-  sunset:
-    "linear-gradient(90deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.2) 100%), linear-gradient(180deg, rgb(47,63,109) 7.8%, rgb(102,70,95) 24.2%, rgb(226,121,121) 68.1%, rgb(241,186,193) 100%)",
-  ocean: "linear-gradient(180deg, #2d3540 0%, #353d48 100%)",
-  infoarch: "linear-gradient(180deg, #3d494e 0%, #696356 100%)",
-  rose: "linear-gradient(180deg, #3a3238 0%, #322a30 100%)",
-};
+// グラデーション定義は src/styles/gradients.ts に統一管理されています
 
 // ============================================
 // サブコンポーネント
@@ -117,7 +104,7 @@ function TopRoadmapCard({
   rotation = 0,
   className,
 }: TopHeroRoadmapItem & { rotation?: number; className?: string }) {
-  const gradientCSS = HERO_GRADIENTS[gradientPreset] || HERO_GRADIENTS.galaxy;
+  const gradientCSS = getGradientCSS(gradientPreset);
 
   return (
     <Link

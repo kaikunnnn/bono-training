@@ -22,62 +22,14 @@ import { Link } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { stripLineBreakMarker } from '@/utils/textFormat';
+import {
+  type GradientPreset,
+  type GradientDef,
+  GRADIENTS,
+} from '@/styles/gradients';
 
-// ============================================
-// グラデーション定義
-// ============================================
-
-export type GradientPreset =
-  | 'career-change'  // UIUXデザイナー転職
-  | 'ui-beginner'    // UIデザイン入門（Figma基礎）
-  | 'ui-visual'      // UIビジュアル入門
-  | 'info-arch'      // 情報設計基礎
-  | 'ux-design';     // UXデザイン基礎
-
-interface GradientDef {
-  from: string;
-  to: string;
-  mid?: string;
-  /** オーバーレイ（暗くする用） */
-  overlay?: string;
-  /** 4点以上のカスタムグラデーション */
-  customGradient?: string;
-}
-
-const GRADIENTS: Record<GradientPreset, GradientDef> = {
-  'career-change': {
-    from: '#482B4B',
-    mid: '#2A2C42',
-    to: '#141520',
-    // 3点グラデーション + 12%黒オーバーレイ
-    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #482B4B 0%, #2A2C42 27%, #141520 100%)',
-  },
-  'ui-beginner': {
-    from: '#684B4B',
-    to: '#231C26',
-    // 2点グラデーション + 12%黒オーバーレイ
-    customGradient:
-      'linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, rgba(104, 75, 75, 1) 0%, rgba(35, 28, 38, 1) 100%)',
-  },
-  'ui-visual': {
-    from: '#304750',
-    to: '#5D5B65',
-    // 既存0.2 + 追加0.12 = 0.32
-    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.32), rgba(0,0,0,0.32)), linear-gradient(0deg, #304750 0%, #5D5B65 100%)',
-  },
-  'info-arch': {
-    from: '#214234',
-    to: '#8D7746',
-    // 既存0.3 + 追加0.12 = 0.42
-    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.42), rgba(0,0,0,0.42)), linear-gradient(0deg, #214234 0%, #8D7746 100%)',
-  },
-  'ux-design': {
-    from: '#F1BAC1',
-    to: '#2F3F6D',
-    // 既存0.4 + 追加0.12 = 0.52、4点グラデーション（反転）
-    customGradient: 'linear-gradient(0deg, rgba(0,0,0,0.52), rgba(0,0,0,0.52)), linear-gradient(0deg, #F1BAC1 0%, #E27979 12%, #764749 54%, #2F3F6D 100%)',
-  },
-};
+// re-export for backward compatibility
+export type { GradientPreset };
 
 // ============================================
 // 型定義
@@ -121,11 +73,11 @@ export interface RoadmapCardV2Props {
 // ============================================
 
 /**
- * グラデーションCSSを生成
+ * グラデーションCSSを生成（方向指定付き）
  * @param gradient グラデーション定義
  * @param direction 方向 - 'vertical'(0deg: 下→上) または 'horizontal'(270deg: 右→左)
  */
-function getGradientCSS(gradient: GradientDef, direction: 'vertical' | 'horizontal' = 'vertical'): string {
+function buildGradientCSS(gradient: GradientDef, direction: 'vertical' | 'horizontal' = 'vertical'): string {
   const { from, to, mid, overlay, customGradient } = gradient;
   const deg = direction === 'horizontal' ? '270deg' : '0deg';
 
@@ -286,7 +238,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   // フォールバック: 未知のプリセットの場合はcareer-changeを使用
   const gradient = customGradient || GRADIENTS[gradientPreset] || GRADIENTS['career-change'];
   // 縦型: 下→上、横型: 左→右
-  const gradientCSS = getGradientCSS(gradient, orientation === 'horizontal' ? 'horizontal' : 'vertical');
+  const gradientCSS = buildGradientCSS(gradient, orientation === 'horizontal' ? 'horizontal' : 'vertical');
   const linkPath = `${basePath}${slug}`;
   const textVariant = variant === 'gradient' ? 'light' : 'dark';
   const isWaveStyle = thumbnailStyle === 'wave';

@@ -9,61 +9,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, RefreshCw } from 'lucide-react';
 import { useRoadmaps } from '@/hooks/useRoadmaps';
-import { GRADIENT_PRESETS, type GradientPreset } from '@/types/sanity-roadmap';
-import RoadmapCardV2, { GradientPreset as CardGradientPreset } from '@/components/roadmap/RoadmapCardV2';
-
-// RoadmapCardV2 のグラデーション定義（コピー）
-interface GradientDef {
-  from: string;
-  to: string;
-  mid?: string;
-  overlay?: string;
-  customGradient?: string;
-}
-
-const CARD_GRADIENTS: Record<string, GradientDef> = {
-  'career-change': {
-    from: '#412731',
-    mid: '#382D28',
-    to: '#22202B',
-  },
-  'ui-beginner': {
-    from: '#BB5F70',
-    to: '#494717',
-    overlay: 'rgba(0, 0, 0, 0.38)',
-  },
-  'ui-visual': {
-    from: '#304750',
-    to: '#5D5B65',
-    overlay: 'rgba(0, 0, 0, 0.2)',
-  },
-  'info-arch': {
-    from: '#8D7746',
-    to: '#214234',
-    overlay: 'rgba(0, 0, 0, 0.3)',
-  },
-  'ux-design': {
-    from: '#2F3F6D',
-    to: '#F1BAC1',
-    overlay: 'rgba(0, 0, 0, 0.4)',
-    customGradient: 'linear-gradient(0deg, #2F3F6D 0%, #764749 46%, #E27979 88%, #F1BAC1 100%)',
-  },
-};
-
-function getCardGradientCSS(gradient: GradientDef): string {
-  const { from, to, mid, overlay, customGradient } = gradient;
-
-  const gradientPart = customGradient
-    ? customGradient
-    : mid
-      ? `linear-gradient(0deg, ${from} 0%, ${mid} 16%, ${to} 100%)`
-      : `linear-gradient(0deg, ${from} 0%, ${to} 100%)`;
-
-  if (overlay) {
-    return `linear-gradient(0deg, ${overlay} 0%, ${overlay} 100%), ${gradientPart}`;
-  }
-  return gradientPart;
-}
+import { type GradientPreset, GRADIENTS, getGradientCSS } from '@/styles/gradients';
+import RoadmapCardV2 from '@/components/roadmap/RoadmapCardV2';
 
 // 全プリセット
 const ALL_PRESETS: GradientPreset[] = ['career-change', 'ui-beginner', 'ui-visual', 'info-arch', 'ux-design'];
@@ -124,7 +71,7 @@ export default function RoadmapGradientPreview() {
             <div className="space-y-6">
               {roadmaps.map((roadmap) => {
                 const preset = (roadmap.gradientPreset || 'career-change') as GradientPreset;
-                const hasCardGradient = !!CARD_GRADIENTS[preset];
+                const hasCardGradient = !!GRADIENTS[preset];
 
                 return (
                   <div key={roadmap._id} className="bg-white rounded-xl p-6 shadow">
@@ -154,12 +101,12 @@ export default function RoadmapGradientPreview() {
                         <p className="text-sm text-gray-500 mb-2">RoadmapHero（詳細ページ）</p>
                         <div
                           className="h-32 rounded-xl flex items-center justify-center text-white text-xs overflow-hidden"
-                          style={{ background: GRADIENT_PRESETS[preset] || GRADIENT_PRESETS['career-change'] }}
+                          style={{ background: getGradientCSS(preset) }}
                         >
                           <div className="text-center px-4">
-                            <div className="opacity-80 text-[10px] mb-1">GRADIENT_PRESETS[{preset}]</div>
+                            <div className="opacity-80 text-[10px] mb-1">GRADIENTS[{preset}] (from gradients.ts)</div>
                             <div className="font-mono text-[10px] opacity-60">
-                              {(GRADIENT_PRESETS[preset] || 'undefined').slice(0, 60)}...
+                              {getGradientCSS(preset).slice(0, 60)}...
                             </div>
                           </div>
                         </div>
@@ -171,12 +118,12 @@ export default function RoadmapGradientPreview() {
                         {hasCardGradient ? (
                           <div
                             className="h-32 rounded-xl flex items-center justify-center text-white text-xs"
-                            style={{ background: getCardGradientCSS(CARD_GRADIENTS[preset]) }}
+                            style={{ background: getGradientCSS(preset) }}
                           >
                             <div className="text-center px-4">
-                              <div className="opacity-80 text-[10px] mb-1">CARD_GRADIENTS[{preset}]</div>
+                              <div className="opacity-80 text-[10px] mb-1">RoadmapCardV2 (uses GRADIENTS)</div>
                               <div className="font-mono text-[10px] opacity-60">
-                                {getCardGradientCSS(CARD_GRADIENTS[preset]).slice(0, 50)}...
+                                {getGradientCSS(preset).slice(0, 50)}...
                               </div>
                             </div>
                           </div>
@@ -251,9 +198,9 @@ export default function RoadmapGradientPreview() {
               </thead>
               <tbody className="divide-y">
                 {ALL_PRESETS.map((preset) => {
-                  const heroGradient = GRADIENT_PRESETS[preset];
-                  const cardGradient = CARD_GRADIENTS[preset];
-                  const cardCSS = cardGradient ? getCardGradientCSS(cardGradient) : null;
+                  const heroGradient = getGradientCSS(preset);
+                  const cardGradient = GRADIENTS[preset];
+                  const cardCSS = cardGradient ? getGradientCSS(preset) : null;
 
                   // 色コードを抽出（簡易比較用）
                   const heroColors = heroGradient.match(/#[0-9a-fA-F]{6}/g) || [];
@@ -309,8 +256,7 @@ export default function RoadmapGradientPreview() {
           <div className="mt-4 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
             <p className="text-sm text-yellow-800">
               <strong>⚠️ 注意:</strong> Hero と Card で異なるグラデーション定義が使われています。
-              統一するには <code className="bg-yellow-100 px-1 rounded">src/types/sanity-roadmap.ts</code> の <code>GRADIENT_PRESETS</code> と
-              <code className="bg-yellow-100 px-1 rounded">src/components/roadmap/RoadmapCardV2.tsx</code> の <code>GRADIENTS</code> を揃える必要があります。
+              グラデーション定義は <code className="bg-green-100 px-1 rounded">src/styles/gradients.ts</code> に統一管理されています。
             </p>
           </div>
         </section>
@@ -345,17 +291,17 @@ export default function RoadmapGradientPreview() {
                     <p className="text-xs text-gray-400 mb-1">Hero</p>
                     <div
                       className="h-16 rounded-lg"
-                      style={{ background: GRADIENT_PRESETS[preset] }}
+                      style={{ background: getGradientCSS(preset) }}
                     />
                   </div>
 
                   {/* Card */}
                   <div>
                     <p className="text-xs text-gray-400 mb-1">Card</p>
-                    {CARD_GRADIENTS[preset] ? (
+                    {GRADIENTS[preset] ? (
                       <div
                         className="h-16 rounded-lg"
-                        style={{ background: getCardGradientCSS(CARD_GRADIENTS[preset]) }}
+                        style={{ background: getGradientCSS(preset) }}
                       />
                     ) : (
                       <div className="h-16 rounded-lg flex items-center justify-center bg-red-100 text-red-500 text-xs border border-dashed border-red-300">
@@ -377,7 +323,7 @@ export default function RoadmapGradientPreview() {
             <div className="relative h-64 rounded-xl overflow-hidden">
               <div
                 className="absolute inset-0"
-                style={{ background: GRADIENT_PRESETS['career-change'] }}
+                style={{ background: getGradientCSS('career-change') }}
               />
               <div
                 className="absolute inset-0"

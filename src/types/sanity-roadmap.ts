@@ -4,34 +4,11 @@
  * Sanity CMSのroadmapスキーマに対応した型定義
  */
 
-// ============================================
-// グラデーションプリセット
-// ============================================
+import { type GradientPreset, getGradientCSS } from "@/styles/gradients";
 
-export type GradientPreset =
-  | "career-change"  // UIUXデザイナー転職
-  | "ui-beginner"    // UIデザイン入門（Figma基礎）
-  | "ui-visual"      // UIビジュアル入門
-  | "info-arch"      // 情報設計基礎
-  | "ux-design";     // UXデザイン基礎
-
-/** グラデーションプリセットのCSS値（RoadmapCardV2と統一、方向: 下から上 0deg、+12%黒オーバーレイ） */
-export const GRADIENT_PRESETS: Record<GradientPreset, string> = {
-  "career-change": "linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #482B4B 0%, #2A2C42 27%, #141520 100%)",
-  "ui-beginner": "linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #684B4B 0%, #231C26 81%, #C9A0A6 100%)",
-  "ui-visual": "linear-gradient(0deg, rgba(0,0,0,0.32), rgba(0,0,0,0.32)), linear-gradient(0deg, #304750 0%, #5D5B65 100%)",
-  "info-arch": "linear-gradient(0deg, rgba(0,0,0,0.42), rgba(0,0,0,0.42)), linear-gradient(0deg, #214234 0%, #8D7746 100%)",
-  "ux-design": "linear-gradient(0deg, rgba(0,0,0,0.52), rgba(0,0,0,0.52)), linear-gradient(0deg, #F1BAC1 0%, #E27979 12%, #764749 54%, #2F3F6D 100%)",
-};
-
-/** グラデーションプリセットのTailwindクラス（RoadmapCardV2と統一） */
-export const GRADIENT_CLASSES: Record<GradientPreset, string> = {
-  "career-change": "from-[#482B4B] via-[#2A2C42] to-[#141520]",
-  "ui-beginner": "from-[#684B4B] via-[#231C26] to-[#C9A0A6]",
-  "ui-visual": "from-[#304750] to-[#5D5B65]",
-  "info-arch": "from-[#214234] to-[#8D7746]",
-  "ux-design": "from-[#F1BAC1] to-[#2F3F6D]",
-};
+// GradientPreset型とグラデーション定義は src/styles/gradients.ts に統一管理されています
+// re-export for backward compatibility
+export type { GradientPreset };
 
 // ============================================
 // 基本型
@@ -193,18 +170,7 @@ export function countLessons(roadmap: SanityRoadmapDetail): number {
 export function getGradientStyle(
   preset?: GradientPreset
 ): React.CSSProperties {
-  if (!preset || !GRADIENT_PRESETS[preset]) {
-    return { background: GRADIENT_PRESETS['career-change'] };
-  }
-  return { background: GRADIENT_PRESETS[preset] };
-}
-
-/**
- * グラデーションTailwindクラスを取得
- */
-export function getGradientClass(preset?: GradientPreset): string {
-  if (!preset || !GRADIENT_CLASSES[preset]) {
-    return GRADIENT_CLASSES['career-change'];
-  }
-  return GRADIENT_CLASSES[preset];
+  const fallbackPreset: GradientPreset = 'career-change';
+  const gradientPreset = preset || fallbackPreset;
+  return { background: getGradientCSS(gradientPreset) };
 }
