@@ -468,7 +468,7 @@ export default function TopPageNew() {
               icon="✨"
               title={
                 <>
-                  <span className="block">UIUXデザイナーに転職 |</span>
+                  <span className="block">UIUXデザイナーに転職</span>
                   <span className="block">キャリアチェンジ</span>
                 </>
               }
@@ -593,7 +593,7 @@ export default function TopPageNew() {
               icon="🔧"
               title={
                 <>
-                  <span className="block">ユーザー課題を解決する |</span>
+                  <span className="block">ユーザー課題を解決する</span>
                   <span className="block">デザインをはじめる</span>
                 </>
               }
