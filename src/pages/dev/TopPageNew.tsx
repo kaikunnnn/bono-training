@@ -331,7 +331,7 @@ export default function TopPageNew() {
         ================================================ */}
         <section className="relative pt-0 pb-0">
           {/* コンテナ全体（h-[1186px] をベースにレスポンシブ調整） */}
-          <div className="relative h-auto min-h-[900px] sm:min-h-[1100px] lg:h-[1186px]">
+          <div className="relative h-auto min-h-[1050px] sm:min-h-[1150px] lg:h-[1186px]">
             {/* 上部: NEWバッジ + キャッチコピー + CTAボタン */}
             <div className="absolute left-1/2 -translate-x-1/2 top-0 w-full max-w-[950px] flex flex-col items-center gap-8 px-4 sm:px-6 lg:px-0 pt-12 pb-0 mb-0">
               {/* コンテンツグループ */}
@@ -448,7 +448,7 @@ export default function TopPageNew() {
         {/* ================================================
             セクション2: Partnership Section
         ================================================ */}
-        <section className="border-b border-[#dfdfdf] py-6 px-4 sm:px-6">
+        <section className="border-b border-[#dfdfdf] py-6 px-4 sm:px-6 mt-8 sm:mt-12">
           <div className="flex items-center justify-center gap-2">
             <p className="text-[13px] font-bold text-[rgba(41,53,37,0.8)] leading-[27px] whitespace-nowrap">
               キャリアパートナーシップ
