@@ -20,7 +20,7 @@ export default function UIUXCareerEyecatch() {
             <img
               src="/images/training-cards/uiux-career/card-125.png"
               alt="UIUX Career Card 1"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-[20px]"
             />
           </div>
         </div>
@@ -36,7 +36,7 @@ export default function UIUXCareerEyecatch() {
             <img
               src="/images/training-cards/uiux-career/card-126.png"
               alt="UIUX Career Card 2"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-[20px]"
             />
           </div>
         </div>
@@ -52,7 +52,7 @@ export default function UIUXCareerEyecatch() {
             <img
               src="/images/training-cards/uiux-career/card-127.png"
               alt="UIUX Career Card 3"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-[20px]"
             />
           </div>
         </div>
@@ -68,7 +68,7 @@ export default function UIUXCareerEyecatch() {
             <img
               src="/images/training-cards/uiux-career/card-124.png"
               alt="UIUX Career Card 4"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-[20px]"
             />
           </div>
         </div>

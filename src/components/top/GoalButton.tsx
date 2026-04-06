@@ -1,6 +1,25 @@
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+/** 丸枠＋棒付き下矢印（chevron ではなく ↓ 系） */
+function FramedArrowDownIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.75}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5M9 12l3 3 3-3" />
+    </svg>
+  );
+}
 
 export interface GoalButtonProps {
   /** アイコン絵文字 */
@@ -60,7 +79,7 @@ export default function GoalButton({ icon, text, href, className }: GoalButtonPr
         <span className="text-base text-text-primary font-extrabold font-noto-sans-jp">
           {text}
         </span>
-        <ChevronRight className="w-3 h-3 text-text-primary rotate-90 group-hover:translate-x-0.5 transition-transform" />
+        <FramedArrowDownIcon className="h-4 w-4 shrink-0 text-text-primary group-hover:translate-y-0.5 transition-transform" />
       </div>
     </Link>
   );
