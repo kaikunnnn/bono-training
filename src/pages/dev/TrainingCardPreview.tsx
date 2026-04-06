@@ -7,9 +7,50 @@
  * - 各要素のサイズ・色・配置確認
  */
 
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import Layout from '@/components/layout/Layout';
 import TrainingCard, { TRAINING_CARDS_DATA } from '@/components/top/TrainingCard';
+
+// パターン2のアニメーション設定（スケール＋フェードイン＋バウンス）
+const PATTERN2_ANIMATION = {
+  initial: { opacity: 0, scale: 0.9 },
+  animate: { opacity: 1, scale: 1 },
+  transition: { duration: 0.5, ease: [0.34, 1.56, 0.64, 1] },
+};
+
+// スクロール時のサイドバー問題の解決パターン
+type ScrollPattern = 'breakthrough' | 'fade-edge' | 'sidebar-avoid';
+
+const SCROLL_PATTERNS = {
+  breakthrough: {
+    name: 'パターン1: サイドバーを突き抜ける',
+    description: 'カードがサイドバーの上に重なって表示される',
+  },
+  'fade-edge': {
+    name: 'パターン2: 左端フェードアウト（スクロール時）',
+    description: '左にスクロールした時、左端32pxがグラデーションで消える',
+  },
+  'sidebar-avoid': {
+    name: 'パターン3: サイドバー回避（左端表示）',
+    description: 'サイドバー領域を避けて、ブラウザの左端から表示を開始',
+  },
+};
+
+// 中央配置のパターン
+type CenterPattern = 'block-center' | 'card2-center';
+
+const CENTER_PATTERNS = {
+  'block-center': {
+    name: 'カードブロック全体の中央',
+    description: '4枚のカード全体の真ん中を画面中央に配置',
+  },
+  'card2-center': {
+    name: '2個目のカードを中央',
+    description: '2個目のカード（UXデザイン）を画面中央に配置',
+  },
+};
 
 // ============================================
 // サブコンポーネント
@@ -79,6 +120,57 @@ function CTAButtonSecondary({
 // ============================================
 
 export default function TrainingCardPreview() {
+  const [animationKey, setAnimationKey] = useState(0);
+  const [scrollPattern, setScrollPattern] = useState<ScrollPattern>('breakthrough');
+  const [centerPattern, setCenterPattern] = useState<CenterPattern>('block-center');
+  const [isScrolledLeft, setIsScrolledLeft] = useState(false);
+  const [shouldCenterCards, setShouldCenterCards] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleReplay = () => {
+    setAnimationKey((prev) => prev + 1);
+  };
+
+  // スクロール監視: 左にスクロールした時のみフェードアウト表示
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setIsScrolledLeft(container.scrollLeft > 10);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // 初期状態をチェック
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, [centerPattern]);
+
+  // 画面幅監視: スクロール不要な場合は中央揃え（デスクトップのみ）
+  useEffect(() => {
+    const checkIfShouldCenter = () => {
+      // デスクトップ（xl: 1280px以上）でのみ判定
+      if (window.innerWidth < 1280) {
+        setShouldCenterCards(false);
+        return;
+      }
+
+      // カード4枚の合計幅を計算
+      // デスクトップ: 420px × 4 + gap 20px × 3 + 左右余白 192px × 2
+      const cardWidth = 420;
+      const cardCount = 4;
+      const gap = 20;
+      const padding = 192 * 2;
+      const totalContentWidth = cardWidth * cardCount + gap * (cardCount - 1) + padding;
+
+      // 画面幅がコンテンツ幅以上ならスクロール不要 → 中央揃え
+      setShouldCenterCards(window.innerWidth >= totalContentWidth);
+    };
+
+    checkIfShouldCenter();
+    window.addEventListener('resize', checkIfShouldCenter, { passive: true });
+    return () => window.removeEventListener('resize', checkIfShouldCenter);
+  }, []);
+
   return (
     <Layout headerGradient="top">
       {/* ヘッダー（Figmaリンク） */}
@@ -141,6 +233,122 @@ export default function TrainingCardPreview() {
       </div>
 
       {/* ================================================
+          アニメーションコントロール
+      ================================================ */}
+      <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200 py-4 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-bold text-purple-900">
+              🎬 同時アニメーション（テキスト＋カード）
+            </h2>
+            <p className="text-sm text-purple-600 mt-1">
+              パターン2: スケール＋フェードイン＋バウンス
+            </p>
+          </div>
+          <button
+            onClick={handleReplay}
+            className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-bold text-sm"
+          >
+            🔄 リプレイ
+          </button>
+        </div>
+      </div>
+
+      {/* ================================================
+          中央配置パターン比較
+      ================================================ */}
+      <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-200 py-6 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-lg font-bold text-blue-900 mb-4">
+            🎯 中央配置パターン比較
+          </h2>
+          <p className="text-sm text-blue-700 mb-4">
+            カードをどこを基準に中央配置するか
+          </p>
+
+          {/* パターン選択ボタン */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {(Object.keys(CENTER_PATTERNS) as CenterPattern[]).map((key) => (
+              <button
+                key={key}
+                onClick={() => setCenterPattern(key)}
+                className={`
+                  p-4 rounded-xl border-2 text-left transition-all
+                  ${
+                    centerPattern === key
+                      ? 'border-blue-600 bg-blue-100 shadow-lg scale-105'
+                      : 'border-gray-300 bg-white hover:border-blue-400 hover:shadow-md'
+                  }
+                `}
+              >
+                <div className="font-bold text-sm text-gray-900 mb-1">
+                  {CENTER_PATTERNS[key].name}
+                </div>
+                <div className="text-xs text-gray-600">
+                  {CENTER_PATTERNS[key].description}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* 選択中のパターン表示 */}
+          <div className="mt-4 p-4 bg-white rounded-lg border border-blue-200">
+            <p className="text-sm text-gray-700">
+              <span className="font-bold text-blue-600">現在選択中:</span>{' '}
+              {CENTER_PATTERNS[centerPattern].name}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ================================================
+          スクロール時のサイドバー問題 - パターン比較
+      ================================================ */}
+      <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border-b border-orange-200 py-6 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-lg font-bold text-orange-900 mb-4">
+            📱 スクロール時のサイドバー問題 - 解決パターン比較
+          </h2>
+          <p className="text-sm text-orange-700 mb-4">
+            デスクトップで左にスクロールした時、サイドバーでカードがぶつ切りにならないようにする方法
+          </p>
+
+          {/* パターン選択ボタン */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {(Object.keys(SCROLL_PATTERNS) as ScrollPattern[]).map((key) => (
+              <button
+                key={key}
+                onClick={() => setScrollPattern(key)}
+                className={`
+                  p-4 rounded-xl border-2 text-left transition-all
+                  ${
+                    scrollPattern === key
+                      ? 'border-orange-600 bg-orange-100 shadow-lg scale-105'
+                      : 'border-gray-300 bg-white hover:border-orange-400 hover:shadow-md'
+                  }
+                `}
+              >
+                <div className="font-bold text-sm text-gray-900 mb-1">
+                  {SCROLL_PATTERNS[key].name}
+                </div>
+                <div className="text-xs text-gray-600">
+                  {SCROLL_PATTERNS[key].description}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* 選択中のパターン表示 */}
+          <div className="mt-4 p-4 bg-white rounded-lg border border-orange-200">
+            <p className="text-sm text-gray-700">
+              <span className="font-bold text-orange-600">現在選択中:</span>{' '}
+              {SCROLL_PATTERNS[scrollPattern].name}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ================================================
           アイキャッチセクション全体
       ================================================ */}
       <section className="relative pt-0 pb-0">
@@ -152,50 +360,132 @@ export default function TrainingCardPreview() {
             {/* コンテンツグループ */}
             <div className="flex flex-col items-center gap-8">
               {/* NEWバッジ */}
-              <div className="mt-8 sm:mt-12 lg:mt-0">
+              <motion.div
+                key={`badge-${animationKey}`}
+                initial={PATTERN2_ANIMATION.initial}
+                animate={PATTERN2_ANIMATION.animate}
+                transition={{ ...PATTERN2_ANIMATION.transition, delay: 0 }}
+                className="mt-8 sm:mt-12 lg:mt-0"
+              >
                 <NewBadge text="AIプロトタイピングコースがリリース" />
-              </div>
+              </motion.div>
 
               {/* メインキャッチコピー + サブキャッチコピー */}
               <div className="flex flex-col items-center gap-4 text-center leading-none">
                 {/* メインキャッチコピー */}
-                <h1 className="font-[LINE_Seed_JP,sans-serif] text-[40px] sm:text-[56px] lg:text-[74px] font-bold text-[#0f172a] leading-[1.32]">
+                <motion.h1
+                  key={`main-catch-${animationKey}`}
+                  initial={PATTERN2_ANIMATION.initial}
+                  animate={PATTERN2_ANIMATION.animate}
+                  transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.15 }}
+                  className="font-[LINE_Seed_JP,sans-serif] text-[40px] sm:text-[56px] lg:text-[74px] font-bold text-[#0f172a] leading-[1.32]"
+                >
                   はじめよう！
                   <br />
                   キモチがうごく
                   <br />
                   ものづくり
-                </h1>
+                </motion.h1>
 
                 {/* サブキャッチコピー */}
-                <div className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl lg:text-2xl text-[#0f172a] leading-[1.76]">
+                <motion.div
+                  key={`sub-catch-${animationKey}`}
+                  initial={PATTERN2_ANIMATION.initial}
+                  animate={PATTERN2_ANIMATION.animate}
+                  transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.3 }}
+                  className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl lg:text-2xl text-[#0f172a] leading-[1.76]"
+                >
                   <p className="mb-0">ボノはユーザー起点で未来のワクワクを</p>
                   <p className="mb-0">
                     &quot;つくる&quot;力を磨く<span className="font-bold">デザイントレーニングサービス</span>です。
                   </p>
-                </div>
+                </motion.div>
               </div>
             </div>
 
             {/* CTAボタン */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto justify-center">
+            <motion.div
+              key={`cta-${animationKey}`}
+              initial={PATTERN2_ANIMATION.initial}
+              animate={PATTERN2_ANIMATION.animate}
+              transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.45 }}
+              className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto justify-center"
+            >
               <CTAButtonPrimary href="https://www.bo-no.design/plan" external>
                 メンバーになってはじめる
               </CTAButtonPrimary>
               <CTAButtonSecondary href="/roadmaps">
                 ロードマップをを見る
               </CTAButtonSecondary>
-            </div>
+            </motion.div>
           </div>
 
           {/* 下部: トレーニングカード（absolute配置） */}
-          {/* デスクトップでは中央配置、モバイル・タブレットでは横スクロール */}
-          <div className="absolute left-0 top-[580px] sm:top-[620px] lg:top-[616px] w-full">
-            <div className="overflow-x-auto scrollbar-hide pb-4">
-              <div className="flex gap-5 px-4 sm:px-6 lg:px-0 min-w-max lg:justify-center">
-                {TRAINING_CARDS_DATA.map((cardData) => (
-                  <TrainingCard key={cardData.id} data={cardData} />
-                ))}
+          {/* テキストブロックの中央に対してセンター配置 */}
+          <div
+            className="absolute top-[580px] sm:top-[620px] lg:top-[616px] w-full"
+            style={{
+              // パターン3（サイドバー回避）の場合は左端配置、それ以外は中央配置
+              left: scrollPattern === 'sidebar-avoid' ? '0' : '50%',
+              transform: scrollPattern === 'sidebar-avoid' ? 'none' : 'translateX(-50%)',
+            }}
+          >
+            {/* スクロールコンテナ - パターンごとに異なるスタイル */}
+            <div
+              className={`relative ${scrollPattern === 'sidebar-avoid' ? 'xl:ml-[200px]' : ''}`}
+            >
+              {/* パターン2: 左端フェードアウト - スクロール時のみ表示（デスクトップのみ） */}
+              {scrollPattern === 'fade-edge' && isScrolledLeft && (
+                <div
+                  className="hidden lg:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#F9F9F7] via-[#F9F9F7]/60 to-transparent z-20 pointer-events-none"
+                  style={{
+                    opacity: isScrolledLeft ? 1 : 0,
+                    transition: 'opacity 700ms ease-out',
+                  }}
+                />
+              )}
+
+              <div
+                ref={scrollContainerRef}
+                className="overflow-x-auto overflow-y-visible scrollbar-hide py-4"
+                style={{
+                  // パターン1: サイドバーを突き抜ける場合のみz-indexを高く
+                  position: 'relative',
+                  zIndex: scrollPattern === 'breakthrough' ? 50 : 1,
+                }}
+              >
+                <div
+                  className={`flex gap-5 min-w-max px-8 sm:px-12 ${!shouldCenterCards ? 'lg:px-48' : 'lg:pl-0 lg:pr-48'}`}
+                  style={{
+                    // デスクトップでスクロール不要な場合のみ中央揃え、それ以外は左端固定
+                    justifyContent:
+                      shouldCenterCards && centerPattern === 'block-center'
+                        ? 'center'
+                        : centerPattern === 'block-center'
+                          ? 'flex-start'
+                          : 'flex-start',
+                    marginLeft:
+                      shouldCenterCards && centerPattern === 'card2-center'
+                        ? 'calc(50% - 150px - 10px - 210px)'
+                        : centerPattern === 'card2-center' && !shouldCenterCards
+                            ? '0'
+                            : '0',
+                  }}
+                >
+                  {TRAINING_CARDS_DATA.map((cardData, index) => (
+                    <motion.div
+                      key={`${cardData.id}-${animationKey}`}
+                      initial={PATTERN2_ANIMATION.initial}
+                      animate={PATTERN2_ANIMATION.animate}
+                      transition={{
+                        ...PATTERN2_ANIMATION.transition,
+                        delay: index * 0.12,
+                      }}
+                    >
+                      <TrainingCard data={cardData} />
+                    </motion.div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>

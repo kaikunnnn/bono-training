@@ -8,6 +8,7 @@
  * 4. Content Sections - キャリア / UX / UI の3セクション
  */
 
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
 import Layout from "@/components/layout/Layout";
@@ -160,8 +161,53 @@ export default function TopPageNew() {
   const uiRoadmap = getRoadmapBySlug("information-architecture");
   const uiVisualRoadmap = getRoadmapBySlug("ui-visual-design");
 
+  // トレーニングカードの動的中央揃え制御
+  const [shouldCenterCards, setShouldCenterCards] = useState(false);
+  const [isScrolledLeft, setIsScrolledLeft] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // 画面幅監視: スクロール不要な場合は中央揃え（デスクトップのみ）
+  useEffect(() => {
+    const checkIfShouldCenter = () => {
+      // デスクトップ（xl: 1280px以上）でのみ判定
+      if (window.innerWidth < 1280) {
+        setShouldCenterCards(false);
+        return;
+      }
+
+      // カード4枚の合計幅を計算
+      // デスクトップ: 420px × 4 + gap 20px × 3 + 左右余白 192px × 2
+      const cardWidth = 420;
+      const cardCount = 4;
+      const gap = 20;
+      const padding = 192 * 2;
+      const totalContentWidth = cardWidth * cardCount + gap * (cardCount - 1) + padding;
+
+      // 画面幅がコンテンツ幅以上ならスクロール不要 → 中央揃え
+      setShouldCenterCards(window.innerWidth >= totalContentWidth);
+    };
+
+    checkIfShouldCenter();
+    window.addEventListener('resize', checkIfShouldCenter, { passive: true });
+    return () => window.removeEventListener('resize', checkIfShouldCenter);
+  }, []);
+
+  // スクロール監視: 左にスクロールした時のみフェードアウト表示
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const handleScroll = () => {
+      setIsScrolledLeft(container.scrollLeft > 10);
+    };
+
+    container.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll(); // 初期状態をチェック
+    return () => container.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <Layout>
+    <Layout headerGradient="top">
       <div className="min-h-screen">
         {/* ================================================
             セクション1: Hero Section
@@ -211,11 +257,35 @@ export default function TopPageNew() {
             </div>
 
             {/* 下部: トレーニングカード（absolute配置） */}
-            <div className="absolute left-0 top-[500px] sm:top-[550px] lg:top-[616px] w-full overflow-x-auto scrollbar-hide pb-4">
-              <div className="flex gap-5 px-4 sm:px-6 lg:px-0 min-w-max">
-                {TRAINING_CARDS_DATA.map((cardData) => (
-                  <TrainingCard key={cardData.id} data={cardData} />
-                ))}
+            <div className="absolute left-1/2 -translate-x-1/2 top-[500px] sm:top-[550px] lg:top-[616px] w-full">
+              {/* スクロールコンテナ */}
+              <div className="relative">
+                {/* パターン2: 左端フェードアウト - スクロール時のみ表示（デスクトップのみ） */}
+                {isScrolledLeft && (
+                  <div
+                    className="hidden lg:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#F9F9F7] via-[#F9F9F7]/60 to-transparent z-20 pointer-events-none"
+                    style={{
+                      opacity: isScrolledLeft ? 1 : 0,
+                      transition: 'opacity 700ms ease-out',
+                    }}
+                  />
+                )}
+
+                <div
+                  ref={scrollContainerRef}
+                  className="overflow-x-auto overflow-y-visible scrollbar-hide py-4"
+                >
+                  <div
+                    className={`flex gap-5 min-w-max px-8 sm:px-12 ${!shouldCenterCards ? 'lg:px-48' : 'lg:pl-0 lg:pr-48'}`}
+                    style={{
+                      justifyContent: shouldCenterCards ? 'center' : 'flex-start',
+                    }}
+                  >
+                    {TRAINING_CARDS_DATA.map((cardData) => (
+                      <TrainingCard key={cardData.id} data={cardData} />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
