@@ -18,8 +18,8 @@ const Index = () => {
     return <Navigate to="/mypage" replace />;
   }
 
-  // 未ログイン → ログインページ
-  return <Navigate to="/login" replace />;
+  // 未ログイン → トップページ
+  return <Navigate to="/top" replace />;
 };
 
 export default Index;

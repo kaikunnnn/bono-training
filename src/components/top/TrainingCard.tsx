@@ -173,7 +173,7 @@ export const TRAINING_CARDS_DATA: TrainingCardData[] = [
     descriptionOpacity: 0.64,
     eyecatchType: 'ux-design',
     badgeRotation: -3,
-    roadmapSlug: 'ux-design',
+    roadmapSlug: 'ux-design-basic',
     eyecatchPosition: {
       left: 72.35,
       top: 145,

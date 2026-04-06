@@ -56,17 +56,30 @@ const CENTER_PATTERNS = {
 // サブコンポーネント
 // ============================================
 
-/** NEWバッジ */
-function NewBadge({ text }: { text: string }) {
-  return (
-    <div className="inline-flex items-center gap-2.5 px-4 py-[7px] bg-white rounded-full">
+/** 進め方カテゴリ「デザインサイクル」レッスン詳細 */
+const DESIGN_CYCLE_LESSON_HREF = "/lessons/ui-design-flow-lv1";
+
+/** NEWバッジ（任意でレッスン詳細へリンク） */
+function NewBadge({ text, href }: { text: string; href?: string }) {
+  const className =
+    "inline-flex items-center gap-2.5 px-4 py-[7px] bg-white rounded-full border border-transparent hover:border-black hover:bg-white/95 transition-colors duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f172a]";
+  const inner = (
+    <>
       <span className="text-xs font-bold text-[#f95a16]">NEW!</span>
       <div className="flex items-baseline gap-0">
         <span className="text-[13px] font-bold text-[#0f172a]">{text}</span>
         <span className="text-xs font-normal text-[#0f172a]">！</span>
       </div>
-    </div>
+    </>
   );
+  if (href) {
+    return (
+      <Link to={href} className={className}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={className}>{inner}</div>;
 }
 
 /** CTAボタン - Primary（濃緑） */
@@ -356,7 +369,7 @@ export default function TrainingCardPreview() {
         {/* デスクトップでサイドバー200px分を考慮してコンテンツを中央配置 */}
         <div className="relative h-auto min-h-[1020px] sm:min-h-[1120px] lg:h-[1186px]">
           {/* 上部: NEWバッジ + キャッチコピー + CTAボタン */}
-          <div className="absolute left-1/2 -translate-x-1/2 top-0 w-full max-w-[950px] flex flex-col items-center gap-8 px-4 sm:px-6 lg:px-0">
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 w-full max-w-[950px] flex flex-col items-center gap-8 px-4 sm:px-6 lg:px-0 pt-8 pb-0 mb-0">
             {/* コンテンツグループ */}
             <div className="flex flex-col items-center gap-8">
               {/* NEWバッジ */}
@@ -367,7 +380,10 @@ export default function TrainingCardPreview() {
                 transition={{ ...PATTERN2_ANIMATION.transition, delay: 0 }}
                 className="mt-8 sm:mt-12 lg:mt-0"
               >
-                <NewBadge text="AIプロトタイピングコースがリリース" />
+                <NewBadge
+                  text='AI時代に生きる「デザインの進め方」をリリース'
+                  href={DESIGN_CYCLE_LESSON_HREF}
+                />
               </motion.div>
 
               {/* メインキャッチコピー + サブキャッチコピー */}
@@ -378,7 +394,7 @@ export default function TrainingCardPreview() {
                   initial={PATTERN2_ANIMATION.initial}
                   animate={PATTERN2_ANIMATION.animate}
                   transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.15 }}
-                  className="font-[LINE_Seed_JP,sans-serif] text-[40px] sm:text-[56px] lg:text-[74px] font-bold text-[#0f172a] leading-[1.32]"
+                  className="font-[LINE_Seed_JP,sans-serif] text-[40px] sm:text-[56px] font-bold text-[#0f172a] leading-[1.32]"
                 >
                   はじめよう！
                   <br />
@@ -393,7 +409,7 @@ export default function TrainingCardPreview() {
                   initial={PATTERN2_ANIMATION.initial}
                   animate={PATTERN2_ANIMATION.animate}
                   transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.3 }}
-                  className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl lg:text-2xl text-[#0f172a] leading-[1.76]"
+                  className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl text-[#0f172a] leading-[1.76]"
                 >
                   <p className="mb-0">ボノはユーザー起点で未来のワクワクを</p>
                   <p className="mb-0">
@@ -455,7 +471,11 @@ export default function TrainingCardPreview() {
                 }}
               >
                 <div
-                  className={`flex gap-5 min-w-max px-8 sm:px-12 ${!shouldCenterCards ? 'lg:px-48' : 'lg:pl-0 lg:pr-48'}`}
+                  className={`flex gap-5 min-w-max py-5 px-8 sm:px-12 -ml-8 sm:-ml-12 ${
+                    !shouldCenterCards
+                      ? 'lg:px-[120px] lg:-ml-[88px]'
+                      : 'lg:pl-0 lg:pr-[120px] lg:ml-0'
+                  }`}
                   style={{
                     // デスクトップでスクロール不要な場合のみ中央揃え、それ以外は左端固定
                     justifyContent:

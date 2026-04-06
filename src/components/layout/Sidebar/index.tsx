@@ -8,7 +8,7 @@ import SidebarMenuItem from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
 import { ICON_SIZE } from "./icon-utils";
 import { useAuth } from "@/contexts/AuthContext";
-import { DirectInbox } from "iconsax-react";
+import { DirectInbox, Home2 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 // 意見箱のリンク先URL
 const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
@@ -52,6 +52,15 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
             マイページ
           </SidebarMenuItem>
         )}
+
+        {/* トップページ */}
+        <SidebarMenuItem
+          href="/top"
+          icon={<Home2 size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/top") || isActive("/")}
+        >
+          トップページ
+        </SidebarMenuItem>
 
         {/* ロードマップ */}
         <SidebarMenuItem
