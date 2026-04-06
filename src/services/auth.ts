@@ -1,9 +1,22 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast as toastFunc } from '@/hooks/use-toast';
+import type { AuthError, User, Session } from '@supabase/supabase-js';
 
 export interface AuthResponse {
-  error: Error | null;
-  data: any | null;
+  error: Error | AuthError | null;
+  data: {
+    user: User | null;
+    session: Session | null;
+  } | null;
+}
+
+// エラーメッセージを安全に取得するヘルパー関数
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return String(error.message);
+  }
+  return 'An unknown error occurred';
 }
 
 // トースト関数の型定義を修正
@@ -70,14 +83,15 @@ export const signUpService = async (
       });
     }
     return { error: null, data };
-  } catch (error: any) {
-    console.error('サインアップエラー:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
+    console.error('サインアップエラー:', errorMessage);
     toast({
       title: "サインアップに失敗しました",
-      description: error.message,
+      description: errorMessage,
       variant: "destructive",
     });
-    return { error, data: null };
+    return { error: error instanceof Error ? error : new Error(errorMessage), data: null };
   }
 };
 
@@ -127,14 +141,15 @@ export const signInService = async (
       description: "ようこそ！",
     });
     return { error: null, data };
-  } catch (error: any) {
-    console.error('サインインエラー:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
+    console.error('サインインエラー:', errorMessage);
     toast({
       title: "ログインに失敗しました",
-      description: error.message,
+      description: errorMessage,
       variant: "destructive",
     });
-    return { error, data: null };
+    return { error: error instanceof Error ? error : new Error(errorMessage), data: null };
   }
 };
 
@@ -147,11 +162,12 @@ export const signOutService = async (
     toast({
       title: "ログアウトしました",
     });
-  } catch (error: any) {
-    console.error('サインアウトエラー:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
+    console.error('サインアウトエラー:', errorMessage);
     toast({
       title: "ログアウトに失敗しました",
-      description: error.message,
+      description: errorMessage,
       variant: "destructive",
     });
   }
@@ -182,14 +198,15 @@ export const resetPasswordService = async (
       description: "メールに記載されたリンクからパスワードを再設定してください。",
     });
     return { error: null, data };
-  } catch (error: any) {
-    console.error('パスワードリセットエラー:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
+    console.error('パスワードリセットエラー:', errorMessage);
     toast({
       title: "パスワードリセットに失敗しました",
-      description: error.message,
+      description: errorMessage,
       variant: "destructive",
     });
-    return { error, data: null };
+    return { error: error instanceof Error ? error : new Error(errorMessage), data: null };
   }
 };
 
@@ -241,13 +258,14 @@ export const updatePasswordService = async (
       description: "新しいパスワードでログインできます。",
     });
     return { error: null, data };
-  } catch (error: any) {
-    console.error('パスワード更新エラー:', error.message);
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
+    console.error('パスワード更新エラー:', errorMessage);
     toast({
       title: "パスワード更新に失敗しました",
-      description: error.message,
+      description: errorMessage,
       variant: "destructive",
     });
-    return { error, data: null };
+    return { error: error instanceof Error ? error : new Error(errorMessage), data: null };
   }
 };

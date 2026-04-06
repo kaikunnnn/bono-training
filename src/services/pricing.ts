@@ -25,7 +25,7 @@ export interface PlanPrices {
 export interface GetPlanPricesResponse {
   prices: PlanPrices | null;
   source: 'frontend_cache' | 'edge_function_cache' | 'stripe_api';
-  error: any;
+  error: Error | null;
 }
 
 // フロントエンドキャッシュの設定
