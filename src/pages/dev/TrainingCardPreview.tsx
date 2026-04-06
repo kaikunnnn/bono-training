@@ -381,7 +381,7 @@ export default function TrainingCardPreview() {
                 className="mt-8 sm:mt-12 lg:mt-0"
               >
                 <NewBadge
-                  text='AI時代に生きる「デザインの進め方」をリリース'
+                  text='AI時代に活きる「デザインの進め方」をリリース'
                   href={DESIGN_CYCLE_LESSON_HREF}
                 />
               </motion.div>
@@ -471,7 +471,7 @@ export default function TrainingCardPreview() {
                 }}
               >
                 <div
-                  className={`flex gap-5 min-w-max py-5 px-8 sm:px-12 -ml-8 sm:-ml-12 ${
+                  className={`flex gap-5 min-w-max pt-5 pb-7 px-8 sm:px-12 -ml-8 sm:-ml-12 ${
                     !shouldCenterCards
                       ? 'lg:px-[120px] lg:-ml-[88px]'
                       : 'lg:pl-0 lg:pr-[120px] lg:ml-0'
@@ -520,13 +520,19 @@ export default function TrainingCardPreview() {
           <p className="text-[13px] font-bold text-[rgba(41,53,37,0.8)] leading-[27px] whitespace-nowrap">
             キャリアパートナーシップ
           </p>
-          <div className="w-[149px] h-[61px]">
+          <a
+            href="https://beauty.gmo/recruit-design/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block h-[61px] w-[149px] shrink-0 rounded-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f172a]"
+            aria-label="GMOビューティー デザイン採用サイト（新しいタブで開く）"
+          >
             <img
               src="/images/partners/gmo-beauty.png"
               alt="GMO BEAUTY"
-              className="w-full h-full object-cover"
+              className="h-full w-full rounded-none object-cover"
             />
-          </div>
+          </a>
         </div>
       </section>
 

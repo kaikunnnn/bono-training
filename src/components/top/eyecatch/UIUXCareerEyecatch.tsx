@@ -47,7 +47,7 @@ export default function UIUXCareerEyecatch() {
           style={{ zIndex: 3 }}
         >
           <div
-            className="w-[257px] h-[257px] shadow-[0px_1px_32px_0px_rgba(0,0,0,0.2)] transition-transform duration-[800ms] ease-out rotate-[-2deg] group-hover:rotate-[4deg] group-hover:scale-105"
+            className="w-[257px] h-[257px] transition-transform duration-[800ms] ease-out rotate-[-2deg] group-hover:rotate-[4deg] group-hover:scale-105"
           >
             <img
               src="/images/training-cards/uiux-career/card-127.png"
@@ -68,7 +68,7 @@ export default function UIUXCareerEyecatch() {
             <img
               src="/images/training-cards/uiux-career/card-124.png"
               alt="UIUX Career Card 4"
-              className="w-full h-full object-cover rounded-[20px]"
+              className="w-full h-full object-cover rounded-none"
             />
           </div>
         </div>

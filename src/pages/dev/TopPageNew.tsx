@@ -24,7 +24,8 @@ import RoadmapCardV2 from "@/components/roadmap/RoadmapCardV2";
 import type { GradientPreset } from "@/components/roadmap/RoadmapCardV2";
 import TrainingCard, { TRAINING_CARDS_DATA } from "@/components/top/TrainingCard";
 import LessonCard from "@/components/lessons/LessonCard";
-import GoalButton from "@/components/top/GoalButton";
+import GoalButton, { type GoalButtonData } from "@/components/top/GoalButton";
+import { GOAL_FLUENT_ICONS } from "@/components/top/goalFluentIcons";
 
 // ============================================
 // 型定義
@@ -129,16 +130,33 @@ function CTAButtonSecondary({
 /** セクションヘッダー（ゴール別セクション用） */
 function GoalSectionHeader({
   icon,
+  iconSrc,
+  iconAlt,
   title,
   description,
 }: {
   icon: string;
+  iconSrc?: string;
+  iconAlt?: string;
   title: ReactNode;
   description: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 sm:gap-4 py-10 sm:py-12 lg:pt-8 lg:pb-[56px] px-4 sm:px-8 lg:px-22 border-b border-[#d6d6d6]">
-      <span className="text-[32px] sm:text-[36px] lg:text-[42px]">{icon}</span>
+    <div className="flex flex-col items-center gap-3 sm:gap-4 py-10 sm:py-12 lg:pt-10 lg:pb-[56px] px-4 sm:px-8 lg:px-22 border-b border-[#d6d6d6]">
+      <div className="flex h-8 w-8 items-center justify-center sm:h-9 sm:w-9 lg:h-[42px] lg:w-[42px]">
+        {iconSrc ? (
+          <img
+            src={iconSrc}
+            alt={iconAlt ?? ""}
+            className="h-full w-full object-contain select-none"
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+        ) : (
+          <span className="text-[32px] leading-none sm:text-[36px] lg:text-[42px]">{icon}</span>
+        )}
+      </div>
       <h2 className="flex flex-col items-center gap-y-2 sm:gap-y-3 text-xl sm:text-2xl lg:text-[32px] font-extrabold text-center text-text-primary leading-[1.5] font-['Rounded_Mplus_1c',sans-serif]">
         {title}
       </h2>
@@ -153,10 +171,29 @@ function GoalSectionHeader({
 // ゴールボタンデータ
 // ============================================
 
-const GOAL_BUTTONS_DATA = [
-  { icon: "✨", text: "UIUXデザイナーに転職", href: "#section-career" },
-  { icon: "🔧", text: "ユーザー課題を解決", href: "#section-ux" },
-  { icon: "🛸", text: "使いやすいUIを提案", href: "#section-ui" },
+/** ゴールボタン（3つ）— `GOAL_FLUENT_ICONS` と同じアセット */
+const GOAL_BUTTONS_DATA: GoalButtonData[] = [
+  {
+    icon: GOAL_FLUENT_ICONS.career.emoji,
+    iconSrc: GOAL_FLUENT_ICONS.career.src,
+    iconAlt: GOAL_FLUENT_ICONS.career.alt,
+    text: "UIUXデザイナーに転職",
+    href: "#section-career",
+  },
+  {
+    icon: GOAL_FLUENT_ICONS.ux.emoji,
+    iconSrc: GOAL_FLUENT_ICONS.ux.src,
+    iconAlt: GOAL_FLUENT_ICONS.ux.alt,
+    text: "ユーザー課題を解決",
+    href: "#section-ux",
+  },
+  {
+    icon: GOAL_FLUENT_ICONS.ui.emoji,
+    iconSrc: GOAL_FLUENT_ICONS.ui.src,
+    iconAlt: GOAL_FLUENT_ICONS.ui.alt,
+    text: "使いやすいUIを提案",
+    href: "#section-ui",
+  },
 ];
 
 // ============================================
@@ -307,7 +344,7 @@ export default function TopPageNew() {
                   className="mt-8 sm:mt-12 lg:mt-0"
                 >
                   <NewBadge
-                    text='AI時代に生きる「デザインの進め方」をリリース'
+                    text='AI時代に活きる「デザインの進め方」をリリース'
                     href={DESIGN_CYCLE_LESSON_HREF}
                   />
                 </motion.div>
@@ -379,7 +416,7 @@ export default function TopPageNew() {
                   className="overflow-x-auto overflow-y-visible scrollbar-hide py-4"
                 >
                   <div
-                    className={`flex gap-5 min-w-max py-5 px-8 sm:px-12 -ml-8 sm:-ml-12 ${
+                    className={`flex gap-5 min-w-max pt-5 pb-7 px-8 sm:px-12 -ml-8 sm:-ml-12 ${
                       !shouldCenterCards
                         ? 'lg:px-[120px] lg:-ml-[88px]'
                         : 'lg:pl-0 lg:pr-[120px] lg:ml-0'
@@ -416,13 +453,19 @@ export default function TopPageNew() {
             <p className="text-[13px] font-bold text-[rgba(41,53,37,0.8)] leading-[27px] whitespace-nowrap">
               キャリアパートナーシップ
             </p>
-            <div className="w-[149px] h-[61px]">
+            <a
+              href="https://beauty.gmo/recruit-design/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block h-[61px] w-[149px] shrink-0 rounded-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f172a]"
+              aria-label="GMOビューティー デザイン採用サイト（新しいタブで開く）"
+            >
               <img
                 src="/images/partners/gmo-beauty.png"
                 alt="GMO BEAUTY"
-                className="w-full h-full object-cover"
+                className="h-full w-full rounded-none object-cover"
               />
-            </div>
+            </a>
           </div>
         </section>
 
@@ -449,6 +492,8 @@ export default function TopPageNew() {
                 <GoalButton
                   key={goal.text}
                   icon={goal.icon}
+                  iconSrc={goal.iconSrc}
+                  iconAlt={goal.iconAlt}
                   text={goal.text}
                   href={goal.href}
                 />
@@ -465,7 +510,9 @@ export default function TopPageNew() {
         <section id="section-career" className="py-6 sm:py-8">
           <div className="bg-[rgba(70,87,83,0.04)] rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] pt-6 pb-6">
             <GoalSectionHeader
-              icon="✨"
+              icon={GOAL_FLUENT_ICONS.career.emoji}
+              iconSrc={GOAL_FLUENT_ICONS.career.src}
+              iconAlt={GOAL_FLUENT_ICONS.career.alt}
               title={
                 <>
                   <span className="block">UIUXデザイナーに転職</span>
@@ -590,7 +637,9 @@ export default function TopPageNew() {
         <section id="section-ux" className="py-6 sm:py-8">
           <div className="bg-[rgba(70,87,83,0.04)] rounded-[24px] sm:rounded-[32px] lg:rounded-[40px]">
             <GoalSectionHeader
-              icon="🔧"
+              icon={GOAL_FLUENT_ICONS.ux.emoji}
+              iconSrc={GOAL_FLUENT_ICONS.ux.src}
+              iconAlt={GOAL_FLUENT_ICONS.ux.alt}
               title={
                 <>
                   <span className="block">ユーザー課題を解決する</span>
@@ -668,7 +717,9 @@ export default function TopPageNew() {
         <section id="section-ui" className="py-6 sm:py-8 pb-16 sm:pb-20 lg:pb-24">
           <div className="bg-[rgba(70,87,83,0.04)] rounded-[24px] sm:rounded-[32px] lg:rounded-[40px]">
             <GoalSectionHeader
-              icon="🛸"
+              icon={GOAL_FLUENT_ICONS.ui.emoji}
+              iconSrc={GOAL_FLUENT_ICONS.ui.src}
+              iconAlt={GOAL_FLUENT_ICONS.ui.alt}
               title={
                 <>
                   <span className="block">使いやすいUI体験を</span>

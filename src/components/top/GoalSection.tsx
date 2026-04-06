@@ -7,8 +7,10 @@ interface GoalSectionProps {
   title: string;
   /** ゴールの説明文 */
   description: string;
-  /** 説明文の後に表示する絵文字（任意） */
+  /** 説明文の後に表示する絵文字（任意、`emojiSrc` 未指定時） */
   emoji?: string;
+  emojiSrc?: string;
+  emojiAlt?: string;
   /** セクション内のコンテンツ */
   children: React.ReactNode;
   /** 追加のクラス名 */
@@ -47,6 +49,8 @@ export default function GoalSection({
   title,
   description,
   emoji,
+  emojiSrc,
+  emojiAlt,
   children,
   className,
 }: GoalSectionProps) {
@@ -63,6 +67,8 @@ export default function GoalSection({
         title={title}
         description={description}
         emoji={emoji}
+        emojiSrc={emojiSrc}
+        emojiAlt={emojiAlt}
       />
 
       {/* 区切り線 */}

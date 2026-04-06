@@ -6,8 +6,11 @@ interface GoalSectionHeaderProps {
   title: string;
   /** 説明文 */
   description: string;
-  /** 説明文の後に表示する絵文字（任意） */
+  /** 説明文の後に表示する絵文字（`emojiSrc` 未指定時） */
   emoji?: string;
+  /** Fluent Emoji 3D 等の画像（指定時はこちらを優先） */
+  emojiSrc?: string;
+  emojiAlt?: string;
   /** 追加のクラス名 */
   className?: string;
 }
@@ -27,6 +30,8 @@ export default function GoalSectionHeader({
   title,
   description,
   emoji,
+  emojiSrc,
+  emojiAlt,
   className,
 }: GoalSectionHeaderProps) {
   return (
@@ -50,10 +55,21 @@ export default function GoalSectionHeader({
           <p className="text-base sm:text-lg lg:text-xl font-normal text-text-secondary/80 leading-[1.35]">
             {description}
           </p>
-          {emoji && (
-            <span className="text-lg sm:text-[22px]" role="img" aria-hidden="true">
-              {emoji}
-            </span>
+          {emojiSrc ? (
+            <img
+              src={emojiSrc}
+              alt={emojiAlt ?? ""}
+              className="h-5 w-5 shrink-0 object-contain sm:h-[22px] sm:w-[22px]"
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+          ) : (
+            emoji && (
+              <span className="text-lg sm:text-[22px]" role="img" aria-hidden="true">
+                {emoji}
+              </span>
+            )
           )}
         </div>
       </div>

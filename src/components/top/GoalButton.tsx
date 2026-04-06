@@ -22,8 +22,17 @@ function FramedArrowDownIcon({ className }: { className?: string }) {
 }
 
 export interface GoalButtonProps {
-  /** アイコン絵文字 */
+  /**
+   * フォールバック用の絵文字（`iconSrc` 未指定時、または画像読み込み前の意味付け用）
+   */
   icon: string;
+  /**
+   * Fluent Emoji 3D などのアイコン画像（`/public` からのパス、例: `/images/goal-buttons/career.webp`）
+   * 指定時はこちらを優先表示する
+   */
+  iconSrc?: string;
+  /** `iconSrc` 用の代替テキスト。装飾のみなら空文字でよい（隣にラベルがあるため） */
+  iconAlt?: string;
   /** ボタンテキスト */
   text: string;
   /** リンク先（内部リンクまたはアンカー） */
@@ -31,6 +40,9 @@ export interface GoalButtonProps {
   /** 追加のクラス名 */
   className?: string;
 }
+
+/** データ配列用（className なし） */
+export type GoalButtonData = Omit<GoalButtonProps, 'className'>;
 
 /**
  * ゴール選択ボタンコンポーネント
@@ -47,12 +59,21 @@ export interface GoalButtonProps {
  * ```tsx
  * <GoalButton
  *   icon="✨"
+ *   iconSrc="/images/goal-buttons/career.webp"
+ *   iconAlt=""
  *   text="UI/UXデザイナーに転職"
  *   href="#section-career"
  * />
  * ```
  */
-export default function GoalButton({ icon, text, href, className }: GoalButtonProps) {
+export default function GoalButton({
+  icon,
+  iconSrc,
+  iconAlt,
+  text,
+  href,
+  className,
+}: GoalButtonProps) {
   return (
     <Link
       to={href}
@@ -71,8 +92,21 @@ export default function GoalButton({ icon, text, href, className }: GoalButtonPr
         className
       )}
     >
-      {/* アイコン */}
-      <span className="text-2xl sm:text-[28px] lg:text-[32px] mb-1">{icon}</span>
+      {/* アイコン: Fluent 等の画像、または絵文字 */}
+      <div className="mb-1 flex h-6 w-6 shrink-0 items-center justify-center sm:h-7 sm:w-7 lg:h-8 lg:w-8">
+        {iconSrc ? (
+          <img
+            src={iconSrc}
+            alt={iconAlt ?? ''}
+            className="h-full w-full object-contain select-none"
+            loading="lazy"
+            decoding="async"
+            draggable={false}
+          />
+        ) : (
+          <span className="text-2xl leading-none sm:text-[28px] lg:text-[32px]">{icon}</span>
+        )}
+      </div>
 
       {/* テキスト + 矢印 */}
       <div className="flex items-center gap-1.5">

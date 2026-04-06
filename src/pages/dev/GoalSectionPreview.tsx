@@ -2,6 +2,7 @@ import Layout from "@/components/layout/Layout";
 import GoalSection, {
   GoalSectionBlock,
 } from "@/components/top/GoalSection";
+import { GOAL_FLUENT_ICONS } from "@/components/top/goalFluentIcons";
 import RoadmapCardV2 from "@/components/roadmap/RoadmapCardV2";
 import ContentCard from "@/components/common/ContentCard";
 import DottedDivider from "@/components/common/DottedDivider";
@@ -31,7 +32,9 @@ export default function GoalSectionPreview() {
           <GoalSection
             title="UIUX転職・キャリアチェンジしたい"
             description="ユーザーに受け入れられるUI体験のための、表現の「ふつう」の構築方法を学ぶよ"
-            emoji="✌️"
+            emoji={GOAL_FLUENT_ICONS.career.emoji}
+            emojiSrc={GOAL_FLUENT_ICONS.career.src}
+            emojiAlt={GOAL_FLUENT_ICONS.career.alt}
           >
             {/* コンテンツブロック */}
             <GoalSectionBlock
