@@ -97,23 +97,28 @@ export interface RoadmapListItem {
  * NOTE: 開発中は全ロードマップを表示（本番リリース時にisPublishedフィルタを有効化）
  */
 async function fetchRoadmaps(): Promise<RoadmapListItem[]> {
-  // TODO: 本番リリース時に isPublished == true フィルタを復活させる
-  const query = `*[_type == "roadmap"] | order(order asc) {
-    _id,
-    title,
-    shortTitle,
-    slug,
-    description,
-    tagline,
-    "thumbnailUrl": thumbnail.asset->url,
-    gradientPreset,
-    estimatedDuration,
-    "stepCount": count(steps),
-    order,
-    isPublished
-  }`;
+  try {
+    // TODO: 本番リリース時に isPublished == true フィルタを復活させる
+    const query = `*[_type == "roadmap"] | order(order asc) {
+      _id,
+      title,
+      shortTitle,
+      slug,
+      description,
+      tagline,
+      "thumbnailUrl": thumbnail.asset->url,
+      gradientPreset,
+      estimatedDuration,
+      "stepCount": count(steps),
+      order,
+      isPublished
+    }`;
 
-  return client.fetch(query);
+    return client.fetch(query);
+  } catch (error) {
+    console.error('ロードマップ一覧の取得に失敗:', error);
+    throw new Error('ロードマップ一覧の読み込みに失敗しました。ページを更新してもう一度お試しください。');
+  }
 }
 
 /**
@@ -132,37 +137,42 @@ export function useRoadmaps() {
  * ロードマップ詳細を取得
  */
 async function fetchRoadmapBySlug(slug: string): Promise<SanityRoadmapDetail | null> {
-  const query = `*[_type == "roadmap" && slug.current == $slug][0] {
-    _id,
-    title,
-    shortTitle,
-    slug,
-    description,
-    tagline,
-    "thumbnailUrl": thumbnail.asset->url,
-    "heroImageUrl": heroImage.asset->url,
-    gradientPreset,
-    estimatedDuration,
-    changingLandscape,
-    interestingPerspectives,
-    order,
-    isPublished,
-    steps[] {
-      _key,
-      // 両方のフィールド名に対応: title/stepTitle, goals/stepGoals
-      "title": coalesce(title, stepTitle),
-      "goals": coalesce(goals, stepGoals),
-      sections[] {
+  try {
+    const query = `*[_type == "roadmap" && slug.current == $slug][0] {
+      _id,
+      title,
+      shortTitle,
+      slug,
+      description,
+      tagline,
+      "thumbnailUrl": thumbnail.asset->url,
+      "heroImageUrl": heroImage.asset->url,
+      gradientPreset,
+      estimatedDuration,
+      changingLandscape,
+      interestingPerspectives,
+      order,
+      isPublished,
+      steps[] {
         _key,
-        // 両方のフィールド名に対応: title/sectionTitle
-        "title": coalesce(title, sectionTitle),
-        description,
-        ${CONTENTS_PROJECTION}
+        // 両方のフィールド名に対応: title/stepTitle, goals/stepGoals
+        "title": coalesce(title, stepTitle),
+        "goals": coalesce(goals, stepGoals),
+        sections[] {
+          _key,
+          // 両方のフィールド名に対応: title/sectionTitle
+          "title": coalesce(title, sectionTitle),
+          description,
+          ${CONTENTS_PROJECTION}
+        }
       }
-    }
-  }`;
+    }`;
 
-  return client.fetch(query, { slug });
+    return client.fetch(query, { slug });
+  } catch (error) {
+    console.error(`ロードマップ詳細の取得に失敗 (slug: ${slug}):`, error);
+    throw new Error('ロードマップの読み込みに失敗しました。ページを更新してもう一度お試しください。');
+  }
 }
 
 /**
@@ -182,37 +192,42 @@ export function useRoadmap(slug: string | undefined) {
  * 全ロードマップ詳細を取得（プレビュー用）
  */
 async function fetchAllRoadmapsWithDetails(): Promise<SanityRoadmapDetail[]> {
-  const query = `*[_type == "roadmap"] | order(order asc) {
-    _id,
-    title,
-    shortTitle,
-    slug,
-    description,
-    tagline,
-    "thumbnailUrl": thumbnail.asset->url,
-    "heroImageUrl": heroImage.asset->url,
-    gradientPreset,
-    estimatedDuration,
-    changingLandscape,
-    interestingPerspectives,
-    order,
-    isPublished,
-    steps[] {
-      _key,
-      // 両方のフィールド名に対応: title/stepTitle, goals/stepGoals
-      "title": coalesce(title, stepTitle),
-      "goals": coalesce(goals, stepGoals),
-      sections[] {
+  try {
+    const query = `*[_type == "roadmap"] | order(order asc) {
+      _id,
+      title,
+      shortTitle,
+      slug,
+      description,
+      tagline,
+      "thumbnailUrl": thumbnail.asset->url,
+      "heroImageUrl": heroImage.asset->url,
+      gradientPreset,
+      estimatedDuration,
+      changingLandscape,
+      interestingPerspectives,
+      order,
+      isPublished,
+      steps[] {
         _key,
-        // 両方のフィールド名に対応: title/sectionTitle
-        "title": coalesce(title, sectionTitle),
-        description,
-        ${CONTENTS_PROJECTION}
+        // 両方のフィールド名に対応: title/stepTitle, goals/stepGoals
+        "title": coalesce(title, stepTitle),
+        "goals": coalesce(goals, stepGoals),
+        sections[] {
+          _key,
+          // 両方のフィールド名に対応: title/sectionTitle
+          "title": coalesce(title, sectionTitle),
+          description,
+          ${CONTENTS_PROJECTION}
+        }
       }
-    }
-  }`;
+    }`;
 
-  return client.fetch(query);
+    return client.fetch(query);
+  } catch (error) {
+    console.error('全ロードマップ詳細の取得に失敗:', error);
+    throw new Error('ロードマップ一覧の読み込みに失敗しました。ページを更新してもう一度お試しください。');
+  }
 }
 
 /**

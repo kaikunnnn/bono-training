@@ -51,25 +51,30 @@ export type IntegratedLesson = SanityLesson;
  * 詳細ページでは引き続きWebflowデータを取得可能（useLessonDetail hook）
  */
 async function fetchLessons(): Promise<SanityLesson[]> {
-  const query = `*[_type == "lesson"] | order(_createdAt desc) {
-    _id,
-    title,
-    slug,
-    description,
-    thumbnail,
-    thumbnailUrl,
-    iconImage,
-    iconImageUrl,
-    category,
-    "categoryTitle": category->title,
-    categories[]->{title},
-    "categoryTitles": categories[]->title,
-    tags,
-    isPremium,
-    webflowSource
-  }`;
+  try {
+    const query = `*[_type == "lesson"] | order(_createdAt desc) {
+      _id,
+      title,
+      slug,
+      description,
+      thumbnail,
+      thumbnailUrl,
+      iconImage,
+      iconImageUrl,
+      category,
+      "categoryTitle": category->title,
+      categories[]->{title},
+      "categoryTitles": categories[]->title,
+      tags,
+      isPremium,
+      webflowSource
+    }`;
 
-  return client.fetch(query);
+    return client.fetch(query);
+  } catch (error) {
+    console.error('レッスン一覧の取得に失敗:', error);
+    throw new Error('レッスン一覧の読み込みに失敗しました。ページを更新してもう一度お試しください。');
+  }
 }
 
 /**
@@ -107,19 +112,24 @@ export interface RoadmapLessonMapping {
  * - contentItem型: steps[].sections[].contents[] が { _type: "contentItem", lesson: { _ref: "lessonId" } }
  */
 async function fetchRoadmapLessonMappings(): Promise<RoadmapLessonMapping[]> {
-  const query = `*[_type == "roadmap" && isPublished == true] {
-    "roadmapSlug": slug.current,
-    "roadmapTitle": title,
-    "roadmapShortTitle": shortTitle,
-    "lessonIds": steps[].sections[].contents[]{
-      // 直接参照型
-      _type == "reference" => @->{ _id, _type },
-      // contentItem型
-      _type == "contentItem" && itemType == "lesson" => lesson->{ _id, _type }
-    }[_type == "lesson"]._id
-  }`;
+  try {
+    const query = `*[_type == "roadmap" && isPublished == true] {
+      "roadmapSlug": slug.current,
+      "roadmapTitle": title,
+      "roadmapShortTitle": shortTitle,
+      "lessonIds": steps[].sections[].contents[]{
+        // 直接参照型
+        _type == "reference" => @->{ _id, _type },
+        // contentItem型
+        _type == "contentItem" && itemType == "lesson" => lesson->{ _id, _type }
+      }[_type == "lesson"]._id
+    }`;
 
-  return client.fetch(query);
+    return client.fetch(query);
+  } catch (error) {
+    console.error('ロードマップ→レッスンマッピングの取得に失敗:', error);
+    throw new Error('ロードマップとレッスンの関連情報の読み込みに失敗しました。');
+  }
 }
 
 /**

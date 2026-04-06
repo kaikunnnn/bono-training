@@ -60,83 +60,98 @@ interface SanityGuideForSearch {
  * 検索用のレッスンデータを取得
  */
 async function fetchLessonsForSearch(): Promise<SanityLessonForSearch[]> {
-  const query = `*[_type == "lesson"] | order(_createdAt desc) {
-    _id,
-    title,
-    slug,
-    description,
-    thumbnailUrl,
-    "categoryTitle": category->title,
-    tags,
-    isPremium,
-    "articleCount": count(quests[]->articles[])
-  }`;
-  return client.fetch(query);
+  try {
+    const query = `*[_type == "lesson"] | order(_createdAt desc) {
+      _id,
+      title,
+      slug,
+      description,
+      thumbnailUrl,
+      "categoryTitle": category->title,
+      tags,
+      isPremium,
+      "articleCount": count(quests[]->articles[])
+    }`;
+    return client.fetch(query);
+  } catch (error) {
+    console.error('検索用レッスンデータの取得に失敗:', error);
+    throw new Error('検索データの読み込みに失敗しました。');
+  }
 }
 
 /**
  * 検索用の記事データを取得（Lesson→Quest→Articleの構造をフラット化）
  */
 async function fetchArticlesForSearch(): Promise<SanityArticleForSearch[]> {
-  const query = `*[_type == "lesson"] {
-    "lessonTitle": title,
-    "lessonSlug": slug.current,
-    "articles": quests[]->articles[]-> {
-      _id,
-      title,
-      slug,
-      excerpt,
-      thumbnailUrl,
-      tags,
-      isPremium,
-      videoDuration
-    }
-  }`;
+  try {
+    const query = `*[_type == "lesson"] {
+      "lessonTitle": title,
+      "lessonSlug": slug.current,
+      "articles": quests[]->articles[]-> {
+        _id,
+        title,
+        slug,
+        excerpt,
+        thumbnailUrl,
+        tags,
+        isPremium,
+        videoDuration
+      }
+    }`;
 
-  const lessons = await client.fetch<
-    {
-      lessonTitle: string;
-      lessonSlug: string;
-      articles: SanityArticleForSearch[];
-    }[]
-  >(query);
+    const lessons = await client.fetch<
+      {
+        lessonTitle: string;
+        lessonSlug: string;
+        articles: SanityArticleForSearch[];
+      }[]
+    >(query);
 
-  // フラット化して親レッスン情報を付与
-  const allArticles: SanityArticleForSearch[] = [];
-  for (const lesson of lessons) {
-    if (lesson.articles) {
-      for (const article of lesson.articles) {
-        if (article) {
-          allArticles.push({
-            ...article,
-            lessonTitle: lesson.lessonTitle,
-            lessonSlug: lesson.lessonSlug,
-          });
+    // フラット化して親レッスン情報を付与
+    const allArticles: SanityArticleForSearch[] = [];
+    for (const lesson of lessons) {
+      if (lesson.articles) {
+        for (const article of lesson.articles) {
+          if (article) {
+            allArticles.push({
+              ...article,
+              lessonTitle: lesson.lessonTitle,
+              lessonSlug: lesson.lessonSlug,
+            });
+          }
         }
       }
     }
+    return allArticles;
+  } catch (error) {
+    console.error('検索用記事データの取得に失敗:', error);
+    throw new Error('検索データの読み込みに失敗しました。');
   }
-  return allArticles;
 }
 
 /**
  * 検索用のナレッジ（ガイド相当）データを取得
  */
 async function fetchKnowledgeForSearch(): Promise<SanityGuideForSearch[]> {
-  const query = `*[_type == "knowledge"] | order(publishedAt desc) {
-    _id,
-    title,
-    slug,
-    excerpt,
-    "thumbnailUrl": thumbnail.asset->url,
-    "category": category-> {
+  try {
+    const query = `*[_type == "knowledge"] | order(publishedAt desc) {
+      _id,
       title,
-      slug
-    },
-    tags,
-    publishedAt
-  }`;
-  return client.fetch(query);
+      slug,
+      excerpt,
+      "thumbnailUrl": thumbnail.asset->url,
+      "category": category-> {
+        title,
+        slug
+      },
+      tags,
+      publishedAt
+    }`;
+    return client.fetch(query);
+  } catch (error) {
+    console.error('検索用ナレッジデータの取得に失敗:', error);
+    throw new Error('検索データの読み込みに失敗しました。');
+  }
 }
 
 // ============================================
@@ -216,19 +231,24 @@ function convertKnowledgeToSearchResult(
 // ============================================
 
 async function fetchAllSearchData(): Promise<SearchResult[]> {
-  const [lessons, articles, knowledge] = await Promise.all([
-    fetchLessonsForSearch(),
-    fetchArticlesForSearch(),
-    fetchKnowledgeForSearch(),
-  ]);
+  try {
+    const [lessons, articles, knowledge] = await Promise.all([
+      fetchLessonsForSearch(),
+      fetchArticlesForSearch(),
+      fetchKnowledgeForSearch(),
+    ]);
 
-  const results: SearchResult[] = [
-    ...lessons.map(convertLessonToSearchResult),
-    ...articles.map(convertArticleToSearchResult),
-    ...knowledge.map(convertKnowledgeToSearchResult),
-  ];
+    const results: SearchResult[] = [
+      ...lessons.map(convertLessonToSearchResult),
+      ...articles.map(convertArticleToSearchResult),
+      ...knowledge.map(convertKnowledgeToSearchResult),
+    ];
 
-  return results;
+    return results;
+  } catch (error) {
+    console.error('統合検索データの取得に失敗:', error);
+    throw new Error('検索データの読み込みに失敗しました。ページを更新してもう一度お試しください。');
+  }
 }
 
 // ============================================
