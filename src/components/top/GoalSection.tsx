@@ -20,7 +20,7 @@ interface GoalSectionProps {
 /**
  * ゴールセクション
  *
- * トップページの目的別セクションのラッパー
+ * トップの目的別セクションのラッパー
  * - 薄い背景色（bg-muted）
  * - 角丸40px
  * - GoalSectionHeader + コンテンツエリア

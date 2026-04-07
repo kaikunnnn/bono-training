@@ -1,5 +1,5 @@
 /**
- * トップページ新デザイン（Figma: PRD🏠_topUI_newBONO2026 node-id: 178-28863）
+ * トップ新デザイン（Figma: PRD🏠_topUI_newBONO2026 node-id: 178-28863）
  *
  * セクション構成:
  * 1. Hero Section - キャッチコピー + CTAボタン
@@ -423,7 +423,7 @@ export default function TopPageNew() {
                     initial={PATTERN2_ANIMATION.initial}
                     animate={PATTERN2_ANIMATION.animate}
                     transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.3 }}
-                    className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl text-[#0f172a] leading-[1.76]"
+                    className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl text-[#0f172a] leading-[188%]"
                   >
                     <p className="mb-0">ボノはユーザー起点で未来のワクワクを</p>
                     <p className="mb-0">
@@ -501,7 +501,7 @@ export default function TopPageNew() {
         {/* ================================================
             セクション2: Partnership Section
         ================================================ */}
-        <section className="border-b border-[#dfdfdf] py-6 px-4 sm:px-6 mt-8 sm:mt-12">
+        <section className="py-6 px-4 sm:px-6">
           <div className="flex items-center justify-center gap-2">
             <p className="text-[13px] font-bold text-[rgba(41,53,37,0.8)] leading-[27px] whitespace-nowrap">
               キャリアパートナーシップ
@@ -560,7 +560,7 @@ export default function TopPageNew() {
         ================================================ */}
 
         {/* section-career */}
-        <section id="section-career" className="py-6 sm:py-8">
+        <section id="section-career" className="py-6 sm:py-8 mx-4">
           <div className="bg-[rgba(70,87,83,0.04)] rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] pt-6 pb-6">
             <GoalSectionHeader
               icon={GOAL_FLUENT_ICONS.career.emoji}
@@ -585,7 +585,7 @@ export default function TopPageNew() {
               <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
               <SectionHeading
                 label="ロードマップ"
-                title="デザインスキルを獲得して転職を目指そう"
+                title="UIUXデザイナー転職のコンテンツ"
                 showUnderline={false}
               />
 
@@ -632,7 +632,7 @@ export default function TopPageNew() {
             <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
               <SectionHeading
                 label="読みもの"
-                title="お役立ちコンテンツ"
+                title="転職の参考になるコンテンツ"
                 showUnderline={false}
               />
 
@@ -672,7 +672,7 @@ export default function TopPageNew() {
               <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
               <SectionHeading
                 label="ロードマップ"
-                title="デザインスキルを獲得して転職を目指そう"
+                title="課題解決スキルを獲得しよう"
                 showUnderline={false}
               />
 
@@ -708,11 +708,11 @@ export default function TopPageNew() {
             </div>
 
             <div className="max-w-[1120px] mx-auto">
-            {/* サブセクション: お役立ちコンテンツ */}
+            {/* サブセクション: 読みもの */}
             <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
               <SectionHeading
                 label="読みもの"
-                title="お役立ちコンテンツ"
+                title="UXリサーチと要件定義を習得しよう"
                 showUnderline={false}
               />
 
@@ -755,7 +755,7 @@ export default function TopPageNew() {
               <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
               <SectionHeading
                 label="ロードマップ"
-                title="デザインスキルを獲得して転職を目指そう"
+                title="UIデザインの基本を体系的に習得しよう"
                 showUnderline={false}
               />
 
@@ -820,7 +820,7 @@ export default function TopPageNew() {
             <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
               <SectionHeading
                 label="読みもの"
-                title="お役立ちコンテンツ"
+                title="UIデザインの原則・進め方を学ぼう"
                 showUnderline={false}
               />
 

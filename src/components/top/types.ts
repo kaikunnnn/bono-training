@@ -1,5 +1,5 @@
 /**
- * トップページ トレーニングカード 型定義
+ * トップ トレーニングカード 型定義
  */
 
 export type EyecatchType = 'info-arch' | 'uiux-career' | 'ux-design' | 'ui-visual';

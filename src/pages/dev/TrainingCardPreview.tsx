@@ -409,7 +409,7 @@ export default function TrainingCardPreview() {
                   initial={PATTERN2_ANIMATION.initial}
                   animate={PATTERN2_ANIMATION.animate}
                   transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.3 }}
-                  className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl text-[#0f172a] leading-[1.76]"
+                  className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl text-[#0f172a] leading-[188%]"
                 >
                   <p className="mb-0">ボノはユーザー起点で未来のワクワクを</p>
                   <p className="mb-0">

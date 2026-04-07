@@ -47,7 +47,7 @@ export type GoalButtonData = Omit<GoalButtonProps, 'className'>;
 /**
  * ゴール選択ボタンコンポーネント
  *
- * トップページの「なりたいゴール」セクションで使用される楕円形ボタン
+ * トップの「なりたいゴール」セクションで使用される楕円形ボタン
  *
  * デザイン仕様:
  * - 楕円形（rounded-[200px]）

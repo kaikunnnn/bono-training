@@ -1,5 +1,5 @@
 /**
- * トップページ ヒーローセクション
+ * トップ ヒーローセクション
  *
  * Figma: PRD🏠_topUI_newBONO2026 node-id: 77-16766
  *
@@ -95,7 +95,7 @@ function CTAButton({
   );
 }
 
-/** ロードマップカード（トップページ用・シンプル版） */
+/** ロードマップカード（トップ用・シンプル版） */
 function TopRoadmapCard({
   slug,
   title,
