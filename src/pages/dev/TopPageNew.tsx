@@ -207,7 +207,7 @@ const CAREER_GUIDE_CARD: ContentCardProps = {
   label: 'ガイド',
   title: '未経験からのUIUXデザイナー転職攻略ガイド',
   description: '使いやすいUI体験をつくるための表現の基礎を身につけよう。',
-  thumbnailSrc: '/images/content/career/career-guide.png',
+  thumbnailSrc: '/images/content/career/career-guide.jpg',
   thumbnailAlt: 'キャリアガイド',
   fallbackEmoji: '📚',
   variant: 'large',

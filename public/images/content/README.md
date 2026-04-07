@@ -16,7 +16,7 @@ content/
 ### 📁 career/ (キャリアセクション)
 
 #### ガイドカード（大）
-- **ファイル名**: `career-guide.png`
+- **ファイル名**: `career-guide.jpg`
 - **推奨サイズ**: 800×500px (横長)
 - **説明**: 「未経験からのUIUXデザイナー転職攻略ガイド」のサムネイル
 
@@ -60,7 +60,7 @@ content/
 
 画像ファイルが配置されていない場合、自動的にフォールバック絵文字が表示されます。
 
-- career-guide.png → 📚
+- career-guide.jpg → 📚
 - interviews.png → 👩‍💻
 - feedback.png → 💬
 - outputs.png → 📝
