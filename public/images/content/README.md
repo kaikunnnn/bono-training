@@ -16,20 +16,20 @@ content/
 ### 📁 career/ (キャリアセクション)
 
 #### ガイドカード（大）
-- **ファイル名**: `career-guide.jpg`
+- **ファイル名**: `career-guide.png`
 - **推奨サイズ**: 800×500px (横長)
 - **説明**: 「未経験からのUIUXデザイナー転職攻略ガイド」のサムネイル
 
 #### 読みものカード（3枚）
-1. **ファイル名**: `interviews.jpg`
+1. **ファイル名**: `interviews.png`
    - **推奨サイズ**: 600×400px
    - **説明**: 「BONOで転職した人のインタビュー集」
 
-2. **ファイル名**: `feedback.jpg`
+2. **ファイル名**: `feedback.png`
    - **推奨サイズ**: 600×400px
    - **説明**: 「フィードバックでコーチをつけて学習する」
 
-3. **ファイル名**: `outputs.jpg`
+3. **ファイル名**: `outputs.png`
    - **推奨サイズ**: 600×400px
    - **説明**: 「メンバーのアウトプットnote」
 
@@ -60,10 +60,10 @@ content/
 
 画像ファイルが配置されていない場合、自動的にフォールバック絵文字が表示されます。
 
-- career-guide.jpg → 📚
-- interviews.jpg → 👩‍💻
-- feedback.jpg → 💬
-- outputs.jpg → 📝
+- career-guide.png → 📚
+- interviews.png → 👩‍💻
+- feedback.png → 💬
+- outputs.png → 📝
 
 ## 実装ファイル
 
