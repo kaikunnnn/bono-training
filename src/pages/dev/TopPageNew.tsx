@@ -622,7 +622,9 @@ export default function TopPageNew() {
             </div>
 
             <div className="max-w-[1120px] mx-auto">
-              <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+              <div className="px-4 sm:px-8 lg:px-14">
+                <DottedDivider />
+              </div>
             </div>
 
             <div className="max-w-[1120px] mx-auto">
@@ -700,7 +702,9 @@ export default function TopPageNew() {
             </div>
 
             <div className="max-w-[1120px] mx-auto">
-              <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+              <div className="px-4 sm:px-8 lg:px-14">
+                <DottedDivider />
+              </div>
             </div>
 
             <div className="max-w-[1120px] mx-auto">
@@ -806,7 +810,9 @@ export default function TopPageNew() {
             </div>
 
             <div className="max-w-[1120px] mx-auto">
-              <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+              <div className="px-4 sm:px-8 lg:px-14">
+                <DottedDivider />
+              </div>
             </div>
 
             <div className="max-w-[1120px] mx-auto">
