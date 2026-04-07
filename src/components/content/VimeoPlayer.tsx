@@ -7,6 +7,7 @@ interface VimeoPlayerProps {
   width?: string | number;
   height?: string | number;
   autoplay?: boolean;
+  muted?: boolean;
   responsive?: boolean;
   className?: string;
 }
@@ -20,6 +21,7 @@ const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
   width = '100%',
   height = 'auto',
   autoplay = false,
+  muted = false,
   responsive = true,
   className = '',
 }) => {
@@ -38,11 +40,14 @@ const VimeoPlayer: React.FC<VimeoPlayerProps> = ({
   const cleanId = extractVimeoId(vimeoId);
   const embedUrl = `https://player.vimeo.com/video/${cleanId}`;
   const queryParams = [];
-  
+
   if (autoplay) {
     queryParams.push('autoplay=1');
   }
-  
+
+  // mutedパラメータを追加（0=音声オン, 1=ミュート）
+  queryParams.push(`muted=${muted ? '1' : '0'}`);
+
   const finalUrl = queryParams.length > 0 ? `${embedUrl}?${queryParams.join('&')}` : embedUrl;
   
   return (
