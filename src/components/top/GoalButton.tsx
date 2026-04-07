@@ -74,9 +74,30 @@ export default function GoalButton({
   href,
   className,
 }: GoalButtonProps) {
+  // アンカーリンク（#で始まる）の場合は通常のaタグ、それ以外はReact RouterのLink
+  const isAnchorLink = href.startsWith('#');
+  const Component = isAnchorLink ? 'a' : Link;
+  const linkProps = isAnchorLink ? { href } : { to: href };
+
+  // スムーズスクロール処理
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (isAnchorLink) {
+      e.preventDefault();
+      const targetId = href.substring(1); // '#' を除去
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
+  const combinedProps = isAnchorLink
+    ? { ...linkProps, onClick: handleClick }
+    : linkProps;
+
   return (
-    <Link
-      to={href}
+    <Component
+      {...(combinedProps as any)}
       className={cn(
         // レイアウト
         'flex-1 flex flex-col items-center justify-center',
@@ -116,6 +137,6 @@ export default function GoalButton({
         </span>
         <FramedArrowDownIcon className="h-4 w-4 shrink-0 text-text-primary group-hover:translate-y-0.5 transition-transform" />
       </div>
-    </Link>
+    </Component>
   );
 }
