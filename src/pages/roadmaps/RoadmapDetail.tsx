@@ -114,8 +114,10 @@ export default function RoadmapDetail() {
             <ChangingLandscape data={roadmap.changingLandscape} />
             {/* ゴールと「身につくこと / カリキュラム」の間にドットボーダー */}
             {(hasInterestingPerspectives || hasCurriculum) && (
-              <div className="max-w-[1100px] mx-auto">
-                <DottedDivider />
+              <div className="px-4 md:px-8">
+                <div className="max-w-[1100px] mx-auto">
+                  <DottedDivider />
+                </div>
               </div>
             )}
           </>
@@ -127,8 +129,10 @@ export default function RoadmapDetail() {
             <InterestingPerspectives data={roadmap.interestingPerspectives} />
             {/* 「身につくこと」とカリキュラムの間にドットボーダー */}
             {hasCurriculum && (
-              <div className="max-w-[1100px] mx-auto">
-                <DottedDivider />
+              <div className="px-4 md:px-8">
+                <div className="max-w-[1100px] mx-auto">
+                  <DottedDivider />
+                </div>
               </div>
             )}
           </>

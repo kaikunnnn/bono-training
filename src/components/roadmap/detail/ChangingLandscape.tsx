@@ -19,7 +19,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
   }
 
   return (
-    <section id="changing-landscape" className="py-16 px-4 md:px-8 scroll-mt-24">
+    <section id="changing-landscape" className="py-8 px-4 md:px-8 scroll-mt-24">
       <div className="max-w-[1100px] mx-auto">
         {/* ヘッダー */}
         <div className="mb-9">

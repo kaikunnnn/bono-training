@@ -18,7 +18,7 @@ export default function CurriculumSection({ steps }: CurriculumSectionProps) {
   }
 
   return (
-    <section id="curriculum" className="py-16 px-4 md:px-8">
+    <section id="curriculum" className="py-8 px-4 md:px-8">
       <div className="max-w-[1100px] mx-auto">
         {/* セクションヘッダー - 他セクションと同じUI */}
         <div className="mb-9">
