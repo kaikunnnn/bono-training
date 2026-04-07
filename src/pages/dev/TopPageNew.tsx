@@ -621,7 +621,9 @@ export default function TopPageNew() {
             </div>
             </div>
 
-            <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+            <div className="max-w-[1120px] mx-auto">
+              <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+            </div>
 
             <div className="max-w-[1120px] mx-auto">
             {/* サブセクション: 読みもの */}
@@ -697,7 +699,9 @@ export default function TopPageNew() {
             </div>
             </div>
 
-            <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+            <div className="max-w-[1120px] mx-auto">
+              <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+            </div>
 
             <div className="max-w-[1120px] mx-auto">
             {/* サブセクション: お役立ちコンテンツ */}
@@ -801,7 +805,9 @@ export default function TopPageNew() {
             </div>
             </div>
 
-            <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+            <div className="max-w-[1120px] mx-auto">
+              <DottedDivider className="mx-4 sm:mx-8 lg:mx-14" />
+            </div>
 
             <div className="max-w-[1120px] mx-auto">
             {/* サブセクション: 読みもの */}
