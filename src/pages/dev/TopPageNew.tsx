@@ -386,7 +386,7 @@ export default function TopPageNew() {
           {/* コンテナ全体（h-[1186px] をベースにレスポンシブ調整） */}
           <div className="relative h-auto min-h-[1050px] sm:min-h-[1150px] lg:h-[1186px]">
             {/* 上部: NEWバッジ + キャッチコピー + CTAボタン */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-0 w-full max-w-[950px] flex flex-col items-center gap-8 px-4 sm:px-6 lg:px-0 pt-12 pb-0 mb-0">
+            <div className="absolute left-1/2 -translate-x-1/2 top-0 w-full max-w-[950px] flex flex-col items-center gap-8 px-4 sm:px-6 lg:px-0 pt-2 sm:pt-12 pb-0 mb-0">
               {/* コンテンツグループ */}
               <div className="flex flex-col items-center gap-8">
                 {/* NEWバッジ */}
