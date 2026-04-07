@@ -502,7 +502,7 @@ export default function TopPageNew() {
             セクション2: Partnership Section
         ================================================ */}
         <section className="py-6 px-4 sm:px-6">
-          <div className="flex items-center justify-center gap-2 sm:gap-4">
+          <div className="flex items-center justify-center gap-2">
             <p className="text-[13px] font-bold text-[rgba(41,53,37,0.8)] leading-[27px] whitespace-nowrap">
               キャリアパートナーシップ
             </p>
@@ -518,28 +518,6 @@ export default function TopPageNew() {
                 alt="GMO BEAUTY"
                 className="h-full w-full rounded-none object-cover"
               />
-            </a>
-            <a
-              href="https://beauty.gmo/recruit-design/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#2d3748] text-white text-sm font-bold rounded-md hover:bg-[#1a202c] transition-colors"
-            >
-              採用情報はこちら
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-                />
-              </svg>
             </a>
           </div>
         </section>
