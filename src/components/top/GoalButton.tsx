@@ -82,7 +82,8 @@ export default function GoalButton({
         'flex-1 flex flex-col items-center justify-center',
         // サイズ
         'h-[90px] sm:h-[100px] lg:h-[117px]',
-        'px-4 sm:px-6 lg:px-8 py-1',
+        'px-4 sm:px-6 lg:px-8',
+        'py-4 sm:py-3 lg:py-2',
         // デザイン（統一）
         'bg-surface rounded-[200px]',
         'border border-black/12',
@@ -93,7 +94,7 @@ export default function GoalButton({
       )}
     >
       {/* アイコン: Fluent 等の画像、または絵文字 */}
-      <div className="mb-1 flex h-6 w-6 shrink-0 items-center justify-center sm:h-7 sm:w-7 lg:h-8 lg:w-8">
+      <div className="mb-2 sm:mb-1.5 lg:mb-1 flex h-6 w-6 shrink-0 items-center justify-center sm:h-7 sm:w-7 lg:h-8 lg:w-8">
         {iconSrc ? (
           <img
             src={iconSrc}
