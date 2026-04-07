@@ -501,7 +501,7 @@ export default function TopPageNew() {
         {/* ================================================
             セクション2: Partnership Section
         ================================================ */}
-        <section className="py-6 px-4 sm:px-6">
+        <section className="-mt-[32px] py-6 px-4 sm:px-6">
           <div className="flex items-center justify-center gap-2">
             <p className="text-[13px] font-bold text-[rgba(41,53,37,0.8)] leading-[27px] whitespace-nowrap">
               キャリアパートナーシップ

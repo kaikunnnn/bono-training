@@ -533,7 +533,7 @@ export default function Lessons() {
     <Layout>
       <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-8 min-w-0">
         <PageHeader
-          label="Lesson"
+          label="テーマ別に鍛えよう"
           title="レッスン一覧"
           description="ワクワクするものづくりのために必要なコンテンツを選んでトレーニングしよう。"
         />
@@ -564,7 +564,7 @@ export default function Lessons() {
           <p className="text-zinc-500">レッスンがありません。</p>
         ) : activeTab === 'recommended' ? (
           /* おすすめタブ: 4つのキュレーションセクション */
-          <div className="space-y-16">
+          <div className="space-y-8">
             {RECOMMENDED_SECTIONS.map((section, index) => {
               const sectionLessons = recommendedLessons[section.id] || [];
               if (sectionLessons.length === 0) return null;
@@ -573,7 +573,7 @@ export default function Lessons() {
                 <section key={section.id}>
                   {/* セクション間のドット区切り線 */}
                   {index > 0 && (
-                    <DottedDivider className="mb-12" />
+                    <DottedDivider className="mb-8" />
                   )}
 
                   {/* セクション見出し */}
@@ -607,7 +607,7 @@ export default function Lessons() {
               <section key={section.id} id={`section-${section.id}`}>
                 {/* セクション間のドット区切り線 */}
                 {index > 0 && (
-                  <DottedDivider className="mb-12" />
+                  <DottedDivider className="mb-8" />
                 )}
                 {/* カテゴリ見出し（sp:22px / md+:28pxデザインシステム） */}
                 <div className="mb-8">
@@ -635,7 +635,7 @@ export default function Lessons() {
                             <div key={sub.id}>
                               {/* サブセクション間のドット区切り線 */}
                               {subIndex > 0 && (
-                                <DottedDivider className="mb-12" />
+                                <DottedDivider className="mb-8" />
                               )}
                               {/* セクション見出し（SectionHeading使用） - label/titleがある場合のみ */}
                               {(sub.label || sub.title) && (
