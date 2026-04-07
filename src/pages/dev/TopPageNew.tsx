@@ -26,6 +26,7 @@ import TrainingCard, { TRAINING_CARDS_DATA } from "@/components/top/TrainingCard
 import LessonCard from "@/components/lessons/LessonCard";
 import GoalButton, { type GoalButtonData } from "@/components/top/GoalButton";
 import { GOAL_FLUENT_ICONS } from "@/components/top/goalFluentIcons";
+import ContentCard, { type ContentCardProps } from "@/components/top/ContentCard";
 
 // ============================================
 // 型定義
@@ -193,6 +194,54 @@ const GOAL_BUTTONS_DATA: GoalButtonData[] = [
     iconAlt: GOAL_FLUENT_ICONS.ui.alt,
     text: "使いやすいUIを提案",
     href: "#section-ui",
+  },
+];
+
+// ============================================
+// コンテンツカードデータ
+// ============================================
+
+/** キャリアセクション: ガイドカード */
+const CAREER_GUIDE_CARD: ContentCardProps = {
+  href: '/lessons/career-guide-uiux',
+  label: 'ガイド',
+  title: '未経験からのUIUXデザイナー転職攻略ガイド',
+  description: '使いやすいUI体験をつくるための表現の基礎を身につけよう。',
+  thumbnailSrc: '/images/content/career/career-guide.jpg',
+  thumbnailAlt: 'キャリアガイド',
+  fallbackEmoji: '📚',
+  variant: 'large',
+};
+
+/** キャリアセクション: 読みものカード（3つ） */
+const CAREER_CONTENT_CARDS: ContentCardProps[] = [
+  {
+    href: '/guide/career-interviews',
+    label: 'メンバー',
+    title: 'BONOで転職した人のインタビュー集',
+    description: '転職成功者の体験談と学習方法',
+    thumbnailSrc: '/images/content/career/interviews.jpg',
+    thumbnailAlt: '転職インタビュー',
+    fallbackEmoji: '👩‍💻',
+  },
+  {
+    href: '/feedback',
+    label: 'BONOサービス',
+    title: 'フィードバックでコーチをつけて学習する',
+    description: 'プロからのアドバイスで成長を加速',
+    thumbnailSrc: '/images/content/career/feedback.jpg',
+    thumbnailAlt: 'フィードバックサービス',
+    fallbackEmoji: '💬',
+  },
+  {
+    href: '/guide/member-outputs',
+    label: 'メンバー',
+    title: 'メンバーのアウトプットnote',
+    description: '学習の成果をアウトプットした記事集',
+    thumbnailSrc: '/images/content/career/outputs.jpg',
+    thumbnailAlt: 'アウトプット集',
+    fallbackEmoji: '📝',
+    className: 'sm:col-span-2 lg:col-span-1',
   },
 ];
 
@@ -561,18 +610,9 @@ export default function TopPageNew() {
                 )}
 
                 {/* ガイドカード */}
-                <Link to="/lessons/career-guide-uiux" className="flex-1 group">
-                  <div className="bg-surface rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] border-2 border-white shadow-sm min-h-[320px] sm:min-h-[360px] lg:min-h-[400px] overflow-hidden transition-all group-hover:shadow-lg group-hover:scale-[1.02]">
-                    <div className="h-[140px] sm:h-[170px] lg:h-[209px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
-                      <span className="text-gray-400 text-sm">サムネイル</span>
-                    </div>
-                    <div className="p-5 sm:p-6 lg:p-8">
-                      <span className="text-[10px] sm:text-[11px] font-bold text-text-primary">ガイド</span>
-                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">未経験からのUIUXデザイナー転職攻略ガイド</h3>
-                      <p className="text-sm sm:text-base text-text-primary/80 mt-2">使いやすいUI体験をつくるための表現の基礎を身につけよう。</p>
-                    </div>
-                  </div>
-                </Link>
+                <div className="flex-1">
+                  <ContentCard {...CAREER_GUIDE_CARD} />
+                </div>
               </div>
             </div>
             </div>
@@ -589,44 +629,9 @@ export default function TopPageNew() {
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-                <Link to="/guide/career-interviews" className="group">
-                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
-                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
-                      <span className="text-3xl sm:text-4xl">👩‍💻</span>
-                    </div>
-                    <div className="p-4 sm:p-5 lg:p-6">
-                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">メンバー</span>
-                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">BONOで転職した人のインタビュー集</h3>
-                      <p className="text-sm sm:text-base text-gray-500 mt-2">転職成功者の体験談と学習方法</p>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link to="/feedback" className="group">
-                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
-                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
-                      <span className="text-3xl sm:text-4xl">💬</span>
-                    </div>
-                    <div className="p-4 sm:p-5 lg:p-6">
-                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">BONOサービス</span>
-                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">フィードバックでコーチをつけて学習する</h3>
-                      <p className="text-sm sm:text-base text-gray-500 mt-2">プロからのアドバイスで成長を加速</p>
-                    </div>
-                  </div>
-                </Link>
-
-                <Link to="/guide/member-outputs" className="group sm:col-span-2 lg:col-span-1">
-                  <div className="bg-surface rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] border-4 border-white shadow-sm overflow-hidden transition-all group-hover:shadow-lg">
-                    <div className="h-[140px] sm:h-[160px] lg:h-[180px] bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center">
-                      <span className="text-3xl sm:text-4xl">📝</span>
-                    </div>
-                    <div className="p-4 sm:p-5 lg:p-6">
-                      <span className="text-[10px] sm:text-xs font-bold text-gray-500">メンバー</span>
-                      <h3 className="text-base sm:text-lg font-bold text-text-primary leading-[1.6] mt-1">メンバーのアウトプットnote</h3>
-                      <p className="text-sm sm:text-base text-gray-500 mt-2">学習の成果をアウトプットした記事集</p>
-                    </div>
-                  </div>
-                </Link>
+                {CAREER_CONTENT_CARDS.map((card) => (
+                  <ContentCard key={card.href} {...card} />
+                ))}
               </div>
             </div>
             </div>
