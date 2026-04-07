@@ -53,13 +53,13 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           </SidebarMenuItem>
         )}
 
-        {/* トップページ */}
+        {/* トップ */}
         <SidebarMenuItem
           href="/top"
           icon={<Home2 size={ICON_SIZE} variant="Outline" />}
           isActive={isActive("/top") || isActive("/")}
         >
-          トップページ
+          トップ
         </SidebarMenuItem>
 
         {/* ロードマップ */}

@@ -143,7 +143,7 @@ function GoalSectionHeader({
   description: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 sm:gap-4 py-10 sm:py-12 lg:pt-10 lg:pb-[56px] px-4 sm:px-8 lg:px-22 border-b border-[#d6d6d6]">
+    <div className="flex flex-col items-center gap-3 sm:gap-4 py-10 sm:py-12 lg:pt-12 lg:pb-[56px] px-4 sm:px-8 lg:px-22 border-b border-[#d6d6d6]">
       <div className="flex h-8 w-8 items-center justify-center sm:h-9 sm:w-9 lg:h-[42px] lg:w-[42px]">
         {iconSrc ? (
           <img
@@ -158,7 +158,7 @@ function GoalSectionHeader({
           <span className="text-[32px] leading-none sm:text-[36px] lg:text-[42px]">{icon}</span>
         )}
       </div>
-      <h2 className="flex flex-col items-center gap-y-2 sm:gap-y-3 text-xl sm:text-2xl lg:text-[32px] font-extrabold text-center text-text-primary leading-[1.5] font-['Rounded_Mplus_1c',sans-serif]">
+      <h2 className="flex flex-col items-center gap-y-2 sm:gap-y-3 text-xl sm:text-2xl lg:text-[32px] font-extrabold text-center text-text-primary leading-[132%] font-['Rounded_Mplus_1c',sans-serif]">
         {title}
       </h2>
       <p className="flex flex-col items-center gap-y-2 sm:gap-y-2.5 text-base sm:text-lg lg:text-xl text-center text-text-primary/80 leading-[1.66]">
@@ -585,7 +585,7 @@ export default function TopPageNew() {
               <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
               <SectionHeading
                 label="ロードマップ"
-                title="UIUXデザイナー転職のコンテンツ"
+                title="UIUXデザイナー転職をはじめよう"
                 showUnderline={false}
               />
 
@@ -669,7 +669,7 @@ export default function TopPageNew() {
 
             <div className="max-w-[1120px] mx-auto">
               {/* サブセクション: ロードマップ */}
-              <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-12">
+              <div className="px-4 sm:px-8 lg:px-14 py-10 sm:py-12 lg:py-8">
               <SectionHeading
                 label="ロードマップ"
                 title="課題解決スキルを獲得しよう"
