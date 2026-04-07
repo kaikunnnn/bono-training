@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 export interface ContentCardProps {
   /** リンク先URL */
   href: string;
+  /** 外部リンクかどうか（trueの場合、別タブで開く） */
+  external?: boolean;
   /** カテゴリラベル（例: "ガイド", "メンバー", "BONOサービス"） */
   label: string;
   /** カードタイトル */
@@ -47,6 +49,7 @@ export interface ContentCardProps {
  */
 export default function ContentCard({
   href,
+  external = false,
   label,
   title,
   description,
@@ -58,8 +61,20 @@ export default function ContentCard({
 }: ContentCardProps) {
   const isLarge = variant === 'large';
 
+  const linkProps = external
+    ? {
+        href,
+        target: '_blank',
+        rel: 'noopener noreferrer',
+      }
+    : {
+        to: href,
+      };
+
+  const LinkComponent = external ? 'a' : Link;
+
   return (
-    <Link to={href} className={cn('group', className)}>
+    <LinkComponent {...(linkProps as any)} className={cn('group', className)}>
       <div
         className={cn(
           'bg-surface rounded-[24px] sm:rounded-[32px] overflow-hidden transition-all group-hover:shadow-lg group-hover:scale-[1.02]',
@@ -71,10 +86,10 @@ export default function ContentCard({
         {/* サムネイル */}
         <div
           className={cn(
-            'bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center overflow-hidden',
+            'bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center overflow-hidden w-full',
             isLarge
-              ? 'h-[140px] sm:h-[170px] lg:h-[209px]'
-              : 'h-[140px] sm:h-[160px] lg:h-[180px]'
+              ? 'aspect-[8/5]'  // ガイドカード: 8:5 (1.6:1)
+              : 'aspect-[3/2]'  // 読みものカード: 3:2 (1.5:1)
           )}
         >
           {thumbnailSrc ? (
@@ -103,6 +118,6 @@ export default function ContentCard({
           </p>
         </div>
       </div>
-    </Link>
+    </LinkComponent>
   );
 }

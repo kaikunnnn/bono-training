@@ -203,7 +203,8 @@ const GOAL_BUTTONS_DATA: GoalButtonData[] = [
 
 /** キャリアセクション: ガイドカード */
 const CAREER_GUIDE_CARD: ContentCardProps = {
-  href: '/lessons/career-guide-uiux',
+  href: 'https://kaikun.bo-no.design/career/beginner',
+  external: true,
   label: 'ガイド',
   title: '未経験からのUIUXデザイナー転職攻略ガイド',
   description: '使いやすいUI体験をつくるための表現の基礎を身につけよう。',
@@ -216,7 +217,8 @@ const CAREER_GUIDE_CARD: ContentCardProps = {
 /** キャリアセクション: 読みものカード（3つ） */
 const CAREER_CONTENT_CARDS: ContentCardProps[] = [
   {
-    href: '/guide/career-interviews',
+    href: 'https://www.bo-no.design/rdm/users/all',
+    external: true,
     label: 'メンバー',
     title: 'BONOで転職した人のインタビュー集',
     description: '転職成功者の体験談と学習方法',
@@ -225,7 +227,8 @@ const CAREER_CONTENT_CARDS: ContentCardProps[] = [
     fallbackEmoji: '👩‍💻',
   },
   {
-    href: '/feedback',
+    href: 'https://takumikai.notion.site/7f32157367744c84b5cd3a61cdf55716?source=copy_link',
+    external: true,
     label: 'BONOサービス',
     title: 'フィードバックでコーチをつけて学習する',
     description: 'プロからのアドバイスで成長を加速',
@@ -234,7 +237,8 @@ const CAREER_CONTENT_CARDS: ContentCardProps[] = [
     fallbackEmoji: '💬',
   },
   {
-    href: '/guide/member-outputs',
+    href: 'https://note.com/design_school/m/m5f641069767f',
+    external: true,
     label: 'メンバー',
     title: 'メンバーのアウトプットnote',
     description: '学習の成果をアウトプットした記事集',
