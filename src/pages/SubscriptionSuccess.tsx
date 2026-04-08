@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { SubscriptionSuccessContent } from '@/components/subscription/SubscriptionSuccessContent';
+import { trackSubscriptionStart } from '@/lib/analytics';
 
 const SubscriptionSuccess: React.FC = () => {
   const { refresh, planType, duration } = useSubscriptionContext();
@@ -28,6 +29,25 @@ const SubscriptionSuccess: React.FC = () => {
 
     refreshSubscription();
   }, [refresh]);
+
+  // GAイベント送信（サブスクリプション情報が取得できたら）
+  useEffect(() => {
+    if (!isLoading && planType && duration) {
+      // プラン料金のマッピング
+      const planPriceMap: Record<string, number> = {
+        'standard-1': 4000,
+        'standard-3': 3800,
+        'feedback-1': 1480,
+        'feedback-3': 1280,
+      };
+
+      const planKey = `${planType}-${duration}`;
+      const monthlyPrice = planPriceMap[planKey] || 0;
+
+      // サブスクリプション開始イベントを送信
+      trackSubscriptionStart(planType, monthlyPrice * duration);
+    }
+  }, [isLoading, planType, duration]);
 
   return (
     <Layout>

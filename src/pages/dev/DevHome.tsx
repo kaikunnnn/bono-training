@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, Mail, Globe, CreditCard, Eye } from 'lucide-react';
+import { Code2, FileText, Mail, Globe, CreditCard, Eye, Volume2 } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -71,6 +71,20 @@ const devResources: DevResourceCard[] = [
     path: '/dev/hero-wave-compare',
     icon: <Eye className="w-8 h-8" />,
     tags: ['Roadmap', 'Hero', 'Wave', 'Mobile']
+  },
+  {
+    title: 'Sound Effect Preview 🔊',
+    description: 'トップページ読み込み時のサウンドエフェクトを3パターンで比較。自動再生ポリシーの動作確認とパターン選択。',
+    path: '/dev/sound-effect-preview',
+    icon: <Volume2 className="w-8 h-8" />,
+    tags: ['Sound', 'Effect', 'Audio', 'UX', 'File']
+  },
+  {
+    title: 'Synth Swoosh Preview 🎵 (推奨)',
+    description: 'Web Audio APIで生成した「シュッ」音のプレビュー。音声ファイル不要で即座に動作確認可能。',
+    path: '/dev/synth-swoosh-preview',
+    icon: <Volume2 className="w-8 h-8" />,
+    tags: ['Sound', 'Synth', 'Web Audio', 'UX', 'NEW', 'No File']
   },
 ];
 
