@@ -1,142 +1,71 @@
 # Google Analytics 設定状況
 
-**最終更新**: 2026-04-07
+**最終更新**: 2026-04-08
 
 ---
 
-## ✅ 現在の設定状況
+## 測定ID
 
-### 1. 基本設定 ✅ 完了
+`G-MH9NGKFBCM`
 
-**測定ID**: `G-MH9NGKFBCM`
+## 実装箇所
 
-**実装箇所**:
 - `index.html` (19-25行目): GAスクリプトタグ
-- `src/lib/analytics.ts`: トラッキング関数
+- `src/lib/analytics.ts`: 全トラッキング関数の定義
 - `src/App.tsx` (127行目): ページビュートラッキング
 
-**動作**:
-- ページ遷移時に自動的にページビューを送信
-- SPAルーティングに対応
+## 実装済みイベント一覧
 
----
+### 基本イベント
 
-## 📊 定義済みイベント
+| イベント名 | 発火箇所 | パラメータ | 用途 |
+|-----------|---------|-----------|------|
+| `page_view` | App.tsx（自動） | path, title | ページ閲覧数 |
+| `video_play` | 動画プレーヤー | article_id, article_title | 動画再生開始 |
+| `video_complete` | 動画プレーヤー | article_id, article_title | 動画視聴完了 |
+| `article_complete` | 記事完了ボタン | article_id, article_title | 記事完了率 |
 
-`src/lib/analytics.ts` で以下のイベント関数が定義されています：
+### サブスクリプションファネル（Phase 1）
 
-### ユーザー行動
-- `trackVideoPlay` - 動画再生開始
-- `trackVideoComplete` - 動画再生完了
-- `trackArticleComplete` - 記事完了ボタン押下
+| イベント名 | 発火箇所 | パラメータ | 用途 |
+|-----------|---------|-----------|------|
+| `view_plans` | Subscription.tsx（ページ表示） | referrer | プランページ流入 |
+| `select_plan` | PlanCard.tsx（カードクリック） | plan_type, price, duration | プラン選択傾向 |
+| `begin_checkout` | Subscription.tsx（購入ボタン） | currency, value, items[] | チェックアウト開始（GA4 Eコマース） |
+| `purchase` | SubscriptionSuccess.tsx | transaction_id, currency, value, items[] | 購入完了（GA4 Eコマース） |
+| `subscription_start` | SubscriptionSuccess.tsx | plan_name, plan_price | 後方互換 |
+| `plan_change` | SubscriptionUpdated.tsx | from_plan, to_plan, to_duration | プラン変更追跡 |
 
-### コンバージョン
-- `trackSignUp` - 会員登録完了
-- `trackSubscriptionStart` - 有料プラン開始
+### コンテンツエンゲージメント（Phase 2）
 
----
+| イベント名 | 発火箇所 | パラメータ | 用途 |
+|-----------|---------|-----------|------|
+| `lesson_view` | LessonDetail.tsx | lesson_id, title, category, is_premium | レッスン閲覧 |
+| `search` | Search.tsx | search_term, results_count | 検索行動 |
+| `content_bookmarked` | bookmarks.ts | content_id, content_type | ブックマーク追加 |
+| `roadmap_view` | RoadmapDetail.tsx | roadmap_id, roadmap_title | ロードマップ閲覧 |
 
-## ⚠️ 改善が必要な項目
+### ユーザー属性（Phase 3）
 
-### 1. 🔴 開発環境でもGAが動作している
+| 項目 | 発火箇所 | 内容 |
+|------|---------|------|
+| `user_id` | AuthContext.tsx | ログインユーザーIDをGA4に設定 |
+| `subscription_status` | useSubscription.ts | ユーザープロパティ（free/standard/feedback） |
+| `plan_interval` | useSubscription.ts | ユーザープロパティ（1m/3m/none） |
+| `login` | AuthContext.tsx | 明示的ログイン時のみ（セッション復元では発火しない） |
+| `sign_up` | AuthContext.tsx | メール確認完了時 |
 
-**問題**:
-- localhost開発中もGAにデータが送信される
-- 本番データが汚染される
+## 未実装（analytics.ts に関数は定義済み）
 
-**対策**:
-- 環境変数で本番/開発を判定
-- 開発環境ではGAを無効化
+以下は `analytics.ts` に関数が用意されているが、まだコンポーネントに埋め込まれていないもの：
 
----
+| 関数名 | 用途 | 埋め込み先候補 |
+|--------|------|--------------|
+| `trackLessonComplete` | レッスン全完了 | 進捗管理の完了判定箇所 |
 
-### 2. 🟡 イベントトラッキングの実装状況不明
+## 技術的な注意事項
 
-**確認が必要**:
-- 定義された関数が実際に使われているか？
-- サブスクリプション開始イベントは送信されているか？
-- 動画再生・完了イベントは動いているか？
-
-**対策**:
-- コードベース全体を調査
-- 未実装のイベントを統合
-
----
-
-### 3. 🟡 Cookie同意バナーなし
-
-**問題**:
-- GDPR/CCPA対応が不十分
-- ユーザーの同意なしにトラッキング開始
-
-**対策**:
-- Cookie同意バナーの実装（オプション）
-- プライバシーポリシーへのリンク
-
----
-
-### 4. 🟡 eコマーストラッキング未整備
-
-**問題**:
-- サブスクリプション収益の詳細トラッキングなし
-- Stripeとの連携イベントが不明確
-
-**対策**:
-- Stripe Webhookからのコンバージョンイベント送信
-- 収益額、プラン名、LTVなどの送信
-
----
-
-## 🎯 推奨改善プラン
-
-### Phase 1: 緊急対応（必須）
-
-**1-1. 開発環境でのGA無効化**
-- 優先度: 🔴 高
-- 工数: 30分
-- 実装: 環境変数チェック追加
-
-**1-2. イベントトラッキング実装状況の確認**
-- 優先度: 🟡 中
-- 工数: 1時間
-- 実装: codebase全体のgrep調査
-
----
-
-### Phase 2: 機能拡張（推奨）
-
-**2-1. サブスクリプションイベント統合**
-- 優先度: 🟡 中
-- 工数: 2時間
-- 実装: Stripe Webhook → GA イベント送信
-
-**2-2. 主要ユーザー行動のトラッキング強化**
-- 優先度: 🟢 低
-- 工数: 2時間
-- 実装: レッスン完了、お気に入り追加など
-
----
-
-### Phase 3: コンプライアンス（オプション）
-
-**3-1. Cookie同意バナー**
-- 優先度: 🟢 低（日本向けサービスなら）
-- 工数: 3時間
-- 実装: react-cookie-consent など
-
----
-
-## 📝 次のアクション
-
-1. ✅ 現状確認ドキュメント作成（このファイル）
-2. ⏳ イベントトラッキング実装状況調査
-3. ⏳ 開発環境GA無効化
-4. ⏳ サブスクリプションイベント統合確認
-
----
-
-## 参考リンク
-
-- [GA4測定ID確認](https://analytics.google.com/)
-- [GA4イベントリファレンス](https://developers.google.com/analytics/devguides/collection/ga4/reference/events)
-- [eコマースイベント](https://developers.google.com/analytics/devguides/collection/ga4/ecommerce)
+1. **開発環境**: `localhost` / `127.0.0.1` ではGA送信無効（コンソールログのみ）
+2. **重複防止**: `purchase` イベントは `sessionStorage` で重複送信を防止
+3. **セッション復元**: `login` イベントはページリロード時には発火しない（`isInitialLoad` フラグ）
+4. **ユーザープロパティ**: `gtag('config')` で正しく設定（`gtag('event')` ではない）

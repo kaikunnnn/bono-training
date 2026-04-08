@@ -16,6 +16,7 @@ import { PlanChangeConfirmModal, ModalState } from '@/components/subscription/Pl
 import { getPlanPrices, PlanPrices } from '@/services/pricing';
 import { supabase } from '@/integrations/supabase/client';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import { trackViewPlans, trackSelectPlan, trackBeginCheckout } from '@/lib/analytics';
 
 const SubscriptionPage: React.FC = () => {
   const { toast } = useToast();
@@ -51,6 +52,12 @@ const SubscriptionPage: React.FC = () => {
       window.history.replaceState({}, '', '/subscription');
     }
   }, [toast]);
+
+  // プランページ表示イベント
+  useEffect(() => {
+    const referrer = document.referrer || undefined;
+    trackViewPlans(referrer);
+  }, []);
 
   // 料金を取得
   useEffect(() => {
@@ -152,6 +159,13 @@ const SubscriptionPage: React.FC = () => {
           planType: selectedPlanType,
           duration: selectedDuration
         });
+
+        // GA4: チェックアウト開始イベント
+        const selectedPlan = plans?.find(p => p.id === selectedPlanType);
+        const priceInfo = selectedPlan?.durations.find(d => d.months === selectedDuration);
+        if (priceInfo) {
+          trackBeginCheckout(selectedPlanType, priceInfo.price, selectedDuration);
+        }
 
         const returnUrl = window.location.origin + '/subscription/success';
         const { url, error } = await createCheckoutSession(returnUrl, selectedPlanType, selectedDuration);

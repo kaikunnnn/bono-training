@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { SubscriptionSuccessContent } from '@/components/subscription/SubscriptionSuccessContent';
-import { trackSubscriptionStart } from '@/lib/analytics';
+import { trackSubscriptionStart, trackPurchase } from '@/lib/analytics';
 
 const SubscriptionSuccess: React.FC = () => {
   const { refresh, planType, duration } = useSubscriptionContext();
@@ -31,8 +31,14 @@ const SubscriptionSuccess: React.FC = () => {
   }, [refresh]);
 
   // GAイベント送信（サブスクリプション情報が取得できたら）
+  // sessionStorageで重複送信を防止（リロード対策）
   useEffect(() => {
     if (!isLoading && planType && duration) {
+      const purchaseKey = `ga_purchase_sent_${planType}_${duration}`;
+      if (sessionStorage.getItem(purchaseKey)) {
+        return; // 既に送信済み
+      }
+
       // プラン料金のマッピング
       const planPriceMap: Record<string, number> = {
         'standard-1': 4000,
@@ -43,9 +49,20 @@ const SubscriptionSuccess: React.FC = () => {
 
       const planKey = `${planType}-${duration}`;
       const monthlyPrice = planPriceMap[planKey] || 0;
+      const transactionId = `sub_${planType}_${duration}_${Date.now()}`;
 
-      // サブスクリプション開始イベントを送信
+      // サブスクリプション開始イベントを送信（後方互換）
       trackSubscriptionStart(planType, monthlyPrice * duration);
+
+      // GA4推奨: purchaseイベント（Monetizationレポート対応）
+      trackPurchase({
+        planType: planType,
+        price: monthlyPrice * duration,
+        duration: duration,
+        transactionId: transactionId,
+      });
+
+      sessionStorage.setItem(purchaseKey, transactionId);
     }
   }, [isLoading, planType, duration]);
 

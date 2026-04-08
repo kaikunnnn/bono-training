@@ -9,6 +9,7 @@ import OverviewTab from "@/components/lesson/OverviewTab";
 import { getLessonProgress } from "@/services/progress";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { SEO } from "@/components/common/SEO";
+import { trackLessonView } from "@/lib/analytics";
 
 interface Article {
   _id: string;
@@ -153,6 +154,13 @@ export default function LessonDetail() {
       fetchLesson();
     }
   }, [slug]);
+
+  // GA4: レッスン表示イベント
+  useEffect(() => {
+    if (lesson) {
+      trackLessonView(lesson._id, lesson.title, lesson.category, lesson.isPremium);
+    }
+  }, [lesson]);
 
   // 各クエストの進捗データを取得
   useEffect(() => {

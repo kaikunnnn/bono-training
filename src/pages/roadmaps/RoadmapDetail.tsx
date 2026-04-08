@@ -17,6 +17,8 @@ import ClearBlock from "@/components/roadmap/detail/ClearBlock";
 import OtherRoadmapsSection from "@/components/roadmap/detail/OtherRoadmapsSection";
 import DottedDivider from "@/components/common/DottedDivider";
 import { useRoadmap } from "@/hooks/useRoadmaps";
+import { useEffect } from "react";
+import { trackRoadmapView } from "@/lib/analytics";
 
 // ============================================
 // グラデーションプリセットタイプ
@@ -47,6 +49,13 @@ export default function RoadmapDetail() {
 
   // Sanityからロードマップデータを取得
   const { data: roadmap, isLoading, error } = useRoadmap(slug);
+
+  // GA4: ロードマップ表示イベント
+  useEffect(() => {
+    if (roadmap) {
+      trackRoadmapView(roadmap._id, roadmap.title);
+    }
+  }, [roadmap]);
 
   // ローディング中
   if (isLoading) {
