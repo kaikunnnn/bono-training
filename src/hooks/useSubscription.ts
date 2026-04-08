@@ -5,6 +5,7 @@ import { checkSubscriptionStatus } from '@/services/stripe';
 import { PlanType, hasLearningAccess, hasMemberAccess, UserPlanInfo } from '@/utils/subscriptionPlans';
 import { canAccessContent as canAccessContentUtil } from '@/utils/premiumAccess';
 import { supabase } from '@/integrations/supabase/client';
+import { setUserProperties } from '@/lib/analytics';
 
 // 開発環境でのみログを出力
 const debugLog = (...args: unknown[]) => {
@@ -103,6 +104,12 @@ export const useSubscription = (): SubscriptionState => {
         setLearningAccess(hasLearningAccess(userPlan));
       }
       
+      // GA4: ユーザープロパティ設定
+      setUserProperties({
+        subscription_status: subscribed ? (plan || 'unknown') : 'free',
+        plan_interval: dur ? `${dur}m` : 'none',
+      });
+
       setError(null);
     } catch (err) {
       console.error('サブスクリプション取得エラー:', err);

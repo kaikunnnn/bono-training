@@ -66,6 +66,40 @@ export const trackEvent = (
   window.gtag('event', eventName, params);
 };
 
+// ===== ユーザー属性設定 =====
+
+/**
+ * ログインユーザーのIDをGA4に設定（クロスデバイス分析用）
+ */
+export const setUserId = (userId: string) => {
+  if (!isGAEnabled()) {
+    if (isDevelopment()) {
+      console.log('[GA] Set User ID (dev):', userId);
+    }
+    return;
+  }
+
+  window.gtag('config', GA_MEASUREMENT_ID, {
+    user_id: userId,
+  });
+};
+
+/**
+ * ユーザープロパティを設定（サブスク状態など）
+ */
+export const setUserProperties = (properties: Record<string, string | number | boolean>) => {
+  if (!isGAEnabled()) {
+    if (isDevelopment()) {
+      console.log('[GA] Set User Properties (dev):', properties);
+    }
+    return;
+  }
+
+  window.gtag('config', GA_MEASUREMENT_ID, {
+    user_properties: properties,
+  });
+};
+
 // ===== 定義済みイベント =====
 
 /**
@@ -101,18 +135,165 @@ export const trackArticleComplete = (articleId: string, articleTitle: string) =>
 /**
  * 会員登録完了
  */
-export const trackSignUp = (method?: string) => {
+export const trackSignUp = (method?: string, referrer?: string) => {
   trackEvent('sign_up', {
     method: method || 'email',
+    referrer: referrer,
   });
 };
 
 /**
- * 有料プラン開始
+ * ログイン
+ */
+export const trackLogin = (method?: string) => {
+  trackEvent('login', {
+    method: method || 'email',
+  });
+};
+
+// ===== サブスクリプション・Eコマースイベント =====
+
+/**
+ * 有料プラン開始（後方互換）
  */
 export const trackSubscriptionStart = (planName: string, planPrice: number) => {
   trackEvent('subscription_start', {
     plan_name: planName,
     plan_price: planPrice,
+  });
+};
+
+/**
+ * プランページ表示
+ */
+export const trackViewPlans = (referrer?: string) => {
+  trackEvent('view_plans', {
+    referrer: referrer,
+  });
+};
+
+/**
+ * プラン選択（カードクリック）
+ */
+export const trackSelectPlan = (planType: string, price: number, duration: number) => {
+  trackEvent('select_plan', {
+    plan_type: planType,
+    price: price,
+    duration: duration,
+  });
+};
+
+/**
+ * チェックアウト開始（購入ボタンクリック）
+ * GA4推奨Eコマースイベント: begin_checkout
+ */
+export const trackBeginCheckout = (planType: string, price: number, duration: number) => {
+  trackEvent('begin_checkout', {
+    currency: 'JPY',
+    value: price,
+    items: [{
+      item_id: `${planType}_${duration}m`,
+      item_name: `${planType} - ${duration}ヶ月`,
+      item_category: 'subscription',
+      price: price,
+      quantity: 1,
+    }],
+  });
+};
+
+/**
+ * 購入完了
+ * GA4推奨Eコマースイベント: purchase
+ * → GA4のMonetizationレポートが自動生成される
+ */
+export const trackPurchase = (params: {
+  planType: string;
+  price: number;
+  duration: number;
+  transactionId?: string;
+}) => {
+  trackEvent('purchase', {
+    transaction_id: params.transactionId || `sub_${Date.now()}`,
+    currency: 'JPY',
+    value: params.price,
+    items: [{
+      item_id: `${params.planType}_${params.duration}m`,
+      item_name: `${params.planType} - ${params.duration}ヶ月`,
+      item_category: 'subscription',
+      price: params.price,
+      quantity: 1,
+    }],
+  });
+};
+
+/**
+ * プラン変更完了
+ */
+export const trackPlanChange = (params: {
+  fromPlan: string;
+  fromDuration: number;
+  toPlan: string;
+  toDuration: number;
+}) => {
+  trackEvent('plan_change', {
+    from_plan: params.fromPlan,
+    from_duration: params.fromDuration,
+    to_plan: params.toPlan,
+    to_duration: params.toDuration,
+  });
+};
+
+// ===== コンテンツエンゲージメントイベント =====
+
+/**
+ * レッスン詳細ページ表示
+ */
+export const trackLessonView = (lessonId: string, title: string, category?: string, isPremium?: boolean) => {
+  trackEvent('lesson_view', {
+    lesson_id: lessonId,
+    lesson_title: title,
+    category: category,
+    is_premium: isPremium,
+  });
+};
+
+/**
+ * レッスン完了（全記事完了時）
+ */
+export const trackLessonComplete = (lessonId: string, title: string) => {
+  trackEvent('lesson_complete', {
+    lesson_id: lessonId,
+    lesson_title: title,
+  });
+};
+
+/**
+ * 検索実行
+ */
+export const trackSearch = (searchTerm: string, resultsCount?: number) => {
+  trackEvent('search', {
+    search_term: searchTerm,
+    results_count: resultsCount,
+  });
+};
+
+/**
+ * コンテンツブックマーク
+ */
+export const trackBookmark = (contentId: string, contentType: string, title?: string) => {
+  trackEvent('content_bookmarked', {
+    content_id: contentId,
+    content_type: contentType,
+    content_title: title,
+  });
+};
+
+/**
+ * ロードマップ表示
+ */
+export const trackRoadmapView = (roadmapId: string, title: string) => {
+  trackEvent('roadmap_view', {
+    roadmap_id: roadmapId,
+    roadmap_title: title,
   });
 };

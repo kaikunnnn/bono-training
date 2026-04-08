@@ -12,6 +12,7 @@ import {
 } from "@/types/search";
 import { useSearch } from "@/hooks/useSearch";
 import { Search as SearchIcon, Loader2 } from "lucide-react";
+import { trackSearch } from "@/lib/analytics";
 
 /**
  * 検索結果ページ
@@ -42,6 +43,13 @@ const Search: React.FC = () => {
     if (selectedTypes.length > 0) params.set("types", selectedTypes.join(","));
     setSearchParams(params, { replace: true });
   }, [query, selectedTypes, setSearchParams]);
+
+  // GA4: 検索結果が返ってきた時にイベント送信
+  useEffect(() => {
+    if (query && !isLoading) {
+      trackSearch(query, results.length);
+    }
+  }, [query, isLoading, results.length]);
 
   // 検索ハンドラ
   const handleSearch = (newQuery: string) => {

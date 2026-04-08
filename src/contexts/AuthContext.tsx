@@ -11,6 +11,7 @@ import {
   updatePasswordService 
 } from '@/services/auth';
 import { AuthContextType } from '@/types/auth';
+import { setUserId, trackLogin, trackSignUp } from '@/lib/analytics';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -23,6 +24,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     // メール確認後のトースト表示用フラグ（重複表示防止）
     let hasShownEmailConfirmationToast = false;
+    // セッション復元（ページリロード）かどうかを判定するフラグ
+    let isInitialLoad = true;
 
     // 認証状態の変更を監視
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -32,8 +35,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(currentSession?.user ?? null);
         setLoading(false);
 
-        // メール確認・変更後のトースト表示
+        // GA4: ユーザーID設定（セッション復元時も含む）
+        if (currentSession?.user) {
+          setUserId(currentSession.user.id);
+        }
+
+        // GA4: ログイン/サインアップイベント（セッション復元時は発火しない）
         const hash = window.location.hash;
+        if (event === 'SIGNED_IN' && !isInitialLoad) {
+          if (hash.includes('type=signup')) {
+            trackSignUp('email');
+          } else {
+            trackLogin('email');
+          }
+        }
+        isInitialLoad = false;
+
+        // メール確認・変更後のトースト表示
 
         // メールアドレス確認完了（新規登録）
         if (event === 'SIGNED_IN' && hash.includes('type=signup') && !hasShownEmailConfirmationToast) {

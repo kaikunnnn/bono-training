@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check } from 'lucide-react';
 import { PlanType, getPlanBenefits } from '@/utils/subscriptionPlans';
+import { trackSelectPlan } from '@/lib/analytics';
 
 interface PlanCardProps {
   id: string;
@@ -44,6 +45,8 @@ const PlanCard: React.FC<PlanCardProps> = ({
   const planBenefits = getPlanBenefits(id as PlanType);
 
   const handleClick = () => {
+    // GA4: プラン選択イベント
+    trackSelectPlan(id, price, duration);
     // プランタイプを渡す（期間は親で管理）
     onSubscribe(id as PlanType);
   };

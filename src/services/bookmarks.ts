@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { client } from '@/lib/sanity';
 import type { Article } from '@/types/sanity';
+import { trackBookmark } from '@/lib/analytics';
 
 /**
  * 記事をブックマーク/解除する（トグル）
@@ -63,6 +64,9 @@ export async function toggleBookmark(
         });
 
       if (error) throw error;
+
+      // GA4: ブックマーク追加イベント
+      trackBookmark(articleId, 'article');
 
       toast({
         title: 'ブックマークに追加しました',

@@ -4,6 +4,7 @@ import Layout from '@/components/layout/Layout';
 import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import { SubscriptionSuccessContent } from '@/components/subscription/SubscriptionSuccessContent';
 import { PlanType } from '@/utils/subscriptionPlans';
+import { trackPlanChange } from '@/lib/analytics';
 
 const SubscriptionUpdated: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -23,6 +24,16 @@ const SubscriptionUpdated: React.FC = () => {
       try {
         // サブスクリプション情報をリフレッシュ
         await refresh();
+
+        // GA4: プラン変更イベント
+        if (updatedPlanType && updatedDuration && currentPlanType) {
+          trackPlanChange({
+            fromPlan: currentPlanType,
+            fromDuration: 0, // 変更前の期間は不明
+            toPlan: updatedPlanType,
+            toDuration: parseInt(updatedDuration, 10),
+          });
+        }
 
         setIsLoading(false);
       } catch (err) {
