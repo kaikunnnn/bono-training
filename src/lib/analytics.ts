@@ -123,12 +123,59 @@ export const trackVideoComplete = (articleId: string, articleTitle: string) => {
 };
 
 /**
+ * 記事表示（記事ページを開いた時点で発火）
+ */
+export const trackArticleView = (params: {
+  articleId: string;
+  articleTitle: string;
+  lessonId?: string;
+  category?: string;
+}) => {
+  trackEvent('article_view', {
+    article_id: params.articleId,
+    article_title: params.articleTitle,
+    lesson_id: params.lessonId,
+    category: params.category,
+  });
+};
+
+/**
  * 記事完了ボタン押下
  */
 export const trackArticleComplete = (articleId: string, articleTitle: string) => {
   trackEvent('article_complete', {
     article_id: articleId,
     article_title: articleTitle,
+  });
+};
+
+/**
+ * 動画再生進捗（25%/50%/75%到達時に発火）
+ */
+export const trackVideoProgress = (articleId: string, articleTitle: string, percent: number) => {
+  trackEvent('video_progress', {
+    article_id: articleId,
+    article_title: articleTitle,
+    percent: percent,
+  });
+};
+
+/**
+ * レッスン進捗（レッスン詳細ページ表示時に発火）
+ */
+export const trackLessonProgress = (params: {
+  lessonId: string;
+  lessonTitle: string;
+  totalArticles: number;
+  completedArticles: number;
+  progressPercent: number;
+}) => {
+  trackEvent('lesson_progress', {
+    lesson_id: params.lessonId,
+    lesson_title: params.lessonTitle,
+    total_articles: params.totalArticles,
+    completed_articles: params.completedArticles,
+    progress_percent: params.progressPercent,
   });
 };
 

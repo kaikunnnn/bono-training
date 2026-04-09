@@ -17,6 +17,8 @@ interface VideoSectionProps {
   onPlay?: () => void;
   /** 動画終了時のコールバック */
   onEnded?: () => void;
+  /** 動画進捗コールバック（25%/50%/75%到達時） */
+  onProgress?: (percent: number) => void;
 }
 
 /**
@@ -39,6 +41,7 @@ const VideoSection = ({
   autoPlay = false,
   onPlay,
   onEnded,
+  onProgress,
 }: VideoSectionProps) => {
   const { canAccessContent } = useSubscriptionContext();
 
@@ -120,6 +123,7 @@ const VideoSection = ({
             muted={false}
             onPlay={onPlay}
             onEnded={onEnded}
+            onProgress={onProgress}
           />
         </div>
       </div>
