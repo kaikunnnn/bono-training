@@ -9,7 +9,7 @@ import OverviewTab from "@/components/lesson/OverviewTab";
 import { getLessonProgress } from "@/services/progress";
 import LoadingSpinner from "@/components/common/LoadingSpinner";
 import { SEO } from "@/components/common/SEO";
-import { trackLessonView } from "@/lib/analytics";
+import { trackLessonView, trackLessonProgress } from "@/lib/analytics";
 
 interface Article {
   _id: string;
@@ -186,6 +186,22 @@ export default function LessonDetail() {
 
     fetchQuestProgress();
   }, [lesson]);
+
+  // GA4: レッスン進捗イベント
+  useEffect(() => {
+    if (lesson && Object.keys(questProgressMap).length > 0) {
+      const totalArticles = lesson.quests.reduce((sum, q) => sum + q.articles.length, 0);
+      const completedArticles = Object.values(questProgressMap).reduce((sum, q) => sum + q.completed, 0);
+      const progressPercent = totalArticles > 0 ? Math.round((completedArticles / totalArticles) * 100) : 0;
+      trackLessonProgress({
+        lessonId: lesson._id,
+        lessonTitle: lesson.title,
+        totalArticles,
+        completedArticles,
+        progressPercent,
+      });
+    }
+  }, [questProgressMap]);
 
   // このレッスンが含まれるロードマップを取得
   useEffect(() => {

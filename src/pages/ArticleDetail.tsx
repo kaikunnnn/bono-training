@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { getArticleWithContext } from "@/lib/sanity";
-import { trackArticleComplete, trackVideoPlay, trackVideoComplete } from "@/lib/analytics";
+import { trackArticleComplete, trackArticleView, trackVideoPlay, trackVideoComplete, trackVideoProgress } from "@/lib/analytics";
 import type { ArticleWithContext } from "@/types/sanity";
 import VideoSection from "@/components/article/VideoSection";
 import HeadingSection from "@/components/article/HeadingSection";
@@ -197,6 +197,18 @@ const ArticleDetail = () => {
 
     fetchArticle();
   }, [slug]);
+
+  // GA4: 記事表示イベント
+  useEffect(() => {
+    if (article) {
+      trackArticleView({
+        articleId: article._id,
+        articleTitle: article.title,
+        lessonId: article.lessonInfo?._id,
+        category: article.lessonInfo?.category,
+      });
+    }
+  }, [article?._id]);
 
   // ブックマーク状態の初期化
   useEffect(() => {
@@ -547,6 +559,7 @@ const ArticleDetail = () => {
               isPremium={article.isPremium}
               onPlay={() => trackVideoPlay(article._id, article.title)}
               onEnded={() => trackVideoComplete(article._id, article.title)}
+              onProgress={(percent) => trackVideoProgress(article._id, article.title, percent)}
             />
           </div>
 

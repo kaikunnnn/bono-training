@@ -14,6 +14,8 @@ interface CustomVimeoPlayerProps {
   onPlay?: () => void;
   /** 動画終了時のコールバック */
   onEnded?: () => void;
+  /** 動画進捗コールバック（25%/50%/75%到達時） */
+  onProgress?: (percent: number) => void;
 }
 
 export function CustomVimeoPlayer({
@@ -23,6 +25,7 @@ export function CustomVimeoPlayer({
   muted = false,
   onPlay,
   onEnded,
+  onProgress,
 }: CustomVimeoPlayerProps) {
   const {
     containerRef,
@@ -61,6 +64,20 @@ export function CustomVimeoPlayer({
       onPlay?.();
     }
   }, [state.isPlaying, onPlay]);
+
+  // GA4: 動画進捗イベント（25%/50%/75%到達時に発火）
+  const progressMilestonesRef = useRef<Set<number>>(new Set());
+  useEffect(() => {
+    if (state.duration > 0 && state.currentTime > 0 && onProgress) {
+      const percent = (state.currentTime / state.duration) * 100;
+      for (const milestone of [25, 50, 75]) {
+        if (percent >= milestone && !progressMilestonesRef.current.has(milestone)) {
+          progressMilestonesRef.current.add(milestone);
+          onProgress(milestone);
+        }
+      }
+    }
+  }, [state.currentTime, state.duration, onProgress]);
 
   // GA4: 動画終了イベント（95%以上再生で発火）
   useEffect(() => {
