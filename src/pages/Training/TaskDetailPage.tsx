@@ -8,13 +8,14 @@ import TaskNavigation from './TaskNavigation';
 import TaskVideo from '@/components/training/TaskVideo';
 import ErrorDisplay from '@/components/common/ErrorBoundary';
 import { useTaskDetail } from '@/hooks/useTrainingCache';
-import { TaskFrontmatter } from '@/types/training';
+import { TaskFrontmatter, SanitySection } from '@/types/training';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { parseContentSections, type ContentSectionData, type StructuredSection } from '@/utils/parseContentSections';
 import ContentSection from '@/components/training/ContentSection';
 import DesignSolutionSection from '@/components/training/DesignSolutionSection';
 import NavigationHeader from '@/components/training/NavigationHeader';
 import { BackButton } from '@/components/common/BackButton';
+import PortableTextRenderer from '@/components/common/PortableTextRenderer';
 
 /**
  * 安全にbooleanを変換するヘルパー関数
@@ -66,29 +67,6 @@ const TaskDetailPage = () => {
     return <Navigate to="/training" replace />;
   }
   const hasPremiumAccess = isSubscribed && hasMemberAccess;
-
-  // デバッグログを強化
-  console.log('TaskDetailPage - アクセス権情報:', { 
-    isSubscribed,
-    hasMemberAccess,
-    hasPremiumAccess,
-    taskIsPremium: task?.is_premium,
-    trainingSlug,
-    taskSlug,
-    userAuthenticated: !!user,
-    taskDataExists: !!task,
-    taskTitle: task?.title,
-    taskContentLength: task?.content?.length || 0
-  });
-
-  // フェーズ2: 有料コンテンツテスト用ログ追加
-  if (task?.is_premium) {
-    console.log('TaskDetailPage - 有料コンテンツ検出:', {
-      taskTitle: task.title,
-      userCanAccess: hasPremiumAccess,
-      needsUpgrade: !hasPremiumAccess
-    });
-  }
 
   if (isLoading) {
     return (
@@ -265,18 +243,6 @@ const TaskDetailPage = () => {
       description: safeStringConvert(task.description),
     };
 
-    console.log('TaskDetailPage - フロントマター変換完了:', {
-      originalData: {
-        is_premium: task.is_premium,
-        order_index: task.order_index,
-        preview_sec: task.preview_sec
-      },
-      convertedData: {
-        is_premium: frontmatter.is_premium,
-        order_index: frontmatter.order_index,
-        preview_sec: frontmatter.preview_sec
-      }
-    });
   } catch (conversionError) {
     console.error('TaskDetailPage - フロントマター変換エラー:', conversionError);
     // エラー時のフォールバック値
@@ -300,36 +266,17 @@ const TaskDetailPage = () => {
   const hasValidVideo = (frontmatter.video_preview && frontmatter.video_preview.trim()) || 
                         (frontmatter.video_full && frontmatter.video_full.trim());
 
-  // フェーズ2: 動画とコンテンツアクセスログ
-  console.log('TaskDetailPage - コンテンツアクセス詳細:', {
-    hasValidVideo,
-    videoFull: !!frontmatter.video_full,
-    videoPreview: !!frontmatter.video_preview,
-    contentLength: task.content?.length || 0,
-    renderMarkdown: true
-  });
+  // Sanity Portable Text セクション（新方式）
+  const sanitySections: SanitySection[] | undefined = task?.sanitySections;
+  const hasSanitySections = sanitySections && sanitySections.length > 0;
 
-  // Step 6: 最終統合 - 構造化コンテンツ対応版
+  // 旧方式: Markdown コンテンツ（フォールバック）
   let contentSections: ContentSectionData[] = [];
-  const hasValidContent = task && task.content && typeof task.content === 'string' && task.content.trim();
-  
-  // 構造化セクションデータの確認（将来的にフロントマターから取得）
-  const structuredSections: StructuredSection[] | undefined = (task as any)?.sections;
-  
+  const hasValidContent = !hasSanitySections && task && task.content && typeof task.content === 'string' && task.content.trim();
+
   if (hasValidContent) {
-    // 構造化データを優先的に使用し、フォールバックでマークダウン解析
+    const structuredSections: StructuredSection[] | undefined = (task as any)?.sections;
     contentSections = parseContentSections(task.content, structuredSections);
-    console.log('✅ 最終統合 - 解析されたセクション数:', contentSections.length);
-    console.log('✅ 最終統合 - セクション構成:', contentSections.map(s => ({ title: s.title, type: s.type })));
-    console.log('✅ 最終統合 - 構造化データ使用:', !!structuredSections?.length);
-  } else {
-    console.warn('⚠️ 最終統合 - コンテンツが無効またはない:', { 
-      hasTask: !!task, 
-      hasContent: !!(task?.content), 
-      contentType: typeof task?.content,
-      contentLength: task?.content?.length || 0,
-      hasStructuredSections: !!structuredSections?.length
-    });
   }
 
   return (
@@ -395,21 +342,47 @@ const TaskDetailPage = () => {
                   </div>
                 )}
 
-                 {/* Step 4-5: 構造化コンテンツセクション表示（プレミアムコンテンツ対応） */}
+                 {/* コンテンツセクション表示 */}
                  <div className="mb-8">
-                   {hasValidContent && contentSections.length > 0 ? (
+                   {hasSanitySections ? (
+                     /* Sanity Portable Text セクション */
+                     sanitySections.map((section) => (
+                       <div key={section._key} className="mb-6">
+                         {section.sectionType === 'premium-only' && !hasPremiumAccess ? (
+                           <div className="border-2 border-orange-200 rounded-lg p-6 bg-orange-50">
+                             <div className="flex items-center gap-3 mb-3">
+                               <span className="text-2xl">🔒</span>
+                               <h3 className="text-lg font-bold text-orange-800">{section.sectionTitle}</h3>
+                             </div>
+                             <div className="text-orange-600 text-sm mb-4">
+                               このセクションはメンバー限定コンテンツです。
+                             </div>
+                             <button
+                               onClick={() => navigate('/training/plan')}
+                               className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                             >
+                               プランを確認
+                             </button>
+                           </div>
+                         ) : (
+                           <div>
+                             {section.sectionTitle && (
+                               <h2 className="text-xl font-bold text-[#1d382f] mb-4">{section.sectionTitle}</h2>
+                             )}
+                             <PortableTextRenderer value={section.content || []} />
+                           </div>
+                         )}
+                       </div>
+                     ))
+                   ) : hasValidContent && contentSections.length > 0 ? (
+                     /* 旧Markdownフォールバック */
                      contentSections.map((section, index) => (
                        <div key={index} className="mb-6">
                          {section.type === 'design-solution' ? (
-                           <DesignSolutionSection 
-                             content={section.content}
-                           />
+                           <DesignSolutionSection content={section.content} />
                          ) : section.type === 'premium-only' ? (
                            hasPremiumAccess ? (
-                             <ContentSection 
-                               title={section.title}
-                               content={section.content}
-                             />
+                             <ContentSection title={section.title} content={section.content} />
                            ) : (
                              <div className="border-2 border-orange-200 rounded-lg p-6 bg-orange-50">
                                <div className="flex items-center gap-3 mb-3">
@@ -428,10 +401,7 @@ const TaskDetailPage = () => {
                              </div>
                            )
                          ) : (
-                           <ContentSection 
-                             title={section.title}
-                             content={section.content}
-                           />
+                           <ContentSection title={section.title} content={section.content} />
                          )}
                        </div>
                      ))

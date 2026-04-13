@@ -1,47 +1,33 @@
 
-import { supabase } from "@/integrations/supabase/client";
 import { Training } from "@/types/training";
-import { TrainingError } from "@/utils/errors";
-import { handleEdgeFunctionError, validateEdgeFunctionResponse } from "./error-handlers";
+import { getTrainings as fetchTrainingsFromSanity } from "@/lib/sanity";
 
 /**
- * トレーニング一覧を取得（Storageベース）
+ * トレーニング一覧を取得（Sanityベース）
  */
 export const getTrainings = async (): Promise<Training[]> => {
   try {
-    const { data, error } = await supabase.functions.invoke('get-training-list', {
-      body: {}
-    });
+    const data = await fetchTrainingsFromSanity();
 
-    if (error) {
-      handleEdgeFunctionError(error, 'トレーニング一覧の取得に失敗しました');
-    }
-
-    const result = validateEdgeFunctionResponse(data, 'トレーニング一覧');
-    
-    return result;
-    
+    return data.map((item: any) => ({
+      id: item._id,
+      slug: item.slug,
+      title: item.title,
+      description: item.description || "",
+      type: item.type || "challenge",
+      difficulty: item.difficulty || "normal",
+      tags: item.tags || [],
+      category: item.category,
+      isPremium: item.isPremium || false,
+      icon: item.iconImageUrl,
+      thumbnailImage: item.thumbnailUrl,
+      backgroundImage: item.backgroundSvg,
+      estimated_total_time: item.estimatedTotalTime,
+      task_count: item.task_count ?? 0,
+      isFree: !item.isPremium,
+    }));
   } catch (err) {
-    // カスタムエラーは再スロー
-    if (err instanceof TrainingError) {
-      throw err;
-    }
-    
-    console.error('getTrainings 予期しないエラー:', err);
-    
-    // フォールバック: ダミーデータを返す
-    return [
-      {
-        id: "todo-app-1",
-        slug: "todo-app",
-        title: "Todo アプリ UI 制作",
-        description: "実践的な Todo アプリの UI デザインを学ぶ",
-        type: "challenge" as 'challenge',
-        difficulty: "normal",
-        tags: ["ui", "todo", "実践"],
-        icon: "📱",
-        thumbnailImage: 'https://source.unsplash.com/random/200x100'
-      }
-    ];
+    console.error("getTrainings エラー:", err);
+    return [];
   }
 };
