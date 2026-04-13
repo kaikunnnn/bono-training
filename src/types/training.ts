@@ -59,6 +59,16 @@ export interface TaskDetailData {
   estimated_time?: string;
   difficulty?: string;
   description?: string;
+  // Sanity Portable Text セクション
+  sanitySections?: SanitySection[];
+  trainingType?: string;
+}
+
+export interface SanitySection {
+  _key: string;
+  sectionTitle: string;
+  sectionType: 'regular' | 'design-solution' | 'premium-only';
+  content: import('@portabletext/types').PortableTextBlock[];
 }
 
 export interface TrainingDetailData {
@@ -70,10 +80,15 @@ export interface TrainingDetailData {
   difficulty: string;
   tags: string[];
   tasks: Task[];
-  skills?: string[];
+  skills?: SkillData[];
+  guide?: GuideData;
   prerequisites?: string[];
   has_premium_content?: boolean;
   thumbnailImage?: string;
+  iconImageUrl?: string;
+  backgroundSvg?: string;
+  fallbackGradient?: { from: string; via: string; to: string };
+  estimatedTotalTime?: string;
 }
 
 /**

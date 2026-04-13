@@ -1,37 +1,56 @@
 
-import { supabase } from "@/integrations/supabase/client";
 import { TrainingDetailData } from "@/types/training";
+import { getTrainingDetail as fetchFromSanity } from "@/lib/sanity";
 import { TrainingError } from "@/utils/errors";
-import { handleEdgeFunctionError, validateEdgeFunctionResponse } from "./error-handlers";
 
 /**
- * トレーニング詳細情報を取得（Storageベース）
+ * トレーニング詳細情報を取得（Sanityベース）
  */
 export const getTrainingDetail = async (slug: string): Promise<TrainingDetailData> => {
+  if (!slug || slug.trim() === "") {
+    throw new TrainingError("トレーニングスラッグが指定されていません", "INVALID_REQUEST", 400);
+  }
+
   try {
-    console.log(`Edge Functionからトレーニング詳細を取得: ${slug}`);
-    
-    if (!slug || slug.trim() === '') {
-      throw new TrainingError('トレーニングスラッグが指定されていません', 'INVALID_REQUEST', 400);
-    }
-    
-    const { data, error } = await supabase.functions.invoke('get-training-detail', {
-      body: { slug }
-    });
+    const data = await fetchFromSanity(slug);
 
-    if (error) {
-      handleEdgeFunctionError(error, 'トレーニング詳細の取得に失敗しました');
+    if (!data) {
+      throw new TrainingError("トレーニングが見つかりません", "NOT_FOUND", 404);
     }
 
-    return validateEdgeFunctionResponse(data, 'トレーニング詳細') as TrainingDetailData;
-    
+    return {
+      id: data._id,
+      slug: data.slug,
+      title: data.title,
+      description: data.description || "",
+      type: data.type || "challenge",
+      difficulty: data.difficulty || "normal",
+      tags: data.tags || [],
+      tasks: (data.tasks || []).map((task: any) => ({
+        id: task._id,
+        training_id: data._id,
+        slug: task.slug,
+        title: task.title,
+        order_index: task.orderIndex ?? 1,
+        is_premium: task.isPremium || false,
+        video_full: task.videoFull,
+        video_preview: task.videoPreview,
+        category: task.category,
+        tags: task.tags || [],
+        description: task.description,
+      })),
+      skills: data.skills,
+      guide: data.guide,
+      thumbnailImage: data.thumbnailUrl,
+      iconImageUrl: data.iconImageUrl,
+      backgroundSvg: data.backgroundSvg,
+      fallbackGradient: data.fallbackGradient,
+      estimatedTotalTime: data.estimatedTotalTime,
+      has_premium_content: (data.tasks || []).some((t: any) => t.isPremium),
+    };
   } catch (err) {
-    // カスタムエラーは再スロー
-    if (err instanceof TrainingError) {
-      throw err;
-    }
-    
-    console.error('getTrainingDetail 予期しないエラー:', err);
-    throw new TrainingError('トレーニング詳細の取得中に予期しないエラーが発生しました', 'UNKNOWN_ERROR');
+    if (err instanceof TrainingError) throw err;
+    console.error("getTrainingDetail エラー:", err);
+    throw new TrainingError("トレーニング詳細の取得中にエラーが発生しました", "UNKNOWN_ERROR");
   }
 };

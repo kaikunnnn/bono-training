@@ -721,3 +721,153 @@ export async function getUserQuestions(userId: string): Promise<UserQuestion[]> 
   return client.fetch<UserQuestion[]>(query, { userId });
 }
 
+// ===== Training 関連クエリ =====
+
+interface SanityTrainingListItem {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  type: string;
+  difficulty: string;
+  category: string;
+  tags: string[];
+  isPremium: boolean;
+  orderIndex: number;
+  iconImageUrl: string;
+  thumbnailUrl: string;
+  backgroundSvg: string;
+  fallbackGradient: { from: string; via: string; to: string };
+  estimatedTotalTime: string;
+  task_count: number;
+}
+
+interface SanityTrainingDetail extends SanityTrainingListItem {
+  skills: { title: string; description: string; referenceLink?: string }[];
+  guide: any;
+  tasks: SanityTrainingTask[];
+}
+
+interface SanityTrainingTask {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  orderIndex: number;
+  isPremium: boolean;
+  category: string;
+  tags: string[];
+  videoFull: string;
+  videoPreview: string;
+  previewSec: number;
+  sections: any[];
+  training: { _id: string; title: string; slug: string; type: string };
+  allTasks: { _id: string; title: string; slug: string; orderIndex: number }[];
+}
+
+/**
+ * トレーニング一覧を取得
+ */
+export async function getTrainings(): Promise<SanityTrainingListItem[]> {
+  const query = `
+    *[_type == "training"] | order(orderIndex asc) {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      "type": trainingType,
+      difficulty,
+      "category": category->title,
+      tags,
+      isPremium,
+      orderIndex,
+      iconImageUrl,
+      thumbnailUrl,
+      backgroundSvg,
+      fallbackGradient,
+      estimatedTotalTime,
+      "task_count": count(tasks)
+    }
+  `;
+  return client.fetch(query);
+}
+
+/**
+ * トレーニング詳細を取得
+ */
+export async function getTrainingDetail(slug: string): Promise<SanityTrainingDetail | null> {
+  const query = `
+    *[_type == "training" && slug.current == $slug][0] {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      "type": trainingType,
+      difficulty,
+      "category": category->title,
+      tags,
+      isPremium,
+      iconImageUrl,
+      thumbnailUrl,
+      backgroundSvg,
+      fallbackGradient,
+      estimatedTotalTime,
+      skills,
+      guide,
+      "tasks": tasks[]-> {
+        _id,
+        title,
+        "slug": slug.current,
+        description,
+        orderIndex,
+        isPremium,
+        category,
+        tags,
+        videoFull,
+        videoPreview
+      } | order(orderIndex asc)
+    }
+  `;
+  return client.fetch(query, { slug });
+}
+
+/**
+ * トレーニングタスク詳細を取得
+ */
+export async function getTrainingTaskDetail(trainingSlug: string, taskSlug: string): Promise<SanityTrainingTask | null> {
+  const query = `
+    *[_type == "trainingTask" && slug.current == $taskSlug && training->slug.current == $trainingSlug][0] {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      orderIndex,
+      isPremium,
+      category,
+      tags,
+      videoFull,
+      videoPreview,
+      previewSec,
+      sections[] {
+        _key,
+        sectionTitle,
+        sectionType,
+        content
+      },
+      "training": training-> {
+        _id,
+        title,
+        "slug": slug.current,
+        "type": trainingType
+      },
+      "allTasks": training->tasks[]-> {
+        _id,
+        title,
+        "slug": slug.current,
+        orderIndex
+      } | order(orderIndex asc)
+    }
+  `;
+  return client.fetch(query, { trainingSlug, taskSlug });
+}
+
