@@ -63,7 +63,7 @@ function parseYaml(yaml: string): Record<string, any> {
     }
 
     const key = keyMatch[1];
-    let value = keyMatch[2].trim();
+    const value = keyMatch[2].trim();
 
     // 配列 (インライン)
     if (value.startsWith("[")) {
@@ -152,7 +152,7 @@ function parseYamlArrayItem(lines: string[]): any {
     const keyMatch = firstLine.match(/^(\w[\w_]*)\s*:\s*(.*)/);
     if (keyMatch) {
       const key = keyMatch[1];
-      let value = keyMatch[2].trim();
+      const value = keyMatch[2].trim();
 
       if (value === "|") {
         // マルチライン値
@@ -167,7 +167,7 @@ function parseYamlArrayItem(lines: string[]): any {
         const subMatch = lines[i].trimStart().match(/^(\w[\w_]*)\s*:\s*(.*)/);
         if (subMatch) {
           const subKey = subMatch[1];
-          let subValue = subMatch[2].trim();
+          const subValue = subMatch[2].trim();
           if (subValue === "|") {
             const subContentLines: string[] = [];
             for (let j = i + 1; j < lines.length; j++) {
@@ -278,7 +278,7 @@ function parseInlineMarkdown(text: string): any[] {
   // リンクと太字のパース
   const spans: any[] = [];
   const markDefs: any[] = [];
-  let remaining = text;
+  const remaining = text;
 
   // シンプルなアプローチ: リンクと太字を順にパース
   const parts = remaining.split(/(\[.*?\]\(.*?\)|\*\*.*?\*\*)/);
