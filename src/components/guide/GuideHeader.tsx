@@ -1,9 +1,8 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import ContentWrapper from "@/components/training/ContentWrapper";
 import type { Guide } from "@/types/guide";
-import CategoryBadge from "./CategoryBadge";
-import { Clock, Calendar, User } from "lucide-react";
+import { getCategoryInfo } from "@/lib/guideCategories";
+import GuideCardMedia from "./GuideCardMedia";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -17,15 +16,21 @@ interface GuideHeaderProps {
   guide: Guide;
 }
 
-/**
- * ガイド詳細ページのヘッダーコンポーネント
- */
 const GuideHeader = ({ guide }: GuideHeaderProps) => {
+  const categoryInfo = getCategoryInfo(guide.category);
+  const publishedDate = guide.publishedAt
+    ? new Date(guide.publishedAt).toLocaleDateString("ja-JP", {
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+      })
+    : null;
+
   return (
-    <div className="bg-white border-b border-gray-200">
-      <ContentWrapper className="py-8">
-        {/* パンくずリスト */}
-        <Breadcrumb className="mb-6">
+    <div className="w-full">
+      {/* パンくずリスト */}
+      <div className="px-7 pt-8 pb-0">
+        <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
@@ -34,63 +39,59 @@ const GuideHeader = ({ guide }: GuideHeaderProps) => {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to={`/guide?category=${guide.category}`}>
+                  {categoryInfo?.label ?? guide.category}
+                </Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
               <BreadcrumbPage>{guide.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
+      </div>
 
-        {/* カテゴリ */}
-        <div className="mb-4">
-          <CategoryBadge category={guide.category} />
-        </div>
+      {/* メインヘッダー：中央揃え */}
+      <div className="flex flex-col items-center gap-8 px-4 pt-8 pb-0">
+        <div className="flex flex-col items-center gap-5 w-full max-w-[640px]">
+          {/* カテゴリ */}
+          <p className="text-xs font-medium text-foreground">
+            {categoryInfo?.label ?? guide.category}
+          </p>
 
-        {/* タイトル */}
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          {guide.title}
-        </h1>
+          {/* タイトル */}
+          <h1
+            className="text-[41px] font-bold text-center leading-[1.5] text-foreground"
+            style={{ fontFamily: "'Rounded Mplus 1c', 'M PLUS Rounded 1c', sans-serif", wordBreak: "keep-all", overflowWrap: "break-word" }}
+          >
+            {guide.title}
+          </h1>
 
-        {/* 説明 */}
-        <p className="text-lg text-gray-600 mb-6">
-          {guide.description}
-        </p>
-
-        {/* メタ情報 */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-          <div className="flex items-center gap-1.5">
-            <User className="w-4 h-4" />
-            <span>{guide.author}</span>
-          </div>
-          {guide.publishedAt && (
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4" />
-              <span>{new Date(guide.publishedAt).toLocaleDateString('ja-JP')}</span>
-            </div>
-          )}
-          {guide.updatedAt && (
-            <div className="flex items-center gap-1.5">
-              <span>更新: {new Date(guide.updatedAt).toLocaleDateString('ja-JP')}</span>
-            </div>
-          )}
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-4 h-4" />
-            <span>{guide.readingTime}</span>
+          {/* 著者・日付 */}
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground text-[13px]">{guide.author}</span>
+            {publishedDate && (
+              <>
+                <span>・</span>
+                <span className="text-[14px]">{publishedDate}</span>
+              </>
+            )}
           </div>
         </div>
 
-        {/* タグ */}
-        {guide.tags && guide.tags.length > 0 && (
-          <div className="mt-6 flex flex-wrap gap-2">
-            {guide.tags.map((tag) => (
-              <span
-                key={tag}
-                className="text-sm px-3 py-1 bg-gray-100 text-gray-700 rounded-full"
-              >
-                #{tag}
-              </span>
-            ))}
+        {/* メディア: 動画 > サムネ > 非表示 */}
+        {(guide.videoUrl || guide.thumbnailUrl) && (
+          <div className="w-full max-w-[640px]">
+            <GuideCardMedia
+              title={guide.title}
+              videoUrl={guide.videoUrl}
+              thumbnail={guide.thumbnailUrl}
+            />
           </div>
         )}
-      </ContentWrapper>
+      </div>
     </div>
   );
 };

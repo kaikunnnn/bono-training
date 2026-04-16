@@ -28,6 +28,7 @@
     "ghost:seed": "node scripts/ghost-seed.js"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.89.0",
     "@hookform/resolvers": "^3.9.0",
     "@portabletext/react": "^4.0.3",
     "@radix-ui/react-accordion": "^1.2.0",

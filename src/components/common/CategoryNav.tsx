@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -26,6 +26,11 @@ interface CategoryNavProps {
   align?: "left" | "center";
   /** 矢印ボタンを表示するか（デフォルト: false） */
   showArrows?: boolean;
+  /**
+   * クエリパラメータ名を指定すると、pathname ではなくクエリパラメータでアクティブ判定する
+   * 例: searchParamKey="category" → href="/guide?category=career" のとき ?category=career で判定
+   */
+  searchParamKey?: string;
 }
 
 /**
@@ -56,8 +61,10 @@ export default function CategoryNav({
   sticky = false,
   align = "left",
   showArrows = false,
+  searchParamKey,
 }: CategoryNavProps) {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -103,8 +110,16 @@ export default function CategoryNav({
     });
   };
 
-  // アクティブ判定（完全一致 or パス先頭一致）
+  // アクティブ判定（完全一致 or パス先頭一致 or クエリパラメータ）
   const isActive = (href: string) => {
+    if (searchParamKey) {
+      const url = new URL(href, window.location.origin);
+      const hrefParamValue = url.searchParams.get(searchParamKey);
+      const currentParamValue = searchParams.get(searchParamKey);
+      // "すべて"はパラメータなし
+      if (!hrefParamValue) return !currentParamValue;
+      return hrefParamValue === currentParamValue;
+    }
     // 完全一致
     if (location.pathname === href) return true;
     // "すべて"以外は前方一致でも判定（サブページ対応）
@@ -128,7 +143,7 @@ export default function CategoryNav({
         width: activeRect.width,
       });
     }
-  }, [location.pathname, items]);
+  }, [location.pathname, location.search, items]);
 
   return (
     <nav

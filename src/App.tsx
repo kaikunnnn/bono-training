@@ -91,6 +91,7 @@ import MyPage from "./pages/MyPage";
 import Account from "./pages/Account";
 import Roadmap from "./pages/Roadmap";
 import Search from "./pages/Search";
+import AskAI from "./pages/AskAI";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionUpdated from "./pages/SubscriptionUpdated";
 import DevEnvironmentBanner from "./components/dev/DevEnvironmentBanner";
@@ -261,6 +262,7 @@ const AppContent = () => {
         <Route path="/events/:slug" element={<EventDetail />} />
 
         <Route path="/search" element={<Search />} />
+        <Route path="/ask" element={<AskAI />} />
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/category/:categoryId" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />
