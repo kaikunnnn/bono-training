@@ -139,12 +139,25 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
           console.log('[VimeoPlayer] No chapters available');
         }
 
-        console.log('[VimeoPlayer] Ready - Duration:', duration, 'Volume:', volume);
+        const muted = await player.getMuted();
+
+        // muted=false が指定されているのに実際にミュートされていれば強制解除
+        if (!options.muted && muted) {
+          await player.setMuted(false);
+        }
+
+        // volume が 0 の場合も強制的に 1 に設定（ブラウザのautoplayポリシー対策）
+        if (!options.muted && volume === 0) {
+          await player.setVolume(1);
+        }
+
+        console.log('[VimeoPlayer] Ready - Duration:', duration, 'Volume:', volume, 'Muted:', muted);
         // 注意: isReadyが既にtrueでもchaptersは常にマージする（レースコンディション対策）
         setState(prev => ({
           ...prev,
           duration: prev.duration || duration,
           volume: prev.volume !== 1 ? prev.volume : volume,
+          muted: options.muted ? muted : false,
           textTracks: prev.textTracks.length > 0 ? prev.textTracks : textTracks as TextTrack[],
           chapters, // チャプターは常に更新（loadedイベントでは取得されないため）
           isLoading: false,
