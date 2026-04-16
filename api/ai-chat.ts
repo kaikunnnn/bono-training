@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import Anthropic from '@anthropic-ai/sdk';
+import Groq from 'groq-sdk';
 import { createClient } from '@sanity/client';
 
 const sanityClient = createClient({
@@ -9,9 +9,7 @@ const sanityClient = createClient({
   useCdn: true,
 });
 
-const anthropic = new Anthropic({
-  apiKey: process.env.ANTHROPIC_API_KEY,
-});
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || '' });
 
 // ============================================
 // Sanityコンテンツ取得
@@ -19,7 +17,6 @@ const anthropic = new Anthropic({
 
 async function fetchContext() {
   const [lessons, guides, roadmaps] = await Promise.all([
-    // レッスン
     sanityClient.fetch(`*[_type == "lesson"] | order(_createdAt desc)[0...30] {
       _id,
       title,
@@ -30,8 +27,6 @@ async function fetchContext() {
       isPremium,
       "questCount": count(quests)
     }`),
-
-    // ガイド
     sanityClient.fetch(`*[_type == "guide"] | order(publishedAt desc)[0...30] {
       _id,
       title,
@@ -41,8 +36,6 @@ async function fetchContext() {
       tags,
       isPremium
     }`),
-
-    // ロードマップ
     sanityClient.fetch(`*[_type == "roadmap" && isPublished == true] | order(order asc)[0...20] {
       _id,
       title,
@@ -67,7 +60,7 @@ function buildContextText(lessons: any[], guides: any[], roadmaps: any[]): strin
 
   lines.push('\n## レッスン（コース）');
   for (const l of lessons) {
-    const premium = l.isPremium ? ' 🔒有料' : '';
+    const premium = l.isPremium ? ' [有料]' : '';
     lines.push(`- [${l.title}](/lessons/${l.slug})${premium}: ${l.description || ''}`);
     if (l.category) lines.push(`  カテゴリ: ${l.category}`);
     if (l.tags?.length) lines.push(`  タグ: ${l.tags.join(', ')}`);
@@ -75,7 +68,7 @@ function buildContextText(lessons: any[], guides: any[], roadmaps: any[]): strin
 
   lines.push('\n## ガイド（読み物）');
   for (const g of guides) {
-    const premium = g.isPremium ? ' 🔒有料' : '';
+    const premium = g.isPremium ? ' [有料]' : '';
     const categoryLabel: Record<string, string> = {
       career: 'キャリア', learning: '学習方法', industry: '業界動向', tools: 'ツール・技術',
     };
@@ -131,38 +124,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Sanityからコンテンツ取得
     const { lessons, guides, roadmaps } = await fetchContext();
     const contextText = buildContextText(lessons, guides, roadmaps);
 
-    // system promptにコンテンツを注入
-    const systemWithContext = `${SYSTEM_PROMPT}
-
-## BONOで学べるコンテンツ一覧
-${contextText}`;
+    const systemWithContext = `${SYSTEM_PROMPT}\n\n## BONOで学べるコンテンツ一覧\n${contextText}`;
 
     // ストリーミングレスポンス
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-    res.setHeader('X-Accel-Buffering', 'no'); // Vercelのプロキシバッファリングを無効化
+    res.setHeader('X-Accel-Buffering', 'no');
 
-    const stream = anthropic.messages.stream({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      system: systemWithContext,
-      messages: messages.map((m) => ({
-        role: m.role,
+    // Groq用にメッセージを変換
+    const groqMessages: Groq.Chat.ChatCompletionMessageParam[] = [
+      { role: 'system', content: systemWithContext },
+      ...messages.map((m) => ({
+        role: m.role as 'user' | 'assistant',
         content: m.content,
       })),
+    ];
+
+    const stream = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: groqMessages,
+      stream: true,
+      max_tokens: 1024,
     });
 
-    for await (const event of stream) {
-      if (
-        event.type === 'content_block_delta' &&
-        event.delta.type === 'text_delta'
-      ) {
-        res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`);
+    for await (const chunk of stream) {
+      const text = chunk.choices[0]?.delta?.content || '';
+      if (text) {
+        res.write(`data: ${JSON.stringify({ text })}\n\n`);
       }
     }
 
