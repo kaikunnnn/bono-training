@@ -91,6 +91,7 @@ import MyPage from "./pages/MyPage";
 import Account from "./pages/Account";
 import Roadmap from "./pages/Roadmap";
 import Search from "./pages/Search";
+import AskAI from "./pages/AskAI";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionUpdated from "./pages/SubscriptionUpdated";
 import DevEnvironmentBanner from "./components/dev/DevEnvironmentBanner";
@@ -113,6 +114,7 @@ import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
 import FeedbackApplyIndex from "./pages/feedback-apply";
 import FeedbackApplySubmit from "./pages/feedback-apply/submit";
+import LearningCompanionPrototype from "./pages/Prototype/LearningCompanion";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -260,7 +262,9 @@ const AppContent = () => {
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
+        <Route path="/prototype/learning-companion" element={<LearningCompanionPrototype />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/ask" element={<Navigate to="/search?mode=ai" replace />} />
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/category/:categoryId" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />

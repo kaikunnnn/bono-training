@@ -41,15 +41,14 @@ interface SanityArticleForSearch {
 interface SanityGuideForSearch {
   _id: string;
   title: string;
-  slug: { current: string };
-  excerpt?: string;
+  slug: string; // クエリで slug.current に解決済み
+  description?: string;
   thumbnailUrl?: string;
-  category?: {
-    title: string;
-    slug: { current: string };
-  };
+  category?: string;
   tags?: string[];
   publishedAt?: string;
+  readingTime?: string;
+  isPremium?: boolean;
 }
 
 // ============================================
@@ -130,26 +129,25 @@ async function fetchArticlesForSearch(): Promise<SanityArticleForSearch[]> {
 }
 
 /**
- * 検索用のナレッジ（ガイド相当）データを取得
+ * 検索用のガイドデータを取得
  */
-async function fetchKnowledgeForSearch(): Promise<SanityGuideForSearch[]> {
+async function fetchGuidesForSearch(): Promise<SanityGuideForSearch[]> {
   try {
-    const query = `*[_type == "knowledge"] | order(publishedAt desc) {
+    const query = `*[_type == "guide"] | order(publishedAt desc) {
       _id,
       title,
-      slug,
-      excerpt,
+      "slug": slug.current,
+      description,
       "thumbnailUrl": thumbnail.asset->url,
-      "category": category-> {
-        title,
-        slug
-      },
+      category,
       tags,
-      publishedAt
+      publishedAt,
+      readingTime,
+      isPremium
     }`;
     return client.fetch(query);
   } catch (error) {
-    console.error('検索用ナレッジデータの取得に失敗:', error);
+    console.error('検索用ガイドデータの取得に失敗:', error);
     throw new Error('検索データの読み込みに失敗しました。');
   }
 }
@@ -209,20 +207,21 @@ function convertArticleToSearchResult(
   };
 }
 
-function convertKnowledgeToSearchResult(
-  knowledge: SanityGuideForSearch
+function convertGuideToSearchResult(
+  guide: SanityGuideForSearch
 ): GuideSearchResult {
   return {
-    id: knowledge._id,
+    id: guide._id,
     type: "guide",
-    title: knowledge.title,
-    description: knowledge.excerpt || "",
-    slug: knowledge.slug?.current || "",
-    thumbnail: knowledge.thumbnailUrl,
-    category: knowledge.category?.slug?.current,
-    tags: knowledge.tags,
-    publishedAt: knowledge.publishedAt,
-    isPremium: false, // ナレッジは無料
+    title: guide.title,
+    description: guide.description || "",
+    slug: guide.slug || "",
+    thumbnail: guide.thumbnailUrl,
+    category: guide.category,
+    tags: guide.tags,
+    publishedAt: guide.publishedAt,
+    readingTime: guide.readingTime,
+    isPremium: guide.isPremium ?? false,
   };
 }
 
@@ -232,16 +231,16 @@ function convertKnowledgeToSearchResult(
 
 async function fetchAllSearchData(): Promise<SearchResult[]> {
   try {
-    const [lessons, articles, knowledge] = await Promise.all([
+    const [lessons, articles, guides] = await Promise.all([
       fetchLessonsForSearch(),
       fetchArticlesForSearch(),
-      fetchKnowledgeForSearch(),
+      fetchGuidesForSearch(),
     ]);
 
     const results: SearchResult[] = [
       ...lessons.map(convertLessonToSearchResult),
       ...articles.map(convertArticleToSearchResult),
-      ...knowledge.map(convertKnowledgeToSearchResult),
+      ...guides.map(convertGuideToSearchResult),
     ];
 
     return results;
@@ -294,10 +293,11 @@ function filterSearchResults(
 /**
  * 検索データを取得するフック
  */
-export function useSearchData() {
+export function useSearchData(enabled = true) {
   return useQuery({
     queryKey: ["searchData"],
     queryFn: fetchAllSearchData,
+    enabled,
     staleTime: 5 * 60 * 1000, // 5分
     gcTime: 10 * 60 * 1000, // 10分
     refetchOnWindowFocus: false,
@@ -306,9 +306,10 @@ export function useSearchData() {
 
 /**
  * 検索を実行するフック
+ * @param enabled false にするとSanityフェッチを完全にスキップ（AIモード時など）
  */
-export function useSearch(query: string, contentTypes: SearchContentType[]) {
-  const { data: allData, isLoading, error } = useSearchData();
+export function useSearch(query: string, contentTypes: SearchContentType[], enabled = true) {
+  const { data: allData, isLoading, error } = useSearchData(enabled);
 
   const results = allData
     ? filterSearchResults(allData, query, contentTypes)

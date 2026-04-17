@@ -1,6 +1,11 @@
 {
   "devCommand": "vite --port 3000",
   "framework": "vite",
+  "functions": {
+    "api/ai-chat.ts": {
+      "maxDuration": 60
+    }
+  },
   "rewrites": [
     {
       "source": "/lessons/:slug",
