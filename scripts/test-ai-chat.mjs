@@ -60,7 +60,15 @@ let lessons = [], guides = [], roadmaps = [];
 
 try {
   [lessons, guides, roadmaps] = await Promise.all([
-    sanityClient.fetch(`*[_type == "lesson"][0...5] { _id, title, "slug": slug.current, description }`),
+    sanityClient.fetch(`*[_type == "lesson"][0...5] {
+      _id, title, "slug": slug.current, description, tags, isPremium,
+      "quests": *[_type == "quest" && references(^._id)] | order(questNumber asc) {
+        questNumber, title, goal,
+        "articles": articles[]->{
+          articleNumber, title, "slug": slug.current, excerpt, articleType, isPremium
+        }
+      }
+    }`),
     sanityClient.fetch(`*[_type == "guide"][0...5] { _id, title, "slug": slug.current, description }`),
     sanityClient.fetch(`*[_type == "roadmap" && isPublished == true][0...5] { _id, title, "slug": slug.current, description }`),
   ]);
@@ -84,21 +92,47 @@ try {
 // ============================================
 console.log('\n=== Step 3: Groq APIストリーミングテスト ===');
 
+const ARTICLE_TYPE_LABEL = {
+  explain: '知識', intro: 'イントロ', practice: '実践', challenge: 'チャレンジ', demo: '実演解説',
+};
+
+function buildTestContext(lessons, guides, roadmaps) {
+  const lines = [];
+  lines.push('## ロードマップ');
+  for (const r of roadmaps) {
+    lines.push(`- [${r.title}](/roadmaps/${r.slug}): ${r.description || ''}`);
+  }
+  lines.push('\n## レッスン');
+  for (const l of lessons) {
+    lines.push(`### [${l.title}](/lessons/${l.slug})`);
+    if (l.description) lines.push(`概要: ${l.description}`);
+    if (l.quests?.length) {
+      for (const q of l.quests) {
+        lines.push(`  ▸ Quest${q.questNumber || ''} 「${q.title}」${q.goal ? ` — ${q.goal}` : ''}`);
+        for (const a of q.articles || []) {
+          const aType = ARTICLE_TYPE_LABEL[a.articleType] || a.articleType || '';
+          const aExcerpt = a.excerpt ? ` — ${a.excerpt}` : '';
+          lines.push(`    - [${a.title}](/lessons/${l.slug}?article=${a.slug}) [${aType}]${aExcerpt}`);
+        }
+      }
+    }
+    lines.push('');
+  }
+  lines.push('\n## ガイド');
+  if (guides.length > 0) {
+    for (const g of guides) lines.push(`- [${g.title}](/guide/${g.slug}): ${g.description || ''}`);
+  } else {
+    lines.push('(まだ記事はありません)');
+  }
+  return lines.join('\n');
+}
+
 const SYSTEM_PROMPT = `あなたはBONO（UIUXデザイン学習サービス）のラーニングアシスタントです。
 ユーザーの質問に対して、BONOのコンテンツを活用して具体的な学習アドバイスを提供します。
 リンクは必ずMarkdown形式 [タイトル](URL) で記述してください。日本語で回答してください。
 
 ## BONOで学べるコンテンツ
-${[
-  '## ロードマップ',
-  ...roadmaps.map(r => `- [${r.title}](/roadmaps/${r.slug}): ${r.description || ''}`),
-  '\n## レッスン',
-  ...lessons.map(l => `- [${l.title}](/lessons/${l.slug}): ${l.description || ''}`),
-  '\n## ガイド',
-  ...(guides.length > 0
-    ? guides.map(g => `- [${g.title}](/guide/${g.slug}): ${g.description || ''}`)
-    : ['(まだ記事はありません)']),
-].join('\n')}`;
+${buildTestContext(lessons, guides, roadmaps)}`;
 
 const TEST_CASES = [
   {
