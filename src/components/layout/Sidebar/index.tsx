@@ -107,14 +107,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           検索
         </SidebarMenuItem>
 
-        {/* AIに聞く */}
-        <SidebarMenuItem
-          href="/ask"
-          icon={<MenuIcons.ai size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/ask")}
-        >
-          AIに聞く
-        </SidebarMenuItem>
       </SidebarMenuGroup>
 
       {/* コミュニティ - 一時的に非表示（TODO: 公開時に hidden を削除） */}

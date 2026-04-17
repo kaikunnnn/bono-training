@@ -262,7 +262,7 @@ const AppContent = () => {
         <Route path="/events/:slug" element={<EventDetail />} />
 
         <Route path="/search" element={<Search />} />
-        <Route path="/ask" element={<AskAI />} />
+        <Route path="/ask" element={<Navigate to="/search?mode=ai" replace />} />
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/category/:categoryId" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />
