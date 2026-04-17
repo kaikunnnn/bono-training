@@ -46,8 +46,9 @@ const Search: React.FC = () => {
   };
 
   const { results, isLoading, error } = useSearch(
-    mode === "search" ? query : "",
-    selectedTypes
+    query,
+    selectedTypes,
+    mode === "search"  // AIモード時はSanityフェッチをスキップ
   );
 
   const groupedResults = useMemo(() => groupSearchResults(results), [results]);

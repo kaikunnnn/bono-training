@@ -293,10 +293,11 @@ function filterSearchResults(
 /**
  * 検索データを取得するフック
  */
-export function useSearchData() {
+export function useSearchData(enabled = true) {
   return useQuery({
     queryKey: ["searchData"],
     queryFn: fetchAllSearchData,
+    enabled,
     staleTime: 5 * 60 * 1000, // 5分
     gcTime: 10 * 60 * 1000, // 10分
     refetchOnWindowFocus: false,
@@ -305,9 +306,10 @@ export function useSearchData() {
 
 /**
  * 検索を実行するフック
+ * @param enabled false にするとSanityフェッチを完全にスキップ（AIモード時など）
  */
-export function useSearch(query: string, contentTypes: SearchContentType[]) {
-  const { data: allData, isLoading, error } = useSearchData();
+export function useSearch(query: string, contentTypes: SearchContentType[], enabled = true) {
+  const { data: allData, isLoading, error } = useSearchData(enabled);
 
   const results = allData
     ? filterSearchResults(allData, query, contentTypes)
