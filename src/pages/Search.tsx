@@ -15,6 +15,7 @@ import { useSearch } from "@/hooks/useSearch";
 import { Search as SearchIcon, Loader2, Sparkles } from "lucide-react";
 import { trackSearch } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { runDiagnostics } from "@/lib/diagnostics";
 
 type SearchMode = "search" | "ai";
 
@@ -66,6 +67,14 @@ const Search: React.FC = () => {
       trackSearch(query, results.length);
     }
   }, [query, isLoading, results.length, mode]);
+
+  // エラー発生時に診断を自動実行
+  useEffect(() => {
+    if (error) {
+      console.warn('[BONO] /search でエラーが発生しました。診断を実行します...');
+      runDiagnostics();
+    }
+  }, [error]);
 
   const availableTypes: SearchContentType[] = ["lesson", "article", "guide"];
   const sectionsToShow =

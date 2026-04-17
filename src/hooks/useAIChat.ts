@@ -51,7 +51,17 @@ export function useAIChat() {
       });
 
       if (!response.ok) {
-        throw new Error('APIエラーが発生しました');
+        const status = response.status;
+        console.error(`[BONO AI] /api/ai-chat エラー status=${status}`);
+        if (status === 500) {
+          console.error('[BONO AI] 原因候補: GROQ_API_KEY が Vercel のプレビュー環境に設定されていない');
+          console.error('[BONO AI] 確認: Vercel Dashboard → Settings → Environment Variables → GROQ_API_KEY の "Preview" チェックを確認');
+        } else if (status === 404) {
+          console.error('[BONO AI] /api/ai-chat が見つかりません。Vercel にデプロイされていない可能性があります');
+        } else if (status === 405) {
+          console.error('[BONO AI] Method Not Allowed — POST 以外のリクエストが送られています');
+        }
+        throw new Error(`APIエラー (${status})`);
       }
 
       const reader = response.body?.getReader();
@@ -91,8 +101,8 @@ export function useAIChat() {
       }
     } catch (err: any) {
       if (err.name === 'AbortError') return;
-      setError('回答の取得に失敗しました。もう一度お試しください。');
-      // エラー時はアシスタントメッセージを削除
+      console.error('[BONO AI] 送信エラー:', err);
+      setError(`回答の取得に失敗しました（${err.message}）。コンソールを確認してください。`);
       setMessages((prev) => prev.filter((m) => m.id !== assistantMessage.id));
     } finally {
       // ストリーミング完了
