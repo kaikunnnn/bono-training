@@ -7,7 +7,7 @@ export const client = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
   dataset: import.meta.env.VITE_SANITY_DATASET,
   apiVersion: import.meta.env.VITE_SANITY_API_VERSION || "2024-01-01",
-  useCdn: false, // リアルタイム更新のためCDNを無効化
+  useCdn: true, // CDN経由（CORS対応・全ドメインからアクセス可）
 });
 
 const builder = imageUrlBuilder(client);
