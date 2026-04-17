@@ -114,6 +114,7 @@ import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
 import FeedbackApplyIndex from "./pages/feedback-apply";
 import FeedbackApplySubmit from "./pages/feedback-apply/submit";
+import LearningCompanionPrototype from "./pages/Prototype/LearningCompanion";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -261,6 +262,7 @@ const AppContent = () => {
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
+        <Route path="/prototype/learning-companion" element={<LearningCompanionPrototype />} />
         <Route path="/search" element={<Search />} />
         <Route path="/ask" element={<Navigate to="/search?mode=ai" replace />} />
         <Route path="/lessons" element={<Lessons />} />
