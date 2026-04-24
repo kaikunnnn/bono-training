@@ -7,7 +7,7 @@ export const client = createClient({
   projectId: import.meta.env.VITE_SANITY_PROJECT_ID,
   dataset: import.meta.env.VITE_SANITY_DATASET,
   apiVersion: import.meta.env.VITE_SANITY_API_VERSION || "2024-01-01",
-  useCdn: false, // リアルタイム更新のためCDNを無効化
+  useCdn: true, // CDN経由（CORS対応・全ドメインからアクセス可）
 });
 
 const builder = imageUrlBuilder(client);
@@ -871,3 +871,58 @@ export async function getTrainingTaskDetail(trainingSlug: string, taskSlug: stri
   return client.fetch(query, { trainingSlug, taskSlug });
 }
 
+// ============================================
+// Guide 関連のクエリ
+// ============================================
+
+const GUIDE_FIELDS = `
+  _id,
+  title,
+  "slug": slug.current,
+  category,
+  description,
+  isPremium,
+  "thumbnailUrl": thumbnail.asset->url,
+  videoUrl,
+  linkUrl,
+  tags,
+  author,
+  readingTime,
+  publishedAt,
+  updatedAt
+`;
+
+/**
+ * ガイド一覧を取得
+ */
+export async function getAllGuides() {
+  const query = `*[_type == "guide"] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
+  return client.fetch(query);
+}
+
+/**
+ * カテゴリ別ガイド一覧を取得
+ */
+export async function getGuidesByCategory(category: string) {
+  const query = `*[_type == "guide" && category == $category] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
+  return client.fetch(query, { category });
+}
+
+/**
+ * ガイド詳細を取得
+ */
+export async function getGuide(slug: string) {
+  const query = `
+    *[_type == "guide" && slug.current == $slug][0] {
+      ${GUIDE_FIELDS},
+      content[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> { _id, url }
+        }
+      }
+    }
+  `;
+  return client.fetch(query, { slug });
+}

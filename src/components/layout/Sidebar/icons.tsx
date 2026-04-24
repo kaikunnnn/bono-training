@@ -37,8 +37,8 @@ export const MenuIcons = {
   lesson: Book,
   // トレーニング
   training: Play,
-  // ガイド
-  guide: LocationDiscover,
+  // よみもの
+  library: LocationDiscover,
   // 設定
   settings: Setting2,
   // マイページ
@@ -60,6 +60,8 @@ export const MenuIcons = {
   feedback: Messages1,
   // ナレッジ
   knowledge: Lamp,
+  // AI
+  ai: Lamp,
 } as const;
 
 /**

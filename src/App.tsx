@@ -62,6 +62,7 @@ import ListingLayoutPreview from "./pages/dev/ListingLayoutPreview";
 import RoadmapPathwayPatterns from "./pages/dev/RoadmapPathwayPatterns";
 import SoundEffectPreview from "./pages/dev/SoundEffectPreview";
 import SynthSwooshPreview from "./pages/dev/SynthSwooshPreview";
+import GuidePatterns from "./pages/dev/GuidePatterns";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
@@ -91,6 +92,7 @@ import MyPage from "./pages/MyPage";
 import Account from "./pages/Account";
 import Roadmap from "./pages/Roadmap";
 import Search from "./pages/Search";
+import AskAI from "./pages/AskAI";
 import SubscriptionSuccess from "./pages/SubscriptionSuccess";
 import SubscriptionUpdated from "./pages/SubscriptionUpdated";
 import DevEnvironmentBanner from "./components/dev/DevEnvironmentBanner";
@@ -113,6 +115,7 @@ import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
 import FeedbackApplyIndex from "./pages/feedback-apply";
 import FeedbackApplySubmit from "./pages/feedback-apply/submit";
+import LearningCompanionPrototype from "./pages/Prototype/LearningCompanion";
 
 // コンソールログでインポートの確認
 console.log('App - SubscriptionProvider loaded:', SubscriptionProvider !== undefined);
@@ -166,8 +169,8 @@ const AppContent = () => {
         <Route path="/training/about" element={<TrainingAbout />} />
         <Route path="/training/debug" element={<TrainingDebug />} />
 
-        <Route path="/guide" element={<GuidePage />} />
-        <Route path="/guide/:slug" element={<GuideDetailPage />} />
+        <Route path="/library" element={<GuidePage />} />
+        <Route path="/library/:slug" element={<GuideDetailPage />} />
 
         <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
         <Route path="/dev/top-new" element={<DevRoute><TopPageNew /></DevRoute>} />
@@ -196,6 +199,7 @@ const AppContent = () => {
         <Route path="/dev/roadmap-pathway-patterns" element={<DevRoute><RoadmapPathwayPatterns /></DevRoute>} />
         <Route path="/dev/sound-effect-preview" element={<DevRoute><SoundEffectPreview /></DevRoute>} />
         <Route path="/dev/synth-swoosh-preview" element={<DevRoute><SynthSwooshPreview /></DevRoute>} />
+        <Route path="/dev/guide-patterns" element={<DevRoute><GuidePatterns /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
         <Route path="/dev/lesson-idea-3" element={<DevRoute><LessonIdea3 /></DevRoute>} />
@@ -260,7 +264,9 @@ const AppContent = () => {
 
         <Route path="/events/:slug" element={<EventDetail />} />
 
+        <Route path="/prototype/learning-companion" element={<LearningCompanionPrototype />} />
         <Route path="/search" element={<Search />} />
+        <Route path="/ask" element={<Navigate to="/search?mode=ai" replace />} />
         <Route path="/lessons" element={<Lessons />} />
         <Route path="/lessons/category/:categoryId" element={<Lessons />} />
         <Route path="/lessons/:slug" element={<LessonDetail />} />

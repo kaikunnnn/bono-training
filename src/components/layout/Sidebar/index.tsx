@@ -88,6 +88,25 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
         >
           トレーニング
         </SidebarMenuItem>
+
+        {/* 学習ガイド */}
+        <SidebarMenuItem
+          href="/library"
+          icon={<MenuIcons.library size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/library") || location.pathname.startsWith("/library/")}
+        >
+          ガイド記事
+        </SidebarMenuItem>
+
+        {/* 検索 */}
+        <SidebarMenuItem
+          href="/search"
+          icon={<MenuIcons.search size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/search")}
+        >
+          検索
+        </SidebarMenuItem>
+
       </SidebarMenuGroup>
 
       {/* コミュニティ - 一時的に非表示（TODO: 公開時に hidden を削除） */}

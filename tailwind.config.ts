@@ -271,6 +271,9 @@ const config = {
         'gradient-slide': 'gradient-slide 1.2s ease-out forwards',
         'gradient-scale-slide': 'gradient-scale-slide 2.0s cubic-bezier(0.215, 0.61, 0.355, 1) -0.3s forwards',
       },
+      fontSize: {
+        '2xs': ['13px', { lineHeight: '20px' }],
+      },
       fontFamily: {
         'futura': ['Futura', 'sans-serif'],
         'inter': ['Inter', 'sans-serif'],

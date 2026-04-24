@@ -2,6 +2,7 @@ import { useSubscriptionContext } from '@/contexts/SubscriptionContext';
 import PremiumVideoLock from '@/components/premium/PremiumVideoLock';
 import { CustomVimeoPlayer } from '@/components/video';
 import { urlFor } from '@/lib/sanity';
+import { getVideoInfo } from '@/lib/videoUtils';
 
 interface VideoSectionProps {
   videoUrl?: string | null | { url?: string; metadata?: any };
@@ -50,32 +51,8 @@ const VideoSection = ({
     return <PremiumVideoLock />;
   }
 
-  // URLからプラットフォームとIDを判定
-  const getVideoInfo = (url: string | null | undefined | { url?: string }) => {
-    if (!url) return null;
-
-    // オブジェクトの場合はURLを抽出
-    const urlString = typeof url === 'string' ? url : url?.url;
-
-    if (!urlString || typeof urlString !== 'string') return null;
-
-    // YouTube判定: youtu.be/xxx or youtube.com/watch?v=xxx
-    const youtubeMatch = urlString.match(/(?:youtu\.be\/|youtube\.com\/watch\?v=)([a-zA-Z0-9_-]+)/);
-    if (youtubeMatch) {
-      return { platform: 'youtube', id: youtubeMatch[1] };
-    }
-
-    // Vimeo判定: vimeo.com/xxx
-    const vimeoMatch = urlString.match(/vimeo\.com\/(\d+)/);
-    if (vimeoMatch) {
-      return { platform: 'vimeo', id: vimeoMatch[1] };
-    }
-
-    return null;
-  };
-
   // videoUrlからプラットフォームとIDを抽出
-  const videoInfo = videoUrl ? getVideoInfo(videoUrl) : null;
+  const videoInfo = getVideoInfo(videoUrl);
 
   // サムネイル画像のURLを取得（URL優先、なければSanity画像オブジェクト）
   const getThumbnailUrl = () => {
