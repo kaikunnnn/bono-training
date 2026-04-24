@@ -884,6 +884,7 @@ const GUIDE_FIELDS = `
   isPremium,
   "thumbnailUrl": thumbnail.asset->url,
   videoUrl,
+  linkUrl,
   tags,
   author,
   readingTime,

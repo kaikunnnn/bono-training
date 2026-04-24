@@ -2,6 +2,16 @@ import React from "react";
 import { PortableText } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/react";
 import { cn } from "@/lib/utils";
+import {
+  SectionHeadingBlock,
+  CardGridBlock,
+  PullQuoteBlock,
+  StepFlowBlock,
+  DividerBlock,
+  CustomContainerBlock,
+  TableBlock,
+  LinkCardBlock,
+} from "./blocks";
 
 interface GuideContentProps {
   content: PortableTextBlock[];
@@ -14,15 +24,15 @@ const portableTextComponents = {
       <p className="text-[15px] leading-[26px] text-foreground/80">{children}</p>
     ),
     h2: ({ children }: any) => (
-      <h2 className="text-lg font-bold leading-8 text-foreground border-b border-border pb-2">
+      <h2 className="text-2xl font-bold leading-8 text-foreground border-b border-border pb-2">
         {children}
       </h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-base font-bold text-foreground">{children}</h3>
+      <h3 className="text-lg font-bold text-foreground">{children}</h3>
     ),
     h4: ({ children }: any) => (
-      <h4 className="text-sm font-bold text-foreground">{children}</h4>
+      <h4 className="text-base font-bold text-foreground">{children}</h4>
     ),
     blockquote: ({ children }: any) => (
       <blockquote className="border-l-4 border-border pl-4 py-1 text-foreground/70 italic">
@@ -85,6 +95,14 @@ const portableTextComponents = {
         </figure>
       );
     },
+    sectionHeading: SectionHeadingBlock,
+    cardGrid: CardGridBlock,
+    pullQuote: PullQuoteBlock,
+    stepFlow: StepFlowBlock,
+    divider: DividerBlock,
+    customContainer: CustomContainerBlock,
+    tableBlock: TableBlock,
+    linkCard: LinkCardBlock,
   },
 };
 

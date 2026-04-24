@@ -41,7 +41,7 @@ const SearchResultCard: React.FC<SearchResultCardProps> = ({
         }
         return `/articles/${result.slug}`;
       case "guide":
-        return `/guide/${result.slug}`;
+        return `/library/${result.slug}`;
       case "roadmap":
         return `/roadmap/${result.slug}`;
       default:

@@ -23,6 +23,7 @@ export interface Guide {
   // 表示設定
   thumbnailUrl?: string;
   videoUrl?: string;
+  linkUrl?: string;
 
   // メタ情報
   author: string;

@@ -34,7 +34,7 @@ const GuideHeader = ({ guide }: GuideHeaderProps) => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link to="/guide">ガイド</Link>
+                <Link to="/library">ガイド記事</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

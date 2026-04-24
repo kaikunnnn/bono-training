@@ -91,11 +91,11 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
 
         {/* 学習ガイド */}
         <SidebarMenuItem
-          href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/guide") || location.pathname.startsWith("/guide/")}
+          href="/library"
+          icon={<MenuIcons.library size={ICON_SIZE} variant="Outline" />}
+          isActive={isActive("/library") || location.pathname.startsWith("/library/")}
         >
-          学習ガイド
+          ガイド記事
         </SidebarMenuItem>
 
         {/* 検索 */}

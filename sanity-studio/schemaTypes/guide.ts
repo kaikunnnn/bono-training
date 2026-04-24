@@ -57,6 +57,14 @@ export default defineType({
       options: { hotspot: true },
     }),
     defineField({
+      name: "linkUrl",
+      title: "リンクURL",
+      type: "url",
+      description: "設定すると記事詳細ではなくこのURLへ遷移するリンク型ガイドになります",
+      validation: (Rule) =>
+        Rule.uri({ scheme: ["https", "http"] }).optional(),
+    }),
+    defineField({
       name: "videoUrl",
       title: "動画URL",
       type: "url",

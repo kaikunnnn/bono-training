@@ -21,7 +21,7 @@ const RelatedGuides = ({ relatedSlugs, currentSlug }: RelatedGuidesProps) => {
       description: g.description,
       thumbnail: g.thumbnail,
       categoryLabel: getCategoryInfo(g.category)?.label,
-      href: `/guide/${g.slug}`,
+      href: `/library/${g.slug}`,
     }));
 
   return <RelatedContent items={items} title="関連ガイド" />;
