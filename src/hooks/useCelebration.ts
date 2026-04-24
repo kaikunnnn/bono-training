@@ -3,6 +3,8 @@
  *
  * 記事完了、クエスト完了、レッスン完了時の演出を一元管理
  */
+'use client';
+
 import { useCallback, useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { fireQuestConfetti, fireLessonConfetti } from '@/lib/confetti';
@@ -74,8 +76,6 @@ export function useCelebration(): UseCelebrationReturn {
    * - 達成感のある効果音
    */
   const celebrateQuestComplete = useCallback((questTitle: string) => {
-    console.log('[useCelebration] celebrateQuestComplete called with:', questTitle);
-
     // 効果音
     playQuestCompleteSound();
 
@@ -98,14 +98,10 @@ export function useCelebration(): UseCelebrationReturn {
    * - ファンファーレ効果音
    */
   const celebrateLessonComplete = useCallback((lessonTitle: string) => {
-    console.log('[useCelebration] celebrateLessonComplete called with:', lessonTitle);
     const message = getLessonCompleteMessage(lessonTitle);
-    console.log('[useCelebration] message:', message);
 
     // 0.5秒のタメを作ってからモーダル表示
     setTimeout(() => {
-      console.log('[useCelebration] Setting modal data and showing modal');
-
       // ファンファーレ効果音
       playLessonCompleteSound();
 
