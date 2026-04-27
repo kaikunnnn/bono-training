@@ -14,6 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Check, Loader2 } from "lucide-react";
 import { createCheckoutSession, updateSubscription } from "@/lib/services/stripe";
+import { trackSelectPlan, trackBeginCheckout } from "@/lib/analytics";
 import {
   PlanChangeConfirmModal,
   type ModalState,
@@ -62,6 +63,9 @@ export function PlanCard({
   const [modalError, setModalError] = useState<string | undefined>();
 
   const handleSelectPlan = async () => {
+    // GA4: プラン選択イベント（mainと同じ: ボタンクリック時に発火）
+    trackSelectPlan(plan.id, plan.price, duration);
+
     if (!isLoggedIn) {
       router.push(`/login?redirectTo=/subscription`);
       return;
@@ -80,6 +84,9 @@ export function PlanCard({
     setError(null);
 
     try {
+      // GA4: チェックアウト開始イベント（mainと同じ: checkout直前に発火）
+      trackBeginCheckout(plan.id, plan.price, duration);
+
       const returnUrl = `${window.location.origin}/subscription/success`;
       const { url, error: checkoutError } = await createCheckoutSession(
         returnUrl,

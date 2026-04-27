@@ -2,10 +2,8 @@ import { Metadata } from "next";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, MessageSquare } from "lucide-react";
-import { PlanCard } from "@/components/subscription/PlanCard";
 import { CustomerPortalButton } from "@/components/subscription/CustomerPortalButton";
-import type { PlanType } from "@/types/subscription";
+import { PlanSelector, type PlanData } from "@/components/subscription/PlanSelector";
 
 export const metadata: Metadata = {
   title: "プレミアム会員",
@@ -19,19 +17,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/subscription" },
 };
 
-const plans: Array<{
-  id: PlanType;
-  name: string;
-  description: string;
-  price: number;
-  features: string[];
-  popular: boolean;
-}> = [
+const plans: PlanData[] = [
   {
     id: "standard",
     name: "スタンダード",
     description: "すべてのコンテンツにアクセス",
-    price: 6800,
+    prices: { 1: 6800, 3: 17400 },
     features: [
       "すべてのレッスン・記事へのアクセス",
       "新規コンテンツの優先アクセス",
@@ -44,7 +35,7 @@ const plans: Array<{
     id: "feedback",
     name: "フィードバック",
     description: "作品のレビューを受ける",
-    price: 15800,
+    prices: { 1: 15800, 3: 41400 },
     features: [
       "すべてのコンテンツへのアクセス",
       "フィードバック機能の利用",
@@ -109,33 +100,17 @@ export default async function SubscriptionPage() {
         </section>
       )}
 
-      {/* プラン一覧 */}
+      {/* プラン一覧（期間切り替えタブ付き） */}
       <section className="container px-4 py-12 sm:px-8">
-        <div className="grid gap-6 md:grid-cols-2 max-w-3xl mx-auto">
-          {plans.map((plan) => (
-            <PlanCard
-              key={plan.id}
-              plan={plan}
-              duration={1}
-              isCurrentPlan={
-                subscription.isSubscribed && subscription.planType === plan.id
-              }
-              isCanceled={subscription.cancelAtPeriodEnd}
-              isLoggedIn={!!user}
-              isSubscribed={subscription.isSubscribed}
-              currentPlanType={subscription.planType}
-              currentDuration={subscription.duration}
-              currentPeriodEnd={subscription.renewalDate}
-            />
-          ))}
-        </div>
-
-        {/* 3ヶ月プランの案内 */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-muted-foreground">
-            3ヶ月プランをご希望の方は、プラン選択後にカスタマーポータルからお申し込みいただけます。
-          </p>
-        </div>
+        <PlanSelector
+          plans={plans}
+          isLoggedIn={!!user}
+          isSubscribed={subscription.isSubscribed}
+          currentPlanType={subscription.planType}
+          currentDuration={subscription.duration}
+          currentPeriodEnd={subscription.renewalDate}
+          cancelAtPeriodEnd={subscription.cancelAtPeriodEnd}
+        />
       </section>
 
       {/* FAQ */}
