@@ -5,6 +5,7 @@ import { Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { toggleBookmark } from "@/lib/services/bookmarks";
+import { trackBookmark } from "@/lib/analytics";
 
 interface BookmarkButtonProps {
   articleId: string;
@@ -35,6 +36,9 @@ export function BookmarkButton({
 
       if (result.success) {
         setIsBookmarked(result.isBookmarked);
+        if (result.isBookmarked) {
+          trackBookmark(articleId, "article");
+        }
         toast({
           title: result.message,
           description: result.isBookmarked

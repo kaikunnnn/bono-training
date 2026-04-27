@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { IconButton } from "@/components/ui/button/IconButton";
@@ -72,6 +73,7 @@ export default function MyPageClient({
   viewHistory,
   lessonsWithProgress,
 }: MyPageClientProps) {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabId>("all");
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const { toast } = useToast();
@@ -96,8 +98,7 @@ export default function MyPageClient({
     const result = await markLessonAsCompleted(lessonId);
     if (result.success) {
       toast({ title: "レッスンを完了しました！" });
-      // ページリロードで状態反映
-      window.location.reload();
+      router.refresh();
     }
   };
 
