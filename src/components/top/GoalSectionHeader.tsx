@@ -1,0 +1,81 @@
+import { cn } from "@/lib/utils";
+import DottedDivider from "@/components/common/DottedDivider";
+
+interface GoalSectionHeaderProps {
+  /** ゴールのタイトル */
+  title: string;
+  /** 説明文 */
+  description: string;
+  /** 説明文の後に表示する絵文字（`emojiSrc` 未指定時） */
+  emoji?: string;
+  /** Fluent Emoji 3D 等の画像（指定時はこちらを優先） */
+  emojiSrc?: string;
+  emojiAlt?: string;
+  /** 追加のクラス名 */
+  className?: string;
+}
+
+/**
+ * ゴールセクションヘッダー
+ *
+ * GoalSection の上部に表示するヘッダー部分
+ * - 「ゴール」バッジ
+ * - タイトル（大きめ）
+ * - 説明文 + 絵文字
+ * - 全幅ボーダー（セクションコンテナの端まで）
+ *
+ * Figma: PRD🏠_topUI_newBONO2026 node-id: 47-13822
+ */
+export default function GoalSectionHeader({
+  title,
+  description,
+  emoji,
+  emojiSrc,
+  emojiAlt,
+  className,
+}: GoalSectionHeaderProps) {
+  return (
+    <div className={cn("flex flex-col", className)}>
+      {/* コンテンツエリア（パディング付き、垂直中央配置） */}
+      <div className="flex flex-col gap-3 sm:gap-[17px] px-4 sm:px-8 lg:px-14 py-8 sm:py-12 lg:py-14">
+        {/* ゴールバッジ */}
+        <div className="inline-flex self-start items-center justify-center px-2 sm:px-2.5 py-1 sm:py-1.5 border border-[#52674e] rounded-full">
+          <span className="text-[10px] sm:text-xs font-bold text-[#52674e] uppercase leading-none">
+            ゴール
+          </span>
+        </div>
+
+        {/* タイトル */}
+        <h2 className="text-xl sm:text-2xl lg:text-[28px] font-extrabold text-text-primary leading-[1.29] font-['Rounded_Mplus_1c',sans-serif]">
+          {title}
+        </h2>
+
+        {/* 説明文 + 絵文字 */}
+        <div className="flex items-center gap-2 sm:gap-2.5 flex-wrap">
+          <p className="text-base sm:text-lg lg:text-xl font-normal text-text-secondary/80 leading-[1.35]">
+            {description}
+          </p>
+          {emojiSrc ? (
+            <img
+              src={emojiSrc}
+              alt={emojiAlt ?? ""}
+              className="h-5 w-5 shrink-0 object-contain sm:h-[22px] sm:w-[22px]"
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+            />
+          ) : (
+            emoji && (
+              <span className="text-lg sm:text-[22px]" role="img" aria-hidden="true">
+                {emoji}
+              </span>
+            )
+          )}
+        </div>
+      </div>
+
+      {/* 全幅ボーダー（グレー背景コンテナの端まで） */}
+      <DottedDivider />
+    </div>
+  );
+}

@@ -1,56 +1,49 @@
-import Link from "next/link";
+import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getAllRoadmaps, getAllLessons } from "@/lib/sanity";
+import TopPageClient from "@/components/top/TopPageClient";
 
-export default function Home() {
-  return (
-    <div className="min-h-screen bg-[#F9F9F7]">
-      <main className="max-w-4xl mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-8">
-          BONO Next.js 移行版
-        </h1>
+export const metadata: Metadata = {
+  title: "BONO - UIUXデザインを学ぶ",
+  description:
+    "UIUXデザインを体系的に学べるオンライン学習プラットフォーム。ロードマップ、レッスン、記事で効率的にスキルアップ。未経験からUIUXデザイナーへ。",
+  openGraph: {
+    title: "BONO - UIUXデザインを学ぶ",
+    description:
+      "UIUXデザインを体系的に学べるオンライン学習プラットフォーム。ロードマップ、レッスン、記事で効率的にスキルアップ。未経験からUIUXデザイナーへ。",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "BONO - UIUXデザインを学ぶ",
+    description:
+      "UIUXデザインを体系的に学べるオンライン学習プラットフォーム。ロードマップ、レッスン、記事で効率的にスキルアップ。",
+  },
+  alternates: { canonical: "/" },
+};
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">✅ セットアップ完了</h2>
-          <ul className="space-y-2 text-gray-600">
-            <li>• Next.js 15 + App Router</li>
-            <li>• Tailwind CSS + shadcn/ui</li>
-            <li>• Supabase SSR対応</li>
-            <li>• Sanity CMS接続</li>
-          </ul>
-        </div>
+/**
+ * トップページ（Server Component）
+ *
+ * - ログイン済み → /mypage へリダイレクト
+ * - 未ログイン → LP（ランディングページ）を表示
+ */
+export default async function IndexPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <h2 className="text-xl font-semibold mb-4">📝 進捗状況</h2>
-          <ul className="space-y-2 text-gray-600">
-            <li className="line-through text-green-600">✓ /lessons/[slug] ページを作成（SSR + OGP）</li>
-            <li>2. /articles/[slug] ページを作成</li>
-            <li>3. 共通レイアウト（ヘッダー/フッター）</li>
-          </ul>
-        </div>
+  if (user) {
+    redirect("/mypage");
+  }
 
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-xl font-semibold mb-4">🔗 テストリンク</h2>
-          <div className="space-y-2">
-            <Link
-              href="/lessons/zerokara-userinterview"
-              className="text-blue-600 hover:underline block"
-            >
-              /lessons/zerokara-userinterview（SSR + OGP動作確認済み）
-            </Link>
-            <Link
-              href="/lessons/bannerbeginner"
-              className="text-blue-600 hover:underline block"
-            >
-              /lessons/bannerbeginner
-            </Link>
-            <Link
-              href="/lessons/rookiesaction"
-              className="text-blue-600 hover:underline block"
-            >
-              /lessons/rookiesaction
-            </Link>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+  // 未ログインユーザー向けにデータをサーバーサイドで取得
+  const [roadmaps, lessons] = await Promise.all([
+    getAllRoadmaps(),
+    getAllLessons(),
+  ]);
+
+  return <TopPageClient roadmaps={roadmaps} lessons={lessons} />;
 }
