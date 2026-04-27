@@ -16,9 +16,6 @@ interface CategoryTagProps {
  * - 角丸: 10px
  * - フォント: Noto Sans JP Medium, 12px
  * - 色: #0D221D
- *
- * @example
- * <CategoryTag category="UIデザイン" />
  */
 export function CategoryTag({ category, className }: CategoryTagProps) {
   return (

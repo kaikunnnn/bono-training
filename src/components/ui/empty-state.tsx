@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 
 export interface EmptyStateProps {
   /** 表示メッセージ（改行はReactNodeで渡す） */
@@ -31,7 +31,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </div>
       {linkHref && linkLabel && (
         <Link
-          to={linkHref}
+          href={linkHref}
           className="px-2.5 py-1.5 bg-white rounded-lg border border-black/10 inline-flex justify-center items-center gap-1 no-underline"
         >
           <span

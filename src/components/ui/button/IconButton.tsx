@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import styles from "./IconButton.module.css";
 
 export interface IconButtonProps {
@@ -174,6 +174,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   }, []);
 
   // 外部から burstKey が更新されたタイミングで発火（初回は発火しない）
+  // prop変更への応答として setState を呼ぶのは有効なパターン
   useEffect(() => {
     if (typeof burstKey !== "number") return;
 
@@ -183,6 +184,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
     if (prev === undefined) return;
     if (prev === burstKey) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     triggerBurst({ delayMs: getBurstDelayMs({ preferPressReturn: true }) });
   }, [burstKey, getBurstDelayMs, triggerBurst]);
 
@@ -406,7 +408,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   if (to) {
     return (
       <Link
-        to={to}
+        href={to}
         onClick={handleClick}
         onPointerDown={handlePointerDown}
         onPointerUp={handlePointerUp}
