@@ -74,12 +74,7 @@ export function canAccessContent(
   }
 
   // プレミアムコンテンツの場合、有料プランが必要
-  return (
-    planType === "standard" ||
-    planType === "growth" ||
-    planType === "community" ||
-    planType === "feedback"
-  );
+  return planType === "standard" || planType === "feedback";
 }
 
 /**
@@ -150,16 +145,9 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
 
   // アクセス権限を計算
   const hasMemberAccess =
-    isActive &&
-    (planType === "standard" ||
-      planType === "growth" ||
-      planType === "community" ||
-      planType === "feedback");
+    isActive && (planType === "standard" || planType === "feedback");
   const hasLearningAccess =
-    isActive &&
-    (planType === "standard" ||
-      planType === "growth" ||
-      planType === "feedback");
+    isActive && (planType === "standard" || planType === "feedback");
 
   return {
     isSubscribed: isActive,
@@ -262,7 +250,7 @@ export function isValidPlanType(
   planType: string | null | undefined
 ): planType is PlanType {
   if (!planType) return false;
-  return ["standard", "feedback", "growth", "community"].includes(planType);
+  return ["standard", "feedback"].includes(planType);
 }
 
 /**
@@ -288,11 +276,9 @@ export function getPlanMonthlyPrice(
  * プラン名を取得する
  */
 export function getPlanDisplayName(planType: PlanType): string {
-  const planNames: Record<string, string> = {
+  const planNames: Record<PlanType, string> = {
     standard: "スタンダード",
     feedback: "フィードバック",
-    growth: "グロース",
-    community: "コミュニティ",
   };
 
   return planNames[planType] || planType;

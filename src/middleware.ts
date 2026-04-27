@@ -15,7 +15,7 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -36,14 +36,28 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   // Protected routes - redirect to login if not authenticated
-  if (
-    !user &&
-    (request.nextUrl.pathname.startsWith('/mypage') ||
-      request.nextUrl.pathname.startsWith('/account') ||
-      request.nextUrl.pathname.startsWith('/subscription'))
-  ) {
+  const protectedPaths = ['/mypage', '/account', '/subscription', '/profile']
+  const isProtectedRoute = protectedPaths.some(path =>
+    request.nextUrl.pathname.startsWith(path)
+  )
+
+  if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
+    url.searchParams.set('redirectTo', request.nextUrl.pathname)
+    return NextResponse.redirect(url)
+  }
+
+  // Already logged in - redirect away from auth pages
+  if (
+    user &&
+    (request.nextUrl.pathname === '/login' ||
+      request.nextUrl.pathname === '/signup')
+  ) {
+    const redirectTo = request.nextUrl.searchParams.get('redirectTo') || '/mypage'
+    const url = request.nextUrl.clone()
+    url.pathname = redirectTo
+    url.searchParams.delete('redirectTo')
     return NextResponse.redirect(url)
   }
 

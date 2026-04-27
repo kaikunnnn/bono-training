@@ -98,12 +98,33 @@ export interface ArticleWithContext extends Article {
       articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
       videoDuration?: string | number;
     }[];
+    lessonInfo?: {
+      _id: string;
+      title: string;
+      slug: SanitySlug;
+      iconImage?: SanityImage;
+      iconImageUrl?: string;
+      quests: {
+        _id: string;
+        questNumber: number;
+        title: string;
+        articles: {
+          _id: string;
+          slug: SanitySlug;
+          title: string;
+          articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
+          videoDuration?: string | number;
+          isPremium?: boolean;
+        }[];
+      }[];
+    };
   };
   lessonInfo?: {
     _id: string;
     title: string;
     slug: SanitySlug;
     iconImage?: SanityImage;
+    iconImageUrl?: string;
     quests: {
       _id: string;
       questNumber: number;
@@ -114,6 +135,7 @@ export interface ArticleWithContext extends Article {
         title: string;
         articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
         videoDuration?: string | number;
+        isPremium?: boolean;
       }[];
     }[];
   };
@@ -272,17 +294,25 @@ export interface Knowledge {
 }
 
 // Lesson詳細ページ用の拡張型
-export interface LessonWithDetails extends Lesson {
+export interface LessonWithDetails extends Omit<Lesson, "quests" | "category"> {
+  category?: string; // category->title で解決済み
+  purposes?: string[];
   quests: {
     _id: string;
     questNumber: number;
     title: string;
-    goal: string;
+    description?: string;
+    goal?: string;
+    estTimeMins?: number;
     articles: {
       _id: string;
+      articleNumber?: number;
       title: string;
       slug: SanitySlug;
-      articleType?: string;
+      articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
+      thumbnail?: SanityImage;
+      thumbnailUrl?: string;
+      videoUrl?: string;
       videoDuration?: string | number;
       isPremium?: boolean;
     }[];

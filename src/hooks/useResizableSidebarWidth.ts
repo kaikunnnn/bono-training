@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 interface UseResizableSidebarWidthOptions {
@@ -121,7 +123,7 @@ export function useResizableSidebarWidth(options: UseResizableSidebarWidthOption
       window.addEventListener("pointerup", onPointerUp);
       window.addEventListener("pointercancel", onPointerUp);
     },
-    [clamp, width]
+    [clamp, collapseThresholdPx, minWidth, onCollapseRequested, width]
   );
 
   const handleKeyDown: React.KeyboardEventHandler<HTMLDivElement> = useCallback(
@@ -162,4 +164,3 @@ export function useResizableSidebarWidth(options: UseResizableSidebarWidthOption
     },
   };
 }
-

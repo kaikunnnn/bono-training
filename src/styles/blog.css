@@ -1,0 +1,528 @@
+/**
+ * BONO Blog - 専用スタイルシート
+ *
+ * 99frontend 仕様に基づくスタイル定義
+ * 参照: .claude/docs/blog/99frontend/
+ */
+
+/* ========================================
+   CSS カスタムプロパティ（Design Tokens）
+   ======================================== */
+
+:root {
+  /* カラー */
+  --blog-color-hero-bg: #E8E6EA;
+  --blog-color-white: #FFFFFF;
+  --blog-color-thumbnail-bg: #D6E3FF;
+  --blog-color-dark-blue: #0F172A;
+  --blog-color-ebony: #151834;
+  --blog-color-gray: #9CA3AF;
+  --blog-color-border: #E5E7EB;
+
+  /* シャドウ */
+  --blog-shadow-light: 0px 1px 3px rgba(0, 0, 0, 0.1);
+  --blog-shadow-medium: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --blog-shadow-hover: 0px 4px 12px rgba(0, 0, 0, 0.15);
+
+  /* フォント */
+  --blog-font-title: 'Noto Sans JP', sans-serif;
+  --blog-font-meta: 'Hind', sans-serif;
+
+  /* スペーシング */
+  --blog-header-height: 74.07px;
+  --blog-hero-height-desktop: 381px;
+  --blog-hero-height-tablet: 340px;
+  --blog-hero-height-mobile: 280px;
+  --blog-card-width: 1120px;
+  --blog-card-height: 159px;
+
+  /* トランジション */
+  --blog-transition-fast: 0.2s ease;
+  --blog-transition-normal: 0.3s ease;
+  --blog-transition-slow: 0.5s ease;
+}
+
+/* ========================================
+   グローバルスタイル
+   ======================================== */
+
+/* フォントスムージング */
+.blog-page {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* スクロールバーのスタイリング（Webkit） */
+.blog-page::-webkit-scrollbar {
+  width: 8px;
+}
+
+.blog-page::-webkit-scrollbar-track {
+  background: var(--blog-color-white);
+}
+
+.blog-page::-webkit-scrollbar-thumb {
+  background: var(--blog-color-gray);
+  border-radius: 4px;
+}
+
+.blog-page::-webkit-scrollbar-thumb:hover {
+  background: var(--blog-color-dark-blue);
+}
+
+/* ========================================
+   ホバー効果
+   ======================================== */
+
+/* カードホバー効果 */
+.blog-card-hover {
+  transition: all var(--blog-transition-normal);
+}
+
+.blog-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--blog-shadow-hover);
+}
+
+/* リンクホバー効果 */
+.blog-link-hover {
+  transition: opacity var(--blog-transition-fast);
+}
+
+.blog-link-hover:hover {
+  opacity: 0.8;
+}
+
+/* ボタンホバー効果 */
+.blog-button-hover {
+  transition: all var(--blog-transition-fast);
+}
+
+.blog-button-hover:hover {
+  background-color: var(--blog-color-dark-blue);
+  color: var(--blog-color-white);
+}
+
+/* ========================================
+   アニメーション
+   ======================================== */
+
+/* フェードイン */
+@keyframes blog-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.blog-fade-in {
+  animation: blog-fade-in 0.5s ease-out;
+}
+
+/* スライドアップ */
+@keyframes blog-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.blog-slide-up {
+  animation: blog-slide-up 0.6s ease-out;
+}
+
+/* スケールイン */
+@keyframes blog-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.blog-scale-in {
+  animation: blog-scale-in 0.4s ease-out;
+}
+
+/* ========================================
+   ユーティリティクラス
+   ======================================== */
+
+/* テキスト切り詰め（1行） */
+.blog-text-truncate-1 {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* テキスト切り詰め（2行） */
+.blog-text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* テキスト切り詰め（3行） */
+.blog-text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* フォーカス可視化 */
+.blog-focus-visible:focus-visible {
+  outline: 2px solid var(--blog-color-dark-blue);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   レスポンシブユーティリティ
+   ======================================== */
+
+/* モバイルのみ表示 */
+@media (min-width: 768px) {
+  .blog-mobile-only {
+    display: none !important;
+  }
+}
+
+/* タブレット以上で表示 */
+@media (max-width: 767px) {
+  .blog-tablet-up {
+    display: none !important;
+  }
+}
+
+/* デスクトップのみ表示 */
+@media (max-width: 1919px) {
+  .blog-desktop-only {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   アクセシビリティ
+   ======================================== */
+
+/* スクリーンリーダー専用テキスト */
+.blog-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* 動きの軽減を望むユーザー向け */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .blog-card-hover:hover {
+    transform: none;
+  }
+}
+
+/* ========================================
+   マークダウンスタイル（記事本文用）
+   /lesson の RichTextSection と統一
+   ======================================== */
+
+.blog-markdown {
+  font-family: 'Noto Sans JP', sans-serif;
+  color: #364153;
+}
+
+/* 見出し共通: M PLUS Rounded 1c, letter-spacing: -0.02em */
+.blog-markdown h1,
+.blog-markdown h2,
+.blog-markdown h3,
+.blog-markdown h4,
+.blog-markdown h5,
+.blog-markdown h6 {
+  font-family: 'M PLUS Rounded 1c', 'Noto Sans JP', sans-serif;
+  font-weight: 600;
+  color: #101828;
+  letter-spacing: -0.02em;
+  line-height: 1.4;
+}
+
+/* H1: 記事タイトル用（通常は使わない） */
+/* 30px = 1.875rem */
+.blog-markdown h1 {
+  font-size: 1.875rem;
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+
+/* H2: 26px(desktop) / 24px(mobile) = 1.625rem / 1.5rem */
+.blog-markdown h2 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  margin-top: 6rem;
+  margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+  .blog-markdown h2 {
+    font-size: 1.625rem;
+  }
+}
+
+/* 最初のH2はmargin-topなし */
+.blog-markdown > h2:first-child {
+  margin-top: 0;
+}
+
+/* H3: 22px(desktop) / 20px(mobile) = 1.375rem / 1.25rem */
+.blog-markdown h3 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  margin-top: 4rem;
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .blog-markdown h3 {
+    font-size: 1.375rem;
+  }
+}
+
+/* H4: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem */
+.blog-markdown h4 {
+  font-size: 1.125rem;
+  line-height: 1.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .blog-markdown h4 {
+    font-size: 1.25rem;
+  }
+}
+
+/* 段落: 18px(desktop) / 18px(mobile) = 1.125rem / 1.125rem, lh:200%, letter-spacing:3% */
+.blog-markdown p {
+  font-size: 1.125rem;
+  line-height: 200%;
+  letter-spacing: 0.03em;
+  margin-bottom: 1.5rem;
+  color: #364153;
+}
+
+@media (min-width: 768px) {
+  .blog-markdown p {
+    font-size: 1.125rem;
+  }
+}
+
+/* リスト共通: mb:1.5rem, インデント:1.34rem */
+.blog-markdown ul,
+.blog-markdown ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.34rem;
+}
+
+.blog-markdown ul {
+  list-style-type: disc;
+}
+
+.blog-markdown ol {
+  list-style-type: decimal;
+}
+
+/* リストアイテム: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem, lh:200%, letter-spacing:3% */
+.blog-markdown li {
+  font-size: 1.125rem;
+  line-height: 200%;
+  letter-spacing: 0.03em;
+  color: #364153;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  .blog-markdown li {
+    font-size: 1.25rem;
+  }
+}
+
+/* ネストされたリスト */
+.blog-markdown li > ul,
+.blog-markdown li > ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+/* リンク: 青色、アンダーライン */
+.blog-markdown a {
+  color: #2563EB;
+  text-decoration: underline;
+  transition: color 0.2s ease;
+}
+
+.blog-markdown a:hover {
+  color: #1D4ED8;
+}
+
+/* 画像: レスポンシブ、角丸、余白 */
+.blog-markdown img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.5rem;
+  margin: 2rem 0;
+}
+
+/* 画像キャプション: 画像下にグレー文字で表示 */
+.blog-markdown figure {
+  margin: 2rem 0;
+}
+
+.blog-markdown figure img {
+  margin: 0;
+}
+
+.blog-markdown figure figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: #6B7280;
+  text-align: center;
+}
+
+/* 太字: 黄色マーカー下線 60%透過 */
+.blog-markdown strong {
+  font-weight: 700;
+  background: linear-gradient(transparent 60%, rgba(236, 248, 76, 0.6) 60%);
+}
+
+/* 斜体 */
+.blog-markdown em {
+  font-style: italic;
+}
+
+/* インラインコード */
+.blog-markdown code {
+  font-family: 'Courier New', Consolas, monospace;
+  background-color: #F3F4F6;
+  padding: 0.125rem 0.375rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+/* コードブロック */
+.blog-markdown pre {
+  background-color: #1F2937;
+  color: #F9FAFB;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  margin: 1.5rem 0;
+}
+
+.blog-markdown pre code {
+  background-color: transparent;
+  padding: 0;
+  color: inherit;
+  font-size: 0.875rem;
+}
+
+/* 引用: 20px(desktop) / 18px(mobile) = 1.25rem / 1.125rem */
+.blog-markdown blockquote {
+  border-left: 0.25rem solid #D0D5DD;
+  background-color: #F9FAFB;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  font-size: 1.125rem;
+  line-height: 200%;
+  letter-spacing: 0.03em;
+  color: #364153;
+}
+
+@media (min-width: 768px) {
+  .blog-markdown blockquote {
+    font-size: 1.25rem;
+  }
+}
+
+.blog-markdown blockquote p {
+  margin-bottom: 0;
+}
+
+.blog-markdown blockquote p + p {
+  margin-top: 1rem;
+}
+
+/* テーブル */
+.blog-markdown table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+}
+
+.blog-markdown th,
+.blog-markdown td {
+  border: 1px solid #E5E7EB;
+  padding: 0.75rem 1rem;
+  text-align: left;
+}
+
+.blog-markdown th {
+  background-color: #F9FAFB;
+  font-weight: 600;
+  color: #6B7280;
+}
+
+.blog-markdown tr:nth-child(even) {
+  background-color: #F9FAFB;
+}
+
+/* 水平線 */
+.blog-markdown hr {
+  border: none;
+  border-top: 1px solid #E5E7EB;
+  margin: 3rem 0;
+}
+
+/* ========================================
+   プリント用スタイル
+   ======================================== */
+
+@media print {
+  .blog-no-print {
+    display: none !important;
+  }
+
+  .blog-page {
+    background: white;
+  }
+
+  .blog-card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}

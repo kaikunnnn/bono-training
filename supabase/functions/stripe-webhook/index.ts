@@ -242,6 +242,49 @@ async function processWebhookAsync(
 }
 
 /**
+ * Stripe関連テーブルからユーザーIDを検索するヘルパー関数
+ * stripe_customers テーブルを優先し、見つからない場合は subscriptions テーブルにフォールバック
+ */
+async function findUserByStripeInfo(
+  supabase: any,
+  options: {
+    stripeCustomerId?: string;
+    stripeSubscriptionId?: string;
+  }
+): Promise<string | null> {
+  // 1. stripe_customers テーブルで検索（checkout時に必ず作成される）
+  if (options.stripeCustomerId) {
+    const { data, error } = await supabase
+      .from("stripe_customers")
+      .select("user_id")
+      .eq("stripe_customer_id", options.stripeCustomerId)
+      .eq("environment", ENVIRONMENT)
+      .single();
+
+    if (!error && data) {
+      return data.user_id;
+    }
+  }
+
+  // 2. フォールバック: subscriptions テーブルで検索
+  if (options.stripeSubscriptionId) {
+    console.warn("⚠️ [LIVE環境] stripe_customersでユーザーが見つかりません。subscriptionsテーブルで再検索します");
+    const { data, error } = await supabase
+      .from("subscriptions")
+      .select("user_id")
+      .eq("stripe_subscription_id", options.stripeSubscriptionId)
+      .eq("environment", ENVIRONMENT)
+      .single();
+
+    if (!error && data) {
+      return data.user_id;
+    }
+  }
+
+  return null;
+}
+
+/**
  * チェックアウト完了イベントの処理
  */
 async function handleCheckoutCompleted(stripe: any, supabase: any, session: any) {
@@ -550,20 +593,19 @@ async function handleInvoicePaid(stripe: any, supabase: any, invoice: any) {
 
     const hasMemberAccess = determineMembershipAccess(planType);
 
-    // サブスクリプション情報を更新（環境フィルタ付き）
-    const { data: subData, error: subError } = await supabase
-      .from("subscriptions")
-      .select("user_id")
-      .eq("stripe_subscription_id", subscriptionId)
-      .eq("environment", ENVIRONMENT)
-      .single();
+    // ユーザーを検索（stripe_customers優先 → subscriptionsフォールバック）
+    const userId = await findUserByStripeInfo(supabase, {
+      stripeCustomerId: invoice.customer,
+      stripeSubscriptionId: subscriptionId,
+    });
 
-    if (subError || !subData) {
-      console.error("🚀 [LIVE環境] サブスクリプションに紐づくユーザーが見つかりません:", subError);
+    if (!userId) {
+      console.error("🚀 [LIVE環境] invoice.paid: ユーザーが見つかりません:", {
+        customer_id: invoice.customer,
+        subscription_id: subscriptionId,
+      });
       return;
     }
-
-    const userId = subData.user_id;
 
     // データベース内のサブスクリプション情報を更新
     const { error: updateError } = await supabase
@@ -635,20 +677,20 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
   const subscriptionId = subscription.id;
 
   try {
-    // サブスクリプションに紐づくユーザーを検索
-    const { data: subData, error: subError } = await supabase
-      .from("subscriptions")
-      .select("user_id")
-      .eq("stripe_subscription_id", subscriptionId)
-      .eq("environment", ENVIRONMENT)
-      .single();
+    // ユーザーを検索（stripe_customers優先 → subscriptionsフォールバック）
+    const customerId = subscription.customer;
+    const userId = await findUserByStripeInfo(supabase, {
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+    });
 
-    if (subError || !subData) {
-      console.error("🚀 [LIVE環境] サブスクリプションに紐づくユーザーが見つかりません:", subError);
+    if (!userId) {
+      console.error("🚀 [LIVE環境] subscription.deleted: ユーザーが見つかりません:", {
+        customer_id: customerId,
+        subscription_id: subscriptionId,
+      });
       return;
     }
-
-    const userId = subData.user_id;
 
     // データベース内のサブスクリプション情報を更新
     const { error: updateError } = await supabase
@@ -684,7 +726,6 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
     // ========================================
     // 📧 解約完了メール送信
     // ========================================
-    const customerId = subscription.customer;
     let customerEmail: string | null = null;
     try {
       const customer = await stripe.customers.retrieve(customerId);
@@ -879,7 +920,7 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
       .from("user_subscriptions")
       .upsert({
         user_id: userId,
-        is_active: subscription.status === "active" || subscription.status === "trialing",
+        is_active: ["active", "trialing", "incomplete"].includes(subscription.status),
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
@@ -997,10 +1038,10 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
       planType = "standard";
       duration = 3;
     } else if (priceId === FEEDBACK_1M) {
-      planType = "feedback"; // グロースプラン1ヶ月
+      planType = "feedback"; // フィードバックプラン1ヶ月
       duration = 1;
     } else if (priceId === FEEDBACK_3M) {
-      planType = "feedback"; // グロースプラン3ヶ月
+      planType = "feedback"; // フィードバックプラン3ヶ月
       duration = 3;
     } else {
       console.warn(`🚀 [LIVE環境] 未知のPrice ID: ${priceId}。デフォルトでstandardプランに設定します`);
@@ -1033,7 +1074,7 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
       .update({
         plan_type: planType,
         duration: duration,
-        is_active: subscription.status === "active",
+        is_active: ["active", "trialing", "incomplete"].includes(subscription.status),
         stripe_subscription_id: subscriptionId,
         cancel_at_period_end: cancelAtPeriodEnd,
         cancel_at: cancelAt,
