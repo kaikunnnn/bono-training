@@ -62,6 +62,8 @@ import ListingLayoutPreview from "./pages/dev/ListingLayoutPreview";
 import RoadmapPathwayPatterns from "./pages/dev/RoadmapPathwayPatterns";
 import SoundEffectPreview from "./pages/dev/SoundEffectPreview";
 import SynthSwooshPreview from "./pages/dev/SynthSwooshPreview";
+import SearchResultsPreview from "./pages/dev/SearchResultsPreview";
+import GuideImportManual from "./pages/dev/GuideImportManual";
 import RoadmapListPage from "./pages/roadmaps";
 import RoadmapDetail from "./pages/roadmaps/RoadmapDetail";
 import LessonIdea1 from "./pages/dev/lesson-ideas/LessonIdea1";
@@ -109,8 +111,6 @@ import QuestionList from "./pages/questions/QuestionList";
 import QuestionDetail from "./pages/questions/QuestionDetail";
 import FeedbackList from "./pages/feedbacks/FeedbackList";
 import FeedbackDetail from "./pages/feedbacks/FeedbackDetail";
-import KnowledgeList from "./pages/knowledge/KnowledgeList";
-import KnowledgeDetail from "./pages/knowledge/KnowledgeDetail";
 import EventDetail from "./pages/events/EventDetail";
 import FeedbackApplyIndex from "./pages/feedback-apply";
 import FeedbackApplySubmit from "./pages/feedback-apply/submit";
@@ -198,6 +198,8 @@ const AppContent = () => {
         <Route path="/dev/roadmap-pathway-patterns" element={<DevRoute><RoadmapPathwayPatterns /></DevRoute>} />
         <Route path="/dev/sound-effect-preview" element={<DevRoute><SoundEffectPreview /></DevRoute>} />
         <Route path="/dev/synth-swoosh-preview" element={<DevRoute><SynthSwooshPreview /></DevRoute>} />
+        <Route path="/dev/search-results" element={<DevRoute><SearchResultsPreview /></DevRoute>} />
+        <Route path="/dev/guide-import" element={<DevRoute><GuideImportManual /></DevRoute>} />
         <Route path="/dev/lesson-idea-1" element={<DevRoute><LessonIdea1 /></DevRoute>} />
         <Route path="/dev/lesson-idea-2" element={<DevRoute><LessonIdea2 /></DevRoute>} />
         <Route path="/dev/lesson-idea-3" element={<DevRoute><LessonIdea3 /></DevRoute>} />
@@ -254,9 +256,6 @@ const AppContent = () => {
         <Route path="/feedback-apply" element={<FeedbackApplyIndex />} />
         <Route path="/feedback-apply/submit" element={<FeedbackApplySubmit />} />
 
-        {/* ナレッジページ（Sanityベース） */}
-        <Route path="/knowledge" element={<KnowledgeList />} />
-        <Route path="/knowledge/:slug" element={<KnowledgeDetail />} />
 
         {/* 思考シェア記事（みんなの学びのアウトプット） */}
 

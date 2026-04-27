@@ -127,7 +127,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           path = `/articles/${result.slug}`;
           break;
         case "guide":
-          path = `/knowledge/${result.slug}`;
+          path = `/guide/${result.slug}`;
           break;
         case "roadmap":
           path = `/roadmaps/${result.slug}`;

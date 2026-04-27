@@ -98,14 +98,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           学習ガイド
         </SidebarMenuItem>
 
-        {/* 検索 */}
-        <SidebarMenuItem
-          href="/search"
-          icon={<MenuIcons.search size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/search")}
-        >
-          検索
-        </SidebarMenuItem>
 
       </SidebarMenuGroup>
 
@@ -124,13 +116,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           isActive={isActive("/feedbacks") || location.pathname.startsWith("/feedbacks/")}
         >
           フィードバック
-        </SidebarMenuItem>
-        <SidebarMenuItem
-          href="/knowledge"
-          icon={<MenuIcons.knowledge size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/knowledge") || location.pathname.startsWith("/knowledge/")}
-        >
-          お役立ち
         </SidebarMenuItem>
       </SidebarMenuGroup>
 

@@ -44,10 +44,12 @@ interface SanityGuideForSearch {
   slug: string; // クエリで slug.current に解決済み
   description?: string;
   thumbnailUrl?: string;
+  videoUrl?: string;
   category?: string;
   tags?: string[];
   publishedAt?: string;
   readingTime?: string;
+  author?: string;
   isPremium?: boolean;
 }
 
@@ -139,10 +141,12 @@ async function fetchGuidesForSearch(): Promise<SanityGuideForSearch[]> {
       "slug": slug.current,
       description,
       "thumbnailUrl": thumbnail.asset->url,
+      videoUrl,
       category,
       tags,
       publishedAt,
       readingTime,
+      author,
       isPremium
     }`;
     return client.fetch(query);
@@ -221,6 +225,8 @@ function convertGuideToSearchResult(
     tags: guide.tags,
     publishedAt: guide.publishedAt,
     readingTime: guide.readingTime,
+    author: guide.author,
+    videoUrl: guide.videoUrl,
     isPremium: guide.isPremium ?? false,
   };
 }
@@ -273,7 +279,7 @@ function filterSearchResults(
       const searchableText = [
         item.title,
         item.description,
-        item.category || "",
+        ...(item.type !== "lesson" ? [item.category || ""] : []),
         ...(item.tags || []),
       ]
         .join(" ")

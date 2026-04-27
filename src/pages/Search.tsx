@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import SearchBar from "@/components/search/SearchBar";
 import SearchFilters from "@/components/search/SearchFilters";
-import SearchResultCard from "@/components/search/SearchResultCard";
+import { SearchArticleCard } from "@/components/search/SearchArticleCard";
+import LessonCardHorizontal from "@/components/lessons/LessonCardHorizontal";
+import GuideCard from "@/components/guide/GuideCard";
 import ChatInterface from "@/components/ai/ChatInterface";
 import {
   SearchContentType,
   groupSearchResults,
   CONTENT_TYPE_LABELS,
   CONTENT_TYPE_ICONS,
+  isLessonResult,
+  isGuideResult,
+  type LessonSearchResult,
+  type GuideSearchResult,
 } from "@/types/search";
+import type { Lesson } from "@/types/lesson";
+import type { Guide, GuideCategory } from "@/types/guide";
 import { useSearch } from "@/hooks/useSearch";
 import { Search as SearchIcon, Loader2, Sparkles } from "lucide-react";
 import { trackSearch } from "@/lib/analytics";
@@ -19,7 +27,38 @@ import { runDiagnostics } from "@/lib/diagnostics";
 
 type SearchMode = "search" | "ai";
 
+/** LessonSearchResult → LessonCard用のLesson型に変換 */
+function toLessonCardProps(result: LessonSearchResult): Lesson {
+  return {
+    id: result.id,
+    title: result.title,
+    description: result.description,
+    category: result.category,
+    thumbnail: result.thumbnail,
+    slug: result.slug,
+  };
+}
+
+/** GuideSearchResult → GuideCard用のGuide型に変換 */
+function toGuideCardProps(result: GuideSearchResult): Guide {
+  return {
+    _id: result.id,
+    title: result.title,
+    description: result.description,
+    slug: result.slug,
+    category: (result.category || "learning") as GuideCategory,
+    tags: result.tags || [],
+    thumbnailUrl: result.thumbnail,
+    videoUrl: result.videoUrl,
+    author: result.author || "BONO",
+    publishedAt: result.publishedAt || "",
+    readingTime: result.readingTime,
+    isPremium: result.isPremium || false,
+  };
+}
+
 const Search: React.FC = () => {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const mode = (searchParams.get("mode") || "search") as SearchMode;
   const queryParam = searchParams.get("q") || "";
@@ -214,11 +253,43 @@ const Search: React.FC = () => {
                           ({sectionResults.length}件)
                         </span>
                       </div>
-                      <div className="space-y-4">
-                        {sectionResults.map((result) => (
-                          <SearchResultCard key={result.id} result={result} />
-                        ))}
-                      </div>
+
+                      {/* レッスン: 横型カードでリスト表示 */}
+                      {type === "lesson" && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                          {sectionResults.filter(isLessonResult).map((result) => (
+                            <LessonCardHorizontal
+                              key={result.id}
+                              lesson={toLessonCardProps(result)}
+                              onClick={() => navigate(`/lessons/${result.slug}`)}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* 記事: 独立カードでグリッド表示 */}
+                      {type === "article" && (
+                        <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                          {sectionResults.map((result) => (
+                            <SearchArticleCard
+                              key={result.id}
+                              result={result as import("@/types/search").ArticleSearchResult}
+                            />
+                          ))}
+                        </div>
+                      )}
+
+                      {/* ガイド: GuideCardをグリッド表示 */}
+                      {type === "guide" && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          {sectionResults.filter(isGuideResult).map((result) => (
+                            <GuideCard
+                              key={result.id}
+                              guide={toGuideCardProps(result)}
+                            />
+                          ))}
+                        </div>
+                      )}
                     </section>
                   );
                 })}

@@ -2,6 +2,16 @@ import React from "react";
 import { PortableText } from "@portabletext/react";
 import type { PortableTextBlock } from "@portabletext/react";
 import { cn } from "@/lib/utils";
+import {
+  SectionHeadingBlock,
+  CardGridBlock,
+  PullQuoteBlock,
+  StepFlowBlock,
+  DividerBlock,
+  CustomContainerBlock,
+  TableBlock,
+  LinkCardBlock,
+} from "./blocks";
 
 interface GuideContentProps {
   content: PortableTextBlock[];
@@ -85,6 +95,14 @@ const portableTextComponents = {
         </figure>
       );
     },
+    sectionHeading: SectionHeadingBlock,
+    cardGrid: CardGridBlock,
+    pullQuote: PullQuoteBlock,
+    stepFlow: StepFlowBlock,
+    divider: DividerBlock,
+    customContainer: CustomContainerBlock,
+    tableBlock: TableBlock,
+    linkCard: LinkCardBlock,
   },
 };
 

@@ -104,13 +104,14 @@ const Footer = ({ className }: FooterProps) => {
           <div className="flex justify-center gap-4 mb-3">
             <Link to="/questions" className="hover:underline">みんなの質問</Link>
             <Link to="/feedbacks" className="hover:underline">フィードバック</Link>
-            <Link to="/knowledge" className="hover:underline">お役立ち</Link>
+            <Link to="/guide" className="hover:underline">ガイド</Link>
           </div>
 
           {/* サービス */}
           <div className="flex justify-center gap-4 mb-2">
             <Link to="/feedback-apply" className="hover:underline">15分フィードバック</Link>
             <Link to="/subscription" className="hover:underline">サブスクリプション</Link>
+            <Link to="/search" className="hover:underline">検索</Link>
           </div>
 
           {/* 開発環境のみ: 隠しページへのリンク */}

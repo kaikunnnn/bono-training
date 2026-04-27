@@ -1,6 +1,6 @@
 # Claude Code プロジェクト指示
 
-**最終更新**: 2026-04-07
+**最終更新**: 2026-04-22
 
 ---
 
@@ -10,10 +10,12 @@
 
 1. **`.claude/PROJECT-RULES.md`** - このプロジェクトの開発ルール（必読）
 
-### タスク確認して、の時に参照
+### タスク管理
 
-2. **`.claude/docs/subscription/TASK-TRACKER.md`** - 現在のタスクと問題
-3. task-tracker はやっている内容が変更した場合に必ずアップデートしながら進めること。違う作業に入る時に「TASK-TRACKER をアップデートしますか？」と聞くようにして下しあ
+2. **Linear (Bono チーム: BON)** - タスク・イシュー管理は全てLinearで行う
+   - Linear: https://linear.app/bono
+   - MCP経由でイシューの作成・更新・確認を行う
+   - ブランチ命名規則: `feature/bon-{番号}-{説明}`
 
 ---
 
@@ -21,32 +23,21 @@
 
 ### Step 1: 現状把握（作業開始時）
 
-**サブスクリプション関連の作業の場合**:
+**必ず以下の順で確認する**:
 
 ```bash
-# 必ず以下のファイルを読む（優先順位順）
-1. .claude/docs/subscription/redesign/MASTER-PLAN.md
-   → 現在のフェーズ、進捗、次のアクション
+1. 現在のブランチ名からLinearイシューを特定する
+   → ブランチ名: feature/bon-{番号}-{説明} → BON-{番号}
+   → ブランチにイシューが紐付いていない場合は、ユーザーに紐付けを確認する
 
-2. .claude/PROJECT-RULES.md
+2. 該当イシューのコメントを確認する（MCP: getComments）
+   → ユーザーからの指示・要件・フィードバックがここに書かれる
+
+3. .claude/PROJECT-RULES.md
    → どうやって作業を進めるか
-
-3. .claude/docs/subscription/redesign/README.md
-   → redesignフォルダのナビゲーション
 ```
 
-**その他の作業の場合**:
-
-```bash
-1. .claude/docs/subscription/TASK-TRACKER.md
-   → 今何をすべきか、どんな問題があるか
-
-2. .claude/PROJECT-RULES.md
-   → どうやって作業を進めるか
-
-3. .claude/docs/subscription/README.md
-   → 関連ドキュメントがどこにあるか
-```
+**重要**: ブランチには必ずLinearイシューを紐付けること。紐付いていないブランチでは作業を開始しない。
 
 ---
 
@@ -75,13 +66,13 @@
 
 ### Step 4: 問題発見時
 
-**即座に TASK-TRACKER.md の Critical Issues セクションに記録する**
+**Linearのイシューにコメントまたはサブイシューとして記録する**
 
 ---
 
 ### Step 5: 完了報告（作業終了時）
 
-**TASK-TRACKER.md の該当タスクを「完了」に更新し、履歴に移動する**
+**Linearの該当イシューのステータスを「Done」に更新する**
 
 ---
 
@@ -89,10 +80,10 @@
 
 以下の行為は**絶対に禁止**:
 
-1. ❌ TASK-TRACKER.md を読まずに作業開始
+1. ❌ Linearのイシューを確認せずに作業開始
 2. ❌ PROJECT-RULES.md を無視した開発
-3. ❌ 問題を発見しても記録せず放置
-4. ❌ ドキュメント更新を忘れる
+3. ❌ 問題を発見してもLinearに記録せず放置
+4. ❌ Linearステータス更新を忘れる
 5. ❌ テストせずにデプロイ
 6. ❌ 本番環境で実験的な操作
 
@@ -339,6 +330,7 @@ Phase 5: 調査結果のまとめ             ✅ 完了
 
 | 日付       | 更新内容                                                             |
 | ---------- | -------------------------------------------------------------------- |
+| 2026-04-22 | タスク管理をLinear (BON)に一元化。TASK-TRACKER.mdはアーカイブ化 |
 | 2026-04-07 | Step 2: 要件確認（実装前）を追加 - 実装前に必ずユーザーの意図を確認する |
 | 2026-03-19 | デザインシステム構築（design-system/、/designコマンド追加）          |
 | 2025-12-17 | features/フォルダ作成（progress, favorites, history を統合）         |

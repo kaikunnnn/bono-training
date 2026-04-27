@@ -52,7 +52,7 @@ export type IntegratedLesson = SanityLesson;
  */
 async function fetchLessons(): Promise<SanityLesson[]> {
   try {
-    const query = `*[_type == "lesson"] | order(_createdAt desc) {
+    const query = `*[_type == "lesson" && !(isHidden == true)] | order(_createdAt desc) {
       _id,
       title,
       slug,

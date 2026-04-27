@@ -120,6 +120,8 @@ export interface GuideSearchResult extends SearchResultBase {
   publishedAt?: string;
   /** 著者 */
   author?: string;
+  /** 動画URL */
+  videoUrl?: string;
 }
 
 /** ロードマップの検索結果 */

@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Code2, FileText, Mail, Globe, CreditCard, Eye, Volume2 } from 'lucide-react';
+import { Code2, FileText, Mail, Globe, CreditCard, Eye, Volume2, Search, BookOpen } from 'lucide-react';
 
 interface DevResourceCard {
   title: string;
@@ -85,6 +85,20 @@ const devResources: DevResourceCard[] = [
     path: '/dev/synth-swoosh-preview',
     icon: <Volume2 className="w-8 h-8" />,
     tags: ['Sound', 'Synth', 'Web Audio', 'UX', 'NEW', 'No File']
+  },
+  {
+    title: 'Search Results Preview',
+    description: '検索結果コンポーネントのプレビュー。LessonCard・ArticleItem・GuideCardを再利用した検索結果表示の確認。',
+    path: '/dev/search-results',
+    icon: <Search className="w-8 h-8" />,
+    tags: ['Search', 'LessonCard', 'ArticleItem', 'GuideCard', 'NEW']
+  },
+  {
+    title: 'Guide Import Manual',
+    description: 'マークダウンからSanityへガイド記事を入稿する仕組みと構文リファレンス。フロントマター、カスタムブロック、実行方法を網羅。',
+    path: '/dev/guide-import',
+    icon: <BookOpen className="w-8 h-8" />,
+    tags: ['Guide', 'Import', 'Markdown', 'Sanity', 'Manual']
   },
 ];
 

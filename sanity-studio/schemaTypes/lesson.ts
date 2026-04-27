@@ -80,6 +80,13 @@ export default defineType({
       initialValue: false,
     }),
     defineField({
+      name: "isHidden",
+      title: "一覧から非表示",
+      type: "boolean",
+      initialValue: false,
+      description: "ONにするとレッスン一覧（/lessons）に表示されません。URLを知っていれば直接アクセス可能です。",
+    }),
+    defineField({
       name: "webflowSource",
       title: "Webflowソース",
       type: "string",

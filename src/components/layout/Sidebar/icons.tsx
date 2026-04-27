@@ -58,8 +58,6 @@ export const MenuIcons = {
   question: MessageQuestion,
   // フィードバック
   feedback: Messages1,
-  // ナレッジ
-  knowledge: Lamp,
   // AI
   ai: Lamp,
 } as const;
