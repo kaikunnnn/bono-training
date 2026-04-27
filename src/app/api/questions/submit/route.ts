@@ -208,13 +208,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // サブスクリプションチェック
+  // サブスクリプションチェック（環境に応じたフィルタ）
+  const environment = process.env.NODE_ENV === 'production' ? 'live' : 'test';
   const { data: subscription, error: subError } = await supabase
-    .from('subscriptions')
-    .select('status')
+    .from('user_subscriptions')
+    .select('is_active, plan_type')
     .eq('user_id', user.id)
-    .in('status', ['active', 'trialing'])
-    .single();
+    .eq('is_active', true)
+    .eq('environment', environment)
+    .maybeSingle();
 
   if (subError || !subscription) {
     return NextResponse.json(

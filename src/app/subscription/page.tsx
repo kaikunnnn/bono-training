@@ -31,7 +31,7 @@ const plans: Array<{
     id: "standard",
     name: "スタンダード",
     description: "すべてのコンテンツにアクセス",
-    price: 4000,
+    price: 6800,
     features: [
       "すべてのレッスン・記事へのアクセス",
       "新規コンテンツの優先アクセス",
@@ -44,7 +44,7 @@ const plans: Array<{
     id: "feedback",
     name: "フィードバック",
     description: "作品のレビューを受ける",
-    price: 1480,
+    price: 15800,
     features: [
       "すべてのコンテンツへのアクセス",
       "フィードバック機能の利用",
@@ -123,6 +123,9 @@ export default async function SubscriptionPage() {
               isCanceled={subscription.cancelAtPeriodEnd}
               isLoggedIn={!!user}
               isSubscribed={subscription.isSubscribed}
+              currentPlanType={subscription.planType}
+              currentDuration={subscription.duration}
+              currentPeriodEnd={subscription.renewalDate}
             />
           ))}
         </div>

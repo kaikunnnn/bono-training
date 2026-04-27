@@ -36,28 +36,28 @@ export const AVAILABLE_PLANS: PlanInfo[] = [
     duration: 1,
     displayName: "スタンダード（1ヶ月）",
     description: "全てのコンテンツにアクセスできる基本プラン",
-    pricePerMonth: 4000,
+    pricePerMonth: 6800,
   },
   {
     type: "standard",
     duration: 3,
     displayName: "スタンダード（3ヶ月）",
     description: "全てのコンテンツにアクセスできる基本プラン（3ヶ月で割引）",
-    pricePerMonth: 3800,
+    pricePerMonth: 5800,
   },
   {
     type: "feedback",
     duration: 1,
     displayName: "フィードバック（1ヶ月）",
     description: "全コンテンツ + フィードバック機能が利用できるプラン",
-    pricePerMonth: 1480,
+    pricePerMonth: 15800,
   },
   {
     type: "feedback",
     duration: 3,
     displayName: "フィードバック（3ヶ月）",
     description: "全コンテンツ + フィードバック機能が利用できるプラン（3ヶ月で割引）",
-    pricePerMonth: 1280,
+    pricePerMonth: 13800,
   },
 ];
 
@@ -110,6 +110,9 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
     };
   }
 
+  // 環境に応じたフィルタ（test/live混在を防止）
+  const environment = process.env.NODE_ENV === "production" ? "live" : "test";
+
   // 直接データベースから購読情報を取得
   const { data: subscription, error } = await supabase
     .from("user_subscriptions")
@@ -117,6 +120,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
       "plan_type, duration, is_active, cancel_at_period_end, cancel_at, current_period_end"
     )
     .eq("user_id", user.id)
+    .eq("environment", environment)
     .maybeSingle();
 
   if (error || !subscription) {
