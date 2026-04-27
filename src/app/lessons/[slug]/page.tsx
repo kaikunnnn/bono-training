@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getLesson, getLessonMetadata, getAllLessonSlugs } from "@/lib/sanity";
 import { getLessonProgress } from "@/lib/services/progress";
+import { getSubscriptionStatus, isContentLocked } from "@/lib/subscription";
 import LessonDetailClient from "./LessonDetailClient";
 
 interface PageProps {
@@ -50,7 +51,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 // ページコンポーネント（Server Component）
 export default async function LessonPage({ params }: PageProps) {
   const { slug } = await params;
-  const lesson = await getLesson(slug);
+  const [lesson, subscription] = await Promise.all([
+    getLesson(slug),
+    getSubscriptionStatus(),
+  ]);
 
   if (!lesson) {
     notFound();
@@ -81,7 +85,7 @@ export default async function LessonPage({ params }: PageProps) {
     ? Math.round((totalCompleted / totalArticles) * 100)
     : 0;
 
-  // クエストに articleNumber を付与
+  // クエストに articleNumber と isLocked を付与
   const processedLesson = {
     ...lesson,
     quests: lesson.quests?.map((quest, questIndex) => ({
@@ -90,6 +94,7 @@ export default async function LessonPage({ params }: PageProps) {
       articles: quest.articles?.map((article, articleIndex) => ({
         ...article,
         articleNumber: articleIndex + 1,
+        isLocked: isContentLocked(article.isPremium || false, subscription.planType),
       })) || [],
     })) || [],
   };

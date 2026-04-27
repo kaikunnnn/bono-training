@@ -17,6 +17,7 @@ interface Article {
   videoDuration?: string | number;
   articleType?: TagType;
   isPremium?: boolean;
+  isLocked?: boolean;
 }
 
 interface QuestCardProps {
@@ -53,6 +54,7 @@ export function QuestCard({
               articleType={article.articleType}
               isCompleted={completedArticleIds.includes(article._id)}
               isPremium={article.isPremium}
+              isLocked={article.isLocked}
             />
           ))}
         </div>

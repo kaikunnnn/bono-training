@@ -145,6 +145,7 @@ export default async function ArticlePage({ params }: PageProps) {
             thumbnailUrl={article.thumbnailUrl}
             isPremium={article.isPremium}
             hasAccess={hasAccess}
+            isLoggedIn={subscription.isLoggedIn}
           />
         </div>
 
@@ -181,6 +182,7 @@ export default async function ArticlePage({ params }: PageProps) {
                 content={article.content}
                 isPremium={article.isPremium}
                 hasAccess={hasAccess}
+                isLoggedIn={subscription.isLoggedIn}
                 afterContent={
                   hasAccess && (
                     <ArticleActionButtons

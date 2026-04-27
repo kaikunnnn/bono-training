@@ -9,6 +9,7 @@ export type ContentAccessType = "learning" | "member";
 
 // サブスクリプション状態
 export interface SubscriptionState {
+  isLoggedIn: boolean;
   isSubscribed: boolean;
   planType: PlanType | null;
   duration: PlanDuration | null;

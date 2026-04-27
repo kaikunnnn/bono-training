@@ -16,6 +16,7 @@ interface Article {
   videoDuration?: string | number;
   articleType?: TagType;
   isPremium?: boolean;
+  isLocked?: boolean;
 }
 
 interface Quest {

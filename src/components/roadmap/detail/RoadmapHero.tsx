@@ -42,14 +42,12 @@ const PrimaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = 
   href,
   children,
 }) => (
-  <a
+  <Link
     href={href}
-    target="_blank"
-    rel="noopener noreferrer"
     className="w-full sm:flex-1 flex items-center justify-center h-12 bg-white border border-white/90 rounded-[14px] text-[14px] font-bold text-[#081c17] tracking-[0.35px] shadow-[0_4px_8px_rgba(0,0,0,0.25)] hover:bg-gray-50 transition-colors"
   >
     {children}
-  </a>
+  </Link>
 );
 
 const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
@@ -232,7 +230,7 @@ export default function RoadmapHero({
 
               {/* CTAボタン */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <PrimaryCTAButton href="https://www.bo-no.design/plan">
+                <PrimaryCTAButton href="/subscription">
                   メンバーになってはじめる
                 </PrimaryCTAButton>
                 <SecondaryCTAButton href="#curriculum">

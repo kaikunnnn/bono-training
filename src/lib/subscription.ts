@@ -99,6 +99,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
 
   if (!user) {
     return {
+      isLoggedIn: false,
       isSubscribed: false,
       planType: null,
       duration: null,
@@ -125,6 +126,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
 
   if (error || !subscription) {
     return {
+      isLoggedIn: true,
       isSubscribed: false,
       planType: null,
       duration: null,
@@ -154,6 +156,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
     isActive && (planType === "standard" || planType === "feedback");
 
   return {
+    isLoggedIn: true,
     isSubscribed: isActive,
     planType,
     duration,
