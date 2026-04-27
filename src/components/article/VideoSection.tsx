@@ -10,6 +10,7 @@ interface VideoSectionProps {
   thumbnailUrl?: string;
   isPremium?: boolean;
   hasAccess?: boolean;
+  isLoggedIn?: boolean;
   /**
    * 自動再生（ブラウザ制約によりミュートでの再生を前提とする）
    * 既定は false
@@ -39,11 +40,12 @@ const VideoSection = ({
   thumbnailUrl,
   isPremium = false,
   hasAccess = true,
+  isLoggedIn = false,
   autoPlay = false,
 }: VideoSectionProps) => {
   // プレミアムコンテンツで未契約の場合、ロック表示
   if (isPremium && !hasAccess) {
-    return <PremiumVideoLock />;
+    return <PremiumVideoLock isLoggedIn={isLoggedIn} />;
   }
 
   // URLからプラットフォームとIDを判定

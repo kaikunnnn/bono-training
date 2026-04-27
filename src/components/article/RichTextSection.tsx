@@ -11,7 +11,8 @@ interface RichTextSectionProps {
   content: PortableTextBlock[];
   isPremium?: boolean;
   hasAccess?: boolean;
-  previewBlockCount?: number; // プレビューで表示するブロック数（デフォルト: 3）
+  isLoggedIn?: boolean;
+  previewBlockCount?: number; // プ��ビューで表示す��ブロック数（デフォルト: 3）
   afterContent?: React.ReactNode;
 }
 
@@ -62,6 +63,7 @@ const RichTextSection = ({
   content,
   isPremium = false,
   hasAccess = true,
+  isLoggedIn = false,
   previewBlockCount = 3,
   afterContent,
 }: RichTextSectionProps) => {
@@ -449,7 +451,7 @@ const RichTextSection = ({
       {afterContent}
 
       {/* プレミアムコンテンツで未契約の場合、オーバーレイを表示 */}
-      {isPremium && !hasAccess && <ContentPreviewOverlay />}
+      {isPremium && !hasAccess && <ContentPreviewOverlay isLoggedIn={isLoggedIn} />}
     </div>
   );
 };

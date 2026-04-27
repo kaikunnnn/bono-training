@@ -19,6 +19,7 @@ interface Article {
   videoDuration?: string | number;
   articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
   isPremium?: boolean;
+  isLocked?: boolean;
 }
 
 interface Quest {
