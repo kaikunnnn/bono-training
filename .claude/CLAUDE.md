@@ -1,0 +1,61 @@
+# BONO Training — Next.js App Router
+
+UIデザイン学習プラットフォーム。Supabase + Stripe + Sanity CMS で構築。
+
+## 技術スタック
+
+- Next.js 16 (App Router / Turbopack) + React 19
+- TypeScript 5
+- Supabase (認証・DB・Edge Functions)
+- Stripe (課金・サブスクリプション)
+- Sanity CMS (レッスン・記事コンテンツ)
+- Tailwind CSS + shadcn/ui
+- Vercel (ホスティング)
+
+## 作業開始フロー
+
+1. ブランチ名から Linear イシューを特定（`feature/bon-{番号}-{説明}` → BON-{番号}）
+2. イシューのコメントで要件・フィードバックを確認
+3. 作業実施、問題発見時はLinearにサブイシューまたはコメントで記録
+4. 完了後、Linearステータスを更新
+
+## ディレクトリ構成
+
+```
+src/
+├── app/          # App Router ページ（Server Component）
+├── components/   # UIコンポーネント（feature別 + ui/）
+├── lib/          # ユーティリティ・サービス・Supabase
+│   ├── supabase/ # server.ts / client.ts
+│   └── services/ # Server Actions（progress, bookmarks等）
+├── hooks/        # カスタムフック
+├── types/        # 型定義
+└── styles/       # グローバルCSS
+```
+
+## 開発コマンド
+
+```bash
+npm run dev       # localhost:3000
+npm run build     # 本番ビルド（Server/Client境界エラーはここで検出）
+npx tsc --noEmit  # 型チェック
+npm run lint      # ESLint
+npm test          # Vitest
+```
+
+## ルール（詳細は .claude/rules/ 参照）
+
+- `01-nextjs-architecture.md` — Server/Client境界・レイアウト（最重要）
+- `02-server-client-modules.md` — supabase/server vs client、モジュール分離パターン
+- `03-ui-conventions.md` — アイコン・UIコンポーネント・CSS
+- `04-billing-patterns.md` — 課金の3段階フォールバック
+- `05-file-conventions.md` — ファイル配置・命名
+- `06-development-workflow.md` — 環境・ビルド・デプロイ
+
+## 禁止事項
+
+- Linear イシューなしで作業開始しない
+- テスト（build + tsc）なしでデプロイしない
+- 本番DBで実験的なクエリを実行しない
+- Client Component から `@/lib/supabase/server` を import しない
+- MCP は本番DB参照のため、開発中のデータ操作に使用しない
