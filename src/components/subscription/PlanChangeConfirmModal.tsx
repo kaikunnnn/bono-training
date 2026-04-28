@@ -23,7 +23,7 @@ import {
   calculateProration,
   type PlanInfo,
 } from "@/lib/prorationCalculator";
-import { getPlanDisplayName } from "@/lib/subscription";
+import { getPlanDisplayName } from "@/lib/subscription-utils";
 import { getPlanPrices, type PlanPrices } from "@/lib/services/pricing";
 import type { PlanType } from "@/types/subscription";
 

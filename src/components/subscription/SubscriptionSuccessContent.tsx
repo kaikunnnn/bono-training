@@ -28,7 +28,7 @@ import {
   Settings,
   ExternalLink,
 } from "lucide-react";
-import { getPlanDisplayName } from "@/lib/subscription";
+import { getPlanDisplayName } from "@/lib/subscription-utils";
 import type { PlanType } from "@/types/subscription";
 
 export type SuccessType = "new" | "updated";

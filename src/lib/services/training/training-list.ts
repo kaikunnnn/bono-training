@@ -1,3 +1,4 @@
+import 'server-only'
 import { createClient } from "@/lib/supabase/server";
 import type { Training } from "@/types/training";
 import { TrainingError } from "@/lib/errors";
