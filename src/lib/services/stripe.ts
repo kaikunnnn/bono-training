@@ -37,16 +37,84 @@ export async function createCheckoutSession(
       },
     });
 
+    console.log("🔍 Edge Function Response:", response);
+
     if (response.error) {
-      console.error("Checkoutセッション作成エラー:", response.error);
+      console.error("❌ Checkoutセッション作成エラー:", response.error);
+      console.error("❌ Response data:", response.data);
+      console.error(
+        "❌ Response error object:",
+        JSON.stringify(response.error, null, 2)
+      );
 
+      // エラーレスポンスの本文を取得（Supabaseが500エラーをerrorとして扱うため）
       let errorMessage = "決済処理の準備に失敗しました。";
+      let errorDetails: string | undefined;
 
-      if (response.data?.error) {
-        errorMessage = response.data.error;
+      // 方法1: response.dataにエラーメッセージが含まれている場合
+      if (response.data) {
+        errorMessage =
+          response.data.error || response.data.message || errorMessage;
+        errorDetails = response.data.details;
+      }
+      // 方法2: response.errorにエラーメッセージが含まれている場合
+      else if (response.error) {
+        if (typeof response.error === "object") {
+          const errorObj = response.error as Record<string, unknown>;
+
+          // contextプロパティからエラーメッセージを取得
+          const errorContext = errorObj.context as Record<string, unknown> | undefined;
+          if (errorContext?.body) {
+            try {
+              const errorBody =
+                typeof errorContext.body === "string"
+                  ? JSON.parse(errorContext.body)
+                  : errorContext.body;
+
+              if (errorBody.error) {
+                errorMessage = errorBody.error;
+              }
+              if (errorBody.details) {
+                errorDetails = errorBody.details;
+              }
+            } catch (parseError) {
+              console.warn("エラーレスポンスのパースに失敗:", parseError);
+              if (typeof errorContext.body === "string") {
+                errorMessage = errorContext.body;
+              }
+            }
+          }
+          // context.dataから取得
+          else if (errorContext?.data) {
+            const errorData =
+              typeof errorContext.data === "string"
+                ? JSON.parse(errorContext.data as string)
+                : errorContext.data;
+            if ((errorData as Record<string, unknown>).error) {
+              errorMessage = (errorData as Record<string, unknown>).error as string;
+            }
+            if ((errorData as Record<string, unknown>).details) {
+              errorDetails = (errorData as Record<string, unknown>).details as string;
+            }
+          }
+          // messageプロパティから取得
+          else if (errorObj.message) {
+            errorMessage = errorObj.message as string;
+          }
+        } else if (typeof response.error === "string") {
+          errorMessage = response.error;
+        }
       }
 
-      throw new Error(errorMessage);
+      if (errorDetails) {
+        console.error("❌ エラー詳細:", errorDetails);
+      }
+
+      const fullErrorMessage = errorDetails
+        ? `${errorMessage}\n\n詳細:\n${errorDetails}`
+        : errorMessage;
+
+      throw new Error(fullErrorMessage);
     }
 
     const { data, error } = response;

@@ -43,8 +43,32 @@ try {
 - 開発環境: `environment = 'test'` のみ参照
 - 本番環境: `environment = 'live'` のみ参照
 
+## Edge Function エラーハンドリング（必須）
+
+Edge Function のエラーレスポンスは必ず詳細パースする。汎用メッセージだけで握りつぶしてはいけない:
+
+```typescript
+// ❌ 間違い: エラー詳細を捨てている
+if (response.error) {
+  throw new Error("決済処理の準備に失敗しました。");
+}
+
+// ✅ 正しい: Edge Functionのレスポンスボディからエラー詳細を取得
+if (response.error) {
+  let errorMessage = "決済処理の準備に失敗しました。";
+  if (response.data?.error) {
+    errorMessage = response.data.error; // Edge Functionが返した実際のメッセージ
+  }
+  // response.error.context.body からもパース
+  throw new Error(errorMessage);
+}
+```
+
+参考実装: `src/lib/services/stripe.ts` の `createCheckoutSession`
+
 ## チェックリスト（課金機能の実装時）
 
 - [ ] Edge Function 失敗時のフォールバックがあるか
+- [ ] Edge Function エラーレスポンスを詳細パースしているか（汎用メッセージで握りつぶしていないか）
 - [ ] ローカル環境（Edge Function なし）でも動作するか
 - [ ] テスト環境で確認後に本番デプロイしたか
