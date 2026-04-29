@@ -288,7 +288,7 @@ function LoginForm() {
       {/* 新規登録への導線 */}
       <p className="text-center mt-6 text-sm text-muted-foreground font-noto-sans-jp">
         アカウントをお持ちでない方は{" "}
-        <Link href="/signup" className="text-primary hover:underline">
+        <Link href={redirectTo !== "/mypage" ? `/signup?redirectTo=${encodeURIComponent(redirectTo)}` : "/signup"} className="text-primary hover:underline">
           新規登録
         </Link>
       </p>

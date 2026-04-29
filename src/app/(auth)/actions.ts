@@ -42,6 +42,7 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
+  const redirectTo = formData.get("redirectTo") as string | null;
 
   if (!email || !password) {
     return { error: "メールアドレスとパスワードを入力してください" };
@@ -59,7 +60,7 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     email,
     password,
     options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
   });
 
@@ -70,7 +71,9 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     return { error: error.message };
   }
 
-  return { success: true };
+  // 登録成功後、自動ログインしてリダイレクト
+  revalidatePath("/", "layout");
+  redirect(redirectTo || "/");
 }
 
 export async function signOut() {
@@ -88,7 +91,7 @@ export async function resetPassword(email: string): Promise<AuthResult> {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/update-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/update-password`,
   });
 
   if (error) {

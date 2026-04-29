@@ -66,9 +66,41 @@ if (response.error) {
 
 参考実装: `src/lib/services/stripe.ts` の `createCheckoutSession`
 
+## Edge Function 呼び出し関数の統一パターン（必須）
+
+`stripe.ts` 内の全ての Edge Function 呼び出し関数に同じエラーパースを適用すること。
+1つの関数だけ修正して他を放置してはいけない。
+
+対象: `createCheckoutSession`, `updateSubscription`, `getCustomerPortalUrl`
+
+## テストデータのルール（必須）
+
+**Stripe操作を伴うテストでは、ダミーIDのサブスクリプションを使ってはいけない。**
+
+- ❌ `sub_test_xxx`, `cus_test_xxx` のようなダミーID → Stripe APIで500エラー
+- ✅ 実際のStripeチェックアウトで作成されたサブスクリプション → プラン変更・キャンセルが動作する
+
+テストデータは以下の手順で作成する:
+1. テストアカウントを作成（Auth API経由）
+2. そのアカウントでログイン → `/subscription` → テストカードでチェックアウト
+3. これにより実際のStripe subscription IDがDBに記録される
+4. この状態でプラン変更・ダウングレード・キャンセルをテスト
+
+**DBに直接サブスクを挿入するのはUI表示確認のみ許可。Stripe操作のテストには使えない。**
+
+## `unit_amount` の注意（必須）
+
+Stripeの `unit_amount` は**プラン期間の合計金額**:
+- 1ヶ月プラン: `unit_amount` = 月額（例: 6,800円）
+- 3ヶ月プラン: `unit_amount` = 3ヶ月合計（例: 17,400円、月額ではない）
+
+日割り計算では `unit_amount / (30 × duration)` で日割り単価を求めること。
+
 ## チェックリスト（課金機能の実装時）
 
 - [ ] Edge Function 失敗時のフォールバックがあるか
-- [ ] Edge Function エラーレスポンスを詳細パースしているか（汎用メッセージで握りつぶしていないか）
-- [ ] ローカル環境（Edge Function なし）でも動作するか
+- [ ] **全ての** Edge Function 呼び出し関数でエラー詳細パースしているか
+- [ ] テストデータはStripeチェックアウト経由で作成したか（ダミーIDではないか）
+- [ ] `unit_amount` の扱いで duration を考慮しているか
+- [ ] ローカル環境（Supabase Local + Stripe Test）でE2Eテスト済みか
 - [ ] テスト環境で確認後に本番デプロイしたか

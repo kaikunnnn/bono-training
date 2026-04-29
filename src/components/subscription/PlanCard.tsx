@@ -87,7 +87,7 @@ export function PlanCard({
       // GA4: チェックアウト開始イベント（mainと同じ: checkout直前に発火）
       trackBeginCheckout(plan.id, plan.price, duration);
 
-      const returnUrl = `${window.location.origin}/subscription/success`;
+      const returnUrl = `${window.location.origin}/subscription/success?plan=${plan.id}&duration=${duration}`;
       const { url, error: checkoutError } = await createCheckoutSession(
         returnUrl,
         plan.id,

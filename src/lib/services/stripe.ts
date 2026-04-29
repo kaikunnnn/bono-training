@@ -198,7 +198,7 @@ export async function updateSubscription(
     console.log(`プラン変更開始: プラン=${planType}, 期間=${duration}ヶ月`);
 
     // Supabase Edge Functionを呼び出してサブスクリプションを更新
-    const { data, error } = await supabase.functions.invoke(
+    const response = await supabase.functions.invoke(
       "update-subscription",
       {
         body: {
@@ -208,10 +208,32 @@ export async function updateSubscription(
       }
     );
 
-    if (error) {
-      console.error("サブスクリプション更新エラー:", error);
-      throw new Error("プラン変更に失敗しました。");
+    console.log("🔍 Update Subscription Response:", response);
+
+    if (response.error) {
+      console.error("❌ サブスクリプション更新エラー:", response.error);
+
+      let errorMessage = "プラン変更に失敗しました。";
+
+      // raw Response からエラー詳細を取得
+      const rawResponse = (response as unknown as Record<string, unknown>).response;
+      if (rawResponse instanceof Response) {
+        try {
+          const cloned = rawResponse.clone();
+          const errorBody = await cloned.json();
+          console.error("❌ Edge Function レスポンスボディ:", errorBody);
+          if (errorBody.error) errorMessage = errorBody.error;
+        } catch {
+          console.warn("raw Responseのパースに失敗");
+        }
+      } else if (response.data?.error) {
+        errorMessage = response.data.error;
+      }
+
+      throw new Error(errorMessage);
     }
+
+    const { data, error } = response;
 
     if (!data || !data.success) {
       throw new Error(data?.error || "プラン変更に失敗しました。");

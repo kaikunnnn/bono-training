@@ -11,7 +11,8 @@ import type { PlanType } from "@/types/subscription";
 export interface PlanInfo {
   type: PlanType;
   duration: 1 | 3;
-  monthlyPrice: number;
+  /** プランの合計金額（1ヶ月プランなら月額、3ヶ月プランなら3ヶ月合計） */
+  totalPrice: number;
 }
 
 export interface ProrationResult {
@@ -37,11 +38,11 @@ export function calculateProration(
   // 1ヶ月を30日として計算
   const DAYS_IN_MONTH = 30;
 
-  // 現在のプランの日割り単価
-  const currentDailyRate = currentPlan.monthlyPrice / DAYS_IN_MONTH;
+  // 現在のプランの日割り単価（durationを考慮: 3ヶ月プランなら90日で割る）
+  const currentDailyRate = currentPlan.totalPrice / (DAYS_IN_MONTH * currentPlan.duration);
 
   // 新プランの日割り単価
-  const newDailyRate = newPlan.monthlyPrice / DAYS_IN_MONTH;
+  const newDailyRate = newPlan.totalPrice / (DAYS_IN_MONTH * newPlan.duration);
 
   // 残り日数を計算（次回更新日までの日数）
   const now = new Date();

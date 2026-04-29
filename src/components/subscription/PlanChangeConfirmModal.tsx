@@ -106,13 +106,13 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
   const currentPlanInfo: PlanInfo = {
     type: currentPlan.type,
     duration: currentPlan.duration,
-    monthlyPrice: planPrices[currentPriceKey]?.unit_amount || 0,
+    totalPrice: planPrices[currentPriceKey]?.unit_amount || 0,
   };
 
   const newPlanInfo: PlanInfo = {
     type: newPlan.type,
     duration: newPlan.duration,
-    monthlyPrice: planPrices[newPriceKey]?.unit_amount || 0,
+    totalPrice: planPrices[newPriceKey]?.unit_amount || 0,
   };
 
   // プロレーション計算
@@ -206,7 +206,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
               ヶ月プラン
             </p>
             <p className="text-sm text-gray-700">
-              ¥{currentPlanInfo.monthlyPrice.toLocaleString()}/月
+              ¥{currentPlanInfo.totalPrice.toLocaleString()}/{currentPlan.duration === 1 ? "月" : `${currentPlan.duration}ヶ月`}
             </p>
           </div>
 
@@ -222,7 +222,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
               {getPlanDisplayName(newPlan.type)} {newPlan.duration}ヶ月プラン
             </p>
             <p className="text-sm text-gray-700">
-              ¥{newPlanInfo.monthlyPrice.toLocaleString()}/月
+              ¥{newPlanInfo.totalPrice.toLocaleString()}/{newPlan.duration === 1 ? "月" : `${newPlan.duration}ヶ月`}
             </p>
           </div>
 
@@ -275,7 +275,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
               次回請求日: {formatDate(currentPeriodEnd)}
             </p>
             <p className="text-sm text-gray-600">
-              次回以降: ¥{newPlanInfo.monthlyPrice.toLocaleString()}/月
+              次回以降: ¥{newPlanInfo.totalPrice.toLocaleString()}/{newPlan.duration === 1 ? "月" : `${newPlan.duration}ヶ月`}
             </p>
           </div>
 

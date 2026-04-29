@@ -45,30 +45,28 @@ npm run lint       # ESLint
 
 ## テスト用サブスクリプションの作成
 
-開発環境（localhost）でサブスク機能を確認するには `environment = 'test'` のレコードが必要。
-MCP の `execute_sql` で作成する:
-
-```sql
--- テスト用サブスク作成（standard 1ヶ月）
-INSERT INTO user_subscriptions (
-  user_id, plan_type, is_active, stripe_subscription_id, stripe_customer_id,
-  duration, cancel_at_period_end, current_period_end, environment
-) VALUES (
-  '<user_id>',        -- auth.users から取得
-  'standard',         -- standard or feedback
-  true,
-  'sub_test_dev_xxx', -- テスト用のダミーID
-  'cus_test_dev',
-  1,                  -- 1 or 3
-  false,
-  '2026-06-01 00:00:00+00',
-  'test'
-);
-
--- テスト用サブスク削除（テスト終了後）
-DELETE FROM user_subscriptions
-WHERE user_id = '<user_id>' AND environment = 'test';
+### ユーザー作成（Auth Admin API経由）
+```bash
+LOCAL_KEY="<service_role_key from supabase start>"
+curl -s -X POST "http://127.0.0.1:54321/auth/v1/admin/users" \
+  -H "Authorization: Bearer $LOCAL_KEY" \
+  -H "apikey: $LOCAL_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"email": "test@example.com", "password": "TestPass123!", "email_confirm": true}'
 ```
 
-**注意**: MCP は本番DBに接続するため、`environment = 'test'` を必ず指定すること。
-`environment = 'live'` のレコードは絶対に変更しない。
+### サブスクリプション作成（実際のStripeチェックアウト経由）
+
+**重要: DBに直接ダミーIDを挿入してはいけない。Stripe操作（プラン変更等）が失敗する。**
+
+1. テストアカウントでログイン
+2. `/subscription` → 「選択する」→ テストカード（`4242 4242 4242 4242`）で決済
+3. Webhookで実際のStripe subscription IDがDBに記録される
+4. この状態でプラン変更・ダウングレード・キャンセルをテスト
+
+### サブスクリプション削除（テスト後のクリーンアップ）
+```bash
+docker exec supabase_db_fryogvfhymnpiqwssmuu psql -U postgres -d postgres -c "
+DELETE FROM user_subscriptions WHERE user_id = '<user_id>';
+"
+```
