@@ -41,4 +41,34 @@ npm run lint       # ESLint
 ## テスト用情報
 
 - Stripe テストカード: `4242 4242 4242 4242`（有効期限: 任意未来日、CVC: 任意3桁）
-- 開発環境: `environment = 'test'` のサブスクのみ参照
+- 開発環境: `environment = 'test'` のサブスクのみ参照（`live` は見えない）
+
+## テスト用サブスクリプションの作成
+
+開発環境（localhost）でサブスク機能を確認するには `environment = 'test'` のレコードが必要。
+MCP の `execute_sql` で作成する:
+
+```sql
+-- テスト用サブスク作成（standard 1ヶ月）
+INSERT INTO user_subscriptions (
+  user_id, plan_type, is_active, stripe_subscription_id, stripe_customer_id,
+  duration, cancel_at_period_end, current_period_end, environment
+) VALUES (
+  '<user_id>',        -- auth.users から取得
+  'standard',         -- standard or feedback
+  true,
+  'sub_test_dev_xxx', -- テスト用のダミーID
+  'cus_test_dev',
+  1,                  -- 1 or 3
+  false,
+  '2026-06-01 00:00:00+00',
+  'test'
+);
+
+-- テスト用サブスク削除（テスト終了後）
+DELETE FROM user_subscriptions
+WHERE user_id = '<user_id>' AND environment = 'test';
+```
+
+**注意**: MCP は本番DBに接続するため、`environment = 'test'` を必ず指定すること。
+`environment = 'live'` のレコードは絶対に変更しない。
