@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@sanity/client';
+import { createClient, type SanityClient } from '@sanity/client';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
-// Sanity client with write token
-const sanityClient = createClient({
-  projectId: process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: process.env.SANITY_DATASET || process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
-  apiVersion: '2024-01-01',
-  token: process.env.SANITY_WRITE_TOKEN,
-  useCdn: false,
-});
+// Sanity write client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
+let sanityClient: SanityClient | null = null;
+
+function getSanityClient(): SanityClient {
+  if (!sanityClient) {
+    sanityClient = createClient({
+      projectId: process.env.SANITY_PROJECT_ID || process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+      dataset: process.env.SANITY_DATASET || process.env.NEXT_PUBLIC_SANITY_DATASET || 'production',
+      apiVersion: '2024-01-01',
+      token: process.env.SANITY_WRITE_TOKEN,
+      useCdn: false,
+    });
+  }
+  return sanityClient;
+}
 
 // Supabase client
 const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -282,7 +289,7 @@ export async function POST(request: NextRequest) {
   // カテゴリ名を取得
   let categoryName = 'カテゴリ未設定';
   try {
-    const category = await sanityClient.fetch(
+    const category = await getSanityClient().fetch(
       `*[_type == "questionCategory" && _id == $id][0]{title}`,
       { id: payload.categoryId }
     );
@@ -317,7 +324,7 @@ export async function POST(request: NextRequest) {
   };
 
   try {
-    const result = await sanityClient.create(questionDoc);
+    const result = await getSanityClient().create(questionDoc);
 
     // Slack通知
     await sendSlackNotification({

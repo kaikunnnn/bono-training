@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@sanity/client";
+import { createClient, type SanityClient } from "@sanity/client";
 
-// Sanity write client (with token)
-const sanityWriteClient = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
-  apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
-  token: process.env.SANITY_WRITE_TOKEN,
-  useCdn: false,
-});
+// Sanity write client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
+let sanityWriteClient: SanityClient | null = null;
+
+function getSanityWriteClient(): SanityClient {
+  if (!sanityWriteClient) {
+    sanityWriteClient = createClient({
+      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID!,
+      dataset: process.env.NEXT_PUBLIC_SANITY_DATASET!,
+      apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
+      token: process.env.SANITY_WRITE_TOKEN,
+      useCdn: false,
+    });
+  }
+  return sanityWriteClient;
+}
 
 interface SubmitRequestBody {
   articleUrl: string;
@@ -189,7 +196,7 @@ export async function POST(request: NextRequest) {
       submittedAt: new Date().toISOString(),
     };
 
-    const result = await sanityWriteClient.create(userOutput);
+    const result = await getSanityWriteClient().create(userOutput);
 
     // Slack通知を送信
     await sendSlackNotification({
