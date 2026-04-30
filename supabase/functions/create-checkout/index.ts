@@ -201,7 +201,7 @@ serve(async (req) => {
         },
       ],
       mode: "subscription",
-      success_url: `${returnUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${returnUrl}${returnUrl.includes('?') ? '&' : '?'}session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: cancelUrl,
       metadata: sessionMetadata,
       locale: "ja", // 日本語UI

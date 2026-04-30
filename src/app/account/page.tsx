@@ -111,7 +111,7 @@ export default async function AccountPage() {
                 <div>
                   <p className="font-medium">
                     {subscription.isSubscribed
-                      ? getPlanLabel(subscription.planType)
+                      ? `${getPlanLabel(subscription.planType)}（${subscription.duration === 3 ? "3ヶ月" : "1ヶ月"}）`
                       : "無料プラン"}
                   </p>
                   {subscription.isSubscribed ? (
