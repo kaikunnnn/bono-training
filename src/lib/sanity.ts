@@ -3,17 +3,35 @@ import imageUrlBuilder from "@sanity/image-url";
 import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory } from "@/types/sanity";
 import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-roadmap";
 
-export const client = createClient({
-  projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
-  apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
-  useCdn: false, // リアルタイム更新のためCDNを無効化
+// Sanity client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
+let _client: ReturnType<typeof createClient> | null = null;
+
+function getClient(): ReturnType<typeof createClient> {
+  if (!_client) {
+    _client = createClient({
+      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+      dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+      apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
+      useCdn: false, // リアルタイム更新のためCDNを無効化
+    });
+  }
+  return _client;
+}
+
+/** @deprecated getClient() を内部で使用。外部からは関数経由でアクセスしてください */
+export const client = new Proxy({} as ReturnType<typeof createClient>, {
+  get(_, prop) {
+    return (getClient() as unknown as Record<string | symbol, unknown>)[prop];
+  },
 });
 
-const builder = imageUrlBuilder(client);
+let _builder: ReturnType<typeof imageUrlBuilder> | null = null;
 
-export function urlFor(source: Parameters<typeof builder.image>[0]) {
-  return builder.image(source);
+export function urlFor(source: Parameters<ReturnType<typeof imageUrlBuilder>["image"]>[0]) {
+  if (!_builder) {
+    _builder = imageUrlBuilder(getClient());
+  }
+  return _builder.image(source);
 }
 
 // ============================================
@@ -76,7 +94,7 @@ export async function getLesson(slug: string): Promise<LessonWithDetails | null>
     }
   `;
 
-  const lesson = await client.fetch<LessonWithDetails | null>(query, { slug });
+  const lesson = await getClient().fetch<LessonWithDetails | null>(query, { slug });
 
   if (!lesson) {
     return null;
@@ -124,7 +142,7 @@ export async function getLessonMetadata(slug: string): Promise<LessonMetadata | 
     }
   `;
 
-  return client.fetch<LessonMetadata | null>(query, { slug });
+  return getClient().fetch<LessonMetadata | null>(query, { slug });
 }
 
 /**
@@ -132,7 +150,7 @@ export async function getLessonMetadata(slug: string): Promise<LessonMetadata | 
  */
 export async function getAllLessonSlugs(): Promise<string[]> {
   const query = `*[_type == "lesson"].slug.current`;
-  return client.fetch<string[]>(query);
+  return getClient().fetch<string[]>(query);
 }
 
 /**
@@ -155,7 +173,7 @@ export async function getAllLessons(): Promise<Lesson[]> {
       isPremium
     }
   `;
-  return client.fetch<Lesson[]>(query);
+  return getClient().fetch<Lesson[]>(query);
 }
 
 export interface LessonWithArticleIds extends Lesson {
@@ -183,7 +201,7 @@ export async function getAllLessonsWithArticleIds(): Promise<LessonWithArticleId
       "articleIds": quests[]->articles[]->_id
     }
   `;
-  const lessons = await client.fetch<LessonWithArticleIds[]>(query);
+  const lessons = await getClient().fetch<LessonWithArticleIds[]>(query);
   // articleIds内のnullを除去
   return lessons.map(lesson => ({
     ...lesson,
@@ -264,7 +282,7 @@ export async function getArticleWithContext(slug: string): Promise<ArticleWithCo
     }
   `;
 
-  const article = await client.fetch<ArticleWithContext | null>(query, { slug });
+  const article = await getClient().fetch<ArticleWithContext | null>(query, { slug });
 
   if (!article) {
     return null;
@@ -301,7 +319,7 @@ export async function getArticleMetadata(slug: string): Promise<ArticleMetadata 
     }
   `;
 
-  return client.fetch<ArticleMetadata | null>(query, { slug });
+  return getClient().fetch<ArticleMetadata | null>(query, { slug });
 }
 
 // ============================================
@@ -341,7 +359,7 @@ export async function getAllArticles(): Promise<ArticleListItem[]> {
       "lessonSlug": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->slug.current
     }
   `;
-  return client.fetch<ArticleListItem[]>(query);
+  return getClient().fetch<ArticleListItem[]>(query);
 }
 
 /**
@@ -365,7 +383,7 @@ export async function getArticlesByLesson(lessonSlug: string): Promise<ArticleLi
       publishedAt
     }
   `;
-  return client.fetch<ArticleListItem[]>(query, { lessonSlug });
+  return getClient().fetch<ArticleListItem[]>(query, { lessonSlug });
 }
 
 // ============================================
@@ -383,7 +401,7 @@ export async function getFeedbackCategories(): Promise<FeedbackCategory[]> {
       slug
     }
   `;
-  return client.fetch<FeedbackCategory[]>(query);
+  return getClient().fetch<FeedbackCategory[]>(query);
 }
 
 /**
@@ -407,7 +425,7 @@ export async function getAllFeedbacks(): Promise<Feedback[]> {
       }
     }
   `;
-  return client.fetch<Feedback[]>(query);
+  return getClient().fetch<Feedback[]>(query);
 }
 
 /**
@@ -431,7 +449,7 @@ export async function getFeedbacksByCategory(categorySlug: string): Promise<Feed
       }
     }
   `;
-  return client.fetch<Feedback[]>(query, { categorySlug });
+  return getClient().fetch<Feedback[]>(query, { categorySlug });
 }
 
 /**
@@ -458,7 +476,7 @@ export async function getFeedback(slug: string): Promise<Feedback | null> {
       }
     }
   `;
-  return client.fetch<Feedback | null>(query, { slug });
+  return getClient().fetch<Feedback | null>(query, { slug });
 }
 
 /**
@@ -496,7 +514,7 @@ export async function getRecentFeedbacks(limit: number = 4, excludeSlug?: string
         }
       }
     `;
-  return client.fetch<Feedback[]>(query, { limit, excludeSlug });
+  return getClient().fetch<Feedback[]>(query, { limit, excludeSlug });
 }
 
 /**
@@ -522,7 +540,7 @@ export async function getRelatedFeedbacks(
       }
     }
   `;
-  return client.fetch<Feedback[]>(query, { categorySlug, excludeSlug, limit });
+  return getClient().fetch<Feedback[]>(query, { categorySlug, excludeSlug, limit });
 }
 
 /**
@@ -530,7 +548,7 @@ export async function getRelatedFeedbacks(
  */
 export async function getAllFeedbackSlugs(): Promise<string[]> {
   const query = `*[_type == "feedback"].slug.current`;
-  return client.fetch<string[]>(query);
+  return getClient().fetch<string[]>(query);
 }
 
 // ============================================
@@ -553,7 +571,7 @@ interface SanityBlogPost {
   category?: string;
   tags?: string[];
   featured?: boolean;
-  thumbnail?: Parameters<typeof builder.image>[0];
+  thumbnail?: Parameters<ReturnType<typeof imageUrlBuilder>["image"]>[0];
   thumbnailUrl?: string;
 }
 
@@ -653,7 +671,7 @@ export async function getBlogPosts(params?: {
     }
   }`;
 
-  const data = await client.fetch<{ total: number; posts: SanityBlogPost[] }>(query, {
+  const data = await getClient().fetch<{ total: number; posts: SanityBlogPost[] }>(query, {
     start,
     end,
     category: params?.category,
@@ -709,7 +727,7 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
     thumbnailUrl
   }`;
 
-  const doc = await client.fetch<SanityBlogPost | null>(query, { slug });
+  const doc = await getClient().fetch<SanityBlogPost | null>(query, { slug });
   if (!doc?._id) return null;
   return toBlogPost(doc);
 }
@@ -737,7 +755,7 @@ export async function getLatestBlogPosts(limit: number = 4, excludeId?: string):
     thumbnailUrl
   }`;
 
-  const docs = await client.fetch<SanityBlogPost[]>(query, { excludeId, limit });
+  const docs = await getClient().fetch<SanityBlogPost[]>(query, { excludeId, limit });
   return (docs ?? []).map(toBlogPost);
 }
 
@@ -746,7 +764,7 @@ export async function getLatestBlogPosts(limit: number = 4, excludeId?: string):
  */
 export async function getAllBlogSlugs(): Promise<string[]> {
   const query = `*[_type == "blogPost"].slug.current`;
-  return client.fetch<string[]>(query);
+  return getClient().fetch<string[]>(query);
 }
 
 // ============================================
@@ -836,7 +854,7 @@ export async function getAllRoadmaps(): Promise<SanityRoadmapListItem[]> {
     order,
     isPublished
   }`;
-  return client.fetch<SanityRoadmapListItem[]>(query);
+  return getClient().fetch<SanityRoadmapListItem[]>(query);
 }
 
 /**
@@ -870,7 +888,7 @@ export async function getRoadmapBySlug(slug: string): Promise<SanityRoadmapDetai
       }
     }
   }`;
-  return client.fetch<SanityRoadmapDetail | null>(query, { slug });
+  return getClient().fetch<SanityRoadmapDetail | null>(query, { slug });
 }
 
 /**
@@ -878,5 +896,5 @@ export async function getRoadmapBySlug(slug: string): Promise<SanityRoadmapDetai
  */
 export async function getAllRoadmapSlugs(): Promise<string[]> {
   const query = `*[_type == "roadmap"].slug.current`;
-  return client.fetch<string[]>(query);
+  return getClient().fetch<string[]>(query);
 }
