@@ -30,6 +30,13 @@ export default function SubscriptionSuccessPage() {
   useEffect(() => {
     // チェックアウト完了後、Webhookが処理されるまで少し待機
     const refreshSubscription = async () => {
+      // URLパラメータからプラン情報を先行設定（GA4イベントの最低限の情報確保）
+      // DB取得に失敗してもGA4イベントが発火できるようにする
+      if (urlPlanType) {
+        setPlanType(urlPlanType);
+        setDuration(urlDuration ? (parseInt(urlDuration, 10) as PlanDuration) : null);
+      }
+
       try {
         // 2秒待機してWebhookの処理を待つ
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -41,7 +48,6 @@ export default function SubscriptionSuccessPage() {
         } = await supabase.auth.getUser();
 
         if (!user) {
-          setError("ユーザー情報の取��に失敗しました");
           setIsLoading(false);
           return;
         }
@@ -59,25 +65,20 @@ export default function SubscriptionSuccessPage() {
           .maybeSingle();
 
         if (subError) {
-          console.error("サブスクリプシ���ン情報の取得エラー:", subError);
-          setError("サブスクリプション情報の取得に失敗しました");
+          console.error("サブスクリプション情報の取得エラー:", subError);
           setIsLoading(false);
           return;
         }
 
+        // DB取得成功時は正確なデータで上書き
         if (subscription) {
           setPlanType(subscription.plan_type as PlanType);
           setDuration(subscription.duration as PlanDuration);
-        } else if (urlPlanType) {
-          // DB未反映の場合、URLパラメータをフォールバックとして使用
-          setPlanType(urlPlanType);
-          setDuration(urlDuration ? (parseInt(urlDuration, 10) as PlanDuration) : null);
         }
 
         setIsLoading(false);
       } catch (err) {
         console.error("サブスクリプション情報の更新エラー:", err);
-        setError("サブスクリプション情報の取得に失敗しました");
         setIsLoading(false);
       }
     };

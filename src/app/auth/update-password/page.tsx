@@ -52,9 +52,29 @@ export default function UpdatePasswordPage() {
       return;
     }
 
+    // パスワード更新成功後、移行ユーザーフラグを削除
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.access_token) {
+        await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/clear-migrated-flag`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.access_token}`,
+            },
+          }
+        );
+      }
+    } catch (e) {
+      // フラグ削除失敗はパスワード更新自体に影響しないので無視
+      console.warn("Failed to clear migrated flag:", e);
+    }
+
     setSuccess(true);
     setTimeout(() => {
-      router.push("/login");
+      router.push("/mypage");
     }, 2000);
   };
 
@@ -70,7 +90,7 @@ export default function UpdatePasswordPage() {
           </CardHeader>
           <CardContent className="text-center">
             <p className="text-muted-foreground">
-              ログインページにリダイレクトします...
+              マイページにリダイレクトします...
             </p>
           </CardContent>
         </Card>
