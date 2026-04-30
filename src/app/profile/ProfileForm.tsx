@@ -1,3 +1,4 @@
+// src/app/profile/ProfileForm.tsx — shadcn/ui コンポーネント使用
 "use client";
 
 import { useState } from "react";
@@ -6,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Loader2, Check } from "lucide-react";
+import { SettingsCard } from "@/components/common/SettingsPageLayout";
 import { updateProfile, type ProfileData } from "./actions";
 
 interface ProfileFormProps {
@@ -50,12 +51,12 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
 
   return (
     <form onSubmit={handleSubmit}>
-      <Card>
-        <CardContent className="pt-6 space-y-6">
+      <SettingsCard title="プロフィール設定">
+        <div className="space-y-6">
           {/* アバター */}
           <div className="flex items-center gap-6">
             <Avatar className="w-20 h-20">
-              <AvatarImage src={avatarUrl} />
+              <AvatarImage src={avatarUrl} alt="アバター" />
               <AvatarFallback className="text-2xl">
                 {defaultValues.displayName?.charAt(0)?.toUpperCase() || "U"}
               </AvatarFallback>
@@ -113,10 +114,11 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
               プロフィールを更新しました
             </div>
           )}
-        </CardContent>
+        </div>
 
-        <CardFooter className="border-t pt-6">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+        {/* 保存ボタン */}
+        <div className="mt-6 pt-6 border-t">
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -126,8 +128,8 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
               "保存する"
             )}
           </Button>
-        </CardFooter>
-      </Card>
+        </div>
+      </SettingsCard>
     </form>
   );
 }

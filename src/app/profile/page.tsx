@@ -1,10 +1,14 @@
+// src/app/profile/page.tsx — mainのスタイルに準拠 + 編集機能を維持
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { getCurrentUser } from "@/lib/subscription";
 import { ProfileForm } from "./ProfileForm";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import {
+  SettingsPageLayout,
+  SettingsPageTitle,
+  SettingsCard,
+  SettingsField,
+} from "@/components/common/SettingsPageLayout";
 
 export const metadata: Metadata = {
   title: "プロフィール編集",
@@ -19,37 +23,26 @@ export default async function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      {/* ヘッダー */}
-      <section className="bg-background border-b">
-        <div className="container px-4 py-8 sm:px-8">
-          <div className="flex items-center gap-4 mb-4">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/mypage">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                マイページ
-              </Link>
-            </Button>
-          </div>
-          <h1 className="text-2xl font-bold">プロフィール編集</h1>
-          <p className="text-muted-foreground mt-1">
-            あなたのプロフィール情報を更新できます
-          </p>
-        </div>
-      </section>
+    <SettingsPageLayout>
+      <SettingsPageTitle>プロフィール編集</SettingsPageTitle>
 
-      {/* フォーム */}
-      <section className="container px-4 py-8 sm:px-8">
-        <div className="max-w-xl mx-auto">
-          <ProfileForm
-            defaultValues={{
-              displayName: user.user_metadata?.display_name || "",
-              avatarUrl: user.user_metadata?.avatar_url || "",
-              bio: user.user_metadata?.bio || "",
-            }}
-          />
+      {/* ユーザー情報（表示のみ） */}
+      <SettingsCard title="ユーザー情報">
+        <div className="space-y-3">
+          <SettingsField label="メールアドレス:">
+            {user.email}
+          </SettingsField>
         </div>
-      </section>
-    </div>
+      </SettingsCard>
+
+      {/* プロフィール編集フォーム */}
+      <ProfileForm
+        defaultValues={{
+          displayName: user.user_metadata?.display_name || "",
+          avatarUrl: user.user_metadata?.avatar_url || "",
+          bio: user.user_metadata?.bio || "",
+        }}
+      />
+    </SettingsPageLayout>
   );
 }
