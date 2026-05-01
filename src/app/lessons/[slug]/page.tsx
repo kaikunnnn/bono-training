@@ -9,8 +9,12 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const slugs = await getAllLessonSlugs();
-  return slugs.map((slug) => ({ slug }));
+  try {
+    const slugs = await getAllLessonSlugs();
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
 }
 
 // OGP用メタデータ生成

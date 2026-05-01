@@ -23,8 +23,12 @@ import type { GradientPreset } from "@/styles/gradients";
 // ============================================
 
 export async function generateStaticParams() {
-  const slugs = await getAllRoadmapSlugs();
-  return slugs.map((slug) => ({ slug }));
+  try {
+    const slugs = await getAllRoadmapSlugs();
+    return slugs.map((slug) => ({ slug }));
+  } catch {
+    return [];
+  }
 }
 
 // ============================================

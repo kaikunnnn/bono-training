@@ -18,8 +18,12 @@ interface PageProps {
 }
 
 export async function generateStaticParams() {
-  const articles = await getAllArticles();
-  return articles.map((article) => ({ slug: article.slug.current }));
+  try {
+    const articles = await getAllArticles();
+    return articles.map((article) => ({ slug: article.slug.current }));
+  } catch {
+    return [];
+  }
 }
 
 // OGP用メタデータ生成
