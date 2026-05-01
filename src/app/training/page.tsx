@@ -19,6 +19,12 @@ export const metadata: Metadata = {
     description:
       "各コースで身につけたことをアウトプットするお題を並べています。実践的なデザイントレーニングで力をつけよう。",
   },
+  twitter: {
+    title: "トレーニング | BONO",
+    description:
+      "各コースで身につけたことをアウトプットするお題を並べています。実践的なデザイントレーニングで力をつけよう。",
+  },
+  alternates: { canonical: "/training" },
 };
 
 // カテゴリ定数

@@ -38,6 +38,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${feedback.title} | フィードバック | BONO`,
       description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     },
+    twitter: {
+      title: `${feedback.title} | フィードバック | BONO`,
+      description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
+    },
     alternates: { canonical: `/feedbacks/${slug}` },
   };
 }

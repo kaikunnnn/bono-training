@@ -21,6 +21,7 @@ import {
   TrendingUp,
   Wrench,
 } from "lucide-react";
+import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -53,6 +54,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${title} | ガイド`,
     description,
     openGraph: {
+      title: `${title} | ガイド | BONO`,
+      description,
+    },
+    twitter: {
       title: `${title} | ガイド | BONO`,
       description,
     },
@@ -90,6 +95,19 @@ export default async function GuideDetailPage({ params }: PageProps) {
     : "";
 
   return (
+    <>
+    <script
+      {...jsonLdScriptProps(
+        generateArticleJsonLd({
+          title: guide.title,
+          description: guide.description,
+          url: `/guide/${slug}`,
+          publishedAt: guide.publishedAt,
+          modifiedAt: guide.updatedAt,
+          author: guide.author,
+        })
+      )}
+    />
     <div className="min-h-screen">
       <div className="max-w-[640px] mx-auto px-4 py-12">
         {/* 戻るリンク */}
@@ -251,5 +269,6 @@ export default async function GuideDetailPage({ params }: PageProps) {
         )}
       </div>
     </div>
+    </>
   );
 }

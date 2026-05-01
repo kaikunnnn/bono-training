@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getAllRoadmaps, getAllLessons } from "@/lib/sanity";
 import TopPageClient from "@/components/top/TopPageClient";
+import { generateWebSiteJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
 export const metadata: Metadata = {
   title: "BONO - UIUXデザインを学ぶ",
@@ -45,5 +46,10 @@ export default async function IndexPage() {
     getAllLessons(),
   ]);
 
-  return <TopPageClient roadmaps={roadmaps} lessons={lessons} />;
+  return (
+    <>
+      <script {...jsonLdScriptProps(generateWebSiteJsonLd())} />
+      <TopPageClient roadmaps={roadmaps} lessons={lessons} />
+    </>
+  );
 }

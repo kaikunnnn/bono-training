@@ -55,6 +55,10 @@ export async function generateMetadata({
       description: roadmap.description,
       ...(roadmap.thumbnailUrl && { images: [{ url: roadmap.thumbnailUrl }] }),
     },
+    twitter: {
+      title: `${roadmap.title} | BONO`,
+      description: roadmap.description,
+    },
     alternates: { canonical: `/roadmap/${slug}` },
   };
 }

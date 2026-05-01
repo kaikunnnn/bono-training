@@ -25,6 +25,11 @@ export const metadata: Metadata = {
     description:
       "目標に合ったロードマップを選んで、デザインの探求をはじめよう！",
   },
+  twitter: {
+    title: "ロードマップ | BONO",
+    description:
+      "目標に合ったロードマップを選んで、デザインの探求をはじめよう！",
+  },
   alternates: { canonical: "/roadmap" },
 };
 

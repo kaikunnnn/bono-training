@@ -27,6 +27,11 @@ export async function generateMetadata({
         description: training.description,
         images: training.thumbnailImage ? [training.thumbnailImage] : undefined,
       },
+      twitter: {
+        title: `${training.title} | トレーニング | BONO`,
+        description: training.description,
+      },
+      alternates: { canonical: `/training/${trainingSlug}` },
     };
   } catch {
     return {

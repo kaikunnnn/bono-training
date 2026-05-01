@@ -11,6 +11,10 @@ export const metadata: Metadata = {
     description: "BONOをつくる30代在宅独身男性のクラフト日誌。デザイン、開発、UI/UXに関する記事をお届けします。",
     type: "website",
   },
+  twitter: {
+    title: "BONO Blog - HOPE.",
+    description: "BONOをつくる30代在宅独身男性のクラフト日誌。デザイン、開発、UI/UXに関する記事をお届けします。",
+  },
   alternates: { canonical: "/blog" },
 };
 

@@ -130,6 +130,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: `${section.label} - レッスン一覧 | BONO`,
       description: section.description,
     },
+    twitter: {
+      title: `${section.label} - レッスン一覧 | BONO`,
+      description: section.description,
+    },
+    alternates: { canonical: `/lessons/category/${categoryId}` },
   };
 }
 

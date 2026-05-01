@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getBlogPost, getLatestBlogPosts, getAllBlogSlugs, getPrevBlogPost, getNextBlogPost } from "@/lib/sanity";
 import { removeEmojiFromText } from "@/utils/blog/emojiUtils";
 import BlogDetailClient from "./BlogDetailClient";
+import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -68,11 +69,25 @@ export default async function BlogDetailPage({ params }: PageProps) {
   ]);
 
   return (
-    <BlogDetailClient
-      post={post}
-      prevPost={prevPost}
-      nextPost={nextPost}
-      latestPosts={latestPosts}
-    />
+    <>
+      <script
+        {...jsonLdScriptProps(
+          generateArticleJsonLd({
+            title: post.title,
+            description: post.description || "",
+            url: `/blog/${slug}`,
+            publishedAt: post.publishedAt,
+            author: post.author,
+            image: post.thumbnail,
+          })
+        )}
+      />
+      <BlogDetailClient
+        post={post}
+        prevPost={prevPost}
+        nextPost={nextPost}
+        latestPosts={latestPosts}
+      />
+    </>
   );
 }

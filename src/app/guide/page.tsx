@@ -14,6 +14,10 @@ export const metadata: Metadata = {
     title: "ガイド | BONO",
     description: "UIUXデザイナーのためのキャリア、学習方法、業界動向、ツールに関するガイド記事。",
   },
+  twitter: {
+    title: "ガイド | BONO",
+    description: "UIUXデザイナーのためのキャリア、学習方法、業界動向、ツールに関するガイド記事。",
+  },
   alternates: { canonical: "/guide" },
 };
 

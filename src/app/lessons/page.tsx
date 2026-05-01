@@ -16,6 +16,11 @@ export const metadata: Metadata = {
     description:
       "UIUXデザインを体系的に学べるレッスン一覧。初心者から実践レベルまで、段階的にスキルアップできるコンテンツを提供しています。",
   },
+  twitter: {
+    title: "レッスン一覧 | BONO",
+    description:
+      "UIUXデザインを体系的に学べるレッスン一覧。初心者から実践レベルまで、段階的にスキルアップできるコンテンツを提供しています。",
+  },
   alternates: { canonical: "/lessons" },
 };
 

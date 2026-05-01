@@ -23,6 +23,11 @@ export const metadata: Metadata = {
     title: "15分フィードバック申請 | BONO",
     description: "BONOの15分フィードバックサービス。あなたのデザインアウトプットに対して、具体的なフィードバックを受けられます。",
   },
+  twitter: {
+    title: "15分フィードバック申請 | BONO",
+    description: "BONOの15分フィードバックサービス。あなたのデザインアウトプットに対して、具体的なフィードバックを受けられます。",
+  },
+  alternates: { canonical: "/feedback-apply" },
 };
 
 const rules = [

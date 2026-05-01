@@ -12,6 +12,7 @@ import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
+import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -135,6 +136,18 @@ export default async function ArticlePage({ params }: PageProps) {
     : undefined;
 
   return (
+    <>
+    <script
+      {...jsonLdScriptProps(
+        generateArticleJsonLd({
+          title: article.title,
+          description: article.excerpt || `${article.title}の学習コンテンツ`,
+          url: `/articles/${slug}`,
+          publishedAt: article.publishedAt || new Date().toISOString(),
+          image: article.thumbnailUrl,
+        })
+      )}
+    />
     <ArticleDetailClient article={article}>
       {/* 閲覧履歴を記録（プレミアムでロックされていない場合のみ） */}
       {hasAccess && <ViewHistoryRecorder articleId={article._id} />}
@@ -211,5 +224,6 @@ export default async function ArticlePage({ params }: PageProps) {
         </div>
       </main>
     </ArticleDetailClient>
+    </>
   );
 }

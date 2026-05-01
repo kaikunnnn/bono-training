@@ -4,6 +4,7 @@ import { getLesson, getLessonMetadata, getAllLessonSlugs } from "@/lib/sanity";
 import { getLessonProgress } from "@/lib/services/progress";
 import { getSubscriptionStatus, isContentLocked } from "@/lib/subscription";
 import LessonDetailClient from "./LessonDetailClient";
+import { generateCourseJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -104,10 +105,22 @@ export default async function LessonPage({ params }: PageProps) {
   };
 
   return (
-    <LessonDetailClient
-      lesson={processedLesson}
-      progress={overallProgress}
-      questProgressMap={questProgressMap}
-    />
+    <>
+      <script
+        {...jsonLdScriptProps(
+          generateCourseJsonLd({
+            title: lesson.title,
+            description: lesson.description || `${lesson.title}のレッスン内容を学習できます。`,
+            url: `/lessons/${slug}`,
+            image: lesson.thumbnailUrl || lesson.iconImageUrl,
+          })
+        )}
+      />
+      <LessonDetailClient
+        lesson={processedLesson}
+        progress={overallProgress}
+        questProgressMap={questProgressMap}
+      />
+    </>
   );
 }

@@ -15,6 +15,10 @@ export const metadata: Metadata = {
     title: "フィードバック一覧 | BONO",
     description: "BONOメンバーのデザインフィードバック事例。ポートフォリオやUIデザインへの具体的なアドバイスを公開しています。",
   },
+  twitter: {
+    title: "フィードバック一覧 | BONO",
+    description: "BONOメンバーのデザインフィードバック事例。ポートフォリオやUIデザインへの具体的なアドバイスを公開しています。",
+  },
   alternates: { canonical: "/feedbacks" },
 };
 

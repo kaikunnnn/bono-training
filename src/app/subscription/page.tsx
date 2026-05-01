@@ -14,6 +14,11 @@ export const metadata: Metadata = {
     description:
       "BONOプレミアム会員になって、すべてのレッスンと記事にアクセスしよう。",
   },
+  twitter: {
+    title: "プレミアム会員 | BONO",
+    description:
+      "BONOプレミアム会員になって、すべてのレッスンと記事にアクセスしよう。",
+  },
   alternates: { canonical: "/subscription" },
 };
 

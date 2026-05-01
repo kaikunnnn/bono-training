@@ -14,6 +14,12 @@ export const metadata: Metadata = {
     description:
       "UIUXデザインに関する記事一覧。動画レッスン、チュートリアル、実践ガイドなど、デザインスキルを高めるコンテンツを提供しています。",
   },
+  twitter: {
+    title: "記事一覧 | BONO",
+    description:
+      "UIUXデザインに関する記事一覧。動画レッスン、チュートリアル、実践ガイドなど、デザインスキルを高めるコンテンツを提供しています。",
+  },
+  alternates: { canonical: "/articles" },
 };
 
 export default async function ArticlesPage() {
