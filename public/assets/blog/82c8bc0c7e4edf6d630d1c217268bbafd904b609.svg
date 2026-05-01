@@ -1,0 +1,15 @@
+<svg preserveAspectRatio="none" width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 260 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="sun.svg" clip-path="url(#clip0_22_132)">
+<path id="Vector" d="M241.859 65.418C206.192 3.63984 127.196 -17.5269 65.418 18.1407C3.63984 53.8084 -17.5269 132.804 18.1407 194.582C53.8084 256.36 132.804 277.527 194.582 241.859C256.36 206.192 277.527 127.196 241.859 65.418Z" fill="url(#paint0_linear_22_132)" fill-opacity="0.4"/>
+</g>
+<defs>
+<linearGradient id="paint0_linear_22_132" x1="236.591" y1="-160.514" x2="-71.6945" y2="34.3971" gradientUnits="userSpaceOnUse">
+<stop offset="0.0133197" stop-color="#1135B3"/>
+<stop offset="0.526863" stop-color="#EE6C6C"/>
+<stop offset="0.994495" stop-color="#FC9F7C"/>
+</linearGradient>
+<clipPath id="clip0_22_132">
+<rect width="260" height="260" fill="white"/>
+</clipPath>
+</defs>
+</svg>
