@@ -33,7 +33,7 @@ function GuideList({ category }: { category?: GuideCategory }) {
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
       {guides.map((guide) => (
         <GuideCard key={guide.slug} guide={guide} />
       ))}
@@ -71,8 +71,8 @@ export default async function GuidePage({ searchParams }: PageProps) {
       : undefined;
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7]">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
+    <div className="min-h-screen">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8">
         {/* ヘッダー */}
         <PageHeader
           label="Guide"

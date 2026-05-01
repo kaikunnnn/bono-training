@@ -90,8 +90,8 @@ export default async function GuideDetailPage({ params }: PageProps) {
     : "";
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7]">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <div className="min-h-screen">
+      <div className="max-w-[640px] mx-auto px-4 py-12">
         {/* 戻るリンク */}
         <Link
           href="/guide"
