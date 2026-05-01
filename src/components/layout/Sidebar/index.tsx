@@ -8,7 +8,7 @@ import { SidebarMenuGroup } from "./SidebarMenuGroup";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
 import { ICON_SIZE } from "./icon-utils";
-import { DirectInbox } from "iconsax-react";
+import { DirectInbox, Home2 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 
 const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
@@ -24,7 +24,8 @@ const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
 export function Sidebar({ className, user }: SidebarProps) {
   const pathname = usePathname();
 
-  const isActive = (href: string) => pathname === href;
+  const isActive = (href: string) =>
+    pathname === href || pathname?.startsWith(href + "/");
 
   const handleSignOut = async (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -56,6 +57,14 @@ export function Sidebar({ className, user }: SidebarProps) {
         )}
 
         <SidebarMenuItem
+          href="/"
+          icon={<Home2 size={ICON_SIZE} variant="Outline" />}
+          isActive={pathname === "/" || pathname === "/top"}
+        >
+          トップ
+        </SidebarMenuItem>
+
+        <SidebarMenuItem
           href="/roadmap"
           icon={<MenuIcons.roadmap size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/roadmap")}
@@ -77,6 +86,25 @@ export function Sidebar({ className, user }: SidebarProps) {
           isActive={isActive("/training")}
         >
           トレーニング
+        </SidebarMenuItem>
+
+        <SidebarMenuItem
+          href="/guide"
+          icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/guide")}
+        >
+          学習ガイド
+        </SidebarMenuItem>
+      </SidebarMenuGroup>
+
+      {/* コミュニティ - 一時的に非表示（mainと同じ） */}
+      <SidebarMenuGroup label="コミュニティ" itemGap className="hidden">
+        <SidebarMenuItem
+          href="/feedbacks"
+          icon={<MenuIcons.feedback size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/feedbacks")}
+        >
+          フィードバック
         </SidebarMenuItem>
       </SidebarMenuGroup>
 

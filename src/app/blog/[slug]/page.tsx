@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getBlogPost, getLatestBlogPosts, getAllBlogSlugs } from "@/lib/sanity";
+import { getBlogPost, getLatestBlogPosts, getAllBlogSlugs, getPrevBlogPost, getNextBlogPost } from "@/lib/sanity";
 import { removeEmojiFromText } from "@/utils/blog/emojiUtils";
 import BlogDetailClient from "./BlogDetailClient";
 
@@ -60,15 +60,18 @@ export default async function BlogDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // 最新の記事を取得（現在の記事を除外）
-  const latestPosts = await getLatestBlogPosts(4, post.id);
+  // 最新の記事と前後の記事を並列取得
+  const [latestPosts, prevPost, nextPost] = await Promise.all([
+    getLatestBlogPosts(4, post.id),
+    getPrevBlogPost(post.id),
+    getNextBlogPost(post.id),
+  ]);
 
-  // 前後の記事ナビゲーションは現在無効化されているのでnullを渡す
   return (
     <BlogDetailClient
       post={post}
-      prevPost={null}
-      nextPost={null}
+      prevPost={prevPost}
+      nextPost={nextPost}
       latestPosts={latestPosts}
     />
   );

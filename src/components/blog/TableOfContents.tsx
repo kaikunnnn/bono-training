@@ -59,7 +59,7 @@ export const TableOfContents: React.FC<TableOfContentsProps> = ({ items, classNa
   }
 
   return (
-    <Card className={cn("", className)}>
+    <Card className={cn("sticky top-24", className)}>
       <CardHeader>
         <CardTitle className="text-lg">目次</CardTitle>
       </CardHeader>

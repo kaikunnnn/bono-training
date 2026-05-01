@@ -24,8 +24,8 @@ export function Footer({ className }: FooterProps) {
             <Link href="/feedbacks" className="hover:underline">
               フィードバック
             </Link>
-            <Link href="/knowledge" className="hover:underline">
-              お役立ち
+            <Link href="/guide" className="hover:underline">
+              ガイド
             </Link>
           </div>
 

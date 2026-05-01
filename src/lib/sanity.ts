@@ -760,6 +760,42 @@ export async function getLatestBlogPosts(limit: number = 4, excludeId?: string):
 }
 
 /**
+ * 前の記事を取得（公開日が現在の記事より前の最新記事）
+ */
+export async function getPrevBlogPost(currentId: string): Promise<BlogPost | null> {
+  const current = await getClient().fetch<{ publishedAt?: string } | null>(
+    `*[_type == "blogPost" && _id == $id][0]{ publishedAt }`,
+    { id: currentId }
+  );
+  if (!current?.publishedAt) return null;
+
+  const query = `*[_type == "blogPost" && publishedAt < $publishedAt] | order(publishedAt desc)[0]{
+    _id, title, slug, publishedAt, author, description, emoji, category, tags, featured,
+    thumbnail { ..., asset-> }, thumbnailUrl
+  }`;
+  const doc = await getClient().fetch<SanityBlogPost | null>(query, { publishedAt: current.publishedAt });
+  return doc?._id ? toBlogPost(doc) : null;
+}
+
+/**
+ * 次の記事を取得（公開日が現在の記事より後の最古の記事）
+ */
+export async function getNextBlogPost(currentId: string): Promise<BlogPost | null> {
+  const current = await getClient().fetch<{ publishedAt?: string } | null>(
+    `*[_type == "blogPost" && _id == $id][0]{ publishedAt }`,
+    { id: currentId }
+  );
+  if (!current?.publishedAt) return null;
+
+  const query = `*[_type == "blogPost" && publishedAt > $publishedAt] | order(publishedAt asc)[0]{
+    _id, title, slug, publishedAt, author, description, emoji, category, tags, featured,
+    thumbnail { ..., asset-> }, thumbnailUrl
+  }`;
+  const doc = await getClient().fetch<SanityBlogPost | null>(query, { publishedAt: current.publishedAt });
+  return doc?._id ? toBlogPost(doc) : null;
+}
+
+/**
  * すべてのブログスラッグを取得（静的生成用）
  */
 export async function getAllBlogSlugs(): Promise<string[]> {
