@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { IconButton } from "@/components/ui/button/IconButton";
@@ -74,9 +74,21 @@ export default function MyPageClient({
   lessonsWithProgress,
 }: MyPageClientProps) {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabId>("all");
+  const searchParams = useSearchParams();
+  const activeTab = (searchParams.get("tab") as TabId) || "all";
   const [bookmarks, setBookmarks] = useState(initialBookmarks);
   const { toast } = useToast();
+
+  const setActiveTab = useCallback((tab: TabId) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (tab === "all") {
+      params.delete("tab");
+    } else {
+      params.set("tab", tab);
+    }
+    const query = params.toString();
+    router.replace(`/mypage${query ? `?${query}` : ""}`, { scroll: false });
+  }, [router, searchParams]);
 
   // 進捗のあるレッスン（0%のものは除外）
   const inProgressLessons = lessonsWithProgress.filter(
