@@ -4,7 +4,7 @@
  * 完了レベル検知ロジック
  * 記事完了後にクエスト完了・レッスン完了を判定する
  */
-import { getLessonProgress, markLessonAsCompleted } from '@/lib/services/progress';
+import { getLessonProgress } from '@/lib/services/progress';
 
 export type CompletionLevel = 'article' | 'quest' | 'lesson';
 
@@ -57,8 +57,8 @@ export async function detectCompletionLevel(
   if (completedInQuest.length === questArticleIds.length) {
     // クエスト内の全記事が完了
     if (progress.percentage === 100) {
-      // レッスン全体完了
-      await markLessonAsCompleted(lessonId);
+      // レッスン全体の全記事完了 → セレブレーション表示のみ
+      // レッスン完了のDB記録はMyPageで手動で行う（main準拠）
       return { level: 'lesson', lessonTitle };
     }
     // クエスト完了のみ
