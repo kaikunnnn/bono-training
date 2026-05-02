@@ -47,6 +47,13 @@ export function CompletionButton({
   const prevCompletedRef = useRef(isCompleted);
   const completionCtx = useArticleCompletionOptional();
 
+  // Context の sharedIsCompleted で他のボタンと同期
+  useEffect(() => {
+    if (completionCtx?.sharedIsCompleted !== null && completionCtx?.sharedIsCompleted !== undefined) {
+      setIsCompleted(completionCtx.sharedIsCompleted);
+    }
+  }, [completionCtx?.sharedIsCompleted]);
+
   // false→true 切り替え時に burst を発火
   useEffect(() => {
     const prev = prevCompletedRef.current;

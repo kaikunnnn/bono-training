@@ -54,14 +54,23 @@ export function SectionQuest({
 
       <div className="flex gap-3 md:gap-5 mt-[12px]">
         <div className="px-[7px] flex items-center">
-          <div
-            className="self-stretch"
-            style={{
-              borderLeft: isQuestCompleted
-                ? "1px dotted #10B981"
-                : "1px dotted #E1E1E1",
-            }}
-          />
+          {isQuestCompleted ? (
+            <div
+              className="self-stretch w-px"
+              style={{
+                background: "linear-gradient(to bottom, rgba(255,75,111,0.68), rgba(38,119,143,0.68))",
+                maskImage: "repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, black 2px, black 6px)",
+                WebkitMaskImage: "repeating-linear-gradient(to bottom, transparent 0px, transparent 2px, black 2px, black 6px)",
+              }}
+            />
+          ) : (
+            <div
+              className="self-stretch"
+              style={{
+                borderLeft: "1px dotted #E1E1E1",
+              }}
+            />
+          )}
         </div>
 
         <QuestCard

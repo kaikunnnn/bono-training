@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 // X (Twitter) アイコン
 const XIcon = ({ className }: { className?: string }) => (
@@ -35,14 +35,22 @@ export function ShareDropdown({
   children,
   align = "start",
 }: ShareDropdownProps) {
+  const { toast } = useToast();
+
   const shareUrl = url || (typeof window !== "undefined" ? window.location.href : "");
 
   const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("URLをクリップボードにコピーしました");
+      toast({
+        title: "リンクをコピーしました",
+        description: "URLをクリップボードにコピーしました",
+      });
     } catch {
-      toast.error("コピーに失敗しました");
+      toast({
+        title: "コピーに失敗しました",
+        variant: "destructive",
+      });
     }
   };
 
@@ -50,7 +58,7 @@ export function ShareDropdown({
     const tweetText = encodeURIComponent(`${title}`);
     const tweetUrl = encodeURIComponent(shareUrl);
     const xShareUrl = `https://x.com/intent/tweet?text=${tweetText}&url=${tweetUrl}`;
-    window.open(xShareUrl, "_blank", "width=600,height=400");
+    window.open(xShareUrl, "_blank");
   };
 
   return (

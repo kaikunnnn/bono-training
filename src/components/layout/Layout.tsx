@@ -9,6 +9,7 @@ import { Footer } from "./Footer";
 import Logo from "@/components/common/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { Toaster } from "@/components/ui/toaster";
 import { Menu } from "lucide-react";
 
 interface LayoutProps {
@@ -64,7 +65,12 @@ export function Layout({ children, className, user }: LayoutProps) {
   })();
 
   if (shouldSkipGlobalLayout) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <Toaster />
+      </>
+    );
   }
 
   return (
@@ -126,6 +132,7 @@ export function Layout({ children, className, user }: LayoutProps) {
         </main>
         <Footer />
       </div>
+      <Toaster />
     </div>
   );
 }

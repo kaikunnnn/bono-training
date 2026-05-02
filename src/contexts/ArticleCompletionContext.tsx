@@ -15,6 +15,8 @@ export interface ArticleCompletionContextValue {
   completedLessonTitle: string | null;
   /** セレブレーション消費後にリセット（BON-136 で使用） */
   resetCompletionLevel: () => void;
+  /** 共有される完了状態（複数ボタン同期用） */
+  sharedIsCompleted: boolean | null;
 }
 
 export const ArticleCompletionContext =

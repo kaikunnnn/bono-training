@@ -57,6 +57,9 @@ export default function ArticleDetailClient({
   // 進捗更新トリガー（インクリメントでサイドバーの再fetchを発火）
   const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
 
+  // 共有される完了状態（複数CompletionButton間の同期用）
+  const [sharedIsCompleted, setSharedIsCompleted] = useState<boolean | null>(null);
+
   // 完了レベル検知結果（BON-136 でセレブレーションに使用）
   const [completionLevel, setCompletionLevel] =
     useState<CompletionLevel | null>(null);
@@ -70,6 +73,8 @@ export default function ArticleDetailClient({
   // CompletionButton から呼ばれるコールバック
   const handleCompletionChange = useCallback(
     async (isCompleted: boolean) => {
+      // 共有完了状態を更新（複数ボタンの同期）
+      setSharedIsCompleted(isCompleted);
       // サイドバーの進捗を更新
       setProgressUpdateTrigger((prev) => prev + 1);
 
@@ -84,6 +89,9 @@ export default function ArticleDetailClient({
         setCompletionLevel(result.level);
         setCompletedQuestTitle(result.questTitle ?? null);
         setCompletedLessonTitle(result.lessonTitle ?? null);
+      } else if (isCompleted) {
+        // questInfo がない場合でも記事完了セレブレーションを発火
+        setCompletionLevel('article');
       } else {
         // 未完了に戻した場合
         setCompletionLevel(null);
@@ -135,6 +143,7 @@ export default function ArticleDetailClient({
       completedQuestTitle,
       completedLessonTitle,
       resetCompletionLevel,
+      sharedIsCompleted,
     }),
     [
       handleCompletionChange,
@@ -142,6 +151,7 @@ export default function ArticleDetailClient({
       completedQuestTitle,
       completedLessonTitle,
       resetCompletionLevel,
+      sharedIsCompleted,
     ]
   );
 

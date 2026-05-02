@@ -88,7 +88,7 @@ export async function toggleBookmark(
       return {
         success: true,
         isBookmarked: false,
-        message: "ブックマークを解除しました",
+        message: "お気に入りを解除しました",
       };
     } else {
       // ブックマークされていない → 追加
@@ -102,7 +102,7 @@ export async function toggleBookmark(
       return {
         success: true,
         isBookmarked: true,
-        message: "ブックマークに追加しました",
+        message: "お気に入りしました",
       };
     }
   } catch (error) {
