@@ -1,0 +1,325 @@
+/* =========================================================
+   BONO Design System — Colors & Type
+   Source: bono-training codebase (Tailwind config + index.css)
+   ========================================================= */
+
+/* ---------- Fonts ---------- */
+@font-face {
+  font-family: "LINE Seed JP";
+  src: url("./fonts/LINESeedJP_OTF_Th.otf") format("opentype");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINE Seed JP";
+  src: url("./fonts/LINESeedJP_OTF_Rg.otf") format("opentype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINE Seed JP";
+  src: url("./fonts/LINESeedJP_OTF_Bd.otf") format("opentype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "LINE Seed JP";
+  src: url("./fonts/LINESeedJP_OTF_Eb.otf") format("opentype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Primary product stack: M PLUS Rounded 1c for JP headings,
+   Inter for Latin body copy, Noto Sans JP fallback.
+   LINE Seed JP is provided as an alt display face (matches the
+   soft, rounded geometric quality that BONO leans on). */
+@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&family=DotGothic16&family=Luckiest+Guy&display=swap");
+
+:root {
+  /* =========================================================
+     COLOR — Foundations
+     ========================================================= */
+
+  /* Base surfaces */
+  --bg-base:           #F9F9F7;  /* Warm off-white, app background */
+  --bg-surface:        #FFFFFF;
+  --bg-surface-raised: #FFFFFF;
+  --bg-warm:           #F5EFE7;  /* Used on marketing top */
+  --bg-overlay:        rgba(5, 16, 12, 0.72);
+
+  --bg-muted:          #F2F3F0;
+  --bg-muted-strong:   #E9EAE6;
+  --bg-hover:          #F2F3F0;
+  --bg-active:         #E0E1DC;
+  --bg-disabled:       #F9FAFB;
+
+  /* Text */
+  --text-primary:   #021710;  /* near-black, cool green undertone */
+  --text-secondary: #354540;
+  --text-muted:     #677470;
+  --text-disabled:  #9AA29F;
+  --text-inverse:   #FAFBFB;
+  --text-link:      #0829BF;
+  --text-link-hover:#3306E8;
+
+  /* Semantic text */
+  --text-success: #047A53;
+  --text-warning: #9E6608;
+  --text-error:   #C42626;
+
+  /* Semantic backgrounds */
+  --bg-success: rgba(138, 204, 161, 0.12);
+  --bg-warning: rgba(255, 183, 33, 0.12);
+  --bg-error:   #FDEFF2;
+  --bg-info:    #FFFFFF;
+
+  /* Borders */
+  --border-light:   #D4D6CC;
+  --border-default: #C3C5BB;
+  --border-strong:  #A8AAA0;
+
+  /* Brand / CTA */
+  --cta-primary-bg:    #102720;  /* Deep forest green — primary buttons */
+  --cta-primary-hover: #1A3A30;
+  --training-dark:     #0D221D;  /* Footer / dark sections */
+  --training-orange:   #FF9900;  /* Training service accent */
+  --training-bg:       #FFF9F4;
+  --accent-orange:     #F95A16;
+  --label-olive:       #77850E;
+
+  /* Roadmap gradient presets — applied as hero backgrounds on each
+     /roadmaps/:slug detail page. All presets stack a translucent black
+     overlay on top of a linear gradient so text reads white. Source:
+     bono-training/src/styles/gradients.ts */
+  --grad-career-change: linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #482B4B 0%, #2A2C42 27%, #141520 100%);
+  --grad-ui-beginner:   linear-gradient(0deg, rgba(0,0,0,0.12), rgba(0,0,0,0.12)), linear-gradient(0deg, #684B4B 0%, #231C26 100%);
+  --grad-ui-visual:     linear-gradient(0deg, rgba(0,0,0,0.32), rgba(0,0,0,0.32)), linear-gradient(0deg, #304750 0%, #5D5B65 100%);
+  --grad-info-arch:     linear-gradient(0deg, rgba(0,0,0,0.42), rgba(0,0,0,0.42)), linear-gradient(0deg, #214234 0%, #8D7746 100%);
+  --grad-ux-design:     linear-gradient(0deg, rgba(0,0,0,0.52), rgba(0,0,0,0.52)), linear-gradient(0deg, #F1BAC1 0%, #E27979 12%, #764749 54%, #2F3F6D 100%);
+
+  /* Training hero gradient */
+  --training-gradient:
+    linear-gradient(180deg, #E0E5F8 0%, #FAF4F0 36.7%, transparent 100%);
+  --hero-gradient:
+    linear-gradient(252deg,
+      rgba(253, 251, 245, 0.88) 15%,
+      rgba(244, 232, 223, 1) 55%,
+      rgba(239, 237, 255, 0.08) 94%);
+
+  /* Category badge colors (from TrainingCard) */
+  --cat-uiux-career: #5E6871;
+  --cat-ux-design:   #525382;
+  --cat-info-arch:   #774000;
+  --cat-ui-visual:   #08381D;
+
+  /* Category utility tints */
+  --cat-tweet:  #1DA1F2;
+  --cat-book:   #8B5CF6;
+  --cat-bono:   #F59E0B;
+  --cat-output: #10B981;
+
+  /* Success scale */
+  --success:         #22C55E;
+  --success-light:   #86EFAC;
+  --success-dark:    #16A34A;
+  --success-bg:      #F0FDF4;
+
+  /* =========================================================
+     RADIUS — Rounded is a core visual motif
+     ========================================================= */
+  --radius-xs:  6px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  16px;
+  --radius-xl:  24px;
+  --radius-2xl: 28px;
+  --radius-3xl: 32px;
+  --radius-pill: 200px;   /* goal buttons, pill CTAs */
+  --radius-full: 9999px;
+
+  /* =========================================================
+     SHADOWS — Soft, low-opacity
+     ========================================================= */
+  --shadow-xs:    0px 1px 3px 0px rgba(0,0,0,0.04);
+  --shadow-sm:    0px 1px 12px 0px rgba(0,0,0,0.05);
+  --shadow-md:    0px 4px 20px rgba(0,0,0,0.08);            /* training-card */
+  --shadow-quest: 1px 1px 4px 0px rgba(0,0,0,0.08);         /* quest-card */
+  --shadow-card:  1px 1px 14px 0px rgba(0,0,0,0.04);        /* lesson card */
+  --shadow-lift:  0px 8px 24px 0px rgba(0,0,0,0.16);        /* hover lift */
+  --shadow-hero-icon: 1px 1px 13.56px 0px rgba(0,0,0,0.33);
+  --shadow-cta:   0px 4px 4px 0px rgba(0,0,0,0.25);
+
+  /* =========================================================
+     SPACING — 4px base
+     ========================================================= */
+  --s-1:  4px;
+  --s-2:  8px;
+  --s-3:  12px;
+  --s-4:  16px;
+  --s-5:  20px;
+  --s-6:  24px;
+  --s-8:  32px;
+  --s-10: 40px;
+  --s-12: 48px;
+  --s-16: 64px;
+  --s-20: 80px;
+
+  /* =========================================================
+     TYPOGRAPHY — Foundations
+     ========================================================= */
+  --font-rounded: "M PLUS Rounded 1c", "Hiragino Kaku Gothic ProN",
+                  "Hiragino Sans", "Meiryo", sans-serif;
+  --font-sans:    "Inter", "Noto Sans JP", "Hiragino Kaku Gothic ProN",
+                  "Hiragino Sans", system-ui, sans-serif;
+  --font-jp:      "Noto Sans JP", "Hiragino Kaku Gothic ProN",
+                  "Hiragino Sans", "Meiryo", sans-serif;
+  --font-line:    "LINE Seed JP", "M PLUS Rounded 1c", sans-serif;
+  --font-display-en: "Luckiest Guy", "M PLUS Rounded 1c", sans-serif;
+  --font-dot:     "DotGothic16", monospace;
+  --font-mono:    ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Size scale (px, product uses pixel values) */
+  --text-2xs: 10px;
+  --text-xs:  12px;
+  --text-sm:  14px;
+  --text-md:  16px;
+  --text-base:16px;
+  --text-lg:  18px;
+  --text-xl:  20px;
+  --text-2xl: 24px;
+  --text-3xl: 28px;
+  --text-4xl: 36px;
+  --text-5xl: 48px;
+  --text-6xl: 72px;
+  --text-7xl: 96px;    /* display big-title on marketing cards */
+}
+
+/* =========================================================
+   SEMANTIC TYPE STYLES
+   Mirrors the product's actual usage — rounded for JP headings,
+   Inter for Latin body / metadata.
+   ========================================================= */
+
+.ds-display, .ds-h1 {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: clamp(28px, 3.2vw, 48px);
+  line-height: 1.42;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+}
+
+.ds-h2 {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: 36px;
+  line-height: 1.4;
+  color: var(--text-primary);
+}
+
+.ds-h3 {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 1.49;
+  letter-spacing: 0.75px;
+  color: var(--text-primary);
+}
+
+.ds-h4 {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: 22px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.ds-h5 {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--text-primary);
+}
+
+.ds-body {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.68;
+  color: var(--text-secondary);
+}
+
+.ds-body-jp {
+  font-family: var(--font-jp);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}
+
+.ds-body-sm {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.ds-caption {
+  font-family: var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: var(--text-muted);
+}
+
+.ds-meta {
+  font-family: var(--font-rounded);
+  font-weight: 500;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.ds-eyebrow {
+  font-family: var(--font-rounded);
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 2.25;
+  letter-spacing: 0.06em;
+  color: var(--text-primary);
+}
+
+.ds-button {
+  font-family: var(--font-rounded);
+  font-weight: 800;       /* extrabold CTA, product hallmark */
+  font-size: 14px;
+  letter-spacing: 0.75px;
+  line-height: 1;
+}
+
+.ds-link {
+  color: var(--text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.ds-link:hover { color: var(--text-link-hover); }
+
+.ds-code {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  background: var(--bg-muted);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+/* Utility backgrounds */
+.ds-bg-training-gradient { background: var(--training-gradient); }
+.ds-bg-hero-gradient     { background: var(--hero-gradient); }
+.ds-bg-warm              { background: var(--bg-warm); }

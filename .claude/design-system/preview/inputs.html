@@ -1,0 +1,17 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><style>
+body{margin:0;background:var(--bg-base);padding:24px;font-family:var(--font-sans);display:flex;gap:14px;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:6px;width:280px}
+label{font:500 12px var(--font-sans);color:var(--text-secondary)}
+input,textarea,select{font:400 14px var(--font-sans);color:var(--text-primary);background:#fff;border:1px solid #D4D6CC;border-radius:12px;padding:12px 14px;outline:none}
+input:focus{border-color:#102720;box-shadow:0 0 0 3px rgba(16,39,32,.08)}
+.disabled{background:#F9FAFB;color:#9AA29F}
+.search{position:relative}
+.search input{padding-left:38px;border-radius:9999px;width:100%;box-sizing:border-box}
+.search svg{position:absolute;left:14px;top:50%;transform:translateY(-50%)}
+</style></head><body>
+<div class="field"><label>メール</label><input value="yuta@example.com"></div>
+<div class="field"><label>パスワード</label><input type="password" value="········"></div>
+<div class="field"><label>難易度</label><select><option>中級</option></select></div>
+<div class="field search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#677470" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg><input placeholder="レッスンを検索"></div>
+<div class="field"><label>無効</label><input class="disabled" value="ロック中" disabled></div>
+</body></html>

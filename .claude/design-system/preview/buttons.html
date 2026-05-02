@@ -1,0 +1,39 @@
+<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><style>
+body{margin:0;background:var(--bg-base);padding:24px;font-family:var(--font-sans)}
+.note{font:500 12px var(--font-sans);color:var(--text-secondary);margin-bottom:16px;max-width:720px;line-height:1.6}
+.note code{background:#EEEFEA;padding:1px 6px;border-radius:6px;font-family:var(--font-mono);font-size:11px}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:16px}
+.lbl{width:100%;font:800 11px var(--font-rounded);letter-spacing:.08em;color:var(--text-muted);text-transform:uppercase;margin-top:8px}
+button,.btn{font-family:var(--font-rounded);font-weight:700;font-size:14px;letter-spacing:.02em;border:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.4}
+
+/* Canonical token: all buttons use rounded-[14px] — matches TopPageNew CTAs and RoadmapHero CTAs */
+.primary      {background:#102720;color:#fff;height:56px;padding:0 24px;border-radius:14px;box-shadow:0px 4px 12px 0px rgba(0,0,0,.12);min-width:174px;letter-spacing:.025em}
+.primary:hover{background:#1A3A30}
+.primary-sm   {background:#081C17;color:#fff;height:48px;padding:0 20px;border-radius:14px;box-shadow:0px 4px 4px 0px rgba(0,0,0,.25)}
+.secondary    {background:transparent;color:#0F172A;height:56px;padding:0 25px;border-radius:14px;border:2px solid #0F172A;min-width:154px;letter-spacing:.025em}
+.secondary:hover{background:#0F172A;color:#fff}
+.on-dark-primary   {background:#fff;color:#081C17;height:48px;padding:0 24px;border-radius:14px;border:1px solid rgba(255,255,255,.9);box-shadow:0 4px 8px rgba(0,0,0,.25);letter-spacing:.025em}
+.on-dark-secondary {background:transparent;color:#fff;height:48px;padding:0 24px;border-radius:14px;box-shadow:inset 0 0 0 1px #fff;letter-spacing:.025em}
+
+.dark{background:#081C17;padding:20px;border-radius:18px;display:flex;gap:12px;flex-wrap:wrap;margin-top:4px}
+svg{width:16px;height:16px}
+</style></head><body>
+<div class="note">Unified on <code>border-radius: 14px</code> — the canonical CTA radius used across <code>TopPageNew.tsx</code> (primary <code>#102720</code>, outlined <code>#0F172A</code>) and the roadmap detail hero. Deprecated: the pill <code>rounded-full</code> variant from the shared <code>PrimaryButton</code> component — no longer used as the system definition.</div>
+
+<div class="lbl">Primary · 14px · h-14 (56px)</div>
+<div class="row">
+  <button class="primary">はじめ方を見る</button>
+  <button class="primary-sm">プランを見る</button>
+</div>
+
+<div class="lbl">Secondary (outlined) · 14px</div>
+<div class="row">
+  <button class="secondary">ロードマップを見る</button>
+</div>
+
+<div class="lbl">On-dark (for gradient hero backgrounds) · 14px</div>
+<div class="dark">
+  <button class="on-dark-primary">プランを見る</button>
+  <button class="on-dark-secondary">続きから始める</button>
+</div>
+</body></html>
