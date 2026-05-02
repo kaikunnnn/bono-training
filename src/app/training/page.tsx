@@ -5,8 +5,8 @@ import TrainingHero from "@/components/training/TrainingHero";
 import TrainingGrid from "@/components/training/TrainingGrid";
 import SectionHeading from "@/components/training/SectionHeading";
 import ContentWrapper from "@/components/training/ContentWrapper";
+import TrainingCardSkeleton from "@/components/training/TrainingCardSkeleton";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Training } from "@/types/training";
 
 export const metadata: Metadata = {
@@ -33,14 +33,10 @@ const CATEGORIES = {
 } as const;
 
 // ローディング用スケルトンコンポーネント
-const SkeletonGrid = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-    {[...Array(3)].map((_, i) => (
-      <div key={i} className="space-y-4">
-        <Skeleton className="h-48 w-full rounded-lg" />
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-4 w-1/2" />
-      </div>
+const SkeletonGrid = ({ count = 3 }: { count?: number }) => (
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 lg:gap-10 xl:gap-12 justify-items-start">
+    {Array.from({ length: count }).map((_, i) => (
+      <TrainingCardSkeleton key={`skeleton-${i}`} />
     ))}
   </div>
 );
@@ -130,24 +126,30 @@ async function TrainingContent() {
 export default function TrainingPage() {
   return (
     <ContentWrapper>
+      {/* Hero は即時表示 */}
       <TrainingHero />
 
       <Suspense
         fallback={
-          <div className="space-y-12">
-            <div>
-              <div className="mb-6">
-                <Skeleton className="h-8 w-64 mb-2" />
-                <Skeleton className="h-4 w-96" />
+          <div>
+            <div className="py-12">
+              <div className="mb-8">
+                <SectionHeading
+                  title="情報設計のお題"
+                  description="コースの基礎を使って、要件からユーザーに必要な情報を整理してデザインしよう！"
+                />
               </div>
-              <SkeletonGrid />
+              <SkeletonGrid count={3} />
             </div>
-            <div>
-              <div className="mb-6">
-                <Skeleton className="h-8 w-64 mb-2" />
-                <Skeleton className="h-4 w-96" />
+            <Separator />
+            <div className="py-12">
+              <div className="mb-8">
+                <SectionHeading
+                  title="UXデザイントレーニング"
+                  description="コースの基礎を使って、ユーザー心理の背景に感情を把握して課題解決しよう"
+                />
               </div>
-              <SkeletonGrid />
+              <SkeletonGrid count={2} />
             </div>
           </div>
         }

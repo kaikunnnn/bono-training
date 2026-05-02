@@ -27,12 +27,18 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
       data-name="Heading"
     >
       {/* メインタイトル */}
-      <div className="font-semibold text-2xl md:text-xl lg:text-2xl leading-[40px] text-slate-900 text-left not-italic relative shrink-0 min-w-full w-min">
+      <div
+        className="font-semibold text-2xl md:text-xl lg:text-2xl leading-[40px] text-slate-900 text-left not-italic relative shrink-0 min-w-full w-min"
+        style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
+      >
         <h2 className="block leading-[40px] font-rounded-mplus-bold">{title}</h2>
       </div>
 
       {/* 説明文 */}
-      <div className="font-medium text-[16px] leading-[20px] text-[#1d382f] text-left not-italic relative shrink-0 min-w-full w-min">
+      <div
+        className="font-medium text-[16px] leading-[20px] text-[#1d382f] text-left not-italic relative shrink-0 min-w-full w-min"
+        style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
+      >
         <p className="block mb-0">{description}</p>
         {linkText && linkHref && (
           <Link

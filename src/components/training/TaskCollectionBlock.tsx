@@ -2,7 +2,6 @@ import React from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { Task } from "@/types/training";
-import { ChevronRight } from "lucide-react";
 
 interface TaskCollectionBlockProps {
   tasks: Task[];
@@ -32,7 +31,8 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
             {/* numberoftraining セクション */}
             <div className="flex items-center gap-5 mb-[11px]">
               {/* 小さな黒い円 */}
-              <div className="w-3 h-3 rounded-full bg-gradient-to-br from-gray-400 to-gray-600" />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/dot/dot-gradation-01.svg" alt="" className="w-3 h-3" />
 
               {/* テキスト部分 */}
               <div className="flex items-center gap-2">
@@ -116,7 +116,12 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                     </div>
 
                     {/* 右矢印アイコン */}
-                    <ChevronRight className="ml-4 flex-shrink-0 w-7 h-7 md:w-8 md:h-8 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/images/arrow/arrow/primary/right.svg"
+                      alt=""
+                      className="ml-4 flex-shrink-0 w-7 h-7 md:w-8 md:h-8"
+                    />
                   </div>
                 </Link>
               </div>

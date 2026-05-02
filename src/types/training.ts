@@ -70,10 +70,14 @@ export interface TrainingDetailData {
   difficulty: string;
   tags: string[];
   tasks: Task[];
-  skills?: string[];
+  skills?: string[] | SkillData[];
   prerequisites?: string[];
   has_premium_content?: boolean;
   thumbnailImage?: string;
+  icon?: string;
+  category?: string;
+  guide?: GuideData;
+  background_svg?: string;
 }
 
 /**

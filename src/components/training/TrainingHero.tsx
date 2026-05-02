@@ -16,7 +16,7 @@ const TrainingHero = () => {
         </h1>
 
         <p className="font-medium text-[16px] text-[#475569] text-left">
-          各コースで身につけたことをアウトプットするお題を並べています
+          各コースで身につけたことをアウトプットするお題を並べています🙋
         </p>
       </div>
     </section>

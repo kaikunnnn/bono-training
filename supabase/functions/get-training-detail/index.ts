@@ -289,7 +289,10 @@ serve(async (req) => {
       skills: Array.isArray(frontmatter.skills) ? frontmatter.skills : [],
       prerequisites: Array.isArray(frontmatter.prerequisites) ? frontmatter.prerequisites : [],
       has_premium_content: tasks.some(task => task.is_premium),
-      thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100'
+      thumbnailImage: frontmatter.thumbnail || 'https://source.unsplash.com/random/200x100',
+      icon: frontmatter.icon || null,
+      category: frontmatter.category || null,
+      background_svg: frontmatter.background_svg || null,
     };
 
     const duration = Date.now() - startTime;
