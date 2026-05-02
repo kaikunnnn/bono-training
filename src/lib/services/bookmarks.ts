@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { client } from "@/lib/sanity";
+import { client as getClient } from "@/lib/sanity";
 
 // ============================================
 // 型定義
@@ -218,7 +218,7 @@ export async function getBookmarkedArticles(
       }
     } | order(_createdAt desc)`;
 
-    const articles = await client.fetch(query, { ids: bookmarkIds });
+    const articles = await getClient().fetch(query, { ids: bookmarkIds });
     return articles;
   } catch (error) {
     console.error("Get bookmarked articles error:", error);

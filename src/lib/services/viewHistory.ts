@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { client } from "@/lib/sanity";
+import { client as getClient } from "@/lib/sanity";
 
 // ============================================
 // 定数
@@ -213,7 +213,7 @@ export async function getViewHistory(
       }
     }`;
 
-    const articles: ViewedArticle[] = await client.fetch(query, {
+    const articles: ViewedArticle[] = await getClient().fetch(query, {
       ids: articleIds,
     });
 

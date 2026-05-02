@@ -18,12 +18,11 @@ function getClient(): ReturnType<typeof createClient> {
   return _client;
 }
 
-/** @deprecated getClient() を内部で使用。外部からは関数経由でアクセスしてください */
-export const client = new Proxy({} as ReturnType<typeof createClient>, {
-  get(_, prop) {
-    return (getClient() as unknown as Record<string | symbol, unknown>)[prop];
-  },
-});
+/**
+ * 遅延初期化されたSanityクライアントを取得する関数。
+ * Proxyはprivateフィールドを転送できないため関数エクスポートに変更。
+ */
+export { getClient as client };
 
 let _builder: ReturnType<typeof imageUrlBuilder> | null = null;
 

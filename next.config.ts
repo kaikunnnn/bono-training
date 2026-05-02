@@ -12,6 +12,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.sanity.io",
       },
+      {
+        protocol: "https",
+        hostname: "uploads-ssl.webflow.com",
+      },
     ],
   },
 };
