@@ -1,0 +1,373 @@
+import { useEffect, useRef, useState, useCallback } from 'react';
+import Player from '@vimeo/player';
+
+export interface TextTrack {
+  label: string;
+  language: string;
+  kind: 'captions' | 'subtitles';
+  mode: 'showing' | 'disabled';
+}
+
+export interface Chapter {
+  startTime: number;
+  title: string;
+  index: number;
+}
+
+export interface VimeoPlayerState {
+  isPlaying: boolean;
+  currentTime: number;
+  duration: number;
+  volume: number;
+  muted: boolean;
+  playbackRate: number;
+  isLoading: boolean;
+  isReady: boolean;
+  textTracks: TextTrack[];
+  activeTextTrack: TextTrack | null;
+  chapters: Chapter[];
+  currentChapter: Chapter | null;
+}
+
+export interface UseVimeoPlayerReturn {
+  containerRef: React.RefObject<HTMLDivElement | null>;
+  state: VimeoPlayerState;
+  play: () => Promise<void>;
+  pause: () => Promise<void>;
+  togglePlay: () => Promise<void>;
+  seek: (time: number) => Promise<void>;
+  setVolume: (volume: number) => Promise<void>;
+  setPlaybackRate: (rate: number) => Promise<void>;
+  toggleFullscreen: () => void;
+  enableTextTrack: (language: string) => Promise<void>;
+  disableTextTrack: () => Promise<void>;
+}
+
+export interface VimeoPlayerOptions {
+  autoPlay?: boolean;
+  muted?: boolean;
+}
+
+export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}): UseVimeoPlayerReturn {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<Player | null>(null);
+
+  const [state, setState] = useState<VimeoPlayerState>({
+    isPlaying: false,
+    currentTime: 0,
+    duration: 0,
+    volume: 1,
+    muted: options.muted ?? false,
+    playbackRate: 1,
+    isLoading: true,
+    isReady: false,
+    textTracks: [],
+    activeTextTrack: null,
+    chapters: [],
+    currentChapter: null,
+  });
+
+  // プレーヤーの初期化
+  useEffect(() => {
+    if (!containerRef.current || !vimeoId) return;
+
+    // 既存のプレーヤーをクリーンアップ
+    if (playerRef.current) {
+      playerRef.current.destroy();
+    }
+
+    // Vimeo IDを抽出（URLの場合）
+    const extractedId = extractVimeoId(vimeoId);
+
+    console.log('[VimeoPlayer] Initializing with ID:', extractedId);
+
+    const player = new Player(containerRef.current, {
+      id: parseInt(extractedId, 10),
+      controls: false,  // Vimeo標準UIを非表示（Plusプラン以上で有効）
+      responsive: true,
+      title: false,
+      byline: false,
+      portrait: false,
+      autoplay: options.autoPlay ?? false,
+      muted: options.muted ?? false,
+    });
+
+    playerRef.current = player;
+
+    // エラーイベントをキャッチ
+    player.on('error', (error: any) => {
+      console.error('[VimeoPlayer] Error:', error);
+      setState(prev => ({ ...prev, isLoading: false }));
+    });
+
+    // イベントリスナーの設定
+    player.on('loaded', async () => {
+      console.log('[VimeoPlayer] Video loaded');
+      try {
+        const duration = await player.getDuration();
+        const volume = await player.getVolume();
+        const textTracks = await player.getTextTracks();
+        console.log('[VimeoPlayer] Duration:', duration, 'Volume:', volume);
+        setState(prev => ({
+          ...prev,
+          duration,
+          volume,
+          textTracks: textTracks as TextTrack[],
+          isLoading: false,
+          isReady: true,
+        }));
+      } catch (err) {
+        console.error('[VimeoPlayer] Error getting video info:', err);
+        setState(prev => ({ ...prev, isLoading: false, isReady: true }));
+      }
+    });
+
+    // readyイベントで初期化を完了
+    player.ready().then(async () => {
+      console.log('[VimeoPlayer] Player ready');
+      try {
+        const duration = await player.getDuration();
+        const volume = await player.getVolume();
+        const textTracks = await player.getTextTracks();
+
+        // チャプター情報を取得
+        let chapters: Chapter[] = [];
+        try {
+          chapters = await player.getChapters() as Chapter[];
+          console.log('[VimeoPlayer] Chapters:', chapters);
+        } catch (chapterErr) {
+          console.log('[VimeoPlayer] No chapters available');
+        }
+
+        const muted = await player.getMuted();
+
+        // muted=false が指定されているのに実際にミュートされていれば強制解除
+        if (!options.muted && muted) {
+          await player.setMuted(false);
+        }
+
+        // volume が 0 の場合も強制的に 1 に設定（ブラウザのautoplayポリシー対策）
+        if (!options.muted && volume === 0) {
+          await player.setVolume(1);
+        }
+
+        console.log('[VimeoPlayer] Ready - Duration:', duration, 'Volume:', volume, 'Muted:', muted);
+        // 注意: isReadyが既にtrueでもchaptersは常にマージする（レースコンディション対策）
+        setState(prev => ({
+          ...prev,
+          duration: prev.duration || duration,
+          volume: prev.volume !== 1 ? prev.volume : volume,
+          muted: options.muted ? muted : false,
+          textTracks: prev.textTracks.length > 0 ? prev.textTracks : textTracks as TextTrack[],
+          chapters, // チャプターは常に更新（loadedイベントでは取得されないため）
+          isLoading: false,
+          isReady: true,
+        }));
+      } catch (err) {
+        console.error('[VimeoPlayer] Ready error getting info:', err);
+        setState(prev => ({ ...prev, isLoading: false, isReady: true }));
+      }
+    }).catch((err: any) => {
+      console.error('[VimeoPlayer] Ready error:', err);
+      setState(prev => ({ ...prev, isLoading: false }));
+    });
+
+    // イベント方式（バックアップ）
+    player.on('play', () => {
+      console.log('[VimeoPlayer] Play event fired');
+      setState(prev => ({ ...prev, isPlaying: true }));
+    });
+
+    player.on('pause', () => {
+      console.log('[VimeoPlayer] Pause event fired');
+      setState(prev => ({ ...prev, isPlaying: false }));
+    });
+
+    player.on('timeupdate', (data: { seconds: number }) => {
+      setState(prev => ({ ...prev, currentTime: data.seconds }));
+    });
+
+    // ポーリング方式（イベントが発火しない場合の対策）
+    const pollInterval = setInterval(async () => {
+      try {
+        const [currentTime, paused, volume, textTracks] = await Promise.all([
+          player.getCurrentTime(),
+          player.getPaused(),
+          player.getVolume(),
+          player.getTextTracks(),
+        ]);
+
+        // アクティブな字幕トラックを特定
+        const activeTrack = (textTracks as TextTrack[]).find(t => t.mode === 'showing') || null;
+
+        setState(prev => {
+          // 現在のチャプターを計算
+          let currentChapter: Chapter | null = null;
+          if (prev.chapters.length > 0) {
+            for (let i = prev.chapters.length - 1; i >= 0; i--) {
+              if (currentTime >= prev.chapters[i].startTime) {
+                currentChapter = prev.chapters[i];
+                break;
+              }
+            }
+          }
+
+          return {
+            ...prev,
+            currentTime,
+            volume,
+            isPlaying: !paused,
+            currentChapter,
+            activeTextTrack: activeTrack,
+          };
+        });
+      } catch (err) {
+        // プレーヤーが破棄された場合は無視
+      }
+    }, 100);
+
+    player.on('volumechange', (data: { volume: number }) => {
+      setState(prev => ({ ...prev, volume: data.volume }));
+    });
+
+    player.on('playbackratechange', (data: { playbackRate: number }) => {
+      setState(prev => ({ ...prev, playbackRate: data.playbackRate }));
+    });
+
+    player.on('bufferstart', () => {
+      setState(prev => ({ ...prev, isLoading: true }));
+    });
+
+    player.on('bufferend', () => {
+      setState(prev => ({ ...prev, isLoading: false }));
+    });
+
+    // 字幕変更イベント
+    player.on('texttrackchange', (data: any) => {
+      console.log('[VimeoPlayer] Text track changed:', data);
+      if (data.label && data.language) {
+        setState(prev => ({
+          ...prev,
+          activeTextTrack: {
+            label: data.label,
+            language: data.language,
+            kind: data.kind,
+            mode: 'showing',
+          },
+        }));
+      } else {
+        setState(prev => ({ ...prev, activeTextTrack: null }));
+      }
+    });
+
+    return () => {
+      clearInterval(pollInterval);
+      player.destroy();
+      playerRef.current = null;
+    };
+  }, [vimeoId]);
+
+  const play = useCallback(async () => {
+    if (playerRef.current) {
+      await playerRef.current.play();
+    }
+  }, []);
+
+  const pause = useCallback(async () => {
+    if (playerRef.current) {
+      await playerRef.current.pause();
+    }
+  }, []);
+
+  const togglePlay = useCallback(async () => {
+    if (playerRef.current) {
+      const paused = await playerRef.current.getPaused();
+      console.log('[VimeoPlayer] togglePlay called, paused:', paused);
+      if (paused) {
+        await playerRef.current.play();
+      } else {
+        await playerRef.current.pause();
+      }
+    }
+  }, []);
+
+  const seek = useCallback(async (time: number) => {
+    if (playerRef.current) {
+      await playerRef.current.setCurrentTime(time);
+    }
+  }, []);
+
+  const setVolume = useCallback(async (volume: number) => {
+    if (playerRef.current) {
+      await playerRef.current.setVolume(volume);
+      // 音量変更時にmuted状態も更新
+      // Vimeo PlayerのsetVolumeは自動的にミュートを解除する
+      setState(prev => ({ ...prev, muted: volume === 0 }));
+    }
+  }, []);
+
+  const setPlaybackRate = useCallback(async (rate: number) => {
+    if (playerRef.current) {
+      // 即座にUIを更新（optimistic update）
+      setState(prev => ({ ...prev, playbackRate: rate }));
+      await playerRef.current.setPlaybackRate(rate);
+    }
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    if (containerRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        containerRef.current.requestFullscreen();
+      }
+    }
+  }, []);
+
+  // 字幕を有効化
+  const enableTextTrack = useCallback(async (language: string) => {
+    if (playerRef.current) {
+      try {
+        const track = await playerRef.current.enableTextTrack(language);
+        console.log('[VimeoPlayer] Enabled text track:', track);
+      } catch (err) {
+        console.error('[VimeoPlayer] Enable text track error:', err);
+      }
+    }
+  }, []);
+
+  // 字幕を無効化
+  const disableTextTrack = useCallback(async () => {
+    if (playerRef.current) {
+      try {
+        await playerRef.current.disableTextTrack();
+        setState(prev => ({ ...prev, activeTextTrack: null }));
+      } catch (err) {
+        console.error('[VimeoPlayer] Disable text track error:', err);
+      }
+    }
+  }, []);
+
+  return {
+    containerRef,
+    state,
+    play,
+    pause,
+    togglePlay,
+    seek,
+    setVolume,
+    setPlaybackRate,
+    toggleFullscreen,
+    enableTextTrack,
+    disableTextTrack,
+  };
+}
+
+// Vimeo URLからIDを抽出するヘルパー
+function extractVimeoId(url: string): string {
+  if (/^\d+$/.test(url)) {
+    return url;
+  }
+  const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
+  return match ? match[1] : url;
+}

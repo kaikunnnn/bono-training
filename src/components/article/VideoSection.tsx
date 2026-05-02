@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { urlFor } from "@/lib/sanity";
 import PremiumVideoLock from "@/components/premium/PremiumVideoLock";
+import { CustomVimeoPlayer } from "@/components/video";
 
 interface VideoSectionProps {
   videoUrl?: string | null | { url?: string; metadata?: unknown };
@@ -20,6 +21,8 @@ interface VideoSectionProps {
   onPlay?: () => void;
   /** 動画終了時のコールバック */
   onEnded?: () => void;
+  /** 動画進捗コールバック（25%/50%/75%到達時） */
+  onProgress?: (percent: number) => void;
 }
 
 /**
@@ -29,6 +32,7 @@ interface VideoSectionProps {
  *
  * 仕様:
  * - YouTubeとVimeoの両方に対応
+ * - Vimeoはカスタムプレーヤー（CustomVimeoPlayer）を使用
  * - width に従って縦も16:9に従って伸びる
  * - URLから自動判定して適切な埋め込みを表示
  * - 動画がない場合、サムネイル画像があれば表示
@@ -42,6 +46,9 @@ const VideoSection = ({
   hasAccess = true,
   isLoggedIn = false,
   autoPlay = false,
+  onPlay,
+  onEnded,
+  onProgress,
 }: VideoSectionProps) => {
   // プレミアムコンテンツで未契約の場合、ロック表示
   if (isPremium && !hasAccess) {
@@ -112,23 +119,19 @@ const VideoSection = ({
     return null;
   }
 
-  // Vimeoの場合
+  // Vimeoの場合はカスタムプレーヤーを使用
   if (videoInfo.platform === "vimeo") {
-    // muted=0 を明示することでデフォルトのミュートを解除する
-    const vimeoParams = autoPlay ? "?autoplay=1&muted=1" : "?muted=0";
     return (
       <div className="w-full">
         <div className="w-full bg-black rounded-2xl shadow-[0px_1px_24px_0px_rgba(0,0,0,0.17)] overflow-hidden">
-          <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-            <iframe
-              src={`https://player.vimeo.com/video/${videoInfo.id}${vimeoParams}`}
-              className="absolute top-0 left-0 w-full h-full"
-              frameBorder="0"
-              allow="autoplay; fullscreen; picture-in-picture"
-              allowFullScreen
-              title="Vimeo video player"
-            />
-          </div>
+          <CustomVimeoPlayer
+            vimeoId={videoInfo.id}
+            autoPlay={autoPlay}
+            muted={false}
+            onPlay={onPlay}
+            onEnded={onEnded}
+            onProgress={onProgress}
+          />
         </div>
       </div>
     );
