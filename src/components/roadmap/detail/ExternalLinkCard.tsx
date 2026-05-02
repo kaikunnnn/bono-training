@@ -53,7 +53,7 @@ export default function ExternalLinkCard({ link }: ExternalLinkCardProps) {
       <div className="flex-1 min-w-0 space-y-3">
         {/* ラベル + タイトル */}
         <div className="space-y-1">
-          <p className="text-[10px] font-bold text-text-gray">
+          <p className="text-[10px] font-bold text-text-muted">
             {isExternal ? "外部リンク" : "リンク"}
           </p>
           <h5 className="text-base font-bold text-[#1a1a1a] leading-[1.4] group-hover:text-primary transition-colors">

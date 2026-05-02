@@ -44,7 +44,7 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
       <div className="flex-1 min-w-0 space-y-5">
         {/* ラベル + タイトル */}
         <div className="space-y-1">
-          <p className="text-[10px] font-bold text-text-gray">レッスン</p>
+          <p className="text-[10px] font-bold text-text-muted">レッスン</p>
           <h5 className="text-base font-bold text-[#1a1a1a] leading-[1.4] group-hover:text-primary transition-colors">
             {content.title}
           </h5>

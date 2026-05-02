@@ -37,13 +37,13 @@ export default function CurriculumStep({
         <div className="flex-shrink-0 w-[75px] bg-white rounded-2xl shadow-[0_1px_5px_rgba(0,0,0,0.08)] overflow-hidden self-start">
           {/* グラデーションヘッダー */}
           <div className="bg-gradient-to-r from-[#b2b3d9] via-[#e2ccd1] to-[#f1e8dc] px-2 py-1.5 rounded-t-2xl">
-            <p className="text-[8px] font-bold text-text-black text-center">
+            <p className="text-[8px] font-bold text-text-primary text-center">
               ステップ
             </p>
           </div>
           {/* 番号 */}
           <div className="px-2 py-2">
-            <p className="text-[27px] font-bold text-text-black text-center font-['Unbounded',sans-serif] leading-none">
+            <p className="text-[27px] font-bold text-text-primary text-center font-['Unbounded',sans-serif] leading-none">
               {formattedNumber}
             </p>
           </div>
@@ -52,7 +52,7 @@ export default function CurriculumStep({
         {/* タイトルとゴール */}
         <div className="flex-1">
           {/* ステップタイトル */}
-          <h3 className="text-lg md:text-xl font-bold text-text-black mb-3 leading-[1.6]">
+          <h3 className="text-lg md:text-xl font-bold text-text-primary mb-3 leading-[1.6]">
             {step.title}
           </h3>
 
@@ -61,8 +61,8 @@ export default function CurriculumStep({
             <div className="flex flex-col md:flex-row md:items-start gap-2 md:gap-4">
               {/* ゴールバッジ */}
               <div className="flex-shrink-0 flex items-center gap-1 bg-[rgba(138,138,138,0.1)] rounded-lg px-3 py-1.5 self-start">
-                <Target className="w-3 h-3 text-text-black" />
-                <span className="text-xs font-bold text-text-black">
+                <Target className="w-3 h-3 text-text-primary" />
+                <span className="text-xs font-bold text-text-primary">
                   ゴール
                 </span>
               </div>
@@ -72,7 +72,7 @@ export default function CurriculumStep({
                 {step.goals.map((goal, index) => (
                   <li
                     key={index}
-                    className="text-sm md:text-base text-text-black leading-[1.8] list-disc ml-6"
+                    className="text-sm md:text-base text-text-primary leading-[1.8] list-disc ml-6"
                   >
                     {goal}
                   </li>

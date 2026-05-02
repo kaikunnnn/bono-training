@@ -62,19 +62,19 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
                     type="button"
                     onClick={() => scrollToStep(index + 1)}
                     aria-label={`ステップ${index + 1}「${step.title}」へ移動`}
-                    className="flex items-center gap-4 w-full text-left group p-5 rounded-xl hover:bg-gray-50 transition-colors duration-200"
+                    className="flex items-center gap-4 w-full text-left group p-5 rounded-xl hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
                   >
                     {/* ステップ番号バッジ */}
                     <div className="flex-shrink-0 w-[50px] h-[43px] bg-white rounded-xl shadow-[0_1px_5px_rgba(0,0,0,0.08)] overflow-hidden">
                       {/* 薄いグレーヘッダー（ホバー時グラデーション） */}
                       <div className="bg-gray-100 group-hover:bg-gradient-to-r group-hover:from-[#b2b3d9] group-hover:via-[#e2ccd1] group-hover:to-[#f1e8dc] px-1.5 py-1.5 rounded-t-xl transition-all">
-                        <p className="text-[6px] font-bold text-text-black text-center leading-[9px]">
+                        <p className="text-[6px] font-bold text-text-primary text-center leading-[9px]">
                           ステップ
                         </p>
                       </div>
                       {/* 番号 */}
                       <div className="flex items-center justify-center h-[26px]">
-                        <p className="text-[14px] font-bold text-text-black text-center font-['Unbounded',sans-serif] leading-[18px]">
+                        <p className="text-[14px] font-bold text-text-primary text-center font-['Unbounded',sans-serif] leading-[18px]">
                           {stepNumber}
                         </p>
                       </div>
@@ -83,7 +83,7 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
                     {/* テキスト */}
                     <div className="flex-1 min-w-0">
                       {/* タイトル */}
-                      <h3 className="text-[16px] font-bold text-text-black leading-[24px] group-hover:text-gray-700 transition-colors">
+                      <h3 className="text-[16px] font-bold text-text-primary leading-[24px] group-hover:text-gray-700 transition-colors">
                         {step.title}
                       </h3>
                     </div>

@@ -16,7 +16,6 @@ import { ArrowUpRight } from 'lucide-react';
 
 // BONOロゴSVGのパス
 const BONO_LOGO = '/assets/blog/d6495cc76015bd725cb662d469f2c31129d53e32.svg';
-const BONO_MAIN_SITE = 'https://bo-no.design';
 
 interface BlogHeaderProps {
   /** 追加のカスタムクラス名 */
@@ -75,16 +74,14 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
           </div>
         </Link>
 
-        {/* 右側: 本サイトリンク */}
-        <a
-          href={BONO_MAIN_SITE}
-          target="_blank"
-          rel="noopener noreferrer"
+        {/* 右側: ページトップへスクロール */}
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <span>BONOへ</span>
           <ArrowUpRight size={14} />
-        </a>
+        </button>
       </div>
     </header>
   );

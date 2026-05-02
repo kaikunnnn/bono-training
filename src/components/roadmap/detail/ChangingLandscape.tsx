@@ -55,7 +55,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
           {data.items.map((item, index) => (
             <div
               key={index}
-              className="group bg-white hover:bg-gray-50 border-l-4 border-[#d3d3d3] flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 pl-6 md:pl-9 pr-6 md:pr-8 py-6 md:py-4 rounded-br-lg rounded-tr-lg transition-colors duration-200 cursor-pointer"
+              className="bg-white border-l-4 border-[#d3d3d3] flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 pl-6 md:pl-9 pr-6 md:pr-8 py-6 md:py-4 rounded-br-lg rounded-tr-lg"
             >
               {/* 左側: アイコン + 課題テキスト */}
               <div className="flex items-center gap-3 shrink-0 w-full md:w-[425px]">
@@ -75,7 +75,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
               </div>
 
               {/* 中央: 矢印アイコン（デスクトップのみ） */}
-              <div className="hidden md:flex shrink-0 w-8 h-8 items-center justify-center transition-transform duration-500 group-hover:rotate-[360deg]">
+              <div className="hidden md:flex shrink-0 w-8 h-8 items-center justify-center">
                 <ArrowRight2 size={32} color="#939993" variant="Linear" />
               </div>
 

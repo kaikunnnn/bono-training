@@ -336,8 +336,7 @@ function MySection({
         </h2>
         <button
           onClick={onViewAll}
-          className="text-xs font-medium"
-          style={{ color: "rgba(2, 8, 23, 0.64)" }}
+          className="text-xs font-medium text-[rgba(2,8,23,0.64)] transition-colors hover:text-blue-600"
         >
           すべてみる
         </button>

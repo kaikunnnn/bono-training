@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { Loader2 } from "lucide-react";
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
@@ -30,9 +31,9 @@ export function LoadingSpinner({
     <div
       className={cn("flex flex-col items-center justify-center gap-3", className)}
     >
-      <div
+      <Loader2
         className={cn(
-          "animate-spin rounded-full border-2 border-gray-200 border-t-gray-600",
+          "animate-spin text-gray-600",
           sizeClasses[size]
         )}
       />

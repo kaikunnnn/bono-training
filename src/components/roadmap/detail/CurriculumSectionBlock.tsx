@@ -30,21 +30,21 @@ export default function CurriculumSectionBlock({
       <div className="space-y-2">
         {/* セクションバッジ */}
         <div className="inline-flex items-center px-2 py-0.5 border border-text-black rounded-full">
-          <span className="text-[10px] font-bold text-text-black">
+          <span className="text-[10px] font-bold text-text-primary">
             {startsWithSection ? sectionTitle : `セクション`}
           </span>
         </div>
 
         {/* セクションタイトル */}
         {sectionTitle && !startsWithSection && (
-          <h4 className="text-lg font-bold text-text-black leading-[1.4] px-1.5">
+          <h4 className="text-lg font-bold text-text-primary leading-[1.4] px-1.5">
             {sectionTitle}
           </h4>
         )}
 
         {/* セクション説明 */}
         {section.description && (
-          <p className="text-base text-text-gray leading-[1.6]">
+          <p className="text-base text-text-muted leading-[1.6]">
             {section.description}
           </p>
         )}
