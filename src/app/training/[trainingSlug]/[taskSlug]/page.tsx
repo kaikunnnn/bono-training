@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getTrainingTaskDetail } from "@/lib/services/training";
-import TrainingLayout from "@/components/training/TrainingLayout";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -51,8 +50,7 @@ export default async function TaskDetailPage({ params }: PageProps) {
   }
 
   return (
-    <TrainingLayout>
-      <div className="box-border content-stretch flex flex-col items-start justify-start p-0 relative size-full">
+    <div className="box-border content-stretch flex flex-col items-start justify-start p-0 relative size-full">
         {/* Navigation Header */}
         <div className="w-full border-b border-gray-200 bg-white">
           <div className="max-w-4xl mx-auto px-4 py-4">
@@ -168,6 +166,5 @@ export default async function TaskDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
-    </TrainingLayout>
   );
 }

@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { getTrainings } from "@/lib/services/training";
-import TrainingLayout from "@/components/training/TrainingLayout";
 import TrainingHero from "@/components/training/TrainingHero";
 import TrainingGrid from "@/components/training/TrainingGrid";
 import SectionHeading from "@/components/training/SectionHeading";
@@ -121,33 +120,31 @@ async function TrainingContent() {
 
 export default function TrainingPage() {
   return (
-    <TrainingLayout>
-      <ContentWrapper>
-        <TrainingHero />
+    <ContentWrapper>
+      <TrainingHero />
 
-        <Suspense
-          fallback={
-            <div className="space-y-12">
-              <div>
-                <div className="mb-6">
-                  <Skeleton className="h-8 w-64 mb-2" />
-                  <Skeleton className="h-4 w-96" />
-                </div>
-                <SkeletonGrid />
+      <Suspense
+        fallback={
+          <div className="space-y-12">
+            <div>
+              <div className="mb-6">
+                <Skeleton className="h-8 w-64 mb-2" />
+                <Skeleton className="h-4 w-96" />
               </div>
-              <div>
-                <div className="mb-6">
-                  <Skeleton className="h-8 w-64 mb-2" />
-                  <Skeleton className="h-4 w-96" />
-                </div>
-                <SkeletonGrid />
-              </div>
+              <SkeletonGrid />
             </div>
-          }
-        >
-          <TrainingContent />
-        </Suspense>
-      </ContentWrapper>
-    </TrainingLayout>
+            <div>
+              <div className="mb-6">
+                <Skeleton className="h-8 w-64 mb-2" />
+                <Skeleton className="h-4 w-96" />
+              </div>
+              <SkeletonGrid />
+            </div>
+          </div>
+        }
+      >
+        <TrainingContent />
+      </Suspense>
+    </ContentWrapper>
   );
 }

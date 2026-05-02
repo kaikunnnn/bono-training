@@ -2,7 +2,6 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getTrainingDetail } from "@/lib/services/training";
-import TrainingLayout from "@/components/training/TrainingLayout";
 import ContentWrapper from "@/components/training/ContentWrapper";
 import TaskCollectionBlock from "@/components/training/TaskCollectionBlock";
 import { Button } from "@/components/ui/button";
@@ -62,7 +61,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
   const firstTask = sortedTasks[0];
 
   return (
-    <TrainingLayout noPaddingTop={true}>
+    <>
       {/* Eyecatch セクション */}
       <div
         className="box-border content-stretch flex flex-col items-center justify-start pb-[120px] pt-24 px-0 relative w-full mb-8 border-b border-slate-200"
@@ -144,6 +143,6 @@ export default async function TrainingDetailPage({ params }: PageProps) {
           />
         </div>
       </ContentWrapper>
-    </TrainingLayout>
+    </>
   );
 }
