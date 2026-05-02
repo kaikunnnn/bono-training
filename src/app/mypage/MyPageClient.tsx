@@ -585,8 +585,9 @@ function CompletedLessonCard({
           >
             {lesson.title}
           </h4>
-          <span className="text-sm font-semibold text-[#EC4899]">
-            ✓ 完了
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 rounded-full px-2 py-0.5">
+            <svg className="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0Zm3.78 5.22a.75.75 0 0 0-1.06 0L7 8.94 5.28 7.22a.75.75 0 1 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.06 0l4.25-4.25a.75.75 0 0 0 0-1.06Z" /></svg>
+            完了
           </span>
         </div>
       </div>

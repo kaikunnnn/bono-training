@@ -25,6 +25,7 @@ import {
 } from "@/lib/prorationCalculator";
 import { getPlanDisplayName } from "@/lib/subscription-utils";
 import { getPlanPrices, type PlanPrices } from "@/lib/services/pricing";
+import { trackPlanChange } from "@/lib/analytics";
 import type { PlanType } from "@/types/subscription";
 
 export type ModalState = "confirm" | "processing" | "error";
@@ -91,6 +92,17 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
     }
     fetchPrices();
   }, []);
+
+  // 確定ボタン押下時: GA4イベント送信 + コールバック
+  const handleConfirm = () => {
+    trackPlanChange({
+      fromPlan: currentPlan.type,
+      fromDuration: currentPlan.duration,
+      toPlan: newPlan.type,
+      toDuration: newPlan.duration,
+    });
+    onConfirm();
+  };
 
   // ローディング中は何も表示しない
   if (loading || !planPrices) {
@@ -291,7 +303,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
           <Button variant="outline" onClick={onCancel}>
             キャンセル
           </Button>
-          <Button onClick={onConfirm}>プラン変更を確定</Button>
+          <Button onClick={handleConfirm}>プラン変更を確定</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

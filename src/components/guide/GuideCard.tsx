@@ -1,71 +1,72 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Lock, Clock, Briefcase, BookOpen, TrendingUp, Wrench } from "lucide-react";
+import { getCategoryInfo } from "@/lib/guideCategories";
 import type { Guide } from "@/types/guide";
-
-const categoryIcons: Record<string, typeof Briefcase> = {
-  career: Briefcase,
-  learning: BookOpen,
-  industry: TrendingUp,
-  tools: Wrench,
-};
-
-const categoryColors: Record<string, string> = {
-  career: "bg-blue-100 text-blue-700",
-  learning: "bg-green-100 text-green-700",
-  industry: "bg-purple-100 text-purple-700",
-  tools: "bg-orange-100 text-orange-700",
-};
 
 interface GuideCardProps {
   guide: Guide;
 }
 
+/**
+ * ガイドカードメディア部分
+ * サムネイル画像がある場合はそれを表示、ない場合はグラデーションプレースホルダー
+ * ※ リスト表示では動画埋め込みではなくサムネイルを表示する
+ */
+function GuideCardMedia({ title, thumbnail }: { title: string; thumbnail?: string }) {
+  return (
+    <div className="w-full aspect-video rounded-3xl overflow-hidden bg-muted">
+      {thumbnail ? (
+        <img
+          src={thumbnail}
+          alt={title}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+          loading="lazy"
+        />
+      ) : (
+        <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#e6e6ef] via-[#ede9f5] to-[#faf2ed]">
+          <span className="text-[10px] font-bold tracking-[0.2em] text-foreground/30 uppercase">
+            Guide Article
+          </span>
+          <p className="text-[13px] font-bold text-foreground/50 text-center px-6 line-clamp-2 leading-snug">
+            {title}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function GuideCard({ guide }: GuideCardProps) {
-  const Icon = categoryIcons[guide.category] || BookOpen;
-  const colorClass = categoryColors[guide.category] || "bg-gray-100 text-gray-700";
+  const categoryInfo = getCategoryInfo(guide.category);
 
   return (
-    <Link href={`/guide/${guide.slug}`}>
-      <Card className="group h-full hover:shadow-lg transition-all duration-300 border-gray-100">
-        <CardContent className="p-5">
-          {/* カテゴリとプレミアムバッジ */}
-          <div className="flex items-center justify-between mb-3">
-            <Badge variant="secondary" className={colorClass}>
-              <Icon className="w-3 h-3 mr-1" />
-              {guide.category}
-            </Badge>
-            {guide.isPremium && (
-              <Badge variant="outline" className="text-amber-600 border-amber-300">
-                <Lock className="w-3 h-3 mr-1" />
-                Premium
-              </Badge>
-            )}
-          </div>
+    <Link href={`/guide/${guide.slug}`} className="group flex flex-col gap-5">
+      <GuideCardMedia title={guide.title} thumbnail={guide.thumbnail} />
 
-          {/* タイトル */}
-          <h3 className="font-bold text-gray-900 mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-            {guide.title}
-          </h3>
+      <div className="flex flex-col gap-3">
+        <h3 className="text-lg font-bold text-foreground leading-snug line-clamp-2 text-balance group-hover:opacity-70 transition-opacity duration-200">
+          {guide.title}
+        </h3>
 
-          {/* 説明 */}
-          <p className="text-sm text-gray-600 line-clamp-2 mb-3">
-            {guide.description}
-          </p>
+        <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+          {guide.description}
+        </p>
 
-          {/* メタ情報 */}
-          <div className="flex items-center gap-3 text-xs text-gray-500">
-            <span className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {guide.readingTime}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
+              <span className="text-[8px] font-bold text-muted-foreground">
+                {guide.author.charAt(0)}
+              </span>
+            </div>
+            <span className="text-[13px] font-medium text-foreground">
+              {guide.author}
             </span>
-            {guide.tags.length > 0 && (
-              <span className="truncate">{guide.tags[0]}</span>
-            )}
           </div>
-        </CardContent>
-      </Card>
+          <span className="text-[13px] text-muted-foreground">
+            {categoryInfo?.label ?? guide.category}
+          </span>
+        </div>
+      </div>
     </Link>
   );
 }
