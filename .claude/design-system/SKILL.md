@@ -147,7 +147,21 @@ UI kit files in `ui_kits/` are written as plain JSX. When copying into the app:
 
 ### Tailwind config
 
-`tailwind.config.ts` must reference CSS variables, not literals:
+#### Tailwind v4 (current — `@theme inline` in globals.css)
+
+```css
+/* good — reference the design-system variable */
+@theme inline {
+  --color-text-primary: var(--text-primary);
+}
+
+/* bad — hard-coded hex bypasses the design system */
+@theme inline {
+  --color-text-primary: #021710;
+}
+```
+
+#### Tailwind v3 (legacy — `tailwind.config.ts`)
 
 ```ts
 // good

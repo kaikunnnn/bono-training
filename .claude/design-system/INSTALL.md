@@ -104,6 +104,30 @@ After this, **delete the `@font-face` and Google `@import` lines from `colors_an
 
 ## 3. Tailwind config
 
+### Tailwind v4 (Next.js App Router — current)
+
+Tailwind v4 uses `@theme inline` in `globals.css` instead of `tailwind.config.ts`. Reference design-system tokens via `var()`:
+
+```css
+@theme inline {
+  /* Colors — reference colors_and_type.css variables */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-surface: var(--bg-surface);
+  --color-warm: var(--bg-warm);
+  --color-cta-primary-bg: var(--btn-primary-bg);
+
+  /* Fonts — reference next/font CSS variables */
+  --font-rounded-mplus: var(--font-mplus-rounded-var), 'M PLUS Rounded 1c', sans-serif;
+  --font-display: var(--font-line-seed-jp), 'LINE Seed JP', sans-serif;
+  --font-noto-sans-jp: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
+}
+```
+
+This generates utility classes like `text-text-primary`, `bg-surface`, `font-display` etc.
+
+### Tailwind v3 (legacy Vite app — `tailwind.config.ts`)
+
 Replace `tailwind.config.ts` color/font/radius/shadow values with CSS-variable references.
 
 ```ts

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import {
   Geist,
   Geist_Mono,
@@ -62,6 +63,17 @@ const luckiestGuy = Luckiest_Guy({
   display: "swap",
 });
 
+const lineSeedJP = localFont({
+  src: [
+    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Th.otf", weight: "300", style: "normal" },
+    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Rg.otf", weight: "400", style: "normal" },
+    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Bd.otf", weight: "700", style: "normal" },
+    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Eb.otf", weight: "800", style: "normal" },
+  ],
+  variable: "--font-line-seed-jp",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design"
@@ -105,7 +117,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
         <LayoutWrapper>{children}</LayoutWrapper>

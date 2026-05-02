@@ -43,6 +43,16 @@ npm run lint      # ESLint
 npm test          # Vitest
 ```
 
+## デザインシステム
+
+UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/SKILL.md` を読むこと**。色・タイポ・角丸・影・コンポーネントの正規ルールはそこに定義されている。
+
+要点:
+- 全てのcolor/type/radius/shadow値は `.claude/design-system/colors_and_type.css` で定義されたCSS変数を参照する
+- JSXに生hex/rgbを書かない。トークンが存在する場合は `bg-[#102720]` ではなく `bg-btn-primary` を使う
+- `next/link`, `next/image`, `next/font` を使う
+- `ui_kits/marketing-top/` と `ui_kits/training/` を参照してから新UIを書く
+
 ## ルール（詳細は .claude/rules/ 参照）
 
 - `01-nextjs-architecture.md` — Server/Client境界・レイアウト（最重要）

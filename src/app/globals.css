@@ -1,7 +1,5 @@
-/* Google Fonts は next/font/google でセルフホスト化済み（layout.tsx）
- * CSS @import は使わない — レンダーブロッキングになるため
- * 新しいフォント追加時は layout.tsx に next/font で定義すること
- */
+/* BONO Design System — single source of truth for all tokens */
+@import "../../.claude/design-system/colors_and_type.css";
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -32,6 +30,8 @@
   --font-dot: 'DotGothic16', monospace;
   --font-geist: var(--font-inter-var), Inter, sans-serif;
   --font-luckiest: var(--font-luckiest-var), 'Luckiest Guy', sans-serif;
+  --font-line-seed-jp: var(--font-line-seed-jp), 'LINE Seed JP', sans-serif;
+  --font-display: var(--font-line-seed-jp), 'LINE Seed JP', sans-serif;
 
   /* Sidebar - these use oklch values, keep as-is */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -87,42 +87,42 @@
   --color-training-gradient-middle: hsl(var(--training-gradient-middle));
   --color-training-gradient-end: hsl(var(--training-gradient-end));
 
-  /* テキストカラートークン（Figma定義）
-   * 直接色値を指定: var()参照だとTailwind v4のopacity modifier(/80等)が機能しないため */
-  --color-text-primary: #021710;
-  --color-text-secondary: #354540;
-  --color-text-muted: #677470;
-  --color-text-disabled: #9AA29F;
-  --color-text-link: #0829BF;
-  --color-text-link-hover: #3306E8;
-  --color-text-success: #047A53;
-  --color-text-warning: #9E6608;
-  --color-text-error: #C42626;
-  --color-text-inverse: #FAFBFB;
+  /* テキストカラートークン — colors_and_type.css がsource of truth
+   * Tailwind v4: var()参照でもopacity modifierは動作する（:rootでhex確定済み） */
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-text-disabled: var(--text-disabled);
+  --color-text-link: var(--text-link);
+  --color-text-link-hover: var(--text-link-hover);
+  --color-text-success: var(--text-success);
+  --color-text-warning: var(--text-warning);
+  --color-text-error: var(--text-error);
+  --color-text-inverse: var(--text-inverse);
 
-  /* 背景カラートークン（Figma定義） */
-  --color-surface: #FFFFFF;
-  --color-surface-raised: #FFFFFF;
-  --color-overlay: rgba(5, 16, 12, 0.72);
-  --color-muted-custom: #F2F3F0;
-  --color-muted-strong: #E9EAE6;
-  --color-hover: #F2F3F0;
-  --color-active: #E0E1DC;
-  --color-disabled: #F9FAFB;
-  --color-success-feedback: rgba(138, 204, 161, 0.12);
-  --color-warning-feedback: rgba(255, 183, 33, 0.12);
-  --color-error-feedback: #FDEFF2;
-  --color-info-feedback: #FFFFFF;
-  --color-warm: #f5efe7;
-  --color-cta-primary-bg: #102720;
-  --color-cta-primary-hover: #1a3a30;
-  --color-accent-orange: #F95A16;
-  --color-label-olive: #77850e;
+  /* 背景カラートークン — colors_and_type.css がsource of truth */
+  --color-surface: var(--bg-surface);
+  --color-surface-raised: var(--bg-surface-raised);
+  --color-overlay: var(--bg-overlay);
+  --color-muted-custom: var(--bg-muted);
+  --color-muted-strong: var(--bg-muted-strong);
+  --color-hover: var(--bg-hover);
+  --color-active: var(--bg-active);
+  --color-disabled: var(--bg-disabled);
+  --color-success-feedback: var(--bg-success);
+  --color-warning-feedback: var(--bg-warning);
+  --color-error-feedback: var(--bg-error);
+  --color-info-feedback: var(--bg-info);
+  --color-warm: var(--bg-warm);
+  --color-cta-primary-bg: var(--btn-primary-bg);
+  --color-cta-primary-hover: var(--btn-primary-bg-hover);
+  --color-accent-orange: var(--accent-orange);
+  --color-label-olive: var(--label-olive);
 
-  /* ボーダーカラートークン（Figma定義） */
-  --color-border-light: #D4D6CC;
-  --color-border-default: #C3C5BB;
-  --color-border-strong: #A8AAA0;
+  /* ボーダーカラートークン — colors_and_type.css がsource of truth */
+  --color-border-light: var(--border-light);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
 
   /* Lesson colors */
   --color-lesson-hero-gradient-start: rgba(253, 251, 245, 0.88);
