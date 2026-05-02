@@ -46,9 +46,9 @@ interface CategoryNavProps {
  *
  * <CategoryNav
  *   items={[
- *     { label: "すべて", href: "/roadmaps" },
- *     { label: "転職したい", href: "/roadmaps/career", icon: Rocket, count: 2 },
- *     { label: "UXを学ぶ", href: "/roadmaps/ux", icon: Target },
+ *     { label: "すべて", href: "/roadmap" },
+ *     { label: "転職したい", href: "/roadmap/career", icon: Rocket, count: 2 },
+ *     { label: "UXを学ぶ", href: "/roadmap/ux", icon: Target },
  *   ]}
  * />
  * ```

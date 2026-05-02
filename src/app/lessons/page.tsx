@@ -222,7 +222,7 @@ export default async function LessonsPage() {
   // const progressMap = await getMultipleLessonProgress(lessonsForProgress);
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7]">
+    <div className="min-h-screen">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
         <PageHeader
           label="テーマ別に鍛えよう"
@@ -232,7 +232,7 @@ export default async function LessonsPage() {
 
         {/* セクションナビゲーション */}
         {activeSections.length > 0 && (
-          <div className="sticky top-16 z-10 bg-[#F9F9F7] pt-4 mb-8 border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
+          <div className="sticky top-16 z-10 bg-base pt-4 mb-8 border-b border-gray-200 -mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto">
             <div className="flex flex-nowrap gap-6 min-w-max sm:min-w-0 px-2">
               {/* すべてタブ */}
               <span className="pb-3 text-sm font-bold transition-colors whitespace-nowrap border-b-2 border-black text-black">

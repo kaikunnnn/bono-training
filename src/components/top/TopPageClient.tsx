@@ -436,7 +436,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
               <CTAButtonPrimary href="https://www.bo-no.design/plan" external>
                 メンバーになってはじめる
               </CTAButtonPrimary>
-              <CTAButtonSecondary href="/roadmaps">
+              <CTAButtonSecondary href="/roadmap">
                 ロードマップへ
               </CTAButtonSecondary>
             </motion.div>

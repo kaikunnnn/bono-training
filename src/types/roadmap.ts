@@ -41,7 +41,7 @@ export interface Roadmap {
   benefits: RoadmapBenefit[];
   /** ステップ一覧 */
   steps: RoadmapStep[];
-  /** 「詳しく知る」リンク先（例: "/roadmaps/career-change/about"） */
+  /** 「詳しく知る」リンク先（例: "/roadmap/career-change/about"） */
   aboutPageUrl?: string;
   /** 関連するガイド記事のスラッグ（例: "skills-requirements"） */
   relatedGuideSlug?: string;

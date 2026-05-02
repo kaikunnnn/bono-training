@@ -77,7 +77,7 @@ export default async function FeedbacksPage({ searchParams }: PageProps) {
   const categorySlug = params.category;
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7]">
+    <div className="min-h-screen">
       <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-8">
         {/* ヘッダー */}
         <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-8">

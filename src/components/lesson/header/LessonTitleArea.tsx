@@ -63,7 +63,7 @@ export function LessonTitleArea({
               {lesson.linkedRoadmaps.map((roadmap, index) => (
                 <span key={roadmap.slug} className="flex items-center gap-1">
                   <Link
-                    href={`/roadmaps/${roadmap.slug}`}
+                    href={`/roadmap/${roadmap.slug}`}
                     className="underline hover:text-[rgba(13,34,29,0.7)] transition-colors"
                   >
                     {roadmap.shortTitle || roadmap.title}

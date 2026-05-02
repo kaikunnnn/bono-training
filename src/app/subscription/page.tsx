@@ -56,7 +56,7 @@ export default async function SubscriptionPage() {
   const subscription = await getSubscriptionStatus();
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen">
       {/* ヒーローセクション */}
       <section className="bg-gradient-to-b from-background to-muted/30 border-b">
         <div className="container px-4 py-16 sm:px-8 text-center">

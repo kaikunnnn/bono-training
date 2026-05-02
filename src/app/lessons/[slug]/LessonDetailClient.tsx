@@ -81,7 +81,7 @@ export default function LessonDetailClient({
   );
 
   return (
-    <div className="min-h-screen bg-base">
+    <div className="min-h-screen">
       <LessonHeaderLayout
         lesson={lesson}
         progress={progress}

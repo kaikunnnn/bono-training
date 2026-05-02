@@ -146,7 +146,7 @@ export default function RoadmapHero({
         <div className="relative flex items-center justify-between px-8 pt-10 pb-5">
           <div className="flex items-center gap-8">
             {/* 戻るボタン（共通コンポーネント） */}
-            <BackButton href="/roadmaps" />
+            <BackButton href="/roadmap" />
 
             {/* パンくずリスト */}
             <nav className="text-[12px] font-bold text-white/60">

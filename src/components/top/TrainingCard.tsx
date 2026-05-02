@@ -29,7 +29,7 @@ export default function TrainingCard({ data }: TrainingCardProps) {
 
   return (
     <Link
-      href={`/roadmaps/${data.roadmapSlug}`}
+      href={`/roadmap/${data.roadmapSlug}`}
       className="
         group
         relative

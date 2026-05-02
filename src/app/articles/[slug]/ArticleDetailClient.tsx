@@ -197,7 +197,7 @@ export default function ArticleDetailClient({
 
   return (
     <ArticleCompletionContext.Provider value={completionContextValue}>
-      <div className="min-h-screen bg-base">
+      <div className="min-h-screen">
         {/* モバイルメニューボタン（スマホのみ表示） */}
         <div className="fixed top-4 left-4 z-30 md:hidden">
           <MobileMenuButton

@@ -192,7 +192,7 @@ export default function TopHeroSection({
           <CTAButton href="https://www.bo-no.design/plan" external>
             はじめ方を見る
           </CTAButton>
-          <CTAButton href="/roadmaps" variant="secondary">
+          <CTAButton href="/roadmap" variant="secondary">
             ロードマップを見る
           </CTAButton>
         </div>

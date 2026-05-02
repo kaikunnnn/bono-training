@@ -47,7 +47,7 @@ export default async function ArticlesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className="min-h-screen">
       {/* ヘッダーセクション */}
       <section className="bg-background border-b">
         <div className="container px-4 py-12 sm:px-8">

@@ -90,7 +90,7 @@ export default async function FeedbackApplyPage() {
     subscription.planType === "feedback";
 
   return (
-    <div className="min-h-screen bg-[#F9F9F7]">
+    <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* ヘッダー */}
         <div className="text-center mb-12">

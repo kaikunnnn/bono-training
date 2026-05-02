@@ -103,7 +103,7 @@ export default function MyPageClient({
   };
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen">
       {/* ヘッダー */}
       <div className="pt-10 pb-0 px-4 max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-6">

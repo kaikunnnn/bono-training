@@ -53,6 +53,27 @@ npm test          # Vitest
 - `06-development-workflow.md` — 環境・ビルド・デプロイ
 - `07-performance.md` — フォント・画像・バンドルサイズ最適化
 
+## 移植ルール（最重要）
+
+mainブランチ（`/Users/kaitakumi/Documents/bono-training`）のコードを移植する際の必須ルール。
+**独自に書き直すことは禁止。コピーして最小限のNext.js適応のみ行う。**
+
+### 移植前チェック
+1. mainの対応ファイルを必ず先に読む（`Read` で確認）
+2. コンポーネント構造・CSS クラス・inline style をそのままコピー
+3. Next.js 固有の変更のみ適用（`"use client"`, `Link`, `Image`, Server Component化 等）
+
+### 移植時の禁止事項
+- **CSSクラスの独自定義禁止**: mainに存在しないクラス名（`text-text-primary`, `bg-surface` 等）を作らない。mainのクラスをそのまま使う
+- **ロジックの簡略化禁止**: mainの入れ子構造やフィルタリングロジックを平坦化しない
+- **スタイルの再実装禁止**: mainで使っている `font-rounded-mplus`, `SectionHeading`, `DottedDivider` 等のコンポーネント/スタイルを手書きで置き換えない
+
+### 移植後チェック（コミット前に必ず実施）
+1. **URL照合**: 全ての `href`, `Link`, `redirect` が `src/app/` のディレクトリ構成と一致しているか確認
+2. **アセット照合**: 参照している画像・フォントが `/public/` に存在するか確認
+3. **色・フォント突合**: 見出し・本文の色・フォントがmainのコンポーネントと一致しているか確認
+4. **mainとの目視比較**: ブラウザでmain（本番）と並べて表示を比較
+
 ## 禁止事項
 
 - Linear イシューなしで作業開始しない
