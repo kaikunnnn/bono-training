@@ -11,6 +11,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 
 // BONOロゴSVGのパス
@@ -69,7 +70,7 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
           </span>
           <span className="text-gray-300">|</span>
           <div className="flex items-center gap-[3px] mt-[2px]">
-            <img src={BONO_LOGO} alt="BONO" className="w-[48px] h-[14px]" />
+            <Image src={BONO_LOGO} alt="BONO" width={48} height={14} />
             <span className="text-xs text-gray-600 font-semibold leading-3">ブログ</span>
           </div>
         </Link>

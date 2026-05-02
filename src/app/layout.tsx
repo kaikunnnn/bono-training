@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import {
+  Geist,
+  Geist_Mono,
+  Noto_Sans_JP,
+  M_PLUS_Rounded_1c,
+  Inter,
+  Hind,
+  Luckiest_Guy,
+} from "next/font/google";
 import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
@@ -17,6 +25,41 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const notoSansJp = Noto_Sans_JP({
+  variable: "--font-noto-sans-jp-var",
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  display: "swap",
+});
+
+const mplusRounded = M_PLUS_Rounded_1c({
+  variable: "--font-mplus-rounded-var",
+  subsets: ["latin"],
+  weight: ["400", "500", "700", "800"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter-var",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const hind = Hind({
+  variable: "--font-hind-var",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const luckiestGuy = Luckiest_Guy({
+  variable: "--font-luckiest-var",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -62,7 +105,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} antialiased`}
       >
         <GoogleAnalytics />
         <LayoutWrapper>{children}</LayoutWrapper>

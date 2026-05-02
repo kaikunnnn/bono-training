@@ -436,7 +436,7 @@ function ProgressLessonCard({
           <div style={{ display: "flex", gap: "16px", alignItems: "center", flex: "1 1 0", minWidth: 0 }}>
             {/* アイコン */}
             <div style={{ width: 48, height: 73, borderTopRightRadius: 8, borderBottomRightRadius: 8, position: "relative", flexShrink: 0, overflow: "hidden", backgroundColor: "#F5F5F5" }}>
-              <img src={iconImageUrl} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }} />
+              <Image src={iconImageUrl} alt="" fill style={{ objectFit: "cover", pointerEvents: "none" }} />
             </div>
 
             {/* テキスト + プログレスバー */}

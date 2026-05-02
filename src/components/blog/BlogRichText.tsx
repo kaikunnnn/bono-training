@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { PortableTextBlock } from '@portabletext/types'
 import { PortableText, type PortableTextComponents } from '@portabletext/react'
+import Image from 'next/image'
 import { LinkCard } from '@/components/blog/LinkCard'
 import { fetchOgpForUrl, type OgpData } from '@/lib/services/ogp'
 import TableOfContents from '@/components/article/TableOfContents'
@@ -152,13 +153,13 @@ export function BlogRichText({
           if (caption) {
             return (
               <figure>
-                <img src={url} alt={alt} loading="lazy" />
+                <Image src={url} alt={alt} width={0} height={0} sizes="100vw" style={{ width: "100%", height: "auto" }} loading="lazy" />
                 <figcaption>{caption}</figcaption>
               </figure>
             )
           }
 
-          return <img src={url} alt={alt} loading="lazy" />
+          return <Image src={url} alt={alt} width={0} height={0} sizes="100vw" style={{ width: "100%", height: "auto" }} loading="lazy" />
         },
         // 目次ブロック（本文内に配置可能、見出しから自動生成）
         tableOfContents: ({ value }) => {

@@ -1,10 +1,7 @@
-/* Google Fonts - must be at the top */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Display:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Luckiest+Guy&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&display=swap');
+/* Google Fonts は next/font/google でセルフホスト化済み（layout.tsx）
+ * CSS @import は使わない — レンダーブロッキングになるため
+ * 新しいフォント追加時は layout.tsx に next/font で定義すること
+ */
 
 @import "tailwindcss";
 @import "tw-animate-css";
@@ -25,15 +22,16 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-futura: Futura, sans-serif;
-  --font-inter: Inter, sans-serif;
-  --font-noto-sans: 'Noto Sans', sans-serif;
-  --font-noto-sans-jp: 'Noto Sans JP', 'Noto Sans', sans-serif;
-  --font-noto: 'Noto Sans JP', sans-serif;
-  --font-hind: Hind, sans-serif;
-  --font-rounded-mplus: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  /* next/font CSS変数（layout.tsxで設定）をフォールバック付きで参照 */
+  --font-inter: var(--font-inter-var), Inter, sans-serif;
+  --font-noto-sans: var(--font-noto-sans-jp-var), 'Noto Sans', sans-serif;
+  --font-noto-sans-jp: var(--font-noto-sans-jp-var), 'Noto Sans JP', 'Noto Sans', sans-serif;
+  --font-noto: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
+  --font-hind: var(--font-hind-var), Hind, sans-serif;
+  --font-rounded-mplus: var(--font-mplus-rounded-var), 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
   --font-dot: 'DotGothic16', monospace;
-  --font-geist: Inter, sans-serif;
-  --font-luckiest: 'Luckiest Guy', sans-serif;
+  --font-geist: var(--font-inter-var), Inter, sans-serif;
+  --font-luckiest: var(--font-luckiest-var), 'Luckiest Guy', sans-serif;
 
   /* Sidebar - these use oklch values, keep as-is */
   --color-sidebar-ring: var(--sidebar-ring);

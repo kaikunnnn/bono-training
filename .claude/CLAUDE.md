@@ -51,6 +51,7 @@ npm test          # Vitest
 - `04-billing-patterns.md` — 課金の3段階フォールバック
 - `05-file-conventions.md` — ファイル配置・命名
 - `06-development-workflow.md` — 環境・ビルド・デプロイ
+- `07-performance.md` — フォント・画像・バンドルサイズ最適化
 
 ## 禁止事項
 
