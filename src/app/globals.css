@@ -31,7 +31,7 @@
   --font-geist: var(--font-inter-var), Inter, sans-serif;
   --font-luckiest: var(--font-luckiest-var), 'Luckiest Guy', sans-serif;
   --font-line-seed-jp: var(--font-line-seed-jp), 'LINE Seed JP', sans-serif;
-  --font-display: var(--font-line-seed-jp), 'LINE Seed JP', sans-serif;
+  --font-display: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
 
   /* Sidebar - these use oklch values, keep as-is */
   --color-sidebar-ring: var(--sidebar-ring);
