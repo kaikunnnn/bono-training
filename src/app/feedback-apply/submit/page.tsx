@@ -1,3 +1,11 @@
+/**
+ * 15分フィードバック 応募フォームページ
+ *
+ * mainブランチの /src/pages/feedback-apply/submit.tsx を移植
+ * - Server Component でデータ取得 + アクセスチェック
+ * - Client Component (FeedbackSubmitForm) にデータを渡す
+ */
+
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSubscriptionStatus, getCurrentUser } from "@/lib/subscription";
@@ -5,8 +13,11 @@ import { getAllLessons } from "@/lib/sanity";
 import { FeedbackSubmitForm } from "@/components/feedback/FeedbackSubmitForm";
 
 export const metadata: Metadata = {
-  title: "フィードバック申請フォーム",
-  description: "15分フィードバックの申請フォーム",
+  title: "15分フィードバック 応募",
+  description: "コンテンツの学びをシェアしてフィードバックを受けよう",
+  openGraph: {
+    images: ["/assets/feedback/og-image.png"],
+  },
 };
 
 export default async function FeedbackSubmitPage() {
