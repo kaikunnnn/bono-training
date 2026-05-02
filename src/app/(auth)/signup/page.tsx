@@ -73,7 +73,7 @@ export default function SignupPage() {
 
   return (
     <div className="container max-w-md mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6 font-noto-sans-jp">
+      <h1 className="text-2xl font-bold mb-6 font-noto-sans-jp text-text-primary">
         新規登録
       </h1>
 

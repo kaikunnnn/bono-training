@@ -44,7 +44,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
     <article
       className={cn(
         'bg-white flex flex-col p-3 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[24px] md:rounded-[29px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]',
-        'cursor-pointer transform transition-all duration-200',
+        'cursor-pointer transform transition-[transform,box-shadow] duration-200 will-change-transform',
         'hover:-translate-y-1 hover:scale-[1.01] hover:shadow-[0px_4px_18px_0px_rgba(0,0,0,0.16)]',
         'w-full h-full text-[#0d221d] opacity-100',
         className

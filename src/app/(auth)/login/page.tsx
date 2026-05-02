@@ -126,7 +126,7 @@ function LoginForm() {
   return (
     <div className="container max-w-md mx-auto py-10">
       {/* ページタイトル */}
-      <h1 className="text-2xl font-bold mb-6 font-noto-sans-jp">
+      <h1 className="text-2xl font-bold mb-6 font-noto-sans-jp text-text-primary">
         ログイン
       </h1>
 

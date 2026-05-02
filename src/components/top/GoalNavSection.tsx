@@ -51,7 +51,7 @@ function GoalNavPill({
         "h-[64px] sm:h-[72px] lg:h-[86px]",
         "px-5 sm:px-6 lg:px-8 py-1",
         "bg-white border border-black/45 rounded-full",
-        "transition-all duration-200",
+        "transition-[transform,box-shadow,border-color] duration-200 will-change-transform",
         "hover:border-black/60 hover:shadow-md hover:scale-[1.01]",
         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-text-primary/20"
       )}

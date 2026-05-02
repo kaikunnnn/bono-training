@@ -58,17 +58,17 @@ export default async function SubscriptionPage() {
   return (
     <div className="min-h-screen">
       {/* ヒーローセクション */}
-      <section className="bg-gradient-to-b from-background to-muted/30 border-b">
+      <section>
         <div className="container px-4 py-16 sm:px-8 text-center">
           <Badge variant="secondary" className="mb-4">
             プレミアム会員
           </Badge>
-          <h1 className="text-4xl font-bold mb-4">
+          <h1 className="text-4xl font-bold mb-4 text-text-primary">
             UIUXデザインを
             <br className="sm:hidden" />
             本格的に学ぶ
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-text-secondary max-w-2xl mx-auto">
             プレミアム会員になると、すべてのレッスンと記事にアクセスできます。
             体系的なカリキュラムで、効率的にスキルアップしましょう。
           </p>
@@ -85,7 +85,7 @@ export default async function SubscriptionPage() {
                   <p className="text-sm text-muted-foreground mb-1">
                     現在のプラン
                   </p>
-                  <p className="text-2xl font-bold">
+                  <p className="text-2xl font-bold text-text-primary">
                     {getPlanLabel(subscription.planType)}
                   </p>
                   {subscription.renewalDate && (
@@ -120,7 +120,7 @@ export default async function SubscriptionPage() {
 
       {/* FAQ */}
       <section className="container px-4 py-12 sm:px-8">
-        <h2 className="text-2xl font-bold text-center mb-8">よくある質問</h2>
+        <h2 className="text-2xl font-bold text-center mb-8 text-text-primary">よくある質問</h2>
         <div className="max-w-2xl mx-auto space-y-4">
           {[
             {

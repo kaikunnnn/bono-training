@@ -83,6 +83,15 @@ const CategorySection = ({
 async function TrainingContent() {
   const trainings = await getTrainings();
 
+  // データが取得できなかった場合の空状態表示
+  if (!trainings || trainings.length === 0) {
+    return (
+      <div className="py-16 text-center text-gray-500">
+        <p className="text-lg">トレーニングコンテンツを読み込み中です。しばらくしてからもう一度お試しください。</p>
+      </div>
+    );
+  }
+
   // カテゴリ別グループ化
   const groupedTrainings = {
     [CATEGORIES.INFO_DESIGN]: trainings.filter(

@@ -58,7 +58,7 @@ export function Sidebar({ className, user }: SidebarProps) {
 
         <SidebarMenuItem
           href="/"
-          icon={<Home2 size={ICON_SIZE} variant="Outline" />}
+          icon={<Home2 size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={pathname === "/" || pathname === "/top"}
         >
           トップ
@@ -143,7 +143,7 @@ export function Sidebar({ className, user }: SidebarProps) {
       <div className="mt-auto pt-4 px-[15px] w-full">
         <Button variant="outline" size="sm" className="w-full gap-1 text-xs" asChild>
           <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
-            <DirectInbox size={14} />
+            <DirectInbox size={14} color="currentColor" />
             意見箱
           </a>
         </Button>

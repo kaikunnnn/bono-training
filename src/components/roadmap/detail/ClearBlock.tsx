@@ -141,6 +141,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
               >
                 <Cup
                   size={20}
+                  color="currentColor"
                   variant={celebrated ? "Bold" : "Outline"}
                 />
                 {celebrated ? "おめでとう！" : "クリアをお祝いする！"}
@@ -174,7 +175,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         </p>
                         <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#52674e] group-hover:text-[#3d4d3a] transition-colors">
                           ポートフォリオガイドを見る
-                          <ArrowRight size={16} />
+                          <ArrowRight size={16} color="currentColor" />
                         </span>
                       </div>
                     </div>
@@ -200,7 +201,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         </p>
                         <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#667eea] group-hover:text-[#5468d4] transition-colors">
                           転職ガイドを見る
-                          <ArrowRight size={16} />
+                          <ArrowRight size={16} color="currentColor" />
                         </span>
                       </div>
                     </div>
@@ -230,7 +231,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                           className="inline-flex items-center gap-2 text-[14px] font-bold text-[#52674e] hover:text-[#3d4d3a] transition-colors"
                         >
                           noteで書く
-                          <ArrowRight size={16} />
+                          <ArrowRight size={16} color="currentColor" />
                         </a>
                       </div>
                     </div>
@@ -255,7 +256,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         </p>
                         <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#667eea] group-hover:text-[#5468d4] transition-colors">
                           フィードバックに申し込む
-                          <ArrowRight size={16} />
+                          <ArrowRight size={16} color="currentColor" />
                         </span>
                       </div>
                     </div>

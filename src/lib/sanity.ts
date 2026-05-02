@@ -803,6 +803,54 @@ export async function getAllBlogSlugs(): Promise<string[]> {
 }
 
 // ============================================
+// Training 関連のクエリ（Server Components用）
+// ============================================
+
+export interface SanityTrainingListItem {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  type: string;
+  difficulty: string;
+  category: string;
+  tags: string[];
+  isPremium: boolean;
+  iconImageUrl: string;
+  thumbnailUrl: string;
+  backgroundSvg: string;
+  estimatedTotalTime: string;
+  task_count: number;
+}
+
+/**
+ * トレーニング一覧を取得（Sanityから直接）
+ * Edge Function のフォールバックとして使用
+ */
+export async function getTrainingListFromSanity(): Promise<SanityTrainingListItem[]> {
+  const query = `
+    *[_type == "training"] | order(orderIndex asc) {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      "type": trainingType,
+      difficulty,
+      "category": category->title,
+      tags,
+      isPremium,
+      orderIndex,
+      iconImageUrl,
+      thumbnailUrl,
+      backgroundSvg,
+      estimatedTotalTime,
+      "task_count": count(tasks)
+    }
+  `;
+  return getClient().fetch<SanityTrainingListItem[]>(query);
+}
+
+// ============================================
 // Roadmap 関連のクエリ（Server Components用）
 // ============================================
 

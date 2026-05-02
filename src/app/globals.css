@@ -388,7 +388,10 @@
   }
 
   body {
-    @apply text-foreground;
+    /* Figma text-primary token: #021710
+     * Direct hex value ensures dark text regardless of CSS variable resolution.
+     * Replaces @apply text-foreground which relied on hsl(var(--foreground)). */
+    color: #021710;
     background-color: #F9F9F7;
     font-feature-settings: "rlig" 1, "calt" 1;
   }

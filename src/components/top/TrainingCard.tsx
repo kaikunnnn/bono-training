@@ -42,10 +42,11 @@ export default function TrainingCard({ data }: TrainingCardProps) {
         overflow-hidden
         hover:scale-[1.05]
         hover:shadow-[0px_8px_24px_0px_rgba(0,0,0,0.16)]
+        will-change-transform
       "
       style={{
         background: data.backgroundGradient || data.backgroundColor,
-        transition: 'all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
       }}
     >
       {/* 左上ラベル - カテゴリ */}

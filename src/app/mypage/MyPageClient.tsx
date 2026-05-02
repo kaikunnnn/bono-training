@@ -56,14 +56,13 @@ interface MyPageClientProps {
 
 // --- Tabs ---
 
-type TabId = "all" | "progress" | "favorite" | "history" | "questions";
+type TabId = "all" | "progress" | "favorite" | "history";
 
 const TABS: { id: TabId; label: string }[] = [
   { id: "all", label: "すべて" },
   { id: "progress", label: "進捗" },
   { id: "favorite", label: "お気に入り" },
   { id: "history", label: "閲覧履歴" },
-  { id: "questions", label: "あなたの質問" },
 ];
 
 // --- Main Component ---
@@ -76,7 +75,8 @@ export default function MyPageClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const activeTab = (searchParams.get("tab") as TabId) || "all";
-  const [bookmarks, setBookmarks] = useState(initialBookmarks);
+  const [bookmarks] = useState(initialBookmarks);
+  const [unbookmarkedIds, setUnbookmarkedIds] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   const setActiveTab = useCallback((tab: TabId) => {
@@ -87,7 +87,7 @@ export default function MyPageClient({
       params.set("tab", tab);
     }
     const query = params.toString();
-    router.replace(`/mypage${query ? `?${query}` : ""}`, { scroll: false });
+    router.push(`/mypage${query ? `?${query}` : ""}`, { scroll: false });
   }, [router, searchParams]);
 
   // 進捗のあるレッスン（0%のものは除外）
@@ -99,10 +99,25 @@ export default function MyPageClient({
   );
 
   const handleRemoveBookmark = async (articleId: string, isPremium?: boolean) => {
+    const isCurrentlyUnbookmarked = unbookmarkedIds.has(articleId);
     const result = await toggleBookmark(articleId, isPremium || false);
-    if (result.success && !result.isBookmarked) {
-      setBookmarks((prev) => prev.filter((b) => b._id !== articleId));
-      toast({ title: "ブックマークを解除しました" });
+    if (result.success) {
+      setUnbookmarkedIds((prev) => {
+        const next = new Set(prev);
+        if (isCurrentlyUnbookmarked) {
+          // Re-bookmarked: remove from unbookmarked set
+          next.delete(articleId);
+        } else {
+          // Unbookmarked: add to unbookmarked set
+          next.add(articleId);
+        }
+        return next;
+      });
+      toast({
+        title: isCurrentlyUnbookmarked
+          ? "ブックマークに追加しました"
+          : "ブックマークを解除しました",
+      });
     }
   };
 
@@ -188,6 +203,7 @@ export default function MyPageClient({
                   key={article._id}
                   article={article}
                   onRemove={handleRemoveBookmark}
+                  isUnbookmarked={unbookmarkedIds.has(article._id)}
                 />
               ))}
             </MySection>
@@ -257,6 +273,7 @@ export default function MyPageClient({
                     key={article._id}
                     article={article}
                     onRemove={handleRemoveBookmark}
+                    isUnbookmarked={unbookmarkedIds.has(article._id)}
                   />
                 ))}
               </div>
@@ -279,13 +296,6 @@ export default function MyPageClient({
           </>
         )}
 
-        {/* === 質問タブ === */}
-        {activeTab === "questions" && (
-          <EmptyState
-            message="質問を投稿するとこちらに表示されます"
-            link="/lessons"
-          />
-        )}
       </div>
     </div>
   );
@@ -588,9 +598,11 @@ function CompletedLessonCard({
 function BookmarkItem({
   article,
   onRemove,
+  isUnbookmarked,
 }: {
   article: BookmarkedArticle;
   onRemove: (id: string, isPremium?: boolean) => void;
+  isUnbookmarked?: boolean;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const thumbnailUrl = article.resolvedThumbnailUrl || "/placeholder-thumbnail.svg";
@@ -656,7 +668,7 @@ function BookmarkItem({
       <div
         role="button"
         tabIndex={0}
-        aria-label="お気に入りを解除"
+        aria-label={isUnbookmarked ? "お気に入りに追加" : "お気に入りを解除"}
         onClick={() => onRemove(article._id, article.isPremium)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -669,8 +681,8 @@ function BookmarkItem({
       >
         <Star
           style={{ width: 20, height: 20, transition: "all 0.2s ease" }}
-          fill="#FFC107"
-          stroke="#FFC107"
+          fill={isUnbookmarked ? "none" : "#FFC107"}
+          stroke={isUnbookmarked ? "#9CA3AF" : "#FFC107"}
           strokeWidth={1.5}
         />
         {/* ツールチップ */}
@@ -684,7 +696,7 @@ function BookmarkItem({
             transition: "opacity 0.2s ease",
           }}
         >
-          解除
+          {isUnbookmarked ? "追加" : "解除"}
         </div>
       </div>
     </div>

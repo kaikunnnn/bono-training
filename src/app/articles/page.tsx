@@ -49,9 +49,9 @@ export default async function ArticlesPage() {
   return (
     <div className="min-h-screen">
       {/* ヘッダーセクション */}
-      <section className="bg-background border-b">
+      <section>
         <div className="container px-4 py-12 sm:px-8">
-          <h1 className="text-3xl font-bold mb-4">記事一覧</h1>
+          <h1 className="text-3xl font-bold mb-4 text-text-primary">記事一覧</h1>
           <p className="text-muted-foreground max-w-2xl">
             UIUXデザインに関する記事。動画レッスン、チュートリアル、実践ガイドなど、
             デザインスキルを高めるコンテンツを用意しています。
@@ -74,7 +74,7 @@ export default async function ArticlesPage() {
               <div key={key}>
                 {/* レッスンタイトル */}
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold">{group.title}</h2>
+                  <h2 className="text-xl font-semibold text-text-primary">{group.title}</h2>
                   {group.slug && (
                     <Link
                       href={`/lessons/${group.slug}`}
@@ -151,7 +151,7 @@ function ArticleCard({ article }: { article: ArticleListItem }) {
 
             {/* コンテンツ */}
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm leading-tight group-hover:text-primary transition-colors line-clamp-2 mb-1">
+              <h3 className="font-medium text-sm leading-tight text-text-primary group-hover:text-primary transition-colors line-clamp-2 mb-1">
                 {article.title}
               </h3>
 

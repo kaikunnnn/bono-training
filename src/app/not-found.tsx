@@ -7,7 +7,7 @@ export default function NotFound() {
     <div className="min-h-[70vh] flex items-center justify-center">
       <div className="text-center px-4">
         <h1 className="text-8xl font-bold text-muted-foreground/30 mb-4">404</h1>
-        <h2 className="text-2xl font-semibold mb-2">
+        <h2 className="text-2xl font-semibold mb-2 text-text-primary">
           ページが見つかりません
         </h2>
         <p className="text-muted-foreground mb-8 max-w-md mx-auto">
