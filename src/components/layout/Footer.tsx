@@ -24,9 +24,10 @@ export function Footer({ className }: FooterProps) {
             <Link href="/feedbacks" className="hover:underline">
               フィードバック
             </Link>
-            <Link href="/guide" className="hover:underline">
+            {/* BON-116で別ブランチ開発中のため一時非表示 */}
+            {/* <Link href="/guide" className="hover:underline">
               ガイド
-            </Link>
+            </Link> */}
           </div>
 
           {/* サービス */}

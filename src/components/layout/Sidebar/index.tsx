@@ -88,13 +88,14 @@ export function Sidebar({ className, user }: SidebarProps) {
           トレーニング
         </SidebarMenuItem>
 
-        <SidebarMenuItem
+        {/* BON-116で別ブランチ開発中のため一時非表示 */}
+        {/* <SidebarMenuItem
           href="/guide"
           icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/guide")}
         >
           学習ガイド
-        </SidebarMenuItem>
+        </SidebarMenuItem> */}
       </SidebarMenuGroup>
 
       {/* コミュニティ - 一時的に非表示（mainと同じ） */}

@@ -243,7 +243,7 @@ const CAREER_CONTENT_CARDS: ContentCardProps[] = [
     fallbackEmoji: '💬',
   },
   {
-    href: 'https://note.com/design_school/m/m5f641069767f',
+    href: 'https://note.com/bono_kaikun/m/m5f641069767f',
     external: true,
     label: 'メンバー',
     title: 'メンバーのアウトプットnote',
@@ -433,7 +433,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
               transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.45 }}
               className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto justify-center"
             >
-              <CTAButtonPrimary href="https://www.bo-no.design/plan" external>
+              <CTAButtonPrimary href="/subscription">
                 メンバーになってはじめる
               </CTAButtonPrimary>
               <CTAButtonSecondary href="/roadmap">
