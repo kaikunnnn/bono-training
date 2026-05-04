@@ -12,6 +12,8 @@ interface VideoSectionProps {
   isPremium?: boolean;
   hasAccess?: boolean;
   isLoggedIn?: boolean;
+  /** ログイン後のリダイレクト先（ゲートUI用） */
+  redirectTo?: string;
   /**
    * 自動再生（ブラウザ制約によりミュートでの再生を前提とする）
    * 既定は false
@@ -45,6 +47,7 @@ const VideoSection = ({
   isPremium = false,
   hasAccess = true,
   isLoggedIn = false,
+  redirectTo,
   autoPlay = false,
   onPlay,
   onEnded,
@@ -52,7 +55,7 @@ const VideoSection = ({
 }: VideoSectionProps) => {
   // プレミアムコンテンツで未契約の場合、ロック表示
   if (isPremium && !hasAccess) {
-    return <PremiumVideoLock isLoggedIn={isLoggedIn} />;
+    return <PremiumVideoLock isLoggedIn={isLoggedIn} redirectTo={redirectTo} />;
   }
 
   // URLからプラットフォームとIDを判定

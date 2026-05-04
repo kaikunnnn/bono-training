@@ -7,7 +7,6 @@ import { SubscriptionSuccessContent } from "@/components/subscription/Subscripti
 import {
   trackSubscriptionStart,
   trackPurchase,
-  trackPlanChange,
 } from "@/lib/analytics";
 import type { PlanType } from "@/types/subscription";
 import type { SuccessType } from "@/components/subscription/SubscriptionSuccessContent";
@@ -100,13 +99,8 @@ export default function SubscriptionSuccessPage() {
       }
 
       if (successType === "updated") {
-        // プラン変更イベント
-        trackPlanChange({
-          fromPlan: urlPlanType || "unknown",
-          fromDuration: 0,
-          toPlan: planType,
-          toDuration: duration,
-        });
+        // プラン変更イベント — PlanChangeConfirmModalで既に送信済みのため、
+        // successページでは重複送信しない（fromDurationが取得できず不正確なため）
       } else {
         // 新規登録イベント
         const planPriceMap: Record<string, number> = {

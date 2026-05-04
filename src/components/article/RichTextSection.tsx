@@ -12,7 +12,9 @@ interface RichTextSectionProps {
   isPremium?: boolean;
   hasAccess?: boolean;
   isLoggedIn?: boolean;
-  previewBlockCount?: number; // プ��ビューで表示す��ブロック数（デフォルト: 3）
+  /** ログイン後のリダイレクト先（ゲートUI用） */
+  redirectTo?: string;
+  previewBlockCount?: number; // プレビューで表示するブロック数（デフォルト: 3）
   afterContent?: React.ReactNode;
 }
 
@@ -64,6 +66,7 @@ const RichTextSection = ({
   isPremium = false,
   hasAccess = true,
   isLoggedIn = false,
+  redirectTo,
   previewBlockCount = 3,
   afterContent,
 }: RichTextSectionProps) => {
@@ -451,7 +454,7 @@ const RichTextSection = ({
       {afterContent}
 
       {/* プレミアムコンテンツで未契約の場合、オーバーレイを表示 */}
-      {isPremium && !hasAccess && <ContentPreviewOverlay isLoggedIn={isLoggedIn} />}
+      {isPremium && !hasAccess && <ContentPreviewOverlay isLoggedIn={isLoggedIn} redirectTo={redirectTo} />}
     </div>
   );
 };

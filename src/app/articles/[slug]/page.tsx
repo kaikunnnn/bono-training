@@ -166,6 +166,7 @@ export default async function ArticlePage({ params }: PageProps) {
             isPremium={article.isPremium}
             hasAccess={hasAccess}
             isLoggedIn={subscription.isLoggedIn}
+            redirectTo={`/articles/${slug}`}
           />
         </div>
 
@@ -203,6 +204,7 @@ export default async function ArticlePage({ params }: PageProps) {
                 isPremium={article.isPremium}
                 hasAccess={hasAccess}
                 isLoggedIn={subscription.isLoggedIn}
+                redirectTo={`/articles/${slug}`}
                 afterContent={
                   hasAccess && (
                     <ArticleActionButtons

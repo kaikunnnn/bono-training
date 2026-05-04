@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 
 interface ContentPreviewOverlayProps {
   isLoggedIn?: boolean;
+  /** ログイン後のリダイレクト先（例: /articles/some-slug） */
+  redirectTo?: string;
 }
 
 /**
@@ -17,7 +19,11 @@ interface ContentPreviewOverlayProps {
  */
 export default function ContentPreviewOverlay({
   isLoggedIn = false,
+  redirectTo,
 }: ContentPreviewOverlayProps) {
+  const loginHref = redirectTo
+    ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+    : "/login";
   return (
     <div className="relative w-full">
       {/* グラデーション（コンテンツにかぶせる） */}
@@ -60,7 +66,7 @@ export default function ContentPreviewOverlay({
                 size="large"
                 className="flex-1 font-noto-sans-jp text-base"
               >
-                <Link href="/login">
+                <Link href={loginHref}>
                   <LogIn className="mr-2 h-4 w-4" />
                   ログインする
                 </Link>

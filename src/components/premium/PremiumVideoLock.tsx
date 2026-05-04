@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 
 interface PremiumVideoLockProps {
   isLoggedIn?: boolean;
+  /** ログイン後のリダイレクト先（例: /articles/some-slug） */
+  redirectTo?: string;
 }
 
 /**
@@ -16,7 +18,11 @@ interface PremiumVideoLockProps {
  */
 export default function PremiumVideoLock({
   isLoggedIn = false,
+  redirectTo,
 }: PremiumVideoLockProps) {
+  const loginHref = redirectTo
+    ? `/login?redirectTo=${encodeURIComponent(redirectTo)}`
+    : "/login";
   return (
     <div className="relative w-full aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
       {/* 背景パターン */}
@@ -63,7 +69,7 @@ export default function PremiumVideoLock({
                 size="large"
                 className="flex-1 font-noto-sans-jp text-base"
               >
-                <Link href="/login">
+                <Link href={loginHref}>
                   <LogIn className="mr-2 h-4 w-4" />
                   ログインする
                 </Link>

@@ -41,7 +41,7 @@ export function TabGroup({
             px-2 py-1.5 rounded-md
             flex justify-center items-center
             text-xs font-bold leading-3
-            transition-all
+            transition-all cursor-pointer
             ${
               tab.id === activeTabId
                 ? "bg-white text-black shadow-[0px_2px_2px_0px_rgba(0,0,0,0.04)]"
