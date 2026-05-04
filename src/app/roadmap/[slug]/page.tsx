@@ -7,6 +7,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getRoadmapBySlug, getAllRoadmapSlugs, getAllRoadmaps } from "@/lib/sanity";
+import { getSubscriptionStatus } from "@/lib/subscription";
 import RoadmapHero from "@/components/roadmap/detail/RoadmapHero";
 import RoadmapPathway from "@/components/roadmap/detail/RoadmapPathway";
 import SectionNav, { type SectionNavItem } from "@/components/roadmap/detail/SectionNav";
@@ -73,9 +74,10 @@ export default async function RoadmapDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [roadmap, allRoadmaps] = await Promise.all([
+  const [roadmap, allRoadmaps, subscriptionStatus] = await Promise.all([
     getRoadmapBySlug(slug),
     getAllRoadmaps(),
+    getSubscriptionStatus(),
   ]);
 
   if (!roadmap) {
@@ -115,6 +117,7 @@ export default async function RoadmapDetailPage({
         gradientPreset={gradientPreset}
         heroImageUrl={roadmap.heroImageUrl}
         thumbnailUrl={roadmap.thumbnailUrl}
+        isSubscribed={subscriptionStatus.isSubscribed}
       />
 
       {/* セクションナビゲーション */}

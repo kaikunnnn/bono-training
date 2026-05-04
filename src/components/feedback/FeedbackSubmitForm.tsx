@@ -11,7 +11,6 @@
  */
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -359,6 +358,7 @@ export function FeedbackSubmitForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [validationErrors, setValidationErrors] = useState<string[]>([]);
 
   const totalSteps = 2;
 
@@ -391,6 +391,42 @@ export function FeedbackSubmitForm({
         return formData.lessonId !== "" && formData.checkedItems.length > 0;
       default:
         return false;
+    }
+  };
+
+  // バリデーションエラーメッセージを取得
+  const getValidationErrors = (): string[] => {
+    const errors: string[] = [];
+    switch (step) {
+      case 1:
+        if (formData.articleUrl === "") {
+          errors.push("アウトプットURLを入力してください");
+        } else if (!/^https?:\/\/.+/.test(formData.articleUrl)) {
+          errors.push("有効なURLを入力してください（https://...）");
+        }
+        if (formData.slackAccountName.trim() === "") {
+          errors.push("アカウント名を入力してください");
+        }
+        break;
+      case 2:
+        if (formData.lessonId === "") {
+          errors.push("学んだBONOコンテンツを選択してください");
+        }
+        if (formData.checkedItems.length === 0) {
+          errors.push("該当する項目を1つ以上選択してください");
+        }
+        break;
+    }
+    return errors;
+  };
+
+  // 次へボタンのクリックハンドラー
+  const handleNextClick = () => {
+    if (canProceed()) {
+      setValidationErrors([]);
+      setStep(step + 1);
+    } else {
+      setValidationErrors(getValidationErrors());
     }
   };
 
@@ -685,6 +721,21 @@ export function FeedbackSubmitForm({
                 )}
               </AnimatePresence>
 
+              {/* バリデーションエラー表示 */}
+              {validationErrors.length > 0 && (
+                <div className="pt-2">
+                  <Alert variant="destructive">
+                    <AlertDescription>
+                      <ul className="list-disc list-inside space-y-1">
+                        {validationErrors.map((err, i) => (
+                          <li key={i}>{err}</li>
+                        ))}
+                      </ul>
+                    </AlertDescription>
+                  </Alert>
+                </div>
+              )}
+
               {/* ナビゲーションボタン */}
               <div
                 className={`flex items-center pt-4 ${
@@ -696,6 +747,7 @@ export function FeedbackSubmitForm({
                     onClick={() => {
                       setStep(step - 1);
                       setError(null);
+                      setValidationErrors([]);
                     }}
                     className="flex items-center gap-1 text-sm font-medium text-slate-900 hover:text-slate-600 transition-colors"
                   >
@@ -706,8 +758,7 @@ export function FeedbackSubmitForm({
 
                 {step < totalSteps ? (
                   <Button
-                    onClick={() => setStep(step + 1)}
-                    disabled={!canProceed()}
+                    onClick={handleNextClick}
                     className="h-10 px-5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl"
                   >
                     次へ

@@ -38,33 +38,52 @@ export function FeedbackApplyClient({
     router.push("/feedback-apply/submit");
   };
 
+  // 非メンバーの場合はサブスクリプションページへのリンクボタンを表示
+  const buttonText = isLoggedIn && !canApply ? "メンバーになって応募" : "応募する";
+
   if (position === "header") {
+    if (isLoggedIn && !canApply) {
+      return (
+        <Button
+          asChild
+          size="large"
+          className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold"
+        >
+          <Link href="/subscription">
+            {buttonText}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
+      );
+    }
+
     return (
       <Button
         onClick={handleApplyClick}
         size="large"
         className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold"
       >
-        応募する
+        {buttonText}
         <ArrowRight className="ml-2 h-4 w-4" />
       </Button>
     );
   }
 
   // CTA position
-  return (
-    <>
-      <Button
-        onClick={handleApplyClick}
-        size="lg"
-        className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-3 shadow-sm"
-      >
-        応募する
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
+  if (isLoggedIn && !canApply) {
+    return (
+      <>
+        <Button
+          asChild
+          size="lg"
+          className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-3 shadow-sm"
+        >
+          <Link href="/subscription">
+            {buttonText}
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Link>
+        </Button>
 
-      {/* アクセス制限メッセージ */}
-      {isLoggedIn && !canApply && (
         <p className="mt-4 text-sm text-muted-foreground">
           15分フィードバックはStandard・Growthプラン限定の機能です。
           <Link
@@ -74,7 +93,20 @@ export function FeedbackApplyClient({
             プランを確認する
           </Link>
         </p>
-      )}
+      </>
+    );
+  }
+
+  return (
+    <>
+      <Button
+        onClick={handleApplyClick}
+        size="lg"
+        className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-3 shadow-sm"
+      >
+        {buttonText}
+        <ArrowRight className="ml-2 h-4 w-4" />
+      </Button>
     </>
   );
 }

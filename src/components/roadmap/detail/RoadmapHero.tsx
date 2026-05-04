@@ -36,6 +36,8 @@ interface RoadmapHeroProps {
   heroImageUrl?: string;
   /** サムネイル画像URL（フォールバック） */
   thumbnailUrl?: string;
+  /** ユーザーがプラン加入済みか */
+  isSubscribed?: boolean;
 }
 
 const PrimaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
@@ -53,17 +55,30 @@ const PrimaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = 
 const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
   href,
   children,
-}) => (
-  <a
-    href={href}
-    className="flex items-center justify-center w-full sm:w-[170px] h-12 rounded-[14px] text-[14px] font-bold text-white tracking-[0.35px] hover:bg-white/10 transition-colors"
-    style={{
-      boxShadow: "inset 0 0 0 1px rgba(255,255,255,1)",
-    }}
-  >
-    {children}
-  </a>
-);
+}) => {
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (href.startsWith("#")) {
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth" });
+      }
+    }
+  };
+
+  return (
+    <a
+      href={href}
+      onClick={handleClick}
+      className="flex items-center justify-center w-full sm:w-[170px] h-12 rounded-[14px] text-[14px] font-bold text-white tracking-[0.35px] hover:bg-white/10 transition-colors"
+      style={{
+        boxShadow: "inset 0 0 0 1px rgba(255,255,255,1)",
+      }}
+    >
+      {children}
+    </a>
+  );
+};
 
 export default function RoadmapHero({
   title,
@@ -74,6 +89,7 @@ export default function RoadmapHero({
   gradientPreset,
   heroImageUrl,
   thumbnailUrl,
+  isSubscribed = false,
 }: RoadmapHeroProps) {
   const gradientStyle = getGradientStyle(gradientPreset);
 
@@ -216,23 +232,27 @@ export default function RoadmapHero({
           {/* CVエリア */}
           <div className="w-full max-w-[538px]">
             <div className="backdrop-blur-[4px] bg-white/[0.04] border border-white/[0.06] rounded-3xl px-8 md:px-12 py-5 pb-6">
-              {/* 料金表示 */}
-              <div className="flex items-center justify-center gap-4 text-white mb-4">
-                <span className="text-[12px] font-bold opacity-70">料金</span>
-                <div className="flex items-end gap-0.5 leading-none">
-                  <span className="text-[20px] font-bold font-['Inter',sans-serif]">
-                    5,800
-                  </span>
-                  <span className="text-[13px]">~</span>
-                  <span className="text-[13px]">円/月</span>
+              {/* 料金表示（未加入時のみ） */}
+              {!isSubscribed && (
+                <div className="flex items-center justify-center gap-4 text-white mb-4">
+                  <span className="text-[12px] font-bold opacity-70">料金</span>
+                  <div className="flex items-end gap-0.5 leading-none">
+                    <span className="text-[20px] font-bold font-['Inter',sans-serif]">
+                      5,800
+                    </span>
+                    <span className="text-[13px]">~</span>
+                    <span className="text-[13px]">円/月</span>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* CTAボタン */}
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                <PrimaryCTAButton href="/subscription">
-                  メンバーになってはじめる
-                </PrimaryCTAButton>
+                {!isSubscribed && (
+                  <PrimaryCTAButton href="/subscription">
+                    メンバーになってはじめる
+                  </PrimaryCTAButton>
+                )}
                 <SecondaryCTAButton href="#curriculum">
                   カリキュラムへ
                 </SecondaryCTAButton>

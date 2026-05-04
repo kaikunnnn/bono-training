@@ -850,6 +850,59 @@ export async function getTrainingListFromSanity(): Promise<SanityTrainingListIte
   return getClient().fetch<SanityTrainingListItem[]>(query);
 }
 
+export interface SanityTrainingDetailItem {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  type: string;
+  difficulty: string;
+  category: string;
+  tags: string[];
+  isPremium: boolean;
+  iconImageUrl: string;
+  thumbnailUrl: string;
+  backgroundSvg: string;
+  tasks: Array<{
+    _id: string;
+    title: string;
+    slug: string;
+    orderIndex: number;
+    isPremium: boolean;
+  }>;
+}
+
+/**
+ * トレーニング詳細を取得（Sanityから直接）
+ * Edge Function のフォールバックとして使用
+ */
+export async function getTrainingDetailFromSanity(slug: string): Promise<SanityTrainingDetailItem | null> {
+  const query = `
+    *[_type == "training" && slug.current == $slug][0] {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      "type": trainingType,
+      difficulty,
+      "category": category->title,
+      tags,
+      isPremium,
+      iconImageUrl,
+      thumbnailUrl,
+      backgroundSvg,
+      "tasks": tasks[]-> {
+        _id,
+        title,
+        "slug": slug.current,
+        orderIndex,
+        isPremium
+      }
+    }
+  `;
+  return getClient().fetch<SanityTrainingDetailItem | null>(query, { slug });
+}
+
 // ============================================
 // Roadmap 関連のクエリ（Server Components用）
 // ============================================
