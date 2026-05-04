@@ -7,6 +7,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  /* Tailwind v4 transition defaults
+   * Tailwind v4はデフォルトでtransition-durationを1e-05s（実質0）に設定する。
+   * これを適切なデフォルト値に上書きしないと、全てのtransitionアニメーションが瞬間的になる。 */
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: ease;
+
   /* Container settings (matching Tailwind v3 config) */
   --container-center: true;
   --container-padding: 2rem;
