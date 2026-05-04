@@ -1,6 +1,7 @@
 // src/components/blog/BlogCard.tsx — mainからコピー＋最小変更
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { BlogPost } from "@/types/blog";
 import Link from "next/link";
@@ -47,19 +48,33 @@ const categoryBgColors: Record<string, string> = {
 };
 
 export const BlogCard: React.FC<BlogCardProps> = ({ post, variant = "default", index = 0 }) => {
+  const [isHovered, setIsHovered] = useState(false);
   // カテゴリ情報を取得
   const category = categories.find(cat => cat.slug === post.category);
   const categoryBgColor = categoryBgColors[post.category] || 'bg-gray-400';
 
   return (
-    <Link href={`/blog/${post.slug}`} className="blog-card-hover hover:opacity-80">
+    <Link
+      href={`/blog/${post.slug}`}
+      className="blog-card-hover"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <motion.li
         variants={cardVariants}
         initial="hidden"
         animate="visible"
-        whileHover={{ scale: 1.01 }}
         transition={{ delay: index * 0.05 }}
-        className="hover:bg-gray-100 bg-white rounded-2xl p-3 md:p-3 pr-3 md:pr-6 min-h-full shadow-sm list-none"
+        className="bg-white rounded-2xl p-3 md:p-3 pr-3 md:pr-6 min-h-full list-none"
+        style={{
+          transform: isHovered ? 'translateY(-4px) scale(1.01)' : 'none',
+          boxShadow: isHovered
+            ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
+            : '0px 1px 8px 0px rgba(0,0,0,0.08)',
+          backgroundColor: isHovered ? '#f3f4f6' : '#ffffff',
+          transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+          willChange: 'transform',
+        }}
       >
         <div className="flex content-between items-center gap-3 md:gap-8">
           {/* 画像セクション */}

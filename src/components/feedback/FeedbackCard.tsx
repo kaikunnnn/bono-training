@@ -1,6 +1,7 @@
 // src/components/feedback/FeedbackCard.tsx — mainからコピー＋最小変更
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -51,6 +52,7 @@ interface FeedbackCardProps {
 }
 
 export function FeedbackCard({ feedback }: FeedbackCardProps) {
+  const [isHovered, setIsHovered] = useState(false);
   const publishedDate = feedback.publishedAt
     ? new Date(feedback.publishedAt).toLocaleDateString("ja-JP", {
         year: "numeric",
@@ -70,8 +72,17 @@ export function FeedbackCard({ feedback }: FeedbackCardProps) {
     <motion.div variants={fadeInUp} className="h-full">
       <Link
         href={`/feedbacks/${feedback.slug.current}`}
-        className="group block h-full bg-white rounded-[24px] border border-border/50 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 will-change-transform"
-        style={{ transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
+        className="group block h-full bg-white rounded-[24px] border border-border/50 overflow-hidden"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{
+          transform: isHovered ? 'translateY(-4px)' : 'none',
+          boxShadow: isHovered
+            ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
+            : '0px 1px 8px 0px rgba(0,0,0,0.08)',
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+          willChange: 'transform',
+        }}
       >
         {/* ビジュアルエリア */}
         <div

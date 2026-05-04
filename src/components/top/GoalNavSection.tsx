@@ -6,6 +6,7 @@
  * Figma: PRD🏠_topUI_newBONO2026 node-id: 47-17453
  */
 
+import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,8 @@ function GoalNavPill({
   targetId,
   label,
 }: GoalNavItem) {
+  const [isHovered, setIsHovered] = useState(false);
+
   const handleClick = () => {
     const element = document.getElementById(targetId);
     if (element) {
@@ -46,16 +49,22 @@ function GoalNavPill({
   return (
     <button
       onClick={handleClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className={cn(
         "flex items-center justify-between w-full sm:w-[400px] lg:w-[480px]",
         "h-[64px] sm:h-[72px] lg:h-[86px]",
         "px-5 sm:px-6 lg:px-8 py-1",
-        "bg-white border border-black/45 rounded-full",
-        "will-change-transform",
-        "hover:border-black/60 hover:shadow-md hover:scale-[1.01]",
+        "bg-white border rounded-full",
         "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-text-primary/20"
       )}
-      style={{ transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease' }}
+      style={{
+        borderColor: isHovered ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0.45)',
+        transform: isHovered ? 'scale(1.01)' : 'none',
+        boxShadow: isHovered ? '0px 4px 12px 0px rgba(0,0,0,0.12)' : 'none',
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease',
+        willChange: 'transform',
+      }}
     >
       <span className="text-sm sm:text-base font-medium text-text-primary leading-[1.8]">
         {label}

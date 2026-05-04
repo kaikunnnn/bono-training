@@ -3,6 +3,7 @@
 import React from 'react';
 import { Map } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { HoverCard } from '@/components/common/HoverCard';
 
 interface LinkedRoadmap {
   slug: string;
@@ -41,16 +42,17 @@ const LessonCard: React.FC<LessonCardProps> = ({
   const hasRoadmap = lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0;
 
   return (
-    <article
+    <HoverCard
+      as="article"
       className={cn(
-        'bg-white flex flex-col p-3 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[24px] md:rounded-[29px] shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)]',
-        'cursor-pointer will-change-transform',
-        'hover:-translate-y-1 hover:scale-[1.01] hover:shadow-[0px_4px_18px_0px_rgba(0,0,0,0.16)]',
-        'w-full h-full text-[#0d221d] opacity-100',
+        'bg-white flex flex-col p-3 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[24px] md:rounded-[29px] cursor-pointer w-full h-full text-[#0d221d] opacity-100',
         className
       )}
+      hoverTransform="translateY(-4px) scale(1.01)"
+      hoverShadow="0px 4px 18px 0px rgba(0,0,0,0.16)"
+      baseShadow="0px 1px 8px 0px rgba(0,0,0,0.08)"
+      transitionTiming="0.2s ease"
       onClick={onClick}
-      style={{ transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}
     >
       <div className="flex h-full flex-col justify-between gap-2 sm:gap-3 md:gap-4">
         {/* カテゴリバッジ */}
@@ -105,7 +107,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
           )}
         </div>
       </div>
-    </article>
+    </HoverCard>
   );
 };
 

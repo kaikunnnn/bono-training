@@ -3,7 +3,9 @@
  *
  * Figma: PRD🏠_topUI_newBONO2026 node-id: 77-16766
  */
+"use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Briefcase } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -96,21 +98,29 @@ function TopRoadmapCard({
   className,
 }: TopHeroRoadmapItem & { rotation?: number; className?: string }) {
   const gradientCSS = getGradientCSS(gradientPreset);
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Link
       href={`/roadmap/${slug}`}
       className={cn("block group", className)}
       style={{ transform: rotation !== 0 ? `rotate(${rotation}deg)` : undefined }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className={cn(
           "relative w-full sm:w-[300px] lg:w-[377px] h-[320px] sm:h-[380px] lg:h-[441px] rounded-[24px] sm:rounded-[32px] overflow-hidden",
-          "shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)]",
-          "will-change-transform",
-          "group-hover:shadow-lg group-hover:scale-[1.02]"
         )}
-        style={{ background: gradientCSS, transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
+        style={{
+          background: gradientCSS,
+          transform: isHovered ? 'scale(1.02)' : 'none',
+          boxShadow: isHovered
+            ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
+            : '0px 1px 12px 0px rgba(0,0,0,0.08)',
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+          willChange: 'transform',
+        }}
       >
         {/* アイコン（左上） */}
         <div className="absolute left-5 sm:left-8 top-5 sm:top-8">

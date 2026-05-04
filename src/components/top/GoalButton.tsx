@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -59,6 +60,7 @@ export default function GoalButton({
   href,
   className,
 }: GoalButtonProps) {
+  const [isHovered, setIsHovered] = useState(false);
   // アンカーリンク（#で始まる）の場合は通常のaタグ、それ以外はNext.jsのLink
   const isAnchorLink = href.startsWith('#');
 
@@ -85,7 +87,6 @@ export default function GoalButton({
     'bg-surface rounded-[200px]',
     'border border-black/12',
     // インタラクション
-    'hover:shadow-md',
     'group',
     className
   );
@@ -118,13 +119,22 @@ export default function GoalButton({
     </>
   );
 
+  const hoverStyle = {
+    boxShadow: isHovered
+      ? '0px 4px 12px 0px rgba(0,0,0,0.12)'
+      : 'none',
+    transition: 'box-shadow 0.2s ease',
+  };
+
   if (isAnchorLink) {
     return (
       <a
         href={href}
         onClick={handleClick}
         className={sharedClassName}
-        style={{ transition: 'box-shadow 0.2s ease' }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={hoverStyle}
       >
         {inner}
       </a>
@@ -132,7 +142,13 @@ export default function GoalButton({
   }
 
   return (
-    <Link href={href} className={sharedClassName} style={{ transition: 'box-shadow 0.2s ease' }}>
+    <Link
+      href={href}
+      className={sharedClassName}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      style={hoverStyle}
+    >
       {inner}
     </Link>
   );

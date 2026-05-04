@@ -3,7 +3,9 @@
  * - サムネイル画像またはフォールバック絵文字表示
  * - レスポンシブ対応
  */
+"use client";
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
@@ -43,16 +45,22 @@ export default function ContentCard({
   className,
 }: ContentCardProps) {
   const isLarge = variant === 'large';
+  const [isHovered, setIsHovered] = useState(false);
 
   const cardContent = (
     <div
       className={cn(
-        'bg-surface rounded-[24px] sm:rounded-[32px] overflow-hidden will-change-transform group-hover:shadow-lg group-hover:scale-[1.02]',
+        'bg-surface rounded-[24px] sm:rounded-[32px] overflow-hidden',
         isLarge
           ? 'lg:rounded-[32px] border-2 border-white shadow-sm min-h-[320px] sm:min-h-[360px] lg:min-h-[400px]'
           : 'lg:rounded-[40px] border-4 border-white shadow-sm'
       )}
-      style={{ transition: 'transform 0.3s ease-out, box-shadow 0.3s ease-out' }}
+      style={{
+        transform: isHovered ? 'scale(1.02)' : 'none',
+        boxShadow: isHovered ? '0px 4px 18px 0px rgba(0,0,0,0.16)' : 'none',
+        transition: 'transform 0.3s ease-out, box-shadow 0.3s ease-out',
+        willChange: 'transform',
+      }}
     >
       {/* サムネイル */}
       <div
@@ -98,6 +106,8 @@ export default function ContentCard({
         target="_blank"
         rel="noopener noreferrer"
         className={cn('group', className)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
         {cardContent}
       </a>
@@ -105,7 +115,12 @@ export default function ContentCard({
   }
 
   return (
-    <Link href={href} className={cn('group', className)}>
+    <Link
+      href={href}
+      className={cn('group', className)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       {cardContent}
     </Link>
   );

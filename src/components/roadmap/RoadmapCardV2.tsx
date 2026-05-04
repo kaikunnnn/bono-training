@@ -17,7 +17,9 @@
  * - thumbnailStyle="wave": 波形マスク（詳細ページHeroと同様）
  */
 
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { stripLineBreakMarker } from '@/utils/textFormat';
@@ -64,14 +66,20 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   // バッジに表示するテキスト（shortTitleがあればそれを優先）
   const badgeText = shortTitle || label;
 
+  const [isHovered, setIsHovered] = useState(false);
+
   // 縦型レイアウト
   if (orientation === 'vertical') {
     return (
-      <Link href={linkPath} className={cn('block group', className)}>
+      <Link
+        href={linkPath}
+        className={cn('block group', className)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
         <div
           className={cn(
-            'overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] will-change-transform',
-            'group-hover:shadow-lg group-hover:scale-[1.02]',
+            'overflow-hidden',
             // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
             isWaveStyle
               ? 'rounded-[32px] border-4 border-white'
@@ -80,7 +88,12 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
           )}
           style={{
             ...(variant === 'gradient' ? { background: gradientCSS } : {}),
+            transform: isHovered ? 'scale(1.02)' : 'none',
+            boxShadow: isHovered
+              ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
+              : '0px 1px 12px 0px rgba(0,0,0,0.08)',
             transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+            willChange: 'transform',
           }}
         >
           {/* サムネイルエリア */}
@@ -172,11 +185,15 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
 
   // 横型レイアウト（モバイルでは縦型にフォールバック）
   return (
-    <Link href={linkPath} className={cn('block group', className)}>
+    <Link
+      href={linkPath}
+      className={cn('block group', className)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div
         className={cn(
-          'flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] will-change-transform',
-          'group-hover:shadow-lg group-hover:scale-[1.01]',
+          'flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 overflow-hidden',
           // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
           isWaveStyle
             ? 'rounded-[32px] border-4 border-white'
@@ -185,7 +202,12 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
         )}
         style={{
           ...(variant === 'gradient' ? { background: gradientCSS } : {}),
+          transform: isHovered ? 'scale(1.01)' : 'none',
+          boxShadow: isHovered
+            ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
+            : '0px 1px 12px 0px rgba(0,0,0,0.08)',
           transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+          willChange: 'transform',
         }}
       >
         {/* サムネイルエリア */}

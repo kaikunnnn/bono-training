@@ -4,7 +4,9 @@
  * - 3D回転アイキャッチ
  * - レスポンシブ対応
  */
+"use client";
 
+import { useState } from 'react';
 import Link from 'next/link';
 import type { TrainingCardData } from './types';
 import InfoArchEyecatch from './eyecatch/InfoArchEyecatch';
@@ -26,10 +28,13 @@ const EYECATCH_COMPONENTS = {
 
 export default function TrainingCard({ data }: TrainingCardProps) {
   const EyecatchComponent = EYECATCH_COMPONENTS[data.eyecatchType];
+  const [isHovered, setIsHovered] = useState(false);
 
   return (
     <Link
       href={`/roadmap/${data.roadmapSlug}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       className="
         group
         relative
@@ -37,16 +42,17 @@ export default function TrainingCard({ data }: TrainingCardProps) {
         w-[300px] sm:w-[350px] lg:w-[420px]
         h-[407px] sm:h-[476px] lg:h-[570px]
         rounded-[28px] sm:rounded-[32px]
-        shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)]
         flex-shrink-0
         overflow-hidden
-        hover:scale-[1.05]
-        hover:shadow-[0px_8px_24px_0px_rgba(0,0,0,0.16)]
-        will-change-transform
       "
       style={{
         background: data.backgroundGradient || data.backgroundColor,
+        transform: isHovered ? 'scale(1.05)' : 'none',
+        boxShadow: isHovered
+          ? '0px 8px 24px 0px rgba(0,0,0,0.16)'
+          : '0px 1px 12px 0px rgba(0,0,0,0.08)',
         transition: 'transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+        willChange: 'transform',
       }}
     >
       {/* 左上ラベル - カテゴリ */}
