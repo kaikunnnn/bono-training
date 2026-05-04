@@ -1,5 +1,6 @@
 import 'server-only'
 import { createClient } from "@/lib/supabase/server";
+import { getTrainingDetailFromSanity } from "@/lib/sanity";
 import type { TaskDetailData } from "@/types/training";
 import { TrainingError } from "@/lib/errors";
 
@@ -92,20 +93,27 @@ const validateAndTransformResponse = (
 
 /**
  * タスク詳細を取得（Storage + Edge Functionベース）
+ *
+ * 3段階フォールバック:
+ * 1. Edge Function（get-training-content）
+ * 2. Sanity CMS からトレーニング詳細を取得し、タスクメタ情報を返す
+ *    （タスク本文は Storage にしかないため、コンテンツなしで返す）
+ * 3. TrainingError をスロー（呼び出し元で notFound() 処理）
  */
 export const getTrainingTaskDetail = async (
   trainingSlug: string,
   taskSlug: string
 ): Promise<TaskDetailData> => {
-  try {
-    if (!trainingSlug || !taskSlug) {
-      throw new TrainingError(
-        "トレーニングスラッグとタスクスラッグが必要です",
-        "INVALID_REQUEST",
-        400
-      );
-    }
+  if (!trainingSlug || !taskSlug) {
+    throw new TrainingError(
+      "トレーニングスラッグとタスクスラッグが必要です",
+      "INVALID_REQUEST",
+      400
+    );
+  }
 
+  // 1. Edge Function（第1段階）
+  try {
     const supabase = await createClient();
 
     const { data, error } = await supabase.functions.invoke(
@@ -119,18 +127,13 @@ export const getTrainingTaskDetail = async (
     );
 
     if (error) {
-      console.error("Edge Function エラー:", error);
-      throw new TrainingError(
-        "タスク詳細の取得に失敗しました",
-        "FETCH_ERROR"
-      );
+      console.error("[getTrainingTaskDetail] Edge Function エラー:", error);
+      throw error;
     }
 
     if (!data?.success) {
-      throw new TrainingError(
-        data?.message || "タスク詳細のレスポンスが不正です",
-        "INVALID_RESPONSE"
-      );
+      console.error("[getTrainingTaskDetail] Edge Function レスポンス不正:", data);
+      throw new Error("レスポンス不正");
     }
 
     const responseData = data.data || data;
@@ -141,15 +144,76 @@ export const getTrainingTaskDetail = async (
     );
 
     return taskDetail;
-  } catch (err) {
-    if (err instanceof TrainingError) {
-      throw err;
-    }
+  } catch (edgeFnError) {
+    console.warn("[getTrainingTaskDetail] Edge Function 失敗、Sanity フォールバックへ:", edgeFnError);
 
-    console.error("getTrainingTaskDetail 予期しないエラー:", err);
-    throw new TrainingError(
-      "タスク詳細の取得中に予期しないエラーが発生しました",
-      "UNKNOWN_ERROR"
-    );
+    // 2. Sanity CMS フォールバック（第2段階）
+    // タスク本文は Supabase Storage のみに存在するため、
+    // Sanity からはタスクのメタ情報（タイトル・順序等）のみ取得し、
+    // コンテンツは空で返す（ページ側で「コンテンツが利用できません」を表示）
+    try {
+      const sanityData = await getTrainingDetailFromSanity(trainingSlug);
+
+      if (!sanityData) {
+        throw new TrainingError(
+          "トレーニングが見つかりません",
+          "NOT_FOUND",
+          404
+        );
+      }
+
+      const sanityTask = (sanityData.tasks || []).find(
+        (t) => t.slug === taskSlug
+      );
+
+      if (!sanityTask) {
+        throw new TrainingError(
+          "タスクが見つかりません",
+          "NOT_FOUND",
+          404
+        );
+      }
+
+      // タスクの順序を取得して前後のタスクを計算
+      const sortedTasks = [...(sanityData.tasks || [])].sort(
+        (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
+      );
+      const currentIndex = sortedTasks.findIndex((t) => t.slug === taskSlug);
+      const prevTask = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
+      const nextTask = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
+
+      return {
+        id: sanityTask._id,
+        slug: sanityTask.slug,
+        title: sanityTask.title,
+        content: "", // Storage にしかないため空
+        is_premium: sanityTask.isPremium ?? false,
+        order_index: sanityTask.orderIndex ?? 1,
+        training_id: sanityData._id,
+        created_at: null,
+        video_full: null,
+        video_preview: null,
+        preview_sec: null,
+        trainingTitle: sanityData.title,
+        trainingSlug: trainingSlug,
+        next_task: nextTask?.slug ?? null,
+        prev_task: prevTask?.slug ?? null,
+        isPremiumCut: false,
+        hasAccess: true,
+      };
+    } catch (sanityError) {
+      // Sanity からの NOT_FOUND はそのまま再スロー
+      if (sanityError instanceof TrainingError) {
+        throw sanityError;
+      }
+
+      console.error("[getTrainingTaskDetail] Sanity フォールバックも失敗:", sanityError);
+
+      // 3. エラーをスロー（第3段階）— ページの notFound() で処理される
+      throw new TrainingError(
+        "タスク詳細の取得に失敗しました",
+        "FETCH_ERROR"
+      );
+    }
   }
 };

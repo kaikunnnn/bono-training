@@ -36,12 +36,20 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           <div className="flex flex-col items-start w-full">
             {/* Step 2-1: アイコン部分 */}
             <div className="relative z-30 w-[72px] h-[72px] p-[11px] pt-4 flex justify-center items-center bg-white border-[0.9px] border-black/10 rounded-[100px_100px_32px_32px] top-[56px] ml-[10.4%]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={training.icon || '/assets/emoji/book.svg'}
-                alt={training.title}
-                className="w-[49.5px] h-[49.5px] object-cover rounded-lg"
-              />
+              {training.icon && !/^https?:\/\//.test(training.icon) && !training.icon.startsWith('/') ? (
+                // 絵文字やテキストアイコンの場合
+                <span className="text-3xl leading-none" role="img" aria-label={training.title}>
+                  {training.icon}
+                </span>
+              ) : (
+                // URL（CDNまたはローカルパス）の場合
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={training.icon || '/assets/emoji/book.svg'}
+                  alt={training.title}
+                  className="w-[49.5px] h-[49.5px] object-cover rounded-lg"
+                />
+              )}
             </div>
 
             {/* 上が円のブロック（SVG） */}

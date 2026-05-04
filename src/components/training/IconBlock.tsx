@@ -32,8 +32,10 @@ export default function IconBlock({
     lg: "size-[68px]",   // デスクトップ内側
   };
 
-  // 絵文字判定（簡易版）
-  const isEmoji = iconSrc && /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{26FF}]|[\u{2700}-\u{27BF}]/u.test(iconSrc);
+  // URL判定: http/httpsで始まるか、/で始まるパスはURL
+  const isUrl = iconSrc && (/^https?:\/\//.test(iconSrc) || iconSrc.startsWith('/'));
+  // URL でなければ絵文字またはテキストとして扱う
+  const isEmoji = iconSrc && !isUrl;
 
   return (
     <div
