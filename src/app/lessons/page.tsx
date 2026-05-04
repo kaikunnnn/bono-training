@@ -105,8 +105,8 @@ export default async function LessonsPage() {
 
                   {/* レッスンカードグリッド（main lines 588-596 から、motion.div → 静的div） */}
                   <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-visible">
-                    {sectionLessons.map((lesson) => (
-                      <LessonCardRenderer key={lesson._id} lesson={lesson} />
+                    {sectionLessons.map((lesson, i) => (
+                      <LessonCardRenderer key={lesson._id} lesson={{ ...lesson, index: i }} />
                     ))}
                   </div>
                 </section>

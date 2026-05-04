@@ -160,9 +160,9 @@ export default async function RoadmapPage({ searchParams }: RoadmapPageProps) {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-                  {category.roadmaps.map((roadmap) => (
+                  {category.roadmaps.map((roadmap, i) => (
+                    <div key={roadmap.slug.current} className="animate-fade-in-up" style={{ animationDelay: `${i * 80}ms` }}>
                     <RoadmapCardV2
-                      key={roadmap.slug.current}
                       slug={roadmap.slug.current}
                       title={roadmap.title}
                       description={roadmap.description}
@@ -176,6 +176,7 @@ export default async function RoadmapPage({ searchParams }: RoadmapPageProps) {
                       orientation="vertical"
                       thumbnailStyle="wave"
                     />
+                    </div>
                   ))}
                 </div>
               </section>

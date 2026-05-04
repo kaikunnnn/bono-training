@@ -10,7 +10,7 @@ import { urlFor, type LessonWithArticleIds } from "@/lib/sanity";
 import { LessonCard } from "@/components/lessons/LessonCard";
 
 interface LessonCardRendererProps {
-  lesson: LessonWithArticleIds;
+  lesson: LessonWithArticleIds & { index?: number };
 }
 
 /**
@@ -32,7 +32,10 @@ export function LessonCardRenderer({ lesson }: LessonCardRendererProps) {
     "";
 
   return (
-    <div className="w-[232px] flex-shrink-0 sm:w-auto">
+    <div
+      className="w-[232px] flex-shrink-0 sm:w-auto animate-fade-in-up"
+      style={{ animationDelay: `${(lesson.index ?? 0) * 60}ms` }}
+    >
       <Link href={`/lessons/${lesson.slug.current}`}>
         <LessonCard
           lesson={{

@@ -140,8 +140,8 @@ export default async function CategoryPage({ params }: PageProps) {
                           {/* レッスンカードグリッド（main lines 651-656 から、motion.div → 静的div） */}
                           <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-visible">
                             {/* カテゴリ別: 全件表示（8件制限なし） */}
-                            {subLessons.map((lesson) => (
-                              <LessonCardRenderer key={lesson._id} lesson={lesson} />
+                            {subLessons.map((lesson, i) => (
+                              <LessonCardRenderer key={lesson._id} lesson={{ ...lesson, index: i }} />
                             ))}
                           </div>
                         </div>
@@ -150,8 +150,8 @@ export default async function CategoryPage({ params }: PageProps) {
                 ) : (
                   // サブセクションがない場合（その他など）
                   <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 sm:gap-6 sm:pb-0 sm:overflow-visible">
-                    {(groupedLessons[section.id]?.['_default'] || []).map((lesson) => (
-                      <LessonCardRenderer key={lesson._id} lesson={lesson} />
+                    {(groupedLessons[section.id]?.['_default'] || []).map((lesson, i) => (
+                      <LessonCardRenderer key={lesson._id} lesson={{ ...lesson, index: i }} />
                     ))}
                   </div>
                 )}

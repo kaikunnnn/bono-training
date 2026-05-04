@@ -408,11 +408,19 @@
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       transition-duration: 150ms !important;
+      animation-duration: 500ms !important;
     }
   }
 
   a {
     cursor: pointer;
+  }
+
+  /* カード・セクションの表示時フェードインアニメーション
+   * mainのframer-motion whileInView相当をCSSで再現 */
+  .animate-fade-in-up {
+    opacity: 0;
+    animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   body {
