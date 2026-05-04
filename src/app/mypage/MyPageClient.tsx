@@ -334,12 +334,7 @@ function MySection({
         >
           {title}
         </h2>
-        <button
-          onClick={onViewAll}
-          className="text-xs font-medium text-[rgba(2,8,23,0.64)] transition-colors hover:text-blue-600"
-        >
-          すべてみる
-        </button>
+        <ViewAllButton onClick={onViewAll} />
       </div>
       {isEmpty ? (
         <EmptyState message={emptyMessage} link={emptyLink} />
@@ -355,6 +350,24 @@ function MySection({
         </div>
       )}
     </section>
+  );
+}
+
+function ViewAllButton({ onClick }: { onClick: () => void }) {
+  const [isHovered, setIsHovered] = useState(false);
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      className="text-xs font-medium"
+      style={{
+        color: isHovered ? "#2563EB" : "rgba(2, 8, 23, 0.64)",
+        transition: "color 0.15s ease",
+      }}
+    >
+      すべてみる
+    </button>
   );
 }
 

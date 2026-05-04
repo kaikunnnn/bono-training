@@ -14,6 +14,9 @@ import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
+// 認証状態に依存するため動的レンダリングを強制（ゲートUIの表示分岐に必要）
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

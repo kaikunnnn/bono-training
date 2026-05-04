@@ -43,7 +43,7 @@ export function Sidebar({ className, user }: SidebarProps) {
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      <SidebarLogo />
+      <SidebarLogo isLoggedIn={!!user} />
 
       <SidebarMenuGroup>
         {user && (

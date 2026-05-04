@@ -273,7 +273,7 @@ export function VideoControls({
           {/* 再生/一時停止ボタン */}
           <button
             onClick={onTogglePlay}
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors cursor-pointer"
             aria-label={isPlaying ? '一時停止' : '再生'}
           >
             {isLoading ? (
@@ -293,7 +293,7 @@ export function VideoControls({
           >
             <button
               onClick={() => onVolumeChange((muted || volume === 0) ? 1 : 0)}
-              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+              className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                 (muted || volume === 0)
                   ? 'bg-destructive hover:bg-destructive/90'
                   : 'bg-white/20 hover:bg-white/30'
@@ -347,7 +347,7 @@ export function VideoControls({
             <div ref={subtitleMenuRef} className="relative">
               <button
                 onClick={() => setShowSubtitleMenu(!showSubtitleMenu)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                   activeTextTrack ? 'bg-white text-black' : 'bg-white/20 hover:bg-white/30 text-white'
                 }`}
                 aria-label="字幕"
@@ -364,7 +364,7 @@ export function VideoControls({
                       onDisableTextTrack();
                       setShowSubtitleMenu(false);
                     }}
-                    className={`w-full px-4 py-2 text-sm text-left transition-colors flex items-center justify-between ${
+                    className={`w-full px-4 py-2 text-sm text-left transition-colors cursor-pointer flex items-center justify-between ${
                       !activeTextTrack
                         ? 'text-white bg-white/10'
                         : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -381,7 +381,7 @@ export function VideoControls({
                         onEnableTextTrack(track.language);
                         setShowSubtitleMenu(false);
                       }}
-                      className={`w-full px-4 py-2 text-sm text-left transition-colors flex items-center justify-between ${
+                      className={`w-full px-4 py-2 text-sm text-left transition-colors cursor-pointer flex items-center justify-between ${
                         activeTextTrack?.language === track.language
                           ? 'text-white bg-white/10'
                           : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -403,7 +403,7 @@ export function VideoControls({
             <div ref={chapterMenuRef} className="relative">
               <button
                 onClick={() => setShowChapterMenu(!showChapterMenu)}
-                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                   showChapterMenu ? 'bg-white text-black' : 'bg-white/20 hover:bg-white/30 text-white'
                 }`}
                 aria-label="チャプター"
@@ -421,7 +421,7 @@ export function VideoControls({
                         onSeek(chapter.startTime);
                         setShowChapterMenu(false);
                       }}
-                      className={`w-full px-4 py-2 text-sm text-left transition-colors flex items-center justify-between gap-3 ${
+                      className={`w-full px-4 py-2 text-sm text-left transition-colors cursor-pointer flex items-center justify-between gap-3 ${
                         currentChapter?.index === chapter.index
                           ? 'text-white bg-white/10'
                           : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -442,7 +442,7 @@ export function VideoControls({
           <div ref={speedMenuRef} className="relative">
             <button
               onClick={() => setShowSpeedMenu(!showSpeedMenu)}
-              className="h-10 px-4 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors text-white text-sm font-medium"
+              className="h-10 px-4 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors cursor-pointer text-white text-sm font-medium"
             >
               {playbackRate === 1 ? '標準' : `${playbackRate}x`}
             </button>
@@ -457,7 +457,7 @@ export function VideoControls({
                       onPlaybackRateChange(rate);
                       setShowSpeedMenu(false);
                     }}
-                    className={`w-full px-4 py-2 text-sm text-left transition-colors flex items-center justify-between ${
+                    className={`w-full px-4 py-2 text-sm text-left transition-colors cursor-pointer flex items-center justify-between ${
                       rate === playbackRate
                         ? 'text-white bg-white/10'
                         : 'text-white/70 hover:text-white hover:bg-white/5'
@@ -476,7 +476,7 @@ export function VideoControls({
           {/* フルスクリーン */}
           <button
             onClick={onToggleFullscreen}
-            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+            className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors cursor-pointer"
             aria-label={isFullscreen ? 'フルスクリーン解除' : 'フルスクリーン'}
           >
             {isFullscreen ? (

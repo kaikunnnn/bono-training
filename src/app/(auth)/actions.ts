@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { translateAuthError } from "@/lib/auth-error-messages";
 
 export interface AuthResult {
   error?: string;
@@ -26,10 +27,7 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
   });
 
   if (error) {
-    if (error.message.includes("Invalid login credentials")) {
-      return { error: "メールアドレスまたはパスワードが正しくありません" };
-    }
-    return { error: error.message };
+    return { error: translateAuthError(error.message) };
   }
 
   revalidatePath("/", "layout");
@@ -65,10 +63,7 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   });
 
   if (error) {
-    if (error.message.includes("already registered")) {
-      return { error: "このメールアドレスは既に登録されています" };
-    }
-    return { error: error.message };
+    return { error: translateAuthError(error.message) };
   }
 
   // 登録成功後、自動ログインしてリダイレクト
@@ -95,7 +90,7 @@ export async function resetPassword(email: string): Promise<AuthResult> {
   });
 
   if (error) {
-    return { error: error.message };
+    return { error: translateAuthError(error.message) };
   }
 
   return { success: true };

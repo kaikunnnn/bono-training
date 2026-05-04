@@ -152,15 +152,15 @@ export function PlanCard({
   return (
     <>
       <Card
-        className={`flex flex-col ${
-          plan.popular ? "border-primary shadow-lg relative" : ""
+        className={`flex flex-col relative ${
+          plan.popular ? "border-primary shadow-lg" : ""
         } ${
           isCurrentPlan
             ? isCanceled
               ? "border-orange-500"
               : "border-green-500"
             : ""
-        }`}
+        } ${plan.popular || isCurrentPlan ? "mt-4" : ""}`}
       >
         {plan.popular && !isCurrentPlan && (
           <div className="absolute -top-3 left-0 right-0 flex justify-center">

@@ -115,10 +115,20 @@ export function CompletionButton({
 
   if (isPending) {
     return (
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        {showLabel && <span>処理中...</span>}
-      </div>
+      <button
+        type="button"
+        disabled
+        className="relative bg-white px-[12px] py-[8px] rounded-[16px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center gap-[4px] opacity-70"
+      >
+        <div className="w-5 h-5 flex items-center justify-center">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        </div>
+        {showLabel && (
+          <span className="font-semibold text-[14px] text-[#020817] leading-[20px]">
+            {isCompleted ? "完了済み" : "完了にする"}
+          </span>
+        )}
+      </button>
     );
   }
 

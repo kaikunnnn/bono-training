@@ -99,7 +99,7 @@ function LoginForm() {
       const result = await signIn(formData);
 
       if (result?.error) {
-        if (result.error.includes("Invalid login credentials") || result.error.includes("メールアドレスまたはパスワードが正しくありません")) {
+        if (result.error.includes("メールアドレスまたはパスワードが正しくありません")) {
           // ログイン失敗時、移行ユーザーかどうかをチェック
           const { exists, isMigrated } = await checkMigratedUser(email);
 
@@ -108,12 +108,11 @@ function LoginForm() {
             setIsMigratedUser(true);
             setLoginError(null);
           } else {
-            // 通常のエラーメッセージ
-            setLoginError("メールアドレスまたはパスワードが正しくありません。");
+            // 通常のエラーメッセージ（Server Actionで翻訳済み）
+            setLoginError(result.error);
           }
-        } else if (result.error.includes("Email not confirmed")) {
-          setLoginError("メールアドレスの確認が完了していません。確認メールをご確認ください。");
         } else {
+          // Server Actionで翻訳済みのメッセージをそのまま表示
           setLoginError(result.error);
         }
       }

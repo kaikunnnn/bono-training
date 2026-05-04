@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Check, Lock } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
+import { translateAuthError } from "@/lib/auth-error-messages";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
@@ -47,7 +48,7 @@ export default function UpdatePasswordPage() {
     });
 
     if (updateError) {
-      setError(updateError.message);
+      setError(translateAuthError(updateError.message));
       setIsSubmitting(false);
       return;
     }
