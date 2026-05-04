@@ -35,9 +35,12 @@
 
 /* Primary product stack: M PLUS Rounded 1c for JP headings,
    Inter for Latin body copy, Noto Sans JP fallback.
-   LINE Seed JP is provided as an alt display face (matches the
-   soft, rounded geometric quality that BONO leans on). */
-@import url("https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700&family=DotGothic16&family=Luckiest+Guy&display=swap");
+   LINE Seed JP is provided as an alt display face.
+
+   NOTE: Google Fonts @import removed — next/font/google in layout.tsx handles
+   all Google font loading with automatic optimization. The @import caused
+   CSS parse errors when this file was imported into globals.css (Turbopack
+   requires @import rules before all other rules). */
 
 :root {
   /* =========================================================
