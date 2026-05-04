@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  body { background: #F9F9F7; font-family: sans-serif; padding: 40px; }
+  .card {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    width: 200px;
+    cursor: pointer;
+    box-shadow: 0px 1px 8px rgba(0,0,0,0.08);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  .card:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0px 8px 24px rgba(0,0,0,0.16);
+  }
+</style>
+</head>
+<body>
+  <h1>Pure HTML Hover Test</h1>
+  <p>This file is NOT processed by Next.js or Tailwind.</p>
+  <div class="card">
+    <strong>Hover me</strong>
+    <p>Should smoothly animate up + shadow</p>
+  </div>
+</body>
+</html>
