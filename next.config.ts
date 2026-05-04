@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "uploads-ssl.webflow.com",
       },
+      {
+        protocol: "https",
+        hostname: "cdn.prod.website-files.com",
+      },
     ],
   },
 };

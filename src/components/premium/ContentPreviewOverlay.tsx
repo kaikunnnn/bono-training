@@ -86,7 +86,7 @@ export default function ContentPreviewOverlay({
                   size="lg"
                   className="flex-1 font-noto-sans-jp text-base"
                 >
-                  <Link href="/auth/login">
+                  <Link href="/login">
                     <LogIn className="mr-2 h-4 w-4" />
                     ログインする
                   </Link>

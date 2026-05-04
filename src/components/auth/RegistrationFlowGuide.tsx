@@ -106,7 +106,7 @@ export const RegistrationFlowGuide: React.FC<RegistrationFlowGuideProps> = ({
             size="large"
             className="w-full font-noto-sans-jp text-base"
           >
-            <Link href="/auth/login?tab=first-time">
+            <Link href="/login?tab=first-time">
               パスワード設定画面へ
             </Link>
           </Button>
@@ -190,7 +190,7 @@ export const RegistrationFlowGuide: React.FC<RegistrationFlowGuideProps> = ({
         {showLoginLink && (
           <p className="text-center mt-4 text-sm text-muted-foreground font-noto-sans-jp">
             アカウントをお持ちの方は{" "}
-            <Link href="/auth/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               ログイン
             </Link>
           </p>
