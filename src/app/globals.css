@@ -406,6 +406,7 @@
     *, *::before, *::after {
       transition-duration: 150ms !important;
       animation-duration: 500ms !important;
+      animation-iteration-count: infinite !important;
     }
   }
 
