@@ -410,9 +410,10 @@
     }
   }
 
-  a {
-    cursor: pointer;
-  }
+  /* cursor: pointer はグローバルではなく、各コンポーネントで設定する。
+   * a { cursor: pointer } はNext.jsのエラーオーバーレイ後にカーソル状態が
+   * 不安定になる原因だったため削除。next/link のLinkコンポーネントは
+   * デフォルトでpointerカーソルになる（aタグのブラウザデフォルト）。 */
 
   /* カード・セクションの表示時フェードインアニメーション
    * mainのframer-motion whileInView相当をCSSで再現 */
