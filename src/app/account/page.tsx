@@ -2,8 +2,8 @@
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
-import { Button } from "@/components/ui/button";
 import SubscriptionInfo from "@/components/account/SubscriptionInfo";
+import { PasswordChangeForm } from "@/components/account/PasswordChangeForm";
 import {
   SettingsPageLayout,
   SettingsPageTitle,
@@ -51,40 +51,7 @@ export default async function AccountPage() {
       </div>
 
       {/* パスワード変更 */}
-      <SettingsCard title="パスワード">
-        <div className="flex items-center justify-between">
-          <SettingsField label="現在のパスワード:">
-            <span className="text-gray-400">••••••••••••</span>
-          </SettingsField>
-          <Button variant="ghost" size="sm" disabled>
-            変更
-          </Button>
-        </div>
-        <p className="font-noto-sans-jp text-xs text-gray-500 mt-3">
-          パスワード変更機能は現在準備中です
-        </p>
-      </SettingsCard>
-
-      {/* アカウント削除 */}
-      <SettingsCard
-        title="危険な操作"
-        className="border-destructive/50"
-        titleClassName="text-destructive"
-      >
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="font-noto-sans-jp font-medium text-base text-gray-800">
-              アカウントを削除
-            </p>
-            <p className="font-noto-sans-jp text-sm text-gray-500 mt-1">
-              この操作は取り消せません。すべてのデータが削除されます。
-            </p>
-          </div>
-          <Button variant="destructive" size="sm" disabled>
-            削除
-          </Button>
-        </div>
-      </SettingsCard>
+      <PasswordChangeForm />
     </SettingsPageLayout>
   );
 }
