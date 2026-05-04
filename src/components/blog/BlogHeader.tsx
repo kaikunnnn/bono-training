@@ -74,14 +74,14 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
           </div>
         </Link>
 
-        {/* 右側: ページトップへスクロール */}
-        <button
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        {/* 右側: BONOトップへのリンク */}
+        <Link
+          href="/"
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <span>BONOへ</span>
           <ArrowUpRight size={14} />
-        </button>
+        </Link>
       </div>
     </header>
   );

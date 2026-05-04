@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { getCategoryInfo } from "@/lib/guideCategories";
 import type { Guide } from "@/types/guide";
+import { GuideCardImage } from "./GuideCardImage";
 
 interface GuideCardProps {
   guide: Guide;
@@ -15,22 +16,26 @@ function GuideCardMedia({ title, thumbnail }: { title: string; thumbnail?: strin
   return (
     <div className="w-full aspect-video rounded-3xl overflow-hidden bg-muted">
       {thumbnail ? (
-        <img
-          src={thumbnail}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-          loading="lazy"
-        />
+        <GuideCardImage src={thumbnail} alt={title} />
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#e6e6ef] via-[#ede9f5] to-[#faf2ed]">
-          <span className="text-[10px] font-bold tracking-[0.2em] text-foreground/30 uppercase">
-            Guide Article
-          </span>
-          <p className="text-[13px] font-bold text-foreground/50 text-center px-6 line-clamp-2 leading-snug">
-            {title}
-          </p>
-        </div>
+        <GuideCardPlaceholder title={title} />
       )}
+    </div>
+  );
+}
+
+/**
+ * サムネイルがない場合のプレースホルダー
+ */
+export function GuideCardPlaceholder({ title }: { title: string }) {
+  return (
+    <div className="w-full h-full flex flex-col items-center justify-center gap-3 bg-gradient-to-br from-[#e6e6ef] via-[#ede9f5] to-[#faf2ed]">
+      <span className="text-[10px] font-bold tracking-[0.2em] text-foreground/30 uppercase">
+        Guide Article
+      </span>
+      <p className="text-[13px] font-bold text-foreground/50 text-center px-6 line-clamp-2 leading-snug">
+        {title}
+      </p>
     </div>
   );
 }
