@@ -14,7 +14,10 @@
   /* Base colors - wrapped in hsl() for proper color parsing */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
-  --color-base: hsl(var(--base));
+  /* NOTE: --color-base は定義しない。Tailwind v4 では --color-* が自動的に
+   * カラーユーティリティを生成するため、--color-base があると text-base が
+   * font-size ではなく color として解釈され、白文字になる。
+   * bg-base は colors_and_type.css の --bg-base を参照する。 */
 
   /* Fonts */
   --font-sans: var(--font-geist-sans);
