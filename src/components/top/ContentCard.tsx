@@ -47,11 +47,12 @@ export default function ContentCard({
   const cardContent = (
     <div
       className={cn(
-        'bg-surface rounded-[24px] sm:rounded-[32px] overflow-hidden transition-[transform,box-shadow] duration-300 ease-out will-change-transform group-hover:shadow-lg group-hover:scale-[1.02]',
+        'bg-surface rounded-[24px] sm:rounded-[32px] overflow-hidden will-change-transform group-hover:shadow-lg group-hover:scale-[1.02]',
         isLarge
           ? 'lg:rounded-[32px] border-2 border-white shadow-sm min-h-[320px] sm:min-h-[360px] lg:min-h-[400px]'
           : 'lg:rounded-[40px] border-4 border-white shadow-sm'
       )}
+      style={{ transition: 'transform 0.3s ease-out, box-shadow 0.3s ease-out' }}
     >
       {/* サムネイル */}
       <div

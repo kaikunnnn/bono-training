@@ -70,7 +70,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
       <Link href={linkPath} className={cn('block group', className)}>
         <div
           className={cn(
-            'overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-300 will-change-transform',
+            'overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] will-change-transform',
             'group-hover:shadow-lg group-hover:scale-[1.02]',
             // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
             isWaveStyle
@@ -78,7 +78,10 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
               : 'rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] p-1.5 sm:p-2 lg:p-2.5',
             variant === 'white' ? 'bg-white' : ''
           )}
-          style={variant === 'gradient' ? { background: gradientCSS } : undefined}
+          style={{
+            ...(variant === 'gradient' ? { background: gradientCSS } : {}),
+            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+          }}
         >
           {/* サムネイルエリア */}
           {isWaveStyle ? (
@@ -172,7 +175,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
     <Link href={linkPath} className={cn('block group', className)}>
       <div
         className={cn(
-          'flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-300 will-change-transform',
+          'flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] will-change-transform',
           'group-hover:shadow-lg group-hover:scale-[1.01]',
           // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
           isWaveStyle
@@ -180,7 +183,10 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
             : 'rounded-[32px] sm:rounded-[48px] lg:rounded-[64px] p-1.5 sm:p-2 lg:p-2.5',
           variant === 'white' ? 'bg-white' : ''
         )}
-        style={variant === 'gradient' ? { background: gradientCSS } : undefined}
+        style={{
+          ...(variant === 'gradient' ? { background: gradientCSS } : {}),
+          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        }}
       >
         {/* サムネイルエリア */}
         {isWaveStyle ? (

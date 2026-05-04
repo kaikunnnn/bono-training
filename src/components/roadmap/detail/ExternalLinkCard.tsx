@@ -83,13 +83,14 @@ export default function ExternalLinkCard({ link }: ExternalLinkCardProps) {
   );
 
   const className =
-    "group flex items-center gap-5 p-5 bg-white rounded-2xl shadow-[0_1px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)] transition-[box-shadow] duration-200";
+    "group flex items-center gap-5 p-5 bg-white rounded-2xl shadow-[0_1px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)]";
 
   // 外部リンクの場合は<a>タグ、内部リンクの場合も<a>タグ（react-routerを経由しない）
   return (
     <a
       href={link.url}
       className={className}
+      style={{ transition: 'box-shadow 0.2s ease' }}
       target={isExternal ? "_blank" : undefined}
       rel={isExternal ? "noopener noreferrer" : undefined}
     >

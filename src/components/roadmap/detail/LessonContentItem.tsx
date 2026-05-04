@@ -23,7 +23,8 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
   return (
     <Link
       href={lessonUrl}
-      className="group flex items-center gap-6 p-6 bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-400 shadow-[0_1px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)] transition-[transform,box-shadow,border-color] duration-200 will-change-transform"
+      className="group flex items-center gap-6 p-6 bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-400 shadow-[0_1px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)] will-change-transform"
+      style={{ transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease' }}
     >
       {/* アイコン画像 - 右側のみ角丸 */}
       <div className="flex-shrink-0 w-[106px] h-[160px] overflow-hidden rounded-r-lg shadow-[0_1px_24px_rgba(0,0,0,0.16)]">

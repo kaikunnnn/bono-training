@@ -107,10 +107,10 @@ function TopRoadmapCard({
         className={cn(
           "relative w-full sm:w-[300px] lg:w-[377px] h-[320px] sm:h-[380px] lg:h-[441px] rounded-[24px] sm:rounded-[32px] overflow-hidden",
           "shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)]",
-          "transition-[transform,box-shadow] duration-300 will-change-transform",
+          "will-change-transform",
           "group-hover:shadow-lg group-hover:scale-[1.02]"
         )}
-        style={{ background: gradientCSS }}
+        style={{ background: gradientCSS, transition: 'transform 0.3s ease, box-shadow 0.3s ease' }}
       >
         {/* アイコン（左上） */}
         <div className="absolute left-5 sm:left-8 top-5 sm:top-8">

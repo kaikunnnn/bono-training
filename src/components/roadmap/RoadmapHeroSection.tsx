@@ -91,7 +91,8 @@ export default function RoadmapHeroSection({
             <div className="flex items-center gap-6">
               <Link
                 href={ctaHref}
-                className="inline-flex items-center gap-3 bg-[#1a1a1a] hover:bg-[#333] text-white font-semibold text-[15px] px-8 py-4 rounded-full transition-[transform,background-color] hover:-translate-y-0.5 will-change-transform"
+                className="inline-flex items-center gap-3 bg-[#1a1a1a] hover:bg-[#333] text-white font-semibold text-[15px] px-8 py-4 rounded-full hover:-translate-y-0.5 will-change-transform"
+                style={{ transition: 'transform 0.2s ease, background-color 0.2s ease' }}
               >
                 {ctaText}
                 <ArrowRight className="w-4 h-4" />

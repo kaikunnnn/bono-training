@@ -85,7 +85,7 @@ export default function GoalButton({
     'bg-surface rounded-[200px]',
     'border border-black/12',
     // インタラクション
-    'hover:shadow-md transition-[box-shadow]',
+    'hover:shadow-md',
     'group',
     className
   );
@@ -124,6 +124,7 @@ export default function GoalButton({
         href={href}
         onClick={handleClick}
         className={sharedClassName}
+        style={{ transition: 'box-shadow 0.2s ease' }}
       >
         {inner}
       </a>
@@ -131,7 +132,7 @@ export default function GoalButton({
   }
 
   return (
-    <Link href={href} className={sharedClassName}>
+    <Link href={href} className={sharedClassName} style={{ transition: 'box-shadow 0.2s ease' }}>
       {inner}
     </Link>
   );
