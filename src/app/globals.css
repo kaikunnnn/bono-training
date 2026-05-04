@@ -400,6 +400,17 @@
     @apply border-border;
   }
 
+  /* Tailwind v4 preflight が prefers-reduced-motion: reduce 時に
+   * 全要素の transition-duration を 0.01ms !important にする。
+   * これはカードホバーなど軽微なUIアニメーションまで殺してしまうため、
+   * transition-duration のみ上書きして適切な値に戻す。
+   * animation-duration はそのまま（ページ遷移等の大きなアニメーション抑制を維持）。 */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 150ms !important;
+    }
+  }
+
   a {
     cursor: pointer;
   }
