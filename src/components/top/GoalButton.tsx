@@ -85,7 +85,7 @@ export default function GoalButton({
     'bg-surface rounded-[200px]',
     'border border-black/12',
     // インタラクション
-    'hover:shadow-md transition-all',
+    'hover:shadow-md transition-[box-shadow]',
     'group',
     className
   );

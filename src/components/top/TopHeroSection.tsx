@@ -60,7 +60,7 @@ function CTAButton({
   external?: boolean;
 }) {
   const baseStyles = cn(
-    "inline-flex items-center justify-center h-11 sm:h-12 px-5 sm:px-6 rounded-[14px] text-sm font-bold tracking-wide transition-all",
+    "inline-flex items-center justify-center h-11 sm:h-12 px-5 sm:px-6 rounded-[14px] text-sm font-bold tracking-wide transition-colors",
     variant === "primary"
       ? "bg-[#081c17] text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] hover:bg-[#0d2a22]"
       : "bg-transparent border border-[#0f172a] text-[#0f172a] hover:bg-[#f5f5f5]"
@@ -107,7 +107,7 @@ function TopRoadmapCard({
         className={cn(
           "relative w-full sm:w-[300px] lg:w-[377px] h-[320px] sm:h-[380px] lg:h-[441px] rounded-[24px] sm:rounded-[32px] overflow-hidden",
           "shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)]",
-          "transition-all duration-300",
+          "transition-[transform,box-shadow] duration-300 will-change-transform",
           "group-hover:shadow-lg group-hover:scale-[1.02]"
         )}
         style={{ background: gradientCSS }}

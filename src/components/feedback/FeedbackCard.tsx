@@ -70,7 +70,7 @@ export function FeedbackCard({ feedback }: FeedbackCardProps) {
     <motion.div variants={fadeInUp} className="h-full">
       <Link
         href={`/feedbacks/${feedback.slug.current}`}
-        className="group block h-full bg-white rounded-[24px] border border-border/50 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-all duration-300"
+        className="group block h-full bg-white rounded-[24px] border border-border/50 overflow-hidden hover:shadow-xl hover:shadow-gray-200/50 hover:-translate-y-1 transition-[transform,box-shadow] duration-300 will-change-transform"
       >
         {/* ビジュアルエリア */}
         <div

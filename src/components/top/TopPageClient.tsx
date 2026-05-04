@@ -130,7 +130,7 @@ function CTAButtonSecondary({
   return (
     <Link
       href={href}
-      className="inline-flex items-center justify-center h-14 px-[25px] py-px rounded-[14px] border-2 border-[#0f172a] text-[#0f172a] text-sm font-bold leading-5 tracking-[0.35px] text-center hover:bg-[#0f172a] hover:text-white transition-all duration-300 w-full sm:w-auto sm:min-w-[154px]"
+      className="inline-flex items-center justify-center h-14 px-[25px] py-px rounded-[14px] border-2 border-[#0f172a] text-[#0f172a] text-sm font-bold leading-5 tracking-[0.35px] text-center hover:bg-[#0f172a] hover:text-white transition-colors duration-300 w-full sm:w-auto sm:min-w-[154px]"
     >
       {children}
     </Link>

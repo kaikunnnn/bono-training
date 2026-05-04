@@ -160,7 +160,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                   {/* ポートフォリオ作成 */}
                   <Link
                     href="/lessons/creating-portfolio"
-                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group block"
+                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-[border-color,box-shadow] group block"
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f4ee] rounded-xl flex items-center justify-center group-hover:bg-[#52674e]/10 transition-colors">
@@ -186,7 +186,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                     href="https://kaikun.bo-no.design/career/beginner"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group block"
+                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-[border-color,box-shadow] group block"
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f0fa] rounded-xl flex items-center justify-center group-hover:bg-[#667eea]/10 transition-colors">
@@ -211,7 +211,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                 // 通常のロードマップのアクション
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
                   {/* ブログにまとめる */}
-                  <div className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group">
+                  <div className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-[border-color,box-shadow] group">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f4ee] rounded-xl flex items-center justify-center group-hover:bg-[#52674e]/10 transition-colors">
                         <Edit size={24} color="#52674e" variant="Linear" />
@@ -240,7 +240,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                   {/* フィードバックを受ける */}
                   <Link
                     href="/feedback-apply"
-                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all group block"
+                    className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-[border-color,box-shadow] group block"
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f0fa] rounded-xl flex items-center justify-center group-hover:bg-[#667eea]/10 transition-colors">

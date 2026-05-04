@@ -67,7 +67,7 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
                     {/* ステップ番号バッジ */}
                     <div className="flex-shrink-0 w-[50px] h-[43px] bg-white rounded-xl shadow-[0_1px_5px_rgba(0,0,0,0.08)] overflow-hidden">
                       {/* 薄いグレーヘッダー（ホバー時グラデーション） */}
-                      <div className="bg-gray-100 group-hover:bg-gradient-to-r group-hover:from-[#b2b3d9] group-hover:via-[#e2ccd1] group-hover:to-[#f1e8dc] px-1.5 py-1.5 rounded-t-xl transition-all">
+                      <div className="bg-gray-100 group-hover:bg-gradient-to-r group-hover:from-[#b2b3d9] group-hover:via-[#e2ccd1] group-hover:to-[#f1e8dc] px-1.5 py-1.5 rounded-t-xl transition-colors">
                         <p className="text-[6px] font-bold text-text-primary text-center leading-[9px]">
                           ステップ
                         </p>
