@@ -52,7 +52,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, variant = "default", i
   const categoryBgColor = categoryBgColors[post.category] || 'bg-gray-400';
 
   return (
-    <Link href={`/blog/${post.slug}`} className="hover:opacity-80">
+    <Link href={`/blog/${post.slug}`} className="blog-card-hover hover:opacity-80">
       <motion.li
         variants={cardVariants}
         initial="hidden"

@@ -394,6 +394,10 @@
     @apply border-border;
   }
 
+  a {
+    cursor: pointer;
+  }
+
   body {
     /* Figma text-primary token: #021710
      * Direct hex value ensures dark text regardless of CSS variable resolution.

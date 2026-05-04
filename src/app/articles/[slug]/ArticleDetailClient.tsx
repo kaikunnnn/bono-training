@@ -10,6 +10,7 @@ import {
   ArticleCompletionContext,
   type CompletionLevel,
 } from "@/contexts/ArticleCompletionContext";
+import { ArticleBookmarkContext } from "@/contexts/ArticleBookmarkContext";
 import { detectCompletionLevel } from "@/lib/completion-detection";
 import { useCelebration } from "@/hooks/useCelebration";
 import { CelebrationModal } from "@/components/celebration/CelebrationModal";
@@ -59,6 +60,9 @@ export default function ArticleDetailClient({
 
   // 共有される完了状態（複数CompletionButton間の同期用）
   const [sharedIsCompleted, setSharedIsCompleted] = useState<boolean | null>(null);
+
+  // 共有されるブックマーク状態（複数BookmarkButton間の同期用）
+  const [sharedIsBookmarked, setSharedIsBookmarked] = useState<boolean | null>(null);
 
   // 完了レベル検知結果（BON-136 でセレブレーションに使用）
   const [completionLevel, setCompletionLevel] =
@@ -135,6 +139,20 @@ export default function ArticleDetailClient({
     setCompletedLessonTitle(null);
   }, []);
 
+  // BookmarkButton から呼ばれるコールバック
+  const handleBookmarkChange = useCallback((isBookmarked: boolean) => {
+    setSharedIsBookmarked(isBookmarked);
+  }, []);
+
+  // Bookmark Context value（メモ化）
+  const bookmarkContextValue = useMemo(
+    () => ({
+      onBookmarkChange: handleBookmarkChange,
+      sharedIsBookmarked,
+    }),
+    [handleBookmarkChange, sharedIsBookmarked]
+  );
+
   // Context value（メモ化）
   const completionContextValue = useMemo(
     () => ({
@@ -207,6 +225,7 @@ export default function ArticleDetailClient({
 
   return (
     <ArticleCompletionContext.Provider value={completionContextValue}>
+    <ArticleBookmarkContext.Provider value={bookmarkContextValue}>
       <div className="min-h-screen">
         {/* モバイルメニューボタン（スマホのみ表示） */}
         <div className="fixed top-4 left-4 z-30 md:hidden">
@@ -288,6 +307,7 @@ export default function ArticleDetailClient({
           footer={celebration.lessonModalData.footer}
         />
       )}
+    </ArticleBookmarkContext.Provider>
     </ArticleCompletionContext.Provider>
   );
 }

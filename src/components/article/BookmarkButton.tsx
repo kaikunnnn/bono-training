@@ -1,20 +1,22 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, useEffect } from "react";
 import { Star, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { toggleBookmark } from "@/lib/services/bookmarks";
 import { trackBookmark } from "@/lib/analytics";
+import { useArticleBookmarkOptional } from "@/contexts/ArticleBookmarkContext";
 
 interface BookmarkButtonProps {
   articleId: string;
   initialIsBookmarked: boolean;
   isPremium?: boolean;
   variant?: "default" | "outline" | "ghost" | "secondary";
-  size?: "default" | "sm" | "lg" | "icon";
+  size?: "default" | "sm" | "lg" | "icon" | "action";
   showLabel?: boolean;
   labelClassName?: string;
+  className?: string;
 }
 
 export function BookmarkButton({
@@ -22,13 +24,22 @@ export function BookmarkButton({
   initialIsBookmarked,
   isPremium = false,
   variant = "secondary",
-  size = "sm",
+  size = "action",
   showLabel = true,
   labelClassName = "",
+  className = "gap-1",
 }: BookmarkButtonProps) {
   const { toast } = useToast();
   const [isBookmarked, setIsBookmarked] = useState(initialIsBookmarked);
   const [isPending, startTransition] = useTransition();
+  const bookmarkCtx = useArticleBookmarkOptional();
+
+  // Context の sharedIsBookmarked で他のボタンと同期
+  useEffect(() => {
+    if (bookmarkCtx?.sharedIsBookmarked !== null && bookmarkCtx?.sharedIsBookmarked !== undefined) {
+      setIsBookmarked(bookmarkCtx.sharedIsBookmarked);
+    }
+  }, [bookmarkCtx?.sharedIsBookmarked]);
 
   const handleToggle = () => {
     startTransition(async () => {
@@ -36,6 +47,8 @@ export function BookmarkButton({
 
       if (result.success) {
         setIsBookmarked(result.isBookmarked);
+        // Context経由で他のBookmarkButtonと同期
+        bookmarkCtx?.onBookmarkChange(result.isBookmarked);
         if (result.isBookmarked) {
           trackBookmark(articleId, "article");
         }
@@ -60,7 +73,7 @@ export function BookmarkButton({
       size={size}
       onClick={handleToggle}
       disabled={isPending}
-      className="gap-1"
+      className={className}
       style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
       aria-label={isBookmarked ? "ブックマークを解除" : "ブックマークに追加"}
     >
@@ -76,7 +89,7 @@ export function BookmarkButton({
         />
       )}
       {showLabel && (
-        <span className={`text-center text-gray-600 text-sm font-semibold leading-5 ${labelClassName}`}>
+        <span className={`text-center text-gray-600 text-sm font-semibold font-['Hiragino_Sans'] leading-5 ${labelClassName}`}>
           お気に入り
         </span>
       )}

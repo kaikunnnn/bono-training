@@ -51,6 +51,13 @@ export const ArticleActionButtons = ({
             isPremium={isPremium}
             showLabel={!isFavoriteIconOnly}
             labelClassName={isFavoriteIconOnlyOnMobile ? "hidden sm:inline" : ""}
+            className={
+              isFavoriteIconOnly
+                ? "gap-0 px-[10px]"
+                : isFavoriteIconOnlyOnMobile
+                ? "gap-0 sm:gap-1 px-[10px] sm:px-[12px]"
+                : "gap-1"
+            }
           />
 
           {/* Share Button with Dropdown */}
