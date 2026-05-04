@@ -38,18 +38,22 @@ export function FeedbackApplyClient({
     router.push("/feedback-apply/submit");
   };
 
-  // 非メンバーの場合はサブスクリプションページへのリンクボタンを表示
-  const buttonText = isLoggedIn && !canApply ? "メンバーになって応募" : "応募する";
+  // 非ログインまたは非メンバーの場合はサブスクリプションページへのリンクボタンを表示
+  const buttonText = !isLoggedIn || !canApply ? "メンバーになって応募" : "応募する";
 
   if (position === "header") {
-    if (isLoggedIn && !canApply) {
+    if (!isLoggedIn || !canApply) {
+      const headerHref = !isLoggedIn
+        ? "/login?redirectTo=/feedback-apply/submit"
+        : "/subscription";
+
       return (
         <Button
           asChild
           size="large"
           className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold"
         >
-          <Link href="/subscription">
+          <Link href={headerHref}>
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -69,8 +73,12 @@ export function FeedbackApplyClient({
     );
   }
 
-  // CTA position
-  if (isLoggedIn && !canApply) {
+  // CTA position — 非ログインまたは非メンバー
+  if (!isLoggedIn || !canApply) {
+    const ctaHref = !isLoggedIn
+      ? "/login?redirectTo=/feedback-apply/submit"
+      : "/subscription";
+
     return (
       <>
         <Button
@@ -78,7 +86,7 @@ export function FeedbackApplyClient({
           size="lg"
           className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-3 shadow-sm"
         >
-          <Link href="/subscription">
+          <Link href={ctaHref}>
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>

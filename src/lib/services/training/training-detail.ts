@@ -23,6 +23,8 @@ export const getTrainingDetail = async (
     );
   }
 
+  const normalizedSlug = slug.trim();
+
   // 1. Edge Function（第1段階）
   try {
     const supabase = await createClient();
@@ -30,7 +32,7 @@ export const getTrainingDetail = async (
     const { data, error } = await supabase.functions.invoke(
       "get-training-detail",
       {
-        body: { slug },
+        body: { slug: normalizedSlug },
       }
     );
 
@@ -50,15 +52,19 @@ export const getTrainingDetail = async (
 
     // 2. Sanity CMS フォールバック（第2段階）
     try {
-      const sanityData = await getTrainingDetailFromSanity(slug);
+      console.log("[getTrainingDetail] Sanity フォールバック開始 slug:", normalizedSlug);
+      const sanityData = await getTrainingDetailFromSanity(normalizedSlug);
 
       if (!sanityData) {
+        console.warn("[getTrainingDetail] Sanity クエリ結果が null。slug:", normalizedSlug);
         throw new TrainingError(
           "トレーニングが見つかりません",
           "NOT_FOUND",
           404
         );
       }
+
+      console.log("[getTrainingDetail] Sanity フォールバック成功:", sanityData.title);
 
       return {
         id: sanityData._id,

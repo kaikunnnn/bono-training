@@ -231,9 +231,16 @@ export default function RoadmapHero({
 
           {/* CVエリア */}
           <div className="w-full max-w-[538px]">
-            <div className="backdrop-blur-[4px] bg-white/[0.04] border border-white/[0.06] rounded-3xl px-8 md:px-12 py-5 pb-6">
-              {/* 料金表示（未加入時のみ） */}
-              {!isSubscribed && (
+            {isSubscribed ? (
+              /* 加入済み: カード不要、ボタンのみ中央配置 */
+              <div className="flex justify-center">
+                <SecondaryCTAButton href="#curriculum">
+                  カリキュラムへ
+                </SecondaryCTAButton>
+              </div>
+            ) : (
+              /* 未加入: カード付きで料金 + CTAボタン */
+              <div className="backdrop-blur-[4px] bg-white/[0.04] border border-white/[0.06] rounded-3xl px-8 md:px-12 py-5 pb-6">
                 <div className="flex items-center justify-center gap-4 text-white mb-4">
                   <span className="text-[12px] font-bold opacity-70">料金</span>
                   <div className="flex items-end gap-0.5 leading-none">
@@ -244,20 +251,17 @@ export default function RoadmapHero({
                     <span className="text-[13px]">円/月</span>
                   </div>
                 </div>
-              )}
 
-              {/* CTAボタン */}
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                {!isSubscribed && (
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
                   <PrimaryCTAButton href="/subscription">
                     メンバーになってはじめる
                   </PrimaryCTAButton>
-                )}
-                <SecondaryCTAButton href="#curriculum">
-                  カリキュラムへ
-                </SecondaryCTAButton>
+                  <SecondaryCTAButton href="#curriculum">
+                    カリキュラムへ
+                  </SecondaryCTAButton>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </motion.div>
 
