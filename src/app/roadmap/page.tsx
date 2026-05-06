@@ -8,6 +8,9 @@
 
 import { Metadata } from "next";
 import { getAllRoadmaps } from "@/lib/sanity";
+
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
 import RoadmapCardV2 from "@/components/roadmap/RoadmapCardV2";
 import CategoryNav from "@/components/common/CategoryNav";
 import SectionHeading from "@/components/common/SectionHeading";

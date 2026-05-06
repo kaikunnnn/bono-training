@@ -1,33 +1,29 @@
-import 'server-only'
-import { createClient } from "@/lib/supabase/server";
+import { Suspense } from "react";
 import { Layout } from "./Layout";
+import { UserProvider } from "./UserProvider";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
 }
 
 /**
- * レイアウトラッパー（Server Component）
- * サーバーサイドでユーザー情報を取得し、Layoutコンポーネントに渡す
+ * レイアウトラッパー
+ *
+ * ユーザー情報の取得をSuspense内のUserProviderに分離し、
+ * ページコンテンツの描画をブロックしない。
+ * これにより、コンテンツページ（/lessons, /roadmap等）が
+ * 静的生成/ISRの候補になる。
  */
-export async function LayoutWrapper({ children }: LayoutWrapperProps) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+export function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
-    <Layout
-      user={
-        user
-          ? {
-              id: user.id,
-              email: user.email || "",
-            }
-          : null
-      }
-    >
-      {children}
-    </Layout>
+    <Suspense fallback={<Layout user={null}>{children}</Layout>}>
+      <UserProviderLayout>{children}</UserProviderLayout>
+    </Suspense>
   );
+}
+
+/** Suspense内でユーザー情報を取得してLayoutに渡す */
+async function UserProviderLayout({ children }: { children: React.ReactNode }) {
+  const user = await UserProvider();
+  return <Layout user={user}>{children}</Layout>;
 }

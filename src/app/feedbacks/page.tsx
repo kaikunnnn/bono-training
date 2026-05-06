@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import Link from "next/link";
+
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
 import { getAllFeedbacks, getFeedbacksByCategory, getFeedbackCategories } from "@/lib/sanity";
 import { FeedbackCard } from "@/components/feedback/FeedbackCard";
 import { CategoryTabs } from "@/components/feedback/CategoryTabs";

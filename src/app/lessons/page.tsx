@@ -3,6 +3,9 @@ import { getAllLessonsWithArticleIds } from "@/lib/sanity";
 // TODO: LessonCardに進捗表示を追加する際に使用
 // import { getMultipleLessonProgress } from "@/lib/services/progress";
 import PageHeader from "@/components/common/PageHeader";
+
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
 import CategoryNav, { type CategoryNavItem } from "@/components/common/CategoryNav";

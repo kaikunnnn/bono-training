@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import { Suspense } from "react";
 import { getAllGuides, getGuidesByCategory } from "@/lib/guideLoader";
+
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
 import { GuideCard } from "@/components/guide/GuideCard";
 import { GuideCategoryFilter } from "@/components/guide/GuideCategoryFilter";

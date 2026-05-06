@@ -3,6 +3,9 @@ import { getAllRoadmaps, getAllLessons } from "@/lib/sanity";
 import TopPageClient from "@/components/top/TopPageClient";
 import { generateWebSiteJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
+// ISR: 1時間キャッシュ（Sanityコンテンツは頻繁に変わらない）
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "BONO - UIUXデザインを学ぶ",
   description:

@@ -2,6 +2,9 @@ import { Metadata } from "next";
 import { getBlogPosts } from "@/lib/sanity";
 import BlogIndexClient from "./BlogIndexClient";
 
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "BONO Blog - HOPE.",
   description: "BONOをつくる30代在宅独身男性のクラフト日誌。デザイン、開発、UI/UXに関する記事をお届けします。",
