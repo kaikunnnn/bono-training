@@ -973,6 +973,45 @@ export async function getTrainingTaskDetailFromSanity(
 }
 
 // ============================================
+// Event 関連のクエリ（Server Components用）
+// ============================================
+
+export async function getEvent(slug: string) {
+  const query = `
+    *[_type == "event" && slug.current == $slug][0] {
+      _id,
+      _type,
+      title,
+      slug,
+      summary,
+      registrationUrl,
+      thumbnail {
+        ...,
+        "asset": asset-> {
+          _id,
+          url
+        }
+      },
+      thumbnailUrl,
+      eventMonth,
+      eventPeriod,
+      content[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> {
+            _id,
+            url
+          }
+        }
+      },
+      publishedAt
+    }
+  `;
+  return getClient().fetch(query, { slug });
+}
+
+// ============================================
 // Roadmap 関連のクエリ（Server Components用）
 // ============================================
 
