@@ -118,8 +118,8 @@ export function Layout({ children, className, user }: LayoutProps) {
             </Sheet>
           </div>
 
-          {/* BONOロゴ（中央）: ログイン中は /mypage、未ログインは / */}
-          <Link href={user ? "/mypage" : "/"} className="flex items-center">
+          {/* BONOロゴ（中央）: mainと同様、常に / にリンク（ログイン済みなら / が /mypage にリダイレクト） */}
+          <Link href="/" className="flex items-center">
             <Logo width={68} height={20} />
           </Link>
         </div>

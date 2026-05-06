@@ -21,16 +21,18 @@ export const getTrainings = async (): Promise<Training[]> => {
     });
 
     if (error) {
-      console.error("[getTrainings] Edge Function エラー:", error);
       throw error;
     }
 
     if (!data?.success || !data?.data) {
-      console.error("[getTrainings] Edge Function レスポンス不正:", data);
       throw new Error("レスポンス不正");
     }
 
-    return data.data as Training[];
+    // Edge Functionから返るslugにもスペースが混入する可能性があるためtrim
+    return (data.data as Training[]).map((t) => ({
+      ...t,
+      slug: (t.slug || "").trim(),
+    }));
   } catch (edgeFnError) {
     console.warn("[getTrainings] Edge Function 失敗、Sanity フォールバックへ:", edgeFnError);
 
@@ -40,7 +42,7 @@ export const getTrainings = async (): Promise<Training[]> => {
 
       return sanityData.map((item) => ({
         id: item._id,
-        slug: item.slug,
+        slug: (item.slug || "").trim(),
         title: item.title,
         description: item.description || "",
         type: (item.type || "challenge") as Training["type"],

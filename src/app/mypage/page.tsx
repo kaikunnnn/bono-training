@@ -50,11 +50,12 @@ export default async function MyPage() {
 
     // 最初の未完了記事を特定
     let firstIncompleteArticle = null;
-    if (lesson.quests && progress) {
+    if (lesson.quests) {
+      const completedIds = progress?.completedArticleIds || [];
       for (const quest of lesson.quests) {
         if (!quest.articles) continue;
         for (const article of quest.articles) {
-          if (!progress.completedArticleIds.includes(article._id)) {
+          if (!completedIds.includes(article._id)) {
             firstIncompleteArticle = {
               title: article.title,
               slug: article.slug?.current || "",

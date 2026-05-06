@@ -42,7 +42,7 @@ export function HeadingSectionInner({
           {linkHref ? (
             <a
               href={linkHref}
-              className="text-[12px] text-[rgba(2,8,23,0.64)] leading-[32px] text-center whitespace-nowrap hover:opacity-80"
+              className="text-[12px] text-[rgba(2,8,23,0.64)] leading-[32px] text-center whitespace-nowrap hover:opacity-80 cursor-pointer"
               style={{ fontFamily: "'Rounded Mplus 1c', sans-serif" }}
             >
               {linkText}

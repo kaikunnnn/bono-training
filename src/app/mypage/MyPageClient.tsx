@@ -360,7 +360,7 @@ function ViewAllButton({ onClick }: { onClick: () => void }) {
       onClick={onClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className="text-xs font-medium"
+      className="text-xs font-medium cursor-pointer"
       style={{
         color: isHovered ? "#2563EB" : "rgba(2, 8, 23, 0.64)",
         transition: "color 0.15s ease",
@@ -554,11 +554,11 @@ function ProgressLessonCard({
             transition: "background-color 0.2s ease",
           }}
         >
-          <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: 24, paddingRight: 24, paddingTop: 8, paddingBottom: 8, width: "100%", whiteSpace: "nowrap" }}>
-            <span style={{ fontFamily: "'Noto Sans JP', sans-serif", fontWeight: 400, fontSize: 10, color: "#4B5563" }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: 24, paddingRight: 24, paddingTop: 8, paddingBottom: 8, width: "100%", minWidth: 0 }}>
+            <span style={{ fontFamily: "'Noto Sans JP', sans-serif", fontWeight: 400, fontSize: 10, color: "#4B5563", flexShrink: 0, whiteSpace: "nowrap" }}>
               <span style={{ fontWeight: 700 }}>次</span>👉️
             </span>
-            <span style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif", fontWeight: 700, fontSize: 12, lineHeight: "20px", color: "#000000" }}>
+            <span style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif", fontWeight: 700, fontSize: 12, lineHeight: "20px", color: "#000000", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
               {currentStep}
             </span>
           </div>

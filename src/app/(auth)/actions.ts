@@ -10,9 +10,18 @@ export interface AuthResult {
   success?: boolean;
 }
 
-export async function signIn(formData: FormData): Promise<AuthResult> {
-  const supabase = await createClient();
+/** ネットワーク・接続エラーをわかりやすいメッセージに変換 */
+function translateConnectionError(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
 
+  if (msg.includes("fetch failed") || msg.includes("ECONNREFUSED")) {
+    return "サーバーに接続できません。開発環境の場合は Supabase が起動しているか確認してください（npx supabase start）";
+  }
+
+  return `接続エラーが発生しました: ${msg}`;
+}
+
+export async function signIn(formData: FormData): Promise<AuthResult> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const redirectTo = formData.get("redirectTo") as string | null;
@@ -21,13 +30,19 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
     return { error: "メールアドレスとパスワードを入力してください" };
   }
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  try {
+    const supabase = await createClient();
 
-  if (error) {
-    return { error: translateAuthError(error.message) };
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      return { error: translateAuthError(error.message) };
+    }
+  } catch (err) {
+    return { error: translateConnectionError(err) };
   }
 
   revalidatePath("/", "layout");
@@ -35,8 +50,6 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
 }
 
 export async function signUp(formData: FormData): Promise<AuthResult> {
-  const supabase = await createClient();
-
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
@@ -54,16 +67,22 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     return { error: "パスワードは8文字以上で入力してください" };
   }
 
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-    },
-  });
+  try {
+    const supabase = await createClient();
 
-  if (error) {
-    return { error: translateAuthError(error.message) };
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      return { error: translateAuthError(error.message) };
+    }
+  } catch (err) {
+    return { error: translateConnectionError(err) };
   }
 
   // 登録成功後、自動ログインしてリダイレクト
@@ -79,18 +98,22 @@ export async function signOut() {
 }
 
 export async function resetPassword(email: string): Promise<AuthResult> {
-  const supabase = await createClient();
-
   if (!email) {
     return { error: "メールアドレスを入力してください" };
   }
 
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/update-password`,
-  });
+  try {
+    const supabase = await createClient();
 
-  if (error) {
-    return { error: translateAuthError(error.message) };
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/update-password`,
+    });
+
+    if (error) {
+      return { error: translateAuthError(error.message) };
+    }
+  } catch (err) {
+    return { error: translateConnectionError(err) };
   }
 
   return { success: true };

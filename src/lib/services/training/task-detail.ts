@@ -1,6 +1,6 @@
 import 'server-only'
 import { createClient } from "@/lib/supabase/server";
-import { getTrainingDetailFromSanity } from "@/lib/sanity";
+import { getTrainingTaskDetailFromSanity } from "@/lib/sanity";
 import type { TaskDetailData } from "@/types/training";
 import { TrainingError } from "@/lib/errors";
 
@@ -127,12 +127,10 @@ export const getTrainingTaskDetail = async (
     );
 
     if (error) {
-      console.error("[getTrainingTaskDetail] Edge Function エラー:", error);
       throw error;
     }
 
     if (!data?.success) {
-      console.error("[getTrainingTaskDetail] Edge Function レスポンス不正:", data);
       throw new Error("レスポンス不正");
     }
 
@@ -143,30 +141,37 @@ export const getTrainingTaskDetail = async (
       taskSlug
     );
 
+    // Edge Function が空コンテンツを返した場合、Sanity から Portable Text セクションを補完
+    if (!taskDetail.content && !taskDetail.sanitySections?.length) {
+      try {
+        const sanityData = await getTrainingTaskDetailFromSanity(trainingSlug, taskSlug);
+        if (sanityData?.sections?.length) {
+          taskDetail.sanitySections = sanityData.sections;
+          taskDetail.description = taskDetail.description || sanityData.description;
+          // Sanityのナビゲーション情報も補完
+          if (!taskDetail.next_task && !taskDetail.prev_task) {
+            const allTasks = sanityData.allTasks || [];
+            const currentIndex = allTasks.findIndex((t) => t.slug === taskSlug);
+            taskDetail.prev_task = currentIndex > 0 ? allTasks[currentIndex - 1].slug : null;
+            taskDetail.next_task = currentIndex < allTasks.length - 1 ? allTasks[currentIndex + 1].slug : null;
+          }
+        }
+      } catch (sanitySupplementError) {
+        console.warn("[getTrainingTaskDetail] Sanity補完も失敗:", sanitySupplementError);
+      }
+    }
+
     return taskDetail;
   } catch (edgeFnError) {
     console.warn("[getTrainingTaskDetail] Edge Function 失敗、Sanity フォールバックへ:", edgeFnError);
 
     // 2. Sanity CMS フォールバック（第2段階）
-    // タスク本文は Supabase Storage のみに存在するため、
-    // Sanity からはタスクのメタ情報（タイトル・順序等）のみ取得し、
-    // コンテンツは空で返す（ページ側で「コンテンツが利用できません」を表示）
+    // mainと同じGROQクエリでPortable Textコンテンツを含むタスクデータを取得
     try {
-      const sanityData = await getTrainingDetailFromSanity(trainingSlug);
+      console.log("[getTrainingTaskDetail] Sanity フォールバック開始:", trainingSlug, taskSlug);
+      const data = await getTrainingTaskDetailFromSanity(trainingSlug, taskSlug);
 
-      if (!sanityData) {
-        throw new TrainingError(
-          "トレーニングが見つかりません",
-          "NOT_FOUND",
-          404
-        );
-      }
-
-      const sanityTask = (sanityData.tasks || []).find(
-        (t) => t.slug === taskSlug
-      );
-
-      if (!sanityTask) {
+      if (!data) {
         throw new TrainingError(
           "タスクが見つかりません",
           "NOT_FOUND",
@@ -174,32 +179,36 @@ export const getTrainingTaskDetail = async (
         );
       }
 
-      // タスクの順序を取得して前後のタスクを計算
-      const sortedTasks = [...(sanityData.tasks || [])].sort(
-        (a, b) => (a.orderIndex ?? 0) - (b.orderIndex ?? 0)
-      );
-      const currentIndex = sortedTasks.findIndex((t) => t.slug === taskSlug);
-      const prevTask = currentIndex > 0 ? sortedTasks[currentIndex - 1] : null;
-      const nextTask = currentIndex < sortedTasks.length - 1 ? sortedTasks[currentIndex + 1] : null;
+      // 前後のタスクを算出（mainと同じロジック）
+      const allTasks = data.allTasks || [];
+      const currentIndex = allTasks.findIndex((t) => t.slug === taskSlug);
+      const prevTask = currentIndex > 0 ? allTasks[currentIndex - 1].slug : null;
+      const nextTask = currentIndex < allTasks.length - 1 ? allTasks[currentIndex + 1].slug : null;
+
+      console.log("[getTrainingTaskDetail] Sanity フォールバック成功:", data.title);
 
       return {
-        id: sanityTask._id,
-        slug: sanityTask.slug,
-        title: sanityTask.title,
-        content: "", // Storage にしかないため空
-        is_premium: sanityTask.isPremium ?? false,
-        order_index: sanityTask.orderIndex ?? 1,
-        training_id: sanityData._id,
+        id: data._id,
+        slug: data.slug,
+        title: data.title,
+        content: "", // Portable TextはsanitySectionsで提供
+        is_premium: data.isPremium || false,
+        order_index: data.orderIndex ?? 1,
+        training_id: data.training?._id || "",
         created_at: null,
-        video_full: null,
-        video_preview: null,
-        preview_sec: null,
-        trainingTitle: sanityData.title,
-        trainingSlug: trainingSlug,
-        next_task: nextTask?.slug ?? null,
-        prev_task: prevTask?.slug ?? null,
+        video_full: data.videoFull || null,
+        video_preview: data.videoPreview || null,
+        preview_sec: data.previewSec || null,
+        trainingTitle: data.training?.title || "",
+        trainingSlug: data.training?.slug || trainingSlug,
+        trainingType: data.training?.type,
+        next_task: nextTask,
+        prev_task: prevTask,
         isPremiumCut: false,
         hasAccess: true,
+        description: data.description,
+        // Sanity Portable Text セクション
+        sanitySections: data.sections || [],
       };
     } catch (sanityError) {
       // Sanity からの NOT_FOUND はそのまま再スロー

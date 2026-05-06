@@ -197,7 +197,14 @@ export async function getAllLessonsWithArticleIds(): Promise<LessonWithArticleId
       "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
       tags,
       isPremium,
-      "articleIds": quests[]->articles[]->_id
+      "articleIds": quests[]->articles[]->_id,
+      "quests": quests[]-> {
+        "articles": articles[]-> {
+          _id,
+          title,
+          slug
+        }
+      }
     }
   `;
   const lessons = await getClient().fetch<LessonWithArticleIds[]>(query);
@@ -901,6 +908,68 @@ export async function getTrainingDetailFromSanity(slug: string): Promise<SanityT
     }
   `;
   return getClient().fetch<SanityTrainingDetailItem | null>(query, { slug });
+}
+
+/**
+ * タスク詳細をSanityから直接取得（mainと同じGROQクエリ）
+ * sections[]（Portable Text）を含む完全なタスクデータを返す
+ */
+interface SanityTrainingTaskDetail {
+  _id: string;
+  title: string;
+  slug: string;
+  description: string;
+  orderIndex: number;
+  isPremium: boolean;
+  category: string;
+  tags: string[];
+  videoFull: string;
+  videoPreview: string;
+  previewSec: number;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sections: any[];
+  training: { _id: string; title: string; slug: string; type: string };
+  allTasks: { _id: string; title: string; slug: string; orderIndex: number }[];
+}
+
+export async function getTrainingTaskDetailFromSanity(
+  trainingSlug: string,
+  taskSlug: string
+): Promise<SanityTrainingTaskDetail | null> {
+  const query = `
+    *[_type == "trainingTask" && slug.current == $taskSlug && training->slug.current == $trainingSlug][0] {
+      _id,
+      title,
+      "slug": slug.current,
+      description,
+      orderIndex,
+      isPremium,
+      category,
+      tags,
+      videoFull,
+      videoPreview,
+      previewSec,
+      sections[] {
+        _key,
+        sectionTitle,
+        sectionType,
+        content
+      },
+      "training": training-> {
+        _id,
+        title,
+        "slug": slug.current,
+        "type": trainingType
+      },
+      "allTasks": training->tasks[]-> {
+        _id,
+        title,
+        "slug": slug.current,
+        orderIndex
+      } | order(orderIndex asc)
+    }
+  `;
+  return getClient().fetch<SanityTrainingTaskDetail | null>(query, { trainingSlug, taskSlug });
 }
 
 // ============================================

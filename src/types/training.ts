@@ -36,6 +36,14 @@ export interface Task {
   description?: string;
 }
 
+/** Sanity Portable Text セクション（mainと同じ構造） */
+export interface SanitySection {
+  _key: string;
+  sectionTitle: string;
+  sectionType: 'regular' | 'design-solution' | 'premium-only';
+  content: import('@portabletext/types').PortableTextBlock[];
+}
+
 export interface TaskDetailData {
   id: string;
   slug: string;
@@ -52,13 +60,14 @@ export interface TaskDetailData {
   trainingSlug: string;
   next_task?: string | null;
   prev_task?: string | null;
-  // 新しいフィールド: プレミアムコンテンツ切り替え情報
   isPremiumCut?: boolean;
   hasAccess?: boolean;
-  // Storage front-matterから取得するフィールドを追加
   estimated_time?: string;
   difficulty?: string;
   description?: string;
+  // Sanity Portable Text セクション
+  sanitySections?: SanitySection[];
+  trainingType?: string;
 }
 
 export interface TrainingDetailData {

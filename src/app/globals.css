@@ -406,14 +406,21 @@
     *, *::before, *::after {
       transition-duration: 150ms !important;
       animation-duration: 500ms !important;
+      animation-iteration-count: 1 !important;
+    }
+
+    /* 機能的アニメーション（スピナー・スケルトン等）は無限回転を維持 */
+    .animate-spin,
+    .animate-pulse {
       animation-iteration-count: infinite !important;
     }
   }
 
-  /* cursor: pointer はグローバルではなく、各コンポーネントで設定する。
-   * a { cursor: pointer } はNext.jsのエラーオーバーレイ後にカーソル状態が
-   * 不安定になる原因だったため削除。next/link のLinkコンポーネントは
-   * デフォルトでpointerカーソルになる（aタグのブラウザデフォルト）。 */
+  /* buttonタグはデフォルトでcursor: defaultのため、グローバルにpointerを設定 */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
 
   /* カード・セクションの表示時フェードインアニメーション
    * mainのframer-motion whileInView相当をCSSで再現 */

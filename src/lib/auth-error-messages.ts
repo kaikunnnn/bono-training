@@ -9,16 +9,26 @@ const AUTH_ERROR_MAP: Record<string, string> = {
   // パスワード関連
   "Password should be at least 6 characters":
     "パスワードは6文字以上にしてください",
+  "Password should be at least 6 characters.":
+    "パスワードは6文字以上にしてください",
   "Password should be at least 8 characters":
     "パスワードは8文字以上にしてください",
+  "Password should be at least 8 characters.":
+    "パスワードは8文字以上にしてください",
+  "Password should contain at least one character of each":
+    "パスワードには大文字・小文字・数字・記号をそれぞれ1つ以上含めてください",
   "Password should be at least":
     "パスワードの文字数が不足しています",
   "New password should be different from the old password":
+    "新しいパスワードは現在のパスワードと異なるものにしてください",
+  "New password should be different from the old password.":
     "新しいパスワードは現在のパスワードと異なるものにしてください",
   "New password should be different":
     "新しいパスワードは現在のパスワードと異なるものにしてください",
   "Password is too weak":
     "パスワードが弱すぎます。より複雑なパスワードを設定してください",
+  "Password does not meet the requirements":
+    "パスワードが要件を満たしていません",
 
   // ログイン関連
   "Invalid login credentials":
@@ -39,10 +49,16 @@ const AUTH_ERROR_MAP: Record<string, string> = {
   // レート制限
   "For security purposes, you can only request this after 60 seconds":
     "セキュリティのため、60秒後に再度お試しください",
+  "For security purposes, you can only request this after":
+    "セキュリティのため、しばらく経ってから再度お試しください",
   "Email rate limit exceeded":
     "メール送信の制限に達しました。しばらく経ってから再度お試しください",
   "Rate limit exceeded":
     "リクエスト回数の制限に達しました。しばらく経ってから再度お試しください",
+  "over_request_rate_limit":
+    "リクエスト回数の制限に達しました。しばらく経ってから再度お試しください",
+  "over_email_send_rate_limit":
+    "メール送信の制限に達しました。しばらく経ってから再度お試しください",
 
   // セッション関連
   "Auth session missing!":
@@ -51,12 +67,18 @@ const AUTH_ERROR_MAP: Record<string, string> = {
     "セッションが期限切れです。再度ログインしてください",
   "Token expired":
     "セッションが期限切れです。再度ログインしてください",
+  "User not found":
+    "ユーザーが見つかりません",
+  "JWT expired":
+    "セッションが期限切れです。再度ログインしてください",
 
   // その他
   "Unable to validate email address: invalid format":
     "メールアドレスの形式が正しくありません",
   "Email address is invalid":
     "メールアドレスの形式が正しくありません",
+  "Signups not allowed for this instance":
+    "現在、新規登録を受け付けていません",
 };
 
 /**

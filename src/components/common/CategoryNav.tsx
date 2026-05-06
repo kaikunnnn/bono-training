@@ -1,7 +1,7 @@
 'use client';
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -61,6 +61,10 @@ export default function CategoryNav({
   showArrows = false,
 }: CategoryNavProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentUrl = searchParams.toString()
+    ? `${pathname}?${searchParams.toString()}`
+    : pathname;
   const navRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -106,10 +110,14 @@ export default function CategoryNav({
     });
   };
 
-  // アクティブ判定（完全一致 or パス先頭一致）
+  // アクティブ判定（完全一致 or パス先頭一致、searchParamsも考慮）
   const isActive = (href: string) => {
-    // 完全一致
-    if (pathname === href) return true;
+    // searchParams付きのhrefの場合（例: /roadmap?category=career）
+    if (href.includes("?")) {
+      return currentUrl === href;
+    }
+    // 完全一致（searchParamsなし）
+    if (pathname === href && !searchParams.toString()) return true;
     // "すべて"以外は前方一致でも判定（サブページ対応）
     if (href !== items[0]?.href && pathname.startsWith(href + "/")) {
       return true;
@@ -131,7 +139,7 @@ export default function CategoryNav({
         width: activeRect.width,
       });
     }
-  }, [pathname, items]);
+  }, [pathname, searchParams, items]);
 
   return (
     <nav

@@ -18,7 +18,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ArrowDown, Loader2, AlertCircle } from "lucide-react";
+import { ArrowDown, AlertCircle } from "lucide-react";
+import { LoadingSpinner } from "@/components/common/LoadingSpinner";
 import {
   calculateProration,
   type PlanInfo,
@@ -139,10 +140,11 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
   // 処理中の表示
   if (modalState === "processing") {
     return (
-      <Dialog open={true} onOpenChange={() => {}}>
+      <Dialog open={true} onOpenChange={() => {}} modal={true}>
         <DialogContent
           className="max-w-md"
           onPointerDownOutside={(e) => e.preventDefault()}
+          onInteractOutside={(e) => e.preventDefault()}
         >
           <DialogHeader>
             <DialogTitle className="text-center">プラン変更中</DialogTitle>
@@ -151,7 +153,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col items-center justify-center py-8 space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <LoadingSpinner size="lg" text="" />
             <p className="text-lg text-center font-noto-sans-jp">
               {newPlanDisplayName}プランへの
               <br />
@@ -169,7 +171,7 @@ export const PlanChangeConfirmModal: React.FC<PlanChangeConfirmModalProps> = ({
   // エラーの表示
   if (modalState === "error") {
     return (
-      <Dialog open={true} onOpenChange={() => {}}>
+      <Dialog open={true} onOpenChange={onCancel} modal={true}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-center text-red-600 flex items-center justify-center gap-2">

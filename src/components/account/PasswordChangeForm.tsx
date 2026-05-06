@@ -35,6 +35,12 @@ export function PasswordChangeForm() {
     const confirmPassword = formData.get("confirmPassword") as string;
 
     // バリデーション
+    if (!newPassword || !confirmPassword) {
+      setError("パスワードを入力してください");
+      setIsSubmitting(false);
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       setError("パスワードが一致しません");
       setIsSubmitting(false);
@@ -136,7 +142,7 @@ export function PasswordChangeForm() {
             </DialogDescription>
           </DialogHeader>
 
-          <form ref={formRef} onSubmit={handleSubmit}>
+          <form ref={formRef} onSubmit={handleSubmit} noValidate>
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="newPassword">新しいパスワード</Label>
@@ -145,8 +151,6 @@ export function PasswordChangeForm() {
                   name="newPassword"
                   type="password"
                   placeholder="8文字以上"
-                  required
-                  minLength={8}
                 />
                 <p className="text-xs text-muted-foreground">
                   パスワードは8文字以上で設定してください
@@ -160,8 +164,6 @@ export function PasswordChangeForm() {
                   name="confirmPassword"
                   type="password"
                   placeholder="パスワードを再入力"
-                  required
-                  minLength={8}
                 />
               </div>
 

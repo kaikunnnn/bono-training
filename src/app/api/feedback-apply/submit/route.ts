@@ -21,6 +21,7 @@ interface SubmitRequestBody {
   articleUrl: string;
   slackAccountName: string;
   lessonId: string;
+  lessonTitle?: string;
   checkedItems: string[];
   userId: string;
   userEmail: string;
@@ -64,80 +65,77 @@ async function fetchOgData(url: string): Promise<OgData> {
   }
 }
 
-async function sendSlackNotification(data: {
+// Slackに通知を送信（mainと同じフォーマット）
+async function sendSlackNotification(payload: {
   articleUrl: string;
   slackAccountName: string;
-  lessonId: string;
-  checkedItems: string[];
-  userEmail: string;
-  ogTitle?: string;
+  lessonTitle?: string;
+  bonoContent?: string;
 }): Promise<void> {
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  const webhookUrl = process.env.SLACK_FEEDBACK_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
 
   if (!webhookUrl) {
-    console.warn("SLACK_WEBHOOK_URL is not configured");
+    console.warn("SLACK_FEEDBACK_WEBHOOK_URL / SLACK_WEBHOOK_URL is not configured");
     return;
   }
 
-  const checkedLabels = data.checkedItems.map((id) => {
-    switch (id) {
-      case "notice":
-        return "気づきを言語化";
-      case "before-after":
-        return "Before/After";
-      case "why":
-        return "なぜを説明";
-      default:
-        return id;
-    }
-  });
-
-  const message = {
+  const slackMessage = {
     blocks: [
       {
-        type: "header",
+        type: "section",
         text: {
-          type: "plain_text",
-          text: "15分フィードバック申請",
-          emoji: true,
+          type: "mrkdwn",
+          text: "*【🔸15分フィードバック新規応募がきたよ】*",
         },
       },
       {
         type: "section",
-        fields: [
+        text: {
+          type: "mrkdwn",
+          text: `👩‍💻Slackアカウント名:\n${payload.slackAccountName}`,
+        },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `🗺️学んだBONOコンテンツ:\n${payload.lessonTitle || payload.bonoContent || "未選択"}`,
+        },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `🔗アウトプットURL:\n<${payload.articleUrl}|${payload.articleUrl}>`,
+        },
+      },
+      {
+        type: "divider",
+      },
+      {
+        type: "context",
+        elements: [
           {
             type: "mrkdwn",
-            text: `*Slackアカウント:*\n${data.slackAccountName}`,
-          },
-          {
-            type: "mrkdwn",
-            text: `*メール:*\n${data.userEmail}`,
+            text: `応募日時: ${new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}`,
           },
         ],
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*提出物:*\n<${data.articleUrl}|${data.ogTitle || data.articleUrl}>`,
-        },
-      },
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `*確認項目:*\n${checkedLabels.join(", ")}`,
-        },
       },
     ],
   };
 
   try {
-    await fetch(webhookUrl, {
+    const response = await fetch(webhookUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(message),
+      body: JSON.stringify(slackMessage),
     });
+
+    if (!response.ok) {
+      console.error("Slack notification failed:", response.status, response.statusText);
+    } else {
+      console.log("Slack notification sent successfully");
+    }
   } catch (error) {
     console.error("Failed to send Slack notification:", error);
   }
@@ -202,10 +200,7 @@ export async function POST(request: NextRequest) {
     await sendSlackNotification({
       articleUrl: body.articleUrl,
       slackAccountName: body.slackAccountName,
-      lessonId: body.lessonId,
-      checkedItems: body.checkedItems,
-      userEmail: body.userEmail,
-      ogTitle: ogData.title,
+      lessonTitle: body.lessonTitle,
     });
 
     return NextResponse.json({

@@ -37,16 +37,26 @@ export const getTrainingDetail = async (
     );
 
     if (error) {
-      console.error("[getTrainingDetail] Edge Function エラー:", error);
       throw error;
     }
 
     if (!data?.success || !data?.data) {
-      console.error("[getTrainingDetail] Edge Function レスポンス不正:", data);
       throw new Error("レスポンス不正");
     }
 
-    return data.data as TrainingDetailData;
+    const result = data.data as TrainingDetailData;
+
+    // Edge Functionが返すslugとリクエストslugが一致するか検証
+    // ローカルStorage のフォルダ名不一致で別トレーニングのデータが返ることがある
+    if (result.slug && result.slug.trim() !== normalizedSlug) {
+      console.warn("[getTrainingDetail] Edge Function のslug不一致:", {
+        requested: normalizedSlug,
+        returned: result.slug,
+      });
+      throw new Error("slug不一致: Sanityフォールバックへ");
+    }
+
+    return result;
   } catch (edgeFnError) {
     console.warn("[getTrainingDetail] Edge Function 失敗、Sanity フォールバックへ:", edgeFnError);
 

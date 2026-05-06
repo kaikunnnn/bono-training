@@ -43,7 +43,7 @@ export function Sidebar({ className, user }: SidebarProps) {
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      <SidebarLogo isLoggedIn={!!user} />
+      <SidebarLogo />
 
       <SidebarMenuGroup>
         {user && (
@@ -57,9 +57,9 @@ export function Sidebar({ className, user }: SidebarProps) {
         )}
 
         <SidebarMenuItem
-          href="/"
+          href="/top"
           icon={<Home2 size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={pathname === "/" || pathname === "/top"}
+          isActive={pathname === "/top" || pathname === "/"}
         >
           トップ
         </SidebarMenuItem>
