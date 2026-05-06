@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getFeedback, getRelatedFeedbacks, getRecentFeedbacks, getAllFeedbackSlugs } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
+
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
 import { FeedbackCard } from "@/components/feedback/FeedbackCard";
 import PortableTextRenderer from "@/components/common/PortableTextRenderer";
 import { Badge } from "@/components/ui/badge";

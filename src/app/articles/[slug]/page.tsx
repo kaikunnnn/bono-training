@@ -14,8 +14,8 @@ import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
-// 認証状態に依存するため動的レンダリングを強制（ゲートUIの表示分岐に必要）
-export const dynamic = "force-dynamic";
+// ISR: 1時間キャッシュ（ユーザー固有データはクライアント側で取得）
+export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;

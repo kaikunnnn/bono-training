@@ -5,6 +5,9 @@ import { removeEmojiFromText } from "@/utils/blog/emojiUtils";
 import BlogDetailClient from "./BlogDetailClient";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

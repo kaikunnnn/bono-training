@@ -6,6 +6,9 @@ import { getSubscriptionStatus, isContentLocked } from "@/lib/subscription";
 import LessonDetailClient from "./LessonDetailClient";
 import { generateCourseJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

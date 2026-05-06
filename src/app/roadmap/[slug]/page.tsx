@@ -19,6 +19,9 @@ import OtherRoadmapsSection from "@/components/roadmap/detail/OtherRoadmapsSecti
 import DottedDivider from "@/components/common/DottedDivider";
 import type { GradientPreset } from "@/styles/gradients";
 
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
+
 // ============================================
 // 静的パスの生成
 // ============================================

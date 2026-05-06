@@ -3,6 +3,9 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getGuide, getAllGuideSlugs, getRelatedGuides } from "@/lib/guideLoader";
 import { getSubscriptionStatus } from "@/lib/subscription";
+
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
 import GuideHeader from "@/components/guide/GuideHeader";
 import GuideContent from "@/components/guide/GuideContent";
 import RelatedGuides from "@/components/guide/RelatedGuides";
