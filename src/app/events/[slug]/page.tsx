@@ -1,12 +1,10 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import Image from "next/image";
 import { getEvent } from "@/lib/sanity";
 import { createClient } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import RichTextSection from "@/components/article/RichTextSection";
-import Logo from "@/components/common/Logo";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
 
 interface PageProps {
@@ -97,18 +95,9 @@ export default async function EventDetailPage({ params }: PageProps) {
   const thumbnailSrc = event.thumbnail?.asset?.url || event.thumbnailUrl;
 
   return (
-    <div className="min-h-screen w-full bg-[#F8F8F8]">
-      {/* ヘッダーエリア */}
-      <div className="w-full">
-        <div className="w-full px-4 sm:px-6 py-6">
-          <Link href="/">
-            <Logo className="h-6 w-auto" />
-          </Link>
-        </div>
-      </div>
-
+    <div className="min-h-screen w-full">
       {/* メインコンテンツ */}
-      <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-12 -mt-12">
+      <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-12">
         <div className="flex flex-col gap-8">
           {/* イベントヘッダー - センター揃え */}
           <div className="flex flex-col items-center text-center gap-6">
