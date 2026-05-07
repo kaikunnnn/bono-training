@@ -20,6 +20,8 @@ import {
   MessageQuestion,
   Messages1,
   Lamp,
+  Routing2,
+  Teacher,
 } from "iconsax-react";
 
 /**
@@ -30,6 +32,8 @@ export const MenuIcons = {
   lesson: Book,
   training: Play,
   guide: LocationDiscover,
+  course: Teacher,
+  process: Routing2,
   settings: Setting2,
   mypage: User,
   user: User,
