@@ -79,17 +79,17 @@
   --color-card-foreground: hsl(var(--card-foreground));
   --color-card: hsl(var(--card));
 
-  /* Success colors */
-  --color-success: #22C55E;
-  --color-success-light: #86EFAC;
-  --color-success-dark: #16A34A;
+  /* Success colors — colors_and_type.css のトークンを参照 */
+  --color-success: var(--success);
+  --color-success-light: var(--success-light);
+  --color-success-dark: var(--success-dark);
   --color-success-foreground: #FFFFFF;
-  --color-success-background: #F0FDF4;
+  --color-success-background: var(--success-bg);
 
-  /* Training colors */
-  --color-training: #FF9900;
-  --color-training-background: #FFF9F4;
-  --color-training-dark: #0D221D;
+  /* Training colors — colors_and_type.css のトークンを参照 */
+  --color-training: var(--training-orange);
+  --color-training-background: var(--training-bg);
+  --color-training-dark: var(--training-dark);
   --color-training-text-primary: hsl(var(--training-text-primary));
   --color-training-text-secondary: hsl(var(--training-text-secondary));
   --color-training-gradient-start: hsl(var(--training-gradient-start));
@@ -138,13 +138,13 @@
   --color-lesson-hero-gradient-mid: rgba(244, 232, 223, 1);
   --color-lesson-hero-gradient-end: rgba(239, 237, 255, 0.08);
   --color-lesson-hero-overlay: rgba(0, 0, 0, 0.2);
-  --color-lesson-hero-text: #0D221D;
+  --color-lesson-hero-text: var(--training-dark);
   --color-lesson-hero-nav-text: #909090;
   --color-lesson-quest-title: #151834;
   --color-lesson-quest-detail: #6F7178;
   --color-lesson-quest-meta: #7D8691;
   --color-lesson-quest-border: rgba(0, 0, 0, 0.06);
-  --color-lesson-quest-card-bg: #FFFFFF;
+  --color-lesson-quest-card-bg: var(--bg-surface);
   --color-lesson-quest-divider: #EEEEEE;
   --color-lesson-item-number: #414141;
   --color-lesson-item-title: #5A5A5A;
