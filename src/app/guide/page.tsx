@@ -1,12 +1,9 @@
 import { Metadata } from "next";
-import { getAllGuidesFromSanity, getGuidesByCategoryFromSanity } from "@/lib/sanity";
-import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
+import { getAllGuidesFromSanity } from "@/lib/sanity";
 import { GuideCard } from "@/components/guide/GuideCard";
-import CategoryNav from "@/components/common/CategoryNav";
 import DottedDivider from "@/components/common/DottedDivider";
 import { GUIDE_THEMES } from "./data";
 import ThemeScroller from "./ThemeScroller";
-import type { GuideCategory } from "@/types/guide";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -22,30 +19,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/guide" },
 };
 
-const CATEGORY_NAV_ITEMS = [
-  { label: "すべて", href: "/guide" },
-  ...GUIDE_CATEGORIES.map((cat) => ({
-    label: cat.label,
-    href: `/guide?category=${cat.id}`,
-  })),
-];
-
-interface PageProps {
-  searchParams: Promise<{ category?: string }>;
-}
-
-export default async function GuidePage({ searchParams }: PageProps) {
-  const params = await searchParams;
-  const category = params.category as GuideCategory | undefined;
-
-  const validCategory =
-    category && GUIDE_CATEGORIES.some((c) => c.id === category)
-      ? category
-      : undefined;
-
-  const sanityGuides = validCategory
-    ? await getGuidesByCategoryFromSanity(validCategory)
-    : await getAllGuidesFromSanity();
+export default async function GuidePage() {
+  const sanityGuides = await getAllGuidesFromSanity();
 
   return (
     <div className="min-h-screen">
@@ -72,11 +47,6 @@ export default async function GuidePage({ searchParams }: PageProps) {
           <h2 className="text-xl font-bold font-rounded-mplus text-text-primary mb-6">
             記事
           </h2>
-
-          {/* カテゴリナビ */}
-          <div className="mb-8">
-            <CategoryNav items={CATEGORY_NAV_ITEMS} />
-          </div>
 
           {/* 記事グリッド */}
           {sanityGuides.length > 0 ? (
