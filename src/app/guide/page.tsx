@@ -24,14 +24,9 @@ export const metadata: Metadata = {
 function ThemeCard({ theme }: { theme: (typeof GUIDE_THEMES)[number] }) {
   return (
     <div className="bg-white rounded-[22px] shadow-[0px_1px_7px_rgba(0,0,0,0.04)] hover:shadow-[0px_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200 overflow-hidden flex flex-col">
-      {/* テーマ画像 */}
-      <div className="w-full aspect-[16/9] overflow-hidden">
-        <img
-          src={theme.thumbnail}
-          alt={theme.title}
-          className="w-full h-full object-cover"
-          loading="lazy"
-        />
+      {/* テーマビジュアル — Fluent Emoji中央配置 */}
+      <div className="w-full aspect-[16/9] bg-gradient-to-br from-[#e6e6ef] via-[#ede9f5] to-[#faf2ed] flex items-center justify-center">
+        <span className="text-[56px] sm:text-[64px]">{theme.emoji}</span>
       </div>
 
       {/* テーマ内容 */}
@@ -52,11 +47,17 @@ function ThemeCard({ theme }: { theme: (typeof GUIDE_THEMES)[number] }) {
             <Link
               key={topic.slug}
               href={`/guide/${topic.slug}`}
-              className="flex items-center gap-3 py-3 border-b border-border-light last:border-b-0 group"
+              className="flex items-center gap-3 py-2.5 border-b border-border-light last:border-b-0 group"
             >
-              <span className="text-[10px] font-bold text-text-disabled font-noto-sans-jp w-4 shrink-0">
-                {String(index + 1).padStart(2, "0")}
-              </span>
+              {/* サムネイル */}
+              <div className="w-10 h-10 rounded-lg overflow-hidden bg-bg-muted shrink-0">
+                <img
+                  src={topic.thumbnail}
+                  alt=""
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                  loading="lazy"
+                />
+              </div>
               <span className="flex-1 text-sm font-bold text-text-primary font-noto-sans-jp group-hover:text-text-link transition-colors leading-snug">
                 {topic.title}
               </span>
@@ -75,7 +76,7 @@ export default async function GuidePage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-[1100px] mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         {/* ヘッダー */}
         <section className="pt-8 pb-12">
           <h1 className="text-3xl sm:text-4xl font-bold font-rounded-mplus text-text-primary mb-4">
