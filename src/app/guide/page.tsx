@@ -1,9 +1,12 @@
 import { Metadata } from "next";
-import { getAllGuidesFromSanity } from "@/lib/sanity";
+import { getAllGuidesFromSanity, getGuidesByCategoryFromSanity } from "@/lib/sanity";
+import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
 import { GuideCard } from "@/components/guide/GuideCard";
+import CategoryNav from "@/components/common/CategoryNav";
 import DottedDivider from "@/components/common/DottedDivider";
 import { GUIDE_THEMES } from "./data";
 import ThemeScroller from "./ThemeScroller";
+import type { GuideCategory } from "@/types/guide";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -19,8 +22,30 @@ export const metadata: Metadata = {
   alternates: { canonical: "/guide" },
 };
 
-export default async function GuidePage() {
-  const sanityGuides = await getAllGuidesFromSanity();
+const CATEGORY_NAV_ITEMS = [
+  { label: "すべて", href: "/guide" },
+  ...GUIDE_CATEGORIES.map((cat) => ({
+    label: cat.label,
+    href: `/guide?category=${cat.id}`,
+  })),
+];
+
+interface PageProps {
+  searchParams: Promise<{ category?: string }>;
+}
+
+export default async function GuidePage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const category = params.category as GuideCategory | undefined;
+
+  const validCategory =
+    category && GUIDE_CATEGORIES.some((c) => c.id === category)
+      ? category
+      : undefined;
+
+  const sanityGuides = validCategory
+    ? await getGuidesByCategoryFromSanity(validCategory)
+    : await getAllGuidesFromSanity();
 
   return (
     <div className="min-h-screen">
@@ -35,27 +60,37 @@ export default async function GuidePage() {
           </p>
         </section>
 
-        {/* テーマ横スクロール（3件表示 + スライドでもっと見れる） */}
+        {/* テーマ横スクロール */}
         <section className="pb-12">
           <ThemeScroller themes={GUIDE_THEMES} />
         </section>
 
-        {/* 最新の記事（ファーストビューに入る） */}
-        {sanityGuides.length > 0 && (
-          <>
-            <DottedDivider className="mb-8" />
-            <section className="pb-16">
-              <h2 className="text-xl font-bold font-rounded-mplus text-text-primary mb-6">
-                最新の記事
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {sanityGuides.slice(0, 16).map((guide) => (
-                  <GuideCard key={guide.slug} guide={guide} />
-                ))}
-              </div>
-            </section>
-          </>
-        )}
+        {/* カテゴリタブ + 記事一覧 */}
+        <DottedDivider className="mb-8" />
+
+        <section className="pb-16">
+          <h2 className="text-xl font-bold font-rounded-mplus text-text-primary mb-6">
+            記事
+          </h2>
+
+          {/* カテゴリナビ */}
+          <div className="mb-8">
+            <CategoryNav items={CATEGORY_NAV_ITEMS} />
+          </div>
+
+          {/* 記事グリッド */}
+          {sanityGuides.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+              {sanityGuides.slice(0, 16).map((guide) => (
+                <GuideCard key={guide.slug} guide={guide} />
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 text-center text-text-muted">
+              該当する記事がありません
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
