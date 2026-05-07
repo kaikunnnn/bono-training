@@ -1,10 +1,9 @@
 import { Metadata } from "next";
-import Link from "next/link";
-import { ChevronRight } from "lucide-react";
 import { getAllGuidesFromSanity } from "@/lib/sanity";
 import { GuideCard } from "@/components/guide/GuideCard";
 import DottedDivider from "@/components/common/DottedDivider";
 import { GUIDE_THEMES } from "./data";
+import ThemeScroller from "./ThemeScroller";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -20,65 +19,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/guide" },
 };
 
-/** テーマカード */
-function ThemeCard({ theme }: { theme: (typeof GUIDE_THEMES)[number] }) {
-  return (
-    <div className="bg-white rounded-[22px] shadow-[0px_1px_7px_rgba(0,0,0,0.04)] hover:shadow-[0px_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200 overflow-hidden flex flex-col">
-      {/* テーマビジュアル — Fluent Emoji中央配置 */}
-      <div className="w-full aspect-[16/9] bg-gradient-to-br from-[#e6e6ef] via-[#ede9f5] to-[#faf2ed] flex items-center justify-center">
-        <span className="text-[56px] sm:text-[64px]">{theme.emoji}</span>
-      </div>
-
-      {/* テーマ内容 */}
-      <div className="p-5 sm:p-6 flex flex-col gap-4">
-        {/* テーマヘッダー */}
-        <div className="flex flex-col gap-1.5">
-          <h2 className="text-lg sm:text-xl font-bold text-text-primary font-rounded-mplus">
-            {theme.title}
-          </h2>
-          <p className="text-xs text-text-muted font-noto-sans-jp">
-            {theme.forWho}
-          </p>
-        </div>
-
-        {/* サブトピック一覧 */}
-        <div className="flex flex-col">
-          {theme.topics.map((topic, index) => (
-            <Link
-              key={topic.slug}
-              href={`/guide/${topic.slug}`}
-              className="flex items-center gap-3 py-2.5 border-b border-border-light last:border-b-0 group"
-            >
-              {/* サムネイル */}
-              <div className="w-10 h-10 rounded-lg overflow-hidden bg-bg-muted shrink-0">
-                <img
-                  src={topic.thumbnail}
-                  alt=""
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                  loading="lazy"
-                />
-              </div>
-              <span className="flex-1 text-sm font-bold text-text-primary font-noto-sans-jp group-hover:text-text-link transition-colors leading-snug">
-                {topic.title}
-              </span>
-              <ChevronRight className="w-3.5 h-3.5 text-text-disabled group-hover:text-text-link transition-colors shrink-0" />
-            </Link>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default async function GuidePage() {
-  // 最新記事用にSanityデータ取得
   const sanityGuides = await getAllGuidesFromSanity();
 
   return (
     <div className="min-h-screen">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
         {/* ヘッダー */}
-        <section className="pt-8 pb-12">
+        <section className="pt-8 pb-8">
           <h1 className="text-3xl sm:text-4xl font-bold font-rounded-mplus text-text-primary mb-4">
             ガイド
           </h1>
@@ -87,23 +35,21 @@ export default async function GuidePage() {
           </p>
         </section>
 
-        {/* テーマカードグリッド（ページの主役） */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-16">
-          {GUIDE_THEMES.map((theme) => (
-            <ThemeCard key={theme.slug} theme={theme} />
-          ))}
+        {/* テーマ横スクロール（3件表示 + スライドでもっと見れる） */}
+        <section className="pb-12">
+          <ThemeScroller themes={GUIDE_THEMES} />
         </section>
 
-        {/* 最新の記事（補助的） */}
+        {/* 最新の記事（ファーストビューに入る） */}
         {sanityGuides.length > 0 && (
           <>
-            <DottedDivider className="mb-12" />
+            <DottedDivider className="mb-8" />
             <section className="pb-16">
-              <h2 className="text-xl font-bold font-rounded-mplus text-text-primary mb-8">
+              <h2 className="text-xl font-bold font-rounded-mplus text-text-primary mb-6">
                 最新の記事
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {sanityGuides.slice(0, 12).map((guide) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {sanityGuides.slice(0, 16).map((guide) => (
                   <GuideCard key={guide.slug} guide={guide} />
                 ))}
               </div>
