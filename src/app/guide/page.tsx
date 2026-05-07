@@ -23,34 +23,47 @@ export const metadata: Metadata = {
 /** テーマカード */
 function ThemeCard({ theme }: { theme: (typeof GUIDE_THEMES)[number] }) {
   return (
-    <div className="bg-[rgba(70,87,83,0.04)] rounded-[24px] sm:rounded-[32px] lg:rounded-[40px] p-6 sm:p-8 lg:p-10 flex flex-col gap-5">
-      {/* テーマヘッダー */}
-      <div className="flex flex-col gap-2">
-        <h2 className="text-xl sm:text-2xl font-bold text-text-primary font-rounded-mplus">
-          {theme.title}
-        </h2>
-        <p className="text-sm text-text-muted font-noto-sans-jp">
-          {theme.forWho}
-        </p>
+    <div className="bg-white rounded-[22px] shadow-[0px_1px_7px_rgba(0,0,0,0.04)] hover:shadow-[0px_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200 overflow-hidden flex flex-col">
+      {/* テーマ画像 */}
+      <div className="w-full aspect-[16/9] overflow-hidden">
+        <img
+          src={theme.thumbnail}
+          alt={theme.title}
+          className="w-full h-full object-cover"
+          loading="lazy"
+        />
       </div>
 
-      {/* サブトピック一覧 */}
-      <div className="flex flex-col">
-        {theme.topics.map((topic, index) => (
-          <Link
-            key={topic.slug}
-            href={`/guide/${topic.slug}`}
-            className="flex items-center gap-3 py-3.5 border-b border-border-light last:border-b-0 group"
-          >
-            <span className="text-xs font-bold text-text-disabled font-noto-sans-jp w-5 shrink-0">
-              {String(index + 1).padStart(2, "0")}
-            </span>
-            <span className="flex-1 text-[15px] font-bold text-text-primary font-noto-sans-jp group-hover:text-text-link transition-colors">
-              {topic.title}
-            </span>
-            <ChevronRight className="w-4 h-4 text-text-disabled group-hover:text-text-link transition-colors shrink-0" />
-          </Link>
-        ))}
+      {/* テーマ内容 */}
+      <div className="p-5 sm:p-6 flex flex-col gap-4">
+        {/* テーマヘッダー */}
+        <div className="flex flex-col gap-1.5">
+          <h2 className="text-lg sm:text-xl font-bold text-text-primary font-rounded-mplus">
+            {theme.title}
+          </h2>
+          <p className="text-xs text-text-muted font-noto-sans-jp">
+            {theme.forWho}
+          </p>
+        </div>
+
+        {/* サブトピック一覧 */}
+        <div className="flex flex-col">
+          {theme.topics.map((topic, index) => (
+            <Link
+              key={topic.slug}
+              href={`/guide/${topic.slug}`}
+              className="flex items-center gap-3 py-3 border-b border-border-light last:border-b-0 group"
+            >
+              <span className="text-[10px] font-bold text-text-disabled font-noto-sans-jp w-4 shrink-0">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              <span className="flex-1 text-sm font-bold text-text-primary font-noto-sans-jp group-hover:text-text-link transition-colors leading-snug">
+                {topic.title}
+              </span>
+              <ChevronRight className="w-3.5 h-3.5 text-text-disabled group-hover:text-text-link transition-colors shrink-0" />
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -74,7 +87,7 @@ export default async function GuidePage() {
         </section>
 
         {/* テーマカードグリッド（ページの主役） */}
-        <section className="grid grid-cols-1 lg:grid-cols-2 gap-5 pb-16">
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-16">
           {GUIDE_THEMES.map((theme) => (
             <ThemeCard key={theme.slug} theme={theme} />
           ))}
