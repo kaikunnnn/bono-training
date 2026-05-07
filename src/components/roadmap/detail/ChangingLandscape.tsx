@@ -55,7 +55,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
           {data.items.map((item, index) => (
             <div
               key={index}
-              className="bg-white border-l-4 border-[#d3d3d3] flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 pl-6 md:pl-9 pr-6 md:pr-8 py-6 md:py-4 rounded-br-lg rounded-tr-lg"
+              className="bg-white border-l-4 border-border-light flex flex-col md:flex-row md:items-center md:justify-between gap-4 md:gap-0 pl-6 md:pl-9 pr-6 md:pr-8 py-6 md:py-4 rounded-br-lg rounded-tr-lg"
             >
               {/* 左側: アイコン + 課題テキスト */}
               <div className="flex items-center gap-3 shrink-0 w-full md:w-[425px]">

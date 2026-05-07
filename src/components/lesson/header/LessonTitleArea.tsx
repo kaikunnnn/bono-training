@@ -89,7 +89,7 @@ export function LessonTitleArea({
           </div>
           {onViewAllDetails && (
             <button
-              className="font-noto-sans-jp font-medium text-[14px] text-[#1e0ff0] leading-[1.6] hover:underline"
+              className="font-noto-sans-jp font-medium text-[14px] text-text-link leading-[1.6] hover:underline"
               onClick={onViewAllDetails}
             >
               概要・目的ですべてみる

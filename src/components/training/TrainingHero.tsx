@@ -7,7 +7,7 @@ const TrainingHero = () => {
       role="banner"
       aria-labelledby="training-hero-title"
     >
-      <div className="w-full flex flex-col gap-4 border-b border-[#e2e8f0] pb-10">
+      <div className="w-full flex flex-col gap-4 border-b border-border-light pb-10">
         <h1
           id="training-hero-title"
           className="font-rounded-mplus-bold font-bold text-[29px] md:text-3xl lg:text-[36px] text-text-primary text-left leading-[40px]"

@@ -124,7 +124,7 @@ export function CompletionButton({
           <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
         </div>
         {showLabel && (
-          <span className="font-semibold text-[14px] text-[#020817] leading-[20px]">
+          <span className="font-semibold text-[14px] text-text-primary leading-[20px]">
             {isCompleted ? "完了済み" : "完了にする"}
           </span>
         )}

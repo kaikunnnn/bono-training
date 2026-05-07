@@ -30,7 +30,7 @@ export default function DescriptionBadge({
         "inline-flex items-center gap-2 rounded-full px-3 py-1",
         className
       )}
-      style={{ backgroundColor: '#F2F3F0' }}
+      style={{ backgroundColor: 'var(--bg-muted)' }}
     >
       <span className="text-sm text-text-secondary font-normal leading-relaxed">
         {children}

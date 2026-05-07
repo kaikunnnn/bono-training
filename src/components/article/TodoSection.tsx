@@ -56,7 +56,7 @@ const TodoSection = ({ items }: TodoSectionProps) => {
 
             {/* タスク内容テキスト */}
             <p
-              className="text-sm font-bold leading-[19.6px] text-[#171717] m-0"
+              className="text-sm font-bold leading-[19.6px] text-text-primary m-0"
               style={{ fontFamily: '"Noto Sans JP", sans-serif' }}
             >
               {item}

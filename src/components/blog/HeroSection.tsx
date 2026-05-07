@@ -144,7 +144,7 @@ export const HeroSectionTailwind: React.FC<HeroSectionProps> = ({
 }) => {
   return (
     <section
-      className={`w-full h-[381px] md:h-[340px] sm:h-[280px] bg-[#E8E6EA] flex flex-col items-center justify-center pt-4 pb-[164px] md:pb-[100px] sm:pb-[80px] ${className}`}
+      className={`w-full h-[381px] md:h-[340px] sm:h-[280px] bg-bg-muted-strong flex flex-col items-center justify-center pt-4 pb-[164px] md:pb-[100px] sm:pb-[80px] ${className}`}
       role="banner"
       aria-label="Hero Section"
     >

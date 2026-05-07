@@ -2,6 +2,7 @@ import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
 import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory } from "@/types/sanity";
 import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-roadmap";
+import type { Guide, GuideCategory } from "@/types/guide";
 
 // Sanity client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
 let _client: ReturnType<typeof createClient> | null = null;
@@ -975,8 +976,6 @@ export async function getTrainingTaskDetailFromSanity(
 // ============================================
 // Guide 関連のクエリ（Server Components用 — Sanity直接連携）
 // ============================================
-
-import type { Guide, GuideCategory } from "@/types/guide";
 
 const GUIDE_FIELDS = `
   _id,

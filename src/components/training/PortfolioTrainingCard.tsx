@@ -79,7 +79,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
                 <h3 className="text-[20px] md:text-lg lg:text-[20px] font-rounded-mplus-bold leading-[1.2] text-text-primary">
                   {training.title}
                 </h3>
-                <p className="text-[14px] font-normal leading-[1.4] text-[#64748B] line-clamp-2">
+                <p className="text-[14px] font-normal leading-[1.4] text-text-muted line-clamp-2">
                   {training.description || ''}
                 </p>
               </div>
@@ -97,10 +97,10 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
               <div className="flex items-center">
                 <div className="flex items-center">
                   <div className="rounded-full py-1 flex items-center gap-2">
-                    <span className="text-[#111827] text-sm font-semibold whitespace-nowrap">
+                    <span className="text-text-primary text-sm font-semibold whitespace-nowrap">
                       お題内容をみる
                     </span>
-                    <div className="w-5 h-5 bg-[#0d221d] rounded-full flex items-center justify-center">
+                    <div className="w-5 h-5 bg-training-dark rounded-full flex items-center justify-center">
                       <ArrowRight className="w-2.5 h-2.5 text-white" />
                     </div>
                   </div>

@@ -446,7 +446,7 @@ const RichTextSection = ({
   };
 
   return (
-    <div className="w-full px-6 py-6 bg-white text-[#1D253A] rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] flex flex-col justify-start items-start gap-1">
+    <div className="w-full px-6 py-6 bg-white text-text-primary rounded-[20px] shadow-xs flex flex-col justify-start items-start gap-1">
       <div className="w-full">
         <PortableText value={displayContent} components={components} />
       </div>

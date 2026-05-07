@@ -56,14 +56,14 @@ export default function ExternalLinkCard({ link }: ExternalLinkCardProps) {
           <p className="text-[10px] font-bold text-text-muted">
             {isExternal ? "外部リンク" : "リンク"}
           </p>
-          <h5 className="text-base font-bold text-[#1a1a1a] leading-[1.4] group-hover:text-primary transition-colors">
+          <h5 className="text-base font-bold text-text-primary leading-[1.4] group-hover:text-primary transition-colors">
             {link.title}
           </h5>
         </div>
 
         {/* 説明 */}
         {link.description && (
-          <p className="text-sm text-[#666] leading-[1.4] line-clamp-2">
+          <p className="text-sm text-text-muted leading-[1.4] line-clamp-2">
             {link.description}
           </p>
         )}

@@ -117,7 +117,7 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
           style={{
             width: BLOG_SPACING.card.thumbnailWidth,
             height: BLOG_SPACING.card.thumbnailHeight,
-            backgroundColor: '#F5F5F4',
+            backgroundColor: 'var(--bg-muted)',
             borderRadius: '12px',
             paddingTop: '40px',
             paddingBottom: '40px',

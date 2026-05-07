@@ -116,7 +116,7 @@ export function BlogRichText({
           }
           return (
             <p
-              className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !mb-6 !font-noto-sans-jp w-full"
+              className="!text-[16px] md:!text-[18px] !leading-[200%] !text-text-primary !mb-6 !font-noto-sans-jp w-full"
               style={{ letterSpacing: '0.03em' }}
             >
               {children}

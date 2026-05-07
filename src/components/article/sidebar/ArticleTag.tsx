@@ -9,14 +9,14 @@ const tagLabels: Record<TagType, string> = {
 };
 
 const tagStyles: Record<TagType, { container: string; text: string }> = {
-  explain: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
+  explain: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
   intro: {
-    container: "border border-[#878A92] rounded-full text-[#878A92]",
-    text: "text-[#878A92] tracking-[-1px]",
+    container: "border border-border-strong rounded-full text-text-muted",
+    text: "text-text-muted tracking-[-1px]",
   },
-  practice: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
-  challenge: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
-  demo: { container: "border border-[#878A92] rounded-full", text: "text-[#878A92]" },
+  practice: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
+  challenge: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
+  demo: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
 };
 
 interface ArticleTagProps {

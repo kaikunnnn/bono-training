@@ -62,7 +62,7 @@ export default function InterestingPerspectives({
                 key={index}
                 className={`py-[30px] ${
                   index < (data.items?.length ?? 0) - 1
-                    ? "border-b border-[#c8c8c8]"
+                    ? "border-b border-border-default"
                     : ""
                 }`}
               >

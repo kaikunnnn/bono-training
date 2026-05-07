@@ -57,7 +57,7 @@ export function LessonDetailCard({
           {/* プログレスバー */}
           <div className="w-full px-8 flex items-center gap-[9px]">
             {/* バー */}
-            <div className="flex-1 h-[7px] bg-[#eaeaea] rounded-full overflow-hidden">
+            <div className="flex-1 h-[7px] bg-bg-muted-strong rounded-full overflow-hidden">
               <div
                 className="h-full bg-black rounded-[40px] transition-all duration-400"
                 style={{ width: `${Math.min(100, progress)}%` }}

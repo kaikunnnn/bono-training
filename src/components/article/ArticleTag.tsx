@@ -10,14 +10,14 @@ const tagLabels: Record<TagType, string> = {
 
 // 将来的に色を追加する想定
 const tagStyles: Record<TagType, { container: string; text: string }> = {
-  explain: { container: "border border-[#878A92] rounded-full", text: "text-text-muted" },
+  explain: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
   intro: {
-    container: "border border-[#878A92] rounded-full text-text-muted",
+    container: "border border-border-strong rounded-full text-text-muted",
     text: "text-text-muted tracking-[-1px]",
   },
-  practice: { container: "border border-[#878A92] rounded-full", text: "text-text-muted" },
-  challenge: { container: "border border-[#878A92] rounded-full", text: "text-text-muted" },
-  demo: { container: "border border-[#878A92] rounded-full", text: "text-text-muted" },
+  practice: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
+  challenge: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
+  demo: { container: "border border-border-strong rounded-full", text: "text-text-muted" },
 };
 
 interface ArticleTagProps {

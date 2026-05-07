@@ -46,7 +46,7 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
         {/* ラベル + タイトル */}
         <div className="space-y-1">
           <p className="text-[10px] font-bold text-text-muted">レッスン</p>
-          <h5 className="text-base font-bold text-[#1a1a1a] leading-[1.4] group-hover:text-primary transition-colors">
+          <h5 className="text-base font-bold text-text-primary leading-[1.4] group-hover:text-primary transition-colors">
             {content.title}
           </h5>
         </div>
@@ -56,7 +56,7 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
 
         {/* 説明 */}
         {content.description && (
-          <p className="text-base text-[#666] leading-[1.4] line-clamp-2">
+          <p className="text-base text-text-muted leading-[1.4] line-clamp-2">
             {content.description}
           </p>
         )}

@@ -130,7 +130,7 @@ export function ArticleItem({
               <GradientLockIcon size={12} />
             )}
           </div>
-          <span className="font-noto-sans-jp font-medium text-[14px] text-[#1e1b1b] leading-[20px]">
+          <span className="font-noto-sans-jp font-medium text-[14px] text-text-primary leading-[20px]">
             {title}
           </span>
         </div>
