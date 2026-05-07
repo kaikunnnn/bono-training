@@ -123,8 +123,8 @@
   --color-error-feedback: var(--bg-error);
   --color-info-feedback: var(--bg-info);
   --color-warm: var(--bg-warm);
-  --color-cta-primary-bg: var(--btn-primary-bg);
-  --color-cta-primary-hover: var(--btn-primary-bg-hover);
+  --color-cta-primary-bg: var(--cta-primary-bg);
+  --color-cta-primary-hover: var(--cta-primary-hover);
   --color-accent-orange: var(--accent-orange);
   --color-label-olive: var(--label-olive);
 
