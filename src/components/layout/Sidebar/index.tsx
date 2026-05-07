@@ -49,7 +49,7 @@ export function Sidebar({ className, user }: SidebarProps) {
         {user && (
           <SidebarMenuItem
             href="/mypage"
-            icon={<MenuIcons.mypage size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+            icon={<MenuIcons.mypage size={ICON_SIZE} color="#2F3037" variant="Outline" />}
             isActive={isActive("/mypage")}
           >
             マイページ
@@ -58,26 +58,23 @@ export function Sidebar({ className, user }: SidebarProps) {
 
         <SidebarMenuItem
           href="/top"
-          icon={<Home2 size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+          icon={<Home2 size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={pathname === "/top" || pathname === "/"}
         >
           トップ
         </SidebarMenuItem>
-      </SidebarMenuGroup>
 
-      {/* コース・レッスン・トレーニング */}
-      <SidebarMenuGroup>
         <SidebarMenuItem
-          href="/topics"
-          icon={<MenuIcons.course size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
-          isActive={isActive("/topics")}
+          href="/roadmap"
+          icon={<MenuIcons.roadmap size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/roadmap")}
         >
-          コース
+          ロードマップ
         </SidebarMenuItem>
 
         <SidebarMenuItem
           href="/lessons"
-          icon={<MenuIcons.lesson size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+          icon={<MenuIcons.lesson size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/lessons")}
         >
           レッスン
@@ -85,64 +82,30 @@ export function Sidebar({ className, user }: SidebarProps) {
 
         <SidebarMenuItem
           href="/training"
-          icon={<MenuIcons.training size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+          icon={<MenuIcons.training size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/training")}
         >
           トレーニング
         </SidebarMenuItem>
-      </SidebarMenuGroup>
 
-      {/* ロードマップ・プロセス・ガイド */}
-      <SidebarMenuGroup label="探す">
-        <SidebarMenuItem
-          href="/roadmap"
-          icon={<MenuIcons.roadmap size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
-          isActive={isActive("/roadmap")}
-        >
-          ロードマップ
-        </SidebarMenuItem>
-
-        <SidebarMenuItem
-          href="/process"
-          icon={<MenuIcons.process size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
-          isActive={isActive("/process")}
-        >
-          プロセス
-        </SidebarMenuItem>
-
-        <SidebarMenuItem
+        {/* BON-116で別ブランチ開発中のため一時非表示 */}
+        {/* <SidebarMenuItem
           href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+          icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/guide")}
         >
-          ガイド
-        </SidebarMenuItem>
+          学習ガイド
+        </SidebarMenuItem> */}
       </SidebarMenuGroup>
 
-      {/* コミュニティ */}
-      <SidebarMenuGroup label="コミュニティ" itemGap>
-        <SidebarMenuItem
-          href="/community/questions"
-          icon={<MenuIcons.question size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
-          isActive={isActive("/community/questions")}
-        >
-          みんなの掲示板
-        </SidebarMenuItem>
-
+      {/* コミュニティ - 一時的に非表示（mainと同じ） */}
+      <SidebarMenuGroup label="コミュニティ" itemGap className="hidden">
         <SidebarMenuItem
           href="/feedbacks"
-          icon={<MenuIcons.feedback size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+          icon={<MenuIcons.feedback size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/feedbacks")}
         >
           フィードバック
-        </SidebarMenuItem>
-
-        <SidebarMenuItem
-          href="/members"
-          icon={<MenuIcons.community size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
-          isActive={isActive("/members")}
-        >
-          受講者
         </SidebarMenuItem>
       </SidebarMenuGroup>
 
@@ -150,7 +113,7 @@ export function Sidebar({ className, user }: SidebarProps) {
         {!user && (
           <SidebarMenuItem
             href="/login"
-            icon={<MenuIcons.login size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+            icon={<MenuIcons.login size={ICON_SIZE} color="#2F3037" variant="Outline" />}
             isActive={isActive("/login")}
           >
             ログイン
@@ -159,7 +122,7 @@ export function Sidebar({ className, user }: SidebarProps) {
         {user && (
           <SidebarMenuItem
             href="/account"
-            icon={<MenuIcons.settings size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+            icon={<MenuIcons.settings size={ICON_SIZE} color="#2F3037" variant="Outline" />}
             isActive={isActive("/account")}
           >
             設定
@@ -168,7 +131,7 @@ export function Sidebar({ className, user }: SidebarProps) {
         {user && (
           <SidebarMenuItem
             href="#"
-            icon={<MenuIcons.logout size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
+            icon={<MenuIcons.logout size={ICON_SIZE} color="#2F3037" variant="Outline" />}
             isActive={false}
             onClick={handleSignOut}
           >
