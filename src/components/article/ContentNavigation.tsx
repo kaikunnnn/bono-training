@@ -50,7 +50,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
           <div className="flex flex-col gap-1 text-left flex-1 min-w-0">
             {/* ラベル */}
             <span
-              className="text-[10px] font-medium leading-[10px] text-[#787878]"
+              className="text-[10px] font-medium leading-[10px] text-text-muted"
               style={{
                 fontFamily: '"Noto Sans JP", sans-serif',
                 letterSpacing: "-3.125%",
@@ -61,7 +61,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
 
             {/* タイトル */}
             <span
-              className="text-sm font-semibold leading-4 text-[#101828] truncate"
+              className="text-sm font-semibold leading-4 text-text-primary truncate"
               style={{
                 fontFamily: "Hind, sans-serif",
               }}
@@ -84,7 +84,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
           <div className="flex flex-col gap-1 text-left flex-1 min-w-0">
             {/* ラベル */}
             <span
-              className="text-[10px] font-medium leading-[10px] text-[#787878]"
+              className="text-[10px] font-medium leading-[10px] text-text-muted"
               style={{
                 fontFamily: '"Noto Sans JP", sans-serif',
                 letterSpacing: "-3.125%",
@@ -95,7 +95,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
 
             {/* タイトル */}
             <span
-              className="text-sm font-semibold leading-4 text-[#101828] truncate"
+              className="text-sm font-semibold leading-4 text-text-primary truncate"
               style={{
                 fontFamily: "Hind, sans-serif",
               }}

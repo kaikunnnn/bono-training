@@ -22,7 +22,7 @@ const TrainingHeader = () => {
       <div className="flex justify-between items-center h-[88px] w-full max-w-[1670px] mx-auto px-5">
         {/* Left Section */}
         <div className="flex-1 flex items-center justify-start max-w-[480px]">
-          <span className="font-rounded-mplus text-xs sm:text-sm font-bold text-[#475569]">
+          <span className="font-rounded-mplus text-xs sm:text-sm font-bold text-text-muted">
             αテスト版
           </span>
         </div>
@@ -33,7 +33,7 @@ const TrainingHeader = () => {
           onClick={handleTrainingHomeClick}
         >
           <span className="font-futura text-xl font-bold tracking-[1px]">BONO</span>
-          <span className="font-futura text-[8px] font-bold tracking-[1px] text-[#666666]">
+          <span className="font-futura text-[8px] font-bold tracking-[1px] text-text-muted">
             TRAINING
           </span>
         </div>

@@ -1,110 +1,84 @@
 import { Metadata } from "next";
-import { Suspense } from "react";
-import { getAllGuides, getGuidesByCategory } from "@/lib/guideLoader";
+import { getAllGuidesFromSanity, getGuidesByCategoryFromSanity } from "@/lib/sanity";
+import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
+import { GuideCard } from "@/components/guide/GuideCard";
+import CategoryNav from "@/components/common/CategoryNav";
+import type { GuideCategory } from "@/types/guide";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
-import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
-import { GuideCard } from "@/components/guide/GuideCard";
-import { GuideCategoryFilter } from "@/components/guide/GuideCategoryFilter";
-import PageHeader from "@/components/common/PageHeader";
-import type { GuideCategory } from "@/types/guide";
 
 export const metadata: Metadata = {
   title: "ガイド",
-  description: "UIUXデザイナーのためのキャリア、学習方法、業界動向、ツールに関するガイド記事。",
+  description:
+    "デザインスキルを身につける上でのヒントになる記事。キャリア、学習方法、業界動向などを解説します。",
   openGraph: {
     title: "ガイド | BONO",
-    description: "UIUXデザイナーのためのキャリア、学習方法、業界動向、ツールに関するガイド記事。",
+    description:
+      "デザインスキルを身につける上でのヒントになる記事。",
   },
   twitter: {
     title: "ガイド | BONO",
-    description: "UIUXデザイナーのためのキャリア、学習方法、業界動向、ツールに関するガイド記事。",
+    description:
+      "デザインスキルを身につける上でのヒントになる記事。",
   },
   alternates: { canonical: "/guide" },
 };
 
+const CATEGORY_NAV_ITEMS = [
+  { label: "すべて", href: "/guide" },
+  ...GUIDE_CATEGORIES.map((cat) => ({
+    label: cat.label,
+    href: `/guide?category=${cat.id}`,
+  })),
+];
+
 interface PageProps {
   searchParams: Promise<{ category?: string }>;
-}
-
-function GuideList({ category }: { category?: GuideCategory }) {
-  const guides = category ? getGuidesByCategory(category) : getAllGuides();
-
-  if (guides.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">ガイド記事がありません</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-      {guides.map((guide) => (
-        <GuideCard key={guide.slug} guide={guide} />
-      ))}
-    </div>
-  );
-}
-
-function CategoryFilterWrapper() {
-  const allGuides = getAllGuides();
-
-  // カテゴリごとのカウントを計算
-  const categoryCounts: Record<string, number> = {};
-  GUIDE_CATEGORIES.forEach((cat) => {
-    categoryCounts[cat.id] = allGuides.filter(
-      (g) => g.category === cat.id
-    ).length;
-  });
-
-  return (
-    <GuideCategoryFilter
-      categoryCounts={categoryCounts}
-      totalCount={allGuides.length}
-    />
-  );
 }
 
 export default async function GuidePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const category = params.category as GuideCategory | undefined;
 
-  // カテゴリが有効かチェック
   const validCategory =
     category && GUIDE_CATEGORIES.some((c) => c.id === category)
       ? category
       : undefined;
 
+  const guides = validCategory
+    ? await getGuidesByCategoryFromSanity(validCategory)
+    : await getAllGuidesFromSanity();
+
   return (
     <div className="min-h-screen">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 py-8">
-        {/* ヘッダー */}
-        <PageHeader
-          label="Guide"
-          title="ガイド"
-          description="UIUXデザイナーとして成長するためのガイド記事。キャリア、学習方法、業界動向などを解説します。"
-        />
+      {/* ヒーロー */}
+      <section className="px-6 pt-16 pb-10 max-w-[1440px] mx-auto">
+        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">ガイド</h1>
+        <p className="text-muted-foreground text-base leading-relaxed max-w-[600px]">
+          デザインスキルを身につける上でのヒントになる記事置き場です。何か書いて欲しい内容があれば質問で教えてください
+        </p>
+      </section>
 
-        {/* カテゴリフィルター */}
-        <div className="mb-8">
-          <Suspense
-            fallback={
-              <div className="flex gap-2">
-                <div className="h-10 w-20 bg-gray-200 rounded-full animate-pulse" />
-                <div className="h-10 w-24 bg-gray-200 rounded-full animate-pulse" />
-                <div className="h-10 w-28 bg-gray-200 rounded-full animate-pulse" />
-              </div>
-            }
-          >
-            <CategoryFilterWrapper />
-          </Suspense>
-        </div>
-
-        {/* ガイド一覧 */}
-        <GuideList category={validCategory} />
+      {/* カテゴリタブ */}
+      <div className="px-6 max-w-[1440px] mx-auto">
+        <CategoryNav items={CATEGORY_NAV_ITEMS} />
       </div>
+
+      {/* 記事グリッド */}
+      <section className="px-6 py-10 max-w-[1440px] mx-auto">
+        {guides.length === 0 ? (
+          <div className="py-20 text-center text-muted-foreground">
+            該当する記事がありません
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {guides.map((guide) => (
+              <GuideCard key={guide.slug} guide={guide} />
+            ))}
+          </div>
+        )}
+      </section>
     </div>
   );
 }

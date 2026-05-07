@@ -973,6 +973,60 @@ export async function getTrainingTaskDetailFromSanity(
 }
 
 // ============================================
+// Guide 関連のクエリ（Server Components用 — Sanity直接連携）
+// ============================================
+
+import type { Guide, GuideCategory } from "@/types/guide";
+
+const GUIDE_FIELDS = `
+  _id,
+  title,
+  "slug": slug.current,
+  category,
+  description,
+  isPremium,
+  "thumbnailUrl": thumbnail.asset->url,
+  videoUrl,
+  linkUrl,
+  tags,
+  author,
+  readingTime,
+  publishedAt,
+  updatedAt
+`;
+
+export async function getAllGuidesFromSanity(): Promise<Guide[]> {
+  const query = `*[_type == "guide" && defined(content) && length(content) > 0] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
+  return getClient().fetch<Guide[]>(query);
+}
+
+export async function getGuidesByCategoryFromSanity(category: GuideCategory): Promise<Guide[]> {
+  const query = `*[_type == "guide" && category == $category && defined(content) && length(content) > 0] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
+  return getClient().fetch<Guide[]>(query, { category });
+}
+
+export async function getGuideFromSanity(slug: string): Promise<Guide | null> {
+  const query = `
+    *[_type == "guide" && slug.current == $slug][0] {
+      ${GUIDE_FIELDS},
+      content[] {
+        ...,
+        _type == "image" => {
+          ...,
+          "asset": asset-> { _id, url }
+        }
+      }
+    }
+  `;
+  return getClient().fetch<Guide | null>(query, { slug });
+}
+
+export async function getAllGuideSlugsFromSanity(): Promise<string[]> {
+  const query = `*[_type == "guide"]{ "slug": slug.current }.slug`;
+  return getClient().fetch<string[]>(query);
+}
+
+// ============================================
 // Event 関連のクエリ（Server Components用）
 // ============================================
 

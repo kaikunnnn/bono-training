@@ -41,7 +41,7 @@ export default function OtherRoadmapsSection({ currentRoadmapSlug, roadmaps }: O
       <div className="max-w-[1100px] mx-auto">
         {/* セクションヘッダー */}
         <div className="mb-8">
-          <h2 className="text-[24px] font-extrabold text-[#293525] leading-[36px] text-center">
+          <h2 className="text-[24px] font-extrabold text-text-secondary leading-[36px] text-center">
             他のロードマップを見る
           </h2>
         </div>

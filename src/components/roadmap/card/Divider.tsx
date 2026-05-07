@@ -14,7 +14,7 @@ export const Divider: React.FC<DividerProps> = ({ variant }) => (
   <div
     className={cn(
       'w-px h-[43px]',
-      variant === 'light' ? 'bg-white/10' : 'bg-[#293525]/10'
+      variant === 'light' ? 'bg-white/10' : 'bg-text-secondary/10'
     )}
   />
 );

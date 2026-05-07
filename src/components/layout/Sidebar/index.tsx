@@ -111,9 +111,9 @@ export function Sidebar({ className, user }: SidebarProps) {
         </SidebarMenuItem>
 
         <SidebarMenuItem
-          href="/guides"
+          href="/guide"
           icon={<MenuIcons.guide size={ICON_SIZE} color="var(--text-primary)" variant="Outline" />}
-          isActive={isActive("/guides")}
+          isActive={isActive("/guide")}
         >
           ガイド
         </SidebarMenuItem>

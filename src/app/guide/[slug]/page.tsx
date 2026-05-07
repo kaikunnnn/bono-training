@@ -1,48 +1,46 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getGuide, getAllGuideSlugs, getRelatedGuides } from "@/lib/guideLoader";
+import { getGuideFromSanity, getAllGuideSlugsFromSanity } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
-
-// ISR: 1時間キャッシュ
-export const revalidate = 3600;
 import GuideHeader from "@/components/guide/GuideHeader";
 import GuideContent from "@/components/guide/GuideContent";
-import RelatedGuides from "@/components/guide/RelatedGuides";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+
+// ISR: 1時間キャッシュ
+export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const slugs = getAllGuideSlugs();
+  const slugs = await getAllGuideSlugsFromSanity();
   return slugs.map((slug) => ({ slug }));
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const guide = getGuide(slug);
+  const guide = await getGuideFromSanity(slug);
 
   if (!guide) {
     return { title: "ガイドが見つかりません" };
   }
 
-  const title = guide.seo?.title || guide.title;
-  const description = guide.seo?.description || guide.description;
-
   return {
-    title: `${title} | ガイド`,
-    description,
+    title: `${guide.title} | ガイド`,
+    description: guide.description,
     openGraph: {
-      title: `${title} | ガイド | BONO`,
-      description,
+      title: `${guide.title} | ガイド | BONO`,
+      description: guide.description,
     },
     twitter: {
-      title: `${title} | ガイド | BONO`,
-      description,
+      title: `${guide.title} | ガイド | BONO`,
+      description: guide.description,
     },
     alternates: { canonical: `/guide/${slug}` },
   };
@@ -50,22 +48,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function GuideDetailPage({ params }: PageProps) {
   const { slug } = await params;
-  const guide = getGuide(slug);
+  const guide = await getGuideFromSanity(slug);
 
   if (!guide) {
     notFound();
   }
 
   const subscription = await getSubscriptionStatus();
-
-  // プレミアムチェック
-  const hasPremiumAccess =
-    !guide.isPremium || subscription.hasMemberAccess;
-
-  // 関連ガイドを取得
-  const relatedGuides = guide.relatedGuides
-    ? getRelatedGuides(guide.relatedGuides)
-    : [];
+  const hasPremiumAccess = !guide.isPremium || subscription.hasMemberAccess;
 
   return (
     <>
@@ -95,7 +85,6 @@ export default async function GuideDetailPage({ params }: PageProps) {
             </div>
           )
         ) : (
-          /* プレミアムロック */
           <div className="px-4 pb-16">
             <div className="max-w-[640px] mx-auto py-12 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
@@ -114,9 +103,6 @@ export default async function GuideDetailPage({ params }: PageProps) {
             </div>
           </div>
         )}
-
-        {/* 関連ガイド */}
-        <RelatedGuides guides={relatedGuides} />
       </div>
     </>
   );

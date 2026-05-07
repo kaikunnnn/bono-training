@@ -25,7 +25,7 @@ export function CategoryTag({ category, className }: CategoryTagProps) {
         className
       )}
     >
-      <span className="font-noto-sans-jp font-medium text-[12px] text-[#0d221d] text-center leading-[10px]">
+      <span className="font-noto-sans-jp font-medium text-[12px] text-training-dark text-center leading-[10px]">
         {category}
       </span>
     </div>

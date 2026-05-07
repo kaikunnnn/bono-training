@@ -12,7 +12,7 @@ export function QuestHeader({ questNumber, isCompleted }: QuestHeaderProps) {
     <div className="flex items-center gap-5">
       <IconCheck status={isCompleted ? "on" : "empty"} />
 
-      <div className="flex items-center gap-0.5 text-[#151834]">
+      <div className="flex items-center gap-0.5 text-text-primary">
         <span className="font-noto-sans-jp font-bold text-[14px] leading-[14.4px]">
           クエスト
         </span>

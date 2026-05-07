@@ -84,13 +84,13 @@ export function ArticleItem({
         </div>
       ) : (
         <div className="size-4 flex items-center justify-center flex-shrink-0">
-          <span className="font-rounded-mplus font-bold text-[13px] text-[#414141] text-center leading-none">
+          <span className="font-rounded-mplus font-bold text-[13px] text-text-secondary text-center leading-none">
             {articleNumber}
           </span>
         </div>
       )}
 
-      <div className="relative w-20 h-[45px] rounded-[6px] overflow-hidden bg-[#e0dfdf] flex-shrink-0">
+      <div className="relative w-20 h-[45px] rounded-[6px] overflow-hidden bg-muted-strong flex-shrink-0">
         {imageUrl && (
           <Image
             src={imageUrl}
@@ -108,7 +108,7 @@ export function ArticleItem({
             </div>
           ) : (
             <div className="bg-white/[0.72] rounded-[3px] box-border h-4 w-4 p-px flex items-center justify-center">
-              <FileText className="w-3 h-3 text-[#111827]" />
+              <FileText className="w-3 h-3 text-text-primary" />
             </div>
           )}
         </div>

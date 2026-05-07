@@ -35,12 +35,12 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
       <div className="max-w-[1100px] mx-auto">
         {/* ヘッダー */}
         <div className="mb-9">
-          <div className="inline-flex items-center justify-center border border-[#52674e] rounded-full px-[8px] py-[2px] mb-4">
-            <span className="text-[12px] font-bold text-[#52674e] uppercase">
+          <div className="inline-flex items-center justify-center border border-text-secondary rounded-full px-[8px] py-[2px] mb-4">
+            <span className="text-[12px] font-bold text-text-secondary uppercase">
               道のり
             </span>
           </div>
-          <h2 className="text-[24px] font-extrabold text-[#293525] leading-[36px] mb-4">
+          <h2 className="text-[24px] font-extrabold text-text-secondary leading-[36px] mb-4">
             ロードマップの流れ
           </h2>
           <p className="text-[20px] text-[rgba(41,53,37,0.8)] leading-[27px] max-w-3xl">
@@ -49,7 +49,7 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
         </div>
 
         {/* 白いカード */}
-        <div className="bg-white rounded-[20px] border border-[#e5e7eb] p-2">
+        <div className="bg-white rounded-[20px] border border-border-light p-2">
           <nav aria-label="ステップナビゲーション">
             {steps.map((step, index) => {
               const stepNumber = (index + 1).toString().padStart(2, "0");
@@ -89,7 +89,7 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
                     </div>
 
                     {/* 下矢印アイコン */}
-                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#f3f4f6]">
+                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-muted-custom">
                       <div className="transition-transform duration-500 group-hover:rotate-[360deg]">
                         <ArrowDown2 size={16} color="#9ca3af" variant="Linear" />
                       </div>

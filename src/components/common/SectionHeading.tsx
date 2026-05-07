@@ -57,7 +57,7 @@ export default function SectionHeading({
         )}
 
         {/* タイトル */}
-        <h2 className="font-rounded-mplus font-extrabold text-[18px] md:text-[20px] leading-9 text-[#293525]">
+        <h2 className="font-rounded-mplus font-extrabold text-[18px] md:text-[20px] leading-9 text-text-secondary">
           {title}
         </h2>
       </div>
@@ -69,7 +69,7 @@ export default function SectionHeading({
             {description}
           </DescriptionBadge>
         ) : (
-          <p className="text-base leading-[27px] text-[#293525]/80">
+          <p className="text-base leading-[27px] text-text-secondary/80">
             {description}
           </p>
         )

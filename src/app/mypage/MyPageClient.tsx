@@ -593,7 +593,7 @@ function CompletedLessonCard({
         />
         <div>
           <h4
-            className="text-base font-bold text-[#020817] m-0 mb-1"
+            className="text-base font-bold text-text-primary m-0 mb-1"
             style={{ fontFamily: "'Rounded Mplus 1c', sans-serif" }}
           >
             {lesson.title}
@@ -632,7 +632,7 @@ function BookmarkItem({
       >
         {/* サムネイル */}
         <div
-          className="flex-shrink-0 overflow-hidden bg-[#F5F5F5]"
+          className="flex-shrink-0 overflow-hidden bg-muted-custom"
           style={{ width: 85, minWidth: 85, height: 48, borderRadius: 8 }}
         >
           <Image
@@ -737,7 +737,7 @@ function HistoryItem({ article }: { article: ViewedArticle }) {
     >
       {/* サムネイル */}
       <div
-        className="flex-shrink-0 overflow-hidden bg-[#F5F5F5]"
+        className="flex-shrink-0 overflow-hidden bg-muted-custom"
         style={{ width: 85, minWidth: 85, height: 48, borderRadius: 8 }}
       >
         <Image

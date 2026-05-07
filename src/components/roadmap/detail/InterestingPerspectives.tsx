@@ -27,14 +27,14 @@ export default function InterestingPerspectives({
         {/* ヘッダー */}
         <div className="mb-[30px]">
           {/* バッジ */}
-          <div className="inline-flex items-center justify-center border border-[#52674e] rounded-full px-[8px] py-[2px] mb-4">
-            <span className="text-[12px] font-bold text-[#52674e] uppercase">
+          <div className="inline-flex items-center justify-center border border-text-secondary rounded-full px-[8px] py-[2px] mb-4">
+            <span className="text-[12px] font-bold text-text-secondary uppercase">
               身につくこと
             </span>
           </div>
 
           {/* タイトル */}
-          <h2 className="text-[24px] font-extrabold text-[#293525] leading-[36px] mb-4">
+          <h2 className="text-[24px] font-extrabold text-text-secondary leading-[36px] mb-4">
             獲得する、デザインを楽しむ「力」
           </h2>
 
@@ -49,8 +49,8 @@ export default function InterestingPerspectives({
         {/* コンテンツブロック */}
         <div className="bg-white rounded-2xl p-1">
           {/* サブヘッダー */}
-          <div className="bg-[#e8ece8] px-6 py-4 rounded-t-[16px] rounded-b-[4px]">
-            <p className="text-[14px] font-extrabold text-[#0f172a]">
+          <div className="bg-muted-custom px-6 py-4 rounded-t-[16px] rounded-b-[4px]">
+            <p className="text-[14px] font-extrabold text-text-primary">
               獲得を目指すもの
             </p>
           </div>
@@ -75,7 +75,7 @@ export default function InterestingPerspectives({
                   {/* テキストコンテンツ */}
                   <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-8 flex-1">
                     {/* タイトル */}
-                    <p className="text-[16px] font-bold text-[#1a1a1a] leading-[1.575] md:w-[425px] md:flex-shrink-0">
+                    <p className="text-[16px] font-bold text-text-primary leading-[1.575] md:w-[425px] md:flex-shrink-0">
                       {item.title}
                     </p>
 

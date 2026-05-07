@@ -6,7 +6,7 @@ import {
   getAllBlogSlugs,
   getAllRoadmapSlugs,
 } from "@/lib/sanity";
-import { getAllGuideSlugs } from "@/lib/guideLoader";
+import { getAllGuideSlugsFromSanity } from "@/lib/sanity";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design";
@@ -69,7 +69,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ]);
 
   // ローカルファイルのガイドスラッグ
-  const guideSlugs = getAllGuideSlugs();
+  const guideSlugs = await getAllGuideSlugsFromSanity();
 
   const lessonPages: MetadataRoute.Sitemap = lessonSlugs.map((slug) => ({
     url: `${BASE_URL}/lessons/${slug}`,

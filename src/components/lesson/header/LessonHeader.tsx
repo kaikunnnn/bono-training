@@ -30,7 +30,7 @@ export function LessonHeader({
       <div className="flex items-start">
         <button
           onClick={handleBack}
-          className="bg-white border border-[#EBEBEB] flex gap-2 items-center px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
+          className="bg-white border border-border-light flex gap-2 items-center px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
         >
           <ArrowLeft className="size-5 text-black" strokeWidth={2} />
           <span className="font-noto-sans-jp font-semibold text-sm text-black">
@@ -43,7 +43,7 @@ export function LessonHeader({
         <div className="flex items-start">
           <ShareDropdown title={title} align="end">
             <button
-              className="bg-white border border-[#EBEBEB] flex gap-1 items-center px-2.5 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
+              className="bg-white border border-border-light flex gap-1 items-center px-2.5 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
             >
               <span className="font-noto-sans-jp font-semibold text-sm text-black">
                 シェア

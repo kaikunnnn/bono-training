@@ -65,7 +65,7 @@ export default function ContentCard({
       {/* サムネイル */}
       <div
         className={cn(
-          'bg-[#f5f5f4] rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center overflow-hidden w-full',
+          'bg-muted-custom rounded-[20px] sm:rounded-[28px] lg:rounded-[32px] flex items-center justify-center overflow-hidden w-full',
           isLarge
             ? 'aspect-[8/5]'  // ガイドカード: 8:5 (1.6:1)
             : 'aspect-[3/2]'  // 読みものカード: 3:2 (1.5:1)

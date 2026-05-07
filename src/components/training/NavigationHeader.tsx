@@ -5,7 +5,7 @@ interface NavigationHeaderProps {
 function NumberoforderIndex({ orderIndex }: { orderIndex: number }) {
   return (
     <div
-      className="box-border content-stretch flex flex-row font-['DotGothic16:Regular',_sans-serif] gap-[5.818px] items-start justify-start leading-[0] not-italic p-0 relative shrink-0 text-[#0d221d] text-[14px] text-center text-nowrap"
+      className="box-border content-stretch flex flex-row font-['DotGothic16:Regular',_sans-serif] gap-[5.818px] items-start justify-start leading-[0] not-italic p-0 relative shrink-0 text-training-dark text-[14px] text-center text-nowrap"
       data-name="numberoforder_index"
     >
       <div className="relative shrink-0 tracking-[2px]">

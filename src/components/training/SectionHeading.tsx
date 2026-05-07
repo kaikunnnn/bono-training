@@ -36,7 +36,7 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
 
       {/* 説明文 */}
       <div
-        className="font-medium text-[16px] leading-[20px] text-[#1d382f] text-left not-italic relative shrink-0 min-w-full w-min"
+        className="font-medium text-[16px] leading-[20px] text-text-primary text-left not-italic relative shrink-0 min-w-full w-min"
         style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
       >
         <p className="block mb-0">{description}</p>

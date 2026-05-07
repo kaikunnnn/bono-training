@@ -15,13 +15,13 @@ const TrainingFooter = () => {
               data-name="content-block-sns"
               className="w-full md:w-[178px] flex flex-col gap-4"
             >
-              <h3 className="text-[#1D382F] font-medium text-sm">SNS</h3>
+              <h3 className="text-text-primary font-medium text-sm">SNS</h3>
               <div className="flex flex-col gap-3">
                 <a
                   href="https://www.youtube.com/channel/UCghPjck_LzxNMs2tI4PPYlQ/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[rgba(13,15,24,0.8)] font-normal text-sm hover:text-[#1D382F]/80 transition-colors"
+                  className="flex items-center gap-2 text-[rgba(13,15,24,0.8)] font-normal text-sm hover:text-text-primary/80 transition-colors"
                 >
                   <Youtube size={16} />
                   YouTube
@@ -30,7 +30,7 @@ const TrainingFooter = () => {
                   href="https://x.com/takumii_kai"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[rgba(13,15,24,0.8)] font-normal text-sm hover:text-[#1D382F]/80 transition-colors"
+                  className="flex items-center gap-2 text-[rgba(13,15,24,0.8)] font-normal text-sm hover:text-text-primary/80 transition-colors"
                 >
                   <Twitter size={16} />X
                 </a>
@@ -42,7 +42,7 @@ const TrainingFooter = () => {
               data-name="content-block-about"
               className="w-full md:w-[239px] flex flex-col gap-4"
             >
-              <h3 className="text-[#1D382F] font-medium text-sm">
+              <h3 className="text-text-primary font-medium text-sm">
                 ボノトレについて
               </h3>
               <p className="text-[rgba(13,15,24,0.8)] font-normal text-sm leading-relaxed">
@@ -56,10 +56,10 @@ const TrainingFooter = () => {
             data-name="logo-area"
             className="w-full md:w-[144px] h-[144px] flex flex-col items-center justify-center"
           >
-            <div className="text-[#1D382F] font-bold text-[39.45px] leading-[31.562px] tracking-tight">
+            <div className="text-text-primary font-bold text-[39.45px] leading-[31.562px] tracking-tight">
               BONO
             </div>
-            <div className="text-[#1D382F] font-bold text-[15.78px] mt-1">
+            <div className="text-text-primary font-bold text-[15.78px] mt-1">
               TRAINING
             </div>
           </div>
@@ -67,7 +67,7 @@ const TrainingFooter = () => {
 
         {/* Message Section */}
         <div data-name="message" className="flex justify-center py-6">
-          <p className="text-[#1D382F] font-rounded-mplus font-bold text-xs text-center">
+          <p className="text-text-primary font-rounded-mplus font-bold text-xs text-center">
             机上の空論ではなく人に響く体験を
             <br />
             クリエイションしていこう

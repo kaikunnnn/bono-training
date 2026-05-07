@@ -137,7 +137,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
 
             {/* タイトル */}
             <div
-              className="leading-[0] w-full not-italic relative shrink-0 text-[#0d221d] text-[28px] md:text-[32px] text-center tracking-[0.75px] px-4"
+              className="leading-[0] w-full not-italic relative shrink-0 text-training-dark text-[28px] md:text-[32px] text-center tracking-[0.75px] px-4"
             >
               <h1 className="block leading-[1.49] font-rounded-mplus-bold">
                 {training.title || 'タイトルなし'}
@@ -146,7 +146,7 @@ export default async function TrainingDetailPage({ params }: PageProps) {
 
             {/* 説明文 */}
             <div
-              className="leading-[0] w-full not-italic relative shrink-0 text-[#0d221d] text-[14px] sm:text-[15px] md:text-[16px] text-center tracking-[1px] px-4"
+              className="leading-[0] w-full not-italic relative shrink-0 text-training-dark text-[14px] sm:text-[15px] md:text-[16px] text-center tracking-[1px] px-4"
             >
               <p className="block leading-[1.6]">
                 {training.description || ''}

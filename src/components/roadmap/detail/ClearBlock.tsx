@@ -79,17 +79,17 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
     <section className="py-16 px-4 md:px-8">
       <div className="max-w-[1100px] mx-auto">
         {/* メインカード */}
-        <div className="relative bg-white rounded-3xl border border-[#E8ECE8] overflow-hidden">
+        <div className="relative bg-white rounded-3xl border border-muted-custom overflow-hidden">
 
           <div className="relative px-8 py-12 md:px-16 md:py-16">
             {/* ステップバッジ */}
             <div className="flex justify-center mb-6">
               <div className="bg-white rounded-2xl shadow-[0_2px_8px_rgba(0,0,0,0.08)] px-4 py-2">
                 <div className="flex flex-col items-center">
-                  <span className="text-[10px] font-bold text-[#52674e] uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">
                     ステップ
                   </span>
-                  <span className="text-[24px] font-bold text-[#293525] font-['Unbounded',sans-serif] leading-none mt-1">
+                  <span className="text-[24px] font-bold text-text-secondary font-['Unbounded',sans-serif] leading-none mt-1">
                     OK
                   </span>
                 </div>
@@ -98,15 +98,15 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
 
             {/* 祝福メッセージ */}
             <div className="text-center mb-8">
-              <h2 className="text-[28px] md:text-[32px] font-extrabold text-[#293525] leading-[1.4] mb-4">
+              <h2 className="text-[28px] md:text-[32px] font-extrabold text-text-secondary leading-[1.4] mb-4">
                 {isCareerChange ? "👏 ロードマップクリア 👏" : "ロードマップクリア 🎉"}
               </h2>
               {isCareerChange ? (
                 <>
-                  <h3 className="text-[24px] font-bold text-[#293525] mb-4">
+                  <h3 className="text-[24px] font-bold text-text-secondary mb-4">
                     転職活動へ
                   </h3>
-                  <p className="text-[18px] text-[#293525]/70 leading-[1.8] max-w-[600px] mx-auto">
+                  <p className="text-[18px] text-text-secondary/70 leading-[1.8] max-w-[600px] mx-auto">
                     クリアおめでとうございます！
                     <br />
                     学びの過程と成果をポートフォリオにまとめて面接に挑みましょう
@@ -115,11 +115,11 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
               ) : (
                 <>
                   {roadmapTitle && (
-                    <p className="text-[16px] text-[#52674e] mb-2">
+                    <p className="text-[16px] text-text-secondary mb-2">
                       「{roadmapTitle}」を完了しました！
                     </p>
                   )}
-                  <p className="text-[18px] text-[#293525]/70 leading-[1.8] max-w-[600px] mx-auto">
+                  <p className="text-[18px] text-text-secondary/70 leading-[1.8] max-w-[600px] mx-auto">
                     お疲れさまでした！
                     <br />
                     学びの旅を一緒に歩んでくれてありがとう。
@@ -150,7 +150,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
 
             {/* 次のアクション */}
             <div className="border-t border-[#d4dbd1] pt-10">
-              <p className="text-center text-[14px] font-bold text-[#52674e] uppercase tracking-wider mb-6">
+              <p className="text-center text-[14px] font-bold text-text-secondary uppercase tracking-wider mb-6">
                 次のステップ
               </p>
 
@@ -167,10 +167,10 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         <Edit size={24} color="#52674e" variant="Linear" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                        <h3 className="text-[16px] font-bold text-text-secondary mb-2">
                           ポートフォリオを作成しよう
                         </h3>
-                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                        <p className="text-[14px] text-text-secondary/60 leading-[1.6] mb-4">
                           学びの過程と成果をまとめて、採用担当者にアピールしましょう。
                         </p>
                         <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#52674e] group-hover:text-[#3d4d3a] transition-colors">
@@ -193,10 +193,10 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         <MessageText1 size={24} color="#667eea" variant="Linear" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                        <h3 className="text-[16px] font-bold text-text-secondary mb-2">
                           転職ガイドを確認しよう
                         </h3>
-                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                        <p className="text-[14px] text-text-secondary/60 leading-[1.6] mb-4">
                           面接対策や企業選びのポイントを確認して、転職活動を始めましょう。
                         </p>
                         <span className="inline-flex items-center gap-2 text-[14px] font-bold text-[#667eea] group-hover:text-[#5468d4] transition-colors">
@@ -217,10 +217,10 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         <Edit size={24} color="#52674e" variant="Linear" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                        <h3 className="text-[16px] font-bold text-text-secondary mb-2">
                           学びをブログにまとめよう
                         </h3>
-                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                        <p className="text-[14px] text-text-secondary/60 leading-[1.6] mb-4">
                           学んだことをアウトプットすることで、知識が定着します。
                           自分の言葉でまとめてみましょう。
                         </p>
@@ -247,10 +247,10 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         <MessageText1 size={24} color="#667eea" variant="Linear" />
                       </div>
                       <div className="flex-1">
-                        <h3 className="text-[16px] font-bold text-[#293525] mb-2">
+                        <h3 className="text-[16px] font-bold text-text-secondary mb-2">
                           15分フィードバックを受けよう
                         </h3>
-                        <p className="text-[14px] text-[#293525]/60 leading-[1.6] mb-4">
+                        <p className="text-[14px] text-text-secondary/60 leading-[1.6] mb-4">
                           ブログにまとめたら、プロのフィードバックを受けてみませんか？
                           新しい視点が得られます。
                         </p>
@@ -267,7 +267,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
 
             {/* 励ましメッセージ */}
             <div className="mt-10 text-center">
-              <p className="text-[14px] text-[#293525]/50 leading-[1.8]">
+              <p className="text-[14px] text-text-secondary/50 leading-[1.8]">
                 よかったら学びの過程と成果をブログにまとめて
                 <br />
                 旅をセーブしましょう 📝

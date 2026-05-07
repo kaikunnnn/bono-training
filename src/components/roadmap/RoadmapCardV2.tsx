@@ -148,7 +148,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
                 <h3
                   className={cn(
                     'text-base sm:text-lg lg:text-xl font-bold leading-[1.65]',
-                    textVariant === 'light' ? 'text-white' : 'text-[#293525]'
+                    textVariant === 'light' ? 'text-white' : 'text-text-secondary'
                   )}
                 >
                   {renderTitleWithLineBreaks(title)}
@@ -157,7 +157,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
               <p
                 className={cn(
                   'text-sm sm:text-base font-normal leading-[1.8]',
-                  textVariant === 'light' ? 'text-white/80' : 'text-[#293525]/80'
+                  textVariant === 'light' ? 'text-white/80' : 'text-text-secondary/80'
                 )}
               >
                 {stripLineBreakMarker(description)}

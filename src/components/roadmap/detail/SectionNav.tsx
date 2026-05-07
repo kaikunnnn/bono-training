@@ -50,7 +50,7 @@ function NavItem({ label, onClick }: NavItemProps) {
       className="flex items-center justify-between gap-2 px-4 py-1 border border-black/[0.12] rounded-[50px] hover:bg-gray-50 hover:border-black/20 transition-colors text-left group flex-1 min-w-0"
     >
       {/* ラベル */}
-      <span className="text-[14px] font-medium text-[#0f172a] leading-[33px] truncate">
+      <span className="text-[14px] font-medium text-text-primary leading-[33px] truncate">
         {label}
       </span>
 

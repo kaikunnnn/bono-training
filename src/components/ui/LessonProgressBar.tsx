@@ -27,7 +27,7 @@ export function LessonProgressBar({
       className={cn("flex items-center gap-[9px]", className)}
       style={{ width: width || "100%" }}
     >
-      <div className="flex-1 h-[7px] bg-[#eaeaea] rounded-full overflow-hidden">
+      <div className="flex-1 h-[7px] bg-muted-strong rounded-full overflow-hidden">
         <div
           className="h-full bg-black rounded-[40px] transition-all duration-300"
           style={{ width: `${normalizedProgress}%` }}

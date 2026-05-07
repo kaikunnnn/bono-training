@@ -301,17 +301,17 @@ export const BlogItemCompact: React.FC<BlogItemProps> = ({ post, className = '' 
     >
       <div className="flex flex-col gap-2">
         <h4
-          className="m-0 font-noto text-base font-bold text-[#0F172A] blog-text-truncate-2"
+          className="m-0 font-noto text-base font-bold text-text-primary blog-text-truncate-2"
         >
           {removeEmojiFromText(post.title)}
         </h4>
         <div className="flex items-center gap-2">
-          <span className="font-hind text-xs font-medium text-[#9CA3AF]">
+          <span className="font-hind text-xs font-medium text-text-disabled">
             {post.category.toUpperCase()}
           </span>
           <time
             dateTime={post.publishedAt}
-            className="font-hind text-xs font-medium text-[#9CA3AF]"
+            className="font-hind text-xs font-medium text-text-disabled"
           >
             {formatDate(post.publishedAt)}
           </time>

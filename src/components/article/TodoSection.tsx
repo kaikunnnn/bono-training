@@ -29,13 +29,13 @@ const TodoSection = ({ items }: TodoSectionProps) => {
     >
       {/* ヘッダーブロック */}
       <div
-        className="bg-[#F5F5F5] px-6 py-[5px] flex items-center gap-2.5"
+        className="bg-muted-custom px-6 py-[5px] flex items-center gap-2.5"
         style={{
           borderRadius: "20px 20px 0px 0px",
         }}
       >
         <h3
-          className="text-xs font-bold leading-6 text-[#656668] m-0"
+          className="text-xs font-bold leading-6 text-text-muted m-0"
           style={{ fontFamily: '"Noto Sans JP", sans-serif' }}
         >
           身につけること

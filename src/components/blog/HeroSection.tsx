@@ -66,7 +66,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
         {/* サブタイトル */}
         <div className="content-stretch flex flex-col items-center relative shrink-0 w-full">
-          <div className="flex flex-col font-['Noto_Sans_JP'] font-medium justify-center leading-[0] relative shrink-0 text-[14px] text-[#9ca3af] text-center text-nowrap tracking-[0.7px]">
+          <div className="flex flex-col font-['Noto_Sans_JP'] font-medium justify-center leading-[0] relative shrink-0 text-[14px] text-text-disabled text-center text-nowrap tracking-[0.7px]">
             <p className="leading-[20px] whitespace-pre">{subtitle}</p>
           </div>
         </div>
@@ -150,14 +150,14 @@ export const HeroSectionTailwind: React.FC<HeroSectionProps> = ({
     >
       {/* タイトル */}
       <div className="flex items-center justify-center w-[344px] h-[89px] mb-8 md:mb-6 sm:mb-4">
-        <h1 className="font-noto text-[96px] md:text-[56px] sm:text-[48px] font-bold text-[#151834] text-center leading-[1.1] tracking-[-0.02em] m-0">
+        <h1 className="font-noto text-[96px] md:text-[56px] sm:text-[48px] font-bold text-text-primary text-center leading-[1.1] tracking-[-0.02em] m-0">
           {title}
         </h1>
       </div>
 
       {/* サブタイトル */}
       <div className="w-full flex justify-center items-center">
-        <p className="font-noto text-[14px] md:text-[13px] sm:text-[12px] font-medium text-[#9CA3AF] text-center leading-5 tracking-[0.7px] w-[325px] md:w-[280px] h-5 md:h-auto m-0">
+        <p className="font-noto text-[14px] md:text-[13px] sm:text-[12px] font-medium text-text-disabled text-center leading-5 tracking-[0.7px] w-[325px] md:w-[280px] h-5 md:h-auto m-0">
           {subtitle}
         </p>
       </div>

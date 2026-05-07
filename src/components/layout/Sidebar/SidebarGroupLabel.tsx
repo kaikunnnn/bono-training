@@ -20,7 +20,7 @@ export function SidebarGroupLabel({
       className={cn(
         "w-full h-[32px] px-[6px] rounded-[8px]",
         "inline-flex justify-start items-center",
-        "text-[#74798B] text-[10px] font-bold leading-[16px]",
+        "text-text-muted text-[10px] font-bold leading-[16px]",
         "select-none",
         className
       )}

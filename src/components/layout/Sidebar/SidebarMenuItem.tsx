@@ -20,7 +20,7 @@ export function SidebarMenuItem({
 }: SidebarMenuItemProps) {
   const baseClasses =
     "w-full rounded-[20px] px-[14px] py-[9px] inline-flex items-center gap-[10px]" +
-    " font-noto-sans-jp text-[13px] font-medium leading-none text-[#2F3037]" +
+    " font-noto-sans-jp text-[13px] font-medium leading-none text-text-primary" +
     " transition-colors duration-150 border border-transparent";
   const stateClasses = isActive
     ? "border border-[rgba(47,48,55,0.08)] bg-[linear-gradient(111.3507deg,rgba(47,48,55,0.08)_9.1965%,rgba(47,48,55,0.03)_79.127%)]"
@@ -32,7 +32,7 @@ export function SidebarMenuItem({
       <span
         className={cn(
           "w-5 h-5 flex-shrink-0 inline-flex flex-col justify-center items-center",
-          "text-[#2F3037]"
+          "text-text-primary"
         )}
         aria-hidden="true"
       >

@@ -23,14 +23,14 @@ export default function CurriculumSection({ steps }: CurriculumSectionProps) {
         {/* セクションヘッダー - 他セクションと同じUI */}
         <div className="mb-9">
           {/* バッジ */}
-          <div className="inline-flex items-center justify-center border border-[#52674e] rounded-full px-[8px] py-[2px] mb-4">
-            <span className="text-[12px] font-bold text-[#52674e] uppercase">
+          <div className="inline-flex items-center justify-center border border-text-secondary rounded-full px-[8px] py-[2px] mb-4">
+            <span className="text-[12px] font-bold text-text-secondary uppercase">
               学習内容
             </span>
           </div>
 
           {/* タイトル */}
-          <h2 className="text-[24px] font-extrabold text-[#293525] leading-[36px] mb-4">
+          <h2 className="text-[24px] font-extrabold text-text-secondary leading-[36px] mb-4">
             カリキュラム
           </h2>
 

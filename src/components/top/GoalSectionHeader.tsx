@@ -39,14 +39,14 @@ export default function GoalSectionHeader({
       {/* コンテンツエリア（パディング付き、垂直中央配置） */}
       <div className="flex flex-col gap-3 sm:gap-[17px] px-4 sm:px-8 lg:px-14 py-8 sm:py-12 lg:py-14">
         {/* ゴールバッジ */}
-        <div className="inline-flex self-start items-center justify-center px-2 sm:px-2.5 py-1 sm:py-1.5 border border-[#52674e] rounded-full">
-          <span className="text-[10px] sm:text-xs font-bold text-[#52674e] uppercase leading-none">
+        <div className="inline-flex self-start items-center justify-center px-2 sm:px-2.5 py-1 sm:py-1.5 border border-text-secondary rounded-full">
+          <span className="text-[10px] sm:text-xs font-bold text-text-secondary uppercase leading-none">
             ゴール
           </span>
         </div>
 
         {/* タイトル */}
-        <h2 className="text-xl sm:text-2xl lg:text-[28px] font-extrabold text-text-primary leading-[1.29] font-['Rounded_Mplus_1c',sans-serif]">
+        <h2 className="text-xl sm:text-2xl lg:text-[28px] font-extrabold text-text-primary leading-[1.29] font-rounded-mplus">
           {title}
         </h2>
 

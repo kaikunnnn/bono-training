@@ -34,7 +34,7 @@ export function BackButton({
       type="button"
       onClick={handleBack}
       className={cn(
-        "bg-white border border-[#EBEBEB] flex items-center justify-center px-2.5 sm:px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition gap-0 sm:gap-2",
+        "bg-white border border-border-light flex items-center justify-center px-2.5 sm:px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition gap-0 sm:gap-2",
         className,
       )}
     >

@@ -29,7 +29,7 @@ export function HeadingSectionInner({
       {/* 左側: タイトル */}
       <div className="flex items-center">
         <span
-          className="text-[13px] text-[#020817] whitespace-nowrap font-bold"
+          className="text-[13px] text-text-primary whitespace-nowrap font-bold"
           style={{ fontFamily: "'Rounded Mplus 1c', sans-serif" }}
         >
           {title}

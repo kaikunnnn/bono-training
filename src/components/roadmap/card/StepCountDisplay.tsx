@@ -15,7 +15,7 @@ export const StepCountDisplay: React.FC<StepCountDisplayProps> = ({ count, varia
   <div
     className={cn(
       'flex flex-col gap-0.5',
-      variant === 'light' ? 'text-white' : 'text-[#293525]'
+      variant === 'light' ? 'text-white' : 'text-text-secondary'
     )}
   >
     <span

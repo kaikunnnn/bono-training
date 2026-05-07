@@ -76,7 +76,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
 
               {/* タイトルと説明 */}
               <div className="flex flex-col gap-2 text-left">
-                <h3 className="text-[20px] md:text-lg lg:text-[20px] font-rounded-mplus-bold leading-[1.2] text-[#020617]">
+                <h3 className="text-[20px] md:text-lg lg:text-[20px] font-rounded-mplus-bold leading-[1.2] text-text-primary">
                   {training.title}
                 </h3>
                 <p className="text-[14px] font-normal leading-[1.4] text-[#64748B] line-clamp-2">
@@ -86,7 +86,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
             </div>
 
             {/* Step 2-3: 区切り線 */}
-            <div className="w-full h-[1px] bg-[#E2E8F0]" />
+            <div className="w-full h-[1px] bg-muted-custom" />
 
             {/* Step 2-4: フッター部分 */}
             <div className="w-full flex justify-between items-center gap-5">

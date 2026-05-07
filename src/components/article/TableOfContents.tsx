@@ -110,8 +110,8 @@ const TableOfContents = ({ content, title = '目次', maxDepth = 2 }: TableOfCon
   const numbers = generateNumbers();
 
   return (
-    <nav className="my-8 p-4 bg-[#F9FAFB] rounded-lg border border-[#E5E7EB]">
-      <h2 className="text-[16px] md:text-[18px] font-semibold text-[#101828] mb-4 font-rounded-mplus">
+    <nav className="my-8 p-4 bg-muted-custom rounded-lg border border-border-light">
+      <h2 className="text-[16px] md:text-[18px] font-semibold text-text-primary mb-4 font-rounded-mplus">
         {title}
       </h2>
       <ul className="space-y-2">
@@ -128,7 +128,7 @@ const TableOfContents = ({ content, title = '目次', maxDepth = 2 }: TableOfCon
               href={`#${item.id}`}
               className="text-[14px] md:text-[16px] text-[#3B82F6] hover:text-[#1D4ED8] hover:underline transition-colors font-noto-sans-jp leading-relaxed"
             >
-              <span className="text-[#6B7280] mr-2">{numbers[index]}</span>
+              <span className="text-text-muted mr-2">{numbers[index]}</span>
               {item.text}
             </a>
           </li>

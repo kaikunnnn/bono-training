@@ -42,9 +42,9 @@ interface TopHeroSectionProps {
 /** NEWバッジ */
 function NewBadge({ text }: { text: string }) {
   return (
-    <div className="inline-flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 py-1.5 border border-[#0f172a] rounded-full">
-      <span className="text-[10px] sm:text-xs font-bold text-[#0f172a]">NEW!</span>
-      <span className="text-[11px] sm:text-[13px] font-bold text-[#0f172a]">{text}</span>
+    <div className="inline-flex items-center gap-1.5 sm:gap-2.5 px-3 sm:px-4 py-1.5 border border-text-primary rounded-full">
+      <span className="text-[10px] sm:text-xs font-bold text-text-primary">NEW!</span>
+      <span className="text-[11px] sm:text-[13px] font-bold text-text-primary">{text}</span>
     </div>
   );
 }
@@ -64,8 +64,8 @@ function CTAButton({
   const baseStyles = cn(
     "inline-flex items-center justify-center h-11 sm:h-12 px-5 sm:px-6 rounded-[14px] text-sm font-bold tracking-wide transition-colors",
     variant === "primary"
-      ? "bg-[#081c17] text-white shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] hover:bg-[#0d2a22]"
-      : "bg-transparent border border-[#0f172a] text-[#0f172a] hover:bg-[#f5f5f5]"
+      ? "bg-cta-primary-bg text-white shadow-cta hover:bg-cta-primary-hover"
+      : "bg-transparent border border-text-primary text-text-primary hover:bg-hover"
   );
 
   if (external) {
@@ -125,7 +125,7 @@ function TopRoadmapCard({
         {/* アイコン（左上） */}
         <div className="absolute left-5 sm:left-8 top-5 sm:top-8">
           <div className="flex items-center justify-center w-12 sm:w-16 h-12 sm:h-16 bg-white rounded-full">
-            <Briefcase className="w-5 sm:w-7 h-5 sm:h-7 text-[#1a1a1a]" />
+            <Briefcase className="w-5 sm:w-7 h-5 sm:h-7 text-text-primary" />
           </div>
         </div>
 
@@ -186,14 +186,14 @@ export default function TopHeroSection({
         <NewBadge text={newBadgeText} />
 
         {/* メインキャッチコピー */}
-        <h1 className="text-center text-[#0f172a] text-2xl sm:text-4xl lg:text-5xl font-bold leading-[1.42] font-['Rounded_Mplus_1c',sans-serif]">
+        <h1 className="text-center text-text-primary text-2xl sm:text-4xl lg:text-5xl font-bold leading-[1.42] font-rounded-mplus">
           ワクワクするものつくるために
           <br />
           体系的にスキルフルになろう
         </h1>
 
         {/* サブキャッチコピー */}
-        <p className="text-center text-[#0f172a] text-base sm:text-lg lg:text-xl leading-[1.6] max-w-[533px]">
+        <p className="text-center text-text-primary text-base sm:text-lg lg:text-xl leading-[1.6] max-w-[533px]">
           ユーザー価値から考えてデザインするスキルを身につける人のためのトレーニングサービスです
         </p>
 
@@ -213,7 +213,7 @@ export default function TopHeroSection({
       ============================================ */}
       <div className="flex flex-col items-center gap-4 sm:gap-6 w-full">
         {/* ラベルテキスト */}
-        <p className="text-center text-[#293525] text-sm sm:text-base font-extrabold leading-[2.25] font-['Rounded_Mplus_1c',sans-serif] px-4">
+        <p className="text-center text-text-secondary text-sm sm:text-base font-extrabold leading-[2.25] font-rounded-mplus px-4">
           目的に合わせたロードマップでデザインの楽しさを探究しよう
         </p>
 

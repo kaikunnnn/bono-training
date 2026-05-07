@@ -87,12 +87,12 @@ export default async function TaskDetailPage({ params }: PageProps) {
                 {/* Heading - タイトルと説明 */}
                 <div className="box-border content-stretch flex flex-col gap-4 items-center justify-start p-0 relative shrink-0 w-full max-w-[640px]">
                   <div className="box-border content-stretch flex flex-row gap-2.5 items-end justify-center p-0 relative shrink-0 w-full">
-                    <div className="basis-0 font-['Rounded_Mplus_1c:Medium',_sans-serif] grow leading-[0] min-h-px min-w-px not-italic relative shrink-0 text-[#1d382f] text-[28px] md:text-[28px] lg:text-[40px] text-center">
+                    <div className="basis-0 font-['Rounded_Mplus_1c:Medium',_sans-serif] grow leading-[0] min-h-px min-w-px not-italic relative shrink-0 text-text-primary text-[28px] md:text-[28px] lg:text-[40px] text-center">
                       <h1 className="block leading-[1.28] font-rounded-mplus font-bold">{task.title}</h1>
                     </div>
                   </div>
                   {task.description && (
-                    <div className="font-['Rounded_Mplus_1c:Medium',_sans-serif] leading-[0] not-italic relative shrink-0 text-base md:text-lg lg:text-[20px] text-[#475569] text-center w-full max-w-[477px]">
+                    <div className="font-['Rounded_Mplus_1c:Medium',_sans-serif] leading-[0] not-italic relative shrink-0 text-base md:text-lg lg:text-[20px] text-text-muted text-center w-full max-w-[477px]">
                       <p className="block leading-[1.69]">{task.description}</p>
                     </div>
                   )}
@@ -121,7 +121,7 @@ export default async function TaskDetailPage({ params }: PageProps) {
                   sanitySections.map((section) => (
                     <div key={section._key} className="mb-6">
                       {section.sectionTitle && (
-                        <h2 className="text-xl font-bold text-[#1d382f] mb-4">{section.sectionTitle}</h2>
+                        <h2 className="text-xl font-bold text-text-primary mb-4">{section.sectionTitle}</h2>
                       )}
                       <PortableTextRenderer value={section.content || []} />
                     </div>

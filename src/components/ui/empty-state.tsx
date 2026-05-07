@@ -35,7 +35,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
           className="px-2.5 py-1.5 bg-white rounded-lg border border-black/10 inline-flex justify-center items-center gap-1 no-underline"
         >
           <span
-            className="text-[#020817] text-xs font-bold leading-6"
+            className="text-text-primary text-xs font-bold leading-6"
             style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif" }}
           >
             {linkLabel}

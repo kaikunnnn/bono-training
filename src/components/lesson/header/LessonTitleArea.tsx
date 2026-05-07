@@ -52,7 +52,7 @@ export function LessonTitleArea({
 
       {/* タイトル + ロードマップリンク */}
       <div className="flex flex-col gap-1.5 items-start w-full">
-        <h1 className="font-rounded-mplus font-bold text-[32px] text-[#0d221d] leading-[40px] w-full">
+        <h1 className="font-rounded-mplus font-bold text-[32px] text-training-dark leading-[40px] w-full">
           {lesson.title}
         </h1>
         {/* ロードマップ紐づき表示 */}
@@ -83,7 +83,7 @@ export function LessonTitleArea({
       {lesson.description && (
         <div className="flex flex-col gap-[3px] items-start w-full">
           <div className="w-full h-fit max-h-[88px] overflow-hidden">
-            <p className="font-noto-sans-jp text-[16px] text-[#4b5563] leading-[1.6] line-clamp-3">
+            <p className="font-noto-sans-jp text-[16px] text-text-muted leading-[1.6] line-clamp-3">
               {lesson.description}
             </p>
           </div>

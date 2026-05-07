@@ -3,6 +3,7 @@ import type { Guide } from "@/types/guide";
 import { getCategoryInfo } from "@/lib/guideCategories";
 import { GuideCardImage } from "./GuideCardImage";
 import { GuideCardPlaceholder } from "./GuideCard";
+import { getVideoInfo } from "@/lib/videoUtils";
 import {
   Breadcrumb,
   BreadcrumbList,
@@ -83,14 +84,27 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
           </div>
         </div>
 
-        {/* メディア: サムネ > プレースホルダー */}
+        {/* メディア: 動画 > サムネ > プレースホルダー */}
         <div className="w-full max-w-[640px]">
           <div className="w-full aspect-video rounded-3xl overflow-hidden bg-muted">
-            {guide.thumbnail ? (
-              <GuideCardImage src={guide.thumbnail} alt={guide.title} />
-            ) : (
-              <GuideCardPlaceholder title={guide.title} />
-            )}
+            {(() => {
+              const videoInfo = guide.videoUrl ? getVideoInfo(guide.videoUrl) : null;
+              if (videoInfo) {
+                return (
+                  <iframe
+                    src={videoInfo.embedUrl}
+                    className="w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={guide.title}
+                  />
+                );
+              }
+              if (guide.thumbnailUrl) {
+                return <GuideCardImage src={guide.thumbnailUrl} alt={guide.title} />;
+              }
+              return <GuideCardPlaceholder title={guide.title} />;
+            })()}
           </div>
         </div>
       </div>

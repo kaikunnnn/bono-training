@@ -28,6 +28,12 @@ export const GUIDE_CATEGORIES: GuideCategoryInfo[] = [
     description: "デザインツールの使い方と選び方",
     icon: "wrench",
   },
+  {
+    id: "design-knowledge",
+    label: "デザイン知識",
+    description: "配色・レイアウトなどデザインの基礎知識",
+    icon: "palette",
+  },
 ];
 
 /**

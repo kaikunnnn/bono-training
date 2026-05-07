@@ -17,7 +17,7 @@ export const ArrowButton: React.FC<ArrowButtonProps> = ({ variant }) => (
       'flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 rounded-full border',
       variant === 'light'
         ? 'border-white/30 text-white'
-        : 'border-[#293525]/30 text-[#293525]'
+        : 'border-text-secondary/30 text-text-secondary'
     )}
   >
     <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />

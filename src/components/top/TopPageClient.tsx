@@ -71,13 +71,13 @@ const DESIGN_CYCLE_LESSON_HREF = "/lessons/ui-design-flow-lv1";
 /** NEWバッジ（任意でレッスン詳細へリンク） */
 function NewBadge({ text, href }: { text: string; href?: string }) {
   const className =
-    "inline-flex items-center gap-2.5 px-4 py-[7px] bg-white rounded-full border border-transparent hover:border-black hover:bg-white/95 transition-colors duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f172a]";
+    "inline-flex items-center gap-2.5 px-4 py-[7px] bg-white rounded-full border border-transparent hover:border-black hover:bg-white/95 transition-colors duration-300 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary";
   const inner = (
     <>
-      <span className="text-xs font-bold text-[#f95a16]">NEW!</span>
+      <span className="text-xs font-bold text-accent-orange">NEW!</span>
       <div className="flex items-baseline gap-0">
-        <span className="text-[13px] font-bold text-[#0f172a]">{text}</span>
-        <span className="text-xs font-normal text-[#0f172a]">！</span>
+        <span className="text-[13px] font-bold text-text-primary">{text}</span>
+        <span className="text-xs font-normal text-text-primary">！</span>
       </div>
     </>
   );
@@ -102,7 +102,7 @@ function CTAButtonPrimary({
   external?: boolean;
 }) {
   const className =
-    "inline-flex items-center justify-center h-14 px-6 rounded-[14px] bg-[#102720] text-white text-sm font-bold leading-5 tracking-[0.35px] text-center shadow-[0px_4px_12px_0px_rgba(0,0,0,0.12)] hover:bg-[#1a3a30] transition-colors w-full sm:w-auto sm:min-w-[174px]";
+    "inline-flex items-center justify-center h-14 px-6 rounded-[14px] bg-cta-primary-bg text-white text-sm font-bold leading-5 tracking-[0.35px] text-center shadow-cta hover:bg-cta-primary-hover transition-colors w-full sm:w-auto sm:min-w-[174px]";
 
   if (external) {
     return (
@@ -130,7 +130,7 @@ function CTAButtonSecondary({
   return (
     <Link
       href={href}
-      className="inline-flex items-center justify-center h-14 px-[25px] py-px rounded-[14px] border-2 border-[#0f172a] text-[#0f172a] text-sm font-bold leading-5 tracking-[0.35px] text-center hover:bg-[#0f172a] hover:text-white transition-colors duration-300 w-full sm:w-auto sm:min-w-[154px]"
+      className="inline-flex items-center justify-center h-14 px-[25px] py-px rounded-[14px] border-2 border-text-primary text-text-primary text-sm font-bold leading-5 tracking-[0.35px] text-center hover:bg-cta-primary-bg hover:text-white transition-colors duration-300 w-full sm:w-auto sm:min-w-[154px]"
     >
       {children}
     </Link>
@@ -152,7 +152,7 @@ function GoalSectionHeader({
   description: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center gap-3 sm:gap-4 py-10 sm:py-12 lg:pt-12 lg:pb-[56px] px-4 sm:px-8 lg:px-22 border-b border-[#d6d6d6]">
+    <div className="flex flex-col items-center gap-3 sm:gap-4 py-10 sm:py-12 lg:pt-12 lg:pb-[56px] px-4 sm:px-8 lg:px-22 border-b border-border-light">
       <div className="flex h-8 w-8 items-center justify-center sm:h-9 sm:w-9 lg:h-[42px] lg:w-[42px]">
         {iconSrc ? (
           <img
@@ -167,7 +167,7 @@ function GoalSectionHeader({
           <span className="text-[32px] leading-none sm:text-[36px] lg:text-[42px]">{icon}</span>
         )}
       </div>
-      <h2 className="flex flex-col items-center gap-y-2 sm:gap-y-3 text-xl sm:text-2xl lg:text-[32px] font-extrabold text-center text-text-primary leading-[132%] font-['Rounded_Mplus_1c',sans-serif]">
+      <h2 className="flex flex-col items-center gap-y-2 sm:gap-y-3 text-xl sm:text-2xl lg:text-[32px] font-extrabold text-center text-text-primary leading-[132%] font-rounded-mplus">
         {title}
       </h2>
       <p className="flex flex-col items-center gap-y-2 sm:gap-y-2.5 text-base sm:text-lg lg:text-xl text-center text-text-primary/80 leading-[1.66]">
@@ -403,7 +403,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
                   initial={PATTERN2_ANIMATION.initial}
                   animate={PATTERN2_ANIMATION.animate}
                   transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.15 }}
-                  className="font-[LINE_Seed_JP,sans-serif] text-[40px] sm:text-[56px] font-bold text-[#0f172a] leading-[1.32]"
+                  className="font-line-seed-jp text-[40px] sm:text-[56px] font-bold text-text-primary leading-[1.32]"
                 >
                   はじめよう！
                   <br />
@@ -416,7 +416,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
                   initial={PATTERN2_ANIMATION.initial}
                   animate={PATTERN2_ANIMATION.animate}
                   transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.3 }}
-                  className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl text-[#0f172a] leading-[188%]"
+                  className="w-full max-w-[681px] px-4 font-noto-sans-jp text-base sm:text-xl text-text-primary leading-[188%]"
                 >
                   <p className="mb-0">ボノはユーザー起点で未来のワクワクを</p>
                   <p className="mb-0">
@@ -448,7 +448,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
               {/* 左端フェードアウト - スクロール時のみ表示 */}
               {isScrolledLeft && (
                 <div
-                  className="hidden lg:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#F9F9F7] via-[#F9F9F7]/60 to-transparent z-20 pointer-events-none"
+                  className="hidden lg:block absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[var(--bg-base)] via-[var(--bg-base)]/60 to-transparent z-20 pointer-events-none"
                   style={{
                     opacity: isScrolledLeft ? 1 : 0,
                     transition: 'opacity 700ms ease-out',
@@ -502,7 +502,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
             href="https://beauty.gmo/recruit-design/"
             target="_blank"
             rel="noopener noreferrer"
-            className="block h-[61px] w-[149px] shrink-0 rounded-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0f172a]"
+            className="block h-[61px] w-[149px] shrink-0 rounded-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-text-primary"
             aria-label="GMOビューティー デザイン採用サイト（新しいタブで開く）"
           >
             <img
@@ -521,7 +521,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
         <div className="w-full max-w-[1120px] mx-0 h-fit bg-white px-4 sm:px-8 lg:px-16 py-10 sm:py-14 lg:py-[72px] rounded-[32px] sm:rounded-[48px] lg:rounded-[64px]">
           {/* ヘッダー */}
           <div className="flex flex-col items-center gap-3 sm:gap-4 mb-4">
-            <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-center text-text-primary leading-[1.5] font-['Rounded_Mplus_1c',sans-serif]">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-extrabold text-center text-text-primary leading-[1.5] font-rounded-mplus">
               「なりたいゴール」で
               <br />
               デザインをはじめよう

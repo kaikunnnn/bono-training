@@ -27,9 +27,9 @@ export default function RelatedGuides({ guides }: RelatedGuidesProps) {
                 href={`/guide/${guide.slug}`}
                 className="group flex flex-col gap-3 p-4 rounded-xl border border-border bg-white hover:bg-muted/50 transition-colors"
               >
-                {guide.thumbnail && (
+                {guide.thumbnailUrl && (
                   <div className="w-full aspect-video rounded-lg overflow-hidden bg-muted">
-                    <GuideCardImage src={guide.thumbnail} alt={guide.title} />
+                    <GuideCardImage src={guide.thumbnailUrl} alt={guide.title} />
                   </div>
                 )}
                 <div className="flex flex-col gap-1.5">

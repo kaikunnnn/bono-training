@@ -26,14 +26,14 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
         {/* ヘッダー */}
         <div className="mb-9">
           {/* バッジ */}
-          <div className="inline-flex items-center justify-center border border-[#52674e] rounded-full px-[8px] py-[2px] mb-4">
-            <span className="text-[12px] font-bold text-[#52674e] uppercase">
+          <div className="inline-flex items-center justify-center border border-text-secondary rounded-full px-[8px] py-[2px] mb-4">
+            <span className="text-[12px] font-bold text-text-secondary uppercase">
               ゴール
             </span>
           </div>
 
           {/* タイトル */}
-          <h2 className="text-[24px] font-extrabold text-[#293525] leading-[36px] mb-4">
+          <h2 className="text-[24px] font-extrabold text-text-secondary leading-[36px] mb-4">
             ロードマップで得られる「変化」
           </h2>
 
@@ -46,7 +46,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
         </div>
 
         {/* サブヘッダー */}
-        <p className="text-[14px] font-extrabold text-[#0f172a] mb-6">
+        <p className="text-[14px] font-extrabold text-text-primary mb-6">
           悩みが楽しみになる「変化」を獲得しよう
         </p>
 
@@ -69,7 +69,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
                 </div>
 
                 {/* タイトル（悩み・課題） */}
-                <p className="text-[16px] font-bold text-[#1a1a1a] leading-[25.2px]">
+                <p className="text-[16px] font-bold text-text-primary leading-[25.2px]">
                   {item.title}
                 </p>
               </div>
@@ -81,7 +81,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
 
               {/* 右側: 解決テキスト */}
               {item.description && (
-                <p className="text-[16px] text-[#0f172a] leading-[25.2px] w-full md:w-[427px]">
+                <p className="text-[16px] text-text-primary leading-[25.2px] w-full md:w-[427px]">
                   {item.description}
                 </p>
               )}

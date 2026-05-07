@@ -86,7 +86,7 @@ const RichTextSection = ({
         return (
           <h2
             id={id}
-            className={`!text-[20px] md:!text-[24px] !font-semibold !leading-[32px] !text-[#101828] !mt-[96px] !mb-[48px] first:!mt-0 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
+            className={`!text-[20px] md:!text-[24px] !font-semibold !leading-[32px] !text-text-primary !mt-[96px] !mb-[48px] first:!mt-0 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
@@ -99,7 +99,7 @@ const RichTextSection = ({
         return (
           <h3
             id={id}
-            className={`!text-[18px] md:!text-[20px] !font-semibold !leading-[28px] !text-[#101828] !mt-[64px] !mb-[32px] !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
+            className={`!text-[18px] md:!text-[20px] !font-semibold !leading-[28px] !text-text-primary !mt-[64px] !mb-[32px] !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
@@ -112,7 +112,7 @@ const RichTextSection = ({
         return (
           <h4
             id={id}
-            className={`!text-[16px] md:!text-[18px] !font-semibold !leading-[24px] !text-[#101828] !mt-6 !mb-3 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
+            className={`!text-[16px] md:!text-[18px] !font-semibold !leading-[24px] !text-text-primary !mt-6 !mb-3 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
@@ -122,7 +122,7 @@ const RichTextSection = ({
       // Blockquote (引用): 18px(desktop) / 16px(mobile), lh:200%, letter-spacing:3%
       blockquote: ({ children }) => (
         <blockquote
-          className={`!border-l-4 !border-[#D0D5DD] !bg-[#F9FAFB] !py-4 !px-6 !my-6 !text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !font-noto-sans-jp ${textContainerClassName}`}
+          className={`!border-l-4 !border-border-default !bg-muted-custom !py-4 !px-6 !my-6 !text-[16px] md:!text-[18px] !leading-[200%] !text-text-primary !font-noto-sans-jp ${textContainerClassName}`}
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -131,7 +131,7 @@ const RichTextSection = ({
       // 通常の段落: 18px(desktop) / 16px(mobile), lh:200%, letter-spacing:3%
       normal: ({ children }) => (
         <p
-          className={`!text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !mb-6 !font-noto-sans-jp ${textContainerClassName}`}
+          className={`!text-[16px] md:!text-[18px] !leading-[200%] !text-text-primary !mb-6 !font-noto-sans-jp ${textContainerClassName}`}
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -162,7 +162,7 @@ const RichTextSection = ({
       // リストアイテム: 18px(desktop) / 16px(mobile), lh:200%, letter-spacing:3%
       bullet: ({ children }) => (
         <li
-          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !font-noto-sans-jp"
+          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-text-primary !font-noto-sans-jp"
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -170,7 +170,7 @@ const RichTextSection = ({
       ),
       number: ({ children }) => (
         <li
-          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-[#182033] !font-noto-sans-jp"
+          className="!text-[16px] md:!text-[18px] !leading-[200%] !text-text-primary !font-noto-sans-jp"
           style={{ letterSpacing: "0.03em" }}
         >
           {children}
@@ -229,7 +229,7 @@ const RichTextSection = ({
               />
             </div>
             {value.caption && (
-              <figcaption className="mt-2 text-sm text-[#6B7280] text-center italic">
+              <figcaption className="mt-2 text-sm text-text-muted text-center italic">
                 {value.caption}
               </figcaption>
             )}
@@ -244,7 +244,7 @@ const RichTextSection = ({
           <div className={`my-6 overflow-x-auto ${textContainerClassName}`}>
             <table className="w-full border-collapse text-[14px]">
               {value.caption && (
-                <caption className="text-left text-[14px] text-[#6B7280] mb-2 italic">
+                <caption className="text-left text-[14px] text-text-muted mb-2 italic">
                   {value.caption}
                 </caption>
               )}
@@ -261,9 +261,9 @@ const RichTextSection = ({
                       <tr
                         key={rowIndex}
                         className={`
-                        border-t border-[#E5E7EB]
-                        ${isHeader ? "bg-[#F9FAFB]" : ""}
-                        ${isEvenRow && !isHeader ? "bg-[#F9FAFB]" : "bg-white"}
+                        border-t border-border-light
+                        ${isHeader ? "bg-muted-custom" : ""}
+                        ${isEvenRow && !isHeader ? "bg-muted-custom" : "bg-white"}
                         transition-colors duration-200
                       `}
                       >
@@ -272,7 +272,7 @@ const RichTextSection = ({
                             return (
                               <th
                                 key={cellIndex}
-                                className="border border-[#E5E7EB] px-4 py-2 text-left font-semibold text-[#6B7280] bg-[#F9FAFB]"
+                                className="border border-border-light px-4 py-2 text-left font-semibold text-text-muted bg-muted-custom"
                               >
                                 {cell}
                               </th>
@@ -281,7 +281,7 @@ const RichTextSection = ({
                           return (
                             <td
                               key={cellIndex}
-                              className="border border-[#E5E7EB] px-4 py-2 text-[#182033]"
+                              className="border border-border-light px-4 py-2 text-text-primary"
                             >
                               {cell}
                             </td>
@@ -343,10 +343,10 @@ const RichTextSection = ({
             defaultTitle: "危険",
           },
           note: {
-            bg: "bg-[#F9FAFB]",
+            bg: "bg-muted-custom",
             border: "border-[#6B7280]",
             icon: "📝",
-            iconBg: "bg-[#F3F4F6]",
+            iconBg: "bg-muted-custom",
             defaultTitle: "ノート",
           },
         };
@@ -365,10 +365,10 @@ const RichTextSection = ({
                 {style.icon}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-[#101828] mb-2 text-[16px] md:text-[18px] font-noto-sans-jp">
+                <p className="font-semibold text-text-primary mb-2 text-[16px] md:text-[18px] font-noto-sans-jp">
                   {displayTitle}
                 </p>
-                <div className="text-[14px] md:text-[16px] leading-[180%] text-[#182033] font-noto-sans-jp [&>p]:mb-2 [&>p:last-child]:mb-0">
+                <div className="text-[14px] md:text-[16px] leading-[180%] text-text-primary font-noto-sans-jp [&>p]:mb-2 [&>p:last-child]:mb-0">
                   <PortableText value={value.content} components={components} />
                 </div>
               </div>
@@ -396,20 +396,20 @@ const RichTextSection = ({
             href={value.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`my-6 block rounded-lg border border-[#E5E7EB] overflow-hidden hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 no-underline ${textContainerClassName}`}
+            className={`my-6 block rounded-lg border border-border-light overflow-hidden hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 no-underline ${textContainerClassName}`}
           >
             <div className="flex flex-col md:flex-row">
               {/* テキスト部分 */}
               <div className="flex-1 p-4 min-w-0">
-                <h3 className="text-[16px] md:text-[18px] font-semibold text-[#101828] mb-2 line-clamp-2 font-noto-sans-jp">
+                <h3 className="text-[16px] md:text-[18px] font-semibold text-text-primary mb-2 line-clamp-2 font-noto-sans-jp">
                   {value.title}
                 </h3>
                 {value.description && (
-                  <p className="text-[14px] text-[#6B7280] line-clamp-2 mb-3 font-noto-sans-jp">
+                  <p className="text-[14px] text-text-muted line-clamp-2 mb-3 font-noto-sans-jp">
                     {value.description}
                   </p>
                 )}
-                <div className="flex items-center gap-2 text-[12px] text-[#9CA3AF]">
+                <div className="flex items-center gap-2 text-[12px] text-text-disabled">
                   <svg
                     className="w-4 h-4"
                     fill="none"

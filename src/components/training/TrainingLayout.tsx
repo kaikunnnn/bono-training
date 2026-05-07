@@ -17,7 +17,7 @@ const TrainingLayout = ({
   noPaddingTop = false,
 }: TrainingLayoutProps) => {
   return (
-    <div className={cn("min-h-screen flex flex-col bg-[#F9F9F7]", className)}>
+    <div className={cn("min-h-screen flex flex-col bg-[var(--bg-base)]", className)}>
       <TrainingHeader />
       <main className={cn("flex-1", noPaddingTop ? "" : "pt-[88px]")}>
         {children}

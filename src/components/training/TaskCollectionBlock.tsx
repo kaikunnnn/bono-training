@@ -36,10 +36,10 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
 
               {/* テキスト部分 */}
               <div className="flex items-center gap-2">
-                <span className="text-[#0D221D] text-xs font-normal leading-[100%]">
+                <span className="text-training-dark text-xs font-normal leading-[100%]">
                   {task.training_id ? "CHALLENGE" : "SKILL"}
                 </span>
-                <span className="text-[#0D221D] text-base font-normal leading-[100%]">
+                <span className="text-training-dark text-base font-normal leading-[100%]">
                   {String(task.order_index).padStart(2, "0")}
                 </span>
               </div>
@@ -86,13 +86,13 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                       )}
 
                       {/* タイトル */}
-                      <h3 className="text-lg font-bold text-[#0D0F18] group-hover:text-blue-600 transition-colors leading-[160%] tracking-[0.75px]">
+                      <h3 className="text-lg font-bold text-text-primary group-hover:text-blue-600 transition-colors leading-[160%] tracking-[0.75px]">
                         {task.title}
                       </h3>
 
                       {/* 説明 */}
                       {task.description && (
-                        <p className="text-sm text-[#0F1742] mb-2 line-clamp-2 font-normal leading-[148%]">
+                        <p className="text-sm text-text-primary mb-2 line-clamp-2 font-normal leading-[148%]">
                           {task.description}
                         </p>
                       )}
@@ -102,13 +102,13 @@ const TaskCollectionBlock: React.FC<TaskCollectionBlockProps> = ({
                         {task.tags?.map((tag, tagIndex) => (
                           <span
                             key={tagIndex}
-                            className="text-[#94A3B8] text-xs font-bold leading-[160%] tracking-[1px]"
+                            className="text-text-disabled text-xs font-bold leading-[160%] tracking-[1px]"
                           >
                             {tag}
                           </span>
                         ))}
                         {task.is_premium && (
-                          <span className="text-[#94A3B8] text-xs font-bold leading-[160%] tracking-[1px]">
+                          <span className="text-text-disabled text-xs font-bold leading-[160%] tracking-[1px]">
                             プレミアム
                           </span>
                         )}

@@ -78,7 +78,7 @@ export const BlogList: React.FC<BlogListProps> = ({
         }}
       >
         <p
-          className="font-noto text-[#9CA3AF] text-center"
+          className="font-noto text-text-disabled text-center"
           style={{ fontSize: '16px' }}
         >
           記事が見つかりませんでした。

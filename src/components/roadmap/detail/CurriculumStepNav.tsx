@@ -45,12 +45,12 @@ function StepNavItem({ stepNumber, title, onClick }: StepNavItemProps) {
       className="flex items-center gap-2 px-3 py-1 border border-black/[0.12] rounded-[50px] hover:bg-gray-50 hover:border-black/20 transition-colors text-left group w-full"
     >
       {/* ステップ番号 */}
-      <span className="text-[12px] font-bold text-[#0f172a] font-['Unbounded',sans-serif] leading-[33px] shrink-0">
+      <span className="text-[12px] font-bold text-text-primary font-['Unbounded',sans-serif] leading-[33px] shrink-0">
         {formattedNumber}
       </span>
 
       {/* ステップタイトル */}
-      <span className="flex-1 text-[14px] font-medium text-[#0f172a] leading-[33px] truncate">
+      <span className="flex-1 text-[14px] font-medium text-text-primary leading-[33px] truncate">
         {title}
       </span>
 
