@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getCategoryInfo } from "@/lib/guideCategories";
 import type { Guide } from "@/types/guide";
 import { GuideCardImage } from "./GuideCardImage";
@@ -80,13 +81,15 @@ export function GuideCard({ guide }: GuideCardProps) {
 
         {/* 著者 + 日付 */}
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-1">
-            <div className="w-5 h-5 rounded-full bg-white overflow-hidden flex items-center justify-center">
-              <span className="text-[8px] font-bold text-muted-foreground">
-                {guide.author.charAt(0)}
-              </span>
-            </div>
-            <span className="text-[13px] font-medium text-[#151619]">
+          <div className="flex items-center gap-1.5">
+            <Image
+              src="/images/authors/kaikun.jpg"
+              alt={guide.author}
+              width={20}
+              height={20}
+              className="rounded-full object-cover"
+            />
+            <span className="text-[13px] font-medium text-text-primary">
               {guide.author}
             </span>
           </div>

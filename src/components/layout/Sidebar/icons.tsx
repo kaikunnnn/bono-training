@@ -8,7 +8,7 @@
 import {
   Map,
   Book,
-  LocationDiscover,
+  DocumentText,
   Setting2,
   User,
   Login,
@@ -29,7 +29,7 @@ export const MenuIcons = {
   roadmap: Map,
   lesson: Book,
   training: Play,
-  guide: LocationDiscover,
+  guide: DocumentText,
   settings: Setting2,
   mypage: User,
   user: User,

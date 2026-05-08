@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Guide } from "@/types/guide";
 import { getCategoryInfo } from "@/lib/guideCategories";
 import { GuideCardImage } from "./GuideCardImage";
@@ -54,25 +55,31 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
         </Breadcrumb>
       </div>
 
-      {/* メインヘッダー：中央揃え */}
+      {/* メインヘッダー：左揃え */}
       <div className="flex flex-col items-center gap-8 px-4 pt-8 pb-0">
-        <div className="flex flex-col items-center gap-5 w-full max-w-[640px]">
+        <div className="flex flex-col items-start gap-5 w-full max-w-[648px]">
           {/* カテゴリ */}
-          <p className="text-xs font-medium text-foreground">
+          <p className="text-xs font-medium text-text-secondary">
             {categoryInfo?.label ?? guide.category}
           </p>
 
           {/* タイトル */}
           <h1
-            className="text-[41px] font-bold text-center leading-[1.5] text-foreground font-rounded-mplus"
-            style={{ wordBreak: "keep-all", overflowWrap: "break-word" }}
+            className="text-[28px] md:text-[36px] font-bold text-left leading-[1.5] text-text-primary font-rounded-mplus break-words"
           >
             {guide.title}
           </h1>
 
           {/* 著者・日付 */}
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="font-medium text-foreground text-[13px]">
+          <div className="flex items-center gap-2 text-sm text-text-muted">
+            <Image
+              src="/images/authors/kaikun.jpg"
+              alt={guide.author}
+              width={24}
+              height={24}
+              className="rounded-full object-cover"
+            />
+            <span className="font-medium text-text-primary text-[13px]">
               {guide.author}
             </span>
             {publishedDate && (
@@ -85,7 +92,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
         </div>
 
         {/* メディア: 動画 > サムネ > プレースホルダー */}
-        <div className="w-full max-w-[640px]">
+        <div className="w-full max-w-[648px]">
           <div className="w-full aspect-video rounded-3xl overflow-hidden bg-muted">
             {(() => {
               const videoInfo = guide.videoUrl ? getVideoInfo(guide.videoUrl) : null;
