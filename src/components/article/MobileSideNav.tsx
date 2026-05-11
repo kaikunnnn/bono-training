@@ -12,7 +12,8 @@ interface MobileSideNavProps {
   onClose: () => void;
   article: ArticleWithContext;
   currentArticleId: string;
-  progressUpdateTrigger?: number;
+  /** Client side で楽観的に管理される完了済み記事 ID 一覧 */
+  completedArticleIds: string[];
   /** 表示対象: mobile(〜md) / desktop(md〜) */
   display?: SideNavDisplay;
   /**
@@ -30,7 +31,7 @@ const MobileSideNav = ({
   onClose,
   article,
   currentArticleId,
-  progressUpdateTrigger,
+  completedArticleIds,
   display = "mobile",
   onRestoreSidebar,
 }: MobileSideNavProps) => {
@@ -103,7 +104,7 @@ const MobileSideNav = ({
           <ArticleSideNavNew
             article={article}
             currentArticleId={currentArticleId}
-            progressUpdateTrigger={progressUpdateTrigger}
+            completedArticleIds={completedArticleIds}
           />
         </div>
       </div>

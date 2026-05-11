@@ -11,7 +11,7 @@ import {
   type CompletionLevel,
 } from "@/contexts/ArticleCompletionContext";
 import { ArticleBookmarkContext } from "@/contexts/ArticleBookmarkContext";
-import { detectCompletionLevel } from "@/lib/completion-detection";
+import { detectCompletionLevelClient } from "@/lib/completion-detection-client";
 import { useCelebration } from "@/hooks/useCelebration";
 import dynamic from "next/dynamic";
 import { trackArticleView } from "@/lib/analytics";
@@ -35,6 +35,8 @@ const QuestCompletionModal = dynamic(
 
 interface ArticleDetailClientProps {
   article: ArticleWithContext;
+  /** lesson 全体の完了済み記事 ID 一覧（楽観的 UI の初期値） */
+  initialCompletedArticleIds: string[];
   children: React.ReactNode;
 }
 
@@ -44,6 +46,7 @@ interface ArticleDetailClientProps {
  */
 export default function ArticleDetailClient({
   article,
+  initialCompletedArticleIds,
   children,
 }: ArticleDetailClientProps) {
   // セレブレーションシステム
@@ -71,8 +74,10 @@ export default function ArticleDetailClient({
 
   const lastOpenWidthRef = useRef<number>(320);
 
-  // 進捗更新トリガー（インクリメントでサイドバーの再fetchを発火）
-  const [progressUpdateTrigger, setProgressUpdateTrigger] = useState(0);
+  // 完了済み記事 ID（Client side で楽観的に管理。サイドバー進捗もここから計算）
+  const [completedArticleIds, setCompletedArticleIds] = useState<string[]>(
+    initialCompletedArticleIds
+  );
 
   // 共有される完了状態（複数CompletionButton間の同期用）
   const [sharedIsCompleted, setSharedIsCompleted] = useState<boolean | null>(null);
@@ -91,19 +96,24 @@ export default function ArticleDetailClient({
   >(null);
 
   // CompletionButton から呼ばれるコールバック
+  // Client side で完結（楽観的更新 → 即時 toast/モーダル発火）
   const handleCompletionChange = useCallback(
-    async (isCompleted: boolean) => {
+    (isCompleted: boolean) => {
       // 共有完了状態を更新（複数ボタンの同期）
       setSharedIsCompleted(isCompleted);
-      // サイドバーの進捗を更新
-      setProgressUpdateTrigger((prev) => prev + 1);
+
+      // 完了済み記事 ID 一覧を楽観的に更新（サイドバー進捗もここから計算）
+      const nextCompletedIds = isCompleted
+        ? Array.from(new Set([...completedArticleIds, article._id]))
+        : completedArticleIds.filter((id) => id !== article._id);
+      setCompletedArticleIds(nextCompletedIds);
 
       if (isCompleted && article.lessonInfo?.quests && article.questInfo) {
-        // 完了レベルを検知
-        const result = await detectCompletionLevel({
+        // 完了レベルを Client side で即時検知（DB fetch 不要）
+        const result = detectCompletionLevelClient({
           currentQuestId: article.questInfo._id,
-          lessonId: article.lessonInfo._id,
           quests: article.lessonInfo.quests,
+          completedArticleIds: nextCompletedIds,
           lessonTitle: article.lessonInfo.title,
         });
         setCompletionLevel(result.level);
@@ -111,7 +121,7 @@ export default function ArticleDetailClient({
         setCompletedLessonTitle(result.lessonTitle ?? null);
       } else if (isCompleted) {
         // questInfo がない場合でも記事完了セレブレーションを発火
-        setCompletionLevel('article');
+        setCompletionLevel("article");
       } else {
         // 未完了に戻した場合
         setCompletionLevel(null);
@@ -119,7 +129,7 @@ export default function ArticleDetailClient({
         setCompletedLessonTitle(null);
       }
     },
-    [article]
+    [article, completedArticleIds]
   );
 
   // completionLevel が変化したらセレブレーションを発火
@@ -271,7 +281,7 @@ export default function ArticleDetailClient({
           onClose={() => setIsMobileMenuOpen(false)}
           article={article}
           currentArticleId={article._id}
-          progressUpdateTrigger={progressUpdateTrigger}
+          completedArticleIds={completedArticleIds}
         />
 
         {/* 2カラムレイアウト */}
@@ -291,7 +301,7 @@ export default function ArticleDetailClient({
                 <ArticleSideNavNew
                   article={article}
                   currentArticleId={article._id}
-                  progressUpdateTrigger={progressUpdateTrigger}
+                  completedArticleIds={completedArticleIds}
                   logoRightAction={
                     <MobileMenuButton
                       isOpen={true}

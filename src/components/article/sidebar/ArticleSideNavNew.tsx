@@ -1,17 +1,18 @@
 "use client";
 
-import { useMemo, useState, useEffect, type ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import LogoBlock from "./LogoBlock";
 import LessonDetailCard from "./LessonDetailCard";
 import QuestItem from "./QuestItem";
 import type { QuestArticleItemLayoutVariant } from "./ArticleListItem";
 import type { ArticleWithContext } from "@/types/sanity";
-import { getLessonProgress, type LessonProgress } from "@/lib/services/progress";
+import { calculateLessonProgress } from "@/lib/completion-detection-client";
 
 interface ArticleSideNavNewProps {
   article: ArticleWithContext;
   currentArticleId: string;
-  progressUpdateTrigger?: number;
+  /** Client side で楽観的に管理される完了済み記事 ID 一覧（ArticleDetailClient から） */
+  completedArticleIds: string[];
   /** 右サイド配置などでロゴをメイン側に出したい場合にfalse */
   showLogo?: boolean;
   /** ロゴブロック右側に置くアクション（例: 閉じるボタン） */
@@ -23,43 +24,18 @@ interface ArticleSideNavNewProps {
 /**
  * ArticleSideNavNew コンポーネント
  * サイドナビゲーション全体
+ *
+ * 進捗は ArticleDetailClient から props 経由で受け取り、Server Action を呼ばない。
+ * 完了ボタンを押した際の楽観的更新が即時反映される。
  */
 export function ArticleSideNavNew({
   article,
   currentArticleId,
-  progressUpdateTrigger,
+  completedArticleIds,
   showLogo = true,
   logoRightAction,
   questArticleItemLayoutVariant = "B",
 }: ArticleSideNavNewProps) {
-  const [progress, setProgress] = useState<LessonProgress | null>(null);
-
-  // レッスンの進捗を取得
-  useEffect(() => {
-    const fetchProgress = async () => {
-      if (!article.lessonInfo?._id || !article.lessonInfo?.quests) return;
-
-      // すべてのクエストから記事IDを収集
-      const articleIds: string[] = [];
-      article.lessonInfo.quests.forEach((quest) => {
-        if (quest.articles) {
-          articleIds.push(...quest.articles.map((a) => a._id));
-        }
-      });
-
-      if (articleIds.length === 0) return;
-
-      const lessonProgress = await getLessonProgress(
-        article.lessonInfo._id,
-        articleIds
-      );
-
-      setProgress(lessonProgress);
-    };
-
-    fetchProgress();
-  }, [article.lessonInfo, progressUpdateTrigger]);
-
   // サイドナビゲーション用のデータを整形
   const navData = useMemo(() => {
     if (!article.lessonInfo) {
@@ -69,9 +45,11 @@ export function ArticleSideNavNew({
     const lesson = article.lessonInfo;
     const quests = lesson.quests || [];
 
-    // 実際の進捗データを使用
-    const progressPercent = progress?.percentage || 0;
-    const completedArticleIds = progress?.completedArticleIds || [];
+    // Client side で進捗を計算
+    const { percentage } = calculateLessonProgress(
+      quests.map((q) => ({ articles: (q.articles || []).map((a) => ({ _id: a._id })) })),
+      completedArticleIds
+    );
 
     // 各クエストのデータを変換
     const questsData = quests.map((quest) => {
@@ -96,10 +74,10 @@ export function ArticleSideNavNew({
       lessonTitle: lesson.title,
       lessonIcon: lesson.iconImage,
       lessonIconUrl: lesson.iconImageUrl || undefined,
-      progressPercent,
+      progressPercent: percentage,
       quests: questsData,
     };
-  }, [article, progress]);
+  }, [article, completedArticleIds]);
 
   if (!navData) {
     return (

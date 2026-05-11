@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getArticleWithContext, getArticleMetadata, getAllArticles } from "@/lib/sanity";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
 import { isBookmarked } from "@/lib/services/bookmarks";
-import { getArticleProgress } from "@/lib/services/progress";
+import { getArticleProgress, getLessonProgress } from "@/lib/services/progress";
 import ArticleDetailClient from "./ArticleDetailClient";
 import { ViewHistoryRecorder } from "@/components/article/ViewHistoryRecorder";
 import VideoSection from "@/components/article/VideoSection";
@@ -77,13 +77,27 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  // ブックマーク・完了状態を並列取得
-  const [bookmarked, progressStatus] = await Promise.all([
+  // lesson 全体の記事 ID 一覧を集める（楽観的 UI 用の初期値計算に使う）
+  const allLessonArticleIds: string[] = [];
+  if (article.lessonInfo?.quests) {
+    for (const quest of article.lessonInfo.quests) {
+      for (const art of quest.articles) {
+        allLessonArticleIds.push(art._id);
+      }
+    }
+  }
+  const lessonId = article.lessonInfo?._id || "";
+
+  // ブックマーク・完了状態・レッスン進捗を並列取得
+  const [bookmarked, progressStatus, lessonProgress] = await Promise.all([
     isBookmarked(article._id),
     getArticleProgress(article._id),
+    lessonId && allLessonArticleIds.length > 0
+      ? getLessonProgress(lessonId, allLessonArticleIds)
+      : Promise.resolve(null),
   ]);
   const isCompleted = progressStatus === "completed";
-  const lessonId = article.lessonInfo?._id || "";
+  const initialCompletedArticleIds = lessonProgress?.completedArticleIds ?? [];
 
   // プレミアムコンテンツへのアクセス権限チェック
   const hasAccess = canAccessContent(article.isPremium || false, subscription.planType);
@@ -151,7 +165,10 @@ export default async function ArticlePage({ params }: PageProps) {
         })
       )}
     />
-    <ArticleDetailClient article={article}>
+    <ArticleDetailClient
+      article={article}
+      initialCompletedArticleIds={initialCompletedArticleIds}
+    >
       {/* 閲覧履歴を記録（プレミアムでロックされていない場合のみ） */}
       {hasAccess && <ViewHistoryRecorder articleId={article._id} />}
 
