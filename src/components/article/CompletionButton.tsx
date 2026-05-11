@@ -6,7 +6,6 @@ import { IconCheck } from "@/components/ui/icon-check";
 import { useToast } from "@/hooks/use-toast";
 import {
   toggleArticleCompletion,
-  getLessonStatus,
   removeLessonCompletion,
 } from "@/lib/services/progress";
 import { useArticleCompletionOptional } from "@/contexts/ArticleCompletionContext";
@@ -72,22 +71,18 @@ export function CompletionButton({
   const handleToggle = () => {
     if (isPending) return; // 多重クリック防止
 
-    // 完了済みを取り消す場合、レッスン完了チェック（off時のみ）
+    // 完了済みを取り消す場合
     if (isCompleted) {
+      // レッスンが手動完了済みなら確認ダイアログ（Server Action なし、Context の値を参照）
+      if (completionCtx?.lessonStatus === "completed") {
+        setShowUndoConfirmDialog(true);
+        return;
+      }
+
+      // 楽観的更新: 即時 UI を OFF に
+      applyState(false);
+
       startTransition(async () => {
-        try {
-          const lessonStatus = await getLessonStatus(lessonId);
-          if (lessonStatus === "completed") {
-            setShowUndoConfirmDialog(true);
-            return;
-          }
-        } catch {
-          // getLessonStatus失敗時はそのまま続行
-        }
-
-        // 楽観的更新: 即時 UI を OFF に
-        applyState(false);
-
         const result = await toggleArticleCompletion(articleId, lessonId);
 
         if (!result.success) {

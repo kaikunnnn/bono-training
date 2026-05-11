@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getArticleWithContext, getArticleMetadata, getAllArticles } from "@/lib/sanity";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
 import { isBookmarked } from "@/lib/services/bookmarks";
-import { getArticleProgress, getLessonProgress } from "@/lib/services/progress";
+import { getArticleProgress, getLessonProgress, getLessonStatus } from "@/lib/services/progress";
 import ArticleDetailClient from "./ArticleDetailClient";
 import { ViewHistoryRecorder } from "@/components/article/ViewHistoryRecorder";
 import VideoSection from "@/components/article/VideoSection";
@@ -88,13 +88,14 @@ export default async function ArticlePage({ params }: PageProps) {
   }
   const lessonId = article.lessonInfo?._id || "";
 
-  // ブックマーク・完了状態・レッスン進捗を並列取得
-  const [bookmarked, progressStatus, lessonProgress] = await Promise.all([
+  // ブックマーク・完了状態・レッスン進捗・lesson status を並列取得
+  const [bookmarked, progressStatus, lessonProgress, lessonStatus] = await Promise.all([
     isBookmarked(article._id),
     getArticleProgress(article._id),
     lessonId && allLessonArticleIds.length > 0
       ? getLessonProgress(lessonId, allLessonArticleIds)
       : Promise.resolve(null),
+    lessonId ? getLessonStatus(lessonId) : Promise.resolve("not_started" as const),
   ]);
   const isCompleted = progressStatus === "completed";
   const initialCompletedArticleIds = lessonProgress?.completedArticleIds ?? [];
@@ -168,6 +169,7 @@ export default async function ArticlePage({ params }: PageProps) {
     <ArticleDetailClient
       article={article}
       initialCompletedArticleIds={initialCompletedArticleIds}
+      initialLessonStatus={lessonStatus}
     >
       {/* 閲覧履歴を記録（プレミアムでロックされていない場合のみ） */}
       {hasAccess && <ViewHistoryRecorder articleId={article._id} />}

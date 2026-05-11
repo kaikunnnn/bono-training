@@ -37,6 +37,8 @@ interface ArticleDetailClientProps {
   article: ArticleWithContext;
   /** lesson 全体の完了済み記事 ID 一覧（楽観的 UI の初期値） */
   initialCompletedArticleIds: string[];
+  /** lesson の手動完了 status（CompletionButton OFF 時の確認に使用） */
+  initialLessonStatus: import("@/lib/services/progress").LessonStatus;
   children: React.ReactNode;
 }
 
@@ -47,6 +49,7 @@ interface ArticleDetailClientProps {
 export default function ArticleDetailClient({
   article,
   initialCompletedArticleIds,
+  initialLessonStatus,
   children,
 }: ArticleDetailClientProps) {
   // セレブレーションシステム
@@ -188,6 +191,7 @@ export default function ArticleDetailClient({
       completedLessonTitle,
       resetCompletionLevel,
       sharedIsCompleted,
+      lessonStatus: initialLessonStatus,
     }),
     [
       handleCompletionChange,
@@ -196,6 +200,7 @@ export default function ArticleDetailClient({
       completedLessonTitle,
       resetCompletionLevel,
       sharedIsCompleted,
+      initialLessonStatus,
     ]
   );
 
