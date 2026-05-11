@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
-import { Loader2 } from "lucide-react";
 import { IconButton } from "@/components/ui/button/IconButton";
 import { IconCheck } from "@/components/ui/icon-check";
 import { useToast } from "@/hooks/use-toast";
@@ -63,10 +62,19 @@ export function CompletionButton({
     }
   }, [isCompleted]);
 
+  // 状態を楽観的に更新する共通処理（成功時/rollback時の両方で使う）
+  const applyState = (next: boolean) => {
+    setIsCompleted(next);
+    onCompletionChange?.(next);
+    completionCtx?.onCompletionChange(next);
+  };
+
   const handleToggle = () => {
-    startTransition(async () => {
-      // 完了済みを取り消す場合、レッスン完了チェック
-      if (isCompleted) {
+    if (isPending) return; // 多重クリック防止
+
+    // 完了済みを取り消す場合、レッスン完了チェック（off時のみ）
+    if (isCompleted) {
+      startTransition(async () => {
         try {
           const lessonStatus = await getLessonStatus(lessonId);
           if (lessonStatus === "completed") {
@@ -76,61 +84,61 @@ export function CompletionButton({
         } catch {
           // getLessonStatus失敗時はそのまま続行
         }
-      }
 
-      const result = await toggleArticleCompletion(articleId, lessonId);
+        // 楽観的更新: 即時 UI を OFF に
+        applyState(false);
 
-      if (result.success) {
-        setIsCompleted(result.isCompleted);
-        onCompletionChange?.(result.isCompleted);
-        // セレブレーションはContext経由（ArticleDetailClient）で発火
-        completionCtx?.onCompletionChange(result.isCompleted);
-        // Context外の場合のみフォールバックトースト
-        if (!completionCtx) {
+        const result = await toggleArticleCompletion(articleId, lessonId);
+
+        if (!result.success) {
+          // rollback
+          applyState(true);
+          toast({ title: result.message, variant: "destructive" });
+        } else if (!completionCtx) {
           toast({ title: result.message });
         }
-      } else {
-        toast({
-          title: result.message,
-          variant: "destructive",
-        });
+      });
+      return;
+    }
+
+    // 完了 ON にする場合: 楽観的に即時更新
+    applyState(true);
+
+    startTransition(async () => {
+      const result = await toggleArticleCompletion(articleId, lessonId);
+
+      if (!result.success) {
+        // rollback
+        applyState(false);
+        toast({ title: result.message, variant: "destructive" });
+      } else if (!completionCtx) {
+        toast({ title: result.message });
       }
     });
   };
 
   const handleConfirmUndo = () => {
     setShowUndoConfirmDialog(false);
+
+    // 楽観的更新: 即時 UI を OFF に
+    applyState(false);
+
     startTransition(async () => {
       await removeLessonCompletion(lessonId);
       const result = await toggleArticleCompletion(articleId, lessonId);
 
-      if (result.success) {
-        setIsCompleted(result.isCompleted);
-        onCompletionChange?.(result.isCompleted);
-        completionCtx?.onCompletionChange(result.isCompleted);
+      if (!result.success) {
+        // rollback
+        applyState(true);
+        toast({ title: result.message, variant: "destructive" });
+      } else {
         toast({ title: result.message });
       }
     });
   };
 
-  if (isPending) {
-    return (
-      <button
-        type="button"
-        disabled
-        className="relative bg-white px-[12px] py-[8px] rounded-[16px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center gap-[4px] opacity-70"
-      >
-        <div className="w-5 h-5 flex items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-        </div>
-        {showLabel && (
-          <span className="font-semibold text-[14px] text-text-primary leading-[20px]">
-            {isCompleted ? "完了済み" : "完了にする"}
-          </span>
-        )}
-      </button>
-    );
-  }
+  // 楽観的 UI 化したため isPending スピナーは表示しない（UI を即時切り替え）
+  // 多重クリック防止は handleToggle 内 `if (isPending) return;` でガード
 
   return (
     <>
