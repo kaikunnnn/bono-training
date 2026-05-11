@@ -9,14 +9,29 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { BackgroundGradation } from '@/components/blog/BackgroundGradation';
 import { BlogHeader } from '@/components/blog/BlogHeader';
 import { HeroSection } from '@/components/blog/HeroSection';
-import { BlogList } from '@/components/blog/BlogList';
 import { Pagination } from '@/components/blog/Pagination';
-import { ResponsiveSunDecoration } from '@/components/blog/SunDecoration';
+
+// BlogList は framer-motion を含むため dynamic import で chunk 分離
+// ssr:true で初期描画は維持しつつ、他ページのバンドルからは切り出す
+const BlogList = dynamic(() =>
+  import('@/components/blog/BlogList').then((m) => m.BlogList)
+);
 import { Footer } from '@/components/layout/Footer';
 import { BlogPost, BlogPagination } from '@/types/blog';
+
+// SunDecoration は装飾要素のため dynamic import (ssr: false)
+// → 初回 paint 後に遅延ロード
+const ResponsiveSunDecoration = dynamic(
+  () =>
+    import('@/components/blog/SunDecoration').then(
+      (m) => m.ResponsiveSunDecoration
+    ),
+  { ssr: false }
+);
 
 // アニメーション定義
 const pageVariants = {

@@ -1,39 +1,23 @@
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
- * マイページのローディングUI
- *
- * タブバー + コンテンツエリアのスケルトンレイアウトを表示する
+ * /mypage 全体の初期 loading（getCurrentUser 中のみ表示）
+ * その後は Suspense fallback（各セクションの skeleton）に置き換わる
  */
 export default function MyPageLoading() {
   return (
     <div className="min-h-screen">
-      <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 py-8 min-w-0">
-        {/* Page title skeleton */}
-        <div className="mb-6">
-          <Skeleton className="h-8 w-36 mb-2" />
-          <Skeleton className="h-4 w-56" />
+      <div className="pt-10 pb-0 px-4 max-w-3xl mx-auto">
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between mb-6">
+          <Skeleton className="h-7 w-32" />
+          <Skeleton className="h-9 w-9 rounded-full" />
         </div>
 
-        {/* Tab bar skeleton */}
-        <div className="flex gap-2 border-b border-gray-200 mb-8 pb-2">
-          {["すべて", "進捗", "お気に入り", "閲覧履歴"].map((_, i) => (
-            <Skeleton key={i} className="h-9 w-20 rounded-lg" />
-          ))}
-        </div>
-
-        {/* Content area: lesson card list skeleton */}
-        <div className="space-y-4">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="flex items-start gap-3 p-4 rounded-lg border border-gray-100 animate-pulse">
-              <Skeleton className="w-10 h-10 rounded-lg flex-shrink-0" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-3/4" />
-                <Skeleton className="h-3 w-1/2" />
-                {/* Progress bar skeleton */}
-                <Skeleton className="h-2 w-full rounded-full" />
-              </div>
-            </div>
+        {/* タブ */}
+        <div className="p-[3px] bg-zinc-100 rounded-lg outline outline-1 outline-offset-[-1px] outline-black/5 inline-flex items-center gap-2">
+          {["すべて", "進捗", "お気に入り", "閲覧履歴"].map((label, i) => (
+            <Skeleton key={i} className="h-6 w-16 rounded-md" />
           ))}
         </div>
       </div>

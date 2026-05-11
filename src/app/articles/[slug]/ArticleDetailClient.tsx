@@ -13,9 +13,25 @@ import {
 import { ArticleBookmarkContext } from "@/contexts/ArticleBookmarkContext";
 import { detectCompletionLevel } from "@/lib/completion-detection";
 import { useCelebration } from "@/hooks/useCelebration";
-import { CelebrationModal } from "@/components/celebration/CelebrationModal";
-import { QuestCompletionModal } from "@/components/celebration/QuestCompletionModal";
+import dynamic from "next/dynamic";
 import { trackArticleView } from "@/lib/analytics";
+
+// Modal 系はユーザー操作後に表示されるため dynamic import
+// → 初回ロード時に framer-motion を含む chunk を読み込まない
+const CelebrationModal = dynamic(
+  () =>
+    import("@/components/celebration/CelebrationModal").then(
+      (m) => m.CelebrationModal
+    ),
+  { ssr: false }
+);
+const QuestCompletionModal = dynamic(
+  () =>
+    import("@/components/celebration/QuestCompletionModal").then(
+      (m) => m.QuestCompletionModal
+    ),
+  { ssr: false }
+);
 
 interface ArticleDetailClientProps {
   article: ArticleWithContext;

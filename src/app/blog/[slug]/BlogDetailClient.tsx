@@ -9,12 +9,25 @@
 import React, { type ReactNode } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { Copy } from 'lucide-react';
 import { BlogHeader } from '@/components/blog/BlogHeader';
 import { BackgroundGradation } from '@/components/blog/BackgroundGradation';
-import { ResponsiveSunDecoration } from '@/components/blog/SunDecoration';
 import { Footer } from '@/components/layout/Footer';
-import { BlogPostHeader } from '@/components/blog/BlogPostHeader';
+
+// BlogPostHeader は framer-motion を含むため dynamic import で chunk 分離
+const BlogPostHeader = dynamic(() =>
+  import('@/components/blog/BlogPostHeader').then((m) => m.BlogPostHeader)
+);
+
+// SunDecoration は装飾要素のため dynamic import (ssr: false)
+const ResponsiveSunDecoration = dynamic(
+  () =>
+    import('@/components/blog/SunDecoration').then(
+      (m) => m.ResponsiveSunDecoration
+    ),
+  { ssr: false }
+);
 import { PostNavigation } from '@/components/blog/PostNavigation';
 import { Breadcrumb } from '@/components/blog/Breadcrumb';
 import { BlogContent } from '@/components/blog/BlogContent';

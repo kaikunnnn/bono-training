@@ -7,10 +7,18 @@
  */
 
 import { Metadata } from "next";
+import dynamic from "next/dynamic";
 import { redirect } from "next/navigation";
 import { getSubscriptionStatus, getCurrentUser } from "@/lib/subscription";
 import { getAllLessons } from "@/lib/sanity";
-import { FeedbackSubmitForm } from "@/components/feedback/FeedbackSubmitForm";
+
+// FeedbackSubmitForm は framer-motion を含む大きい client component
+// route-level chunk に分離して他ページのバンドルから切り出す
+const FeedbackSubmitForm = dynamic(() =>
+  import("@/components/feedback/FeedbackSubmitForm").then(
+    (m) => m.FeedbackSubmitForm
+  )
+);
 
 export const metadata: Metadata = {
   title: "15分フィードバック 応募",
