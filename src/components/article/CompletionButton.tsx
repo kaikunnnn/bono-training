@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useTransition, useEffect, useRef } from "react";
-import { Loader2 } from "lucide-react";
 import { IconButton } from "@/components/ui/button/IconButton";
 import { IconCheck } from "@/components/ui/icon-check";
 import { useToast } from "@/hooks/use-toast";
 import {
-  toggleArticleCompletion,
-  getLessonStatus,
+  setArticleCompletion,
   removeLessonCompletion,
 } from "@/lib/services/progress";
 import { useArticleCompletionOptional } from "@/contexts/ArticleCompletionContext";
@@ -41,7 +39,8 @@ export function CompletionButton({
 }: CompletionButtonProps) {
   const { toast } = useToast();
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
-  const [isPending, startTransition] = useTransition();
+  // useTransition は startTransition のためだけに使用（isPending はガードに使わない）
+  const [, startTransition] = useTransition();
   const [showUndoConfirmDialog, setShowUndoConfirmDialog] = useState(false);
   const [burstKey, setBurstKey] = useState(0);
   const prevCompletedRef = useRef(isCompleted);
@@ -63,74 +62,60 @@ export function CompletionButton({
     }
   }, [isCompleted]);
 
+  // 状態を楽観的に更新する共通処理（成功時/rollback時の両方で使う）
+  const applyState = (next: boolean) => {
+    setIsCompleted(next);
+    onCompletionChange?.(next);
+    completionCtx?.onCompletionChange(next);
+  };
+
   const handleToggle = () => {
+    // 完了 OFF 操作で、レッスンが手動完了済みなら確認ダイアログ
+    if (isCompleted && completionCtx?.lessonStatus === "completed") {
+      setShowUndoConfirmDialog(true);
+      return;
+    }
+
+    // 楽観的に即時 UI 更新（連続クリックを許可、isPending ガードなし）
+    const nextState = !isCompleted;
+    applyState(nextState);
+
     startTransition(async () => {
-      // 完了済みを取り消す場合、レッスン完了チェック
-      if (isCompleted) {
-        try {
-          const lessonStatus = await getLessonStatus(lessonId);
-          if (lessonStatus === "completed") {
-            setShowUndoConfirmDialog(true);
-            return;
-          }
-        } catch {
-          // getLessonStatus失敗時はそのまま続行
-        }
-      }
+      // setArticleCompletion は target state を明示的に指定 → race condition 回避
+      const result = await setArticleCompletion(articleId, lessonId, nextState);
 
-      const result = await toggleArticleCompletion(articleId, lessonId);
-
-      if (result.success) {
-        setIsCompleted(result.isCompleted);
-        onCompletionChange?.(result.isCompleted);
-        // セレブレーションはContext経由（ArticleDetailClient）で発火
-        completionCtx?.onCompletionChange(result.isCompleted);
-        // Context外の場合のみフォールバックトースト
-        if (!completionCtx) {
-          toast({ title: result.message });
-        }
-      } else {
-        toast({
-          title: result.message,
-          variant: "destructive",
-        });
+      if (!result.success) {
+        // rollback
+        applyState(!nextState);
+        toast({ title: result.message, variant: "destructive" });
+      } else if (!completionCtx) {
+        toast({ title: result.message });
       }
     });
   };
 
   const handleConfirmUndo = () => {
     setShowUndoConfirmDialog(false);
+
+    // 楽観的更新: 即時 UI を OFF に
+    applyState(false);
+
     startTransition(async () => {
       await removeLessonCompletion(lessonId);
-      const result = await toggleArticleCompletion(articleId, lessonId);
+      const result = await setArticleCompletion(articleId, lessonId, false);
 
-      if (result.success) {
-        setIsCompleted(result.isCompleted);
-        onCompletionChange?.(result.isCompleted);
-        completionCtx?.onCompletionChange(result.isCompleted);
+      if (!result.success) {
+        // rollback
+        applyState(true);
+        toast({ title: result.message, variant: "destructive" });
+      } else {
         toast({ title: result.message });
       }
     });
   };
 
-  if (isPending) {
-    return (
-      <button
-        type="button"
-        disabled
-        className="relative bg-white px-[12px] py-[8px] rounded-[16px] border border-[rgba(0,0,0,0.08)] shadow-[0px_1px_3px_0px_rgba(0,0,0,0.06)] inline-flex items-center gap-[4px] opacity-70"
-      >
-        <div className="w-5 h-5 flex items-center justify-center">
-          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-        </div>
-        {showLabel && (
-          <span className="font-semibold text-[14px] text-text-primary leading-[20px]">
-            {isCompleted ? "完了済み" : "完了にする"}
-          </span>
-        )}
-      </button>
-    );
-  }
+  // 楽観的 UI 化 + 連続クリック許可のため isPending スピナーや disabled は使わない
+  // race 対策は setArticleCompletion(target=明示) で実現
 
   return (
     <>
