@@ -5,7 +5,7 @@ import { IconButton } from "@/components/ui/button/IconButton";
 import { IconCheck } from "@/components/ui/icon-check";
 import { useToast } from "@/hooks/use-toast";
 import {
-  toggleArticleCompletion,
+  setArticleCompletion,
   removeLessonCompletion,
 } from "@/lib/services/progress";
 import { useArticleCompletionOptional } from "@/contexts/ArticleCompletionContext";
@@ -39,7 +39,8 @@ export function CompletionButton({
 }: CompletionButtonProps) {
   const { toast } = useToast();
   const [isCompleted, setIsCompleted] = useState(initialIsCompleted);
-  const [isPending, startTransition] = useTransition();
+  // useTransition は startTransition のためだけに使用（isPending はガードに使わない）
+  const [, startTransition] = useTransition();
   const [showUndoConfirmDialog, setShowUndoConfirmDialog] = useState(false);
   const [burstKey, setBurstKey] = useState(0);
   const prevCompletedRef = useRef(isCompleted);
@@ -69,42 +70,23 @@ export function CompletionButton({
   };
 
   const handleToggle = () => {
-    if (isPending) return; // 多重クリック防止
-
-    // 完了済みを取り消す場合
-    if (isCompleted) {
-      // レッスンが手動完了済みなら確認ダイアログ（Server Action なし、Context の値を参照）
-      if (completionCtx?.lessonStatus === "completed") {
-        setShowUndoConfirmDialog(true);
-        return;
-      }
-
-      // 楽観的更新: 即時 UI を OFF に
-      applyState(false);
-
-      startTransition(async () => {
-        const result = await toggleArticleCompletion(articleId, lessonId);
-
-        if (!result.success) {
-          // rollback
-          applyState(true);
-          toast({ title: result.message, variant: "destructive" });
-        } else if (!completionCtx) {
-          toast({ title: result.message });
-        }
-      });
+    // 完了 OFF 操作で、レッスンが手動完了済みなら確認ダイアログ
+    if (isCompleted && completionCtx?.lessonStatus === "completed") {
+      setShowUndoConfirmDialog(true);
       return;
     }
 
-    // 完了 ON にする場合: 楽観的に即時更新
-    applyState(true);
+    // 楽観的に即時 UI 更新（連続クリックを許可、isPending ガードなし）
+    const nextState = !isCompleted;
+    applyState(nextState);
 
     startTransition(async () => {
-      const result = await toggleArticleCompletion(articleId, lessonId);
+      // setArticleCompletion は target state を明示的に指定 → race condition 回避
+      const result = await setArticleCompletion(articleId, lessonId, nextState);
 
       if (!result.success) {
         // rollback
-        applyState(false);
+        applyState(!nextState);
         toast({ title: result.message, variant: "destructive" });
       } else if (!completionCtx) {
         toast({ title: result.message });
@@ -120,7 +102,7 @@ export function CompletionButton({
 
     startTransition(async () => {
       await removeLessonCompletion(lessonId);
-      const result = await toggleArticleCompletion(articleId, lessonId);
+      const result = await setArticleCompletion(articleId, lessonId, false);
 
       if (!result.success) {
         // rollback
@@ -132,8 +114,8 @@ export function CompletionButton({
     });
   };
 
-  // 楽観的 UI 化したため isPending スピナーは表示しない（UI を即時切り替え）
-  // 多重クリック防止は handleToggle 内 `if (isPending) return;` でガード
+  // 楽観的 UI 化 + 連続クリック許可のため isPending スピナーや disabled は使わない
+  // race 対策は setArticleCompletion(target=明示) で実現
 
   return (
     <>

@@ -32,6 +32,70 @@ export type LessonStatus = "not_started" | "in_progress" | "completed";
 // ============================================
 
 /**
+ * 記事の完了状態を明示的に設定する（連続クリック時の race condition 対策）
+ *
+ * 楽観的 UI で連続クリックを許可する場合、各クリックで target state を明示的に
+ * 指定することで「現在状態 → 逆」の判定によるレースを避ける。
+ *
+ * @param articleId 記事ID (Sanity article._id)
+ * @param lessonId レッスンID (Sanity lesson._id)
+ * @param completed 設定したい状態（true = 完了, false = 未完了）
+ */
+export async function setArticleCompletion(
+  articleId: string,
+  lessonId: string,
+  completed: boolean
+): Promise<{ success: boolean; isCompleted: boolean; message: string }> {
+  try {
+    const supabase = await createClient();
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      return {
+        success: false,
+        isCompleted: false,
+        message: "ログインが必要です",
+      };
+    }
+
+    if (completed) {
+      // 完了として upsert（新規作成 or 既存を completed に更新）
+      const now = new Date().toISOString();
+      const { error } = await supabase.from("article_progress").upsert(
+        {
+          user_id: user.id,
+          article_id: articleId,
+          lesson_id: lessonId,
+          status: "completed",
+          completed_at: now,
+        },
+        { onConflict: "user_id,article_id" }
+      );
+      if (error) throw error;
+      return { success: true, isCompleted: true, message: "完了にしました" };
+    }
+
+    // 未完了に戻す（既存があれば update、なければ何もしない）
+    const { error } = await supabase
+      .from("article_progress")
+      .update({ status: "not_started", completed_at: null })
+      .eq("user_id", user.id)
+      .eq("article_id", articleId);
+    if (error) throw error;
+    return { success: true, isCompleted: false, message: "未完了に戻しました" };
+  } catch (error) {
+    console.error("Set article completion error:", error);
+    return {
+      success: false,
+      isCompleted: completed,
+      message: "エラーが発生しました",
+    };
+  }
+}
+
+/**
  * 記事を完了状態にする（トグル）
  * @param articleId 記事ID (Sanity article._id)
  * @param lessonId レッスンID (Sanity lesson._id)
