@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import { getArticleWithContext, getArticleMetadata, getAllArticles } from "@/lib/sanity";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
 import { isBookmarked } from "@/lib/services/bookmarks";
-import { getArticleProgress, getLessonProgress, getLessonStatus } from "@/lib/services/progress";
-import ArticleDetailClient from "./ArticleDetailClient";
+import { getArticleProgress } from "@/lib/services/progress";
 import { ViewHistoryRecorder } from "@/components/article/ViewHistoryRecorder";
 import VideoSection from "@/components/article/VideoSection";
 import HeadingSection from "@/components/article/HeadingSection";
@@ -66,6 +65,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 // ページコンポーネント（Server Component）
+// サイドナビは layout.tsx 側で描画される（記事間遷移時の保持のため）
 export default async function ArticlePage({ params }: PageProps) {
   const { slug } = await params;
   const [article, subscription] = await Promise.all([
@@ -77,28 +77,14 @@ export default async function ArticlePage({ params }: PageProps) {
     notFound();
   }
 
-  // lesson 全体の記事 ID 一覧を集める（楽観的 UI 用の初期値計算に使う）
-  const allLessonArticleIds: string[] = [];
-  if (article.lessonInfo?.quests) {
-    for (const quest of article.lessonInfo.quests) {
-      for (const art of quest.articles) {
-        allLessonArticleIds.push(art._id);
-      }
-    }
-  }
   const lessonId = article.lessonInfo?._id || "";
 
-  // ブックマーク・完了状態・レッスン進捗・lesson status を並列取得
-  const [bookmarked, progressStatus, lessonProgress, lessonStatus] = await Promise.all([
+  // ブックマーク・記事完了状態を並列取得（記事固有のデータのみ）
+  const [bookmarked, progressStatus] = await Promise.all([
     isBookmarked(article._id),
     getArticleProgress(article._id),
-    lessonId && allLessonArticleIds.length > 0
-      ? getLessonProgress(lessonId, allLessonArticleIds)
-      : Promise.resolve(null),
-    lessonId ? getLessonStatus(lessonId) : Promise.resolve("not_started" as const),
   ]);
   const isCompleted = progressStatus === "completed";
-  const initialCompletedArticleIds = lessonProgress?.completedArticleIds ?? [];
 
   // プレミアムコンテンツへのアクセス権限チェック
   const hasAccess = canAccessContent(article.isPremium || false, subscription.planType);
@@ -155,22 +141,18 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <>
-    <script
-      {...jsonLdScriptProps(
-        generateArticleJsonLd({
-          title: article.title,
-          description: article.excerpt || `${article.title}の学習コンテンツ`,
-          url: `/articles/${slug}`,
-          publishedAt: article.publishedAt || new Date().toISOString(),
-          image: article.thumbnailUrl,
-        })
-      )}
-    />
-    <ArticleDetailClient
-      article={article}
-      initialCompletedArticleIds={initialCompletedArticleIds}
-      initialLessonStatus={lessonStatus}
-    >
+      <script
+        {...jsonLdScriptProps(
+          generateArticleJsonLd({
+            title: article.title,
+            description: article.excerpt || `${article.title}の学習コンテンツ`,
+            url: `/articles/${slug}`,
+            publishedAt: article.publishedAt || new Date().toISOString(),
+            image: article.thumbnailUrl,
+          })
+        )}
+      />
+
       {/* 閲覧履歴を記録（プレミアムでロックされていない場合のみ） */}
       {hasAccess && <ViewHistoryRecorder articleId={article._id} />}
 
@@ -247,7 +229,6 @@ export default async function ArticlePage({ params }: PageProps) {
           </div>
         </div>
       </main>
-    </ArticleDetailClient>
     </>
   );
 }

@@ -1,6 +1,7 @@
 import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
 import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory } from "@/types/sanity";
 import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-roadmap";
 import type { Guide, GuideCategory } from "@/types/guide";
@@ -245,7 +246,7 @@ export const getAllLessonsWithArticleIds = unstable_cache(
  * 記事詳細を取得（SSR用）
  * Quest と Lesson のコンテキスト情報も含む
  */
-export const getArticleWithContext = unstable_cache(
+export const getArticleWithContext = cache(unstable_cache(
   async (slug: string): Promise<ArticleWithContext | null> => {
     const query = `
     *[_type == "article" && slug.current == $slug][0] {
@@ -329,7 +330,7 @@ export const getArticleWithContext = unstable_cache(
   },
   ["sanity:article:withContext"],
   { tags: ["article", "quest", "lesson"], revalidate: 3600 }
-);
+));
 
 /**
  * OGP用の記事メタデータを取得
