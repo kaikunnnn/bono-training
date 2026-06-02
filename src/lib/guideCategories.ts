@@ -29,10 +29,10 @@ export const GUIDE_CATEGORIES: GuideCategoryInfo[] = [
     icon: "wrench",
   },
   {
-    id: "design-knowledge",
-    label: "デザイン知識",
-    description: "配色・レイアウトなどデザインの基礎知識",
-    icon: "palette",
+    id: "practice",
+    label: "デザイン実践",
+    description: "デザインの基礎から現場ケース別の進め方まで、実際に手を動かすための知識",
+    icon: "compass",
   },
 ];
 

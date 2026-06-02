@@ -3,7 +3,7 @@ import type { PortableTextBlock } from "@portabletext/types";
 /**
  * ガイドカテゴリの型定義
  */
-export type GuideCategory = "career" | "learning" | "industry" | "tools" | "design-knowledge";
+export type GuideCategory = "career" | "learning" | "industry" | "tools" | "practice";
 
 /**
  * ガイド記事の型定義（Sanity）

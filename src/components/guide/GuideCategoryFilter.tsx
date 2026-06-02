@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
-import { Briefcase, BookOpen, TrendingUp, Wrench } from "lucide-react";
+import { Briefcase, BookOpen, TrendingUp, Wrench, Compass } from "lucide-react";
 
 const categoryIcons: Record<string, typeof Briefcase> = {
   career: Briefcase,
   learning: BookOpen,
   industry: TrendingUp,
   tools: Wrench,
+  practice: Compass,
 };
 
 interface GuideCategoryFilterProps {
