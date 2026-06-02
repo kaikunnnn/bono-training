@@ -143,26 +143,23 @@ export default async function StoryDetailPage({ params }: PageProps) {
               {/* 人物（左）+ タグ・日付（右）— モバイルは縦積み、sm 以上は左右配置 */}
               <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 {/* 左: 人物（アイコン + 名前 + 職種） */}
-                {/* アイコンは profileImage 優先、未設定なら記事の heroImage をフォールバック表示 */}
+                {/* アイコンは一覧と同じ person.profileImage を表示、未設定なら User フォールバック */}
                 <div className="flex items-center gap-3 min-w-0">
-                  {(() => {
-                    const iconUrl = story.person.profileImageUrl || story.heroImageUrl;
-                    return iconUrl ? (
-                      <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-[#e8e9e2]">
-                        <Image
-                          src={iconUrl}
-                          alt={story.person.name}
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-[#e8e9e2] flex items-center justify-center flex-shrink-0">
-                        <User className="w-5 h-5 text-text-primary/40" strokeWidth={1.75} />
-                      </div>
-                    );
-                  })()}
+                  {story.person.profileImageUrl ? (
+                    <div className="relative w-10 h-10 rounded-full overflow-hidden flex-shrink-0 bg-[#e8e9e2]">
+                      <Image
+                        src={story.person.profileImageUrl}
+                        alt={story.person.name}
+                        fill
+                        className="object-cover"
+                        unoptimized
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-[#e8e9e2] flex items-center justify-center flex-shrink-0">
+                      <User className="w-5 h-5 text-text-primary/40" strokeWidth={1.75} />
+                    </div>
+                  )}
                   <div className="min-w-0">
                     <p className="text-sm font-bold text-text-primary font-noto-sans-jp leading-tight">
                       {story.person.name}
