@@ -2,7 +2,7 @@ import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory } from "@/types/sanity";
+import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory, Story, StorySummary, UserOutputSummary } from "@/types/sanity";
 import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-roadmap";
 import type { Guide, GuideCategory } from "@/types/guide";
 
@@ -1328,4 +1328,159 @@ export const getAllRoadmapSlugs = unstable_cache(
   },
   ["sanity:roadmaps:slugs"],
   { tags: ["roadmap"], revalidate: 3600 }
+);
+
+// ============================================
+// Story 関連のクエリ — BON-327
+// ============================================
+
+const STORY_CATEGORY_LABELS: Record<string, string> = {
+  uiux_career_change: "UIUX転職",
+};
+
+const STORY_SUMMARY_FIELDS = `
+  _id,
+  _type,
+  title,
+  slug,
+  publishedAt,
+  excerpt,
+  heroImage,
+  "heroImageUrl": heroImage.asset->url,
+  category,
+  tags,
+  person {
+    name,
+    profileImage,
+    "profileImageUrl": profileImage.asset->url,
+    currentRole,
+  }
+`;
+
+const STORY_DETAIL_FIELDS = `
+  _id,
+  _type,
+  title,
+  slug,
+  publishedAt,
+  excerpt,
+  heroImage,
+  "heroImageUrl": heroImage.asset->url,
+  category,
+  tags,
+  person {
+    name,
+    profileImage,
+    "profileImageUrl": profileImage.asset->url,
+    bio,
+    currentRole,
+    socialLinks,
+  },
+  relatedRoadmaps[]->{
+    _id,
+    title,
+    shortTitle,
+    slug,
+    description,
+    "thumbnailUrl": thumbnail.asset->url,
+  },
+  body
+`;
+
+function attachStoryCategoryLabel<T extends { category: string }>(item: T): T & { categoryLabel: string } {
+  return { ...item, categoryLabel: STORY_CATEGORY_LABELS[item.category] ?? item.category };
+}
+
+/**
+ * ストーリー一覧を取得
+ */
+export const getStoriesList = unstable_cache(
+  async (limit?: number): Promise<StorySummary[]> => {
+    const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
+    const query = `*[_type == "story" && defined(slug.current)] | order(publishedAt desc) ${limitClause} { ${STORY_SUMMARY_FIELDS} }`;
+    const results = await getClient().fetch<StorySummary[]>(query);
+    return results.map(attachStoryCategoryLabel);
+  },
+  ["sanity:stories:list"],
+  { tags: ["story"], revalidate: 3600 }
+);
+
+/**
+ * ストーリー詳細を取得
+ */
+export const getStoryBySlug = unstable_cache(
+  async (slug: string): Promise<Story | null> => {
+    const query = `*[_type == "story" && slug.current == $slug][0] { ${STORY_DETAIL_FIELDS} }`;
+    const result = await getClient().fetch<Story | null>(query, { slug });
+    return result ? attachStoryCategoryLabel(result) : null;
+  },
+  ["sanity:stories:bySlug"],
+  { tags: ["story"], revalidate: 3600 }
+);
+
+/**
+ * 関連ストーリー（同じ category、自分以外）を取得
+ */
+export const getRelatedStories = unstable_cache(
+  async (excludeId: string, limit = 2): Promise<StorySummary[]> => {
+    const query = `*[_type == "story" && _id != $excludeId && defined(slug.current)] | order(publishedAt desc) [0...${limit}] { ${STORY_SUMMARY_FIELDS} }`;
+    const results = await getClient().fetch<StorySummary[]>(query, { excludeId });
+    return results.map(attachStoryCategoryLabel);
+  },
+  ["sanity:stories:related"],
+  { tags: ["story"], revalidate: 3600 }
+);
+
+/**
+ * ストーリーの全slugを取得（generateStaticParams 用）
+ */
+export const getAllStorySlugs = unstable_cache(
+  async (): Promise<string[]> => {
+    const query = `*[_type == "story" && defined(slug.current)].slug.current`;
+    return getClient().fetch<string[]>(query);
+  },
+  ["sanity:stories:slugs"],
+  { tags: ["story"], revalidate: 3600 }
+);
+
+// ============================================
+// UserOutput 関連のクエリ — BON-345
+// ============================================
+
+// 新旧のフィールド名違いに両対応（coalesce で先に non-null を取る）
+//   旧: articleTitle / articleUrl / articleImage / articleDescription / author.displayName / relatedLesson
+//   新: ogTitle / url / ogImage / ogDescription / author.slackAccountName / lesson
+const USER_OUTPUT_FIELDS = `
+  _id,
+  _type,
+  "articleUrl": coalesce(articleUrl, url),
+  "articleTitle": coalesce(articleTitle, ogTitle),
+  "articleImage": coalesce(articleImage, ogImage),
+  "articleDescription": coalesce(articleDescription, ogDescription),
+  author {
+    userId,
+    "displayName": coalesce(displayName, slackAccountName),
+    slackAccountName,
+    email
+  },
+  bonoContent,
+  checkedItems,
+  submittedAt,
+  displayOrder,
+  "relatedLesson": coalesce(relatedLesson->{_id, title, slug}, lesson->{_id, title, slug})
+`;
+
+/**
+ * アウトプット一覧を取得
+ * BON-327 暫定: isPublished フラグを問わず、タイトル + URL が
+ * 揃っているものを公開対象とする（旧/新スキーマ両対応）。
+ */
+export const getOutputsList = unstable_cache(
+  async (limit?: number): Promise<UserOutputSummary[]> => {
+    const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
+    const query = `*[_type == "userOutput" && (defined(articleTitle) || defined(ogTitle)) && (defined(articleUrl) || defined(url))] | order(submittedAt desc) ${limitClause} { ${USER_OUTPUT_FIELDS} }`;
+    return getClient().fetch<UserOutputSummary[]>(query);
+  },
+  ["sanity:outputs:list:v3"],
+  { tags: ["userOutput"], revalidate: 3600 }
 );
