@@ -1347,6 +1347,9 @@ const STORY_SUMMARY_FIELDS = `
   excerpt,
   heroImage,
   "heroImageUrl": heroImage.asset->url,
+  videoUrl,
+  videoDuration,
+  isPremium,
   category,
   tags,
   person {
@@ -1366,6 +1369,9 @@ const STORY_DETAIL_FIELDS = `
   excerpt,
   heroImage,
   "heroImageUrl": heroImage.asset->url,
+  videoUrl,
+  videoDuration,
+  isPremium,
   category,
   tags,
   person {
@@ -1384,7 +1390,16 @@ const STORY_DETAIL_FIELDS = `
     description,
     "thumbnailUrl": thumbnail.asset->url,
   },
-  body
+  body[] {
+    ...,
+    _type == "image" => {
+      ...,
+      "asset": asset-> {
+        _id,
+        url
+      }
+    }
+  }
 `;
 
 function attachStoryCategoryLabel<T extends { category: string }>(item: T): T & { categoryLabel: string } {
@@ -1401,7 +1416,7 @@ export const getStoriesList = unstable_cache(
     const results = await getClient().fetch<StorySummary[]>(query);
     return results.map(attachStoryCategoryLabel);
   },
-  ["sanity:stories:list"],
+  ["sanity:stories:list:v3"],
   { tags: ["story"], revalidate: 3600 }
 );
 
@@ -1414,7 +1429,7 @@ export const getStoryBySlug = unstable_cache(
     const result = await getClient().fetch<Story | null>(query, { slug });
     return result ? attachStoryCategoryLabel(result) : null;
   },
-  ["sanity:stories:bySlug"],
+  ["sanity:stories:bySlug:v3"],
   { tags: ["story"], revalidate: 3600 }
 );
 
@@ -1427,7 +1442,7 @@ export const getRelatedStories = unstable_cache(
     const results = await getClient().fetch<StorySummary[]>(query, { excludeId });
     return results.map(attachStoryCategoryLabel);
   },
-  ["sanity:stories:related"],
+  ["sanity:stories:related:v3"],
   { tags: ["story"], revalidate: 3600 }
 );
 

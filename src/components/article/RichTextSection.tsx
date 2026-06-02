@@ -23,7 +23,7 @@ interface RichTextSectionProps {
  */
 const generateHeadingId = (
   children: React.ReactNode,
-  index: number
+  key: string
 ): string => {
   const text =
     typeof children === "string"
@@ -38,7 +38,7 @@ const generateHeadingId = (
           .join("")
       : "";
 
-  return `heading-${index}-${text
+  return `heading-${key}-${text
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^\w\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf-]/g, "")}`;
@@ -75,14 +75,12 @@ const RichTextSection = ({
   // プレミアムコンテンツで未契約の場合、最初のブロックのみ表示
   const displayContent =
     isPremium && !hasAccess ? content.slice(0, previewBlockCount) : content;
-  // 見出しのインデックスを追跡するためのカウンター
-  let headingIndex = 0;
 
   const components: PortableTextComponents = {
     block: {
       // Heading 2: 24px(desktop) / 20px(mobile), semibold, lh:32px
-      h2: ({ children }) => {
-        const id = generateHeadingId(children, headingIndex++);
+      h2: ({ children, value }) => {
+        const id = generateHeadingId(children, value._key || "");
         return (
           <h2
             id={id}
@@ -94,8 +92,8 @@ const RichTextSection = ({
         );
       },
       // Heading 3: 20px(desktop) / 18px(mobile), semibold, lh:28px
-      h3: ({ children }) => {
-        const id = generateHeadingId(children, headingIndex++);
+      h3: ({ children, value }) => {
+        const id = generateHeadingId(children, value._key || "");
         return (
           <h3
             id={id}
@@ -107,8 +105,8 @@ const RichTextSection = ({
         );
       },
       // Heading 4: 18px(desktop) / 16px(mobile), semibold, lh:24px
-      h4: ({ children }) => {
-        const id = generateHeadingId(children, headingIndex++);
+      h4: ({ children, value }) => {
+        const id = generateHeadingId(children, value._key || "");
         return (
           <h4
             id={id}
