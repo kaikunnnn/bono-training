@@ -362,6 +362,9 @@ export interface StorySummary {
   excerpt: string;
   heroImage?: SanityImage;
   heroImageUrl?: string;
+  videoUrl?: string;
+  videoDuration?: string;
+  isPremium?: boolean;
   category: StoryCategory;
   categoryLabel: string;
   tags: string[];
@@ -378,6 +381,9 @@ export interface Story {
   excerpt: string;
   heroImage?: SanityImage;
   heroImageUrl?: string;
+  videoUrl?: string;
+  videoDuration?: string;
+  isPremium?: boolean;
   person: StoryPerson;
   category: StoryCategory;
   categoryLabel: string;

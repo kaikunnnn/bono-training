@@ -76,13 +76,15 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
       playerRef.current.destroy();
     }
 
-    // Vimeo IDを抽出（URLの場合）
+    // Vimeo IDと private hash を抽出（URLの場合）
     const extractedId = extractVimeoId(vimeoId);
+    const extractedHash = extractVimeoHash(vimeoId);
 
-    console.log('[VimeoPlayer] Initializing with ID:', extractedId);
+    console.log('[VimeoPlayer] Initializing with ID:', extractedId, 'hash:', extractedHash ?? '(none)');
 
     const player = new Player(containerRef.current, {
       id: parseInt(extractedId, 10),
+      ...(extractedHash ? { h: extractedHash } : {}),
       controls: false,  // Vimeo標準UIを非表示（Plusプラン以上で有効）
       responsive: true,
       title: false,
@@ -370,4 +372,21 @@ function extractVimeoId(url: string): string {
   }
   const match = url.match(/(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/);
   return match ? match[1] : url;
+}
+
+/**
+ * Vimeo URLから private hash を抽出する。
+ * 例: https://vimeo.com/1027603200/2dc830c8cb?share=copy → "2dc830c8cb"
+ * 例: https://player.vimeo.com/video/1027603200?h=2dc830c8cb → "2dc830c8cb"
+ * 公開動画の場合は null。
+ */
+function extractVimeoHash(url: string): string | null {
+  if (/^\d+$/.test(url)) return null;
+  // パスに含まれる /vimeo.com/{id}/{hash}
+  const pathMatch = url.match(/vimeo\.com\/\d+\/([a-f0-9]+)/);
+  if (pathMatch) return pathMatch[1];
+  // クエリで ?h={hash}
+  const queryMatch = url.match(/[?&]h=([a-f0-9]+)/);
+  if (queryMatch) return queryMatch[1];
+  return null;
 }
