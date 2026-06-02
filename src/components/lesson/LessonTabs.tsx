@@ -49,13 +49,13 @@ export default function LessonTabs({
         <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent rounded-none h-auto p-0 mb-[32px]">
           <TabsTrigger
             value="content"
-            className="font-noto-sans-jp font-bold text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent !text-black data-[state=active]:border-black data-[state=active]:!text-black data-[state=active]:bg-transparent data-[state=inactive]:!text-black bg-transparent shadow-none"
+            className="font-noto-sans-jp font-bold text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent !text-black data-[state=active]:border-black data-[state=active]:!text-black data-[state=active]:bg-transparent data-[state=active]:!shadow-none data-[state=inactive]:!text-black bg-transparent !shadow-none"
           >
             コンテンツ
           </TabsTrigger>
           <TabsTrigger
             value="overview"
-            className="font-noto-sans-jp font-bold text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent !text-black data-[state=active]:border-black data-[state=active]:!text-black data-[state=active]:bg-transparent data-[state=inactive]:!text-black bg-transparent shadow-none"
+            className="font-noto-sans-jp font-bold text-sm md:text-base px-4 md:px-6 py-2 md:py-3 rounded-none border-b-2 border-transparent !text-black data-[state=active]:border-black data-[state=active]:!text-black data-[state=active]:bg-transparent data-[state=active]:!shadow-none data-[state=inactive]:!text-black bg-transparent !shadow-none"
           >
             概要・目的
           </TabsTrigger>

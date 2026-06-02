@@ -328,3 +328,103 @@ export interface LessonMetadata {
   thumbnailUrl?: string;
   iconImageUrl?: string;
 }
+
+// ============================================================
+// Story（受講者ストーリー） — BON-327
+// ============================================================
+
+// SNS / ポートフォリオリンク
+export interface StorySocialLink {
+  label: string;
+  url: string;
+}
+
+// 人物プロフィール
+export interface StoryPerson {
+  name: string;
+  profileImage?: SanityImage;
+  profileImageUrl?: string;
+  bio?: string;
+  currentRole?: string;
+  socialLinks?: StorySocialLink[];
+}
+
+// カテゴリ enum（将来拡張可能）
+export type StoryCategory = "uiux_career_change";
+
+// 受講者ストーリー（一覧用・最小フィールド）
+export interface StorySummary {
+  _id: string;
+  _type: "story";
+  title: string;
+  slug: SanitySlug;
+  publishedAt: string;
+  excerpt: string;
+  heroImage?: SanityImage;
+  heroImageUrl?: string;
+  category: StoryCategory;
+  categoryLabel: string;
+  tags: string[];
+  person: Pick<StoryPerson, "name" | "profileImage" | "profileImageUrl" | "currentRole">;
+}
+
+// 受講者ストーリー（詳細用・全フィールド）
+export interface Story {
+  _id: string;
+  _type: "story";
+  title: string;
+  slug: SanitySlug;
+  publishedAt: string;
+  excerpt: string;
+  heroImage?: SanityImage;
+  heroImageUrl?: string;
+  person: StoryPerson;
+  category: StoryCategory;
+  categoryLabel: string;
+  tags: string[];
+  relatedRoadmaps?: StoryRelatedRoadmap[];
+  body: PortableTextBlock[];
+}
+
+// Story 内で参照するロードマップ（最小フィールド）
+export interface StoryRelatedRoadmap {
+  _id: string;
+  title: string;
+  shortTitle?: string;
+  slug: SanitySlug;
+  description?: string;
+  thumbnailUrl?: string;
+}
+
+// ============================================================
+// UserOutput（受講者アウトプット = 15分FB済み記事） — BON-345
+// ============================================================
+
+export interface UserOutputAuthor {
+  userId?: string;
+  displayName: string;
+  slackAccountName?: string;
+  email?: string;
+}
+
+export type UserOutputCheckedItem = "notice" | "before-after" | "why";
+export type UserOutputSource = "user_submission" | "admin_curated";
+
+export interface UserOutputSummary {
+  _id: string;
+  _type: "userOutput";
+  articleUrl: string;
+  articleTitle?: string;
+  articleImage?: string;
+  articleDescription?: string;
+  author?: UserOutputAuthor;
+  bonoContent?: string;
+  relatedLesson?: {
+    _id: string;
+    title: string;
+    slug: SanitySlug;
+  };
+  checkedItems?: UserOutputCheckedItem[];
+  submittedAt: string;
+  displayOrder?: number;
+}

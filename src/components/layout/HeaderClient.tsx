@@ -148,6 +148,33 @@ function MobileMenu() {
               </span>
             </Link>
             <Link
+              href="/achievements"
+              className="flex flex-col rounded-lg p-3 hover:bg-accent"
+            >
+              <span className="font-medium">みんなの事例</span>
+              <span className="text-sm text-muted-foreground">
+                ストーリー & アウトプット
+              </span>
+            </Link>
+            <Link
+              href="/stories"
+              className="flex flex-col rounded-lg p-3 pl-6 hover:bg-accent"
+            >
+              <span className="text-sm font-medium">ストーリー</span>
+              <span className="text-xs text-muted-foreground">
+                BONOで人生を動かした人たちのインタビュー
+              </span>
+            </Link>
+            <Link
+              href="/outputs"
+              className="flex flex-col rounded-lg p-3 pl-6 hover:bg-accent"
+            >
+              <span className="text-sm font-medium">アウトプット</span>
+              <span className="text-xs text-muted-foreground">
+                受講者の作品・記事一覧
+              </span>
+            </Link>
+            <Link
               href="/subscription"
               className="flex flex-col rounded-lg p-3 hover:bg-accent"
             >
@@ -204,6 +231,19 @@ function DesktopNavigation() {
               </ListItem>
               <ListItem href="/tools" title="その他のツール">
                 便利なデザインツール一覧
+              </ListItem>
+            </ul>
+          </NavigationMenuContent>
+        </NavigationMenuItem>
+        <NavigationMenuItem>
+          <NavigationMenuTrigger>みんなの事例</NavigationMenuTrigger>
+          <NavigationMenuContent>
+            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[500px]">
+              <ListItem href="/stories" title="ストーリー">
+                BONOで人生を動かした受講者のインタビュー
+              </ListItem>
+              <ListItem href="/outputs" title="アウトプット">
+                15分FBを受けた受講者の作品・記事
               </ListItem>
             </ul>
           </NavigationMenuContent>

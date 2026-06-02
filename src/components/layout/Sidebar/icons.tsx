@@ -20,6 +20,7 @@ import {
   MessageQuestion,
   Messages1,
   Lamp,
+  Medal,
 } from "iconsax-react";
 
 /**
@@ -41,6 +42,7 @@ export const MenuIcons = {
   question: MessageQuestion,
   feedback: Messages1,
   knowledge: Lamp,
+  achievements: Medal,
 } as const;
 
 export type IconKey = keyof typeof MenuIcons;

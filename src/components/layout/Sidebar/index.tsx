@@ -109,6 +109,13 @@ export function Sidebar({ className, user }: SidebarProps) {
       </SidebarMenuGroup>
 
       <SidebarMenuGroup label="その他" itemGap>
+        <SidebarMenuItem
+          href="/achievements"
+          icon={<MenuIcons.achievements size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/achievements")}
+        >
+          みんなの実績
+        </SidebarMenuItem>
         {!user && (
           <SidebarMenuItem
             href="/login"
