@@ -24,6 +24,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/design-breakdown/achievements",
+    issue: "DESIGN",
+    title: "/achievements 分解ダッシュボード",
+    summary:
+      "/achievements を トークン / コンポーネント / ブロック の3層に分解し、各ノブを動かすと画面の印象がどう変わるかを比較で示す分析用ダッシュボード。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/bon-327",
     issue: "BON-327",
     title: "受講者ストーリー & アウトプット まわり",
