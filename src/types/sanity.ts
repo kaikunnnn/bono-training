@@ -70,6 +70,8 @@ export interface Lesson {
   _id: string;
   _type: "lesson";
   title: string;
+  subtitle?: string;
+  seoTitle?: string;
   slug: SanitySlug;
   description?: string;
   lessonNumber?: number;
@@ -324,6 +326,7 @@ export interface LessonWithDetails extends Omit<Lesson, "quests" | "category"> {
 // OGP用メタデータ
 export interface LessonMetadata {
   title: string;
+  seoTitle?: string;
   description?: string;
   thumbnailUrl?: string;
   iconImageUrl?: string;

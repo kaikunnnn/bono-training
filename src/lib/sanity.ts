@@ -50,6 +50,8 @@ export const getLesson = unstable_cache(
       _id,
       _type,
       title,
+      subtitle,
+      seoTitle,
       slug,
       description,
       lessonNumber,
@@ -143,6 +145,7 @@ export const getLessonMetadata = unstable_cache(
     const query = `
       *[_type == "lesson" && slug.current == $slug][0] {
         title,
+        seoTitle,
         description,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
         "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url)
