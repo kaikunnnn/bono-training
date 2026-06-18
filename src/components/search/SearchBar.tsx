@@ -217,9 +217,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
               "w-full pl-12 pr-12 py-3 sm:py-4",
               "text-base sm:text-lg",
               "bg-white border border-gray-200 rounded-2xl",
-              "focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent",
+              "focus:outline-none focus:border-gray-900 focus:ring-0",
               "placeholder:text-gray-400",
-              "transition-all duration-200",
+              "transition-colors duration-200",
               isOpen && "rounded-b-none border-b-0"
             )}
           />

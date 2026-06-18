@@ -11,12 +11,25 @@ const SUGGESTED_QUESTIONS = [
   'Figmaの次に学ぶべきスキルは何ですか？',
 ];
 
-const ChatInterface = () => {
+interface ChatInterfaceProps {
+  /** 履歴なし・入力空のときに一度だけ入力欄へプリフィルされる初期値（自動送信はしない） */
+  initialInput?: string;
+}
+
+const ChatInterface = ({ initialInput }: ChatInterfaceProps) => {
   const { messages, isLoading, error, sendMessage, clearMessages } = useAIChat();
   const [input, setInput] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const isEmpty = messages.length === 0;
+
+  useEffect(() => {
+    if (!initialInput) return;
+    if (messages.length > 0) return;
+    if (input !== '') return;
+    setInput(initialInput);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialInput]);
 
   // 新しいメッセージが来たら末尾にスクロール
   useEffect(() => {
@@ -38,7 +51,10 @@ const ChatInterface = () => {
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    // IME 変換中の Enter は無視（日本語変換確定の Enter で誤送信されないように）
+    if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+    // Cmd+Enter (Mac) / Ctrl+Enter (Win) で送信。素の Enter は改行
+    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
       e.preventDefault();
       handleSubmit();
     }
@@ -94,8 +110,8 @@ const ChatInterface = () => {
         )}
       </div>
 
-      {/* 入力エリア */}
-      <div className="border-t border-border px-4 py-4">
+      {/* 入力エリア（Figma 19:1675 準拠：白ボックス + 影 + 内側右下に送信） */}
+      <div className="px-4 py-4">
         <div className="max-w-2xl mx-auto">
           {!isEmpty && (
             <button
@@ -107,7 +123,7 @@ const ChatInterface = () => {
             </button>
           )}
 
-          <div className="relative flex items-end gap-2 bg-muted rounded-2xl px-4 py-3">
+          <div className="bg-white border border-gray-200 shadow-[0_4px_8px_rgba(0,0,0,0.06)] rounded-3xl px-6 pt-5 pb-2.5">
             <textarea
               ref={textareaRef}
               value={input}
@@ -115,25 +131,28 @@ const ChatInterface = () => {
               onKeyDown={handleKeyDown}
               placeholder="学習の悩みや疑問を書いてください..."
               rows={1}
-              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground resize-none outline-none leading-relaxed min-h-[24px]"
+              className="w-full bg-transparent text-sm text-foreground placeholder:text-slate-500 resize-none outline-none leading-[1.625] min-h-[24px]"
               disabled={isLoading}
             />
-            <button
-              onClick={handleSubmit}
-              disabled={!input.trim() || isLoading}
-              className={cn(
-                'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors',
-                input.trim() && !isLoading
-                  ? 'bg-foreground text-background'
-                  : 'bg-muted-foreground/20 text-muted-foreground cursor-not-allowed'
-              )}
-            >
-              <ArrowUp className="w-4 h-4" />
-            </button>
+            <div className="flex items-center justify-end gap-2.5 mt-1">
+              <span className="text-[11px] text-slate-500 tracking-wide">
+                Cmd+Enterで送信
+              </span>
+              <button
+                onClick={handleSubmit}
+                disabled={!input.trim() || isLoading}
+                aria-label="送信"
+                className={cn(
+                  'flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-colors',
+                  input.trim() && !isLoading
+                    ? 'bg-foreground text-background hover:bg-foreground/90'
+                    : 'bg-muted-foreground/15 text-muted-foreground cursor-not-allowed'
+                )}
+              >
+                <ArrowUp className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-          <p className="text-[11px] text-muted-foreground text-center mt-2">
-            Enterで送信・Shift+Enterで改行
-          </p>
         </div>
       </div>
     </div>

@@ -3,6 +3,7 @@ import { useLocation } from "react-router-dom";
 import { SidebarProps } from "./types";
 import { cn } from "@/lib/utils";
 import SidebarLogo from "./SidebarLogo";
+import SidebarSearchBox from "./SidebarSearchBox";
 import SidebarMenuGroup from "./SidebarMenuGroup";
 import SidebarMenuItem from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
@@ -39,6 +40,9 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
     >
       {/* ロゴセクション */}
       <SidebarLogo />
+
+      {/* 検索ボックス（ロゴ直下） */}
+      <SidebarSearchBox />
 
       {/* メインナビゲーション */}
       <SidebarMenuGroup>
@@ -96,15 +100,6 @@ const Sidebar: React.FC<SidebarProps> = ({ className }) => {
           isActive={isActive("/guide") || location.pathname.startsWith("/guide/")}
         >
           学習ガイド
-        </SidebarMenuItem>
-
-        {/* 検索 */}
-        <SidebarMenuItem
-          href="/search"
-          icon={<MenuIcons.search size={ICON_SIZE} variant="Outline" />}
-          isActive={isActive("/search")}
-        >
-          検索
         </SidebarMenuItem>
 
       </SidebarMenuGroup>
