@@ -15,6 +15,7 @@ interface LinkedRoadmap {
 interface LessonTitleAreaProps {
   lesson: {
     title: string;
+    subtitle?: string;
     category?: string;
     description?: string;
     linkedRoadmaps?: LinkedRoadmap[];
@@ -55,6 +56,11 @@ export function LessonTitleArea({
         <h1 className="font-rounded-mplus font-bold text-[32px] text-training-dark leading-[40px] w-full">
           {lesson.title}
         </h1>
+        {lesson.subtitle && (
+          <h2 className="font-noto-sans-jp font-medium text-[16px] text-text-muted leading-[1.5] w-full">
+            {lesson.subtitle}
+          </h2>
+        )}
         {/* ロードマップ紐づき表示 */}
         {lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0 && (
           <div className="flex items-center gap-1 text-[rgba(13,34,29,0.48)]">
