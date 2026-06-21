@@ -30,6 +30,20 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: "/feedbacks",
+        destination: "/community/feedback",
+        permanent: true,
+      },
+      {
+        source: "/feedbacks/:slug",
+        destination: "/community/feedback/:slug",
+        permanent: true,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

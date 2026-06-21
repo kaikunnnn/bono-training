@@ -16,6 +16,8 @@ interface RichTextSectionProps {
   redirectTo?: string;
   previewBlockCount?: number; // プレビューで表示するブロック数（デフォルト: 3）
   afterContent?: React.ReactNode;
+  /** 外側の白カード（bg-white / rounded / shadow / padding）を外す。デフォルト false */
+  bare?: boolean;
 }
 
 /**
@@ -69,6 +71,7 @@ const RichTextSection = ({
   redirectTo,
   previewBlockCount = 3,
   afterContent,
+  bare = false,
 }: RichTextSectionProps) => {
   const textContainerClassName = "w-full max-w-[60ch] md:max-w-[66ch]";
 
@@ -443,8 +446,12 @@ const RichTextSection = ({
     },
   };
 
+  const wrapperClass = bare
+    ? "w-full text-text-primary flex flex-col justify-start items-start gap-1 relative"
+    : "w-full px-6 py-6 bg-white text-text-primary rounded-[20px] shadow-xs flex flex-col justify-start items-start gap-1";
+
   return (
-    <div className="w-full px-6 py-6 bg-white text-text-primary rounded-[20px] shadow-xs flex flex-col justify-start items-start gap-1">
+    <div className={wrapperClass}>
       <div className="w-full">
         <PortableText value={displayContent} components={components} />
       </div>

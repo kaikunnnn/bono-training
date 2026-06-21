@@ -1,22 +1,12 @@
-// src/components/feedback/FeedbackCard.tsx — mainからコピー＋最小変更
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
-import { cn } from "@/lib/utils";
 import type { Feedback } from "@/types/sanity";
+import { cn } from "@/lib/utils";
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" as const },
-  },
-};
+interface FeedbackCardProps {
+  feedback: Feedback;
+}
 
-// カテゴリごとのFluentEmoji 3D URLマッピング
+// カテゴリ別 Fluent Emoji 3D
 const categoryEmojiUrl: Record<string, string> = {
   portfolio:
     "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Briefcase/3D/briefcase_3d.png",
@@ -30,116 +20,71 @@ const categoryEmojiUrl: Record<string, string> = {
     "https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Memo/3D/memo_3d.png",
 };
 
-const categoryEmoji: Record<string, string> = {
-  portfolio: "💼",
-  "user-value-design": "🎯",
-  "ui-style": "🎨",
-  career: "🚀",
-  default: "📝",
+// 控えめな単色寄り背景（淡いトーン）
+const categoryBg: Record<string, string> = {
+  portfolio: "bg-[#F4F6FB]",
+  "user-value-design": "bg-[#FBF5EE]",
+  "ui-style": "bg-[#FBF1F3]",
+  career: "bg-[#F1F7F3]",
+  default: "bg-[#F5F5F4]",
 };
-
-const categoryGradient: Record<string, string> = {
-  portfolio: "from-blue-100/50 via-indigo-50/50 to-white",
-  "user-value-design": "from-orange-100/50 via-amber-50/50 to-white",
-  "ui-style": "from-pink-100/50 via-rose-50/50 to-white",
-  career: "from-emerald-100/50 via-teal-50/50 to-white",
-  default: "from-gray-100/50 via-slate-50/50 to-white",
-};
-
-interface FeedbackCardProps {
-  feedback: Feedback;
-  index?: number;
-}
 
 export function FeedbackCard({ feedback }: FeedbackCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
   const publishedDate = feedback.publishedAt
     ? new Date(feedback.publishedAt).toLocaleDateString("ja-JP", {
         year: "numeric",
-        month: "short",
+        month: "numeric",
         day: "numeric",
       })
     : null;
 
   const categorySlug = feedback.category?.slug?.current || "default";
-  const emojiUrl =
-    categoryEmojiUrl[categorySlug] || categoryEmojiUrl["default"];
-  const emojiAlt = categoryEmoji[categorySlug] || categoryEmoji["default"];
-  const gradientClass =
-    categoryGradient[categorySlug] || categoryGradient["default"];
+  const emojiUrl = categoryEmojiUrl[categorySlug] || categoryEmojiUrl.default;
+  const bgClass = categoryBg[categorySlug] || categoryBg.default;
 
   return (
-    <motion.div variants={fadeInUp} className="h-full">
-      <Link
-        href={`/feedbacks/${feedback.slug.current}`}
-        className="group block h-full bg-white rounded-[24px] border border-border/50 overflow-hidden"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        style={{
-          transform: isHovered ? 'translateY(-4px)' : 'none',
-          boxShadow: isHovered
-            ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
-            : '0px 1px 8px 0px rgba(0,0,0,0.08)',
-          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-          willChange: 'transform',
-        }}
+    <Link
+      href={`/community/feedback/${feedback.slug.current}`}
+      className="group flex flex-col bg-white rounded-[22px] overflow-hidden shadow-[0px_1px_7px_rgba(0,0,0,0.04)] hover:shadow-[0px_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200"
+    >
+      {/* サムネ: 控えめ単色背景 + 絵文字3D */}
+      <div
+        className={cn(
+          "w-full h-[140px] flex items-center justify-center",
+          bgClass
+        )}
       >
-        {/* ビジュアルエリア */}
-        <div
-          className={cn(
-            "h-[180px] w-full bg-gradient-to-br flex items-center justify-center relative overflow-hidden",
-            gradientClass
-          )}
-        >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white/40 rounded-full blur-2xl" />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={emojiUrl}
+          alt=""
+          className="w-14 h-14 object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-110"
+          loading="lazy"
+        />
+      </div>
 
-          <div className="relative z-10 transform group-hover:scale-110 transition-transform duration-300">
-            <img
-              src={emojiUrl}
-              alt={emojiAlt}
-              className="w-16 h-16 object-contain drop-shadow-sm"
-              loading="lazy"
-            />
-          </div>
+      <div className="flex flex-col gap-3 py-6 px-5">
+        {feedback.targetOutput && (
+          <p className="text-xs font-bold text-gray-500">
+            {feedback.targetOutput}
+          </p>
+        )}
 
-          {feedback.category && (
-            <div className="absolute top-4 right-4">
-              <span className="inline-flex items-center justify-center px-3 py-1 bg-white/80 backdrop-blur-sm rounded-full border border-white/50 shadow-sm">
-                <span className="font-noto-sans-jp text-[11px] font-bold text-foreground/80">
-                  {feedback.category.title}
-                </span>
-              </span>
-            </div>
-          )}
-        </div>
+        <h3 className="font-rounded-mplus text-lg font-bold text-[#1a1a1a] leading-snug line-clamp-2 text-balance">
+          {feedback.title}
+        </h3>
 
-        {/* コンテンツエリア */}
-        <div className="p-6 flex flex-col gap-3">
-          <h3 className="font-rounded-mplus text-[17px] font-bold text-foreground leading-[1.6] line-clamp-2 group-hover:text-primary transition-colors">
-            {feedback.title}
-          </h3>
+        {feedback.excerpt && (
+          <p className="text-sm text-gray-500 leading-[1.7] line-clamp-2">
+            {feedback.excerpt}
+          </p>
+        )}
 
-          {feedback.targetOutput && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 rounded-lg">
-              <span className="text-muted-foreground">📎</span>
-              <span className="font-noto-sans-jp text-[12px] font-medium text-foreground/80 line-clamp-1">
-                {feedback.targetOutput}
-              </span>
-            </div>
-          )}
-
-          {feedback.excerpt && (
-            <p className="font-noto-sans-jp text-[13px] text-muted-foreground leading-[1.8] line-clamp-2">
-              {feedback.excerpt}
-            </p>
-          )}
-
-          <div className="mt-auto pt-4 flex items-center text-xs text-muted-foreground/70">
-            {publishedDate && <span>{publishedDate}</span>}
-          </div>
-        </div>
-      </Link>
-    </motion.div>
+        {publishedDate && (
+          <span className="mt-1 text-xs text-gray-400">{publishedDate}</span>
+        )}
+      </div>
+    </Link>
   );
 }
 

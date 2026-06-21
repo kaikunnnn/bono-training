@@ -45,7 +45,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/feedbacks`,
+      url: `${BASE_URL}/community/feedback`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
@@ -88,7 +88,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const feedbackPages: MetadataRoute.Sitemap = feedbackSlugs.map((slug) => ({
-    url: `${BASE_URL}/feedbacks/${slug}`,
+    url: `${BASE_URL}/community/feedback/${slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.6,

@@ -100,9 +100,9 @@ export function Sidebar({ className, user }: SidebarProps) {
       {/* コミュニティ - 一時的に非表示（mainと同じ） */}
       <SidebarMenuGroup label="コミュニティ" itemGap className="hidden">
         <SidebarMenuItem
-          href="/feedbacks"
+          href="/community/feedback"
           icon={<MenuIcons.feedback size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/feedbacks")}
+          isActive={isActive("/community/feedback")}
         >
           フィードバック
         </SidebarMenuItem>
