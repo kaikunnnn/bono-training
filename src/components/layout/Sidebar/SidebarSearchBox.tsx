@@ -1,22 +1,30 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
  * サイドバー専用のコンパクト検索ボックス
  * Figma 19:1718 準拠（外側 px-[15px] でメニュー項目と幅揃え、内側 rounded-[12px] / px-[13px] py-[5px] / gap-3）
- * submit で /search?q=... に遷移
+ * submit で /search?q=... に遷移。すでに /search にいる場合は現在の tab パラメータを引き継ぐ
  */
 const SidebarSearchBox: React.FC<{ className?: string }> = ({ className }) => {
   const [query, setQuery] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = query.trim();
     if (!trimmed) return;
-    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
+    const next = new URLSearchParams();
+    next.set("q", trimmed);
+    // /search に既にいる場合のみ、tab を引き継ぐ（絞り込み状態の維持）
+    const currentTab = new URLSearchParams(location.search).get("tab");
+    if (currentTab && location.pathname === "/search") {
+      next.set("tab", currentTab);
+    }
+    navigate(`/search?${next.toString()}`);
     setQuery("");
   };
 

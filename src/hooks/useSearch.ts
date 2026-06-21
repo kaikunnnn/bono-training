@@ -60,16 +60,28 @@ interface SanityGuideForSearch {
  */
 async function fetchLessonsForSearch(): Promise<SanityLessonForSearch[]> {
   try {
+    // Lessons.tsx と同じ解決順序で thumbnail URL を coalesce
+    // 1) iconImageUrl, 2) iconImage の asset URL, 3) thumbnailUrl, 4) thumbnail の asset URL
     const query = `*[_type == "lesson"] | order(_createdAt desc) {
       _id,
       title,
       slug,
       description,
-      thumbnailUrl,
+      "thumbnailUrl": coalesce(
+        iconImageUrl,
+        iconImage.asset->url,
+        thumbnailUrl,
+        thumbnail.asset->url
+      ),
       "categoryTitle": category->title,
       tags,
       isPremium,
-      "articleCount": count(quests[]->articles[])
+      "articleCount": count(quests[]->articles[]),
+      "linkedRoadmaps": *[_type == "roadmap" && references(^._id)] {
+        "slug": slug.current,
+        title,
+        shortTitle
+      }
     }`;
     return client.fetch(query);
   } catch (error) {
@@ -91,7 +103,7 @@ async function fetchArticlesForSearch(): Promise<SanityArticleForSearch[]> {
         title,
         slug,
         excerpt,
-        thumbnailUrl,
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
         tags,
         isPremium,
         videoDuration
@@ -157,7 +169,9 @@ async function fetchGuidesForSearch(): Promise<SanityGuideForSearch[]> {
 // ============================================
 
 function convertLessonToSearchResult(
-  lesson: SanityLessonForSearch
+  lesson: SanityLessonForSearch & {
+    linkedRoadmaps?: { slug: string; title: string; shortTitle?: string }[];
+  }
 ): LessonSearchResult {
   return {
     id: lesson._id,
@@ -170,6 +184,7 @@ function convertLessonToSearchResult(
     tags: lesson.tags,
     isPremium: lesson.isPremium,
     lessonCount: lesson.articleCount,
+    linkedRoadmaps: lesson.linkedRoadmaps,
   };
 }
 

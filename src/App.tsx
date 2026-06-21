@@ -47,6 +47,7 @@ import ColorTokenPreview from "./pages/dev/ColorTokenPreview";
 import BgTokenPreview from "./pages/dev/BgTokenPreview";
 import DottedDividerPreview from "./pages/dev/DottedDividerPreview";
 import ContentCardPreview from "./pages/dev/ContentCardPreview";
+import SearchCardPreview from "./pages/dev/SearchCardPreview";
 import RoadmapHeroPreview from "./pages/dev/RoadmapHeroPreview";
 import RoadmapDetailPreview from "./pages/dev/RoadmapDetailPreview";
 import RoadmapPreview from "./pages/dev/RoadmapPreview";
@@ -172,6 +173,7 @@ const AppContent = () => {
         <Route path="/guide/:slug" element={<GuideDetailPage />} />
 
         <Route path="/dev" element={<DevRoute><DevHome /></DevRoute>} />
+        <Route path="/dev/search-card" element={<DevRoute><SearchCardPreview /></DevRoute>} />
         <Route path="/dev/top-new" element={<DevRoute><TopPageNew /></DevRoute>} />
         <Route path="/dev/webflow-embed" element={<DevRoute><WebflowEmbed /></DevRoute>} />
         <Route path="/dev/roadmap-card-v2" element={<DevRoute><RoadmapCardV2Preview /></DevRoute>} />

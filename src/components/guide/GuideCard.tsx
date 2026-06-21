@@ -10,8 +10,17 @@ interface GuideCardProps {
   className?: string;
 }
 
+/** 公開日を `2026/5/8` 形式に整形（ISO / 不正値はそのまま返す） */
+const formatPublishedDate = (date?: string): string => {
+  if (!date) return "";
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return date;
+  return `${d.getFullYear()}/${d.getMonth() + 1}/${d.getDate()}`;
+};
+
 const GuideCard = ({ guide, className }: GuideCardProps) => {
   const categoryInfo = getCategoryInfo(guide.category);
+  const publishedDate = formatPublishedDate(guide.publishedAt);
 
   return (
     <Link
@@ -25,6 +34,13 @@ const GuideCard = ({ guide, className }: GuideCardProps) => {
       />
 
       <div className="flex flex-col gap-3">
+        {/* カテゴリラベル（タイトル上のサブテキスト） */}
+        {(categoryInfo?.label || guide.category) && (
+          <span className="text-[13px] text-text-muted">
+            {categoryInfo?.label ?? guide.category}
+          </span>
+        )}
+
         <h3 className="text-lg font-bold text-foreground leading-snug line-clamp-2 text-balance group-hover:opacity-70 transition-opacity duration-200">
           {guide.title}
         </h3>
@@ -44,9 +60,9 @@ const GuideCard = ({ guide, className }: GuideCardProps) => {
               {guide.author}
             </span>
           </div>
-          <span className="text-[13px] text-text-muted">
-            {categoryInfo?.label ?? guide.category}
-          </span>
+          {publishedDate && (
+            <span className="text-[13px] text-text-muted">{publishedDate}</span>
+          )}
         </div>
       </div>
     </Link>

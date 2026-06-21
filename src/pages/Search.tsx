@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout/Layout";
 import SearchBar from "@/components/search/SearchBar";
 import SearchTabs, { SearchTab } from "@/components/search/SearchTabs";
-import SearchResultCard from "@/components/search/SearchResultCard";
+import HorizontalContentCard from "@/components/search/HorizontalContentCard";
+import { searchResultToCardProps } from "@/components/search/searchResultToCardProps";
 import ChatInterface from "@/components/ai/ChatInterface";
 import {
   SearchContentType,
@@ -13,10 +14,12 @@ import {
   CONTENT_TYPE_ICONS,
 } from "@/types/search";
 import { useSearch } from "@/hooks/useSearch";
-import { Search as SearchIcon, Loader2, Sparkles } from "lucide-react";
+import { Search as SearchIcon, Loader2, Sparkles, MessageCircle } from "lucide-react";
 import { trackSearch } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { runDiagnostics } from "@/lib/diagnostics";
+import { Button } from "@/components/ui/button";
+import { SLACK_QUESTIONS_URL } from "@/lib/external-links";
 
 const AVAILABLE_TYPES: SearchContentType[] = ["lesson", "article", "guide"];
 
@@ -42,20 +45,42 @@ const Search: React.FC = () => {
   const tab = resolveTab(searchParams);
   const queryParam = searchParams.get("q") || "";
 
-  const [query, setQuery] = useState(queryParam);
+  // URL を single source of truth に。内部 state は持たず、queryParam を直接読む。
+  // ※ 過去に query state を持ったが、URL ↔ state の双方向 useEffect が競合して
+  //   サイドバー submit 時に書き戻し合うバグになったため廃止
+  const query = queryParam;
 
-  const setTab = (newTab: SearchTab) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams();
-        const q = prev.get("q");
-        if (q) next.set("q", q);
-        if (newTab !== "all") next.set("tab", newTab);
-        return next;
-      },
-      { replace: true }
-    );
-  };
+  const setQuery = useCallback(
+    (newQuery: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams();
+          if (newQuery) next.set("q", newQuery);
+          const currentTab = prev.get("tab");
+          if (currentTab) next.set("tab", currentTab);
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
+
+  const setTab = useCallback(
+    (newTab: SearchTab) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams();
+          const q = prev.get("q");
+          if (q) next.set("q", q);
+          if (newTab !== "all") next.set("tab", newTab);
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   // tab が変わったら、それに応じて useSearch に渡す types を計算
   const searchTypes: SearchContentType[] = useMemo(() => {
@@ -70,21 +95,6 @@ const Search: React.FC = () => {
   );
 
   const groupedResults = useMemo(() => groupSearchResults(results), [results]);
-
-  // クエリ変更を URL に反映（AI タブでも q は同期する。tab は維持）
-  useEffect(() => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams();
-        if (query) next.set("q", query);
-        const currentTab = prev.get("tab");
-        if (currentTab) next.set("tab", currentTab);
-        // 旧パラメータ（mode/types）が残ってたら正規化のため明示的に消す
-        return next;
-      },
-      { replace: true }
-    );
-  }, [query, setSearchParams]);
 
   useEffect(() => {
     if (query && !isLoading && tab !== "ai") {
@@ -128,6 +138,7 @@ const Search: React.FC = () => {
               aria-hidden={tab === "ai"}
             >
               <SearchBar
+                key={queryParam}
                 defaultValue={query}
                 onSearch={(q) => setQuery(q)}
                 navigateOnSearch={false}
@@ -193,16 +204,29 @@ const Search: React.FC = () => {
                     <h2 className="text-xl font-bold text-gray-900 mb-2">
                       検索結果が見つかりませんでした
                     </h2>
-                    <p className="text-gray-600 mb-4">
-                      別のキーワードで検索するか、AIに聞いてみてください
+                    <p className="text-gray-600 mb-6">
+                      AI に聞くか、カイクンに直接質問してみましょう
                     </p>
-                    <button
-                      onClick={() => setTab("ai")}
-                      className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      AIに聞いてみる
-                    </button>
+                    <div className="flex flex-wrap items-center justify-center gap-3">
+                      <Button
+                        variant="secondary"
+                        onClick={() => setTab("ai")}
+                        className="gap-1.5"
+                      >
+                        <Sparkles className="w-4 h-4" />
+                        AIに聞く
+                      </Button>
+                      <Button variant="secondary" asChild className="gap-1.5">
+                        <a
+                          href={SLACK_QUESTIONS_URL}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <MessageCircle className="w-4 h-4" />
+                          カイクンに質問する
+                        </a>
+                      </Button>
+                    </div>
                   </div>
                 )}
 
@@ -224,9 +248,12 @@ const Search: React.FC = () => {
                         </span>
                       </div>
                       <div className="space-y-4">
-                        {sectionResults.map((result) => (
-                          <SearchResultCard key={result.id} result={result} />
-                        ))}
+                        {sectionResults.map((result) => {
+                          const props = searchResultToCardProps(result);
+                          return props ? (
+                            <HorizontalContentCard key={result.id} {...props} />
+                          ) : null;
+                        })}
                       </div>
                     </section>
                   );

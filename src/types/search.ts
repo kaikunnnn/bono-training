@@ -98,6 +98,12 @@ export interface LessonSearchResult extends SearchResultBase {
   type: "lesson";
   /** レッスン数 */
   lessonCount?: number;
+  /** 紐づくロードマップ（LessonCard と同じ構造） */
+  linkedRoadmaps?: {
+    slug: string;
+    title: string;
+    shortTitle?: string;
+  }[];
 }
 
 /** 記事の検索結果（レッスンコース内） */
