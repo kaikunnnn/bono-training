@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { SidebarProps } from "./types";
 import { cn } from "@/lib/utils";
 import { SidebarLogo } from "./SidebarLogo";
+import SidebarSearchBox from "./SidebarSearchBox";
 import { SidebarMenuGroup } from "./SidebarMenuGroup";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
@@ -44,6 +45,9 @@ export function Sidebar({ className, user }: SidebarProps) {
       aria-label="メインナビゲーション"
     >
       <SidebarLogo />
+
+      {/* 検索ボックス（ロゴ直下、Figma 19:1718） */}
+      <SidebarSearchBox />
 
       <SidebarMenuGroup>
         {user && (
