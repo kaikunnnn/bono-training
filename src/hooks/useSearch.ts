@@ -26,6 +26,36 @@ async function fetchSearchData(): Promise<SearchResult[]> {
 // 検索ロジック（クライアント側でフィルタリング）
 // ============================================================
 
+/**
+ * クエリのマッチ判定
+ * - 英数字のみのクエリ: 単語境界 (\b) で大文字小文字無視マッチ
+ *   → 「AI」が「Daily」の "ai" に誤ヒットしないようにする
+ * - それ以外（日本語など）: 通常の lowercase 部分一致
+ *   → 「情」で「情報設計」がヒットする挙動を維持
+ */
+function matchesQuery(haystack: string, needle: string): boolean {
+  const trimmed = needle.trim();
+  if (!trimmed) return true;
+
+  const isAsciiOnly = /^[\x20-\x7E]+$/.test(trimmed);
+  if (isAsciiOnly) {
+    const escaped = trimmed.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(`\\b${escaped}\\b`, "i");
+    return regex.test(haystack);
+  }
+
+  return haystack.toLowerCase().includes(trimmed.toLowerCase());
+}
+
+function buildSearchableText(item: SearchResult): string {
+  return [
+    item.title,
+    item.description,
+    item.category || "",
+    ...(item.tags || []),
+  ].join(" ");
+}
+
 function filterSearchResults(
   data: SearchResult[],
   query: string,
@@ -38,18 +68,9 @@ function filterSearchResults(
   }
 
   if (query.trim()) {
-    const normalizedQuery = query.toLowerCase().trim();
-    results = results.filter((item) => {
-      const searchableText = [
-        item.title,
-        item.description,
-        item.category || "",
-        ...(item.tags || []),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return searchableText.includes(normalizedQuery);
-    });
+    results = results.filter((item) =>
+      matchesQuery(buildSearchableText(item), query)
+    );
   }
 
   return results;
@@ -103,19 +124,8 @@ export function searchFromCache(
   limit = 8
 ): SearchResult[] {
   if (!data || !query.trim()) return [];
-  const normalizedQuery = query.toLowerCase().trim();
   return data
-    .filter((item) => {
-      const searchableText = [
-        item.title,
-        item.description,
-        item.category || "",
-        ...(item.tags || []),
-      ]
-        .join(" ")
-        .toLowerCase();
-      return searchableText.includes(normalizedQuery);
-    })
+    .filter((item) => matchesQuery(buildSearchableText(item), query))
     .slice(0, limit);
 }
 
