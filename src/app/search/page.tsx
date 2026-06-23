@@ -11,8 +11,6 @@ import ChatInterface from "@/components/ai/ChatInterface";
 import {
   SearchContentType,
   groupSearchResults,
-  CONTENT_TYPE_LABELS,
-  CONTENT_TYPE_ICONS,
 } from "@/types/search";
 import { useSearch } from "@/hooks/useSearch";
 import {
@@ -21,29 +19,34 @@ import {
   Sparkles,
   MessageCircle,
 } from "lucide-react";
+import { MenuIcons } from "@/components/layout/Sidebar/icons";
+import type { SearchResult } from "@/types/search";
 import { trackSearch } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { runDiagnostics } from "@/lib/diagnostics";
 import { Button } from "@/components/ui/button";
 import { SLACK_QUESTIONS_URL } from "@/lib/external-links";
 
-const AVAILABLE_TYPES: SearchContentType[] = ["lesson", "article", "guide"];
+/** タブ別に useSearch へ渡す型のマッピング */
+const TAB_TO_TYPES: Record<Exclude<SearchTab, "ai" | "all">, SearchContentType[]> = {
+  lesson: ["lesson"],
+  guide: ["article", "guide"], // 記事はガイドに統合
+};
 
-/** URL クエリから現在の tab を解決（後方互換: mode=ai / types=lesson も拾う） */
+/** URL クエリから現在の tab を解決（後方互換: mode=ai / types=lesson / tab=article も拾う） */
 const resolveTab = (params: URLSearchParams | null): SearchTab => {
   if (!params) return "all";
   const tabParam = params.get("tab");
   if (tabParam) {
     if (tabParam === "ai" || tabParam === "all") return tabParam;
-    if ((AVAILABLE_TYPES as string[]).includes(tabParam)) {
-      return tabParam as SearchTab;
-    }
+    if (tabParam === "lesson") return "lesson";
+    // 記事は廃止 → ガイドに統合
+    if (tabParam === "article" || tabParam === "guide") return "guide";
   }
   if (params.get("mode") === "ai") return "ai";
   const firstType = params.get("types")?.split(",").filter(Boolean)[0];
-  if (firstType && (AVAILABLE_TYPES as string[]).includes(firstType)) {
-    return firstType as SearchTab;
-  }
+  if (firstType === "lesson") return "lesson";
+  if (firstType === "article" || firstType === "guide") return "guide";
   return "all";
 };
 
@@ -93,7 +96,7 @@ function SearchPageInner() {
   // tab → useSearch に渡す types
   const searchTypes: SearchContentType[] = useMemo(() => {
     if (tab === "ai" || tab === "all") return [];
-    return [tab];
+    return TAB_TO_TYPES[tab];
   }, [tab]);
 
   const { results, isLoading, error } = useSearch(
@@ -117,14 +120,42 @@ function SearchPageInner() {
     }
   }, [error]);
 
-  const sectionsToShow: SearchContentType[] =
-    tab === "all" ? AVAILABLE_TYPES : tab === "ai" ? [] : [tab];
+  // ===== 表示用セクション（記事はガイドに統合）=====
+  type SectionKey = "lesson" | "guide";
+  const sections: {
+    key: SectionKey;
+    label: string;
+    Icon: React.FC<{ size?: number; variant?: "Outline" | "Bold" | "Linear" | "Bulk" | "TwoTone" }>;
+    results: SearchResult[];
+  }[] = useMemo(() => {
+    const all = [
+      {
+        key: "lesson" as const,
+        label: "レッスン",
+        Icon: MenuIcons.lesson,
+        results: groupedResults.lesson as SearchResult[],
+      },
+      {
+        key: "guide" as const,
+        label: "ガイド",
+        Icon: MenuIcons.guide,
+        // 記事 + ガイドを統合
+        results: [
+          ...(groupedResults.guide as SearchResult[]),
+          ...(groupedResults.article as SearchResult[]),
+        ],
+      },
+    ];
+    if (tab === "all") return all;
+    if (tab === "ai") return [];
+    return all.filter((s) => s.key === tab);
+  }, [groupedResults, tab]);
 
   // ===== 各セクションの表示件数（最大 5 件 → さらに表示で +5）=====
   const INITIAL_VISIBLE = 5;
   const STEP = 5;
   const [visibleCount, setVisibleCount] = useState<
-    Partial<Record<SearchContentType, number>>
+    Partial<Record<SectionKey, number>>
   >({});
 
   // クエリ / tab 変更時にリセット
@@ -133,19 +164,16 @@ function SearchPageInner() {
   }, [query, tab]);
 
   const getVisibleCount = useCallback(
-    (type: SearchContentType) => visibleCount[type] ?? INITIAL_VISIBLE,
+    (key: SectionKey) => visibleCount[key] ?? INITIAL_VISIBLE,
     [visibleCount]
   );
 
-  const showMore = useCallback(
-    (type: SearchContentType) => {
-      setVisibleCount((prev) => ({
-        ...prev,
-        [type]: (prev[type] ?? INITIAL_VISIBLE) + STEP,
-      }));
-    },
-    []
-  );
+  const showMore = useCallback((key: SectionKey) => {
+    setVisibleCount((prev) => ({
+      ...prev,
+      [key]: (prev[key] ?? INITIAL_VISIBLE) + STEP,
+    }));
+  }, []);
 
   return (
     <div className={cn("flex flex-col", tab === "ai" && "h-[calc(100vh-64px)]")}>
@@ -254,18 +282,19 @@ function SearchPageInner() {
                 </div>
               )}
 
-              {sectionsToShow.map((type) => {
-                const sectionResults = groupedResults[type];
+              {sections.map((section) => {
+                const sectionResults = section.results;
                 if (!sectionResults || sectionResults.length === 0) return null;
-                const visible = getVisibleCount(type);
+                const visible = getVisibleCount(section.key);
                 const visibleResults = sectionResults.slice(0, visible);
                 const remaining = sectionResults.length - visible;
+                const { Icon } = section;
                 return (
-                  <section key={type} className="mb-10">
+                  <section key={section.key} className="mb-10">
                     <div className="flex items-center gap-2 mb-4">
-                      <span className="text-xl">{CONTENT_TYPE_ICONS[type]}</span>
+                      <Icon size={20} variant="Outline" />
                       <h2 className="text-lg font-bold text-gray-900">
-                        {CONTENT_TYPE_LABELS[type]}
+                        {section.label}
                       </h2>
                       <span className="text-sm text-gray-500">
                         ({sectionResults.length}件)
@@ -283,7 +312,7 @@ function SearchPageInner() {
                       <div className="mt-4 flex justify-center">
                         <Button
                           variant="outline"
-                          onClick={() => showMore(type)}
+                          onClick={() => showMore(section.key)}
                           className="gap-1.5"
                         >
                           さらに {Math.min(STEP, remaining)} 件表示

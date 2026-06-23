@@ -3,25 +3,20 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
-import {
-  SearchContentType,
-  CONTENT_TYPE_LABELS,
-  CONTENT_TYPE_ICONS,
-} from "@/types/search";
+import { MenuIcons } from "@/components/layout/Sidebar/icons";
 
-export type SearchTab = "ai" | "all" | SearchContentType;
+/** タブの種類 — 記事はガイドに統合済 */
+export type SearchTab = "ai" | "all" | "lesson" | "guide";
 
 interface SearchTabsProps {
   tab: SearchTab;
   onTabChange: (tab: SearchTab) => void;
-  availableTypes?: SearchContentType[];
   className?: string;
 }
 
 const SearchTabs: React.FC<SearchTabsProps> = ({
   tab,
   onTabChange,
-  availableTypes = ["lesson", "article", "guide"],
   className,
 }) => {
   const tabs: { id: SearchTab; label: string; icon?: React.ReactNode }[] = [
@@ -31,15 +26,16 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
       icon: <Sparkles className="w-3.5 h-3.5" />,
     },
     { id: "all", label: "すべて" },
-    ...availableTypes.map((type) => ({
-      id: type as SearchTab,
-      label: CONTENT_TYPE_LABELS[type],
-      icon: (
-        <span className="text-base leading-none">
-          {CONTENT_TYPE_ICONS[type]}
-        </span>
-      ),
-    })),
+    {
+      id: "lesson",
+      label: "レッスン",
+      icon: <MenuIcons.lesson size={14} variant="Outline" />,
+    },
+    {
+      id: "guide",
+      label: "ガイド",
+      icon: <MenuIcons.guide size={14} variant="Outline" />,
+    },
   ];
 
   return (
