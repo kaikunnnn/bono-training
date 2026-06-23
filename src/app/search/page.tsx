@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useCallback } from "react";
+import React, { Suspense, useEffect, useMemo, useCallback, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import SearchBar from "@/components/search/SearchBar";
@@ -120,6 +120,33 @@ function SearchPageInner() {
   const sectionsToShow: SearchContentType[] =
     tab === "all" ? AVAILABLE_TYPES : tab === "ai" ? [] : [tab];
 
+  // ===== 各セクションの表示件数（最大 5 件 → さらに表示で +5）=====
+  const INITIAL_VISIBLE = 5;
+  const STEP = 5;
+  const [visibleCount, setVisibleCount] = useState<
+    Partial<Record<SearchContentType, number>>
+  >({});
+
+  // クエリ / tab 変更時にリセット
+  useEffect(() => {
+    setVisibleCount({});
+  }, [query, tab]);
+
+  const getVisibleCount = useCallback(
+    (type: SearchContentType) => visibleCount[type] ?? INITIAL_VISIBLE,
+    [visibleCount]
+  );
+
+  const showMore = useCallback(
+    (type: SearchContentType) => {
+      setVisibleCount((prev) => ({
+        ...prev,
+        [type]: (prev[type] ?? INITIAL_VISIBLE) + STEP,
+      }));
+    },
+    []
+  );
+
   return (
     <div className={cn("flex flex-col", tab === "ai" && "h-[calc(100vh-64px)]")}>
       {/* ヘッダー: 「探す」見出し位置は固定、検索バーだけアニメーションで開閉 */}
@@ -230,6 +257,9 @@ function SearchPageInner() {
               {sectionsToShow.map((type) => {
                 const sectionResults = groupedResults[type];
                 if (!sectionResults || sectionResults.length === 0) return null;
+                const visible = getVisibleCount(type);
+                const visibleResults = sectionResults.slice(0, visible);
+                const remaining = sectionResults.length - visible;
                 return (
                   <section key={type} className="mb-10">
                     <div className="flex items-center gap-2 mb-4">
@@ -242,13 +272,27 @@ function SearchPageInner() {
                       </span>
                     </div>
                     <div className="space-y-4">
-                      {sectionResults.map((result) => {
+                      {visibleResults.map((result) => {
                         const props = searchResultToCardProps(result);
                         return props ? (
                           <HorizontalContentCard key={result.id} {...props} />
                         ) : null;
                       })}
                     </div>
+                    {remaining > 0 && (
+                      <div className="mt-4 flex justify-center">
+                        <Button
+                          variant="outline"
+                          onClick={() => showMore(type)}
+                          className="gap-1.5"
+                        >
+                          さらに {Math.min(STEP, remaining)} 件表示
+                          <span className="text-xs text-gray-500">
+                            （残り {remaining} 件）
+                          </span>
+                        </Button>
+                      </div>
+                    )}
                   </section>
                 );
               })}
