@@ -13,46 +13,34 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
 
 async function fetchContext() {
   const sanity = client();
+  // Groq の payload 制限（413）回避のため取得を絞る
+  // - lessons: 最新 20、Quest タイトルだけ（articles 展開なし、tags 省略）
+  // - guides: 最新 20、description は省略してタイトル + カテゴリのみ
+  // - roadmaps: 最新 15、description は短めに
   const [lessons, guides, roadmaps] = await Promise.all([
-    // Lesson + Quest + Article の階層を一括取得
-    sanity.fetch(`*[_type == "lesson"] | order(_createdAt desc)[0...30] {
-      _id,
+    sanity.fetch(`*[_type == "lesson"] | order(_createdAt desc)[0...20] {
       title,
       "slug": slug.current,
       description,
       "category": category->title,
-      tags,
       isPremium,
       "quests": *[_type == "quest" && references(^._id)] | order(questNumber asc) {
         questNumber,
         title,
-        goal,
-        "articles": articles[]->{
-          articleNumber,
-          title,
-          "slug": slug.current,
-          excerpt,
-          articleType,
-          contentType,
-          isPremium
-        }
+        goal
       }
     }`),
-    sanity.fetch(`*[_type == "guide"] | order(publishedAt desc)[0...30] {
-      _id,
+    sanity.fetch(`*[_type == "guide"] | order(publishedAt desc)[0...20] {
       title,
       "slug": slug.current,
       description,
       category,
-      tags,
       isPremium
     }`),
-    sanity.fetch(`*[_type == "roadmap" && isPublished == true] | order(order asc)[0...20] {
-      _id,
+    sanity.fetch(`*[_type == "roadmap" && isPublished == true] | order(order asc)[0...15] {
       title,
       "slug": slug.current,
       description,
-      tags,
       estimatedDuration
     }`),
   ]);
@@ -60,56 +48,36 @@ async function fetchContext() {
   return { lessons, guides, roadmaps };
 }
 
-const ARTICLE_TYPE_LABEL: Record<string, string> = {
-  explain: "知識",
-  intro: "イントロ",
-  practice: "実践",
-  challenge: "チャレンジ",
-  demo: "実演解説",
-};
-
-interface SanityArticle {
-  articleNumber?: number;
-  title: string;
-  slug: string;
-  excerpt?: string;
-  articleType?: string;
-  contentType?: string;
-  isPremium?: boolean;
-}
 interface SanityQuest {
   questNumber?: number;
   title: string;
   goal?: string;
-  articles?: SanityArticle[];
 }
 interface SanityLesson {
-  _id: string;
   title: string;
   slug: string;
   description?: string;
   category?: string;
-  tags?: string[];
   isPremium?: boolean;
   quests?: SanityQuest[];
 }
 interface SanityGuide {
-  _id: string;
   title: string;
   slug: string;
   description?: string;
   category?: string;
-  tags?: string[];
   isPremium?: boolean;
 }
 interface SanityRoadmap {
-  _id: string;
   title: string;
   slug: string;
   description?: string;
-  tags?: string[];
   estimatedDuration?: string;
 }
+
+/** 文字列を最大 N 文字に切り詰め */
+const truncate = (s: string | undefined, max: number): string =>
+  s && s.length > max ? s.slice(0, max) + "…" : s || "";
 
 function buildContextText(
   lessons: SanityLesson[],
@@ -121,38 +89,25 @@ function buildContextText(
   lines.push("## ロードマップ（学習パス）");
   for (const r of roadmaps) {
     lines.push(
-      `- [${r.title}](/roadmaps/${r.slug}): ${r.description || ""}${
+      `- [${r.title}](/roadmaps/${r.slug}): ${truncate(r.description, 80)}${
         r.estimatedDuration ? ` (目安: ${r.estimatedDuration})` : ""
       }`
     );
-    if (r.tags?.length) lines.push(`  タグ: ${r.tags.join(", ")}`);
   }
 
   lines.push("\n## レッスン（コース）");
   for (const l of lessons) {
     const premium = l.isPremium ? " [有料]" : "";
     lines.push(`### [${l.title}](/lessons/${l.slug})${premium}`);
-    if (l.description) lines.push(`概要: ${l.description}`);
-    if (l.tags?.length) lines.push(`タグ: ${l.tags.join(", ")}`);
+    if (l.description) lines.push(`概要: ${truncate(l.description, 120)}`);
+    if (l.category) lines.push(`カテゴリ: ${l.category}`);
 
+    // Quest はタイトルのみ簡潔に列挙（article 展開は payload 削減のためスキップ）
     if (l.quests?.length) {
-      for (const q of l.quests) {
-        lines.push(
-          `  ▸ Quest${q.questNumber || ""} 「${q.title}」${
-            q.goal ? ` — ${q.goal}` : ""
-          }`
-        );
-        if (q.articles?.length) {
-          for (const a of q.articles) {
-            const aType = ARTICLE_TYPE_LABEL[a.articleType || ""] || a.articleType || "";
-            const aPremium = a.isPremium ? "[有料]" : "";
-            const aExcerpt = a.excerpt ? ` — ${a.excerpt}` : "";
-            lines.push(
-              `    - [${a.title}](/lessons/${l.slug}?article=${a.slug}) [${aType}]${aPremium}${aExcerpt}`
-            );
-          }
-        }
-      }
+      const questLine = l.quests
+        .map((q) => `Q${q.questNumber || ""}:${q.title}`)
+        .join(" / ");
+      lines.push(`  Quests: ${questLine}`);
     }
     lines.push("");
   }
@@ -166,9 +121,10 @@ function buildContextText(
   };
   for (const g of guides) {
     const premium = g.isPremium ? " [有料]" : "";
-    lines.push(`- [${g.title}](/guide/${g.slug})${premium}: ${g.description || ""}`);
-    if (g.category) lines.push(`  カテゴリ: ${categoryLabel[g.category] ?? g.category}`);
-    if (g.tags?.length) lines.push(`  タグ: ${g.tags.join(", ")}`);
+    const cat = g.category ? ` [${categoryLabel[g.category] ?? g.category}]` : "";
+    lines.push(
+      `- [${g.title}](/guide/${g.slug})${premium}${cat}: ${truncate(g.description, 80)}`
+    );
   }
 
   return lines.join("\n");
