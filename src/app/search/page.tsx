@@ -125,21 +125,18 @@ function SearchPageInner() {
   const sections: {
     key: SectionKey;
     label: string;
-    Icon: React.FC<{ size?: number; variant?: "Outline" | "Bold" | "Linear" | "Bulk" | "TwoTone" }>;
     results: SearchResult[];
   }[] = useMemo(() => {
     const all = [
       {
         key: "lesson" as const,
         label: "レッスン",
-        Icon: MenuIcons.lesson,
         results: groupedResults.lesson as SearchResult[],
       },
       {
         key: "guide" as const,
-        label: "ガイド",
-        Icon: MenuIcons.guide,
-        // 記事 + ガイドを統合
+        // 記事とガイドを混合表示しているので「コンテンツ」表記に
+        label: "コンテンツ",
         results: [
           ...(groupedResults.guide as SearchResult[]),
           ...(groupedResults.article as SearchResult[]),
@@ -150,6 +147,14 @@ function SearchPageInner() {
     if (tab === "ai") return [];
     return all.filter((s) => s.key === tab);
   }, [groupedResults, tab]);
+
+  /** 見出しに表示するアイコン（サイドナビと同一） */
+  const renderSectionIcon = (key: SectionKey) =>
+    key === "lesson" ? (
+      <MenuIcons.lesson size={20} color="#0d221d" variant="Outline" />
+    ) : (
+      <MenuIcons.guide size={20} color="#0d221d" variant="Outline" />
+    );
 
   // ===== 各セクションの表示件数（最大 5 件 → さらに表示で +5）=====
   const INITIAL_VISIBLE = 5;
@@ -288,11 +293,10 @@ function SearchPageInner() {
                 const visible = getVisibleCount(section.key);
                 const visibleResults = sectionResults.slice(0, visible);
                 const remaining = sectionResults.length - visible;
-                const { Icon } = section;
                 return (
                   <section key={section.key} className="mb-10">
                     <div className="flex items-center gap-2 mb-4">
-                      <Icon size={20} variant="Outline" />
+                      {renderSectionIcon(section.key)}
                       <h2 className="text-lg font-bold text-gray-900">
                         {section.label}
                       </h2>

@@ -33,7 +33,7 @@ const SearchTabs: React.FC<SearchTabsProps> = ({
     },
     {
       id: "guide",
-      label: "ガイド",
+      label: "コンテンツ",
       icon: <MenuIcons.guide size={14} variant="Outline" />,
     },
   ];
