@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { useAIChat } from '@/hooks/useAIChat';
 import { SLACK_QUESTIONS_URL } from '@/lib/external-links';
 import ChatMessage from './ChatMessage';
+import { AIAvatar } from './AIAvatar';
 
 const SUGGESTED_QUESTIONS = [
   'UIデザインを学び始めるには何から始めればいいですか？',
@@ -79,16 +80,19 @@ const ChatInterface = ({ initialInput }: ChatInterfaceProps) => {
         /* 空状態（Figma 17:1621）: 中央寄せのウェルカム + 大きい入力 + サジェスト2x2 */
         <div className="flex-1 overflow-y-auto px-4 py-12">
           <div className="max-w-2xl mx-auto flex flex-col gap-5">
-            {/* ヘッダー */}
-            <div className="text-center">
-              <h2 className="font-noto-sans-jp text-[20px] font-bold leading-[28px] text-[#020817]">
-                AI学習アシスタント
-              </h2>
-              <p className="pt-2 text-[14px] text-[#64748b] leading-[22.75px] tracking-tight">
-                悩みや疑問を自由に書いてください。
-                <br />
-                BONOのコンテンツをもとに最適な学習パスを提案します。
-              </p>
+            {/* ヘッダー（AI アバター + 見出し） */}
+            <div className="flex flex-col items-center gap-3 text-center">
+              <AIAvatar />
+              <div>
+                <h2 className="font-noto-sans-jp text-[20px] font-bold leading-[28px] text-[#020817]">
+                  AI学習アシスタント
+                </h2>
+                <p className="pt-2 text-[14px] text-[#64748b] leading-[22.75px] tracking-tight">
+                  悩みや疑問を自由に書いてください。
+                  <br />
+                  BONOのコンテンツをもとに最適な学習パスを提案します。
+                </p>
+              </div>
             </div>
 
             {/* 大きい入力フォーム（h-[173px] 相当、白ボックス全体がクリック範囲） */}

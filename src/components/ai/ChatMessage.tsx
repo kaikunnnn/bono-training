@@ -4,6 +4,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { cn } from '@/lib/utils';
 import type { ChatMessage as ChatMessageType } from '@/hooks/useAIChat';
+import { AIAvatar } from './AIAvatar';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -24,10 +25,8 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
 
   return (
     <div className="flex justify-start gap-3">
-      {/* アバター */}
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white text-[10px] font-bold mt-0.5">
-        AI
-      </div>
+      {/* アバター（AIAvatar 共通コンポーネント） */}
+      <AIAvatar />
 
       {/* メッセージ本文 */}
       <div className="max-w-[85%] min-w-0">
