@@ -1084,6 +1084,7 @@ const GUIDE_FIELDS = `
   title,
   "slug": slug.current,
   category,
+  "type": coalesce(type, "guide"),
   description,
   isPremium,
   "thumbnailUrl": thumbnail.asset->url,

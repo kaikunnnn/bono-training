@@ -89,11 +89,11 @@ export function Sidebar({ className, user }: SidebarProps) {
         </SidebarMenuItem>
 
         <SidebarMenuItem
-          href="/guide"
+          href="/notes"
           icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/guide")}
+          isActive={isActive("/notes")}
         >
-          学習ガイド
+          ものづくりノート
         </SidebarMenuItem>
       </SidebarMenuGroup>
 

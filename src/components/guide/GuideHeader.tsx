@@ -36,20 +36,14 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/guide">ガイド</Link>
+                <Link href="/notes">ものづくりノート</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/guide?category=${guide.category}`}>
-                  {categoryInfo?.label ?? guide.category}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{guide.title}</BreadcrumbPage>
+              <BreadcrumbPage>
+                {categoryInfo?.label ?? guide.category}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>

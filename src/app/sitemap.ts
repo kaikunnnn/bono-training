@@ -33,7 +33,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/guide`,
+      url: `${BASE_URL}/notes`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
@@ -109,7 +109,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const guidePages: MetadataRoute.Sitemap = guideSlugs.map((slug) => ({
-    url: `${BASE_URL}/guide/${slug}`,
+    url: `${BASE_URL}/notes/${slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.7,

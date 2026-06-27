@@ -8,28 +8,29 @@ import type { GuideCategory } from "@/types/guide";
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
 
+const PAGE_TITLE = "ものづくりノート";
+const PAGE_DESCRIPTION =
+  "デザイン・サービス開発・クラフトについての気軽な読みもの。ガイドから日々の発見まで。";
+
 export const metadata: Metadata = {
-  title: "ガイド",
-  description:
-    "デザインスキルを身につける上でのヒントになる記事。キャリア、学習方法、業界動向などを解説します。",
+  title: PAGE_TITLE,
+  description: PAGE_DESCRIPTION,
   openGraph: {
-    title: "ガイド | BONO",
-    description:
-      "デザインスキルを身につける上でのヒントになる記事。",
+    title: `${PAGE_TITLE} | BONO`,
+    description: PAGE_DESCRIPTION,
   },
   twitter: {
-    title: "ガイド | BONO",
-    description:
-      "デザインスキルを身につける上でのヒントになる記事。",
+    title: `${PAGE_TITLE} | BONO`,
+    description: PAGE_DESCRIPTION,
   },
-  alternates: { canonical: "/guide" },
+  alternates: { canonical: "/notes" },
 };
 
 const CATEGORY_NAV_ITEMS = [
-  { label: "すべて", href: "/guide" },
+  { label: "すべて", href: "/notes" },
   ...GUIDE_CATEGORIES.map((cat) => ({
     label: cat.label,
-    href: `/guide?category=${cat.id}`,
+    href: `/notes?category=${cat.id}`,
   })),
 ];
 
@@ -37,7 +38,7 @@ interface PageProps {
   searchParams: Promise<{ category?: string }>;
 }
 
-export default async function GuidePage({ searchParams }: PageProps) {
+export default async function NotesPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const category = params.category as GuideCategory | undefined;
 
@@ -54,9 +55,11 @@ export default async function GuidePage({ searchParams }: PageProps) {
     <div className="min-h-screen">
       {/* ヒーロー */}
       <section className="px-6 pt-16 pb-10 max-w-[1440px] mx-auto">
-        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">ガイド</h1>
+        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">
+          {PAGE_TITLE}
+        </h1>
         <p className="text-muted-foreground text-base leading-relaxed max-w-[600px]">
-          デザインスキルを身につける上でのヒントになる記事置き場です。何か書いて欲しい内容があれば質問で教えてください
+          {PAGE_DESCRIPTION}
         </p>
       </section>
 
