@@ -1,28 +1,38 @@
 import DocCard from "./DocCard";
 import type { WorkshopStepWithDocs } from "@/lib/workshop/content";
+import { WS_DARK } from "./theme";
 
 interface StepSectionProps {
   step: WorkshopStepWithDocs;
 }
 
 /**
- * トップページ ブロック2：ステップ見出し + ドキュメントカード一覧
- * 淡い背景のブロックの中に白カードを置く構成
+ * トップページ ブロック2（ダークエディトリアル版）
+ * ステップ見出し + 白いクリッカブルカード。左端はヒーローと同じラインに揃える
  */
 export default function StepSection({ step }: StepSectionProps) {
   return (
-    <section className="bg-base rounded-[20px] px-5 py-6 md:px-8 md:py-8">
+    <section>
       <div className="mb-5 md:mb-6">
         {step.label && (
-          <p className="text-[12px] font-bold tracking-[0.18em] uppercase text-text-muted mb-2 font-hind">
+          <p
+            className="text-[11px] md:text-[12px] font-semibold tracking-[0.28em] uppercase mb-2.5 font-hind"
+            style={{ color: WS_DARK.muted }}
+          >
             {step.label}
           </p>
         )}
-        <h2 className="text-[20px] md:text-[22px] font-bold leading-[1.5] tracking-[-0.01em] text-text-primary font-rounded-mplus">
+        <h2
+          className="font-serif-editorial text-[24px] md:text-[28px] leading-[1.4] tracking-[-0.01em]"
+          style={{ color: WS_DARK.ink }}
+        >
           {step.title}
         </h2>
         {step.description && (
-          <p className="mt-2 text-[14px] leading-[1.9] text-text-secondary font-noto-sans-jp">
+          <p
+            className="mt-2 text-[13px] md:text-[14px] leading-[1.9] font-noto-sans-jp"
+            style={{ color: WS_DARK.body }}
+          >
             {step.description}
           </p>
         )}
