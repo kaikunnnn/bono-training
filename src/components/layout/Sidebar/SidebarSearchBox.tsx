@@ -35,13 +35,13 @@ const SidebarSearchBox: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn("w-full px-[15px]", className)}
+      className={cn("w-full pl-[30px] pr-[15px]", className)}
       role="search"
     >
       <div
         className={cn(
-          "flex items-center gap-3 bg-white border border-gray-200 rounded-[12px]",
-          "px-[13px] py-[5px]",
+          "flex items-center gap-[12px] bg-white border border-gray-200 rounded-[12px]",
+          "px-[14px] py-[5px]",
           "focus-within:border-gray-900 transition-colors"
         )}
       >

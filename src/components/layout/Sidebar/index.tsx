@@ -44,10 +44,11 @@ export function Sidebar({ className, user }: SidebarProps) {
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      <SidebarLogo />
-
-      {/* 検索ボックス（ロゴ直下、Figma 19:1718） */}
-      <SidebarSearchBox />
+      {/* ロゴ + 検索（Figma 29:2352: ロゴ直下に検索バー、間隔 0px） */}
+      <div className="w-full flex flex-col items-start">
+        <SidebarLogo />
+        <SidebarSearchBox />
+      </div>
 
       <SidebarMenuGroup>
         {user && (
