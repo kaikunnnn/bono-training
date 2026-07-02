@@ -13,12 +13,14 @@ export async function GET(request: Request) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`);
     }
+    // code はあったが交換失敗 → システムバグの可能性があるため通知
+    await reportAuthError({
+      type: "callback_failed",
+      message: `Code exchange failed: ${error.message}`,
+      path: "/auth/callback",
+    });
   }
+  // code がない = リンク期限切れ or スキャナ消費 → ユーザー起因なので通知しない
 
-  await reportAuthError({
-    type: "callback_failed",
-    message: "OAuth code exchange failed or code missing",
-    path: "/auth/callback",
-  });
   return NextResponse.redirect(`${origin}/login?error=link_expired`);
 }
