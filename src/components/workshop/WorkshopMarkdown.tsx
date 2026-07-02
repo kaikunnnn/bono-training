@@ -18,23 +18,23 @@ export default function WorkshopMarkdown({
   className,
 }: WorkshopMarkdownProps) {
   return (
-    <div className={cn("w-full max-w-[648px] mx-auto font-noto-sans-jp", className)}>
+    <div className={cn("w-full max-w-[648px] mx-auto font-line-seed-jp", className)}>
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           p: ({ children }) => <p className={pStyle}>{children}</p>,
           h2: ({ children }) => (
-            <h2 className="text-[24px] md:text-[26px] font-semibold leading-[2rem] tracking-[-0.02em] text-text-primary font-rounded-mplus mt-24 mb-12 first:mt-0 scroll-mt-20">
+            <h2 className="text-[24px] md:text-[26px] font-semibold leading-[2rem] tracking-[-0.02em] text-text-primary font-line-seed-jp mt-24 mb-12 first:mt-0 scroll-mt-20">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-[20px] md:text-[22px] font-semibold leading-[1.75rem] tracking-[-0.02em] text-text-primary font-rounded-mplus mt-16 mb-8 scroll-mt-20">
+            <h3 className="text-[20px] md:text-[22px] font-semibold leading-[1.75rem] tracking-[-0.02em] text-text-primary font-line-seed-jp mt-16 mb-8 scroll-mt-20">
               {children}
             </h3>
           ),
           h4: ({ children }) => (
-            <h4 className="text-[18px] md:text-[20px] font-semibold leading-[1.5rem] tracking-[-0.02em] text-text-primary font-rounded-mplus mt-6 mb-3 scroll-mt-20">
+            <h4 className="text-[18px] md:text-[20px] font-semibold leading-[1.5rem] tracking-[-0.02em] text-text-primary font-line-seed-jp mt-6 mb-3 scroll-mt-20">
               {children}
             </h4>
           ),

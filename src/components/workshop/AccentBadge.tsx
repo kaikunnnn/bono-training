@@ -25,7 +25,7 @@ export default function AccentBadge({
           transform="translate(0,0) scale(0.97) translate(2,2)"
         />
       </svg>
-      <span className="absolute inset-0 flex flex-col items-center justify-center -rotate-6 text-text-primary font-rounded-mplus font-bold text-[14px] leading-[1.3] text-center whitespace-pre-line">
+      <span className="absolute inset-0 flex flex-col items-center justify-center -rotate-6 text-text-primary font-line-seed-jp font-bold text-[14px] leading-[1.3] text-center whitespace-pre-line">
         {lines.join("\n")}
       </span>
     </div>

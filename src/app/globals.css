@@ -41,8 +41,6 @@
   --font-luckiest: var(--font-luckiest-var), 'Luckiest Guy', sans-serif;
   --font-line-seed-jp: var(--font-line-seed-jp), 'LINE Seed JP', sans-serif;
   --font-display: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
-  /* エディトリアル用セリフ体（欧文: Instrument Serif / 和文: しっぽり明朝） */
-  --font-serif-editorial: var(--font-instrument-serif-var), var(--font-shippori-mincho-var), 'Hiragino Mincho ProN', 'Yu Mincho', serif;
 
   /* Sidebar - these use oklch values, keep as-is */
   --color-sidebar-ring: var(--sidebar-ring);

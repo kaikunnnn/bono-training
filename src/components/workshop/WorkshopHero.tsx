@@ -39,7 +39,7 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
       {/* ラベル + 日付の行 */}
       <div className="mt-12 md:mt-16 flex items-baseline justify-between gap-4">
         <p
-          className="flex items-center gap-2.5 text-[11px] md:text-[12px] font-semibold tracking-[0.28em] uppercase font-hind"
+          className="flex items-center gap-2.5 text-[11px] md:text-[12px] font-semibold tracking-[0.28em] uppercase font-line-seed-jp"
           style={{ color: WS_DARK.muted }}
         >
           <span
@@ -50,7 +50,7 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
           BONO Workshop
         </p>
         <p
-          className="text-[11px] md:text-[12px] font-semibold tracking-[0.28em] uppercase font-hind whitespace-nowrap"
+          className="text-[11px] md:text-[12px] font-semibold tracking-[0.28em] uppercase font-line-seed-jp whitespace-nowrap"
           style={{ color: WS_DARK.muted }}
         >
           Saturday, July 5, 2026
@@ -59,7 +59,7 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
 
       {/* セリフ体の大見出し */}
       <h1
-        className="mt-8 md:mt-10 font-serif-editorial italic font-medium text-[44px] md:text-[68px] leading-[1.15] tracking-[-0.01em]"
+        className="mt-8 md:mt-10 font-line-seed-jp font-extrabold text-[44px] md:text-[68px] leading-[1.15] tracking-[-0.01em]"
         style={{ color: WS_DARK.ink }}
       >
         AI×UI
@@ -69,7 +69,7 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
 
       {/* 説明 */}
       <p
-        className="mt-7 max-w-[680px] text-[15px] md:text-[17px] font-medium leading-[190%] tracking-[0.02em] font-noto-sans-jp"
+        className="mt-7 max-w-[680px] text-[15px] md:text-[17px] font-medium leading-[190%] tracking-[0.02em] font-line-seed-jp"
         style={{ color: WS_DARK.body }}
       >
         <span style={{ color: WS_DARK.ink }} className="font-bold">
@@ -92,19 +92,19 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
             }
           >
             <p
-              className="font-serif-editorial text-[26px] md:text-[32px] leading-none"
+              className="font-line-seed-jp font-bold text-[26px] md:text-[32px] leading-none"
               style={{ color: WS_DARK.ink }}
             >
               {stat.value}
             </p>
             <p
-              className="mt-2 text-[13px] md:text-[14px] font-semibold font-hind"
+              className="mt-2 text-[13px] md:text-[14px] font-semibold font-line-seed-jp"
               style={{ color: WS_DARK.body }}
             >
               {stat.label}
             </p>
             <p
-              className="mt-0.5 text-[11px] md:text-[12px] font-noto-sans-jp"
+              className="mt-0.5 text-[11px] md:text-[12px] font-line-seed-jp"
               style={{ color: WS_DARK.muted }}
             >
               {stat.sub}

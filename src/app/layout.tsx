@@ -8,8 +8,6 @@ import {
   Inter,
   Hind,
   Luckiest_Guy,
-  Shippori_Mincho,
-  Instrument_Serif,
 } from "next/font/google";
 import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
@@ -63,21 +61,6 @@ const luckiestGuy = Luckiest_Guy({
   variable: "--font-luckiest-var",
   subsets: ["latin"],
   weight: "400",
-  display: "swap",
-});
-
-const shipporiMincho = Shippori_Mincho({
-  variable: "--font-shippori-mincho-var",
-  subsets: ["latin"],
-  weight: ["500", "600", "700"],
-  display: "swap",
-});
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-instrument-serif-var",
-  subsets: ["latin"],
-  weight: "400",
-  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -135,7 +118,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} ${lineSeedJP.variable} ${shipporiMincho.variable} ${instrumentSerif.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
         <QueryProvider>

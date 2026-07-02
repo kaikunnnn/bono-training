@@ -40,7 +40,7 @@ export default function WorkshopTopPage() {
         </div>
 
         <footer
-          className="mt-20 pt-8 text-center text-[12px] font-hind tracking-[0.2em] uppercase"
+          className="mt-20 pt-8 text-center text-[12px] font-line-seed-jp tracking-[0.2em] uppercase"
           style={{ borderTop: `1px solid ${WS_DARK.hairline}`, color: WS_DARK.muted }}
         >
           BONO — {WORKSHOP_META.title}

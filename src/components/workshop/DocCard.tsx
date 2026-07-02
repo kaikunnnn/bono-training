@@ -17,7 +17,7 @@ export default function DocCard({ doc }: DocCardProps) {
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="text-[16px] md:text-[17px] font-bold leading-[1.6] text-text-primary font-rounded-mplus">
+          <h3 className="text-[16px] md:text-[17px] font-bold leading-[1.6] text-text-primary font-line-seed-jp">
             {doc.title}
           </h3>
           {doc.note && (
@@ -27,7 +27,7 @@ export default function DocCard({ doc }: DocCardProps) {
           )}
         </div>
         {doc.description && (
-          <p className="mt-1 text-[13px] md:text-[14px] leading-[1.8] text-text-muted font-noto-sans-jp">
+          <p className="mt-1 text-[13px] md:text-[14px] leading-[1.8] text-text-muted font-line-seed-jp">
             {doc.description}
           </p>
         )}

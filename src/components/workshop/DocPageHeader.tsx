@@ -24,15 +24,15 @@ export default function DocPageHeader({ doc }: DocPageHeaderProps) {
 
       <div className="mt-8">
         {step && (
-          <p className="text-[12px] font-bold tracking-[0.18em] uppercase text-text-muted mb-3 font-hind">
+          <p className="text-[12px] font-bold tracking-[0.18em] uppercase text-text-muted mb-3 font-line-seed-jp">
             {step.label ? `${step.label} — ${step.title}` : step.title}
           </p>
         )}
-        <h1 className="text-[28px] md:text-[36px] font-bold leading-[1.5] tracking-[-0.02em] text-text-primary font-rounded-mplus">
+        <h1 className="text-[28px] md:text-[36px] font-bold leading-[1.5] tracking-[-0.02em] text-text-primary font-line-seed-jp">
           {doc.title}
         </h1>
         {doc.description && (
-          <p className="mt-4 text-[15px] md:text-[16px] leading-[1.9] text-text-secondary font-noto-sans-jp">
+          <p className="mt-4 text-[15px] md:text-[16px] leading-[1.9] text-text-secondary font-line-seed-jp">
             {doc.description}
           </p>
         )}
