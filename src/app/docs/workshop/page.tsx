@@ -4,7 +4,7 @@ import WorkshopHero from "@/components/workshop/WorkshopHero";
 import StepSection from "@/components/workshop/StepSection";
 import { getStepsWithDocs } from "@/lib/workshop/content";
 import { WORKSHOP_META } from "@/lib/workshop/config";
-import { WS_DARK } from "@/components/workshop/theme";
+import { WS_THEME } from "@/components/workshop/theme";
 
 export const dynamic = "force-static";
 
@@ -19,7 +19,7 @@ export default function WorkshopTopPage() {
   const docsCount = steps.reduce((sum, s) => sum + s.docs.length, 0);
 
   return (
-    <main className="min-h-screen" style={{ backgroundColor: WS_DARK.bg }}>
+    <main className="min-h-screen" style={{ backgroundColor: WS_THEME.bg }}>
       <div className="max-w-[1080px] mx-auto px-5 md:px-8 pt-6 md:pt-10 pb-24">
         <WorkshopHero stepsCount={steps.length} docsCount={docsCount} />
 
@@ -30,7 +30,7 @@ export default function WorkshopTopPage() {
                 // ステップをつなぐ点線の縦棒
                 <div
                   className="my-5 ml-1 h-12 md:h-14 border-l-2 border-dotted"
-                  style={{ borderColor: WS_DARK.dotted }}
+                  style={{ borderColor: WS_THEME.dotted }}
                   aria-hidden
                 />
               )}
@@ -41,7 +41,7 @@ export default function WorkshopTopPage() {
 
         <footer
           className="mt-20 pt-8 text-center text-[12px] font-line-seed-jp tracking-[0.2em] uppercase"
-          style={{ borderTop: `1px solid ${WS_DARK.hairline}`, color: WS_DARK.muted }}
+          style={{ borderTop: `1px solid ${WS_THEME.hairline}`, color: WS_THEME.muted }}
         >
           BONO — {WORKSHOP_META.title}
         </footer>

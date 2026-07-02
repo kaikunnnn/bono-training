@@ -1,18 +1,19 @@
 /**
- * ワークショップトップページ（ダークエディトリアル）のテーマ定数。
- * デザイントークンに存在しない配色のため、ここに集約して差し替えやすくする。
+ * ワークショップトップページのテーマ定数。
+ * 詳細ページ（/guide準拠のライト配色）と揃えたライトテーマ。
+ * 値はデザイントークン（colors_and_type.css）と同じ。
  */
-export const WS_DARK = {
-  /** ページ背景（ウォームチャコール） */
-  bg: "#1E1D1A",
-  /** 見出し・主要テキスト（クリーム） */
-  ink: "#F4F1E8",
-  /** 本文 */
-  body: "#C7C2B4",
-  /** ラベル・メタ情報 */
-  muted: "#918C7E",
-  /** 罫線（ヘアライン） */
-  hairline: "rgba(244,241,232,0.18)",
-  /** 点線コネクタ */
-  dotted: "rgba(244,241,232,0.35)",
+export const WS_THEME = {
+  /** ページ背景（--bg-surface） */
+  bg: "#FFFFFF",
+  /** 見出し・主要テキスト（--text-primary） */
+  ink: "#021710",
+  /** 本文（--text-secondary） */
+  body: "#354540",
+  /** ラベル・メタ情報（--text-muted） */
+  muted: "#677470",
+  /** 罫線（--border-light） */
+  hairline: "#D4D6CC",
+  /** 点線コネクタ（--border-default） */
+  dotted: "#C3C5BB",
 } as const;
