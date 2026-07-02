@@ -141,8 +141,9 @@ export const getTrainingTaskDetail = async (
       taskSlug
     );
 
-    // Edge Function が空コンテンツを返した場合、Sanity から Portable Text セクションを補完
-    if (!taskDetail.content && !taskDetail.sanitySections?.length) {
+    // Sanity の Portable Text セクションを優先描画したいので、sanitySections が空であれば
+    // Edge Function の markdown content が返っていても Sanity から補完する
+    if (!taskDetail.sanitySections?.length) {
       try {
         const sanityData = await getTrainingTaskDetailFromSanity(trainingSlug, taskSlug);
         if (sanityData?.sections?.length) {
