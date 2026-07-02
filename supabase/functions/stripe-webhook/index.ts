@@ -111,31 +111,28 @@ serve(async (req) => {
       console.error(`⚠️ [LIVE環境] webhook_events check error:`, checkError);
     }
 
-    // ========================================
-    // 🚀 Phase 6-1: 非同期処理パターン
-    // ========================================
     // パフォーマンス測定: リクエスト受信からここまでの時間
     const responseTime = Date.now() - requestStartTime;
-    console.log(`⏱️ [LIVE環境] 200レスポンスまでの時間: ${responseTime}ms`);
+    console.log(`⏱️ [LIVE環境] 検証完了までの時間: ${responseTime}ms`);
 
-    // 3. すぐに200を返す（ここまで1秒以内）
-    const response = new Response(
+    // 同期的に処理する: 失敗時に500を返すことでStripeが自動リトライする
+    try {
+      await processWebhookAsync(stripe, supabase, event, eventId, ENVIRONMENT);
+    } catch (error) {
+      console.error(`❌ [LIVE環境] Webhook処理失敗 → 500を返しStripeにリトライさせる:`, error);
+      return new Response(JSON.stringify({ error: error.message }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    return new Response(
       JSON.stringify({ received: true, event_type: event.type }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
-
-    // 4. 重い処理は非同期で実行（Promiseを返さない）
-    processWebhookAsync(stripe, supabase, event, eventId, ENVIRONMENT)
-      .catch((error) => {
-        console.error(`❌ [LIVE環境] Webhook非同期処理エラー:`, error);
-        console.error(error.stack);
-        // エラーログを記録（将来的にはDB保存も検討）
-      });
-
-    return response;
   } catch (error) {
     console.error(`❌ [LIVE環境] Webhookエラー: ${error.message}`);
     console.error(error.stack);
