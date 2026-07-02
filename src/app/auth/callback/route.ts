@@ -20,5 +20,5 @@ export async function GET(request: Request) {
     message: "OAuth code exchange failed or code missing",
     path: "/auth/callback",
   });
-  return NextResponse.redirect(`${origin}/auth/auth-code-error`);
+  return NextResponse.redirect(`${origin}/login?error=link_expired`);
 }

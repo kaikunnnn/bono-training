@@ -21,6 +21,8 @@ function LoginForm() {
   const { toast } = useToast();
   const redirectTo = searchParams.get("redirectTo") || "/mypage";
 
+  const urlError = searchParams.get("error");
+
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     const tab = searchParams.get("tab");
     return tab === "first-time" ? "first-time" : "login";
@@ -128,6 +130,16 @@ function LoginForm() {
       <h1 className="text-2xl font-bold mb-6 font-noto-sans-jp text-text-primary">
         ログイン
       </h1>
+
+      {urlError === "link_expired" && (
+        <Alert className="mb-4 border-orange-500 bg-orange-50">
+          <AlertCircle className="h-4 w-4 text-orange-600" />
+          <AlertTitle className="text-orange-800">リンクの有効期限が切れています</AlertTitle>
+          <AlertDescription className="text-orange-700">
+            メールのリンクは1度しか使用できません。「はじめての方」タブからメールアドレスを入力して、新しいリンクを送信してください。
+          </AlertDescription>
+        </Alert>
+      )}
 
       <TabGroup
         tabs={[
