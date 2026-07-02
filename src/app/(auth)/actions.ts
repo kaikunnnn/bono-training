@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { translateAuthError } from "@/lib/auth-error-messages";
+import { reportAuthError } from "@/lib/monitoring";
 
 export interface AuthResult {
   error?: string;
@@ -39,6 +40,12 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
     });
 
     if (error) {
+      await reportAuthError({
+        type: "login_failed",
+        email,
+        message: error.message,
+        path: "/login",
+      });
       return { error: translateAuthError(error.message) };
     }
   } catch (err) {
@@ -79,6 +86,12 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     });
 
     if (error) {
+      await reportAuthError({
+        type: "signup_failed",
+        email,
+        message: error.message,
+        path: "/signup",
+      });
       return { error: translateAuthError(error.message) };
     }
   } catch (err) {
@@ -110,6 +123,12 @@ export async function resetPassword(email: string): Promise<AuthResult> {
     });
 
     if (error) {
+      await reportAuthError({
+        type: "password_reset_failed",
+        email,
+        message: error.message,
+        path: "/forgot-password",
+      });
       return { error: translateAuthError(error.message) };
     }
   } catch (err) {

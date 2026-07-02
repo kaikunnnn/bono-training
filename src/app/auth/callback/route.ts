@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { reportAuthError } from "@/lib/monitoring";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -14,6 +15,10 @@ export async function GET(request: Request) {
     }
   }
 
-  // return the user to an error page with instructions
+  await reportAuthError({
+    type: "callback_failed",
+    message: "OAuth code exchange failed or code missing",
+    path: "/auth/callback",
+  });
   return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }
