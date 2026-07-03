@@ -11,7 +11,7 @@ order: 31
 
 > お題はこちらです。
 >
-> [アイデア — 家計簿お題（仮）](/docs/workshop/idea-kakeibo)
+> [お題：家計簿アプリの体験アイデアを検証するプロトをつくる](/docs/workshop/idea-kakeibo)
 >
 > 質問はこういう感じでお願いします
 >
