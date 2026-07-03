@@ -32,9 +32,14 @@ export const WORKSHOP_STEPS: WorkshopStep[] = [
     title: "ワークショップのゴール",
   },
   {
+    id: "setup",
+    label: null,
+    title: "コーディングAIのセットアップ",
+  },
+  {
     id: "step0",
     label: "STEP 0",
-    title: "コーディングツールのセットアップ",
+    title: "作業の目的を伝えてスタート",
   },
   {
     id: "step1",
@@ -55,5 +60,10 @@ export const WORKSHOP_STEPS: WorkshopStep[] = [
     id: "step4",
     label: "STEP 4",
     title: "プロトタイプを叩いて学習する",
+  },
+  {
+    id: "cycle",
+    label: null,
+    title: "学んだことを使ってサイクルを回していこう",
   },
 ];
