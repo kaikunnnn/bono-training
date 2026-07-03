@@ -9,9 +9,9 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { TabGroup } from "@/components/ui/tab-group";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Mail, Lock, LogIn, AlertCircle, AlertTriangle, Send, CheckCircle } from "lucide-react";
+import { Mail, Lock, LogIn, AlertCircle, AlertTriangle, Send, KeyRound } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { signIn, resetPassword, checkMigratedUser } from "../actions";
+import { signIn, resetPassword, verifyEmailOtp, checkMigratedUser } from "../actions";
 
 type TabId = "login" | "first-time";
 
@@ -30,10 +30,11 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [firstTimeEmail, setFirstTimeEmail] = useState("");
+  const [firstTimeCode, setFirstTimeCode] = useState("");
+  const [firstTimeStep, setFirstTimeStep] = useState<"email" | "code">("email");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
   const [firstTimeError, setFirstTimeError] = useState<string | null>(null);
-  const [firstTimeSuccess, setFirstTimeSuccess] = useState(false);
   const [isMigratedUser, setIsMigratedUser] = useState(false);
 
   // URLクエリで「はじめての方」タブを指定できるようにする
@@ -48,7 +49,6 @@ function LoginForm() {
   const handleFirstTimeSetup = async (e: React.FormEvent) => {
     e.preventDefault();
     setFirstTimeError(null);
-    setFirstTimeSuccess(false);
 
     if (!firstTimeEmail) {
       setFirstTimeError("メールアドレスを入力してください");
@@ -68,13 +68,28 @@ function LoginForm() {
 
       const result = await resetPassword(firstTimeEmail);
       if (result.error) {
-        setFirstTimeError("メールの送信に失敗しました。メールアドレスを確認してください。");
+        setFirstTimeError("コードの送信に失敗しました。メールアドレスを確認してください。");
       } else {
-        setFirstTimeSuccess(true);
+        setFirstTimeStep("code");
         toast({
-          title: "メール送信完了",
-          description: "パスワード設定用のメールを送信しました。",
+          title: "コードを送信しました",
+          description: "メールに届いた6桁のコードを入力してください。",
         });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleFirstTimeCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!firstTimeCode) return;
+    setFirstTimeError(null);
+    setIsSubmitting(true);
+    try {
+      const result = await verifyEmailOtp(firstTimeEmail, firstTimeCode);
+      if (result?.error) {
+        setFirstTimeError(result.error);
       }
     } finally {
       setIsSubmitting(false);
@@ -240,59 +255,97 @@ function LoginForm() {
       {/* はじめての方タブ: BONO本サイトでメンバーシップ登録済みの方 */}
       {activeTab === "first-time" && (
         <Card className="mt-4 rounded-3xl">
-          <form onSubmit={handleFirstTimeSetup}>
-            <CardContent className="pt-6 space-y-4">
-              <p className="text-sm text-muted-foreground font-noto-sans-jp">
-                BONO本サイトでメンバーシップ登録済みの方は、パスワードを設定してログインしましょう
-              </p>
-              {firstTimeSuccess ? (
-                <div className="space-y-4">
-                  <Alert className="border-green-500 bg-green-50">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    <AlertTitle className="text-green-800 font-noto-sans-jp">メールを送信しました</AlertTitle>
+          {firstTimeStep === "email" ? (
+            <form onSubmit={handleFirstTimeSetup}>
+              <CardContent className="pt-6 space-y-4">
+                <p className="text-sm text-muted-foreground font-noto-sans-jp">
+                  BONO本サイトでメンバーシップ登録済みの方は、パスワードを設定してログインしましょう
+                </p>
+                {firstTimeError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="font-noto-sans-jp">{firstTimeError}</AlertDescription>
                   </Alert>
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground font-noto-sans-jp">
-                      メールに記載されたリンクからパスワードを設定してください。
-                      設定完了後、「設定済み」タブからログインできます。
-                    </p>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="first-time-email" className="font-noto-sans-jp">メールアドレス</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="first-time-email"
+                      type="email"
+                      placeholder="BONO本サイトで登録したメールアドレス"
+                      className="pl-10"
+                      value={firstTimeEmail}
+                      onChange={(e) => setFirstTimeEmail(e.target.value)}
+                      required
+                    />
                   </div>
                 </div>
-              ) : (
-                <>
-                  {firstTimeError && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription className="font-noto-sans-jp">{firstTimeError}</AlertDescription>
-                    </Alert>
-                  )}
-                  <div className="space-y-2">
-                    <Label htmlFor="first-time-email" className="font-noto-sans-jp">メールアドレス</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="first-time-email"
-                        type="email"
-                        placeholder="BONO本サイトで登録したメールアドレス"
-                        className="pl-10"
-                        value={firstTimeEmail}
-                        onChange={(e) => setFirstTimeEmail(e.target.value)}
-                        required
-                      />
-                    </div>
-                  </div>
-                </>
-              )}
-            </CardContent>
-            {!firstTimeSuccess && (
+              </CardContent>
               <CardFooter>
                 <Button type="submit" size="large" className="w-full font-noto-sans-jp" disabled={isSubmitting}>
                   <Send className="mr-2 h-4 w-4" />
-                  {isSubmitting ? "送信中..." : "パスワード設定メールを送信"}
+                  {isSubmitting ? "送信中..." : "確認コードを送信"}
                 </Button>
               </CardFooter>
-            )}
-          </form>
+            </form>
+          ) : (
+            <form onSubmit={handleFirstTimeCodeSubmit}>
+              <CardContent className="pt-6 space-y-4">
+                <p className="text-sm text-muted-foreground font-noto-sans-jp">
+                  {firstTimeEmail} に6桁のコードを送信しました。メールに記載のコードを入力してください。
+                </p>
+                {firstTimeError && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription className="font-noto-sans-jp">{firstTimeError}</AlertDescription>
+                  </Alert>
+                )}
+                <div className="space-y-2">
+                  <Label htmlFor="first-time-code" className="font-noto-sans-jp">確認コード（6桁）</Label>
+                  <div className="relative">
+                    <KeyRound className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="first-time-code"
+                      type="text"
+                      inputMode="numeric"
+                      pattern="[0-9]*"
+                      maxLength={6}
+                      placeholder="123456"
+                      className="pl-10 text-center text-2xl tracking-widest"
+                      value={firstTimeCode}
+                      onChange={(e) => setFirstTimeCode(e.target.value.replace(/\D/g, ""))}
+                      required
+                      autoFocus
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground font-noto-sans-jp">
+                  コードが届かない場合は迷惑メールフォルダをご確認ください。
+                </p>
+              </CardContent>
+              <CardFooter className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="large"
+                  className="font-noto-sans-jp"
+                  onClick={() => { setFirstTimeStep("email"); setFirstTimeCode(""); setFirstTimeError(null); }}
+                >
+                  戻る
+                </Button>
+                <Button
+                  type="submit"
+                  size="large"
+                  className="flex-1 font-noto-sans-jp"
+                  disabled={isSubmitting || firstTimeCode.length !== 6}
+                >
+                  {isSubmitting ? "確認中..." : "コードを確認"}
+                </Button>
+              </CardFooter>
+            </form>
+          )}
         </Card>
       )}
 

@@ -118,8 +118,11 @@ export async function resetPassword(email: string): Promise<AuthResult> {
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/auth/update-password`,
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+      },
     });
 
     if (error) {
@@ -136,6 +139,35 @@ export async function resetPassword(email: string): Promise<AuthResult> {
   }
 
   return { success: true };
+}
+
+export async function verifyEmailOtp(
+  email: string,
+  token: string
+): Promise<AuthResult> {
+  if (!email || !token) {
+    return { error: "メールアドレスと確認コードを入力してください" };
+  }
+
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email",
+    });
+
+    if (error) {
+      return {
+        error: "確認コードが正しくないか、有効期限が切れています。もう一度お試しください。",
+      };
+    }
+  } catch (err) {
+    return { error: translateConnectionError(err) };
+  }
+
+  redirect("/auth/update-password");
 }
 
 // 移行ユーザーかどうかをチェックする関数

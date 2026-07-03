@@ -72,6 +72,16 @@ const AUTH_ERROR_MAP: Record<string, string> = {
   "JWT expired":
     "セッションが期限切れです。再度ログインしてください",
 
+  // OTP / 確認コード関連
+  "Token has expired or is invalid":
+    "確認コードが正しくないか、有効期限が切れています",
+  "Token has expired or is invalid.":
+    "確認コードが正しくないか、有効期限が切れています",
+  "otp_expired":
+    "確認コードの有効期限が切れています。もう一度送信してください",
+  "Email link is invalid or has expired":
+    "確認コードが無効または期限切れです",
+
   // その他
   "Unable to validate email address: invalid format":
     "メールアドレスの形式が正しくありません",
