@@ -49,7 +49,7 @@ export default function WorkshopMarkdown({
               style={{
                 background:
                   "linear-gradient(90deg, rgba(40,118,220,0.5), rgba(255,152,221,0.5))",
-                backgroundSize: "100% 40%",
+                backgroundSize: "100% 0.3em",
                 backgroundPosition: "0 100%",
                 backgroundRepeat: "no-repeat",
               }}
