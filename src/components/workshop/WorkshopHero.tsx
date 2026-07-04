@@ -1,21 +1,10 @@
 import { WS_THEME } from "./theme";
 
-interface WorkshopHeroProps {
-  stepsCount: number;
-  docsCount: number;
-}
-
 /**
  * トップページ ブロック1
- * ラベル+日付の行 → 大見出し → 説明 → スタッツバー
+ * ラベル+日付の行 → 大見出し → 説明 → 境界線
  */
-export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProps) {
-  const stats = [
-    { value: String(stepsCount), label: "Steps", sub: "セットアップ〜検証まで" },
-    { value: String(docsCount), label: "Docs", sub: "このページで配布" },
-    { value: "7.5", label: "Sat", sub: "ワークショップ開催日" },
-  ];
-
+export default function WorkshopHero() {
   return (
     <header className="relative">
       {/* ラベル + 日付の行 */}
@@ -70,40 +59,11 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
         「気になるジャンル（例：コンビニ）の出費に、ユーザーが自分で気づける体験を、どうデザインすると良いのか？」——今日はこれを考えます。
       </p>
 
-      {/* スタッツバー */}
-      <div
-        className="mt-10 grid grid-cols-3 border"
+      {/* 幅いっぱいの境界線 */}
+      <hr
+        className="mt-10 border-t"
         style={{ borderColor: WS_THEME.hairline }}
-      >
-        {stats.map((stat, i) => (
-          <div
-            key={stat.label}
-            className="px-5 py-5 md:px-7 md:py-6"
-            style={
-              i > 0 ? { borderLeft: `1px solid ${WS_THEME.hairline}` } : undefined
-            }
-          >
-            <p
-              className="font-line-seed-jp font-bold text-[26px] md:text-[32px] leading-none"
-              style={{ color: WS_THEME.ink }}
-            >
-              {stat.value}
-            </p>
-            <p
-              className="mt-2 text-[13px] md:text-[14px] font-semibold font-line-seed-jp"
-              style={{ color: WS_THEME.body }}
-            >
-              {stat.label}
-            </p>
-            <p
-              className="mt-0.5 text-[11px] md:text-[12px] font-line-seed-jp"
-              style={{ color: WS_THEME.muted }}
-            >
-              {stat.sub}
-            </p>
-          </div>
-        ))}
-      </div>
+      />
     </header>
   );
 }

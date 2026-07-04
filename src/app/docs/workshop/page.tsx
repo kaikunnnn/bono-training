@@ -16,12 +16,11 @@ export const metadata: Metadata = {
 
 export default function WorkshopTopPage() {
   const steps = getStepsWithDocs();
-  const docsCount = steps.reduce((sum, s) => sum + s.docs.length, 0);
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: WS_THEME.bg }}>
       <div className="max-w-[1080px] mx-auto px-5 md:px-8 pt-6 md:pt-10 pb-24">
-        <WorkshopHero stepsCount={steps.length} docsCount={docsCount} />
+        <WorkshopHero />
 
         <div className="mt-16 md:mt-20">
           {steps.map((step, i) => (
