@@ -47,7 +47,8 @@ export default function WorkshopMarkdown({
             <strong
               className="font-bold"
               style={{
-                background: "linear-gradient(90deg, #2876DC, #FF98DD)",
+                background:
+                  "linear-gradient(90deg, rgba(40,118,220,0.5), rgba(255,152,221,0.5))",
                 backgroundSize: "100% 40%",
                 backgroundPosition: "0 100%",
                 backgroundRepeat: "no-repeat",
