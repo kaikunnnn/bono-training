@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import DocCard from "@/components/workshop/DocCard";
 import DocPageHeader from "@/components/workshop/DocPageHeader";
+import DocToc from "@/components/workshop/DocToc";
+import { extractHeadings } from "@/lib/workshop/toc";
 import WorkshopHeader from "@/components/workshop/WorkshopHeader";
 import WorkshopMarkdown from "@/components/workshop/WorkshopMarkdown";
 import { getAllSlugs, getDocBySlug, getNextDoc } from "@/lib/workshop/content";
@@ -45,7 +47,11 @@ export default async function WorkshopDocPage({ params }: PageProps) {
 
         <hr className="my-10 border-border-light" />
 
-        <WorkshopMarkdown content={doc.content} />
+        <DocToc headings={extractHeadings(doc.content)} />
+
+        <div className="mt-12">
+          <WorkshopMarkdown content={doc.content} />
+        </div>
 
         {nextDoc && (
           <section className="mt-20">

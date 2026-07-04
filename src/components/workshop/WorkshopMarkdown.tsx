@@ -1,6 +1,7 @@
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
+import { extractHeadings } from "@/lib/workshop/toc";
 
 interface WorkshopMarkdownProps {
   content: string;
@@ -17,6 +18,11 @@ export default function WorkshopMarkdown({
   content,
   className,
 }: WorkshopMarkdownProps) {
+  // 目次（DocToc）と同じ抽出結果を、h2/h3の出現順に消費してIDを一致させる
+  const headings = extractHeadings(content);
+  let headingCursor = 0;
+  const nextHeadingId = () => headings[headingCursor++]?.id;
+
   return (
     <div className={cn("w-full max-w-[648px] mx-auto font-line-seed-jp", className)}>
       <ReactMarkdown
@@ -24,12 +30,18 @@ export default function WorkshopMarkdown({
         components={{
           p: ({ children }) => <p className={pStyle}>{children}</p>,
           h2: ({ children }) => (
-            <h2 className="text-[24px] md:text-[26px] font-semibold leading-[2rem] tracking-[-0.02em] text-text-primary font-line-seed-jp mt-24 mb-12 first:mt-0 scroll-mt-20">
+            <h2
+              id={nextHeadingId()}
+              className="text-[24px] md:text-[26px] font-semibold leading-[2rem] tracking-[-0.02em] text-text-primary font-line-seed-jp mt-24 mb-12 first:mt-0 scroll-mt-20"
+            >
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-[20px] md:text-[22px] font-semibold leading-[1.75rem] tracking-[-0.02em] text-text-primary font-line-seed-jp mt-16 mb-8 scroll-mt-20">
+            <h3
+              id={nextHeadingId()}
+              className="text-[20px] md:text-[22px] font-semibold leading-[1.75rem] tracking-[-0.02em] text-text-primary font-line-seed-jp mt-16 mb-8 scroll-mt-20"
+            >
               {children}
             </h3>
           ),
