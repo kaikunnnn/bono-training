@@ -2,7 +2,7 @@
 title: カイクンが実際にやってみたやつ
 description: AIインタビューでユーザーゴールを定義した実例
 step: step1
-order: 31
+order: 32
 ---
 
 ## 📋 実際に使ったプロンプト
@@ -15,7 +15,7 @@ order: 31
 >
 > 質問はこういう感じでお願いします
 >
-> 👉[質問のプロンプト](/docs/workshop/think-user-state)
+> 👉[質問のプロンプト](/docs/workshop/goal-interview-prompt)
 
 ## ゴールの質問に回答する
 
