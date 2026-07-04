@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import DocCard from "@/components/workshop/DocCard";
 import DocPageHeader from "@/components/workshop/DocPageHeader";
+import WorkshopHeader from "@/components/workshop/WorkshopHeader";
 import WorkshopMarkdown from "@/components/workshop/WorkshopMarkdown";
-import { getAllSlugs, getDocBySlug } from "@/lib/workshop/content";
+import { getAllSlugs, getDocBySlug, getNextDoc } from "@/lib/workshop/content";
 import { WORKSHOP_META } from "@/lib/workshop/config";
 
 export const dynamic = "force-static";
@@ -33,9 +35,11 @@ export default async function WorkshopDocPage({ params }: PageProps) {
   const { slug } = await params;
   const doc = getDocBySlug(slug);
   if (!doc) notFound();
+  const nextDoc = getNextDoc(slug);
 
   return (
     <main className="min-h-screen bg-surface">
+      <WorkshopHeader />
       <div className="max-w-[648px] mx-auto px-4 md:px-6 pt-8 md:pt-12 pb-24">
         <DocPageHeader doc={doc} />
 
@@ -43,7 +47,16 @@ export default async function WorkshopDocPage({ params }: PageProps) {
 
         <WorkshopMarkdown content={doc.content} />
 
-        <footer className="mt-20 pt-8 border-t border-border-light">
+        {nextDoc && (
+          <section className="mt-20">
+            <p className="text-[12px] font-bold tracking-[0.18em] uppercase text-text-muted mb-3 font-line-seed-jp">
+              Next
+            </p>
+            <DocCard doc={nextDoc} />
+          </section>
+        )}
+
+        <footer className="mt-16 pt-8 border-t border-border-light">
           <Link
             href="/docs/workshop"
             className="inline-flex items-center gap-1.5 text-[14px] font-medium text-text-muted hover:text-text-primary transition-colors"

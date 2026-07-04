@@ -73,3 +73,11 @@ export function getDocBySlug(slug: string): WorkshopDoc | null {
 export function getAllSlugs(): string[] {
   return listDocFiles().map((f) => f.replace(/\.md$/, ""));
 }
+
+/** 表示順で次にあたるドキュメント（最後のドキュメントなら null） */
+export function getNextDoc(slug: string): WorkshopDocMeta | null {
+  const docs = getAllDocs();
+  const index = docs.findIndex((d) => d.slug === slug);
+  if (index === -1 || index === docs.length - 1) return null;
+  return docs[index + 1];
+}

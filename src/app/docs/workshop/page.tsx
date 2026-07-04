@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import React from "react";
+import WorkshopHeader from "@/components/workshop/WorkshopHeader";
 import WorkshopHero from "@/components/workshop/WorkshopHero";
 import StepSection from "@/components/workshop/StepSection";
 import { getStepsWithDocs } from "@/lib/workshop/content";
@@ -19,6 +20,7 @@ export default function WorkshopTopPage() {
 
   return (
     <main className="min-h-screen" style={{ backgroundColor: WS_THEME.bg }}>
+      <WorkshopHeader />
       <div className="max-w-[1080px] mx-auto px-5 md:px-8 pt-6 md:pt-10 pb-24">
         <WorkshopHero />
 
