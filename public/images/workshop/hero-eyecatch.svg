@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 400" preserveAspectRatio="xMidYMid slice">
+  <!-- テスト用アイキャッチのプレースホルダー。差し替え時はこのファイルを置き換えるか config.ts の eyecatch を変更 -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F4EFE3"/>
+      <stop offset="1" stop-color="#DCE5D4"/>
+    </linearGradient>
+    <linearGradient id="hillFar" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9DB894"/>
+      <stop offset="1" stop-color="#7FA379"/>
+    </linearGradient>
+    <linearGradient id="hillMid" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5E8A5C"/>
+      <stop offset="1" stop-color="#43703F"/>
+    </linearGradient>
+    <linearGradient id="hillNear" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2E5233"/>
+      <stop offset="1" stop-color="#1C3A24"/>
+    </linearGradient>
+  </defs>
+  <rect width="1080" height="400" fill="url(#sky)"/>
+  <circle cx="820" cy="110" r="52" fill="#F6D77B"/>
+  <path d="M0 220 Q 180 150 360 205 T 720 195 T 1080 210 L 1080 400 L 0 400 Z" fill="url(#hillFar)"/>
+  <path d="M0 280 Q 220 200 440 265 T 860 250 T 1080 275 L 1080 400 L 0 400 Z" fill="url(#hillMid)"/>
+  <path d="M0 345 Q 260 285 520 335 T 1080 330 L 1080 400 L 0 400 Z" fill="url(#hillNear)"/>
+  <g fill="#2E5233">
+    <ellipse cx="150" cy="238" rx="26" ry="34"/>
+    <ellipse cx="185" cy="252" rx="18" ry="24"/>
+    <ellipse cx="930" cy="228" rx="22" ry="30"/>
+  </g>
+</svg>
