@@ -40,6 +40,12 @@ order: 10
 - **困りごと:** 反応が薄い。マネーフォワード・Zaim等の競合と差別化できていない
 - **CEOの仮説:** 汎用的すぎて誰の心にも刺さってない。特化したサービスを別途立ち上げるべきかも
 
+### 現状の『カケル』を触ってみる
+
+👉 **実物はこちら**：[https://bono-challenge.vercel.app/budget-app/v1-plain](https://bono-challenge.vercel.app/budget-app/v1-plain)（ブラウザで開いて実際に操作できます）
+
+![現状の『カケル』のUI。残高と支出の一覧が並ぶ、一般的な家計簿の画面](/images/workshop/kakeru-current.png)
+
 ## 4. 救いたいユーザー
 
 ### コンビニ依存気にしてる在宅勤務会社員（30代）
