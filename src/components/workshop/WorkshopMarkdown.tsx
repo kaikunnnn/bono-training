@@ -46,7 +46,12 @@ export default function WorkshopMarkdown({
           strong: ({ children }) => (
             <strong
               className="font-bold"
-              style={{ background: "linear-gradient(transparent 60%, #FED7AA 60%)" }}
+              style={{
+                background: "linear-gradient(90deg, #2876DC, #FF98DD)",
+                backgroundSize: "100% 40%",
+                backgroundPosition: "0 100%",
+                backgroundRepeat: "no-repeat",
+              }}
             >
               {children}
             </strong>
