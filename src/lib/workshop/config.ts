@@ -13,7 +13,7 @@ export interface WorkshopStep {
 }
 
 export const WORKSHOP_META = {
-  title: "AI×UIワークショップ",
+  title: "AI×UI プロトタイピング ワークショップ",
   description:
     "AIを使ってユーザー理解するためのプロトタイピングを実践しよう。このページの資料に沿ってワークショップを進めます。",
   eyecatch: "/images/workshop/hero-eyecatch.svg",

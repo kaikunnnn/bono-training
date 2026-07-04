@@ -46,6 +46,8 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
       >
         AI×UI
         <br />
+        プロトタイピング
+        <br />
         ワークショップ
       </h1>
 
