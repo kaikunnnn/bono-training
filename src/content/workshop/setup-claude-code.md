@@ -28,6 +28,8 @@ order: 20
 こちらからチェック👇
 [https://youtu.be/aWaAe2VQrTw](https://youtu.be/aWaAe2VQrTw)
 
+[![Claude Code入門動画のサムネイル](/images/workshop/claude-code-intro-video.webp)](https://youtu.be/aWaAe2VQrTw)
+
 ## ① インストール（4ステップ）
 
 インストールは4ステップで進めます。
