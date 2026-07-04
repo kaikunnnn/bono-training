@@ -1,6 +1,3 @@
-import Image from "next/image";
-import AccentBadge from "./AccentBadge";
-import { WORKSHOP_META } from "@/lib/workshop/config";
 import { WS_THEME } from "./theme";
 
 interface WorkshopHeroProps {
@@ -9,8 +6,8 @@ interface WorkshopHeroProps {
 }
 
 /**
- * トップページ ブロック1（ダークエディトリアル版）
- * アイキャッチ → ラベル+日付の行 → セリフ体の大見出し → 説明 → スタッツバー
+ * トップページ ブロック1
+ * ラベル+日付の行 → 大見出し → 説明 → スタッツバー
  */
 export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProps) {
   const stats = [
@@ -21,23 +18,8 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
 
   return (
     <header className="relative">
-      {/* アイキャッチ（テスト用プレースホルダー画像） */}
-      <div className="relative w-full aspect-[1080/400] rounded-[20px] overflow-hidden">
-        <Image
-          src={WORKSHOP_META.eyecatch}
-          alt=""
-          fill
-          priority
-          className="object-cover"
-        />
-        {/* 遊びのアクセントバッジ */}
-        <div className="absolute right-6 bottom-5 md:right-10 md:bottom-7 w-[88px] h-[88px] md:w-[104px] md:h-[104px] rotate-6">
-          <AccentBadge className="w-full h-full" />
-        </div>
-      </div>
-
       {/* ラベル + 日付の行 */}
-      <div className="mt-12 md:mt-16 flex items-baseline justify-between gap-4">
+      <div className="mt-6 md:mt-8 flex items-baseline justify-between gap-4">
         <p
           className="flex items-center gap-2.5 text-[11px] md:text-[12px] font-semibold tracking-[0.28em] uppercase font-line-seed-jp"
           style={{ color: WS_THEME.muted }}
