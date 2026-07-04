@@ -103,7 +103,8 @@ export default function WorkshopMarkdown({
             <img
               src={typeof src === "string" ? src : undefined}
               alt={alt || ""}
-              className="my-8 w-full rounded-lg"
+              // 画面に余力があれば本文幅の1.25倍（648px→810px）に広げて中央揃え
+              className="my-8 block w-full rounded-lg lg:w-[125%] lg:max-w-none lg:relative lg:left-1/2 lg:-translate-x-1/2"
             />
           ),
           table: ({ children }) => (
