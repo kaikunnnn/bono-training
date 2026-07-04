@@ -60,6 +60,14 @@ export default function WorkshopHero({ stepsCount, docsCount }: WorkshopHeroProp
         このページの資料に沿ってワークショップを進めます。当日のプレゼンも、手を動かすときの手順もすべてここにあります。
       </p>
 
+      {/* 今日考えることの一言 */}
+      <p
+        className="mt-6 max-w-[680px] text-[15px] md:text-[17px] font-bold leading-[190%] tracking-[0.02em] font-line-seed-jp border-l-4 pl-4"
+        style={{ color: WS_THEME.ink, borderColor: WS_THEME.dotted }}
+      >
+        「気になるジャンル（例：コンビニ）の出費に、ユーザーが自分で気づける体験を、どうデザインすると良いのか？」——今日はこれを考えます。
+      </p>
+
       {/* スタッツバー */}
       <div
         className="mt-10 grid grid-cols-3 border"
