@@ -50,6 +50,8 @@ export const WORKSHOP_STEPS: WorkshopStep[] = [
     id: "step2",
     label: "STEP 2",
     title: "アイデアの仮説をつくる",
+    description:
+      "※基本スケジュールではこのステップを飛ばして、プロトタイプ生成に時間をかけます（玄人向け）",
   },
   {
     id: "step3",
