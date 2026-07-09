@@ -35,14 +35,16 @@ const AUTH_PAGE_PATHS = ["/login", "/signup"];
 
 /**
  * Supabase auth cookie が存在するかチェック
- * @supabase/ssr が設定する `sb-{project-ref}-auth-token` を探す
+ * @supabase/ssr が設定する `sb-{project-ref}-auth-token` を探す。
+ * セッションが大きい場合は `...-auth-token.0` `...-auth-token.1` に分割保存される
+ * ため、endsWith ではなく includes で判定する
  */
 function hasSupabaseAuthCookie(request: NextRequest): boolean {
   return request.cookies
     .getAll()
     .some(
       (cookie) =>
-        cookie.name.startsWith("sb-") && cookie.name.endsWith("-auth-token")
+        cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token")
     );
 }
 
@@ -62,8 +64,17 @@ export function middleware(request: NextRequest) {
   }
 
   // 2. ログイン済みで認証ページ → /mypage (or redirectTo) へ
+  //
+  // ただし `reauth=1` が付いている場合はリダイレクトしない。
+  // ここは cookie の「存在」しか見ていないため、無効な cookie（ローカルDBリセットで
+  // ユーザー消滅・refresh token 失効等）でも「ログイン済み」と判定してしまう。
+  // その状態で保護ページ側（getCurrentUser = 本物の検証）が /login に差し戻すと、
+  // /login → /mypage → /login … の無限リダイレクトループになる。
+  // 保護ページからの差し戻しには reauth=1 を付け、ログイン画面を必ず表示させて
+  // ループを構造的に断ち切る（ログイン画面側で stale cookie を signOut で掃除する）。
   const isAuthPage = AUTH_PAGE_PATHS.includes(pathname);
-  if (hasAuth && isAuthPage) {
+  const isReauth = request.nextUrl.searchParams.get("reauth") === "1";
+  if (hasAuth && isAuthPage && !isReauth) {
     const redirectTo =
       request.nextUrl.searchParams.get("redirectTo") || "/mypage";
     const url = request.nextUrl.clone();

@@ -110,6 +110,13 @@ export function Sidebar({ className, user }: SidebarProps) {
 
       <SidebarMenuGroup label="その他" itemGap>
         <SidebarMenuItem
+          href="/questions"
+          icon={<MenuIcons.question size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/questions")}
+        >
+          みんなの掲示板
+        </SidebarMenuItem>
+        <SidebarMenuItem
           href="/achievements"
           icon={<MenuIcons.achievements size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/achievements")}

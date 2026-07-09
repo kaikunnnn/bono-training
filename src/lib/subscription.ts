@@ -37,9 +37,14 @@ export type {
 export async function getSubscriptionStatus(): Promise<SubscriptionState> {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const result = await supabase.auth.getUser();
+    user = result.data.user;
+  } catch {
+    // セッションがstale等で auth が落ちた場合は未ログイン扱い
+    user = null;
+  }
 
   if (!user) {
     return {
@@ -117,8 +122,12 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
  */
 export async function getCurrentUser() {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    return user;
+  } catch {
+    return null;
+  }
 }

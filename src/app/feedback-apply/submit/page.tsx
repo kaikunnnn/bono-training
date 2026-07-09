@@ -37,7 +37,7 @@ export default async function FeedbackSubmitPage() {
 
   // 未ログインの場合はログインページへ
   if (!user) {
-    redirect("/login?redirectTo=/feedback-apply/submit");
+    redirect("/login?reauth=1&redirectTo=/feedback-apply/submit");
   }
 
   // Standard / Feedback プランのみアクセス可能

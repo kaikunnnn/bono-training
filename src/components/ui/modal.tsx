@@ -73,7 +73,11 @@ const ModalContainer = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-32px)] max-w-md translate-x-[-50%] translate-y-[-50%] gap-6 border-0 bg-background px-7 py-6 shadow-2xl duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-3xl',
+        // エンター/イグジットは「フェード + 下から上にふわっと」で統一。
+        // 旧 shadcn の slide-in-from-left-1/2 / top-[48%]（中央寄せ補正）は
+        // Tailwind v4 では translate プロパティと transform が二重適用になり
+        // 「左上から右下に流れて見える」バグの原因になるため使わないこと。
+        'fixed left-[50%] top-[50%] z-50 grid w-[calc(100%-32px)] max-w-md translate-x-[-50%] translate-y-[-50%] gap-6 border-0 bg-background px-7 py-6 shadow-2xl rounded-3xl duration-300 ease-out data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:slide-in-from-bottom-4 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:slide-out-to-bottom-2 data-[state=closed]:duration-200',
         className
       )}
       {...props}

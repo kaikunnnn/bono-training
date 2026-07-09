@@ -11,6 +11,7 @@ import { TabGroup } from "@/components/ui/tab-group";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Mail, Lock, LogIn, AlertCircle, AlertTriangle, Send, CheckCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { createClient } from "@/lib/supabase/client";
 import { signIn, resetPassword, checkMigratedUser } from "../actions";
 
 type TabId = "login" | "first-time";
@@ -20,6 +21,8 @@ function LoginForm() {
   const router = useRouter();
   const { toast } = useToast();
   const redirectTo = searchParams.get("redirectTo") || "/mypage";
+  // 保護ページで認証に失敗して差し戻された（=セッション切れ / 無効cookie）
+  const isReauth = searchParams.get("reauth") === "1";
 
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     const tab = searchParams.get("tab");
@@ -41,6 +44,18 @@ function LoginForm() {
       setActiveTab("first-time");
     }
   }, [searchParams]);
+
+  // reauth=1 で来た場合、ブラウザに残った無効な auth cookie を掃除する。
+  // これを消さないと middleware が cookie の存在だけで「ログイン済み」と誤判定し、
+  // /login → /mypage → /login の無限リダイレクトループが再発する
+  useEffect(() => {
+    if (!isReauth) return;
+    createClient()
+      .auth.signOut()
+      .catch(() => {
+        // 掃除に失敗しても reauth フラグでループ自体は防がれているので握りつぶす
+      });
+  }, [isReauth]);
 
   // はじめての方向け: パスワード設定メール送信
   const handleFirstTimeSetup = async (e: React.FormEvent) => {
@@ -163,6 +178,16 @@ function LoginForm() {
                     >
                       パスワードを再設定する
                     </Button>
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {/* セッション切れで差し戻された場合の案内 */}
+              {isReauth && !loginError && !isMigratedUser && (
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    セッションの有効期限が切れました。再度ログインしてください。
                   </AlertDescription>
                 </Alert>
               )}

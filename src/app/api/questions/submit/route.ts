@@ -42,11 +42,34 @@ const VALIDATION_RULES = {
   questionContent: { minLength: 20, maxLength: 5000 },
 };
 
-// slugを生成
-function generateSlug(title: string): string {
+// slugを生成（タイムスタンプ + ランダム文字列。タイトルには依存しない）
+function generateSlug(): string {
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 8);
   return `q-${timestamp}-${randomStr}`;
+}
+
+// http(s) のみ許可（javascript: 等のスキーム注入を防ぐ。<a href> にそのまま描画されるため）
+function isValidHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
+// Figma URL はホスト名で判定（includes だと https://evil.com/?figma.com が通る）
+function isFigmaUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === 'https:' &&
+      (url.hostname === 'figma.com' || url.hostname.endsWith('.figma.com'))
+    );
+  } catch {
+    return false;
+  }
 }
 
 // プレーンテキストをPortable Textに変換
@@ -95,6 +118,7 @@ async function sendSlackNotification(data: {
   category: string;
   author: string;
   questionId: string;
+  slug: string;
 }) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
@@ -102,6 +126,8 @@ async function sendSlackNotification(data: {
     return;
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://app.bo-no.design';
+  const questionPageUrl = `${siteUrl}/questions/${data.slug}`;
   const sanityStudioUrl = `https://bono-training.sanity.studio/structure/question;${data.questionId}`;
 
   const message = {
@@ -138,7 +164,7 @@ async function sendSlackNotification(data: {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*回答手順:*\n1. 下のボタンでSanity Studioを開く\n2. 「コンテンツ」タブで回答を入力\n3. 「管理情報」タブでステータスを「回答済み」に\n4. 公開をONにして保存',
+          text: '*対応方法:*\n投稿は掲示板に公開済みです。\n1. 掲示板の詳細ページを開き、コメントで回答する\n2. 不適切な投稿の場合は Sanity Studio から削除する',
         },
       },
       {
@@ -146,9 +172,14 @@ async function sendSlackNotification(data: {
         elements: [
           {
             type: 'button',
-            text: { type: 'plain_text', text: '🔗 Sanity Studioで回答する', emoji: true },
-            url: sanityStudioUrl,
+            text: { type: 'plain_text', text: '💬 掲示板でコメント回答する', emoji: true },
+            url: questionPageUrl,
             style: 'primary',
+          },
+          {
+            type: 'button',
+            text: { type: 'plain_text', text: '🔗 Sanity Studioで管理', emoji: true },
+            url: sanityStudioUrl,
           },
         ],
       },
@@ -166,31 +197,15 @@ async function sendSlackNotification(data: {
   }
 }
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
-}
-
+// CORSヘッダーは付けない（同一オリジンのフォームからのみ呼ばれる想定。
+// 以前の Access-Control-Allow-Origin: * は不要な外部オリジン許可だったため撤去）
 export async function POST(request: NextRequest) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
-
   // 認証チェック
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return NextResponse.json(
       { error: 'Unauthorized: No token provided' },
-      { status: 401, headers }
-    );
+      { status: 401 });
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -199,8 +214,7 @@ export async function POST(request: NextRequest) {
     console.error('Supabase configuration missing');
     return NextResponse.json(
       { error: 'Server configuration error' },
-      { status: 500, headers }
-    );
+      { status: 500 });
   }
 
   const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey);
@@ -211,8 +225,7 @@ export async function POST(request: NextRequest) {
   if (authError || !user) {
     return NextResponse.json(
       { error: 'Unauthorized: Invalid token' },
-      { status: 401, headers }
-    );
+      { status: 401 });
   }
 
   // サブスクリプションチェック（環境に応じたフィルタ）
@@ -228,55 +241,71 @@ export async function POST(request: NextRequest) {
   if (subError || !subscription) {
     return NextResponse.json(
       { error: 'Premium subscription required' },
-      { status: 403, headers }
-    );
+      { status: 403 });
   }
 
   // リクエストボディの取得
-  const payload: SubmitQuestionPayload = await request.json();
+  let payload: SubmitQuestionPayload;
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: 'リクエストの形式が不正です' },
+      { status: 400 });
+  }
 
   // バリデーション
   if (!payload.title || payload.title.length < VALIDATION_RULES.title.minLength) {
     return NextResponse.json(
       { error: `タイトルは${VALIDATION_RULES.title.minLength}文字以上で入力してください` },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   if (payload.title.length > VALIDATION_RULES.title.maxLength) {
     return NextResponse.json(
       { error: `タイトルは${VALIDATION_RULES.title.maxLength}文字以内で入力してください` },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   if (!payload.questionContent || payload.questionContent.length < VALIDATION_RULES.questionContent.minLength) {
     return NextResponse.json(
       { error: `質問内容は${VALIDATION_RULES.questionContent.minLength}文字以上で入力してください` },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   if (payload.questionContent.length > VALIDATION_RULES.questionContent.maxLength) {
     return NextResponse.json(
       { error: `質問内容は${VALIDATION_RULES.questionContent.maxLength}文字以内で入力してください` },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   if (!payload.categoryId) {
     return NextResponse.json(
       { error: 'カテゴリを選択してください' },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   // FigmaURLのバリデーション
-  if (payload.figmaUrl && !payload.figmaUrl.includes('figma.com')) {
+  if (payload.figmaUrl && !isFigmaUrl(payload.figmaUrl)) {
     return NextResponse.json(
-      { error: 'FigmaのURLを入力してください' },
-      { status: 400, headers }
-    );
+      { error: 'FigmaのURL（https://www.figma.com/...）を入力してください' },
+      { status: 400 });
+  }
+
+  // 参考URLのバリデーション（http/https のみ許可）
+  if (payload.referenceUrls) {
+    if (!Array.isArray(payload.referenceUrls) || payload.referenceUrls.length > 10) {
+      return NextResponse.json(
+        { error: '参考URLの形式が不正です' },
+        { status: 400 });
+    }
+    for (const ref of payload.referenceUrls) {
+      if (!ref?.url || typeof ref.url !== 'string' || !isValidHttpUrl(ref.url)) {
+        return NextResponse.json(
+          { error: '参考URLは http:// または https:// で始まるURLを入力してください' },
+          { status: 400 });
+      }
+    }
   }
 
   // ユーザー情報の準備
@@ -304,7 +333,7 @@ export async function POST(request: NextRequest) {
   const questionDoc = {
     _type: 'question',
     title: payload.title,
-    slug: { _type: 'slug', current: generateSlug(payload.title) },
+    slug: { _type: 'slug', current: generateSlug() },
     category: { _type: 'reference', _ref: payload.categoryId },
     questionContent: textToPortableText(payload.questionContent),
     author: {
@@ -318,9 +347,7 @@ export async function POST(request: NextRequest) {
       title: ref.title || null,
       url: ref.url,
     })) || null,
-    status: 'pending',
-    isPublic: false,
-    submittedAt: new Date().toISOString(),
+    publishedAt: new Date().toISOString(),
   };
 
   try {
@@ -332,6 +359,7 @@ export async function POST(request: NextRequest) {
       category: categoryName,
       author: userInfo.displayName,
       questionId: result._id,
+      slug: questionDoc.slug.current,
     });
 
     return NextResponse.json(
@@ -340,13 +368,11 @@ export async function POST(request: NextRequest) {
         questionId: result._id,
         slug: questionDoc.slug.current,
       },
-      { status: 201, headers }
-    );
+      { status: 201 });
   } catch (error) {
     console.error('Failed to create question:', error);
     return NextResponse.json(
       { error: 'Failed to create question' },
-      { status: 500, headers }
-    );
+      { status: 500 });
   }
 }

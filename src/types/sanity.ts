@@ -229,16 +229,12 @@ export interface Question {
   slug: SanitySlug;
   category?: QuestionCategory;
   questionContent?: PortableTextBlock[];
-  answerContent?: PortableTextBlock[];
   questionExcerpt?: string; // 一覧用の抜粋
   publishedAt?: string;
   // ユーザー投稿関連
   author?: QuestionAuthor;
   figmaUrl?: string;
   referenceUrls?: QuestionReferenceUrl[];
-  status?: "pending" | "answered" | "hidden";
-  isPublic?: boolean;
-  submittedAt?: string;
 }
 
 // FeedbackCategory型

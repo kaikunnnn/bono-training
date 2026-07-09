@@ -30,7 +30,7 @@ export default async function MyPage({
   console.time("[mypage] shell ready (until first byte)");
   const user = await getCurrentUser();
   if (!user) {
-    redirect("/login?redirectTo=/mypage");
+    redirect("/login?reauth=1&redirectTo=/mypage");
   }
 
   const params = await searchParams;

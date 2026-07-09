@@ -24,6 +24,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/question-community",
+    issue: "掲示板 #137",
+    title: "みんなの掲示板：改善 Before/After ハブ",
+    summary:
+      "/questions の改善を実装前確認 + リリース後ログとして集約。ログイン訴求モーダルの整列案・アニメーション刷新など。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/design-breakdown/achievements",
     issue: "DESIGN",
     title: "/achievements 分解ダッシュボード",
