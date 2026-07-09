@@ -28,6 +28,12 @@ import { TickCircle } from "iconsax-react";
 - グローバル CSS は `globals.css` と `blog.css` のみ。新規追加しない
 - フォント: `font-noto-sans-jp`（本文）, `font-rounded-mplus`（見出し）
 
+## ステート原則（Empty / エラー時）
+
+- **空状態は「情報がありません」で終わらせない。次のアクションを促す**（例: 「まだ質問がありません」→「最初の質問を投稿してみよう」+ セカンダリーボタンで導線）
+- アクションボタンはプライマリーではなくセカンダリー系を基本とする
+- 参考実装: `src/app/questions/page.tsx` の Empty カード（#137-B）
+
 ## レスポンシブ
 
 - モバイルファースト（Tailwind のデフォルト）

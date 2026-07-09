@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * 軽量化された middleware
+ * 軽量化された proxy（Next.js 16 で middleware.ts から改名。役割は同じ）
  *
  * BON-325 で改修。 旧実装は全ページに対して `supabase.auth.getUser()` を呼んでおり
  * Supabase API 往復で TTFB に ~200-300ms 上乗せしていた。
@@ -48,7 +48,7 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
     );
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
   const hasAuth = hasSupabaseAuthCookie(request);
 

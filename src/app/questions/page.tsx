@@ -145,12 +145,22 @@ export default async function Page() {
           );
         })}
 
+        {/* Empty状態はBONOのステート原則に従い「情報がない」ではなくアクションを促す（#137-B） */}
         {items.length === 0 && (
           <Card className="rounded-2xl border border-border/60 bg-white">
-            <CardContent className="py-12 text-center text-sm text-muted-foreground">
-              {hasFullAccess
-                ? "まだ質問がありません。最初の質問を投稿してみましょう。"
-                : "まだ質問がありません。"}
+            <CardContent className="flex flex-col items-center gap-4 py-12 text-center">
+              <div>
+                <p className="text-base font-medium">最初の質問を投稿してみよう</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  デザインの悩みや聞いてみたいことを、メンバーと共有できます。
+                </p>
+              </div>
+              <PostQuestionButton
+                hasMemberAccess={hasFullAccess}
+                isLoggedIn={isLoggedIn}
+                variant="secondary"
+                label="最初の質問を投稿する"
+              />
             </CardContent>
           </Card>
         )}

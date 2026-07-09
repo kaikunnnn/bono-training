@@ -28,6 +28,24 @@ interface ImprovementEntry {
   href?: string;
 }
 
+interface VersionArchive {
+  label: string;
+  tag: string;
+  url: string;
+  note: string;
+}
+
+// 新しいバージョンを凍結したらここに追記する
+// 手順: git tag questions-vYYYY-MM-DD → git branch archive/questions-vYYYY-MM-DD → 両方 push
+const VERSION_ARCHIVES: VersionArchive[] = [
+  {
+    label: "v2026-07-09 の掲示板を触る",
+    tag: "questions-v2026-07-09",
+    url: "https://bono-training-git-archive-questions-58ece5-kaikunnnns-projects.vercel.app/questions",
+    note: "初回実装 + ハードニング + モーダルアニメ刷新 + 投稿ボタン応答の時点",
+  },
+];
+
 const entries: ImprovementEntry[] = [
   {
     tag: "#137-A",
@@ -57,8 +75,9 @@ const entries: ImprovementEntry[] = [
     tag: "#137-B",
     title: "一覧 Empty 状態をアクション促しに",
     summary:
-      "「まだ質問がありません」→「最初の質問を投稿してみよう」+ セカンダリーボタン。BONOのステート原則（空状態はアクションを促す）の適用第1号。",
-    status: "planned",
+      "「まだ質問がありません」→「最初の質問を投稿してみよう」+ セカンダリーボタン。BONOのステート原則（空状態はアクションを促す）の適用第1号。原則は rules/03 に追記済み。",
+    status: "shipped",
+    href: "/dev/question-empty-state",
   },
   {
     tag: "#137-E",
@@ -114,6 +133,37 @@ export default function QuestionCommunityDevHub() {
             </Link>
           </p>
         </header>
+
+        {/* 触れるバージョンアーカイブ（git タグ + Vercel プレビューで当時の実物を保存） */}
+        <section className="mb-10 rounded-2xl border border-blue-200 bg-blue-50/40 p-5">
+          <h2 className="text-sm font-bold text-text-primary font-rounded-mplus">
+            🕰️ 触れるバージョンアーカイブ
+          </h2>
+          <p className="mt-1 text-xs text-text-primary/60 font-noto-sans-jp leading-relaxed">
+            各時点のコミットを archive ブランチで凍結し、Vercel プレビューとしてデプロイ。
+            クリックすると当時のアプリを実際に触れる（遷移・アニメ・フォーム操作OK）。
+            ※プレビューは本番DBに接続するため、本番に掲示板テーブルを push
+            するまでコメント・スタンプの操作は動かない。
+          </p>
+          <ul className="mt-3 space-y-2">
+            {VERSION_ARCHIVES.map((v) => (
+              <li key={v.tag} className="flex flex-wrap items-center gap-3 text-sm">
+                <a
+                  href={v.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-blue-700 underline hover:text-blue-900 font-noto-sans-jp"
+                >
+                  {v.label}
+                </a>
+                <code className="text-xs text-text-primary/50">git tag: {v.tag}</code>
+                <span className="text-xs text-text-primary/50 font-noto-sans-jp">
+                  {v.note}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <ul className="space-y-4">
           {entries.map((entry) => {

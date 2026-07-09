@@ -17,11 +17,17 @@ interface PostQuestionButtonProps {
   /** メンバーなら /questions/new に遷移、そうでなければモーダル */
   hasMemberAccess: boolean;
   isLoggedIn: boolean;
+  /** ボタンの見た目（Empty状態のアクション促しでは secondary を使う） */
+  variant?: React.ComponentProps<typeof Button>["variant"];
+  /** ボタンのラベル（デフォルト: 質問を投稿する） */
+  label?: string;
 }
 
 export function PostQuestionButton({
   hasMemberAccess,
   isLoggedIn,
+  variant = "default",
+  label = "質問を投稿する",
 }: PostQuestionButtonProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -45,13 +51,13 @@ export function PostQuestionButton({
 
   return (
     <>
-      <Button onClick={handleClick} disabled={isPending}>
+      <Button onClick={handleClick} disabled={isPending} variant={variant}>
         {isPending ? (
           <Loader2 className="mr-1 h-4 w-4 animate-spin" />
         ) : (
           <Plus className="mr-1 h-4 w-4" />
         )}
-        質問を投稿する
+        {label}
       </Button>
 
       <Modal open={open} onOpenChange={setOpen}>

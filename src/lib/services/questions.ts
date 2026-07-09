@@ -221,6 +221,13 @@ export async function addComment(input: {
     .single();
 
   if (error || !data) {
+    // DBトリガーのレート制限（migrations/20260709_add_comment_rate_limit.sql と対）
+    if (error?.message?.includes("comment_rate_limit_exceeded")) {
+      return {
+        ok: false,
+        error: "短時間に投稿しすぎです。少し時間をおいてからもう一度お試しください",
+      };
+    }
     console.error("[addComment]", error);
     return { ok: false, error: "コメントの投稿に失敗しました" };
   }

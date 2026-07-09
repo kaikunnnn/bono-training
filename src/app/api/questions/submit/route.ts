@@ -308,6 +308,24 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // レート制限: 1ユーザーにつき1時間に5件まで（#131-C。カウントはSanityの実データ）
+  try {
+    const RATE_LIMIT_PER_HOUR = 5;
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const recentCount = await getSanityClient().fetch<number>(
+      `count(*[_type == "question" && author.userId == $uid && publishedAt > $since])`,
+      { uid: user.id, since }
+    );
+    if (recentCount >= RATE_LIMIT_PER_HOUR) {
+      return NextResponse.json(
+        { error: '短時間に多くの質問が投稿されています。しばらく時間をおいてから再度お試しください' },
+        { status: 429 });
+    }
+  } catch (e) {
+    // カウント失敗時は投稿を止めない（レート制限は best-effort）
+    console.error('Rate limit check failed:', e);
+  }
+
   // ユーザー情報の準備
   const userInfo: UserInfo = {
     id: user.id,
