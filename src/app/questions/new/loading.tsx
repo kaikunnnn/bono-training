@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * /questions/new の初期 loading（auth / サブスク判定 / カテゴリ取得中に表示）
- * 「質問を投稿する」押下後すぐに画面が切り替わり、応答が返っている感を出す（#137-A）
+ * 「投稿する」押下後すぐに画面が切り替わり、応答が返っている感を出す（#137-A）
  */
 export default function NewQuestionLoading() {
   return (

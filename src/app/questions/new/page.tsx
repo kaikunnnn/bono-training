@@ -4,36 +4,41 @@ import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { getQuestionCategories } from "@/lib/services/questions";
-import { NewQuestionClient } from "@/components/questions/NewQuestionClient";
+import { BOARD_CATEGORIES } from "@/lib/questions/categories";
+import type { QuestionCategory } from "@/types/sanity";
+import { PostFlowClient } from "@/components/questions/post-flow/PostFlowClient";
+import { isProfileIncomplete } from "@/lib/profile-utils";
+
+/** プレビュー用モックカテゴリ（BOARD_CATEGORIES の post から生成。contact は Sanity に存在しない） */
+const PREVIEW_CATEGORIES: QuestionCategory[] = BOARD_CATEGORIES.filter(
+  (c) => c.kind === "post",
+).map((c) => ({
+  _id: `preview-${c.slug}`,
+  title: c.label,
+  slug: { _type: "slug", current: c.slug },
+}));
 
 export const metadata = {
-  title: "質問を投稿する | みんなの掲示板",
-  description: "UIデザインや学習に関する質問をメンバーと共有できます",
+  title: "投稿する | みんなの掲示板",
+  description: "UIデザインや学習に関する話題をメンバーと共有できます",
 };
 
 interface PageProps {
-  searchParams: Promise<{ preview?: string; step?: string }>;
+  searchParams: Promise<{ preview?: string }>;
 }
 
 export default async function Page({ searchParams }: PageProps) {
   const sp = await searchParams;
   const isPreviewMode = sp.preview === "true";
-  const initialStep = sp.step ? parseInt(sp.step, 10) : undefined;
 
   // プレビューモードは認証スキップ（デザイン確認用）。本番では無効（/dev と同じ遮断方針）
   if (isPreviewMode && process.env.NODE_ENV !== "production") {
     return (
-      <div className="container py-8">
-        <div className="mx-auto max-w-2xl">
-          <NewQuestionClient
-            categories={[]}
-            displayName="たかし"
-            displayAvatar="/avatars/avatar-06.svg"
-            previewMode
-            initialStep={initialStep}
-          />
-        </div>
-      </div>
+      <PostFlowClient
+        categories={PREVIEW_CATEGORIES}
+        isPreview
+        profileIncomplete={false}
+      />
     );
   }
 
@@ -51,7 +56,7 @@ export default async function Page({ searchParams }: PageProps) {
             <Lock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
             <h2 className="mb-2 text-lg font-semibold">ログインが必要です</h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              質問を投稿するにはログインしてください
+              投稿するにはログインしてください
             </p>
             <Button asChild>
               <Link href="/login?next=/questions/new">ログイン</Link>
@@ -73,7 +78,7 @@ export default async function Page({ searchParams }: PageProps) {
               メンバー限定の機能です
             </h2>
             <p className="mb-4 text-sm text-muted-foreground">
-              質問投稿はメンバーのみご利用いただけます
+              投稿はメンバーのみご利用いただけます
             </p>
             <Button asChild>
               <Link href="/subscription">プランを確認する</Link>
@@ -87,23 +92,13 @@ export default async function Page({ searchParams }: PageProps) {
   // カテゴリは Server Component で取得して props で渡す（クライアントの fetch を避ける）
   const categories = await getQuestionCategories();
 
-  const displayName =
-    (user.user_metadata?.name as string | undefined) ||
-    user.email?.split("@")[0] ||
-    "メンバー";
-  const displayAvatar =
-    (user.user_metadata?.avatar_url as string | undefined) ||
-    "/avatars/avatar-06.svg";
+  // 表示名・アイコンが未設定なら投稿完了時に設定を促す（#142）
+  const profileIncomplete = isProfileIncomplete(user.user_metadata);
 
   return (
-    <div className="container py-8">
-      <div className="mx-auto max-w-2xl">
-        <NewQuestionClient
-          categories={categories}
-          displayName={displayName}
-          displayAvatar={displayAvatar}
-        />
-      </div>
-    </div>
+    <PostFlowClient
+      categories={categories}
+      profileIncomplete={profileIncomplete}
+    />
   );
 }

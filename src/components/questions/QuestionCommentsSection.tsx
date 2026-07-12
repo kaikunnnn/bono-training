@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { MessageSquare } from "lucide-react";
 import type { QuestionComment, ReactionKey } from "@/lib/services/questions";
 import { emptyReactionCounts } from "@/lib/services/questions-utils";
 import { QuestionCommentForm } from "./QuestionCommentForm";
 import { QuestionCommentItem } from "./QuestionCommentItem";
+import { ProfileSetupPromptModal } from "./ProfileSetupPromptModal";
+import { shouldShowProfilePrompt } from "@/lib/profile-utils";
 
 interface QuestionCommentsSectionProps {
   questionId: string;
@@ -15,6 +17,8 @@ interface QuestionCommentsSectionProps {
   commentReactionCounts: Record<string, Record<ReactionKey, number>>;
   myCommentReactions: Record<string, ReactionKey[]>;
   currentUserId: string | null;
+  /** 表示名・アイコンが未設定か。コメント完了後に設定を促す（#142） */
+  profileIncomplete?: boolean;
 }
 
 /**
@@ -29,8 +33,13 @@ export function QuestionCommentsSection({
   commentReactionCounts,
   myCommentReactions,
   currentUserId,
+  profileIncomplete = false,
 }: QuestionCommentsSectionProps) {
   const [comments, setComments] = useState(initialComments);
+  // プロフィール設定促しモーダルの開閉（#142）
+  const [showProfilePrompt, setShowProfilePrompt] = useState(false);
+  // このマウント中に一度でも促したか。2回目以降のコメントで連続表示しないためのガード
+  const promptedRef = useRef(false);
 
   // router.refresh() 後に届く最新のサーバー状態で上書きする
   useEffect(() => {
@@ -41,6 +50,16 @@ export function QuestionCommentsSection({
     setComments((prev) =>
       prev.some((c) => c.id === comment.id) ? prev : [...prev, comment],
     );
+    // コメント完了後、表示名・アイコンが未設定なら設定を促す（#142）。
+    // 30日抑制中や、このマウント中に一度promptした後は出さない。
+    if (
+      profileIncomplete &&
+      !promptedRef.current &&
+      shouldShowProfilePrompt()
+    ) {
+      promptedRef.current = true;
+      setShowProfilePrompt(true);
+    }
   };
 
   const handleDeleted = (commentId: string) => {
@@ -86,6 +105,11 @@ export function QuestionCommentsSection({
           />
         </div>
       </CardContent>
+
+      <ProfileSetupPromptModal
+        open={showProfilePrompt}
+        onOpenChange={setShowProfilePrompt}
+      />
     </Card>
   );
 }

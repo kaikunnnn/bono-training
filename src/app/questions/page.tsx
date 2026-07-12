@@ -1,9 +1,8 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Heart, Lock, MessageSquare } from "lucide-react";
+import { Heart, MessageSquare } from "lucide-react";
 import { getQuestionList } from "@/lib/services/questions";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { extractPreviewText } from "@/lib/portable-text-utils";
@@ -71,59 +70,44 @@ export default async function Page() {
           const authorAvatar = question.author?.avatarUrl;
 
           return (
-            <Card
+            <Link
               key={question._id}
-              className="rounded-3xl border border-white/80 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur"
+              href={`/questions/${question.slug.current}`}
+              className="block"
             >
-              <CardHeader className="space-y-4">
-                <div className="flex flex-wrap items-center gap-2">
-                  {question.category && (
-                    <Badge variant="outline">{question.category.title}</Badge>
-                  )}
-                </div>
-                <div className="flex items-start gap-3">
-                  <Avatar className="h-11 w-11">
-                    {authorAvatar && (
-                      <AvatarImage src={authorAvatar} alt={authorName} />
+              <Card className="group rounded-3xl border border-white/80 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)] backdrop-blur transition-all duration-200 hover:shadow-[0_18px_50px_rgba(15,23,42,0.16)]">
+                <CardHeader className="space-y-4">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {question.category && (
+                      <Badge variant="outline">{question.category.title}</Badge>
                     )}
-                    <AvatarFallback>{authorName.slice(0, 1)}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 space-y-1">
-                    <CardTitle className="text-xl">
-                      {hasFullAccess ? (
-                        <Link
-                          href={`/questions/${question.slug.current}`}
-                          className="transition-colors hover:text-primary"
-                        >
-                          {question.title}
-                        </Link>
-                      ) : (
-                        <span>{question.title}</span>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <Avatar className="h-11 w-11">
+                      {authorAvatar && (
+                        <AvatarImage src={authorAvatar} alt={authorName} />
                       )}
-                    </CardTitle>
-                    <div className="text-sm text-muted-foreground">
-                      {authorName} ・ {formatDate(question.publishedAt)}
+                      <AvatarFallback>{authorName.slice(0, 1)}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 space-y-1">
+                      <CardTitle className="text-xl transition-colors group-hover:text-primary">
+                        {question.title}
+                      </CardTitle>
+                      <div className="text-sm text-muted-foreground">
+                        {authorName} ・ {formatDate(question.publishedAt)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <p className="whitespace-pre-line text-base text-muted-foreground leading-7">
-                  {bodyText}
-                </p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <p className="whitespace-pre-line text-base text-muted-foreground leading-7">
+                    {bodyText}
+                  </p>
 
-                {!hasFullAccess && (
-                  <div className="mt-4 rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 px-4 py-3 text-sm text-amber-900">
-                    <Lock className="mr-1 inline h-4 w-4" />
-                    続きを読むにはメンバー登録が必要です
-                  </div>
-                )}
-
-                {/* コメント/スタンプ数はRLSにより非メンバーには常に0で返るため、
-                    誤解を招く「0件」表示を避けてメンバーのみに見せる */}
-                {hasFullAccess && (
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  {/* コメント/スタンプ数はRLSにより非メンバーには常に0で返るため、
+                      誤解を招く「0件」表示を避けてメンバーのみに見せる */}
+                  {hasFullAccess && (
+                    <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4" />
                         コメント {commentCount}件
@@ -133,15 +117,10 @@ export default async function Page() {
                         スタンプ {reactionTotal}件
                       </span>
                     </div>
-                    <Button variant="ghost" size="sm" asChild>
-                      <Link href={`/questions/${question.slug.current}`}>
-                        詳細を見る
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                  )}
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
 

@@ -229,5 +229,8 @@ The system itself can be edited directly via Claude Code. Rules:
 **"Add a new roadmap"**
 → Pick or add a `--gradient-roadmap-*` → wire slug → use `RoadmapCardV2` with `variant="gradient"`.
 
+**"Gate content behind login/membership"**
+→ Don't hand-write a Lock icon + Card. For a preview-cutoff (text continues below a "become a member" CTA), use `src/components/premium/ContentPreviewOverlay` (`isLoggedIn`, `redirectTo` props) — used in `articles/[slug]`, `stories/[slug]`, `questions/[slug]`. For video, use `src/components/premium/PremiumVideoLock`. Both are Client Components fed `isLoggedIn`/`hasMemberAccess` from a Server Component via `getSubscriptionStatus()`.
+
 **"Theme tweak (color shift)"**
 → Edit `colors_and_type.css` only. No code changes elsewhere should be required. If they are, the consumer was bypassing the system — fix that consumer.

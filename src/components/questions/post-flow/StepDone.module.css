@@ -1,0 +1,73 @@
+/*
+ * Step3 完了画面のアニメーション（#139 スライス5）
+ *
+ * グローバルCSS追加禁止ルールのため、keyframes は CSS Module に閉じる
+ * （前例: ui/icon-check.module.css）。
+ * 演出シーケンス:
+ *   1. チェックアイコン: ポップイン（scale 0→1・軽いオーバーシュート）
+ *   2. 「🙌ARIGATO🙌」: 1文字ずつ左から出現（delay は JSX 側で index ベース付与）
+ *   3. 残り（完了テキスト・サブ・ボタン群）: 後追いフェードイン
+ * prefers-reduced-motion: reduce では全アニメを無効化し即時表示する。
+ */
+
+.icon {
+  animation: step-done-pop 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.char {
+  display: inline-block;
+  white-space: pre;
+  opacity: 0;
+  animation: step-done-char 280ms ease-out both;
+  /* animation-delay は JSX の inline style（文字index）で付与 */
+}
+
+.reveal {
+  opacity: 0;
+  animation: step-done-fade 360ms ease-out both;
+  /* animation-delay は JSX の inline style で付与 */
+}
+
+@keyframes step-done-pop {
+  0% {
+    transform: scale(0);
+  }
+  70% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes step-done-char {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes step-done-fade {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .icon,
+  .char,
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

@@ -203,6 +203,7 @@ export async function addComment(input: {
 
   // 投稿者プロフィールを auth から snapshot して denormalize
   const authorName =
+    (user.user_metadata?.display_name as string | undefined) ||
     (user.user_metadata?.name as string | undefined) ||
     user.email?.split("@")[0] ||
     "メンバー";

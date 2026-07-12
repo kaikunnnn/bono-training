@@ -136,7 +136,7 @@ async function sendSlackNotification(data: {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: '📝 新しい質問が投稿されました',
+          text: '📝 新しい投稿がありました',
           emoji: true,
         },
       },
@@ -269,13 +269,13 @@ export async function POST(request: NextRequest) {
 
   if (!payload.questionContent || payload.questionContent.length < VALIDATION_RULES.questionContent.minLength) {
     return NextResponse.json(
-      { error: `質問内容は${VALIDATION_RULES.questionContent.minLength}文字以上で入力してください` },
+      { error: `内容は${VALIDATION_RULES.questionContent.minLength}文字以上で入力してください` },
       { status: 400 });
   }
 
   if (payload.questionContent.length > VALIDATION_RULES.questionContent.maxLength) {
     return NextResponse.json(
-      { error: `質問内容は${VALIDATION_RULES.questionContent.maxLength}文字以内で入力してください` },
+      { error: `内容は${VALIDATION_RULES.questionContent.maxLength}文字以内で入力してください` },
       { status: 400 });
   }
 
@@ -318,7 +318,7 @@ export async function POST(request: NextRequest) {
     );
     if (recentCount >= RATE_LIMIT_PER_HOUR) {
       return NextResponse.json(
-        { error: '短時間に多くの質問が投稿されています。しばらく時間をおいてから再度お試しください' },
+        { error: '短時間に多くの投稿がされています。しばらく時間をおいてから再度お試しください' },
         { status: 429 });
     }
   } catch (e) {
@@ -329,7 +329,7 @@ export async function POST(request: NextRequest) {
   // ユーザー情報の準備
   const userInfo: UserInfo = {
     id: user.id,
-    displayName: user.user_metadata?.name || user.email?.split('@')[0] || 'ユーザー',
+    displayName: user.user_metadata?.display_name || user.user_metadata?.name || user.email?.split('@')[0] || 'ユーザー',
     avatarUrl: user.user_metadata?.avatar_url,
   };
 

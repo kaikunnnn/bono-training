@@ -1,11 +1,13 @@
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
+import { linkifyText } from "@/lib/questions/linkify";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft, Lock } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import {
   getQuestionBySlug,
   getCommentsByQuestion,
@@ -15,8 +17,10 @@ import {
 } from "@/lib/services/questions";
 import { emptyReactionCounts } from "@/lib/services/questions-utils";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
+import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
 import { extractPreviewText } from "@/lib/portable-text-utils";
 import { QuestionCommentsSection } from "@/components/questions/QuestionCommentsSection";
+import { isProfileIncomplete } from "@/lib/profile-utils";
 import { ReactionButtons } from "@/components/questions/ReactionButtons";
 
 const PREVIEW_LINES_FOR_GUEST = 3;
@@ -32,18 +36,71 @@ function formatDate(iso?: string): string {
   });
 }
 
+// DS のリンクスタイル（text-text-link は globals.css の --color-text-link に対応）。
+// 自動リンク化・明示的な link マーク・その他の外部リンクで共通利用する。
+const DS_LINK_CLASS = "text-text-link underline break-all";
+
+/**
+ * PortableText の block に渡される children を走査し、プレーンな文字列ノード内の
+ * http/https URL をレンダー時に自動リンク化する。
+ *
+ * marks（strong/em/code/link 等）は文字列ではなく React 要素として渡ってくるため、
+ * ここでは触らず素通しする。結果として「マーク無しの生テキスト中の URL」だけが
+ * 自動リンク化され、既存の link マークのスタイルとは競合しない。
+ */
+function linkifyChildren(children: ReactNode): ReactNode {
+  if (typeof children === "string") {
+    return renderLinkifiedString(children);
+  }
+  if (Array.isArray(children)) {
+    return children.map((child, i) => {
+      if (typeof child === "string") {
+        return <Fragment key={i}>{renderLinkifiedString(child)}</Fragment>;
+      }
+      return child;
+    });
+  }
+  return children;
+}
+
+function renderLinkifiedString(text: string): ReactNode {
+  const segments = linkifyText(text);
+  // URL を含まない（text セグメント 1 つだけ）の場合は文字列のまま返す
+  if (segments.length === 1 && segments[0].type === "text") {
+    return segments[0].value;
+  }
+  return segments.map((seg, i) => {
+    if (seg.type === "link") {
+      return (
+        <a
+          key={i}
+          href={seg.href}
+          target="_blank"
+          rel="noopener noreferrer nofollow"
+          className={DS_LINK_CLASS}
+        >
+          {seg.label}
+        </a>
+      );
+    }
+    return <Fragment key={i}>{seg.value}</Fragment>;
+  });
+}
+
 const ptComponents: PortableTextComponents = {
   block: {
     h3: ({ children }) => (
-      <h3 className="mt-6 mb-2 text-lg font-bold">{children}</h3>
+      <h3 className="mt-6 mb-2 text-lg font-bold">{linkifyChildren(children)}</h3>
     ),
     blockquote: ({ children }) => (
       <blockquote className="my-4 border-l-4 border-muted pl-4 italic text-muted-foreground">
-        {children}
+        {linkifyChildren(children)}
       </blockquote>
     ),
     normal: ({ children }) => (
-      <p className="my-3 leading-7 whitespace-pre-line">{children}</p>
+      <p className="my-3 leading-7 whitespace-pre-line">
+        {linkifyChildren(children)}
+      </p>
     ),
   },
   marks: {
@@ -56,8 +113,8 @@ const ptComponents: PortableTextComponents = {
       <a
         href={value?.href}
         target="_blank"
-        rel="noopener noreferrer"
-        className="text-primary underline"
+        rel="noopener noreferrer nofollow"
+        className={DS_LINK_CLASS}
       >
         {children}
       </a>
@@ -84,6 +141,10 @@ export default async function Page({ params }: PageProps) {
   const authorName = question.author?.displayName || "メンバー";
   const authorAvatar = question.author?.avatarUrl;
   const currentUserId = currentUser?.id ?? null;
+  // 表示名・アイコンが未設定なら、コメント完了後に設定を促す（#142。未ログインは false）
+  const profileIncomplete = currentUser
+    ? isProfileIncomplete(currentUser.user_metadata)
+    : false;
 
   // メンバーのみコメントとリアクションを取得
   let comments: Awaited<ReturnType<typeof getCommentsByQuestion>> = [];
@@ -225,14 +286,11 @@ export default async function Page({ params }: PageProps) {
                   PREVIEW_LINES_FOR_GUEST,
                 )}
               </p>
-              <div className="mt-6 rounded-2xl border border-dashed border-amber-300 bg-amber-50/60 px-4 py-5 text-center">
-                <Lock className="mx-auto mb-2 h-6 w-6 text-amber-700" />
-                <p className="text-sm text-amber-900">
-                  続きとコメントを見るにはメンバー登録が必要です
-                </p>
-                <Button asChild className="mt-3">
-                  <Link href="/subscription">プランを確認する</Link>
-                </Button>
+              <div className="mt-6">
+                <ContentPreviewOverlay
+                  isLoggedIn={status.isLoggedIn}
+                  redirectTo={`/questions/${slug}`}
+                />
               </div>
             </>
           )}
@@ -248,6 +306,7 @@ export default async function Page({ params }: PageProps) {
           commentReactionCounts={commentReactionCountsMap}
           myCommentReactions={myCommentReactionsByCommentId}
           currentUserId={currentUserId}
+          profileIncomplete={profileIncomplete}
         />
       )}
     </div>
