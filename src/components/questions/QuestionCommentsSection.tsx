@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import type { QuestionComment, ReactionKey } from "@/lib/services/questions";
 import { emptyReactionCounts } from "@/lib/services/questions-utils";
@@ -17,6 +18,10 @@ interface QuestionCommentsSectionProps {
   commentReactionCounts: Record<string, Record<ReactionKey, number>>;
   myCommentReactions: Record<string, ReactionKey[]>;
   currentUserId: string | null;
+  /** ログインユーザーのアバターURL（入力フォームのアバター表示用） */
+  currentUserAvatarUrl?: string | null;
+  /** ログインユーザーの表示名（入力フォームのイニシャルfallback用） */
+  currentUserName?: string;
   /** 表示名・アイコンが未設定か。コメント完了後に設定を促す（#142） */
   profileIncomplete?: boolean;
 }
@@ -33,9 +38,14 @@ export function QuestionCommentsSection({
   commentReactionCounts,
   myCommentReactions,
   currentUserId,
+  currentUserAvatarUrl,
+  currentUserName = "",
   profileIncomplete = false,
 }: QuestionCommentsSectionProps) {
   const [comments, setComments] = useState(initialComments);
+  // サブ導線（一覧下部の枠線ボタン）を押すとメインと同じ入力フォームへ展開する。
+  // 一方向の切り替えでよい（リロードするまで戻せなくてOK）。
+  const [subFormOpen, setSubFormOpen] = useState(false);
   // プロフィール設定促しモーダルの開閉（#142）
   const [showProfilePrompt, setShowProfilePrompt] = useState(false);
   // このマウント中に一度でも促したか。2回目以降のコメントで連続表示しないためのガード
@@ -75,6 +85,15 @@ export function QuestionCommentsSection({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* メイン入力：コメント一覧の先頭（元の投稿のすぐ下） */}
+        <QuestionCommentForm
+          questionId={questionId}
+          questionSlug={questionSlug}
+          onAdded={handleAdded}
+          authorAvatarUrl={currentUserAvatarUrl}
+          authorName={currentUserName}
+        />
+
         {comments.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             まだコメントがありません。最初のコメントを書きましょう。
@@ -97,13 +116,30 @@ export function QuestionCommentsSection({
           </ul>
         )}
 
-        <div className="border-t pt-4">
-          <QuestionCommentForm
-            questionId={questionId}
-            questionSlug={questionSlug}
-            onAdded={handleAdded}
-          />
-        </div>
+        {/* サブ導線：一覧下部の枠線ボタン → 押すとメインと同じ入力フォームに展開（一方向）。
+            コメント0件のときはメイン入力だけで十分なので非表示。 */}
+        {comments.length > 0 && (
+          <div className="border-t pt-4">
+            {subFormOpen ? (
+              <QuestionCommentForm
+                questionId={questionId}
+                questionSlug={questionSlug}
+                onAdded={handleAdded}
+                authorAvatarUrl={currentUserAvatarUrl}
+                authorName={currentUserName}
+                autoFocus
+              />
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setSubFormOpen(true)}
+              >
+                コメントを書く
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
 
       <ProfileSetupPromptModal

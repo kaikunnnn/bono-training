@@ -2,28 +2,44 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
 import { addComment, type QuestionComment } from "@/lib/services/questions";
 
+/** サーバ側・DB と一致させる文字数上限（Figma の 2000 には合わせない） */
+const MAX_LENGTH = 5000;
+
 interface QuestionCommentFormProps {
   questionId: string;
   questionSlug: string;
   /** 投稿成功時に呼ばれる（一覧への楽観的追加用） */
   onAdded?: (comment: QuestionComment) => void;
+  /** ログインユーザーのアバターURL（未設定はイニシャルfallback） */
+  authorAvatarUrl?: string | null;
+  /** ログインユーザーの表示名（イニシャルfallback用） */
+  authorName?: string;
+  /** マウント時にtextareaへフォーカスする（サブ→メイン展開時に使用） */
+  autoFocus?: boolean;
 }
 
 export function QuestionCommentForm({
   questionId,
   questionSlug,
   onAdded,
+  authorAvatarUrl,
+  authorName = "",
+  autoFocus = false,
 }: QuestionCommentFormProps) {
   const router = useRouter();
   const [content, setContent] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // 文字入力が始まったらボタン行を表示する（focus だけでは出さない）
+  const hasInput = content.length > 0;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,28 +68,51 @@ export function QuestionCommentForm({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <Textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder="コメントを書く..."
-        rows={3}
-        maxLength={5000}
-        disabled={isPending}
-      />
-      <div className="flex items-center justify-end gap-2">
-        <span className="text-xs text-muted-foreground">
-          {content.length} / 5000
-        </span>
-        <Button type="submit" disabled={isPending || !content.trim()}>
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              送信中...
-            </>
-          ) : (
-            "コメントする"
+      <div className="flex items-start gap-3">
+        <Avatar className="h-10 w-10 shrink-0 border border-border bg-muted">
+          {authorAvatarUrl && (
+            <AvatarImage src={authorAvatarUrl} alt={authorName} />
           )}
-        </Button>
+          <AvatarFallback>{authorName.slice(0, 1) || "?"}</AvatarFallback>
+        </Avatar>
+        <div className="flex-1 space-y-2">
+          <Textarea
+            autoFocus={autoFocus}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="コメントする"
+            rows={3}
+            maxLength={MAX_LENGTH}
+            disabled={isPending}
+            className="rounded-[16px] border border-border bg-surface p-4"
+          />
+          {/* 入力を始めたらカウンタ＋ボタン行がアニメーション付きで現れる */}
+          <div
+            className={`grid overflow-hidden transition-all duration-200 ease-out ${
+              hasInput
+                ? "grid-rows-[1fr] opacity-100"
+                : "grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="min-h-0">
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <span className="text-xs text-muted-foreground">
+                  {content.length} / {MAX_LENGTH}
+                </span>
+                <Button type="submit" disabled={isPending || !content.trim()}>
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      送信中...
+                    </>
+                  ) : (
+                    "コメントする"
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </form>
   );

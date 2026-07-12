@@ -1,13 +1,10 @@
-import { Fragment, type ReactNode } from "react";
-import Link from "next/link";
+import { Fragment, Suspense, type ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { linkifyText } from "@/lib/questions/linkify";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowLeft } from "lucide-react";
+import { MessageSquare } from "lucide-react";
+import { BackButton } from "@/components/common/BackButton";
 import {
   getQuestionBySlug,
   getCommentsByQuestion,
@@ -16,12 +13,25 @@ import {
   type ReactionKey,
 } from "@/lib/services/questions";
 import { emptyReactionCounts } from "@/lib/services/questions-utils";
+import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
 import { extractPreviewText } from "@/lib/portable-text-utils";
 import { QuestionCommentsSection } from "@/components/questions/QuestionCommentsSection";
 import { isProfileIncomplete } from "@/lib/profile-utils";
 import { ReactionButtons } from "@/components/questions/ReactionButtons";
+import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
+
+/** 単一スレッドのコメント件数（非メンバーのメタ表示用。集計 view を read-only 参照） */
+async function getCommentCount(questionId: string): Promise<number> {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("question_comment_counts")
+    .select("count")
+    .eq("question_id", questionId)
+    .maybeSingle();
+  return (data?.count as number | undefined) ?? 0;
+}
 
 const PREVIEW_LINES_FOR_GUEST = 3;
 
@@ -98,7 +108,7 @@ const ptComponents: PortableTextComponents = {
       </blockquote>
     ),
     normal: ({ children }) => (
-      <p className="my-3 leading-7 whitespace-pre-line">
+      <p className="my-3 text-[18px] leading-9 whitespace-pre-line text-foreground">
         {linkifyChildren(children)}
       </p>
     ),
@@ -141,6 +151,14 @@ export default async function Page({ params }: PageProps) {
   const authorName = question.author?.displayName || "メンバー";
   const authorAvatar = question.author?.avatarUrl;
   const currentUserId = currentUser?.id ?? null;
+  // 入力フォームのアバター表示用（ログインユーザー自身の表示名・アイコン）
+  const currentUserMeta = currentUser?.user_metadata ?? {};
+  const currentUserName =
+    (currentUserMeta.display_name as string | undefined) ||
+    (currentUserMeta.name as string | undefined) ||
+    "メンバー";
+  const currentUserAvatarUrl =
+    (currentUserMeta.avatar_url as string | undefined) ?? null;
   // 表示名・アイコンが未設定なら、コメント完了後に設定を促す（#142。未ログインは false）
   const profileIncomplete = currentUser
     ? isProfileIncomplete(currentUser.user_metadata)
@@ -152,9 +170,12 @@ export default async function Page({ params }: PageProps) {
   let commentReactionCountsMap: Record<string, Record<ReactionKey, number>> = {};
   let myQuestionReactions: ReactionKey[] = [];
   const myCommentReactionsByCommentId: Record<string, ReactionKey[]> = {};
+  // メタ表示用のコメント件数（メンバーは取得済みの comments から、非メンバーは view から）
+  let commentCount = 0;
 
   if (hasFullAccess) {
     comments = await getCommentsByQuestion(question._id);
+    commentCount = comments.length;
 
     // 質問本体のリアクション
     const qReactionMap = await getReactionCountsMap({
@@ -194,108 +215,129 @@ export default async function Page({ params }: PageProps) {
         myCommentReactionsByCommentId[r.targetId].push(r.reaction);
       });
     }
+  } else {
+    commentCount = await getCommentCount(question._id);
   }
 
   return (
-    <div className="container py-10">
-      <Button variant="ghost" size="sm" asChild className="mb-4">
-        <Link href="/questions">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          一覧へ戻る
-        </Link>
-      </Button>
+    <div className="mx-auto max-w-[800px] px-4 py-10 sm:px-6">
+      {/* 掲示板へ戻る（共通コンポーネント） */}
+      <BackButton label="掲示板へ戻る" href="/questions" />
 
-      {/* 質問本体 */}
-      <Card className="rounded-3xl border border-white/80 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
-        <CardHeader className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            {question.category && (
-              <Badge variant="outline">{question.category.title}</Badge>
+      {/* タイトルブロック */}
+      <div className="mt-6 border-b border-border pb-8">
+        {/* 現在地表示：他リンクから来ても迷わないためのラベル */}
+        <p className="text-[13px] font-medium text-muted-foreground">
+          みんなの掲示板
+        </p>
+        <h1 className="mt-2 font-rounded-mplus text-[22px] font-bold leading-8 text-foreground sm:text-[30px] sm:leading-9">
+          {question.title}
+        </h1>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          {question.category && (
+            <span className="rounded-full bg-primary/10 px-3 py-1 text-[14px] font-medium text-primary">
+              {question.category.title}
+            </span>
+          )}
+          <span className="flex items-center gap-1 text-[14px] text-muted-foreground">
+            <MessageSquare className="h-4 w-4" />
+            {commentCount} 件のコメント
+          </span>
+          <span className="text-[14px] text-muted-foreground">
+            {formatDate(question.publishedAt)}
+          </span>
+        </div>
+      </div>
+
+      {/* 元の投稿ブロック */}
+      <div className="mt-8">
+        {/* ヘッダー行：アバター（カード外）＋投稿者名 */}
+        <div className="flex items-center gap-3">
+          <Avatar className="h-10 w-10 border border-border bg-muted">
+            {authorAvatar && <AvatarImage src={authorAvatar} alt={authorName} />}
+            <AvatarFallback>{authorName.slice(0, 1)}</AvatarFallback>
+          </Avatar>
+          <span className="text-[15px] font-medium text-foreground">
+            {authorName}
+          </span>
+        </div>
+
+        {/* 本文カード：ヘッダー行からインデント（sm未満は解除） */}
+        <div className="mt-4 pl-0 sm:pl-[52px]">
+          <div className="w-full rounded-[16px] border border-border bg-surface p-5">
+            {hasFullAccess ? (
+              <>
+                <div className="prose prose-sm max-w-none">
+                  <PortableText
+                    value={question.questionContent ?? []}
+                    components={ptComponents}
+                  />
+                  {question.figmaUrl && (
+                    <p className="mt-4 text-sm">
+                      <a
+                        href={question.figmaUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary underline"
+                      >
+                        🎨 Figmaファイルを見る
+                      </a>
+                    </p>
+                  )}
+                  {question.referenceUrls &&
+                    question.referenceUrls.length > 0 && (
+                      <div className="mt-4">
+                        <p className="text-sm font-medium">参考URL</p>
+                        <ul className="mt-1 space-y-1 text-sm">
+                          {question.referenceUrls.map((ref) => (
+                            <li key={ref._key}>
+                              <a
+                                href={ref.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary underline"
+                              >
+                                {ref.title || ref.url}
+                              </a>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="whitespace-pre-line text-base leading-7 text-muted-foreground">
+                  {extractPreviewText(
+                    question.questionContent,
+                    PREVIEW_LINES_FOR_GUEST,
+                  )}
+                </p>
+                <div className="mt-6">
+                  <ContentPreviewOverlay
+                    isLoggedIn={status.isLoggedIn}
+                    redirectTo={`/questions/${slug}`}
+                  />
+                </div>
+              </>
             )}
           </div>
-          <CardTitle className="text-2xl md:text-3xl">{question.title}</CardTitle>
-          <div className="flex items-center gap-3">
-            <Avatar className="h-10 w-10">
-              {authorAvatar && (
-                <AvatarImage src={authorAvatar} alt={authorName} />
-              )}
-              <AvatarFallback>{authorName.slice(0, 1)}</AvatarFallback>
-            </Avatar>
-            <div className="text-sm text-muted-foreground">
-              {authorName} ・ {formatDate(question.publishedAt)}
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {hasFullAccess ? (
-            <>
-              <div className="prose prose-sm max-w-none">
-                <PortableText
-                  value={question.questionContent ?? []}
-                  components={ptComponents}
-                />
-                {question.figmaUrl && (
-                  <p className="mt-4 text-sm">
-                    <a
-                      href={question.figmaUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary underline"
-                    >
-                      🎨 Figmaファイルを見る
-                    </a>
-                  </p>
-                )}
-                {question.referenceUrls && question.referenceUrls.length > 0 && (
-                  <div className="mt-4">
-                    <p className="text-sm font-medium">参考URL</p>
-                    <ul className="mt-1 space-y-1 text-sm">
-                      {question.referenceUrls.map((ref) => (
-                        <li key={ref._key}>
-                          <a
-                            href={ref.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary underline"
-                          >
-                            {ref.title || ref.url}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
 
-              {/* 質問本体へのリアクション */}
-              <div className="mt-6 border-t pt-4">
-                <ReactionButtons
-                  targetType="question"
-                  targetId={question._id}
-                  counts={questionReactionCounts}
-                  myReactions={myQuestionReactions}
-                  canReact={currentUserId !== null}
-                />
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="whitespace-pre-line text-base text-muted-foreground leading-7">
-                {extractPreviewText(
-                  question.questionContent,
-                  PREVIEW_LINES_FOR_GUEST,
-                )}
-              </p>
-              <div className="mt-6">
-                <ContentPreviewOverlay
-                  isLoggedIn={status.isLoggedIn}
-                  redirectTo={`/questions/${slug}`}
-                />
-              </div>
-            </>
+          {/* 元の投稿へのリアクション（インデント内・カード下） */}
+          {hasFullAccess && (
+            <div className="mt-4">
+              <ReactionButtons
+                targetType="question"
+                targetId={question._id}
+                counts={questionReactionCounts}
+                myReactions={myQuestionReactions}
+                canReact={currentUserId !== null}
+              />
+            </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* コメント（メンバーのみ） */}
       {hasFullAccess && (
@@ -306,9 +348,24 @@ export default async function Page({ params }: PageProps) {
           commentReactionCounts={commentReactionCountsMap}
           myCommentReactions={myCommentReactionsByCommentId}
           currentUserId={currentUserId}
+          currentUserAvatarUrl={currentUserAvatarUrl}
+          currentUserName={currentUserName}
           profileIncomplete={profileIncomplete}
         />
       )}
+
+      {/*
+        関連する・最近のスレッド（#140 スライスD）。
+        詳細ページ本体の初期表示を止めないよう Suspense でストリーミング（遅延ロード）。
+        データ取得は RelatedThreadsSection 内に閉じている。
+      */}
+      <Suspense fallback={null}>
+        <RelatedThreadsSection
+          currentQuestionId={question._id}
+          categorySlug={question.category?.slug?.current}
+          showEngagement={hasFullAccess}
+        />
+      </Suspense>
     </div>
   );
 }

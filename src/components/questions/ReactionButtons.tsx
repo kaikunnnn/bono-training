@@ -23,6 +23,11 @@ interface ReactionButtonsProps {
   myReactions: ReactionKey[];
   canReact: boolean;
   size?: "sm" | "md";
+  /**
+   * 表示するリアクションの種類を絞り込む。省略時は 3 種すべて（元投稿用）。
+   * コメント用は ["thanks"] を渡して 1 種のみ表示する。
+   */
+  keys?: ReactionKey[];
 }
 
 export function ReactionButtons({
@@ -32,6 +37,7 @@ export function ReactionButtons({
   myReactions,
   canReact,
   size = "md",
+  keys,
 }: ReactionButtonsProps) {
   const router = useRouter();
   const [, startTransition] = useTransition();
@@ -83,9 +89,13 @@ export function ReactionButtons({
     size === "sm" ? "px-2 py-0.5 text-xs gap-1" : "px-3 py-1 text-xs gap-1.5";
   const iconSize = size === "sm" ? 12 : 14;
 
+  const visibleReactions = keys
+    ? REACTIONS.filter((r) => keys.includes(r.key))
+    : REACTIONS;
+
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {REACTIONS.map(({ key, label, Icon }) => {
+      {visibleReactions.map(({ key, label, Icon }) => {
         const active = optMine.has(key);
         return (
           <button

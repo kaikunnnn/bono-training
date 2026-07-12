@@ -197,6 +197,7 @@ export function QuestionCommentItem({
               myReactions={myReactions}
               canReact={currentUserId !== null}
               size="sm"
+              keys={["thanks"]}
             />
           </div>
         )}

@@ -34,6 +34,8 @@ export interface QuestionListItem {
   question: Question;
   commentCount: number;
   reactionCounts: Record<ReactionKey, number>;
+  /** publishedAt と最新コメント時刻の遅い方（新着コメントでの浮上ソートに使う） */
+  lastActivityAt: string;
 }
 
 // ============================================
@@ -41,19 +43,20 @@ export interface QuestionListItem {
 // ============================================
 
 /**
- * 質問一覧 + コメント数 + スタンプ集計を 1往復で取得
+ * 質問一覧 + コメント数 + スタンプ集計を取得。
+ *
  * ※ コメント数とスタンプは Supabase の View から IN クエリで取得（N+1回避）
+ * ※ 並び順は「新着コメントでの浮上」を実現するため
+ *   last_activity = max(publishedAt, そのスレッドの最新コメント created_at) の降順。
+ *   Sanity から候補を多め（最大 CANDIDATE_POOL 件）に取得 → コメント最新時刻を IN クエリで集計 →
+ *   last_activity でソート → 上位 limit 件を返す。専用ビューは作らない（migration 不要）。
+ *
+ * @param params.limit 最終的に返す件数（デフォルト 20）。互換のため意味は「返す件数」。
  */
-export async function getQuestionList(params?: {
-  categorySlug?: string;
-  limit?: number;
-}): Promise<QuestionListItem[]> {
-  const limit = Math.min(Math.max(params?.limit ?? 20, 1), 100);
-  const categoryFilter = params?.categorySlug
-    ? `&& category->slug.current == $categorySlug`
-    : "";
+const CANDIDATE_POOL = 50;
 
-  const sanityQuery = `*[_type == "question" ${categoryFilter}] | order(publishedAt desc)[0...${limit}]{
+/** カード用の共通 projection（QuestionListItem 生成に必要なフィールドを揃える） */
+const QUESTION_CARD_PROJECTION = `{
     _id,
     title,
     slug,
@@ -64,27 +67,38 @@ export async function getQuestionList(params?: {
     category->{_id, title, slug}
   }`;
 
-  const questions = await getClient().fetch<Question[]>(
-    sanityQuery,
-    params?.categorySlug ? { categorySlug: params.categorySlug } : {},
-    { next: { revalidate: 60, tags: ["questions"] } },
-  );
+/**
+ * Sanity から取得済みの質問配列に、Supabase 側のエンゲージメント集計
+ * （コメント数・スタンプ3種・最新コメント時刻）を IN クエリ1回ずつで付与して
+ * QuestionListItem[] に変換する。N+1 を避けるため一覧・関連・最近で共通利用する。
+ *
+ * ※ 並び替えはしない。呼び出し側の要求（浮上ソート／公開日順など）に委ねる。
+ */
+async function buildListItems(questions: Question[]): Promise<QuestionListItem[]> {
   if (questions.length === 0) return [];
 
   const ids = questions.map((q) => q._id);
   const supabase = await createClient();
 
-  const [commentCountsResult, reactionCountsResult] = await Promise.all([
-    supabase
-      .from("question_comment_counts")
-      .select("question_id, count")
-      .in("question_id", ids),
-    supabase
-      .from("question_reaction_counts")
-      .select("target_type, target_id, reaction, count")
-      .eq("target_type", "question")
-      .in("target_id", ids),
-  ]);
+  const [commentCountsResult, reactionCountsResult, latestCommentResult] =
+    await Promise.all([
+      supabase
+        .from("question_comment_counts")
+        .select("question_id, count")
+        .in("question_id", ids),
+      supabase
+        .from("question_reaction_counts")
+        .select("target_type, target_id, reaction, count")
+        .eq("target_type", "question")
+        .in("target_id", ids),
+      // 質問ごとの最新コメント時刻を JS 側で集計（created_at 降順で取り、最初に出た id を採用）
+      supabase
+        .from("question_comments")
+        .select("question_id, created_at")
+        .in("question_id", ids)
+        .is("deleted_at", null)
+        .order("created_at", { ascending: false }),
+    ]);
 
   const commentMap = new Map<string, number>();
   (commentCountsResult.data ?? []).forEach((r) =>
@@ -99,11 +113,115 @@ export async function getQuestionList(params?: {
     reactionMap.set(key, existing);
   });
 
-  return questions.map((q) => ({
-    question: q,
-    commentCount: commentMap.get(q._id) ?? 0,
-    reactionCounts: reactionMap.get(q._id) ?? { cheer: 0, thanks: 0, insight: 0 },
-  }));
+  // 質問ID → 最新コメント時刻。降順取得なので最初に現れたものが最新。
+  // 取得失敗時（latestCommentResult.data が null）は publishedAt のみでフォールバック。
+  const latestCommentMap = new Map<string, string>();
+  (latestCommentResult.data ?? []).forEach((r) => {
+    const qid = r.question_id as string;
+    if (!latestCommentMap.has(qid)) {
+      latestCommentMap.set(qid, r.created_at as string);
+    }
+  });
+
+  return questions.map((q) => {
+    const publishedAt = q.publishedAt ?? "";
+    const latestComment = latestCommentMap.get(q._id);
+    const lastActivityAt =
+      latestComment && latestComment > publishedAt ? latestComment : publishedAt;
+    return {
+      question: q,
+      commentCount: commentMap.get(q._id) ?? 0,
+      reactionCounts: reactionMap.get(q._id) ?? {
+        cheer: 0,
+        thanks: 0,
+        insight: 0,
+      },
+      lastActivityAt,
+    };
+  });
+}
+
+export async function getQuestionList(params?: {
+  categorySlug?: string;
+  limit?: number;
+}): Promise<QuestionListItem[]> {
+  const limit = Math.min(Math.max(params?.limit ?? 20, 1), 100);
+  const categoryFilter = params?.categorySlug
+    ? `&& category->slug.current == $categorySlug`
+    : "";
+
+  // 浮上ソートのため候補を多めに取得してから JS 側で並べ替える
+  const sanityQuery = `*[_type == "question" ${categoryFilter}] | order(publishedAt desc)[0...${CANDIDATE_POOL}]${QUESTION_CARD_PROJECTION}`;
+
+  const questions = await getClient().fetch<Question[]>(
+    sanityQuery,
+    params?.categorySlug ? { categorySlug: params.categorySlug } : {},
+    { next: { revalidate: 60, tags: ["questions"] } },
+  );
+
+  const items = await buildListItems(questions);
+
+  // last_activity 降順（ISO 文字列は辞書順 = 時系列順）。同着は publishedAt 降順で安定化。
+  items.sort((a, b) => {
+    if (a.lastActivityAt !== b.lastActivityAt) {
+      return a.lastActivityAt < b.lastActivityAt ? 1 : -1;
+    }
+    return (a.question.publishedAt ?? "") < (b.question.publishedAt ?? "") ? 1 : -1;
+  });
+
+  return items.slice(0, limit);
+}
+
+/**
+ * 詳細ページ「関連するスレッド」用：同じカテゴリの他スレッドを公開日の新しい順で取得。
+ * excludeIds（現在表示中のスレッド等）は除外する。カード表示に必要な集計付き。
+ */
+export async function getRelatedQuestions(params: {
+  categorySlug: string;
+  excludeIds?: string[];
+  limit?: number;
+}): Promise<QuestionListItem[]> {
+  const limit = Math.min(Math.max(params.limit ?? 2, 1), 20);
+  const excludeIds = params.excludeIds ?? [];
+
+  // limit は上でクランプ済みの安全な整数。GROQ の range は変数を取らないため文字列に埋め込む
+  const query = `*[_type == "question"
+    && category->slug.current == $categorySlug
+    && !(_id in $excludeIds)
+  ] | order(publishedAt desc)[0...${limit}]${QUESTION_CARD_PROJECTION}`;
+
+  const questions = await getClient().fetch<Question[]>(
+    query,
+    { categorySlug: params.categorySlug, excludeIds },
+    { next: { revalidate: 60, tags: ["questions"] } },
+  );
+
+  return buildListItems(questions);
+}
+
+/**
+ * 詳細ページ「最近のスレッド」用：公開日の新しい順で取得。
+ * excludeIds（現在表示中のスレッド＋関連セクションに出したもの）は除外する。
+ */
+export async function getRecentQuestions(params?: {
+  excludeIds?: string[];
+  limit?: number;
+}): Promise<QuestionListItem[]> {
+  const limit = Math.min(Math.max(params?.limit ?? 2, 1), 20);
+  const excludeIds = params?.excludeIds ?? [];
+
+  // limit は上でクランプ済みの安全な整数。GROQ の range は変数を取らないため文字列に埋め込む
+  const query = `*[_type == "question"
+    && !(_id in $excludeIds)
+  ] | order(publishedAt desc)[0...${limit}]${QUESTION_CARD_PROJECTION}`;
+
+  const questions = await getClient().fetch<Question[]>(
+    query,
+    { excludeIds },
+    { next: { revalidate: 60, tags: ["questions"] } },
+  );
+
+  return buildListItems(questions);
 }
 
 export async function getQuestionBySlug(slug: string): Promise<Question | null> {
