@@ -400,6 +400,9 @@ export async function deleteComment(input: {
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "ログインが必要です" };
 
+  // 注意: PostgREST は UPDATE 時に内部で RETURNING を使うため、論理削除後の行が
+  // SELECT ポリシーで不可視だと 42501 で失敗する。本人が自分の削除済みコメントを
+  // SELECT できるようポリシー側で許可している（20260713_fix_comment_soft_delete_rls.sql）。
   const { data, error } = await supabase
     .from("question_comments")
     .update({ deleted_at: new Date().toISOString() })
@@ -409,7 +412,11 @@ export async function deleteComment(input: {
     .select("id");
 
   if (error) {
-    console.error("[deleteComment]", error);
+    // PostgrestError は enumerable でないプロパティを持つため文字列化して出す
+    console.error(
+      "[deleteComment]",
+      JSON.stringify(error, Object.getOwnPropertyNames(error)),
+    );
     return { ok: false, error: "コメントの削除に失敗しました" };
   }
   if (!data || data.length === 0) {
