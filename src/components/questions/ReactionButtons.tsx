@@ -10,10 +10,12 @@ import {
 } from "@/lib/services/questions";
 import { cn } from "@/lib/utils";
 
+// 表示名・アイコンは Figma 100:2820 系＋#135 確定に準拠
+// （DBキー cheer/thanks/insight は変更しない）
 const REACTIONS: Array<{ key: ReactionKey; label: string; Icon: typeof Heart }> = [
   { key: "cheer", label: "応援", Icon: Sparkles },
-  { key: "thanks", label: "ありがとう", Icon: Heart },
-  { key: "insight", label: "なるほど", Icon: ThumbsUp },
+  { key: "thanks", label: "いいやん", Icon: ThumbsUp },
+  { key: "insight", label: "知りたい", Icon: Heart },
 ];
 
 interface ReactionButtonsProps {
@@ -85,8 +87,11 @@ export function ReactionButtons({
     });
   };
 
+  // md は Figma 100:2820 実測（px-[12.5px] py-[4.5px] gap-[6px]）。sm はコメント用の縮小版
   const sizeClasses =
-    size === "sm" ? "px-2 py-0.5 text-xs gap-1" : "px-3 py-1 text-xs gap-1.5";
+    size === "sm"
+      ? "px-2 py-0.5 gap-1"
+      : "px-[12.5px] py-[4.5px] gap-[6px]";
   const iconSize = size === "sm" ? 12 : 14;
 
   const visibleReactions = keys
@@ -106,11 +111,11 @@ export function ReactionButtons({
             aria-pressed={active}
             aria-label={`${label}スタンプ${active ? "を取り消す" : "を押す"}`}
             className={cn(
-              "inline-flex items-center rounded-full font-medium shadow-sm transition",
+              "inline-flex items-center rounded-full text-[12px] font-medium shadow transition",
               sizeClasses,
               active
                 ? "bg-primary/10 text-primary border border-primary/30"
-                : "bg-white/90 text-muted-foreground border border-transparent hover:text-foreground",
+                : "bg-surface/90 text-muted-foreground border border-transparent hover:text-foreground",
               !canReact && "cursor-not-allowed opacity-50",
               pendingKey === key && "opacity-70",
             )}
@@ -119,7 +124,7 @@ export function ReactionButtons({
             <span>{label}</span>
             <span
               className={cn(
-                "rounded-full px-1.5 text-[11px]",
+                "rounded-full px-[6px] text-[11px] font-medium leading-[14.7px]",
                 active ? "bg-primary/15 text-primary" : "bg-muted text-foreground",
               )}
             >

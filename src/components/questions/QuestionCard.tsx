@@ -7,11 +7,11 @@ import type { QuestionListItem, ReactionKey } from "@/lib/services/questions";
 /** 一覧カードの本文プレビュー行数（line-clamp-2 と揃える。切れる前提で余裕を持たせる） */
 const PREVIEW_LINES = 4;
 
-/** スタンプ3種の表示定義（ReactionButtons と揃える：cheer=応援 / thanks=ありがとう / insight=なるほど） */
+/** スタンプ3種の表示定義（ReactionButtons と揃える：cheer=応援 / thanks=いいやん / insight=知りたい） */
 const STAMPS: Array<{ key: ReactionKey; label: string; Icon: LucideIcon }> = [
   { key: "cheer", label: "応援", Icon: Sparkles },
-  { key: "thanks", label: "ありがとう", Icon: Heart },
-  { key: "insight", label: "なるほど", Icon: ThumbsUp },
+  { key: "thanks", label: "いいやん", Icon: ThumbsUp },
+  { key: "insight", label: "知りたい", Icon: Heart },
 ];
 
 function formatDate(iso?: string): string {
@@ -30,7 +30,7 @@ interface QuestionCardProps {
  * 掲示板一覧の投稿カード（Figma: fb-post-card-link-style / node 13:1467）。
  *
  * 構成順: カテゴリタグ → タイトル → アバター+投稿者名 → 本文2行プレビュー → フッター。
- * フッター左はスタンプ3種を個別に（件数>0のもののみ）表示専用で並べ、右はコメント件数（0件でも常時表示）+日付。
+ * フッター左はスタンプ3種（件数>0のもののみ・表示専用）+「・」+コメント件数（0件でも常時表示）、右は日付のみ。
  * カード全体が詳細ページへのリンク。
  */
 export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
@@ -45,11 +45,11 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
   return (
     <Link
       href={`/questions/${question.slug.current}`}
-      className="group block w-full rounded-[24px] border border-border bg-surface p-6 shadow-sm transition-shadow hover:shadow-md"
+      className="group block w-full rounded-[24px] border border-border bg-surface p-6 shadow-sm transition hover:bg-muted/30 hover:shadow-md"
     >
       <div className="flex flex-col gap-4">
         {/* Content */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-3">
           {question.category && (
             <span className="inline-flex w-fit items-center rounded-full bg-[var(--tag-category-bg)] px-[7px] py-[2px] text-xs font-medium text-foreground">
               {question.category.title}
@@ -76,8 +76,8 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
 
         {/* Footer */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* 左: スタンプ3種（件数>0のもののみ・表示専用） */}
-          <div className="flex flex-wrap items-center gap-2">
+          {/* 左: スタンプ3種（件数>0のもののみ・表示専用）+「・」+ コメント件数（0件でも常時表示） */}
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             {activeStamps.map(({ key, label, Icon }) => (
               <span
                 key={key}
@@ -92,20 +92,18 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
                 </span>
               </span>
             ))}
-          </div>
-
-          {/* 右: コメント件数（0件でも常時表示） + 日付 */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {showEngagement ? (
+            {showEngagement && (
               <>
+                {activeStamps.length > 0 && <span aria-hidden>・</span>}
                 <span>コメント {commentCount}件</span>
-                <span aria-hidden>・</span>
-                <span>{formatDate(question.publishedAt)}</span>
               </>
-            ) : (
-              <span>{formatDate(question.publishedAt)}</span>
             )}
           </div>
+
+          {/* 右: 日付のみ */}
+          <span className="text-xs text-muted-foreground">
+            {formatDate(question.publishedAt)}
+          </span>
         </div>
       </div>
     </Link>

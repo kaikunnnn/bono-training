@@ -17,6 +17,7 @@ interface BackButtonProps {
  * 戻るボタン（白背景＋グレー枠＋影）
  *
  * - ブラウザの履歴で前の画面に戻る
+ * - 履歴がない場合（直リンク・新規タブ）は href へ遷移するフォールバック
  */
 export function BackButton({
   label = "戻る",
@@ -26,7 +27,12 @@ export function BackButton({
   const router = useRouter();
 
   const handleBack = () => {
-    router.back();
+    // 直リンクや新規タブで履歴が無い場合は back() が効かないため href へフォールバック
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(href);
+    }
   };
 
   return (

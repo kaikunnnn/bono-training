@@ -12,10 +12,14 @@ interface PostQuestionButtonProps {
   isLoggedIn: boolean;
   /** ボタンの見た目（Empty状態のアクション促しでは secondary を使う） */
   variant?: React.ComponentProps<typeof Button>["variant"];
+  /** ボタンサイズ。掲示板トップの「スレッドを作成」は large（ログイン画面と同じ共通スタイル） */
+  size?: React.ComponentProps<typeof Button>["size"];
   /** ボタンのラベル（デフォルト: 質問を投稿する） */
   label?: string;
   /** 先頭アイコン。掲示板の「スレッドを作成」導線では SquarePen を渡す */
   icon?: "plus" | "square-pen";
+  /** トリガーボタンの追加クラス */
+  className?: string;
 }
 
 const ICONS: Record<NonNullable<PostQuestionButtonProps["icon"]>, LucideIcon> = {
@@ -27,8 +31,10 @@ export function PostQuestionButton({
   hasMemberAccess,
   isLoggedIn,
   variant = "default",
+  size = "default",
   label = "質問を投稿する",
   icon = "plus",
+  className,
 }: PostQuestionButtonProps) {
   const LeadingIcon = ICONS[icon];
   const router = useRouter();
@@ -48,11 +54,17 @@ export function PostQuestionButton({
 
   return (
     <>
-      <Button onClick={handleClick} disabled={isPending} variant={variant}>
+      <Button
+        onClick={handleClick}
+        disabled={isPending}
+        variant={variant}
+        size={size}
+        className={className}
+      >
         {isPending ? (
-          <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (
-          <LeadingIcon className="mr-1 h-4 w-4" />
+          <LeadingIcon className="mr-2 h-4 w-4" />
         )}
         {label}
       </Button>

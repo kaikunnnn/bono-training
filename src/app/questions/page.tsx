@@ -34,11 +34,13 @@ export default async function Page() {
           デザインの話をみんなで広げて深めよう
         </p>
         <div className="pt-4">
+          {/* ログイン画面と同じ共通スタイル（Button size="large"）を使用 */}
           <PostQuestionButton
             hasMemberAccess={hasFullAccess}
             isLoggedIn={isLoggedIn}
             label="スレッドを作成"
             icon="square-pen"
+            size="large"
           />
         </div>
       </header>

@@ -36,6 +36,7 @@
   --font-noto: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
   --font-hind: var(--font-hind-var), Hind, sans-serif;
   --font-rounded-mplus: var(--font-mplus-rounded-var), 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  --font-mplus-1p: var(--font-mplus-1p), 'M PLUS 1p', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
   --font-dot: 'DotGothic16', monospace;
   --font-geist: var(--font-inter-var), Inter, sans-serif;
   --font-luckiest: var(--font-luckiest-var), 'Luckiest Guy', sans-serif;
