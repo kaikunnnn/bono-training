@@ -24,6 +24,7 @@ import {
   ImagePlus,
   X,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FormattingTextarea } from "@/components/questions/FormattingTextarea";
@@ -377,24 +378,24 @@ export function StepCompose({
           <ArrowLeft size={16} />
           戻る
         </button>
-        <button
+        {/* 共通Buttonコンポーネント（スタイルは全サイズ統一・defaultサイズ） */}
+        <Button
           type="button"
           onClick={handleSubmit}
           disabled={!canSubmit || isSubmitting}
-          className="inline-flex h-10 items-center gap-1.5 rounded-[6px] bg-primary px-4 text-[14px] text-primary-foreground transition-opacity disabled:opacity-50"
         >
           {isSubmitting ? (
             <>
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="mr-1.5 animate-spin" />
               送信中
             </>
           ) : (
             <>
               投稿する
-              <ArrowRight size={16} />
+              <ArrowRight size={16} className="ml-1.5" />
             </>
           )}
-        </button>
+        </Button>
       </div>
     </div>
   );

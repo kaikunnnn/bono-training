@@ -36,13 +36,12 @@ export default async function Page() {
           デザインの話をみんなで広げて深めよう
         </p>
         <div className="pt-4">
-          {/* ログイン画面と同じ共通スタイル（Button size="large"）を使用 */}
+          {/* Buttonのスタイルは全サイズ統一（defaultサイズ = Figma 13:1446 の h-40/rounded-12 と一致） */}
           <PostQuestionButton
             hasMemberAccess={hasFullAccess}
             isLoggedIn={isLoggedIn}
             label="スレッドを作成"
             icon="square-pen"
-            size="large"
           />
         </div>
       </header>
