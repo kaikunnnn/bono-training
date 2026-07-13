@@ -45,7 +45,7 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
   return (
     <Link
       href={`/questions/${question.slug.current}`}
-      className="group block w-full rounded-[24px] border border-border bg-surface p-6 shadow-sm transition hover:bg-muted/30 hover:shadow-md"
+      className="group block w-full rounded-[24px] border border-[var(--card-border-subtle)] bg-surface p-6 shadow-[var(--shadow-board-card)] transition hover:bg-muted/30 hover:shadow-md"
     >
       <div className="flex flex-col gap-4">
         {/* Content */}
@@ -55,7 +55,8 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
               {question.category.title}
             </span>
           )}
-          <h2 className="text-base font-semibold leading-[1.5] text-foreground transition-colors group-hover:text-primary">
+          {/* Figma 127:3266: M PLUS Rounded 1c SemiBold 16px / leading-6(24px) */}
+          <h2 className="font-rounded-mplus text-[16px] font-semibold leading-6 text-foreground transition-colors group-hover:text-primary">
             {question.title}
           </h2>
           <div className="flex items-center gap-2">

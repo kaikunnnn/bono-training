@@ -68,7 +68,8 @@ export function QuestionCommentForm({
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <div className="flex items-start gap-3">
+      {/* Figma 20:2845: アバター40px + gap-[10px] */}
+      <div className="flex items-start gap-[10px]">
         <Avatar className="h-10 w-10 shrink-0 border border-border bg-muted">
           {authorAvatarUrl && (
             <AvatarImage src={authorAvatarUrl} alt={authorName} />
@@ -76,15 +77,16 @@ export function QuestionCommentForm({
           <AvatarFallback>{authorName.slice(0, 1) || "?"}</AvatarFallback>
         </Avatar>
         <div className="flex-1 space-y-2">
+          {/* Figma 20:2845: bg-surface / rounded-24 / px-21 py-17 / border #C0C0C0 / shadow 0 1 6 8% */}
           <Textarea
             autoFocus={autoFocus}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="コメントする"
+            placeholder="コメントを投稿しよう"
             rows={3}
             maxLength={MAX_LENGTH}
             disabled={isPending}
-            className="rounded-[16px] border border-border bg-surface p-4"
+            className="rounded-[24px] border border-[var(--border-input-strong)] bg-surface px-[21px] py-[17px] text-[16px] shadow-[var(--shadow-input)] placeholder:text-muted-foreground"
           />
           {/* 入力を始めたらカウンタ＋ボタン行がアニメーション付きで現れる */}
           <div

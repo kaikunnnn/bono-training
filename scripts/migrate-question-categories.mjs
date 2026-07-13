@@ -26,10 +26,10 @@ import { createClient } from '@sanity/client';
 // --- src/lib/questions/categories.ts と同期必須（post のみ Sanity に書く）---
 const CATEGORIES = [
   { slug: 'zatsudan',       label: '雑談・デザイン全般', order: 1, kind: 'post' },
-  { slug: 'tools',          label: 'ツールの使い方',     order: 2, kind: 'post' },
-  { slug: 'ui',             label: 'UI',                order: 3, kind: 'post' },
-  { slug: 'career',         label: 'キャリア・転職',     order: 4, kind: 'post' },
-  { slug: 'design-process', label: 'デザインの進め方',   order: 5, kind: 'post' },
+  { slug: 'design-process', label: 'デザインの進め方',   order: 2, kind: 'post' },
+  { slug: 'tools',          label: 'ツールの使い方',     order: 3, kind: 'post' },
+  { slug: 'ui',             label: 'UIとデザイン',       order: 4, kind: 'post' },
+  { slug: 'career',         label: 'キャリア・転職',     order: 5, kind: 'post' },
   { slug: 'bono-bug',       label: 'BONOのバグ・質問',   order: 6, kind: 'contact' },
 ];
 

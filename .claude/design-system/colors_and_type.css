@@ -86,6 +86,13 @@
   --border-default: #C3C5BB;
   --border-strong:  #A8AAA0;
 
+  /* 掲示板一覧カードのボーダー（Figma 127:3266・黒8%）。
+     border-border より薄い、カード用の控えめな枠線。 */
+  --card-border-subtle: rgba(0, 0, 0, 0.08);
+  /* 掲示板コメント入力カードのボーダー（Figma 20:2845・グレー実線）。
+     入力欄をはっきり縁取るための強めのボーダー。 */
+  --border-input-strong: #C0C0C0;
+
   /* Brand / CTA */
   --cta-primary-bg:    #102720;  /* Deep forest green — primary buttons */
   --cta-primary-hover: #1A3A30;
@@ -173,6 +180,12 @@
   --shadow-lift:  0px 8px 24px 0px rgba(0,0,0,0.16);        /* hover lift */
   --shadow-hero-icon: 1px 1px 13.56px 0px rgba(0,0,0,0.33);
   --shadow-cta:   0px 4px 4px 0px rgba(0,0,0,0.25);
+
+  /* 掲示板一覧カードの影（Figma 127:3266）。既存の --shadow-card（lesson card）は
+     別値のため名前衝突を避けて board 専用トークンを用意する。 */
+  --shadow-board-card:  0px 1px 4px rgba(0, 0, 0, 0.04);
+  /* 掲示板コメント入力カードの影（Figma 20:2845）。 */
+  --shadow-input:       0px 1px 6px rgba(0, 0, 0, 0.08);
 
   /* =========================================================
      SPACING — 4px base

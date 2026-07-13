@@ -3,7 +3,7 @@
 /**
  * Step2 投稿作成フォーム（#139 スライス3）
  *
- * タイトル + 本文を1画面に統合し、「次へ」＝送信を担う中核ステップ。
+ * タイトル + 本文を1画面に統合し、「投稿する」＝送信を担う中核ステップ。
  * - 送信は Supabase セッション → Bearer → POST /api/questions/submit
  * - ペイロードは { title, categoryId, questionContent } のみ（figmaUrl / referenceUrls は廃止・送らない）
  * - 失敗時は compose に留まり入力を保持したままカード上部にエラーバナーを出す（A-3）
@@ -18,6 +18,7 @@
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createClient } from "@/lib/supabase/client";
 
@@ -70,7 +71,7 @@ export function StepCompose({
   const titleTrimmedLen = title.trim().length;
   const contentTrimmedLen = content.trim().length;
 
-  // 「次へ」有効条件（サーバー値と一致）。空白のみは無効にする。
+  // 「投稿する」有効条件（サーバー値と一致）。空白のみは無効にする。
   const canSubmit =
     titleTrimmedLen >= VALIDATION_RULES.title.minLength &&
     title.length <= VALIDATION_RULES.title.maxLength &&
@@ -195,9 +196,9 @@ export function StepCompose({
 
       {/* タイトル */}
       <div className="space-y-2">
-        <label htmlFor="compose-title" className="block text-[14px] text-foreground">
+        <Label htmlFor="compose-title" className="text-[14px]">
           タイトル
-        </label>
+        </Label>
         <Input
           id="compose-title"
           value={title}
@@ -216,9 +217,9 @@ export function StepCompose({
 
       {/* 内容 */}
       <div className="space-y-2">
-        <label htmlFor="compose-content" className="block text-[14px] text-foreground">
+        <Label htmlFor="compose-content" className="text-[14px]">
           内容
-        </label>
+        </Label>
         <Textarea
           id="compose-content"
           value={content}
@@ -266,7 +267,7 @@ export function StepCompose({
             </>
           ) : (
             <>
-              次へ
+              投稿する
               <ArrowRight size={16} />
             </>
           )}

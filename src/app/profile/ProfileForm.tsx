@@ -77,13 +77,13 @@ export function ProfileForm({ defaultValues }: ProfileFormProps) {
             </div>
           </div>
 
-          {/* 表示名 */}
+          {/* プロフィール名 */}
           <div className="space-y-2">
-            <Label htmlFor="displayName">表示名</Label>
+            <Label htmlFor="displayName">プロフィール名</Label>
             <Input
               id="displayName"
               name="displayName"
-              placeholder="表示名を入力"
+              placeholder="プロフィール名を入力"
               defaultValue={defaultValues.displayName}
             />
           </div>

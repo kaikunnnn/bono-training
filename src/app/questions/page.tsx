@@ -24,8 +24,10 @@ export default async function Page() {
 
   return (
     <div className="mx-auto w-full max-w-[1120px] px-4 py-8">
-      {/* センター揃えヘッダー（Figma 13:1437） */}
-      <header className="mx-auto flex max-w-[752px] flex-col items-center gap-2 pt-12 text-center">
+      {/* センター揃えヘッダー（Figma 13:1437）。
+          Figma原値は上余白48px(pt-12)だが、グローバルヘッダーが上に積み上がるため
+          体感が広すぎる。24px(pt-6)に詰めて調整（T4・レビューで微調整）。 */}
+      <header className="mx-auto flex max-w-[752px] flex-col items-center gap-2 pt-6 text-center">
         <p className="text-sm text-muted-foreground">Q&amp;A</p>
         <h1 className="font-rounded-mplus-bold text-4xl text-foreground md:text-5xl">
           みんなの掲示板

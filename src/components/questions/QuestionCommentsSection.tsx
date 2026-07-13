@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import type { QuestionComment, ReactionKey } from "@/lib/services/questions";
@@ -77,75 +76,75 @@ export function QuestionCommentsSection({
   };
 
   return (
-    <Card className="mt-6 rounded-3xl border border-white/80 bg-white/90 shadow-[0_18px_50px_rgba(15,23,42,0.08)]">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <MessageSquare className="h-5 w-5" />
-          コメント {comments.length}件
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {/* メイン入力：コメント一覧の先頭（元の投稿のすぐ下） */}
-        <QuestionCommentForm
-          questionId={questionId}
-          questionSlug={questionSlug}
-          onAdded={handleAdded}
-          authorAvatarUrl={currentUserAvatarUrl}
-          authorName={currentUserName}
-        />
+    // Figma 20:2845: 白カード包みを廃止し、本文カード下の区切り線付きフラットセクションに。
+    // border-t で区切り / pt-8 pb-6 / gap-8。
+    <section className="mt-8 flex flex-col gap-8 border-t border-border pt-8 pb-6">
+      {/* 見出し：アイコン20px + 「コメント N件」 Rounded Mplus Bold 18px/leading-7 */}
+      <h2 className="flex items-center gap-[5px] font-rounded-mplus text-[18px] font-bold leading-7 text-foreground">
+        <MessageSquare className="h-5 w-5" />
+        コメント {comments.length}件
+      </h2>
 
-        {comments.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            まだコメントがありません。最初のコメントを書きましょう。
-          </p>
-        ) : (
-          <ul className="space-y-4">
-            {comments.map((c) => (
-              <QuestionCommentItem
-                key={c.id}
-                comment={c}
-                questionSlug={questionSlug}
-                currentUserId={currentUserId}
-                reactionCounts={
-                  commentReactionCounts[c.id] ?? emptyReactionCounts()
-                }
-                myReactions={myCommentReactions[c.id] ?? []}
-                onDeleted={handleDeleted}
-              />
-            ))}
-          </ul>
-        )}
+      {/* メイン入力：コメント一覧の先頭（元の投稿のすぐ下） */}
+      <QuestionCommentForm
+        questionId={questionId}
+        questionSlug={questionSlug}
+        onAdded={handleAdded}
+        authorAvatarUrl={currentUserAvatarUrl}
+        authorName={currentUserName}
+      />
 
-        {/* サブ導線：一覧下部の枠線ボタン → 押すとメインと同じ入力フォームに展開（一方向）。
-            コメント0件のときはメイン入力だけで十分なので非表示。 */}
-        {comments.length > 0 && (
-          <div className="border-t pt-4">
-            {subFormOpen ? (
-              <QuestionCommentForm
-                questionId={questionId}
-                questionSlug={questionSlug}
-                onAdded={handleAdded}
-                authorAvatarUrl={currentUserAvatarUrl}
-                authorName={currentUserName}
-                autoFocus
-              />
-            ) : (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setSubFormOpen(true)}
-              >
-                コメントを書く
-              </Button>
-            )}
-          </div>
-        )}
-      </CardContent>
+      {comments.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          まだコメントがありません。最初のコメントを書きましょう。
+        </p>
+      ) : (
+        <ul className="space-y-4">
+          {comments.map((c) => (
+            <QuestionCommentItem
+              key={c.id}
+              comment={c}
+              questionSlug={questionSlug}
+              currentUserId={currentUserId}
+              reactionCounts={
+                commentReactionCounts[c.id] ?? emptyReactionCounts()
+              }
+              myReactions={myCommentReactions[c.id] ?? []}
+              onDeleted={handleDeleted}
+            />
+          ))}
+        </ul>
+      )}
+
+      {/* サブ導線：一覧下部の枠線ボタン → 押すとメインと同じ入力フォームに展開（一方向）。
+          コメント0件のときはメイン入力だけで十分なので非表示。 */}
+      {comments.length > 0 && (
+        <div className="border-t pt-4">
+          {subFormOpen ? (
+            <QuestionCommentForm
+              questionId={questionId}
+              questionSlug={questionSlug}
+              onAdded={handleAdded}
+              authorAvatarUrl={currentUserAvatarUrl}
+              authorName={currentUserName}
+              autoFocus
+            />
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setSubFormOpen(true)}
+            >
+              コメントを書く
+            </Button>
+          )}
+        </div>
+      )}
 
       <ProfileSetupPromptModal
         open={showProfilePrompt}
         onOpenChange={setShowProfilePrompt}
       />
-    </Card>
+    </section>
   );
 }

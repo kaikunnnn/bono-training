@@ -112,12 +112,19 @@ function textToPortableText(text: string) {
   });
 }
 
+// 本文プレビュー用に前後空白を除去して指定長でtruncate（末尾に … を付与）
+function truncateForPreview(text: string, maxLength = 300): string {
+  const normalized = text.trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength)}…`;
+}
+
 // Slack通知を送信
 async function sendSlackNotification(data: {
   title: string;
   category: string;
   author: string;
-  questionId: string;
+  content: string;
   slug: string;
 }) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
@@ -128,7 +135,6 @@ async function sendSlackNotification(data: {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://app.bo-no.design';
   const questionPageUrl = `${siteUrl}/questions/${data.slug}`;
-  const sanityStudioUrl = `https://bono-training.sanity.studio/structure/question;${data.questionId}`;
 
   const message = {
     blocks: [
@@ -164,7 +170,7 @@ async function sendSlackNotification(data: {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*対応方法:*\n投稿は掲示板に公開済みです。\n1. 掲示板の詳細ページを開き、コメントで回答する\n2. 不適切な投稿の場合は Sanity Studio から削除する',
+          text: `*投稿内容:*\n${truncateForPreview(data.content)}`,
         },
       },
       {
@@ -172,14 +178,9 @@ async function sendSlackNotification(data: {
         elements: [
           {
             type: 'button',
-            text: { type: 'plain_text', text: '💬 掲示板でコメント回答する', emoji: true },
+            text: { type: 'plain_text', text: '💬 詳細ページを開く', emoji: true },
             url: questionPageUrl,
             style: 'primary',
-          },
-          {
-            type: 'button',
-            text: { type: 'plain_text', text: '🔗 Sanity Studioで管理', emoji: true },
-            url: sanityStudioUrl,
           },
         ],
       },
@@ -376,7 +377,7 @@ export async function POST(request: NextRequest) {
       title: payload.title,
       category: categoryName,
       author: userInfo.displayName,
-      questionId: result._id,
+      content: payload.questionContent,
       slug: questionDoc.slug.current,
     });
 

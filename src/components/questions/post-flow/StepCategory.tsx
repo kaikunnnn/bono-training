@@ -64,10 +64,10 @@ export function StepCategory({ categories, onSelect }: StepCategoryProps) {
     <div className="space-y-6">
       {/* 見出し + サブテキスト（左寄せ・既存の見出し+説明パターン） */}
       <div className="space-y-1">
-        <h2 className="text-[18px] font-medium leading-7 text-foreground">
+        <h2 className="text-[18px] font-bold leading-7 text-foreground">
           1. 何について投稿する？
         </h2>
-        <p className="text-[14px] text-muted-foreground">
+        <p className="text-[14px] text-foreground">
           カテゴリを選んでください
         </p>
       </div>

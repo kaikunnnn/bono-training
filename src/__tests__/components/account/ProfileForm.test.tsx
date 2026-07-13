@@ -30,7 +30,7 @@ describe("ProfileForm", () => {
   it("デフォルト値がフォームに表示される", () => {
     render(<ProfileForm defaultValues={defaultValues} />);
 
-    const nameInput = screen.getByLabelText("表示名") as HTMLInputElement;
+    const nameInput = screen.getByLabelText("プロフィール名") as HTMLInputElement;
     expect(nameInput.defaultValue).toBe("テストユーザー");
 
     const avatarInput = screen.getByLabelText("アバターURL") as HTMLInputElement;
@@ -51,7 +51,7 @@ describe("ProfileForm", () => {
         defaultValues={{ displayName: "", avatarUrl: "", bio: "" }}
       />
     );
-    expect(screen.getByLabelText("表示名")).toBeInTheDocument();
+    expect(screen.getByLabelText("プロフィール名")).toBeInTheDocument();
   });
 
   it("アバターのフォールバック文字が表示名の先頭文字になる", () => {
