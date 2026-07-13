@@ -93,6 +93,13 @@
      入力欄をはっきり縁取るための強めのボーダー。 */
   --border-input-strong: #C0C0C0;
 
+  /* リアクションボタン（Figma 135:4348）。
+     枠線は黒15%。ON状態は「明るい色」指定のためリンク色（--text-link #0829BF）系統で表現
+     （primaryが黒のための暫定。primaryカラー導入時に差し替え） */
+  --reaction-border: rgba(0, 0, 0, 0.15);
+  --reaction-active-bg: rgba(8, 41, 191, 0.08);
+  --reaction-active-border: rgba(8, 41, 191, 0.30);
+
   /* Brand / CTA */
   --cta-primary-bg:    #102720;  /* Deep forest green — primary buttons */
   --cta-primary-hover: #1A3A30;

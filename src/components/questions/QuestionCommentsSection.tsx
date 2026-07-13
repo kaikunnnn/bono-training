@@ -76,14 +76,21 @@ export function QuestionCommentsSection({
   };
 
   return (
-    // Figma 20:2845: 白カード包みを廃止し、本文カード下の区切り線付きフラットセクションに。
-    // border-t で区切り / pt-8 pb-6 / gap-8。
-    <section className="mt-8 flex flex-col gap-8 border-t border-border pt-8 pb-6">
-      {/* 見出し：アイコン20px + 「コメント N件」 Rounded Mplus Bold 18px/leading-7 */}
-      <h2 className="flex items-center gap-[5px] font-rounded-mplus text-[18px] font-bold leading-7 text-foreground">
-        <MessageSquare className="h-5 w-5" />
-        コメント {comments.length}件
-      </h2>
+    // Figma 135:4406: divider（border-t）なしのフラットセクション / pt-8 pb-6 / gap-8。
+    <section className="mt-8 flex flex-col gap-8 pt-8 pb-6">
+      {/* 見出しブロック：アイコン16px + 「コメント N件」 Rounded Mplus Bold 14px。
+          0件時のメッセージはこのブロック内（見出し直下・gap-9px）に表示する */}
+      <div className="flex flex-col gap-[9px]">
+        <h2 className="flex items-center gap-[5px] font-rounded-mplus text-[14px] font-bold leading-7 text-foreground">
+          <MessageSquare className="h-4 w-4" />
+          コメント {comments.length}件
+        </h2>
+        {comments.length === 0 && (
+          <p className="text-[14px] leading-5 text-foreground">
+            まだコメントがありません。最初のコメントを書きましょう。
+          </p>
+        )}
+      </div>
 
       {/* メイン入力：コメント一覧の先頭（元の投稿のすぐ下） */}
       <QuestionCommentForm
@@ -94,11 +101,7 @@ export function QuestionCommentsSection({
         authorName={currentUserName}
       />
 
-      {comments.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          まだコメントがありません。最初のコメントを書きましょう。
-        </p>
-      ) : (
+      {comments.length > 0 && (
         <ul className="space-y-4">
           {comments.map((c) => (
             <QuestionCommentItem

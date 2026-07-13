@@ -87,11 +87,11 @@ export function ReactionButtons({
     });
   };
 
-  // md は Figma 100:2820 実測（px-[12.5px] py-[4.5px] gap-[6px]）。sm はコメント用の縮小版
+  // md は Figma 135:4348 実測（px-[13.5px] py-[5.5px] gap-[6px]・rounded-9px）。sm はコメント用の縮小版
   const sizeClasses =
     size === "sm"
       ? "px-2 py-0.5 gap-1"
-      : "px-[12.5px] py-[4.5px] gap-[6px]";
+      : "px-[13.5px] py-[5.5px] gap-[6px]";
   const iconSize = size === "sm" ? 12 : 14;
 
   const visibleReactions = keys
@@ -111,11 +111,13 @@ export function ReactionButtons({
             aria-pressed={active}
             aria-label={`${label}スタンプ${active ? "を取り消す" : "を押す"}`}
             className={cn(
-              "inline-flex items-center rounded-full text-[12px] font-medium shadow transition",
+              // Figma 135:4348: rounded-9px・黒15%枠・shadowなし。
+              // hover はDSの背景色（--bg-hover）、ON はリンク色系統（primaryが黒のための暫定）
+              "inline-flex items-center rounded-[9px] text-[12px] font-medium leading-[18px] transition",
               sizeClasses,
               active
-                ? "bg-primary/10 text-primary border border-primary/30"
-                : "bg-surface/90 text-muted-foreground border border-transparent hover:text-foreground",
+                ? "border border-[var(--reaction-active-border)] bg-[var(--reaction-active-bg)] text-text-link"
+                : "border border-[var(--reaction-border)] bg-surface/90 text-muted-foreground hover:bg-[var(--bg-hover)] hover:text-foreground",
               !canReact && "cursor-not-allowed opacity-50",
               pendingKey === key && "opacity-70",
             )}
@@ -125,7 +127,9 @@ export function ReactionButtons({
             <span
               className={cn(
                 "rounded-full px-[6px] text-[11px] font-medium leading-[14.7px]",
-                active ? "bg-primary/15 text-primary" : "bg-muted text-foreground",
+                active
+                  ? "bg-[var(--reaction-active-bg)] text-text-link"
+                  : "bg-muted text-foreground",
               )}
             >
               {optCounts[key]}

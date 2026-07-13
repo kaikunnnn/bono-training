@@ -1,10 +1,8 @@
 import { Fragment, Suspense, type ReactNode } from "react";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { linkifyText } from "@/lib/questions/linkify";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { MessageSquare } from "lucide-react";
 import { BackButton } from "@/components/common/BackButton";
 import {
   getQuestionBySlug,
@@ -14,7 +12,6 @@ import {
   type ReactionKey,
 } from "@/lib/services/questions";
 import { emptyReactionCounts } from "@/lib/services/questions-utils";
-import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
 import { extractPreviewText } from "@/lib/portable-text-utils";
@@ -22,17 +19,6 @@ import { QuestionCommentsSection } from "@/components/questions/QuestionComments
 import { isProfileIncomplete } from "@/lib/profile-utils";
 import { ReactionButtons } from "@/components/questions/ReactionButtons";
 import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
-
-/** 単一スレッドのコメント件数（非メンバーのメタ表示用。集計 view を read-only 参照） */
-async function getCommentCount(questionId: string): Promise<number> {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("question_comment_counts")
-    .select("count")
-    .eq("question_id", questionId)
-    .maybeSingle();
-  return (data?.count as number | undefined) ?? 0;
-}
 
 const PREVIEW_LINES_FOR_GUEST = 3;
 
@@ -167,12 +153,9 @@ export default async function Page({ params }: PageProps) {
   let commentReactionCountsMap: Record<string, Record<ReactionKey, number>> = {};
   let myQuestionReactions: ReactionKey[] = [];
   const myCommentReactionsByCommentId: Record<string, ReactionKey[]> = {};
-  // メタ表示用のコメント件数（メンバーは取得済みの comments から、非メンバーは view から）
-  let commentCount = 0;
 
   if (hasFullAccess) {
     comments = await getCommentsByQuestion(question._id);
-    commentCount = comments.length;
 
     // 質問本体のリアクション
     const qReactionMap = await getReactionCountsMap({
@@ -212,8 +195,6 @@ export default async function Page({ params }: PageProps) {
         myCommentReactionsByCommentId[r.targetId].push(r.reaction);
       });
     }
-  } else {
-    commentCount = await getCommentCount(question._id);
   }
 
   return (
@@ -221,42 +202,28 @@ export default async function Page({ params }: PageProps) {
       {/* 掲示板へ戻る（共通コンポーネント） */}
       <BackButton label="掲示板へ戻る" href="/questions" />
 
-      {/* タイトルブロック（Figma 13:2612: 縦 gap-[12px]） */}
-      <div className="mt-6 flex flex-col gap-[12px] border-b border-border pb-8">
-        {/* ①「みんなの掲示板」= 黒枠ピルバッジ（一覧へのリンク） */}
-        <Link
-          href="/questions"
-          className="inline-flex w-fit items-center rounded-full border border-foreground px-[13px] py-[3px] text-[14px] font-medium leading-5 text-text-primary"
-        >
-          みんなの掲示板
-        </Link>
-        {/* ②H1（M PLUS 1p Bold / 24px / leading-9） */}
-        <h1 className="font-mplus-1p text-[24px] font-bold leading-9 text-foreground">
+      {/* タイトルブロック（Figma 135:4488: カテゴリタグ + H1 のみに簡素化。divider無し・gap-20px/pt-32px） */}
+      <div className="flex flex-col gap-5 pt-8">
+        {question.category && (
+          <span className="inline-flex w-fit items-center rounded-full bg-[var(--tag-category-bg)] px-3 py-1 text-[12px] font-medium leading-[21px] text-foreground">
+            {question.category.title}
+          </span>
+        )}
+        {/* H1（M PLUS 1p Bold / 24px / leading-9・左右8pxの内余白） */}
+        <h1 className="px-2 font-mplus-1p text-[24px] font-bold leading-9 text-foreground">
           {question.title}
         </h1>
-        {/* ③メタ行：コメント数 → カテゴリタグ（日付はここに置かない） */}
-        <div className="flex flex-wrap items-center gap-4">
-          <span className="flex items-center gap-1 text-[12px] text-muted-foreground">
-            <MessageSquare className="h-3 w-3" />
-            コメント {commentCount}件
-          </span>
-          {question.category && (
-            <span className="rounded-full bg-[var(--tag-category-bg)] px-3 py-1 text-[14px] font-medium text-foreground">
-              {question.category.title}
-            </span>
-          )}
-        </div>
       </div>
 
-      {/* 元の投稿ブロック（Figma 13:2617: カード内にヘッダー・本文・フッターを内包） */}
-      <div className="mt-8 flex w-full flex-col gap-[15px] rounded-[24px] border border-border bg-surface p-8">
-        {/* カード内ヘッダー：アバター 48px + gap-[22px] + 投稿者名（Inter Bold 18px） */}
-        <div className="flex items-center gap-[22px]">
+      {/* 元の投稿ブロック（Figma 135:4348: カード gap-8px・名前16px・ヘッダーgap-12px） */}
+      <div className="mt-8 flex w-full flex-col gap-2 rounded-[24px] border border-border bg-surface p-8">
+        {/* カード内ヘッダー：アバター 48px + gap-[12px] + 投稿者名（Inter Bold 16px/leading-27） */}
+        <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12 border border-border bg-muted">
             {authorAvatar && <AvatarImage src={authorAvatar} alt={authorName} />}
             <AvatarFallback>{authorName.slice(0, 1)}</AvatarFallback>
           </Avatar>
-          <span className="font-inter text-[18px] font-bold text-foreground">
+          <span className="font-inter text-[16px] font-bold leading-[27px] text-foreground">
             {authorName}
           </span>
         </div>
@@ -338,7 +305,7 @@ export default async function Page({ params }: PageProps) {
               myReactions={myQuestionReactions}
               canReact={currentUserId !== null}
             />
-            <span className="text-[14px] leading-5 text-muted-foreground">
+            <span className="text-[13px] leading-5 text-muted-foreground">
               {formatDate(question.publishedAt)}
             </span>
           </div>
