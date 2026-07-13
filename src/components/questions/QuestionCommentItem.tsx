@@ -156,6 +156,8 @@ export function QuestionCommentItem({
               rows={3}
               maxLength={5000}
               disabled={isPending}
+              containerClassName="rounded-[16px] border border-input bg-surface p-3"
+              className="min-h-[72px]"
             />
             {error && <p className="text-xs text-destructive">{error}</p>}
             <div className="flex items-center justify-end gap-2">

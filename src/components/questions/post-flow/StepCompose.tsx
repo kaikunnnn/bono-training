@@ -301,7 +301,8 @@ export function StepCompose({
           }}
           placeholder={CONTENT_PLACEHOLDER}
           maxLength={VALIDATION_RULES.content.maxLength}
-          className="min-h-[240px] resize-y rounded-[16px] border border-input bg-muted/50 p-4 text-base sm:min-h-[320px]"
+          containerClassName="rounded-[16px] border border-input bg-muted/50 p-4"
+          className="min-h-[240px] text-base sm:min-h-[320px]"
         />
         <div className="flex items-center justify-between gap-2">
           {contentFieldError ? (

@@ -87,7 +87,8 @@ export function QuestionCommentForm({
             rows={3}
             maxLength={MAX_LENGTH}
             disabled={isPending}
-            className="rounded-[24px] border border-[var(--border-input-strong)] bg-surface px-[21px] py-[17px] text-[16px] shadow-[var(--shadow-input)] placeholder:text-muted-foreground"
+            containerClassName="rounded-[24px] border border-[var(--border-input-strong)] bg-surface px-[21px] pb-[10px] pt-[17px] shadow-[var(--shadow-input)]"
+            className="min-h-[48px] text-[16px]"
           />
           {/* 入力を始めたらカウンタ＋ボタン行がアニメーション付きで現れる */}
           <div
