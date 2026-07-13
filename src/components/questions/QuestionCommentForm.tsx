@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { FormattingTextarea } from "@/components/questions/FormattingTextarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle } from "lucide-react";
 import { addComment, type QuestionComment } from "@/lib/services/questions";
@@ -78,10 +78,11 @@ export function QuestionCommentForm({
         </Avatar>
         <div className="flex-1 space-y-2">
           {/* Figma 20:2845: bg-surface / rounded-24 / px-21 py-17 / border #C0C0C0 / shadow 0 1 6 8% */}
-          <Textarea
+          <FormattingTextarea
+            ariaLabel="コメント"
             autoFocus={autoFocus}
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={setContent}
             placeholder="コメントを投稿しよう"
             rows={3}
             maxLength={MAX_LENGTH}

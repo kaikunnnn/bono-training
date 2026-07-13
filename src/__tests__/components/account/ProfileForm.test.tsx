@@ -5,6 +5,7 @@ import { ProfileForm } from "@/app/profile/ProfileForm";
 // Server Action のモック
 vi.mock("@/app/profile/actions", () => ({
   updateProfile: vi.fn().mockResolvedValue({ success: true }),
+  uploadAvatar: vi.fn().mockResolvedValue({ avatarUrl: "https://example.com/avatar.webp" }),
 }));
 
 // SettingsCard のモック（server-onlyの依存回避）
@@ -33,8 +34,8 @@ describe("ProfileForm", () => {
     const nameInput = screen.getByLabelText("プロフィール名") as HTMLInputElement;
     expect(nameInput.defaultValue).toBe("テストユーザー");
 
-    const avatarInput = screen.getByLabelText("アバターURL") as HTMLInputElement;
-    expect(avatarInput.defaultValue).toBe("https://example.com/avatar.png");
+    // アバターは URL 入力ではなく「画像を選択」ボタン方式に変更（#145）
+    expect(screen.getByText("画像を選択")).toBeInTheDocument();
 
     const bioInput = screen.getByLabelText("自己紹介") as HTMLTextAreaElement;
     expect(bioInput.defaultValue).toBe("自己紹介テスト");

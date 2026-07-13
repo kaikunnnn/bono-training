@@ -226,7 +226,7 @@ export async function getRecentQuestions(params?: {
 
 export async function getQuestionBySlug(slug: string): Promise<Question | null> {
   const query = `*[_type == "question" && slug.current == $slug][0]{
-    _id, title, slug, publishedAt, questionContent, figmaUrl, referenceUrls, author,
+    _id, title, slug, publishedAt, questionContent, figmaUrl, referenceUrls, attachedImage, author,
     category->{_id, title, slug}
   }`;
   return getClient().fetch<Question | null>(query, { slug }, {

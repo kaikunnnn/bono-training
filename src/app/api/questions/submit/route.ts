@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SanityClient } from '@sanity/client';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { textToPortableBlocks } from '@/lib/questions/text-format';
 
 // Sanity write client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
 let sanityClient: SanityClient | null = null;
@@ -28,6 +29,7 @@ interface SubmitQuestionPayload {
   questionContent: string;
   figmaUrl?: string;
   referenceUrls?: Array<{ title?: string; url: string }>;
+  imageUrl?: string;
 }
 
 interface UserInfo {
@@ -72,44 +74,18 @@ function isFigmaUrl(value: string): boolean {
   }
 }
 
-// プレーンテキストをPortable Textに変換
-function textToPortableText(text: string) {
-  const paragraphs = text.split(/\n\n+/);
-  return paragraphs.map((paragraph, index) => {
-    // 見出しの検出（## で始まる行）
-    if (paragraph.startsWith('## ')) {
-      return {
-        _type: 'block',
-        _key: `block-${index}`,
-        style: 'h3',
-        children: [
-          {
-            _type: 'span',
-            _key: `span-${index}`,
-            text: paragraph.replace(/^## /, ''),
-            marks: [],
-          },
-        ],
-        markDefs: [],
-      };
-    }
-
-    // 通常の段落
-    return {
-      _type: 'block',
-      _key: `block-${index}`,
-      style: 'normal',
-      children: [
-        {
-          _type: 'span',
-          _key: `span-${index}`,
-          text: paragraph.trim(),
-          marks: [],
-        },
-      ],
-      markDefs: [],
-    };
-  });
+// 添付画像URLは http/https かつ Supabase Storage（SUPABASE_URL のホスト）のみ許可。
+// アップロードは自前の Server Action（question-attachments バケット）経由のため、
+// ホストを固定して外部URLの持ち込み（不適切画像のホットリンク等）を防ぐ。
+function isSupabaseImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    const base = supabaseUrl ? new URL(supabaseUrl) : null;
+    return base !== null && url.hostname === base.hostname;
+  } catch {
+    return false;
+  }
 }
 
 // 本文プレビュー用に前後空白を除去して指定長でtruncate（末尾に … を付与）
@@ -126,6 +102,7 @@ async function sendSlackNotification(data: {
   author: string;
   content: string;
   slug: string;
+  imageUrl?: string;
 }) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
@@ -135,6 +112,18 @@ async function sendSlackNotification(data: {
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://app.bo-no.design';
   const questionPageUrl = `${siteUrl}/questions/${data.slug}`;
+
+  const imageBlocks = data.imageUrl
+    ? [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*画像添付あり:*\n${data.imageUrl}`,
+          },
+        },
+      ]
+    : [];
 
   const message = {
     blocks: [
@@ -173,6 +162,7 @@ async function sendSlackNotification(data: {
           text: `*投稿内容:*\n${truncateForPreview(data.content)}`,
         },
       },
+      ...imageBlocks,
       {
         type: 'actions',
         elements: [
@@ -309,6 +299,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  // 添付画像URLのバリデーション（Supabase Storage のホストのみ許可）
+  if (payload.imageUrl && !isSupabaseImageUrl(payload.imageUrl)) {
+    return NextResponse.json(
+      { error: '添付画像の形式が不正です' },
+      { status: 400 });
+  }
+
   // レート制限: 1ユーザーにつき1時間に5件まで（#131-C。カウントはSanityの実データ）
   try {
     const RATE_LIMIT_PER_HOUR = 5;
@@ -354,7 +351,7 @@ export async function POST(request: NextRequest) {
     title: payload.title,
     slug: { _type: 'slug', current: generateSlug() },
     category: { _type: 'reference', _ref: payload.categoryId },
-    questionContent: textToPortableText(payload.questionContent),
+    questionContent: textToPortableBlocks(payload.questionContent),
     author: {
       userId: userInfo.id,
       displayName: userInfo.displayName,
@@ -366,6 +363,10 @@ export async function POST(request: NextRequest) {
       title: ref.title || null,
       url: ref.url,
     })) || null,
+    // 添付画像（imageUrl がある時のみ object を持たせる。本文とは独立したブロック）
+    ...(payload.imageUrl
+      ? { attachedImage: { url: payload.imageUrl } }
+      : {}),
     publishedAt: new Date().toISOString(),
   };
 
@@ -379,6 +380,7 @@ export async function POST(request: NextRequest) {
       author: userInfo.displayName,
       content: payload.questionContent,
       slug: questionDoc.slug.current,
+      imageUrl: payload.imageUrl,
     });
 
     return NextResponse.json(

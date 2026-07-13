@@ -15,12 +15,21 @@
  * 色/角丸は DSトークン対応表のクラスのみ使用（生hex/rgb禁止）。
  */
 
-import { useState } from "react";
-import { ArrowLeft, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Loader2,
+  AlertCircle,
+  ImagePlus,
+  X,
+} from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { FormattingTextarea } from "@/components/questions/FormattingTextarea";
 import { createClient } from "@/lib/supabase/client";
+import { validateImageFile, resizeImageToWebP } from "@/lib/image-utils";
+import { uploadQuestionImage } from "@/app/questions/new/actions";
 
 // サーバー側（/api/questions/submit）と一致させる。ズレると UX とサーバー拒否が食い違う。
 const VALIDATION_RULES = {
@@ -30,7 +39,8 @@ const VALIDATION_RULES = {
 
 const CONTENT_PLACEHOLDER = `話したいことや聞きたいことを詳しく書き込みましょう。
 ・「理由」や「背景」が明確なほど答えやすいです。
-・リンクがあるならリンクも貼るとよいでしょう`;
+・リンクがあるならリンクも貼るとよいでしょう
+（## 見出し・**太字**・- 箇条書き が使えます）`;
 
 /** 送信成功時に返す最小限の結果 */
 export interface ComposeResult {
@@ -67,6 +77,49 @@ export function StepCompose({
 }: StepComposeProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 添付画像（1枚固定）。StepCompose 内ローカル state で保持する。
+  // 戻る→再入場で消える点は許容（親 state に持たせていない）。
+  // imageBlob: アップロード対象の縮小済み WebP。imagePreviewUrl: その場プレビュー用 objectURL。
+  const [imageBlob, setImageBlob] = useState<Blob | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleImageSelect = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = e.target.files?.[0];
+    // 同じファイルを選び直せるよう input をリセット
+    e.target.value = "";
+    if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.valid) {
+      setError(validation.error ?? "画像を選択し直してください");
+      return;
+    }
+
+    setError(null);
+    setIsProcessingImage(true);
+    try {
+      const blob = await resizeImageToWebP(file);
+      // 既存プレビューがあれば objectURL を解放してから差し替え
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      setImageBlob(blob);
+      setImagePreviewUrl(URL.createObjectURL(blob));
+    } catch {
+      setError("画像の処理に失敗しました。別の画像でお試しください");
+    } finally {
+      setIsProcessingImage(false);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    setImageBlob(null);
+    setImagePreviewUrl(null);
+  };
 
   const titleTrimmedLen = title.trim().length;
   const contentTrimmedLen = content.trim().length;
@@ -118,10 +171,28 @@ export function StepCompose({
         return;
       }
 
+      // 画像があれば先にアップロードして公開URLを得る。失敗時は送信中断。
+      let imageUrl: string | undefined;
+      if (imageBlob) {
+        const formData = new FormData();
+        formData.append("file", imageBlob, "attachment.webp");
+        const uploadResult = await uploadQuestionImage(formData);
+        if (uploadResult.error || !uploadResult.imageUrl) {
+          setError(
+            uploadResult.error ||
+              "画像のアップロードに失敗しました。もう一度お試しください",
+          );
+          setIsSubmitting(false);
+          return;
+        }
+        imageUrl = uploadResult.imageUrl;
+      }
+
       const payload = {
         title,
         categoryId,
         questionContent: content,
+        ...(imageUrl ? { imageUrl } : {}),
       };
 
       const response = await fetch("/api/questions/submit", {
@@ -220,11 +291,12 @@ export function StepCompose({
         <Label htmlFor="compose-content" className="text-[14px]">
           内容
         </Label>
-        <Textarea
+        <FormattingTextarea
           id="compose-content"
+          ariaLabel="内容"
           value={content}
-          onChange={(e) => {
-            onContentChange(e.target.value);
+          onChange={(next) => {
+            onContentChange(next);
             if (error) setError(null);
           }}
           placeholder={CONTENT_PLACEHOLDER}
@@ -241,6 +313,56 @@ export function StepCompose({
             {content.length} / {VALIDATION_RULES.content.maxLength} 文字
           </span>
         </div>
+      </div>
+
+      {/* 画像添付（1枚固定・任意） */}
+      <div className="space-y-2">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleImageSelect}
+        />
+        {imagePreviewUrl ? (
+          <div className="relative w-fit">
+            {/* プレビューはローカル objectURL。next/image は blob: を扱えないため素の img */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imagePreviewUrl}
+              alt="添付画像プレビュー"
+              className="max-h-[240px] max-w-full rounded-[16px] border border-border object-contain"
+            />
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              disabled={isSubmitting}
+              aria-label="画像を削除"
+              className="absolute right-2 top-2 inline-flex h-8 w-8 items-center justify-center rounded-full bg-foreground/70 text-background transition-opacity hover:bg-foreground disabled:opacity-50"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isProcessingImage || isSubmitting}
+            className="inline-flex items-center gap-1.5 rounded-[8px] border border-input bg-transparent px-3 py-2 text-[14px] text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+          >
+            {isProcessingImage ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                画像を処理中
+              </>
+            ) : (
+              <>
+                <ImagePlus size={16} />
+                画像を追加
+              </>
+            )}
+          </button>
+        )}
       </div>
 
       {/* フッター（カードの padding を貫通する full-bleed） */}

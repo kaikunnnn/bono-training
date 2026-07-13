@@ -235,6 +235,8 @@ export interface Question {
   author?: QuestionAuthor;
   figmaUrl?: string;
   referenceUrls?: QuestionReferenceUrl[];
+  // 添付画像（Phase 2 / #145）。Supabase Storage の公開URLを保持する
+  attachedImage?: { url: string };
 }
 
 // FeedbackCategory型

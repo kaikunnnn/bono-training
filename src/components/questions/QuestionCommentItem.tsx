@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { FormattingTextarea } from "@/components/questions/FormattingTextarea";
+import { FormattedText } from "@/components/questions/FormattedText";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -148,9 +149,10 @@ export function QuestionCommentItem({
 
         {isEditing ? (
           <div className="mt-2 space-y-2">
-            <Textarea
+            <FormattingTextarea
+              ariaLabel="コメント編集"
               value={draft}
-              onChange={(e) => setDraft(e.target.value)}
+              onChange={setDraft}
               rows={3}
               maxLength={5000}
               disabled={isPending}
@@ -183,7 +185,7 @@ export function QuestionCommentItem({
           </div>
         ) : (
           <>
-            <p className="mt-1 whitespace-pre-line text-sm">{comment.content}</p>
+            <FormattedText text={comment.content} className="mt-1 text-sm" />
             {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
           </>
         )}

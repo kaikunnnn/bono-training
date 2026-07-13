@@ -268,6 +268,17 @@ export default async function Page({ params }: PageProps) {
               value={question.questionContent ?? []}
               components={ptComponents}
             />
+            {question.attachedImage?.url && (
+              <div className="mt-4 not-prose">
+                {/* 添付画像。Supabase Storage で縮小済みのため素の img で表示 */}
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={question.attachedImage.url}
+                  alt="添付画像"
+                  className="max-w-full rounded-[16px] border border-border"
+                />
+              </div>
+            )}
             {question.figmaUrl && (
               <p className="mt-4 text-sm">
                 <a
