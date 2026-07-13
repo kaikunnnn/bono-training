@@ -16,11 +16,8 @@ const STAMPS: Array<{ key: ReactionKey; label: string; Icon: LucideIcon }> = [
 
 function formatDate(iso?: string): string {
   if (!iso) return "";
-  return new Date(iso).toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-  });
+  const d = new Date(iso);
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
 }
 
 interface QuestionCardProps {
@@ -33,7 +30,7 @@ interface QuestionCardProps {
  * 掲示板一覧の投稿カード（Figma: fb-post-card-link-style / node 13:1467）。
  *
  * 構成順: カテゴリタグ → タイトル → アバター+投稿者名 → 本文2行プレビュー → フッター。
- * フッター左はスタンプ3種を個別に（件数>0のもののみ）表示専用で並べ、右はコメント件数+日付。
+ * フッター左はスタンプ3種を個別に（件数>0のもののみ）表示専用で並べ、右はコメント件数（0件でも常時表示）+日付。
  * カード全体が詳細ページへのリンク。
  */
 export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
@@ -54,11 +51,11 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
         {/* Content */}
         <div className="flex flex-col gap-2">
           {question.category && (
-            <span className="inline-flex w-fit items-center rounded-full bg-muted px-[7px] py-[2px] text-xs font-medium text-foreground">
+            <span className="inline-flex w-fit items-center rounded-full bg-[var(--tag-category-bg)] px-[7px] py-[2px] text-xs font-medium text-foreground">
               {question.category.title}
             </span>
           )}
-          <h2 className="text-base font-semibold leading-normal text-foreground transition-colors group-hover:text-primary">
+          <h2 className="text-base font-semibold leading-[1.5] text-foreground transition-colors group-hover:text-primary">
             {question.title}
           </h2>
           <div className="flex items-center gap-2">
@@ -72,7 +69,7 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
               {authorName}
             </span>
           </div>
-          <p className="line-clamp-2 whitespace-pre-line text-sm leading-relaxed text-muted-foreground">
+          <p className="line-clamp-2 whitespace-pre-line text-sm leading-[1.6] text-[var(--text-body-muted)]">
             {bodyText}
           </p>
         </div>
@@ -84,24 +81,22 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
             {activeStamps.map(({ key, label, Icon }) => (
               <span
                 key={key}
-                className="flex items-center gap-1.5 rounded-full px-2 py-1.5"
+                className="flex items-center gap-[6px] rounded-full px-[8.5px] py-[6.5px]"
               >
                 <Icon className="size-3.5 text-muted-foreground" />
                 <span className="text-xs font-medium text-muted-foreground">
                   {label}
                 </span>
-                <span className="rounded-full bg-muted px-1.5 text-[11px] font-medium text-foreground">
+                <span className="rounded-full bg-muted px-[6px] text-[11px] font-medium leading-[14.7px] text-foreground">
                   {reactionCounts[key]}
                 </span>
               </span>
             ))}
           </div>
 
-          {/* 右: コメント件数 + 日付 */}
+          {/* 右: コメント件数（0件でも常時表示） + 日付 */}
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            {showEngagement && commentCount === 0 ? (
-              <span>コメントしようぜ</span>
-            ) : showEngagement ? (
+            {showEngagement ? (
               <>
                 <span>コメント {commentCount}件</span>
                 <span aria-hidden>・</span>

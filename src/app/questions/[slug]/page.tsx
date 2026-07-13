@@ -235,7 +235,7 @@ export default async function Page({ params }: PageProps) {
         </h1>
         <div className="mt-3 flex flex-wrap items-center gap-3">
           {question.category && (
-            <span className="rounded-full bg-primary/10 px-3 py-1 text-[14px] font-medium text-primary">
+            <span className="rounded-full bg-[var(--tag-category-bg)] px-3 py-1 text-[14px] font-medium text-foreground">
               {question.category.title}
             </span>
           )}

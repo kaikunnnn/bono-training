@@ -64,6 +64,7 @@
   --text-primary:   #021710;  /* near-black, cool green undertone */
   --text-secondary: #354540;
   --text-muted:     #677470;
+  --text-body-muted:#434E5D;  /* 掲示板一覧カードの本文抜粋（Figma 13:1467 本文色） */
   --text-disabled:  #9AA29F;
   --text-inverse:   #FAFBFB;
   --text-link:      #0829BF;
@@ -118,6 +119,10 @@
   --cat-ux-design:   #525382;
   --cat-info-arch:   #774000;
   --cat-ui-visual:   #08381D;
+
+  /* 掲示板カテゴリタグ背景（Figma 13:1467・#C3BE2C の 10%）。
+     一覧カードと詳細ページのカテゴリタグで共通利用する。 */
+  --tag-category-bg: rgba(195, 190, 44, 0.10);
 
   /* Category utility tints */
   --cat-tweet:  #1DA1F2;
