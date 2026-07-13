@@ -71,6 +71,8 @@ The host app is **Next.js (App Router)**. The system also works for the legacy V
 
 ### 2. Look at the kit before writing new UI
 
+For information-structure patterns (focused flows, flow shells, cards, empty states, permission gates), read `patterns.md` in this directory first.
+
 Before writing a hero, CTA, card, badge, or section header from scratch, check:
 
 - `ui_kits/marketing-top/index.html` for `/top`-style marketing surfaces

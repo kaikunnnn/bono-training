@@ -62,6 +62,8 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 - `05-file-conventions.md` — ファイル配置・命名
 - `06-development-workflow.md` — 環境・ビルド・デプロイ
 - `07-performance.md` — フォント・画像・バンドルサイズ最適化
+- `08-figma-implementation.md` — Figmaデザイン実装の必須手順（実測→トークン対応表→突合）
+- `09-work-loop.md` — タスク進行の標準ループ（リサーチ→計画→実装→テスト→改善）
 
 ## 移植ルール（最重要）
 
