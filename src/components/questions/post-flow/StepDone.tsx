@@ -13,16 +13,16 @@
  */
 
 import Link from "next/link";
-import { Check } from "lucide-react";
 import styles from "./StepDone.module.css";
+import { Confetti } from "./Confetti";
 
 /** ARIGATO 見出し。絵文字も1文字カウントするため Array.from でコードポイント分割する。 */
 const ARIGATO = Array.from("🙌ARIGATO🙌");
 
 /** 1文字ごとの出現間隔（ms） */
 const CHAR_STAGGER_MS = 70;
-/** チェックのポップイン後、最初の文字が出るまでの遅延（ms） */
-const CHARS_START_MS = 240;
+/** チェック描画＋フラッシュ完了後、最初の文字が出るまでの遅延（ms・#143で調整） */
+const CHARS_START_MS = 650;
 /** 文字列出現後、残りブロックがフェードインし始めるまでの遅延（ms） */
 const REVEAL_GAP_MS = 120;
 
@@ -44,12 +44,39 @@ export function StepDone({ slug, isPreview }: StepDoneProps) {
     <div className="flex flex-col gap-8">
       {/* 内側センタリングブロック */}
       <div className="flex flex-col items-center gap-3 p-6 text-center">
-        {/* チェックアイコン 56px（黒丸線 + チェック） */}
-        <div
-          className={`${styles.icon} flex size-14 items-center justify-center rounded-full border-2 border-foreground text-foreground`}
-          aria-hidden="true"
-        >
-          <Check size={28} strokeWidth={2.5} />
+        {/* チェックアイコン 56px（丸サークル出現→パス描画→白フラッシュ・花吹雪） */}
+        <div className={`${styles.iconWrap} relative size-14`} aria-hidden="true">
+          {/* 花吹雪はアイコン中心を基点に放射状バースト（背後レイヤー） */}
+          <Confetti />
+          <svg
+            width="56"
+            height="56"
+            viewBox="0 0 56 56"
+            fill="none"
+            className="relative block text-foreground"
+          >
+            {/* 丸サークル: currentColor の線（既存と同じ黒系・border-2 相当 2px） */}
+            <circle
+              className={styles.circle}
+              cx="28"
+              cy="28"
+              r="26"
+              stroke="currentColor"
+              strokeWidth="2"
+            />
+            {/* チェックパス: pathLength=1 で stroke-dasharray 描画を長さ非依存に */}
+            <path
+              className={styles.check}
+              d="M17 28.5L24.5 36L39 21"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              pathLength={1}
+            />
+          </svg>
+          {/* 白フラッシュ: アイコン上に重ねる角丸オーバーレイ */}
+          <span className={styles.flash} />
         </div>
 
         {/* 🙌ARIGATO🙌（1文字ずつ左から出現・絵文字も1文字） */}

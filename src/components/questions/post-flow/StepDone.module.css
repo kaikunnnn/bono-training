@@ -1,17 +1,49 @@
 /*
- * Step3 完了画面のアニメーション（#139 スライス5）
+ * Step3 完了画面のアニメーション（#139 スライス5 / #143 強化）
  *
  * グローバルCSS追加禁止ルールのため、keyframes は CSS Module に閉じる
  * （前例: ui/icon-check.module.css）。
- * 演出シーケンス:
- *   1. チェックアイコン: ポップイン（scale 0→1・軽いオーバーシュート）
- *   2. 「🙌ARIGATO🙌」: 1文字ずつ左から出現（delay は JSX 側で index ベース付与）
- *   3. 残り（完了テキスト・サブ・ボタン群）: 後追いフェードイン
+ * 演出シーケンス（Figma 92:129 パターン「フラッシュ」準拠・1回再生）:
+ *   1. 丸サークル: opacity 0→1(0-150ms) / scale 0→1(0-400ms)
+ *      cubic-bezier(0.45,1.45,0.8,1) のオーバーシュートで出現
+ *   2. チェックパス: 280-550ms で stroke を描画（pathLength=1 + stroke-dasharray）
+ *   3. 白フラッシュ: 380-640ms で opacity 0→0.18→0.88→0 の閃光
+ *   4. 「🙌ARIGATO🙌」: ~650ms から1文字ずつ左から出現（delay は JSX 側で付与）
+ *   5. 残り（完了テキスト・サブ・ボタン群）: 後追いフェードイン
  * prefers-reduced-motion: reduce では全アニメを無効化し即時表示する。
  */
 
-.icon {
-  animation: step-done-pop 320ms cubic-bezier(0.16, 1, 0.3, 1) both;
+/* アイコン全体のラッパ: opacity 0→1(0-200ms) / scale 0.85→1(0-350ms) ease-out */
+.iconWrap {
+  position: relative;
+  animation: step-done-icon 350ms ease-out both;
+}
+
+/* 丸サークル: オーバーシュート付きで出現 */
+.circle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation:
+    step-done-circle-scale 400ms cubic-bezier(0.45, 1.45, 0.8, 1) both,
+    step-done-circle-fade 150ms ease-out both;
+}
+
+/* チェックパス: pathLength=1 前提で stroke-dasharray を 0→1 に描画 */
+.check {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: step-done-check 270ms ease-out 280ms both;
+}
+
+/* 白フラッシュ: アイコン上に重ねる角丸矩形オーバーレイ */
+.flash {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  opacity: 0;
+  pointer-events: none;
+  animation: step-done-flash 640ms ease-out both;
 }
 
 .char {
@@ -28,15 +60,70 @@
   /* animation-delay は JSX の inline style で付与 */
 }
 
-@keyframes step-done-pop {
+@keyframes step-done-icon {
   0% {
-    transform: scale(0);
+    opacity: 0;
+    transform: scale(0.85);
   }
-  70% {
-    transform: scale(1.12);
+  /* opacity は 200ms（=57%）で 1 に到達、scale は 350ms 全体で 1 に */
+  57% {
+    opacity: 1;
   }
   100% {
+    opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes step-done-circle-scale {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes step-done-circle-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes step-done-check {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* 380-640ms（260ms間）で 0→0.18→0.88→0。
+   380ms 相当を 0% に合わせるため animation は 640ms 全体だが、
+   0-380ms は 0 を維持する。 */
+@keyframes step-done-flash {
+  0% {
+    opacity: 0;
+  }
+  59.4% {
+    /* ~380ms */
+    opacity: 0;
+  }
+  68.75% {
+    /* ~440ms */
+    opacity: 0.18;
+  }
+  78.1% {
+    /* ~500ms */
+    opacity: 0.88;
+  }
+  100% {
+    /* ~640ms */
+    opacity: 0;
   }
 }
 
@@ -63,11 +150,20 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .icon,
+  .iconWrap,
+  .circle,
+  .check,
+  .flash,
   .char,
   .reveal {
     animation: none;
     opacity: 1;
     transform: none;
+  }
+  .check {
+    stroke-dashoffset: 0;
+  }
+  .flash {
+    opacity: 0;
   }
 }

@@ -131,6 +131,19 @@
   --success-dark:    #16A34A;
   --success-bg:      #F0FDF4;
 
+  /* Confetti — 8-color burst palette for completion animations
+     (Tailwind 400-level bright mid-tones). Used by the /questions
+     post-flow StepDone celebration. Reference via var(--confetti-N);
+     never inline the hex in JSX/TS. */
+  --confetti-1: #F87171;  /* coral red */
+  --confetti-2: #FB923C;  /* orange */
+  --confetti-3: #FBBF24;  /* yellow */
+  --confetti-4: #4ADE80;  /* green */
+  --confetti-5: #2DD4BF;  /* mint */
+  --confetti-6: #60A5FA;  /* blue */
+  --confetti-7: #A78BFA;  /* purple */
+  --confetti-8: #F472B6;  /* pink */
+
   /* =========================================================
      RADIUS — Rounded is a core visual motif
      ========================================================= */
