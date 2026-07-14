@@ -41,14 +41,12 @@ interface QuestionCommentItemProps {
   onDeleted?: (commentId: string) => void;
 }
 
-// 月日+時刻で統一（元投稿の表記と揃える。ユーザー指定）
+// 「7月14日 18:00」形式（年なし・スラッシュ不可。元投稿の表記と揃える。ユーザー指定）
+// toLocaleString は年なしだと「7/14」になるため手組みする
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("ja-JP", {
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const d = new Date(iso);
+  const time = `${d.getHours()}:${String(d.getMinutes()).padStart(2, "0")}`;
+  return `${d.getMonth() + 1}月${d.getDate()}日 ${time}`;
 }
 
 export function QuestionCommentItem({
