@@ -14,7 +14,7 @@
  *   文字数カウント・バリデーション・ボタン出現条件は従来どおり動く）
  */
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Heading2, Bold, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FormattedText } from "./FormattedText";
@@ -56,6 +56,21 @@ export function FormattingTextarea({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const generatedId = useId();
   const textareaId = id ?? generatedId;
+
+  // 内容に応じた自動拡張。内容が現在の高さを超えた時だけ伸ばす
+  // （縮める方向へは触らない＝ユーザーが resize-y で手動調整した高さを尊重する）
+  const autoGrow = () => {
+    const el = textareaRef.current;
+    if (!el) return;
+    if (el.scrollHeight > el.clientHeight) {
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  };
+
+  // 初期表示・プレビューから編集へ戻った時・値の外部変更（編集モード復元等）にも追従
+  useEffect(() => {
+    if (tab === "edit") autoGrow();
+  }, [value, tab]);
 
   /**
    * カーソル位置 / 選択範囲へ記法を挿入する。
@@ -112,7 +127,8 @@ export function FormattingTextarea({
           disabled={disabled}
           autoFocus={autoFocus}
           className={cn(
-            "w-full flex-1 resize-none border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50",
+            // resize-y: 右下のつまみで手動リサイズ可能。autoGrow が内容に応じて自動でも伸ばす
+            "w-full flex-1 resize-y border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50",
             className,
           )}
         />
