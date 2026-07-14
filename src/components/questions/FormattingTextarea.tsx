@@ -127,13 +127,14 @@ export function FormattingTextarea({
           disabled={disabled}
           autoFocus={autoFocus}
           className={cn(
-            // resize-y: 右下のつまみで手動リサイズ可能。autoGrow が内容に応じて自動でも伸ばす
-            "w-full flex-1 resize-y border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50",
+            // resize-y: 右下のつまみで手動リサイズ可能。autoGrow が内容に応じて自動でも伸ばす。
+            // flex-1 は付けない（flex-basis:0% になり、ドラッグ/autoGrow の height 指定が無視されるため）
+            "w-full resize-y border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50",
             className,
           )}
         />
       ) : (
-        <div className={cn("flex-1 text-sm", className)}>
+        <div className={cn("text-sm", className)}>
           {value.trim() ? (
             <FormattedText text={value} />
           ) : (

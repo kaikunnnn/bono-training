@@ -121,18 +121,19 @@ export function QuestionCommentsSection({
 
       {/* サブ導線：一覧下部の枠線ボタン → 押すとメインと同じ入力フォームに展開（一方向）。
           コメント0件のときはメイン入力だけで十分なので非表示。 */}
-      {comments.length > 0 && (
-        <div className="border-t pt-4">
-          {subFormOpen ? (
-            <QuestionCommentForm
-              questionId={questionId}
-              questionSlug={questionSlug}
-              onAdded={handleAdded}
-              authorAvatarUrl={currentUserAvatarUrl}
-              authorName={currentUserName}
-              autoFocus
-            />
-          ) : (
+      {comments.length > 0 &&
+        (subFormOpen ? (
+          <QuestionCommentForm
+            questionId={questionId}
+            questionSlug={questionSlug}
+            onAdded={handleAdded}
+            authorAvatarUrl={currentUserAvatarUrl}
+            authorName={currentUserName}
+            autoFocus
+          />
+        ) : (
+          // コメントカードと左端・横幅を揃える（アバター40px + gap17px = 57px）
+          <div className="pl-[57px]">
             <Button
               type="button"
               variant="outline"
@@ -142,9 +143,8 @@ export function QuestionCommentsSection({
               <MessageSquare className="h-4 w-4" />
               コメントする
             </Button>
-          )}
-        </div>
-      )}
+          </div>
+        ))}
 
       <ProfileSetupPromptModal
         open={showProfilePrompt}

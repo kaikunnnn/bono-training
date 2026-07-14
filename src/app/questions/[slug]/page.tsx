@@ -24,11 +24,16 @@ import { portableBlocksToText } from "@/lib/questions/text-format";
 
 const PREVIEW_LINES_FOR_GUEST = 3;
 
-// 投稿カード下部のフッター表示用（Figma 13:2617: YYYY年M月D日）
+// 投稿カード下部のフッター表示用。
+// Figma 13:2617 は YYYY年M月D日 だが、ユーザー指定で「月日+時刻」に統一（コメントと同表記）
 function formatDate(iso?: string): string {
   if (!iso) return "";
-  const d = new Date(iso);
-  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+  return new Date(iso).toLocaleString("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 // DS のリンクスタイル（text-text-link は globals.css の --color-text-link に対応）。

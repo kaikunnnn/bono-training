@@ -41,11 +41,13 @@ interface QuestionCommentItemProps {
   onDeleted?: (commentId: string) => void;
 }
 
+// 月日+時刻で統一（元投稿の表記と揃える。ユーザー指定）
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("ja-JP", {
-    year: "numeric",
+  return new Date(iso).toLocaleString("ja-JP", {
     month: "numeric",
     day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
   });
 }
 
