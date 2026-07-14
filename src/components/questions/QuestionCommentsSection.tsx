@@ -102,7 +102,7 @@ export function QuestionCommentsSection({
       />
 
       {comments.length > 0 && (
-        <ul className="space-y-4">
+        <ul className="space-y-6">
           {comments.map((c) => (
             <QuestionCommentItem
               key={c.id}
@@ -136,9 +136,11 @@ export function QuestionCommentsSection({
             <Button
               type="button"
               variant="outline"
+              className="w-full"
               onClick={() => setSubFormOpen(true)}
             >
-              コメントを書く
+              <MessageSquare className="h-4 w-4" />
+              コメントする
             </Button>
           )}
         </div>

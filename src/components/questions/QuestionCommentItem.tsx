@@ -42,12 +42,10 @@ interface QuestionCommentItemProps {
 }
 
 function formatDate(iso: string): string {
-  return new Date(iso).toLocaleString("ja-JP", {
+  return new Date(iso).toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "numeric",
     day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
   });
 }
 
@@ -107,26 +105,28 @@ export function QuestionCommentItem({
   };
 
   return (
-    <li className="flex items-start gap-3 rounded-2xl bg-[#F1F4F8] px-4 py-3">
-      <Avatar className="h-9 w-9">
+    // Figma 135:4877: アバターはカード外・左（40px）、右カラムに名前行＋白カード
+    <li className="flex items-start gap-[17px]">
+      <Avatar className="h-10 w-10 shrink-0">
         {comment.authorAvatarUrl && (
           <AvatarImage src={comment.authorAvatarUrl} alt={comment.authorName} />
         )}
         <AvatarFallback>{comment.authorName.slice(0, 1)}</AvatarFallback>
       </Avatar>
-      <div className="flex-1 rounded-2xl bg-white/90 px-4 py-3">
+
+      <div className="flex min-w-0 flex-1 flex-col gap-[9px]">
+        {/* 名前行（カード外・カード上）：左=投稿者名 / 右=本人メニュー */}
         <div className="flex items-start justify-between gap-2">
-          <div className="text-xs text-muted-foreground">
-            {comment.authorName} ・ {formatDate(comment.createdAt)}
-            {wasEdited && " ・ 編集済み"}
-          </div>
+          <span className="text-[16px] font-medium leading-[22.5px] text-foreground">
+            {comment.authorName}
+          </span>
           {isOwner && !isEditing && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-6 w-6 p-0"
+                  className="h-6 w-6 shrink-0 p-0"
                   aria-label="メニュー"
                 >
                   <MoreHorizontal className="h-4 w-4" />
@@ -147,64 +147,76 @@ export function QuestionCommentItem({
           )}
         </div>
 
-        {isEditing ? (
-          <div className="mt-2 space-y-2">
-            <FormattingTextarea
-              ariaLabel="コメント編集"
-              value={draft}
-              onChange={setDraft}
-              rows={3}
-              maxLength={5000}
-              disabled={isPending}
-              containerClassName="rounded-[16px] border border-input bg-surface p-3"
-              className="min-h-[72px]"
-            />
-            {error && <p className="text-xs text-destructive">{error}</p>}
-            <div className="flex items-center justify-end gap-2">
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  setIsEditing(false);
-                  setDraft(comment.content);
-                  setError(null);
-                }}
+        {/* 白カード：本文 + カード内フッター */}
+        <div className="w-full rounded-[16px] bg-surface p-5 shadow-comment-card">
+          {isEditing ? (
+            <div className="space-y-2">
+              <FormattingTextarea
+                ariaLabel="コメント編集"
+                value={draft}
+                onChange={setDraft}
+                rows={3}
+                maxLength={5000}
                 disabled={isPending}
-              >
-                キャンセル
-              </Button>
-              <Button size="sm" onClick={handleSave} disabled={isPending}>
-                {isPending ? (
-                  <>
-                    <Loader2 className="mr-1 h-3 w-3 animate-spin" />
-                    保存中
-                  </>
-                ) : (
-                  "保存"
-                )}
-              </Button>
+                containerClassName="rounded-[16px] border border-input bg-surface p-3"
+                className="min-h-[72px]"
+              />
+              {error && <p className="text-xs text-destructive">{error}</p>}
+              <div className="flex items-center justify-end gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setDraft(comment.content);
+                    setError(null);
+                  }}
+                  disabled={isPending}
+                >
+                  キャンセル
+                </Button>
+                <Button size="sm" onClick={handleSave} disabled={isPending}>
+                  {isPending ? (
+                    <>
+                      <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                      保存中
+                    </>
+                  ) : (
+                    "保存"
+                  )}
+                </Button>
+              </div>
             </div>
-          </div>
-        ) : (
-          <>
-            <FormattedText text={comment.content} className="mt-1 text-sm" />
-            {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
-          </>
-        )}
+          ) : (
+            <>
+              {/* 本文（元投稿と同じ 18px / leading-9） */}
+              <FormattedText
+                text={comment.content}
+                className="text-[18px] leading-9 text-foreground"
+              />
+              {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
 
-        {!isEditing && (
-          <div className="mt-3">
-            <ReactionButtons
-              targetType="comment"
-              targetId={comment.id}
-              counts={reactionCounts}
-              myReactions={myReactions}
-              canReact={currentUserId !== null}
-              size="sm"
-              keys={["thanks"]}
-            />
-          </div>
-        )}
+              {/* フッター：左=リアクション / 右=日付（Figma 135:4877） */}
+              <div className="mt-5 flex items-start justify-between border-t border-border pt-6">
+                <ReactionButtons
+                  targetType="comment"
+                  targetId={comment.id}
+                  counts={reactionCounts}
+                  myReactions={myReactions}
+                  canReact={currentUserId !== null}
+                  size="md"
+                  keys={["thanks"]}
+                />
+                <span className="text-[14px] leading-5 text-muted-foreground">
+                  {formatDate(comment.createdAt)}
+                  {wasEdited && (
+                    <span className="ml-1 text-[12px]">（編集済み）</span>
+                  )}
+                </span>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <AlertDialog open={confirmingDelete} onOpenChange={setConfirmingDelete}>
