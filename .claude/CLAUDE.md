@@ -55,6 +55,8 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 
 ## ルール（詳細は .claude/rules/ 参照）
 
+**優先順位**: これらのルールはデフォルトであり、会話でのユーザーの明示的な指示が常に優先される。指示がルールと矛盾する場合、黙ってルール側を貫くことも、黙ってルールを破ることもしない。「ルール○○（例: 08のトークン対応表）と異なりますが、指示を優先して進めます」と一言明示してから指示に従う。
+
 - `01-nextjs-architecture.md` — Server/Client境界・レイアウト（最重要）
 - `02-server-client-modules.md` — supabase/server vs client、モジュール分離パターン
 - `03-ui-conventions.md` — アイコン・UIコンポーネント・CSS
@@ -62,6 +64,8 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 - `05-file-conventions.md` — ファイル配置・命名
 - `06-development-workflow.md` — 環境・ビルド・デプロイ
 - `07-performance.md` — フォント・画像・バンドルサイズ最適化
+- `08-figma-implementation.md` — Figmaデザイン実装の必須手順（実測→トークン対応表→突合）
+- `09-work-loop.md` — タスク進行の標準ループ（リサーチ→計画→実装→テスト→改善）
 
 ## 移植ルール（最重要）
 
