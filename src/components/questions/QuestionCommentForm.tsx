@@ -77,7 +77,8 @@ export function QuestionCommentForm({
           <AvatarFallback>{authorName.slice(0, 1) || "?"}</AvatarFallback>
         </Avatar>
         <div className="flex-1 space-y-2">
-          {/* Figma 20:2845: bg-surface / rounded-24 / px-21 py-17 / border #C0C0C0 / shadow 0 1 6 8% */}
+          {/* Figma 20:2845: bg-surface / rounded-24 / px-21 py-17 / shadow 0 1 6 8%。
+              枠色は実測 #C0C0C0 だと濃いためユーザー指定で DS の border-border に変更 */}
           <FormattingTextarea
             ariaLabel="コメント"
             autoFocus={autoFocus}
@@ -87,7 +88,7 @@ export function QuestionCommentForm({
             rows={3}
             maxLength={MAX_LENGTH}
             disabled={isPending}
-            containerClassName="rounded-[24px] border border-[var(--border-input-strong)] bg-surface px-[21px] pb-[10px] pt-[17px] shadow-[var(--shadow-input)]"
+            containerClassName="rounded-[24px] border border-border bg-surface px-[21px] pb-[10px] pt-[17px] shadow-[var(--shadow-input)]"
             className="min-h-[48px] text-[16px]"
           />
           {/* 入力を始めたらカウンタ＋ボタン行がアニメーション付きで現れる */}
