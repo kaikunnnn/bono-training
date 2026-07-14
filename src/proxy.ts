@@ -22,12 +22,13 @@ import { NextResponse, type NextRequest } from "next/server";
  * - 通常 token は数日有効なので、定期アクセスがあるユーザーには影響軽微
  */
 
+// /subscription は含めない: プラン紹介ページは未ログインでも見せる（権限モーダルの
+// 「メンバー登録へ」の遷移先）。決済ボタン押下時は PlanCard 側が /login へ誘導する
 const PROTECTED_PATH_PREFIXES = [
   "/mypage",
   "/account",
   "/profile",
   "/settings",
-  "/subscription",
   "/feedback-apply",
 ];
 
@@ -96,7 +97,6 @@ export const config = {
     "/account/:path*",
     "/profile/:path*",
     "/settings/:path*",
-    "/subscription/:path*",
     "/feedback-apply/:path*",
     "/login",
     "/signup",

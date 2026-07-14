@@ -75,6 +75,17 @@ export function QuestionCommentsSection({
     setComments((prev) => prev.filter((c) => c.id !== commentId));
   };
 
+  // 編集保存の即時反映。updatedAt も進めて「（編集済み）+ 編集時刻」が保存直後から見えるようにする
+  const handleUpdated = (commentId: string, content: string) => {
+    setComments((prev) =>
+      prev.map((c) =>
+        c.id === commentId
+          ? { ...c, content, updatedAt: new Date().toISOString() }
+          : c,
+      ),
+    );
+  };
+
   return (
     // Figma 135:4406: divider（border-t）なしのフラットセクション / pt-8 pb-6 / gap-8。
     <section className="mt-8 flex flex-col gap-8 pt-8 pb-6">
@@ -114,6 +125,7 @@ export function QuestionCommentsSection({
               }
               myReactions={myCommentReactions[c.id] ?? []}
               onDeleted={handleDeleted}
+              onUpdated={handleUpdated}
             />
           ))}
         </ul>

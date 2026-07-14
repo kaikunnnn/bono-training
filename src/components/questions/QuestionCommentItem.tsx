@@ -39,6 +39,8 @@ interface QuestionCommentItemProps {
   myReactions: ReactionKey[];
   /** 削除成功時に呼ばれる（一覧からの即時除去用） */
   onDeleted?: (commentId: string) => void;
+  /** 編集保存成功時に呼ばれる（一覧への即時反映用。router.refresh を待たない） */
+  onUpdated?: (commentId: string, content: string) => void;
 }
 
 // 「7月14日 18:00」形式（年なし・スラッシュ不可。元投稿の表記と揃える。ユーザー指定）
@@ -56,6 +58,7 @@ export function QuestionCommentItem({
   reactionCounts,
   myReactions,
   onDeleted,
+  onUpdated,
 }: QuestionCommentItemProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -85,6 +88,8 @@ export function QuestionCommentItem({
         setError(res.error || "更新に失敗しました");
         return;
       }
+      // 一覧 state に即時反映（本文の差し替え +（編集済み）表示）。裏で refresh して再同期
+      onUpdated?.(comment.id, trimmed);
       setIsEditing(false);
       router.refresh();
     });
@@ -148,7 +153,8 @@ export function QuestionCommentItem({
         </div>
 
         {/* 白カード：本文 + カード内フッター */}
-        <div className="w-full rounded-[16px] bg-surface p-5 shadow-comment-card">
+        {/* 960px以上ではユーザー指定の余白（左右32px / 上8px。下は20pxのまま） */}
+        <div className="w-full rounded-[16px] bg-surface p-5 shadow-comment-card min-[960px]:px-8 min-[960px]:pt-2">
           {isEditing ? (
             <div className="space-y-2">
               <FormattingTextarea
@@ -189,10 +195,10 @@ export function QuestionCommentItem({
             </div>
           ) : (
             <>
-              {/* 本文（元投稿と同じ 18px / leading-9） */}
+              {/* 本文 16px（元投稿18pxより一段小さく。ユーザー指定） */}
               <FormattedText
                 text={comment.content}
-                className="text-[18px] leading-9 text-foreground"
+                className="text-[16px] leading-8 text-foreground"
               />
               {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
 
@@ -207,11 +213,9 @@ export function QuestionCommentItem({
                   size="md"
                   keys={["thanks"]}
                 />
-                <span className="text-[14px] leading-5 text-muted-foreground">
-                  {formatDate(comment.createdAt)}
-                  {wasEdited && (
-                    <span className="ml-1 text-[12px]">（編集済み）</span>
-                  )}
+                <span className="text-[12px] leading-[18px] text-muted-foreground">
+                  {formatDate(comment.updatedAt)}
+                  {wasEdited && <span className="ml-1">（編集済み）</span>}
                 </span>
               </div>
             </>
