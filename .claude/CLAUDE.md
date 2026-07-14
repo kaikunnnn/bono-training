@@ -58,6 +58,8 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 
 ## ルール（詳細は .claude/rules/ 参照）
 
+**優先順位**: これらのルールはデフォルトであり、会話でのユーザーの明示的な指示が常に優先される。指示がルールと矛盾する場合、黙ってルール側を貫くことも、黙ってルールを破ることもしない。「ルール○○（例: 08のトークン対応表）と異なりますが、指示を優先して進めます」と一言明示してから指示に従う。
+
 - `01-nextjs-architecture.md` — Server/Client境界・レイアウト（最重要）
 - `02-server-client-modules.md` — supabase/server vs client、モジュール分離パターン
 - `03-ui-conventions.md` — アイコン・UIコンポーネント・CSS

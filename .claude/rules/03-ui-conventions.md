@@ -34,17 +34,6 @@ import { TickCircle } from "iconsax-react";
 - アクションボタンはプライマリーではなくセカンダリー系を基本とする
 - 参考実装: `src/app/questions/page.tsx` の Empty カード（#137-B）
 
-## 文言方針
-
-- **掲示板関連では「質問」という語をUI文言に使わない**。「スレッド」「投稿」「トピック」を使う
-  - 例外: カテゴリ固有名「BONOのバグ・質問」はそのまま
-- 新規UI文言を書いたら、変更ファイルに対して禁止語grepをかけて確認する
-
-```bash
-# 掲示板UIの変更後チェック
-grep -n "質問" src/components/questions/ src/app/questions/ -r
-```
-
 ## レスポンシブ
 
 - モバイルファースト（Tailwind のデフォルト）
