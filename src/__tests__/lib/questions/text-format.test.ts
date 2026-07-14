@@ -3,6 +3,7 @@ import {
   parseInlineRuns,
   parseFormattedText,
   textToPortableBlocks,
+  portableBlocksToText,
 } from "@/lib/questions/text-format";
 
 describe("parseInlineRuns", () => {
@@ -167,5 +168,52 @@ describe("textToPortableBlocks", () => {
       (b) => (b as unknown as { _key: string })._key,
     );
     expect(new Set(keys).size).toBe(keys.length);
+  });
+});
+
+describe("portableBlocksToText", () => {
+  it("h3 / normal を記法付きプレーンに戻す", () => {
+    const blocks = [
+      { style: "h3", children: [{ _type: "span", text: "見出し", marks: [] }] },
+      { style: "normal", children: [{ _type: "span", text: "本文", marks: [] }] },
+    ];
+    expect(portableBlocksToText(blocks)).toBe("## 見出し\n本文");
+  });
+
+  it("strong マークを **...** に戻す", () => {
+    const blocks = [
+      {
+        style: "normal",
+        children: [
+          { _type: "span", text: "あ", marks: [] },
+          { _type: "span", text: "い", marks: ["strong"] },
+          { _type: "span", text: "う", marks: [] },
+        ],
+      },
+    ];
+    expect(portableBlocksToText(blocks)).toBe("あ**い**う");
+  });
+
+  it("空・null は空文字を返す", () => {
+    expect(portableBlocksToText([])).toBe("");
+    expect(portableBlocksToText(null)).toBe("");
+    expect(portableBlocksToText(undefined)).toBe("");
+  });
+
+  // ---- 往復テスト（textToPortableBlocks → portableBlocksToText で概ね保存される）----
+
+  it("往復: 見出し・太字・リストの混在が保存される", () => {
+    const text = "## 見出し\n本文の**太字**\n- リスト1\n- リスト2";
+    expect(portableBlocksToText(textToPortableBlocks(text))).toBe(text);
+  });
+
+  it("往復: 複数行の通常段落（改行保持）が保存される", () => {
+    const text = "1行目\n2行目\n3行目";
+    expect(portableBlocksToText(textToPortableBlocks(text))).toBe(text);
+  });
+
+  it("往復: 見出し内の太字が保存される", () => {
+    const text = "## 見出し**強調**";
+    expect(portableBlocksToText(textToPortableBlocks(text))).toBe(text);
   });
 });

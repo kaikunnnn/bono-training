@@ -19,6 +19,8 @@ import { QuestionCommentsSection } from "@/components/questions/QuestionComments
 import { isProfileIncomplete } from "@/lib/profile-utils";
 import { ReactionButtons } from "@/components/questions/ReactionButtons";
 import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
+import { PostActions } from "@/components/questions/PostActions";
+import { portableBlocksToText } from "@/lib/questions/text-format";
 
 const PREVIEW_LINES_FOR_GUEST = 3;
 
@@ -202,21 +204,35 @@ export default async function Page({ params }: PageProps) {
       {/* 掲示板へ戻る（共通コンポーネント） */}
       <BackButton label="掲示板へ戻る" href="/questions" />
 
-      {/* タイトルブロック（Figma 135:4488: カテゴリタグ + H1 のみに簡素化。divider無し・gap-20px/pt-32px） */}
-      <div className="flex flex-col gap-5 pt-8">
-        {question.category && (
-          <span className="inline-flex w-fit items-center rounded-full bg-[var(--tag-category-bg)] px-3 py-1 text-[12px] font-medium leading-[21px] text-foreground">
-            {question.category.title}
-          </span>
-        )}
-        {/* H1（M PLUS 1p Bold / 24px / leading-9・左右8pxの内余白） */}
-        <h1 className="px-2 font-mplus-1p text-[24px] font-bold leading-9 text-foreground">
-          {question.title}
-        </h1>
-      </div>
-
-      {/* 元の投稿ブロック（Figma 135:4348: カード gap-8px・名前16px・ヘッダーgap-12px） */}
-      <div className="mt-8 flex w-full flex-col gap-2 rounded-[24px] border border-border bg-surface p-8">
+      {/*
+        タイトルブロック + 元投稿カードを PostActions（Client）で包み、
+        本人のみ編集・削除できるようにする（#147）。閲覧表示はサーバー描画のまま
+        titleView / cardView として素通しする。
+      */}
+      <PostActions
+        questionId={question._id}
+        slug={slug}
+        authorUserId={question.author?.userId ?? null}
+        currentUserId={currentUserId}
+        initialTitle={question.title}
+        initialContent={portableBlocksToText(question.questionContent)}
+        titleView={
+          /* タイトルブロック（Figma 135:4488: カテゴリタグ + H1 のみに簡素化。divider無し・gap-20px/pt-32px） */
+          <div className="flex flex-col gap-5 pt-8">
+            {question.category && (
+              <span className="inline-flex w-fit items-center rounded-full bg-[var(--tag-category-bg)] px-3 py-1 text-[12px] font-medium leading-[21px] text-foreground">
+                {question.category.title}
+              </span>
+            )}
+            {/* H1（M PLUS 1p Bold / 24px / leading-9・左右8pxの内余白） */}
+            <h1 className="px-2 font-mplus-1p text-[24px] font-bold leading-9 text-foreground">
+              {question.title}
+            </h1>
+          </div>
+        }
+        cardView={
+          /* 元の投稿ブロック（Figma 135:4348: カード gap-8px・名前16px・ヘッダーgap-12px） */
+          <div className="mt-8 flex w-full flex-col gap-2 rounded-[24px] border border-border bg-surface p-8">
         {/* カード内ヘッダー：アバター 48px + gap-[12px] + 投稿者名（Inter Bold 16px/leading-27） */}
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12 border border-border bg-muted">
@@ -310,7 +326,9 @@ export default async function Page({ params }: PageProps) {
             </span>
           </div>
         )}
-      </div>
+          </div>
+        }
+      />
 
       {/* コメント（メンバーのみ） */}
       {hasFullAccess && (

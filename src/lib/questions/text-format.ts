@@ -191,3 +191,68 @@ export function textToPortableBlocks(text: string): PortableTextBlock[] {
     } as unknown as PortableTextBlock;
   });
 }
+
+// ---------------------------------------------------------------------------
+// Portable Text → プレーンテキスト逆変換（編集フォームの初期値復元用）
+// ---------------------------------------------------------------------------
+
+interface PortableSpanLike {
+  _type?: string;
+  text?: string;
+  marks?: string[];
+}
+
+interface PortableBlockLike {
+  _type?: string;
+  style?: string;
+  listItem?: string;
+  children?: PortableSpanLike[];
+}
+
+/**
+ * 1 ブロックの span 配列を、`**太字**` 記法込みのプレーン文字列へ戻す。
+ * marks に "strong" を含む span を `**...**` で囲む（textToPortableBlocks の逆）。
+ * strong 以外の marks（link 等・markDefs 参照）は割り切りでテキストのみ残す。
+ */
+function spansToText(children: PortableSpanLike[] | undefined): string {
+  if (!children) return "";
+  return children
+    .map((span) => {
+      const text = span.text ?? "";
+      if (text && span.marks && span.marks.includes("strong")) {
+        return `**${text}**`;
+      }
+      return text;
+    })
+    .join("");
+}
+
+/**
+ * Portable Text ブロック配列を、掲示板記法のプレーンテキストへ逆変換する
+ * （投稿編集フォームの初期値復元用）。textToPortableBlocks の逆変換で、
+ * `## `（h3）/ `- `（bullet listItem）/ `**...**`（strong）を往復で概ね再現する。
+ *
+ * 割り切り:
+ * - h3 / listItem 以外の style（blockquote 等）は normal と同じくプレーン行にする
+ * - strong 以外の marks は記法に戻さずテキストのみ残す
+ * - normal ブロック内の改行（textToPortableBlocks で 1 ブロックに結合された段落）は
+ *   span.text にそのまま含まれているため保持される
+ */
+export function portableBlocksToText(
+  blocks: PortableBlockLike[] | undefined | null,
+): string {
+  if (!blocks || blocks.length === 0) return "";
+
+  return blocks
+    .map((block) => {
+      const inner = spansToText(block.children);
+      if (block.style === "h3") {
+        return `## ${inner}`;
+      }
+      if (block.listItem === "bullet") {
+        return `- ${inner}`;
+      }
+      return inner;
+    })
+    .join("\n");
+}
