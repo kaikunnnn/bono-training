@@ -77,7 +77,7 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
 
         {/* Footer */}
         <div className="flex flex-wrap items-center justify-between gap-2">
-          {/* 左: スタンプ3種（件数>0のもののみ・表示専用）+「・」+ コメント件数（0件でも常時表示） */}
+          {/* 左: スタンプ3種（件数>0のもののみ・表示専用）+「・」+ コメント件数（0件のときは非表示） */}
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
             {activeStamps.map(({ key, label, Icon }) => (
               <span
@@ -93,7 +93,7 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
                 </span>
               </span>
             ))}
-            {showEngagement && (
+            {showEngagement && commentCount > 0 && (
               <>
                 {activeStamps.length > 0 && <span aria-hidden>・</span>}
                 <span>コメント {commentCount}件</span>
