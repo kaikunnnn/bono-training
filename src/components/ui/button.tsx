@@ -18,7 +18,9 @@ const buttonVariants = cva(
           "bg-white border border-[#EBEBEB] text-black shadow-[0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50",
         secondary:
           "bg-[rgba(245,245,244,1)] border border-[rgba(0,0,0,0.04)] text-secondary-foreground shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)] hover:bg-[rgba(235,235,234,1)] hover:border-[rgba(0,0,0,0.08)] active:bg-[rgba(229,229,228,1)]",
-        ghost: "hover:bg-accent hover:text-accent-foreground",
+        // ゴースト: 背景なし。hover で薄い背景、押下でわずかに濃く（状態はしっかり付与する）
+        ghost:
+          "text-foreground hover:bg-accent hover:text-accent-foreground active:bg-[var(--bg-active)]",
         link: "text-primary underline-offset-4 hover:underline",
         // カスタムボタンスタイル（HeadingSection等で使用）
         "action-secondary":

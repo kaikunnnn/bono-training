@@ -11,6 +11,7 @@
  */
 
 import { X } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface PostFlowShellProps {
   /** ヘッダーの Step 表示（例: 1）。3 分割 */
@@ -44,16 +45,17 @@ export function PostFlowShell({
       <div className="relative mx-auto w-full max-w-[672px] px-4 py-8">
         {/* ヘッダー領域（カード外） */}
         <div className="mb-6 space-y-4">
-          {/* ✕キャンセル（done 状態では非表示） */}
+          {/* ✕キャンセル（done 状態では非表示）。共通Buttonのghost（hover/active状態つき） */}
           {onCancel && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
               onClick={onCancel}
-              className="flex items-center gap-2 text-[14px] text-foreground"
+              className="-ml-5"
             >
               <X size={16} />
               キャンセル
-            </button>
+            </Button>
           )}
 
           {/* 見出し */}
