@@ -111,31 +111,28 @@ serve(async (req) => {
       console.error(`⚠️ [LIVE環境] webhook_events check error:`, checkError);
     }
 
-    // ========================================
-    // 🚀 Phase 6-1: 非同期処理パターン
-    // ========================================
     // パフォーマンス測定: リクエスト受信からここまでの時間
     const responseTime = Date.now() - requestStartTime;
-    console.log(`⏱️ [LIVE環境] 200レスポンスまでの時間: ${responseTime}ms`);
+    console.log(`⏱️ [LIVE環境] 検証完了までの時間: ${responseTime}ms`);
 
-    // 3. すぐに200を返す（ここまで1秒以内）
-    const response = new Response(
+    // 同期的に処理する: 失敗時に500を返すことでStripeが自動リトライする
+    try {
+      await processWebhookAsync(stripe, supabase, event, eventId, ENVIRONMENT);
+    } catch (error) {
+      console.error(`❌ [LIVE環境] Webhook処理失敗 → 500を返しStripeにリトライさせる:`, error);
+      return new Response(JSON.stringify({ error: error.message }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
+    }
+
+    return new Response(
       JSON.stringify({ received: true, event_type: event.type }),
       {
         status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       }
     );
-
-    // 4. 重い処理は非同期で実行（Promiseを返さない）
-    processWebhookAsync(stripe, supabase, event, eventId, ENVIRONMENT)
-      .catch((error) => {
-        console.error(`❌ [LIVE環境] Webhook非同期処理エラー:`, error);
-        console.error(error.stack);
-        // エラーログを記録（将来的にはDB保存も検討）
-      });
-
-    return response;
   } catch (error) {
     console.error(`❌ [LIVE環境] Webhookエラー: ${error.message}`);
     console.error(error.stack);
@@ -285,6 +282,33 @@ async function findUserByStripeInfo(
 }
 
 /**
+ * auth.users からメールアドレスでユーザーを検索するヘルパー関数
+ * listUsers は1ページ最大1000件しか返さないため、全ページを走査する
+ * （ユーザー数が1000人を超えると1ページ目だけでは見つからない）
+ */
+async function findAuthUserIdByEmail(supabase: any, email: string): Promise<string | null> {
+  const perPage = 1000;
+  const target = email.toLowerCase();
+
+  for (let page = 1; page <= 50; page++) {
+    const { data, error } = await supabase.auth.admin.listUsers({ page, perPage });
+    if (error) {
+      console.error(`❌ [LIVE環境] listUsersエラー (page ${page}):`, error);
+      return null;
+    }
+    const users = data?.users ?? [];
+    const found = users.find((u: any) => (u.email || "").toLowerCase() === target);
+    if (found) {
+      return found.id;
+    }
+    if (users.length < perPage) {
+      break; // 最終ページまで走査完了
+    }
+  }
+  return null;
+}
+
+/**
  * チェックアウト完了イベントの処理
  */
 async function handleCheckoutCompleted(stripe: any, supabase: any, session: any) {
@@ -350,16 +374,11 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
         return;
       }
 
-      // Supabase auth.usersでメールからユーザーを検索
-      const { data: userListResult } = await supabase.auth.admin.listUsers({
-        page: 1,
-        perPage: 1000,
-      });
+      // Supabase auth.usersでメールからユーザーを検索（全ページ走査）
+      const existingUserId = await findAuthUserIdByEmail(supabase, email);
 
-      const existingUser = userListResult?.users?.find((u: any) => u.email === email);
-
-      if (existingUser) {
-        userId = existingUser.id;
+      if (existingUserId) {
+        userId = existingUserId;
         console.log(`✅ [LIVE環境] 既存ユーザーを発見: ${userId}`);
       } else {
         // ユーザーが存在しない → 新規作成
@@ -799,12 +818,6 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
       .eq("environment", ENVIRONMENT)
       .single();
 
-    if (existingCustomer) {
-      // 既に登録済み → checkout.session.completedで処理されるはずなのでスキップ
-      console.log(`✅ [LIVE環境] 顧客 ${customerId} は既に登録済み。checkout.session.completedで処理されます。`);
-      return;
-    }
-
     // 2. Stripe Customerからメールアドレスを取得
     const customer = await stripe.customers.retrieve(customerId);
     if (customer.deleted) {
@@ -813,48 +826,51 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
     }
 
     const email = customer.email;
-    if (!email) {
-      console.error("❌ [LIVE環境] Stripe顧客にメールアドレスがありません");
-      return;
-    }
 
-    console.log(`🔍 [LIVE環境] 旧サイトからの課金を検出: ${email}`);
-
-    // 3. Supabase auth.usersでメールからユーザーを検索
     let userId: string;
 
-    // まずlistUsersで検索（getUserByEmailは存在しない）
-    const { data: userListResult, error: listError } = await supabase.auth.admin.listUsers({
-      page: 1,
-      perPage: 1000,
-    });
-
-    const existingUser = userListResult?.users?.find((u: any) => u.email === email);
-
-    if (existingUser) {
-      // ユーザーが存在する
-      userId = existingUser.id;
-      console.log(`✅ [LIVE環境] 既存ユーザーを発見: ${userId}`);
+    if (existingCustomer) {
+      // 登録済み顧客 → そのユーザーに直接同期する
+      // 注意: Memberstack購入には checkout.session.completed が発火しないため、
+      // ここでスキップすると既存顧客の再契約・プラン変更が永久に反映されない
+      userId = existingCustomer.user_id;
+      console.log(`✅ [LIVE環境] 登録済み顧客 ${customerId} → ユーザー ${userId} に同期します`);
     } else {
-      // 4. ユーザーが存在しない → 新規作成（migrated_from: "memberstack"）
-      console.log(`🔄 [LIVE環境] ユーザーを新規作成: ${email}`);
-
-      const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-        email: email,
-        email_confirm: true,
-        user_metadata: {
-          migrated_from: "memberstack",
-          migrated_at: new Date().toISOString(),
-        },
-      });
-
-      if (createError) {
-        console.error("❌ [LIVE環境] ユーザー作成エラー:", createError);
+      if (!email) {
+        console.error("❌ [LIVE環境] Stripe顧客にメールアドレスがありません");
         return;
       }
 
-      userId = newUser.user.id;
-      console.log(`✅ [LIVE環境] 新規ユーザー作成完了: ${userId} (migrated_from: memberstack)`);
+      console.log(`🔍 [LIVE環境] 旧サイトからの課金を検出: ${email}`);
+
+      // 3. Supabase auth.usersでメールからユーザーを検索（全ページ走査）
+      const existingUserId = await findAuthUserIdByEmail(supabase, email);
+
+      if (existingUserId) {
+        // ユーザーが存在する
+        userId = existingUserId;
+        console.log(`✅ [LIVE環境] 既存ユーザーを発見: ${userId}`);
+      } else {
+        // 4. ユーザーが存在しない → 新規作成（migrated_from: "memberstack"）
+        console.log(`🔄 [LIVE環境] ユーザーを新規作成: ${email}`);
+
+        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+          email: email,
+          email_confirm: true,
+          user_metadata: {
+            migrated_from: "memberstack",
+            migrated_at: new Date().toISOString(),
+          },
+        });
+
+        if (createError) {
+          console.error("❌ [LIVE環境] ユーザー作成エラー:", createError);
+          return;
+        }
+
+        userId = newUser.user.id;
+        console.log(`✅ [LIVE環境] 新規ユーザー作成完了: ${userId} (migrated_from: memberstack)`);
+      }
     }
 
     // 5. プラン情報を取得

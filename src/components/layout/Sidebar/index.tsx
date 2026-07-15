@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { SidebarProps } from "./types";
 import { cn } from "@/lib/utils";
 import { SidebarLogo } from "./SidebarLogo";
+import SidebarSearchBox from "./SidebarSearchBox";
 import { SidebarMenuGroup } from "./SidebarMenuGroup";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
@@ -43,7 +44,11 @@ export function Sidebar({ className, user }: SidebarProps) {
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      <SidebarLogo />
+      {/* ロゴ + 検索（Figma 29:2352: ロゴ直下に検索バー、間隔 0px） */}
+      <div className="w-full flex flex-col items-start">
+        <SidebarLogo />
+        <SidebarSearchBox />
+      </div>
 
       <SidebarMenuGroup>
         {user && (

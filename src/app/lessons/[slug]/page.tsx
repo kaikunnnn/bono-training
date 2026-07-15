@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const title = `${lesson.title} | BONO`;
+  const title = `${lesson.seoTitle || lesson.title} | BONO`;
   const description = lesson.description || `${lesson.title}のレッスン内容を学習できます。`;
   const imageUrl = lesson.thumbnailUrl || lesson.iconImageUrl;
 

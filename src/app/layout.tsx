@@ -12,6 +12,7 @@ import {
 } from "next/font/google";
 import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
 import "./globals.css";
 import "@/styles/blog.css";
@@ -129,7 +130,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${mplus1p.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <QueryProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </QueryProvider>
       </body>
     </html>
   );

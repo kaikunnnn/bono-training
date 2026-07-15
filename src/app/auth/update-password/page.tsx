@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Check, Lock } from "lucide-react";
+import { Loader2, Check, Lock, AlertCircle } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 import { translateAuthError } from "@/lib/auth-error-messages";
 
@@ -16,6 +16,19 @@ export default function UpdatePasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [sessionMissing, setSessionMissing] = useState(false);
+
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        setSessionMissing(true);
+      }
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -78,6 +91,35 @@ export default function UpdatePasswordPage() {
       router.push("/mypage");
     }, 2000);
   };
+
+  if (sessionMissing) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-orange-600" />
+            </div>
+            <CardTitle>セッションが見つかりません</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              パスワード設定を行うには、再度確認コードを取得してください。
+            </p>
+            <Button asChild className="w-full">
+              <Link href="/forgot-password">確認コードを取得する</Link>
+            </Button>
+            <Link
+              href="/login"
+              className="text-sm text-muted-foreground hover:underline block"
+            >
+              ログインページに戻る
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (success) {
     return (

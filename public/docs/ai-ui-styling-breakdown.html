@@ -1,0 +1,742 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UIを変数と部品に分解する、初めての design-system 生成</title>
+  <style>
+    :root {
+      --text: #111;
+      --text-soft: #555;
+      --line: #e5e5e5;
+      --line-soft: #f0f0f0;
+      --bg: #fff;
+      --bg-soft: #f7f7f7;
+      --code-bg: #f4f4f4;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+      font-size: 16px;
+      line-height: 1.85;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+    }
+
+    /* Header */
+    .eyebrow {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+      margin: 0 0 24px;
+    }
+
+    .lede {
+      font-size: 17px;
+      line-height: 1.85;
+      color: var(--text-soft);
+      margin-bottom: 56px;
+    }
+
+    /* Meta box */
+    .meta {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 12px 16px;
+      padding: 24px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 56px;
+      font-size: 14px;
+    }
+
+    .meta dt {
+      color: var(--text-soft);
+    }
+
+    .meta dd {
+      margin: 0;
+      color: var(--text);
+    }
+
+    /* Body */
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: -0.005em;
+      margin: 72px 0 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.6;
+      margin: 40px 0 12px;
+    }
+
+    p {
+      margin: 0 0 20px;
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      text-decoration-thickness: 2px;
+    }
+
+    strong {
+      font-weight: 700;
+    }
+
+    /* Numbered step */
+    .step-num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      border-radius: 50%;
+      background: var(--text);
+      color: var(--bg);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      margin-right: 12px;
+      vertical-align: 1px;
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 1.4em;
+      margin: 0 0 24px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    /* Code */
+    code {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0 0 28px;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13px;
+    }
+
+    /* Callout */
+    .callout {
+      border-left: 2px solid var(--text);
+      padding: 4px 0 4px 20px;
+      margin: 28px 0;
+      color: var(--text-soft);
+      font-size: 15px;
+    }
+
+    .callout strong {
+      color: var(--text);
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 80px 0;
+    }
+
+    /* Figure */
+    .figure {
+      margin: 32px 0 40px;
+    }
+
+    .figure img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      cursor: zoom-in;
+      transition: opacity 0.15s ease;
+    }
+
+    .figure img:hover {
+      opacity: 0.88;
+    }
+
+    .figure figcaption {
+      font-size: 13px;
+      color: var(--text-soft);
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 17, 17, 0.92);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      cursor: zoom-out;
+      padding: 40px;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border: none;
+      border-radius: 0;
+      display: block;
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: transparent;
+      color: rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .lightbox-close:hover {
+      border-color: rgba(255, 255, 255, 0.85);
+      color: #fff;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--line);
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+
+    .footer p {
+      margin-bottom: 10px;
+    }
+
+    /* Small */
+    .small {
+      font-size: 14px;
+      color: var(--text-soft);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container { padding: 56px 20px 80px; }
+      h1 { font-size: 26px; }
+      h2 { font-size: 20px; margin-top: 56px; }
+      .lede { font-size: 16px; }
+      pre { padding: 16px 18px; font-size: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+
+    <div class="eyebrow">AIUI スタイリング / ガイド 01</div>
+    <h1>UI を「変数」と「部品」に分解する、はじめての design-system 生成</h1>
+
+    <p class="lede">
+      気になる UI を 1 枚渡すだけで、その UI を構成している色や余白、ボタンやカードといった「部品」、さらにヘッダーやテーブルといった「ブロック」のカタログページを AI に作ってもらえる。これができると、なんとなく綺麗だと思っていた UI が、実は <strong>変数 → 部品 → ブロック</strong> の組み合わせで出来ているという当たり前のことが、目に見える形で腹に落ちる。4 つのステップで進めるので、最後まで通して 15 分から 20 分くらい。
+    </p>
+
+    <dl class="meta">
+      <dt>対象</dt>
+      <dd>Figma は触れるけど、デザインシステムや Tailwind はまだそこまで触っていない人</dd>
+      <dt>準備するもの</dt>
+      <dd>気になる UI の画像 1 枚（スクショで OK）と、 AI ツール（Claude / Cursor / Claude Code / v0 のどれか）</dd>
+      <dt>所要時間</dt>
+      <dd>10〜15 分</dd>
+      <dt>出来上がるもの</dt>
+      <dd>渡した UI の色・余白・部品・ブロックが一覧で見える Web ページ（コード 4 ファイル）</dd>
+    </dl>
+
+    <h2>このガイドで何が手に入るか</h2>
+
+    <p>
+      ステップ 1 から 4 まで順番に AI にプロンプトを送ると、最終的に手元に 4 つのコードファイルが出来上がる。それを自分の Next.js プロジェクトに置くと、ブラウザで「色一覧」「余白一覧」「角丸一覧」「使われている部品の一覧」「組み立てられたブロックの一覧」が見える 1 枚のページになる。これがいわゆる design-system ページの簡易版です。
+    </p>
+
+    <p>
+      作り終わったあとに改めて元の UI と見比べると、「この色がここで使われているのか」「このボタンとこのバッジは同じ角丸を共有しているのか」「ヘッダーは検索 + アバター + ナビという 3 つの部品の組み合わせで出来ているのか」みたいなことが、なんとなくの感覚じゃなく具体的な <strong>値や構造</strong> として見えるようになる。これが「変数で考える」スタイリングの最初の体感です。
+    </p>
+
+    <div class="callout">
+      <strong>補足</strong>　もう一つ別の使い方として、「ダメな UI から良い UI に変わっていく 4 段階の playground」を作るプロンプトテンプレもあります（<a href="file:///Users/kaitakumi/Documents/01_BONO%E4%BA%8B%E6%A5%AD/01_Docs/rebono/04_Prompt/AIUI%E3%82%B9%E3%82%BF%E3%82%A4%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%99_%E6%AF%94%E8%BC%83%E3%83%95%E3%82%9A%E3%83%AC%E3%82%A4%E3%82%AF%E3%82%99%E3%83%A9%E3%82%A6%E3%83%B3%E3%83%88%E3%82%99_%E7%94%9F%E6%88%90%E3%83%86%E3%83%B3%E3%83%95%E3%82%9A%E3%83%AC.html" target="_blank" rel="noopener">比較プレイグラウンド版を開く</a>）。最初の 2 ステップは同じ内容なので、ここで作った <code>tokens.json</code> と <code>components.json</code> をそのまま使えます。
+    </div>
+
+    <h2><span class="step-num">1</span>変数（トークン）を抜き出す</h2>
+
+    <p>
+      最初のステップは、入力した UI からトークンと呼ばれる「再利用される値」を全部抜き出してもらう作業です。トークンというのは、色とか余白の何ピクセル分とか、角の丸さの数値とか、フォントサイズとか、要するに UI 全体で使い回されている数値や色のことです。
+    </p>
+
+    <p>
+      ここで大事なのは、AI に「ただ色を全部リストアップして」と頼むのではなく、「何のために使われているか（role）」もセットで答えてもらうことです。 <code>#0066ff</code> という色がプライマリーボタンに使われているのか、リンク文字色に使われているのか、ホバー時にだけ出てくる強調色なのか。 role が分かっていると、後で別の UI に応用するときに迷わない。
+    </p>
+
+    <h3>渡すもの</h3>
+
+    <ul>
+      <li>気になる UI のスクリーンショット画像（コードがあるなら一緒に貼ってもいい）</li>
+      <li>余裕があれば「何のアプリか」「何の画面か」「想定ユーザー」も 1 行ずつ</li>
+    </ul>
+
+    <h3>使うプロンプト</h3>
+
+<pre><code>あなたの役割: UI スタイリングのトークン (色 / 余白 / 角丸 / 線 / 影 / フォント) を抽出する design system expert。
+
+# 入力
+
+## 良い UI (= 完成形)
+[ここに UI のスクリーンショット or コード or Figma URL を貼る]
+
+## (任意) コンテキスト
+- 何のアプリ:
+- 何の画面:
+- 想定ユーザー:
+
+# タスク
+
+入力 UI を観察し、 使われている全トークンを下のスキーマで JSON 出力する。
+
+## ルール
+- 同じ値は重複させず 1 つに統合する (例: #ffffff と white は同じ)
+- 出現頻度の多い順に並べる
+- 各 token に role (用途の 1 行) を必ず書く
+- 段階数は UI に従う (色なら 5-7 / 余白なら 7-10 段階あたり)
+- 無いカテゴリ (例: shadow を使ってない) は空オブジェクト {} で出す
+
+## 出力スキーマ
+
+{
+  "color": {
+    "bg":   { "&lt;name&gt;": { "value": "#rrggbb", "role": "&lt;役割&gt;" } },
+    "fg":   { "&lt;name&gt;": { "value": "#rrggbb", "role": "&lt;役割&gt;" } },
+    "text": { "&lt;name&gt;": { "value": "#rrggbb", "role": "&lt;役割&gt;" } }
+  },
+  "spacing":    { "&lt;key&gt;": { "value_px": "&lt;number&gt;", "role": "&lt;役割&gt;" } },
+  "radius":     { "&lt;key&gt;": { "value_px": "&lt;number&gt;", "role": "&lt;役割&gt;" } },
+  "ring":       { "&lt;key&gt;": { "width_px": "&lt;number&gt;", "color": "&lt;css&gt;", "role": "&lt;役割&gt;" } },
+  "shadow":     { "&lt;key&gt;": { "css": "&lt;css&gt;", "role": "&lt;役割&gt;" } },
+  "typography": { "&lt;key&gt;": { "size_px": "&lt;number&gt;", "weight": "&lt;number&gt;", "role": "&lt;役割&gt;" } }
+}
+
+# 出力フォーマット
+
+```json ブロックの JSON のみ。 説明文や前置きは書かない。</code></pre>
+
+    <h3>戻ってくるもの</h3>
+
+    <p>
+      AI から JSON という形式で返ってきます。 JSON は「キーと値のセットで書く、メモ帳でも読めるただのテキスト」というだけのもので、 AI に決まった形で結果を返してもらいたい時の中間データとしてよく使われます（変換や Figma 登録の話は <a href="file:///Users/kaitakumi/Documents/01_BONO%E4%BA%8B%E6%A5%AD/01_Docs/rebono/04_Prompt/AIUI%E3%82%B9%E3%82%BF%E3%82%A4%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%99_Figma%E7%99%BB%E9%8C%B2%E6%96%B9%E6%B3%95.html" target="_blank" rel="noopener">Figma 登録ガイド</a> で扱います）。 中身は色なら 5 個から 7 個、余白なら 7 個から 10 個くらいに整理されているはずです。次のステップでこの JSON をそのまま使うので、コピーして手元のファイル（仮に <code>tokens.json</code> とでも名付けて）に保存しておきます。
+    </p>
+
+    <p>
+      この JSON が最終的にステップ 3 で Web ページの形になると、こんなふうに色が一覧で見える状態になります。
+    </p>
+
+    <figure class="figure">
+      <img src="assets/preview-01-color.png" alt="design-system ページの Color セクション。background / foreground / text の3カテゴリーで色がカード形式で一覧表示されている">
+      <figcaption>ステップ 3 まで通したあとの色一覧（preview）。 background / foreground / text の 3 カテゴリーで、各色に name / role / hex が並ぶ。</figcaption>
+    </figure>
+
+    <div class="callout">
+      <strong>うまくいかなかった時のチェック</strong>　画像だけ渡したのに色のコードが <code>#???</code> みたいに伏字で返ってきたら、プロンプトの末尾に「画像から目視で色を読み取り、 hex で出力して」と付け足して再度送る。これでだいたい直ります。
+    </div>
+
+    <h2><span class="step-num">2</span>部品（コンポーネント）を抜き出す</h2>
+
+    <p>
+      次に、同じ UI から「再利用される部品」を抜き出します。ボタン、バッジ、カード、入力欄、テーブル、ヘッダー、こういったもの。ステップ 1 で抜き出した変数（色や余白）が、ここで「ボタンというパッケージ」にまとまっていく感じです。
+    </p>
+
+    <p>
+      ここでも注意点があって、細かすぎず大きすぎず、 5 個から 15 個くらいに収めてもらうのがちょうどいい。文字 1 つを部品と呼ぶには細かすぎるし、ページ全体を部品にしてしまうと再利用できない。 AI がこの粒度を外しそうな時に効くのが、プロンプト内の「reusable な部品」というキーワードです。
+    </p>
+
+    <h3>渡すもの</h3>
+
+    <ul>
+      <li>ステップ 1 で使ったのと同じ UI 画像（または同じコード）</li>
+      <li>ステップ 1 で出てきた <code>tokens.json</code> の中身を全部コピーして貼り付け</li>
+    </ul>
+
+    <h3>使うプロンプト</h3>
+
+<pre><code>あなたの役割: UI の reusable な部品 (component) を識別してカタログ化する design system curator。
+
+# 入力
+
+## 良い UI
+[ステップ 1 で使ったのと同じ UI 画像 or コード]
+
+## tokens.json (ステップ 1 の出力)
+[ステップ 1 の結果をそのまま貼る]
+
+# タスク
+
+UI から reusable な component を 5〜15 個 識別し、 下のスキーマで JSON 出力する。
+
+## ルール
+- 細かすぎ (例: 1 文字レベル) も大きすぎ (= ページ丸ごと) も避け、 再利用される部品を選ぶ
+- 同じ 形 の複数 state (default/hover/pressed など) や種類 (primary/secondary) は variants にまとめる
+- 各 component が使うトークンを tokens_used で参照 (ステップ 1 の path 形式 = color.fg.primary spacing.3.5 等)
+- example_jsx は実物を Tailwind class で書く (動く JSX)
+
+## 出力スキーマ
+
+{
+  "components": [
+    {
+      "name": "&lt;部品名&gt;",
+      "description": "&lt;1 行説明&gt;",
+      "variants": ["&lt;variant1&gt;", "&lt;variant2&gt;"],
+      "tokens_used": ["color.fg.primary", "radius.full", "spacing.3.5"],
+      "example_jsx": "&lt;button className='...'&gt;label&lt;/button&gt;"
+    }
+  ]
+}
+
+# 出力フォーマット
+
+```json ブロックの JSON のみ。 説明文や前置きは書かない。</code></pre>
+
+    <h3>戻ってくるもの</h3>
+
+    <p>
+      <code>components</code> という配列の中に、 5 個から 15 個分の部品定義が並んだ JSON が返ってきます。各部品には「どのトークンを使っているか」が明示されていて、これがあとで「ボタンと入力欄が同じ角丸を共有している」みたいな関係を見える化してくれます。これも <code>components.json</code> として手元に保存します。
+    </p>
+
+    <p>
+      ステップ 3 まで通すと、各部品はこんなふうにカード形式で並びます。名前・variants・参照しているトークンまでセットで見える化されます。
+    </p>
+
+    <figure class="figure">
+      <img src="assets/preview-04-components.png" alt="design-system ページの Components セクション。Button / Status / Avatar の各部品が、Examples（実物）・Variants・参照Tokens のセットでカード表示されている">
+      <figcaption>ステップ 3 まで通したあとの部品カタログ（preview）。 Button / Status / Avatar の各カードに、実物 + variants + 使っているトークン名が並ぶ。</figcaption>
+    </figure>
+
+    <h2><span class="step-num">3</span>部品を組み立てて「ブロック」を抜き出す</h2>
+
+    <p>
+      ここまでで「変数（色や余白）」と「部品（ボタンやバッジ）」が揃いました。でも実際の UI を見ていると、ボタン単体やバッジ単体ではなく、それらが組み合わさってもう一段大きい <strong>「ブロック」</strong> になっていることに気づきます。ロゴ + ナビ + 検索 + 通知 + アバターが横一列で並んだ「ヘッダー」、見出し + フィルター + テーブル本体がセットになった「データテーブル」、サイドバー、ヒーロー、こういう <strong>中サイズの構造単位</strong> を抜き出すのがこのステップです。
+    </p>
+
+    <p>
+      ブロックを意識して分解できると、自分が UI を作る時に「この画面のヘッダー部分は、あの参考 UI のヘッダーブロックの組み立て方を借りられるな」みたいな移植がしやすくなります。部品単位ではなく <strong>構造単位</strong> で参考にできるようになる、というのが狙いです。
+    </p>
+
+    <h3>渡すもの</h3>
+
+    <ul>
+      <li>ステップ 1・2 で使ったのと同じ UI 画像（または同じコード）</li>
+      <li>ステップ 1 の <code>tokens.json</code> と ステップ 2 の <code>components.json</code> の中身</li>
+    </ul>
+
+    <h3>使うプロンプト</h3>
+
+<pre><code>あなたの役割: UI の reusable な block (= component を組み合わせた構造単位) を識別する design system architect。
+
+# 入力
+
+## 良い UI
+[ステップ 1・2 で使ったのと同じ UI 画像 or コード]
+
+## tokens.json (ステップ 1 の出力)
+[ステップ 1 の結果をそのまま貼る]
+
+## components.json (ステップ 2 の出力)
+[ステップ 2 の結果をそのまま貼る]
+
+# タスク
+
+UI から reusable な block を 3〜7 個 識別し、 下のスキーマで JSON 出力する。
+
+## block とは
+- 複数の component (場合によっては tokens) を組み合わせて作る、 ページ内で意味的にまとまった構造単位
+- 例: header / global navigation / page hero / data table / filter bar / sidebar / page footer
+- component より大きく、 page より小さい中サイズのまとまり
+
+## ルール
+- 細かすぎ (= 単一 component) も大きすぎ (= ページ全体) も避ける
+- 各 block が含む components を components_used で参照 (ステップ 2 の name)
+- 必要に応じて直接使う tokens を tokens_used で参照 (背景色やレイアウト spacing 等)
+- purpose に 1 行で「このブロックの役目 (何のために存在するか)」 を書く
+- example_jsx は実物を Tailwind class で書く (動く JSX)
+
+## 出力スキーマ
+
+{
+  "blocks": [
+    {
+      "name": "&lt;block名&gt;",
+      "purpose": "&lt;このブロックの役目 (1 行)&gt;",
+      "components_used": ["&lt;component name&gt;", "..."],
+      "tokens_used": ["color.bg.surface", "spacing.6"],
+      "example_jsx": "&lt;header className='...'&gt;...&lt;/header&gt;"
+    }
+  ]
+}
+
+# 出力フォーマット
+
+```json ブロックの JSON のみ。 説明文や前置きは書かない。</code></pre>
+
+    <h3>戻ってくるもの</h3>
+
+    <p>
+      <code>blocks</code> という配列の中に、 3 個から 7 個分のブロック定義が並んだ JSON が返ってきます。各ブロックには「どの component を組み合わせて作られているか」が明示されていて、これがあとで「自分のプロジェクトのヘッダーは、このブロック構成を真似てみよう」という時の <strong>設計図</strong> になります。これも <code>blocks.json</code> として手元に保存します。
+    </p>
+
+    <p>
+      次のステップ 4 のページ生成で、この <code>blocks.json</code> もまとめて渡すと、 design-system ページの末尾に「Blocks セクション」が出来て、組み立てたブロックがプレビュー + 構成要素 (components_used / tokens_used) と一緒に並んで見えるようになります。
+    </p>
+
+    <div class="callout">
+      <strong>うまく動かなかった時のチェック</strong>　ブロックが細かすぎ (= component とほぼ同じ) になったら、プロンプトに「ボタン単体や入力欄単体は block ではなく component なので除外して」と付け足す。逆に大きすぎ (= 1 ブロックで画面の半分以上を占める) なら、「block は画面の 1 セクション程度の大きさ」と制約を加える。
+    </div>
+
+    <h2><span class="step-num">4</span>分解ページを作る</h2>
+
+    <p>
+      ここまでで JSON が 3 つ揃いました。最後のステップは、この 3 つを材料にして、ブラウザで開ける Web ページの形（React + Tailwind のコード）を作ってもらう作業です。出来上がるのは 4 つのファイルで、それぞれ役割が違います。
+    </p>
+
+    <p>
+      1 つ目の <code>tokens.ts</code> は、トークンを TypeScript の型付きの定数として書き出したファイル。 2 つ目の <code>components.tsx</code> は、各部品を実際の React コンポーネントとして実装したファイル。 3 つ目の <code>blocks.tsx</code> は、各ブロックを React コンポーネントとして実装し、 使っている部品と変数の参照も持つファイル。 4 つ目の <code>design-system/page.tsx</code> は、 これら 3 つを読み込んでカタログ表示する Web ページ本体です。 Next.js プロジェクトに 4 ファイルを所定の場所に置けば、ブラウザで開けるようになります。
+    </p>
+
+    <h3>渡すもの</h3>
+
+    <ul>
+      <li>ステップ 1 の出力（<code>tokens.json</code>）</li>
+      <li>ステップ 2 の出力（<code>components.json</code>）</li>
+      <li>ステップ 3 の出力（<code>blocks.json</code>）</li>
+    </ul>
+
+    <h3>使うプロンプト</h3>
+
+<pre><code>あなたの役割: React + Tailwind の design system カタログページを生成する。
+
+# 入力
+
+## tokens.json (ステップ 1 の出力)
+[ここに貼る]
+
+## components.json (ステップ 2 の出力)
+[ここに貼る]
+
+## blocks.json (ステップ 3 の出力)
+[ここに貼る]
+
+# タスク
+
+以下の 4 ファイルを生成する:
+
+1. _design-system/tokens.ts — typed const として tokens を export
+2. _design-system/components.tsx — 各 component を React で実装 + メタカタログ export
+3. _design-system/blocks.tsx — 各 block を React で実装 + メタカタログ export
+4. design-system/page.tsx — tokens / components / blocks をデータ駆動でカタログ表示
+
+## 構造の指示
+
+### tokens.ts
+- type 定義 (ColorToken / SpacingToken / RadiusToken / etc.)
+- export const tokens = { color: {...}, spacing: {...}, ... } as const satisfies ...
+- 入力 JSON の値をそのまま型付けして export する
+
+### components.tsx
+- 各 component を function コンポーネントとして実装
+- export const components = [{ name, description, variants, tokens, examples: [...] }, ...]
+- examples の中で実物の React 要素を返す
+
+### blocks.tsx
+- 各 block を function コンポーネントとして実装 (内部で components.tsx の部品を import して組み立てる)
+- export const blocks = [{ name, purpose, components_used, tokens_used, examples: [...] }, ...]
+- examples の中で実物の React 要素を返す (= ヘッダーやテーブル本体)
+
+### design-system/page.tsx
+- tokens を category 別に table 形式でカタログ表示 (色は swatch + hex + role)
+- components を card 形式で各 example を render
+- blocks を大きめのプレビューカードで render (構成 components_used と tokens_used も一緒に表示)
+- セクション順: Color → Spacing → Radius → Ring → Shadow → Typography → Components → Blocks
+- Tailwind のみで、 外部 UI library (shadcn / radix UI 等) は使わない
+
+## 出力フォーマット
+
+4 つの ```tsx ブロックを順に。 各ブロックの 1 行目に // === &lt;filepath&gt; === コメントでファイルパスを明示。</code></pre>
+
+    <h3>戻ってくるもの</h3>
+
+    <p>
+      <code>tokens.ts</code> <code>components.tsx</code> <code>blocks.tsx</code> <code>design-system/page.tsx</code> の 4 つのファイルが、それぞれコードブロックとして返ってきます。これを自分の Next.js プロジェクトの該当する場所に保存して、開発サーバーを起動。ブラウザで <code>/design-system</code> を開くと、入力した UI の <strong>変数・部品・ブロック</strong> のカタログが見えるようになっています。
+    </p>
+
+    <p>
+      Color の下には Spacing / Radius / Ring（線） が続き、その下に Shadow / Typography、続いて Components、最後に <strong>Blocks（組み立てた構造単位）</strong> という構造で並びます。全体だとこんな見え方です。
+    </p>
+
+    <figure class="figure">
+      <img src="assets/preview-02-spacing-radius.png" alt="design-system ページの Spacing / Radius / Ring セクション。各値の使われ方をミニチュアで示したカードが並ぶ">
+      <figcaption>Spacing（余白） / Radius（角丸） / Ring（線）の段階。 各カードに小さい図解 + px 値 + Tailwind class 名が並ぶ。</figcaption>
+    </figure>
+
+    <figure class="figure">
+      <img src="assets/preview-03-shadow-typography.png" alt="design-system ページの Shadow / Typography セクション。影の段階と、見出し・本文・ラベル・microの文字サイズ階層がカード形式で並ぶ">
+      <figcaption>Shadow（影） と Typography（文字サイズ階層）。 px・weight・letter-spacing まで見える形で整理される。</figcaption>
+    </figure>
+
+    <h2>うまく動かなかった時のチェックリスト</h2>
+
+    <p>
+      ここで詰まる人が多そうなポイントを 3 つだけ書いておきます。
+    </p>
+
+    <p>
+      <strong>1 つ目、色や角丸が画面に反映されない。</strong>　これは Tailwind 側の設定が足りていないことが多い。 Tailwind v4 を使っているなら <code>@theme inline</code> を、 v3 なら <code>tailwind.config.js</code> で CSS variable 経由で読み込む設定が必要です。 AI に「私のプロジェクトの Tailwind 設定はこうです」と渡して、必要な追記を教えてもらうのが速い。
+    </p>
+
+    <p>
+      <strong>2 つ目、フォントが崩れる。</strong>　 Inter フォントの読み込みが入ってない可能性が高いです。 <code>next/font/google</code> 経由で読み込むか、 <code>globals.css</code> に CDN 経由の link を書き足すと直ります。
+    </p>
+
+    <p>
+      <strong>3 つ目、コードが途中で切れた。</strong>　長い tsx ファイルだと AI の出力が打ち切られることがあります。「続きから書いて」と頼むか、ステップ 4 のプロンプトを 1 ファイルずつに分けて 4 回送る、で解決します。 <code>blocks.tsx</code> は中身が大きくなりがちなので、ここで分割するのが特に有効です。
+    </p>
+
+    <h2>出来上がったあとに、もう一度 UI を眺める</h2>
+
+    <p>
+      最後にひとつだけお願いがあって、 4 ファイルを配置してブラウザで開いた後、ぜひ元の UI 画像をもう一度横に並べて眺めてみてほしい。「あの綺麗に見えたボタンの角は、ちゃんと <code>radius.lg</code> という名前の値だった」「あのいい感じの余白は <code>spacing.4</code> という名前で管理されている」「あの目を引くヘッダーは、ロゴ + ナビピル + アバターという 3 つの部品の組み合わせで出来ている」みたいなことが、見比べた瞬間に腹に落ちる。
+    </p>
+
+    <p>
+      これが「変数で考える」という言葉の意味の最初の手触りです。同じ手順を、別の UI、別のサービスでも繰り返すと、自分の中に「分解する目」が育っていきます。
+    </p>
+
+    <hr class="divider">
+
+    <div class="footer">
+      <p><strong>関連ガイド</strong></p>
+      <p><a href="file:///Users/kaitakumi/Documents/01_BONO%E4%BA%8B%E6%A5%AD/01_Docs/rebono/04_Prompt/AIUI%E3%82%B9%E3%82%BF%E3%82%A4%E3%83%AA%E3%83%B3%E3%82%AF%E3%82%99_%E6%AF%94%E8%BC%83%E3%83%95%E3%82%9A%E3%83%AC%E3%82%A4%E3%82%AF%E3%82%99%E3%83%A9%E3%82%A6%E3%83%B3%E3%83%88%E3%82%99_%E7%94%9F%E6%88%90%E3%83%86%E3%83%B3%E3%83%95%E3%82%9A%E3%83%AC.html" target="_blank" rel="noopener">比較プレイグラウンド版（ダメ UI → 良い UI の 4 段階変換 playground）</a> — 最初の 2 ステップは同じ内容なので、ここで作った <code>tokens.json</code> と <code>components.json</code> をそのまま使い回せます。</p>
+      <p>このガイドは BONO の AIUI スタイリングカリキュラムの一部として作成。</p>
+    </div>
+
+  </main>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" aria-label="閉じる" type="button">×</button>
+    <img src="" alt="">
+  </div>
+
+  <script>
+    (function () {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = lightbox.querySelector('img');
+      const closeBtn = lightbox.querySelector('.lightbox-close');
+
+      function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || '';
+        lightbox.classList.add('active');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        lightboxImg.src = '';
+      }
+
+      document.querySelectorAll('.figure img').forEach(function (img) {
+        img.addEventListener('click', function () {
+          openLightbox(img.src, img.alt);
+        });
+      });
+
+      lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox || e.target === lightboxImg || e.target === closeBtn) {
+          closeLightbox();
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+          closeLightbox();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
