@@ -86,7 +86,7 @@ export function Confetti() {
         const duration = rand(2400, 3400);
         const delay = rand(0, 180);
 
-        // 中心 → 弧の頂点（序盤で一気に広がる） → 残り時間でゆっくり落下 → 終盤にフェードアウト
+        // 中心 → 弧の頂点（前半45%かけてゆっくり広がる） → ゆっくり落下 → 終盤にフェードアウト
         const anim = el.animate(
           [
             {
@@ -99,14 +99,14 @@ export function Confetti() {
                 dyUp * 0.7 - gravity * 0.1
               }px)) rotate(${rotStart + (rotEnd - rotStart) * 0.35}deg) scale(1)`,
               opacity: 1,
-              offset: 0.25,
+              offset: 0.45,
             },
             {
               transform: `translate(calc(-50% + ${dx * 0.95}px), calc(-50% + ${
                 dyUp + gravity * 0.6
               }px)) rotate(${rotStart + (rotEnd - rotStart) * 0.75}deg) scale(0.95)`,
               opacity: 1,
-              offset: 0.72,
+              offset: 0.8,
             },
             {
               transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${
@@ -119,7 +119,8 @@ export function Confetti() {
           {
             duration,
             delay,
-            easing: "cubic-bezier(0.16, 1, 0.3, 1)",
+            // 立ち上がりを緩めたease-out（旧: 0.16,1 は初速が速すぎた）
+            easing: "cubic-bezier(0.3, 0.75, 0.4, 1)",
             fill: "forwards",
           }
         );
