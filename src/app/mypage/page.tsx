@@ -27,7 +27,6 @@ export default async function MyPage({
 }: {
   searchParams: Promise<{ tab?: string | string[] }>;
 }) {
-  console.time("[mypage] shell ready (until first byte)");
   const user = await getCurrentUser();
   if (!user) {
     redirect("/login?reauth=1&redirectTo=/mypage");
@@ -43,8 +42,6 @@ export default async function MyPage({
   const progressMode: "preview" | "full" = tab === "progress" ? "full" : "preview";
   const bookmarksMode: "preview" | "full" = tab === "favorite" ? "full" : "preview";
   const historyMode: "preview" | "full" = tab === "history" ? "full" : "preview";
-
-  console.timeEnd("[mypage] shell ready (until first byte)");
 
   return (
     <MyPageShell activeTab={tab}>

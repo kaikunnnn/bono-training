@@ -8,9 +8,7 @@ export async function BookmarksSection({
   userId: string;
   mode: "preview" | "full";
 }) {
-  console.time("[mypage section] Bookmarks total");
   const bookmarks = await getBookmarkedArticles(userId);
-  console.timeEnd("[mypage section] Bookmarks total");
 
   if (mode === "preview") {
     return <BookmarksPreview bookmarks={bookmarks} />;
