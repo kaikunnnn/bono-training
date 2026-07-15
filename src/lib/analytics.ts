@@ -344,3 +344,45 @@ export const trackRoadmapView = (roadmapId: string, title: string) => {
     roadmap_title: title,
   });
 };
+
+// ===== 掲示板 投稿フローイベント（#148） =====
+
+/**
+ * 投稿フローのステップ表示（category / compose / contact / done）
+ */
+export const trackPostFlowStepView = (step: string) => {
+  trackEvent('post_flow_step_view', {
+    step,
+  });
+};
+
+/**
+ * 投稿フローのカテゴリ選択（slug と kind: post / contact）
+ */
+export const trackPostFlowCategorySelect = (
+  categorySlug: string,
+  categoryKind: string
+) => {
+  trackEvent('post_flow_category_select', {
+    category_slug: categorySlug,
+    category_kind: categoryKind,
+  });
+};
+
+/**
+ * 投稿フローの投稿成功（done 到達）
+ */
+export const trackPostFlowSubmitSuccess = (categorySlug?: string) => {
+  trackEvent('post_flow_submit_success', {
+    category_slug: categorySlug,
+  });
+};
+
+/**
+ * 投稿フローの破棄（キャンセル確認で「破棄して閉じる」）
+ */
+export const trackPostFlowDiscard = (step: string) => {
+  trackEvent('post_flow_discard', {
+    step,
+  });
+};
