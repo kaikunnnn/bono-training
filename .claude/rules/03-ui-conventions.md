@@ -21,6 +21,14 @@ import { TickCircle } from "iconsax-react";
 - 独自の Tailwind ボタンやカードを作らない
 - 新しい variant が必要なら `ui/` のファイルに追加する
 
+### ボタンは必ず共通 Button を使う（Figmaより優先）
+
+- **押せる見た目の要素は必ず `@/components/ui/button` の Button（または buttonVariants）を使う**。`<button>` / `<Link>` / `<a>` にボタン風クラスを直書きしない（`asChild` でラップする）
+- **Figma のボタンがデザインシステムと違っていても、Buttonコンポーネント側を正とする**。Figmaの生スタイルを写経しない
+  - 既存 variant/size で表現できないときは `ui/button.tsx` に variant を追加してから使う
+  - Figmaとの差異は「意図的にDS優先にした箇所」として報告に明記する（勝手に黙って丸めない）
+- 実例: 投稿完了画面の「投稿を確認する」が生スタイルLinkで実装され、DSと不一致になった（#137-0715で是正）
+
 ## CSS
 
 - Tailwind CSS を優先
