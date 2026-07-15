@@ -87,6 +87,10 @@ export function StepCategory({ categories, onSelect }: StepCategoryProps) {
             <span className="mt-2 text-[16px] font-medium leading-6 text-foreground">
               {def.label}
             </span>
+            {/* タイトルより一段小さい説明文（DSの muted 色） */}
+            <span className="mt-0.5 text-[13px] leading-5 text-muted-foreground">
+              {def.description}
+            </span>
           </button>
         ))}
       </div>

@@ -18,6 +18,8 @@ export interface BoardCategoryDef {
   emoji: string;
   /** 表示名 */
   label: string;
+  /** カテゴリ選択カードでタイトル下に出す説明文（1文） */
+  description: string;
   /** 表示順（この定数が唯一の正。Sanity の order は移行スクリプトが同期する） */
   order: number;
   /** contact = 投稿させず問い合わせへ誘導する分岐（BONOのバグ・質問） */
@@ -29,10 +31,10 @@ export const CONTACT_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSfUE-AYkZsepc8NfDGO5FtPnHJI77-iMIMnx6KxSfgWVaUgOA/viewform?usp=header";
 
 export const BOARD_CATEGORIES: BoardCategoryDef[] = [
-  { slug: 'zatsudan',       emoji: '💭', label: '雑談・デザイン全般', order: 1, kind: 'post' },
-  { slug: 'design-process', emoji: '🏃', label: 'デザインの進め方',   order: 2, kind: 'post' },
-  { slug: 'tools',          emoji: '🔨', label: 'ツールの使い方',     order: 3, kind: 'post' },
-  { slug: 'ui',             emoji: '🧑‍💻', label: 'UIとデザイン',       order: 4, kind: 'post' },
-  { slug: 'career',         emoji: '🧳', label: 'キャリア・転職',     order: 5, kind: 'post' },
-  { slug: 'bono-bug',       emoji: '❓', label: 'BONOのバグ・質問',   order: 6, kind: 'contact' },
+  { slug: 'zatsudan',       emoji: '💭', label: '雑談・デザイン全般', description: '感想・雑談なんでもOK',         order: 1, kind: 'post' },
+  { slug: 'design-process', emoji: '🏃', label: 'デザインの進め方',   description: '進め方・AI活用の話題',         order: 2, kind: 'post' },
+  { slug: 'tools',          emoji: '🔨', label: 'ツールの使い方',     description: 'AI、Figmaなどツールについて',   order: 3, kind: 'post' },
+  { slug: 'ui',             emoji: '🧑‍💻', label: 'UIとデザイン',       description: 'UI表現・スタイリングの話題',   order: 4, kind: 'post' },
+  { slug: 'career',         emoji: '🧳', label: 'キャリア・転職',     description: '転職・キャリアについて',       order: 5, kind: 'post' },
+  { slug: 'bono-bug',       emoji: '❓', label: 'BONOのバグ・質問',   description: '不具合はお問い合わせへ',       order: 6, kind: 'contact' },
 ];
