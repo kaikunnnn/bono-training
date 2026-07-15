@@ -203,8 +203,10 @@ export default async function Page({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-[800px] px-4 py-10 sm:px-6">
-      {/* 掲示板へ戻る（共通コンポーネント） */}
-      <BackButton label="掲示板へ戻る" href="/questions" />
+      {/* 掲示板へ戻る（共通コンポーネント）。
+          mode="href": 履歴戻りだと投稿完了→詳細と来たとき投稿フローに戻ってしまうため、
+          常に /questions へ遷移する（#137-0715 バグ修正） */}
+      <BackButton label="掲示板へ戻る" href="/questions" mode="href" />
 
       {/*
         タイトルブロック + 元投稿カードを PostActions（Client）で包み、

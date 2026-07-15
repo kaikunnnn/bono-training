@@ -13,6 +13,7 @@
  */
 
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import styles from "./StepDone.module.css";
 import { Confetti } from "./Confetti";
 
@@ -126,12 +127,10 @@ export function StepDone({ slug, isPreview, isFirstPost }: StepDoneProps) {
         className={`${styles.reveal} flex flex-col gap-4 sm:px-24`}
         style={{ animationDelay: `${CHARS_END_MS + REVEAL_GAP_MS * 3}ms` }}
       >
-        <Link
-          href={confirmHref}
-          className="inline-flex h-10 w-full items-center justify-center rounded-[6px] bg-primary text-[14px] text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          投稿を確認する
-        </Link>
+        {/* 共通Button（default variant）。生スタイルの直書きはしない（#137-0715） */}
+        <Button asChild className="w-full">
+          <Link href={confirmHref}>投稿を確認する</Link>
+        </Button>
         <Link
           href="/questions"
           className="inline-flex h-10 w-full items-center justify-center text-[14px] text-text-link hover:underline"

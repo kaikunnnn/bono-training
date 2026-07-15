@@ -54,6 +54,8 @@ export interface ComposeResult {
 interface StepComposeProps {
   /** 選択済み Sanity カテゴリ _id（post カテゴリで必ず解決済み） */
   categoryId?: string;
+  /** 選択済みカテゴリの表示名。見出し「2. ○○について詳しく教えて!」に使う（#137-0715） */
+  categoryLabel?: string;
   /** タイトル（PostFlowClient が保持。戻る→再入場で消えないように親state） */
   title: string;
   onTitleChange: (value: string) => void;
@@ -70,6 +72,7 @@ interface StepComposeProps {
 
 export function StepCompose({
   categoryId,
+  categoryLabel,
   title,
   onTitleChange,
   content,
@@ -270,7 +273,9 @@ export function StepCompose({
       {/* 見出し + サブ（左寄せ） */}
       <div className="space-y-1">
         <h2 className="text-[18px] font-medium leading-7 text-foreground">
-          2. 詳しく教えて!
+          {categoryLabel
+            ? `2. ${categoryLabel}について詳しく教えて!`
+            : "2. 詳しく教えて!"}
         </h2>
         <p className="text-[14px] text-muted-foreground">
           背景や具体的な内容をみんなに伝えよう

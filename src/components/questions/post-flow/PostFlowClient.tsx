@@ -82,6 +82,8 @@ export function PostFlowClient({
   const [categoryId, setCategoryId] = useState<string | undefined>(undefined);
   // 選択したカテゴリの slug（GA4 submit_success の category_slug に使用）。
   const [categorySlug, setCategorySlug] = useState<string | undefined>(undefined);
+  // Step2 見出し「2. ○○について詳しく教えて!」用（#137-0715）
+  const [categoryLabel, setCategoryLabel] = useState<string | undefined>(undefined);
   // compose の入力（戻る→再入場で消えないよう親で保持。dirty 判定にも使う）
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -157,6 +159,7 @@ export function PostFlowClient({
     const nextState: FlowState = def.kind === "contact" ? "contact" : "compose";
     setCategoryId(id);
     setCategorySlug(def.slug);
+    setCategoryLabel(def.label);
     trackPostFlowCategorySelect(def.slug, def.kind);
     // 履歴に1エントリ積んでから遷移する（StrictMode 二重実行を避けるため
     // イベントハンドラ内で push する。useEffect では積まない）。
@@ -218,6 +221,7 @@ export function PostFlowClient({
       {state === "compose" && (
         <StepCompose
           categoryId={categoryId}
+          categoryLabel={categoryLabel}
           title={title}
           onTitleChange={setTitle}
           content={content}
