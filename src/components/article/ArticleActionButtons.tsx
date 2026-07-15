@@ -93,7 +93,7 @@ export const ArticleActionButtons = ({
         {/* Share Button with Dropdown（右側配置） */}
         <ShareDropdown title={title}>
           <Button
-            variant="secondary"
+            variant="ghost"
             size="action"
             className="gap-0 sm:gap-1 px-[10px] sm:px-[12px]"
             style={{
