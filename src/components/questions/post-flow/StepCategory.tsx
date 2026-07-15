@@ -68,7 +68,7 @@ export function StepCategory({ categories, onSelect }: StepCategoryProps) {
           1. 何について投稿する？
         </h2>
         <p className="text-[14px] text-foreground">
-          カテゴリを選んでください
+          質問でも、感想でも、迷いでもOK
         </p>
       </div>
 
