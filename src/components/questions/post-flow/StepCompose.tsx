@@ -47,6 +47,8 @@ const CONTENT_PLACEHOLDER = `話したいことや聞きたいことを詳しく
 export interface ComposeResult {
   questionId: string;
   slug: string;
+  /** 初投稿（このユーザーの post_count が 0→1）なら true。完了画面のお祝い切替に使う（#149） */
+  isFirstPost?: boolean;
 }
 
 interface StepComposeProps {
@@ -207,7 +209,12 @@ export function StepCompose({
 
       // 空ボディでの "Unexpected end of JSON input" を防ぐため text → 安全に parse
       const text = await response.text();
-      let data: { questionId?: string; slug?: string; error?: string } = {};
+      let data: {
+        questionId?: string;
+        slug?: string;
+        error?: string;
+        isFirstPost?: boolean;
+      } = {};
       try {
         data = text ? JSON.parse(text) : {};
       } catch {
@@ -231,7 +238,11 @@ export function StepCompose({
         throw new Error("投稿レスポンスが不正です");
       }
 
-      onSuccess({ questionId: data.questionId, slug: data.slug });
+      onSuccess({
+        questionId: data.questionId,
+        slug: data.slug,
+        isFirstPost: data.isFirstPost === true,
+      });
     } catch (err) {
       // ネットワーク例外もここで捕捉して汎用文言に
       setError(

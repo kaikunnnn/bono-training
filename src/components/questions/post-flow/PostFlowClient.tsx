@@ -229,7 +229,11 @@ export function PostFlowClient({
       )}
       {state === "contact" && <StepContact onBack={back} />}
       {state === "done" && (
-        <StepDone slug={submitResult?.slug} isPreview={isPreview} />
+        <StepDone
+          slug={submitResult?.slug}
+          isPreview={isPreview}
+          isFirstPost={submitResult?.isFirstPost}
+        />
       )}
       </PostFlowShell>
 

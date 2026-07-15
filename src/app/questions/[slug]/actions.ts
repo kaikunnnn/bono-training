@@ -8,6 +8,7 @@ import {
 import { createClient as createSupabaseServiceClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { textToPortableBlocks } from "@/lib/questions/text-format";
+import { adjustBoardUserStats } from "@/lib/questions/board-user-stats";
 
 // ---------------------------------------------------------------------------
 // スレッド（掲示板の元投稿）の編集・削除 Server Actions（#147）
@@ -258,6 +259,9 @@ export async function deleteQuestion(input: {
     console.error("[deleteQuestion] Sanity delete failed:", error);
     return { ok: false, error: "スレッドの削除に失敗しました" };
   }
+
+  // 投稿数カウントを減算（#149・ベストエフォート。0未満にはしない）
+  await adjustBoardUserStats(auth.userId, { postDelta: -1 });
 
   revalidatePath("/questions");
   revalidatePath(`/questions/${input.slug}`);

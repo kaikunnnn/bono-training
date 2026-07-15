@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SanityClient } from '@sanity/client';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { textToPortableBlocks } from '@/lib/questions/text-format';
+import { adjustBoardUserStats } from '@/lib/questions/board-user-stats';
 
 // Sanity write client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
 let sanityClient: SanityClient | null = null;
@@ -373,6 +374,11 @@ export async function POST(request: NextRequest) {
   try {
     const result = await getSanityClient().create(questionDoc);
 
+    // 投稿数カウント（#149・ベストエフォート）。更新後 post_count が 1 なら初投稿。
+    // 失敗しても投稿自体は成功として返す（adjustBoardUserStats 内で握って console.error）。
+    const stats = await adjustBoardUserStats(user.id, { postDelta: 1 });
+    const isFirstPost = stats.ok && stats.postCount === 1;
+
     // Slack通知
     await sendSlackNotification({
       title: payload.title,
@@ -388,6 +394,7 @@ export async function POST(request: NextRequest) {
         success: true,
         questionId: result._id,
         slug: questionDoc.slug.current,
+        isFirstPost,
       },
       { status: 201 });
   } catch (error) {

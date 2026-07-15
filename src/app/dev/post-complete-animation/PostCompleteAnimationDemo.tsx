@@ -28,17 +28,29 @@ const TIMINGS: { label: string; valueMs: number; note: string }[] = [
 export function PostCompleteAnimationDemo() {
   // key を変えて StepDone を再マウント → アニメを頭から再生
   const [replayKey, setReplayKey] = useState(0);
+  // 初投稿お祝い（#149）の文言切替を確認するトグル
+  const [isFirstPost, setIsFirstPost] = useState(false);
 
   return (
     <div className="space-y-8">
       {/* リプレイ操作 */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <Button onClick={() => setReplayKey((k) => k + 1)}>
           <RotateCcw className="mr-1 h-4 w-4" />
           リプレイ
         </Button>
+        <Button
+          variant="outline"
+          onClick={() => {
+            // 切り替えと同時に頭から再生（key を変えて再マウント）
+            setIsFirstPost((v) => !v);
+            setReplayKey((k) => k + 1);
+          }}
+        >
+          {isFirstPost ? "通常投稿に切替" : "初投稿に切替"}
+        </Button>
         <span className="text-sm text-text-primary/50 font-noto-sans-jp">
-          押すたびに完了アニメを頭から再生します
+          押すたびに完了アニメを頭から再生します（現在: {isFirstPost ? "初投稿" : "通常投稿"}）
         </span>
       </div>
 
@@ -68,7 +80,7 @@ export function PostCompleteAnimationDemo() {
       <div className="mx-auto w-full max-w-[672px]">
         <div className="w-full rounded-[24px] border border-border bg-surface px-6 py-8 shadow-sm sm:px-10">
           {/* key を変えて再マウント。isPreview で slug 無しでも一覧へフォールバック */}
-          <StepDone key={replayKey} isPreview />
+          <StepDone key={replayKey} isPreview isFirstPost={isFirstPost} />
         </div>
       </div>
     </div>

@@ -34,11 +34,19 @@ interface StepDoneProps {
   slug?: string;
   /** プレビュー: slug が実在しないため「投稿を確認する」も一覧へ向ける */
   isPreview?: boolean;
+  /** 初投稿（#149）。true のとき見出し/サブを初投稿向けの文言に切り替える（アニメ・レイアウトは同じ） */
+  isFirstPost?: boolean;
 }
 
-export function StepDone({ slug, isPreview }: StepDoneProps) {
+export function StepDone({ slug, isPreview, isFirstPost }: StepDoneProps) {
   // preview（または slug 欠落）では詳細が存在しないので一覧へフォールバック。
   const confirmHref = isPreview || !slug ? "/questions" : `/questions/${slug}`;
+
+  // 初投稿は文言だけ切り替える（紙吹雪・チェックアニメ・レイアウトは共通のまま）。
+  const headingText = isFirstPost ? "初投稿おめでとう！🎉" : "投稿が完了しました！";
+  const subText = isFirstPost
+    ? "はじめの一歩、ナイスです。あなたの投稿がデザインの話を増やしていきます👼"
+    : "デザインの話が増えることが誰かの助けにもなるはずです👼";
 
   return (
     <div className="flex flex-col gap-8">
@@ -96,20 +104,20 @@ export function StepDone({ slug, isPreview }: StepDoneProps) {
           ))}
         </p>
 
-        {/* 完了テキスト */}
+        {/* 完了テキスト（初投稿時は文言のみ切替） */}
         <p
           className={`${styles.reveal} text-[20px] font-bold text-foreground`}
           style={{ animationDelay: `${CHARS_END_MS + REVEAL_GAP_MS}ms` }}
         >
-          投稿が完了しました！
+          {headingText}
         </p>
 
-        {/* サブテキスト */}
+        {/* サブテキスト（初投稿時は文言のみ切替） */}
         <p
           className={`${styles.reveal} text-[14px] text-foreground`}
           style={{ animationDelay: `${CHARS_END_MS + REVEAL_GAP_MS * 2}ms` }}
         >
-          デザインの話が増えることが誰かの助けにもなるはずです👼
+          {subText}
         </p>
       </div>
 

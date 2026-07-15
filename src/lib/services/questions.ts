@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { client as getClient } from "@/lib/sanity";
 import { revalidatePath } from "next/cache";
 import type { Question, QuestionCategory } from "@/types/sanity";
+import { adjustBoardUserStats } from "@/lib/questions/board-user-stats";
 
 // ============================================
 // 型定義
@@ -351,6 +352,9 @@ export async function addComment(input: {
     return { ok: false, error: "コメントの投稿に失敗しました" };
   }
 
+  // コメント数カウントを加算（#149・ベストエフォート）
+  await adjustBoardUserStats(user.id, { commentDelta: 1 });
+
   revalidatePath(`/questions/${input.questionSlug}`);
   return { ok: true, comment: rowToComment(data as CommentRow) };
 }
@@ -422,6 +426,9 @@ export async function deleteComment(input: {
   if (!data || data.length === 0) {
     return { ok: false, error: "コメントが見つからないか、削除する権限がありません" };
   }
+
+  // コメント数カウントを減算（#149・ベストエフォート。0未満にはしない）
+  await adjustBoardUserStats(user.id, { commentDelta: -1 });
 
   revalidatePath(`/questions/${input.questionSlug}`);
   return { ok: true };
