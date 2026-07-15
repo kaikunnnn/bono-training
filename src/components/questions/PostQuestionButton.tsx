@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Loader2, SquarePen, type LucideIcon } from "lucide-react";
+import { Plus, Loader2, MessageSquare, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PermissionRequiredModal } from "@/components/common/PermissionRequiredModal";
 
@@ -16,15 +16,16 @@ interface PostQuestionButtonProps {
   size?: React.ComponentProps<typeof Button>["size"];
   /** ボタンのラベル（デフォルト: 質問を投稿する） */
   label?: string;
-  /** 先頭アイコン。掲示板の「スレッドを作成」導線では SquarePen を渡す */
-  icon?: "plus" | "square-pen";
+  /** 先頭アイコン。掲示板の「スレッドを作成」導線では吹き出し（message-square）を渡す
+      （記事詳細の「掲示板で聞く」と同系統のアイコンに統一） */
+  icon?: "plus" | "message-square";
   /** トリガーボタンの追加クラス */
   className?: string;
 }
 
 const ICONS: Record<NonNullable<PostQuestionButtonProps["icon"]>, LucideIcon> = {
   plus: Plus,
-  "square-pen": SquarePen,
+  "message-square": MessageSquare,
 };
 
 export function PostQuestionButton({

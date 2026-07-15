@@ -41,7 +41,7 @@ export default async function Page() {
             hasMemberAccess={hasFullAccess}
             isLoggedIn={isLoggedIn}
             label="スレッドを作成"
-            icon="square-pen"
+            icon="message-square"
           />
         </div>
       </header>
@@ -73,7 +73,7 @@ export default async function Page() {
                 isLoggedIn={isLoggedIn}
                 variant="secondary"
                 label="スレッドを作成"
-                icon="square-pen"
+                icon="message-square"
               />
             </CardContent>
           </Card>
