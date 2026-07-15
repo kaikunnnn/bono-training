@@ -202,8 +202,8 @@ export function QuestionCommentItem({
               />
               {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
 
-              {/* フッター：左=リアクション / 右=日付（Figma 135:4877） */}
-              <div className="mt-5 flex items-start justify-between border-t border-border pt-6">
+              {/* フッター：左=リアクション / 右=日付。divider無し（ユーザー指定でFigma 135:4877から変更） */}
+              <div className="mt-4 flex items-center justify-between">
                 <ReactionButtons
                   targetType="comment"
                   targetId={comment.id}
