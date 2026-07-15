@@ -73,20 +73,20 @@ export function Confetti() {
 
         container.appendChild(el);
 
-        // 放射状に散らす角度（全周） + 距離（px）
+        // 放射状に散らす角度（全周） + 距離（px）。広めに散らす（#137-0715 調整）
         const angle = rand(0, Math.PI * 2);
-        const distance = rand(70, 150);
+        const distance = rand(120, 280);
         const dx = Math.cos(angle) * distance;
-        // やや落下させるため縦方向に重力オフセットを足す
-        const gravity = rand(30, 90);
+        // 落下量を大きめに取り、ゆっくり長く落ちる印象にする
+        const gravity = rand(120, 260);
         const dyUp = Math.sin(angle) * distance;
 
         const rotStart = rand(-90, 90);
         const rotEnd = rotStart + rand(180, 540);
-        const duration = rand(1200, 1600);
-        const delay = rand(0, 120);
+        const duration = rand(2400, 3400);
+        const delay = rand(0, 180);
 
-        // 中心 → 弧の頂点 → 落下してフェードアウト
+        // 中心 → 弧の頂点（序盤で一気に広がる） → 残り時間でゆっくり落下 → 終盤にフェードアウト
         const anim = el.animate(
           [
             {
@@ -95,11 +95,18 @@ export function Confetti() {
               offset: 0,
             },
             {
-              transform: `translate(calc(-50% + ${dx * 0.6}px), calc(-50% + ${
-                dyUp * 0.6 - gravity * 0.15
-              }px)) rotate(${rotStart + (rotEnd - rotStart) * 0.4}deg) scale(1)`,
+              transform: `translate(calc(-50% + ${dx * 0.7}px), calc(-50% + ${
+                dyUp * 0.7 - gravity * 0.1
+              }px)) rotate(${rotStart + (rotEnd - rotStart) * 0.35}deg) scale(1)`,
               opacity: 1,
-              offset: 0.4,
+              offset: 0.25,
+            },
+            {
+              transform: `translate(calc(-50% + ${dx * 0.95}px), calc(-50% + ${
+                dyUp + gravity * 0.6
+              }px)) rotate(${rotStart + (rotEnd - rotStart) * 0.75}deg) scale(0.95)`,
+              opacity: 1,
+              offset: 0.72,
             },
             {
               transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${
