@@ -24,6 +24,22 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/question-community",
+    issue: "掲示板 #137",
+    title: "みんなの掲示板：改善 Before/After ハブ",
+    summary:
+      "/questions の改善を実装前確認 + リリース後ログとして集約。ログイン訴求モーダルの整列案・アニメーション刷新など。",
+    status: "in-progress",
+  },
+  {
+    href: "/dev/post-complete-animation",
+    issue: "掲示板 #143",
+    title: "投稿完了アニメーションの再生確認",
+    summary:
+      "投稿フロー最終ステップの完了アニメ（チェック + 紙吹雪）をリプレイ再生してタイミングを確認できる。prefers-reduced-motion のフォールバック確認もここで。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/design-breakdown/achievements",
     issue: "DESIGN",
     title: "/achievements 分解ダッシュボード",

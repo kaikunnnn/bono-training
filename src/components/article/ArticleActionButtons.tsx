@@ -4,7 +4,7 @@ import { CompletionButton } from "@/components/article/CompletionButton";
 import { BookmarkButton } from "@/components/article/BookmarkButton";
 import { Button } from "@/components/ui/button";
 import { ShareDropdown } from "@/components/common/ShareDropdown";
-import { ArrowRight, Share2 } from "lucide-react";
+import { ArrowRight, MessageSquare, Share2 } from "lucide-react";
 
 export interface ArticleActionButtonsProps {
   articleId: string;
@@ -60,48 +60,77 @@ export const ArticleActionButtons = ({
             }
           />
 
-          {/* Share Button with Dropdown */}
-          <ShareDropdown title={title}>
-            <Button
-              variant="secondary"
-              size="action"
-              className="gap-0 sm:gap-1 px-[10px] sm:px-[12px]"
-              style={{
-                fontFamily: "'Hiragino Sans', -apple-system, sans-serif",
-              }}
-              aria-label="シェア"
+          {/* 掲示板で聞く（お気に入りの横）: みんなの掲示板トップを別タブで開く */}
+          <Button
+            asChild
+            variant="secondary"
+            size="action"
+            className="gap-0 sm:gap-1 px-[10px] sm:px-[12px]"
+            style={{
+              fontFamily: "'Hiragino Sans', -apple-system, sans-serif",
+            }}
+          >
+            <a
+              href="/questions"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="掲示板で聞く"
             >
-              <Share2 size={16} className="text-gray-600" />
-
+              <MessageSquare size={16} className="text-gray-600" />
               <div className="hidden sm:inline-flex flex-col justify-start items-center">
                 <div className="text-center justify-center text-gray-600 text-sm font-semibold font-['Hiragino_Sans'] leading-5">
-                  シェア
+                  掲示板で聞く
                 </div>
               </div>
-            </Button>
-          </ShareDropdown>
+            </a>
+          </Button>
+
         </div>
       </div>
 
-      {/* Right Button - Next Video */}
-      {onNext && (
-        <Button
-          onClick={onNext}
-          variant="secondary"
-          size="action"
-          className="gap-1 w-full md:w-auto justify-center md:justify-start"
-          style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
-          aria-label="次の動画へ"
-        >
-          <div className="inline-flex flex-col justify-start items-center">
-            <div className="text-center justify-center text-gray-500 text-sm font-semibold font-['Hiragino_Sans'] leading-5">
-              次の動画
-            </div>
-          </div>
+      {/* Right Button Group - Share (+ Next Video) */}
+      <div className="flex items-center gap-2 w-full md:w-auto md:gap-3 md:justify-end">
+        {/* Share Button with Dropdown（右側配置） */}
+        <ShareDropdown title={title}>
+          <Button
+            variant="ghost"
+            size="action"
+            className="gap-0 sm:gap-1 px-[10px] sm:px-[12px]"
+            style={{
+              fontFamily: "'Hiragino Sans', -apple-system, sans-serif",
+            }}
+            aria-label="シェア"
+          >
+            <Share2 size={16} className="text-gray-600" />
 
-          <ArrowRight size={16} className="text-gray-500" />
-        </Button>
-      )}
+            <div className="hidden sm:inline-flex flex-col justify-start items-center">
+              <div className="text-center justify-center text-gray-600 text-sm font-semibold font-['Hiragino_Sans'] leading-5">
+                シェア
+              </div>
+            </div>
+          </Button>
+        </ShareDropdown>
+
+        {/* Next Video */}
+        {onNext && (
+          <Button
+            onClick={onNext}
+            variant="secondary"
+            size="action"
+            className="gap-1 flex-1 md:flex-none justify-center md:justify-start"
+            style={{ fontFamily: "'Hiragino Sans', -apple-system, sans-serif" }}
+            aria-label="次の動画へ"
+          >
+            <div className="inline-flex flex-col justify-start items-center">
+              <div className="text-center justify-center text-gray-500 text-sm font-semibold font-['Hiragino_Sans'] leading-5">
+                次の動画
+              </div>
+            </div>
+
+            <ArrowRight size={16} className="text-gray-500" />
+          </Button>
+        )}
+      </div>
     </div>
   );
 };

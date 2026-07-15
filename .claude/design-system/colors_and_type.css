@@ -64,6 +64,7 @@
   --text-primary:   #021710;  /* near-black, cool green undertone */
   --text-secondary: #354540;
   --text-muted:     #677470;
+  --text-body-muted:#434E5D;  /* 掲示板一覧カードの本文抜粋（Figma 13:1467 本文色） */
   --text-disabled:  #9AA29F;
   --text-inverse:   #FAFBFB;
   --text-link:      #0829BF;
@@ -84,6 +85,20 @@
   --border-light:   #D4D6CC;
   --border-default: #C3C5BB;
   --border-strong:  #A8AAA0;
+
+  /* 掲示板一覧カードのボーダー（Figma 127:3266・黒8%）。
+     border-border より薄い、カード用の控えめな枠線。 */
+  --card-border-subtle: rgba(0, 0, 0, 0.08);
+  /* 掲示板コメント入力カードのボーダー（Figma 20:2845・グレー実線）。
+     入力欄をはっきり縁取るための強めのボーダー。 */
+  --border-input-strong: #C0C0C0;
+
+  /* リアクションボタン（Figma 135:4348）。
+     枠線は黒15%。ON状態は「明るい色」指定のためリンク色（--text-link #0829BF）系統で表現
+     （primaryが黒のための暫定。primaryカラー導入時に差し替え） */
+  --reaction-border: rgba(0, 0, 0, 0.15);
+  --reaction-active-bg: rgba(8, 41, 191, 0.08);
+  --reaction-active-border: rgba(8, 41, 191, 0.30);
 
   /* Brand / CTA */
   --cta-primary-bg:    #102720;  /* Deep forest green — primary buttons */
@@ -119,6 +134,10 @@
   --cat-info-arch:   #774000;
   --cat-ui-visual:   #08381D;
 
+  /* 掲示板カテゴリタグ背景（Figma 13:1467・#C3BE2C の 10%）。
+     一覧カードと詳細ページのカテゴリタグで共通利用する。 */
+  --tag-category-bg: rgba(195, 190, 44, 0.10);
+
   /* Category utility tints */
   --cat-tweet:  #1DA1F2;
   --cat-book:   #8B5CF6;
@@ -130,6 +149,19 @@
   --success-light:   #86EFAC;
   --success-dark:    #16A34A;
   --success-bg:      #F0FDF4;
+
+  /* Confetti — 8-color burst palette for completion animations
+     (Tailwind 400-level bright mid-tones). Used by the /questions
+     post-flow StepDone celebration. Reference via var(--confetti-N);
+     never inline the hex in JSX/TS. */
+  --confetti-1: #F87171;  /* coral red */
+  --confetti-2: #FB923C;  /* orange */
+  --confetti-3: #FBBF24;  /* yellow */
+  --confetti-4: #4ADE80;  /* green */
+  --confetti-5: #2DD4BF;  /* mint */
+  --confetti-6: #60A5FA;  /* blue */
+  --confetti-7: #A78BFA;  /* purple */
+  --confetti-8: #F472B6;  /* pink */
 
   /* =========================================================
      RADIUS — Rounded is a core visual motif
@@ -155,6 +187,12 @@
   --shadow-lift:  0px 8px 24px 0px rgba(0,0,0,0.16);        /* hover lift */
   --shadow-hero-icon: 1px 1px 13.56px 0px rgba(0,0,0,0.33);
   --shadow-cta:   0px 4px 4px 0px rgba(0,0,0,0.25);
+
+  /* 掲示板一覧カードの影（Figma 127:3266）。既存の --shadow-card（lesson card）は
+     別値のため名前衝突を避けて board 専用トークンを用意する。 */
+  --shadow-board-card:  0px 1px 4px rgba(0, 0, 0, 0.04);
+  /* 掲示板コメント入力カードの影（Figma 20:2845）。 */
+  --shadow-input:       0px 1px 6px rgba(0, 0, 0, 0.08);
 
   /* =========================================================
      SPACING — 4px base

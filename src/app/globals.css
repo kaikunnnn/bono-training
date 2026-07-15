@@ -36,6 +36,7 @@
   --font-noto: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
   --font-hind: var(--font-hind-var), Hind, sans-serif;
   --font-rounded-mplus: var(--font-mplus-rounded-var), 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  --font-mplus-1p: var(--font-mplus-1p), 'M PLUS 1p', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
   --font-dot: 'DotGothic16', monospace;
   --font-geist: var(--font-inter-var), Inter, sans-serif;
   --font-luckiest: var(--font-luckiest-var), 'Luckiest Guy', sans-serif;
@@ -172,6 +173,7 @@
   --shadow-training-card: 0 4px 20px rgba(0,0,0,0.08);
   --shadow-quest-card: 1px 1px 4px 0px rgba(0, 0, 0, 0.08);
   --shadow-hero-icon: 1px 1px 13.56px 0px rgba(0, 0, 0, 0.33);
+  --shadow-comment-card: 0px 1px 1px 0px rgba(0, 0, 0, 0.05);
 
   /* Spacing for icon blocks */
   --spacing-icon-block-sm: 80px;
@@ -593,6 +595,10 @@
 
   .shadow-hero-icon {
     box-shadow: 1px 1px 13.56px 0px rgba(0, 0, 0, 0.33);
+  }
+
+  .shadow-comment-card {
+    box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.05);
   }
 
   /* Animation utilities */

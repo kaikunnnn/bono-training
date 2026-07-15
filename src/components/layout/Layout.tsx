@@ -61,6 +61,8 @@ export function Layout({ children, className, user }: LayoutProps) {
     if (pathname.startsWith("/articles/") && pathname !== "/articles") return true;
     if (pathname.startsWith("/blog")) return true;
     if (pathname === "/feedback-apply/submit") return true;
+    // #139: 投稿モードは専用シェル（PostFlowShell）を使うためグローバルナビ非表示
+    if (pathname === "/questions/new") return true;
     if (pathname.startsWith("/docs")) return true; // 共有用ドキュメント（ワークショップ等）は独立表示
     return false;
   })();

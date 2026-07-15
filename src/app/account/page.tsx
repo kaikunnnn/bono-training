@@ -20,7 +20,7 @@ export default async function AccountPage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login?redirectTo=/account");
+    redirect("/login?reauth=1&redirectTo=/account");
   }
 
   const subscription = await getSubscriptionStatus();
