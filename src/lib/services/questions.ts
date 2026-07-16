@@ -306,6 +306,73 @@ function validateCommentContent(
   return { ok: true, content };
 }
 
+// 本文プレビュー用に前後空白を除去して指定長でtruncate（末尾に … を付与）
+function truncateForPreview(text: string, maxLength = 300): string {
+  const normalized = text.trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength)}…`;
+}
+
+// コメント投稿のSlack通知（api/questions/submit の質問投稿通知と同じ webhook を使用）
+async function sendCommentSlackNotification(data: {
+  questionSlug: string;
+  authorName: string;
+  content: string;
+}) {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  if (!webhookUrl) return;
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design";
+  const questionPageUrl = `${siteUrl}/questions/${data.questionSlug}`;
+
+  const message = {
+    blocks: [
+      {
+        type: "header",
+        text: { type: "plain_text", text: "💬 新しいコメントがありました", emoji: true },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*コメント者:*\n${data.authorName}`,
+        },
+      },
+      {
+        type: "divider",
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*コメント内容:*\n${truncateForPreview(data.content)}`,
+        },
+      },
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: { type: "plain_text", text: "💬 詳細ページを開く", emoji: true },
+            url: questionPageUrl,
+            style: "primary",
+          },
+        ],
+      },
+    ],
+  };
+
+  try {
+    await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(message),
+    });
+  } catch (error) {
+    console.error("Failed to send comment Slack notification:", error);
+  }
+}
+
 export async function addComment(input: {
   questionId: string;
   questionSlug: string;
@@ -354,6 +421,12 @@ export async function addComment(input: {
 
   // コメント数カウントを加算（#149・ベストエフォート）
   await adjustBoardUserStats(user.id, { commentDelta: 1 });
+
+  await sendCommentSlackNotification({
+    questionSlug: input.questionSlug,
+    authorName,
+    content: validated.content,
+  });
 
   revalidatePath(`/questions/${input.questionSlug}`);
   return { ok: true, comment: rowToComment(data as CommentRow) };
