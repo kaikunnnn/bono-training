@@ -1,7 +1,10 @@
 // src/app/account/page.tsx — mainのスタイルに準拠
 import { Metadata } from "next";
+import Link from "next/link";
 import { redirect } from "next/navigation";
+import { UserRound } from "lucide-react";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
+import { Button } from "@/components/ui/button";
 import SubscriptionInfo from "@/components/account/SubscriptionInfo";
 import { PasswordChangeForm } from "@/components/account/PasswordChangeForm";
 import {
@@ -35,6 +38,21 @@ export default async function AccountPage() {
           <SettingsField label="メールアドレス:">
             {user.email}
           </SettingsField>
+        </div>
+      </SettingsCard>
+
+      {/* プロフィール編集への導線（マイページと同じ /profile へ） */}
+      <SettingsCard title="プロフィール">
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            掲示板やコメントで表示される名前・アイコンを編集できます。
+          </p>
+          <Button asChild variant="outline">
+            <Link href="/profile">
+              <UserRound className="h-4 w-4" />
+              プロフィールを編集
+            </Link>
+          </Button>
         </div>
       </SettingsCard>
 
