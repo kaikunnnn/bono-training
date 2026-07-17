@@ -12,7 +12,8 @@ import { ICON_SIZE } from "./icon-utils";
 import { DirectInbox, Home2 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 
-const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
+const FEEDBACK_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSfUE-AYkZsepc8NfDGO5FtPnHJI77-iMIMnx6KxSfgWVaUgOA/viewform?usp=header";
 
 /**
  * サイドバーコンポーネント
