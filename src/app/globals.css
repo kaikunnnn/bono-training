@@ -118,6 +118,7 @@
   --color-hover: var(--bg-hover);
   --color-active: var(--bg-active);
   --color-disabled: var(--bg-disabled);
+  --color-dark-section: var(--bg-dark-section);
   --color-success-feedback: var(--bg-success);
   --color-warning-feedback: var(--bg-warning);
   --color-error-feedback: var(--bg-error);
@@ -278,6 +279,8 @@
   --bg-hover: #F2F3F0;
   --bg-active: #E0E1DC;
   --bg-disabled: #F9FAFB;
+  /* 暗い背景セクション用。Figma "デザインとキャリアを考える" セクションより */
+  --bg-dark-section: #050423;
   --bg-success: rgba(138, 204, 161, 0.12);
   --bg-warning: rgba(255, 183, 33, 0.12);
   --bg-error: #FDEFF2;

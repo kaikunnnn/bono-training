@@ -39,7 +39,7 @@ function NewContentCard({ type, title, thumbnail, href }: NewContentItem) {
       className="group flex h-full flex-col overflow-hidden rounded-[28px] border border-black/[0.06] bg-surface transition-shadow sm:rounded-[36px] hover:shadow-[0px_4px_18px_0px_rgba(0,0,0,0.10)]"
     >
       {/* サムネイル */}
-      <div className="relative aspect-[480/253] w-full overflow-hidden bg-muted-custom">
+      <div className="relative aspect-video w-full overflow-hidden bg-muted-custom">
         <Image
           src={thumbnail}
           alt=""
@@ -52,7 +52,7 @@ function NewContentCard({ type, title, thumbnail, href }: NewContentItem) {
       {/* テキスト */}
       <div className="flex flex-col gap-2 px-6 py-5 sm:px-8 sm:py-6">
         <p className="text-[13px] font-bold uppercase leading-none text-text-primary/60">{type}</p>
-        <p className="text-base font-bold leading-[1.6] text-text-primary">{title}</p>
+        <p className="line-clamp-1 text-base font-bold leading-[1.6] text-text-primary">{title}</p>
       </div>
     </Link>
   );

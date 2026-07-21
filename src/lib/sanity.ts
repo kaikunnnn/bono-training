@@ -2,7 +2,7 @@ import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory, Story, StorySummary, UserOutputSummary } from "@/types/sanity";
+import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory, Story, StorySummary, UserOutputSummary, SanitySlug } from "@/types/sanity";
 import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-roadmap";
 import type { Guide, GuideCategory } from "@/types/guide";
 
@@ -179,6 +179,7 @@ export const getAllLessons = unstable_cache(
       *[_type == "lesson"] | order(lessonNumber asc) {
         _id,
         _type,
+        _createdAt,
         title,
         slug,
         description,
@@ -1189,6 +1190,40 @@ export const getEvent = unstable_cache(
   { tags: ["event"], revalidate: 3600 }
 );
 
+/**
+ * イベント一覧の軽量型（新着コンテンツ横断取得用）
+ */
+export interface EventListItem {
+  _id: string;
+  title: string;
+  slug: SanitySlug;
+  summary?: string;
+  thumbnailUrl?: string;
+  publishedAt?: string;
+}
+
+/**
+ * すべてのイベントを取得（一覧・新着コンテンツ用）
+ * publishedAt 降順でソートして返す。
+ */
+export const getAllEvents = unstable_cache(
+  async (): Promise<EventListItem[]> => {
+    const query = `
+      *[_type == "event"] | order(publishedAt desc) {
+        _id,
+        title,
+        slug,
+        summary,
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+        publishedAt
+      }
+    `;
+    return getClient().fetch<EventListItem[]>(query);
+  },
+  ["sanity:events:all"],
+  { tags: ["event"], revalidate: 3600 }
+);
+
 // ============================================
 // Roadmap 関連のクエリ（Server Components用）
 // ============================================
@@ -1460,6 +1495,236 @@ export const getAllStorySlugs = unstable_cache(
   ["sanity:stories:slugs"],
   { tags: ["story"], revalidate: 3600 }
 );
+
+// ============================================
+// 新着コンテンツ横断取得（新トップ 2026 / ブロックB-3）
+// ============================================
+
+/**
+ * 新着コンテンツの正規化された軽量型。
+ * NewContentSection の NewContentItem に対応させやすい形にしている。
+ */
+export interface MixedContentItem {
+  /** オブジェクトの種類ラベル（例: 記事 / ガイド / 読み物 / 体験談） */
+  type: string;
+  /** タイトル */
+  title: string;
+  /** サムネイル画像 URL（未取得時は空文字） */
+  thumbnail: string;
+  /** 遷移先 */
+  href: string;
+  /** 公開日（ISO 文字列。ソートに使用） */
+  publishedAt: string;
+}
+
+/**
+ * 記事・読み物(guide)・ブログ・体験談(story)・イベント(event)・レッスン(lesson)を
+ * 横断取得し、publishedAt 降順でマージして最新 limit 件を返す。
+ *
+ * パフォーマンス: 各タイプは既存の一覧取得関数（unstable_cache 済み）を
+ * Promise.all で並行呼び出しし、結合後にソート・スライスする。
+ *
+ * NOTE（レッスンの日付フォールバック）:
+ * - レッスンは publishedAt を持たず lessonNumber のみ。ただし Sanity の
+ *   全ドキュメントが持つシステムフィールド `_createdAt`（ISO 日時）を
+ *   getAllLessons のクエリで取得しているため、これを publishedAt 代わりに
+ *   使って他コンテンツと同じ土俵で日付マージする。
+ * - 万一 `_createdAt` が欠けている場合は、lessonNumber が大きいほど新しいとみなす
+ *   擬似的な新しさスコアを ISO 文字列として与えてフォールバックする
+ *   （lessonNumber を 0 埋めした固定エポック日付。数値が大きいほど文字列比較で
+ *   後ろ=新しい側に来るようにする）。これで publishedAt を持つ他コンテンツと
+ *   localeCompare で安定してマージできる。
+ */
+export async function getLatestMixedContent(
+  limit: number
+): Promise<MixedContentItem[]> {
+  const [articles, guides, blogPosts, stories, events, lessons] =
+    await Promise.all([
+      getAllArticles(),
+      getAllGuidesFromSanity(),
+      getLatestBlogPosts(limit),
+      getStoriesList(limit),
+      getAllEvents(),
+      getAllLessons(),
+    ]);
+
+  // レッスン用: publishedAt 相当の日付を決定する。
+  // 1) Sanity システムフィールド _createdAt があればそれを使う
+  // 2) 無ければ lessonNumber から擬似日付を生成（番号が大きいほど新しい扱い）
+  const lessonPublishedAt = (
+    lesson: Lesson & { _createdAt?: string }
+  ): string => {
+    if (lesson._createdAt) return lesson._createdAt;
+    const n = lesson.lessonNumber ?? 0;
+    // 固定エポック(2000-01-01)からの通し番号を日付に写像。
+    // lessonNumber が大きいほど後ろ（新しい側）に並ぶ。
+    const pseudo = new Date(Date.UTC(2000, 0, 1) + n * 86_400_000);
+    return pseudo.toISOString();
+  };
+
+  const items: MixedContentItem[] = [
+    ...articles.slice(0, limit).map((a) => ({
+      type: "記事",
+      title: a.title,
+      thumbnail: a.thumbnailUrl ?? "",
+      href: `/articles/${a.slug.current}`,
+      publishedAt: a.publishedAt ?? "",
+    })),
+    ...guides.slice(0, limit).map((g) => ({
+      type: "ガイド",
+      title: g.title,
+      thumbnail: g.thumbnailUrl ?? "",
+      href: `/guide/${g.slug}`,
+      publishedAt: g.publishedAt ?? "",
+    })),
+    ...blogPosts.slice(0, limit).map((b) => ({
+      type: "読み物",
+      title: b.title,
+      thumbnail: b.thumbnail ?? "",
+      href: `/blog/${b.slug}`,
+      publishedAt: b.publishedAt ?? "",
+    })),
+    ...stories.slice(0, limit).map((s) => ({
+      type: "体験談",
+      title: s.title,
+      thumbnail: s.heroImageUrl ?? "",
+      href: `/stories/${s.slug.current}`,
+      publishedAt: s.publishedAt ?? "",
+    })),
+    ...events.slice(0, limit).map((e) => ({
+      type: "イベント",
+      title: e.title,
+      thumbnail: e.thumbnailUrl ?? "",
+      href: `/events/${e.slug.current}`,
+      publishedAt: e.publishedAt ?? "",
+    })),
+    ...lessons.slice(0, limit).map((l) => ({
+      type: "レッスン",
+      title: l.title,
+      thumbnail: l.thumbnailUrl ?? l.iconImageUrl ?? "",
+      href: `/lessons/${l.slug.current}`,
+      publishedAt: lessonPublishedAt(l),
+    })),
+  ];
+
+  return items
+    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+    .slice(0, limit);
+}
+
+// ============================================
+// みんなの実績 横断取得（新トップ 2026 / ブロックF）
+// ============================================
+
+/**
+ * 「みんなの実績」用の正規化された軽量型。
+ *
+ * 転職インタビュー(story) と 15分フィードバック応募のアウトプット(userOutput) を
+ * 同じカード（`AchievementCard`）で並べるため、両者を共通の最小フィールドに正規化する。
+ */
+export interface AchievementItem {
+  /** 種類。カードのラベル出し分け・リンクの内部/外部判定に使う */
+  type: "story" | "output";
+  /** タイトル */
+  title: string;
+  /** サムネイル画像 URL（未取得時は空文字） */
+  thumbnailUrl: string;
+  /** 著者名（無ければ undefined） */
+  authorName?: string;
+  /** 著者アバター画像 URL（story のみ。output は avatar が無いため undefined） */
+  authorAvatarUrl?: string;
+  /** 著者の役職・現在の職種（story の person.currentRole） */
+  authorRole?: string;
+  /** 遷移先。story は内部パス、output は外部 URL */
+  href: string;
+  /** 公開日（ISO 文字列。ソートに使用） */
+  publishedAt: string;
+}
+
+/**
+ * 転職インタビュー(story)とアウトプット(userOutput)を横断取得し、
+ * publishedAt 降順でマージして最新 limit 件を返す。
+ *
+ * - story: `publishedAt` / `heroImageUrl` / `person.name` / `/stories/[slug]`（内部）
+ * - output: `submittedAt` / `articleImage` / `author.displayName` / `articleUrl`（外部）
+ *
+ * パフォーマンス: 各タイプは既存の unstable_cache 済み一覧取得関数を
+ * Promise.all で並行呼び出しし、結合後にソート・スライスする。
+ */
+export async function getLatestAchievements(
+  limit: number
+): Promise<AchievementItem[]> {
+  const [stories, outputs] = await Promise.all([
+    getStoriesList(limit),
+    getOutputsList(limit),
+  ]);
+
+  const items: AchievementItem[] = [
+    ...stories.map((s) => ({
+      type: "story" as const,
+      title: s.title,
+      thumbnailUrl: s.heroImageUrl ?? "",
+      authorName: s.person?.name,
+      authorAvatarUrl: s.person?.profileImageUrl,
+      authorRole: s.person?.currentRole,
+      href: `/stories/${s.slug.current}`,
+      publishedAt: s.publishedAt ?? "",
+    })),
+    ...outputs.map((o) => ({
+      type: "output" as const,
+      title: o.articleTitle || o.articleUrl,
+      thumbnailUrl: o.articleImage ?? "",
+      authorName: o.author?.displayName,
+      href: o.articleUrl,
+      publishedAt: o.submittedAt ?? "",
+    })),
+  ];
+
+  return items
+    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+    .slice(0, limit);
+}
+
+export interface AchievementGroups {
+  stories: AchievementItem[];
+  outputs: AchievementItem[];
+}
+
+/**
+ * 転職インタビュー(story)とアウトプット(userOutput)を、
+ * 混ぜずに別グループとしてそれぞれ最新 limitEach 件を返す。
+ * （`getLatestAchievements` は横断マージ版。「みんなの実績」ブロックは
+ * 各タイプごとに件数を揃えて表示したいため、こちらを使う）
+ */
+export async function getAchievementGroups(
+  limitEach: number
+): Promise<AchievementGroups> {
+  const [stories, outputs] = await Promise.all([
+    getStoriesList(limitEach),
+    getOutputsList(limitEach),
+  ]);
+
+  return {
+    stories: stories.map((s) => ({
+      type: "story" as const,
+      title: s.title,
+      thumbnailUrl: s.heroImageUrl ?? "",
+      authorName: s.person?.name,
+      authorAvatarUrl: s.person?.profileImageUrl,
+      authorRole: s.person?.currentRole,
+      href: `/stories/${s.slug.current}`,
+      publishedAt: s.publishedAt ?? "",
+    })),
+    outputs: outputs.map((o) => ({
+      type: "output" as const,
+      title: o.articleTitle || o.articleUrl,
+      thumbnailUrl: o.articleImage ?? "",
+      authorName: o.author?.displayName,
+      href: o.articleUrl,
+      publishedAt: o.submittedAt ?? "",
+    })),
+  };
+}
 
 // ============================================
 // UserOutput 関連のクエリ — BON-345

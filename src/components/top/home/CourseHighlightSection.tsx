@@ -19,6 +19,11 @@ export interface CourseHighlightSectionProps {
   badgeLabel?: string;
   /** セクション見出し */
   heading: string;
+  /**
+   * 見出しサイズ。ブロック5(662-39727)は 32px("lg")、
+   * ブロックC(671-6642「UIUXデザイナーに転職する」)は Figma実データで 28px("md")。
+   */
+  headingSize?: "lg" | "md";
   /** 表示するカード（2枚想定） */
   cards: CoursePromoCardProps[];
   className?: string;
@@ -27,6 +32,7 @@ export interface CourseHighlightSectionProps {
 export default function CourseHighlightSection({
   badgeLabel = "DESIGN WITH USER",
   heading,
+  headingSize = "lg",
   cards,
   className,
 }: CourseHighlightSectionProps) {
@@ -35,7 +41,11 @@ export default function CourseHighlightSection({
   return (
     <section className={cn("border-t border-black/10 pt-16 sm:pt-24", className)}>
       {/* ヘッダー: ピルバッジ + 見出し */}
-      <SectionBadgeHeading badgeLabel={badgeLabel} heading={heading} />
+      <SectionBadgeHeading
+        badgeLabel={badgeLabel}
+        heading={heading}
+        size={headingSize}
+      />
 
       {/* カード 2枚 */}
       <div className="grid grid-cols-1 gap-6 pt-16 sm:grid-cols-2 sm:gap-6">

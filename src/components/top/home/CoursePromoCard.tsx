@@ -41,6 +41,24 @@ export type CoursePromoVisual =
       image: { src: string; alt: string };
       /** ダーク背景のグラデーションプリセット（省略時は muted 背景） */
       gradientPreset?: CoursePromoGradientPreset;
+    }
+  | {
+      /**
+       * 最新コンテンツ訴求系（ブロックB-1 / Figma 662-40053）:
+       * 薄いパステルグラデ背景に縦長画像を1枚センター配置。
+       * カテゴリ/タイプラベルなし・角丸4px・タイトル20px で用いる。
+       */
+      type: "spotlight";
+      image: { src: string; alt: string };
+    }
+  | {
+      /**
+       * OGP画像系（ブロックC / Figma 671-6642）:
+       * リンク先ページの Open Graph 画像を 16:9 で表示する。
+       * ラベルなし・角丸8px。src が null の場合は bg-muted-custom フォールバック。
+       */
+      type: "og";
+      image: { src: string | null; alt: string };
     };
 
 export interface CoursePromoCardProps {
@@ -60,6 +78,8 @@ export interface CoursePromoCardProps {
   ctaLabel?: string;
   /** 遷移先 */
   href: string;
+  /** 外部リンク（別タブで開く: target="_blank" rel="noopener noreferrer"） */
+  external?: boolean;
   className?: string;
 }
 
@@ -70,6 +90,14 @@ export interface CoursePromoCardProps {
  */
 const COLLAGE_GRADIENT =
   "linear-gradient(180deg,rgba(232,235,251,0.35)_0%,rgba(214,189,213,0.35)_47.461%,rgba(234,209,189,0.35)_76.635%,rgba(248,245,245,0.35)_100%)";
+
+/**
+ * spotlight ビジュアル用のパステルグラデ背景（ブロックB-1 / Figma 662-40053）。
+ * COLLAGE_GRADIENT に薄いオフホワイトのオーバーレイを重ねたもの。
+ * design-system にトークンがないため Figma の rgba stops をそのまま使用する。
+ */
+const SPOTLIGHT_GRADIENT =
+  "linear-gradient(90deg,rgba(246,246,245,0.58)_0%,rgba(246,246,245,0.58)_100%),linear-gradient(180deg,rgba(232,235,251,0.35)_0%,rgba(214,189,213,0.35)_47.461%,rgba(234,209,189,0.35)_76.635%,rgba(248,245,245,0.35)_100%)";
 
 /** コラージュの各画像の重なり演出（回転角・水平オフセット）。Figma の近似値。 */
 const COLLAGE_TRANSFORMS = [
@@ -229,6 +257,62 @@ function SingleThumbnail({
   );
 }
 
+/**
+ * スポットライトサムネイル（最新コンテンツ訴求系 / ブロックB-1）。
+ * 薄いパステルグラデ背景・角丸4px・中央に縦長画像1枚（ラベルなし）。
+ */
+function SpotlightThumbnail({ image }: { image: { src: string; alt: string } }) {
+  // Figma実測(662-40053): 外枠674x431 → 内側 px-[24px] のパディング
+  // (626 = 674 - 24*2) → visual-area(aspect 626/354, py-[6px]) → 画像(aspect 236/342)。
+  // h-[80%] のようなパーセンテージ指定はflex+aspect-ratio下で解決が不安定なため、
+  // Figmaの入れ子構造(パディング→aspect比ラッパー)をそのまま再現する。
+  return (
+    <div
+      className="relative aspect-[674/432] w-full overflow-hidden rounded-[4px] bg-[image:var(--spotlight-grad)]"
+      style={
+        {
+          "--spotlight-grad": SPOTLIGHT_GRADIENT.replace(/_/g, " "),
+        } as React.CSSProperties
+      }
+    >
+      <div className="flex size-full items-center justify-center px-[24px]">
+        <div className="flex aspect-[626/354] w-full items-center justify-center py-[6px]">
+          <div className="relative aspect-[236/342] h-full overflow-hidden rounded-r-[4.645px] shadow-[0px_1px_26px_0px_rgba(0,0,0,0.16)]">
+            <Image
+              src={image.src}
+              alt={image.alt}
+              fill
+              sizes="(max-width: 640px) 40vw, 236px"
+              className="object-cover"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * OGP画像サムネイル（ブロックC / Figma 671-6642）。
+ * リンク先ページの Open Graph 画像を 16:9・角丸8px で表示。
+ * src が null の場合は bg-muted-custom のフォールバック。
+ */
+function OgThumbnail({ image }: { image: { src: string | null; alt: string } }) {
+  return (
+    <div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted-custom">
+      {image.src && (
+        <Image
+          src={image.src}
+          alt={image.alt}
+          fill
+          sizes="(max-width: 640px) 100vw, 50vw"
+          className="object-cover"
+        />
+      )}
+    </div>
+  );
+}
+
 function Thumbnail({
   categoryLabel,
   typeLabel,
@@ -238,6 +322,9 @@ function Thumbnail({
   typeLabel: string;
   visual: CoursePromoVisual;
 }) {
+  if (visual.type === "og") {
+    return <OgThumbnail image={visual.image} />;
+  }
   if (visual.type === "collage") {
     return (
       <CollageThumbnail
@@ -246,6 +333,9 @@ function Thumbnail({
         images={visual.images}
       />
     );
+  }
+  if (visual.type === "spotlight") {
+    return <SpotlightThumbnail image={visual.image} />;
   }
   return (
     <SingleThumbnail
@@ -266,10 +356,19 @@ export default function CoursePromoCard({
   description,
   ctaLabel = "詳しく見る",
   href,
+  external = false,
   className,
 }: CoursePromoCardProps) {
+  // spotlight / og ビジュアルはタイトル 20px・M PLUS Medium（Figma実データ準拠、
+  // 他の default/single 系は既存踏襲で 22px・bold のまま）
+  const isSmallTitle = visual.type === "spotlight" || visual.type === "og";
   const titleEl = (
-    <h3 className="font-rounded-mplus text-[22px] font-bold leading-snug text-text-primary">
+    <h3
+      className={cn(
+        "font-rounded-mplus leading-snug text-text-primary",
+        isSmallTitle ? "text-xl font-medium" : "text-[22px] font-bold"
+      )}
+    >
       {title}
     </h3>
   );
@@ -286,8 +385,14 @@ export default function CoursePromoCard({
   return (
     <Link
       href={href}
+      {...(external
+        ? { target: "_blank", rel: "noopener noreferrer" }
+        : {})}
       className={cn(
-        "group flex flex-col",
+        // -m-3 p-3: ホバー背景の「見た目の余白」だけを作り、実際のレイアウト位置・
+        // 幅・グリッドgapには影響させない（p-3のみだと全カードが内側に12px縮んで
+        // Figmaの余白と食い違うバグがあったため、負のmarginで打ち消す）
+        "group -m-3 flex flex-col rounded-2xl p-3 transition-colors hover:bg-hover active:bg-active",
         // Figma: default は gap/stack(16px)、title-first は gap/focus(20px)
         layout === "title-first" ? "gap-5" : "gap-4",
         className

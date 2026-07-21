@@ -23,6 +23,10 @@ const buttonVariants = cva(
           "bg-white border border-[#E4E4E4] text-black shadow-[0px_1px_12px_0px_rgba(0,0,0,0.05)] hover:bg-[#FAFAFA] hover:border-[#D0D0D0] active:bg-[#F5F5F5] rounded-full",
         "action-tertiary":
           "bg-[#E9EBEB] text-[#5A616F] hover:bg-[#DFE1E1] active:bg-[#D5D7D7] rounded-full font-semibold",
+        // ダーク背景セクション用の pill ボタン（黒背景 + 白ボーダー + 白文字）
+        // Figma "デザインとキャリアを考える" セクション（662-39684）の「相談する」より
+        "dark-outline":
+          "bg-black border border-white/20 text-text-inverse rounded-full hover:bg-white/10 active:bg-white/[0.16]",
       },
       size: {
         default: "h-10 px-4 py-2",

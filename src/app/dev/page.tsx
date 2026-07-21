@@ -24,6 +24,30 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/top",
+    issue: "TOP-2026",
+    title: "新トップページ v1（初期実装）",
+    summary:
+      "PRD🏠_topUI_newBONO2026 を元にした新トップページの最初の組み立て。スタイル崩れが見つかったため v2/v3 で再構築中。",
+    status: "archived",
+  },
+  {
+    href: "/dev/top2",
+    issue: "TOP-2026",
+    title: "新トップページ v2（Figma実測px版）",
+    summary:
+      "コンポーネント単位→ブロック単位で1から再構築した参照版。フォントサイズ等はFigma実測pxをそのまま採用。",
+    status: "in-progress",
+  },
+  {
+    href: "/dev/top3",
+    issue: "TOP-2026",
+    title: "新トップページ v3（採用サイズ版）",
+    summary:
+      "v2をベースに、title/description等をFigma実測より2px小さくした版。ユーザー確認済みで現在はこちらを正として更新中。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/design-breakdown/achievements",
     issue: "DESIGN",
     title: "/achievements 分解ダッシュボード",
