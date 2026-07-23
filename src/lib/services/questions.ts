@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCachedUser } from "@/lib/supabase/server";
 import { client as getClient } from "@/lib/sanity";
 import { revalidatePath } from "next/cache";
 import type { Question, QuestionCategory } from "@/types/sanity";
@@ -596,9 +596,9 @@ export async function getMyReactions(input: {
 }): Promise<Array<{ targetId: string; reaction: ReactionKey }>> {
   if (input.targetIds.length === 0) return [];
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // auth.getUser() はリクエストスコープでキャッシュ済み（質問用・コメント用の
+  // getMyReactions 2回や getSubscriptionStatus 等との認証往復の重複を排除）
+  const user = await getCachedUser();
   if (!user) return [];
 
   const { data } = await supabase
