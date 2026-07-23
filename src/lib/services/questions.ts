@@ -20,6 +20,8 @@ export interface QuestionComment {
   authorName: string;
   authorAvatarUrl?: string;
   content: string;
+  /** 添付画像の公開URL（question-attachments バケット、1コメント1枚）。未添付は undefined */
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -247,7 +249,7 @@ export async function getQuestionCategories(): Promise<QuestionCategory[]> {
 // ============================================
 
 const COMMENT_COLUMNS =
-  "id, question_id, user_id, author_name, author_avatar_url, content, created_at, updated_at";
+  "id, question_id, user_id, author_name, author_avatar_url, content, image_url, created_at, updated_at";
 
 type CommentRow = {
   id: string;
@@ -256,6 +258,7 @@ type CommentRow = {
   author_name: string;
   author_avatar_url: string | null;
   content: string;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -268,6 +271,7 @@ function rowToComment(r: CommentRow): QuestionComment {
     authorName: r.author_name,
     authorAvatarUrl: r.author_avatar_url ?? undefined,
     content: r.content,
+    imageUrl: r.image_url ?? undefined,
     createdAt: r.created_at,
     updatedAt: r.updated_at,
   };
@@ -306,6 +310,21 @@ function validateCommentContent(
   return { ok: true, content };
 }
 
+// 添付画像 URL の許可バケット（question/new/actions.ts の ATTACHMENT_BUCKET と一致）
+const ATTACHMENT_BUCKET = "question-attachments";
+
+/**
+ * クライアントから来る画像URLが、自分がアップロードした question-attachments の
+ * 公開URL（`{SUPABASE_URL}/storage/v1/object/public/question-attachments/{uid}/...`）で
+ * あることを検証する。他人のファイルURL・外部URLの注入を防ぐ。
+ */
+function isOwnAttachmentUrl(value: string, userId: string): boolean {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!supabaseUrl) return false;
+  const expectedPrefix = `${supabaseUrl}/storage/v1/object/public/${ATTACHMENT_BUCKET}/${userId}/`;
+  return value.startsWith(expectedPrefix);
+}
+
 // 本文プレビュー用に前後空白を除去して指定長でtruncate（末尾に … を付与）
 function truncateForPreview(text: string, maxLength = 300): string {
   const normalized = text.trim();
@@ -318,12 +337,24 @@ async function sendCommentSlackNotification(data: {
   questionSlug: string;
   authorName: string;
   content: string;
+  imageUrl?: string;
 }) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) return;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design";
   const questionPageUrl = `${siteUrl}/questions/${data.questionSlug}`;
+
+  // 質問投稿側（api/questions/submit/route.ts の imageBlocks）と同形式の image ブロック
+  const imageBlocks = data.imageUrl
+    ? [
+        {
+          type: "image",
+          image_url: data.imageUrl,
+          alt_text: "添付画像",
+        },
+      ]
+    : [];
 
   const message = {
     blocks: [
@@ -348,6 +379,7 @@ async function sendCommentSlackNotification(data: {
           text: `*コメント内容:*\n${truncateForPreview(data.content)}`,
         },
       },
+      ...imageBlocks,
       {
         type: "actions",
         elements: [
@@ -377,6 +409,7 @@ export async function addComment(input: {
   questionId: string;
   questionSlug: string;
   content: string;
+  imageUrl?: string;
 }): Promise<{ ok: true; comment: QuestionComment } | { ok: false; error: string }> {
   const supabase = await createClient();
   const {
@@ -386,6 +419,12 @@ export async function addComment(input: {
 
   const validated = validateCommentContent(input.content);
   if (!validated.ok) return validated;
+
+  // 画像URLはクライアントから来る文字列。自分がアップロードした
+  // question-attachments の公開URLであることを検証する（外部URL・他人ファイル注入の防止）。
+  if (input.imageUrl && !isOwnAttachmentUrl(input.imageUrl, user.id)) {
+    return { ok: false, error: "画像の添付に失敗しました" };
+  }
 
   // 投稿者プロフィールを auth から snapshot して denormalize
   const authorName =
@@ -403,6 +442,7 @@ export async function addComment(input: {
       author_name: authorName,
       author_avatar_url: authorAvatarUrl,
       content: validated.content,
+      image_url: input.imageUrl ?? null,
     })
     .select(COMMENT_COLUMNS)
     .single();
@@ -426,6 +466,7 @@ export async function addComment(input: {
     questionSlug: input.questionSlug,
     authorName,
     content: validated.content,
+    imageUrl: input.imageUrl,
   });
 
   revalidatePath(`/questions/${input.questionSlug}`);

@@ -167,6 +167,19 @@ export function QuestionCommentItem({
                 containerClassName="rounded-[16px] border border-input bg-surface p-3"
                 className="min-h-[72px]"
               />
+              {/* 編集はテキストのみ。画像は変更UIなしでそのまま表示し続ける（スコープ外） */}
+              {comment.imageUrl && (
+                <div>
+                  {/* 添付画像。Supabase Storage で縮小済みのため素の img で表示 */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={comment.imageUrl}
+                    alt="添付画像"
+                    loading="lazy"
+                    className="max-w-full rounded-[16px] border border-border"
+                  />
+                </div>
+              )}
               {error && <p className="text-xs text-destructive">{error}</p>}
               <div className="flex items-center justify-end gap-2">
                 <Button
@@ -200,6 +213,18 @@ export function QuestionCommentItem({
                 text={comment.content}
                 className="text-[16px] leading-8 text-foreground"
               />
+              {comment.imageUrl && (
+                <div className="mt-3">
+                  {/* 添付画像。Supabase Storage で縮小済みのため素の img で表示 */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={comment.imageUrl}
+                    alt="添付画像"
+                    loading="lazy"
+                    className="max-w-full rounded-[16px] border border-border"
+                  />
+                </div>
+              )}
               {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
 
               {/* フッター：左=リアクション / 右=日付。divider無し（ユーザー指定でFigma 135:4877から変更） */}
