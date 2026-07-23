@@ -37,6 +37,15 @@ export interface QuestionListItem {
   reactionCounts: Record<ReactionKey, number>;
   /** publishedAt と最新コメント時刻の遅い方（新着コメントでの浮上ソートに使う） */
   lastActivityAt: string;
+  /**
+   * 直近コメント者（重複除去済み・最新順・最大3人）。カードのアバタースタック表示用。
+   * 非メンバー（未ログイン）は RLS で View が 0 行を返すため空配列になる。コメント0件でも空配列。
+   */
+  recentCommenters: Array<{
+    userId: string;
+    name: string;
+    avatarUrl: string | null;
+  }>;
 }
 
 // ============================================
@@ -54,7 +63,12 @@ export interface QuestionListItem {
  *
  * @param params.limit 最終的に返す件数（デフォルト 20）。互換のため意味は「返す件数」。
  */
-const CANDIDATE_POOL = 50;
+// 表示は最新6件。候補プールはSanity取得＋Supabase集計の転送量に直結するため 20 に抑える（#153）。
+// トレードオフ: last_activity（新着コメント）で浮上させる仕様上、
+// 「publishedAt が候補21件目以降の古いスレッドに新規コメントが付いた」場合、
+// そのスレッドが本来上位に浮上すべきでも候補に入らず取りこぼす可能性がわずかに増える。
+// 表示6件に対し20件の候補があれば実運用上の浮上は十分カバーできると判断（#153）。
+const CANDIDATE_POOL = 20;
 
 /** カード用の共通 projection（QuestionListItem 生成に必要なフィールドを揃える） */
 const QUESTION_CARD_PROJECTION = `{
@@ -75,36 +89,62 @@ const QUESTION_CARD_PROJECTION = `{
  *
  * ※ 並び替えはしない。呼び出し側の要求（浮上ソート／公開日順など）に委ねる。
  */
+/** question_comment_summaries View の recent_commenters jsonb 要素の生の形 */
+type RecentCommenterRow = {
+  user_id: string;
+  author_name: string;
+  author_avatar_url: string | null;
+};
+
 async function buildListItems(questions: Question[]): Promise<QuestionListItem[]> {
   if (questions.length === 0) return [];
 
   const ids = questions.map((q) => q._id);
   const supabase = await createClient();
 
-  const [commentCountsResult, reactionCountsResult, latestCommentResult] =
-    await Promise.all([
-      supabase
-        .from("question_comment_counts")
-        .select("question_id, count")
-        .in("question_id", ids),
-      supabase
-        .from("question_reaction_counts")
-        .select("target_type, target_id, reaction, count")
-        .eq("target_type", "question")
-        .in("target_id", ids),
-      // 質問ごとの最新コメント時刻を JS 側で集計（created_at 降順で取り、最初に出た id を採用）
-      supabase
-        .from("question_comments")
-        .select("question_id, created_at")
-        .in("question_id", ids)
-        .is("deleted_at", null)
-        .order("created_at", { ascending: false }),
-    ]);
+  // コメント集計（数・最新時刻・直近コメント者）は新 View question_comment_summaries に統合し、
+  // リアクション集計は既存 View と合わせて 2 並列で取得する（#153・転送量削減）。
+  const [summaryResult, reactionCountsResult] = await Promise.all([
+    supabase
+      .from("question_comment_summaries")
+      .select("question_id, comment_count, latest_commented_at, recent_commenters")
+      .in("question_id", ids),
+    supabase
+      .from("question_reaction_counts")
+      .select("target_type, target_id, reaction, count")
+      .eq("target_type", "question")
+      .in("target_id", ids),
+  ]);
 
-  const commentMap = new Map<string, number>();
-  (commentCountsResult.data ?? []).forEach((r) =>
-    commentMap.set(r.question_id as string, r.count as number),
-  );
+  // 失敗時は空にフォールバックしページはクラッシュさせない。ただし黙殺せず console.error に残す（#153）。
+  if (summaryResult.error) {
+    console.error("[buildListItems] question_comment_summaries", summaryResult.error);
+  }
+  if (reactionCountsResult.error) {
+    console.error("[buildListItems] question_reaction_counts", reactionCountsResult.error);
+  }
+
+  // 質問ID → 集計（コメント数 / 最新コメント時刻 / 直近コメント者）
+  const summaryMap = new Map<
+    string,
+    {
+      commentCount: number;
+      latestCommentedAt: string | null;
+      recentCommenters: QuestionListItem["recentCommenters"];
+    }
+  >();
+  (summaryResult.data ?? []).forEach((r) => {
+    const rawCommenters = (r.recent_commenters ?? []) as RecentCommenterRow[];
+    summaryMap.set(r.question_id as string, {
+      commentCount: (r.comment_count as number) ?? 0,
+      latestCommentedAt: (r.latest_commented_at as string | null) ?? null,
+      recentCommenters: rawCommenters.map((c) => ({
+        userId: c.user_id,
+        name: c.author_name,
+        avatarUrl: c.author_avatar_url ?? null,
+      })),
+    });
+  });
 
   const reactionMap = new Map<string, Record<ReactionKey, number>>();
   (reactionCountsResult.data ?? []).forEach((r) => {
