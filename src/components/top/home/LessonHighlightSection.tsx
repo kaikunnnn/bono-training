@@ -21,6 +21,10 @@ import TopSectionHeading from "@/components/top2/TopSectionHeading";
  * - 行1 → 行2: 748.8 − (173+511.8) = 64px（親 `gap-16`）
  * - 各行内: サブ見出し → カード群 86 − 38 = 48px（`gap-12`）
  * - カード間: 463 − 436 = 27px（`gap-[27px]`）
+ *
+ * `paddingY`（number）を渡すと外側sectionの上下パディング（pt-[24px] pb-[25px]）を
+ * inline styleで上書きする。見出し→コンテンツの内側 py-[64px] は不変。
+ * （ページ単位の余白統一実験用 / 例: /dev/top4）。未指定時は既存挙動のまま。
  */
 
 export interface LessonHighlightRow {
@@ -39,6 +43,8 @@ export interface LessonHighlightSectionProps {
   rows: LessonHighlightRow[];
   /** フォントサイズを2px落とした試験用バリアント（/dev/top3 での比較用） */
   compact?: boolean;
+  /** 外側sectionの上下パディングをinline styleで上書き（px。内側 py-[64px] は不変） */
+  paddingY?: number;
   className?: string;
 }
 
@@ -47,11 +53,17 @@ export default function LessonHighlightSection({
   heading,
   rows,
   compact = false,
+  paddingY,
   className,
 }: LessonHighlightSectionProps) {
   return (
     <section
       className={cn("border-b border-black/[0.12] pt-[24px] pb-[25px]", className)}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       <div className="flex flex-col gap-16 py-[64px]">
         <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />

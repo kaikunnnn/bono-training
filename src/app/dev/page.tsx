@@ -48,6 +48,30 @@ const projects: DevProjectEntry[] = [
     status: "in-progress",
   },
   {
+    href: "/dev/top4",
+    issue: "TOP-2026",
+    title: "新トップページ v4（余白統一版）",
+    summary:
+      "v3をベースに、全ブロックの外側の上下余白を「みんなの実績」ブロックの120pxリズムに統一した余白実験版。内容はv3と同一で余白のみ変更。",
+    status: "in-progress",
+  },
+  {
+    href: "/dev/top5",
+    issue: "TOP-2026",
+    title: "新トップページ v5（Figma Make移植版）",
+    summary:
+      "Figma Make でスタイル調整済みの HANDOFF を、top-next の atoms/molecules/organisms で組み上げた版。余白・ボーダー・背景は HANDOFF のスペーシング表に準拠。実データは v3 を再利用。",
+    status: "in-progress",
+  },
+  {
+    href: "/dev/top5/components",
+    issue: "TOP-2026",
+    title: "v5 コンポーネント確認（Showcase）",
+    summary:
+      "top-next の Atoms/Molecules をダミーデータで個別に確認するページ。ページ全体のレイアウトではなく、各コンポーネント単体のスタイルをチェックする用途。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/design-breakdown/achievements",
     issue: "DESIGN",
     title: "/achievements 分解ダッシュボード",

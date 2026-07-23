@@ -23,6 +23,10 @@ import TopSectionHeading from "@/components/top2/TopSectionHeading";
  * - グループ内サブ見出し → カード群: `gap-[24px]`（Figma実測）
  * - カード間: `gap-[24px]`
  * - カード横幅 442px / 3 枚横並び
+ *
+ * このセクションの py-[120px] が余白リズムの参照値。`paddingY`（number）を渡すと
+ * 外側sectionの上下パディングをinline styleで上書きできる（API統一のため。未指定時は
+ * デフォルトの py-[120px] のまま。ページ単位の余白統一実験用 / 例: /dev/top4）。
  */
 
 export interface AchievementHighlightSectionProps {
@@ -40,6 +44,8 @@ export interface AchievementHighlightSectionProps {
   outputItems: AchievementCardProps[];
   /** フォントサイズを2px落とした試験用バリアント（/dev/top3 での比較用） */
   compact?: boolean;
+  /** 外側sectionの上下パディングをinline styleで上書き（px。未指定時はデフォルト py-[120px]） */
+  paddingY?: number;
   className?: string;
 }
 
@@ -51,6 +57,7 @@ export default function AchievementHighlightSection({
   storyItems,
   outputItems,
   compact = false,
+  paddingY,
   className,
 }: AchievementHighlightSectionProps) {
   const subheadingClass =
@@ -59,6 +66,11 @@ export default function AchievementHighlightSection({
   return (
     <section
       className={cn("border-b border-black/[0.12] py-[120px]", className)}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       <div className="flex flex-col gap-[48px]">
         <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />

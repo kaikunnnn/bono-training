@@ -17,6 +17,8 @@ import TopSectionHeading from "@/components/top2/TopSectionHeading";
  * `.container` の外に置くこと）に配置して背景を親要素（`main`）いっぱいに広げ、
  * 中身（バッジ・見出し・カード）だけ内部の `.container` で他ブロックと同じ最大幅・
  * 左右パディングに揃える。
+ * `paddingY`（number）を渡すと外側section（フルブリード背景側）の上下パディングを
+ * inline styleで上書きする（ページ単位の余白統一実験用 / 例: /dev/top4）。未指定時は既存挙動のまま。
  */
 
 export interface DesignCareerSection2Props {
@@ -26,6 +28,8 @@ export interface DesignCareerSection2Props {
   items: DarkGuideItemProps[];
   /** フォントサイズを2px落とした試験用バリアント（/dev/top3 での比較用） */
   compact?: boolean;
+  /** 外側sectionの上下パディングをinline styleで上書き（px。ページ単位の余白統一実験用） */
+  paddingY?: number;
   className?: string;
 }
 
@@ -34,11 +38,17 @@ export default function DesignCareerSection2({
   heading = "デザインとキャリアを考える",
   items,
   compact = false,
+  paddingY,
   className,
 }: DesignCareerSection2Props) {
   return (
     <section
       className={`border-t border-white/10 bg-dark-section pt-16 pb-16 ${className ?? ""}`}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       {/* 中身だけ他ブロックと同じ最大幅・左右パディングに揃える（section自体はcontainerの外） */}
       <div className="container">

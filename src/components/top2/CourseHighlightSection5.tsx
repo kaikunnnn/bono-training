@@ -23,6 +23,8 @@ import TopSectionHeading from "@/components/top2/TopSectionHeading";
  * 構造: border-b, pt-[64px] pb-[65px]。見出しにバッジなし（671-6642とは異なる）。
  * カード2枚（ダーク系サムネ、カテゴリ/タイプラベルのみ・メタキャプションなし）。
  * 実データのサムネイル画像は未確定のためグレープレースホルダー。
+ * `paddingY`（number）を渡すと外側sectionの上下パディングをinline styleで上書きする
+ * （見出し→カード間の内側 pt-16 はそのまま。ページ単位の余白統一実験用 / 例: /dev/top4）。
  */
 
 export interface CourseHighlightSection5CardProps {
@@ -83,6 +85,8 @@ export interface CourseHighlightSection5Props {
   heading?: string;
   cards: CourseHighlightSection5CardProps[];
   compact?: boolean;
+  /** 外側sectionの上下パディングをinline styleで上書き（px。内側 pt-16 は不変） */
+  paddingY?: number;
   className?: string;
 }
 
@@ -90,11 +94,17 @@ export default function CourseHighlightSection5({
   heading = "課題解決のデザインをはじめる",
   cards,
   compact = false,
+  paddingY,
   className,
 }: CourseHighlightSection5Props) {
   return (
     <section
       className={`border-b border-black/10 pt-16 pb-[65px] ${className ?? ""}`}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       <TopSectionHeading badgeLabel="コーストレーニング" heading={heading} />
 

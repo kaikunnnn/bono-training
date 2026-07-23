@@ -19,6 +19,8 @@ import Image from "next/image";
  * | CTA2文字 | Inter | Bold(700) | 14px | 20px | 0.35px | #021710→text-text-primary |
  *
  * 余白: 全体 pt-[76px] pb-[77px] border-b border-black/20。
+ * `paddingY`（number）を渡すと外側の上下パディングをinline styleで上書きする
+ * （ページ単位の余白統一実験用 / 例: /dev/top4）。未指定時は既存挙動のまま。
  * 見出し→サブ見出し pt-8px(=--s-2)。サブ見出し→本文 pt-32px(=--s-8)。
  * 本文→CTA pt-32px(=--s-8)。CTA間 gap-16px(=--s-4)。
  *
@@ -29,16 +31,24 @@ import Image from "next/image";
 export interface EyecatchHeroProps {
   /** フォントサイズを2px落とした試験用バリアント（/dev/top3 での比較用） */
   compact?: boolean;
+  /** 外側の上下パディングをinline styleで上書き（px。ページ単位の余白統一実験用） */
+  paddingY?: number;
   className?: string;
 }
 
 export default function EyecatchHero({
   compact = false,
+  paddingY,
   className,
 }: EyecatchHeroProps) {
   return (
     <section
       className={`flex flex-col items-end gap-10 border-b border-black/20 pt-[76px] pb-[77px] lg:flex-row lg:justify-between ${className ?? ""}`}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       {/* 左: テキストブロック */}
       <div className="flex w-full max-w-[672px] flex-col items-start">

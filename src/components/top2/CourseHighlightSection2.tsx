@@ -17,6 +17,8 @@ import TopSectionHeading from "@/components/top2/TopSectionHeading";
  *
  * 構造: border-b border-black/10, pt-[64px] pb-[65px]。バッジ+見出し(gap-2) →
  * pt-[64px] → カード2枚(gap-[24px])。
+ * `paddingY`（number）を渡すと外側sectionの上下パディングをinline styleで上書きする
+ * （見出し→カード間の内側 pt-16 はそのまま。ページ単位の余白統一実験用 / 例: /dev/top4）。
  */
 
 export interface CourseHighlightSection2Props {
@@ -25,6 +27,8 @@ export interface CourseHighlightSection2Props {
   cards: CourseHighlightCardProps[];
   /** フォントサイズを2px落とした試験用バリアント（/dev/top3 での比較用） */
   compact?: boolean;
+  /** 外側sectionの上下パディングをinline styleで上書き（px。内側 pt-16 は不変） */
+  paddingY?: number;
   className?: string;
 }
 
@@ -33,11 +37,17 @@ export default function CourseHighlightSection2({
   heading,
   cards,
   compact = false,
+  paddingY,
   className,
 }: CourseHighlightSection2Props) {
   return (
     <section
       className={`border-b border-black/10 pt-16 pb-[65px] ${className ?? ""}`}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />
 

@@ -53,6 +53,10 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 - `next/link`, `next/image`, `next/font` を使う
 - `ui_kits/marketing-top/` と `ui_kits/training/` を参照してから新UIを書く
 
+## SEO・見出しタグ（必須）
+
+見出しになりうるテキスト（ページ主見出し・セクション見出し・カードタイトル等）を実装する際は、**必ず `.claude/rules/08-seo-semantics.md` を読み、`<p>`/`<span>` で済ませず正しい `h1`〜`h6` タグを使うこと**。1ページに `h1` は1つだけ、レベルを飛ばさない（`h2`の次に`h4`を使わない）。フォントサイズと見出しレベルは無関係— 見た目はCSSで決め、タグは文書構造で決める。
+
 ## ルール（詳細は .claude/rules/ 参照）
 
 - `01-nextjs-architecture.md` — Server/Client境界・レイアウト（最重要）
@@ -62,6 +66,7 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 - `05-file-conventions.md` — ファイル配置・命名
 - `06-development-workflow.md` — 環境・ビルド・デプロイ
 - `07-performance.md` — フォント・画像・バンドルサイズ最適化
+- `08-seo-semantics.md` — 見出しタグ（h1〜h6）の正しい階層構造（必須）
 
 ## 移植ルール（最重要）
 

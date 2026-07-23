@@ -4,7 +4,7 @@ import {
   Geist,
   Geist_Mono,
   Noto_Sans_JP,
-  M_PLUS_Rounded_1c,
+  M_PLUS_1,
   Inter,
   Hind,
   Luckiest_Guy,
@@ -35,7 +35,7 @@ const notoSansJp = Noto_Sans_JP({
   display: "swap",
 });
 
-const mplusRounded = M_PLUS_Rounded_1c({
+const mplusRounded = M_PLUS_1({
   variable: "--font-mplus-rounded-var",
   subsets: ["latin"],
   weight: ["400", "500", "700", "800"],

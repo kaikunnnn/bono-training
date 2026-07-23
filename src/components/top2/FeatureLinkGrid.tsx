@@ -18,6 +18,8 @@ import type { LucideIcon } from "lucide-react";
  * 構造: border-b border-black/[0.12]、py-[32px]（spacing/xl）。見出し→グリッド gap-[24px]
  * （spacing/lg）。グリッド内: 56x56 角丸4px アイコンボックス（bg: --bg-feature-icon）
  * + lucide-reactアイコン(20px) + 機能名ラベル/タイトルの2行テキスト。項目間 gap-[21px]。
+ * `paddingY`（number）を渡すと外側の上下パディングをinline styleで上書きする
+ * （ページ単位の余白統一実験用 / 例: /dev/top4）。未指定時は既存挙動のまま。
  */
 
 interface FeatureLinkItem {
@@ -60,17 +62,25 @@ export interface FeatureLinkGridProps {
   heading?: string;
   /** フォントサイズを2px落とした試験用バリアント（/dev/top3 での比較用） */
   compact?: boolean;
+  /** 外側の上下パディングをinline styleで上書き（px。ページ単位の余白統一実験用） */
+  paddingY?: number;
   className?: string;
 }
 
 export default function FeatureLinkGrid({
   heading = "目的から探す",
   compact = false,
+  paddingY,
   className,
 }: FeatureLinkGridProps) {
   return (
     <div
       className={`flex flex-col gap-6 border-b border-black/[0.12] py-8 ${className ?? ""}`}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       <p
         className={`font-noto-sans-jp font-medium leading-[1.71] text-text-primary ${

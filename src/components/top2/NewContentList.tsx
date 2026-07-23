@@ -20,6 +20,8 @@ import Image from "next/image";
  *
  * サムネイルは実データ（`getLatestMixedContent`）の thumbnail URL を使う。
  * 取得できない場合のみグレー背景プレースホルダーにフォールバックする。
+ * `paddingY`（number）を渡すと外側の上下パディングをinline styleで上書きする
+ * （ページ単位の余白統一実験用 / 例: /dev/top4）。未指定時は既存挙動のまま。
  */
 
 export interface NewContentItem {
@@ -35,6 +37,8 @@ export interface NewContentListProps {
   heading?: string;
   /** フォントサイズを2px落とした試験用バリアント（/dev/top3 での比較用） */
   compact?: boolean;
+  /** 外側の上下パディングをinline styleで上書き（px。ページ単位の余白統一実験用） */
+  paddingY?: number;
   className?: string;
 }
 
@@ -42,11 +46,17 @@ export default function NewContentList({
   items,
   heading = "あたらしいコンテンツ",
   compact = false,
+  paddingY,
   className,
 }: NewContentListProps) {
   return (
     <div
       className={`flex flex-col gap-6 border-b border-black/[0.12] py-8 ${className ?? ""}`}
+      style={
+        paddingY !== undefined
+          ? { paddingTop: paddingY, paddingBottom: paddingY }
+          : undefined
+      }
     >
       <p
         className={`font-noto-sans-jp font-medium leading-[1.71] text-text-primary ${
