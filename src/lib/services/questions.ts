@@ -154,30 +154,22 @@ async function buildListItems(questions: Question[]): Promise<QuestionListItem[]
     reactionMap.set(key, existing);
   });
 
-  // 質問ID → 最新コメント時刻。降順取得なので最初に現れたものが最新。
-  // 取得失敗時（latestCommentResult.data が null）は publishedAt のみでフォールバック。
-  const latestCommentMap = new Map<string, string>();
-  (latestCommentResult.data ?? []).forEach((r) => {
-    const qid = r.question_id as string;
-    if (!latestCommentMap.has(qid)) {
-      latestCommentMap.set(qid, r.created_at as string);
-    }
-  });
-
   return questions.map((q) => {
     const publishedAt = q.publishedAt ?? "";
-    const latestComment = latestCommentMap.get(q._id);
+    const summary = summaryMap.get(q._id);
+    const latestComment = summary?.latestCommentedAt;
     const lastActivityAt =
       latestComment && latestComment > publishedAt ? latestComment : publishedAt;
     return {
       question: q,
-      commentCount: commentMap.get(q._id) ?? 0,
+      commentCount: summary?.commentCount ?? 0,
       reactionCounts: reactionMap.get(q._id) ?? {
         cheer: 0,
         thanks: 0,
         insight: 0,
       },
       lastActivityAt,
+      recentCommenters: summary?.recentCommenters ?? [],
     };
   });
 }
