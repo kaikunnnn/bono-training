@@ -35,6 +35,10 @@ interface FormattingTextareaProps {
   id?: string;
   /** アクセシビリティ用ラベル（ツールバーの説明） */
   ariaLabel?: string;
+  /** 書式ボタン群の右側に薄い区切り線を挟んで追加するボタン（画像添付など） */
+  toolbarExtra?: React.ReactNode;
+  /** 入力エリアとツールバーの間に挿入するコンテンツ（画像添付プレビュー等）。カード内側に収まる */
+  belowContent?: React.ReactNode;
 }
 
 type Tab = "edit" | "preview";
@@ -51,6 +55,8 @@ export function FormattingTextarea({
   className,
   id,
   ariaLabel = "本文",
+  toolbarExtra,
+  belowContent,
 }: FormattingTextareaProps) {
   const [tab, setTab] = useState<Tab>("edit");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -143,6 +149,8 @@ export function FormattingTextarea({
         </div>
       )}
 
+      {belowContent}
+
       {/* フッター: 書式アクションエリア（カードの中に置く） */}
       <div
         className="mt-3 flex items-center justify-between gap-2 border-t border-border/60 pt-2"
@@ -171,6 +179,13 @@ export function FormattingTextarea({
           >
             <List size={16} />
           </ToolbarButton>
+          {toolbarExtra && (
+            <>
+              {/* 書式ボタン群と区別するための薄い縦区切り線 */}
+              <div className="mx-1 h-4 w-px bg-border/60" aria-hidden />
+              {toolbarExtra}
+            </>
+          )}
         </div>
         <div className="flex items-center gap-1 text-[12px]">
           <TabButton active={tab === "edit"} onClick={() => setTab("edit")}>
@@ -185,8 +200,8 @@ export function FormattingTextarea({
   );
 }
 
-/** フッターの ghost アイコンボタン */
-function ToolbarButton({
+/** フッターの ghost アイコンボタン（画像添付ボタン等、toolbarExtra からも再利用する） */
+export function ToolbarButton({
   label,
   onClick,
   disabled,

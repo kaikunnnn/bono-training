@@ -4,7 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { FormattingTextarea } from "@/components/questions/FormattingTextarea";
+import { FormattingTextarea, ToolbarButton } from "@/components/questions/FormattingTextarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, ImagePlus, X } from "lucide-react";
 import { validateImageFile, resizeImageToWebP } from "@/lib/image-utils";
@@ -162,6 +162,47 @@ export function QuestionCommentForm({
             disabled={isPending}
             containerClassName="rounded-[24px] border border-border bg-surface px-[21px] pb-[10px] pt-[17px] shadow-[var(--shadow-input)]"
             className="min-h-[48px] text-[16px]"
+            toolbarExtra={
+              // 画像は1枚固定。選択済みのときはボタン自体を隠す（フォーカス不要で常時見える位置）
+              !imagePreviewUrl ? (
+                <ToolbarButton
+                  label="画像を追加"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isBusy}
+                >
+                  {isProcessingImage ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <ImagePlus size={16} />
+                  )}
+                </ToolbarButton>
+              ) : null
+            }
+            belowContent={
+              // プレビューはカード（白背景）の内側・textarea 下に表示する
+              imagePreviewUrl ? (
+                <div className="relative mt-3 w-fit">
+                  {/* プレビューはローカル objectURL。next/image は blob: を扱えないため素の img */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={imagePreviewUrl}
+                    alt="添付画像プレビュー"
+                    className="max-h-[240px] max-w-full rounded-[16px] border border-border object-contain"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleRemoveImage}
+                    disabled={isPending}
+                    aria-label="画像を削除"
+                    className="absolute right-2 top-2 h-8 w-8 rounded-full bg-foreground/70 p-0 text-background hover:bg-foreground hover:text-background"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : null
+            }
           />
 
           {/* 画像入力（隠し要素・ref クリックで開く） */}
@@ -172,30 +213,6 @@ export function QuestionCommentForm({
             className="hidden"
             onChange={handleImageSelect}
           />
-
-          {/* プレビュー（textarea 下・右上に削除ボタン） */}
-          {imagePreviewUrl && (
-            <div className="relative w-fit">
-              {/* プレビューはローカル objectURL。next/image は blob: を扱えないため素の img */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={imagePreviewUrl}
-                alt="添付画像プレビュー"
-                className="max-h-[240px] max-w-full rounded-[16px] border border-border object-contain"
-              />
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={handleRemoveImage}
-                disabled={isPending}
-                aria-label="画像を削除"
-                className="absolute right-2 top-2 h-8 w-8 rounded-full bg-foreground/70 p-0 text-background hover:bg-foreground hover:text-background"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
 
           {/* 入力を始めたらカウンタ＋ボタン行がアニメーション付きで現れる */}
           <div
@@ -208,23 +225,7 @@ export function QuestionCommentForm({
             <div className="min-h-0">
               <div className="flex items-center justify-between gap-2 pt-1">
                 <div className="flex items-center gap-2">
-                  {/* 画像未添付のときだけ追加ボタンを出す（1枚固定） */}
-                  {!imagePreviewUrl && (
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isBusy}
-                      aria-label="画像を追加"
-                    >
-                      {isProcessingImage ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <ImagePlus className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
+                  {/* 画像追加ボタンは書式ツールバー（textarea下部）に常時表示する */}
                   <span className="text-xs text-muted-foreground">
                     {content.length} / {MAX_LENGTH}
                   </span>
