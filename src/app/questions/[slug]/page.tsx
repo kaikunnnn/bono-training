@@ -159,39 +159,44 @@ export default async function Page({ params }: PageProps) {
   const myCommentReactionsByCommentId: Record<string, ReactionKey[]> = {};
 
   if (hasFullAccess) {
-    comments = await getCommentsByQuestion(question._id);
-
-    // 質問本体のリアクション
-    const qReactionMap = await getReactionCountsMap({
-      targetType: "question",
-      targetIds: [question._id],
-    });
+    // ステージA: コメント取得と「質問本体」に対するリアクション集計・自分の
+    // リアクションを並列で実行する。以前は getCommentsByQuestion →
+    // getReactionCountsMap(質問) → getMyReactions(質問) が直列だったため、
+    // 独立した3クエリが waterfall になっていた（#156）。
+    const [comments_, qReactionMap, qMine] = await Promise.all([
+      getCommentsByQuestion(question._id),
+      getReactionCountsMap({
+        targetType: "question",
+        targetIds: [question._id],
+      }),
+      currentUserId
+        ? getMyReactions({
+            targetType: "question",
+            targetIds: [question._id],
+          })
+        : Promise.resolve([]),
+    ]);
+    comments = comments_;
     questionReactionCounts = qReactionMap[question._id] ?? emptyReactionCounts();
+    myQuestionReactions = qMine.map((r) => r.reaction);
 
-    // コメントのリアクションを 1 クエリで集計
+    // ステージB: コメントの ID が確定してから、コメントに対するリアクション集計と
+    // 自分のリアクションを並列で取得する（コメントが存在する場合のみ）。
     if (comments.length > 0) {
       const commentIds = comments.map((c) => c.id);
-      commentReactionCountsMap = await getReactionCountsMap({
-        targetType: "comment",
-        targetIds: commentIds,
-      });
-    }
-
-    // 自分が押しているリアクション（質問 + コメント）を取得
-    if (currentUserId) {
-      const [qMine, cMine] = await Promise.all([
-        getMyReactions({
-          targetType: "question",
-          targetIds: [question._id],
+      const [cReactionMap, cMine] = await Promise.all([
+        getReactionCountsMap({
+          targetType: "comment",
+          targetIds: commentIds,
         }),
-        comments.length > 0
+        currentUserId
           ? getMyReactions({
               targetType: "comment",
-              targetIds: comments.map((c) => c.id),
+              targetIds: commentIds,
             })
           : Promise.resolve([]),
       ]);
-      myQuestionReactions = qMine.map((r) => r.reaction);
+      commentReactionCountsMap = cReactionMap;
       cMine.forEach((r) => {
         if (!myCommentReactionsByCommentId[r.targetId]) {
           myCommentReactionsByCommentId[r.targetId] = [];

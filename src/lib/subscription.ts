@@ -5,7 +5,7 @@ import 'server-only'
  *
  * クライアントコンポーネントからは @/lib/subscription-utils を使用すること
  */
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCachedUser } from "@/lib/supabase/server";
 import type { PlanType, SubscriptionState } from "@/types/subscription";
 
 // ユーティリティ関数・定数を re-export（Server Component の既存importを壊さない）
@@ -37,14 +37,9 @@ export type {
 export async function getSubscriptionStatus(): Promise<SubscriptionState> {
   const supabase = await createClient();
 
-  let user = null;
-  try {
-    const result = await supabase.auth.getUser();
-    user = result.data.user;
-  } catch {
-    // セッションがstale等で auth が落ちた場合は未ログイン扱い
-    user = null;
-  }
+  // auth.getUser() はリクエストスコープでキャッシュ済み（getCurrentUser 等との
+  // 認証往復の重複を排除。詳細は supabase/server.ts の getCachedUser）
+  const user = await getCachedUser();
 
   if (!user) {
     return {
@@ -121,13 +116,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
  * サーバーサイドでユーザー情報を取得
  */
 export async function getCurrentUser() {
-  const supabase = await createClient();
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-    return user;
-  } catch {
-    return null;
-  }
+  // auth.getUser() をリクエストスコープでキャッシュ（getSubscriptionStatus 等との
+  // 認証往復の重複を排除。詳細は supabase/server.ts の getCachedUser）
+  return getCachedUser();
 }
