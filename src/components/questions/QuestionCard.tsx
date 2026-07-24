@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Heart, Sparkles, ThumbsUp, type LucideIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { extractPreviewText } from "@/lib/portable-text-utils";
 import type { QuestionListItem, ReactionKey } from "@/lib/services/questions";
@@ -8,10 +7,10 @@ import type { QuestionListItem, ReactionKey } from "@/lib/services/questions";
 const PREVIEW_LINES = 4;
 
 /** スタンプ3種の表示定義（ReactionButtons と揃える：cheer=応援 / thanks=いいやん / insight=知りたい） */
-const STAMPS: Array<{ key: ReactionKey; label: string; Icon: LucideIcon }> = [
-  { key: "cheer", label: "応援", Icon: Sparkles },
-  { key: "thanks", label: "いいやん", Icon: ThumbsUp },
-  { key: "insight", label: "知りたい", Icon: Heart },
+const STAMPS: Array<{ key: ReactionKey; label: string; emoji: string }> = [
+  { key: "cheer", label: "応援", emoji: "📣" },
+  { key: "thanks", label: "いいやん", emoji: "👍" },
+  { key: "insight", label: "知りたい", emoji: "🙋" },
 ];
 
 function formatDate(iso?: string): string {
@@ -79,12 +78,14 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
         <div className="flex flex-wrap items-center justify-between gap-2">
           {/* 左: スタンプ3種（件数>0のもののみ・表示専用）+「・」+ コメント件数（0件のときは非表示） */}
           <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {activeStamps.map(({ key, label, Icon }) => (
+            {activeStamps.map(({ key, label, emoji }) => (
               <span
                 key={key}
                 className="flex items-center gap-[6px] rounded-full px-[8.5px] py-[6.5px]"
               >
-                <Icon className="size-3.5 text-muted-foreground" />
+                <span className="text-[14px] leading-none" aria-hidden>
+                  {emoji}
+                </span>
                 <span className="text-xs font-medium text-muted-foreground">
                   {label}
                 </span>

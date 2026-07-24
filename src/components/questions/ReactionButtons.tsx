@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Heart, Sparkles, ThumbsUp } from "lucide-react";
 import {
   toggleReaction,
   type ReactionKey,
@@ -10,12 +9,11 @@ import {
 } from "@/lib/services/questions";
 import { cn } from "@/lib/utils";
 
-// 表示名・アイコンは Figma 100:2820 系＋#135 確定に準拠
-// （DBキー cheer/thanks/insight は変更しない）
-const REACTIONS: Array<{ key: ReactionKey; label: string; Icon: typeof Heart }> = [
-  { key: "cheer", label: "応援", Icon: Sparkles },
-  { key: "thanks", label: "いいやん", Icon: ThumbsUp },
-  { key: "insight", label: "知りたい", Icon: Heart },
+// 表示名・絵文字は #153 確定に準拠（DBキー cheer/thanks/insight は変更しない）
+const REACTIONS: Array<{ key: ReactionKey; label: string; emoji: string }> = [
+  { key: "cheer", label: "応援", emoji: "📣" },
+  { key: "thanks", label: "いいやん", emoji: "👍" },
+  { key: "insight", label: "知りたい", emoji: "🙋" },
 ];
 
 interface ReactionButtonsProps {
@@ -92,7 +90,7 @@ export function ReactionButtons({
     size === "sm"
       ? "px-2 py-0.5 gap-1"
       : "px-[13.5px] py-[5.5px] gap-[6px]";
-  const iconSize = size === "sm" ? 12 : 14;
+  const emojiSizeClass = size === "sm" ? "text-[12px]" : "text-[14px]";
 
   const visibleReactions = keys
     ? REACTIONS.filter((r) => keys.includes(r.key))
@@ -100,7 +98,7 @@ export function ReactionButtons({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      {visibleReactions.map(({ key, label, Icon }) => {
+      {visibleReactions.map(({ key, label, emoji }) => {
         const active = optMine.has(key);
         return (
           <button
@@ -122,7 +120,9 @@ export function ReactionButtons({
               pendingKey === key && "opacity-70",
             )}
           >
-            <Icon size={iconSize} />
+            <span className={cn("leading-none", emojiSizeClass)} aria-hidden>
+              {emoji}
+            </span>
             <span>{label}</span>
             <span
               className={cn(
