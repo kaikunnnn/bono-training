@@ -17,7 +17,7 @@ const PURPOSE_ITEMS = [
     sub: "フィードバック",
     label: "プロに改善点をもらう",
     icon: <MessageSquare className="size-5 text-text-primary" aria-hidden />,
-    href: "/feedbacks",
+    href: "/feedback-apply/guide",
   },
   {
     sub: "レッスン",

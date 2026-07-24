@@ -1,7 +1,6 @@
 "use client";
 
 import React from 'react';
-import Image from 'next/image';
 import { Map } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { HoverCard } from '@/components/common/HoverCard';
@@ -26,15 +25,6 @@ interface LessonCardProps {
   lesson: Lesson;
   onClick?: () => void;
   className?: string;
-  /**
-   * "default": 既存の /lessons 一覧デザイン（変更なし）
-   * "cover": 新トップページ用の本の表紙風デザイン（新トップページHANDOFF由来）
-   */
-  variant?: "default" | "cover";
-  /** cover variant のみ: 左上カテゴリ表示（未指定時は lesson.category、それも無ければ "UIデザイン"） */
-  cat?: string;
-  /** cover variant のみ: 影の強さ */
-  shadow?: "normal" | "light";
 }
 
 /**
@@ -48,53 +38,8 @@ const LessonCard: React.FC<LessonCardProps> = ({
   lesson,
   onClick,
   className,
-  variant = "default",
-  cat,
-  shadow = "normal",
 }) => {
   const hasRoadmap = lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0;
-
-  if (variant === "cover") {
-    const cardClass =
-      shadow === "light"
-        ? "bg-white rounded-[29px] border border-[rgba(0,0,0,0.08)] drop-shadow-[0px_1px_4px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col"
-        : "bg-white rounded-[29px] lg:rounded-[36px] border border-[rgba(0,0,0,0.12)] overflow-hidden flex flex-col";
-    return (
-      <div className={cn(cardClass, "cursor-pointer group", className)} onClick={onClick}>
-        <div className="relative flex items-center justify-center pt-[48px] pb-[16px] px-[24px] overflow-hidden">
-          <p className="absolute top-[21px] left-[28px] font-noto-sans-jp font-bold text-[12px] text-[#6d56ff] leading-[1.6] whitespace-nowrap z-10">
-            {cat ?? lesson.category ?? "UIデザイン"}
-          </p>
-          <div className="relative h-[176px] w-[116px] overflow-hidden rounded-tr-[4px] rounded-br-[4px]">
-            {lesson.thumbnail && (
-              <Image
-                src={lesson.thumbnail}
-                alt={`${lesson.title}のサムネイル`}
-                fill
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
-              />
-            )}
-          </div>
-        </div>
-        <div className="px-[32px] py-[24px] flex flex-col gap-[12px]">
-          {/* "レッスン" タグ（Phase 1 で共通 LessonTag atom に置き換え予定） */}
-          <div className="bg-[rgba(102,102,102,0.06)] border border-[rgba(102,102,102,0.04)] rounded-[61px] flex items-center gap-[4px] px-[8px] py-[6px] self-start">
-            <p className="font-noto-sans-jp font-bold text-[11px] text-[#666] uppercase leading-normal">
-              レッスン
-            </p>
-          </div>
-          <h4 className="font-noto-sans-jp font-bold text-[20px] text-text-primary leading-normal group-hover:opacity-70 transition-opacity duration-300">
-            {lesson.title}
-          </h4>
-          {lesson.description && (
-            <p className="font-noto-sans-jp font-normal text-[14px] text-text-primary/80 leading-[1.6]">
-              {lesson.description}
-            </p>
-          )}
-        </div>
-      </div>
-    );
-  }
 
   return (
     <HoverCard

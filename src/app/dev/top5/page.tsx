@@ -7,12 +7,16 @@ import { NewContentSection } from "@/components/top-next/organisms/NewContentSec
 import { TrainingSection } from "@/components/top-next/organisms/TrainingSection";
 import { CareerSection } from "@/components/top-next/organisms/CareerSection";
 import { GuideSection } from "@/components/top-next/organisms/GuideSection";
-import { LessonSection } from "@/components/top-next/organisms/LessonSection";
-import { CommunitySection } from "@/components/top-next/organisms/CommunitySection";
+import LessonHighlightSection, {
+  type LessonHighlightRow,
+} from "@/components/top/home/LessonHighlightSection";
+import AchievementHighlightSection from "@/components/top/home/AchievementHighlightSection";
 import {
   getAllLessonsWithArticleIds,
   getAchievementGroups,
   getLatestMixedContent,
+  getAllGuidesFromSanity,
+  getAllRoadmaps,
 } from "@/lib/sanity";
 
 /**
@@ -37,18 +41,53 @@ export const metadata: Metadata = {
 };
 
 export default async function DevTop5Page() {
-  const [allLessons, achievementGroups, newContentItems] = await Promise.all([
-    getAllLessonsWithArticleIds(),
-    getAchievementGroups(3),
-    getLatestMixedContent(4),
-  ]);
+  const [allLessons, achievementGroups, newContentItems, allGuides, allRoadmaps] =
+    await Promise.all([
+      getAllLessonsWithArticleIds(),
+      getAchievementGroups(3),
+      getLatestMixedContent(4),
+      getAllGuidesFromSanity(),
+      getAllRoadmaps(),
+    ]);
 
   const findLesson = (title: string) =>
     allLessons.find((lesson) => lesson.title === title);
   const findLessonBySlug = (slug: string) =>
     allLessons.find((lesson) => lesson.slug?.current === slug);
+  const findGuideBySlug = (slug: string) =>
+    allGuides.find((guide) => guide.slug === slug);
+  const findRoadmapBySlug = (slug: string) =>
+    allRoadmaps.find((roadmap) => roadmap.slug?.current === slug);
 
-  const lessonGroups = [
+  const guideItems = [
+    {
+      title: "デザインとは何か。AIで変わること変わらないこと",
+      description: "見た目ではなくAI時代に必要なスキルを解説",
+      slug: "ai-design-experience-shift",
+    },
+    {
+      title: "ジュニアUI/UXデザイナーのためのスキルマップ",
+      description: "肩書ではなく、何に貢献するかからスキルを考える",
+      slug: "uiuxdesigner-skillmap",
+    },
+    {
+      title: "転職ポートフォリオのポイント",
+      description: "作るだけでなく、採用でアピールすべきポイントを解説",
+      slug: "portfolio-01",
+    },
+    {
+      title: "初心者が身につけるべきUXスキルの全体像",
+      description: "事業やユーザーへの貢献は課題を知ることから",
+      slug: "uxresearch_and_uidesign",
+    },
+  ].map((item) => ({
+    title: item.title,
+    description: item.description,
+    href: `/guide/${item.slug}`,
+    image: findGuideBySlug(item.slug)?.thumbnailUrl,
+  }));
+
+  const lessonRows: LessonHighlightRow[] = [
     {
       subheading: "基本のデザインフローを身につける",
       lessons: [
@@ -70,7 +109,7 @@ export default async function DevTop5Page() {
   const featuredCards = [
     {
       title: "AIでUIスタイリング入門",
-      desc: "情報設計でユーザー中心のUI設計をはじめるロードマップ",
+      desc: "ユーザー中心のUI設計を学ぶロードマップ",
       href: "/lessons/ai-ui-styling-beginner",
       image:
         findLessonBySlug("ai-ui-styling-beginner")?.thumbnailUrl ??
@@ -85,12 +124,12 @@ export default async function DevTop5Page() {
         findLessonBySlug("ui-design-flow-lv1")?.iconImageUrl,
     },
     {
-      title: "センスを盗んで成長速度を上げる",
-      desc: "自己流を卒業して引き出しを増やすシリーズ",
-      href: "/lessons/steel-design-sense",
+      title: "使いやすいUIデザイン構造を習得",
+      desc: "モード、アクションなど操作UIの基本を学ぼう",
+      href: "/lessons/ui-layout-basic",
       image:
-        findLessonBySlug("steel-design-sense")?.thumbnailUrl ??
-        findLessonBySlug("steel-design-sense")?.iconImageUrl,
+        findLessonBySlug("ui-layout-basic")?.thumbnailUrl ??
+        findLessonBySlug("ui-layout-basic")?.iconImageUrl,
     },
   ];
 
@@ -108,14 +147,30 @@ export default async function DevTop5Page() {
       <PurposeNav />
       <FeaturedSeries cards={featuredCards} />
       <NewContentSection articles={newContentArticles} />
-      <TrainingSection />
-      <CareerSection />
-      <GuideSection />
-      <LessonSection groups={lessonGroups} />
-      <CommunitySection
-        stories={achievementGroups.stories}
-        outputs={achievementGroups.outputs}
+      <TrainingSection
+        image1={findRoadmapBySlug("information-architecture")?.thumbnailUrl}
+        image2={findRoadmapBySlug("ux-design-basic")?.thumbnailUrl}
       />
+      <CareerSection
+        image1={findRoadmapBySlug("uiux-career-change")?.thumbnailUrl}
+      />
+      <GuideSection guides={guideItems} />
+      <div className="container">
+        <div className="flex flex-col">
+          <LessonHighlightSection
+            compact
+            badgeLabel="レッスン"
+            heading="1−2週間でレベルを上げる"
+            rows={lessonRows}
+            viewAllHref="/lessons"
+          />
+          <AchievementHighlightSection
+            compact
+            storyItems={achievementGroups.stories}
+            outputItems={achievementGroups.outputs}
+          />
+        </div>
+      </div>
     </>
   );
 }

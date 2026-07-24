@@ -2,16 +2,9 @@ import type { Metadata } from "next";
 import { Map, MessageSquare } from "lucide-react";
 import { DevNav } from "@/components/top-next/DevNav";
 import { SectionBadge } from "@/components/top-next/atoms/SectionBadge";
-import { LessonTag } from "@/components/top-next/atoms/LessonTag";
-import { TrainingCard } from "@/components/top-next/molecules/TrainingCard";
-import { RoadmapCard } from "@/components/top-next/molecules/RoadmapCard";
-import { GuideCard } from "@/components/top-next/molecules/GuideCard";
-import { FeaturedCard } from "@/components/top-next/molecules/FeaturedCard";
+import { PromoCard } from "@/components/top-next/molecules/PromoCard";
 import { ArticleRow } from "@/components/top-next/molecules/ArticleRow";
 import { PurposeItem } from "@/components/top-next/molecules/PurposeItem";
-import { TestimonialCard } from "@/components/top-next/molecules/TestimonialCard";
-import { OutputCard } from "@/components/top-next/molecules/OutputCard";
-import { LessonCard } from "@/components/lessons/LessonCard";
 
 /**
  * /dev/top5/components — top-next配下のAtoms/Moleculesをダミーデータで個別確認するページ
@@ -76,10 +69,6 @@ export default function ComponentsShowcasePage() {
         </div>
       </ShowcaseItem>
 
-      <ShowcaseItem name="LessonTag" file="atoms/LessonTag.tsx">
-        <LessonTag />
-      </ShowcaseItem>
-
       <h2 className="mb-6 mt-12 border-b-2 border-[#6d56ff] pb-2 font-mono text-xs font-bold text-white">
         <span className="bg-[#6d56ff] px-2 py-1">MOLECULES</span>
       </h2>
@@ -98,92 +87,46 @@ export default function ComponentsShowcasePage() {
         </div>
       </ShowcaseItem>
 
-      <ShowcaseItem name="FeaturedCard" file="molecules/FeaturedCard.tsx">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <FeaturedCard title="AIとUIをつくりはじめよう" desc="AIとUIのスタイリングを進める入門シリーズです" href="/lessons" />
-          <FeaturedCard title="質を上げるデザインの進め方" desc="基本のワークフローでアウトプットの質を高めます" href="/lessons" />
-          <FeaturedCard title="センスを盗んで成長速度を上げる" desc="自己流を卒業して引き出しを増やすシリーズ" href="/lessons" />
+      <ShowcaseItem name="PromoCard" file="molecules/PromoCard.tsx">
+        <p className="mb-2 font-sans text-xs text-gray-500">
+          サムネイル＋タイトル＋説明（任意）＋ボタン。titlePositionでタイトルの上下が変わる（旧 TrainingCard / RoadmapCard / FeaturedCard を統合）
+        </p>
+        <p className="mb-2 font-sans text-xs text-gray-500">titlePosition=&quot;above&quot;（旧FeaturedCard相当）</p>
+        <div className="mb-6 grid grid-cols-1 gap-6 sm:grid-cols-3">
+          <PromoCard title="AIとUIをつくりはじめよう" description="AIとUIのスタイリングを進める入門シリーズです" href="/lessons" titlePosition="above" aspectRatio="674/431" />
+          <PromoCard title="質を上げるデザインの進め方" description="基本のワークフローでアウトプットの質を高めます" href="/lessons" titlePosition="above" aspectRatio="674/431" />
         </div>
-      </ShowcaseItem>
-
-      <ShowcaseItem name="TrainingCard" file="molecules/TrainingCard.tsx">
-        <div className="flex flex-col gap-6 lg:flex-row">
-          <TrainingCard
-            topLabel="UIのアイデア"
-            topSubLabel="トレーニング"
+        <p className="mb-2 font-sans text-xs text-gray-500">titlePosition=&quot;below&quot;・説明文あり（旧TrainingCard相当）</p>
+        <div className="mb-6 flex flex-col gap-6 lg:flex-row">
+          <PromoCard
             title="目的からデザインを構築するトレーニング"
             description="UIの仕組みとユーザーから発想する基本の形を身につけます"
             href="/training"
           />
-          <TrainingCard
-            topLabel="顧客の課題解決"
-            topSubLabel="トレーニング"
+          <PromoCard
             title="顧客理解を価値に変換するデザイントレーニング"
             description="UXデザインの基本を顧客インタビューを通して習得"
             href="/training"
           />
         </div>
-      </ShowcaseItem>
-
-      <ShowcaseItem name="RoadmapCard" file="molecules/RoadmapCard.tsx">
-        <div className="flex flex-col gap-6 lg:flex-row">
-          <RoadmapCard topLabel="UIUX転職" topSubLabel="ロードマップ" title="UIUX転職ロードマップ" href="/roadmap" rounded="16px" />
-          <RoadmapCard topLabel="UIUX転職" topSubLabel="ロードマップ" title="未経験からのUIUXデザイナー転職ガイド" href="https://example.com" external />
+        <p className="mb-2 font-sans text-xs text-gray-500">titlePosition=&quot;below&quot;・説明文なし（旧RoadmapCard相当）</p>
+        <div className="mb-6 flex flex-col gap-6 lg:flex-row">
+          <PromoCard title="UIUX転職ロードマップ" href="/roadmap" rounded="16px" />
+          <PromoCard title="未経験からのUIUXデザイナー転職ガイド" href="https://example.com" external />
+        </div>
+        <p className="mb-2 font-sans text-xs text-gray-500">inverse（ダーク背景用。旧GuideCard相当）</p>
+        <div className="grid grid-cols-1 gap-8 rounded-lg bg-dark-section p-6 sm:grid-cols-2">
+          <PromoCard title="AIとデザインで身につけるスキル" description="生成AI時代に必要なデザインスキルを体系的に学ぶ" href="/roadmap" inverse />
+          <PromoCard title="UXのロードマップ" description="ユーザー理解から体験設計までを学ぶ学習ルート" href="/roadmap" inverse />
         </div>
       </ShowcaseItem>
 
-      <ShowcaseItem name="GuideCard" file="molecules/GuideCard.tsx" dark>
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-          <GuideCard title="AIとデザインで身につけるスキル" description="生成AI時代に必要なデザインスキルを体系的に学ぶ" href="/roadmap" />
-          <GuideCard title="UXのロードマップ" description="ユーザー理解から体験設計までを学ぶ学習ルート" href="/roadmap" />
-        </div>
-      </ShowcaseItem>
-
-      <ShowcaseItem name="LessonCard (variant=&quot;cover&quot;)" file="lessons/LessonCard.tsx">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <LessonCard
-            variant="cover"
-            lesson={{
-              id: "1",
-              title: "ゼロからはじめるUI情報設計",
-              description: "情報設計の基本を学ぶレッスン",
-              category: "UIデザイン",
-              thumbnail: "",
-              slug: "dummy",
-            }}
-          />
-          <LessonCard
-            variant="cover"
-            shadow="light"
-            lesson={{
-              id: "2",
-              title: "センスを盗む技術",
-              description: "自己流を卒業して引き出しを増やす",
-              category: "UIデザイン",
-              thumbnail: "",
-              slug: "dummy2",
-            }}
-          />
-        </div>
-      </ShowcaseItem>
-
-      <ShowcaseItem name="TestimonialCard" file="molecules/TestimonialCard.tsx">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <TestimonialCard
-            category="UIUX転職"
-            title="非美大・未経験から新卒でデザイン制作会社へ就職。実務とBONOを掛け合わせたデザインスキル獲得法について聞いてみた"
-            authorName="和家くん"
-            authorRole="2027年から制作会社の新卒デザイナー"
-            href="/achievements"
-          />
-        </div>
-      </ShowcaseItem>
-
-      <ShowcaseItem name="OutputCard" file="molecules/OutputCard.tsx">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          <OutputCard title="UI/UX勉強記録 #12 - 1人を深く掘ったら、設計のゴールが見えてきた" href="https://example.com" />
-        </div>
-      </ShowcaseItem>
+      <p className="mb-8 max-w-2xl font-sans text-xs text-gray-500">
+        レッスン特集（1−2週間でレベルを上げる）とみんなの実績は、top-next独自のカード
+        ではなく本番の共有コンポーネント（<code>LessonHighlightSection</code> /
+        <code>AchievementHighlightSection</code>、top3・top4と同一）をそのまま使う方針に
+        変更したため、このショーケースには含めていません。
+      </p>
       </div>
     </div>
   );

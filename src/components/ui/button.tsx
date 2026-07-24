@@ -34,6 +34,11 @@ const buttonVariants = cva(
         // 既存の "dark-outline"（黒背景・pill型）とは別デザインのため新規追加）
         "outline-dark":
           "border border-white/20 text-white shadow-[0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-white/10",
+        // ライト背景用の枠線のみボタン（白塗りなし・透明背景）。
+        // 既存の "outline" は bg-white 塗りつぶし固定なので、白背景を持たせたくない
+        // カード（top-next等）はこちらを使う
+        "outline-ghost":
+          "border border-[#EBEBEB] text-black hover:bg-black/[0.03]",
       },
       size: {
         default: "h-10 px-4 py-2",

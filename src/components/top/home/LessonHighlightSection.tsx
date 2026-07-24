@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { LessonWithArticleIds } from "@/lib/sanity";
 import { LessonCardRenderer } from "@/app/lessons/LessonCardRenderer";
 import { cn } from "@/lib/utils";
@@ -45,6 +46,10 @@ export interface LessonHighlightSectionProps {
   compact?: boolean;
   /** 外側sectionの上下パディングをinline styleで上書き（px。内側 py-[64px] は不変） */
   paddingY?: number;
+  /** 見出し下に表示するテキストリンク（未指定時は非表示。例: レッスン一覧へのリンク） */
+  viewAllHref?: string;
+  /** viewAllHref 指定時のリンク文言（デフォルト "レッスン一覧を見る"） */
+  viewAllLabel?: string;
   className?: string;
 }
 
@@ -54,6 +59,8 @@ export default function LessonHighlightSection({
   rows,
   compact = false,
   paddingY,
+  viewAllHref,
+  viewAllLabel = "レッスン一覧を見る",
   className,
 }: LessonHighlightSectionProps) {
   return (
@@ -66,7 +73,17 @@ export default function LessonHighlightSection({
       }
     >
       <div className="flex flex-col gap-16 py-[64px]">
-        <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />
+        <div className="flex flex-col gap-2">
+          <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />
+          {viewAllHref && (
+            <Link
+              href={viewAllHref}
+              className="font-noto-sans-jp text-sm text-text-link underline-offset-4 hover:text-text-link-hover hover:underline"
+            >
+              {viewAllLabel} →
+            </Link>
+          )}
+        </div>
 
         {rows.map((row) => (
           <div key={row.subheading} className="flex flex-col gap-12">
