@@ -73,12 +73,14 @@ export interface QuestionListItem {
 const CANDIDATE_POOL = 20;
 
 /** カード用の共通 projection（QuestionListItem 生成に必要なフィールドを揃える） */
+// questionContent はカードでは extractPreviewText で先頭4行しか使わないため、
+// 全文転送を避け先頭8ブロックのみ取得する（本文が長いスレッドほど転送量削減効果が大きい。#153）。
 const QUESTION_CARD_PROJECTION = `{
     _id,
     title,
     slug,
     publishedAt,
-    questionContent,
+    "questionContent": questionContent[0...8],
     figmaUrl,
     author,
     category->{_id, title, slug}
