@@ -20,13 +20,13 @@ export function ArticleRow({ image, category, title, href }: ArticleRowProps) {
       href={href}
       className="group flex w-[calc(100%+24px)] -mx-3 items-center gap-4 rounded-[8px] px-3 py-3 text-left transition-colors duration-200 hover:bg-black/[0.03]"
     >
-      <div className="relative h-[56px] w-[101px] shrink-0 overflow-hidden rounded-[2px] bg-muted-custom">
+      <div className="relative h-14 w-[101px] shrink-0 overflow-hidden rounded-[2px] bg-muted-custom lg:h-16 lg:w-[115px]">
         {image && (
           <Image
             src={image}
             alt=""
             fill
-            sizes="101px"
+            sizes="(min-width: 1024px) 115px, 101px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
           />
         )}

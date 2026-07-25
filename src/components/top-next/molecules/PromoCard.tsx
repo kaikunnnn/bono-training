@@ -50,7 +50,7 @@ export function PromoCard({
 
   const titleEl = (
     <h3
-      className={`font-rounded-mplus text-xl font-medium leading-[1.76] tracking-[0.22px] ${
+      className={`font-rounded-mplus text-xl font-medium leading-[1.4] tracking-[0.22px] ${
         inverse ? "text-text-inverse" : "text-text-primary"
       }`}
     >
@@ -91,7 +91,12 @@ export function PromoCard({
             {description}
           </p>
         )}
-        <Button variant={inverse ? "outline-dark" : "outline-ghost"} size="top-card" asChild>
+        <Button
+          variant={inverse ? "outline-dark" : "outline-ghost"}
+          size="top-card"
+          className="mt-1"
+          asChild
+        >
           <span>{resolvedCtaLabel}</span>
         </Button>
       </div>

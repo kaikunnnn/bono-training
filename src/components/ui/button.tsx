@@ -38,7 +38,7 @@ const buttonVariants = cva(
         // 既存の "outline" は bg-white 塗りつぶし固定なので、白背景を持たせたくない
         // カード（top-next等）はこちらを使う
         "outline-ghost":
-          "border border-[#EBEBEB] text-black hover:bg-black/[0.03]",
+          "border border-border-strong text-black hover:bg-black/[0.03]",
       },
       size: {
         default: "h-10 px-4 py-2",

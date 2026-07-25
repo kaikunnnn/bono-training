@@ -3,8 +3,7 @@ import { PromoCard } from "@/components/top-next/molecules/PromoCard";
 /**
  * おすすめシリーズ（新トップページ Figma Make HANDOFF / FeaturedSeries）
  *
- * 3枚の PromoCard を横並び。titlePosition="below"（タイトルが画像の下、
- * TrainingSectionと同じ見た目）で比較のため試験適用中。
+ * 3枚の PromoCard を横並び。titlePosition="above"（タイトルが画像の上）。
  * データは page.tsx 側で取得して props で渡す
  * （Server Componentのデータフロー規約に従い、organism は presentational に保つ）。
  */
@@ -31,7 +30,7 @@ export function FeaturedSeries({ cards }: FeaturedSeriesProps) {
               description={card.desc}
               image={card.image}
               href={card.href}
-              titlePosition="below"
+              titlePosition="above"
             />
           ))}
         </div>

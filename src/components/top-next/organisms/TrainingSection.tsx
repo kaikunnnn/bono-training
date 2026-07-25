@@ -26,13 +26,13 @@ export function TrainingSection({ image1, image2 }: TrainingSectionProps) {
         <div className="flex flex-col gap-6 lg:flex-row">
           <PromoCard
             title="情報設計×OOUIで実践するUIデザイン"
-            description="情報設計とOOUIで目的達成のUIをデザインする"
+            description="ユーザーと目的から最適なUIを設計しよう"
             href="/roadmap/information-architecture"
             image={image1}
           />
           <PromoCard
             title="UXリサーチで顧客課題を解決するデザインの基本"
-            description="UXリサーチで顧客課題を発見し解決策をデザイン"
+            description="インタビューで課題を定義してUIを考える"
             href="/roadmap/ux-design-basic"
             image={image2}
           />

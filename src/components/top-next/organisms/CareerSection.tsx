@@ -9,14 +9,14 @@ import { PromoCard } from "@/components/top-next/molecules/PromoCard";
  * 2枚目は外部リンク（キャリアガイド、外部のためサムネイル取得対象外）。
  *
  * TrainingSection・FeaturedSeries と同じ PromoCard を使用（旧 RoadmapCard は統合済み）。
- * 1枚目のサムネイルは page.tsx 側でリンク先ロードマップの実画像を取得して props で渡す
- * （試験適用。無ければグレープレースホルダーのまま）。
+ * サムネイルは page.tsx 側から props で渡す（無ければグレープレースホルダーのまま）。
  */
 export interface CareerSectionProps {
   image1?: string;
+  image2?: string;
 }
 
-export function CareerSection({ image1 }: CareerSectionProps) {
+export function CareerSection({ image1, image2 }: CareerSectionProps) {
   return (
     <section className="px-6 lg:px-12">
       <div className="border-b border-black/[0.1] pt-[64px] pb-[65px]">
@@ -37,6 +37,7 @@ export function CareerSection({ image1 }: CareerSectionProps) {
             title="未経験からのUIUXデザイナー転職ガイド"
             description="ポートフォリオや面接など転職準備をまとめて解説"
             href="https://kaikun.bo-no.design/career/beginner"
+            image={image2}
             external
           />
         </div>

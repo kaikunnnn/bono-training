@@ -1518,8 +1518,9 @@ export interface MixedContentItem {
 }
 
 /**
- * 記事・読み物(guide)・ブログ・体験談(story)・イベント(event)・レッスン(lesson)を
- * 横断取得し、publishedAt 降順でマージして最新 limit 件を返す。
+ * 記事・読み物(guide)・ブログ・体験談(story)・イベント(event)・レッスン(lesson)・
+ * アウトプット(userOutput)・質問(question / みんなの掲示板)を横断取得し、
+ * publishedAt 降順でマージして最新 limit 件を返す。
  *
  * パフォーマンス: 各タイプは既存の一覧取得関数（unstable_cache 済み）を
  * Promise.all で並行呼び出しし、結合後にソート・スライスする。
@@ -1534,11 +1535,18 @@ export interface MixedContentItem {
  *   （lessonNumber を 0 埋めした固定エポック日付。数値が大きいほど文字列比較で
  *   後ろ=新しい側に来るようにする）。これで publishedAt を持つ他コンテンツと
  *   localeCompare で安定してマージできる。
+ *
+ * NOTE（ロードマップは対象外）:
+ * - ロードマップは「新しいコンテンツ」に含めない方針（意図的に除外）。
+ *
+ * NOTE（質問=みんなの掲示板の詳細ページは未実装）:
+ * - `/questions/[slug]` はこの Next.js 版ではまだ移植前のため、質問カードの
+ *   リンク先は現状 404 になる。一覧移植が完了次第、解消される想定。
  */
 export async function getLatestMixedContent(
   limit: number
 ): Promise<MixedContentItem[]> {
-  const [articles, guides, blogPosts, stories, events, lessons] =
+  const [articles, guides, blogPosts, stories, events, lessons, outputs, questions] =
     await Promise.all([
       getAllArticles(),
       getAllGuidesFromSanity(),
@@ -1546,6 +1554,8 @@ export async function getLatestMixedContent(
       getStoriesList(limit),
       getAllEvents(),
       getAllLessons(),
+      getOutputsList(limit),
+      getLatestQuestions(limit),
     ]);
 
   // レッスン用: publishedAt 相当の日付を決定する。
@@ -1604,6 +1614,20 @@ export async function getLatestMixedContent(
       thumbnail: l.thumbnailUrl ?? l.iconImageUrl ?? "",
       href: `/lessons/${l.slug.current}`,
       publishedAt: lessonPublishedAt(l),
+    })),
+    ...outputs.slice(0, limit).map((o) => ({
+      type: "アウトプット",
+      title: o.articleTitle || o.articleUrl,
+      thumbnail: o.articleImage ?? "",
+      href: o.articleUrl,
+      publishedAt: o.submittedAt ?? "",
+    })),
+    ...questions.slice(0, limit).map((q) => ({
+      type: "掲示板",
+      title: q.title,
+      thumbnail: "",
+      href: `/questions/${q.slug}`,
+      publishedAt: q.publishedAt ?? "",
     })),
   ];
 
@@ -1766,4 +1790,33 @@ export const getOutputsList = unstable_cache(
   },
   ["sanity:outputs:list:v3"],
   { tags: ["userOutput"], revalidate: 3600 }
+);
+
+// ============================================
+// Question（みんなの掲示板）関連のクエリ
+// ============================================
+
+export interface LatestQuestionItem {
+  title: string;
+  slug: string;
+  publishedAt: string;
+}
+
+/**
+ * 最新の質問（掲示板スレッド）を取得。
+ * フィルタは本番リポジトリ（bono-training）の getAllQuestions と同じ:
+ * isPublic は未設定なら公開扱い（isPublic == true || !defined(isPublic)）。
+ */
+export const getLatestQuestions = unstable_cache(
+  async (limit?: number): Promise<LatestQuestionItem[]> => {
+    const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
+    const query = `*[_type == "question" && (isPublic == true || !defined(isPublic))] | order(publishedAt desc) ${limitClause} {
+      title,
+      "slug": slug.current,
+      publishedAt
+    }`;
+    return getClient().fetch<LatestQuestionItem[]>(query);
+  },
+  ["sanity:questions:latest:v1"],
+  { tags: ["question"], revalidate: 3600 }
 );

@@ -16,7 +16,6 @@ import {
   getAchievementGroups,
   getLatestMixedContent,
   getAllGuidesFromSanity,
-  getAllRoadmaps,
 } from "@/lib/sanity";
 
 /**
@@ -41,23 +40,18 @@ export const metadata: Metadata = {
 };
 
 export default async function DevTop5Page() {
-  const [allLessons, achievementGroups, newContentItems, allGuides, allRoadmaps] =
+  const [allLessons, achievementGroups, newContentItems, allGuides] =
     await Promise.all([
       getAllLessonsWithArticleIds(),
       getAchievementGroups(3),
       getLatestMixedContent(4),
       getAllGuidesFromSanity(),
-      getAllRoadmaps(),
     ]);
 
   const findLesson = (title: string) =>
     allLessons.find((lesson) => lesson.title === title);
-  const findLessonBySlug = (slug: string) =>
-    allLessons.find((lesson) => lesson.slug?.current === slug);
   const findGuideBySlug = (slug: string) =>
     allGuides.find((guide) => guide.slug === slug);
-  const findRoadmapBySlug = (slug: string) =>
-    allRoadmaps.find((roadmap) => roadmap.slug?.current === slug);
 
   const guideItems = [
     {
@@ -111,25 +105,19 @@ export default async function DevTop5Page() {
       title: "AIでUIスタイリング入門",
       desc: "ユーザー中心のUI設計を学ぶロードマップ",
       href: "/lessons/ai-ui-styling-beginner",
-      image:
-        findLessonBySlug("ai-ui-styling-beginner")?.thumbnailUrl ??
-        findLessonBySlug("ai-ui-styling-beginner")?.iconImageUrl,
+      image: "/images/top5/ai-ui-styling.jpg",
     },
     {
       title: "質を上げるデザインの進め方",
       desc: "基本のワークフローでアウトプットの質を高めます",
       href: "/lessons/ui-design-flow-lv1",
-      image:
-        findLessonBySlug("ui-design-flow-lv1")?.thumbnailUrl ??
-        findLessonBySlug("ui-design-flow-lv1")?.iconImageUrl,
+      image: "/images/top5/design-process-cycle.jpg",
     },
     {
       title: "使いやすいUIデザイン構造を習得",
       desc: "モード、アクションなど操作UIの基本を学ぼう",
       href: "/lessons/ui-layout-basic",
-      image:
-        findLessonBySlug("ui-layout-basic")?.thumbnailUrl ??
-        findLessonBySlug("ui-layout-basic")?.iconImageUrl,
+      image: "/images/top5/usable-ui-structure.jpg",
     },
   ];
 
@@ -144,15 +132,16 @@ export default async function DevTop5Page() {
     <>
       <DevNav current="page" />
       <HeroSection />
-      <PurposeNav />
       <FeaturedSeries cards={featuredCards} />
+      <PurposeNav />
       <NewContentSection articles={newContentArticles} />
       <TrainingSection
-        image1={findRoadmapBySlug("information-architecture")?.thumbnailUrl}
-        image2={findRoadmapBySlug("ux-design-basic")?.thumbnailUrl}
+        image1="/images/top5/training-info-architecture.jpg"
+        image2="/images/top5/training-ux-research.jpg"
       />
       <CareerSection
-        image1={findRoadmapBySlug("uiux-career-change")?.thumbnailUrl}
+        image1="/images/top5/career-uiux-roadmap.jpg"
+        image2="/images/top5/career-uiux-guide.jpg"
       />
       <GuideSection guides={guideItems} />
       <div className="container">
