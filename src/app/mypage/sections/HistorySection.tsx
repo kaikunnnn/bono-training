@@ -8,9 +8,7 @@ export async function HistorySection({
   userId: string;
   mode: "preview" | "full";
 }) {
-  console.time("[mypage section] History total");
   const viewHistory = await getViewHistory(userId);
-  console.timeEnd("[mypage section] History total");
 
   if (mode === "preview") {
     return <HistoryPreview viewHistory={viewHistory} />;

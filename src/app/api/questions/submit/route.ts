@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient, type SanityClient } from '@sanity/client';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
+import { textToPortableBlocks } from '@/lib/questions/text-format';
+import { adjustBoardUserStats } from '@/lib/questions/board-user-stats';
 
 // Sanity write client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
 let sanityClient: SanityClient | null = null;
@@ -28,6 +30,7 @@ interface SubmitQuestionPayload {
   questionContent: string;
   figmaUrl?: string;
   referenceUrls?: Array<{ title?: string; url: string }>;
+  imageUrl?: string;
 }
 
 interface UserInfo {
@@ -42,51 +45,55 @@ const VALIDATION_RULES = {
   questionContent: { minLength: 20, maxLength: 5000 },
 };
 
-// slugを生成
-function generateSlug(title: string): string {
+// slugを生成（タイムスタンプ + ランダム文字列。タイトルには依存しない）
+function generateSlug(): string {
   const timestamp = Date.now();
   const randomStr = Math.random().toString(36).substring(2, 8);
   return `q-${timestamp}-${randomStr}`;
 }
 
-// プレーンテキストをPortable Textに変換
-function textToPortableText(text: string) {
-  const paragraphs = text.split(/\n\n+/);
-  return paragraphs.map((paragraph, index) => {
-    // 見出しの検出（## で始まる行）
-    if (paragraph.startsWith('## ')) {
-      return {
-        _type: 'block',
-        _key: `block-${index}`,
-        style: 'h3',
-        children: [
-          {
-            _type: 'span',
-            _key: `span-${index}`,
-            text: paragraph.replace(/^## /, ''),
-            marks: [],
-          },
-        ],
-        markDefs: [],
-      };
-    }
+// http(s) のみ許可（javascript: 等のスキーム注入を防ぐ。<a href> にそのまま描画されるため）
+function isValidHttpUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
 
-    // 通常の段落
-    return {
-      _type: 'block',
-      _key: `block-${index}`,
-      style: 'normal',
-      children: [
-        {
-          _type: 'span',
-          _key: `span-${index}`,
-          text: paragraph.trim(),
-          marks: [],
-        },
-      ],
-      markDefs: [],
-    };
-  });
+// Figma URL はホスト名で判定（includes だと https://evil.com/?figma.com が通る）
+function isFigmaUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    return (
+      url.protocol === 'https:' &&
+      (url.hostname === 'figma.com' || url.hostname.endsWith('.figma.com'))
+    );
+  } catch {
+    return false;
+  }
+}
+
+// 添付画像URLは http/https かつ Supabase Storage（SUPABASE_URL のホスト）のみ許可。
+// アップロードは自前の Server Action（question-attachments バケット）経由のため、
+// ホストを固定して外部URLの持ち込み（不適切画像のホットリンク等）を防ぐ。
+function isSupabaseImageUrl(value: string): boolean {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    const base = supabaseUrl ? new URL(supabaseUrl) : null;
+    return base !== null && url.hostname === base.hostname;
+  } catch {
+    return false;
+  }
+}
+
+// 本文プレビュー用に前後空白を除去して指定長でtruncate（末尾に … を付与）
+function truncateForPreview(text: string, maxLength = 300): string {
+  const normalized = text.trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength)}…`;
 }
 
 // Slack通知を送信
@@ -94,7 +101,9 @@ async function sendSlackNotification(data: {
   title: string;
   category: string;
   author: string;
-  questionId: string;
+  content: string;
+  slug: string;
+  imageUrl?: string;
 }) {
   const webhookUrl = process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl) {
@@ -102,7 +111,20 @@ async function sendSlackNotification(data: {
     return;
   }
 
-  const sanityStudioUrl = `https://bono-training.sanity.studio/structure/question;${data.questionId}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://app.bo-no.design';
+  const questionPageUrl = `${siteUrl}/questions/${data.slug}`;
+
+  const imageBlocks = data.imageUrl
+    ? [
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*画像添付あり:*\n${data.imageUrl}`,
+          },
+        },
+      ]
+    : [];
 
   const message = {
     blocks: [
@@ -110,7 +132,7 @@ async function sendSlackNotification(data: {
         type: 'header',
         text: {
           type: 'plain_text',
-          text: '📝 新しい質問が投稿されました',
+          text: '📝 新しい投稿がありました',
           emoji: true,
         },
       },
@@ -138,16 +160,17 @@ async function sendSlackNotification(data: {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '*回答手順:*\n1. 下のボタンでSanity Studioを開く\n2. 「コンテンツ」タブで回答を入力\n3. 「管理情報」タブでステータスを「回答済み」に\n4. 公開をONにして保存',
+          text: `*投稿内容:*\n${truncateForPreview(data.content)}`,
         },
       },
+      ...imageBlocks,
       {
         type: 'actions',
         elements: [
           {
             type: 'button',
-            text: { type: 'plain_text', text: '🔗 Sanity Studioで回答する', emoji: true },
-            url: sanityStudioUrl,
+            text: { type: 'plain_text', text: '💬 詳細ページを開く', emoji: true },
+            url: questionPageUrl,
             style: 'primary',
           },
         ],
@@ -166,31 +189,15 @@ async function sendSlackNotification(data: {
   }
 }
 
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
-}
-
+// CORSヘッダーは付けない（同一オリジンのフォームからのみ呼ばれる想定。
+// 以前の Access-Control-Allow-Origin: * は不要な外部オリジン許可だったため撤去）
 export async function POST(request: NextRequest) {
-  const headers = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-  };
-
   // 認証チェック
   const authHeader = request.headers.get('authorization');
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return NextResponse.json(
       { error: 'Unauthorized: No token provided' },
-      { status: 401, headers }
-    );
+      { status: 401 });
   }
 
   const token = authHeader.replace('Bearer ', '');
@@ -199,8 +206,7 @@ export async function POST(request: NextRequest) {
     console.error('Supabase configuration missing');
     return NextResponse.json(
       { error: 'Server configuration error' },
-      { status: 500, headers }
-    );
+      { status: 500 });
   }
 
   const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey);
@@ -211,8 +217,7 @@ export async function POST(request: NextRequest) {
   if (authError || !user) {
     return NextResponse.json(
       { error: 'Unauthorized: Invalid token' },
-      { status: 401, headers }
-    );
+      { status: 401 });
   }
 
   // サブスクリプションチェック（環境に応じたフィルタ）
@@ -228,61 +233,102 @@ export async function POST(request: NextRequest) {
   if (subError || !subscription) {
     return NextResponse.json(
       { error: 'Premium subscription required' },
-      { status: 403, headers }
-    );
+      { status: 403 });
   }
 
   // リクエストボディの取得
-  const payload: SubmitQuestionPayload = await request.json();
+  let payload: SubmitQuestionPayload;
+  try {
+    payload = await request.json();
+  } catch {
+    return NextResponse.json(
+      { error: 'リクエストの形式が不正です' },
+      { status: 400 });
+  }
 
   // バリデーション
   if (!payload.title || payload.title.length < VALIDATION_RULES.title.minLength) {
     return NextResponse.json(
       { error: `タイトルは${VALIDATION_RULES.title.minLength}文字以上で入力してください` },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   if (payload.title.length > VALIDATION_RULES.title.maxLength) {
     return NextResponse.json(
       { error: `タイトルは${VALIDATION_RULES.title.maxLength}文字以内で入力してください` },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   if (!payload.questionContent || payload.questionContent.length < VALIDATION_RULES.questionContent.minLength) {
     return NextResponse.json(
-      { error: `質問内容は${VALIDATION_RULES.questionContent.minLength}文字以上で入力してください` },
-      { status: 400, headers }
-    );
+      { error: `内容は${VALIDATION_RULES.questionContent.minLength}文字以上で入力してください` },
+      { status: 400 });
   }
 
   if (payload.questionContent.length > VALIDATION_RULES.questionContent.maxLength) {
     return NextResponse.json(
-      { error: `質問内容は${VALIDATION_RULES.questionContent.maxLength}文字以内で入力してください` },
-      { status: 400, headers }
-    );
+      { error: `内容は${VALIDATION_RULES.questionContent.maxLength}文字以内で入力してください` },
+      { status: 400 });
   }
 
   if (!payload.categoryId) {
     return NextResponse.json(
       { error: 'カテゴリを選択してください' },
-      { status: 400, headers }
-    );
+      { status: 400 });
   }
 
   // FigmaURLのバリデーション
-  if (payload.figmaUrl && !payload.figmaUrl.includes('figma.com')) {
+  if (payload.figmaUrl && !isFigmaUrl(payload.figmaUrl)) {
     return NextResponse.json(
-      { error: 'FigmaのURLを入力してください' },
-      { status: 400, headers }
+      { error: 'FigmaのURL（https://www.figma.com/...）を入力してください' },
+      { status: 400 });
+  }
+
+  // 参考URLのバリデーション（http/https のみ許可）
+  if (payload.referenceUrls) {
+    if (!Array.isArray(payload.referenceUrls) || payload.referenceUrls.length > 10) {
+      return NextResponse.json(
+        { error: '参考URLの形式が不正です' },
+        { status: 400 });
+    }
+    for (const ref of payload.referenceUrls) {
+      if (!ref?.url || typeof ref.url !== 'string' || !isValidHttpUrl(ref.url)) {
+        return NextResponse.json(
+          { error: '参考URLは http:// または https:// で始まるURLを入力してください' },
+          { status: 400 });
+      }
+    }
+  }
+
+  // 添付画像URLのバリデーション（Supabase Storage のホストのみ許可）
+  if (payload.imageUrl && !isSupabaseImageUrl(payload.imageUrl)) {
+    return NextResponse.json(
+      { error: '添付画像の形式が不正です' },
+      { status: 400 });
+  }
+
+  // レート制限: 1ユーザーにつき1時間に5件まで（#131-C。カウントはSanityの実データ）
+  try {
+    const RATE_LIMIT_PER_HOUR = 5;
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const recentCount = await getSanityClient().fetch<number>(
+      `count(*[_type == "question" && author.userId == $uid && publishedAt > $since])`,
+      { uid: user.id, since }
     );
+    if (recentCount >= RATE_LIMIT_PER_HOUR) {
+      return NextResponse.json(
+        { error: '短時間に多くの投稿がされています。しばらく時間をおいてから再度お試しください' },
+        { status: 429 });
+    }
+  } catch (e) {
+    // カウント失敗時は投稿を止めない（レート制限は best-effort）
+    console.error('Rate limit check failed:', e);
   }
 
   // ユーザー情報の準備
   const userInfo: UserInfo = {
     id: user.id,
-    displayName: user.user_metadata?.name || user.email?.split('@')[0] || 'ユーザー',
+    displayName: user.user_metadata?.display_name || user.user_metadata?.name || user.email?.split('@')[0] || 'ユーザー',
     avatarUrl: user.user_metadata?.avatar_url,
   };
 
@@ -304,9 +350,9 @@ export async function POST(request: NextRequest) {
   const questionDoc = {
     _type: 'question',
     title: payload.title,
-    slug: { _type: 'slug', current: generateSlug(payload.title) },
+    slug: { _type: 'slug', current: generateSlug() },
     category: { _type: 'reference', _ref: payload.categoryId },
-    questionContent: textToPortableText(payload.questionContent),
+    questionContent: textToPortableBlocks(payload.questionContent),
     author: {
       userId: userInfo.id,
       displayName: userInfo.displayName,
@@ -318,20 +364,29 @@ export async function POST(request: NextRequest) {
       title: ref.title || null,
       url: ref.url,
     })) || null,
-    status: 'pending',
-    isPublic: false,
-    submittedAt: new Date().toISOString(),
+    // 添付画像（imageUrl がある時のみ object を持たせる。本文とは独立したブロック）
+    ...(payload.imageUrl
+      ? { attachedImage: { url: payload.imageUrl } }
+      : {}),
+    publishedAt: new Date().toISOString(),
   };
 
   try {
     const result = await getSanityClient().create(questionDoc);
+
+    // 投稿数カウント（#149・ベストエフォート）。更新後 post_count が 1 なら初投稿。
+    // 失敗しても投稿自体は成功として返す（adjustBoardUserStats 内で握って console.error）。
+    const stats = await adjustBoardUserStats(user.id, { postDelta: 1 });
+    const isFirstPost = stats.ok && stats.postCount === 1;
 
     // Slack通知
     await sendSlackNotification({
       title: payload.title,
       category: categoryName,
       author: userInfo.displayName,
-      questionId: result._id,
+      content: payload.questionContent,
+      slug: questionDoc.slug.current,
+      imageUrl: payload.imageUrl,
     });
 
     return NextResponse.json(
@@ -339,14 +394,13 @@ export async function POST(request: NextRequest) {
         success: true,
         questionId: result._id,
         slug: questionDoc.slug.current,
+        isFirstPost,
       },
-      { status: 201, headers }
-    );
+      { status: 201 });
   } catch (error) {
     console.error('Failed to create question:', error);
     return NextResponse.json(
       { error: 'Failed to create question' },
-      { status: 500, headers }
-    );
+      { status: 500 });
   }
 }

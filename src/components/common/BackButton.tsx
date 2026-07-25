@@ -9,6 +9,13 @@ interface BackButtonProps {
   label?: string;
   /** フォールバック先URL（履歴がない場合に遷移） */
   href?: string;
+  /**
+   * 戻り方。
+   * - "history"（既定）: ブラウザ履歴で戻る（履歴がなければ href へ）
+   * - "href": 常に href へ遷移する。「掲示板へ戻る」のようにラベルが行き先を
+   *   明示するボタン用（履歴戻りだと投稿フロー等の直前ページに戻ってしまう）
+   */
+  mode?: "history" | "href";
   /** 追加クラス */
   className?: string;
 }
@@ -17,16 +24,28 @@ interface BackButtonProps {
  * 戻るボタン（白背景＋グレー枠＋影）
  *
  * - ブラウザの履歴で前の画面に戻る
+ * - 履歴がない場合（直リンク・新規タブ）は href へ遷移するフォールバック
  */
 export function BackButton({
   label = "戻る",
   href = "/",
+  mode = "history",
   className,
 }: BackButtonProps) {
   const router = useRouter();
 
   const handleBack = () => {
-    router.back();
+    // href モード: ラベルが行き先を明示しているので常にそこへ遷移
+    if (mode === "href") {
+      router.push(href);
+      return;
+    }
+    // 直リンクや新規タブで履歴が無い場合は back() が効かないため href へフォールバック
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push(href);
+    }
   };
 
   return (

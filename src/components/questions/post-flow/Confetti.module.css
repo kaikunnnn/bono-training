@@ -1,0 +1,41 @@
+/*
+ * Confetti — 花吹雪の粒スタイル（#143）
+ *
+ * 動きは Confetti.tsx の Web Animations API（element.animate）で付与するため、
+ * ここでは粒の見た目（サイズ・角丸・初期配置）だけを定義する。
+ * グローバルCSS追加禁止ルールのため CSS Module に閉じる。
+ * 色はコンポーネント側で var(--confetti-N) を backgroundColor に注入する。
+ */
+
+.container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  overflow: visible;
+  z-index: 1;
+}
+
+/* ピル形の紙片（約4×10px・角丸） */
+.pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 10px;
+  border-radius: var(--radius-full);
+  will-change: transform, opacity;
+}
+
+/* 丸ドット（サイズは JS で 6-8px を注入） */
+.dot {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  will-change: transform, opacity;
+}

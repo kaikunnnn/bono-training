@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["iconsax-react"],
+  async rewrites() {
+    return [
+      // /docs/xxx → public/docs/xxx.html（拡張子なしURLで静的ドキュメントを配信）
+      {
+        source: "/docs/:slug",
+        destination: "/docs/:slug.html",
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

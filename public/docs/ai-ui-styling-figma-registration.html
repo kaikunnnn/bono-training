@@ -1,0 +1,798 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Figma に「変数」と「部品」を登録する、 design-system をキャンバスにも持ち込む</title>
+  <style>
+    :root {
+      --text: #111;
+      --text-soft: #555;
+      --line: #e5e5e5;
+      --line-soft: #f0f0f0;
+      --bg: #fff;
+      --bg-soft: #f7f7f7;
+      --code-bg: #f4f4f4;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", sans-serif;
+      font-size: 16px;
+      line-height: 1.85;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+    }
+
+    /* Header */
+    .eyebrow {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.4;
+      letter-spacing: -0.01em;
+      margin: 0 0 24px;
+    }
+
+    .lede {
+      font-size: 17px;
+      line-height: 1.85;
+      color: var(--text-soft);
+      margin-bottom: 56px;
+    }
+
+    /* Meta box */
+    .meta {
+      display: grid;
+      grid-template-columns: 88px 1fr;
+      gap: 12px 16px;
+      padding: 24px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 56px;
+      font-size: 14px;
+    }
+
+    .meta dt {
+      color: var(--text-soft);
+    }
+
+    .meta dd {
+      margin: 0;
+      color: var(--text);
+    }
+
+    /* Body */
+    h2 {
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1.5;
+      letter-spacing: -0.005em;
+      margin: 72px 0 20px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    h3 {
+      font-size: 17px;
+      font-weight: 700;
+      line-height: 1.6;
+      margin: 40px 0 12px;
+    }
+
+    p {
+      margin: 0 0 20px;
+    }
+
+    a {
+      color: var(--text);
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    a:hover {
+      text-decoration-thickness: 2px;
+    }
+
+    strong {
+      font-weight: 700;
+    }
+
+    /* Numbered step */
+    .step-num {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      border-radius: 50%;
+      background: var(--text);
+      color: var(--bg);
+      text-align: center;
+      font-size: 14px;
+      font-weight: 700;
+      margin-right: 12px;
+      vertical-align: 1px;
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 1.4em;
+      margin: 0 0 24px;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    /* Code */
+    code {
+      font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+      font-size: 14px;
+      background: var(--code-bg);
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.7;
+      margin: 0 0 28px;
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      font-size: 13px;
+    }
+
+    /* Callout */
+    .callout {
+      border-left: 2px solid var(--text);
+      padding: 4px 0 4px 20px;
+      margin: 28px 0;
+      color: var(--text-soft);
+      font-size: 15px;
+    }
+
+    .callout strong {
+      color: var(--text);
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 80px 0;
+    }
+
+    /* Figure */
+    .figure {
+      margin: 32px 0 40px;
+    }
+
+    .figure img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      cursor: zoom-in;
+      transition: opacity 0.15s ease;
+    }
+
+    .figure img:hover {
+      opacity: 0.88;
+    }
+
+    .figure figcaption {
+      font-size: 13px;
+      color: var(--text-soft);
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    /* Route box */
+    .route {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 24px 28px;
+      margin: 24px 0;
+    }
+
+    .route-label {
+      display: inline-block;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      background: var(--text);
+      color: var(--bg);
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 12px;
+    }
+
+    .route-label.soft {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+
+    .route h4 {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .route p:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      background: rgba(17, 17, 17, 0.92);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      cursor: zoom-out;
+      padding: 40px;
+    }
+
+    .lightbox.active {
+      display: flex;
+    }
+
+    .lightbox img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border: none;
+      border-radius: 0;
+      display: block;
+    }
+
+    .lightbox-close {
+      position: fixed;
+      top: 20px;
+      right: 24px;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      background: transparent;
+      color: rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-family: inherit;
+    }
+
+    .lightbox-close:hover {
+      border-color: rgba(255, 255, 255, 0.85);
+      color: #fff;
+    }
+
+    /* Footer */
+    .footer {
+      margin-top: 80px;
+      padding-top: 32px;
+      border-top: 1px solid var(--line);
+      color: var(--text-soft);
+      font-size: 14px;
+    }
+
+    .footer p {
+      margin-bottom: 10px;
+    }
+
+    /* Small */
+    .small {
+      font-size: 14px;
+      color: var(--text-soft);
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container { padding: 56px 20px 80px; }
+      h1 { font-size: 26px; }
+      h2 { font-size: 20px; margin-top: 56px; }
+      .lede { font-size: 16px; }
+      pre { padding: 16px 18px; font-size: 12px; }
+      .route { padding: 20px 22px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+
+    <div class="eyebrow">AIUI スタイリング / ガイド 03</div>
+    <h1>Figma に「変数」と「部品」を登録する、 design-system をキャンバスにも持ち込む</h1>
+
+    <p class="lede">
+      ガイド 01 で作った <code>tokens.json</code> と <code>components.json</code> を、 今度は Figma 側にも持ち込むためのガイドです。これをやると、コードでもキャンバスでも同じ design-system が使える状態になる。 Figma 派の同僚やデザインだけ触る人とも、ルールを共有できるようになります。 2 つのプロンプトとやり方説明を、初心者向けに丁寧に書きました。
+    </p>
+
+    <dl class="meta">
+      <dt>対象</dt>
+      <dd>Figma は触れる人。 Tokens Studio プラグインや Figma MCP は初めて触ってもOK</dd>
+      <dt>準備するもの</dt>
+      <dd>ガイド 01 で作った <code>tokens.json</code> と <code>components.json</code>、 Figma ファイル、 AI ツール</dd>
+      <dt>所要時間</dt>
+      <dd>変数登録は 10〜20 分、部品登録は 1〜2 時間（手動の場合）</dd>
+      <dt>出来上がるもの</dt>
+      <dd>Figma の Local Variables に色・余白・角丸などが登録され、 Components として部品が並んだ状態</dd>
+    </dl>
+
+    <h2>キャンバスとコードを行き来できる状態を作る理由</h2>
+
+    <p>
+      コードで作った design-system がそのまま Figma にもあると、何が嬉しいか。 1 つは「世界が分断されない」こと。 Figma だけ触る同僚と、コードだけ触る同僚が、同じ単位（同じ色名、同じ余白の段階）で会話できるようになります。 2 つ目は「ルールが残る」こと。 Figma 上で「この色は何用？」と毎回聞かなくても、 Variable に role が紐づいているから見れば分かる。 3 つ目は「往復が速くなる」こと。コードで微調整したものを Figma に反映するのも、 Figma で発想したパターンをコードに持ち込むのも、変数として共通化されているとロスが少ない。
+    </p>
+
+    <p>
+      ここで一番伝えたいのは、 Figma を使う理由が「コードと対立するから」ではなく、「両方使える方が表現の幅が広がるから」という発想です。 どちらか片方を選ぶ、ではない。
+    </p>
+
+    <h2>前提：分解ページの出力を持っていること</h2>
+
+    <p>
+      このガイドは、 <a href="/docs/ai-ui-styling-breakdown" target="_blank" rel="noopener">分解ページ生成ガイド（ガイド 01）</a> を先に走らせて、以下 2 つのファイルを手元に持っている前提です。
+    </p>
+
+    <ul>
+      <li><code>tokens.json</code> — 変数（色 / 余白 / 角丸 / 線 / 影 / フォント）の一覧</li>
+      <li><code>components.json</code> — 部品（ボタン・カードなど）の一覧</li>
+    </ul>
+
+    <h3>tokens.json って何が入っているのか</h3>
+
+    <p>
+      ここで初めて出てくる「JSON」という言葉について 1 つだけ。 JSON はデータを「キー」と「値」のセットで書くテキスト形式のことです。 たとえば <code>{ "color": "黒", "size": 14 }</code> のように、中括弧と <code>:</code> で書く、ただのテキスト。 拡張子が <code>.json</code> のファイルになることが多いだけで、中身はメモ帳で開けば普通に読めます。 AI に「結果をこの形で返して」と頼むと、その後の処理（変換とか、別のツールに渡すとか）がぐっと楽になる、 そういう中間データとしてよく使われます。
+    </p>
+
+    <p>
+      ガイド 01 のステップ 1 を走らせると、 AI からこんな形の JSON が返ってきます。これが <code>tokens.json</code> の中身です。 色や余白や角丸の数値が、 name + value + role（役割の 1 行説明）のセットで並んでいる、ただそれだけ。
+    </p>
+
+<pre><code>{
+  "color": {
+    "bg": {
+      "page":    { "value": "#ffffff", "role": "ページ背景" },
+      "primary": { "value": "#18181b", "role": "プライマリーボタン背景" }
+    },
+    "text": {
+      "primary": { "value": "#111111", "role": "本文" },
+      "muted":   { "value": "#71717a", "role": "補足ラベル" }
+    }
+  },
+  "spacing": {
+    "sm": { "value_px": "8",  "role": "小さい余白" },
+    "md": { "value_px": "16", "role": "標準余白" }
+  },
+  "radius": {
+    "full": { "value_px": "9999", "role": "ピル形ボタン" }
+  }
+}</code></pre>
+
+    <h3>components.json って何が入っているのか</h3>
+
+    <p>
+      ガイド 01 のステップ 2 を走らせると、こんな形の JSON が返ってきます。これが <code>components.json</code>。 部品 1 つにつき、名前・説明・variants・使っているトークンの参照名・実例の JSX、がセットになっています。
+    </p>
+
+<pre><code>{
+  "components": [
+    {
+      "name": "Button",
+      "description": "プライマリ操作のボタン",
+      "variants": ["primary", "secondary"],
+      "tokens_used": ["color.bg.primary", "color.text.inverse", "radius.full", "spacing.md"],
+      "example_jsx": "&lt;button className='...'&gt;保存&lt;/button&gt;"
+    },
+    {
+      "name": "Card",
+      "description": "汎用カード",
+      "variants": ["default"],
+      "tokens_used": ["color.bg.card", "radius.lg", "spacing.md"],
+      "example_jsx": "&lt;div className='...'&gt;...&lt;/div&gt;"
+    }
+  ]
+}</code></pre>
+
+    <p>
+      この 2 つの JSON があれば、 Figma に「同じ内容」を持ち込めます。 まだ持っていない場合は先にガイド 01 を走らせてください。何度かやれば「変数を抜き出してもらう作業」がどういうものか体感として分かるはずです。
+    </p>
+
+    <div class="callout">
+      <strong>用語メモ</strong>　 このガイドでは、 ガイド 01 で出てくるこの形式の JSON を、便宜上 <code>tokens.json</code> <code>components.json</code> と呼んでいます。 ファイル名は何でもよくて、 AI から返ってきた中身をそのままコピーして手元に保存しておけば OK。
+    </div>
+
+    <h2>全体フロー、 3 つのスキル</h2>
+
+    <p>
+      これからやるのは 3 つです。 1 つ目は前段のおまけ的な作業、 2 つ目と 3 つ目が本体です。
+    </p>
+
+    <ul>
+      <li><strong>スキル 1：生成した画面を Figma に持ち込む</strong>。 画像として貼るか、 Figma MCP でフレームとしてデータ化するかの 2 択</li>
+      <li><strong>スキル 2：Variables（変数）を Figma に登録する</strong>。 プロンプト 1 を使って <code>tokens.json</code> を Figma Local Variables に</li>
+      <li><strong>スキル 3：Components（部品）を Figma に登録する</strong>。 プロンプト 2 を使って <code>components.json</code> を Figma Components に</li>
+    </ul>
+
+    <h2><span class="step-num">1</span>生成した画面を Figma に持ち込む</h2>
+
+    <p>
+      ここは選択肢が 2 つあります。 ガイド 01 で出来た <code>/design-system</code> ページや、 元になった題材 UI の画面を、 Figma 側に「参考画像として貼る」か、 「Figma のフレームとしてデータ化する」か。 前者は無料で 5 分で済む。 後者は Figma MCP が必要で課金プランが要りますが、 そのあと変数や部品の登録も含めて自動化が効きます。
+    </p>
+
+    <div class="route">
+      <span class="route-label">推奨</span>
+      <h4>ルート A：画像として貼る（無料・参考用）</h4>
+      <p>
+        画面をブラウザで開いてスクショ。 Figma にドラッグ＆ドロップで貼り付けて、 フレーム化して「reference」と名前をつけて横に置いておきます。 これから登録する Variables や Components の参照点になり、 「これと同じ見た目になるか」を後で確認するためのもの。 ポイントは <strong>Figma で作り直そうとしないこと</strong>。 再現を始めるとキリがないので、横に貼っておくだけで十分です。
+      </p>
+    </div>
+
+    <div class="route">
+      <span class="route-label soft">中級者向け</span>
+      <h4>ルート B：Figma MCP で Figma フレームとしてデータ化する</h4>
+      <p>
+        Figma MCP Server を使うと、 コードからそのまま「Figma 上のフレーム」を生成できます (code-to-design)。 ガイド 01 で出来た <code>/design-system</code> ページの React コードを AI に渡して、 「これを Figma フレームとして起こして」と頼むと、 Auto Layout で組まれたフレームがそのまま Figma にできあがる。 画像と違って、 後から要素を選んで色を変えたり、 部品化したりできる状態で入ってくる。
+      </p>
+      <p>
+        ただし <strong>無料プランでは実質使えません</strong>。 Figma Starter (無料) は MCP 呼び出しが月 6 回までという制限があるので、 1 画面分でも足りなくなる。 Professional プラン以上の Dev seat ($12/月) か Full seat ($16/月) が要ります。 そのぶん、 このルートを選ぶとスキル 2・3 の Variables / Components 登録も MCP で続けてできるので、 全工程まとめて自動化したい人向け。
+      </p>
+    </div>
+
+    <p>
+      どちらを選ぶかは、 後ろのスキル 2・3 でルート A（手動 + Tokens Studio）を取るか、 ルート B（Figma MCP）を取るかと連動します。 課金しない人はずっとルート A 側で完結できる。
+    </p>
+
+    <h2><span class="step-num">2</span>Variables を Figma に登録する</h2>
+
+    <p>
+      ここからが 1 つ目のプロンプトを使う作業です。 ガイド 01 で作った <code>tokens.json</code>（色、余白、角丸など）を、 Figma の右パネルにある「Local variables」というところに登録していきます。 Figma Variables は 2023 年あたりから入った機能で、色や数値を「変数」として保存して、複数のオブジェクトから参照できるようにする仕組みです。
+    </p>
+
+    <p>
+      やり方は 2 ルートあります。最初は <strong>ルート A（Tokens Studio）</strong> から試すのが安全です。
+    </p>
+
+    <div class="route">
+      <span class="route-label">推奨</span>
+      <h4>ルート A：Tokens Studio for Figma プラグイン経由</h4>
+      <p>
+        無料の Figma プラグイン「Tokens Studio for Figma」を使って、 JSON を読み込ませる方法です。プラグインに JSON を貼り付けて「Apply to Figma」ボタンを押すと、 Local Variables として一括登録される。 環境構築不要、認証も不要、 Figma 無料プランでも動きます。 デメリットは外部プラグインに依存することくらい。
+      </p>
+    </div>
+
+    <div class="route">
+      <span class="route-label soft">中級者向け</span>
+      <h4>ルート B：Figma MCP 経由で AI に直接登録させる</h4>
+      <p>
+        Figma MCP Server（Figma 公式の Model Context Protocol サーバー）が立ち上がっている前提で、 AI に「この tokens.json を Figma の Local Variables として登録して」と頼む方法。 環境構築が要りますが、一度動けば JSON 変換も不要で全自動。
+      </p>
+    </div>
+
+    <h3>プロンプト 1：tokens.json → Tokens Studio 用 JSON 変換</h3>
+
+    <p>
+      ルート A で使うプロンプトです。 ガイド 01 で出てきた <code>tokens.json</code>（上で例を見せたあの形）を、 Tokens Studio for Figma が読み込める JSON 形式（W3C Design Tokens spec ベース）に変換してもらいます。 Tokens Studio は独自の形式を持っていて、 そのままでは読み込めないので、 1 度変換が要る、という話です。
+    </p>
+
+<pre><code>あなたの役割: design system エンジニアとして、 入力の tokens.json を Tokens Studio for Figma が読み込める JSON 形式に変換する。
+
+# 入力
+
+## tokens.json (分解ページ生成のステップ1 出力)
+[ここに貼る]
+
+# タスク
+
+入力 tokens を Tokens Studio for Figma の JSON フォーマット に変換する。
+
+## 変換ルール
+
+- 全 token は { "value": "&lt;値&gt;", "type": "&lt;タイプ&gt;", "description": "&lt;役割&gt;" } 形式
+- BONO 形式の role フィールドは description にマップする
+- 1 つの集合 (例: color.bg) を 1 階層に展開する。 入力の name がそのまま Tokens Studio の key になる
+- Tokens Studio の type は以下にマップ:
+  - 色 → color (value は #rrggbb 形式)
+  - spacing → spacing (value は "8" のように数値文字列)
+  - radius → borderRadius (value は数値文字列)
+  - ring → border (value は { "color", "width", "style": "solid" } のオブジェクト)
+  - shadow → boxShadow (value は { "x", "y", "blur", "spread", "color", "type" } の配列)
+  - typography → typography (value は { "fontFamily", "fontWeight", "fontSize", "lineHeight" } のオブジェクト)
+- 全体を "global" セットの下に配置する
+
+## 出力スキーマ
+
+{
+  "global": {
+    "color": {
+      "bg": {
+        "page": { "value": "#ffffff", "type": "color", "description": "ページ背景" }
+      },
+      "fg":   { ... },
+      "text": { ... }
+    },
+    "spacing":      { "&lt;key&gt;": { "value": "&lt;number&gt;", "type": "spacing",      "description": "&lt;役割&gt;" } },
+    "borderRadius": { "&lt;key&gt;": { "value": "&lt;number&gt;", "type": "borderRadius", "description": "&lt;役割&gt;" } },
+    "border":     { "&lt;key&gt;": { "value": { "color": "...", "width": "...", "style": "solid" }, "type": "border", "description": "&lt;役割&gt;" } },
+    "boxShadow":  { "&lt;key&gt;": { "value": [{ "x": "0", "y": "1", "blur": "2", "spread": "0", "color": "rgba(0,0,0,0.05)", "type": "dropShadow" }], "type": "boxShadow", "description": "&lt;役割&gt;" } },
+    "typography": { "&lt;key&gt;": { "value": { "fontFamily": "Inter", "fontWeight": "400", "fontSize": "14", "lineHeight": "20" }, "type": "typography", "description": "&lt;役割&gt;" } }
+  }
+}
+
+# 出力フォーマット
+
+```json ブロックの JSON のみ。 説明文や前置きは書かない。</code></pre>
+
+    <h3>使う手順（ルート A）</h3>
+
+    <ol>
+      <li>上のプロンプトを Claude や GPT に送って、 Tokens Studio 用 JSON を得る</li>
+      <li>Figma で「Tokens Studio for Figma」プラグインを起動（インストール済みでない場合はまず Community からインストール）</li>
+      <li>プラグインの <code>Tools</code> → <code>Import</code> から、取得した JSON を貼り付け</li>
+      <li>プラグインの <code>Apply to Figma</code> ボタンを押す</li>
+      <li>Figma の右パネル <code>Local variables</code> に色・余白・角丸などが全部登録される</li>
+    </ol>
+
+    <h3>使う手順（ルート B：Figma MCP）</h3>
+
+    <p>
+      Figma MCP Server が動いている前提で、 AI（Claude Code など）に以下のように頼みます。
+    </p>
+
+<pre><code>この tokens.json を Figma MCP 経由で、 開いている Figma ファイルの Local Variables として登録してください。
+
+- 各カテゴリ (color / spacing / radius / shadow / typography) を Variable Collection に分ける
+- 各 token の name と value をそのまま登録
+- role を description として残す
+- 重複は統合</code></pre>
+
+    <p>
+      MCP の認証が通っていれば、 AI が自動で Figma に書き込んでくれます。
+    </p>
+
+    <h2><span class="step-num">3</span>Components を Figma に登録する</h2>
+
+    <p>
+      最後のステップは、 ガイド 01 で作った <code>components.json</code> をもとに、 Figma 上に Components を作っていく作業です。 ボタン、カード、入力欄、こういう部品を、 Figma の Component として登録すると、ファイル中で何度でも使い回せて、デザインに一貫性が出る。
+    </p>
+
+    <p>
+      こちらも 2 ルートあります。 初学者には <strong>ルート A（手動 + AI が仕様書を書く）</strong> をおすすめします。 手で作る過程で Figma の基本操作（Auto Layout、Variants、Properties）が身につくし、結果に責任を持てるからです。
+    </p>
+
+    <div class="route">
+      <span class="route-label">推奨</span>
+      <h4>ルート A：手動登録 + 「Figma 構造仕様書」を AI に書いてもらう</h4>
+      <p>
+        AI に <code>components.json</code> と <code>tokens.json</code> を渡して、 各部品の「Figma で手動作成するための完全な仕様書」を書いてもらいます。 そこには、フレーム階層、 Auto Layout 設定、トークン適用、 Variants 定義、作成手順が全部書かれている。 これを見ながら Figma で 1 つずつ作る。 5〜15 個の部品なら 1〜2 時間くらい。
+      </p>
+    </div>
+
+    <div class="route">
+      <span class="route-label soft">中級者向け</span>
+      <h4>ルート B：Figma MCP 経由で AI に直接 Component を作らせる</h4>
+      <p>
+        AI に <code>components.json</code> と先に登録した Variables を参照させて、 Figma 上で直接 Component を生成させます。 自動化されて速い反面、 Auto Layout や Variant の精度がブレることがあり、後で手直しが要ることも。
+      </p>
+    </div>
+
+    <h3>プロンプト 2：components.json → Figma 構造仕様書</h3>
+
+    <p>
+      ルート A で使うプロンプトです。 各 component を Figma 上で手作りするための、フレーム階層・Auto Layout 設定・トークン適用・Variants 定義・作成手順がセットになった仕様書を AI に書いてもらいます。
+    </p>
+
+<pre><code>あなたの役割: Figma 上で reusable な component を作るための 構造仕様書 を書く Figma エキスパート。
+
+# 入力
+
+## components.json (分解ページ生成のステップ2 出力)
+[ここに貼る]
+
+## tokens.json (分解ページ生成のステップ1 出力、 Variable 名参照用)
+[ここに貼る]
+
+# タスク
+
+各 component について、 Figma で手動作成するための完全な仕様書 を作る。Figma 経験者なら見ながら 1 個 5〜15 分で作れるレベルで詳細に書く。
+
+## 各 component の仕様に含めるもの
+
+1. コンポーネント名 — 入力 JSON の name をそのまま使う
+2. フレーム構造 — どのフレームの中にどの要素が入るか、 階層図で示す
+3. Auto Layout 設定 — 各フレームに対して以下を指定:
+   - direction (Horizontal / Vertical)
+   - alignment (Top-left / Center 等)
+   - spacing (Variables 参照、 例: spacing.sm)
+   - padding (Variables 参照、 例: spacing.md)
+   - resizing (Hug / Fill / Fixed)
+4. トークン適用 — 各要素にどの Variable を割り当てるか:
+   - 背景色 → color.bg.xxx
+   - テキスト色 → color.text.xxx
+   - 角丸 → radius.xxx
+   - 線 → ring.xxx
+   - フォント → typography.xxx
+5. Variants 定義 — Component Property として何を作るか:
+   - Property 名と型 (Variant / Boolean / Text / Instance Swap)
+   - 各 Variant の値（例: state = default | hover | pressed）
+6. 作成順 — 「まず default を作って、 ⌥⌘K で Component 化、 右パネルから Variant を追加」のような手順
+
+## 出力フォーマット
+
+各 component を以下のテンプレで出力:
+
+### Component N: &lt;名前&gt;
+
+1 行説明: &lt;description&gt;
+
+Variants: &lt;variants 一覧&gt;
+
+フレーム構造:
+Component (Auto Layout: Horizontal, gap=spacing.sm, padding=spacing.md)
+├─ Icon (24x24, Hug)
+└─ Label (Text, color=color.text.primary, font=typography.body)
+
+各要素のトークン:
+- ルートフレーム: bg=color.bg.primary, radius=radius.full, ring=none
+- Label: color=color.text.inverse, font=typography.body
+
+Variants 設定:
+- Property: state (Variant)
+- 値: default / hover / pressed
+- それぞれの違い: hover で bg を color.bg.primary-hover に切り替え
+
+Figma 作成手順:
+1. フレームを 1 つ作って Auto Layout 適用 (右パネル → Auto layout)
+2. 中に Icon (Frame 24x24) と Label (Text) を入れる
+3. ルートフレームに上記トークンを割り当て (右クリック → Apply variable)
+4. フレームを選択して ⌥⌘K で Component 化
+5. 右パネル → Properties → + → Variant を追加して state を作る
+6. default を複製して hover / pressed の見た目を作る
+
+# ルール
+
+- 入力の component が 5〜15 個あるはず。 全部について上記フォーマットで出力する
+- Variables の参照名は tokens.json の path 形式 (color.bg.primary 等) を使う
+- Figma の右パネル名は実際の英語ラベルで書く (Auto layout / Hug / Fill / Apply variable 等)</code></pre>
+
+    <h3>使う手順（ルート A）</h3>
+
+    <ol>
+      <li>上のプロンプトを Claude や GPT に送って、各 component の仕様書を得る</li>
+      <li>Figma の Variables が登録済み（スキル 2 で完了）の状態で、ファイルを開く</li>
+      <li>仕様書を見ながら、 1 コンポーネントずつ Figma で作る</li>
+      <li>全部できたら左パネル「Assets」タブで一覧表示してチェック</li>
+    </ol>
+
+    <h3>使う手順（ルート B：Figma MCP）</h3>
+
+<pre><code>この components.json と tokens.json を使って、 Figma MCP 経由で、 開いている Figma ファイルに Components として登録してください。
+
+- 各 component は Auto Layout で組む
+- トークンは先に登録した Local Variables を参照する
+- Variants はプロパティとして定義する
+- 1 つずつ作ったら確認できるよう、 作成完了ごとにレポートする</code></pre>
+
+    <p>
+      AI が Figma 上に直接 Component を作ってくれます。 出来上がったものを目視で確認、必要なら手直し。
+    </p>
+
+    <h2>どちらのルートが向くか</h2>
+
+    <p>
+      両方のルートを併記しましたが、 初学者向けにはルート A（Tokens Studio + 手動コンポーネント作成）を基本にして、 ルート B（Figma MCP）を「課金プランがあるなら試す upgrade パス」として紹介するのが現実的です。
+    </p>
+
+    <p>
+      理由は 3 つあります。 1 つ目、 <strong>料金面</strong>。 Figma MCP は MCP サーバー自体は無料で配布されていますが、 Figma 側のアカウントが無料 Starter プランだと MCP 呼び出しが月 6 回までしかできず、 1 画面分の登録でも足りなくなる。 実用するには Professional プラン以上の Dev seat ($12/月) か Full seat ($16/月) が要ります（Enterprise までは不要）。 2 つ目、 ルート A は無料 Figma プランでも完結する。 3 つ目、 手動でコンポーネントを 1 つずつ作る過程で、 Auto Layout や Variant の仕組みが身につくので、 教育的価値が高い。
+    </p>
+
+    <p>
+      課金していて時間を節約したい人はルート B で MCP に任せる。 無料で完結させたい人や Figma の構造を体で覚えたい人はルート A。 慣れてきたらルート B に進めばいい。 まず手で作って、 構造が頭に入った上で AI に任せる方が、 AI が出した結果の良し悪しを判断できるようになります。
+    </p>
+
+    <h2>出来上がったあとに、 Figma ファイルを眺める</h2>
+
+    <p>
+      Variables と Components が両方登録できたら、 Figma の右パネル <code>Local variables</code> と、左パネル <code>Assets</code> タブを眺めてみてください。コードで作った <code>/design-system</code> ページと、 Figma 上の variables / assets を見比べると、「同じものが両方の世界に存在している」状態が見えるはずです。
+    </p>
+
+    <p>
+      この状態が、最初に言った「世界が分断されない」という意味です。 ここから新しい画面を Figma で作ろうとすると、自然と Variables や Components を呼び出すクセがつき、ばらつきのないデザインができるようになります。 逆に、コードで新しい部品を増やすと、その変更を同じやり方で Figma に持ち込めます。
+    </p>
+
+    <hr class="divider">
+
+    <div class="footer">
+      <p><strong>関連ガイド</strong></p>
+      <p><a href="/docs/ai-ui-styling-breakdown" target="_blank" rel="noopener">ガイド 01：UI を変数と部品に分解する（design-system 生成）</a> — ここで作る <code>tokens.json</code> と <code>components.json</code> がこのガイドの入口になります。</p>
+      <p>ガイド 02：ダメ UI → 良い UI の 4 段階変換 playground を作る（transform-lab 生成） — ガイド 01 の出力をもう一方の方向に使うパターン。</p>
+      <p>このガイドは BONO の AIUI スタイリングカリキュラムの一部として作成。</p>
+    </div>
+
+  </main>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" aria-label="閉じる" type="button">×</button>
+    <img src="" alt="">
+  </div>
+
+  <script>
+    (function () {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = lightbox.querySelector('img');
+      const closeBtn = lightbox.querySelector('.lightbox-close');
+
+      function openLightbox(src, alt) {
+        lightboxImg.src = src;
+        lightboxImg.alt = alt || '';
+        lightbox.classList.add('active');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeLightbox() {
+        lightbox.classList.remove('active');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        lightboxImg.src = '';
+      }
+
+      document.querySelectorAll('.figure img').forEach(function (img) {
+        img.addEventListener('click', function () {
+          openLightbox(img.src, img.alt);
+        });
+      });
+
+      lightbox.addEventListener('click', function (e) {
+        if (e.target === lightbox || e.target === lightboxImg || e.target === closeBtn) {
+          closeLightbox();
+        }
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && lightbox.classList.contains('active')) {
+          closeLightbox();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 860" font-family="'Hiragino Kaku Gothic ProN','Hiragino Sans','Noto Sans JP',sans-serif">
+  <!-- 伝えたいこと：機能ではなく「ユーザーの状態の変化」を作る。アイデアはゴールの状態から発想し、プロトタイプは状態に近づくかを確かめる道具 -->
+  <defs>
+    <linearGradient id="flow" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2876DC"/>
+      <stop offset="1" stop-color="#FF98DD"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="860" fill="#FFFFFF"/>
+
+  <!-- 今の状態（Before） -->
+  <rect x="90" y="80" width="430" height="210" rx="20" fill="#F4F4F1" stroke="#C3C5BB" stroke-width="2"/>
+  <text x="130" y="130" font-size="22" font-weight="bold" fill="#677470">今の状態</text>
+  <text x="130" y="172" font-size="23" fill="#354540">30代・在宅勤務の彼</text>
+  <text x="130" y="208" font-size="23" fill="#354540">「月末に明細見たら4万円超え…</text>
+  <text x="130" y="244" font-size="23" fill="#354540">　買ってる時は気づかない」</text>
+
+  <!-- Before → After の矢印 -->
+  <line x1="530" y1="185" x2="580" y2="185" stroke="#C3C5BB" stroke-width="8" stroke-linecap="round"/>
+  <polygon points="580,170 606,185 580,200" fill="#C3C5BB"/>
+
+  <!-- キャプション -->
+  <text x="350" y="345" text-anchor="middle" font-size="24" font-weight="bold" fill="#021710">この“状態の変化”をつくるのがデザイン</text>
+
+  <!-- なりたい状態（After）＝図のハブ。一番目立たせる -->
+  <rect x="620" y="60" width="560" height="240" rx="24" fill="#FFFFFF" stroke="url(#flow)" stroke-width="6"/>
+  <rect x="656" y="92" width="120" height="40" rx="20" fill="url(#flow)"/>
+  <text x="716" y="119" text-anchor="middle" font-size="20" font-weight="bold" fill="#FFFFFF">GOAL</text>
+  <text x="796" y="120" font-size="22" font-weight="bold" fill="#677470">なりたい状態</text>
+  <text x="656" y="184" font-size="32" font-weight="bold" fill="#021710">気になるジャンルの出費に</text>
+  <text x="656" y="232" font-size="32" font-weight="bold" fill="#021710">自分で気づけて、立て直せる</text>
+  <!-- 旗アイコン -->
+  <g stroke="#021710" stroke-width="4.5" fill="none" stroke-linecap="round">
+    <line x1="1108" y1="180" x2="1108" y2="264"/>
+  </g>
+  <polygon points="1108,180 1150,194 1108,208" fill="#FF98DD" stroke="#021710" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- ゴールから発想する（下向き矢印×3） -->
+  <text x="648" y="372" text-anchor="end" font-size="24" font-weight="bold" fill="#2876DC">ここから発想する</text>
+  <g stroke-width="7" stroke-linecap="round">
+    <line x1="700" y1="308" x2="700" y2="400" stroke="#4A7BDA"/>
+    <line x1="900" y1="308" x2="900" y2="400" stroke="#9487DB"/>
+    <line x1="1100" y1="308" x2="1100" y2="400" stroke="#DE93DC"/>
+  </g>
+  <polygon points="686,400 700,426 714,400" fill="#4A7BDA"/>
+  <polygon points="886,400 900,426 914,400" fill="#9487DB"/>
+  <polygon points="1086,400 1100,426 1114,400" fill="#DE93DC"/>
+
+  <!-- アイデア＝手段の候補（点線＝仮のもの） -->
+  <g fill="#FFFFFF" stroke="#C3C5BB" stroke-width="2.5" stroke-dasharray="10 8">
+    <rect x="590" y="436" width="220" height="80" rx="40"/>
+    <rect x="790" y="436" width="220" height="80" rx="40"/>
+    <rect x="990" y="436" width="220" height="80" rx="40"/>
+  </g>
+  <text x="700" y="487" text-anchor="middle" font-size="25" fill="#354540">通知…？</text>
+  <text x="900" y="487" text-anchor="middle" font-size="25" fill="#354540">見せ方…？</text>
+  <text x="1100" y="487" text-anchor="middle" font-size="25" fill="#354540">入力の体験…？</text>
+
+  <!-- 機能が目的ではない注記 -->
+  <g stroke="#918C7E" stroke-width="7" stroke-linecap="round">
+    <line x1="120" y1="462" x2="152" y2="494"/>
+    <line x1="152" y1="462" x2="120" y2="494"/>
+  </g>
+  <text x="180" y="487" font-size="23" fill="#918C7E">機能を作ること自体が目的ではない</text>
+
+  <!-- アイデア → プロトタイプ（収束） -->
+  <g stroke="#C3C5BB" stroke-width="6" stroke-linecap="round" fill="none">
+    <path d="M 700 516 C 700 560 830 570 866 596"/>
+    <line x1="900" y1="516" x2="900" y2="596"/>
+    <path d="M 1100 516 C 1100 560 970 570 934 596"/>
+  </g>
+  <polygon points="886,594 900,620 914,594" fill="#C3C5BB"/>
+  <text x="990" y="575" font-size="22" fill="#677470">触れる形にする</text>
+
+  <!-- プロトタイプ -->
+  <rect x="750" y="628" width="300" height="160" rx="20" fill="#FFFFFF" stroke="#D4D6CC" stroke-width="2.5"/>
+  <g stroke="#021710" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="782" y="668" width="52" height="86" rx="10"/>
+    <line x1="796" y1="738" x2="820" y2="738"/>
+    <line x1="794" y1="690" x2="822" y2="690"/>
+    <line x1="794" y1="708" x2="822" y2="708"/>
+  </g>
+  <text x="948" y="720" text-anchor="middle" font-size="29" font-weight="bold" fill="#021710">プロトタイプ</text>
+
+  <!-- プロトタイプ → なりたい状態へ戻る（状態に照らして確かめる） -->
+  <path d="M 1060 708 C 1420 708 1440 320 1204 190" fill="none" stroke="url(#flow)" stroke-width="9" stroke-linecap="round"/>
+  <polygon points="1214,214 1188,180 1230,182" fill="#2876DC"/>
+  <text x="1382" y="452" text-anchor="middle" font-size="25" font-weight="bold" fill="#021710" stroke="#FFFFFF" stroke-width="10" paint-order="stroke">この状態に</text>
+  <text x="1382" y="488" text-anchor="middle" font-size="25" font-weight="bold" fill="#021710" stroke="#FFFFFF" stroke-width="10" paint-order="stroke">近づけた？</text>
+</svg>
