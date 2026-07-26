@@ -45,6 +45,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.bo-no.design",
       },
+      {
+        protocol: "https",
+        hostname: "*.st-note.com",
+      },
     ],
   },
 };
