@@ -54,8 +54,6 @@ const buttonVariants = cva(
         action: "px-[12px] py-[8px] text-[14px] leading-[20px] rounded-xl",
         // 大CTA（ログイン・レッスン詳細等）
         large: "h-12 px-7 py-3.5 rounded-[16px]",
-        medium: "h-10 px-5 py-2.5 rounded-[12px]",
-        small: "h-8 px-3.5 py-1.5 rounded-[10px] text-xs",
         // 新トップページ Hero用（メンバーになってはじめる／ロードマップへ）
         "top-cta": "h-9 px-6 rounded-[14px] text-sm font-bold tracking-[0.35px]",
         // 新トップページ カード用（詳しく見る／詳細を見る）。
