@@ -45,7 +45,7 @@ export async function generateMetadata({
     title: `${guide.title} | ガイド`,
     description: guide.description,
     openGraph: {
-      title: `${guide.title} | ガイド | BONO`,
+      title: `${guide.title} | ガイド`,
       description: guide.description,
       type: "article",
       ...(ogImages.length > 0 && { images: ogImages }),
@@ -54,7 +54,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${guide.title} | ガイド | BONO`,
+      title: `${guide.title} | ガイド`,
       description: guide.description,
       ...(guide.thumbnailUrl && { images: [guide.thumbnailUrl] }),
     },

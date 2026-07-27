@@ -55,12 +55,12 @@ export async function generateMetadata({
     title: roadmap.title,
     description: roadmap.description,
     openGraph: {
-      title: `${roadmap.title} | BONO`,
+      title: `${roadmap.title}`,
       description: roadmap.description,
       ...(roadmap.thumbnailUrl && { images: [{ url: roadmap.thumbnailUrl }] }),
     },
     twitter: {
-      title: `${roadmap.title} | BONO`,
+      title: `${roadmap.title}`,
       description: roadmap.description,
     },
     alternates: { canonical: `/roadmap/${slug}` },

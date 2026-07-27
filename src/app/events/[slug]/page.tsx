@@ -22,10 +22,10 @@ export async function generateMetadata({
   }
 
   return {
-    title: `${event.title} | イベント | BONO`,
+    title: `${event.title} | イベント`,
     description: event.summary || `${event.title}の詳細`,
     openGraph: {
-      title: `${event.title} | イベント | BONO`,
+      title: `${event.title} | イベント`,
       description: event.summary || `${event.title}の詳細`,
     },
   };

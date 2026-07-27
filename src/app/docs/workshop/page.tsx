@@ -10,7 +10,7 @@ import { WS_THEME } from "@/components/workshop/theme";
 export const dynamic = "force-static";
 
 export const metadata: Metadata = {
-  title: `${WORKSHOP_META.title} | BONO`,
+  title: `${WORKSHOP_META.title}`,
   description: WORKSHOP_META.description,
   robots: { index: false }, // テスト運用中のため noindex
 };

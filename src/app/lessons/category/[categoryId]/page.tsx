@@ -28,11 +28,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${section.label} - レッスン一覧`,
     description: `${section.label}カテゴリのレッスン一覧。`,
     openGraph: {
-      title: `${section.label} - レッスン一覧 | BONO`,
+      title: `${section.label} - レッスン一覧`,
       description: `${section.label}カテゴリのレッスン一覧。`,
     },
     twitter: {
-      title: `${section.label} - レッスン一覧 | BONO`,
+      title: `${section.label} - レッスン一覧`,
       description: `${section.label}カテゴリのレッスン一覧。`,
     },
     alternates: { canonical: `/lessons/category/${categoryId}` },

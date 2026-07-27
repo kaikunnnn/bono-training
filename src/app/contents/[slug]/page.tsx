@@ -42,8 +42,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const title = article.lessonTitle
-    ? `${article.title} | ${article.lessonTitle} | BONO`
-    : `${article.title} | BONO`;
+    ? `${article.title} | ${article.lessonTitle}`
+    : `${article.title}`;
   const description = article.excerpt || `${article.title}の学習コンテンツ`;
 
   // サイト移行 Week1 / SEO止血:

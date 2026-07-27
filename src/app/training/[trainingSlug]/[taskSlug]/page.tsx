@@ -22,10 +22,10 @@ export async function generateMetadata({
     const task = await getTrainingTaskDetail(trainingSlug, taskSlug);
 
     return {
-      title: `${task.title} | トレーニング | BONO`,
+      title: `${task.title} | トレーニング`,
       description: task.description || `${task.trainingTitle}のタスク`,
       openGraph: {
-        title: `${task.title} | トレーニング | BONO`,
+        title: `${task.title} | トレーニング`,
         description: task.description || `${task.trainingTitle}のタスク`,
       },
     };

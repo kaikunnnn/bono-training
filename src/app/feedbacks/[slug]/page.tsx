@@ -38,11 +38,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${feedback.title} | フィードバック`,
     description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     openGraph: {
-      title: `${feedback.title} | フィードバック | BONO`,
+      title: `${feedback.title} | フィードバック`,
       description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     },
     twitter: {
-      title: `${feedback.title} | フィードバック | BONO`,
+      title: `${feedback.title} | フィードバック`,
       description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     },
     alternates: { canonical: `/feedbacks/${slug}` },
