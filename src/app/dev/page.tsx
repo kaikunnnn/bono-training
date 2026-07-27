@@ -56,19 +56,11 @@ const projects: DevProjectEntry[] = [
     status: "in-progress",
   },
   {
-    href: "/dev/top5",
+    href: "/dev/top6",
     issue: "TOP-2026",
-    title: "新トップページ v5（Figma Make移植版）",
+    title: "新トップページ 背景白パターン（top6）",
     summary:
-      "Figma Make でスタイル調整済みの HANDOFF を、top-next の atoms/molecules/organisms で組み上げた版。余白・ボーダー・背景は HANDOFF のスペーシング表に準拠。実データは v3 を再利用。",
-    status: "in-progress",
-  },
-  {
-    href: "/dev/top5/components",
-    issue: "TOP-2026",
-    title: "v5 コンポーネント確認（Showcase）",
-    summary:
-      "top-next の Atoms/Molecules をダミーデータで個別に確認するページ。ページ全体のレイアウトではなく、各コンポーネント単体のスタイルをチェックする用途。",
+      "本番トップ `/` に採用した新トップ構成の、背景色/サイドバー境界線パターン違い版。`/` はこの構成（旧 v5）を昇格したもの。比較検証用に /dev に残置。",
     status: "in-progress",
   },
   {

@@ -79,8 +79,10 @@ export function Layout({ children, className, user }: LayoutProps) {
   // /dev/top6: 背景白 + サイドバー右端に薄いボーダーのパターン確認用（このページのみの見た目差分）
   const isTop6 = pathname?.startsWith("/dev/top6") ?? false;
   const isTop5 = pathname?.startsWith("/dev/top5") ?? false;
-  // /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にするパターン確認用
-  const isHalfGradient = isTop5 || isTop6;
+  // 本番トップ `/`（新トップ = 旧 /dev/top5 の構成）
+  const isHome = pathname === "/";
+  // `/`, /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にする（新トップの見た目）
+  const isHalfGradient = isHome || isTop5 || isTop6;
 
   return (
     <div className={cn("min-h-screen flex relative", isTop6 ? "bg-white" : "bg-base", className)}>
