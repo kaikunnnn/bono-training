@@ -129,23 +129,12 @@ export default async function DevTop5Page() {
     },
   ];
 
-  // みんなの掲示板は Sanity の mixed feed に含まれない（一覧取得の仕組みが無い）ため、
-  // あたらしいコンテンツ欄の先頭に手動カードとして差し込む。サムネは掲示板用の固定画像。
-  const boardCard = {
-    category: "みんなの掲示板",
-    title: "デザインの疑問や相談をメンバーと共有しよう",
-    href: "/questions",
-    image: "/images/top5/thumbnail-keijiban.jpg",
-  };
-  const newContentArticles = [
-    boardCard,
-    ...newContentItems.map((item) => ({
-      category: item.type,
-      title: item.title,
-      href: item.href,
-      image: item.thumbnail || undefined,
-    })),
-  ];
+  const newContentArticles = newContentItems.map((item) => ({
+    category: item.type,
+    title: item.title,
+    href: item.href,
+    image: item.thumbnail || undefined,
+  }));
 
   return (
     <>

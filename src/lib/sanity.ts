@@ -1625,7 +1625,9 @@ export async function getLatestMixedContent(
     ...questions.slice(0, limit).map((q) => ({
       type: "掲示板",
       title: q.title,
-      thumbnail: "",
+      // 掲示板スレッドは個別サムネを持たないため、みんなの掲示板ページの
+      // OGP画像を共通サムネとして使う（/questions のトップと同じビジュアル）
+      thumbnail: "/images/questions-og.jpg",
       href: `/questions/${q.slug}`,
       publishedAt: q.publishedAt ?? "",
     })),
