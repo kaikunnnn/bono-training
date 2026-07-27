@@ -88,11 +88,12 @@ export default function DarkArticleItem({
         </p>
         <span
           className={cn(
-            buttonVariants({ variant: "dark-outline", size: "small" }),
-            // size="small" の rounded-[10px] が twMerge で dark-outline の
+            buttonVariants({ variant: "dark-outline", size: "sm" }),
+            // size="sm" の rounded-[10px] が twMerge で dark-outline の
             // rounded-full を上書きしてしまうため、pill形状とFigma実測の
-            // px-21px/py-1px/tracking-0.6pxを明示的に後勝ちさせる
-            "w-fit rounded-full px-[21px] py-px tracking-[0.6px]"
+            // px-21px/py-1px/tracking-0.6px、旧 size="small" が持っていた
+            // text-xs を明示的に後勝ちさせる
+            "w-fit rounded-full px-[21px] py-px tracking-[0.6px] text-xs"
           )}
         >
           {ctaLabel}

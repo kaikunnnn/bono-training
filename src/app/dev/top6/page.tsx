@@ -19,27 +19,21 @@ import {
 import { getSubscriptionStatus } from "@/lib/subscription";
 
 /**
- * /dev/top5 — Figma Make 移植版
+ * /dev/top6 — top5の背景・サイドバー境界線パターン違い版
  *
- * Figma Make の HANDOFF（デザイン確認・スタイル調整済み）を、Phase 1 で作成した
- * top-next の atoms/molecules と Phase 2 の organisms で組み上げた版。
- * 余白・ボーダー・背景は HANDOFF のスペーシング表に準拠。
- *
- * データ（レッスン・みんなの実績・あたらしいコンテンツ）は /dev/top3 と同じ
- * 実データを再利用。organisms は presentational に保ち、取得はここで行う。
- *
- * ラッパー <main> は付けない（root layout の Layout が既にサイドバーオフセットと
- * モバイルTopBarオフセットを付与しているため、HANDOFF の margin/padding は不要）。
+ * top5をそのままコピーし、page.tsx側のコンテンツ・データ取得は変更していない。
+ * 差分は Layout.tsx 側の pathname 分岐（このページのみ背景を白に、
+ * サイドバー右端に薄いボーダーを追加）のみ。
  *
  * /dev 配下なので本番では 404（dev/layout.tsx でゲート）。
  */
 
 export const metadata: Metadata = {
-  title: "Figma Make移植版 (/dev/top5)",
+  title: "背景白パターン (/dev/top6)",
   robots: { index: false, follow: false },
 };
 
-export default async function DevTop5Page() {
+export default async function DevTop6Page() {
   const [
     allLessons,
     achievementGroups,

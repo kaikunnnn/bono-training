@@ -7,10 +7,6 @@ import Link from "next/link";
 export function DevNav({ current }: { current: "page" | "components" }) {
   return (
     <div className="sticky top-0 z-50 flex items-center gap-4 border-b border-black/10 bg-white/90 px-4 py-2 backdrop-blur">
-      <Link href="/dev" className="font-mono text-xs text-gray-500 hover:underline">
-        ← /dev
-      </Link>
-      <span className="text-gray-300">|</span>
       <Link
         href="/dev/top5"
         className={`font-mono text-xs hover:underline ${

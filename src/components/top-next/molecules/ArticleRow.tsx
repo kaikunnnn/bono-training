@@ -35,7 +35,7 @@ export function ArticleRow({ image, category, title, href }: ArticleRowProps) {
         <p className="font-noto-sans-jp text-xs font-medium leading-[24px] text-text-primary/[0.56]">
           {category}
         </p>
-        <h3 className="font-noto-sans-jp text-base font-medium leading-[24px] text-text-primary group-hover:underline">
+        <h3 className="font-noto-sans-jp text-sm font-medium leading-[24px] text-text-primary group-hover:underline">
           {title}
         </h3>
       </div>

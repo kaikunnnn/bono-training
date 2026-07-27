@@ -24,12 +24,16 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // /subscription は含めない: プラン紹介ページは未ログインでも見せる（権限モーダルの
 // 「メンバー登録へ」の遷移先）。決済ボタン押下時は PlanCard 側が /login へ誘導する
+//
+// /feedback-apply, /feedback-apply/guide も含めない: フィードバック説明・応募案内ページは
+// 未ログインでも見せる（プラン紹介ページと同じ理由）。実際の応募フォームである
+// /feedback-apply/submit のみ保護する（page 側でも reauth=1 付きで /login へ誘導している）
 const PROTECTED_PATH_PREFIXES = [
   "/mypage",
   "/account",
   "/profile",
   "/settings",
-  "/feedback-apply",
+  "/feedback-apply/submit",
 ];
 
 const AUTH_PAGE_PATHS = ["/login", "/signup"];
@@ -97,7 +101,7 @@ export const config = {
     "/account/:path*",
     "/profile/:path*",
     "/settings/:path*",
-    "/feedback-apply/:path*",
+    "/feedback-apply/submit",
     "/login",
     "/signup",
   ],
