@@ -5,6 +5,7 @@ import { client as getClient } from "@/lib/sanity";
 import { revalidatePath } from "next/cache";
 import type { Question, QuestionCategory } from "@/types/sanity";
 import { adjustBoardUserStats } from "@/lib/questions/board-user-stats";
+import { createNotification } from "@/lib/services/notifications-create";
 
 // ============================================
 // 型定義
@@ -439,6 +440,59 @@ async function sendCommentSlackNotification(data: {
   }
 }
 
+/**
+ * 質問へのコメント投稿を、その質問の投稿主へサイト内通知する（#160 S1・ベストエフォート）。
+ *
+ * 宛先（投稿主 userId）は質問本体（Sanity）にしか無いため、ここで軽く GROQ を投げて解決する。
+ * author.userId が欠けている質問は通知を skip + console.error のみ（クラッシュ・投稿失敗にしない）。
+ * createNotification 側で自己通知抑止・未読重複抑止を行う。
+ */
+async function notifyQuestionAuthorOfComment(input: {
+  questionId: string;
+  questionSlug: string;
+  actorId: string;
+  actorName: string;
+  actorAvatarUrl: string | null;
+  content: string;
+}) {
+  try {
+    const question = await getClient().fetch<{
+      author?: { userId?: string };
+      title?: string;
+    } | null>(
+      `*[_type == "question" && _id == $id][0]{ title, author }`,
+      { id: input.questionId },
+    );
+
+    const recipientId = question?.author?.userId;
+    if (!recipientId) {
+      // 過去/インポート質問で author.userId が欠けているケース。通知は諦め、投稿処理は続行。
+      console.error(
+        "[notifyQuestionAuthorOfComment] missing author.userId for question",
+        input.questionId,
+      );
+      return;
+    }
+
+    await createNotification({
+      recipientId,
+      actorId: input.actorId,
+      actorName: input.actorName,
+      actorAvatarUrl: input.actorAvatarUrl,
+      type: "question_comment",
+      entityType: "question",
+      entityId: input.questionId,
+      linkUrl: `/questions/${input.questionSlug}`,
+      payload: {
+        questionTitle: question?.title ?? null,
+        preview: truncateForPreview(input.content, 140),
+      },
+    });
+  } catch (error) {
+    console.error("[notifyQuestionAuthorOfComment] threw:", error);
+  }
+}
+
 export async function addComment(input: {
   questionId: string;
   questionSlug: string;
@@ -501,6 +555,16 @@ export async function addComment(input: {
     authorName,
     content: validated.content,
     imageUrl: input.imageUrl,
+  });
+
+  // 質問の投稿主へサイト内通知（#160・ベストエフォート。失敗してもコメント投稿は成功させる）
+  await notifyQuestionAuthorOfComment({
+    questionId: input.questionId,
+    questionSlug: input.questionSlug,
+    actorId: user.id,
+    actorName: authorName,
+    actorAvatarUrl: authorAvatarUrl,
+    content: validated.content,
   });
 
   revalidatePath(`/questions/${input.questionSlug}`);
