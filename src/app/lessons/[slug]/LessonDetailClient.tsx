@@ -65,7 +65,7 @@ export default function LessonDetailClient({
   const handleStart = () => {
     if (lesson?.quests?.[0]?.articles?.[0]) {
       const firstArticle = lesson.quests[0].articles[0];
-      router.push(`/articles/${firstArticle.slug.current}`);
+      router.push(`/contents/${firstArticle.slug.current}`);
     }
   };
 

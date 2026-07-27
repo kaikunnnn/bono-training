@@ -58,7 +58,7 @@ function HistoryItem({ article }: { article: ViewedArticle }) {
 
   return (
     <Link
-      href={`/articles/${article.slug.current}`}
+      href={`/contents/${article.slug.current}`}
       className="w-full block no-underline"
       style={{
         minHeight: 68,

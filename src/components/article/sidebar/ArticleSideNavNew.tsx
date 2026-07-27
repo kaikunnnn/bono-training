@@ -58,7 +58,7 @@ export function ArticleSideNavNew({
         title: a.title,
         tag: a.articleType,
         isCompleted: completedArticleIds.includes(a._id),
-        href: `/articles/${a.slug.current}`,
+        href: `/contents/${a.slug.current}`,
       }));
 
       return {

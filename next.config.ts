@@ -11,6 +11,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      // サイト移行 Week1: 個別記事ルートを /articles/:slug → /contents/:slug に統一。
+      // ベータドメイン上で既にクロール・被リンクされている旧 URL を 308 で恒久保護する。
+      {
+        source: "/articles/:slug",
+        destination: "/contents/:slug",
+        permanent: true,
+      },
+    ];
+  },
   images: {
     remotePatterns: [
       {

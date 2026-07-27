@@ -12,6 +12,7 @@ import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
 
 // ISR: 1時間キャッシュ（ユーザー固有データはクライアント側で取得）
 export const revalidate = 3600;
@@ -45,6 +46,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : `${article.title} | BONO`;
   const description = article.excerpt || `${article.title}の学習コンテンツ`;
 
+  // サイト移行 Week1 / SEO止血:
+  // Webflow 本番（www.bo-no.design）に同一 slug の記事が存在する場合、
+  // canonical を本番の絶対 URL に向けて重複評価を本番へ集約する。
+  // 本番に無いベータ独自記事は従来通り自己 canonical（相対パス）のまま。
+  // metadataBase 設定に依存させないため、cross-domain 側は絶対 URL を指定する。
+  const productionSlugs = await getProductionContentSlugs();
+  const canonical = productionSlugs.has(slug)
+    ? `https://www.bo-no.design/contents/${slug}`
+    : `/contents/${slug}`;
+
   return {
     title,
     description,
@@ -60,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       images: article.thumbnailUrl ? [article.thumbnailUrl] : [],
     },
-    alternates: { canonical: `/articles/${slug}` },
+    alternates: { canonical },
   };
 }
 
@@ -146,7 +157,7 @@ export default async function ArticlePage({ params }: PageProps) {
           generateArticleJsonLd({
             title: article.title,
             description: article.excerpt || `${article.title}の学習コンテンツ`,
-            url: `/articles/${slug}`,
+            url: `/contents/${slug}`,
             publishedAt: article.publishedAt || new Date().toISOString(),
             image: article.thumbnailUrl,
           })
@@ -167,7 +178,7 @@ export default async function ArticlePage({ params }: PageProps) {
             isPremium={article.isPremium}
             hasAccess={hasAccess}
             isLoggedIn={subscription.isLoggedIn}
-            redirectTo={`/articles/${slug}`}
+            redirectTo={`/contents/${slug}`}
           />
         </div>
 
@@ -205,7 +216,7 @@ export default async function ArticlePage({ params }: PageProps) {
                 isPremium={article.isPremium}
                 hasAccess={hasAccess}
                 isLoggedIn={subscription.isLoggedIn}
-                redirectTo={`/articles/${slug}`}
+                redirectTo={`/contents/${slug}`}
                 afterContent={
                   hasAccess && (
                     <ArticleActionButtons

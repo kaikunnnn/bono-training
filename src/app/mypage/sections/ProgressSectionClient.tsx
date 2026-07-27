@@ -133,7 +133,7 @@ function ProgressLessonCard({
   const progress = lesson.progress?.percentage || 0;
   const currentStep = lesson.firstIncompleteArticle?.title || "次のステップ";
   const nextArticleUrl = lesson.firstIncompleteArticle
-    ? `/articles/${lesson.firstIncompleteArticle.slug}`
+    ? `/contents/${lesson.firstIncompleteArticle.slug}`
     : undefined;
   const shouldShowCompleteButton = progress === 100;
   const iconImageUrl = lesson.iconImageUrl || "/placeholder-thumbnail.svg";
