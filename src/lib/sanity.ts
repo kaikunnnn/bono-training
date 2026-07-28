@@ -198,6 +198,40 @@ export const getAllLessons = unstable_cache(
   { tags: ["lesson"], revalidate: 3600 }
 );
 
+/**
+ * 最新レッスンを limit 件だけ取得（新着コンテンツ用）
+ *
+ * getAllLessons は lessonNumber 昇順（＝古い順）で全件返すため、
+ * 新着マージ用にそのまま `[0...limit]` すると最古のレッスンが混ざってしまう。
+ * ここでは getLatestMixedContent の lessonPublishedAt（_createdAt 優先、無ければ
+ * lessonNumber から擬似日付）と整合するよう、_createdAt 降順→lessonNumber 降順で
+ * 並べてから先頭 limit 件だけを取得する。射影は getAllLessons と同一（_createdAt を含む）。
+ */
+export const getLatestLessons = unstable_cache(
+  async (limit: number): Promise<Lesson[]> => {
+    const query = `
+      *[_type == "lesson"] | order(coalesce(_createdAt, "") desc, lessonNumber desc) [0...$limit] {
+        _id,
+        _type,
+        _createdAt,
+        title,
+        slug,
+        description,
+        lessonNumber,
+        thumbnail,
+        thumbnailUrl,
+        iconImage,
+        "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+        tags,
+        isPremium
+      }
+    `;
+    return getClient().fetch<Lesson[]>(query, { limit });
+  },
+  ["sanity:lessons:latest"],
+  { tags: ["lesson"], revalidate: 3600 }
+);
+
 export interface LessonWithArticleIds extends Lesson {
   articleIds: string[];
 }
@@ -404,6 +438,36 @@ export const getAllArticles = unstable_cache(
     return getClient().fetch<ArticleListItem[]>(query);
   },
   ["sanity:articles:all"],
+  { tags: ["article", "quest", "lesson"], revalidate: 3600 }
+);
+
+/**
+ * 最新記事を limit 件だけ取得（新着コンテンツ用）
+ *
+ * getAllArticles は全記事を取得したうえで各記事ごとに lessonTitle/lessonSlug の
+ * 相関サブクエリ（O(N)）を走らせるため重い。スライスを射影より前に行うことで、
+ * サブクエリの実行を先頭 limit 件だけに限定する。射影は getAllArticles と同一。
+ */
+export const getLatestArticles = unstable_cache(
+  async (limit: number): Promise<ArticleListItem[]> => {
+    const query = `
+      *[_type == "article"] | order(publishedAt desc) [0...$limit] {
+        _id,
+        title,
+        slug,
+        excerpt,
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+        articleType,
+        videoDuration,
+        isPremium,
+        publishedAt,
+        "lessonTitle": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->title,
+        "lessonSlug": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->slug.current
+      }
+    `;
+    return getClient().fetch<ArticleListItem[]>(query, { limit });
+  },
+  ["sanity:articles:latest"],
   { tags: ["article", "quest", "lesson"], revalidate: 3600 }
 );
 
@@ -1226,6 +1290,28 @@ export const getAllEvents = unstable_cache(
   { tags: ["event"], revalidate: 3600 }
 );
 
+/**
+ * 最新イベントを limit 件だけ取得（新着コンテンツ用）
+ * publishedAt 降順で先頭 limit 件のみ取得する。射影は getAllEvents と同一。
+ */
+export const getLatestEvents = unstable_cache(
+  async (limit: number): Promise<EventListItem[]> => {
+    const query = `
+      *[_type == "event"] | order(publishedAt desc) [0...$limit] {
+        _id,
+        title,
+        slug,
+        summary,
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+        publishedAt
+      }
+    `;
+    return getClient().fetch<EventListItem[]>(query, { limit });
+  },
+  ["sanity:events:latest"],
+  { tags: ["event"], revalidate: 3600 }
+);
+
 // ============================================
 // Roadmap 関連のクエリ（Server Components用）
 // ============================================
@@ -1552,12 +1638,12 @@ export async function getLatestMixedContent(
 ): Promise<MixedContentItem[]> {
   const [articles, guides, blogPosts, stories, events, lessons, outputs, questions] =
     await Promise.all([
-      getAllArticles(),
+      getLatestArticles(limit),
       getAllGuidesFromSanity(),
       getLatestBlogPosts(limit),
       getStoriesList(limit),
-      getAllEvents(),
-      getAllLessons(),
+      getLatestEvents(limit),
+      getLatestLessons(limit),
       getOutputsList(limit),
       getLatestQuestions(limit),
     ]);
