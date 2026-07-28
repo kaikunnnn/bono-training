@@ -509,9 +509,13 @@
     font-family: var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
   }
 
-  /* 日本語テキストにRounded Mplusを自動適用 */
+  /* 見出しは M PLUS 1 で表示。macOSの-webkit-font-smoothing:antialiased(body既定)は
+     文字を細く見せるため、見出しだけ subpixel(=auto) に戻して Google公式に近い
+     しっかりした太さで表示する（Mac固有の見え方の補正。Windowsでは影響ほぼ無し） */
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
 
   /* Rounded Mplus Bold クラスの確実な適用 */

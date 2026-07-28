@@ -13,7 +13,7 @@ export function NewContentSection({ articles }: NewContentSectionProps) {
   return (
     <section className="px-6 lg:px-12">
       <div className="border-b border-black/[0.12] py-8">
-        <h2 className="mb-6 font-noto-sans-jp text-[22px] font-medium leading-[1.71] text-text-primary">
+        <h2 className="mb-6 font-rounded-mplus text-[22px] font-medium leading-[1.71] text-text-primary">
           あたらしいコンテンツ
         </h2>
         <div className="grid grid-cols-1 gap-x-12 gap-y-0 sm:grid-cols-2">

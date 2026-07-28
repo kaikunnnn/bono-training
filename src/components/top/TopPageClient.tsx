@@ -403,7 +403,7 @@ export default function TopPageClient({ roadmaps, lessons }: TopPageClientProps)
                   initial={PATTERN2_ANIMATION.initial}
                   animate={PATTERN2_ANIMATION.animate}
                   transition={{ ...PATTERN2_ANIMATION.transition, delay: 0.15 }}
-                  className="font-line-seed-jp text-[40px] sm:text-[56px] font-bold text-text-primary leading-[1.32]"
+                  className="font-rounded-mplus text-[40px] sm:text-[56px] font-bold text-text-primary leading-[1.32]"
                 >
                   はじめよう！
                   <br />

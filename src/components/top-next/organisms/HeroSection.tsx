@@ -30,7 +30,7 @@ export function HeroSection({ isMember = false }: HeroSectionProps) {
           <div className="w-full shrink-0 lg:col-span-2">
             {/* ページの主見出し。h1はページ内でここのみ */}
             <h1
-              className="text-[28px] font-semibold leading-[1.6] tracking-[1px] text-text-primary lg:text-[32px]"
+              className="text-[28px] font-medium leading-[1.6] tracking-[1px] text-text-primary lg:text-[32px]"
               style={{
                 fontFamily:
                   "var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif",
