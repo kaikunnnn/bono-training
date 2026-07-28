@@ -1,6 +1,6 @@
 import { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { getArticleWithContext, getArticleMetadata, getAllArticles } from "@/lib/sanity";
+import { redirectMissingContent } from "@/lib/missingContentRedirect";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
 import { isBookmarked } from "@/lib/services/bookmarks";
 import { getArticleProgress } from "@/lib/services/progress";
@@ -85,7 +85,10 @@ export default async function ArticlePage({ params }: PageProps) {
   ]);
 
   if (!article) {
-    notFound();
+    // 記事が Sanity に無い場合: 本番 Webflow に存在すれば legacy へリダイレクト、
+    // 無ければ notFound()（redirectMissingContent が両分岐を throw で処理する）。
+    // return で抜けることで、以降 article が non-null に型で絞り込まれる。
+    return await redirectMissingContent(slug);
   }
 
   const lessonId = article.lessonInfo?._id || "";

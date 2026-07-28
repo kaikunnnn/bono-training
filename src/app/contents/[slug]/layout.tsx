@@ -1,6 +1,6 @@
 import "server-only";
-import { notFound } from "next/navigation";
 import { getArticleWithContext } from "@/lib/sanity";
+import { redirectMissingContent } from "@/lib/missingContentRedirect";
 import { getLessonProgress, getLessonStatus } from "@/lib/services/progress";
 import ArticleDetailClient from "./ArticleDetailClient";
 
@@ -27,7 +27,9 @@ export default async function ArticleDetailLayout({ params, children }: LayoutPr
   const article = await getArticleWithContext(slug);
 
   if (!article) {
-    notFound();
+    // 記事が Sanity に無い場合: 本番 Webflow に存在すれば legacy へリダイレクト、
+    // 無ければ notFound()（redirectMissingContent が両分岐を throw で処理する）。
+    return await redirectMissingContent(slug);
   }
 
   // lesson 全体の記事 ID 一覧を集める（楽観的 UI 用の初期値計算に使う）

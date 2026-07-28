@@ -3,13 +3,37 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   transpilePackages: ["iconsax-react"],
   async rewrites() {
-    return [
-      // /docs/xxx → public/docs/xxx.html（拡張子なしURLで静的ドキュメントを配信）
-      {
-        source: "/docs/:slug",
-        destination: "/docs/:slug.html",
-      },
-    ];
+    return {
+      beforeFiles: [],
+      afterFiles: [
+        // /docs/xxx → public/docs/xxx.html（拡張子なしURLで静的ドキュメントを配信）
+        // 配列形式の rewrites は Next.js 仕様上 afterFiles 相当の挙動なので、
+        // オブジェクト形式へ移行しても動作を変えないためここに置く。
+        {
+          source: "/docs/:slug",
+          destination: "/docs/:slug.html",
+        },
+      ],
+      // サイト移行: Next.js 側のページ・静的ファイル・動的ルートの
+      // いずれにもマッチしなかった場合のみ発動するフォールバック。
+      // 本番ドメイン（bo-no.design / www.bo-no.design）でのアクセス時のみ、
+      // まだ移植されていないパスを Webflow の裏サブドメイン legacy.bo-no.design へ転送する。
+      //
+      // has の host 条件は必須。これを外すと開発中の bono-training.vercel.app 等でも
+      // 発動し、存在しない legacy.bo-no.design への接続エラーを招く。
+      fallback: [
+        {
+          source: "/:path*",
+          destination: "https://legacy.bo-no.design/:path*",
+          has: [
+            {
+              type: "host",
+              value: "(www\\.)?bo-no\\.design",
+            },
+          ],
+        },
+      ],
+    };
   },
   async redirects() {
     return [
