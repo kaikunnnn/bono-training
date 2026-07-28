@@ -33,9 +33,13 @@
   font-display: swap;
 }
 
-/* Primary product stack: M PLUS Rounded 1c for JP headings,
-   Inter for Latin body copy, Noto Sans JP fallback.
-   LINE Seed JP is provided as an alt display face.
+/* 正規フォントロール（4種・詳細は SKILL.md「フォントの正規ロール」）:
+     見出し/タイトル = M PLUS 1（font-heading / weights 500,700）
+     本文（＝サイト既定）= Noto Sans JP（font-body / font-sans）
+     英数字ディスプレイ = system font stack（font-latin / DLなし）
+     コード = Geist Mono（font-mono）
+   LINE Seed JP は workshop/docs 専用のブランド字体（下記 @font-face）。
+   ※ M PLUS Rounded 1c / Inter / Hind / Geist は廃止（旧クラスは後方互換の非推奨エイリアス）。
 
    NOTE: Google Fonts @import removed — next/font/google in layout.tsx handles
    all Google font loading with automatic optimization. The @import caused
