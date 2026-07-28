@@ -27,10 +27,12 @@ const notoSansJp = Noto_Sans_JP({
   display: "swap",
 });
 
+// 見出し専用。実使用ウェイトは 700(主力) と 500 のみ（監査で確認）。
+// 400/600/800 はごく少数のため近傍にフォールバックさせ、和文フォントの重量を半減。
 const mplus1 = M_PLUS_1({
   variable: "--font-mplus-1-var",
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
+  weight: ["500", "700"],
   display: "swap",
 });
 
