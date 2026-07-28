@@ -33,7 +33,7 @@ export function HeroSection({ isMember = false }: HeroSectionProps) {
               className="text-[28px] font-semibold leading-[1.6] tracking-[1px] text-text-primary lg:text-[32px]"
               style={{
                 fontFamily:
-                  "'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif",
+                  "var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif",
               }}
             >
               <span className="block">UI/UXデザインとAIで</span>
