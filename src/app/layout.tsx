@@ -5,7 +5,6 @@ import {
   Geist_Mono,
   Noto_Sans_JP,
   M_PLUS_Rounded_1c,
-  M_PLUS_1p,
   Inter,
   Hind,
 } from "next/font/google";
@@ -40,14 +39,6 @@ const mplusRounded = M_PLUS_Rounded_1c({
   variable: "--font-mplus-rounded-var",
   subsets: ["latin"],
   weight: ["400", "500", "700", "800"],
-  display: "swap",
-});
-
-// M PLUS 1p（丸ゴシックでない方）。掲示板詳細 H1（Figma 13:2612 'Mplus 1p Bold'）で使用
-const mplus1p = M_PLUS_1p({
-  variable: "--font-mplus-1p",
-  subsets: ["latin"],
-  weight: ["700"],
   display: "swap",
 });
 
@@ -119,7 +110,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${mplus1p.variable} ${inter.variable} ${hind.variable} ${lineSeedJP.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${inter.variable} ${hind.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
         <QueryProvider>
