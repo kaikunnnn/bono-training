@@ -8,7 +8,6 @@ import {
   M_PLUS_1p,
   Inter,
   Hind,
-  Luckiest_Guy,
 } from "next/font/google";
 import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
@@ -66,13 +65,6 @@ const hind = Hind({
   display: "swap",
 });
 
-const luckiestGuy = Luckiest_Guy({
-  variable: "--font-luckiest-var",
-  subsets: ["latin"],
-  weight: "400",
-  display: "swap",
-});
-
 const lineSeedJP = localFont({
   src: [
     { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Th.otf", weight: "300", style: "normal" },
@@ -127,7 +119,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${mplus1p.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} ${lineSeedJP.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${mplus1p.variable} ${inter.variable} ${hind.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
         <QueryProvider>
