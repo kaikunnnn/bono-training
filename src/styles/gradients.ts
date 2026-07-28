@@ -117,3 +117,14 @@ export function getGradientColors(preset: GradientPreset): { from: string; to: s
     to: gradient.to,
   };
 }
+
+// ============================================
+// UIコンポーネント用グラデーション
+// ============================================
+
+/**
+ * 「目的から探す」ナビ（PurposeNav / PurposeItem）のアイコン背景。
+ * Figma（43rIPBQ9lm2b4DO2gElXCO / 800:9300）の斜めグラデーション。
+ */
+export const PURPOSE_ICON_GRADIENT =
+  'linear-gradient(229deg, #dbe0fe 7.5579%, #f0f4fa 41.414%, #f8f1ed 90.967%)';

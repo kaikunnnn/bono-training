@@ -1,14 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import {
-  Geist,
   Geist_Mono,
   Noto_Sans_JP,
-  M_PLUS_Rounded_1c,
-  M_PLUS_1p,
-  Inter,
-  Hind,
-  Luckiest_Guy,
+  M_PLUS_1,
 } from "next/font/google";
 import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
@@ -19,11 +14,6 @@ import "@/styles/blog.css";
 import "@/styles/blog/link-card.css";
 
 const GA_MEASUREMENT_ID = "G-MH9NGKFBCM";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -37,39 +27,12 @@ const notoSansJp = Noto_Sans_JP({
   display: "swap",
 });
 
-const mplusRounded = M_PLUS_Rounded_1c({
-  variable: "--font-mplus-rounded-var",
+// 見出し専用。実使用ウェイトは 700(主力) と 500 のみ（監査で確認）。
+// 600/800等はごく少数のため近傍(700)にフォールバックさせ、和文フォントの重量を削減。
+const mplus1 = M_PLUS_1({
+  variable: "--font-mplus-1-var",
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
-  display: "swap",
-});
-
-// M PLUS 1p（丸ゴシックでない方）。掲示板詳細 H1（Figma 13:2612 'Mplus 1p Bold'）で使用
-const mplus1p = M_PLUS_1p({
-  variable: "--font-mplus-1p",
-  subsets: ["latin"],
-  weight: ["700"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter-var",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const hind = Hind({
-  variable: "--font-hind-var",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const luckiestGuy = Luckiest_Guy({
-  variable: "--font-luckiest-var",
-  subsets: ["latin"],
-  weight: "400",
+  weight: ["500", "700"],
   display: "swap",
 });
 
@@ -127,7 +90,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${mplus1p.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} ${lineSeedJP.variable} antialiased`}
+        className={`${geistMono.variable} ${notoSansJp.variable} ${mplus1.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
         <QueryProvider>

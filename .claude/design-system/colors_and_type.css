@@ -33,9 +33,13 @@
   font-display: swap;
 }
 
-/* Primary product stack: M PLUS Rounded 1c for JP headings,
-   Inter for Latin body copy, Noto Sans JP fallback.
-   LINE Seed JP is provided as an alt display face.
+/* 正規フォントロール（4種・詳細は SKILL.md「フォントの正規ロール」）:
+     見出し/タイトル = M PLUS 1（font-heading / weights 500,700）
+     本文（＝サイト既定）= Noto Sans JP（font-body / font-sans）
+     英数字ディスプレイ = system font stack（font-latin / DLなし）
+     コード = Geist Mono（font-mono）
+   LINE Seed JP は workshop/docs 専用のブランド字体（下記 @font-face）。
+   ※ M PLUS Rounded 1c / Inter / Hind / Geist は廃止（旧クラスは後方互換の非推奨エイリアス）。
 
    NOTE: Google Fonts @import removed — next/font/google in layout.tsx handles
    all Google font loading with automatic optimization. The @import caused
@@ -104,10 +108,14 @@
   --cta-primary-bg:    #102720;  /* Deep forest green — primary buttons */
   --cta-primary-hover: #1A3A30;
   --training-dark:     #0D221D;  /* Footer / dark sections */
+  /* 暗い背景セクション用。Figma "デザインとキャリアを考える" セクションより */
+  --bg-dark-section:   #050423;
   --training-orange:   #FF9900;  /* Training service accent */
   --training-bg:       #FFF9F4;
   --accent-orange:     #F95A16;
   --label-olive:       #77850E;
+  /* トップページ機能訴求アイコン背景。Figma "GUIDE CONTENTS" セクションより */
+  --bg-feature-icon:   #F7F7CA;
 
   /* Roadmap gradient presets — applied as hero backgrounds on each
      /roadmaps/:slug detail page. All presets stack a translucent black
@@ -196,6 +204,17 @@
 
   /* =========================================================
      SPACING — 4px base
+     Tailwind の spacing ユーティリティ（p-, m-, gap- 等）は
+     --spacing: 0.25rem（4px）を基準単位として自動生成される
+     （src/app/globals.css の @theme、Tailwind v4デフォルト）。
+     この --s-* スケールは Tailwind のその基準単位と1:1で一致するよう
+     意図的に設計されている（偶然の一致ではない）。
+     つまり Figma の px 値を Tailwind クラスへ変換する際は:
+       --s-1(4px)→p-1, --s-2(8px)→p-2, --s-3(12px)→p-3, --s-4(16px)→p-4,
+       --s-5(20px)→p-5, --s-6(24px)→p-6, --s-8(32px)→p-8, --s-10(40px)→p-10,
+       --s-12(48px)→p-12, --s-16(64px)→p-16, --s-20(80px)→p-20
+     のように、4pxの倍数ならTailwindの数値クラスをそのまま「公式の余白トークン」
+     として使う。4pxの倍数でない値のみ arbitrary（例: gap-[27px]）を使う。
      ========================================================= */
   --s-1:  4px;
   --s-2:  8px;

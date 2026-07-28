@@ -25,23 +25,33 @@
    * font-size ではなく color として解釈され、白文字になる。
    * bg-base は colors_and_type.css の --bg-base を参照する。 */
 
-  /* Fonts */
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Fonts
+   * 正規フォントロール（4種）:
+   *   見出し/タイトル = font-heading (M PLUS 1)
+   *   本文（サイト既定）= font-body（= 既定の font-sans / Noto Sans JP）
+   *   英数字ディスプレイ = font-latin（system font stack）
+   *   コード = font-mono (Geist Mono)
+   * font-rounded-mplus / font-inter / font-hind / font-geist は後方互換の
+   * 非推奨エイリアス。段階的に font-heading / font-latin へ移行する。 */
+  --font-sans: var(--font-noto-sans-jp-var), 'Noto Sans JP', 'Noto Sans', sans-serif;  /* 既定=本文(和文) */
+  --font-mono: var(--font-geist-mono);  /* コード */
+  /* 正規ロール */
+  --font-heading: var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+  --font-body: var(--font-noto-sans-jp-var), 'Noto Sans JP', 'Noto Sans', sans-serif;
+  --font-latin: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
   --font-futura: Futura, sans-serif;
   /* next/font CSS変数（layout.tsxで設定）をフォールバック付きで参照 */
-  --font-inter: var(--font-inter-var), Inter, sans-serif;
   --font-noto-sans: var(--font-noto-sans-jp-var), 'Noto Sans', sans-serif;
   --font-noto-sans-jp: var(--font-noto-sans-jp-var), 'Noto Sans JP', 'Noto Sans', sans-serif;
   --font-noto: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
-  --font-hind: var(--font-hind-var), Hind, sans-serif;
-  --font-rounded-mplus: var(--font-mplus-rounded-var), 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
-  --font-mplus-1p: var(--font-mplus-1p), 'M PLUS 1p', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
   --font-dot: 'DotGothic16', monospace;
-  --font-geist: var(--font-inter-var), Inter, sans-serif;
-  --font-luckiest: var(--font-luckiest-var), 'Luckiest Guy', sans-serif;
   --font-line-seed-jp: var(--font-line-seed-jp), 'LINE Seed JP', sans-serif;
   --font-display: var(--font-noto-sans-jp-var), 'Noto Sans JP', sans-serif;
+  /* 以下は後方互換の別名。段階的に font-heading / font-latin へ移行 */
+  --font-rounded-mplus: var(--font-heading);
+  --font-inter: var(--font-latin);
+  --font-hind: var(--font-latin);
+  --font-geist: var(--font-latin);
 
   /* Sidebar - these use oklch values, keep as-is */
   --color-sidebar-ring: var(--sidebar-ring);
@@ -119,6 +129,7 @@
   --color-hover: var(--bg-hover);
   --color-active: var(--bg-active);
   --color-disabled: var(--bg-disabled);
+  --color-dark-section: var(--bg-dark-section);
   --color-success-feedback: var(--bg-success);
   --color-warning-feedback: var(--bg-warning);
   --color-error-feedback: var(--bg-error);
@@ -280,6 +291,8 @@
   --bg-hover: #F2F3F0;
   --bg-active: #E0E1DC;
   --bg-disabled: #F9FAFB;
+  /* 暗い背景セクション用。Figma "デザインとキャリアを考える" セクションより */
+  --bg-dark-section: #050423;
   --bg-success: rgba(138, 204, 161, 0.12);
   --bg-warning: rgba(255, 183, 33, 0.12);
   --bg-error: #FDEFF2;
@@ -486,24 +499,28 @@
 
   /* Rounded Mplus フォントの強制適用 */
   .font-rounded-mplus-force {
-    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
+    font-family: var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
     font-display: swap;
     font-weight: 700;
   }
 
   /* Rounded Mplus フォントのグローバル適用 */
   .font-rounded-mplus {
-    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+    font-family: var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
   }
 
-  /* 日本語テキストにRounded Mplusを自動適用 */
+  /* 見出しは M PLUS 1 で表示。macOSの-webkit-font-smoothing:antialiased(body既定)は
+     文字を細く見せるため、見出しだけ subpixel(=auto) に戻して Google公式に近い
+     しっかりした太さで表示する（Mac固有の見え方の補正。Windowsでは影響ほぼ無し） */
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+    font-family: var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif;
+    -webkit-font-smoothing: auto;
+    -moz-osx-font-smoothing: auto;
   }
 
   /* Rounded Mplus Bold クラスの確実な適用 */
   .font-rounded-mplus-bold {
-    font-family: 'M PLUS Rounded 1c', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
+    font-family: var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif !important;
     font-weight: 700 !important;
   }
 

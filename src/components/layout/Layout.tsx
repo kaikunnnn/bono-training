@@ -76,11 +76,22 @@ export function Layout({ children, className, user }: LayoutProps) {
     );
   }
 
+  // /dev/top6: 背景白 + サイドバー右端に薄いボーダーのパターン確認用（このページのみの見た目差分）
+  const isTop6 = pathname?.startsWith("/dev/top6") ?? false;
+  const isTop5 = pathname?.startsWith("/dev/top5") ?? false;
+  // 本番トップ `/`（新トップ = 旧 /dev/top5 の構成）
+  const isHome = pathname === "/";
+  // `/`, /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にする（新トップの見た目）
+  const isHalfGradient = isHome || isTop5 || isTop6;
+
   return (
-    <div className={cn("min-h-screen flex bg-base relative", className)}>
+    <div className={cn("min-h-screen flex relative", isTop6 ? "bg-white" : "bg-base", className)}>
       {/* ヘッダーグラデーション（mainと同じ） */}
       <div
-        className="fixed inset-x-0 top-0 h-[148px] pointer-events-none z-0 transition-opacity duration-1000 ease-out"
+        className={cn(
+          "fixed inset-x-0 top-0 pointer-events-none z-0 transition-opacity duration-1000 ease-out",
+          isHalfGradient ? "h-[74px]" : "h-[148px]"
+        )}
         style={{
           background:
             "linear-gradient(180deg, rgb(230, 230, 239) 0%, rgb(250, 242, 237) 44.3%, rgb(249, 248, 246) 84.3%, rgba(249, 248, 246, 0) 100%)",
@@ -89,7 +100,12 @@ export function Layout({ children, className, user }: LayoutProps) {
       />
 
       {/* デスクトップ用サイドバー（1280px以上） */}
-      <aside className="hidden xl:block fixed left-0 top-0 h-screen z-10">
+      <aside
+        className={cn(
+          "hidden xl:block fixed left-0 top-0 h-screen z-10",
+          isTop6 && "border-r border-black/10"
+        )}
+      >
         <Sidebar user={user} />
       </aside>
 

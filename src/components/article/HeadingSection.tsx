@@ -55,10 +55,10 @@ const HeadingSection = ({
           </div>
 
           {/* Title */}
-          <div className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-['Noto_Sans_JP'] leading-[148%]">
+          <h1 className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-['Noto_Sans_JP'] leading-[148%]">
             {articleIndex ? `${articleIndex}. ` : ""}
             {title}
-          </div>
+          </h1>
 
           {/* Quest Info */}
           {questInfo && (

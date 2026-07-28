@@ -2,7 +2,7 @@ import { createClient } from "@sanity/client";
 import imageUrlBuilder from "@sanity/image-url";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory, Story, StorySummary, UserOutputSummary } from "@/types/sanity";
+import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory, Story, StorySummary, UserOutputSummary, SanitySlug } from "@/types/sanity";
 import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-roadmap";
 import type { Guide, GuideCategory } from "@/types/guide";
 
@@ -179,6 +179,7 @@ export const getAllLessons = unstable_cache(
       *[_type == "lesson"] | order(lessonNumber asc) {
         _id,
         _type,
+        _createdAt,
         title,
         slug,
         description,
@@ -194,6 +195,40 @@ export const getAllLessons = unstable_cache(
     return getClient().fetch<Lesson[]>(query);
   },
   ["sanity:lessons:all"],
+  { tags: ["lesson"], revalidate: 3600 }
+);
+
+/**
+ * 最新レッスンを limit 件だけ取得（新着コンテンツ用）
+ *
+ * getAllLessons は lessonNumber 昇順（＝古い順）で全件返すため、
+ * 新着マージ用にそのまま `[0...limit]` すると最古のレッスンが混ざってしまう。
+ * ここでは getLatestMixedContent の lessonPublishedAt（_createdAt 優先、無ければ
+ * lessonNumber から擬似日付）と整合するよう、_createdAt 降順→lessonNumber 降順で
+ * 並べてから先頭 limit 件だけを取得する。射影は getAllLessons と同一（_createdAt を含む）。
+ */
+export const getLatestLessons = unstable_cache(
+  async (limit: number): Promise<Lesson[]> => {
+    const query = `
+      *[_type == "lesson"] | order(coalesce(_createdAt, "") desc, lessonNumber desc) [0...$limit] {
+        _id,
+        _type,
+        _createdAt,
+        title,
+        slug,
+        description,
+        lessonNumber,
+        thumbnail,
+        thumbnailUrl,
+        iconImage,
+        "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+        tags,
+        isPremium
+      }
+    `;
+    return getClient().fetch<Lesson[]>(query, { limit });
+  },
+  ["sanity:lessons:latest"],
   { tags: ["lesson"], revalidate: 3600 }
 );
 
@@ -403,6 +438,36 @@ export const getAllArticles = unstable_cache(
     return getClient().fetch<ArticleListItem[]>(query);
   },
   ["sanity:articles:all"],
+  { tags: ["article", "quest", "lesson"], revalidate: 3600 }
+);
+
+/**
+ * 最新記事を limit 件だけ取得（新着コンテンツ用）
+ *
+ * getAllArticles は全記事を取得したうえで各記事ごとに lessonTitle/lessonSlug の
+ * 相関サブクエリ（O(N)）を走らせるため重い。スライスを射影より前に行うことで、
+ * サブクエリの実行を先頭 limit 件だけに限定する。射影は getAllArticles と同一。
+ */
+export const getLatestArticles = unstable_cache(
+  async (limit: number): Promise<ArticleListItem[]> => {
+    const query = `
+      *[_type == "article"] | order(publishedAt desc) [0...$limit] {
+        _id,
+        title,
+        slug,
+        excerpt,
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+        articleType,
+        videoDuration,
+        isPremium,
+        publishedAt,
+        "lessonTitle": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->title,
+        "lessonSlug": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->slug.current
+      }
+    `;
+    return getClient().fetch<ArticleListItem[]>(query, { limit });
+  },
+  ["sanity:articles:latest"],
   { tags: ["article", "quest", "lesson"], revalidate: 3600 }
 );
 
@@ -1099,13 +1164,15 @@ const GUIDE_FIELDS = `
   updatedAt
 `;
 
-export const getAllGuidesFromSanity = unstable_cache(
-  async (): Promise<Guide[]> => {
-    const query = `*[_type == "guide" && defined(content) && length(content) > 0] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
-    return getClient().fetch<Guide[]>(query);
-  },
-  ["sanity:guides:all"],
-  { tags: ["guide"], revalidate: 3600 }
+export const getAllGuidesFromSanity = cache(
+  unstable_cache(
+    async (): Promise<Guide[]> => {
+      const query = `*[_type == "guide" && defined(content) && length(content) > 0] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
+      return getClient().fetch<Guide[]>(query);
+    },
+    ["sanity:guides:all"],
+    { tags: ["guide"], revalidate: 3600 }
+  )
 );
 
 export const getGuidesByCategoryFromSanity = unstable_cache(
@@ -1186,6 +1253,62 @@ export const getEvent = unstable_cache(
     return getClient().fetch(query, { slug });
   },
   ["sanity:event"],
+  { tags: ["event"], revalidate: 3600 }
+);
+
+/**
+ * イベント一覧の軽量型（新着コンテンツ横断取得用）
+ */
+export interface EventListItem {
+  _id: string;
+  title: string;
+  slug: SanitySlug;
+  summary?: string;
+  thumbnailUrl?: string;
+  publishedAt?: string;
+}
+
+/**
+ * すべてのイベントを取得（一覧・新着コンテンツ用）
+ * publishedAt 降順でソートして返す。
+ */
+export const getAllEvents = unstable_cache(
+  async (): Promise<EventListItem[]> => {
+    const query = `
+      *[_type == "event"] | order(publishedAt desc) {
+        _id,
+        title,
+        slug,
+        summary,
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+        publishedAt
+      }
+    `;
+    return getClient().fetch<EventListItem[]>(query);
+  },
+  ["sanity:events:all"],
+  { tags: ["event"], revalidate: 3600 }
+);
+
+/**
+ * 最新イベントを limit 件だけ取得（新着コンテンツ用）
+ * publishedAt 降順で先頭 limit 件のみ取得する。射影は getAllEvents と同一。
+ */
+export const getLatestEvents = unstable_cache(
+  async (limit: number): Promise<EventListItem[]> => {
+    const query = `
+      *[_type == "event"] | order(publishedAt desc) [0...$limit] {
+        _id,
+        title,
+        slug,
+        summary,
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
+        publishedAt
+      }
+    `;
+    return getClient().fetch<EventListItem[]>(query, { limit });
+  },
+  ["sanity:events:latest"],
   { tags: ["event"], revalidate: 3600 }
 );
 
@@ -1412,15 +1535,17 @@ function attachStoryCategoryLabel<T extends { category: string }>(item: T): T & 
 /**
  * ストーリー一覧を取得
  */
-export const getStoriesList = unstable_cache(
-  async (limit?: number): Promise<StorySummary[]> => {
-    const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
-    const query = `*[_type == "story" && defined(slug.current)] | order(publishedAt desc) ${limitClause} { ${STORY_SUMMARY_FIELDS} }`;
-    const results = await getClient().fetch<StorySummary[]>(query);
-    return results.map(attachStoryCategoryLabel);
-  },
-  ["sanity:stories:list:v3"],
-  { tags: ["story"], revalidate: 3600 }
+export const getStoriesList = cache(
+  unstable_cache(
+    async (limit?: number): Promise<StorySummary[]> => {
+      const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
+      const query = `*[_type == "story" && defined(slug.current)] | order(publishedAt desc) ${limitClause} { ${STORY_SUMMARY_FIELDS} }`;
+      const results = await getClient().fetch<StorySummary[]>(query);
+      return results.map(attachStoryCategoryLabel);
+    },
+    ["sanity:stories:list:v3"],
+    { tags: ["story"], revalidate: 3600 }
+  )
 );
 
 /**
@@ -1462,6 +1587,270 @@ export const getAllStorySlugs = unstable_cache(
 );
 
 // ============================================
+// 新着コンテンツ横断取得（新トップ 2026 / ブロックB-3）
+// ============================================
+
+/**
+ * 新着コンテンツの正規化された軽量型。
+ * NewContentSection の NewContentItem に対応させやすい形にしている。
+ */
+export interface MixedContentItem {
+  /** オブジェクトの種類ラベル（例: 記事 / ガイド / 読み物 / 体験談） */
+  type: string;
+  /** タイトル */
+  title: string;
+  /** サムネイル画像 URL（未取得時は空文字） */
+  thumbnail: string;
+  /** 遷移先 */
+  href: string;
+  /** 公開日（ISO 文字列。ソートに使用） */
+  publishedAt: string;
+}
+
+/**
+ * 記事・読み物(guide)・ブログ・体験談(story)・イベント(event)・レッスン(lesson)・
+ * アウトプット(userOutput)・質問(question / みんなの掲示板)を横断取得し、
+ * publishedAt 降順でマージして最新 limit 件を返す。
+ *
+ * パフォーマンス: 各タイプは既存の一覧取得関数（unstable_cache 済み）を
+ * Promise.all で並行呼び出しし、結合後にソート・スライスする。
+ *
+ * NOTE（レッスンの日付フォールバック）:
+ * - レッスンは publishedAt を持たず lessonNumber のみ。ただし Sanity の
+ *   全ドキュメントが持つシステムフィールド `_createdAt`（ISO 日時）を
+ *   getAllLessons のクエリで取得しているため、これを publishedAt 代わりに
+ *   使って他コンテンツと同じ土俵で日付マージする。
+ * - 万一 `_createdAt` が欠けている場合は、lessonNumber が大きいほど新しいとみなす
+ *   擬似的な新しさスコアを ISO 文字列として与えてフォールバックする
+ *   （lessonNumber を 0 埋めした固定エポック日付。数値が大きいほど文字列比較で
+ *   後ろ=新しい側に来るようにする）。これで publishedAt を持つ他コンテンツと
+ *   localeCompare で安定してマージできる。
+ *
+ * NOTE（ロードマップは対象外）:
+ * - ロードマップは「新しいコンテンツ」に含めない方針（意図的に除外）。
+ *
+ * NOTE（質問=みんなの掲示板の詳細ページは未実装）:
+ * - `/questions/[slug]` はこの Next.js 版ではまだ移植前のため、質問カードの
+ *   リンク先は現状 404 になる。一覧移植が完了次第、解消される想定。
+ */
+export async function getLatestMixedContent(
+  limit: number
+): Promise<MixedContentItem[]> {
+  const [articles, guides, blogPosts, stories, events, lessons, outputs, questions] =
+    await Promise.all([
+      getLatestArticles(limit),
+      getAllGuidesFromSanity(),
+      getLatestBlogPosts(limit),
+      getStoriesList(limit),
+      getLatestEvents(limit),
+      getLatestLessons(limit),
+      getOutputsList(limit),
+      getLatestQuestions(limit),
+    ]);
+
+  // レッスン用: publishedAt 相当の日付を決定する。
+  // 1) Sanity システムフィールド _createdAt があればそれを使う
+  // 2) 無ければ lessonNumber から擬似日付を生成（番号が大きいほど新しい扱い）
+  const lessonPublishedAt = (
+    lesson: Lesson & { _createdAt?: string }
+  ): string => {
+    if (lesson._createdAt) return lesson._createdAt;
+    const n = lesson.lessonNumber ?? 0;
+    // 固定エポック(2000-01-01)からの通し番号を日付に写像。
+    // lessonNumber が大きいほど後ろ（新しい側）に並ぶ。
+    const pseudo = new Date(Date.UTC(2000, 0, 1) + n * 86_400_000);
+    return pseudo.toISOString();
+  };
+
+  const items: MixedContentItem[] = [
+    ...articles.slice(0, limit).map((a) => ({
+      type: "記事",
+      title: a.title,
+      thumbnail: a.thumbnailUrl ?? "",
+      href: `/articles/${a.slug.current}`,
+      publishedAt: a.publishedAt ?? "",
+    })),
+    ...guides.slice(0, limit).map((g) => ({
+      type: "ガイド",
+      title: g.title,
+      thumbnail: g.thumbnailUrl ?? "",
+      href: `/guide/${g.slug}`,
+      publishedAt: g.publishedAt ?? "",
+    })),
+    ...blogPosts.slice(0, limit).map((b) => ({
+      type: "読み物",
+      title: b.title,
+      thumbnail: b.thumbnail ?? "",
+      href: `/blog/${b.slug}`,
+      publishedAt: b.publishedAt ?? "",
+    })),
+    ...stories.slice(0, limit).map((s) => ({
+      type: "体験談",
+      title: s.title,
+      thumbnail: s.heroImageUrl ?? "",
+      href: `/stories/${s.slug.current}`,
+      publishedAt: s.publishedAt ?? "",
+    })),
+    ...events.slice(0, limit).map((e) => ({
+      type: "イベント",
+      title: e.title,
+      thumbnail: e.thumbnailUrl ?? "",
+      href: `/events/${e.slug.current}`,
+      publishedAt: e.publishedAt ?? "",
+    })),
+    ...lessons.slice(0, limit).map((l) => ({
+      type: "レッスン",
+      title: l.title,
+      thumbnail: l.thumbnailUrl ?? l.iconImageUrl ?? "",
+      href: `/lessons/${l.slug.current}`,
+      publishedAt: lessonPublishedAt(l),
+    })),
+    ...outputs.slice(0, limit).map((o) => ({
+      type: "アウトプット",
+      title: o.articleTitle || o.articleUrl,
+      thumbnail: o.articleImage ?? "",
+      href: o.articleUrl,
+      publishedAt: o.submittedAt ?? "",
+    })),
+    ...questions.slice(0, limit).map((q) => ({
+      type: "掲示板",
+      title: q.title,
+      // 掲示板スレッドは個別サムネを持たないため、みんなの掲示板ページの
+      // OGP画像を共通サムネとして使う（/questions のトップと同じビジュアル）
+      thumbnail: "/images/questions-og.jpg",
+      href: `/questions/${q.slug}`,
+      publishedAt: q.publishedAt ?? "",
+    })),
+  ];
+
+  return items
+    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+    .slice(0, limit);
+}
+
+// ============================================
+// みんなの実績 横断取得（新トップ 2026 / ブロックF）
+// ============================================
+
+/**
+ * 「みんなの実績」用の正規化された軽量型。
+ *
+ * 転職インタビュー(story) と 15分フィードバック応募のアウトプット(userOutput) を
+ * 同じカード（`AchievementCard`）で並べるため、両者を共通の最小フィールドに正規化する。
+ */
+export interface AchievementItem {
+  /** 種類。カードのラベル出し分け・リンクの内部/外部判定に使う */
+  type: "story" | "output";
+  /** タイトル */
+  title: string;
+  /** サムネイル画像 URL（未取得時は空文字） */
+  thumbnailUrl: string;
+  /** 著者名（無ければ undefined） */
+  authorName?: string;
+  /** 著者アバター画像 URL（story のみ。output は avatar が無いため undefined） */
+  authorAvatarUrl?: string;
+  /** 著者の役職・現在の職種（story の person.currentRole） */
+  authorRole?: string;
+  /** 遷移先。story は内部パス、output は外部 URL */
+  href: string;
+  /** 公開日（ISO 文字列。ソートに使用） */
+  publishedAt: string;
+}
+
+/**
+ * 転職インタビュー(story)とアウトプット(userOutput)を横断取得し、
+ * publishedAt 降順でマージして最新 limit 件を返す。
+ *
+ * - story: `publishedAt` / `heroImageUrl` / `person.name` / `/stories/[slug]`（内部）
+ * - output: `submittedAt` / `articleImage` / `author.displayName` / `articleUrl`（外部）
+ *
+ * パフォーマンス: 各タイプは既存の unstable_cache 済み一覧取得関数を
+ * Promise.all で並行呼び出しし、結合後にソート・スライスする。
+ */
+export async function getLatestAchievements(
+  limit: number
+): Promise<AchievementItem[]> {
+  const [stories, outputs] = await Promise.all([
+    getStoriesList(limit),
+    getOutputsList(limit),
+  ]);
+
+  const items: AchievementItem[] = [
+    ...stories.map((s) => ({
+      type: "story" as const,
+      title: s.title,
+      thumbnailUrl: s.heroImageUrl ?? "",
+      authorName: s.person?.name,
+      authorAvatarUrl: s.person?.profileImageUrl,
+      authorRole: s.person?.currentRole,
+      href: `/stories/${s.slug.current}`,
+      publishedAt: s.publishedAt ?? "",
+    })),
+    ...outputs.map((o) => ({
+      type: "output" as const,
+      title: o.articleTitle || o.articleUrl,
+      thumbnailUrl: o.articleImage ?? "",
+      authorName: o.author?.displayName,
+      href: o.articleUrl,
+      publishedAt: o.submittedAt ?? "",
+    })),
+  ];
+
+  return items
+    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+    .slice(0, limit);
+}
+
+export interface AchievementGroups {
+  stories: AchievementItem[];
+  outputs: AchievementItem[];
+}
+
+/**
+ * 転職インタビュー(story)とアウトプット(userOutput)を、
+ * 混ぜずに別グループとしてそれぞれ最新 limitEach 件を返す。
+ * （`getLatestAchievements` は横断マージ版。「みんなの実績」ブロックは
+ * 各タイプごとに件数を揃えて表示したいため、こちらを使う）
+ */
+export async function getAchievementGroups(
+  limitEach: number
+): Promise<AchievementGroups> {
+  // getLatestMixedContent は getStoriesList(4)/getOutputsList(4) を呼ぶ。
+  // ここも同じ limit（>=4）で取得すると unstable_cache / React cache のキーが
+  // 一致し、同一リクエスト内で 4 データセット→2 データセットに集約できる。
+  // 取得後に limitEach 件へ絞り、返す shape は従来と完全に同一にする。
+  const fetchLimit = Math.max(limitEach, 4);
+  const [storiesRaw, outputsRaw] = await Promise.all([
+    getStoriesList(fetchLimit),
+    getOutputsList(fetchLimit),
+  ]);
+
+  const stories = storiesRaw.slice(0, limitEach);
+  const outputs = outputsRaw.slice(0, limitEach);
+
+  return {
+    stories: stories.map((s) => ({
+      type: "story" as const,
+      title: s.title,
+      thumbnailUrl: s.heroImageUrl ?? "",
+      authorName: s.person?.name,
+      authorAvatarUrl: s.person?.profileImageUrl,
+      authorRole: s.person?.currentRole,
+      href: `/stories/${s.slug.current}`,
+      publishedAt: s.publishedAt ?? "",
+    })),
+    outputs: outputs.map((o) => ({
+      type: "output" as const,
+      title: o.articleTitle || o.articleUrl,
+      thumbnailUrl: o.articleImage ?? "",
+      authorName: o.author?.displayName,
+      href: o.articleUrl,
+      publishedAt: o.submittedAt ?? "",
+    })),
+  };
+}
+
+// ============================================
 // UserOutput 関連のクエリ — BON-345
 // ============================================
 
@@ -1493,12 +1882,43 @@ const USER_OUTPUT_FIELDS = `
  * BON-327 暫定: isPublished フラグを問わず、タイトル + URL が
  * 揃っているものを公開対象とする（旧/新スキーマ両対応）。
  */
-export const getOutputsList = unstable_cache(
-  async (limit?: number): Promise<UserOutputSummary[]> => {
+export const getOutputsList = cache(
+  unstable_cache(
+    async (limit?: number): Promise<UserOutputSummary[]> => {
+      const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
+      const query = `*[_type == "userOutput" && (defined(articleTitle) || defined(ogTitle)) && (defined(articleUrl) || defined(url))] | order(submittedAt desc) ${limitClause} { ${USER_OUTPUT_FIELDS} }`;
+      return getClient().fetch<UserOutputSummary[]>(query);
+    },
+    ["sanity:outputs:list:v3"],
+    { tags: ["userOutput"], revalidate: 3600 }
+  )
+);
+
+// ============================================
+// Question（みんなの掲示板）関連のクエリ
+// ============================================
+
+export interface LatestQuestionItem {
+  title: string;
+  slug: string;
+  publishedAt: string;
+}
+
+/**
+ * 最新の質問（掲示板スレッド）を取得。
+ * フィルタは本番リポジトリ（bono-training）の getAllQuestions と同じ:
+ * isPublic は未設定なら公開扱い（isPublic == true || !defined(isPublic)）。
+ */
+export const getLatestQuestions = unstable_cache(
+  async (limit?: number): Promise<LatestQuestionItem[]> => {
     const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
-    const query = `*[_type == "userOutput" && (defined(articleTitle) || defined(ogTitle)) && (defined(articleUrl) || defined(url))] | order(submittedAt desc) ${limitClause} { ${USER_OUTPUT_FIELDS} }`;
-    return getClient().fetch<UserOutputSummary[]>(query);
+    const query = `*[_type == "question" && (isPublic == true || !defined(isPublic))] | order(publishedAt desc) ${limitClause} {
+      title,
+      "slug": slug.current,
+      publishedAt
+    }`;
+    return getClient().fetch<LatestQuestionItem[]>(query);
   },
-  ["sanity:outputs:list:v3"],
-  { tags: ["userOutput"], revalidate: 3600 }
+  ["sanity:questions:latest:v1"],
+  { tags: ["question"], revalidate: 3600 }
 );

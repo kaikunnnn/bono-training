@@ -233,8 +233,8 @@ export default async function Page({ params }: PageProps) {
                 {question.category.title}
               </span>
             )}
-            {/* H1（M PLUS 1p Bold / 24px / leading-9・左右8pxの内余白） */}
-            <h1 className="px-2 font-mplus-1p text-[24px] font-bold leading-9 text-foreground">
+            {/* H1（見出しフォント=M PLUS Rounded 1c / 24px / leading-9・左右8pxの内余白） */}
+            <h1 className="px-2 font-rounded-mplus text-[24px] font-bold leading-9 text-foreground">
               {question.title}
             </h1>
           </div>

@@ -27,6 +27,22 @@ const buttonVariants = cva(
           "bg-white border border-[#E4E4E4] text-black shadow-[0px_1px_12px_0px_rgba(0,0,0,0.05)] hover:bg-[#FAFAFA] hover:border-[#D0D0D0] active:bg-[#F5F5F5] rounded-full",
         "action-tertiary":
           "bg-[#E9EBEB] text-[#5A616F] hover:bg-[#DFE1E1] active:bg-[#D5D7D7] rounded-full font-semibold",
+        // ダーク背景セクション用の pill ボタン（黒背景 + 白ボーダー + 白文字）
+        // Figma "デザインとキャリアを考える" セクション（662-39684）の「相談する」より
+        "dark-outline":
+          "bg-black border border-white/20 text-text-inverse rounded-full hover:bg-white/10 active:bg-white/[0.16]",
+        // 塗りつぶし緑ボタン（新トップページ Hero「メンバーになってはじめる」用）
+        primary:
+          "bg-[#102720] text-white font-bold hover:opacity-90",
+        // ダーク背景用の枠線ボタン（角丸小、新トップページ GuideCard「詳細を見る」用。
+        // 既存の "dark-outline"（黒背景・pill型）とは別デザインのため新規追加）
+        "outline-dark":
+          "border border-white/20 text-white shadow-[0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-white/10",
+        // ライト背景用の枠線のみボタン（白塗りなし・透明背景）。
+        // 既存の "outline" は bg-white 塗りつぶし固定なので、白背景を持たせたくない
+        // カード（top-next等）はこちらを使う
+        "outline-ghost":
+          "border border-border-strong text-black hover:bg-black/[0.03]",
       },
       size: {
         // 角丸は高さに比例（h-8→10px / h-10→12px / h-11→14px / h-12→16px）
@@ -38,6 +54,11 @@ const buttonVariants = cva(
         action: "px-[12px] py-[8px] text-[14px] leading-[20px] rounded-xl",
         // 大CTA（ログイン・レッスン詳細等）
         large: "h-12 px-7 py-3.5 rounded-[16px]",
+        // 新トップページ Hero用（メンバーになってはじめる／ロードマップへ）
+        "top-cta": "h-9 px-6 rounded-[14px] text-sm font-bold tracking-[0.35px]",
+        // 新トップページ カード用（詳しく見る／詳細を見る）。
+        // flex-col の親（カード内）に置かれる想定なので self-start で全幅化を防ぐ
+        "top-card": "h-8 w-fit self-start px-6 rounded-[6px] text-xs font-medium tracking-[0.6px]",
       },
     },
     defaultVariants: {

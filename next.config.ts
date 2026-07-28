@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   transpilePackages: ["iconsax-react"],
+  experimental: {
+    optimizePackageImports: ["iconsax-react", "lucide-react"],
+  },
   async rewrites() {
     return [
       // /docs/xxx → public/docs/xxx.html（拡張子なしURLで静的ドキュメントを配信）
@@ -12,6 +15,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         protocol: "https",
@@ -36,6 +40,18 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "api.dicebear.com",
+      },
+      {
+        protocol: "https",
+        hostname: "bo-no.design",
+      },
+      {
+        protocol: "https",
+        hostname: "*.bo-no.design",
+      },
+      {
+        protocol: "https",
+        hostname: "*.st-note.com",
       },
     ],
   },
