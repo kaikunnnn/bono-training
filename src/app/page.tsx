@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import { UserProvider } from "@/components/layout/UserProvider";
 import { generateWebSiteJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 import { HeroSection } from "@/components/top-next/organisms/HeroSection";
 import { PurposeNav } from "@/components/top-next/organisms/PurposeNav";
@@ -55,10 +55,9 @@ export const metadata: Metadata = {
  */
 export default async function IndexPage() {
   // ログインチェック: ログイン済みは /mypage へ
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // UserProvider は React cache() でメモ化されており、同一リクエスト内で
+  // LayoutWrapper と getUser を共有する（1リクエスト1回の getUser）。
+  const { user } = await UserProvider();
 
   if (user) {
     redirect("/mypage");

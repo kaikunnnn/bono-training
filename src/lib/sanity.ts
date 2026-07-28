@@ -1100,13 +1100,15 @@ const GUIDE_FIELDS = `
   updatedAt
 `;
 
-export const getAllGuidesFromSanity = unstable_cache(
-  async (): Promise<Guide[]> => {
-    const query = `*[_type == "guide" && defined(content) && length(content) > 0] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
-    return getClient().fetch<Guide[]>(query);
-  },
-  ["sanity:guides:all"],
-  { tags: ["guide"], revalidate: 3600 }
+export const getAllGuidesFromSanity = cache(
+  unstable_cache(
+    async (): Promise<Guide[]> => {
+      const query = `*[_type == "guide" && defined(content) && length(content) > 0] | order(publishedAt desc) { ${GUIDE_FIELDS} }`;
+      return getClient().fetch<Guide[]>(query);
+    },
+    ["sanity:guides:all"],
+    { tags: ["guide"], revalidate: 3600 }
+  )
 );
 
 export const getGuidesByCategoryFromSanity = unstable_cache(
@@ -1447,15 +1449,17 @@ function attachStoryCategoryLabel<T extends { category: string }>(item: T): T & 
 /**
  * ストーリー一覧を取得
  */
-export const getStoriesList = unstable_cache(
-  async (limit?: number): Promise<StorySummary[]> => {
-    const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
-    const query = `*[_type == "story" && defined(slug.current)] | order(publishedAt desc) ${limitClause} { ${STORY_SUMMARY_FIELDS} }`;
-    const results = await getClient().fetch<StorySummary[]>(query);
-    return results.map(attachStoryCategoryLabel);
-  },
-  ["sanity:stories:list:v3"],
-  { tags: ["story"], revalidate: 3600 }
+export const getStoriesList = cache(
+  unstable_cache(
+    async (limit?: number): Promise<StorySummary[]> => {
+      const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
+      const query = `*[_type == "story" && defined(slug.current)] | order(publishedAt desc) ${limitClause} { ${STORY_SUMMARY_FIELDS} }`;
+      const results = await getClient().fetch<StorySummary[]>(query);
+      return results.map(attachStoryCategoryLabel);
+    },
+    ["sanity:stories:list:v3"],
+    { tags: ["story"], revalidate: 3600 }
+  )
 );
 
 /**
@@ -1725,10 +1729,18 @@ export interface AchievementGroups {
 export async function getAchievementGroups(
   limitEach: number
 ): Promise<AchievementGroups> {
-  const [stories, outputs] = await Promise.all([
-    getStoriesList(limitEach),
-    getOutputsList(limitEach),
+  // getLatestMixedContent は getStoriesList(4)/getOutputsList(4) を呼ぶ。
+  // ここも同じ limit（>=4）で取得すると unstable_cache / React cache のキーが
+  // 一致し、同一リクエスト内で 4 データセット→2 データセットに集約できる。
+  // 取得後に limitEach 件へ絞り、返す shape は従来と完全に同一にする。
+  const fetchLimit = Math.max(limitEach, 4);
+  const [storiesRaw, outputsRaw] = await Promise.all([
+    getStoriesList(fetchLimit),
+    getOutputsList(fetchLimit),
   ]);
+
+  const stories = storiesRaw.slice(0, limitEach);
+  const outputs = outputsRaw.slice(0, limitEach);
 
   return {
     stories: stories.map((s) => ({
@@ -1784,14 +1796,16 @@ const USER_OUTPUT_FIELDS = `
  * BON-327 暫定: isPublished フラグを問わず、タイトル + URL が
  * 揃っているものを公開対象とする（旧/新スキーマ両対応）。
  */
-export const getOutputsList = unstable_cache(
-  async (limit?: number): Promise<UserOutputSummary[]> => {
-    const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
-    const query = `*[_type == "userOutput" && (defined(articleTitle) || defined(ogTitle)) && (defined(articleUrl) || defined(url))] | order(submittedAt desc) ${limitClause} { ${USER_OUTPUT_FIELDS} }`;
-    return getClient().fetch<UserOutputSummary[]>(query);
-  },
-  ["sanity:outputs:list:v3"],
-  { tags: ["userOutput"], revalidate: 3600 }
+export const getOutputsList = cache(
+  unstable_cache(
+    async (limit?: number): Promise<UserOutputSummary[]> => {
+      const limitClause = typeof limit === "number" ? `[0...${limit}]` : "";
+      const query = `*[_type == "userOutput" && (defined(articleTitle) || defined(ogTitle)) && (defined(articleUrl) || defined(url))] | order(submittedAt desc) ${limitClause} { ${USER_OUTPUT_FIELDS} }`;
+      return getClient().fetch<UserOutputSummary[]>(query);
+    },
+    ["sanity:outputs:list:v3"],
+    { tags: ["userOutput"], revalidate: 3600 }
+  )
 );
 
 // ============================================
