@@ -73,19 +73,26 @@ export default async function LessonPage({ params }: PageProps) {
   let totalCompleted = 0;
   let totalArticles = 0;
 
-  // 各クエストの進捗を取得
+  // 全クエストの記事IDを一括収集し、進捗を1回だけ取得（N+1 の直列待ちを回避）
+  const allArticleIds = (lesson.quests || []).flatMap(
+    (q) => q.articles?.map((a) => a._id) || []
+  );
+  const progress = await getLessonProgress(lesson._id, allArticleIds);
+  const completedSet = new Set(progress.completedArticleIds);
+
+  // クエストごとの内訳はローカルで計算（await なし）
   for (const quest of lesson.quests || []) {
-    const articleIds = quest.articles?.map(a => a._id) || [];
-    const progress = await getLessonProgress(lesson._id, articleIds);
+    const qArticleIds = quest.articles?.map((a) => a._id) || [];
+    const completedIds = qArticleIds.filter((id) => completedSet.has(id));
 
     questProgressMap[quest._id] = {
-      completed: progress.completedArticles,
-      total: progress.totalArticles,
-      completedArticleIds: progress.completedArticleIds,
+      completed: completedIds.length,
+      total: qArticleIds.length,
+      completedArticleIds: completedIds,
     };
 
-    totalCompleted += progress.completedArticles;
-    totalArticles += progress.totalArticles;
+    totalCompleted += completedIds.length;
+    totalArticles += qArticleIds.length;
   }
 
   // 全体の進捗率を計算
