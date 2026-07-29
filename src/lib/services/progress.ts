@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCachedUser } from "@/lib/supabase/server";
 
 // ============================================
 // 型定義
@@ -244,10 +244,9 @@ export async function getLessonProgress(
   articleIds: string[]
 ): Promise<LessonProgress> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // 認証はリクエストスコープでメモ化された getCachedUser を使い、
+    // 同一レンダー内の他の auth.getUser 呼び出しと往復を共有する
+    const user = await getCachedUser();
 
     if (!user || articleIds.length === 0) {
       return {
@@ -259,6 +258,9 @@ export async function getLessonProgress(
         lastUpdatedAt: null,
       };
     }
+
+    // DB クエリ用に Supabase クライアントを生成
+    const supabase = await createClient();
 
     // そのレッスンの記事で完了しているものを取得
     const { data } = await supabase

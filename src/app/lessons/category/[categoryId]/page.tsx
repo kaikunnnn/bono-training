@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getAllLessonsWithArticleIds } from "@/lib/sanity";
+import { getAllLessons } from "@/lib/sanity";
 import PageHeader from "@/components/common/PageHeader";
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
@@ -47,7 +47,7 @@ export default async function CategoryPage({ params }: PageProps) {
     notFound();
   }
 
-  const lessons = await getAllLessonsWithArticleIds();
+  const lessons = await getAllLessons();
 
   // セクション・サブセクションごとにグルーピング（共通ロジック使用）
   const groupedLessons = groupLessonsNested(lessons);
