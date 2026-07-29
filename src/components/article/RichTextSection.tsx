@@ -1,5 +1,6 @@
-"use client";
-
+// Server Component。PortableText の描画はサーバー側で行い @portabletext/react を
+// クライアントバンドルから外す。唯一のインタラクティブ要素 ContentPreviewOverlay は
+// それ自身が "use client" の子コンポーネントなので Server から描画してOK。
 import { PortableText, PortableTextComponents } from "@portabletext/react";
 import { PortableTextBlock } from "@portabletext/types";
 import Link from "next/link";
