@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getTrainingDetailFromSanity } from "@/lib/sanity";
 import type { TrainingDetailData } from "@/types/training";
@@ -12,7 +13,7 @@ import { TrainingError } from "@/lib/errors";
  * 2. Sanity CMS 直接クエリ
  * 3. TrainingError をスロー（呼び出し元で notFound() 処理）
  */
-export const getTrainingDetail = async (
+export const getTrainingDetail = cache(async (
   slug: string
 ): Promise<TrainingDetailData> => {
   if (!slug || slug.trim() === "") {
@@ -113,4 +114,4 @@ export const getTrainingDetail = async (
       );
     }
   }
-};
+});
