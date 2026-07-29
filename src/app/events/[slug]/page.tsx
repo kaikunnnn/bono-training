@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getEvent } from "@/lib/sanity";
-import { createClient } from "@/lib/supabase/server";
+import { getCachedUser } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import RichTextSection from "@/components/article/RichTextSection";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
@@ -76,10 +76,8 @@ export default async function EventDetailPage({ params }: PageProps) {
   }
 
   // ユーザー・サブスクリプション状態を取得
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getCachedUser（React cache）で、下の getSubscriptionStatus と認証往復を共有する
+  const user = await getCachedUser();
 
   let hasMemberAccess = false;
   if (user) {
