@@ -201,11 +201,12 @@ export async function getArticleProgress(
   articleId: string
 ): Promise<"completed" | "in_progress" | "not_started"> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // 認証はリクエストスコープでメモ化された getCachedUser を使い、
+    // 同一レンダー内の他の auth.getUser 呼び出しと往復を共有する
+    const user = await getCachedUser();
     if (!user) return "not_started";
+
+    const supabase = await createClient();
 
     const { data } = await supabase
       .from("article_progress")
@@ -440,11 +441,12 @@ export async function markLessonAsCompleted(
  */
 export async function getLessonStatus(lessonId: string): Promise<LessonStatus> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // 認証はリクエストスコープでメモ化された getCachedUser を使い、
+    // 同一レンダー内の他の auth.getUser 呼び出しと往復を共有する
+    const user = await getCachedUser();
     if (!user) return "not_started";
+
+    const supabase = await createClient();
 
     const { data } = await supabase
       .from("lesson_progress")
