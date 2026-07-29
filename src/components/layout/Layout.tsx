@@ -79,9 +79,9 @@ export function Layout({ children, className, user }: LayoutProps) {
   // /dev/top6: 背景白 + サイドバー右端に薄いボーダーのパターン確認用（このページのみの見た目差分）
   const isTop6 = pathname?.startsWith("/dev/top6") ?? false;
   const isTop5 = pathname?.startsWith("/dev/top5") ?? false;
-  // 本番トップ `/`（新トップ = 旧 /dev/top5 の構成）
-  const isHome = pathname === "/";
-  // `/`, /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にする（新トップの見た目）
+  // 本番トップ `/` と、ログイン中でも新トップを見られる /top（同一構成）
+  const isHome = pathname === "/" || pathname === "/top";
+  // `/`, /top, /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にする（新トップの見た目）
   const isHalfGradient = isHome || isTop5 || isTop6;
 
   return (
