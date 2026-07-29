@@ -6,7 +6,7 @@
  * Figma: PRD🏠_Roadmap_2026 node-id 1-5906
  */
 
-import { Verify } from "iconsax-react";
+import { BadgeCheck } from "lucide-react";
 import type { SanityInterestingPerspectives } from "@/types/sanity-roadmap";
 
 interface InterestingPerspectivesProps {
@@ -69,7 +69,7 @@ export default function InterestingPerspectives({
                 <div className="flex items-center gap-6">
                   {/* アイコン */}
                   <div className="flex-shrink-0">
-                    <Verify size={24} color="#52674e" variant="Linear" />
+                    <BadgeCheck size={24} color="#52674e" />
                   </div>
 
                   {/* テキストコンテンツ */}
