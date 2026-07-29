@@ -7,7 +7,7 @@
  * ヒーローの直後に配置して、ロードマップ全体の流れを提示
  */
 
-import { ArrowDown2 } from "iconsax-react";
+import { ChevronDown } from "lucide-react";
 import type { SanityRoadmapStep } from "@/types/sanity-roadmap";
 import DottedDivider from "@/components/common/DottedDivider";
 
@@ -91,7 +91,7 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
                     {/* 下矢印アイコン */}
                     <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-muted-custom">
                       <div className="transition-transform duration-500 group-hover:rotate-[360deg]">
-                        <ArrowDown2 size={16} color="#9ca3af" variant="Linear" />
+                        <ChevronDown size={16} color="#9ca3af" />
                       </div>
                     </div>
                   </button>

@@ -7,7 +7,7 @@
  * 2026-04-02: 横型レイアウト（課題 → 矢印 → 解決）
  */
 
-import { MessageQuestion, ArrowRight2 } from "iconsax-react";
+import { MessageCircleQuestion, ArrowRight } from "lucide-react";
 import type { SanityChangingLandscape } from "@/types/sanity-roadmap";
 
 interface ChangingLandscapeProps {
@@ -61,10 +61,9 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
               <div className="flex items-center gap-3 shrink-0 w-full md:w-[425px]">
                 {/* アイコン */}
                 <div className="flex items-center justify-center w-6 h-6 shrink-0">
-                  <MessageQuestion
+                  <MessageCircleQuestion
                     size={24}
                     color="#939993"
-                    variant="Linear"
                   />
                 </div>
 
@@ -76,7 +75,7 @@ export default function ChangingLandscape({ data }: ChangingLandscapeProps) {
 
               {/* 中央: 矢印アイコン（デスクトップのみ） */}
               <div className="hidden md:flex shrink-0 w-8 h-8 items-center justify-center">
-                <ArrowRight2 size={32} color="#939993" variant="Linear" />
+                <ArrowRight size={32} color="#939993" />
               </div>
 
               {/* 右側: 解決テキスト */}
