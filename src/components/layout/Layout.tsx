@@ -27,7 +27,7 @@ interface LayoutProps {
  * モバイル: ハンバーガーメニューでSidebar開閉
  *
  * 以下のページは独自のレイアウトを使用するため、グローバルナビを非表示:
- * - /articles/[slug]: ArticleSideNavNew を使用
+ * - /contents/[slug]: ArticleSideNavNew を使用
  * - /blog/*: BlogHeader/Footer を使用
  * - /feedback-apply/submit: フォーム専用ページ
  */
@@ -58,7 +58,7 @@ export function Layout({ children, className, user }: LayoutProps) {
   // グローバルナビを非表示にするページ
   const shouldSkipGlobalLayout = (() => {
     if (!pathname) return false;
-    if (pathname.startsWith("/articles/") && pathname !== "/articles") return true;
+    if (pathname.startsWith("/contents/")) return true;
     if (pathname.startsWith("/blog")) return true;
     if (pathname === "/feedback-apply/submit") return true;
     // #139: 投稿モードは専用シェル（PostFlowShell）を使うためグローバルナビ非表示

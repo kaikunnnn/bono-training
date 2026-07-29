@@ -118,7 +118,7 @@ function BookmarkItem({
       style={{ minHeight: "68px", padding: "16px" }}
     >
       <Link
-        href={`/articles/${article.slug.current}`}
+        href={`/contents/${article.slug.current}`}
         className="flex items-center gap-3 flex-1 min-w-0 no-underline"
       >
         {/* サムネイル */}

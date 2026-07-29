@@ -75,7 +75,7 @@ export function ArticleItem({
 
   return (
     <Link
-      href={"/articles/" + slug}
+      href={"/contents/" + slug}
       className="flex items-center gap-4 px-8 py-4 border-b border-black/[0.08] cursor-pointer hover:bg-gray-50 transition w-full"
     >
       {isCompleted ? (

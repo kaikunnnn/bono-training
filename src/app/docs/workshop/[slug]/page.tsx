@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const doc = getDocBySlug(slug);
   if (!doc) return {};
   return {
-    title: `${doc.title} | ${WORKSHOP_META.title} | BONO`,
+    title: `${doc.title} | ${WORKSHOP_META.title}`,
     description: doc.description,
     robots: { index: false }, // テスト運用中のため noindex
   };

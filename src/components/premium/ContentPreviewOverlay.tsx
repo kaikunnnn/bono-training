@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 interface ContentPreviewOverlayProps {
   isLoggedIn?: boolean;
-  /** ログイン後のリダイレクト先（例: /articles/some-slug） */
+  /** ログイン後のリダイレクト先（例: /contents/some-slug） */
   redirectTo?: string;
 }
 

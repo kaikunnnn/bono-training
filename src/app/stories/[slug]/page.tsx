@@ -60,11 +60,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const ogImage = story.heroImageUrl;
 
   return {
-    title: `${story.title} | BONO`,
+    title: `${story.title}`,
     description: story.excerpt,
     keywords: story.tags?.join(", "),
     openGraph: {
-      title: `${story.title} | BONO`,
+      title: `${story.title}`,
       description: story.excerpt,
       type: "article",
       images: ogImage ? [ogImage] : undefined,
