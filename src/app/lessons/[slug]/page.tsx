@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getLesson, getLessonMetadata, getAllLessonSlugs } from "@/lib/sanity";
+import { getLesson, getLessonMetadata } from "@/lib/sanity";
 import { getLessonProgress } from "@/lib/services/progress";
 import { getSubscriptionStatus, isContentLocked } from "@/lib/subscription";
 import LessonDetailClient from "./LessonDetailClient";
@@ -11,15 +11,6 @@ export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  try {
-    const slugs = await getAllLessonSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
 }
 
 // OGP用メタデータ生成

@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getFeedback, getRelatedFeedbacks, getRecentFeedbacks, getAllFeedbackSlugs } from "@/lib/sanity";
+import { getFeedback, getRelatedFeedbacks, getRecentFeedbacks } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
 
 // ISR: 1時間キャッシュ
@@ -15,15 +15,6 @@ import { ArrowLeft, ExternalLink, Lock, Play } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  try {
-    const slugs = await getAllFeedbackSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

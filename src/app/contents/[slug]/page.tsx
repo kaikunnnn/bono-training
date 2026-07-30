@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getArticleWithContext, getArticleMetadata, getAllArticles } from "@/lib/sanity";
+import { getArticleWithContext, getArticleMetadata } from "@/lib/sanity";
 import { redirectMissingContent } from "@/lib/missingContentRedirect";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
 import { isBookmarked } from "@/lib/services/bookmarks";
@@ -19,15 +19,6 @@ export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  try {
-    const articles = await getAllArticles();
-    return articles.map((article) => ({ slug: article.slug.current }));
-  } catch {
-    return [];
-  }
 }
 
 // OGP用メタデータ生成
