@@ -1,9 +1,29 @@
 import 'server-only'
-import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
+import { createClient as createSupabaseAnonClient } from "@supabase/supabase-js";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { getTrainingDetailFromSanity } from "@/lib/sanity";
 import type { TrainingDetailData } from "@/types/training";
 import { TrainingError } from "@/lib/errors";
+
+/**
+ * Edge Function 呼び出し専用の cookie-free Supabase クライアント（遅延初期化）
+ *
+ * unstable_cache のキャッシュ関数内では cookies() 等の動的APIが使えないため、
+ * @/lib/supabase/server の createClient（cookieベース）は使えない。
+ * Edge Function は内部で SERVICE_ROLE を使い、呼び出し元のユーザー識別に依存しない
+ * （結果はユーザー非依存）ため、anon キーの cookie なしクライアントで呼び出す。
+ */
+let anonClient: SupabaseClient | null = null;
+const getAnonClient = (): SupabaseClient => {
+  if (!anonClient) {
+    anonClient = createSupabaseAnonClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+  }
+  return anonClient;
+};
 
 /**
  * トレーニング詳細情報を取得（Storageベース）
@@ -12,8 +32,11 @@ import { TrainingError } from "@/lib/errors";
  * 1. Edge Function（get-training-detail）
  * 2. Sanity CMS 直接クエリ
  * 3. TrainingError をスロー（呼び出し元で notFound() 処理）
+ *
+ * unstable_cache で永続キャッシュ（リクエスト横断・ユーザー横断で共有）。
+ * slug は関数引数としてキャッシュキーに自動的に含まれる。
  */
-export const getTrainingDetail = cache(async (
+export const getTrainingDetail = unstable_cache(async (
   slug: string
 ): Promise<TrainingDetailData> => {
   if (!slug || slug.trim() === "") {
@@ -28,7 +51,7 @@ export const getTrainingDetail = cache(async (
 
   // 1. Edge Function（第1段階）
   try {
-    const supabase = await createClient();
+    const supabase = getAnonClient();
 
     const { data, error } = await supabase.functions.invoke(
       "get-training-detail",
@@ -114,4 +137,4 @@ export const getTrainingDetail = cache(async (
       );
     }
   }
-});
+}, ["training:detail"], { tags: ["training"], revalidate: 3600 });
