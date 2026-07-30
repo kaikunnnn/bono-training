@@ -7,25 +7,43 @@ import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-
 import type { Guide, GuideCategory } from "@/types/guide";
 
 // Sanity client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
-let _client: ReturnType<typeof createClient> | null = null;
+function createSanityClient(useCdn: boolean): ReturnType<typeof createClient> {
+  return createClient({
+    projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
+    dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
+    apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
+    useCdn,
+  });
+}
 
+// 既定クライアント: useCdn:true（Sanity公式の本番推奨）。CDN配信でAPIリクエスト枠を
+// ほぼ消費せず高速。コンテンツの鮮度は Next 側キャッシュ(unstable_cache) + 将来の
+// Sanity Webhook→revalidateTag で管理する方針（issue #163）。
+let _client: ReturnType<typeof createClient> | null = null;
 function getClient(): ReturnType<typeof createClient> {
   if (!_client) {
-    _client = createClient({
-      projectId: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-      dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
-      apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
-      useCdn: false, // リアルタイム更新のためCDNを無効化
-    });
+    _client = createSanityClient(true);
   }
   return _client;
+}
+
+// live クライアント: useCdn:false（CDNを介さず常に最新）。掲示板(questions)など
+// 投稿直後の即時反映が必要な read 専用。API枠を消費するため利用は最小限に限定する。
+let _liveClient: ReturnType<typeof createClient> | null = null;
+function getLiveClient(): ReturnType<typeof createClient> {
+  if (!_liveClient) {
+    _liveClient = createSanityClient(false);
+  }
+  return _liveClient;
 }
 
 /**
  * 遅延初期化されたSanityクライアントを取得する関数。
  * Proxyはprivateフィールドを転送できないため関数エクスポートに変更。
+ * - client: 既定（CDN、高速・低API消費）
+ * - liveClient: 常に最新（掲示板など即時反映が必要な箇所のみ）
  */
-export { getClient as client };
+export { getClient as client, getLiveClient as liveClient };
 
 let _builder: ReturnType<typeof imageUrlBuilder> | null = null;
 
