@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   getGuideFromSanity,
-  getAllGuideSlugsFromSanity,
   getGuidesByCategoryFromSanity,
 } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
@@ -20,11 +19,6 @@ export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllGuideSlugsFromSanity();
-  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
