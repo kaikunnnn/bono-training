@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { SubscriptionSuccessContent } from "@/components/subscription/SubscriptionSuccessContent";
+import { NewSubscriberSuccessContent } from "@/components/subscription/NewSubscriberSuccessContent";
+import { ChangeSubscriberSuccessContent } from "@/components/subscription/ChangeSubscriberSuccessContent";
 import {
   trackSubscriptionStart,
   trackPurchase,
@@ -13,12 +14,25 @@ import type { SuccessType } from "@/components/subscription/SubscriptionSuccessC
 
 type PlanDuration = 1 | 3;
 
+/** 次回更新日を「2026年9月7日」形式に整形（PlanChangeConfirmModal と同じ ja-JP 整形） */
+function formatRenewalDate(iso: string | null): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString("ja-JP", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+}
+
 export default function SubscriptionSuccessPage() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [planType, setPlanType] = useState<PlanType | null>(null);
   const [duration, setDuration] = useState<PlanDuration | null>(null);
+  const [renewalDate, setRenewalDate] = useState<string | null>(null);
 
   // URLパラメータからタイプを判定（プラン変更の場合: ?type=updated&plan=xxx&duration=x）
   const successType: SuccessType =
@@ -57,7 +71,9 @@ export default function SubscriptionSuccessPage() {
 
         const { data: subscription, error: subError } = await supabase
           .from("user_subscriptions")
-          .select("plan_type, duration, is_active")
+          .select(
+            "plan_type, duration, is_active, current_period_end, cancel_at, cancel_at_period_end"
+          )
           .eq("user_id", user.id)
           .eq("is_active", true)
           .eq("environment", environment)
@@ -73,6 +89,14 @@ export default function SubscriptionSuccessPage() {
         if (subscription) {
           setPlanType(subscription.plan_type as PlanType);
           setDuration(subscription.duration as PlanDuration);
+
+          // 次回更新日: 解約予約があれば cancel_at、それ以外は current_period_end
+          // （src/lib/subscription.ts の renewalDate 決定ロジックに準拠）
+          const rawRenewal =
+            subscription.cancel_at_period_end && subscription.cancel_at
+              ? subscription.cancel_at
+              : subscription.current_period_end;
+          setRenewalDate(formatRenewalDate(rawRenewal));
         }
 
         setIsLoading(false);
@@ -130,11 +154,25 @@ export default function SubscriptionSuccessPage() {
     }
   }, [isLoading, planType, duration, successType, urlPlanType]);
 
+  // 新規加入は Figma準拠の新デザイン、プラン変更は従来画面（別フェーズで対応）
+  if (successType === "new") {
+    return (
+      <NewSubscriberSuccessContent
+        planType={planType}
+        duration={duration}
+        renewalDate={renewalDate}
+        isLoading={isLoading}
+        error={error}
+      />
+    );
+  }
+
+  // プラン変更（type=updated）: 変更確認を主役にした専用画面
   return (
-    <SubscriptionSuccessContent
-      type={successType}
+    <ChangeSubscriberSuccessContent
       planType={planType}
       duration={duration}
+      renewalDate={renewalDate}
       isLoading={isLoading}
       error={error}
     />
