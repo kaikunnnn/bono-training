@@ -25,7 +25,7 @@ export function PurposeItem({ subLabel, label, icon, href }: PurposeItemProps) {
         className="group -mx-3 flex items-center gap-4 rounded-[8px] px-3 py-3 text-left transition-colors duration-200 hover:bg-black/[0.03]"
       >
         <div
-          className="flex h-14 w-[72px] shrink-0 items-center justify-center rounded-[4px] border-[0.5px] border-black/10 transition-transform duration-300 group-hover:scale-[1.08]"
+          className="flex size-14 shrink-0 items-center justify-center rounded-[4px] border-[0.5px] border-black/10 transition-transform duration-300 group-hover:scale-[1.08]"
           style={{ backgroundImage: PURPOSE_ICON_GRADIENT }}
         >
           {icon}
