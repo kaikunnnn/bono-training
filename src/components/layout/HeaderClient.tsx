@@ -26,6 +26,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOut } from "@/app/(auth)/actions";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface HeaderUser {
   id: string;
@@ -35,12 +36,14 @@ interface HeaderUser {
 
 interface HeaderClientProps {
   user: HeaderUser | null;
+  /** ログインユーザーの未読通知件数（未ログイン時は 0） */
+  unreadCount?: number;
 }
 
 /**
  * ヘッダークライアントコンポーネント
  */
-export function HeaderClient({ user }: HeaderClientProps) {
+export function HeaderClient({ user, unreadCount = 0 }: HeaderClientProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [isMounted, setIsMounted] = useState(false);
@@ -74,7 +77,13 @@ export function HeaderClient({ user }: HeaderClientProps) {
               <Link href="/login">ログイン</Link>
             </Button>
           ) : (
-            <UserMenu user={user} onSignOut={handleSignOut} />
+            <>
+              <NotificationBell
+                userId={user.id}
+                initialUnreadCount={unreadCount}
+              />
+              <UserMenu user={user} onSignOut={handleSignOut} />
+            </>
           )}
         </div>
       </div>

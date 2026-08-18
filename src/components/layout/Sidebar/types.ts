@@ -27,6 +27,11 @@ export interface SidebarProps {
     id: string;
     email: string;
   } | null;
+  /**
+   * 通知ベル（#160 S3）。未読件数取得を内包した Server Component を Suspense で
+   * ラップした要素を上位から受け取りそのまま描画する。未ログイン時は undefined/null。
+   */
+  notificationSlot?: ReactNode;
 }
 
 /**

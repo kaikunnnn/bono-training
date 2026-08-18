@@ -23,7 +23,7 @@ const FEEDBACK_URL =
  * - 高さ: 100%（デスクトップ時）
  * - レイアウト: flexbox（縦並び）
  */
-export function Sidebar({ className, user }: SidebarProps) {
+export function Sidebar({ className, user, notificationSlot }: SidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -138,6 +138,16 @@ export function Sidebar({ className, user }: SidebarProps) {
             ログイン
           </SidebarMenuItem>
         )}
+        {/* 通知ベル（#160 S3）。ログイン時のみ notificationSlot が渡る。
+            サイドバー項目と左端を揃え、ラベル「通知」を添える。ベル本体は Popover を
+            内包した Client Component（未読バッジ・一覧表示はそちらが担当）。 */}
+        {notificationSlot && (
+          <div className="flex items-center gap-2 px-[15px] py-1">
+            {notificationSlot}
+            <span className="text-sm text-[#2F3037]">通知</span>
+          </div>
+        )}
+
         {user && (
           <SidebarMenuItem
             href="/account"
