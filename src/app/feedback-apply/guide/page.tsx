@@ -65,7 +65,7 @@ function SectionBlock({
     <div className={bordered ? "border-b border-black/[0.12] py-10" : "py-10"}>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-[40%] md:shrink-0">
-          <h3 className="font-rounded-mplus text-lg font-bold text-slate-900">
+          <h3 className="font-rounded-mplus text-lg font-bold text-text-primary">
             {title}
           </h3>
         </div>
@@ -102,8 +102,8 @@ function ChoiceItem({
 }) {
   return (
     <li>
-      <span className="font-bold text-slate-900">{label}：</span>
-      <span className="text-slate-700">{children}</span>
+      <span className="font-bold text-text-primary">{label}：</span>
+      <span className="text-text-secondary">{children}</span>
     </li>
   );
 }
@@ -123,7 +123,7 @@ export default async function FeedbackGuidePage() {
             {/* 左側: タイトル + ボタン（40%幅） */}
             <div className="md:w-[40%] md:shrink-0 flex flex-col gap-3">
               <div className="space-y-4">
-                <h1 className="font-rounded-mplus text-[30px] font-bold text-slate-900 leading-tight">
+                <h1 className="font-rounded-mplus text-[30px] font-bold text-text-primary leading-tight">
                   フィードバックのやり方
                 </h1>
                 <ApplyButton canApply={canApply} className="w-fit" />
@@ -131,7 +131,7 @@ export default async function FeedbackGuidePage() {
             </div>
 
             {/* 右側: 説明文（60%幅） */}
-            <div className="md:w-[60%] text-slate-600 leading-relaxed py-4">
+            <div className="md:w-[60%] text-text-muted leading-relaxed py-4">
               <p>BONOのフィードバックは「デザイナー上司への相談」として使える仕組みです。</p>
               <p>使い方・前提・フォームの選び方をまとめました。</p>
             </div>
@@ -163,7 +163,7 @@ export default async function FeedbackGuidePage() {
 
             <div>
               <SectionBlock title="グロースプランの方限定でフィードバックします">
-                <div className="space-y-3 text-lg leading-relaxed text-slate-700">
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
                   <p>
                     フィードバックはグロースプラン（フィードバックプラン）の方限定で行っています。月2回までご利用いただけます（2025年6月改定）。
                   </p>
@@ -171,7 +171,7 @@ export default async function FeedbackGuidePage() {
               </SectionBlock>
 
               <SectionBlock title="綺麗なアウトプットが無くても相談できます">
-                <div className="space-y-3 text-lg leading-relaxed text-slate-700">
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
                   <p>
                     フィードバックは「デザイナー上司への相談」として使ってください。自分なりに完成したデザインがなくても大丈夫です。
                   </p>
@@ -182,7 +182,7 @@ export default async function FeedbackGuidePage() {
               </SectionBlock>
 
               <SectionBlock title="フィードバックには目的を含めましょう" bordered={false}>
-                <div className="space-y-3 text-lg leading-relaxed text-slate-700">
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
                   <p>
                     「何を見てほしいか／相談したい内容」が明確でないフィードバック依頼は、まず考えてみるよう案内されることがあります。何も考えずに依頼すると「いろいろできていない」と言われて凹んだり、言われたことをただやるだけになってしまい、成長につながりにくくなります。
                   </p>
@@ -240,11 +240,11 @@ export default async function FeedbackGuidePage() {
         </article>
 
         {/* ボトムCTA */}
-        <div className="mt-16 rounded-2xl border border-gray-200 bg-slate-50 px-6 py-10 text-center">
-          <h2 className="font-rounded-mplus text-xl font-bold text-slate-900">
+        <div className="mt-16 rounded-2xl border border-gray-200 bg-muted-custom px-6 py-10 text-center">
+          <h2 className="font-rounded-mplus text-xl font-bold text-text-primary">
             フィードバックを使ってみよう
           </h2>
-          <p className="mt-3 text-slate-600 leading-relaxed">
+          <p className="mt-3 text-text-muted leading-relaxed">
             相談したいことを整理して、応募してみましょう。
           </p>
           <div className="mt-6 flex justify-center">

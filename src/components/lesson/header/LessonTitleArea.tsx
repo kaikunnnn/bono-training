@@ -63,14 +63,14 @@ export function LessonTitleArea({
         )}
         {/* ロードマップ紐づき表示 */}
         {lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0 && (
-          <div className="flex items-center gap-1 text-[rgba(13,34,29,0.48)]">
+          <div className="flex items-center gap-1 text-text-primary/50">
             <Map className="w-3.5 h-3.5 flex-shrink-0" />
             <div className="font-noto-sans-jp text-[13px] font-medium flex items-center flex-wrap gap-x-1">
               {lesson.linkedRoadmaps.map((roadmap, index) => (
                 <span key={roadmap.slug} className="flex items-center gap-1">
                   <Link
                     href={`/roadmap/${roadmap.slug}`}
-                    className="underline hover:text-[rgba(13,34,29,0.7)] transition-colors"
+                    className="underline hover:text-text-primary/70 transition-colors"
                   >
                     {roadmap.shortTitle || roadmap.title}
                   </Link>
@@ -94,12 +94,13 @@ export function LessonTitleArea({
             </p>
           </div>
           {onViewAllDetails && (
-            <button
-              className="font-noto-sans-jp font-medium text-[14px] text-text-link leading-[1.6] hover:underline"
+            <Button
+              variant="ghost"
               onClick={onViewAllDetails}
+              className="h-auto p-0 font-noto-sans-jp font-medium text-[14px] text-text-link leading-[1.6] hover:underline hover:text-text-link hover:bg-transparent active:bg-transparent"
             >
               概要・目的ですべてみる
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -108,9 +109,8 @@ export function LessonTitleArea({
       <div className="flex items-start w-full">
         <Button
           size="large"
-          variant="default"
+          variant="primary"
           onClick={onStart}
-          className="bg-black text-white hover:bg-black/90"
         >
           スタートする
         </Button>

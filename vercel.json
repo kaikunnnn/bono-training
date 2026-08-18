@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/storage-usage",
       "schedule": "0 21 * * 0"
+    },
+    {
+      "path": "/api/cron/onboarding-funnel",
+      "schedule": "0 22 * * 0"
     }
   ]
 }

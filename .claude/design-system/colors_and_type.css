@@ -78,12 +78,13 @@
   --text-success: #047A53;
   --text-warning: #9E6608;
   --text-error:   #C42626;
+  --text-info:    #1D4ED8;  /* info コールアウトのアクセント（ボーダー等） */
 
   /* Semantic backgrounds */
   --bg-success: rgba(138, 204, 161, 0.12);
   --bg-warning: rgba(255, 183, 33, 0.12);
   --bg-error:   #FDEFF2;
-  --bg-info:    #FFFFFF;
+  --bg-info:    rgba(59, 130, 246, 0.12);  /* info コールアウト背景（青の淡いティント） */
 
   /* Borders */
   --border-light:   #D4D6CC;
