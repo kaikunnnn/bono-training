@@ -212,7 +212,7 @@ export default async function CommunityGuidePage() {
                 </p>
                 <p>
                   使い方・前提は「
-                  <Link href="/feedback-apply/guide" className={linkCls}>
+                  <Link href="/how-to/feedback" className={linkCls}>
                     フィードバックのやり方
                   </Link>
                   」にまとめています。

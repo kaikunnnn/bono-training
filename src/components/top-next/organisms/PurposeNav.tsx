@@ -24,7 +24,7 @@ const PURPOSE_ITEMS = [
     sub: "フィードバック",
     label: "プロに改善点をもらう",
     icon: <ClipboardCheck className="size-5 text-text-primary" aria-hidden />,
-    href: "/feedback-apply/guide",
+    href: "/how-to/feedback",
   },
   {
     sub: "掲示板",
