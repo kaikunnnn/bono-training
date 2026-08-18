@@ -1014,16 +1014,18 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
 
     const userId = customerData.user_id;
 
-    // 現在のプラン情報を取得（プラン変更検知用）
+    // 現在のプラン情報を取得（プラン変更検知用 / 解約予約の遷移検知用）
     const { data: currentSubData } = await supabase
       .from("user_subscriptions")
-      .select("plan_type, duration")
+      .select("plan_type, duration, cancel_at_period_end")
       .eq("user_id", userId)
       .eq("environment", ENVIRONMENT)
       .single();
 
     const previousPlanType = currentSubData?.plan_type;
     const previousDuration = currentSubData?.duration;
+    // 更新前の解約予約フラグ（行が無い場合は false 扱い）。遷移検知に使う。
+    const previousCancelAtPeriodEnd = currentSubData?.cancel_at_period_end ?? false;
 
     // 新しいプラン情報を取得
     const items = subscription.items.data;
@@ -1104,6 +1106,33 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
       console.error("🚀 [LIVE環境] user_subscriptions更新エラー:", updateError);
     } else {
       console.log(`✅ [LIVE環境] プラン変更完了: ${planType} (${duration}ヶ月)`);
+    }
+
+    // ========================================
+    // 🗒 解約予約(cancel_at_period_end)の遷移を記録（週次の予約数集計用 / issue 191）
+    // false→true = 解約予約 / true→false = 予約取消。追記専用ログに残す。
+    // user_subscriptions は現在値のみで予約時刻・履歴が残らないため、ここで記録する。
+    // 記録失敗は課金処理を止めない（warnして続行）。
+    // ========================================
+    if (previousCancelAtPeriodEnd !== cancelAtPeriodEnd) {
+      const reservationEventType = cancelAtPeriodEnd ? "reserved" : "unreserved";
+      const { error: reservationLogError } = await supabase
+        .from("cancel_reservation_events")
+        .insert({
+          user_id: userId,
+          stripe_subscription_id: subscriptionId,
+          stripe_customer_id: customerId,
+          plan_type: planType,
+          duration: duration,
+          event_type: reservationEventType,
+          current_period_end: currentPeriodEnd,
+          environment: ENVIRONMENT,
+        });
+      if (reservationLogError) {
+        console.warn(`⚠️ [${ENVIRONMENT}環境] 解約予約ログ記録失敗（続行）:`, reservationLogError);
+      } else {
+        console.log(`🗒 [${ENVIRONMENT}環境] 解約予約ログ: ${reservationEventType} user=${userId}`);
+      }
     }
 
     // subscriptionsテーブルも更新
