@@ -18,8 +18,14 @@ export default defineType({
       name: "url",
       title: "URL",
       type: "url",
-      validation: (Rule) => Rule.required(),
-      description: "リンク先のURL",
+      // 相対URL（例: /how-to/community, /roadmap）も許可する。
+      // 内部リンクはドメイン移行に強い相対パスで貼るため、絶対URL(http/https)に加えて相対も通す。
+      validation: (Rule) =>
+        Rule.required().uri({
+          scheme: ["http", "https"],
+          allowRelative: true,
+        }),
+      description: "リンク先のURL（絶対URL または /how-to/community のような相対パス）",
     }),
     defineField({
       name: "title",
