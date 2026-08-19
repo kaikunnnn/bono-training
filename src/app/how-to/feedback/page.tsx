@@ -50,7 +50,7 @@ function ApplyButton({
 }
 
 // 見出し(40%) + 内容(60%) の並列ブロック（/feedback-apply の SectionLayout と同じ構造。
-// アイコンは無し）。「前提」「フォームの内容について」という大見出し(h2)の中の
+// アイコンは無し）。「おすすめ／よくない使い方」「フォームの内容について」という大見出し(h2)の中の
 // 1トピック=1ブロックとして使うため、見出しは h3。
 function SectionBlock({
   title,
@@ -65,7 +65,7 @@ function SectionBlock({
     <div className={bordered ? "border-b border-black/[0.12] py-10" : "py-10"}>
       <div className="flex flex-col md:flex-row gap-8">
         <div className="md:w-[40%] md:shrink-0">
-          <h3 className="font-rounded-mplus text-lg font-bold text-slate-900">
+          <h3 className="font-rounded-mplus text-lg font-bold text-text-primary">
             {title}
           </h3>
         </div>
@@ -78,18 +78,18 @@ function SectionBlock({
 export const metadata: Metadata = {
   title: "フィードバックのやり方",
   description:
-    "BONOのフィードバックの使い方・前提・フォームの選び方を解説します",
+    "BONOのフィードバックの使い方・おすすめの使い方・フォームの選び方を解説します",
   openGraph: {
     title: "フィードバックのやり方 | BONO",
     description:
-      "BONOのフィードバックの使い方・前提・フォームの選び方を解説します",
+      "BONOのフィードバックの使い方・おすすめの使い方・フォームの選び方を解説します",
   },
   twitter: {
     title: "フィードバックのやり方 | BONO",
     description:
-      "BONOのフィードバックの使い方・前提・フォームの選び方を解説します",
+      "BONOのフィードバックの使い方・おすすめの使い方・フォームの選び方を解説します",
   },
-  alternates: { canonical: "/feedback-apply/guide" },
+  alternates: { canonical: "/how-to/feedback" },
 };
 
 // フォーム選択肢アイテム（○○ or ××、箇条書き1項目）
@@ -102,8 +102,8 @@ function ChoiceItem({
 }) {
   return (
     <li>
-      <span className="font-bold text-slate-900">{label}：</span>
-      <span className="text-slate-700">{children}</span>
+      <span className="font-bold text-text-primary">{label}：</span>
+      <span className="text-text-secondary">{children}</span>
     </li>
   );
 }
@@ -123,7 +123,7 @@ export default async function FeedbackGuidePage() {
             {/* 左側: タイトル + ボタン（40%幅） */}
             <div className="md:w-[40%] md:shrink-0 flex flex-col gap-3">
               <div className="space-y-4">
-                <h1 className="font-rounded-mplus text-[30px] font-bold text-slate-900 leading-tight">
+                <h1 className="font-rounded-mplus text-[30px] font-bold text-text-primary leading-tight">
                   フィードバックのやり方
                 </h1>
                 <ApplyButton canApply={canApply} className="w-fit" />
@@ -131,9 +131,9 @@ export default async function FeedbackGuidePage() {
             </div>
 
             {/* 右側: 説明文（60%幅） */}
-            <div className="md:w-[60%] text-slate-600 leading-relaxed py-4">
+            <div className="md:w-[60%] text-text-muted leading-relaxed py-4">
               <p>BONOのフィードバックは「デザイナー上司への相談」として使える仕組みです。</p>
-              <p>使い方・前提・フォームの選び方をまとめました。</p>
+              <p>おすすめの使い方・避けたい使い方・フォームの選び方をまとめました。</p>
             </div>
           </div>
         </section>
@@ -154,40 +154,89 @@ export default async function FeedbackGuidePage() {
           </div>
         </section>
 
-        {/* 本文: 「前提」「フォームの内容について」を大見出し(h2)にして、
+        {/* 本文: 「おすすめ／よくない使い方」「フォームの内容について」を大見出し(h2)にして、
             その中の各トピックを1トピック=1並列ブロック(h3)の単位で並べる */}
         <article>
-          {/* 前提 */}
+          {/* おすすめの使い方 */}
           <section className="border-b border-black/[0.12] py-16">
-            <TopSectionHeading badgeLabel="前提条件" heading="前提" className="mb-8" />
+            <TopSectionHeading badgeLabel="おすすめ" heading="おすすめの使い方" className="mb-8" />
 
             <div>
-              <SectionBlock title="グロースプランの方限定でフィードバックします">
-                <div className="space-y-3 text-lg leading-relaxed text-slate-700">
+              <SectionBlock title="迷ったら「相談」として使おう">
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
                   <p>
-                    フィードバックはグロースプラン（フィードバックプラン）の方限定で行っています。月2回までご利用いただけます（2025年6月改定）。
+                    デザインの進め方やアウトプットに自信がなくても大丈夫です。「ここから先、どう進めればいいかわからない」と思った時点で、相談として使ってください。
+                  </p>
+                  <p>
+                    完璧である必要はありません。むしろ、自分で完成させてから持ってくるより、一度やってみて仮説がある状態で見てもらうほうがおすすめです。
+                  </p>
+                  <p>
+                    これは実際の現場の進め方と同じです。完成してから見せるのではなく、途中の経過を共有しながら、方向性がずれていないかを確かめる。迷っているところを早めに相談して、細かくフィードバックをもらいながら進める。現場でも当たり前に行われていることです。
                   </p>
                 </div>
               </SectionBlock>
 
-              <SectionBlock title="綺麗なアウトプットが無くても相談できます">
-                <div className="space-y-3 text-lg leading-relaxed text-slate-700">
+              <SectionBlock title="途中でも方向性の相談で使おう">
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
                   <p>
-                    フィードバックは「デザイナー上司への相談」として使ってください。自分なりに完成したデザインがなくても大丈夫です。
+                    考えが固まってから「実は大きくずれていた」とわかると、巻き戻しの手間が大きくなります。だから、まとまりきっていなくてもかまいません。「今の方向、良くないかもしれない」と感じた時点で、方向性の相談として使ってください。
                   </p>
                   <p>
-                    例えば「デザインの途中だけど行き詰まったので、プロの視点で方向性を示唆してほしい」「プロトタイプの段階までやってみたが、方向性に自信がない」といった相談も歓迎です。
+                    コンテンツを一度見ただけで、すぐにできるようになる人はほとんどいません。大きくずれてダメージを受けるより、途中で細かく相談したほうが軽く進めます。これも現場のやり方です。
                   </p>
                 </div>
               </SectionBlock>
 
-              <SectionBlock title="フィードバックには目的を含めましょう" bordered={false}>
-                <div className="space-y-3 text-lg leading-relaxed text-slate-700">
+              <SectionBlock title="定期デザインチェックとして使おう" bordered={false}>
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
                   <p>
-                    「何を見てほしいか／相談したい内容」が明確でないフィードバック依頼は、まず考えてみるよう案内されることがあります。何も考えずに依頼すると「いろいろできていない」と言われて凹んだり、言われたことをただやるだけになってしまい、成長につながりにくくなります。
+                    今の状態を定期的に見てもらう。これを強くおすすめします。現場では確実にやることだからです。
                   </p>
                   <p>
-                    まず自分の頭で「何が悪そうか」「どこを改善できそうか」「やっているけどよくわかっていない部分はどこか」を考えた上で、他者の目線を借りるのが効果的です。うまく言語化できなくても「なんとなくここが変な気がする」という状態で構いません。とにかく自分のデザインについて考えてみて、聞きたい部分を伝えることが重要です。
+                    一人だけの視点でデザインを進めることは、実はあまりありません。大きくずれる前に細かく相談し、フィードバックをもらいながら進める。そのほうが、あとから大量に指摘されるより、少しずつ自分で試しながら身につけられます。
+                  </p>
+                </div>
+              </SectionBlock>
+            </div>
+          </section>
+
+          {/* よくない使い方 */}
+          <section className="border-b border-black/[0.12] py-16">
+            <TopSectionHeading badgeLabel="注意" heading="よくない使い方" className="mb-8" />
+
+            <div>
+              <SectionBlock title="完璧にしてから見せるのは良くない">
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+                  <p>
+                    よほどの理由がない限り、完全に仕上げてから相談すると、たいてい大量の改善ポイントが返ってきます。方向性が合っていれば問題はありません。ただ、ずれていたときの修正量とダメージが、とても大きくなってしまいます。
+                  </p>
+                  <p>
+                    現場では、早めにパターンを出してチームに共有し、方向性を決めながら進めるのが普通です。小さい単位で相談する、確認する、疑問を持って進める。このやり方を身につけておくと、ずっと楽になります。
+                  </p>
+                </div>
+              </SectionBlock>
+
+              <SectionBlock title="なんか言われたくないから見せない">
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+                  <p>
+                    あれこれ言われたくない、という気持ちは自然です。でも、「言われたくないから完璧にしてから見せる」は、進め方としてはあまり良くありません。
+                  </p>
+                  <p>
+                    現場でも、恥ずかしさはありつつ、途中のアウトプットを共有して早めにフィードバックをもらいます。そのほうが、ずれずに進む確率が上がるからです。完璧にしてから出したい気持ちはわかります。それでも、途中で見せるほうが自然で、うまくいきます。
+                  </p>
+                </div>
+              </SectionBlock>
+
+              <SectionBlock title="考えてないけど答えが欲しい" bordered={false}>
+                <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+                  <p>
+                    「とりあえずやったけど、よくわからないから答えを教えてほしい」。この気持ちで来るのも、あまりおすすめしません。
+                  </p>
+                  <p>
+                    デザインで一番大事なのは、結果を再現できることではありません。そこに至るプロセスを自分で組み立て、試し、良くしていけるかどうかです。だからフィードバックでも、答えそのものは渡しません。やり方や捉え方、どこが良くないか、どうすればもっと良くなるか。その視点で返すようにしています。
+                  </p>
+                  <p>
+                    できる範囲でかまいません。フィードバックを受ける前に、今の自分の考えを箇条書きで簡単にまとめておいてください。その上で、合っているところ、ずれているところを確認する。それが、成長を早くします。
                   </p>
                 </div>
               </SectionBlock>
@@ -240,11 +289,11 @@ export default async function FeedbackGuidePage() {
         </article>
 
         {/* ボトムCTA */}
-        <div className="mt-16 rounded-2xl border border-gray-200 bg-slate-50 px-6 py-10 text-center">
-          <h2 className="font-rounded-mplus text-xl font-bold text-slate-900">
+        <div className="mt-16 rounded-2xl border border-gray-200 bg-muted-custom px-6 py-10 text-center">
+          <h2 className="font-rounded-mplus text-xl font-bold text-text-primary">
             フィードバックを使ってみよう
           </h2>
-          <p className="mt-3 text-slate-600 leading-relaxed">
+          <p className="mt-3 text-text-muted leading-relaxed">
             相談したいことを整理して、応募してみましょう。
           </p>
           <div className="mt-6 flex justify-center">

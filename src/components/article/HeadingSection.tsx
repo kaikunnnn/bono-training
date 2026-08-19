@@ -55,7 +55,7 @@ const HeadingSection = ({
           </div>
 
           {/* Title */}
-          <h1 className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-['Noto_Sans_JP'] leading-[148%]">
+          <h1 className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-noto-sans-jp leading-[148%]">
             {articleIndex ? `${articleIndex}. ` : ""}
             {title}
           </h1>

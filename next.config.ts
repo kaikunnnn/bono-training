@@ -47,6 +47,12 @@ const nextConfig: NextConfig = {
         destination: "/contents/:slug",
         permanent: true,
       },
+      // フィードバックのやり方ガイドを使い方系(/how-to)配下へ移動。旧URLを308で恒久保護。
+      {
+        source: "/feedback-apply/guide",
+        destination: "/how-to/feedback",
+        permanent: true,
+      },
     ];
   },
   images: {

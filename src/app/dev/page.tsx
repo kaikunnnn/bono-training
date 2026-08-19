@@ -88,6 +88,14 @@ const projects: DevProjectEntry[] = [
     status: "in-progress",
   },
   {
+    href: "/dev/subscription-success",
+    issue: "課金 success",
+    title: "課金登録後（決済完了）画面の現状確認",
+    summary:
+      "本番 /subscription/success が表示する SubscriptionSuccessContent を Stripe/Webhook/DB なしで描画。状態（成功/ローディング/エラー）・タイプ（新規/プラン変更）・プラン・期間を切り替えて改善前の現状を確認できる。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/bon-327",
     issue: "BON-327",
     title: "受講者ストーリー & アウトプット まわり",

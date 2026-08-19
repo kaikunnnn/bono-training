@@ -204,7 +204,7 @@ const RichTextSection = ({
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#2563EB] underline hover:text-[#1D4ED8] transition-colors [overflow-wrap:anywhere]"
+            className="text-text-link underline hover:text-text-link-hover transition-colors [overflow-wrap:anywhere]"
           >
             {children}
           </a>
@@ -314,36 +314,36 @@ const RichTextSection = ({
           }
         > = {
           tip: {
-            bg: "bg-[#ECFDF5]",
-            border: "border-[#10B981]",
+            bg: "bg-success-feedback",
+            border: "border-text-success",
             icon: "💡",
-            iconBg: "bg-[#D1FAE5]",
+            iconBg: "bg-success-feedback",
             defaultTitle: "ヒント",
           },
           info: {
-            bg: "bg-[#EFF6FF]",
-            border: "border-[#3B82F6]",
+            bg: "bg-info-feedback",
+            border: "border-text-info",
             icon: "ℹ️",
-            iconBg: "bg-[#DBEAFE]",
+            iconBg: "bg-info-feedback",
             defaultTitle: "情報",
           },
           warning: {
-            bg: "bg-[#FFFBEB]",
-            border: "border-[#F59E0B]",
+            bg: "bg-warning-feedback",
+            border: "border-text-warning",
             icon: "⚠️",
-            iconBg: "bg-[#FEF3C7]",
+            iconBg: "bg-warning-feedback",
             defaultTitle: "注意",
           },
           danger: {
-            bg: "bg-[#FEF2F2]",
-            border: "border-[#EF4444]",
+            bg: "bg-error-feedback",
+            border: "border-text-error",
             icon: "🚨",
-            iconBg: "bg-[#FEE2E2]",
+            iconBg: "bg-error-feedback",
             defaultTitle: "危険",
           },
           note: {
             bg: "bg-muted-custom",
-            border: "border-[#6B7280]",
+            border: "border-text-muted",
             icon: "📝",
             iconBg: "bg-muted-custom",
             defaultTitle: "ノート",
@@ -395,7 +395,7 @@ const RichTextSection = ({
             href={value.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`my-6 block rounded-lg border border-border-light overflow-hidden hover:border-[#3B82F6] hover:shadow-md transition-all duration-200 no-underline ${textContainerClassName}`}
+            className={`my-6 block rounded-lg border border-border-light overflow-hidden hover:border-text-link hover:shadow-md transition-all duration-200 no-underline ${textContainerClassName}`}
           >
             <div className="flex flex-col md:flex-row">
               {/* テキスト部分 */}
