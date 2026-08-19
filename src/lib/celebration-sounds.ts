@@ -59,6 +59,21 @@ export function playArticleCompleteSound(): void {
 }
 
 /**
+ * コメント投稿音（#158）
+ * 記事完了音（playArticleCompleteSound）と同系統の軽い2音（ド→ミ「ポン」）。
+ * コメント用に気持ち短め・軽めに微調整。失敗は握りつぶす（記事完了音と同じ挙動）。
+ */
+export function playCommentPostedSound(): void {
+  try {
+    // 軽やかな2音（ド→ミ）。記事完了音よりやや短く軽め。
+    playTone(523.25, 0.12, 0, 'sine', 0.22);      // C5
+    playTone(659.25, 0.15, 0.09, 'sine', 0.18);   // E5
+  } catch (e) {
+    console.warn('Audio playback failed:', e);
+  }
+}
+
+/**
  * レベル2: クエスト完了音
  * 達成感のある「ピロリン♪」という音
  */
