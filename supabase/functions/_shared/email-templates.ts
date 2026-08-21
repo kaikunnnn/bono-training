@@ -19,6 +19,16 @@ function encodeBase64(str: string): string {
 // ロゴのBase64
 const LOGO_BASE64 = encodeBase64(BONO_LOGO_SVG);
 
+/**
+ * メール内リンクのベースURL。
+ * ⚠️ ドメインをハードコードしない。env `SITE_URL` から取得し、未設定時のみ現行の
+ * 稼働ドメイン(bono-training.vercel.app)にフォールバックする。
+ * → 本番ドメイン移行時は Supabase の secret `SITE_URL` を新ドメインに更新するだけで
+ *    メールのリンクが自動追従する（貼り替え漏れを防ぐ仕組み）。
+ * 設定: npx supabase secrets set SITE_URL=https://<new-domain> --project-ref fryogvfhymnpiqwssmuu
+ */
+const SITE_URL = (Deno.env.get("SITE_URL") || "https://bono-training.vercel.app").replace(/\/$/, "");
+
 // プラン名の日本語マッピング
 export function getPlanDisplayName(planType: string, duration: number): string {
   const planNames: Record<string, string> = {
@@ -84,49 +94,42 @@ export function generateWelcomeEmail(): { subject: string; html: string } {
                 BONOへようこそ！🎉
               </h1>
               <p style="margin: 0 0 24px 0; font-size: 18px; color: #222222; line-height: 28px; text-align: left; font-weight: 400;">
-                メンバーシップ登録ありがとうございます！<br><br>BONOを有効活用してデザインスキルを伸ばすため、まず以下のコンテンツを見て、実行してみてください。
+                ご登録ありがとうございます！さっそくデザインを始めましょう。<br><br>まずは7ステップで、BONOをつかい倒す準備を整えます。
               </p>
 
-              <!-- セクション1 -->
+              <!-- 使い方をセットアップする（単一CTA・完了画面と統一） -->
               <div style="margin-bottom: 32px;">
                 <h2 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #222222; line-height: 24px;">
-                  ① BONOを使う準備
+                  最短で成長する進め方を設定する
                 </h2>
                 <p style="margin: 0 0 16px 0; font-size: 16px; color: #222222; line-height: 24px;">
-                  まずはBONOを利用するための準備をしましょう。<br>・コミュニティへの参加<br>・取り組むコンテンツの決定<br>・2週間でやるべきことを決める
+                  7ステップで、コミュニティ参加・取り組むコンテンツの決定・2週間の計画までを一気に整えます。
                 </p>
                 <table cellpadding="0" cellspacing="0">
                   <tr>
                     <td>
-                      <a href="https://www.bo-no.design/howtouse" style="display: inline-block; padding: 14px 24px; background-color: #151834; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px;">
-                        BONOを使う準備をはじめる →
+                      <a href="${SITE_URL}/lessons/bono-onboarding" style="display: inline-block; padding: 14px 24px; background-color: #151834; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px;">
+                        使い方をセットアップする →
                       </a>
                     </td>
                   </tr>
                 </table>
               </div>
 
-              <!-- セクション2 -->
+              <!-- やること（非リンク・完了画面のSTEPと同一） -->
               <div style="margin-bottom: 32px;">
-                <h2 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #222222; line-height: 24px;">
-                  ② BONOの使い方ガイド
-                </h2>
-                <p style="margin: 0 0 16px 0; font-size: 16px; color: #222222; line-height: 24px;">
-                  学習の進め方、コミュニティの使い方など、BONOでデザインスキルを身につけるためのガイドページをチェックしてデザインを進めましょう。
+                <p style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: #222222; line-height: 24px;">
+                  やること
                 </p>
-                <table cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td>
-                      <a href="https://www.bo-no.design/bono-guide" style="display: inline-block; padding: 14px 24px; background-color: #151834; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px;">
-                        BONO 使い方ガイドへ →
-                      </a>
-                    </td>
-                  </tr>
-                </table>
+                <p style="margin: 0; font-size: 16px; color: #222222; line-height: 26px;">
+                  STEP 1-2　コミュニティ（Slack）に参加する<br>
+                  STEP 3-4　トレーニング計画を立てる<br>
+                  STEP 5-6　質問・相談を1回やってみる
+                </p>
               </div>
 
               <p style="margin: 0 0 24px 0; font-size: 14px; color: #717171; line-height: 20px; text-align: left; font-weight: 400;">
-                ボタンがない場合はページを再読み込みしていただくか、プラン登録状況をマイページよりご確認ください。
+                ボタンが開けない場合は、マイページからプラン登録状況をご確認ください。
               </p>`;
 
   return {
