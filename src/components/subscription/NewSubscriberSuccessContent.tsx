@@ -211,6 +211,21 @@ function NewSubscriberSuccessView({
               </div>
             )}
           </dl>
+
+          {/* 防御表示: is_active なサブスクをDBで確認できず更新日が取れない場合、
+              黙って欠落させず「反映中」を落ち着いたトーンで注記する（サイレント失敗防止） */}
+          {!renewalDate && (
+            <p className="text-sm text-text-primary/60 font-noto-sans-jp leading-relaxed pt-3">
+              プラン情報を反映中です。数分後に
+              <Link
+                href="/account"
+                className="text-text-primary underline underline-offset-2"
+              >
+                アカウント設定
+              </Link>
+              でご確認ください。
+            </p>
+          )}
         </Reveal>
 
         {/* 4. アカウント設定リンク（控えめ・中央） */}
