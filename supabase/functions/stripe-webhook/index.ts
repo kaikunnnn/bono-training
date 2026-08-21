@@ -936,7 +936,7 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
       .from("user_subscriptions")
       .upsert({
         user_id: userId,
-        is_active: ["active", "trialing", "incomplete"].includes(subscription.status),
+        is_active: ["active", "trialing"].includes(subscription.status),
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
@@ -1090,7 +1090,7 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
       .update({
         plan_type: planType,
         duration: duration,
-        is_active: ["active", "trialing", "incomplete"].includes(subscription.status),
+        is_active: ["active", "trialing"].includes(subscription.status),
         stripe_subscription_id: subscriptionId,
         cancel_at_period_end: cancelAtPeriodEnd,
         cancel_at: cancelAt,
