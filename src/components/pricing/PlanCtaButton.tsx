@@ -11,6 +11,8 @@
  *  - ダミーモード（isLoggedIn 未指定 = stateAware=false）: console.log CTA + href="#" 再開リンク。
  *  - 未ログイン: 「{プラン名}で始める」→ /signup?redirectTo=<intent付きURL> へ遷移（S1b/S2）。
  *      intent（plan/duration）を redirectTo に内包し、登録完了後に料金ページへ戻す。
+ *      戻り先は現在パス（usePathname）基準。/subscription からは /subscription、
+ *      /dev/pricing-final からは /dev/pricing-final に戻る。
  *  - ログイン済・未課金: 「{プラン名}で始める」→ createCheckoutSession → Stripe Checkout へ。
  *  - 課金中・現行プラン（type+duration一致）: 「現在のプラン」disabled。
  *  - 課金中・現行プランかつキャンセル予約中: 「プランを管理（再開/解約）」→ カスタマーポータル。
@@ -25,7 +27,7 @@
  */
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -92,6 +94,9 @@ export function PlanCtaButton({
   compact = false,
 }: PlanCtaButtonProps) {
   const router = useRouter();
+  // 現在のパス（料金ページは /subscription と /dev/pricing-final の両方でホストされる）。
+  // signup 後の戻り先・ポータルの戻り先を現在パス基準にし、遷移元へ正しく戻す。
+  const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showChangeModal, setShowChangeModal] = useState(false);
@@ -171,7 +176,7 @@ export function PlanCtaButton({
     setError(null);
     try {
       // getCustomerPortalUrl は例外を投げる（createCheckoutSession と異なる）ため try/catch
-      const returnUrl = `${window.location.origin}/dev/pricing-final`;
+      const returnUrl = `${window.location.origin}${pathname}`;
       const url = await getCustomerPortalUrl(returnUrl);
       window.location.href = url;
     } catch (err) {
@@ -189,7 +194,7 @@ export function PlanCtaButton({
       // 未ログイン: intent（plan/duration）を redirectTo に内包して /signup へ。
       // 登録完了後に redirectTo（料金ページ + intent_*）へ戻り、S2 の useEffect が
       // 自動 checkout を起動する。
-      const redirectTo = `/dev/pricing-final?intent_plan=${planType}&intent_duration=${duration}`;
+      const redirectTo = `${pathname}?intent_plan=${planType}&intent_duration=${duration}`;
       router.push(`/signup?redirectTo=${encodeURIComponent(redirectTo)}`);
       return;
     }

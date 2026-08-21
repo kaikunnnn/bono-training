@@ -16,7 +16,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import type { PlanType, PlanDuration } from "@/types/subscription";
 import { PricingHero } from "@/components/pricing/PricingHero";
 import { PlanCards } from "@/components/pricing/PlanCards";
@@ -28,6 +28,12 @@ import { trackBeginCheckout } from "@/lib/analytics";
 interface PricingFinalProps {
   /** 実績・アウトプット（Server Component で Sanity 取得済みの ReactNode） */
   achievementSlot: ReactNode;
+  /**
+   * 有効契約者向けの管理ストリップ（任意）。PricingHero の直後にレンダリングする。
+   * 未指定なら何も出ない（/dev/pricing-final は無影響）。/subscription 側で
+   * 契約者のときだけ「現在のプラン＋プラン管理ボタン」を ReactNode として渡す。
+   */
+  managementSlot?: ReactNode;
   // ---- 購読状態（Server で取得済み）。上下 2 つの PlanCards へそのまま渡す。 ----
   isLoggedIn: boolean;
   isSubscribed: boolean;
@@ -39,6 +45,7 @@ interface PricingFinalProps {
 
 export function PricingFinal({
   achievementSlot,
+  managementSlot,
   isLoggedIn,
   isSubscribed,
   currentPlanType,
@@ -51,6 +58,9 @@ export function PricingFinal({
 
   const router = useRouter();
   const searchParams = useSearchParams();
+  // 現在のパス（このコンポーネントは /subscription と /dev/pricing-final の両方でホスト
+  // される）。intent 消費後の URL 書き換え先を現在パス基準にし、別ページへ飛ばさない。
+  const pathname = usePathname();
   // intent の多重消費防止（同一マウント中に一度だけ自動 checkout を起動する）。
   const intentConsumed = useRef(false);
 
@@ -65,8 +75,8 @@ export function PricingFinal({
   };
 
   // ---- S2: 登録完了後の自動 Checkout（intent 消費） ----
-  // 未ログイン CTA は /signup?redirectTo=/dev/pricing-final?intent_plan=..&intent_duration=..
-  // へ遷移する（PlanCtaButton）。登録完了でこの URL に戻ってきたとき、下記条件を満たせば
+  // 未ログイン CTA は /signup?redirectTo=<現在パス>?intent_plan=..&intent_duration=..
+  // へ遷移する（PlanCtaButton・現在パス基準）。登録完了でこの URL に戻ってきたとき、下記条件を満たせば
   // 自動で Stripe Checkout を起動し、ユーザーの再クリックを省く。
   //
   // 発火条件（すべて満たすとき一度だけ）:
@@ -103,10 +113,9 @@ export function PricingFinal({
     params.delete("intent_plan");
     params.delete("intent_duration");
     const query = params.toString();
-    router.replace(
-      query ? `/dev/pricing-final?${query}` : "/dev/pricing-final",
-      { scroll: false }
-    );
+    router.replace(query ? `${pathname}?${query}` : pathname, {
+      scroll: false,
+    });
 
     // 自動 Checkout 起動。
     void (async () => {
@@ -124,7 +133,7 @@ export function PricingFinal({
         window.location.href = url;
       }
     })();
-  }, [searchParams, isLoggedIn, isSubscribed, router]);
+  }, [searchParams, isLoggedIn, isSubscribed, router, pathname]);
 
   return (
     <div className="mx-auto w-full max-w-[1040px] px-4 py-12">
@@ -136,6 +145,10 @@ export function PricingFinal({
         <div>
           {/* ヘッダー（料金プラン／統合h1／支払いリンク・border-b無し） */}
           <PricingHero />
+
+          {/* 有効契約者向けの管理ストリップ（任意 slot）。未指定なら描画されない
+              （/dev/pricing-final は無影響）。/subscription 側で契約者のときだけ渡す。 */}
+          {managementSlot}
 
           {/* 価格カード（トグル付き・各カード末尾に「詳細を見る」）。ヘッダーから 24px。 */}
           <div className="mt-6">
