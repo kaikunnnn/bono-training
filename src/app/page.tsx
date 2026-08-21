@@ -33,12 +33,18 @@ export const metadata: Metadata = {
  * メタデータのみ担当する。到達するのは未ログインユーザーのみ（ログイン済みは上で
  * リダイレクト）なので Hero の入会CTAは常に表示（isMember=false 固定）。
  */
-export default async function IndexPage() {
+export default async function IndexPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
   // UserProvider は React cache() でメモ化されており、LayoutWrapper と getUser を共有する
   const { user } = await UserProvider();
 
   if (user) {
-    redirect("/mypage");
+    // 通常signup直後の welcome フラグは /mypage まで引き継ぐ（着地ページで歓迎トースト）
+    const { welcome } = await searchParams;
+    redirect(welcome === "1" ? "/mypage?welcome=1" : "/mypage");
   }
 
   return <NewTopContent isMember={false} />;

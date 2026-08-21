@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import AchievementCard, {
   type AchievementCardProps,
 } from "@/components/top/home/AchievementCard";
@@ -46,6 +47,19 @@ export interface AchievementHighlightSectionProps {
   compact?: boolean;
   /** 外側sectionの上下パディングをinline styleで上書き（px。未指定時はデフォルト py-[120px]） */
   paddingY?: number;
+  /**
+   * メイン見出しを差し替える任意スロット。指定時は既定の `TopSectionHeading`
+   * （バッジpill＋見出し）の代わりにこの ReactNode を描画する。未指定時は従来どおり
+   * `TopSectionHeading` を出す（/top 等は無影響）。料金ページで plan-detail と同じ
+   * 見出し体裁に合わせるために使用する。
+   */
+  headingSlot?: ReactNode;
+  /**
+   * 各カードグリッド（story/output）の `<div>` に付与する追加クラス（twMergeで合成）。
+   * 未指定時は従来どおり（/top 等は無影響）。料金ページでスマホのカード間 gap を
+   * 広げる（gap-[40px]）ために使用する。
+   */
+  cardGridClassName?: string;
   className?: string;
 }
 
@@ -58,6 +72,8 @@ export default function AchievementHighlightSection({
   outputItems,
   compact = false,
   paddingY,
+  headingSlot,
+  cardGridClassName,
   className,
 }: AchievementHighlightSectionProps) {
   const subheadingClass =
@@ -73,12 +89,19 @@ export default function AchievementHighlightSection({
       }
     >
       <div className="flex flex-col gap-[48px]">
-        <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />
+        {headingSlot ?? (
+          <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />
+        )}
 
         {storyItems.length > 0 && (
           <div className="flex flex-col gap-12">
             <h3 className={subheadingClass}>{storyHeading}</h3>
-            <div className="grid grid-cols-1 gap-[24px] sm:grid-cols-3">
+            <div
+              className={cn(
+                "grid grid-cols-1 gap-[24px] sm:grid-cols-3",
+                cardGridClassName,
+              )}
+            >
               {storyItems.map((item) => (
                 <AchievementCard
                   key={`story-${item.href}`}
@@ -93,7 +116,12 @@ export default function AchievementHighlightSection({
         {outputItems.length > 0 && (
           <div className="flex flex-col gap-12">
             <h3 className={subheadingClass}>{outputHeading}</h3>
-            <div className="grid grid-cols-1 gap-[24px] sm:grid-cols-3">
+            <div
+              className={cn(
+                "grid grid-cols-1 gap-[24px] sm:grid-cols-3",
+                cardGridClassName,
+              )}
+            >
               {outputItems.map((item) => (
                 <AchievementCard
                   key={`output-${item.href}`}

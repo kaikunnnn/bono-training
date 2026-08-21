@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import Logo from "@/components/common/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
+import { WelcomeToast } from "@/components/auth/WelcomeToast";
 import { Menu } from "lucide-react";
 
 interface LayoutProps {
@@ -72,6 +73,9 @@ export function Layout({ children, className, user }: LayoutProps) {
       <>
         {children}
         <Toaster />
+        <Suspense fallback={null}>
+          <WelcomeToast />
+        </Suspense>
       </>
     );
   }
@@ -153,6 +157,9 @@ export function Layout({ children, className, user }: LayoutProps) {
         <Footer />
       </div>
       <Toaster />
+      <Suspense fallback={null}>
+        <WelcomeToast />
+      </Suspense>
     </div>
   );
 }
