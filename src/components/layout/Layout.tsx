@@ -103,20 +103,21 @@ export function Layout({ children, className, user }: LayoutProps) {
         }}
       />
 
-      {/* デスクトップ用サイドバー（1280px以上） */}
+      {/* デスクトップ用サイドバー（1024px以上）。MacBook Air等のノートPCで
+          非最大化・ズーム時もサイドバーが出るよう、閾値を xl(1280) → lg(1024) に下げた。 */}
       <aside
         className={cn(
-          "hidden xl:block fixed left-0 top-0 h-screen z-10",
+          "hidden lg:block fixed left-0 top-0 h-screen z-10",
           isTop6 && "border-r border-black/10"
         )}
       >
         <Sidebar user={user} />
       </aside>
 
-      {/* モバイル・タブレット用ヘッダーバー（1280px未満） */}
+      {/* モバイル・タブレット用ヘッダーバー（1024px未満） */}
       <div
         className={cn(
-          "xl:hidden fixed top-0 left-0 right-0 z-50 flex flex-col transition-all duration-200",
+          "lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col transition-all duration-200",
           isScrolled ? "backdrop-blur-sm bg-white/50" : "bg-transparent"
         )}
       >
@@ -149,8 +150,8 @@ export function Layout({ children, className, user }: LayoutProps) {
       </div>
 
       {/* メインコンテンツエリア */}
-      <div className="flex-1 flex flex-col xl:ml-[200px] relative z-[1] min-w-0 w-full xl:w-[calc(100%-200px)]">
-        <main className="flex-1 pt-14 xl:pt-0 min-w-0 w-full">
+      <div className="flex-1 flex flex-col lg:ml-[200px] relative z-[1] min-w-0 w-full lg:w-[calc(100%-200px)]">
+        <main className="flex-1 pt-14 lg:pt-0 min-w-0 w-full">
           {children}
         </main>
         <Footer />
