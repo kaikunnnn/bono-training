@@ -376,6 +376,13 @@
   }
 }
 
+/* 料金ページ feedbackカードのグラデ枠を巡回させる（border-box 背景位置を流す）。 */
+@keyframes feedback-border-flow {
+  to {
+    background-position: 200% 0;
+  }
+}
+
 .dark {
   --background: 222.2 84% 4.9%;
   --foreground: 210 40% 98%;
@@ -429,6 +436,11 @@
     .animate-pulse {
       animation-iteration-count: infinite !important;
     }
+
+    /* 料金ページ feedbackカードの巡回グラデは静止（枠は保持） */
+    .feedback-card-anim {
+      animation: none !important;
+    }
   }
 
   /* buttonタグはデフォルトでcursor: defaultのため、グローバルにpointerを設定 */
@@ -442,6 +454,19 @@
   .animate-fade-in-up {
     opacity: 0;
     animation: fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+
+  /* 料金ページ feedbackカード（強調）: グラデ枠をゆっくり巡回させる。
+   * padding-box は単色背景(auto)、border-box は 200% 幅のループ用グラデを流す。
+   * 濃く見える場合は --grad-feedback-border-loop を淡色へ差し替える（トークン側で調整）。 */
+  .feedback-card-anim {
+    border: 2px solid transparent;
+    background:
+      linear-gradient(var(--bg-surface), var(--bg-surface)) padding-box,
+      var(--grad-feedback-border-loop) border-box;
+    background-size: auto, 200% 100%;
+    animation: feedback-border-flow 8s linear infinite;
+    box-shadow: var(--shadow-md);
   }
 
   body {

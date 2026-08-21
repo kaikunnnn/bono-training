@@ -136,6 +136,14 @@
       rgba(244, 232, 223, 1) 55%,
       rgba(239, 237, 255, 0.08) 94%);
 
+  /* 料金ページ feedbackカード（強調・Figma 37:421）: グラデ枠＋影 */
+  /* ※グラデ停止点は Figma API が単色 #f99487 に平坦化したためスクショから近似（要ユーザー確認） */
+  --grad-feedback-border: linear-gradient(135deg, #9B7FE8 0%, #F472B6 55%, #F99487 100%);
+  --shadow-feedback-card: 0px 1px 8px rgba(0, 0, 0, 0.08);
+  /* 巡回アニメ用（.feedback-card-anim）: 始点=終点でseamlessにループさせる。
+   * 淡くしたい場合は各色を淡側に差し替える（例: #B9A6ED / #F7A8CE / #FBB3AB）。 */
+  --grad-feedback-border-loop: linear-gradient(90deg, #9B7FE8 0%, #F472B6 33%, #F99487 66%, #9B7FE8 100%);
+
   /* Category badge colors (from TrainingCard) */
   --cat-uiux-career: #5E6871;
   --cat-ux-design:   #525382;

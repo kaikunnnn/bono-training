@@ -89,7 +89,7 @@ export const metadata: Metadata = {
     description:
       "BONOのフィードバックの使い方・前提・フォームの選び方を解説します",
   },
-  alternates: { canonical: "/feedback-apply/guide" },
+  alternates: { canonical: "/how-to/feedback" },
 };
 
 // フォーム選択肢アイテム（○○ or ××、箇条書き1項目）

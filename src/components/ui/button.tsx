@@ -11,7 +11,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-primary/90",
+        // primaryボタンはDS定義の #102720（Deep forest green＝緑がかった黒）を使う。
+        // 以前は shadcn デフォルトの bg-primary(#0f172a・青みの黒) だったが DS とズレていたため是正。
+        default: "bg-cta-primary-bg text-primary-foreground shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-cta-primary-bg/90",
         destructive:
           "bg-destructive text-destructive-foreground hover:bg-destructive/90",
         outline:
