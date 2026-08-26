@@ -56,8 +56,13 @@ function pct(numerator: number, denominator: number): number {
   return Math.round((numerator / denominator) * 1000) / 10; // 小数第1位まで
 }
 
+// 送信先はオンボーディング専用の Webhook のみ。
+// 質問チャンネル用の SLACK_WEBHOOK_URL には意図的にフォールバックしない
+// （フォールバックすると週次レポートが質問チャンネルへ誤爆するため）。
+// このレポートはカイクン宛の Slack DM に届くよう、DM 用 Incoming Webhook を
+// SLACK_ONBOARDING_WEBHOOK_URL に設定して運用する。未設定なら送信をスキップする。
 function sendableWebhookUrl(): string | undefined {
-  return process.env.SLACK_WEBHOOK_URL;
+  return process.env.SLACK_ONBOARDING_WEBHOOK_URL;
 }
 
 async function sendSlackFunnel(
@@ -303,7 +308,7 @@ export async function GET(request: NextRequest) {
     }
   } else {
     console.log(
-      "SLACK_WEBHOOK_URL not configured, skipping onboarding funnel Slack message"
+      "SLACK_ONBOARDING_WEBHOOK_URL not configured, skipping onboarding funnel Slack message"
     );
   }
 
