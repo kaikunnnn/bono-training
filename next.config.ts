@@ -55,6 +55,41 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // セキュリティヘッダ（段階導入 第1歩）: CSP以外の安全な4ヘッダを全パスに enforce で付与。
+  // CSP（Content-Security-Policy）はここでは付けない。Sanity画像/Stripe/Supabase/
+  // YouTube等の外部リソース依存が多く誤爆リスクが高いため、別ステップで
+  // Content-Security-Policy-Report-Only から段階導入する予定。
+  // HSTS（Strict-Transport-Security）もここでは付けない（Vercelが付与済み・preload事故回避）。
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // MIMEスニッフィングを禁止（Content-Type を尊重させる）
+          {
+            key: "X-Content-Type-Options",
+            value: "nosniff",
+          },
+          // リファラは同一オリジンには full URL、クロスオリジンにはオリジンのみ送る
+          {
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
+          },
+          // クリックジャッキング対策。DENYではなくSAMEORIGIN＝将来の自サイト内
+          // iframe埋め込みの余地を残す安全側の選択。
+          {
+            key: "X-Frame-Options",
+            value: "SAMEORIGIN",
+          },
+          // 未使用の強権限を明示的に無効化（最小限に留める。付けすぎると壊れる）
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=()",
+          },
+        ],
+      },
+    ];
+  },
   images: {
     formats: ["image/avif", "image/webp"],
     remotePatterns: [
