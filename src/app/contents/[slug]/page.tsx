@@ -42,6 +42,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   // canonical を本番の絶対 URL に向けて重複評価を本番へ集約する。
   // 本番に無いベータ独自記事は従来通り自己 canonical（相対パス）のまま。
   // metadataBase 設定に依存させないため、cross-domain 側は絶対 URL を指定する。
+  // 切替後（NEXT_PUBLIC_SITE_URL=本番ドメイン）は getProductionContentSlugs が
+  // 空 Set を返して自動無効化 → 全記事が自己 canonical（相対パス）になる（B-4）。
   const productionSlugs = await getProductionContentSlugs();
   const canonical = productionSlugs.has(slug)
     ? `https://www.bo-no.design/contents/${slug}`

@@ -76,6 +76,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Webflow 本番（www.bo-no.design）に同一 slug で存在する記事は
   // ベータ側 sitemap から除外し、本番のクロール評価を守る。
   // 取得失敗時は空 Set（＝除外なし＝従来通り全出力の安全側）に倒れる。
+  // 切替後（NEXT_PUBLIC_SITE_URL=本番ドメイン）は getProductionContentSlugs が
+  // 空 Set を返して自動無効化 → 除外なし＝全公開 slug を出力（B-4）。
   const productionSlugs = await getProductionContentSlugs();
 
   const lessonPages: MetadataRoute.Sitemap = lessonSlugs.map((slug) => ({

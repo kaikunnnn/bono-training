@@ -25,6 +25,11 @@ const PRODUCTION_HOST_PATTERN = /^(www\.)?bo-no\.design$/;
  * 済んでいたものが接続エラー表示に悪化する（本番ドメイン切替前の退行）。
  * next.config.ts の fallback rewrite と同じ host 条件をここでも揃える。
  *
+ * 切替後（NEXT_PUBLIC_SITE_URL=本番ドメイン）は getProductionContentSlugs が
+ * 空 Set を返す（B-4 で自己無効化）ため、この legacy リダイレクト分岐は発火せず
+ * 常に notFound() になる。切替後の 226本救済は proxy.ts（静的リスト）が担うので、
+ * ここに到達する slug は実在（Sanity にある）か未知 slug のみで、notFound で正しい。
+ *
  * どちらの分岐も throw するため、戻り値の型は never。
  *
  * 注意: generateMetadata 内で呼んではいけない（redirect() が問題を起こすため）。
