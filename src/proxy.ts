@@ -1,4 +1,8 @@
 import { NextResponse, type NextRequest } from "next/server";
+import {
+  LEGACY_ONLY_CONTENT_SLUGS,
+  GUIDE_REDIRECT_MAP,
+} from "@/lib/migration/legacy-only-content-slugs";
 
 /**
  * 軽量化された proxy（Next.js 16 で middleware.ts から改名。役割は同じ）
@@ -39,6 +43,59 @@ const PROTECTED_PATH_PREFIXES = [
 
 const AUTH_PAGE_PATHS = ["/login", "/signup"];
 
+// --- サイト移行 #198 / 226本救済 -------------------------------------------
+// 本番ドメイン判定。ポート付き host（開発時等）にも耐えるよう split(":")[0] で正規化。
+// redirectMissingContent / next.config.ts の fallback rewrite と同じ条件に揃える。
+const PRODUCTION_HOST_PATTERN = /^(www\.)?bo-no\.design$/;
+const LEGACY_ORIGIN = "https://legacy.bo-no.design";
+
+/**
+ * 旧 Webflow の /contents/{slug}（新 Sanity 未移植の 226本）を救済する。
+ * 該当すれば救済用の NextResponse を返し、非該当なら null（＝以降の通常処理へ委譲）。
+ *
+ * なぜ proxy 側で静的リストを持つか:
+ * ページ側 redirectMissingContent は本番 sitemap を都度 fetch して判定するが、
+ * ドメイン切替後は www.bo-no.design 自体がこの Next.js アプリになり、fetch 先が
+ * 「自分自身の Sanity 限定 sitemap」となって 226本を拾えなくなる（自己参照で機能不全）。
+ * そこでルーティングより前段の proxy で静的リストを判定して確実に救済する。
+ *
+ * 3分岐（いずれも host 条件が前提。実在 499本は全分岐に該当せず null で素通し）:
+ *  ① GUIDE_REDIRECT_MAP に含まれる 5本
+ *     → 新サイトの実在 /guide/{slug} へ 308 恒久リダイレクト（新サイト内へ誘導）
+ *  ② LEGACY_ONLY_CONTENT_SLUGS に含まれる 221本
+ *     → legacy.bo-no.design へ rewrite（プロキシ・URL 据え置きで SEO 一貫性維持）
+ *  ③ それ以外 → null（実在 499本 or 未知 slug は素通し。未知は page 側で notFound）
+ *
+ * host 条件（(www.)?bo-no.design のみ発火）は必須。無いと beta ドメインでも発動し、
+ * ①の /guide への恒久リダイレクトや②の legacy 経由 Webflow 遷移が本番切替前に暴発する。
+ */
+function rescueLegacyContent(request: NextRequest): NextResponse | null {
+  const { pathname } = request.nextUrl;
+
+  const match = /^\/contents\/([^/]+)\/?$/.exec(pathname);
+  if (!match) return null;
+
+  const slug = decodeURIComponent(match[1]);
+
+  // slug がどの救済対象でもなければ即素通し（Set/Map ルックアップのみで軽量）。
+  const guideTarget = GUIDE_REDIRECT_MAP.get(slug);
+  const isLegacy = LEGACY_ONLY_CONTENT_SLUGS.has(slug);
+  if (!guideTarget && !isLegacy) return null;
+
+  // ここから先は救済対象。host が本番ドメインのときのみ発火（切替前は素通し）。
+  const host = (request.headers.get("host") ?? "").split(":")[0];
+  if (!PRODUCTION_HOST_PATTERN.test(host)) return null;
+
+  // ① 新サイトの /guide/{slug} へ 308 恒久リダイレクト。
+  if (guideTarget) {
+    return NextResponse.redirect(new URL(guideTarget, request.url), 308);
+  }
+
+  // ② legacy.bo-no.design へ rewrite（プロキシ）。
+  const target = new URL(`${LEGACY_ORIGIN}${pathname}${request.nextUrl.search}`);
+  return NextResponse.rewrite(target);
+}
+
 /**
  * Supabase auth cookie が存在するかチェック
  * @supabase/ssr が設定する `sb-{project-ref}-auth-token` を探す。
@@ -56,6 +113,12 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // サイト移行 #198: legacy 専用 226本の /contents/{slug} を最優先で救済（プロキシ）。
+  // 認証判定より前に行う（/contents/* は認証状態で挙動が変わらないため副作用なし）。
+  const rescued = rescueLegacyContent(request);
+  if (rescued) return rescued;
+
   const hasAuth = hasSupabaseAuthCookie(request);
 
   // 1. 未ログインで保護されたページ → /login へ
@@ -105,5 +168,8 @@ export const config = {
     "/feedback-apply/submit",
     "/login",
     "/signup",
+    // サイト移行 #198 / 226本救済: legacy 専用 /contents/{slug} をプロキシするため。
+    // Set 非該当 slug は proxy 内で即 next() 相当（rescue が null → 通常処理）＝素通し。
+    "/contents/:path*",
   ],
 };
