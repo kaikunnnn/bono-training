@@ -53,6 +53,66 @@ const nextConfig: NextConfig = {
         destination: "/how-to/feedback",
         permanent: true,
       },
+      // ── サイト移行 B-9: 旧サイト(Webflow)からの 301/308 リダイレクトマップ ──
+      // 出典: rebono/issues/bono-training_URL移行/11_individual_301_map_2026-08-28.tsv
+      // 3列目が 410 の行(80本)は next.config で 410 を返せないため実装しない
+      // （切替後は legacy フォールバックで生存→解約時に自然404）。
+      // /mypage・/search（NATIVE）は新サイトに実ルートがあるため 301 不要（自己リダイレクト回避）。
+      // /guide 救済5本は src/proxy.ts で 308 実装済みのため重複追加しない。
+      //
+      // 旧シリーズページ(/series/:slug)を新レッスンルート(/lessons/:slug)へ一括救済（42本相当）。
+      {
+        source: "/series/:slug",
+        destination: "/lessons/:slug",
+        permanent: true,
+      },
+      // 個別301（46本・TSV11 の3列目が実パスの行を機械生成）。
+      { source: "/rdm/roadmap-uiuxdesigner", destination: "/roadmap/uiux-career-change", permanent: true },
+      { source: "/plan", destination: "/subscription", permanent: true },
+      { source: "/rdm/users/all", destination: "/roadmap", permanent: true },
+      { source: "/communityplan", destination: "/subscription", permanent: true },
+      { source: "/rdm/infomationarchitect-beginner", destination: "/roadmap/information-architecture", permanent: true },
+      { source: "/membership", destination: "/subscription", permanent: true },
+      { source: "/rdm/lists", destination: "/roadmap", permanent: true },
+      { source: "/rdm/uidezainru-men", destination: "/roadmap/ui-design-beginner", permanent: true },
+      { source: "/usecase/webdesigner-to-uiuxdesigner", destination: "/roadmap/uiux-career-change", permanent: true },
+      { source: "/usecase/infoarchitect-beginner", destination: "/roadmap/information-architecture", permanent: true },
+      { source: "/rdm/guide/all", destination: "/roadmap", permanent: true },
+      { source: "/feedback/mentalingfeedback", destination: "/how-to/feedback", permanent: true },
+      { source: "/designtag/basicuipattern", destination: "/guide", permanent: true },
+      { source: "/log_in", destination: "/login", permanent: true },
+      { source: "/content/career", destination: "/roadmap/uiux-career-change", permanent: true },
+      { source: "/rdm/ux-beginner", destination: "/roadmap/ux-design-basic", permanent: true },
+      { source: "/designtag/uicolor", destination: "/guide", permanent: true },
+      { source: "/bononoshi-ifang", destination: "/how-to", permanent: true },
+      { source: "/bono-guide", destination: "/how-to", permanent: true },
+      { source: "/usecase/uidesign-junior-designer", destination: "/roadmap/uiux-career-change", permanent: true },
+      { source: "/rdm/users/success-story", destination: "/roadmap", permanent: true },
+      { source: "/designtag/designguideline", destination: "/guide", permanent: true },
+      { source: "/designtag/architecture", destination: "/guide", permanent: true },
+      { source: "/howtouse", destination: "/how-to", permanent: true },
+      { source: "/corse/uistarter", destination: "/lessons", permanent: true },
+      { source: "/corse/uivisualstarter", destination: "/lessons", permanent: true },
+      { source: "/corse/infomationarchitecturebignner", destination: "/lessons", permanent: true },
+      { source: "/rdm/uivisual-course", destination: "/roadmap/ui-visual", permanent: true },
+      { source: "/question", destination: "/questions", permanent: true },
+      { source: "/subscribe/sign-up-communityplan", destination: "/subscription", permanent: true },
+      { source: "/subscribe/sign-up-standard", destination: "/subscription", permanent: true },
+      { source: "/te-ding-shang-pin-qu-yin-fa-specified-commercial-transactions-act", destination: "/tokushoho", permanent: true },
+      { source: "/puraibasiporisi", destination: "/privacy", permanent: true },
+      { source: "/subscribe/signup-feedback-onetime", destination: "/subscription", permanent: true },
+      { source: "/subscribe/sign-up-growth", destination: "/subscription", permanent: true },
+      { source: "/subscribe/mentoring-begin", destination: "/subscription", permanent: true },
+      { source: "/cancelmembersresumption/resumption-standard-permonth", destination: "/subscription", permanent: true },
+      { source: "/termsofuse", destination: "/terms", permanent: true },
+      { source: "/subscribe/sign-up-under100", destination: "/subscription", permanent: true },
+      { source: "/subscribe/sign-up-standard-threemonth", destination: "/subscription", permanent: true },
+      { source: "/subscribe/sign-up-growth-threemonths", destination: "/subscription", permanent: true },
+      { source: "/subscribe/mentoring", destination: "/subscription", permanent: true },
+      { source: "/cancelmembersresumption/resumption-standard-perthreemonth", destination: "/subscription", permanent: true },
+      { source: "/cancelmembersresumption/resumption-growth-perthreemonth", destination: "/subscription", permanent: true },
+      { source: "/cancelmembersresumption/resumption-growth-permonth", destination: "/subscription", permanent: true },
+      { source: "/blog/sharebeginnerforuidesignfromzero", destination: "/blog", permanent: true },
     ];
   },
   // セキュリティヘッダ（段階導入 第1歩）: CSP以外の安全な4ヘッダを全パスに enforce で付与。
