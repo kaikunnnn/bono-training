@@ -99,15 +99,15 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
         }}
       />
 
-      {/* デスクトップ用サイドバー（1280px以上） */}
-      <aside className="hidden xl:block fixed left-0 top-0 h-screen z-10">
+      {/* デスクトップ用サイドバー（1024px以上）。閾値は lg(1024)（4e01002 の修正を踏襲） */}
+      <aside className="hidden lg:block fixed left-0 top-0 h-screen z-10">
         <Sidebar user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot} />
       </aside>
 
-      {/* モバイル・タブレット用ヘッダーバー（1280px未満） */}
+      {/* モバイル・タブレット用ヘッダーバー（1024px未満） */}
       <div
         className={cn(
-          "xl:hidden fixed top-0 left-0 right-0 z-50 flex flex-col transition-all duration-200",
+          "lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col transition-all duration-200",
           isScrolled ? "backdrop-blur-sm bg-white/50" : "bg-transparent"
         )}
       >
@@ -145,8 +145,8 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
       </div>
 
       {/* メインコンテンツエリア */}
-      <div className="flex-1 flex flex-col xl:ml-[200px] relative z-[1] min-w-0 w-full xl:w-[calc(100%-200px)]">
-        <main className="flex-1 pt-14 xl:pt-0 min-w-0 w-full">
+      <div className="flex-1 flex flex-col lg:ml-[200px] relative z-[1] min-w-0 w-full lg:w-[calc(100%-200px)]">
+        <main className="flex-1 pt-14 lg:pt-0 min-w-0 w-full">
           {children}
         </main>
         <Footer />
