@@ -2,7 +2,7 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { UserRound } from "lucide-react";
+import { UserRound, Bell } from "lucide-react";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { Button } from "@/components/ui/button";
 import SubscriptionInfo from "@/components/account/SubscriptionInfo";
@@ -51,6 +51,21 @@ export default async function AccountPage() {
             <Link href="/profile">
               <UserRound className="h-4 w-4" />
               プロフィールを編集
+            </Link>
+          </Button>
+        </div>
+      </SettingsCard>
+
+      {/* 通知設定への導線 */}
+      <SettingsCard title="通知">
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            コメントやリアクションの通知を、種類ごとにオン/オフできます。
+          </p>
+          <Button asChild variant="outline">
+            <Link href="/account/notifications">
+              <Bell className="h-4 w-4" />
+              通知設定を変更
             </Link>
           </Button>
         </div>

@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient as createSupabaseServiceClient } from "@supabase/supabase-js";
 import type { NotificationType } from "@/types/notification";
+import { reportNotificationError } from "@/lib/services/notifications-monitoring";
 
 /**
  * 汎用通知の作成（service_role で INSERT）モジュール（#160 S1）。
@@ -56,16 +57,58 @@ export async function createNotification(
   if (input.recipientId === input.actorId) return;
 
   if (!input.recipientId || !input.actorId) {
-    console.error("[createNotification] missing recipientId/actorId");
+    void reportNotificationError({
+      stage: "missing_recipient",
+      type: input.type,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      recipientId: input.recipientId,
+      actorId: input.actorId,
+      message: "missing recipientId/actorId",
+    });
     return;
   }
   if (!supabaseUrl || !supabaseServiceKey) {
-    console.error("[createNotification] Supabase service config missing");
+    void reportNotificationError({
+      stage: "config_missing",
+      type: input.type,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      recipientId: input.recipientId,
+      actorId: input.actorId,
+      message: "Supabase service config missing",
+    });
     return;
   }
 
   try {
     const service = createSupabaseServiceClient(supabaseUrl, supabaseServiceKey);
+
+    // オプトアウト判定: 受信者がこの種別の通知をオフにしていたら作らない（DBに記録も残さない）。
+    // notification_type_preferences は「オフ時のみ enabled=false 行を持つ」ため、
+    // 行が無い / enabled=true なら従来通り作成する。
+    // 取得失敗時はフェイルオープン（インフラ障害で通知を落とさない。重複抑止と同じ方針）。
+    const { data: pref, error: prefError } = await service
+      .from("notification_type_preferences")
+      .select("enabled")
+      .eq("user_id", input.recipientId)
+      .eq("type", input.type)
+      .maybeSingle();
+
+    if (prefError) {
+      void reportNotificationError({
+        stage: "preference_select",
+        type: input.type,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        recipientId: input.recipientId,
+        actorId: input.actorId,
+        error: prefError,
+      });
+      // 判定に失敗しても作成は試みる（設定取得障害 < 通知取りこぼしの回避を優先）
+    } else if (pref && pref.enabled === false) {
+      return;
+    }
 
     // 重複抑止: 同一 (type, entity_id, actor_id, recipient_id) の未読通知が既にあれば作らない
     const { data: existing, error: selectError } = await service
@@ -80,7 +123,15 @@ export async function createNotification(
       .maybeSingle();
 
     if (selectError) {
-      console.error("[createNotification] dedup select failed:", selectError);
+      void reportNotificationError({
+        stage: "dedup_select",
+        type: input.type,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        recipientId: input.recipientId,
+        actorId: input.actorId,
+        error: selectError,
+      });
       // 判定に失敗しても作成は試みる（重複 < 通知取りこぼしの回避を優先）
     } else if (existing) {
       return;
@@ -99,9 +150,26 @@ export async function createNotification(
     });
 
     if (insertError) {
-      console.error("[createNotification] insert failed:", insertError);
+      // 重大: 通知の完全な取りこぼし。運用Slackへ通知（fetch完了を待つ）。
+      await reportNotificationError({
+        stage: "insert",
+        type: input.type,
+        entityType: input.entityType,
+        entityId: input.entityId,
+        recipientId: input.recipientId,
+        actorId: input.actorId,
+        error: insertError,
+      });
     }
   } catch (error) {
-    console.error("[createNotification] threw:", error);
+    await reportNotificationError({
+      stage: "threw",
+      type: input.type,
+      entityType: input.entityType,
+      entityId: input.entityId,
+      recipientId: input.recipientId,
+      actorId: input.actorId,
+      error,
+    });
   }
 }

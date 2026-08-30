@@ -34,7 +34,9 @@ export async function reportAuthError(event: AuthErrorEvent): Promise<void> {
     })
   );
 
-  const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+  // 運用アラート用 webhook（未設定なら旧chにフォールバックし、取りこぼしを防ぐ）
+  const webhookUrl =
+    process.env.SLACK_OPS_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
   if (!webhookUrl || !CRITICAL_TYPES.includes(event.type)) return;
 
   try {
