@@ -450,6 +450,7 @@ async function sendCommentSlackNotification(data: {
 async function notifyQuestionAuthorOfComment(input: {
   questionId: string;
   questionSlug: string;
+  commentId: string;
   actorId: string;
   actorName: string;
   actorAvatarUrl: string | null;
@@ -480,9 +481,12 @@ async function notifyQuestionAuthorOfComment(input: {
       actorName: input.actorName,
       actorAvatarUrl: input.actorAvatarUrl,
       type: "question_comment",
-      entityType: "question",
-      entityId: input.questionId,
-      linkUrl: `/questions/${input.questionSlug}`,
+      // entity をコメント単位にする（案A: 1コメント＝1通知）。これで重複抑止が
+      // 「同一コメントの重複作成のみ抑止／別コメントは別通知」として自然に効く。
+      entityType: "comment",
+      entityId: input.commentId,
+      // アンカー付きで該当コメント位置へ遷移させる（QuestionCommentsSection がスクロール）
+      linkUrl: `/questions/${input.questionSlug}#comment-${input.commentId}`,
       payload: {
         questionTitle: question?.title ?? null,
         preview: truncateForPreview(input.content, 140),
@@ -561,6 +565,7 @@ export async function addComment(input: {
   await notifyQuestionAuthorOfComment({
     questionId: input.questionId,
     questionSlug: input.questionSlug,
+    commentId: (data as CommentRow).id,
     actorId: user.id,
     actorName: authorName,
     actorAvatarUrl: authorAvatarUrl,
