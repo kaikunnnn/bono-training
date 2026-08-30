@@ -25,6 +25,11 @@ interface LayoutProps {
    * 未ログイン時や未対応時は undefined/null。
    */
   notificationSlot?: React.ReactNode;
+  /**
+   * 掲示板の新着ドット（掲示板の新着ドット）。hasUnseenBoard を内包した Server Component を
+   * Suspense でラップした要素。デスクトップのサイドバーにのみ渡す（通知ベルの現状に倣う）。
+   */
+  boardDotSlot?: React.ReactNode;
 }
 
 /**
@@ -37,7 +42,7 @@ interface LayoutProps {
  * - /blog/*: BlogHeader/Footer を使用
  * - /feedback-apply/submit: フォーム専用ページ
  */
-export function Layout({ children, className, user, notificationSlot }: LayoutProps) {
+export function Layout({ children, className, user, notificationSlot, boardDotSlot }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGradientVisible, setIsGradientVisible] = useState(false);
@@ -96,7 +101,7 @@ export function Layout({ children, className, user, notificationSlot }: LayoutPr
 
       {/* デスクトップ用サイドバー（1280px以上） */}
       <aside className="hidden xl:block fixed left-0 top-0 h-screen z-10">
-        <Sidebar user={user} notificationSlot={notificationSlot} />
+        <Sidebar user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot} />
       </aside>
 
       {/* モバイル・タブレット用ヘッダーバー（1280px未満） */}

@@ -23,7 +23,7 @@ const FEEDBACK_URL =
  * - 高さ: 100%（デスクトップ時）
  * - レイアウト: flexbox（縦並び）
  */
-export function Sidebar({ className, user, notificationSlot }: SidebarProps) {
+export function Sidebar({ className, user, notificationSlot, boardDotSlot }: SidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -45,9 +45,16 @@ export function Sidebar({ className, user, notificationSlot }: SidebarProps) {
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      {/* ロゴ + 検索（Figma 29:2352: ロゴ直下に検索バー、間隔 0px） */}
+      {/* ロゴ（左30px）+ 通知ベル（右端を検索バー右端=15px に揃える）→ 直下に検索 */}
       <div className="w-full flex flex-col items-start">
-        <SidebarLogo />
+        <div className="relative w-full">
+          <SidebarLogo />
+          {notificationSlot && (
+            <div className="absolute right-[15px] top-1/2 -translate-y-1/2">
+              {notificationSlot}
+            </div>
+          )}
+        </div>
         <SidebarSearchBox />
       </div>
 
@@ -119,6 +126,7 @@ export function Sidebar({ className, user, notificationSlot }: SidebarProps) {
           href="/questions"
           icon={<MenuIcons.question size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/questions")}
+          dot={boardDotSlot}
         >
           みんなの掲示板
         </SidebarMenuItem>
@@ -138,16 +146,6 @@ export function Sidebar({ className, user, notificationSlot }: SidebarProps) {
             ログイン
           </SidebarMenuItem>
         )}
-        {/* 通知ベル（#160 S3）。ログイン時のみ notificationSlot が渡る。
-            サイドバー項目と左端を揃え、ラベル「通知」を添える。ベル本体は Popover を
-            内包した Client Component（未読バッジ・一覧表示はそちらが担当）。 */}
-        {notificationSlot && (
-          <div className="flex items-center gap-2 px-[15px] py-1">
-            {notificationSlot}
-            <span className="text-sm text-[#2F3037]">通知</span>
-          </div>
-        )}
-
         {user && (
           <SidebarMenuItem
             href="/account"

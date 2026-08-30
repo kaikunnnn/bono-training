@@ -86,14 +86,19 @@ export function NotificationDropdown({
               onClick={onNavigate}
               className="flex items-start gap-3 px-3 py-3 transition-colors hover:bg-accent focus:bg-accent focus:outline-none"
             >
-              <Avatar className="h-9 w-9 shrink-0 border border-border bg-muted">
+              <Avatar className="h-8 w-8 shrink-0 border border-border bg-muted">
                 {item.actorAvatarUrl && (
                   <AvatarImage src={item.actorAvatarUrl} alt={actorName} />
                 )}
                 <AvatarFallback>{actorName.slice(0, 1) || "?"}</AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <p className="text-sm leading-snug text-foreground">
+                {/* 既読は一段落としたグレー（--text-secondary）で表示する */}
+                <p
+                  className={`text-[length:var(--text-13)] leading-snug ${
+                    isUnread ? "text-foreground" : "text-text-secondary"
+                  }`}
+                >
                   {buildNotificationMessage(item)}
                 </p>
                 {relative && (

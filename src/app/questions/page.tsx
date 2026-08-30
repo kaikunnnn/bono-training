@@ -3,6 +3,7 @@ import { getQuestionList } from "@/lib/services/questions";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { PostQuestionButton } from "@/components/questions/PostQuestionButton";
 import { QuestionCard } from "@/components/questions/QuestionCard";
+import { BoardSeenRecorder } from "@/components/questions/BoardSeenRecorder";
 
 export const metadata = {
   title: "みんなの掲示板",
@@ -24,6 +25,9 @@ export default async function Page() {
 
   return (
     <div className="mx-auto w-full max-w-[1120px] px-4 py-8">
+      {/* 掲示板一覧を開いたら既読を記録し、サイドバーの新着ドットを消す（掲示板の新着ドット）。
+          ログイン済みのみ。recordBoardSeen 側でも未認証は no-op。 */}
+      {isLoggedIn && <BoardSeenRecorder />}
       {/* センター揃えヘッダー（Figma 13:1437）。
           Figma原値は上余白48px(pt-12)だが、グローバルヘッダーが上に積み上がるため
           体感が広すぎる。24px(pt-6)に詰めて調整（T4・レビューで微調整）。 */}

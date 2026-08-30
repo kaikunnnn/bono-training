@@ -5,6 +5,7 @@ import { Layout } from "./Layout";
 import { UserProvider } from "./UserProvider";
 import { StaleSessionCleaner } from "@/components/auth/StaleSessionCleaner";
 import { NotificationBellServer } from "@/components/notifications/NotificationBellServer";
+import { BoardNewDotServer } from "@/components/questions/BoardNewDotServer";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -51,8 +52,18 @@ async function UserProviderLayout({ children }: { children: React.ReactNode }) {
     </Suspense>
   ) : null;
 
+  // 掲示板の新着ドット（掲示板の新着ドット）: 通知ベルと同じ Suspense スロット方式。
+  // hasUnseenBoard の1往復を Suspense 境界に閉じ、ページ本体・サイドバー描画をブロックしない。
+  // fallback は null（ドット無し）で、未読が確定したらピンクのポチが差し込まれる。
+  // 未ログイン時はドット自体を出さない。
+  const boardDotSlot = user ? (
+    <Suspense fallback={null}>
+      <BoardNewDotServer userId={user.id} />
+    </Suspense>
+  ) : null;
+
   return (
-    <Layout user={user} notificationSlot={notificationSlot}>
+    <Layout user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot}>
       {hasStaleAuthCookie && <StaleSessionCleaner />}
       {children}
     </Layout>

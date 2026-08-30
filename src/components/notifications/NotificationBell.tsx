@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -73,12 +73,23 @@ export function NotificationBell({
         <Button
           variant="ghost"
           size="icon"
-          className="relative h-8 w-8 rounded-full"
-          aria-label={hasBadge ? `通知（未読${unreadCount}件）` : "通知"}
+          className={`relative h-6 w-6 rounded-full p-0 ${
+            open
+              ? "bg-[var(--bell-open-bg)] ring-1 ring-inset ring-white/[0.14] hover:bg-[var(--bell-open-bg)]"
+              : ""
+          }`}
+          aria-label={hasBadge ? `お知らせ（未読${unreadCount}件）` : "お知らせ"}
         >
-          <Bell className="h-5 w-5" />
+          {/* Figma 専用グリフ（16px）を 24px 円コンテナ内に配置（開/閉同一） */}
+          <Image
+            src="/icons/notification-bell.svg"
+            alt=""
+            width={16}
+            height={16}
+            aria-hidden
+          />
           {hasBadge && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium leading-none text-destructive-foreground">
+            <span className="absolute left-[13px] top-0 flex h-2.5 min-w-2.5 items-center justify-center rounded-full bg-[var(--notification-badge)] px-0.5 text-[8px] font-bold leading-none text-white">
               {formatUnreadBadge(unreadCount)}
             </span>
           )}
@@ -86,11 +97,16 @@ export function NotificationBell({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-80 p-0"
+        // PC: ベルが右寄せのため箱は左へ開く。画面左端(0px)に張り付かないよう
+        // 衝突回避で左に 15px の余白を確保し、箱の左端をサイドナビの左端(=15px)に揃える。
+        collisionPadding={15}
+        className="w-[252px] rounded-[var(--radius-md)] border-[var(--border-hairline)] p-0 shadow-[var(--shadow-popover)]"
         // フォーカスが Popover 内に閉じ込められると Link 遷移が阻害されるため素直に閉じる
       >
         <div className="border-b px-4 py-3">
-          <p className="text-sm font-medium">通知</p>
+          <p className="text-xs font-medium text-[var(--text-primary)]">
+            お知らせ
+          </p>
         </div>
         <div className="max-h-[60vh] overflow-y-auto">
           <NotificationDropdown
