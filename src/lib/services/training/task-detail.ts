@@ -1,4 +1,5 @@
 import 'server-only'
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getTrainingTaskDetailFromSanity } from "@/lib/sanity";
 import type { TaskDetailData } from "@/types/training";
@@ -100,7 +101,7 @@ const validateAndTransformResponse = (
  *    （タスク本文は Storage にしかないため、コンテンツなしで返す）
  * 3. TrainingError をスロー（呼び出し元で notFound() 処理）
  */
-export const getTrainingTaskDetail = async (
+export const getTrainingTaskDetail = cache(async (
   trainingSlug: string,
   taskSlug: string
 ): Promise<TaskDetailData> => {
@@ -225,4 +226,4 @@ export const getTrainingTaskDetail = async (
       );
     }
   }
-};
+});

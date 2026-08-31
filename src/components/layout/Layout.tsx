@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import Logo from "@/components/common/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
+import { WelcomeToast } from "@/components/auth/WelcomeToast";
 import { Menu } from "lucide-react";
 
 interface LayoutProps {
@@ -38,7 +39,7 @@ interface LayoutProps {
  * モバイル: ハンバーガーメニューでSidebar開閉
  *
  * 以下のページは独自のレイアウトを使用するため、グローバルナビを非表示:
- * - /articles/[slug]: ArticleSideNavNew を使用
+ * - /contents/[slug]: ArticleSideNavNew を使用
  * - /blog/*: BlogHeader/Footer を使用
  * - /feedback-apply/submit: フォーム専用ページ
  */
@@ -69,7 +70,7 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
   // グローバルナビを非表示にするページ
   const shouldSkipGlobalLayout = (() => {
     if (!pathname) return false;
-    if (pathname.startsWith("/articles/") && pathname !== "/articles") return true;
+    if (pathname.startsWith("/contents/")) return true;
     if (pathname.startsWith("/blog")) return true;
     if (pathname === "/feedback-apply/submit") return true;
     // #139: 投稿モードは専用シェル（PostFlowShell）を使うためグローバルナビ非表示
@@ -83,15 +84,29 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
       <>
         {children}
         <Toaster />
+        <Suspense fallback={null}>
+          <WelcomeToast />
+        </Suspense>
       </>
     );
   }
 
+  // /dev/top6: 背景白 + サイドバー右端に薄いボーダーのパターン確認用（このページのみの見た目差分）
+  const isTop6 = pathname?.startsWith("/dev/top6") ?? false;
+  const isTop5 = pathname?.startsWith("/dev/top5") ?? false;
+  // 本番トップ `/` と、ログイン中でも新トップを見られる /top（同一構成）
+  const isHome = pathname === "/" || pathname === "/top";
+  // `/`, /top, /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にする（新トップの見た目）
+  const isHalfGradient = isHome || isTop5 || isTop6;
+
   return (
-    <div className={cn("min-h-screen flex bg-base relative", className)}>
+    <div className={cn("min-h-screen flex relative", isTop6 ? "bg-white" : "bg-base", className)}>
       {/* ヘッダーグラデーション（mainと同じ） */}
       <div
-        className="fixed inset-x-0 top-0 h-[148px] pointer-events-none z-0 transition-opacity duration-1000 ease-out"
+        className={cn(
+          "fixed inset-x-0 top-0 pointer-events-none z-0 transition-opacity duration-1000 ease-out",
+          isHalfGradient ? "h-[74px]" : "h-[148px]"
+        )}
         style={{
           background:
             "linear-gradient(180deg, rgb(230, 230, 239) 0%, rgb(250, 242, 237) 44.3%, rgb(249, 248, 246) 84.3%, rgba(249, 248, 246, 0) 100%)",
@@ -99,8 +114,14 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
         }}
       />
 
-      {/* デスクトップ用サイドバー（1024px以上）。閾値は lg(1024)（4e01002 の修正を踏襲） */}
-      <aside className="hidden lg:block fixed left-0 top-0 h-screen z-10">
+      {/* デスクトップ用サイドバー（1024px以上）。MacBook Air等のノートPCで
+          非最大化・ズーム時もサイドバーが出るよう、閾値を xl(1280) → lg(1024) に下げた。 */}
+      <aside
+        className={cn(
+          "hidden lg:block fixed left-0 top-0 h-screen z-10",
+          isTop6 && "border-r border-black/10"
+        )}
+      >
         <Sidebar user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot} />
       </aside>
 
@@ -152,6 +173,9 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
         <Footer />
       </div>
       <Toaster />
+      <Suspense fallback={null}>
+        <WelcomeToast />
+      </Suspense>
     </div>
   );
 }

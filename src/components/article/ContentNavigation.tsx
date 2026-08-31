@@ -38,7 +38,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
       {/* 前の記事カード */}
       {previous ? (
         <button
-          onClick={() => router.push(`/articles/${previous.slug}`)}
+          onClick={() => router.push(`/contents/${previous.slug}`)}
           className="flex items-center gap-3 px-6 py-5 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] hover:bg-gray-50 transition-colors flex-1 min-w-0"
         >
           {/* 左矢印 */}
@@ -77,7 +77,7 @@ const ContentNavigation = ({ previous, next }: ContentNavigationProps) => {
       {/* 次の記事カード */}
       {next ? (
         <button
-          onClick={() => router.push(`/articles/${next.slug}`)}
+          onClick={() => router.push(`/contents/${next.slug}`)}
           className="flex items-center gap-3 px-6 py-5 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] hover:bg-gray-50 transition-colors flex-1 min-w-0"
         >
           {/* テキストコンテナ */}

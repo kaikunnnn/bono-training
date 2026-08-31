@@ -12,7 +12,7 @@ export function ProgressSkeleton({ mode }: { mode: "preview" | "full" }) {
           <Skeleton className="h-6 w-20" />
           <Skeleton className="h-4 w-16" />
         </div>
-        <div className="flex gap-[10px] w-full">
+        <div className="flex flex-col sm:flex-row gap-[10px] w-full">
           {[0, 1].map((i) => (
             <div key={i} className="flex-1 min-w-0">
               <ProgressCardSkeleton />

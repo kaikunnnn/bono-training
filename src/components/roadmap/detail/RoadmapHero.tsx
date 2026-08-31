@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { BackButton } from "@/components/common/BackButton";
 import type { GradientPreset } from "@/types/sanity-roadmap";
@@ -273,10 +274,13 @@ export default function RoadmapHero({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
           >
-            <img
+            <Image
               src={heroImageUrl}
               alt={stripLineBreakMarker(title)}
-              className="w-full h-full object-cover object-center opacity-90"
+              fill
+              priority
+              sizes="(min-width: 1200px) 1200px, 100vw"
+              className="object-cover object-center opacity-90"
             />
           </motion.div>
         )}

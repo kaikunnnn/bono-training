@@ -9,7 +9,7 @@
 import { useState, useCallback } from "react";
 import Link from "next/link";
 import confetti from "canvas-confetti";
-import { Cup, Edit, MessageText1, ArrowRight } from "iconsax-react";
+import { Trophy, Pencil, MessageSquareText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface ClearBlockProps {
@@ -139,10 +139,9 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                 size="large"
                 className="gap-3"
               >
-                <Cup
+                <Trophy
                   size={20}
                   color="currentColor"
-                  variant={celebrated ? "Bold" : "Outline"}
                 />
                 {celebrated ? "おめでとう！" : "クリアをお祝いする！"}
               </Button>
@@ -164,7 +163,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f4ee] rounded-xl flex items-center justify-center group-hover:bg-[#52674e]/10 transition-colors">
-                        <Edit size={24} color="#52674e" variant="Linear" />
+                        <Pencil size={24} color="#52674e" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-[16px] font-bold text-text-secondary mb-2">
@@ -190,7 +189,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f0fa] rounded-xl flex items-center justify-center group-hover:bg-[#667eea]/10 transition-colors">
-                        <MessageText1 size={24} color="#667eea" variant="Linear" />
+                        <MessageSquareText size={24} color="#667eea" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-[16px] font-bold text-text-secondary mb-2">
@@ -214,7 +213,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                   <div className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-[border-color,box-shadow] group">
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f4ee] rounded-xl flex items-center justify-center group-hover:bg-[#52674e]/10 transition-colors">
-                        <Edit size={24} color="#52674e" variant="Linear" />
+                        <Pencil size={24} color="#52674e" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-[16px] font-bold text-text-secondary mb-2">
@@ -244,7 +243,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                   >
                     <div className="flex items-start gap-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-[#f0f0fa] rounded-xl flex items-center justify-center group-hover:bg-[#667eea]/10 transition-colors">
-                        <MessageText1 size={24} color="#667eea" variant="Linear" />
+                        <MessageSquareText size={24} color="#667eea" />
                       </div>
                       <div className="flex-1">
                         <h3 className="text-[16px] font-bold text-text-secondary mb-2">

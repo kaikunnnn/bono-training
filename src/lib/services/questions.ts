@@ -1,7 +1,9 @@
 "use server";
 
 import { createClient, getCachedUser } from "@/lib/supabase/server";
-import { client as getClient } from "@/lib/sanity";
+// 掲示板は投稿直後の即時反映が必要なため live クライアント（useCdn:false）を使う。
+// 他のコンテンツは既定の CDN クライアント（issue #163）。
+import { liveClient as getClient } from "@/lib/sanity";
 import { revalidatePath } from "next/cache";
 import type { Question, QuestionCategory } from "@/types/sanity";
 import { adjustBoardUserStats } from "@/lib/questions/board-user-stats";

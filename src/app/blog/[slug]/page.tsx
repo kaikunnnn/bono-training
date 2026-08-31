@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getBlogPost, getLatestBlogPosts, getAllBlogSlugs, getPrevBlogPost, getNextBlogPost } from "@/lib/sanity";
+import { getBlogPost, getLatestBlogPosts, getPrevBlogPost, getNextBlogPost } from "@/lib/sanity";
 import { removeEmojiFromText } from "@/utils/blog/emojiUtils";
 import BlogDetailClient from "./BlogDetailClient";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
@@ -10,15 +10,6 @@ export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  try {
-    const slugs = await getAllBlogSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

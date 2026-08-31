@@ -311,6 +311,38 @@ async function findAuthUserIdByEmail(supabase: any, email: string): Promise<stri
 /**
  * チェックアウト完了イベントの処理
  */
+/**
+ * subscription.created / updated は Stripe のイベント配信・処理順が無保証。
+ * 特に created は status=incomplete（決済確定前）で発火することがあり、これを
+ * is_active=false として書くと、並行処理された checkout.session.completed /
+ * subscription.updated(active) の is_active=true を上書きしてしまう
+ * （＝決済成功でも is_active=false になりアクセス不可になる不具合。BUG-1）。
+ *
+ * 対策:
+ *  1) イベントの status スナップショットを信用せず、Stripe から現在の status を再取得する。
+ *  2) incomplete / incomplete_expired（過渡状態）では is_active を書き換えない
+ *     （既存の値を保持。新規行は user_subscriptions.is_active の既定 false）。
+ *  3) active / trialing → true、それ以外（past_due/unpaid/canceled 等）→ false。
+ *
+ * 返り値を upsert/update のペイロードにスプレッドして使う（空オブジェクト＝is_activeを触らない）。
+ * 参考: https://docs.stripe.com/webhooks （イベント順序は保証されない）
+ */
+async function resolveIsActivePatch(
+  stripe: any,
+  subscription: any
+): Promise<{ is_active?: boolean }> {
+  let status = subscription?.status;
+  try {
+    const fresh = await stripe.subscriptions.retrieve(subscription.id);
+    if (fresh?.status) status = fresh.status;
+  } catch (e) {
+    console.warn("⚠️ [webhook] subscription 現在statusの再取得に失敗。イベントのstatusで続行:", e);
+  }
+  if (["active", "trialing"].includes(status)) return { is_active: true };
+  if (["incomplete", "incomplete_expired"].includes(status)) return {};
+  return { is_active: false };
+}
+
 async function handleCheckoutCompleted(stripe: any, supabase: any, session: any) {
   console.log("🚀 [LIVE環境] checkout.session.completedイベントを処理中");
 
@@ -932,11 +964,14 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
       ? new Date(subscription.current_period_end * 1000).toISOString()
       : null;
 
+    // BUG-1対策: incomplete の並行書き込みで is_active=true を潰さない
+    // （現在statusをStripeから再取得＋incompleteではis_activeを書かないdowngradeガード）。
+    const isActivePatch = await resolveIsActivePatch(stripe, subscription);
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
       .upsert({
         user_id: userId,
-        is_active: ["active", "trialing", "incomplete"].includes(subscription.status),
+        ...isActivePatch,
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
@@ -1085,12 +1120,14 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
     });
 
     // user_subscriptionsテーブルを更新
+    // BUG-1対策: incomplete のスナップショットで is_active=true を潰さない（同上）。
+    const isActivePatch = await resolveIsActivePatch(stripe, subscription);
     const { error: updateError } = await supabase
       .from("user_subscriptions")
       .update({
         plan_type: planType,
         duration: duration,
-        is_active: ["active", "trialing", "incomplete"].includes(subscription.status),
+        ...isActivePatch,
         stripe_subscription_id: subscriptionId,
         cancel_at_period_end: cancelAtPeriodEnd,
         cancel_at: cancelAt,

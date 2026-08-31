@@ -18,7 +18,7 @@ export const resolveSearchResultHref = (r: SearchResult): string => {
       if (isArticleResult(r) && r.parentLessonSlug) {
         return `/lessons/${r.parentLessonSlug}/${r.slug}`;
       }
-      return `/articles/${r.slug}`;
+      return `/contents/${r.slug}`;
     case "guide":
       return `/guide/${r.slug}`;
     case "roadmap":

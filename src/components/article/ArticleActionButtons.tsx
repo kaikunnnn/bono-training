@@ -60,7 +60,7 @@ export const ArticleActionButtons = ({
             }
           />
 
-          {/* 掲示板で聞く（お気に入りの横）: みんなの掲示板トップを別タブで開く */}
+          {/* 質問する（お気に入りの横）: みんなの掲示板トップを別タブで開く */}
           <Button
             asChild
             variant="secondary"
@@ -74,12 +74,12 @@ export const ArticleActionButtons = ({
               href="/questions"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="掲示板で聞く"
+              aria-label="質問する"
             >
               <MessageSquare size={16} className="text-gray-600" />
               <div className="hidden sm:inline-flex flex-col justify-start items-center">
                 <div className="text-center justify-center text-gray-600 text-sm font-semibold font-['Hiragino_Sans'] leading-5">
-                  掲示板で聞く
+                  質問する
                 </div>
               </div>
             </a>

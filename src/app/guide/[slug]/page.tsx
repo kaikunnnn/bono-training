@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
   getGuideFromSanity,
-  getAllGuideSlugsFromSanity,
   getGuidesByCategoryFromSanity,
 } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
@@ -20,11 +19,6 @@ export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const slugs = await getAllGuideSlugsFromSanity();
-  return slugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -45,7 +39,7 @@ export async function generateMetadata({
     title: `${guide.title} | ガイド`,
     description: guide.description,
     openGraph: {
-      title: `${guide.title} | ガイド | BONO`,
+      title: `${guide.title} | ガイド`,
       description: guide.description,
       type: "article",
       ...(ogImages.length > 0 && { images: ogImages }),
@@ -54,7 +48,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${guide.title} | ガイド | BONO`,
+      title: `${guide.title} | ガイド`,
       description: guide.description,
       ...(guide.thumbnailUrl && { images: [guide.thumbnailUrl] }),
     },

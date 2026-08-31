@@ -1,176 +1,136 @@
-import { Metadata } from "next";
-import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import AchievementHighlightSection from "@/components/top/home/AchievementHighlightSection";
+import { getAchievementGroups } from "@/lib/sanity";
+import {
+  getCurrentUser,
+  getSubscriptionStatus,
+  getPlanDisplayName,
+} from "@/lib/subscription";
 import { CustomerPortalButton } from "@/components/subscription/CustomerPortalButton";
-import { PlanSelector, type PlanData } from "@/components/subscription/PlanSelector";
+import { PricingFinal } from "../dev/pricing-final/PricingFinal";
+
+/**
+ * 料金プラン（本番ページ）。
+ *
+ * 新デザイン（/dev/pricing-final の PricingFinal）を本番に昇格したもの。
+ * サーバーロジックは /dev/pricing-final/page.tsx を踏襲:
+ *  - 実績・アウトプットは Sanity から getAchievementGroups(3) で取得し、
+ *    AchievementHighlightSection を組み立てて ReactNode として client へ渡す。
+ *  - 状態（ログイン/課金）は getCurrentUser / getSubscriptionStatus で取得。
+ *
+ * /dev 版との差分:
+ *  - 本番ページなので noindex にしない（SEO 資産化）。canonical は /subscription。
+ *  - 有効契約者には managementSlot（現在プラン＋プラン管理導線）を渡す。
+ */
 
 export const metadata: Metadata = {
-  title: "プレミアム会員",
+  // 親レイアウトの title.template（"%s | BONO"）が自動で " | BONO" を付ける。
+  // og/twitter はテンプレートが効かないので明示的に付ける（faqページと同じパターン）。
+  title: "料金プラン",
   description:
-    "BONOプレミアム会員になって、すべてのレッスンと記事にアクセスしよう。UIUXデザインのスキルを効率的に身につけられます。",
+    "BONOの料金プラン。すべてのレッスンと記事にアクセスして、UIUXデザインのスキルを効率的に身につけよう。",
   openGraph: {
-    title: "プレミアム会員 | BONO",
+    title: "料金プラン | BONO",
     description:
-      "BONOプレミアム会員になって、すべてのレッスンと記事にアクセスしよう。",
+      "BONOの料金プラン。すべてのレッスンと記事にアクセスして、UIUXデザインのスキルを効率的に身につけよう。",
   },
   twitter: {
-    title: "プレミアム会員 | BONO",
+    title: "料金プラン | BONO",
     description:
-      "BONOプレミアム会員になって、すべてのレッスンと記事にアクセスしよう。",
+      "BONOの料金プラン。すべてのレッスンと記事にアクセスして、UIUXデザインのスキルを効率的に身につけよう。",
   },
   alternates: { canonical: "/subscription" },
 };
 
-const plans: PlanData[] = [
-  {
-    id: "standard",
-    name: "スタンダード",
-    description: "すべてのコンテンツにアクセス",
-    prices: { 1: 6800, 3: 17400 },
-    features: [
-      "すべてのレッスン・記事へのアクセス",
-      "新規コンテンツの優先アクセス",
-      "学習進捗の記録",
-      "メールサポート",
-    ],
-    popular: true,
-  },
-  {
-    id: "feedback",
-    name: "フィードバック",
-    description: "作品のレビューを受ける",
-    prices: { 1: 15800, 3: 41400 },
-    features: [
-      "すべてのコンテンツへのアクセス",
-      "フィードバック機能の利用",
-      "実務プロジェクトのレビュー",
-      "キャリア相談",
-    ],
-    popular: false,
-  },
-];
-
-export default async function SubscriptionPage() {
-  const user = await getCurrentUser();
-  const subscription = await getSubscriptionStatus();
-
-  return (
-    <div className="min-h-screen">
-      {/* ヒーローセクション */}
-      <section>
-        <div className="container px-4 py-16 sm:px-8 text-center">
-          <Badge variant="secondary" className="mb-4">
-            プレミアム会員
-          </Badge>
-          <h1 className="text-4xl font-bold mb-4 text-text-primary">
-            UIUXデザインを
-            <br className="sm:hidden" />
-            本格的に学ぶ
-          </h1>
-          <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            プレミアム会員になると、すべてのレッスンと記事にアクセスできます。
-            体系的なカリキュラムで、効率的にスキルアップしましょう。
-          </p>
-        </div>
-      </section>
-
-      {/* 現在のプラン表示（ログイン済みの場合） */}
-      {user && subscription.isSubscribed && (
-        <section className="container px-4 py-8 sm:px-8">
-          <Card className="bg-primary/5 border-primary/20">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">
-                    現在のプラン
-                  </p>
-                  <p className="text-2xl font-bold text-text-primary">
-                    {getPlanLabel(subscription.planType)}
-                  </p>
-                  {subscription.renewalDate && (
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {subscription.cancelAtPeriodEnd
-                        ? `${formatDate(subscription.renewalDate)} に終了予定`
-                        : `次回更新: ${formatDate(subscription.renewalDate)}`}
-                    </p>
-                  )}
-                </div>
-                <CustomerPortalButton variant="outline">
-                  プランを管理
-                </CustomerPortalButton>
-              </div>
-            </CardContent>
-          </Card>
-        </section>
-      )}
-
-      {/* プラン一覧（期間切り替えタブ付き） */}
-      <section className="container px-4 py-12 sm:px-8">
-        <PlanSelector
-          plans={plans}
-          isLoggedIn={!!user}
-          isSubscribed={subscription.isSubscribed}
-          currentPlanType={subscription.planType}
-          currentDuration={subscription.duration}
-          currentPeriodEnd={subscription.renewalDate}
-          cancelAtPeriodEnd={subscription.cancelAtPeriodEnd}
-        />
-      </section>
-
-      {/* FAQ */}
-      <section className="container px-4 py-12 sm:px-8">
-        <h2 className="text-2xl font-bold text-center mb-8 text-text-primary">よくある質問</h2>
-        <div className="max-w-2xl mx-auto space-y-4">
-          {[
-            {
-              q: "いつでも解約できますか？",
-              a: "はい、いつでも解約できます。解約後も、次回更新日までコンテンツにアクセスできます。",
-            },
-            {
-              q: "プランの変更はできますか？",
-              a: "はい、いつでもプランを変更できます。アップグレードは即時適用され、ダウングレードは次回更新時に適用されます。",
-            },
-            {
-              q: "支払い方法は何が使えますか？",
-              a: "クレジットカード（Visa、Mastercard、JCB、American Express）でお支払いいただけます。",
-            },
-            {
-              q: "無料トライアルはありますか？",
-              a: "一部のコンテンツは無料でお試しいただけます。プレミアムコンテンツをすべて体験したい場合は、月額プランにご登録ください。",
-            },
-          ].map((faq, i) => (
-            <Card key={i}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">{faq.q}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">{faq.a}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function getPlanLabel(planType: string | null): string {
-  switch (planType) {
-    case "standard":
-      return "スタンダード";
-    case "feedback":
-      return "フィードバック";
-    default:
-      return "無料プラン";
+async function buildAchievementSlot() {
+  try {
+    const groups = await getAchievementGroups(3);
+    return (
+      <AchievementHighlightSection
+        compact
+        paddingY={0}
+        className="border-b-0"
+        cardGridClassName="gap-[40px] sm:gap-[24px]"
+        headingSlot={
+          <div>
+            <p className="text-xs tracking-[1.6px] text-foreground">
+              MEMBER&apos;S VOICE
+            </p>
+            <h2 className="mt-3 font-heading text-[28px] font-semibold text-foreground">
+              みんなの実績
+            </h2>
+          </div>
+        }
+        storyItems={groups.stories}
+        outputItems={groups.outputs}
+      />
+    );
+  } catch (error) {
+    // Sanity 未接続（.env.local 無し）等で取得失敗 → セクションは出さず fallback を表示
+    console.warn(
+      "[subscription] achievement 取得に失敗。fallback を表示します。",
+      error
+    );
+    return (
+      <p className="rounded-2xl border border-dashed border-border px-4 py-8 text-sm text-muted-foreground">
+        （実績データは環境未接続のため非表示）
+      </p>
+    );
   }
 }
 
+/** 日付を「YYYY年M月D日」に整形する。 */
 function formatDate(dateString: string): string {
-  const date = new Date(dateString);
-  return date.toLocaleDateString("ja-JP", {
+  return new Date(dateString).toLocaleDateString("ja-JP", {
     year: "numeric",
     month: "long",
     day: "numeric",
   });
+}
+
+export default async function SubscriptionPage() {
+  const achievementSlot = await buildAchievementSlot();
+  // 状態取得（Server）— /dev/pricing-final と同じ取得。実CTAの状態出し分けに使う。
+  const user = await getCurrentUser();
+  const subscription = await getSubscriptionStatus();
+
+  // 有効契約者向けの管理ストリップ（PricingHero 直後に表示）。
+  // 契約者かつ planType が確定しているときだけ組み立てる（非契約者は undefined＝非表示）。
+  const managementSlot =
+    subscription.isSubscribed && subscription.planType ? (
+      <div className="mt-6 flex flex-col gap-3 rounded-2xl border border-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm text-muted-foreground">現在のプラン</p>
+          <p className="mt-0.5 text-base font-semibold text-foreground">
+            {getPlanDisplayName(subscription.planType)}
+            {subscription.renewalDate && (
+              <span className="ml-2 text-sm font-normal text-muted-foreground">
+                {subscription.cancelAtPeriodEnd
+                  ? `${formatDate(subscription.renewalDate)} に終了予定`
+                  : `次回更新: ${formatDate(subscription.renewalDate)}`}
+              </span>
+            )}
+          </p>
+        </div>
+        <CustomerPortalButton variant="outline">
+          プランを管理
+        </CustomerPortalButton>
+      </div>
+    ) : undefined;
+
+  return (
+    <Suspense fallback={<div className="p-8 text-sm">読み込み中…</div>}>
+      <PricingFinal
+        achievementSlot={achievementSlot}
+        managementSlot={managementSlot}
+        isLoggedIn={!!user}
+        isSubscribed={subscription.isSubscribed}
+        currentPlanType={subscription.planType}
+        currentDuration={subscription.duration}
+        currentPeriodEnd={subscription.renewalDate}
+        cancelAtPeriodEnd={subscription.cancelAtPeriodEnd}
+      />
+    </Suspense>
+  );
 }

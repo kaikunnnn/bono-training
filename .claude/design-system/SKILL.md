@@ -59,15 +59,31 @@ The host app is **Next.js (App Router)**. The system also works for the legacy V
 | Muted text | `--text-muted` | `text-text-muted` |
 | Primary CTA fill | `--btn-primary-bg` (`#102720`) | `bg-btn-primary` |
 | Outlined CTA stroke | `--text-primary` | `border-text-primary` |
-| Heading font (JP) | `--font-rounded` | `font-rounded` |
-| Body font (JP) | `--font-sans-jp` | `font-noto-sans-jp` |
-| Display font (Latin) | `--font-display` (LINE Seed JP) | `font-display` |
+| 見出し/タイトル font | `--font-heading` (M PLUS 1 / weights **500,700**) | `font-heading` |
+| 本文 font（サイト既定） | `--font-body` = 既定 `--font-sans` (Noto Sans JP) | `font-body` / `font-noto-sans-jp` |
+| 英数字ディスプレイ font | `--font-latin` (system font stack, DLなし) | `font-latin` |
+| コード font | `--font-mono` (Geist Mono) | `font-mono` |
 | Card radius (md) | `--radius-md` (`32px`) | `rounded-md-card` |
 | Card radius (xl) | `--radius-xl` (`64px`) | `rounded-xl-card` |
 | Button radius | `--radius-btn` (`14px`) | `rounded-btn` |
 | Pill (goal buttons) | `--radius-pill` (`200px`) | `rounded-pill` |
 
 (See `colors_and_type.css` for the full list.)
+
+#### フォントの正規ロール（4種）— これ以外を新規で増やさない
+
+| ロール | フォント | 使うクラス | ロードウェイト |
+|---|---|---|---|
+| 見出し・タイトル | M PLUS 1 | `font-heading` | 500, 700 |
+| 本文（＝サイト既定） | Noto Sans JP | `font-body`（既定 `font-sans`） | 400, 500, 700 |
+| 英数字ディスプレイ | system font stack（DLなし・最速） | `font-latin` | — |
+| コード | Geist Mono | `font-mono` | — |
+
+- **既定（クラス未指定）は本文= Noto Sans JP**。日本語は原則 Noto、見出しだけ M PLUS 1。
+- **非推奨エイリアス**（後方互換で残置、順次 `font-heading`/`font-latin` へ移行し最終的に削除）:
+  `font-rounded-mplus`→見出し / `font-inter`・`font-hind`・`font-geist`→英数字。名前が実体と異なるので**新規では使わない**。
+- **LINE Seed JP**（`font-line-seed-jp`）は workshop / docs 専用のブランド字体。トップや汎用UIでは使わない。
+- 実ロード定義は `src/app/layout.tsx`（next/font）と `src/app/globals.css`（`@theme` トークン）。**このロール表と一致させること**。
 
 ### 2. Look at the kit before writing new UI
 
@@ -143,7 +159,7 @@ UI kit files in `ui_kits/` are written as plain JSX. When copying into the app:
 | `<a href="...">` internal | `import Link from 'next/link'` |
 | `<img src="...">` | `import Image from 'next/image'` (always pass `alt`, `width`, `height` or `fill`) |
 | Local fonts | `next/font/local` from `.claude/design-system/fonts/`. Do **not** add a `@font-face` block in CSS. |
-| Google Fonts | `next/font/google` for M PLUS Rounded 1c, Inter, Noto Sans JP. The `@import` line in `colors_and_type.css` is a fallback for non-Next environments — leave it; `next/font` takes precedence in Next. |
+| Google Fonts | `next/font/google` for **M PLUS 1**（見出し / 500,700）, **Noto Sans JP**（本文 / 400,500,700）, **Geist Mono**（コード）。英数字ディスプレイは system font stack（`font-latin`, DLなし）。新規フォントを増やさない。 |
 | Sanity fetches | Server Components with `client.fetch(...)`. No `useRoadmaps`/`useLessons` hooks in Server trees. |
 | react-router `<Link>` | Replace with `next/link` `<Link>`. The `to=` prop becomes `href=`. |
 

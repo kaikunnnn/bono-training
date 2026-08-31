@@ -6,7 +6,7 @@
 
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getRoadmapBySlug, getAllRoadmapSlugs, getAllRoadmaps } from "@/lib/sanity";
+import { getRoadmapBySlug, getAllRoadmaps } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import RoadmapHero from "@/components/roadmap/detail/RoadmapHero";
 import RoadmapPathway from "@/components/roadmap/detail/RoadmapPathway";
@@ -21,19 +21,6 @@ import type { GradientPreset } from "@/styles/gradients";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
-
-// ============================================
-// 静的パスの生成
-// ============================================
-
-export async function generateStaticParams() {
-  try {
-    const slugs = await getAllRoadmapSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
-}
 
 // ============================================
 // OGP メタデータの生成
@@ -55,12 +42,12 @@ export async function generateMetadata({
     title: roadmap.title,
     description: roadmap.description,
     openGraph: {
-      title: `${roadmap.title} | BONO`,
+      title: `${roadmap.title}`,
       description: roadmap.description,
       ...(roadmap.thumbnailUrl && { images: [{ url: roadmap.thumbnailUrl }] }),
     },
     twitter: {
-      title: `${roadmap.title} | BONO`,
+      title: `${roadmap.title}`,
       description: roadmap.description,
     },
     alternates: { canonical: `/roadmap/${slug}` },

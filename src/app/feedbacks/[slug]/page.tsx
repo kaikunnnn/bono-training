@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getFeedback, getRelatedFeedbacks, getRecentFeedbacks, getAllFeedbackSlugs } from "@/lib/sanity";
+import { getFeedback, getRelatedFeedbacks, getRecentFeedbacks } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
 
 // ISR: 1時間キャッシュ
@@ -17,15 +17,6 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  try {
-    const slugs = await getAllFeedbackSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const feedback = await getFeedback(slug);
@@ -38,11 +29,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${feedback.title} | フィードバック`,
     description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     openGraph: {
-      title: `${feedback.title} | フィードバック | BONO`,
+      title: `${feedback.title} | フィードバック`,
       description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     },
     twitter: {
-      title: `${feedback.title} | フィードバック | BONO`,
+      title: `${feedback.title} | フィードバック`,
       description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     },
     alternates: { canonical: `/feedbacks/${slug}` },

@@ -21,6 +21,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { stripLineBreakMarker } from '@/utils/textFormat';
 import { type GradientPreset, GRADIENTS } from '@/styles/gradients';
@@ -107,10 +108,13 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
                 style={{ background: gradientCSS }}
               >
                 {thumbnailUrl && (
-                  <img
+                  <Image
                     src={thumbnailUrl}
                     alt={title}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    fill
+                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    className="object-cover"
+                    unoptimized
                   />
                 )}
               </div>
@@ -122,11 +126,14 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
               style={{ background: gradientCSS }}
             >
               {thumbnailUrl && (
-                <img
+                <Image
                   src={thumbnailUrl}
                   alt={title}
+                  fill
+                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
                   className="absolute inset-0 w-full h-full object-cover rounded-[16px] sm:rounded-[22px] lg:rounded-[30px] m-1.5 sm:m-2 lg:m-2.5"
                   style={{ width: 'calc(100% - 12px)', height: 'calc(100% - 12px)' }}
+                  unoptimized
                 />
               )}
             </div>
@@ -221,10 +228,13 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
               style={{ background: gradientCSS }}
             >
               {thumbnailUrl && (
-                <img
+                <Image
                   src={thumbnailUrl}
                   alt={title}
-                  className="absolute inset-0 w-full h-full object-cover"
+                  fill
+                  sizes="(min-width: 1280px) 435px, (min-width: 1024px) 320px, 100vw"
+                  className="object-cover"
+                  unoptimized
                 />
               )}
             </div>
@@ -236,11 +246,16 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
             style={{ background: gradientCSS }}
           >
             {thumbnailUrl && (
-              <img
-                src={thumbnailUrl}
-                alt={title}
-                className="absolute inset-2 sm:inset-3 w-[calc(100%-16px)] sm:w-[calc(100%-24px)] h-[calc(100%-16px)] sm:h-[calc(100%-24px)] object-cover rounded-[16px] sm:rounded-[22px] lg:rounded-[30px]"
-              />
+              <div className="absolute inset-2 sm:inset-3 overflow-hidden rounded-[16px] sm:rounded-[22px] lg:rounded-[30px]">
+                <Image
+                  src={thumbnailUrl}
+                  alt={title}
+                  fill
+                  sizes="(min-width: 1280px) 435px, (min-width: 1024px) 320px, 100vw"
+                  className="object-cover"
+                  unoptimized
+                />
+              </div>
             )}
           </div>
         )}

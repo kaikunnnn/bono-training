@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { ShareDropdown } from "@/components/common/ShareDropdown";
+import { Button } from "@/components/ui/button";
 
 interface LessonHeaderProps {
   backLabel?: string;
@@ -28,27 +29,29 @@ export function LessonHeader({
   return (
     <div className="flex items-start justify-between w-full mb-[24px]">
       <div className="flex items-start">
-        <button
+        <Button
+          variant="outline"
           onClick={handleBack}
-          className="bg-white border border-border-light flex gap-2 items-center px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
+          className="h-auto gap-2 border-border-light px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] [&_svg]:size-5"
         >
-          <ArrowLeft className="size-5 text-black" strokeWidth={2} />
+          <ArrowLeft className="text-black" strokeWidth={2} />
           <span className="font-noto-sans-jp font-semibold text-sm text-black">
             {backLabel}
           </span>
-        </button>
+        </Button>
       </div>
 
       {showShare && (
         <div className="flex items-start">
           <ShareDropdown title={title} align="end">
-            <button
-              className="bg-white border border-border-light flex gap-1 items-center px-2.5 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] hover:bg-gray-50 transition"
+            <Button
+              variant="outline"
+              className="h-auto gap-1 border-border-light px-2.5 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)]"
             >
               <span className="font-noto-sans-jp font-semibold text-sm text-black">
                 シェア
               </span>
-            </button>
+            </Button>
           </ShareDropdown>
         </div>
       )}

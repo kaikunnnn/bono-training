@@ -100,7 +100,18 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
 
   // 登録成功後、自動ログインしてリダイレクト
   revalidatePath("/", "layout");
-  redirect(redirectTo || "/");
+
+  // 通常のsignup（intentなし）のみ、着地先に welcome フラグを付ける。
+  // 着地ページ側の WelcomeToast がこれを検知して歓迎トーストを一度だけ表示する。
+  // intentフロー（redirectTo に intent_plan を含む）では登録直後に自動でStripe
+  // Checkout へ遷移するためトーストが見えない/一瞬で流れる → フラグを付けない。
+  // 注意: redirect() は NEXT_REDIRECT を throw して動作するため try/catch の外で呼ぶ。
+  const target = redirectTo || "/";
+  if (target.includes("intent_plan")) {
+    redirect(target);
+  }
+  const separator = target.includes("?") ? "&" : "?";
+  redirect(`${target}${separator}welcome=1`);
 }
 
 export async function signOut() {

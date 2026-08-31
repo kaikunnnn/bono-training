@@ -31,22 +31,12 @@ function buildEmbedUrl(url: string): string | null {
 import {
   getStoryBySlug,
   getRelatedStories,
-  getAllStorySlugs,
 } from "@/lib/sanity";
 
 export const revalidate = 3600;
 
 interface PageProps {
   params: Promise<{ slug: string }>;
-}
-
-export async function generateStaticParams() {
-  try {
-    const slugs = await getAllStorySlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -60,11 +50,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const ogImage = story.heroImageUrl;
 
   return {
-    title: `${story.title} | BONO`,
+    title: `${story.title}`,
     description: story.excerpt,
     keywords: story.tags?.join(", "),
     openGraph: {
-      title: `${story.title} | BONO`,
+      title: `${story.title}`,
       description: story.excerpt,
       type: "article",
       images: ogImage ? [ogImage] : undefined,

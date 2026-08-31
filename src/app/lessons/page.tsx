@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { getAllLessonsWithArticleIds } from "@/lib/sanity";
+import { getAllLessons } from "@/lib/sanity";
 // TODO: LessonCardに進捗表示を追加する際に使用
 // import { getMultipleLessonProgress } from "@/lib/services/progress";
 import PageHeader from "@/components/common/PageHeader";
@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 };
 
 export default async function LessonsPage() {
-  const lessons = await getAllLessonsWithArticleIds();
+  const lessons = await getAllLessons();
 
   // セクション・サブセクションごとにグルーピング（main の groupedLessons に対応）
   const groupedLessons = groupLessonsNested(lessons);

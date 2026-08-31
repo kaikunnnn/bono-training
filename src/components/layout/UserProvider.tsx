@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 export interface UserProviderResult {
@@ -16,7 +17,7 @@ export interface UserProviderResult {
  * Suspense boundary 内で呼び出すことで、
  * ページコンテンツの描画をブロックしない
  */
-export async function UserProvider(): Promise<UserProviderResult> {
+export const UserProvider = cache(async (): Promise<UserProviderResult> => {
   try {
     const supabase = await createClient();
     const {
@@ -40,4 +41,4 @@ export async function UserProvider(): Promise<UserProviderResult> {
   } catch {
     return { user: null, invalidSession: false };
   }
-}
+});
