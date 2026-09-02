@@ -1,7 +1,11 @@
+import { Suspense } from "react";
 import { cookies } from "next/headers";
+import { Bell } from "lucide-react";
 import { Layout } from "./Layout";
 import { UserProvider } from "./UserProvider";
 import { StaleSessionCleaner } from "@/components/auth/StaleSessionCleaner";
+import { NotificationBellServer } from "@/components/notifications/NotificationBellServer";
+import { BoardNewDotServer } from "@/components/questions/BoardNewDotServer";
 
 interface LayoutWrapperProps {
   children: React.ReactNode;
@@ -36,10 +40,44 @@ export async function LayoutWrapper({ children }: LayoutWrapperProps) {
       .some((c) => c.name.startsWith("sb-") && c.name.includes("-auth-token"));
   }
 
+  // 通知ベル（#160 S3）: 未読件数の取得を Suspense 境界に閉じ、ページ本体の
+  // クリティカルパスから外す。fallback は「バッジなしのベル」で、未読数が確定したら
+  // 差し替わる（バッジが付く）。未ログイン時はベル自体を出さない。
+  const notificationSlot = user ? (
+    <Suspense fallback={<NotificationBellFallback />}>
+      <NotificationBellServer userId={user.id} />
+    </Suspense>
+  ) : null;
+
+  // 掲示板の新着ドット（掲示板の新着ドット）: 通知ベルと同じ Suspense スロット方式。
+  // hasUnseenBoard の1往復を Suspense 境界に閉じ、ページ本体・サイドバー描画をブロックしない。
+  // fallback は null（ドット無し）で、未読が確定したらピンクのポチが差し込まれる。
+  // 未ログイン時はドット自体を出さない。
+  const boardDotSlot = user ? (
+    <Suspense fallback={null}>
+      <BoardNewDotServer userId={user.id} />
+    </Suspense>
+  ) : null;
+
   return (
-    <Layout user={user}>
+    <Layout user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot}>
       {hasStaleAuthCookie && <StaleSessionCleaner />}
       {children}
     </Layout>
+  );
+}
+
+/**
+ * 未読件数取得中に出す「バッジなしのベル」。NotificationBell のトリガーボタンと
+ * 見た目を揃える（ghost / h-8 w-8 rounded-full / Bell h-5 w-5）。表示のみ（非活性）。
+ */
+function NotificationBellFallback() {
+  return (
+    <div
+      className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground"
+      aria-hidden="true"
+    >
+      <Bell className="h-5 w-5" />
+    </div>
   );
 }

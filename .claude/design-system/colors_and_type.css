@@ -97,6 +97,10 @@
   /* 掲示板コメント入力カードのボーダー（Figma 20:2845・グレー実線）。
      入力欄をはっきり縁取るための強めのボーダー。 */
   --border-input-strong: #C0C0C0;
+  /* 通知ボックスの枠線（Figma 394:3871・黒4%）。card-border-subtle(0.08)より薄い。 */
+  --border-hairline: rgba(0, 0, 0, 0.04);
+  /* 開いた状態の通知ベル背景（Figma 394:3827・半透明白72%）。 */
+  --bell-open-bg: rgba(255, 255, 255, 0.72);
 
   /* リアクションボタン（Figma 135:4348）。
      枠線は黒15%。ON状態は「明るい色」指定のためリンク色（--text-link #0829BF）系統で表現
@@ -180,6 +184,9 @@
   --confetti-7: #A78BFA;  /* purple */
   --confetti-8: #F472B6;  /* pink */
 
+  /* 通知の未読バッジ（Figma 394:3325）。既存のピンク系と一致しない専用色。 */
+  --notification-badge: #f14190;
+
   /* =========================================================
      RADIUS — Rounded is a core visual motif
      ========================================================= */
@@ -210,6 +217,8 @@
   --shadow-board-card:  0px 1px 4px rgba(0, 0, 0, 0.04);
   /* 掲示板コメント入力カードの影（Figma 20:2845）。 */
   --shadow-input:       0px 1px 6px rgba(0, 0, 0, 0.08);
+  /* 通知ボックス（Popover）の影（Figma 394:3871）。既存 --shadow-md より濃く広い専用値。 */
+  --shadow-popover:     0px 4px 24px 0px rgba(0, 0, 0, 0.18);
 
   /* =========================================================
      SPACING — 4px base
@@ -254,6 +263,7 @@
   /* Size scale (px, product uses pixel values) */
   --text-2xs: 10px;
   --text-xs:  12px;
+  --text-13:  13px;  /* 通知一覧テキストなど xs と sm の中間サイズ */
   --text-sm:  14px;
   --text-md:  16px;
   --text-base:16px;

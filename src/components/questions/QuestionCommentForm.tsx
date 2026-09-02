@@ -10,6 +10,9 @@ import { Loader2, AlertCircle, ImagePlus, X } from "lucide-react";
 import { validateImageFile, resizeImageToWebP } from "@/lib/image-utils";
 import { uploadQuestionImage } from "@/app/questions/new/actions";
 import { addComment, type QuestionComment } from "@/lib/services/questions";
+import { toast } from "@/hooks/use-toast";
+import { playCommentPostedSound } from "@/lib/celebration-sounds";
+import { getRandomCommentPostedMessage } from "@/lib/questions/comment-toast-messages";
 
 /** サーバ側・DB と一致させる文字数上限（Figma の 2000 には合わせない） */
 const MAX_LENGTH = 5000;
@@ -123,6 +126,10 @@ export function QuestionCommentForm({
       }
       // 成功時のみテキスト・画像 state をクリア
       clearForm();
+      // 投稿完了の演出（#158）：軽い効果音 + ランダム文言トースト。
+      // 記事完了音と挙動を揃える（prefers-reduced-motion ガードは付けない）。失敗は握りつぶす設計。
+      playCommentPostedSound();
+      toast({ title: getRandomCommentPostedMessage() });
       // 返ってきたコメントを即座に一覧へ反映しつつ、裏でサーバー状態と同期する
       onAdded?.(result.comment);
       router.refresh();

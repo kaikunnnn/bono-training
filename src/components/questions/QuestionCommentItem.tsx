@@ -41,6 +41,8 @@ interface QuestionCommentItemProps {
   onDeleted?: (commentId: string) => void;
   /** 編集保存成功時に呼ばれる（一覧への即時反映用。router.refresh を待たない） */
   onUpdated?: (commentId: string, content: string) => void;
+  /** 通知からの遷移で対象コメントを一時的にハイライトする（#160・数秒でフェード） */
+  highlighted?: boolean;
 }
 
 // 「7月14日 18:00」形式（年なし・スラッシュ不可。元投稿の表記と揃える。ユーザー指定）
@@ -59,6 +61,7 @@ export function QuestionCommentItem({
   myReactions,
   onDeleted,
   onUpdated,
+  highlighted = false,
 }: QuestionCommentItemProps) {
   const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
@@ -111,7 +114,11 @@ export function QuestionCommentItem({
 
   return (
     // Figma 135:4877: アバターはカード外・左（40px）、右カラムに名前行＋白カード
-    <li className="flex items-start gap-[17px]">
+    // id + scroll-mt-24: 通知アンカー(#comment-<id>)の遷移先。sticky header(h-16=64px)に隠れないよう96pxのスクロール余白
+    <li
+      id={`comment-${comment.id}`}
+      className="flex scroll-mt-24 items-start gap-[17px]"
+    >
       <Avatar className="h-10 w-10 shrink-0">
         {comment.authorAvatarUrl && (
           <AvatarImage src={comment.authorAvatarUrl} alt={comment.authorName} />
@@ -154,7 +161,14 @@ export function QuestionCommentItem({
 
         {/* 白カード：本文 + カード内フッター */}
         {/* 960px以上ではユーザー指定の余白（左右32px / 上8px。下は20pxのまま） */}
-        <div className="w-full rounded-[16px] bg-surface p-5 shadow-comment-card min-[960px]:px-8 min-[960px]:pt-2">
+        {/* highlighted 時は ring トークン（DSのフォーカス/ハイライト指標色）で一時ハイライト。
+            ringはbox-shadow実装のため transition-shadow でフェード。
+            prefers-reduced-motion では motion-reduce:transition-none で即時切替 */}
+        <div
+          className={`w-full rounded-[16px] bg-surface p-5 shadow-comment-card transition-shadow duration-700 motion-reduce:transition-none min-[960px]:px-8 min-[960px]:pt-2 ${
+            highlighted ? "ring-2 ring-ring ring-offset-2 ring-offset-background" : ""
+          }`}
+        >
           {isEditing ? (
             <div className="space-y-2">
               <FormattingTextarea

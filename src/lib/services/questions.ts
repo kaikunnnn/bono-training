@@ -7,6 +7,7 @@ import { liveClient as getClient } from "@/lib/sanity";
 import { revalidatePath } from "next/cache";
 import type { Question, QuestionCategory } from "@/types/sanity";
 import { adjustBoardUserStats } from "@/lib/questions/board-user-stats";
+import { createNotification } from "@/lib/services/notifications-create";
 
 // ============================================
 // 型定義
@@ -441,6 +442,63 @@ async function sendCommentSlackNotification(data: {
   }
 }
 
+/**
+ * 質問へのコメント投稿を、その質問の投稿主へサイト内通知する（#160 S1・ベストエフォート）。
+ *
+ * 宛先（投稿主 userId）は質問本体（Sanity）にしか無いため、ここで軽く GROQ を投げて解決する。
+ * author.userId が欠けている質問は通知を skip + console.error のみ（クラッシュ・投稿失敗にしない）。
+ * createNotification 側で自己通知抑止・未読重複抑止を行う。
+ */
+async function notifyQuestionAuthorOfComment(input: {
+  questionId: string;
+  questionSlug: string;
+  commentId: string;
+  actorId: string;
+  actorName: string;
+  actorAvatarUrl: string | null;
+  content: string;
+}) {
+  try {
+    const question = await getClient().fetch<{
+      author?: { userId?: string };
+      title?: string;
+    } | null>(
+      `*[_type == "question" && _id == $id][0]{ title, author }`,
+      { id: input.questionId },
+    );
+
+    const recipientId = question?.author?.userId;
+    if (!recipientId) {
+      // 過去/インポート質問で author.userId が欠けているケース。通知は諦め、投稿処理は続行。
+      console.error(
+        "[notifyQuestionAuthorOfComment] missing author.userId for question",
+        input.questionId,
+      );
+      return;
+    }
+
+    await createNotification({
+      recipientId,
+      actorId: input.actorId,
+      actorName: input.actorName,
+      actorAvatarUrl: input.actorAvatarUrl,
+      type: "question_comment",
+      // entity をコメント単位にする（案A: 1コメント＝1通知）。これで重複抑止が
+      // 「同一コメントの重複作成のみ抑止／別コメントは別通知」として自然に効く。
+      entityType: "comment",
+      entityId: input.commentId,
+      // アンカー付きで該当コメント位置へ遷移させる（QuestionCommentsSection がスクロール）
+      linkUrl: `/questions/${input.questionSlug}#comment-${input.commentId}`,
+      payload: {
+        questionTitle: question?.title ?? null,
+        preview: truncateForPreview(input.content, 140),
+      },
+    });
+  } catch (error) {
+    console.error("[notifyQuestionAuthorOfComment] threw:", error);
+  }
+}
+
 export async function addComment(input: {
   questionId: string;
   questionSlug: string;
@@ -503,6 +561,17 @@ export async function addComment(input: {
     authorName,
     content: validated.content,
     imageUrl: input.imageUrl,
+  });
+
+  // 質問の投稿主へサイト内通知（#160・ベストエフォート。失敗してもコメント投稿は成功させる）
+  await notifyQuestionAuthorOfComment({
+    questionId: input.questionId,
+    questionSlug: input.questionSlug,
+    commentId: (data as CommentRow).id,
+    actorId: user.id,
+    actorName: authorName,
+    actorAvatarUrl: authorAvatarUrl,
+    content: validated.content,
   });
 
   revalidatePath(`/questions/${input.questionSlug}`);
@@ -588,6 +657,120 @@ export async function deleteComment(input: {
 // Supabase: スタンプ
 // ============================================
 
+/**
+ * リアクション（スタンプ）新規追加を、その対象の作者へサイト内通知する（#160 S3・ベストエフォート）。
+ *
+ * notifyQuestionAuthorOfComment と対称の構造。INSERT 成功時（新規リアクション）のみ呼ぶこと。
+ * 取り消し（delete）や 23505（既に押下済み）では呼ばない。
+ * 宛先が欠けているケース（author.userId 未設定・コメント行が取れない等）は skip + console.error のみ
+ * （クラッシュ・リアクション失敗にしない）。createNotification 側で自己通知抑止・未読重複抑止を行う。
+ */
+async function notifyReactionTarget(input: {
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  targetType: ReactionTarget;
+  targetId: string;
+  actorId: string;
+  actorName: string;
+  actorAvatarUrl: string | null;
+}) {
+  try {
+    if (input.targetType === "question") {
+      // 対象は質問。宛先＝質問の投稿主。宛先 userId と slug は Sanity にしか無いため GROQ で解決。
+      const question = await getClient().fetch<{
+        title?: string;
+        author?: { userId?: string };
+        slug?: string;
+      } | null>(
+        `*[_type == "question" && _id == $id][0]{ title, author, "slug": slug.current }`,
+        { id: input.targetId },
+      );
+
+      const recipientId = question?.author?.userId;
+      if (!recipientId) {
+        console.error(
+          "[notifyReactionTarget] missing author.userId for question",
+          input.targetId,
+        );
+        return;
+      }
+      // 参照整合: slug 解決不能なら壊れた遷移先の通知は作らず skip + ログ（コメント側と対称）。
+      if (!question?.slug) {
+        console.error(
+          "[notifyReactionTarget] could not resolve slug for question",
+          input.targetId,
+        );
+        return;
+      }
+
+      await createNotification({
+        recipientId,
+        actorId: input.actorId,
+        actorName: input.actorName,
+        actorAvatarUrl: input.actorAvatarUrl,
+        type: "question_reaction",
+        entityType: "question",
+        entityId: input.targetId,
+        linkUrl: `/questions/${question.slug}`,
+        payload: { questionTitle: question?.title ?? null },
+      });
+      return;
+    }
+
+    // targetType === "comment": 対象はコメント。宛先＝コメント投稿者。
+    // まずローカル Supabase の question_comments から user_id（宛先）と question_id を引く。
+    const { data: comment, error } = await input.supabase
+      .from("question_comments")
+      .select("user_id, question_id")
+      .eq("id", input.targetId)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (error || !comment) {
+      console.error("[notifyReactionTarget] comment lookup failed", input.targetId, error);
+      return;
+    }
+
+    const recipientId = comment.user_id as string | null;
+    if (!recipientId) {
+      console.error("[notifyReactionTarget] missing user_id for comment", input.targetId);
+      return;
+    }
+
+    // question_id（Sanity _id）から slug と title を解決（遷移先 URL / 表示用）。
+    const question = await getClient().fetch<{
+      title?: string;
+      slug?: string;
+    } | null>(
+      `*[_type == "question" && _id == $id][0]{ title, "slug": slug.current }`,
+      { id: comment.question_id as string },
+    );
+
+    // 参照整合: Sanity から質問が消えている等で slug 解決不能なら、壊れた遷移先の通知は作らず skip + ログ。
+    if (!question?.slug) {
+      console.error(
+        "[notifyReactionTarget] could not resolve question slug for comment",
+        input.targetId,
+        comment.question_id,
+      );
+      return;
+    }
+
+    await createNotification({
+      recipientId,
+      actorId: input.actorId,
+      actorName: input.actorName,
+      actorAvatarUrl: input.actorAvatarUrl,
+      type: "comment_reaction",
+      entityType: "comment",
+      entityId: input.targetId,
+      linkUrl: `/questions/${question.slug}`,
+      payload: { questionTitle: question?.title ?? null },
+    });
+  } catch (error) {
+    console.error("[notifyReactionTarget] threw:", error);
+  }
+}
+
 /** トグル：押されていれば取り消し、なければ追加 */
 export async function toggleReaction(input: {
   targetType: ReactionTarget;
@@ -626,11 +809,29 @@ export async function toggleReaction(input: {
   });
   if (error) {
     // 2タブ同時押し等で check-then-insert が競合した場合（unique_violation）は
-    // 「既に押されている」＝目的の状態なので成功として扱う
+    // 「既に押されている」＝目的の状態なので成功として扱う（既に押下済みなので通知不要）
     if (error.code === "23505") return { ok: true, active: true };
     console.error("[toggleReaction:insert]", error);
     return { ok: false, error: "スタンプの送信に失敗しました" };
   }
+
+  // 新規リアクション（INSERT 成功）時のみ、対象の作者へサイト内通知（#160 S3・ベストエフォート。
+  // 失敗してもリアクション自体は成功させる）。addComment と同じ思想。
+  const actorName =
+    (user.user_metadata?.display_name as string | undefined) ||
+    (user.user_metadata?.name as string | undefined) ||
+    user.email?.split("@")[0] ||
+    "メンバー";
+  const actorAvatarUrl = (user.user_metadata?.avatar_url as string | undefined) ?? null;
+  await notifyReactionTarget({
+    supabase,
+    targetType: input.targetType,
+    targetId: input.targetId,
+    actorId: user.id,
+    actorName,
+    actorAvatarUrl,
+  });
+
   return { ok: true, active: true };
 }
 

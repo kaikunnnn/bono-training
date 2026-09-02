@@ -6,7 +6,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BackButton } from "@/components/common/BackButton";
 import {
   getQuestionBySlug,
-  getCommentsByQuestion,
   getReactionCountsMap,
   getMyReactions,
   type ReactionKey,
@@ -15,7 +14,10 @@ import { emptyReactionCounts } from "@/lib/services/questions-utils";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
 import { extractPreviewText } from "@/lib/portable-text-utils";
-import { QuestionCommentsSection } from "@/components/questions/QuestionCommentsSection";
+import {
+  QuestionCommentsBoundary,
+  QuestionCommentsSkeleton,
+} from "@/components/questions/QuestionCommentsBoundary";
 import { isProfileIncomplete } from "@/lib/profile-utils";
 import { ReactionButtons } from "@/components/questions/ReactionButtons";
 import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
@@ -151,20 +153,15 @@ export default async function Page({ params }: PageProps) {
     ? isProfileIncomplete(currentUser.user_metadata)
     : false;
 
-  // メンバーのみコメントとリアクションを取得
-  let comments: Awaited<ReturnType<typeof getCommentsByQuestion>> = [];
+  // メンバーのみ「質問本体」へのリアクションを取得（質問カードのフッターに即時表示する）。
+  // コメント一覧・コメントリアクションは重い（コメント件数に比例）ため、ここでは待たず
+  // QuestionCommentsBoundary（Suspense 内）へ切り出してストリーミングする（#160 S2）。
   let questionReactionCounts = emptyReactionCounts();
-  let commentReactionCountsMap: Record<string, Record<ReactionKey, number>> = {};
   let myQuestionReactions: ReactionKey[] = [];
-  const myCommentReactionsByCommentId: Record<string, ReactionKey[]> = {};
 
   if (hasFullAccess) {
-    // ステージA: コメント取得と「質問本体」に対するリアクション集計・自分の
-    // リアクションを並列で実行する。以前は getCommentsByQuestion →
-    // getReactionCountsMap(質問) → getMyReactions(質問) が直列だったため、
-    // 独立した3クエリが waterfall になっていた（#156）。
-    const [comments_, qReactionMap, qMine] = await Promise.all([
-      getCommentsByQuestion(question._id),
+    // 質問本体に対するリアクション集計・自分のリアクションを並列取得（軽量・単一ID）。
+    const [qReactionMap, qMine] = await Promise.all([
       getReactionCountsMap({
         targetType: "question",
         targetIds: [question._id],
@@ -176,34 +173,8 @@ export default async function Page({ params }: PageProps) {
           })
         : Promise.resolve([]),
     ]);
-    comments = comments_;
     questionReactionCounts = qReactionMap[question._id] ?? emptyReactionCounts();
     myQuestionReactions = qMine.map((r) => r.reaction);
-
-    // ステージB: コメントの ID が確定してから、コメントに対するリアクション集計と
-    // 自分のリアクションを並列で取得する（コメントが存在する場合のみ）。
-    if (comments.length > 0) {
-      const commentIds = comments.map((c) => c.id);
-      const [cReactionMap, cMine] = await Promise.all([
-        getReactionCountsMap({
-          targetType: "comment",
-          targetIds: commentIds,
-        }),
-        currentUserId
-          ? getMyReactions({
-              targetType: "comment",
-              targetIds: commentIds,
-            })
-          : Promise.resolve([]),
-      ]);
-      commentReactionCountsMap = cReactionMap;
-      cMine.forEach((r) => {
-        if (!myCommentReactionsByCommentId[r.targetId]) {
-          myCommentReactionsByCommentId[r.targetId] = [];
-        }
-        myCommentReactionsByCommentId[r.targetId].push(r.reaction);
-      });
-    }
   }
 
   return (
@@ -339,19 +310,21 @@ export default async function Page({ params }: PageProps) {
         }
       />
 
-      {/* コメント（メンバーのみ） */}
+      {/* コメント（メンバーのみ）。
+          コメント一覧・リアクション集計は QuestionCommentsBoundary（async）に閉じ、
+          Suspense でストリーミングする。本文カードが先に出て、コメント欄だけ後から
+          差し替わる（#160 S2）。fallback はスケルトンで高さを確保し CLS を防ぐ。 */}
       {hasFullAccess && (
-        <QuestionCommentsSection
-          questionId={question._id}
-          questionSlug={slug}
-          initialComments={comments}
-          commentReactionCounts={commentReactionCountsMap}
-          myCommentReactions={myCommentReactionsByCommentId}
-          currentUserId={currentUserId}
-          currentUserAvatarUrl={currentUserAvatarUrl}
-          currentUserName={currentUserName}
-          profileIncomplete={profileIncomplete}
-        />
+        <Suspense fallback={<QuestionCommentsSkeleton />}>
+          <QuestionCommentsBoundary
+            questionId={question._id}
+            questionSlug={slug}
+            currentUserId={currentUserId}
+            currentUserAvatarUrl={currentUserAvatarUrl}
+            currentUserName={currentUserName}
+            profileIncomplete={profileIncomplete}
+          />
+        </Suspense>
       )}
 
       {/*

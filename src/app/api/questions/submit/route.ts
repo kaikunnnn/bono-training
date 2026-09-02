@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { createClient, type SanityClient } from '@sanity/client';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 import { textToPortableBlocks } from '@/lib/questions/text-format';
@@ -373,6 +374,10 @@ export async function POST(request: NextRequest) {
 
   try {
     const result = await getSanityClient().create(questionDoc);
+
+    // 新規スレッド作成を「questions」タグの各キャッシュ（一覧・最新質問 publishedAt）へ即時反映。
+    // これにより掲示板の新着ドット（getLatestBoardActivityAt）と一覧が最大60秒待たずに更新される。
+    revalidateTag("questions", "max");
 
     // 投稿数カウント（#149・ベストエフォート）。更新後 post_count が 1 なら初投稿。
     // 失敗しても投稿自体は成功として返す（adjustBoardUserStats 内で握って console.error）。
