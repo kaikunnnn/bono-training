@@ -372,6 +372,7 @@ function truncateForPreview(text: string, maxLength = 300): string {
 // コメント投稿のSlack通知（api/questions/submit の質問投稿通知と同じ webhook を使用）
 async function sendCommentSlackNotification(data: {
   questionSlug: string;
+  questionTitle: string | null;
   authorName: string;
   content: string;
   imageUrl?: string;
@@ -398,6 +399,13 @@ async function sendCommentSlackNotification(data: {
       {
         type: "header",
         text: { type: "plain_text", text: "💬 新しいコメントがありました", emoji: true },
+      },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `*スレッド:*\n${data.questionTitle || "(タイトル不明)"}`,
+        },
       },
       {
         type: "section",
@@ -556,8 +564,22 @@ export async function addComment(input: {
   // コメント数カウントを加算（#149・ベストエフォート）
   await adjustBoardUserStats(user.id, { commentDelta: 1 });
 
+  // スレッド名（Slack通知に付与。どのスレッドへのコメントか分かるように）。
+  // 取得失敗しても通知は送る（ベストエフォート・タイトル無しで送信）。
+  let questionTitle: string | null = null;
+  try {
+    questionTitle = await getClient().fetch<string | null>(
+      `*[_type == "question" && _id == $id][0].title`,
+      { id: input.questionId },
+      { next: { tags: ["questions"], revalidate: 300 } },
+    );
+  } catch (e) {
+    console.error("[addComment] スレッド名の取得に失敗（Slackはタイトル無しで送信）:", e);
+  }
+
   await sendCommentSlackNotification({
     questionSlug: input.questionSlug,
+    questionTitle,
     authorName,
     content: validated.content,
     imageUrl: input.imageUrl,
