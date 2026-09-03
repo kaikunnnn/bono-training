@@ -9,6 +9,7 @@ import {
   SettingsCard,
 } from "@/components/common/SettingsPageLayout";
 import { NotificationPreferencesForm } from "@/components/account/NotificationPreferencesForm";
+import { PushNotificationToggle } from "@/components/account/PushNotificationToggle";
 
 export const metadata: Metadata = {
   title: "通知設定",
@@ -34,6 +35,15 @@ export default async function NotificationSettingsPage() {
             オフにした種類は通知が作成されなくなります。オンに戻すと、それ以降の通知から再び受け取れます。
           </p>
           <NotificationPreferencesForm initialPreferences={preferences} />
+        </div>
+      </SettingsCard>
+
+      <SettingsCard title="プッシュ通知（ベータ）">
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            スマホやPCに、サイトを開いていないときでも通知を届けます。オンにするとこの端末で通知を受け取れます。
+          </p>
+          <PushNotificationToggle />
         </div>
       </SettingsCard>
     </SettingsPageLayout>

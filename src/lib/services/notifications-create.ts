@@ -1,8 +1,10 @@
 import "server-only";
 
 import { createClient as createSupabaseServiceClient } from "@supabase/supabase-js";
-import type { NotificationType } from "@/types/notification";
+import type { NotificationItem, NotificationType } from "@/types/notification";
 import { reportNotificationError } from "@/lib/services/notifications-monitoring";
+import { buildNotificationMessage } from "@/lib/notifications-display";
+import { sendWebPush } from "@/lib/services/web-push-send";
 
 /**
  * 汎用通知の作成（service_role で INSERT）モジュール（#160 S1）。
@@ -160,7 +162,28 @@ export async function createNotification(
         actorId: input.actorId,
         error: insertError,
       });
+      return;
     }
+
+    // Web Push 送信（追加チャンネル・ベストエフォート）。
+    // sendWebPush は内部で全例外を握るため throw しない。Vercel serverless では
+    // await しないと未完了で凍結されるため、fire-and-forget でも await する。
+    const title = buildNotificationMessage({
+      actorName: input.actorName,
+      type: input.type,
+    } as NotificationItem);
+    // body はコメントなら本文プレビュー、リアクションなら対象質問タイトルを使う。
+    const preview =
+      typeof input.payload?.preview === "string"
+        ? (input.payload.preview as string)
+        : typeof input.payload?.questionTitle === "string"
+          ? (input.payload.questionTitle as string)
+          : "";
+    await sendWebPush(input.recipientId, {
+      title,
+      body: preview,
+      url: input.linkUrl || "/",
+    });
   } catch (error) {
     await reportNotificationError({
       stage: "threw",
