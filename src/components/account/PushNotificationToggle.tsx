@@ -70,6 +70,8 @@ export function PushNotificationToggle() {
   const [error, setError] = useState<string | null>(null);
   // iOS Safari だがまだPWA未インストール → 購読不可、案内を出す
   const [needsIosInstall, setNeedsIosInstall] = useState(false);
+  // ブラウザで通知がブロック済み（再プロンプト不可 → サイト設定から許可し直す案内を出す）
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   useEffect(() => {
     if (!isPushSupported()) {
@@ -79,6 +81,14 @@ export function PushNotificationToggle() {
         setNeedsIosInstall(true);
       }
       return;
+    }
+
+    // ブラウザで通知がブロック済みか（再プロンプト不可なので案内表示に使う）
+    if (
+      typeof Notification !== "undefined" &&
+      Notification.permission === "denied"
+    ) {
+      setPermissionDenied(true);
     }
 
     // 既存の購読状態を反映する
@@ -123,11 +133,13 @@ export function PushNotificationToggle() {
       // 権限要求はこのクリック起点でのみ呼ぶ
       const permission = await Notification.requestPermission();
       if (permission !== "granted") {
+        if (permission === "denied") setPermissionDenied(true);
         setError(
           "通知が許可されていません。ブラウザの設定で通知を許可してください。",
         );
         return;
       }
+      setPermissionDenied(false);
 
       const registration = await navigator.serviceWorker.register("/sw.js");
       await navigator.serviceWorker.ready;
@@ -224,7 +236,7 @@ export function PushNotificationToggle() {
       )}
 
       {enabled && (
-        <div>
+        <div className="space-y-1.5">
           <Button
             type="button"
             variant="secondary"
@@ -234,7 +246,17 @@ export function PushNotificationToggle() {
           >
             {testing ? "送信中…" : "テスト送信"}
           </Button>
+          <p className="font-noto-sans-jp text-xs text-muted-foreground">
+            まず「テスト送信」で端末に通知が実際に表示されるか確認してください。表示されない場合は下の「通知が届かないとき」をご覧ください。
+          </p>
         </div>
+      )}
+
+      {permissionDenied && (
+        <p className="font-noto-sans-jp text-xs text-destructive" role="alert">
+          このブラウザで通知がブロックされています。アドレスバーの鍵／サイト情報アイコン →
+          「通知」を「許可」に変更してから、もう一度ONにしてください。
+        </p>
       )}
 
       {message && (
@@ -247,6 +269,35 @@ export function PushNotificationToggle() {
           {error}
         </p>
       )}
+
+      <details className="rounded-lg border border-border bg-muted/30 px-3 py-2">
+        <summary className="cursor-pointer font-noto-sans-jp text-xs font-medium text-gray-800">
+          🔔 通知が届かないとき
+        </summary>
+        <div className="mt-2 space-y-2 font-noto-sans-jp text-xs text-muted-foreground">
+          <p>
+            ONにして「テスト送信」しても表示されない場合、ブラウザ本体にOS側の通知許可が必要です。
+          </p>
+          <ul className="list-disc space-y-1 pl-4">
+            <li>
+              <span className="font-medium text-gray-800">Mac</span>：システム設定 → 通知 →
+              お使いのブラウザ（Chrome等）を選び「通知を許可」ON・スタイルを「バナー」に
+            </li>
+            <li>
+              <span className="font-medium text-gray-800">Windows</span>：設定 → システム →
+              通知 → お使いのブラウザをON
+            </li>
+            <li>
+              <span className="font-medium text-gray-800">iPhone / iPad</span>：Safariで開き
+              「共有 → ホーム画面に追加」→ 追加したアイコンから開いてON
+            </li>
+            <li>
+              <span className="font-medium text-gray-800">共通</span>：集中モード /
+              おやすみモードをOFFにする
+            </li>
+          </ul>
+        </div>
+      </details>
     </div>
   );
 }
