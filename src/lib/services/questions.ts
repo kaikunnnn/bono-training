@@ -507,6 +507,66 @@ async function notifyQuestionAuthorOfComment(input: {
   }
 }
 
+/**
+ * コメントが付いたスレッドの「過去にコメントした人（＝参加者）」全員へ通知する（#160）。
+ *
+ * スレ主（質問の投稿者）は notifyQuestionAuthorOfComment が担当。ここは投稿者本人を
+ * 除いた参加者へ「新しいコメントが付いた」ことを知らせる。
+ * type は既存の question_comment を再利用（スレ主通知と同一コメント entity のため、
+ * スレ主が過去に自分でもコメントしていても createNotification の未読重複抑止で1件に収まる）。
+ * createNotification 側で 自己通知抑止 / オプトアウト / 未読重複抑止 を行うため、
+ * ここでは重複を含む候補をそのまま渡してよい（actor だけはクエリで除外しておく）。
+ * 失敗してもコメント投稿は成功させる（ベストエフォート）。
+ */
+async function notifyThreadParticipantsOfComment(input: {
+  questionId: string;
+  questionSlug: string;
+  questionTitle: string | null;
+  commentId: string;
+  actorId: string;
+  actorName: string;
+  actorAvatarUrl: string | null;
+  content: string;
+}) {
+  try {
+    const supabase = await createClient();
+    // このスレッドに過去コメントした人（投稿者本人は除外）。掲示板のコメントは
+    // メンバーが全件読める RLS のため user 権限で取得できる。
+    const { data, error } = await supabase
+      .from("question_comments")
+      .select("user_id")
+      .eq("question_id", input.questionId)
+      .neq("user_id", input.actorId);
+    if (error) {
+      console.error("[notifyThreadParticipantsOfComment] select failed:", error);
+      return;
+    }
+    const recipientIds = [
+      ...new Set((data ?? []).map((r) => r.user_id as string)),
+    ];
+    await Promise.all(
+      recipientIds.map((recipientId) =>
+        createNotification({
+          recipientId,
+          actorId: input.actorId,
+          actorName: input.actorName,
+          actorAvatarUrl: input.actorAvatarUrl,
+          type: "question_comment",
+          entityType: "comment",
+          entityId: input.commentId,
+          linkUrl: `/questions/${input.questionSlug}#comment-${input.commentId}`,
+          payload: {
+            questionTitle: input.questionTitle,
+            preview: truncateForPreview(input.content, 140),
+          },
+        }),
+      ),
+    );
+  } catch (error) {
+    console.error("[notifyThreadParticipantsOfComment] threw:", error);
+  }
+}
+
 export async function addComment(input: {
   questionId: string;
   questionSlug: string;
@@ -589,6 +649,19 @@ export async function addComment(input: {
   await notifyQuestionAuthorOfComment({
     questionId: input.questionId,
     questionSlug: input.questionSlug,
+    commentId: (data as CommentRow).id,
+    actorId: user.id,
+    actorName: authorName,
+    actorAvatarUrl: authorAvatarUrl,
+    content: validated.content,
+  });
+
+  // スレッドに過去コメントした参加者へも通知（#160・ベストエフォート）。
+  // 自分がスレ主でないスレッドでも、参加中のスレッドに新規コメントが付いたら気づける。
+  await notifyThreadParticipantsOfComment({
+    questionId: input.questionId,
+    questionSlug: input.questionSlug,
+    questionTitle,
     commentId: (data as CommentRow).id,
     actorId: user.id,
     actorName: authorName,
