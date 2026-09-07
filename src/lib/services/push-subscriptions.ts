@@ -120,8 +120,8 @@ export async function sendTestPush(): Promise<PushSubscriptionResult> {
   }
 
   await sendWebPush(user.id, {
-    title: "テスト通知",
-    body: "Web Push が届いています🎉",
+    title: "BONO",
+    body: "テスト通知が届きました🎉",
     url: "/questions",
   });
 

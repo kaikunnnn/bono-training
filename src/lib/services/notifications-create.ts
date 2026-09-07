@@ -168,11 +168,13 @@ export async function createNotification(
     // Web Push 送信（追加チャンネル・ベストエフォート）。
     // sendWebPush は内部で全例外を握るため throw しない。Vercel serverless では
     // await しないと未完了で凍結されるため、fire-and-forget でも await する。
-    const title = buildNotificationMessage({
+    // タイトルは「BONO」で統一（通知の送信元表示をブランド名にする）。
+    // 実際のメッセージ（〇〇さんがコメントしました等）は本文の1行目に置く。
+    const message = buildNotificationMessage({
       actorName: input.actorName,
       type: input.type,
     } as NotificationItem);
-    // body はコメントなら本文プレビュー、リアクションなら対象質問タイトルを使う。
+    // body 2行目：コメントなら本文プレビュー、リアクションなら対象質問タイトル。
     const preview =
       typeof input.payload?.preview === "string"
         ? (input.payload.preview as string)
@@ -180,8 +182,8 @@ export async function createNotification(
           ? (input.payload.questionTitle as string)
           : "";
     await sendWebPush(input.recipientId, {
-      title,
-      body: preview,
+      title: "BONO",
+      body: preview ? `${message}\n${preview}` : message,
       url: input.linkUrl || "/",
     });
   } catch (error) {
