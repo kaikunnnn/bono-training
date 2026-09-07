@@ -134,9 +134,11 @@ async function checkUserAccess(authHeader: string | null): Promise<{ isAuthentic
       return { isAuthenticated: true, hasPremiumAccess: false, userId: user.id };
     }
 
-    // メンバーアクセス権の判定（standard, growth, community プランがアクセス可能）
-    const hasPremiumAccess = subscriptions && subscriptions.length > 0 && 
-      ['standard', 'growth', 'community'].includes(subscriptions[0].plan_type);
+    // メンバーアクセス権の判定。実プランは standard / feedback（src/lib/subscription-utils.ts）。
+    // 旧プラン名(growth/community)は残置＝既存契約者の権限を奪わない安全側。feedback を追加し
+    // 「有料(feedback)なのにトレーニング有料枠が見れない」バグを解消（監査M-1）。
+    const hasPremiumAccess = subscriptions && subscriptions.length > 0 &&
+      ['standard', 'feedback', 'growth', 'community'].includes(subscriptions[0].plan_type);
 
     console.log('User access check:', { 
       userId: user.id, 
