@@ -24,6 +24,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/branch-review",
+    issue: "REVIEW",
+    title: "chivalrous-appendix ブランチレビュー",
+    summary:
+      "このブランチの未マージ2コミット（/community/feedback 移設・/notes リブランド）の確認ページ一覧とチェック項目。マージ/捨てるの判断用。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/design-breakdown/achievements",
     issue: "DESIGN",
     title: "/achievements 分解ダッシュボード",
