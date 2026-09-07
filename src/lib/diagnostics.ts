@@ -109,6 +109,10 @@ async function checkAIEndpoint() {
     if (res.ok || res.headers.get('content-type')?.includes('text/event-stream')) {
       log('AI endpoint', 'ok', '/api/ai-chat は応答しています');
       res.body?.cancel(); // ストリームを閉じる
+    } else if (res.status === 401) {
+      // C-1 でログイン必須化。無認証プローブは 401 になるが、これはエンドポイントが
+      // 生きている（＝到達可能）証拠なので ok 扱いにする。
+      log('AI endpoint', 'ok', '/api/ai-chat は応答しています（401=要ログイン。正常）');
     } else if (res.status === 500) {
       const body = await res.text();
       log('AI endpoint', 'error',
