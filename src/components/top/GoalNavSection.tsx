@@ -91,7 +91,7 @@ export default function GoalNavSection({
     >
       {/* 見出し */}
       <div className="flex flex-col items-center gap-3 sm:gap-4 lg:gap-[17px] max-w-[800px]">
-        <h2 className="text-xl sm:text-2xl lg:text-[24px] font-extrabold text-text-primary leading-[1.5] text-center font-['Rounded_Mplus_1c',sans-serif]">
+        <h2 className="text-xl sm:text-2xl lg:text-[24px] font-extrabold text-text-primary leading-[1.5] text-center font-rounded-mplus">
           目的に合わせたロードマップで
           <br />
           デザインの楽しさを発見する

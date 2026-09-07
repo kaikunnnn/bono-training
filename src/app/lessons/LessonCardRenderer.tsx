@@ -6,11 +6,12 @@
  */
 
 import Link from "next/link";
-import { urlFor, type LessonWithArticleIds } from "@/lib/sanity";
+import { urlFor } from "@/lib/sanity";
+import type { Lesson } from "@/types/sanity";
 import { LessonCard } from "@/components/lessons/LessonCard";
 
 interface LessonCardRendererProps {
-  lesson: LessonWithArticleIds & { index?: number };
+  lesson: Lesson & { index?: number };
 }
 
 /**

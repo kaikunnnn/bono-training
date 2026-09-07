@@ -1,0 +1,239 @@
+import { Metadata } from "next";
+import { getArticleWithContext, getArticleMetadata } from "@/lib/sanity";
+import { redirectMissingContent } from "@/lib/missingContentRedirect";
+import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
+import { isBookmarked } from "@/lib/services/bookmarks";
+import { getArticleProgress } from "@/lib/services/progress";
+import { ViewHistoryRecorder } from "@/components/article/ViewHistoryRecorder";
+import VideoSection from "@/components/article/VideoSection";
+import HeadingSection from "@/components/article/HeadingSection";
+import TodoSection from "@/components/article/TodoSection";
+import RichTextSection from "@/components/article/RichTextSection";
+import ContentNavigation from "@/components/article/ContentNavigation";
+import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
+import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
+
+// ISR: 1時間キャッシュ（ユーザー固有データはクライアント側で取得）
+export const revalidate = 3600;
+
+interface PageProps {
+  params: Promise<{ slug: string }>;
+}
+
+// OGP用メタデータ生成
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticleMetadata(slug);
+
+  if (!article) {
+    return {
+      title: "記事が見つかりません",
+    };
+  }
+
+  const title = article.lessonTitle
+    ? `${article.title} | ${article.lessonTitle}`
+    : `${article.title}`;
+  const description = article.excerpt || `${article.title}の学習コンテンツ`;
+
+  // サイト移行 Week1 / SEO止血:
+  // Webflow 本番（www.bo-no.design）に同一 slug の記事が存在する場合、
+  // canonical を本番の絶対 URL に向けて重複評価を本番へ集約する。
+  // 本番に無いベータ独自記事は従来通り自己 canonical（相対パス）のまま。
+  // metadataBase 設定に依存させないため、cross-domain 側は絶対 URL を指定する。
+  const productionSlugs = await getProductionContentSlugs();
+  const canonical = productionSlugs.has(slug)
+    ? `https://www.bo-no.design/contents/${slug}`
+    : `/contents/${slug}`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images: article.thumbnailUrl ? [{ url: article.thumbnailUrl, width: 1200, height: 630 }] : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: article.thumbnailUrl ? [article.thumbnailUrl] : [],
+    },
+    alternates: { canonical },
+  };
+}
+
+// ページコンポーネント（Server Component）
+// サイドナビは layout.tsx 側で描画される（記事間遷移時の保持のため）
+export default async function ArticlePage({ params }: PageProps) {
+  const { slug } = await params;
+  const [article, subscription] = await Promise.all([
+    getArticleWithContext(slug),
+    getSubscriptionStatus(),
+  ]);
+
+  if (!article) {
+    // 記事が Sanity に無い場合: 本番 Webflow に存在すれば legacy へリダイレクト、
+    // 無ければ notFound()（redirectMissingContent が両分岐を throw で処理する）。
+    // return で抜けることで、以降 article が non-null に型で絞り込まれる。
+    return await redirectMissingContent(slug);
+  }
+
+  const lessonId = article.lessonInfo?._id || "";
+
+  // ブックマーク・記事完了状態を並列取得（記事固有のデータのみ）
+  const [bookmarked, progressStatus] = await Promise.all([
+    isBookmarked(article._id),
+    getArticleProgress(article._id),
+  ]);
+  const isCompleted = progressStatus === "completed";
+
+  // プレミアムコンテンツへのアクセス権限チェック
+  const hasAccess = canAccessContent(article.isPremium || false, subscription.planType);
+
+  // 前後の記事を計算（クエストをまたぐナビゲーション対応）
+  const navigation = (() => {
+    if (!article.lessonInfo?.quests) {
+      return { previous: undefined, next: undefined };
+    }
+
+    // レッスン内の全記事をフラット化
+    const allArticles: { slug: string; title: string; questId: string }[] = [];
+    for (const quest of article.lessonInfo.quests) {
+      for (const art of quest.articles) {
+        allArticles.push({
+          slug: art.slug.current,
+          title: art.title,
+          questId: quest._id,
+        });
+      }
+    }
+
+    const currentIndex = allArticles.findIndex(
+      (a) => a.slug === article.slug.current
+    );
+
+    if (currentIndex === -1) {
+      return { previous: undefined, next: undefined };
+    }
+
+    const previousArticle =
+      currentIndex > 0
+        ? {
+            slug: allArticles[currentIndex - 1].slug,
+            title: allArticles[currentIndex - 1].title,
+          }
+        : undefined;
+
+    const nextArticle =
+      currentIndex < allArticles.length - 1
+        ? {
+            slug: allArticles[currentIndex + 1].slug,
+            title: allArticles[currentIndex + 1].title,
+          }
+        : undefined;
+
+    return { previous: previousArticle, next: nextArticle };
+  })();
+
+  // 記事のインデックス番号を取得
+  const articleIndex = article.questInfo?.articles
+    ? article.questInfo.articles.findIndex((a) => a._id === article._id) + 1
+    : undefined;
+
+  return (
+    <>
+      <script
+        {...jsonLdScriptProps(
+          generateArticleJsonLd({
+            title: article.title,
+            description: article.excerpt || `${article.title}の学習コンテンツ`,
+            url: `/contents/${slug}`,
+            publishedAt: article.publishedAt || new Date().toISOString(),
+            image: article.thumbnailUrl,
+          })
+        )}
+      />
+
+      {/* 閲覧履歴を記録（プレミアムでロックされていない場合のみ） */}
+      {hasAccess && <ViewHistoryRecorder articleId={article._id} />}
+
+      {/* メインコンテンツエリア */}
+      <main className="flex-1 min-w-0 flex flex-col items-center gap-4 pb-12">
+        {/* Video Section */}
+        <div className="w-full px-4 sm:px-6 md:px-0 min-[1680px]:px-2 min-[1680px]:pt-8 pt-16 md:pt-8">
+          <VideoSection
+            videoUrl={article.videoUrl}
+            thumbnail={article.thumbnail}
+            thumbnailUrl={article.thumbnailUrl}
+            isPremium={article.isPremium}
+            hasAccess={hasAccess}
+            isLoggedIn={subscription.isLoggedIn}
+            redirectTo={`/contents/${slug}`}
+          />
+        </div>
+
+        {/* 記事コンテンツ - 動画ブロックと同じ幅 */}
+        <div className="w-full px-4 sm:px-6 md:px-0 py-0 min-[1680px]:px-2">
+          <div className="flex flex-col gap-3">
+            {/* Heading Section - 記事カード群の先頭へ移動 */}
+            <HeadingSection
+              tagType={article.articleType as "explain" | "intro" | "practice" | "challenge" | "demo" | undefined}
+              title={article.title}
+              description={article.excerpt}
+              questInfo={
+                article.questInfo
+                  ? {
+                      questNumber: article.questInfo.questNumber,
+                      title: article.questInfo.title,
+                    }
+                  : undefined
+              }
+              articleIndex={articleIndex}
+              articleId={article._id}
+              lessonId={lessonId}
+              isBookmarked={bookmarked}
+              isCompleted={isCompleted}
+              isPremium={article.isPremium}
+            />
+
+            {/* TODO Section - learningObjectives がある場合のみ表示 */}
+            <TodoSection items={article.learningObjectives} />
+
+            {/* Rich Text Section - 記事本文 */}
+            {article.content && (
+              <RichTextSection
+                content={article.content}
+                isPremium={article.isPremium}
+                hasAccess={hasAccess}
+                isLoggedIn={subscription.isLoggedIn}
+                redirectTo={`/contents/${slug}`}
+                afterContent={
+                  hasAccess && (
+                    <ArticleActionButtons
+                      articleId={article._id}
+                      lessonId={lessonId}
+                      title={article.title}
+                      isBookmarked={bookmarked}
+                      isCompleted={isCompleted}
+                      isPremium={article.isPremium}
+                    />
+                  )
+                }
+              />
+            )}
+
+            {/* Content Navigation - 前後の記事へのナビゲーション */}
+            <ContentNavigation
+              previous={navigation.previous}
+              next={navigation.next}
+            />
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}

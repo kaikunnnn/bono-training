@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { translateAuthError } from "@/lib/auth-error-messages";
+import { reportAuthError } from "@/lib/monitoring";
 
 export interface AuthResult {
   error?: string;
@@ -39,6 +40,12 @@ export async function signIn(formData: FormData): Promise<AuthResult> {
     });
 
     if (error) {
+      await reportAuthError({
+        type: "login_failed",
+        email,
+        message: error.message,
+        path: "/login",
+      });
       return { error: translateAuthError(error.message) };
     }
   } catch (err) {
@@ -79,6 +86,12 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     });
 
     if (error) {
+      await reportAuthError({
+        type: "signup_failed",
+        email,
+        message: error.message,
+        path: "/signup",
+      });
       return { error: translateAuthError(error.message) };
     }
   } catch (err) {
@@ -87,7 +100,18 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
 
   // 登録成功後、自動ログインしてリダイレクト
   revalidatePath("/", "layout");
-  redirect(redirectTo || "/");
+
+  // 通常のsignup（intentなし）のみ、着地先に welcome フラグを付ける。
+  // 着地ページ側の WelcomeToast がこれを検知して歓迎トーストを一度だけ表示する。
+  // intentフロー（redirectTo に intent_plan を含む）では登録直後に自動でStripe
+  // Checkout へ遷移するためトーストが見えない/一瞬で流れる → フラグを付けない。
+  // 注意: redirect() は NEXT_REDIRECT を throw して動作するため try/catch の外で呼ぶ。
+  const target = redirectTo || "/";
+  if (target.includes("intent_plan")) {
+    redirect(target);
+  }
+  const separator = target.includes("?") ? "&" : "?";
+  redirect(`${target}${separator}welcome=1`);
 }
 
 export async function signOut() {
@@ -105,11 +129,20 @@ export async function resetPassword(email: string): Promise<AuthResult> {
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/update-password`,
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        shouldCreateUser: false,
+      },
     });
 
     if (error) {
+      await reportAuthError({
+        type: "password_reset_failed",
+        email,
+        message: error.message,
+        path: "/forgot-password",
+      });
       return { error: translateAuthError(error.message) };
     }
   } catch (err) {
@@ -117,6 +150,35 @@ export async function resetPassword(email: string): Promise<AuthResult> {
   }
 
   return { success: true };
+}
+
+export async function verifyEmailOtp(
+  email: string,
+  token: string
+): Promise<AuthResult> {
+  if (!email || !token) {
+    return { error: "メールアドレスと確認コードを入力してください" };
+  }
+
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "email",
+    });
+
+    if (error) {
+      return {
+        error: "確認コードが正しくないか、有効期限が切れています。もう一度お試しください。",
+      };
+    }
+  } catch (err) {
+    return { error: translateConnectionError(err) };
+  }
+
+  redirect("/auth/update-password");
 }
 
 // 移行ユーザーかどうかをチェックする関数

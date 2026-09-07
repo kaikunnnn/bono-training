@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { SidebarProps } from "./types";
 import { cn } from "@/lib/utils";
 import { SidebarLogo } from "./SidebarLogo";
+import SidebarSearchBox from "./SidebarSearchBox";
 import { SidebarMenuGroup } from "./SidebarMenuGroup";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
@@ -11,7 +12,8 @@ import { ICON_SIZE } from "./icon-utils";
 import { DirectInbox, Home2 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 
-const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
+const FEEDBACK_URL =
+  "https://docs.google.com/forms/d/e/1FAIpQLSfUE-AYkZsepc8NfDGO5FtPnHJI77-iMIMnx6KxSfgWVaUgOA/viewform?usp=header";
 
 /**
  * サイドバーコンポーネント
@@ -21,7 +23,7 @@ const FEEDBACK_URL = "https://forms.gle/Y5LorStnPm4jzFv77";
  * - 高さ: 100%（デスクトップ時）
  * - レイアウト: flexbox（縦並び）
  */
-export function Sidebar({ className, user }: SidebarProps) {
+export function Sidebar({ className, user, notificationSlot, boardDotSlot }: SidebarProps) {
   const pathname = usePathname();
 
   const isActive = (href: string) =>
@@ -43,7 +45,18 @@ export function Sidebar({ className, user }: SidebarProps) {
       role="navigation"
       aria-label="メインナビゲーション"
     >
-      <SidebarLogo />
+      {/* ロゴ（左30px）+ 通知ベル（右端を検索バー右端=15px に揃える）→ 直下に検索 */}
+      <div className="w-full flex flex-col items-start">
+        <div className="relative w-full">
+          <SidebarLogo />
+          {notificationSlot && (
+            <div className="absolute right-[15px] top-1/2 -translate-y-1/2">
+              {notificationSlot}
+            </div>
+          )}
+        </div>
+        <SidebarSearchBox />
+      </div>
 
       <SidebarMenuGroup>
         {user && (
@@ -109,6 +122,14 @@ export function Sidebar({ className, user }: SidebarProps) {
       </SidebarMenuGroup>
 
       <SidebarMenuGroup label="その他" itemGap>
+        <SidebarMenuItem
+          href="/questions"
+          icon={<MenuIcons.question size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/questions")}
+          dot={boardDotSlot}
+        >
+          みんなの掲示板
+        </SidebarMenuItem>
         <SidebarMenuItem
           href="/achievements"
           icon={<MenuIcons.achievements size={ICON_SIZE} color="#2F3037" variant="Outline" />}

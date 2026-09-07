@@ -42,7 +42,7 @@ export function MySection({
       {isEmpty ? (
         <EmptyState message={emptyMessage} link={emptyLink} />
       ) : horizontal ? (
-        <div className="flex gap-[10px] w-full">
+        <div className="flex flex-col sm:flex-row gap-[10px] w-full">
           {React.Children.map(children, (child) => (
             <div className="flex-1 min-w-0">{child}</div>
           ))}

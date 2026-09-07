@@ -33,9 +33,13 @@
   font-display: swap;
 }
 
-/* Primary product stack: M PLUS Rounded 1c for JP headings,
-   Inter for Latin body copy, Noto Sans JP fallback.
-   LINE Seed JP is provided as an alt display face.
+/* 正規フォントロール（4種・詳細は SKILL.md「フォントの正規ロール」）:
+     見出し/タイトル = M PLUS 1（font-heading / weights 500,700）
+     本文（＝サイト既定）= Noto Sans JP（font-body / font-sans）
+     英数字ディスプレイ = system font stack（font-latin / DLなし）
+     コード = Geist Mono（font-mono）
+   LINE Seed JP は workshop/docs 専用のブランド字体（下記 @font-face）。
+   ※ M PLUS Rounded 1c / Inter / Hind / Geist は廃止（旧クラスは後方互換の非推奨エイリアス）。
 
    NOTE: Google Fonts @import removed — next/font/google in layout.tsx handles
    all Google font loading with automatic optimization. The @import caused
@@ -64,6 +68,7 @@
   --text-primary:   #021710;  /* near-black, cool green undertone */
   --text-secondary: #354540;
   --text-muted:     #677470;
+  --text-body-muted:#434E5D;  /* 掲示板一覧カードの本文抜粋（Figma 13:1467 本文色） */
   --text-disabled:  #9AA29F;
   --text-inverse:   #FAFBFB;
   --text-link:      #0829BF;
@@ -73,26 +78,49 @@
   --text-success: #047A53;
   --text-warning: #9E6608;
   --text-error:   #C42626;
+  --text-info:    #1D4ED8;  /* info コールアウトのアクセント（ボーダー等） */
 
   /* Semantic backgrounds */
   --bg-success: rgba(138, 204, 161, 0.12);
   --bg-warning: rgba(255, 183, 33, 0.12);
   --bg-error:   #FDEFF2;
-  --bg-info:    #FFFFFF;
+  --bg-info:    rgba(59, 130, 246, 0.12);  /* info コールアウト背景（青の淡いティント） */
 
   /* Borders */
   --border-light:   #D4D6CC;
   --border-default: #C3C5BB;
   --border-strong:  #A8AAA0;
 
+  /* 掲示板一覧カードのボーダー（Figma 127:3266・黒8%）。
+     border-border より薄い、カード用の控えめな枠線。 */
+  --card-border-subtle: rgba(0, 0, 0, 0.08);
+  /* 掲示板コメント入力カードのボーダー（Figma 20:2845・グレー実線）。
+     入力欄をはっきり縁取るための強めのボーダー。 */
+  --border-input-strong: #C0C0C0;
+  /* 通知ボックスの枠線（Figma 394:3871・黒4%）。card-border-subtle(0.08)より薄い。 */
+  --border-hairline: rgba(0, 0, 0, 0.04);
+  /* 開いた状態の通知ベル背景（Figma 394:3827・半透明白72%）。 */
+  --bell-open-bg: rgba(255, 255, 255, 0.72);
+
+  /* リアクションボタン（Figma 135:4348）。
+     枠線は黒15%。ON状態は「明るい色」指定のためリンク色（--text-link #0829BF）系統で表現
+     （primaryが黒のための暫定。primaryカラー導入時に差し替え） */
+  --reaction-border: rgba(0, 0, 0, 0.15);
+  --reaction-active-bg: rgba(8, 41, 191, 0.08);
+  --reaction-active-border: rgba(8, 41, 191, 0.30);
+
   /* Brand / CTA */
   --cta-primary-bg:    #102720;  /* Deep forest green — primary buttons */
   --cta-primary-hover: #1A3A30;
   --training-dark:     #0D221D;  /* Footer / dark sections */
+  /* 暗い背景セクション用。Figma "デザインとキャリアを考える" セクションより */
+  --bg-dark-section:   #050423;
   --training-orange:   #FF9900;  /* Training service accent */
   --training-bg:       #FFF9F4;
   --accent-orange:     #F95A16;
   --label-olive:       #77850E;
+  /* トップページ機能訴求アイコン背景。Figma "GUIDE CONTENTS" セクションより */
+  --bg-feature-icon:   #F7F7CA;
 
   /* Roadmap gradient presets — applied as hero backgrounds on each
      /roadmaps/:slug detail page. All presets stack a translucent black
@@ -113,11 +141,23 @@
       rgba(244, 232, 223, 1) 55%,
       rgba(239, 237, 255, 0.08) 94%);
 
+  /* 料金ページ feedbackカード（強調・Figma 37:421）: グラデ枠＋影 */
+  /* ※グラデ停止点は Figma API が単色 #f99487 に平坦化したためスクショから近似（要ユーザー確認） */
+  --grad-feedback-border: linear-gradient(135deg, #9B7FE8 0%, #F472B6 55%, #F99487 100%);
+  --shadow-feedback-card: 0px 1px 8px rgba(0, 0, 0, 0.08);
+  /* 巡回アニメ用（.feedback-card-anim）: 始点=終点でseamlessにループさせる。
+   * 淡くしたい場合は各色を淡側に差し替える（例: #B9A6ED / #F7A8CE / #FBB3AB）。 */
+  --grad-feedback-border-loop: linear-gradient(90deg, #9B7FE8 0%, #F472B6 33%, #F99487 66%, #9B7FE8 100%);
+
   /* Category badge colors (from TrainingCard) */
   --cat-uiux-career: #5E6871;
   --cat-ux-design:   #525382;
   --cat-info-arch:   #774000;
   --cat-ui-visual:   #08381D;
+
+  /* 掲示板カテゴリタグ背景（Figma 13:1467・#C3BE2C の 10%）。
+     一覧カードと詳細ページのカテゴリタグで共通利用する。 */
+  --tag-category-bg: rgba(195, 190, 44, 0.10);
 
   /* Category utility tints */
   --cat-tweet:  #1DA1F2;
@@ -130,6 +170,22 @@
   --success-light:   #86EFAC;
   --success-dark:    #16A34A;
   --success-bg:      #F0FDF4;
+
+  /* Confetti — 8-color burst palette for completion animations
+     (Tailwind 400-level bright mid-tones). Used by the /questions
+     post-flow StepDone celebration. Reference via var(--confetti-N);
+     never inline the hex in JSX/TS. */
+  --confetti-1: #F87171;  /* coral red */
+  --confetti-2: #FB923C;  /* orange */
+  --confetti-3: #FBBF24;  /* yellow */
+  --confetti-4: #4ADE80;  /* green */
+  --confetti-5: #2DD4BF;  /* mint */
+  --confetti-6: #60A5FA;  /* blue */
+  --confetti-7: #A78BFA;  /* purple */
+  --confetti-8: #F472B6;  /* pink */
+
+  /* 通知の未読バッジ（Figma 394:3325）。既存のピンク系と一致しない専用色。 */
+  --notification-badge: #f14190;
 
   /* =========================================================
      RADIUS — Rounded is a core visual motif
@@ -156,8 +212,27 @@
   --shadow-hero-icon: 1px 1px 13.56px 0px rgba(0,0,0,0.33);
   --shadow-cta:   0px 4px 4px 0px rgba(0,0,0,0.25);
 
+  /* 掲示板一覧カードの影（Figma 127:3266）。既存の --shadow-card（lesson card）は
+     別値のため名前衝突を避けて board 専用トークンを用意する。 */
+  --shadow-board-card:  0px 1px 4px rgba(0, 0, 0, 0.04);
+  /* 掲示板コメント入力カードの影（Figma 20:2845）。 */
+  --shadow-input:       0px 1px 6px rgba(0, 0, 0, 0.08);
+  /* 通知ボックス（Popover）の影（Figma 394:3871）。既存 --shadow-md より濃く広い専用値。 */
+  --shadow-popover:     0px 4px 24px 0px rgba(0, 0, 0, 0.18);
+
   /* =========================================================
      SPACING — 4px base
+     Tailwind の spacing ユーティリティ（p-, m-, gap- 等）は
+     --spacing: 0.25rem（4px）を基準単位として自動生成される
+     （src/app/globals.css の @theme、Tailwind v4デフォルト）。
+     この --s-* スケールは Tailwind のその基準単位と1:1で一致するよう
+     意図的に設計されている（偶然の一致ではない）。
+     つまり Figma の px 値を Tailwind クラスへ変換する際は:
+       --s-1(4px)→p-1, --s-2(8px)→p-2, --s-3(12px)→p-3, --s-4(16px)→p-4,
+       --s-5(20px)→p-5, --s-6(24px)→p-6, --s-8(32px)→p-8, --s-10(40px)→p-10,
+       --s-12(48px)→p-12, --s-16(64px)→p-16, --s-20(80px)→p-20
+     のように、4pxの倍数ならTailwindの数値クラスをそのまま「公式の余白トークン」
+     として使う。4pxの倍数でない値のみ arbitrary（例: gap-[27px]）を使う。
      ========================================================= */
   --s-1:  4px;
   --s-2:  8px;
@@ -188,6 +263,7 @@
   /* Size scale (px, product uses pixel values) */
   --text-2xs: 10px;
   --text-xs:  12px;
+  --text-13:  13px;  /* 通知一覧テキストなど xs と sm の中間サイズ */
   --text-sm:  14px;
   --text-md:  16px;
   --text-base:16px;

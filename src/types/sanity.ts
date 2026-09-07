@@ -70,6 +70,8 @@ export interface Lesson {
   _id: string;
   _type: "lesson";
   title: string;
+  subtitle?: string;
+  seoTitle?: string;
   slug: SanitySlug;
   description?: string;
   lessonNumber?: number;
@@ -229,16 +231,14 @@ export interface Question {
   slug: SanitySlug;
   category?: QuestionCategory;
   questionContent?: PortableTextBlock[];
-  answerContent?: PortableTextBlock[];
   questionExcerpt?: string; // 一覧用の抜粋
   publishedAt?: string;
   // ユーザー投稿関連
   author?: QuestionAuthor;
   figmaUrl?: string;
   referenceUrls?: QuestionReferenceUrl[];
-  status?: "pending" | "answered" | "hidden";
-  isPublic?: boolean;
-  submittedAt?: string;
+  // 添付画像（Phase 2 / #145）。Supabase Storage の公開URLを保持する
+  attachedImage?: { url: string };
 }
 
 // FeedbackCategory型
@@ -324,6 +324,7 @@ export interface LessonWithDetails extends Omit<Lesson, "quests" | "category"> {
 // OGP用メタデータ
 export interface LessonMetadata {
   title: string;
+  seoTitle?: string;
   description?: string;
   thumbnailUrl?: string;
   iconImageUrl?: string;

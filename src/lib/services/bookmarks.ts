@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { createClient, getCachedUser } from "@/lib/supabase/server";
 import { client as getClient } from "@/lib/sanity";
 
 // ============================================
@@ -122,11 +122,12 @@ export async function toggleBookmark(
  */
 export async function isBookmarked(articleId: string): Promise<boolean> {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    // 認証はリクエストスコープでメモ化された getCachedUser を使い、
+    // 同一レンダー内の他の auth.getUser 呼び出しと往復を共有する
+    const user = await getCachedUser();
     if (!user) return false;
+
+    const supabase = await createClient();
 
     const { data } = await supabase
       .from("article_bookmarks")

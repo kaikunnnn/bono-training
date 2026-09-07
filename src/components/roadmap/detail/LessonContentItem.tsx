@@ -5,6 +5,7 @@
  */
 
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronRight, BookOpen } from "lucide-react";
 import type { SanityReferenceContent } from "@/types/sanity-roadmap";
 
@@ -27,12 +28,15 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
       style={{ transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease' }}
     >
       {/* アイコン画像 - 右側のみ角丸 */}
-      <div className="flex-shrink-0 w-[106px] h-[160px] overflow-hidden rounded-r-lg shadow-[0_1px_24px_rgba(0,0,0,0.16)]">
+      <div className="relative flex-shrink-0 w-[106px] h-[160px] overflow-hidden rounded-r-lg shadow-[0_1px_24px_rgba(0,0,0,0.16)]">
         {imageUrl ? (
-          <img
+          <Image
             src={imageUrl}
             alt={content.title}
-            className="w-full h-full object-cover"
+            fill
+            sizes="106px"
+            className="object-cover"
+            unoptimized
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">

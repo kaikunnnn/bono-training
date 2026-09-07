@@ -5,7 +5,6 @@ import {
   getFeedback,
   getRelatedFeedbacks,
   getRecentFeedbacks,
-  getAllFeedbackSlugs,
 } from "@/lib/sanity";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
 import { getVideoInfo } from "@/lib/videoUtils";
@@ -27,15 +26,6 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
-export async function generateStaticParams() {
-  try {
-    const slugs = await getAllFeedbackSlugs();
-    return slugs.map((slug) => ({ slug }));
-  } catch {
-    return [];
-  }
-}
-
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const feedback = await getFeedback(slug);
@@ -51,11 +41,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${feedback.title} | フィードバック`,
     description,
     openGraph: {
-      title: `${feedback.title} | フィードバック | BONO`,
+      title: `${feedback.title} | フィードバック`,
       description,
     },
     twitter: {
-      title: `${feedback.title} | フィードバック | BONO`,
+      title: `${feedback.title} | フィードバック`,
       description,
     },
     alternates: { canonical: `/community/feedback/${slug}` },

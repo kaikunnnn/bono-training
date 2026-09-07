@@ -22,15 +22,15 @@ export async function generateMetadata({
     const training = await getTrainingDetail(trainingSlug);
 
     return {
-      title: `${training.title} | トレーニング | BONO`,
+      title: `${training.title} | トレーニング`,
       description: training.description,
       openGraph: {
-        title: `${training.title} | トレーニング | BONO`,
+        title: `${training.title} | トレーニング`,
         description: training.description,
         images: training.thumbnailImage ? [training.thumbnailImage] : undefined,
       },
       twitter: {
-        title: `${training.title} | トレーニング | BONO`,
+        title: `${training.title} | トレーニング`,
         description: training.description,
       },
       alternates: { canonical: `/training/${trainingSlug}` },

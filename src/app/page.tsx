@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getAllRoadmaps, getAllLessons } from "@/lib/sanity";
-import { createClient } from "@/lib/supabase/server";
-import TopPageClient from "@/components/top/TopPageClient";
-import { generateWebSiteJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import { UserProvider } from "@/components/layout/UserProvider";
+import { NewTopContent } from "@/components/top-next/NewTopContent";
 
 export const metadata: Metadata = {
   title: "BONO - UIUXデザインを学ぶ",
@@ -25,31 +23,29 @@ export const metadata: Metadata = {
 };
 
 /**
- * インデックスページ（Server Component）
+ * トップページ（Server Component / 本番 `/`）
  *
- * mainと同じ挙動:
- * - ログイン済み → /mypage にリダイレクト
- * - 未ログイン → トップページを表示
+ * 挙動:
+ * - ログイン済み → /mypage にリダイレクト（従来どおり）
+ * - 未ログイン → 新トップ（NewTopContent）を表示
+ *
+ * 新トップの中身は `/top` と共通の NewTopContent（1ソース）。ここでは認証と
+ * メタデータのみ担当する。到達するのは未ログインユーザーのみ（ログイン済みは上で
+ * リダイレクト）なので Hero の入会CTAは常に表示（isMember=false 固定）。
  */
-export default async function IndexPage() {
-  // ログインチェック: mainの Index.tsx と同じリダイレクトロジック
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+export default async function IndexPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ welcome?: string }>;
+}) {
+  // UserProvider は React cache() でメモ化されており、LayoutWrapper と getUser を共有する
+  const { user } = await UserProvider();
 
   if (user) {
-    redirect("/mypage");
+    // 通常signup直後の welcome フラグは /mypage まで引き継ぐ（着地ページで歓迎トースト）
+    const { welcome } = await searchParams;
+    redirect(welcome === "1" ? "/mypage?welcome=1" : "/mypage");
   }
 
-  // 未ログイン → トップページを表示
-  const [roadmaps, lessons] = await Promise.all([
-    getAllRoadmaps(),
-    getAllLessons(),
-  ]);
-
-  return (
-    <>
-      <script {...jsonLdScriptProps(generateWebSiteJsonLd())} />
-      <TopPageClient roadmaps={roadmaps} lessons={lessons} />
-    </>
-  );
+  return <NewTopContent isMember={false} />;
 }

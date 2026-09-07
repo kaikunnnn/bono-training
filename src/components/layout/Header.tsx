@@ -1,16 +1,20 @@
 import 'server-only'
-import { createClient } from "@/lib/supabase/server";
+import { getCachedUser } from "@/lib/supabase/server";
+import { getUnreadCount } from "@/lib/services/notifications";
 import { HeaderClient } from "./HeaderClient";
 
 /**
  * ヘッダーコンポーネント（Server Component）
- * サーバーサイドでユーザー情報を取得し、クライアントコンポーネントに渡す
+ * サーバーサイドでユーザー情報を取得し、クライアントコンポーネントに渡す。
+ *
+ * ユーザー取得は getCachedUser（リクエストスコープでメモ化）を使い、
+ * 他の Server Component と認証往復を共有する（rules/09 パフォーマンス）。
  */
 export async function Header() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCachedUser();
+
+  // ログイン中のみ未読件数を取得（未ログイン時はベル自体を出さない）
+  const unreadCount = user ? await getUnreadCount(user.id) : 0;
 
   return (
     <HeaderClient
@@ -23,6 +27,7 @@ export async function Header() {
             }
           : null
       }
+      unreadCount={unreadCount}
     />
   );
 }

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
+import { reportAuthError } from "@/lib/monitoring";
 
 /**
  * PKCE対応のメール確認エンドポイント
@@ -27,7 +28,11 @@ export async function GET(request: Request) {
   });
 
   if (error) {
-    console.error("[auth/confirm] OTP verification failed:", error.message);
+    await reportAuthError({
+      type: "otp_verification_failed",
+      message: error.message,
+      path: "/auth/confirm",
+    });
     return NextResponse.redirect(
       new URL("/login?error=verification_failed", request.url)
     );

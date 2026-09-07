@@ -130,7 +130,7 @@ function ArticleCard({ article }: { article: ArticleListItem }) {
   };
 
   return (
-    <Link href={`/articles/${article.slug.current}`}>
+    <Link href={`/contents/${article.slug.current}`}>
       <Card className="group hover:shadow-md transition-all duration-200 h-full">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">

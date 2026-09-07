@@ -110,6 +110,8 @@ const VideoSection = ({
                 src={thumbnailSrc}
                 alt="記事サムネイル"
                 fill
+                priority
+                sizes="(min-width: 1024px) 800px, 100vw"
                 className="object-cover"
                 unoptimized
               />

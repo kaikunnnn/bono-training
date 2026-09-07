@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ import Logo from "@/components/common/Logo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
+import { WelcomeToast } from "@/components/auth/WelcomeToast";
 import { Menu } from "lucide-react";
 
 interface LayoutProps {
@@ -19,6 +20,17 @@ interface LayoutProps {
     id: string;
     email: string;
   } | null;
+  /**
+   * 通知ベル（#160 S3）。未読件数取得を内包した Server Component を Suspense で
+   * ラップした要素を親（Server: UserProviderLayout）から受け取り、そのまま描画する。
+   * 未ログイン時や未対応時は undefined/null。
+   */
+  notificationSlot?: React.ReactNode;
+  /**
+   * 掲示板の新着ドット（掲示板の新着ドット）。hasUnseenBoard を内包した Server Component を
+   * Suspense でラップした要素。デスクトップのサイドバーにのみ渡す（通知ベルの現状に倣う）。
+   */
+  boardDotSlot?: React.ReactNode;
 }
 
 /**
@@ -27,11 +39,11 @@ interface LayoutProps {
  * モバイル: ハンバーガーメニューでSidebar開閉
  *
  * 以下のページは独自のレイアウトを使用するため、グローバルナビを非表示:
- * - /articles/[slug]: ArticleSideNavNew を使用
+ * - /contents/[slug]: ArticleSideNavNew を使用
  * - /blog/*: BlogHeader/Footer を使用
  * - /feedback-apply/submit: フォーム専用ページ
  */
-export function Layout({ children, className, user }: LayoutProps) {
+export function Layout({ children, className, user, notificationSlot, boardDotSlot }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGradientVisible, setIsGradientVisible] = useState(false);
@@ -58,9 +70,12 @@ export function Layout({ children, className, user }: LayoutProps) {
   // グローバルナビを非表示にするページ
   const shouldSkipGlobalLayout = (() => {
     if (!pathname) return false;
-    if (pathname.startsWith("/articles/") && pathname !== "/articles") return true;
+    if (pathname.startsWith("/contents/")) return true;
     if (pathname.startsWith("/blog")) return true;
     if (pathname === "/feedback-apply/submit") return true;
+    // #139: 投稿モードは専用シェル（PostFlowShell）を使うためグローバルナビ非表示
+    if (pathname === "/questions/new") return true;
+    if (pathname.startsWith("/docs")) return true; // 共有用ドキュメント（ワークショップ等）は独立表示
     return false;
   })();
 
@@ -69,15 +84,29 @@ export function Layout({ children, className, user }: LayoutProps) {
       <>
         {children}
         <Toaster />
+        <Suspense fallback={null}>
+          <WelcomeToast />
+        </Suspense>
       </>
     );
   }
 
+  // /dev/top6: 背景白 + サイドバー右端に薄いボーダーのパターン確認用（このページのみの見た目差分）
+  const isTop6 = pathname?.startsWith("/dev/top6") ?? false;
+  const isTop5 = pathname?.startsWith("/dev/top5") ?? false;
+  // 本番トップ `/` と、ログイン中でも新トップを見られる /top（同一構成）
+  const isHome = pathname === "/" || pathname === "/top";
+  // `/`, /top, /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にする（新トップの見た目）
+  const isHalfGradient = isHome || isTop5 || isTop6;
+
   return (
-    <div className={cn("min-h-screen flex bg-base relative", className)}>
+    <div className={cn("min-h-screen flex relative", isTop6 ? "bg-white" : "bg-base", className)}>
       {/* ヘッダーグラデーション（mainと同じ） */}
       <div
-        className="fixed inset-x-0 top-0 h-[148px] pointer-events-none z-0 transition-opacity duration-1000 ease-out"
+        className={cn(
+          "fixed inset-x-0 top-0 pointer-events-none z-0 transition-opacity duration-1000 ease-out",
+          isHalfGradient ? "h-[74px]" : "h-[148px]"
+        )}
         style={{
           background:
             "linear-gradient(180deg, rgb(230, 230, 239) 0%, rgb(250, 242, 237) 44.3%, rgb(249, 248, 246) 84.3%, rgba(249, 248, 246, 0) 100%)",
@@ -85,15 +114,21 @@ export function Layout({ children, className, user }: LayoutProps) {
         }}
       />
 
-      {/* デスクトップ用サイドバー（1280px以上） */}
-      <aside className="hidden xl:block fixed left-0 top-0 h-screen z-10">
-        <Sidebar user={user} />
+      {/* デスクトップ用サイドバー（1024px以上）。MacBook Air等のノートPCで
+          非最大化・ズーム時もサイドバーが出るよう、閾値を xl(1280) → lg(1024) に下げた。 */}
+      <aside
+        className={cn(
+          "hidden lg:block fixed left-0 top-0 h-screen z-10",
+          isTop6 && "border-r border-black/10"
+        )}
+      >
+        <Sidebar user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot} />
       </aside>
 
-      {/* モバイル・タブレット用ヘッダーバー（1280px未満） */}
+      {/* モバイル・タブレット用ヘッダーバー（1024px未満） */}
       <div
         className={cn(
-          "xl:hidden fixed top-0 left-0 right-0 z-50 flex flex-col transition-all duration-200",
+          "lg:hidden fixed top-0 left-0 right-0 z-50 flex flex-col transition-all duration-200",
           isScrolled ? "backdrop-blur-sm bg-white/50" : "bg-transparent"
         )}
       >
@@ -122,17 +157,25 @@ export function Layout({ children, className, user }: LayoutProps) {
           <Link href="/" className="flex items-center">
             <Logo width={68} height={20} />
           </Link>
+
+          {/* 通知ベル（右寄せ・#160 S3）。ログイン時のみ notificationSlot が渡る */}
+          {notificationSlot && (
+            <div className="absolute right-4">{notificationSlot}</div>
+          )}
         </div>
       </div>
 
       {/* メインコンテンツエリア */}
-      <div className="flex-1 flex flex-col xl:ml-[200px] relative z-[1] min-w-0 w-full xl:w-[calc(100%-200px)]">
-        <main className="flex-1 pt-14 xl:pt-0 min-w-0 w-full">
+      <div className="flex-1 flex flex-col lg:ml-[200px] relative z-[1] min-w-0 w-full lg:w-[calc(100%-200px)]">
+        <main className="flex-1 pt-14 lg:pt-0 min-w-0 w-full">
           {children}
         </main>
         <Footer />
       </div>
       <Toaster />
+      <Suspense fallback={null}>
+        <WelcomeToast />
+      </Suspense>
     </div>
   );
 }

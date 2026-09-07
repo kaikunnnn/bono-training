@@ -1,27 +1,20 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import {
-  Geist,
   Geist_Mono,
   Noto_Sans_JP,
-  M_PLUS_Rounded_1c,
-  Inter,
-  Hind,
-  Luckiest_Guy,
+  M_PLUS_1,
 } from "next/font/google";
 import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import "./globals.css";
 import "@/styles/blog.css";
 import "@/styles/blog/link-card.css";
 
 const GA_MEASUREMENT_ID = "G-MH9NGKFBCM";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -35,31 +28,12 @@ const notoSansJp = Noto_Sans_JP({
   display: "swap",
 });
 
-const mplusRounded = M_PLUS_Rounded_1c({
-  variable: "--font-mplus-rounded-var",
+// 見出し専用。主力は 700 / 500。加えて 600(SemiBold) を料金ページの見出し用に読み込む。
+// 800等はごく少数のため近傍(700)にフォールバックさせ、和文フォントの重量を削減。
+const mplus1 = M_PLUS_1({
+  variable: "--font-mplus-1-var",
   subsets: ["latin"],
-  weight: ["400", "500", "700", "800"],
-  display: "swap",
-});
-
-const inter = Inter({
-  variable: "--font-inter-var",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const hind = Hind({
-  variable: "--font-hind-var",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const luckiestGuy = Luckiest_Guy({
-  variable: "--font-luckiest-var",
-  subsets: ["latin"],
-  weight: "400",
+  weight: ["500", "600", "700"],
   display: "swap",
 });
 
@@ -117,10 +91,13 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${notoSansJp.variable} ${mplusRounded.variable} ${inter.variable} ${hind.variable} ${luckiestGuy.variable} ${lineSeedJP.variable} antialiased`}
+        className={`${geistMono.variable} ${notoSansJp.variable} ${mplus1.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
-        <LayoutWrapper>{children}</LayoutWrapper>
+        <ServiceWorkerRegistrar />
+        <QueryProvider>
+          <LayoutWrapper>{children}</LayoutWrapper>
+        </QueryProvider>
       </body>
     </html>
   );

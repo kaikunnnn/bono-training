@@ -9,7 +9,7 @@
  * - categoryTitle/categoryTitles → tags[] でカテゴリマッチング
  */
 
-import type { LessonWithArticleIds } from "@/lib/sanity";
+import type { Lesson } from "@/types/sanity";
 import { SECTIONS, RECOMMENDED_SECTIONS } from "./sections";
 
 /**
@@ -18,9 +18,9 @@ import { SECTIONS, RECOMMENDED_SECTIONS } from "./sections";
  *
  * Key: 同じレッスンが複数のセクション/サブセクションに属することを許可（break しない）
  */
-export function groupLessonsNested(lessons: LessonWithArticleIds[]) {
+export function groupLessonsNested(lessons: Lesson[]) {
   // セクションID -> サブセクションID -> レッスン配列
-  const groups: Record<string, Record<string, LessonWithArticleIds[]>> = {};
+  const groups: Record<string, Record<string, Lesson[]>> = {};
 
   // 初期化
   SECTIONS.forEach(section => {
@@ -121,8 +121,8 @@ export function groupLessonsNested(lessons: LessonWithArticleIds[]) {
  * おすすめタブ用のレッスングルーピング
  * mainブランチの recommendedLessons ロジック（lines 357-378）をコピー
  */
-export function groupRecommendedLessons(lessons: LessonWithArticleIds[]) {
-  const groups: Record<string, LessonWithArticleIds[]> = {};
+export function groupRecommendedLessons(lessons: Lesson[]) {
+  const groups: Record<string, Lesson[]> = {};
 
   RECOMMENDED_SECTIONS.forEach(section => {
     groups[section.id] = [];
@@ -147,7 +147,7 @@ export function groupRecommendedLessons(lessons: LessonWithArticleIds[]) {
  * セクションごとの総レッスン数を計算
  * mainブランチの sectionCounts ロジック（lines 382-392）をコピー
  */
-export function getSectionCounts(groupedLessons: Record<string, Record<string, LessonWithArticleIds[]>>) {
+export function getSectionCounts(groupedLessons: Record<string, Record<string, Lesson[]>>) {
   const counts: Record<string, number> = {};
   SECTIONS.forEach(section => {
     let total = 0;

@@ -92,7 +92,7 @@ export default function TrainingCard({ data }: TrainingCardProps) {
             font-bold leading-[1.52]
             tracking-tight
             italic
-            font-noto-sans-jp
+            font-rounded-mplus
             whitespace-nowrap
             transition-transform duration-[800ms] ease-out
             group-hover:-translate-x-5

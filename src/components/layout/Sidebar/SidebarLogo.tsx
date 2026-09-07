@@ -15,7 +15,7 @@ interface SidebarLogoProps {
 export function SidebarLogo({ className }: SidebarLogoProps) {
   return (
     <div className={cn("w-full", className)}>
-      <div className="w-full px-[28px] py-[33px]">
+      <div className="w-full px-[30px] py-[33px]">
         <Link href="/" className="flex items-center">
           <Logo width={81} height={24} />
         </Link>

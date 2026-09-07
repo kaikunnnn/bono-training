@@ -40,6 +40,19 @@ export function Footer({ className }: FooterProps) {
             </Link>
           </div>
 
+          {/* 法的ページ */}
+          <div className="flex justify-center gap-4 mb-2 text-xs">
+            <Link href="/terms" className="hover:underline">
+              利用規約
+            </Link>
+            <Link href="/privacy" className="hover:underline">
+              プライバシーポリシー
+            </Link>
+            <Link href="/tokushoho" className="hover:underline">
+              特定商取引法に基づく表示
+            </Link>
+          </div>
+
           {/* 開発環境のみ: 隠しページへのリンク */}
           {isDev && (
             <div className="flex justify-center gap-4 mb-2 text-xs text-gray-400">

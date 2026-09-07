@@ -14,10 +14,19 @@ UIデザイン学習プラットフォーム。Supabase + Stripe + Sanity CMS �
 
 ## 作業開始フロー
 
-1. ブランチ名から Linear イシューを特定（`feature/bon-{番号}-{説明}` → BON-{番号}）
-2. イシューのコメントで要件・フィードバックを確認
-3. 作業実施、問題発見時はLinearにサブイシューまたはコメントで記録
-4. 完了後、Linearステータスを更新
+タスク管理は **`/Users/kaitakumi/Documents/01_BONO事業/01_Docs/rebono/issues/`** 配下のMDで行う（Linearは2026-06-19廃止）。
+
+1. 新規タスクは rebono/issues に新しいMDを起票（`issue_number` は既存最大値+1）
+2. ゴール / 決定 / 未決Q / TODO / 参照 / 進捗ログ をwiki的に1ファイルにまとめる
+3. ブランチ命名は `feature/{slug}`（issue MDのファイル名と対応させる）
+4. 作業中は進捗ログに追記、未決事項は「❓未決Q」に置く
+5. 既存ブランチや git log の `BON-xxx` は履歴。新規作業では参照しない
+
+## 実装の進め方（厳守）
+
+**実装計画を立てる前に、一般的な（外部の）ベストプラクティスを必ずリサーチする。** 技術選定・アーキテクチャ・パフォーマンス・キャッシュ/データ取得・外部サービス連携（Sanity/Supabase/Stripe/Next.js等）など「定石があるはずの判断」では、公式ドキュメント等で標準的なやり方を先に調べてから計画を立てる（自己流で作らない）。
+
+採用した定石は**出典URL付きで rebono/issues の該当MDに記録・保存**し、それに沿って**確認しながら段階的に実装・改善**する。詳細は `.claude/rules/09-work-loop.md`「ベストプラクティス駆動の実装（型）」。
 
 ## ディレクトリ構成
 
@@ -53,7 +62,13 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 - `next/link`, `next/image`, `next/font` を使う
 - `ui_kits/marketing-top/` と `ui_kits/training/` を参照してから新UIを書く
 
+## SEO・見出しタグ（必須）
+
+見出しになりうるテキスト（ページ主見出し・セクション見出し・カードタイトル等）を実装する際は、**必ず `.claude/rules/08-seo-semantics.md` を読み、`<p>`/`<span>` で済ませず正しい `h1`〜`h6` タグを使うこと**。1ページに `h1` は1つだけ、レベルを飛ばさない（`h2`の次に`h4`を使わない）。フォントサイズと見出しレベルは無関係— 見た目はCSSで決め、タグは文書構造で決める。
+
 ## ルール（詳細は .claude/rules/ 参照）
+
+**優先順位**: これらのルールはデフォルトであり、会話でのユーザーの明示的な指示が常に優先される。指示がルールと矛盾する場合、黙ってルール側を貫くことも、黙ってルールを破ることもしない。「ルール○○（例: 08のトークン対応表）と異なりますが、指示を優先して進めます」と一言明示してから指示に従う。
 
 - `01-nextjs-architecture.md` — Server/Client境界・レイアウト（最重要）
 - `02-server-client-modules.md` — supabase/server vs client、モジュール分離パターン
@@ -62,6 +77,9 @@ UIの追加・編集・移植を行う前に、**必ず `.claude/design-system/S
 - `05-file-conventions.md` — ファイル配置・命名
 - `06-development-workflow.md` — 環境・ビルド・デプロイ
 - `07-performance.md` — フォント・画像・バンドルサイズ最適化
+- `08-figma-implementation.md` — Figmaデザイン実装の必須手順（実測→トークン対応表→突合）
+- `08-seo-semantics.md` — 見出しタグ（h1〜h6）の正しい階層構造（必須）
+- `09-work-loop.md` — タスク進行の標準ループ（リサーチ→計画→実装→テスト→改善）
 
 ## 移植ルール（最重要）
 
@@ -86,7 +104,7 @@ mainブランチ（`/Users/kaitakumi/Documents/bono-training`）のコードを�
 
 ## 禁止事項
 
-- Linear イシューなしで作業開始しない
+- rebono/issues のMD起票なしで作業開始しない
 - テスト（build + tsc）なしでデプロイしない
 - 本番DBで実験的なクエリを実行しない
 - Client Component から `@/lib/supabase/server` を import しない

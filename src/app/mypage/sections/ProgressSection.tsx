@@ -17,18 +17,13 @@ export async function ProgressSection({
   userId: string;
   mode: "preview" | "full";
 }) {
-  console.time("[mypage section] Progress total");
-
-  console.time("[mypage section]   Progress getAllLessons");
   const lessons = await getAllLessonsWithArticleIds();
-  console.timeEnd("[mypage section]   Progress getAllLessons");
 
   const lessonProgressInput = lessons.map((lesson) => ({
     lessonId: lesson._id,
     articleIds: lesson.articleIds || [],
   }));
 
-  console.time("[mypage section]   Progress phase2 (progress + status)");
   const [progressMap, statusMap] = await Promise.all([
     getMultipleLessonProgress(lessonProgressInput, userId),
     getMultipleLessonStatus(
@@ -36,7 +31,6 @@ export async function ProgressSection({
       userId
     ),
   ]);
-  console.timeEnd("[mypage section]   Progress phase2 (progress + status)");
 
   // レッスン + 進捗データを統合
   const lessonsWithProgress: LessonWithProgress[] = lessons.map((lesson) => {
@@ -78,8 +72,6 @@ export async function ProgressSection({
   const completedLessons = lessonsWithProgress.filter(
     (l) => l.lessonStatus === "completed"
   );
-
-  console.timeEnd("[mypage section] Progress total");
 
   if (mode === "preview") {
     return <ProgressPreview inProgressLessons={inProgressLessons} />;

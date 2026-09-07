@@ -19,7 +19,7 @@ export default async function ProfilePage() {
   const user = await getCurrentUser();
 
   if (!user) {
-    redirect("/login?redirectTo=/profile");
+    redirect("/login?reauth=1&redirectTo=/profile");
   }
 
   return (

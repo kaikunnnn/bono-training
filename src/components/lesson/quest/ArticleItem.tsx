@@ -75,7 +75,7 @@ export function ArticleItem({
 
   return (
     <Link
-      href={"/articles/" + slug}
+      href={"/contents/" + slug}
       className="flex items-center gap-4 px-8 py-4 border-b border-black/[0.08] cursor-pointer hover:bg-gray-50 transition w-full"
     >
       {isCompleted ? (
@@ -90,7 +90,7 @@ export function ArticleItem({
         </div>
       )}
 
-      <div className="relative w-20 h-[45px] rounded-[6px] overflow-hidden bg-muted-strong flex-shrink-0">
+      <div className="relative w-20 h-[45px] rounded-[6px] overflow-hidden bg-muted-strong border border-black/[0.08] flex-shrink-0">
         {imageUrl && (
           <Image
             src={imageUrl}
