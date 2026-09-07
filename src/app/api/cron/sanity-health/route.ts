@@ -61,13 +61,11 @@ async function sendSlackAlert(
 }
 
 export async function GET(request: NextRequest) {
-  // Vercel Cron 規約: CRON_SECRET が設定されていれば Bearer で検証する
+  // Vercel Cron 規約: CRON_SECRET で Bearer 検証（fail-closed: env未設定でも拒否）
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const authHeader = request.headers.get("authorization");
-    if (authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const authHeader = request.headers.get("authorization");
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const projectId = process.env.NEXT_PUBLIC_SANITY_PROJECT_ID;
