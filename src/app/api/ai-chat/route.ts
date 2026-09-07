@@ -1,11 +1,27 @@
 import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { client } from "@/lib/sanity";
 
 // Edge ではなく Node.js 環境で実行（Groq SDK の streaming に必要）
 export const runtime = "nodejs";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
+
+// Supabase（認証・レート制限のカウント用）。questions/submit と同じ env を使う。
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+// レート制限: 1ユーザーにつき 1時間 30 回まで（金銭的DoS＝Groq/Sanity枠の枯渇対策）。
+// 保存先は ai_chat_usage テーブル（1リクエスト1行）。直近1時間の行数をcountして判定する。
+const RATE_LIMIT_PER_HOUR = 30;
+
+function jsonError(message: string, status: number): Response {
+  return new Response(JSON.stringify({ error: message }), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
+}
 
 // ============================================================
 // Sanity コンテンツ取得（Vite 版の構造をそのまま踏襲）
@@ -161,22 +177,76 @@ interface IncomingChatMessage {
 // ============================================================
 
 export async function POST(req: NextRequest) {
+  // --- 認証（questions/submit と同じ Bearer トークン方式）--------------------
+  // メンバー限定（サブスク必須）。LLM/Sanity を無認証で無制限に叩ける金銭的DoS（C-1）を
+  // 塞ぎつつ、AIラーニングアシスタントは有料会員向け機能として提供する。
+  const authHeader = req.headers.get("authorization");
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return jsonError("Unauthorized: No token provided", 401);
+  }
+  const token = authHeader.replace("Bearer ", "");
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    console.error("[ai-chat] Supabase configuration missing");
+    return jsonError("Server configuration error", 500);
+  }
+
+  const supabase = createSupabaseClient(supabaseUrl, supabaseServiceKey);
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser(token);
+  if (authError || !user) {
+    return jsonError("Unauthorized: Invalid token", 401);
+  }
+
+  // --- サブスク確認（questions/submit と同じ is_active + environment フィルタ）---
+  // アクティブな課金メンバーのみ許可。ログイン済みでも非課金は 403。
+  const environment = process.env.NODE_ENV === "production" ? "live" : "test";
+  const { data: subscription, error: subError } = await supabase
+    .from("user_subscriptions")
+    .select("is_active, plan_type")
+    .eq("user_id", user.id)
+    .eq("is_active", true)
+    .eq("environment", environment)
+    .maybeSingle();
+  if (subError || !subscription) {
+    return jsonError("この機能は有料メンバー限定です", 403);
+  }
+
+  // --- リクエストボディ ------------------------------------------------------
   let messages: IncomingChatMessage[];
   try {
     const body = await req.json();
     messages = body.messages;
   } catch {
-    return new Response(JSON.stringify({ error: "Invalid JSON" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonError("Invalid JSON", 400);
   }
 
   if (!messages || !Array.isArray(messages) || messages.length === 0) {
-    return new Response(JSON.stringify({ error: "messages is required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonError("messages is required", 400);
+  }
+
+  // --- レート制限（永続カウント方式。questions/submit の実データcountに倣う）---
+  // ai_chat_usage の直近1時間の行数で判定。カウント/記録の失敗では止めない
+  // （best-effort。認証が既に第一防御なので、DB不調時にチャットを壊さないことを優先）。
+  try {
+    const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    const { count, error: countError } = await supabase
+      .from("ai_chat_usage")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", since);
+    if (!countError && (count ?? 0) >= RATE_LIMIT_PER_HOUR) {
+      return jsonError(
+        "短時間に多くのリクエストがありました。しばらく時間をおいてから再度お試しください",
+        429
+      );
+    }
+    // 上限内なら今回の利用を1行記録（次回以降のカウント対象にする）
+    await supabase.from("ai_chat_usage").insert({ user_id: user.id });
+  } catch (e) {
+    console.error("[ai-chat] Rate limit check failed:", e);
   }
 
   try {
