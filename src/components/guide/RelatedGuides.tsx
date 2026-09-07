@@ -11,7 +11,7 @@ export default function RelatedGuides({ guides }: RelatedGuidesProps) {
   return (
     <section className="w-full border-t border-border-light pt-12 pb-16">
       <div className="max-w-[648px] mx-auto px-4">
-        <h2 className="text-xl font-bold text-text-primary mb-2 text-center font-rounded-mplus">
+        <h2 className="text-xl font-bold text-text-primary mb-2 text-center font-heading">
           もっと読む
         </h2>
         <p className="text-text-muted text-center mb-8">

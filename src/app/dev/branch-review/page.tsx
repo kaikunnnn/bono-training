@@ -51,7 +51,7 @@ const sections: CommitSection[] = [
         checks: [
           {
             label: "ヘッダーが /guide スタイルで統一されているか",
-            detail: "font-rounded-mplus・左揃え・CategoryNav",
+            detail: "font-heading・左揃え・CategoryNav",
           },
           {
             label: "FeedbackCard の新デザイン",
@@ -174,7 +174,7 @@ export default function BranchReviewPage() {
           <p className="text-sm font-bold text-text-primary/50 font-noto-sans-jp">
             INTERNAL / BRANCH REVIEW
           </p>
-          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary font-rounded-mplus mt-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-text-primary font-heading mt-1">
             chivalrous-appendix レビュー
           </h1>
           <p className="text-sm text-text-primary/60 mt-2 font-noto-sans-jp leading-relaxed">
@@ -195,7 +195,7 @@ export default function BranchReviewPage() {
                     {section.date}
                   </span>
                 </div>
-                <h2 className="text-lg sm:text-xl font-bold text-text-primary font-rounded-mplus mt-2">
+                <h2 className="text-lg sm:text-xl font-bold text-text-primary font-heading mt-2">
                   {section.title}
                 </h2>
                 <p className="text-sm text-text-primary/70 font-noto-sans-jp leading-relaxed mt-2">
@@ -213,7 +213,7 @@ export default function BranchReviewPage() {
                     className="bg-surface rounded-[20px] border border-gray-200/60 shadow-sm p-6"
                   >
                     <div className="flex items-center justify-between gap-3 flex-wrap mb-1">
-                      <h3 className="text-base font-bold text-text-primary font-rounded-mplus">
+                      <h3 className="text-base font-bold text-text-primary font-heading">
                         {page.title}
                       </h3>
                       <Link

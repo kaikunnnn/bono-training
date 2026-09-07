@@ -118,7 +118,7 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
             </div>
 
             {/* タイトル */}
-            <h1 className="text-[28px] md:text-[32px] font-bold text-left leading-[1.4] text-text-primary font-rounded-mplus break-words">
+            <h1 className="text-[28px] md:text-[32px] font-bold text-left leading-[1.4] text-text-primary font-heading break-words">
               {feedback.title}
             </h1>
 
@@ -215,7 +215,7 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
         <div className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-16">
           {relatedFeedbacks.length > 0 && (
             <section className="mt-12">
-              <h2 className="text-xl font-bold font-rounded-mplus text-text-primary mb-6">
+              <h2 className="text-xl font-bold font-heading text-text-primary mb-6">
                 関連フィードバック
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -228,7 +228,7 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
 
           {recentFeedbacks.length > 0 && (
             <section className="mt-12">
-              <h2 className="text-xl font-bold font-rounded-mplus text-text-primary mb-6">
+              <h2 className="text-xl font-bold font-heading text-text-primary mb-6">
                 最近のフィードバック
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

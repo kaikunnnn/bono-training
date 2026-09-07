@@ -62,7 +62,7 @@ export default async function CommunityFeedbackPage({ searchParams }: PageProps)
     <div className="min-h-screen">
       {/* ヒーロー */}
       <section className="px-6 pt-16 pb-10 max-w-[1440px] mx-auto">
-        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">
+        <h1 className="text-4xl font-bold font-heading mb-4">
           フィードバック
         </h1>
         <p className="text-muted-foreground text-base leading-relaxed max-w-[600px]">

@@ -51,7 +51,7 @@ const portableTextComponents: PortableTextComponents = {
       return (
         <h2
           id={id}
-          className="text-[24px] md:text-[26px] font-semibold leading-[2rem] tracking-[-0.02em] text-text-primary font-rounded-mplus mt-24 mb-12 first:mt-0 scroll-mt-20"
+          className="text-[24px] md:text-[26px] font-semibold leading-[2rem] tracking-[-0.02em] text-text-primary font-heading mt-24 mb-12 first:mt-0 scroll-mt-20"
         >
           {children}
         </h2>
@@ -62,7 +62,7 @@ const portableTextComponents: PortableTextComponents = {
       return (
         <h3
           id={id}
-          className="text-[20px] md:text-[22px] font-semibold leading-[1.75rem] tracking-[-0.02em] text-text-primary font-rounded-mplus mt-16 mb-8 scroll-mt-20"
+          className="text-[20px] md:text-[22px] font-semibold leading-[1.75rem] tracking-[-0.02em] text-text-primary font-heading mt-16 mb-8 scroll-mt-20"
         >
           {children}
         </h3>
@@ -73,7 +73,7 @@ const portableTextComponents: PortableTextComponents = {
       return (
         <h4
           id={id}
-          className="text-[18px] md:text-[20px] font-semibold leading-[1.5rem] tracking-[-0.02em] text-text-primary font-rounded-mplus mt-6 mb-3 scroll-mt-20"
+          className="text-[18px] md:text-[20px] font-semibold leading-[1.5rem] tracking-[-0.02em] text-text-primary font-heading mt-6 mb-3 scroll-mt-20"
         >
           {children}
         </h4>

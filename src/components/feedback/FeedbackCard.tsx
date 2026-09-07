@@ -70,7 +70,7 @@ export function FeedbackCard({ feedback }: FeedbackCardProps) {
           </p>
         )}
 
-        <h3 className="font-rounded-mplus text-lg font-bold text-[#1a1a1a] leading-snug line-clamp-2 text-balance">
+        <h3 className="font-heading text-lg font-bold text-[#1a1a1a] leading-snug line-clamp-2 text-balance">
           {feedback.title}
         </h3>
 

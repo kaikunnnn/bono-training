@@ -53,6 +53,17 @@ const nextConfig: NextConfig = {
         destination: "/how-to/feedback",
         permanent: true,
       },
+      // フィードバック一覧・詳細を /community/feedback 配下へ移設。旧URLを308で恒久保護。
+      {
+        source: "/feedbacks",
+        destination: "/community/feedback",
+        permanent: true,
+      },
+      {
+        source: "/feedbacks/:slug",
+        destination: "/community/feedback/:slug",
+        permanent: true,
+      },
     ];
   },
   // セキュリティヘッダ（段階導入 第1歩）: CSP以外の安全な4ヘッダを全パスに enforce で付与。
@@ -130,20 +141,6 @@ const nextConfig: NextConfig = {
         hostname: "*.st-note.com",
       },
     ],
-  },
-  async redirects() {
-    return [
-      {
-        source: "/feedbacks",
-        destination: "/community/feedback",
-        permanent: true,
-      },
-      {
-        source: "/feedbacks/:slug",
-        destination: "/community/feedback/:slug",
-        permanent: true,
-      },
-    ];
   },
 };
 

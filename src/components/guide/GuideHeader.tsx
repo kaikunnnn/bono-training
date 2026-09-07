@@ -59,7 +59,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
 
           {/* タイトル */}
           <h1
-            className="text-[28px] md:text-[36px] font-bold text-left leading-[1.5] text-text-primary font-rounded-mplus break-words"
+            className="text-[28px] md:text-[36px] font-bold text-left leading-[1.5] text-text-primary font-heading break-words"
           >
             {guide.title}
           </h1>
