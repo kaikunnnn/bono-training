@@ -17,9 +17,10 @@ export function SidebarMenuItem({
   children,
   isActive = false,
   onClick,
+  dot,
 }: SidebarMenuItemProps) {
   const baseClasses =
-    "w-full rounded-[20px] px-[14px] py-[9px] inline-flex items-center gap-[10px]" +
+    "relative w-full rounded-[20px] px-[14px] py-[9px] inline-flex items-center gap-[10px]" +
     " font-noto-sans-jp text-[13px] font-medium leading-none text-text-primary" +
     " transition-colors duration-150 border border-transparent";
   const stateClasses = isActive
@@ -41,6 +42,13 @@ export function SidebarMenuItem({
       <span className="pb-[2px] whitespace-nowrap overflow-hidden text-ellipsis">
         {children}
       </span>
+      {/* 新着ドット（掲示板の新着ドット）。項目の右上に絶対配置。
+          dot は Suspense スロット（未確定時は null＝ドット無しで描画）。 */}
+      {dot && (
+        <span className="pointer-events-none absolute right-[10px] top-[6px]">
+          {dot}
+        </span>
+      )}
     </>
   );
 

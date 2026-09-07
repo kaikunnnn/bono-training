@@ -9,6 +9,7 @@ import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
+import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import "./globals.css";
 import "@/styles/blog.css";
 import "@/styles/blog/link-card.css";
@@ -93,6 +94,7 @@ export default function RootLayout({
         className={`${geistMono.variable} ${notoSansJp.variable} ${mplus1.variable} ${lineSeedJP.variable} antialiased`}
       >
         <GoogleAnalytics />
+        <ServiceWorkerRegistrar />
         <QueryProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
         </QueryProvider>

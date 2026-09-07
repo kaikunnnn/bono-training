@@ -20,6 +20,17 @@ interface LayoutProps {
     id: string;
     email: string;
   } | null;
+  /**
+   * 通知ベル（#160 S3）。未読件数取得を内包した Server Component を Suspense で
+   * ラップした要素を親（Server: UserProviderLayout）から受け取り、そのまま描画する。
+   * 未ログイン時や未対応時は undefined/null。
+   */
+  notificationSlot?: React.ReactNode;
+  /**
+   * 掲示板の新着ドット（掲示板の新着ドット）。hasUnseenBoard を内包した Server Component を
+   * Suspense でラップした要素。デスクトップのサイドバーにのみ渡す（通知ベルの現状に倣う）。
+   */
+  boardDotSlot?: React.ReactNode;
 }
 
 /**
@@ -32,7 +43,7 @@ interface LayoutProps {
  * - /blog/*: BlogHeader/Footer を使用
  * - /feedback-apply/submit: フォーム専用ページ
  */
-export function Layout({ children, className, user }: LayoutProps) {
+export function Layout({ children, className, user, notificationSlot, boardDotSlot }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGradientVisible, setIsGradientVisible] = useState(false);
@@ -111,7 +122,7 @@ export function Layout({ children, className, user }: LayoutProps) {
           isTop6 && "border-r border-black/10"
         )}
       >
-        <Sidebar user={user} />
+        <Sidebar user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot} />
       </aside>
 
       {/* モバイル・タブレット用ヘッダーバー（1024px未満） */}
@@ -146,6 +157,11 @@ export function Layout({ children, className, user }: LayoutProps) {
           <Link href="/" className="flex items-center">
             <Logo width={68} height={20} />
           </Link>
+
+          {/* 通知ベル（右寄せ・#160 S3）。ログイン時のみ notificationSlot が渡る */}
+          {notificationSlot && (
+            <div className="absolute right-4">{notificationSlot}</div>
+          )}
         </div>
       </div>
 

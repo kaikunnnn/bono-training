@@ -50,10 +50,68 @@ export function QuestionCommentsSection({
   // このマウント中に一度でも促したか。2回目以降のコメントで連続表示しないためのガード
   const promptedRef = useRef(false);
 
+  // 通知（#comment-<id>）から遷移してきたときに一時ハイライトする対象コメントID（#160）
+  const [highlightedCommentId, setHighlightedCommentId] = useState<string | null>(
+    null,
+  );
+  // 処理済みの hash。comments 更新（router.refresh）のたびに再スクロールしないためのガード
+  const handledHashRef = useRef<string | null>(null);
+  // ハイライト解除タイマー。effect の cleanup で消すと、ハイライト中に comments が
+  // 更新された場合にタイマーが消えて二度と再セットされず（handledHashRef ガードで早期 return）、
+  // ハイライトが消えなくなる。そのため ref で持ち、アンマウント時のみ破棄する。
+  const highlightTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // アンマウント時にハイライト解除タイマーを破棄する
+  useEffect(
+    () => () => {
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    },
+    [],
+  );
+
   // router.refresh() 後に届く最新のサーバー状態で上書きする
   useEffect(() => {
     setComments(initialComments);
   }, [initialComments]);
+
+  // 通知アンカーへのスクロール + ハイライト（#160）。
+  // コメントはストリーミングで後から描画されるため、ブラウザ標準の #comment-x ジャンプは
+  // 要素が存在する前に発火して失敗する。そこで JS で「コメントが描画された後に」
+  // scrollIntoView する。対象が見つからない間は comments 更新のたびに再試行する。
+  useEffect(() => {
+    const hash = window.location.hash; // 例: "#comment-<uuid>"
+    const match = hash.match(/^#comment-(.+)$/);
+    if (!match) return;
+    // 既にこの hash を処理済みなら何もしない（refresh で comments が変わっても再スクロールしない）
+    if (handledHashRef.current === hash) return;
+
+    const targetId = match[1];
+    const el = document.getElementById(`comment-${targetId}`);
+    if (!el) {
+      // まだ描画されていない or 一覧に存在しない（削除・別ページ等）。
+      // 描画待ちなら次の comments 更新で再試行される。存在しないなら握って何もしない。
+      console.debug(
+        "[QuestionCommentsSection] target comment not yet in list:",
+        targetId,
+      );
+      return;
+    }
+
+    handledHashRef.current = hash;
+    const prefersReduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+    el.scrollIntoView({
+      behavior: prefersReduced ? "auto" : "smooth",
+      block: "center",
+    });
+    setHighlightedCommentId(targetId);
+    if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    highlightTimerRef.current = setTimeout(
+      () => setHighlightedCommentId(null),
+      2500,
+    );
+  }, [comments]);
 
   const handleAdded = (comment: QuestionComment) => {
     setComments((prev) =>
@@ -126,6 +184,7 @@ export function QuestionCommentsSection({
               myReactions={myCommentReactions[c.id] ?? []}
               onDeleted={handleDeleted}
               onUpdated={handleUpdated}
+              highlighted={c.id === highlightedCommentId}
             />
           ))}
         </ul>

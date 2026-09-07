@@ -35,7 +35,7 @@ const SidebarSearchBox: React.FC<{ className?: string }> = ({ className }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn("w-full pl-[30px] pr-[15px]", className)}
+      className={cn("w-full px-[15px]", className)}
       role="search"
     >
       <div

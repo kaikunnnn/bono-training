@@ -90,7 +90,7 @@ export function ArticleItem({
         </div>
       )}
 
-      <div className="relative w-20 h-[45px] rounded-[6px] overflow-hidden bg-muted-strong flex-shrink-0">
+      <div className="relative w-20 h-[45px] rounded-[6px] overflow-hidden bg-muted-strong border border-black/[0.08] flex-shrink-0">
         {imageUrl && (
           <Image
             src={imageUrl}

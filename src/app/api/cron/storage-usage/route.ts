@@ -163,7 +163,9 @@ export async function GET(request: NextRequest) {
   let alerted = false;
 
   if (overThreshold) {
-    const webhookUrl = process.env.SLACK_WEBHOOK_URL;
+    // 運用アラート用 webhook（未設定なら旧chにフォールバックし、取りこぼしを防ぐ）
+    const webhookUrl =
+      process.env.SLACK_OPS_WEBHOOK_URL || process.env.SLACK_WEBHOOK_URL;
     if (webhookUrl) {
       try {
         await sendSlackAlert(webhookUrl, totalBytes, perBucket);
@@ -173,7 +175,7 @@ export async function GET(request: NextRequest) {
       }
     } else {
       console.log(
-        "SLACK_WEBHOOK_URL not configured, skipping storage usage alert"
+        "SLACK_OPS_WEBHOOK_URL / SLACK_WEBHOOK_URL not configured, skipping storage usage alert"
       );
     }
   }

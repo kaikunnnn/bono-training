@@ -26,6 +26,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { signOut } from "@/app/(auth)/actions";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 interface HeaderUser {
   id: string;
@@ -35,12 +36,14 @@ interface HeaderUser {
 
 interface HeaderClientProps {
   user: HeaderUser | null;
+  /** ログインユーザーの未読通知件数（未ログイン時は 0） */
+  unreadCount?: number;
 }
 
 /**
  * ヘッダークライアントコンポーネント
  */
-export function HeaderClient({ user }: HeaderClientProps) {
+export function HeaderClient({ user, unreadCount = 0 }: HeaderClientProps) {
   const router = useRouter();
   const isMobile = useIsMobile();
   const [isMounted, setIsMounted] = useState(false);
@@ -59,13 +62,23 @@ export function HeaderClient({ user }: HeaderClientProps) {
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center px-4 sm:px-8">
-        <div className="flex gap-6 md:gap-10">
+        <div className="flex items-center gap-6 md:gap-10">
           {isMobile && isMounted && <MobileMenu />}
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="hidden font-bold sm:inline-block">
-              UIUX DESIGN
-            </span>
-          </Link>
+          {/* ロゴ + 通知ベル（PC）。ベルはロゴのすぐ右に置く（Figma 確定判断） */}
+          <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center space-x-2">
+              <span className="hidden font-bold sm:inline-block">
+                UIUX DESIGN
+              </span>
+            </Link>
+            {/* PC ではベルをロゴ右に配置（モバイルは右クラスタで表示） */}
+            {!isMobile && isMounted && user && (
+              <NotificationBell
+                userId={user.id}
+                initialUnreadCount={unreadCount}
+              />
+            )}
+          </div>
           {!isMobile && isMounted && <DesktopNavigation />}
         </div>
         <div className="ml-auto flex items-center space-x-4">
@@ -74,7 +87,16 @@ export function HeaderClient({ user }: HeaderClientProps) {
               <Link href="/login">ログイン</Link>
             </Button>
           ) : (
-            <UserMenu user={user} onSignOut={handleSignOut} />
+            <>
+              {/* モバイルはベルを右クラスタに置く（PC はロゴ右へ移動済み） */}
+              {isMobile && isMounted && (
+                <NotificationBell
+                  userId={user.id}
+                  initialUnreadCount={unreadCount}
+                />
+              )}
+              <UserMenu user={user} onSignOut={handleSignOut} />
+            </>
           )}
         </div>
       </div>
