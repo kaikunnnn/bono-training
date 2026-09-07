@@ -59,11 +59,7 @@ export default async function FeedbackSubmitPage() {
   return (
     <div className="min-h-screen">
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-8">
-        <FeedbackSubmitForm
-          userId={user.id}
-          userEmail={user.email || ""}
-          lessons={lessonOptions}
-        />
+        <FeedbackSubmitForm lessons={lessonOptions} />
       </div>
     </div>
   );

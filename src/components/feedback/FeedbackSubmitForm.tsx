@@ -25,6 +25,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { createClient } from "@/lib/supabase/client";
 
 // ============================================
 // 型定義
@@ -44,8 +45,6 @@ interface LessonOption {
 }
 
 interface FeedbackSubmitFormProps {
-  userId: string;
-  userEmail: string;
   lessons: LessonOption[];
 }
 
@@ -340,8 +339,6 @@ function SuccessScreen({
 // メインコンポーネント
 // ============================================
 export function FeedbackSubmitForm({
-  userId,
-  userEmail,
   lessons,
 }: FeedbackSubmitFormProps) {
   const router = useRouter();
@@ -451,17 +448,30 @@ export function FeedbackSubmitForm({
     setIsSubmitting(true);
 
     try {
+      // Supabase セッションから access_token を取得し Bearer で送る
+      // （サーバー側で認証＋サブスク確認するため未送信だと 401 になる）
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setError("ログインが必要です");
+        setIsSubmitting(false);
+        return;
+      }
+
       const response = await fetch("/api/feedback-apply/submit", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({
           articleUrl: formData.articleUrl,
           slackAccountName: formData.slackAccountName,
           lessonId: formData.lessonId,
           lessonTitle: selectedLesson?.title || "",
           checkedItems: formData.checkedItems,
-          userId,
-          userEmail,
         }),
       });
 
