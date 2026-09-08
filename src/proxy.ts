@@ -40,6 +40,26 @@ const PROTECTED_PATH_PREFIXES = [
 const AUTH_PAGE_PATHS = ["/login", "/signup"];
 
 /**
+ * 本番から遮断する内部用パス（/dev と検討中プレビュールート）。
+ *
+ * 遮断はここ（proxy）が正。layout 側の assertNotProduction は補助でしかない:
+ * - VERCEL_ENV はプロジェクト設定次第でランタイムに露出しない（実測で undefined）
+ * - layout 内の notFound() は 404 を返さない（実測 200。Next.js の既知挙動）
+ * ため、本番ドメインへのリクエストを proxy で存在しないパスへ rewrite して
+ * not-found（404）を返す。preview デプロイ・ローカルは素通し。
+ */
+const DEV_ONLY_PATH_PREFIXES = ["/dev", "/notes", "/community/feedback"];
+
+const PRODUCTION_HOSTS = new Set([
+  "bono-training.vercel.app",
+  "bono-training-kaikunnnns-projects.vercel.app",
+  "bono-training-git-main-kaikunnnns-projects.vercel.app",
+  "bo-no.design",
+  "www.bo-no.design",
+  "app.bo-no.design",
+]);
+
+/**
  * Supabase auth cookie が存在するかチェック
  * @supabase/ssr が設定する `sb-{project-ref}-auth-token` を探す。
  * セッションが大きい場合は `...-auth-token.0` `...-auth-token.1` に分割保存される
@@ -56,6 +76,22 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
 
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
+
+  // 0. 本番ドメインでは内部用パスを 404 に
+  const isDevOnlyRoute = DEV_ONLY_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
+  );
+  if (isDevOnlyRoute) {
+    const host =
+      request.headers.get("host")?.toLowerCase() ?? request.nextUrl.hostname;
+    if (process.env.VERCEL_ENV === "production" || PRODUCTION_HOSTS.has(host)) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/404"; // 存在しないパスへ rewrite → not-found が 404 で返る
+      return NextResponse.rewrite(url);
+    }
+    return NextResponse.next();
+  }
+
   const hasAuth = hasSupabaseAuthCookie(request);
 
   // 1. 未ログインで保護されたページ → /login へ
@@ -105,5 +141,11 @@ export const config = {
     "/feedback-apply/submit",
     "/login",
     "/signup",
+    "/dev/:path*",
+    "/dev",
+    "/notes/:path*",
+    "/notes",
+    "/community/feedback/:path*",
+    "/community/feedback",
   ],
 };
