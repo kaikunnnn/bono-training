@@ -1,8 +1,9 @@
 /**
  * /dev/branch-review — chivalrous-appendix ブランチのレビューページ
  *
- * このブランチで未マージの変更を「確認するページ」と「確認内容」の一覧にまとめる。
- * ここを上から順にチェックすれば、各コミットをマージするか捨てるかを判断できる。
+ * このブランチは本番ルート（/guide・/feedbacks）を一切変更せず、新UIを本番遮断プレビュー
+ * （/notes・/community/feedback、いずれも dev/preview 環境でのみ表示）として同梱している。
+ * ここを上から順にチェックすれば、新UIを採用するか捨てるかを判断できる。
  * 本番には出さない（/dev layout でゲート済み + noindex）。
  */
 
@@ -39,11 +40,11 @@ const sections: CommitSection[] = [
   {
     commit: "75a5290",
     date: "2026-06-21",
-    title: "フィードバックを /community/feedback に移設 + Figma準拠UI刷新",
+    title: "フィードバック新UI（/community/feedback プレビュー）+ Figma準拠UI刷新",
     summary:
-      "一覧・詳細を /feedbacks から /community/feedback へ移設。旧URLは301リダイレクト。詳細ページをFigma準拠に刷新（タグバッジ・32pxタイトル・メタ行・区切り線）。FeedbackCardを単色背景 + Fluent Emoji 3Dに刷新し、CategoryTabsとframer-motion依存を削除。MD→Sanity投入スクリプト（scripts/import-feedbacks.mjs）を追加。",
+      "本番の /feedbacks は一切変更していない。新しい一覧・詳細UIを /community/feedback（本番遮断プレビュー）として同梱。詳細ページはFigma準拠（タグバッジ・32pxタイトル・メタ行・区切り線）、FeedbackCardは単色背景 + Fluent Emoji 3D。プレビュー専用のカードは src/components/dev-preview/feedback/ に隔離しており、本番 FeedbackCard には手を入れていない。MD→Sanity投入スクリプト（scripts/import-feedbacks.mjs）も同梱。",
     decision:
-      "判断ポイント: 新しい一覧/詳細のUIがFigmaの意図どおりか。URL移設（/community/ 配下に置く方針）を確定してよいか。OKならマージ、UIの方向性ごと見直すなら捨てる。",
+      "判断ポイント: プレビューを見て採用を決める。新しい一覧/詳細UIがFigmaの意図どおりで、/community/ 配下へ移設する方針でよければ採用 → 本番ルートへ昇格（/feedbacks の移設・旧URLの301リダイレクト追加）。不採用なら /community/feedback と dev-preview ごと削除する。",
     pages: [
       {
         href: "/community/feedback",
@@ -88,11 +89,11 @@ const sections: CommitSection[] = [
       },
       {
         href: "/feedbacks",
-        title: "旧URL /feedbacks（リダイレクト確認）",
+        title: "本番 /feedbacks が変わっていないこと",
         checks: [
           {
-            label: "/community/feedback へ301リダイレクトされるか",
-            detail: "詳細の旧URL /feedbacks/[slug] → /community/feedback/[slug] も同様",
+            label: "/feedbacks が main と同じUIのまま表示されるか",
+            detail: "リダイレクトは追加していない。旧UIの一覧・詳細（/feedbacks/[slug]）がそのまま生きていること",
           },
         ],
       },
@@ -101,11 +102,11 @@ const sections: CommitSection[] = [
   {
     commit: "7b5055a",
     date: "2026-06-26",
-    title: "/guide を /notes (ものづくりノート) にリブランド + type badge 追加",
+    title: "ものづくりノート新UI（/notes プレビュー）+ type badge 追加",
     summary:
-      "/guide を /notes へリネーム（非公開のためリダイレクト無し）。ページタイトル「ものづくりノート」とサブコピー追加。Guide.type（guide / blog）を追加し、GuideCard にバッジ表示。RelatedGuides を「同カテゴリ優先→全体最新で補完（最大4本）」に改善。Sidebar / sitemap / パンくずの参照を更新。",
+      "本番の /guide は一切変更していない。「ものづくりノート」リブランド案を /notes（本番遮断プレビュー）として同梱。ページタイトル「ものづくりノート」とサブコピー、Guide.type（guide / blog）バッジ、RelatedGuides の「同カテゴリ優先→全体最新で補完（最大4本）」改善を確認できる。プレビュー専用のカード/ヘッダー/関連は src/components/dev-preview/notes/ に隔離。Guide 型と GROQ の type 追加は additive（本番 /guide にも無害に入っている）。",
     decision:
-      "判断ポイント: 「ものづくりノート」という名前と /notes というURLで確定してよいか。type バッジ（ガイド/ブログ）の見た目が意図どおりか。ネーミングごと再検討するなら捨てる。",
+      "判断ポイント: プレビューを見て採用を決める。「ものづくりノート」という名前・/notes というURL・type バッジ（ガイド/ブログ）の見た目でよければ採用 → 本番ルートへ昇格（/guide のリネーム等）。不採用なら /notes と dev-preview ごと削除する。",
     pages: [
       {
         href: "/notes",
@@ -119,8 +120,8 @@ const sections: CommitSection[] = [
             detail: "type 未設定の既存記事は「ガイド」にフォールバック（GROQ coalesce）",
           },
           {
-            label: "旧 /guide がリンク切れになっていないか",
-            detail: "リダイレクトは意図的に無し（未公開のため）。サイト内に /guide への残リンクが無いことを確認",
+            label: "カードのリンク先が /notes/[slug] になっているか",
+            detail: "プレビュー専用カード（dev-preview/notes/GuideCard）は /notes を指す。本番 /guide のカードには影響しない",
           },
         ],
       },
@@ -144,21 +145,21 @@ const sections: CommitSection[] = [
       },
       {
         href: "/",
-        title: "サイドバー（全ページ共通）",
+        title: "サイドバー（全ページ共通）が変わっていないこと",
         checks: [
           {
-            label: "サイドバーのリンクが /notes / /community/feedback を指しているか",
-            detail: "旧 /guide・/feedbacks への参照が残っていないこと",
+            label: "サイドバーのリンクが main のまま（/guide・/feedbacks）か",
+            detail: "本番ナビは変更していない。/notes・/community/feedback はサイドバーからは辿れない（プレビューのため直接URLで開く）",
           },
         ],
       },
       {
         href: "/sitemap.xml",
-        title: "sitemap.xml",
+        title: "sitemap.xml が変わっていないこと",
         checks: [
           {
-            label: "/notes・/community/feedback 系のURLに更新されているか",
-            detail: "/guide・/feedbacks が sitemap に残っていないこと",
+            label: "sitemap が main のまま（/guide・/feedbacks 系）か",
+            detail: "プレビューの /notes・/community/feedback は sitemap に載せていない（noindex・本番遮断のため）",
           },
         ],
       },
@@ -178,8 +179,9 @@ export default function BranchReviewPage() {
             chivalrous-appendix レビュー
           </h1>
           <p className="text-sm text-text-primary/60 mt-2 font-noto-sans-jp leading-relaxed">
-            このブランチで main 未マージのコミットは2つ。それぞれ「確認するページ」を開いて
-            チェック項目を見て、コミット単位でマージするか捨てるかを判断する。
+            本番ルート（/guide・/feedbacks）は main と同一のまま。新UIは本番遮断プレビュー
+            （/notes・/community/feedback）として同梱している。各「確認するページ」を開いて
+            チェック項目を見て、新UIを採用するか捨てるかを判断する。
           </p>
         </header>
 
@@ -254,9 +256,11 @@ export default function BranchReviewPage() {
 
         <footer className="mt-12 pt-6 border-t border-gray-200">
           <p className="text-xs text-text-primary/50 font-noto-sans-jp leading-relaxed">
-            判断後の操作メモ: 両方OKならこのブランチをそのままPRへ（mainが先行しているためリベース推奨）。
-            片方だけ捨てる場合はコミット単位で cherry-pick / revert を検討。
-            未追跡の scripts/import-feedbacks.preview.json はインポートスクリプトのプレビュー出力（コミット不要）。
+            判断後の操作メモ: 採用が決まった新UIは本番ルートへ昇格する（/notes → /guide のリネーム、
+            /community/feedback → /feedbacks 移設 + 旧URLの301リダイレクト追加）。昇格時にこのプレビューの
+            ゲート（notFound）を外す。不採用なら該当プレビュー（src/app/notes・src/app/community/feedback）と
+            src/components/dev-preview 配下をまとめて削除する。本番ルートはこのブランチでは触っていないので、
+            そのまま main にマージしても本番挙動は変わらない。
           </p>
           <p className="text-xs text-text-primary/40 font-noto-sans-jp mt-2">
             <Link href="/dev" className="underline hover:no-underline">

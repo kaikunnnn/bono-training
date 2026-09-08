@@ -28,7 +28,7 @@ const projects: DevProjectEntry[] = [
     issue: "REVIEW",
     title: "chivalrous-appendix ブランチレビュー",
     summary:
-      "このブランチの未マージ2コミット（/community/feedback 移設・/notes リブランド）の確認ページ一覧とチェック項目。マージ/捨てるの判断用。",
+      "本番ルート（/guide・/feedbacks）は変えず、新UIを本番遮断プレビュー（/notes・/community/feedback）として同梱。確認ページ一覧とチェック項目で、採用/捨てるを判断する。",
     status: "in-progress",
   },
   {

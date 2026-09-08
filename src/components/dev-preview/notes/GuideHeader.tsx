@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Guide } from "@/types/guide";
 import { getCategoryInfo } from "@/lib/guideCategories";
-import { GuideCardImage } from "./GuideCardImage";
+import { GuideCardImage } from "@/components/guide/GuideCardImage";
 import { GuideCardPlaceholder } from "./GuideCard";
 import { getVideoInfo } from "@/lib/videoUtils";
 import {
@@ -36,20 +36,14 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/guide">ガイド</Link>
+                <Link href="/notes">ものづくりノート</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link href={`/guide?category=${guide.category}`}>
-                  {categoryInfo?.label ?? guide.category}
-                </Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>{guide.title}</BreadcrumbPage>
+              <BreadcrumbPage>
+                {categoryInfo?.label ?? guide.category}
+              </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -65,7 +59,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
 
           {/* タイトル */}
           <h1
-            className="text-[28px] md:text-[36px] font-bold text-left leading-[1.5] text-text-primary font-rounded-mplus break-words"
+            className="text-[28px] md:text-[36px] font-bold text-left leading-[1.5] text-text-primary font-heading break-words"
           >
             {guide.title}
           </h1>

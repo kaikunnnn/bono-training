@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { getCategoryInfo } from "@/lib/guideCategories";
 import type { Guide } from "@/types/guide";
-import { GuideCardImage } from "./GuideCardImage";
+import { GuideCardImage } from "@/components/guide/GuideCardImage";
 import { getVideoInfo } from "@/lib/videoUtils";
 
 interface GuideCardProps {
@@ -53,20 +53,33 @@ export function GuideCard({ guide }: GuideCardProps) {
         day: "numeric",
       })
     : null;
+  const type = guide.type ?? "guide";
+  const typeLabel = type === "blog" ? "ブログ" : "ガイド";
+  const typeBadgeClass =
+    type === "blog"
+      ? "bg-[#FBF1F3] text-[#9B2C5A]"
+      : "bg-[#F1F7F3] text-[#1F6B47]";
 
   return (
     <Link
-      href={`/guide/${guide.slug}`}
+      href={`/notes/${guide.slug}`}
       className="group flex flex-col gap-5 bg-white rounded-[22px] pt-4 pb-6 px-4 shadow-[0px_1px_7px_rgba(0,0,0,0.04)] hover:shadow-[0px_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200"
     >
       <GuideCardMedia title={guide.title} thumbnail={guide.thumbnailUrl} videoUrl={guide.videoUrl} />
 
       <div className="flex flex-col gap-5 px-3">
         <div className="flex flex-col gap-2">
-          {/* カテゴリラベル */}
-          <p className="text-xs font-bold text-gray-500">
-            {categoryInfo?.label ?? guide.category}
-          </p>
+          {/* タイプバッジ + カテゴリラベル */}
+          <div className="flex items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${typeBadgeClass}`}
+            >
+              {typeLabel}
+            </span>
+            <p className="text-xs font-bold text-gray-500">
+              {categoryInfo?.label ?? guide.category}
+            </p>
+          </div>
 
           {/* タイトル */}
           <h3 className="text-lg font-bold text-[#1a1a1a] leading-snug line-clamp-2 text-balance">

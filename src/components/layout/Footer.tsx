@@ -21,7 +21,7 @@ export function Footer({ className }: FooterProps) {
             <Link href="/questions" className="hover:underline">
               みんなの質問
             </Link>
-            <Link href="/community/feedback" className="hover:underline">
+            <Link href="/feedbacks" className="hover:underline">
               フィードバック
             </Link>
             {/* BON-116で別ブランチ開発中のため一時非表示 */}

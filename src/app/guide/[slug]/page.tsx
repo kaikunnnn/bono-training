@@ -4,13 +4,12 @@ import Link from "next/link";
 import {
   getGuideFromSanity,
   getGuidesByCategoryFromSanity,
-  getAllGuidesFromSanity,
 } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
-import GuideHeader from "@/components/dev-preview/notes/GuideHeader";
+import GuideHeader from "@/components/guide/GuideHeader";
 import GuideContent from "@/components/guide/GuideContent";
 import GuideShareSection from "@/components/guide/GuideShareSection";
-import RelatedGuides from "@/components/dev-preview/notes/RelatedGuides";
+import RelatedGuides from "@/components/guide/RelatedGuides";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
@@ -29,7 +28,7 @@ export async function generateMetadata({
   const guide = await getGuideFromSanity(slug);
 
   if (!guide) {
-    return { title: "記事が見つかりません" };
+    return { title: "ガイドが見つかりません" };
   }
 
   const ogImages = guide.thumbnailUrl
@@ -37,10 +36,10 @@ export async function generateMetadata({
     : [];
 
   return {
-    title: `${guide.title} | ものづくりノート`,
+    title: `${guide.title} | ガイド`,
     description: guide.description,
     openGraph: {
-      title: `${guide.title} | ものづくりノート`,
+      title: `${guide.title} | ガイド`,
       description: guide.description,
       type: "article",
       ...(ogImages.length > 0 && { images: ogImages }),
@@ -49,11 +48,11 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${guide.title} | ものづくりノート`,
+      title: `${guide.title} | ガイド`,
       description: guide.description,
       ...(guide.thumbnailUrl && { images: [guide.thumbnailUrl] }),
     },
-    alternates: { canonical: `/notes/${slug}` },
+    alternates: { canonical: `/guide/${slug}` },
   };
 }
 
@@ -65,19 +64,14 @@ export default async function GuideDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const [subscription, sameCategory, allGuides] = await Promise.all([
+  const [subscription, relatedAll] = await Promise.all([
     getSubscriptionStatus(),
     getGuidesByCategoryFromSanity(guide.category),
-    getAllGuidesFromSanity(),
   ]);
   const hasPremiumAccess = !guide.isPremium || subscription.hasMemberAccess;
-
-  // 同カテゴリ優先 + 不足分は全体最新で埋める（最大4本）
-  const sameCategoryFiltered = sameCategory.filter((g) => g.slug !== slug);
-  const usedSlugs = new Set(sameCategoryFiltered.map((g) => g.slug));
-  usedSlugs.add(slug);
-  const fillFromAll = allGuides.filter((g) => !usedSlugs.has(g.slug));
-  const relatedGuides = [...sameCategoryFiltered, ...fillFromAll].slice(0, 4);
+  const relatedGuides = relatedAll
+    .filter((g) => g.slug !== slug)
+    .slice(0, 4);
 
   return (
     <>
@@ -86,7 +80,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
           generateArticleJsonLd({
             title: guide.title,
             description: guide.description,
-            url: `/notes/${slug}`,
+            url: `/guide/${slug}`,
             publishedAt: guide.publishedAt,
             modifiedAt: guide.updatedAt,
             author: guide.author,

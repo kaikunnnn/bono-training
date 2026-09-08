@@ -8,7 +8,7 @@ import {
 } from "@/lib/sanity";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
 import { getVideoInfo } from "@/lib/videoUtils";
-import { FeedbackCard } from "@/components/feedback/FeedbackCard";
+import { FeedbackCard } from "@/components/dev-preview/feedback/FeedbackCard";
 import RichTextSection from "@/components/article/RichTextSection";
 import PremiumVideoLock from "@/components/premium/PremiumVideoLock";
 import {

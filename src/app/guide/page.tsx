@@ -1,36 +1,35 @@
 import { Metadata } from "next";
 import { getAllGuidesFromSanity, getGuidesByCategoryFromSanity } from "@/lib/sanity";
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
-import { GuideCard } from "@/components/dev-preview/notes/GuideCard";
+import { GuideCard } from "@/components/guide/GuideCard";
 import CategoryNav from "@/components/common/CategoryNav";
 import type { GuideCategory } from "@/types/guide";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
 
-const PAGE_TITLE = "ものづくりノート";
-const PAGE_DESCRIPTION =
-  "デザイン・サービス開発・クラフトについての気軽な読みもの。ガイドから日々の発見まで。";
-
 export const metadata: Metadata = {
-  title: PAGE_TITLE,
-  description: PAGE_DESCRIPTION,
+  title: "ガイド",
+  description:
+    "デザインスキルを身につける上でのヒントになる記事。キャリア、学習方法、業界動向などを解説します。",
   openGraph: {
-    title: `${PAGE_TITLE} | BONO`,
-    description: PAGE_DESCRIPTION,
+    title: "ガイド | BONO",
+    description:
+      "デザインスキルを身につける上でのヒントになる記事。",
   },
   twitter: {
-    title: `${PAGE_TITLE} | BONO`,
-    description: PAGE_DESCRIPTION,
+    title: "ガイド | BONO",
+    description:
+      "デザインスキルを身につける上でのヒントになる記事。",
   },
-  alternates: { canonical: "/notes" },
+  alternates: { canonical: "/guide" },
 };
 
 const CATEGORY_NAV_ITEMS = [
-  { label: "すべて", href: "/notes" },
+  { label: "すべて", href: "/guide" },
   ...GUIDE_CATEGORIES.map((cat) => ({
     label: cat.label,
-    href: `/notes?category=${cat.id}`,
+    href: `/guide?category=${cat.id}`,
   })),
 ];
 
@@ -38,7 +37,7 @@ interface PageProps {
   searchParams: Promise<{ category?: string }>;
 }
 
-export default async function NotesPage({ searchParams }: PageProps) {
+export default async function GuidePage({ searchParams }: PageProps) {
   const params = await searchParams;
   const category = params.category as GuideCategory | undefined;
 
@@ -55,11 +54,9 @@ export default async function NotesPage({ searchParams }: PageProps) {
     <div className="min-h-screen">
       {/* ヒーロー */}
       <section className="px-6 pt-16 pb-10 max-w-[1440px] mx-auto">
-        <h1 className="text-4xl font-bold font-heading mb-4">
-          {PAGE_TITLE}
-        </h1>
+        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">ガイド</h1>
         <p className="text-muted-foreground text-base leading-relaxed max-w-[600px]">
-          {PAGE_DESCRIPTION}
+          デザインスキルを身につける上でのヒントになる記事置き場です。何か書いて欲しい内容があれば質問で教えてください
         </p>
       </section>
 

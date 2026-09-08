@@ -102,20 +102,20 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
         </SidebarMenuItem>
 
         <SidebarMenuItem
-          href="/notes"
+          href="/guide"
           icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/notes")}
+          isActive={isActive("/guide")}
         >
-          ものづくりノート
+          学習ガイド
         </SidebarMenuItem>
       </SidebarMenuGroup>
 
       {/* コミュニティ - 一時的に非表示（mainと同じ） */}
       <SidebarMenuGroup label="コミュニティ" itemGap className="hidden">
         <SidebarMenuItem
-          href="/community/feedback"
+          href="/feedbacks"
           icon={<MenuIcons.feedback size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/community/feedback")}
+          isActive={isActive("/feedbacks")}
         >
           フィードバック
         </SidebarMenuItem>

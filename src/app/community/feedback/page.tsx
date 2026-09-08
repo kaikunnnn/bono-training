@@ -4,7 +4,7 @@ import {
   getFeedbacksByCategory,
   getFeedbackCategories,
 } from "@/lib/sanity";
-import { FeedbackCard } from "@/components/feedback/FeedbackCard";
+import { FeedbackCard } from "@/components/dev-preview/feedback/FeedbackCard";
 import CategoryNav from "@/components/common/CategoryNav";
 
 export const revalidate = 3600;

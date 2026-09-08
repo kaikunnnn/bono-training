@@ -34,7 +34,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${BASE_URL}/notes`,
+      url: `${BASE_URL}/guide`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
@@ -46,7 +46,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
-      url: `${BASE_URL}/community/feedback`,
+      url: `${BASE_URL}/feedbacks`,
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
@@ -97,7 +97,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }));
 
   const feedbackPages: MetadataRoute.Sitemap = feedbackSlugs.map((slug) => ({
-    url: `${BASE_URL}/community/feedback/${slug}`,
+    url: `${BASE_URL}/feedbacks/${slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.6,
@@ -118,7 +118,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const guidePages: MetadataRoute.Sitemap = guideSlugs.map((slug) => ({
-    url: `${BASE_URL}/notes/${slug}`,
+    url: `${BASE_URL}/guide/${slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.7,
