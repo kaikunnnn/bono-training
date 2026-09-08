@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from 'react';
+import { createClient } from '@/lib/supabase/client';
 
 export interface ChatMessage {
   id: string;
@@ -45,9 +46,24 @@ export function useAIChat() {
     abortRef.current = new AbortController();
 
     try {
+      // /api/ai-chat はログイン必須（C-1）。Supabase セッションから Bearer トークンを付与する。
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        setError('ログインが必要です。ログインしてからもう一度お試しください。');
+        setMessages((prev) => prev.filter((m) => m.id !== assistantMessage.id));
+        setIsLoading(false);
+        return;
+      }
+
       const response = await fetch('/api/ai-chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
         body: JSON.stringify({ messages: historyForApi }),
         signal: abortRef.current.signal,
       });
@@ -55,7 +71,22 @@ export function useAIChat() {
       if (!response.ok) {
         const status = response.status;
         console.error(`[BONO AI] /api/ai-chat エラー status=${status}`);
-        if (status === 500) {
+        if (status === 401) {
+          setError('ログインが必要です。ログインしてからもう一度お試しください。');
+          setMessages((prev) => prev.filter((m) => m.id !== assistantMessage.id));
+          setIsLoading(false);
+          return;
+        } else if (status === 403) {
+          setError('この機能は有料メンバー限定です。');
+          setMessages((prev) => prev.filter((m) => m.id !== assistantMessage.id));
+          setIsLoading(false);
+          return;
+        } else if (status === 429) {
+          setError('短時間に多くのリクエストがありました。しばらく時間をおいてから再度お試しください。');
+          setMessages((prev) => prev.filter((m) => m.id !== assistantMessage.id));
+          setIsLoading(false);
+          return;
+        } else if (status === 500) {
           console.error('[BONO AI] 原因候補: GROQ_API_KEY が Vercel のプレビュー環境に設定されていない');
           console.error('[BONO AI] 確認: Vercel Dashboard → Settings → Environment Variables → GROQ_API_KEY の "Preview" チェックを確認');
         } else if (status === 404) {
