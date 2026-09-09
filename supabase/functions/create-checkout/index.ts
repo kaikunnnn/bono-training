@@ -4,6 +4,13 @@ import {
   createStripeClient,
   type StripeEnvironment,
 } from "../_shared/stripe-helpers.ts";
+import {
+  resolveStripeCustomerId,
+  findActiveStripeSubscriptions,
+  type CustomerResolutionDeps,
+  type StripeLike,
+  type SupabaseLike,
+} from "./customer-resolution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -70,16 +77,13 @@ serve(async (req) => {
     const stripe = createStripeClient(ENVIRONMENT);
     logDebug(`Stripe環境: ${ENVIRONMENT}`);
 
-    // ユーザーのStripe Customer IDと既存サブスクリプションを取得
-    let stripeCustomerId: string;
-
-    // DBからユーザーのStripe Customer IDを検索（環境フィルタ付き）
-    const { data: customerData, error: customerError } = await supabaseClient
-      .from("stripe_customers")
-      .select("stripe_customer_id")
-      .eq("user_id", user.id)
-      .eq("environment", ENVIRONMENT)
-      .single();
+    // 顧客解決・二重登録ガードの依存注入コンテナ
+    // （実SDKを薄いインターフェースに束ねる。ロジックは customer-resolution.ts に集約）
+    const resolutionDeps: CustomerResolutionDeps = {
+      stripe: stripe as unknown as StripeLike,
+      supabase: supabaseClient as unknown as SupabaseLike,
+      log: logDebug,
+    };
 
     // 既存サブスクリプションを確認（複数ある場合も全て取得、環境フィルタ付き）
     const { data: existingSubList, error: existingSubError } =
@@ -117,40 +121,39 @@ serve(async (req) => {
       );
     }
 
-    if (customerError || !customerData) {
-      // Stripe顧客が存在しない場合は新規作成
-      logDebug(`${user.id}のStripe顧客情報がDBに存在しないため作成します`);
+    // Phase 5 追加ガード: Stripe側の実態チェック（DB未同期対策）
+    // DBが inactive でも Stripe側に active/trialing サブスクが残っている人が
+    // 再登録すると二重課金になりうるため、メールで名寄せしてStripe側も塞ぐ。
+    const stripeActiveSubs = await findActiveStripeSubscriptions(resolutionDeps, {
+      email: user.email,
+    });
+    if (stripeActiveSubs.length > 0) {
+      logDebug(
+        `Stripe側に${stripeActiveSubs.length}件のactive/trialingサブスクを検出 - エラーを返します`,
+        { subscriptionIds: stripeActiveSubs.map((s) => s.id) }
+      );
 
-      const customer = await stripe.customers.create({
-        email: user.email,
-        metadata: {
-          user_id: user.id,
-        },
-      });
-
-      // 作成した顧客情報をDBに保存（upsertで既存レコードがあっても対応、環境を含む）
-      const { error: insertError } = await supabaseClient
-        .from("stripe_customers")
-        .upsert(
-          {
-            user_id: user.id,
-            stripe_customer_id: customer.id,
-            environment: ENVIRONMENT,
-          },
-          { onConflict: "user_id,environment" }
-        );
-
-      if (insertError) {
-        logDebug("Stripe顧客情報のDB保存に失敗:", insertError);
-        throw new Error("顧客情報の保存に失敗しました");
-      }
-
-      stripeCustomerId = customer.id;
-    } else {
-      // 既存の顧客IDを使用
-      stripeCustomerId = customerData.stripe_customer_id;
-      logDebug(`既存のStripe顧客ID ${stripeCustomerId} を使用します`);
+      return new Response(
+        JSON.stringify({
+          error: "既にアクティブな契約があります。",
+          details:
+            "決済システム側に有効なサブスクリプションが残っています。お手数ですがサポートへご連絡ください。",
+          existing_subscriptions: stripeActiveSubs.map((s) => s.id),
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
     }
+
+    // Stripe Customer IDを解決する（DB→email名寄せ再利用→新規作成の順）
+    // これにより同一メールでの重複Stripe顧客の量産を防ぐ。
+    const stripeCustomerId = await resolveStripeCustomerId(resolutionDeps, {
+      email: user.email,
+      userId: user.id,
+      environment: ENVIRONMENT,
+    });
 
     // プランタイプと期間に応じたPrice IDを選択
     let priceId: string | undefined;
