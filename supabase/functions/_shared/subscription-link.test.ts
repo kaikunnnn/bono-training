@@ -67,7 +67,7 @@ Deno.test("成功: 単一active → stripe_customers と user_subscriptions を 
       environment: "live",
       subscription: makeSubscription({
         id: "price_std1",
-        unit_amount: 680000,
+        unit_amount: 6800,
         recurring: { interval: "month", interval_count: 1 },
       }),
     }
@@ -109,7 +109,7 @@ Deno.test("成功: feedback plan は plan_members:true / duration は price由�
       environment: "live",
       subscription: makeSubscription({
         id: "price_fb3",
-        unit_amount: 4140000,
+        unit_amount: 41400,
         recurring: { interval: "month", interval_count: 3 },
       }),
     }
@@ -158,7 +158,7 @@ Deno.test("customer upsert 失敗 → user_subscriptions は書かず customer_u
       environment: "live",
       subscription: makeSubscription({
         id: "price_std1",
-        unit_amount: 680000,
+        unit_amount: 6800,
         recurring: { interval: "month", interval_count: 1 },
       }),
     }
@@ -179,7 +179,7 @@ Deno.test("subscription upsert 失敗（ねじれ等）→ subscription_upsert_f
       environment: "live",
       subscription: makeSubscription({
         id: "price_std1",
-        unit_amount: 680000,
+        unit_amount: 6800,
         recurring: { interval: "month", interval_count: 1 },
       }),
     }

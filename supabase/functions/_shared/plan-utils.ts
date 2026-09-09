@@ -60,17 +60,17 @@ const FEEDBACK_KEYWORDS = ["feedback", "フィードバック", "growth", "グ�
 const STANDARD_KEYWORDS = ["standard", "スタンダード", "basic", "ベーシック"];
 
 /**
- * Tier 3 用の unit_amount(最小単位=銭) 完全一致テーブル。
+ * Tier 3 用の unit_amount(円・JPYはゼロ小数通貨のためそのまま円額) 完全一致テーブル。
  * 現行4価格 + 確証のある legacy のみを列挙する。
  * ⚠️ 曖昧な金額（例: legacy 26,400円 = plan_type不明）は載せない。
  *    載せると誤ったプランを課金状態に書き込むため、null(fail loud)に倒す。
  */
 const EXACT_AMOUNT_TABLE: Record<number, PlanInfo> = {
-  680000: { planType: "standard", duration: 1 }, // 現行 standard 1ヶ月 6,800円
-  1740000: { planType: "standard", duration: 3 }, // 現行 standard 3ヶ月 合計17,400円
-  1580000: { planType: "feedback", duration: 1 }, // 現行 feedback 1ヶ月 15,800円
-  4140000: { planType: "feedback", duration: 3 }, // 現行 feedback 3ヶ月 合計41,400円
-  1194000: { planType: "standard", duration: 3 }, // legacy standard 3ヶ月 合計11,940円
+  6800: { planType: "standard", duration: 1 }, // 現行 standard 1ヶ月 6,800円
+  17400: { planType: "standard", duration: 3 }, // 現行 standard 3ヶ月 合計17,400円
+  15800: { planType: "feedback", duration: 1 }, // 現行 feedback 1ヶ月 15,800円
+  41400: { planType: "feedback", duration: 3 }, // 現行 feedback 3ヶ月 合計41,400円
+  11940: { planType: "standard", duration: 3 }, // legacy standard 3ヶ月 合計11,940円
 };
 
 /** recurring.interval_count から duration を導く（3ヶ月契約 → 3、その他 → 1） */

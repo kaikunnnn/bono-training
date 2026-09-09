@@ -13,37 +13,37 @@ import { derivePlanFromPrice, type StripePriceLike } from "./plan-utils.ts";
 
 // ---- Tier 3: unit_amount 完全一致（現行4価格） ----
 
-Deno.test("現行 standard 1ヶ月(680000)→ standard/1", () => {
+Deno.test("現行 standard 1ヶ月(6,800円)→ standard/1", () => {
   const price: StripePriceLike = {
     id: "price_x",
-    unit_amount: 680000,
+    unit_amount: 6800,
     recurring: { interval: "month", interval_count: 1 },
   };
   assertEquals(derivePlanFromPrice(price), { planType: "standard", duration: 1 });
 });
 
-Deno.test("現行 standard 3ヶ月(1740000)→ standard/3", () => {
+Deno.test("現行 standard 3ヶ月(17,400円)→ standard/3", () => {
   const price: StripePriceLike = {
     id: "price_x",
-    unit_amount: 1740000,
+    unit_amount: 17400,
     recurring: { interval: "month", interval_count: 3 },
   };
   assertEquals(derivePlanFromPrice(price), { planType: "standard", duration: 3 });
 });
 
-Deno.test("現行 feedback 1ヶ月(1580000)→ feedback/1", () => {
+Deno.test("現行 feedback 1ヶ月(15,800円)→ feedback/1", () => {
   const price: StripePriceLike = {
     id: "price_x",
-    unit_amount: 1580000,
+    unit_amount: 15800,
     recurring: { interval: "month", interval_count: 1 },
   };
   assertEquals(derivePlanFromPrice(price), { planType: "feedback", duration: 1 });
 });
 
-Deno.test("現行 feedback 3ヶ月(4140000)→ feedback/3", () => {
+Deno.test("現行 feedback 3ヶ月(41,400円)→ feedback/3", () => {
   const price: StripePriceLike = {
     id: "price_x",
-    unit_amount: 4140000,
+    unit_amount: 41400,
     recurring: { interval: "month", interval_count: 3 },
   };
   assertEquals(derivePlanFromPrice(price), { planType: "feedback", duration: 3 });
@@ -51,10 +51,10 @@ Deno.test("現行 feedback 3ヶ月(4140000)→ feedback/3", () => {
 
 // ---- Tier 3: legacy（確証のある金額のみ） ----
 
-Deno.test("legacy standard 3ヶ月(1194000)→ standard/3", () => {
+Deno.test("legacy standard 3ヶ月(11,940円)→ standard/3", () => {
   const price: StripePriceLike = {
     id: "price_legacy",
-    unit_amount: 1194000,
+    unit_amount: 11940,
     recurring: { interval: "month", interval_count: 3 },
   };
   assertEquals(derivePlanFromPrice(price), { planType: "standard", duration: 3 });
@@ -95,7 +95,7 @@ Deno.test("nickname に standard → standard、duration 既定1", () => {
 Deno.test("キーワードが amount より優先される（product feedback だが amount は standard の金額）", () => {
   const price: StripePriceLike = {
     id: "price_conflict",
-    unit_amount: 680000, // これはstandardの金額だが…
+    unit_amount: 6800, // これはstandardの金額だが…
     recurring: { interval: "month", interval_count: 1 },
     product: { name: "Feedback (special)" }, // 名称はfeedback
   };
@@ -106,7 +106,7 @@ Deno.test("キーワードが amount より優先される（product feedback �
 Deno.test("deleted な product は name を無視して amount へ落ちる", () => {
   const price: StripePriceLike = {
     id: "price_deleted_prod",
-    unit_amount: 680000,
+    unit_amount: 6800,
     recurring: { interval: "month", interval_count: 1 },
     product: { deleted: true },
   };
@@ -150,7 +150,7 @@ Deno.test("price が null/undefined → null", () => {
 Deno.test("standard と feedback の両キーワードが混在 → Tier2を諦め amount へ", () => {
   const price: StripePriceLike = {
     id: "price_both",
-    unit_amount: 1580000, // feedback 1M の金額
+    unit_amount: 15800, // feedback 1M の金額
     recurring: { interval: "month", interval_count: 1 },
     product: { name: "Standard→Feedback upgrade" }, // 両方含む
   };
