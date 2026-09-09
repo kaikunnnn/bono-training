@@ -13,7 +13,14 @@ export async function createCheckoutSession(
   returnUrl: string,
   planType: PlanType = "standard",
   duration: PlanDuration = 1
-): Promise<{ url: string | null; error: Error | null }> {
+): Promise<{
+  url: string | null;
+  error: Error | null;
+  /** S3-A: 既存Stripe契約を検出しアカウントへ復元した場合 true（checkoutは作られない） */
+  restored?: boolean;
+  /** restored 時に表示する復元メッセージ */
+  message?: string;
+}> {
   try {
     const supabase = createClient();
 
@@ -109,6 +116,18 @@ export async function createCheckoutSession(
     if (error) {
       console.error("Checkoutセッション作成エラー:", error);
       throw new Error("決済処理の準備に失敗しました。");
+    }
+
+    // S3-A: 既存Stripe契約を検出しアカウントへ復元した場合、checkout URLではなく
+    // { restored: true, message } が返る。エラーではないので error は null のまま。
+    if (data?.restored) {
+      console.log("既存契約を検出しアカウントへ復元しました:", data.message);
+      return {
+        url: null,
+        error: null,
+        restored: true,
+        message: data.message as string | undefined,
+      };
     }
 
     console.log("Checkoutセッション作成成功:", data.url);

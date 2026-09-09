@@ -11,6 +11,11 @@ import {
   type StripeLike,
   type SupabaseLike,
 } from "./customer-resolution.ts";
+import {
+  linkExistingStripeSubscription,
+  type FullStripeSubscriptionLike,
+  type LinkSupabaseLike,
+} from "../_shared/subscription-link.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -127,13 +132,14 @@ serve(async (req) => {
     const stripeActiveSubs = await findActiveStripeSubscriptions(resolutionDeps, {
       email: user.email,
     });
-    if (stripeActiveSubs.length > 0) {
-      logDebug(
-        `Stripe側に${stripeActiveSubs.length}件のactive/trialingサブスクを検出 - エラーを返します`,
-        { subscriptionIds: stripeActiveSubs.map((s) => s.id) }
-      );
 
-      return new Response(
+    // S5 + S3-A: Stripe側に active/trialing があるが DB は未同期のケース。
+    //  - 複数active（異常系）: 誤リンク防止のためリンクせず 400 + サポート案内。
+    //  - 単一active: 検出済みの実契約をβ DB へ自動リンク（復元）して 200 を返す。
+    //    押したプランボタンと実契約が違う可能性があるため checkout は作らない
+    //    （作ると二重課金リスク）。プラン変更はマイページ(ポータル)から。
+    const supportResponse = () =>
+      new Response(
         JSON.stringify({
           error: "既にアクティブな契約があります。",
           details:
@@ -142,6 +148,77 @@ serve(async (req) => {
         }),
         {
           status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+
+    if (stripeActiveSubs.length > 1) {
+      logDebug(
+        `Stripe側に${stripeActiveSubs.length}件のactive/trialingサブスクを検出（複数=異常系）- リンクせず400を返します`,
+        { subscriptionIds: stripeActiveSubs.map((s) => s.id) }
+      );
+      return supportResponse();
+    }
+
+    if (stripeActiveSubs.length === 1) {
+      const detected = stripeActiveSubs[0];
+      logDebug(
+        "Stripe側に1件のactive/trialingサブスクを検出 - β DB へ自動リンク(復元)を試みます",
+        { subscriptionId: detected.id }
+      );
+
+      // price(product) を含む完全なサブスクを取得してリンクする
+      let fullSub: FullStripeSubscriptionLike;
+      try {
+        fullSub = (await stripe.subscriptions.retrieve(detected.id, {
+          expand: ["items.data.price.product"],
+        })) as unknown as FullStripeSubscriptionLike;
+      } catch (retrieveError) {
+        console.error(
+          "❌ [CREATE-CHECKOUT] 既存サブスクの取得に失敗（リンク中止・従来の400を返します）:",
+          retrieveError
+        );
+        return supportResponse();
+      }
+
+      const linkResult = await linkExistingStripeSubscription(
+        {
+          supabase: supabaseClient as unknown as LinkSupabaseLike,
+          log: logDebug,
+          errorLog: (m, d) => console.error(m, d),
+        },
+        {
+          userId: user.id,
+          environment: ENVIRONMENT,
+          subscription: fullSub,
+        }
+      );
+
+      if (!linkResult.linked) {
+        // price導出不能 / DB書き込み失敗 → 「復元しました」を返さず従来の400
+        logDebug("自動リンクに失敗したため従来の400を返します", {
+          reason: linkResult.reason,
+          subscriptionId: detected.id,
+        });
+        return supportResponse();
+      }
+
+      logDebug("既存契約の自動リンク(復元)に成功しました", {
+        subscriptionId: detected.id,
+        planType: linkResult.planType,
+        duration: linkResult.duration,
+      });
+
+      return new Response(
+        JSON.stringify({
+          restored: true,
+          message:
+            "既存の契約を確認し、アカウントに復元しました。ページを再読み込みすると会員として表示されます。プラン変更はマイページから行えます。",
+          plan_type: linkResult.planType,
+          duration: linkResult.duration,
+        }),
+        {
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );
