@@ -1,12 +1,13 @@
 /**
  * コミュニティの歩き方（使い方ガイド）
- * - 内容は Notion「BONOコミュニティの歩き方」をネイティブ移植
- * - レイアウトは /feedback-apply/guide を踏襲（ヘッダー40/60 + TopSectionHeading + SectionBlock + ボトムCTA）
+ * - 内容は Notion「BONOコミュニティの歩き方」をネイティブ移植（文章は変えない）
+ * - レイアウトは how-to 共通の「型」（HowToTocLayout + HowToSection + HowToSubheading）を使用:
+ *     全幅ヒーロー → 左sticky目次 + 本文カラム（max640）の2カラム（sm未満は1カラム）
  * - アイキャッチの「参加する」ボタンは課金判定で出し分け:
  *     課金メンバー → Slack 参加（招待URLは暫定プレースホルダ / SLACK_COMMUNITY_INVITE_URL）
  *     非課金・未ログイン → /subscription（登録促し）
  *
- * 画像は /public/how-to-community/（reaction.png=スタンプ例, times.png=Times例）。アイキャッチ画像は無し。
+ * 画像は /public/how-to-community/（reaction.png=スタンプ例, times.png=Times例）。
  */
 
 import type { Metadata } from "next";
@@ -20,11 +21,23 @@ import {
   SLACK_SELF_INTRO_URL,
   SLACK_ANNOUNCEMENTS_URL,
 } from "@/lib/external-links";
-import TopSectionHeading from "@/components/top2/TopSectionHeading";
+import HowToTocLayout from "@/components/how-to/HowToTocLayout";
+import HowToSection from "@/components/how-to/HowToSection";
+import HowToSubheading from "@/components/how-to/HowToSubheading";
 
 // 本文中のリンク共通スタイル
 const linkCls =
   "text-text-link underline underline-offset-2 hover:text-text-link-hover font-medium";
+
+// 本文ブロック共通スタイル（本文カラム内で縦に流す。約15px / text-secondary / Noto既定）
+const bodyCls = "space-y-3 text-[15px] leading-relaxed text-text-secondary";
+
+// 目次（大セクション3つへのアンカー）
+const TOC = [
+  { id: "first-steps", label: "まずやること" },
+  { id: "events", label: "イベントに参加しよう" },
+  { id: "channels", label: "チャンネルを作ろう" },
+];
 
 export const metadata: Metadata = {
   title: "コミュニティの歩き方",
@@ -53,11 +66,7 @@ function JoinButton({
 }) {
   if (isMember) {
     return (
-      <Button
-        asChild
-        size="large"
-        className={`bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold ${className ?? ""}`}
-      >
+      <Button asChild variant="primary" size="large" className={className}>
         <Link
           href={SLACK_COMMUNITY_INVITE_URL}
           target="_blank"
@@ -70,37 +79,9 @@ function JoinButton({
   }
 
   return (
-    <Button
-      asChild
-      size="large"
-      className={`bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold ${className ?? ""}`}
-    >
+    <Button asChild variant="primary" size="large" className={className}>
       <Link href="/subscription">メンバーになって参加する →</Link>
     </Button>
-  );
-}
-
-// 見出し(40%) + 内容(60%) の並列ブロック（feedback-apply/guide と同じ構造）
-function SectionBlock({
-  title,
-  bordered = true,
-  children,
-}: {
-  title: string;
-  bordered?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <div className={bordered ? "border-b border-black/[0.12] py-10" : "py-10"}>
-      <div className="flex flex-col md:flex-row gap-8">
-        <div className="md:w-[40%] md:shrink-0">
-          <h3 className="font-rounded-mplus text-lg font-medium text-text-primary">
-            {title}
-          </h3>
-        </div>
-        <div className="md:w-[60%] py-1">{children}</div>
-      </div>
-    </div>
   );
 }
 
@@ -109,7 +90,7 @@ function Callout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex gap-3 rounded-2xl bg-muted-custom border border-black/[0.08] p-5">
       <span aria-hidden className="text-xl leading-none">👉</span>
-      <div className="text-base leading-relaxed text-text-secondary space-y-1">
+      <div className="text-[15px] leading-relaxed text-text-secondary space-y-1">
         {children}
       </div>
     </div>
@@ -123,43 +104,37 @@ export default async function CommunityGuidePage() {
 
   return (
     <div className="min-h-screen">
-      <main className="max-w-[960px] mx-auto px-4 sm:px-6 py-8">
-        {/* ヘッダー（アイキャッチ：タイトル + 参加ボタン / 説明） */}
-        <section className="border-b border-gray-200 pb-8 mb-4">
-          <div className="flex flex-col md:flex-row md:items-end gap-8">
-            {/* 左: タイトル + 参加ボタン（40%） */}
-            <div className="md:w-[40%] md:shrink-0 flex flex-col gap-3">
-              <div className="space-y-4">
-                <h1 className="font-rounded-mplus text-[30px] font-bold text-text-primary leading-tight">
-                  コミュニティの歩き方
-                </h1>
-                <JoinButton isMember={isMember} className="w-fit" />
-              </div>
-            </div>
-
-            {/* 右: 説明文（60%）。参加導線は上部ボタンに集約 */}
-            <div className="md:w-[60%] text-text-muted leading-relaxed py-4 space-y-2">
-              <p>
-                BONOのSlackコミュニティは、質問・相談・イベントなど「学習を進めること以外」の中心地です。
-              </p>
-              <p>
-                コミュニティ参加は専用リンクが必要です。上の「参加する」ボタンから進めましょう（参加は自動ではありません）。
-              </p>
-            </div>
+      {/* ヒーロー（全幅・下に1px境界） */}
+      <section className="border-b border-border-light">
+        <div className="mx-auto max-w-[880px] px-4 sm:px-6 py-12 sm:py-16">
+          <p className="font-body text-xs tracking-[1.6px] text-text-muted">
+            使い方ガイド
+          </p>
+          <h1 className="mt-3 font-heading text-[32px] font-bold leading-tight text-text-primary sm:text-[40px]">
+            コミュニティの歩き方
+          </h1>
+          <div className="mt-5 max-w-[640px] space-y-2 leading-relaxed text-text-secondary">
+            <p>
+              BONOのSlackコミュニティは、質問・相談・イベントなど「学習を進めること以外」の中心地です。
+            </p>
+            <p>
+              コミュニティ参加は専用リンクが必要です。上の「参加する」ボタンから進めましょう（参加は自動ではありません）。
+            </p>
           </div>
-        </section>
+          <div className="mt-7">
+            <JoinButton isMember={isMember} className="w-fit" />
+          </div>
+        </div>
+      </section>
 
-        <article>
-          {/* まずやること */}
-          <section className="border-b border-black/[0.12] py-16">
-            <TopSectionHeading
-              badgeLabel="参加したら"
-              heading="まずやること"
-              className="mb-8"
-            />
-
-            <SectionBlock title="まずは自己紹介しよう">
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+      {/* 目次 + 本文 */}
+      <div className="py-4 sm:py-6">
+        <HowToTocLayout toc={TOC}>
+          <article className="divide-y divide-border-light">
+            {/* まずやること */}
+            <HowToSection id="first-steps" badge="参加したら" heading="まずやること">
+              <HowToSubheading>まずは自己紹介しよう</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   自己紹介チャンネルで自己紹介をしましょう。次のようなことを書くと、人となりが伝わります。
                 </p>
@@ -178,10 +153,9 @@ export default async function CommunityGuidePage() {
                   </a>
                 </p>
               </div>
-            </SectionBlock>
 
-            <SectionBlock title="質問チャンネルを使おう">
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+              <HowToSubheading>質問チャンネルを使おう</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   「質問／相談」チャンネルは、疑問が集まる場所です。学習や制作で「あれ、これで合ってる？」「調べたけどわからない」が出たら、遠慮なく投稿しましょう。
                 </p>
@@ -200,10 +174,9 @@ export default async function CommunityGuidePage() {
                   </Link>
                 </p>
               </div>
-            </SectionBlock>
 
-            <SectionBlock title="フィードバックチャンネルを使おう">
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+              <HowToSubheading>フィードバックチャンネルを使おう</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   「フィードバック」チャンネルは、アウトプットに成長の視点をもらう場所です。制作したアウトプットにカイクンがコメントします（原則グロースプランの方が対象）。
                 </p>
@@ -218,10 +191,9 @@ export default async function CommunityGuidePage() {
                   」にまとめています。
                 </p>
               </div>
-            </SectionBlock>
 
-            <SectionBlock title="リアクション（スタンプ）をつけよう">
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+              <HowToSubheading>リアクション（スタンプ）をつけよう</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   横のつながりを作るなら、発言している人に絡んでいくのが一番の近道です。みんなのtimesを見たら、リアクション（スタンプ）をつけましょう。
                 </p>
@@ -237,10 +209,9 @@ export default async function CommunityGuidePage() {
                   className="mt-2 w-full h-auto rounded-2xl border border-black/[0.08]"
                 />
               </div>
-            </SectionBlock>
 
-            <SectionBlock title="timesチャンネルに入る／つくる" bordered={false}>
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+              <HowToSubheading>timesチャンネルに入る／つくる</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   timesは、日々の活動やX（Twitter）ではつぶやきにくいことを気軽に書く場です。使い方は人それぞれですが、BONOとしてはこんな狙いがあります。
                 </p>
@@ -268,19 +239,12 @@ export default async function CommunityGuidePage() {
                   className="w-full h-auto rounded-2xl border border-black/[0.08]"
                 />
               </div>
-            </SectionBlock>
-          </section>
+            </HowToSection>
 
-          {/* イベントに参加しよう */}
-          <section className="border-b border-black/[0.12] py-16">
-            <TopSectionHeading
-              badgeLabel="イベント"
-              heading="イベントに参加しよう"
-              className="mb-8"
-            />
-
-            <SectionBlock title="月1の勉強会・デザトレワークショップ">
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+            {/* イベントに参加しよう */}
+            <HowToSection id="events" badge="イベント" heading="イベントに参加しよう">
+              <HowToSubheading>月1の勉強会・デザトレワークショップ</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   月1回、勉強会・デザトレのワークショップを開催しています。告知は「お知らせチャンネル」で流れるので、チェックしておきましょう。
                 </p>
@@ -298,10 +262,9 @@ export default async function CommunityGuidePage() {
                   参加はBONOメンバーのみ。その場で作業時間を設けて、デザイン → 共有 → 発表まで行います。ぜひ参加してください。
                 </p>
               </div>
-            </SectionBlock>
 
-            <SectionBlock title="交流会について" bordered={false}>
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+              <HowToSubheading>交流会について</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   交流会は3〜4ヶ月に1回ほど、基本オンラインで開催しています。飛び入り参加も途中抜けも自由です。
                 </p>
@@ -309,19 +272,12 @@ export default async function CommunityGuidePage() {
                   気が向いたら「お知らせチャンネル」で告知して実施していますが、要望があれば企画するので、気軽にカイクンに聞いてみてください。
                 </p>
               </div>
-            </SectionBlock>
-          </section>
+            </HowToSection>
 
-          {/* チャンネルを作る */}
-          <section className="py-16">
-            <TopSectionHeading
-              badgeLabel="チャンネル"
-              heading="チャンネルを自由に作ろう"
-              className="mb-8"
-            />
-
-            <SectionBlock title="作成は自由。命名ルールだけ守ってね" bordered={false}>
-              <div className="space-y-3 text-lg leading-relaxed text-text-secondary">
+            {/* チャンネルを作る */}
+            <HowToSection id="channels" badge="チャンネル" heading="チャンネルを自由に作ろう">
+              <HowToSubheading>作成は自由。命名ルールだけ守ってね</HowToSubheading>
+              <div className={bodyCls}>
                 <p>
                   イベントや趣味など、デザインに関係ないことでもチャンネルを作ってOKです。作るときは「<span className="font-bold text-text-primary">数字_カテゴリ名</span>」の命名ルールを守ってください。
                 </p>
@@ -340,23 +296,23 @@ export default async function CommunityGuidePage() {
                   </li>
                 </ul>
               </div>
-            </SectionBlock>
-          </section>
-        </article>
+            </HowToSection>
+          </article>
 
-        {/* ボトムCTA */}
-        <div className="mt-16 rounded-2xl border border-gray-200 bg-muted-custom px-6 py-10 text-center">
-          <h2 className="font-rounded-mplus text-xl font-bold text-text-primary">
-            コミュニティに参加しよう
-          </h2>
-          <p className="mt-3 text-text-muted leading-relaxed">
-            まずは参加して、自己紹介から始めてみましょう。
-          </p>
-          <div className="mt-6 flex justify-center">
-            <JoinButton isMember={isMember} />
+          {/* ボトムCTA */}
+          <div className="mt-14 rounded-2xl border border-border-light bg-muted-custom px-6 py-10 text-center">
+            <h2 className="font-heading text-xl font-bold text-text-primary">
+              コミュニティに参加しよう
+            </h2>
+            <p className="mt-3 text-text-muted leading-relaxed">
+              まずは参加して、自己紹介から始めてみましょう。
+            </p>
+            <div className="mt-6 flex justify-center">
+              <JoinButton isMember={isMember} />
+            </div>
           </div>
-        </div>
-      </main>
+        </HowToTocLayout>
+      </div>
     </div>
   );
 }
