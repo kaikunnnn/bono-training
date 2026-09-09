@@ -8,7 +8,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ClipboardCheck, HelpCircle } from "lucide-react";
+import { ArrowRight, ClipboardCheck, HelpCircle, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -18,12 +18,12 @@ export const metadata: Metadata = {
   openGraph: {
     title: "BONOの使い方 | BONO",
     description:
-      "BONOをより活用するためのガイド集。よくある質問とフィードバック機能の使い方をまとめています。",
+      "BONOをより活用するためのガイド集。コミュニティの歩き方・よくある質問・フィードバック機能の使い方をまとめています。",
   },
   twitter: {
     title: "BONOの使い方 | BONO",
     description:
-      "BONOをより活用するためのガイド集。よくある質問とフィードバック機能の使い方をまとめています。",
+      "BONOをより活用するためのガイド集。コミュニティの歩き方・よくある質問・フィードバック機能の使い方をまとめています。",
   },
   alternates: { canonical: "/how-to" },
 };
@@ -36,6 +36,13 @@ type Guide = {
 };
 
 const GUIDES: Guide[] = [
+  {
+    href: "/how-to/community",
+    title: "コミュニティの歩き方",
+    description:
+      "Slackコミュニティへの参加方法と、相談・質問・イベント情報の使いこなし方を紹介します。",
+    icon: Users,
+  },
   {
     href: "/how-to/faq",
     title: "よくある質問",
