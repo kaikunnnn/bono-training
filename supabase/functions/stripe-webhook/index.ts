@@ -334,7 +334,12 @@ async function findUserByStripeInfo(
   // 3. 最終フォールバック: Stripe顧客のメールで auth.users を検索（S3補完）
   //    旧サイト時代の契約は stripe_customers/subscriptions に無く、
   //    従来はここで「見つかりません」と諦めて請求イベントが永遠にDBへ入らなかった。
-  //    メール名寄せで userId を引けたら stripe_customers に upsert して届き先を正す。
+  //    メール名寄せで userId を引けたら stripe_customers を「無ければ追加」する。
+  //
+  //    【重要】この fallback は請求(invoice.paid)等の positive/backfill イベント専用。
+  //    stripe を渡さない呼び出し（subscription.deleted 等）では実行されない。
+  //    また upsert は ignoreDuplicates で「行が無い場合のみ追加」し、既存の
+  //    正しい customer リンクを絶対に上書きしない（dead customer への rewiring防止）。
   if (stripe && options.stripeCustomerId) {
     try {
       const customer = await stripe.customers.retrieve(options.stripeCustomerId);
@@ -345,7 +350,8 @@ async function findUserByStripeInfo(
         );
         const userId = await findAuthUserIdByEmail(supabase, email);
         if (userId) {
-          // 今後この顧客のイベントが直接引けるよう stripe_customers を補完
+          // 今後この顧客のイベントが直接引けるよう stripe_customers を「無ければ」補完
+          // （ignoreDuplicates: 既存リンクがある場合は上書きしない）
           const { error: upsertError } = await supabase
             .from("stripe_customers")
             .upsert(
@@ -354,12 +360,12 @@ async function findUserByStripeInfo(
                 stripe_customer_id: options.stripeCustomerId,
                 environment: ENVIRONMENT,
               },
-              { onConflict: "user_id,environment" }
+              { onConflict: "user_id,environment", ignoreDuplicates: true }
             );
           if (upsertError) {
             console.error("❌ [LIVE環境] メール名寄せ後の stripe_customers 補完に失敗:", upsertError);
           } else {
-            console.log(`✅ [LIVE環境] メール名寄せ成功 → stripe_customers を補完: ${userId}`);
+            console.log(`✅ [LIVE環境] メール名寄せ成功 → stripe_customers を補完(無ければ追加): ${userId}`);
           }
           return userId;
         }
@@ -793,12 +799,16 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
   const subscriptionId = subscription.id;
 
   try {
-    // ユーザーを検索（stripe_customers優先 → subscriptionsフォールバック → email名寄せ）
+    // ユーザーを検索（stripe_customers優先 → subscriptionsフォールバック）
+    // 注意: 削除イベントでは email名寄せフォールバックを使わない。
+    //   このハンドラは user_subscriptions を user_id 単位で is_active=false 化するため、
+    //   孤児サブスクの削除で別customerの課金ユーザーをメール一致で引くと、
+    //   支払い中のユーザーを誤って失効させうる（rewiring/誤失効ガード）。
     const customerId = subscription.customer;
     const userId = await findUserByStripeInfo(supabase, {
       stripeCustomerId: customerId,
       stripeSubscriptionId: subscriptionId,
-    }, stripe);
+    });
 
     if (!userId) {
       console.error("🚀 [LIVE環境] subscription.deleted: ユーザーが見つかりません:", {
