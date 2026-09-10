@@ -24,6 +24,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/branch-review",
+    issue: "REVIEW",
+    title: "chivalrous-appendix ブランチレビュー",
+    summary:
+      "本番ルート（/guide・/feedbacks）は変えず、新UIを本番遮断プレビュー（/notes・/community/feedback）として同梱。確認ページ一覧とチェック項目で、採用/捨てるを判断する。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/top",
     issue: "TOP-2026",
     title: "新トップページ v1（初期実装）",

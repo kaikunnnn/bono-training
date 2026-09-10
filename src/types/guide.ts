@@ -6,6 +6,13 @@ import type { PortableTextBlock } from "@portabletext/types";
 export type GuideCategory = "career" | "learning" | "industry" | "tools" | "practice";
 
 /**
+ * 記事タイプ
+ * - guide: 体系的なガイド（既存）
+ * - blog: 気軽な読みもの・トレンド系（新規）
+ */
+export type GuideType = "guide" | "blog";
+
+/**
  * ガイド記事の型定義（Sanity）
  */
 export interface Guide {
@@ -18,6 +25,7 @@ export interface Guide {
 
   // 分類
   category: GuideCategory;
+  type?: GuideType; // デフォルト "guide"（未設定の既存記事はguide扱い）
   tags?: string[];
 
   // 表示設定

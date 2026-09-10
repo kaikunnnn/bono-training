@@ -52,3 +52,8 @@ verify_jwt = false
 
 [functions.stripe-webhook-test]
 verify_jwt = false
+
+# 既存Stripe契約の自動リンク（S3-B）。認証済みユーザー専用のため JWT検証を有効化。
+# 未認証リクエストでの Stripe API 叩き（DoS）を入口で弾く。
+[functions.link-stripe-subscription]
+verify_jwt = true

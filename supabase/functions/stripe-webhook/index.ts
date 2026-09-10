@@ -10,6 +10,7 @@ import Stripe from "https://esm.sh/stripe@17.7.0";
 import { sendEmailSafe } from "../_shared/resend.ts";
 import { generateWelcomeEmail, generateCancellationEmail, generatePlanChangeEmail, getPlanDisplayName } from "../_shared/email-templates.ts";
 import { syncToMemberstack, removePlanFromMemberstack, changePlanInMemberstack } from "../_shared/memberstack.ts";
+import { derivePlanFromPrice } from "../_shared/plan-utils.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,6 +26,57 @@ console.log(`🔍 [DEBUG] ENVIRONMENT: ${ENVIRONMENT}`);
 function determineMembershipAccess(planType: string): boolean {
   // standardとfeedbackプランはメンバーアクセス権あり
   return planType === "standard" || planType === "feedback";
+}
+
+/**
+ * Stripe Price から plan_type / duration を解決する（S4）。
+ *
+ * 判定順:
+ *  Tier 1: env-var の price ID 完全一致（現行価格。既存挙動を維持）。
+ *  Tier 2/3: legacy price を derivePlanFromPrice でオブジェクトから導出。
+ *  導出不能: 既存フォールバック（standard/1）に warn ログで倒す（挙動変更は最小限）。
+ *
+ * @param price - Stripe Price オブジェクト（items[0].price）
+ * @param context - ログ用のイベント名
+ */
+function resolvePlanFromPrice(
+  price: any,
+  context: string
+): { planType: string; duration: number } {
+  const envPrefix = ENVIRONMENT === "test" ? "STRIPE_TEST_" : "STRIPE_";
+  const STANDARD_1M = Deno.env.get(`${envPrefix}STANDARD_1M_PRICE_ID`);
+  const STANDARD_3M = Deno.env.get(`${envPrefix}STANDARD_3M_PRICE_ID`);
+  const FEEDBACK_1M = Deno.env.get(`${envPrefix}FEEDBACK_1M_PRICE_ID`);
+  const FEEDBACK_3M = Deno.env.get(`${envPrefix}FEEDBACK_3M_PRICE_ID`);
+
+  const priceId = price?.id;
+
+  // Tier 1: 現行 price ID の完全一致
+  if (priceId === STANDARD_1M) return { planType: "standard", duration: 1 };
+  if (priceId === STANDARD_3M) return { planType: "standard", duration: 3 };
+  if (priceId === FEEDBACK_1M) return { planType: "feedback", duration: 1 };
+  if (priceId === FEEDBACK_3M) return { planType: "feedback", duration: 3 };
+
+  // Tier 2/3: legacy price をオブジェクトから導出
+  const derived = derivePlanFromPrice(price);
+  if (derived) {
+    console.warn(
+      `⚠️ [LIVE環境] 未知のPrice ID (${context}) をオブジェクトから導出: ${priceId} → ${derived.planType}/${derived.duration}ヶ月`
+    );
+    return derived;
+  }
+
+  // 導出不能 → 既存フォールバック（standard/1）。fail loud で price 情報を残す。
+  console.warn(
+    `⚠️ [LIVE環境] 未知のPrice ID (${context}) を導出できず standard/1 にフォールバック: ${priceId}`,
+    {
+      unit_amount: price?.unit_amount,
+      nickname: price?.nickname,
+      recurring: price?.recurring,
+      product: price?.product,
+    }
+  );
+  return { planType: "standard", duration: 1 };
 }
 
 serve(async (req) => {
@@ -247,7 +299,8 @@ async function findUserByStripeInfo(
   options: {
     stripeCustomerId?: string;
     stripeSubscriptionId?: string;
-  }
+  },
+  stripe?: any
 ): Promise<string | null> {
   // 1. stripe_customers テーブルで検索（checkout時に必ず作成される）
   if (options.stripeCustomerId) {
@@ -275,6 +328,50 @@ async function findUserByStripeInfo(
 
     if (!error && data) {
       return data.user_id;
+    }
+  }
+
+  // 3. 最終フォールバック: Stripe顧客のメールで auth.users を検索（S3補完）
+  //    旧サイト時代の契約は stripe_customers/subscriptions に無く、
+  //    従来はここで「見つかりません」と諦めて請求イベントが永遠にDBへ入らなかった。
+  //    メール名寄せで userId を引けたら stripe_customers を「無ければ追加」する。
+  //
+  //    【重要】この fallback は請求(invoice.paid)等の positive/backfill イベント専用。
+  //    stripe を渡さない呼び出し（subscription.deleted 等）では実行されない。
+  //    また upsert は ignoreDuplicates で「行が無い場合のみ追加」し、既存の
+  //    正しい customer リンクを絶対に上書きしない（dead customer への rewiring防止）。
+  if (stripe && options.stripeCustomerId) {
+    try {
+      const customer = await stripe.customers.retrieve(options.stripeCustomerId);
+      const email = customer && !customer.deleted ? customer.email : null;
+      if (email) {
+        console.warn(
+          `⚠️ [LIVE環境] メール名寄せで再検索します: ${email} (customer ${options.stripeCustomerId})`
+        );
+        const userId = await findAuthUserIdByEmail(supabase, email);
+        if (userId) {
+          // 今後この顧客のイベントが直接引けるよう stripe_customers を「無ければ」補完
+          // （ignoreDuplicates: 既存リンクがある場合は上書きしない）
+          const { error: upsertError } = await supabase
+            .from("stripe_customers")
+            .upsert(
+              {
+                user_id: userId,
+                stripe_customer_id: options.stripeCustomerId,
+                environment: ENVIRONMENT,
+              },
+              { onConflict: "user_id,environment", ignoreDuplicates: true }
+            );
+          if (upsertError) {
+            console.error("❌ [LIVE環境] メール名寄せ後の stripe_customers 補完に失敗:", upsertError);
+          } else {
+            console.log(`✅ [LIVE環境] メール名寄せ成功 → stripe_customers を補完(無ければ追加): ${userId}`);
+          }
+          return userId;
+        }
+      }
+    } catch (e) {
+      console.error("❌ [LIVE環境] メール名寄せフォールバック中にエラー:", e);
     }
   }
 
@@ -608,47 +705,21 @@ async function handleInvoicePaid(stripe: any, supabase: any, invoice: any) {
       return;
     }
 
-    const priceId = items[0].price.id;
     let amount = 0;
     if (items[0].price.unit_amount) {
       amount = items[0].price.unit_amount;
     }
 
-    // Price IDからプランタイプと期間を判定（環境に応じた環境変数を使用）
-    const envPrefix = ENVIRONMENT === 'test' ? 'STRIPE_TEST_' : 'STRIPE_';
-    const STANDARD_1M = Deno.env.get(`${envPrefix}STANDARD_1M_PRICE_ID`);
-    const STANDARD_3M = Deno.env.get(`${envPrefix}STANDARD_3M_PRICE_ID`);
-    const FEEDBACK_1M = Deno.env.get(`${envPrefix}FEEDBACK_1M_PRICE_ID`);
-    const FEEDBACK_3M = Deno.env.get(`${envPrefix}FEEDBACK_3M_PRICE_ID`);
-
-    let planType: string;
-    let duration: number;
-
-    if (priceId === STANDARD_1M) {
-      planType = "standard";
-      duration = 1;
-    } else if (priceId === STANDARD_3M) {
-      planType = "standard";
-      duration = 3;
-    } else if (priceId === FEEDBACK_1M) {
-      planType = "feedback";
-      duration = 1;
-    } else if (priceId === FEEDBACK_3M) {
-      planType = "feedback";
-      duration = 3;
-    } else {
-      console.warn(`🚀 [LIVE環境] 未知のPrice ID (invoice.paid): ${priceId}`);
-      planType = "standard";
-      duration = 1;
-    }
+    // Price からプランタイプと期間を判定（S4: env完全一致 → legacy導出 → fallback）
+    const { planType, duration } = resolvePlanFromPrice(items[0].price, "invoice.paid");
 
     const hasMemberAccess = determineMembershipAccess(planType);
 
-    // ユーザーを検索（stripe_customers優先 → subscriptionsフォールバック）
+    // ユーザーを検索（stripe_customers優先 → subscriptionsフォールバック → email名寄せ）
     const userId = await findUserByStripeInfo(supabase, {
       stripeCustomerId: invoice.customer,
       stripeSubscriptionId: subscriptionId,
-    });
+    }, stripe);
 
     if (!userId) {
       console.error("🚀 [LIVE環境] invoice.paid: ユーザーが見つかりません:", {
@@ -729,6 +800,10 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
 
   try {
     // ユーザーを検索（stripe_customers優先 → subscriptionsフォールバック）
+    // 注意: 削除イベントでは email名寄せフォールバックを使わない。
+    //   このハンドラは user_subscriptions を user_id 単位で is_active=false 化するため、
+    //   孤児サブスクの削除で別customerの課金ユーザーをメール一致で引くと、
+    //   支払い中のユーザーを誤って失効させうる（rewiring/誤失効ガード）。
     const customerId = subscription.customer;
     const userId = await findUserByStripeInfo(supabase, {
       stripeCustomerId: customerId,
@@ -912,35 +987,12 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
       return;
     }
 
-    const priceId = items[0].price.id;
-
-    // Price IDからプランタイプと期間を判定
-    const envPrefix = ENVIRONMENT === 'test' ? 'STRIPE_TEST_' : 'STRIPE_';
-    const STANDARD_1M = Deno.env.get(`${envPrefix}STANDARD_1M_PRICE_ID`);
-    const STANDARD_3M = Deno.env.get(`${envPrefix}STANDARD_3M_PRICE_ID`);
-    const FEEDBACK_1M = Deno.env.get(`${envPrefix}FEEDBACK_1M_PRICE_ID`);
-    const FEEDBACK_3M = Deno.env.get(`${envPrefix}FEEDBACK_3M_PRICE_ID`);
-
-    let planType: string;
-    let duration: number;
-
-    if (priceId === STANDARD_1M) {
-      planType = "standard";
-      duration = 1;
-    } else if (priceId === STANDARD_3M) {
-      planType = "standard";
-      duration = 3;
-    } else if (priceId === FEEDBACK_1M) {
-      planType = "feedback";
-      duration = 1;
-    } else if (priceId === FEEDBACK_3M) {
-      planType = "feedback";
-      duration = 3;
-    } else {
-      console.warn(`⚠️ [LIVE環境] 未知のPrice ID: ${priceId}。デフォルトでstandardプランに設定`);
-      planType = "standard";
-      duration = 1;
-    }
+    // Price からプランタイプと期間を判定（S4: env完全一致 → legacy導出 → fallback）
+    // 旧サイト(Memberstack)由来の legacy price はここで正しく解決される。
+    const { planType, duration } = resolvePlanFromPrice(
+      items[0].price,
+      "customer.subscription.created"
+    );
 
     const hasMemberAccess = determineMembershipAccess(planType);
 
@@ -1072,33 +1124,11 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
 
     console.log("🚀 [LIVE環境] プラン変更情報:", { subscriptionId, userId, priceId, amount });
 
-    // Price IDからプランタイプと期間を判定（環境に応じた環境変数を使用）
-    let planType: string;
-    let duration: number;
-
-    const envPrefix = ENVIRONMENT === 'test' ? 'STRIPE_TEST_' : 'STRIPE_';
-    const STANDARD_1M = Deno.env.get(`${envPrefix}STANDARD_1M_PRICE_ID`);
-    const STANDARD_3M = Deno.env.get(`${envPrefix}STANDARD_3M_PRICE_ID`);
-    const FEEDBACK_1M = Deno.env.get(`${envPrefix}FEEDBACK_1M_PRICE_ID`);
-    const FEEDBACK_3M = Deno.env.get(`${envPrefix}FEEDBACK_3M_PRICE_ID`);
-
-    if (priceId === STANDARD_1M) {
-      planType = "standard";
-      duration = 1;
-    } else if (priceId === STANDARD_3M) {
-      planType = "standard";
-      duration = 3;
-    } else if (priceId === FEEDBACK_1M) {
-      planType = "feedback"; // フィードバックプラン1ヶ月
-      duration = 1;
-    } else if (priceId === FEEDBACK_3M) {
-      planType = "feedback"; // フィードバックプラン3ヶ月
-      duration = 3;
-    } else {
-      console.warn(`🚀 [LIVE環境] 未知のPrice ID: ${priceId}。デフォルトでstandardプランに設定します`);
-      planType = "standard";
-      duration = 1;
-    }
+    // Price からプランタイプと期間を判定（S4: env完全一致 → legacy導出 → fallback）
+    const { planType, duration } = resolvePlanFromPrice(
+      items[0].price,
+      "customer.subscription.updated"
+    );
 
     console.log("🚀 [LIVE環境] 判定結果:", { planType, duration, matchedPriceId: priceId });
 

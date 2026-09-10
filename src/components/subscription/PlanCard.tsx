@@ -57,6 +57,8 @@ export function PlanCard({
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // S3-A: 既存契約の復元メッセージ（エラーではないので別枠で表示）
+  const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
   // プラン変更モーダル
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [modalState, setModalState] = useState<ModalState>("confirm");
@@ -82,20 +84,29 @@ export function PlanCard({
     // 新規ユーザー → チェックアウト
     setIsLoading(true);
     setError(null);
+    setRestoredMessage(null);
 
     try {
       // GA4: チェックアウト開始イベント（mainと同じ: checkout直前に発火）
       trackBeginCheckout(plan.id, plan.price, duration);
 
       const returnUrl = `${window.location.origin}/subscription/success?plan=${plan.id}&duration=${duration}`;
-      const { url, error: checkoutError } = await createCheckoutSession(
-        returnUrl,
-        plan.id,
-        duration
-      );
+      const { url, error: checkoutError, restored, message } =
+        await createCheckoutSession(returnUrl, plan.id, duration);
 
       if (checkoutError) {
         setError(checkoutError.message);
+        return;
+      }
+
+      // S3-A: 既存Stripe契約を検出してアカウントに復元した場合
+      if (restored) {
+        setRestoredMessage(
+          message ||
+            "既存の契約を確認し、アカウントに復元しました。ページを再読み込みすると会員として表示されます。"
+        );
+        // サブスク状態を再取得して会員表示に更新
+        router.refresh();
         return;
       }
 
@@ -217,6 +228,12 @@ export function PlanCard({
             {error && (
               <p className="text-sm text-red-600 mt-4 p-2 bg-red-50 rounded">
                 {error}
+              </p>
+            )}
+
+            {restoredMessage && (
+              <p className="text-sm text-green-700 mt-4 p-2 bg-green-50 rounded font-noto-sans-jp">
+                {restoredMessage}
               </p>
             )}
 

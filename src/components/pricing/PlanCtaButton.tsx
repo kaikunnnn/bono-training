@@ -99,6 +99,8 @@ export function PlanCtaButton({
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // S3-A: 既存契約の復元メッセージ（エラーではないので別枠で表示）
+  const [restoredMessage, setRestoredMessage] = useState<string | null>(null);
   const [showChangeModal, setShowChangeModal] = useState(false);
   const [modalState, setModalState] = useState<ModalState>("confirm");
   const [modalError, setModalError] = useState<string | undefined>();
@@ -147,16 +149,23 @@ export function PlanCtaButton({
   const startCheckout = async () => {
     setIsLoading(true);
     setError(null);
+    setRestoredMessage(null);
     try {
       trackBeginCheckout(planType, totalForDuration, duration);
       const returnUrl = `${window.location.origin}/subscription/success?plan=${planType}&duration=${duration}`;
-      const { url, error: checkoutError } = await createCheckoutSession(
-        returnUrl,
-        planType,
-        duration
-      );
+      const { url, error: checkoutError, restored, message } =
+        await createCheckoutSession(returnUrl, planType, duration);
       if (checkoutError) {
         setError(checkoutError.message);
+        return;
+      }
+      // S3-A: 既存Stripe契約を検出してアカウントに復元した場合
+      if (restored) {
+        setRestoredMessage(
+          message ||
+            "既存の契約を確認し、アカウントに復元しました。ページを再読み込みすると会員として表示されます。"
+        );
+        router.refresh();
         return;
       }
       if (url) {
@@ -264,6 +273,11 @@ export function PlanCtaButton({
         {getButtonText()}
       </Button>
       {error && <p className="mt-2 text-sm text-destructive">{error}</p>}
+      {restoredMessage && (
+        <p className="mt-2 text-sm text-green-700 font-noto-sans-jp">
+          {restoredMessage}
+        </p>
+      )}
 
       {/* 再開の独立リンクは Figma(186) で撤去。キャンセル予約中の再開は上の CTA
           「プランを管理（再開/解約）」→ openPortal で担保する（挙動不変）。 */}
