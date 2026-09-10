@@ -102,6 +102,14 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
         </SidebarMenuItem>
 
         <SidebarMenuItem
+          href="/how-to"
+          icon={<MenuIcons.howto size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/how-to")}
+        >
+          使い方
+        </SidebarMenuItem>
+
+        <SidebarMenuItem
           href="/guide"
           icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/guide")}
