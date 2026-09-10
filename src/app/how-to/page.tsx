@@ -8,7 +8,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, ClipboardCheck, HelpCircle, Users } from "lucide-react";
+import { ArrowRight, ClipboardCheck, HelpCircle, MessageSquareText, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -56,6 +56,13 @@ const GUIDES: Guide[] = [
     description:
       "フィードバック機能の使い方・前提・フォームの選び方を解説します。",
     icon: ClipboardCheck,
+  },
+  {
+    href: "/feedback-apply",
+    title: "15分フィードバック",
+    description:
+      "コンテンツの学びをシェアして、15分のフィードバックを受けよう。制作物に成長の視点がもらえます。",
+    icon: MessageSquareText,
   },
 ];
 
