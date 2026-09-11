@@ -3,7 +3,6 @@
  * 本番環境のStripe Webhookイベントを処理します
  */
 
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { createStripeClient, getWebhookSecret } from "../_shared/stripe-helpers.ts";
 import Stripe from "https://esm.sh/stripe@17.7.0";
@@ -79,7 +78,7 @@ function resolvePlanFromPrice(
   return { planType: "standard", duration: 1 };
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // Deno環境用のcrypto providerを初期化（Webhook署名検証に必要）
   const cryptoProvider = Stripe.createSubtleCryptoProvider();
 
