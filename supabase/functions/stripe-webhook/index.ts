@@ -584,12 +584,25 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       console.error("🚀 [LIVE環境] 顧客情報の保存エラー:", customerError);
     }
 
+    // #193対策: 支払い確定前はプレミアム付与しない。
+    // is_active をハードコードの true にせず、実サブスク状態（active/trialing のみ true、
+    // incomplete/incomplete_expired は付与せず既存値保持）で決める。さらに
+    // session.payment_status が 'paid' 以外なら安全側で is_active を付与しない。
+    const isActivePatch = await resolveIsActivePatch(stripe, subscription);
+    if (isActivePatch.is_active === true && session.payment_status !== "paid") {
+      console.warn(
+        `⚠️ [webhook] payment_status=${session.payment_status} のため is_active 付与を見送り (session=${session.id})`
+      );
+      delete isActivePatch.is_active;
+    }
+
     // user_subscriptionsテーブルにサブスクリプション情報を保存または更新（環境を含む）
+    // ※ is_active は isActivePatch で決定（空なら既存値保持 / 新規行はDB既定 false）
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
       .upsert({
         user_id: userId,
-        is_active: true,
+        ...isActivePatch,
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
