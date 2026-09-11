@@ -1,4 +1,3 @@
-import { serve } from 'https://deno.land/std@0.190.0/http/server.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 
 type OgpResponse = {
@@ -353,7 +352,7 @@ function parseOgp(finalUrl: string, html: string): OgpResponse {
   return { title, description, image, icon, siteName }
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
