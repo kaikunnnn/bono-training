@@ -86,6 +86,40 @@ function parseFrontmatter(content: string): { data: Record<string, any>, content
 }
 
 /**
+ * 有料限定のメタフィールド denylist（F-4 対策）。
+ * 非会員には frontmatter からこれらのキーを除去して返す。フィールド名は実データで
+ * 揺れるため "full/premium な動画/アセットURL" と判断できるキーを広めに列挙する。
+ * title / thumbnail / is_premium など公開して問題ないキーは残す。
+ */
+const PREMIUM_META_DENYLIST = [
+  'video_full',
+  'videoFull',
+  'video_url',
+  'videoUrl',
+  'full_video',
+  'fullVideo',
+  'premium_video',
+  'premiumVideo',
+  'premium_video_url',
+  'premiumVideoUrl',
+  'video_premium',
+  'full_video_url',
+  'fullVideoUrl',
+]
+
+/**
+ * 非会員向けに frontmatter から有料限定フィールドを除去する。
+ */
+function stripPremiumMeta(meta: Record<string, any>): Record<string, any> {
+  const cleaned: Record<string, any> = {}
+  for (const [key, value] of Object.entries(meta)) {
+    if (PREMIUM_META_DENYLIST.includes(key)) continue
+    cleaned[key] = value
+  }
+  return cleaned
+}
+
+/**
  * コンテンツを分割（プレミアムマーカーで）
  */
 function splitContent(content: string, marker = '<!-- PREMIUM_ONLY -->'): { free: string, premium: string, hasPremium: boolean } {
@@ -223,10 +257,18 @@ Deno.serve(async (req) => {
       showPremiumBanner = split.hasPremium;
     }
 
+    // F-4対策: プレミアムコンテンツを非会員が取得する場合のみ、有料限定メタ
+    // （video_full 等）を除去して返す。フロント（training/[taskSlug]/page.tsx）は
+    // meta.video_full を無条件で iframe 描画するため、ここで漏らすと本文gate（splitContent）
+    // を回避して有料動画URLが渡ってしまう。無料コンテンツの動画は残す（会員でない閲覧者にも
+    // 表示すべきなので stripしない）。会員には従来通り全メタを返す。
+    const responseMeta =
+      isPremiumContent && !hasPremiumAccess ? stripPremiumMeta(frontmatter) : frontmatter
+
     const response = {
       success: true,
       data: {
-        meta: frontmatter,
+        meta: responseMeta,
         content: displayContent,
         showPremiumBanner,
         isPremium: isPremiumContent,
