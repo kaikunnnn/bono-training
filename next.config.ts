@@ -55,10 +55,12 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // セキュリティヘッダ（段階導入 第1歩）: CSP以外の安全な4ヘッダを全パスに enforce で付与。
-  // CSP（Content-Security-Policy）はここでは付けない。Sanity画像/Stripe/Supabase/
-  // YouTube等の外部リソース依存が多く誤爆リスクが高いため、別ステップで
-  // Content-Security-Policy-Report-Only から段階導入する予定。
+  // セキュリティヘッダ（段階導入）: CSP以外の安全ヘッダ＋「壊れない範囲のCSP」を全パスに enforce。
+  // F-8対策: script-src/style-src/img-src 等は Sanity画像/Stripe/Supabase/YouTube/GA 依存が
+  // 多く誤爆リスクが高いため付けない。代わりに副作用が無く保護効果のある3ディレクティブのみ enforce:
+  //   base-uri 'self'（<base>注入によるURL乗っ取り防止）/ object-src 'none'（プラグイン埋め込み無効）/
+  //   frame-ancestors 'self'（クリックジャッキング。X-Frame-Optionsを近代ヘッダで補強）。
+  // 完全な script-src CSP は別ステップで Content-Security-Policy-Report-Only から段階導入する。
   // HSTS（Strict-Transport-Security）もここでは付けない（Vercelが付与済み・preload事故回避）。
   async headers() {
     return [
@@ -85,6 +87,11 @@ const nextConfig: NextConfig = {
           {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
+          },
+          // F-8: 副作用の無い最小CSP（script/style/img/connect は制限しない＝外部依存を壊さない）
+          {
+            key: "Content-Security-Policy",
+            value: "base-uri 'self'; object-src 'none'; frame-ancestors 'self'",
           },
         ],
       },

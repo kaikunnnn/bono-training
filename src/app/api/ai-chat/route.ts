@@ -228,23 +228,31 @@ export async function POST(req: NextRequest) {
   }
 
   // --- レート制限（永続カウント方式。questions/submit の実データcountに倣う）---
-  // ai_chat_usage の直近1時間の行数で判定。カウント/記録の失敗では止めない
-  // （best-effort。認証が既に第一防御なので、DB不調時にチャットを壊さないことを優先）。
+  // F-6対策: 旧実装は「count→判定→insert」で、同時多発リクエストが全員 count<上限 を
+  // 読んでから insert する TOCTOU レースで上限を超過できた。これを「先に記録→自分の行を
+  // 含めて count」の順に変更し、各リクエストが記録後に数えることで超過を検知する。
+  // カウント/記録の失敗では止めない（best-effort。認証が第一防御、DB不調時にチャットを壊さない）。
   try {
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+    // 1) 先に今回の利用を記録（自分の行をカウント対象に含める）
+    const { error: insertError } = await supabase
+      .from("ai_chat_usage")
+      .insert({ user_id: user.id });
+    if (insertError) {
+      console.error("[ai-chat] usage insert failed (best-effort continue):", insertError);
+    }
+    // 2) 自分の行を含めた直近1時間の件数で判定（上限ちょうどまで許可＝ > で拒否）
     const { count, error: countError } = await supabase
       .from("ai_chat_usage")
       .select("id", { count: "exact", head: true })
       .eq("user_id", user.id)
       .gte("created_at", since);
-    if (!countError && (count ?? 0) >= RATE_LIMIT_PER_HOUR) {
+    if (!countError && (count ?? 0) > RATE_LIMIT_PER_HOUR) {
       return jsonError(
         "短時間に多くのリクエストがありました。しばらく時間をおいてから再度お試しください",
         429
       );
     }
-    // 上限内なら今回の利用を1行記録（次回以降のカウント対象にする）
-    await supabase.from("ai_chat_usage").insert({ user_id: user.id });
   } catch (e) {
     console.error("[ai-chat] Rate limit check failed:", e);
   }
