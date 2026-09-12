@@ -7,6 +7,9 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { BackButton } from "@/components/common/BackButton";
 import NavigationHeader from "@/components/training/NavigationHeader";
 import PortableTextRenderer from "@/components/common/PortableTextRenderer";
+import ContentSection from "@/components/training/ContentSection";
+import DesignSolutionSection from "@/components/training/DesignSolutionSection";
+import { parseContentSections } from "@/utils/parseContentSections";
 import type { SanitySection } from "@/types/training";
 
 interface PageProps {
@@ -127,10 +130,36 @@ export default async function TaskDetailPage({ params }: PageProps) {
                     </div>
                   ))
                 ) : task.content ? (
-                  /* Markdownフォールバック */
-                  <div className="prose prose-gray max-w-none">
-                    {task.content}
-                  </div>
+                  /* Markdownフォールバック（Sanity sections未移行のタスク向け）— mainのTaskDetailPage:377-407 と同じ構成 */
+                  parseContentSections(task.content).map((section, index) => (
+                    <div key={index} className="mb-6">
+                      {section.type === "design-solution" ? (
+                        <DesignSolutionSection content={section.content} />
+                      ) : section.type === "premium-only" ? (
+                        task.hasAccess ? (
+                          <ContentSection title={section.title} content={section.content} />
+                        ) : (
+                          <div className="border-2 border-orange-200 rounded-lg p-6 bg-orange-50">
+                            <div className="flex items-center gap-3 mb-3">
+                              <span className="text-2xl">🔒</span>
+                              <h3 className="text-lg font-bold text-orange-800">{section.title}</h3>
+                            </div>
+                            <div className="text-orange-600 text-sm mb-4">
+                              このセクションはメンバー限定コンテンツです。
+                            </div>
+                            <Link
+                              href="/subscription"
+                              className="inline-block bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
+                            >
+                              プランを確認
+                            </Link>
+                          </div>
+                        )
+                      ) : (
+                        <ContentSection title={section.title} content={section.content} />
+                      )}
+                    </div>
+                  ))
                 ) : !task.description ? (
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 text-center">
                     <div className="text-yellow-800 font-medium mb-2">
