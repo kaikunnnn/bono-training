@@ -7,6 +7,7 @@
  */
 
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Image from "next/image";
 import { getSubscriptionStatus, getCurrentUser } from "@/lib/subscription";
 import { FeedbackApplyClient } from "@/components/feedback/FeedbackApplyClient";
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
   description:
     "コンテンツの学びをシェアしてフィードバックを受けよう",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "15分フィードバック | BONO",
     description:
       "コンテンツの学びをシェアしてフィードバックを受けよう",

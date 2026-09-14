@@ -12,6 +12,7 @@ import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import { OG_DEFAULTS, DEFAULT_OG_IMAGE } from "@/lib/seo-metadata";
 import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
 
 // ISR: 1時間キャッシュ（ユーザー固有データはクライアント側で取得）
@@ -53,16 +54,20 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     openGraph: {
+      ...OG_DEFAULTS,
       title,
       description,
       type: "article",
-      images: article.thumbnailUrl ? [{ url: article.thumbnailUrl, width: 1200, height: 630 }] : [],
+      // サムネ未設定時は root の既定 OGP にフォールバック（og:image を消さない）
+      images: article.thumbnailUrl
+        ? [{ url: article.thumbnailUrl, width: 1200, height: 630 }]
+        : [{ url: DEFAULT_OG_IMAGE, width: 1200, height: 630 }],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: article.thumbnailUrl ? [article.thumbnailUrl] : [],
+      images: article.thumbnailUrl ? [article.thumbnailUrl] : [DEFAULT_OG_IMAGE],
     },
     alternates: { canonical },
   };

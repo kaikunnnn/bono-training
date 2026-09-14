@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { getBlogPosts } from "@/lib/sanity";
 import BlogIndexClient from "./BlogIndexClient";
 
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description: "BONOをつくる30代在宅独身男性のクラフト日誌。デザイン、開発、UI/UXに関する記事をお届けします。",
   keywords: "BONO, ブログ, デザイン, UI/UX, Web開発",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "BONO Blog - HOPE.",
     description: "BONOをつくる30代在宅独身男性のクラフト日誌。デザイン、開発、UI/UXに関する記事をお届けします。",
     type: "website",

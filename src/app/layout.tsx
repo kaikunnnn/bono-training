@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import {
   Geist_Mono,
@@ -67,6 +67,12 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
   },
+};
+
+// モバイルブラウザUIバーの色（ブランド primary #102720）。
+// CSS変数を参照できない設定エクスポートのため raw hex を許容。
+export const viewport: Viewport = {
+  themeColor: "#102720",
 };
 
 export default function RootLayout({

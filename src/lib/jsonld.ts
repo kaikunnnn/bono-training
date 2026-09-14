@@ -3,7 +3,13 @@
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design";
 const SITE_NAME = "BONO";
-const ORGANIZATION_LOGO = `${SITE_URL}/logo.png`;
+const ORGANIZATION_LOGO = `${SITE_URL}/images/bono-logo.png`;
+
+// 公式SNSアカウント（schema.org Organization.sameAs）
+const ORGANIZATION_SAME_AS = [
+  "https://www.youtube.com/channel/UCghPjck_LzxNMs2tI4PPYlQ/",
+  "https://x.com/takumii_kai",
+];
 
 /**
  * WebSite + Organization schema（トップページ用）
@@ -30,6 +36,7 @@ export function generateWebSiteJsonLd() {
           "@type": "ImageObject",
           url: ORGANIZATION_LOGO,
         },
+        sameAs: ORGANIZATION_SAME_AS,
       },
     ],
   };

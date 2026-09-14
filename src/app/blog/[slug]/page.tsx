@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import { getBlogPost, getLatestBlogPosts, getPrevBlogPost, getNextBlogPost } from "@/lib/sanity";
 import { removeEmojiFromText } from "@/utils/blog/emojiUtils";
@@ -31,6 +32,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     keywords: post.tags?.join(', '),
     authors: [{ name: post.author }],
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${removeEmojiFromText(post.title)} | BONO Blog`,
       description: post.description,
       type: "article",

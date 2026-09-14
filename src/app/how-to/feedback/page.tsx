@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getSubscriptionStatus } from "@/lib/subscription";
@@ -80,6 +81,7 @@ export const metadata: Metadata = {
   description:
     "BONOのフィードバックの使い方・おすすめの使い方・フォームの選び方を解説します",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "フィードバックのやり方 | BONO",
     description:
       "BONOのフィードバックの使い方・おすすめの使い方・フォームの選び方を解説します",

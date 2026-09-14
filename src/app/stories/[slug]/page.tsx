@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -54,6 +55,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     description: story.excerpt,
     keywords: story.tags?.join(", "),
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${story.title}`,
       description: story.excerpt,
       type: "article",

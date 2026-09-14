@@ -5,6 +5,11 @@ export const alt = "BONO - UIUXデザインを学ぶ";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
+// 表示ドメインは env 駆動（移行後は自動で新ドメインになる）。fallback は既存と同一。
+const SITE_HOST = new URL(
+  process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design"
+).host;
+
 export default function Image() {
   return new ImageResponse(
     (
@@ -76,7 +81,7 @@ export default function Image() {
             color: "rgba(255,255,255,0.4)",
           }}
         >
-          app.bo-no.design
+          {SITE_HOST}
         </div>
       </div>
     ),
