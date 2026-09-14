@@ -677,6 +677,45 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       console.warn(`⚠️ [LIVE環境] 顧客メールアドレスがないためウェルカムメールをスキップ`);
     }
 
+    // ========================================
+    // 📧 運営者（owner）への新規課金通知
+    //   新規にプランへ課金した人が出たら owner に知らせる。
+    //   実際に支払いが成立したもの（payment_status==='paid'）のみ通知＝incomplete/未払いでは送らない。
+    //   宛先は env OWNER_NOTIFICATION_EMAIL（未設定時は既定へ）。
+    // ========================================
+    if (session.payment_status === "paid") {
+      try {
+        const ownerEmail =
+          Deno.env.get("OWNER_NOTIFICATION_EMAIL") || "takumi.kai.skywalker@gmail.com";
+        const planLabel = getPlanDisplayName(planType);
+        const amountYen =
+          typeof amount === "number" && amount > 0
+            ? `¥${amount.toLocaleString("ja-JP")}`
+            : "-";
+        const kind = replaceSubscriptionId ? "プラン変更" : "新規";
+        await sendEmailSafe({
+          to: ownerEmail,
+          subject: `【BONO課金通知】${kind}: ${planLabel}（${duration}ヶ月）`,
+          html: `
+            <div style="font-family: sans-serif; line-height: 1.8; color: #021710;">
+              <h2 style="margin:0 0 12px;">${kind}の課金がありました 🎉</h2>
+              <table style="border-collapse: collapse; font-size: 14px;">
+                <tr><td style="padding:4px 16px 4px 0; color:#677470;">メール</td><td>${customerEmail ?? "(不明)"}</td></tr>
+                <tr><td style="padding:4px 16px 4px 0; color:#677470;">種別</td><td>${kind}</td></tr>
+                <tr><td style="padding:4px 16px 4px 0; color:#677470;">プラン</td><td>${planLabel}（${duration}ヶ月）</td></tr>
+                <tr><td style="padding:4px 16px 4px 0; color:#677470;">金額</td><td>${amountYen}</td></tr>
+                <tr><td style="padding:4px 16px 4px 0; color:#677470;">環境</td><td>${ENVIRONMENT}</td></tr>
+                <tr><td style="padding:4px 16px 4px 0; color:#677470;">サブスクID</td><td>${subscriptionId}</td></tr>
+              </table>
+            </div>
+          `,
+        });
+        console.log(`📧 [LIVE環境] owner課金通知を送信: ${ownerEmail}（${kind}）`);
+      } catch (ownerNotifyError) {
+        console.warn(`⚠️ [LIVE環境] owner課金通知の送信に失敗（続行）:`, ownerNotifyError);
+      }
+    }
+
     console.log("🚀 [LIVE環境] 新しいサブスクリプションが作成されました。既存サブスクリプションは上記で処理済みです。");
 
   } catch (error) {
