@@ -8,13 +8,12 @@ import { cn } from "@/lib/utils";
  * 仕様:
  * - セクションコンテナ: w-full
  * - NavItemリストラッパー: px-[15px]
- * - NavItem間: gap-[8px]
+ * - NavItem間: gap-0
  */
 export function SidebarMenuGroup({
   label,
   children,
   className,
-  itemGap = false,
 }: SidebarMenuGroupProps) {
   return (
     <div
@@ -24,12 +23,7 @@ export function SidebarMenuGroup({
       )}
     >
       {label && <SidebarGroupLabel>{label}</SidebarGroupLabel>}
-      <div
-        className={cn(
-          "w-full flex flex-col items-start gap-[8px]",
-          itemGap && "gap-[8px]"
-        )}
-      >
+      <div className="w-full flex flex-col items-start gap-0">
         {children}
       </div>
     </div>

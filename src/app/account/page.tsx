@@ -7,6 +7,7 @@ import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { Button } from "@/components/ui/button";
 import SubscriptionInfo from "@/components/account/SubscriptionInfo";
 import { PasswordChangeForm } from "@/components/account/PasswordChangeForm";
+import { LogoutButton } from "@/components/account/LogoutButton";
 import {
   SettingsPageLayout,
   SettingsPageTitle,
@@ -85,6 +86,16 @@ export default async function AccountPage() {
 
       {/* パスワード変更 */}
       <PasswordChangeForm />
+
+      {/* ログアウト */}
+      <SettingsCard title="ログアウト">
+        <div className="space-y-3">
+          <p className="text-sm text-muted-foreground">
+            このアカウントからログアウトします。
+          </p>
+          <LogoutButton />
+        </div>
+      </SettingsCard>
     </SettingsPageLayout>
   );
 }
