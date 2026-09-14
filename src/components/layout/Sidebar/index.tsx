@@ -9,11 +9,11 @@ import { SidebarMenuGroup } from "./SidebarMenuGroup";
 import { SidebarMenuItem } from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
 import { ICON_SIZE } from "./icon-utils";
-import { DirectInbox, Home2 } from "iconsax-react";
-import { Button } from "@/components/ui/button";
+import { Home2 } from "iconsax-react";
 
-const FEEDBACK_URL =
-  "https://docs.google.com/forms/d/e/1FAIpQLSfUE-AYkZsepc8NfDGO5FtPnHJI77-iMIMnx6KxSfgWVaUgOA/viewform?usp=header";
+// 旧BONOサイト（Webflow）。ドメイン切替後は https://legacy.bo-no.design に貼り替える
+// （rebono/issues/切替実行パッケージ.md 参照。legacyは切替日まで www へ301のため今はwww固定）
+const OLD_BONO_URL = "https://www.bo-no.design";
 
 /**
  * サイドバーコンポーネント
@@ -28,13 +28,6 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
 
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
-
-  const handleSignOut = async (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    // Server Action でサインアウト
-    const { signOut } = await import("@/app/(auth)/actions");
-    await signOut();
-  };
 
   return (
     <nav
@@ -86,40 +79,25 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
         </SidebarMenuItem>
 
         <SidebarMenuItem
+          href="/questions"
+          icon={<MenuIcons.question size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/questions")}
+          dot={boardDotSlot}
+        >
+          掲示板
+        </SidebarMenuItem>
+
+        <SidebarMenuItem
           href="/lessons"
           icon={<MenuIcons.lesson size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/lessons")}
         >
           レッスン
         </SidebarMenuItem>
-
-        <SidebarMenuItem
-          href="/training"
-          icon={<MenuIcons.training size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/training")}
-        >
-          トレーニング
-        </SidebarMenuItem>
-
-        <SidebarMenuItem
-          href="/how-to"
-          icon={<MenuIcons.howto size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/how-to")}
-        >
-          使い方
-        </SidebarMenuItem>
-
-        <SidebarMenuItem
-          href="/guide"
-          icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/guide")}
-        >
-          学習ガイド
-        </SidebarMenuItem>
       </SidebarMenuGroup>
 
       {/* コミュニティ - 一時的に非表示（mainと同じ） */}
-      <SidebarMenuGroup label="コミュニティ" itemGap className="hidden">
+      <SidebarMenuGroup label="コミュニティ" className="hidden">
         <SidebarMenuItem
           href="/feedbacks"
           icon={<MenuIcons.feedback size={ICON_SIZE} color="#2F3037" variant="Outline" />}
@@ -129,14 +107,13 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
         </SidebarMenuItem>
       </SidebarMenuGroup>
 
-      <SidebarMenuGroup label="その他" itemGap>
+      <SidebarMenuGroup label="サブ">
         <SidebarMenuItem
-          href="/questions"
-          icon={<MenuIcons.question size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-          isActive={isActive("/questions")}
-          dot={boardDotSlot}
+          href="/guide"
+          icon={<MenuIcons.guide size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/guide")}
         >
-          みんなの掲示板
+          読みもの
         </SidebarMenuItem>
         <SidebarMenuItem
           href="/achievements"
@@ -144,6 +121,31 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
           isActive={isActive("/achievements")}
         >
           みんなの実績
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/how-to"
+          icon={<MenuIcons.howto size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/how-to")}
+        >
+          使い方
+        </SidebarMenuItem>
+      </SidebarMenuGroup>
+
+      {/* PC(lg以上)では「その他」をサイドバー下端に固定。モバイルSheet内では通常フロー */}
+      <SidebarMenuGroup label="その他" className="lg:mt-auto lg:pb-6">
+        <SidebarMenuItem
+          href="/subscription"
+          icon={<MenuIcons.pricing size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/subscription")}
+        >
+          料金プラン
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href="/training"
+          icon={<MenuIcons.training size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/training")}
+        >
+          トレーニング
         </SidebarMenuItem>
         {!user && (
           <SidebarMenuItem
@@ -163,26 +165,14 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
             設定
           </SidebarMenuItem>
         )}
-        {user && (
-          <SidebarMenuItem
-            href="#"
-            icon={<MenuIcons.logout size={ICON_SIZE} color="#2F3037" variant="Outline" />}
-            isActive={false}
-            onClick={handleSignOut}
-          >
-            ログアウト
-          </SidebarMenuItem>
-        )}
+        <SidebarMenuItem
+          href={OLD_BONO_URL}
+          icon={<MenuIcons.share size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={false}
+        >
+          旧サイト
+        </SidebarMenuItem>
       </SidebarMenuGroup>
-
-      <div className="mt-auto pt-4 px-[15px] w-full">
-        <Button variant="outline" size="sm" className="w-full gap-1 text-xs" asChild>
-          <a href={FEEDBACK_URL} target="_blank" rel="noopener noreferrer">
-            <DirectInbox size={14} color="currentColor" />
-            意見箱
-          </a>
-        </Button>
-      </div>
     </nav>
   );
 }

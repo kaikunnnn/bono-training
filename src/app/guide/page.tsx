@@ -9,16 +9,16 @@ import type { GuideCategory } from "@/types/guide";
 export const revalidate = 3600;
 
 export const metadata: Metadata = {
-  title: "ガイド",
+  title: "読みもの",
   description:
     "デザインスキルを身につける上でのヒントになる記事。キャリア、学習方法、業界動向などを解説します。",
   openGraph: {
-    title: "ガイド | BONO",
+    title: "読みもの | BONO",
     description:
       "デザインスキルを身につける上でのヒントになる記事。",
   },
   twitter: {
-    title: "ガイド | BONO",
+    title: "読みもの | BONO",
     description:
       "デザインスキルを身につける上でのヒントになる記事。",
   },
@@ -54,7 +54,7 @@ export default async function GuidePage({ searchParams }: PageProps) {
     <div className="min-h-screen">
       {/* ヒーロー */}
       <section className="px-6 pt-16 pb-10 max-w-[1440px] mx-auto">
-        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">ガイド</h1>
+        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">読みもの</h1>
         <p className="text-muted-foreground text-base leading-relaxed max-w-[600px]">
           デザインスキルを身につける上でのヒントになる記事置き場です。何か書いて欲しい内容があれば質問で教えてください
         </p>

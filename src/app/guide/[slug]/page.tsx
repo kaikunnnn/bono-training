@@ -36,10 +36,10 @@ export async function generateMetadata({
     : [];
 
   return {
-    title: `${guide.title} | ガイド`,
+    title: `${guide.title} | 読みもの`,
     description: guide.description,
     openGraph: {
-      title: `${guide.title} | ガイド`,
+      title: `${guide.title} | 読みもの`,
       description: guide.description,
       type: "article",
       ...(ogImages.length > 0 && { images: ogImages }),
@@ -48,7 +48,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${guide.title} | ガイド`,
+      title: `${guide.title} | 読みもの`,
       description: guide.description,
       ...(guide.thumbnailUrl && { images: [guide.thumbnailUrl] }),
     },
