@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import { getLesson, getLessonMetadata } from "@/lib/sanity";
 import { getLessonProgress } from "@/lib/services/progress";
@@ -32,6 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     openGraph: {
+      ...OG_DEFAULTS,
       title,
       description,
       type: "article",

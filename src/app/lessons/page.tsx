@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { getAllLessons } from "@/lib/sanity";
 // TODO: LessonCardに進捗表示を追加する際に使用
 // import { getMultipleLessonProgress } from "@/lib/services/progress";
@@ -18,6 +19,7 @@ export const metadata: Metadata = {
   description:
     "UIUXデザインを体系的に学べるレッスン一覧。初心者から実践レベルまで、段階的にスキルアップできるコンテンツを提供しています。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "レッスン一覧 | BONO",
     description:
       "UIUXデザインを体系的に学べるレッスン一覧。初心者から実践レベルまで、段階的にスキルアップできるコンテンツを提供しています。",

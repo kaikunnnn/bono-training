@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import PageHeader from "@/components/common/PageHeader";
 import StoryCardItem from "@/components/story/StoryCardItem";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   description:
     "BONOで学んで人生を動かした受講者たちのインタビュー記事。未経験からUIデザイナーへの転職、独立、キャリアチェンジなど。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "ストーリー一覧 | BONO",
     description:
       "BONOで学んで人生を動かした受講者たちのインタビュー記事。",

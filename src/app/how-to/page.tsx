@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import { ArrowRight, ClipboardCheck, HelpCircle, MessageSquareText, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
   description:
     "BONOをより活用するためのガイド集。よくある質問（料金・支払い・退会など）とフィードバック機能の使い方をまとめています。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "BONOの使い方 | BONO",
     description:
       "BONOをより活用するためのガイド集。コミュニティの歩き方・よくある質問・フィードバック機能の使い方をまとめています。",

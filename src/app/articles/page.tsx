@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import { getAllArticles, type ArticleListItem } from "@/lib/sanity";
 import { Badge } from "@/components/ui/badge";
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
   description:
     "UIUXデザインに関する記事一覧。動画レッスン、チュートリアル、実践ガイドなど、デザインスキルを高めるコンテンツを提供しています。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "記事一覧 | BONO",
     description:
       "UIUXデザインに関する記事一覧。動画レッスン、チュートリアル、実践ガイドなど、デザインスキルを高めるコンテンツを提供しています。",

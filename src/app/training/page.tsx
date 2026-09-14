@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { Suspense } from "react";
 import { getTrainings } from "@/lib/services/training";
 import TrainingHero from "@/components/training/TrainingHero";
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   description:
     "各コースで身につけたことをアウトプットするお題を並べています。実践的なデザイントレーニングで力をつけよう。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "トレーニング | BONO",
     description:
       "各コースで身につけたことをアウトプットするお題を並べています。実践的なデザイントレーニングで力をつけよう。",

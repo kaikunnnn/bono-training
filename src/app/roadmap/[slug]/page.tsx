@@ -5,6 +5,7 @@
  */
 
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import { getRoadmapBySlug, getAllRoadmaps } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
@@ -42,6 +43,7 @@ export async function generateMetadata({
     title: roadmap.title,
     description: roadmap.description,
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${roadmap.title}`,
       description: roadmap.description,
       ...(roadmap.thumbnailUrl && { images: [{ url: roadmap.thumbnailUrl }] }),

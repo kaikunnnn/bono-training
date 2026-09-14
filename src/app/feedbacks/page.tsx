@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { Suspense } from "react";
 import Link from "next/link";
 
@@ -15,6 +16,7 @@ export const metadata: Metadata = {
   title: "フィードバック一覧",
   description: "BONOメンバーのデザインフィードバック事例。ポートフォリオやUIデザインへの具体的なアドバイスを公開しています。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "フィードバック一覧 | BONO",
     description: "BONOメンバーのデザインフィードバック事例。ポートフォリオやUIデザインへの具体的なアドバイスを公開しています。",
   },

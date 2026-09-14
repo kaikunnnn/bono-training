@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { Suspense } from "react";
 import AchievementHighlightSection from "@/components/top/home/AchievementHighlightSection";
 import { getAchievementGroups } from "@/lib/sanity";
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
   description:
     "BONOの料金プラン。すべてのレッスンと記事にアクセスして、UIUXデザインのスキルを効率的に身につけよう。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "料金プラン | BONO",
     description:
       "BONOの料金プラン。すべてのレッスンと記事にアクセスして、UIUXデザインのスキルを効率的に身につけよう。",

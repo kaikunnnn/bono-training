@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   description:
     "BONOで学んだ受講者の転職ストーリーと、実際に手を動かして生まれたアウトプットを紹介します。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "BONOで動き出した人たち | BONO",
     description:
       "BONOで学んだ受講者の転職ストーリーと、実際に手を動かして生まれたアウトプットを紹介します。",

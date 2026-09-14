@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import { getAllLessons } from "@/lib/sanity";
 import PageHeader from "@/components/common/PageHeader";
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${section.label} - レッスン一覧`,
     description: `${section.label}カテゴリのレッスン一覧。`,
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${section.label} - レッスン一覧`,
       description: `${section.label}カテゴリのレッスン一覧。`,
     },

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { getEvent } from "@/lib/sanity";
@@ -25,6 +26,7 @@ export async function generateMetadata({
     title: `${event.title} | イベント`,
     description: event.summary || `${event.title}の詳細`,
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${event.title} | イベント`,
       description: event.summary || `${event.title}の詳細`,
     },

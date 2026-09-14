@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -41,6 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${feedback.title} | フィードバック`,
     description,
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${feedback.title} | フィードバック`,
       description,
     },

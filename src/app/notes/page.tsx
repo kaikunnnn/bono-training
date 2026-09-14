@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { getAllGuidesFromSanity, getGuidesByCategoryFromSanity } from "@/lib/sanity";
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
 import { GuideCard } from "@/components/dev-preview/notes/GuideCard";
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
   title: PAGE_TITLE,
   description: PAGE_DESCRIPTION,
   openGraph: {
+    ...OG_DEFAULTS,
     title: `${PAGE_TITLE} | BONO`,
     description: PAGE_DESCRIPTION,
   },

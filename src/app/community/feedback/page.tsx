@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import {
   getAllFeedbacks,
   getFeedbacksByCategory,
@@ -14,6 +15,7 @@ export const metadata: Metadata = {
   description:
     "BONOメンバーのデザインフィードバック事例。ポートフォリオやUIデザインへの具体的なアドバイスを公開しています。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "フィードバック | BONO",
     description:
       "BONOメンバーのデザインフィードバック事例。ポートフォリオやUIデザインへの具体的なアドバイスを公開しています。",
