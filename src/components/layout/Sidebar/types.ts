@@ -62,7 +62,6 @@ export interface SidebarMenuGroupProps {
   label?: string;
   children: ReactNode;
   className?: string;
-  itemGap?: boolean;
 }
 
 /**
