@@ -4,10 +4,27 @@ import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { PostQuestionButton } from "@/components/questions/PostQuestionButton";
 import { QuestionCard } from "@/components/questions/QuestionCard";
 import { BoardSeenRecorder } from "@/components/questions/BoardSeenRecorder";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
+
+const QUESTIONS_TITLE = "みんなの掲示板";
+const QUESTIONS_DESCRIPTION =
+  "デザインの話をみんなで広げて深める、メンバー同士の掲示板です。";
 
 export const metadata = {
-  title: "みんなの掲示板",
-  description: "デザインの話をみんなで広げて深める、メンバー同士の掲示板です。",
+  title: QUESTIONS_TITLE,
+  description: QUESTIONS_DESCRIPTION,
+  // M-3: index対象。canonical と OG/twitter を明示（他ページと同パターン）。
+  alternates: { canonical: "/questions" },
+  openGraph: {
+    ...OG_DEFAULTS,
+    title: QUESTIONS_TITLE,
+    description: QUESTIONS_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: QUESTIONS_TITLE,
+    description: QUESTIONS_DESCRIPTION,
+  },
 };
 
 /** 読み込み速度優先で最新6件のみ表示（新規コメントで浮上）。#140 */
