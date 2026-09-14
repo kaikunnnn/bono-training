@@ -11,6 +11,7 @@
  */
 
 import type { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,7 @@ export const metadata: Metadata = {
   description:
     "BONOのSlackコミュニティの使い方・参加のしかた・チャンネルの歩き方をまとめました。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "コミュニティの歩き方 | BONO",
     description:
       "BONOのSlackコミュニティの使い方・参加のしかた・チャンネルの歩き方をまとめました。",

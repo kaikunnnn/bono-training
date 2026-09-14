@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
   description:
     "BONOのよくある質問（FAQ）。料金・支払い・プラン変更・加入後の使い方・退会など、加入前後の疑問をまとめました。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "よくある質問 | BONO",
     description:
       "BONOのよくある質問（FAQ）。料金・支払い・プラン変更・加入後の使い方・退会など、加入前後の疑問をまとめました。",

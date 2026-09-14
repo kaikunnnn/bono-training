@@ -7,6 +7,7 @@
  */
 
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { getAllRoadmaps } from "@/lib/sanity";
 
 // ISR: 1時間キャッシュ
@@ -24,6 +25,7 @@ export const metadata: Metadata = {
   description:
     "目標に合ったロードマップを選んで、デザインの探求をはじめよう！転職・スキルアップ・UXデザインなど目的別に学習パスを提供します。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "ロードマップ | BONO",
     description:
       "目標に合ったロードマップを選んで、デザインの探求をはじめよう！",

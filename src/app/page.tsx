@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { redirect } from "next/navigation";
 import { UserProvider } from "@/components/layout/UserProvider";
 import { NewTopContent } from "@/components/top-next/NewTopContent";
@@ -8,6 +9,7 @@ export const metadata: Metadata = {
   description:
     "UIUXデザインを体系的に学べるオンライン学習プラットフォーム。ロードマップ、レッスン、記事で効率的にスキルアップ。未経験からUIUXデザイナーへ。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "BONO - UIUXデザインを学ぶ",
     description:
       "UIUXデザインを体系的に学べるオンライン学習プラットフォーム。ロードマップ、レッスン、記事で効率的にスキルアップ。未経験からUIUXデザイナーへ。",

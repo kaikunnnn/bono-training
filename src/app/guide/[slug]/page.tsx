@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import {
@@ -39,6 +40,7 @@ export async function generateMetadata({
     title: `${guide.title} | 読みもの`,
     description: guide.description,
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${guide.title} | 読みもの`,
       description: guide.description,
       type: "article",

@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import Link from "next/link";
 import PageHeader from "@/components/common/PageHeader";
 import OutputBannerCardItem from "@/components/output/OutputBannerCardItem";
@@ -11,6 +12,7 @@ export const metadata: Metadata = {
   description:
     "BONOのコンテンツを使った受講者が、実際に書いた記事を集めた場所。15分FBを受けた作品・気づきを一覧で。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "アウトプット一覧 | BONO",
     description:
       "BONOのコンテンツを使った受講者が、実際に書いた記事を集めた場所。",

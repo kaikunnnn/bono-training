@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getFeedback, getRelatedFeedbacks, getRecentFeedbacks } from "@/lib/sanity";
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${feedback.title} | フィードバック`,
     description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     openGraph: {
+      ...OG_DEFAULTS,
       title: `${feedback.title} | フィードバック`,
       description: feedback.excerpt || feedback.targetOutput || "BONOのデザインフィードバック",
     },

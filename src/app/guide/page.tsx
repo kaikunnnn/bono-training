@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { getAllGuidesFromSanity, getGuidesByCategoryFromSanity } from "@/lib/sanity";
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
 import { GuideCard } from "@/components/guide/GuideCard";
@@ -13,6 +14,7 @@ export const metadata: Metadata = {
   description:
     "デザインスキルを身につける上でのヒントになる記事。キャリア、学習方法、業界動向などを解説します。",
   openGraph: {
+    ...OG_DEFAULTS,
     title: "読みもの | BONO",
     description:
       "デザインスキルを身につける上でのヒントになる記事。",

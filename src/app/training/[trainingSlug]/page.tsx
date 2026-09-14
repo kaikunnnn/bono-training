@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getTrainingDetail } from "@/lib/services/training";
@@ -25,6 +26,7 @@ export async function generateMetadata({
       title: `${training.title} | トレーニング`,
       description: training.description,
       openGraph: {
+        ...OG_DEFAULTS,
         title: `${training.title} | トレーニング`,
         description: training.description,
         images: training.thumbnailImage ? [training.thumbnailImage] : undefined,
