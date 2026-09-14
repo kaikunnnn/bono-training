@@ -286,6 +286,18 @@ serve(async (req) => {
       metadata: sessionMetadata,
       locale: "ja", // 日本語UI
       allow_promotion_codes: true, // クーポンコード入力欄を表示
+      // 領収書対応（任意入力）: 住所は必要時のみ収集（必須にしない）。
+      billing_address_collection: "auto",
+      // 領収書の宛名（法人名・氏名）を任意で収集。入力があれば webhook で Stripe 顧客名に反映し、
+      // 次回以降の請求書/領収書に表示する（初回は請求確定済みのため反映されない場合あり）。
+      custom_fields: [
+        {
+          key: "receipt_name",
+          label: { type: "custom", custom: "領収書の宛名（法人名・任意）" },
+          type: "text",
+          optional: true,
+        },
+      ],
     };
 
     // 【重要】既存サブスクリプションのキャンセルはWebhook（checkout.session.completed）で実行

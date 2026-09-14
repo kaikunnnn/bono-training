@@ -473,6 +473,21 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       return;
     }
 
+    // 領収書の宛名（任意カスタムフィールド receipt_name）が入力されていれば Stripe 顧客名に反映。
+    // 次回以降の請求書/領収書に表示される（初回は請求確定済みのため反映されない場合あり）。ベストエフォート。
+    try {
+      const receiptNameField = (session.custom_fields ?? []).find(
+        (f: any) => f.key === "receipt_name"
+      );
+      const receiptName = receiptNameField?.text?.value?.trim();
+      if (receiptName) {
+        await stripe.customers.update(customerId, { name: receiptName });
+        console.log(`📇 [LIVE環境] 領収書宛名を顧客名に反映: ${receiptName}`);
+      }
+    } catch (receiptNameError) {
+      console.warn("⚠️ [LIVE環境] 領収書宛名の反映に失敗（続行）:", receiptNameError);
+    }
+
     // メタデータからプラン情報を取得
     const planType = session.metadata?.plan_type || "standard";
     const duration = parseInt(session.metadata?.duration || "1");
