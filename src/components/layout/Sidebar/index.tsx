@@ -13,7 +13,7 @@ import { Home2 } from "iconsax-react";
 
 // 旧BONOサイト（Webflow）。ドメイン切替後は https://legacy.bo-no.design に貼り替える
 // （rebono/issues/切替実行パッケージ.md 参照。legacyは切替日まで www へ301のため今はwww固定）
-const OLD_BONO_URL = "https://www.bo-no.design";
+const OLD_BONO_URL = "https://legacy.bo-no.design";
 
 /**
  * サイドバーコンポーネント
