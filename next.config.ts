@@ -7,7 +7,20 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     return {
-      beforeFiles: [],
+      beforeFiles: [
+        // localhost だけ識別用faviconへ差し替える。本番の app/favicon.ico と
+        // app/apple-icon.png はそのまま維持するため、公開環境には影響しない。
+        {
+          source: "/favicon.ico",
+          destination: "/favicons/local/favicon.png",
+          has: [{ type: "host", value: "localhost(?::\\d+)?" }],
+        },
+        {
+          source: "/apple-icon.png",
+          destination: "/favicons/local/apple-icon.png",
+          has: [{ type: "host", value: "localhost(?::\\d+)?" }],
+        },
+      ],
       afterFiles: [
         // /docs/xxx → public/docs/xxx.html（拡張子なしURLで静的ドキュメントを配信）
         // 配列形式の rewrites は Next.js 仕様上 afterFiles 相当の挙動なので、
