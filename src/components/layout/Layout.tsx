@@ -150,6 +150,12 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
               <SheetContent
                 side="left"
                 className="p-0 w-[280px] h-full"
+                // メニュー内のリンクを選択したら、遷移先が同じ場合もSheetを閉じる
+                onClick={(e) => {
+                  if (e.target instanceof Element && e.target.closest("a")) {
+                    setIsSidebarOpen(false);
+                  }
+                }}
                 // 開いた時に検索boxへ自動フォーカスさせない（モバイルでキーボードが出てしまうため）
                 onOpenAutoFocus={(e) => e.preventDefault()}
                 // 黒い半透明オーバーレイを出さない（透明のまま外側タップで閉じる挙動は維持）
