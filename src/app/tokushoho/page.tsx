@@ -16,7 +16,7 @@ const ROWS: { label: string; value: string[] }[] = [
   {
     label: "電話番号",
     value: [
-      "請求があった場合、遅滞なく開示いたします。掲載のメールアドレスまでご連絡ください。",
+      "電話番号は、請求があった場合、遅滞なく電子メールで開示いたします。ご購入前に掲載のメールアドレスまでご連絡ください。",
     ],
   },
   { label: "メールアドレス", value: ["takumi.kai.skywalker@gmail.com"] },
