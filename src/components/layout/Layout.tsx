@@ -147,7 +147,14 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
                   <Menu size={20} />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="left" className="p-0 w-[280px] h-full">
+              <SheetContent
+                side="left"
+                className="p-0 w-[280px] h-full"
+                // 開いた時に検索boxへ自動フォーカスさせない（モバイルでキーボードが出てしまうため）
+                onOpenAutoFocus={(e) => e.preventDefault()}
+                // 黒い半透明オーバーレイを出さない（透明のまま外側タップで閉じる挙動は維持）
+                overlayClassName="bg-transparent"
+              >
                 <Sidebar user={user} />
               </SheetContent>
             </Sheet>
