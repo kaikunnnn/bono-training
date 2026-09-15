@@ -13,7 +13,12 @@ const ROWS: { label: string; value: string[] }[] = [
     value: ["甲斐琢巳"],
   },
   { label: "住所", value: ["杉並区西荻北3-42-17"] },
-  { label: "電話番号", value: ["07084264038"] },
+  {
+    label: "電話番号",
+    value: [
+      "請求があった場合、遅滞なく開示いたします。掲載のメールアドレスまでご連絡ください。",
+    ],
+  },
   { label: "メールアドレス", value: ["takumi.kai.skywalker@gmail.com"] },
   {
     label: "商品の販売価格・サービスの対価",
