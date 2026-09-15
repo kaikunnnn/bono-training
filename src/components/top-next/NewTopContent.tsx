@@ -129,7 +129,7 @@ export async function NewTopContent({ isMember }: { isMember: boolean }) {
           <FeaturedSeries cards={featuredCards} />
         </div>
       </div>
-      <NewContentSection articles={newContentArticles} />
+      <NewContentSection articles={newContentArticles} viewAllHref="/updates" />
       <TrainingSection
         image1="/images/top5/training-info-architecture.jpg"
         image2="/images/top5/training-ux-research.jpg"

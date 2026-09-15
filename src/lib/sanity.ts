@@ -219,16 +219,18 @@ export const getAllLessons = unstable_cache(
 /**
  * 最新レッスンを limit 件だけ取得（新着コンテンツ用）
  *
- * getAllLessons は lessonNumber 昇順（＝古い順）で全件返すため、
- * 新着マージ用にそのまま `[0...limit]` すると最古のレッスンが混ざってしまう。
- * ここでは getLatestMixedContent の lessonPublishedAt（_createdAt 優先、無ければ
- * lessonNumber から擬似日付）と整合するよう、_createdAt 降順→lessonNumber 降順で
- * 並べてから先頭 limit 件だけを取得する。射影は getAllLessons と同一（_createdAt を含む）。
+ * lesson 自体には publishedAt がないため、紐づく article の最新 publishedAt を
+ * シリーズの公開日相当として使う。記事公開日がない場合だけ _createdAt にフォールバックする。
+ * isHidden=true のレッスンは新着に表示しない。
  */
 export const getLatestLessons = unstable_cache(
-  async (limit: number): Promise<Lesson[]> => {
+  async (
+    limit: number
+  ): Promise<
+    Array<Lesson & { _createdAt?: string; latestArticlePublishedAt?: string }>
+  > => {
     const query = `
-      *[_type == "lesson"] | order(coalesce(_createdAt, "") desc, lessonNumber desc) [0...$limit] {
+      *[_type == "lesson" && isHidden != true] {
         _id,
         _type,
         _createdAt,
@@ -237,17 +239,20 @@ export const getLatestLessons = unstable_cache(
         description,
         lessonNumber,
         thumbnail,
-        thumbnailUrl,
-        iconImage,
-        "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+        "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
         tags,
-        isPremium
-      }
+        isPremium,
+        "latestArticlePublishedAt": (
+          array::compact(
+            *[_type == "quest" && lesson._ref == ^._id].articles[]->publishedAt
+          ) | order(@ desc)
+        )[0]
+      } | order(coalesce(latestArticlePublishedAt, _createdAt) desc) [0...$limit]
     `;
     return getClient().fetch<Lesson[]>(query, { limit });
   },
-  ["sanity:lessons:latest"],
-  { tags: ["lesson"], revalidate: 3600 }
+  ["sanity:lessons:latest:thumbnail-v2"],
+  { tags: ["lesson", "quest", "article"], revalidate: 3600 }
 );
 
 export interface LessonWithArticleIds extends Lesson {
@@ -469,7 +474,8 @@ export const getAllArticles = unstable_cache(
 export const getLatestArticles = unstable_cache(
   async (limit: number): Promise<ArticleListItem[]> => {
     const query = `
-      *[_type == "article"] | order(publishedAt desc) [0...$limit] {
+      *[_type == "article" && defined(publishedAt) && defined(slug.current)]
+        | order(publishedAt desc) [0...$limit] {
         _id,
         title,
         slug,
@@ -1635,11 +1641,10 @@ export interface MixedContentItem {
  * Promise.all で並行呼び出しし、結合後にソート・スライスする。
  *
  * NOTE（レッスンの日付フォールバック）:
- * - レッスンは publishedAt を持たず lessonNumber のみ。ただし Sanity の
- *   全ドキュメントが持つシステムフィールド `_createdAt`（ISO 日時）を
- *   getAllLessons のクエリで取得しているため、これを publishedAt 代わりに
- *   使って他コンテンツと同じ土俵で日付マージする。
- * - 万一 `_createdAt` が欠けている場合は、lessonNumber が大きいほど新しいとみなす
+ * - レッスンは publishedAt を持たないため、紐づく記事の最新 publishedAt を
+ *   シリーズの公開日相当として使う。
+ * - 紐づく記事に publishedAt がなければ Sanity の `_createdAt` を使う。
+ * - 万一どちらも欠けている場合は、lessonNumber が大きいほど新しいとみなす
  *   擬似的な新しさスコアを ISO 文字列として与えてフォールバックする
  *   （lessonNumber を 0 埋めした固定エポック日付。数値が大きいほど文字列比較で
  *   後ろ=新しい側に来るようにする）。これで publishedAt を持つ他コンテンツと
@@ -1668,11 +1673,16 @@ export async function getLatestMixedContent(
     ]);
 
   // レッスン用: publishedAt 相当の日付を決定する。
-  // 1) Sanity システムフィールド _createdAt があればそれを使う
-  // 2) 無ければ lessonNumber から擬似日付を生成（番号が大きいほど新しい扱い）
+  // 1) 紐づく記事の最新 publishedAt があればそれを使う
+  // 2) Sanity システムフィールド _createdAt があればそれを使う
+  // 3) 無ければ lessonNumber から擬似日付を生成（番号が大きいほど新しい扱い）
   const lessonPublishedAt = (
-    lesson: Lesson & { _createdAt?: string }
+    lesson: Lesson & {
+      _createdAt?: string;
+      latestArticlePublishedAt?: string;
+    }
   ): string => {
+    if (lesson.latestArticlePublishedAt) return lesson.latestArticlePublishedAt;
     if (lesson._createdAt) return lesson._createdAt;
     const n = lesson.lessonNumber ?? 0;
     // 固定エポック(2000-01-01)からの通し番号を日付に写像。
@@ -1686,7 +1696,7 @@ export async function getLatestMixedContent(
       type: "記事",
       title: a.title,
       thumbnail: a.thumbnailUrl ?? "",
-      href: `/articles/${a.slug.current}`,
+      href: `/contents/${a.slug.current}`,
       publishedAt: a.publishedAt ?? "",
     })),
     ...guides.slice(0, limit).map((g) => ({
@@ -1720,7 +1730,7 @@ export async function getLatestMixedContent(
     ...lessons.slice(0, limit).map((l) => ({
       type: "レッスン",
       title: l.title,
-      thumbnail: l.thumbnailUrl ?? l.iconImageUrl ?? "",
+      thumbnail: l.thumbnailUrl ?? "",
       href: `/lessons/${l.slug.current}`,
       publishedAt: lessonPublishedAt(l),
     })),
@@ -1743,7 +1753,16 @@ export async function getLatestMixedContent(
   ];
 
   return items
-    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
+    .sort((a, b) => {
+      const dateOrder = (b.publishedAt ?? "").localeCompare(
+        a.publishedAt ?? ""
+      );
+      if (dateOrder !== 0) return dateOrder;
+
+      // シリーズと配下記事が同時公開された場合、枠数の少ない /top でも
+      // 親シリーズが埋もれないようレッスンを先に表示する。
+      return Number(b.type === "レッスン") - Number(a.type === "レッスン");
+    })
     .slice(0, limit);
 }
 

@@ -38,6 +38,7 @@ export const FOOTER_GROUPS: FooterGroup[] = [
       { label: "UI/UXデザインのロードマップ", href: "/roadmap" },
       { label: "レッスン一覧", href: "/lessons" },
       { label: "スキルガイド", href: "/guide" },
+      { label: "新着", href: "/updates" },
       { label: "デザイン記事", href: "/blog" },
     ],
   },
