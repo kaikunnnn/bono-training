@@ -40,14 +40,16 @@ async function loadMPlus1(weight: 400 | 500, text: string): Promise<ArrayBuffer>
 }
 
 async function loadAssets() {
-  const [bg, logoSvg] = await Promise.all([
-    fetch(new URL("./og-assets/og-bg.png", import.meta.url)).then((r) => r.arrayBuffer()),
-    fetch(new URL("./og-assets/bono-outline.svg", import.meta.url)).then((r) => r.text()),
+  // Node.js ランタイム前提（Edge は Hobby プランの 1MB 上限を超えるため不使用）。
+  // new URL(…, import.meta.url) 参照は Vercel のファイルトレースで同梱される。
+  const { readFile } = await import("node:fs/promises");
+  const [bgBuf, logoSvg] = await Promise.all([
+    readFile(new URL("./og-assets/og-bg.jpg", import.meta.url)),
+    readFile(new URL("./og-assets/bono-outline.svg", import.meta.url), "utf8"),
   ]);
+  const bg = bgBuf.buffer.slice(bgBuf.byteOffset, bgBuf.byteOffset + bgBuf.byteLength);
   // SVG は data URI で渡す（ArrayBuffer だと Satori が MIME を判別できない）
-  const logoDataUri = `data:image/svg+xml;base64,${btoa(
-    String.fromCharCode(...new Uint8Array(new TextEncoder().encode(logoSvg)))
-  )}`;
+  const logoDataUri = `data:image/svg+xml;base64,${Buffer.from(logoSvg).toString("base64")}`;
   return { bg, logoDataUri };
 }
 
