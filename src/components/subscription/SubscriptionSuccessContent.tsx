@@ -33,8 +33,8 @@ import type { PlanType } from "@/types/subscription";
 
 export type SuccessType = "new" | "updated";
 
-// 旧サイト（Memberstack）のログインURL
-const LEGACY_SITE_LOGIN_URL = "https://bo-no.design/login";
+// 旧サイト（Memberstack）のログインURL。切替後は legacy.bo-no.design（bo-no.design は新サイト）。
+const LEGACY_SITE_LOGIN_URL = "https://legacy.bo-no.design/login";
 
 interface SubscriptionSuccessContentProps {
   /** 成功タイプ: 新規登録 or プラン更新 */
