@@ -44,8 +44,8 @@ export const FOOTER_GROUPS: FooterGroup[] = [
   {
     label: "コミュニティ",
     links: [
-      { label: "みんなの質問", href: "/questions" },
-      { label: "フィードバック", href: "/feedbacks" },
+      { label: "掲示板", href: "/questions" },
+      { label: "みんなの実績", href: "/achievements" },
       { label: "使い方", href: "/how-to" },
     ],
   },
@@ -53,7 +53,7 @@ export const FOOTER_GROUPS: FooterGroup[] = [
     label: "サービス",
     links: [
       { label: "料金・プラン", href: "/subscription" },
-      { label: "15分フィードバック", href: "/feedback-apply" },
+      { label: "フィードバック", href: "/how-to/feedback" },
       { label: "BONOについて", href: "https://kaikun.bo-no.design/about", external: true },
       { label: "お問い合わせ", href: "https://forms.gle/mC445GwiNUoY9LD3A", external: true },
     ],
