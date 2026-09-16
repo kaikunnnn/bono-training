@@ -8,8 +8,8 @@ import { PurposeItem } from "@/components/top-next/molecules/PurposeItem";
  * レッスン・掲示板は、左サイドバー（Sidebar/icons.tsx の MenuIcons.lesson /
  * MenuIcons.question）と同じ iconsax-react アイコン（Book / MessageQuestion）を
  * 使う（ユーザー指定：同じ導線は同じアイコンで揃える）。
- * ※ 03-ui-conventions.md は新規コードで lucide-react を原則としているが、
- * この2つはサイドバーとの一貫性を優先し、意図的に iconsax-react を使用している。
+ * プロダクト内で同じ導線を同じアイコンに揃える規約に従い、
+ * この2つはサイドバーと同じ iconsax-react を使用している。
  */
 const ICONSAX_SIZE = 20;
 

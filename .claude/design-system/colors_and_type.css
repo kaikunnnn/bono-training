@@ -141,6 +141,18 @@
       rgba(244, 232, 223, 1) 55%,
       rgba(239, 237, 255, 0.08) 94%);
 
+  /* ペルソナ中心UIトレーニング（/lessons/scenario-based-design） */
+  --persona-gradient-start: #06175A;
+  --persona-gradient-middle: #25408D;
+  --persona-gradient-end: #E0B0D2;
+  --persona-cta-gradient: linear-gradient(58deg, var(--persona-gradient-start) 8%, var(--persona-gradient-middle) 73%, var(--persona-gradient-end) 111%);
+  --persona-hero-surface: #F7EFF4;
+  --persona-hero-overlay: rgba(255, 255, 255, 0.72);
+  --persona-media-border: #EBEBEB;
+  --persona-dark-overlay: rgba(2, 23, 16, 0.79);
+  --persona-dark-overlay-soft: rgba(2, 23, 16, 0.66);
+  --persona-recommendation: #FDFF80;
+
   /* 料金ページ feedbackカード（強調・Figma 37:421）: グラデ枠＋影 */
   /* ※グラデ停止点は Figma API が単色 #f99487 に平坦化したためスクショから近似（要ユーザー確認） */
   --grad-feedback-border: linear-gradient(135deg, #9B7FE8 0%, #F472B6 55%, #F99487 100%);
@@ -210,6 +222,8 @@
   --shadow-card:  1px 1px 14px 0px rgba(0,0,0,0.04);        /* lesson card */
   --shadow-lift:  0px 8px 24px 0px rgba(0,0,0,0.16);        /* hover lift */
   --shadow-hero-icon: 1px 1px 13.56px 0px rgba(0,0,0,0.33);
+  --shadow-persona-course-icon: 0px 1px 24px 2px rgba(0,0,0,0.08);
+  --shadow-persona-cta: 0px 1px 2px rgba(0,0,0,0.09);
   --shadow-cta:   0px 4px 4px 0px rgba(0,0,0,0.25);
 
   /* 掲示板一覧カードの影（Figma 127:3266）。既存の --shadow-card（lesson card）は

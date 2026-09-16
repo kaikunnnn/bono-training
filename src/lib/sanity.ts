@@ -99,6 +99,7 @@ export const getLesson = unstable_cache(
         "articles": articles[]-> {
           _id,
           title,
+          excerpt,
           slug,
           articleType,
           thumbnail {

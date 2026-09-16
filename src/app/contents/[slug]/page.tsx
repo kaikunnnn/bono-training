@@ -1,7 +1,11 @@
 import { Metadata } from "next";
 import { getArticleWithContext, getArticleMetadata } from "@/lib/sanity";
 import { redirectMissingContent } from "@/lib/missingContentRedirect";
-import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
+import {
+  getSubscriptionStatus,
+  canAccessContent,
+  getEffectiveLearningPlanType,
+} from "@/lib/subscription";
 import { isBookmarked } from "@/lib/services/bookmarks";
 import { getArticleProgress } from "@/lib/services/progress";
 import { ViewHistoryRecorder } from "@/components/article/ViewHistoryRecorder";
@@ -97,7 +101,14 @@ export default async function ArticlePage({ params }: PageProps) {
   const isCompleted = progressStatus === "completed";
 
   // プレミアムコンテンツへのアクセス権限チェック
-  const hasAccess = canAccessContent(article.isPremium || false, subscription.planType);
+  const effectivePlanType = getEffectiveLearningPlanType(
+    subscription.planType,
+    subscription.hasLearningAccess
+  );
+  const hasAccess = canAccessContent(
+    article.isPremium || false,
+    effectivePlanType
+  );
 
   // 前後の記事を計算（クエストをまたぐナビゲーション対応）
   const navigation = (() => {

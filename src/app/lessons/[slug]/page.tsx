@@ -1,10 +1,16 @@
 import { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
-import { getLesson, getLessonMetadata } from "@/lib/sanity";
+import { getLesson, getLessonMetadata, urlFor } from "@/lib/sanity";
 import { getLessonProgress } from "@/lib/services/progress";
-import { getSubscriptionStatus, isContentLocked } from "@/lib/subscription";
+import {
+  getEffectiveLearningPlanType,
+  getSubscriptionStatus,
+  isContentLocked,
+} from "@/lib/subscription";
 import LessonDetailClient from "./LessonDetailClient";
+import PersonaLessonTopClient from "./PersonaLessonTopClient";
+import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
 import { generateCourseJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 
 // ISR: 1時間キャッシュ
@@ -61,6 +67,73 @@ export default async function LessonPage({ params }: PageProps) {
     notFound();
   }
 
+  const effectivePlanType = getEffectiveLearningPlanType(
+    subscription.planType,
+    subscription.hasLearningAccess
+  );
+
+  if (slug === PERSONA_LESSON_SLUG) {
+    const personaLesson = {
+      _id: lesson._id,
+      title: lesson.title,
+      slug: lesson.slug,
+      iconImageUrl: lesson.iconImageUrl,
+      quests: (lesson.quests || []).map((quest, questIndex) => ({
+        _id: quest._id,
+        questNumber: quest.questNumber || questIndex + 1,
+        title: quest.title,
+        articles: (quest.articles || []).map((article, articleIndex) => ({
+          _id: article._id,
+          articleNumber: articleIndex + 1,
+          title: article.title,
+          excerpt: article.excerpt,
+          slug: article.slug,
+          thumbnailUrl:
+            article.thumbnailUrl ||
+            (article.thumbnail?.asset?._ref
+              ? urlFor(article.thumbnail)
+                  .width(320)
+                  .height(180)
+                  .fit("crop")
+                  .auto("format")
+                  .url()
+              : undefined),
+          videoUrl: article.videoUrl,
+          videoDuration: article.videoDuration,
+          articleType:
+            questIndex === 0 && /トレーニング(?:の)?準備/.test(article.title)
+              ? ("intro" as const)
+              : article.articleType,
+          isPremium: article.isPremium,
+          isLocked: isContentLocked(
+            article.isPremium || false,
+            effectivePlanType
+          ),
+        })),
+      })),
+    };
+
+    return (
+      <>
+        <script
+          {...jsonLdScriptProps(
+            generateCourseJsonLd({
+              title: lesson.title,
+              description:
+                lesson.description || `${lesson.title}のレッスン内容を学習できます。`,
+              url: `/lessons/${slug}`,
+              image: lesson.thumbnailUrl || lesson.iconImageUrl,
+            })
+          )}
+        />
+        <PersonaLessonTopClient
+          lesson={personaLesson}
+          hasFullAccess={subscription.hasLearningAccess}
+        />
+      </>
+    );
+  }
+
   // クエストごとの進捗マップを構築
   const questProgressMap: Record<string, { completed: number; total: number; completedArticleIds: string[] }> = {};
   let totalCompleted = 0;
@@ -102,7 +175,7 @@ export default async function LessonPage({ params }: PageProps) {
       articles: quest.articles?.map((article, articleIndex) => ({
         ...article,
         articleNumber: articleIndex + 1,
-        isLocked: isContentLocked(article.isPremium || false, subscription.planType),
+        isLocked: isContentLocked(article.isPremium || false, effectivePlanType),
       })) || [],
     })) || [],
   };

@@ -45,6 +45,10 @@ const buttonVariants = cva(
         // カード（top-next等）はこちらを使う
         "outline-ghost":
           "border border-border-strong text-black hover:bg-black/[0.03]",
+        "persona-gradient":
+          "bg-[image:var(--persona-cta-gradient)] text-text-inverse shadow-[var(--shadow-persona-cta)] hover:brightness-110",
+        unstyled:
+          "bg-transparent text-inherit shadow-none hover:bg-transparent",
       },
       size: {
         // 角丸は高さに比例（h-8→10px / h-10→12px / h-11→14px / h-12→16px）
@@ -61,6 +65,8 @@ const buttonVariants = cva(
         // 新トップページ カード用（詳しく見る／詳細を見る）。
         // flex-col の親（カード内）に置かれる想定なので self-start で全幅化を防ぐ
         "top-card": "h-8 w-fit self-start px-6 rounded-[6px] text-xs font-medium tracking-[0.6px]",
+        "persona-cta": "h-14 px-6 rounded-[var(--radius-sm)]",
+        unstyled: "h-auto rounded-none p-0",
       },
     },
     defaultVariants: {

@@ -137,6 +137,7 @@ When rendering a roadmap detail hero or card with `variant="gradient"`, resolve 
 
 - Hand-drawn 3D emoji live in `assets/emoji/`. They are **PNG-baked SVGs** (one per file). Always use them via a path, never inline base64 in components.
 - Goal buttons use Fluent 3D emoji at `/images/goal-buttons/*_3d.png`. Match the `goalFluentIcons` mapping.
+- Iconsax icons are the first choice for product, category, and navigation concepts. Match the global sidebar icon when representing the same destination or feature.
 - Lucide icons are allowed for utility (chevrons, checkmarks, close). Stroke width `2.5` for primary CTAs.
 
 ---
