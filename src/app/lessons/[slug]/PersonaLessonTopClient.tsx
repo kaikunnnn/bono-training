@@ -258,24 +258,32 @@ function OverviewMedia() {
           className={s.slideImage}
         />
       </div>
+      <div className={s.slideThumbnails} aria-label="表示するスライドを選ぶ">
+        {overviewSlides.map((slide, index) => (
+          <Button
+            key={slide.src}
+            type="button"
+            variant="unstyled"
+            size="unstyled"
+            className={s.slideThumbnail}
+            aria-label={`${index + 1}枚目のスライドを表示`}
+            aria-current={index === active ? "true" : undefined}
+            onClick={() => setActive(index)}
+          >
+            <Image
+              src={slide.src}
+              alt=""
+              width={320}
+              height={180}
+              sizes="(min-width: 1000px) 170px, 112px"
+            />
+          </Button>
+        ))}
+      </div>
       <div className={s.slideControls}>
         <p className={s.slideCounter} aria-live="polite">
           {pad(active + 1)} <span aria-hidden="true">/</span> {pad(overviewSlides.length)}
         </p>
-        <div className={s.slideDots} aria-label="表示するスライドを選ぶ">
-          {overviewSlides.map((slide, index) => (
-            <Button
-              key={slide.src}
-              type="button"
-              variant="unstyled"
-              size="unstyled"
-              className={s.slideDot}
-              aria-label={`${index + 1}枚目のスライドを表示`}
-              aria-current={index === active ? "true" : undefined}
-              onClick={() => setActive(index)}
-            />
-          ))}
-        </div>
         <div className={s.slideArrows}>
           <Button
             type="button"
