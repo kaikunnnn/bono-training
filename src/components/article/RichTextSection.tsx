@@ -219,17 +219,21 @@ const RichTextSection = ({
       image: ({ value }) => {
         if (!value?.asset) return null;
 
+        // Sanity CDNのURL末尾（-WxH.ext）から実寸を取り、本来の縦横比で表示する
+        const dims = value.asset.url?.match(/-(\d+)x(\d+)\.(?:png|jpe?g|webp|gif)/);
+        const width = dims ? Number(dims[1]) : 1600;
+        const height = dims ? Number(dims[2]) : 900;
+
         return (
           <figure className="my-8 w-full">
-            <div className="relative w-full aspect-video">
-              <Image
-                src={value.asset.url}
-                alt={value.alt || ""}
-                fill
-                className="rounded-lg object-contain"
-                unoptimized
-              />
-            </div>
+            <Image
+              src={value.asset.url}
+              alt={value.alt || ""}
+              width={width}
+              height={height}
+              className="w-full h-auto rounded-lg"
+              unoptimized
+            />
             {value.caption && (
               <figcaption className="mt-2 text-sm text-text-muted text-center italic">
                 {value.caption}
