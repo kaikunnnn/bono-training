@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Book1, Briefcase, Lock1, Magicpen, Unlock } from "iconsax-react";
-import { ArrowLeft, ArrowRight, FileText, Minus, Play, Plus, Video } from "lucide-react";
+import { ArrowRight, FileText, Minus, Play, Plus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { personaLessonTopContent } from "@/lib/persona-lesson-top-config";
 import { formatVideoDuration } from "@/lib/utils";
@@ -231,14 +231,6 @@ const overviewSlides = [
 function OverviewMedia() {
   const [active, setActive] = useState(0);
   const currentSlide = overviewSlides[active];
-  const showPrevious = () => {
-    setActive((current) =>
-      current === 0 ? overviewSlides.length - 1 : current - 1
-    );
-  };
-  const showNext = () => {
-    setActive((current) => (current + 1) % overviewSlides.length);
-  };
 
   return (
     <div
@@ -279,31 +271,6 @@ function OverviewMedia() {
             />
           </Button>
         ))}
-      </div>
-      <div className={s.slideControls}>
-        <p className={s.slideCounter} aria-live="polite">
-          {pad(active + 1)} <span aria-hidden="true">/</span> {pad(overviewSlides.length)}
-        </p>
-        <div className={s.slideArrows}>
-          <Button
-            type="button"
-            variant="unstyled"
-            size="unstyled"
-            aria-label="前のスライド"
-            onClick={showPrevious}
-          >
-            <ArrowLeft size={17} strokeWidth={1.7} />
-          </Button>
-          <Button
-            type="button"
-            variant="unstyled"
-            size="unstyled"
-            aria-label="次のスライド"
-            onClick={showNext}
-          >
-            <ArrowRight size={17} strokeWidth={1.7} />
-          </Button>
-        </div>
       </div>
     </div>
   );

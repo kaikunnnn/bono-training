@@ -132,7 +132,7 @@ describe("PersonaLessonTopClient", () => {
     expect(screen.getByRole("img", { name: "閲覧可能" })).toBeInTheDocument();
   });
 
-  it("shows the five overview slides in order with arrow and direct controls", () => {
+  it("shows the five overview slides with direct thumbnail controls", () => {
     render(<PersonaLessonTopClient lesson={lesson} hasFullAccess={false} />);
 
     const carousel = screen.getByRole("group", { name: "トレーニングの進め方" });
@@ -140,7 +140,9 @@ describe("PersonaLessonTopClient", () => {
       within(carousel).getByRole("img", { name: /トレーニングの完成イメージ/ })
     ).toBeInTheDocument();
 
-    fireEvent.click(within(carousel).getByRole("button", { name: "次のスライド" }));
+    fireEvent.click(
+      within(carousel).getByRole("button", { name: "2枚目のスライドを表示" })
+    );
     expect(
       within(carousel).getByRole("img", { name: /3ステップ/ })
     ).toBeInTheDocument();
@@ -152,10 +154,7 @@ describe("PersonaLessonTopClient", () => {
       within(carousel).getByRole("img", { name: /デザイン検討ドキュメント/ })
     ).toBeInTheDocument();
 
-    fireEvent.click(within(carousel).getByRole("button", { name: "次のスライド" }));
-    expect(
-      within(carousel).getByRole("img", { name: /トレーニングの完成イメージ/ })
-    ).toBeInTheDocument();
+    expect(within(carousel).queryByRole("button", { name: "次のスライド" })).toBeNull();
   });
 
   it("has one h1 and a continuous h1-h3 heading hierarchy", () => {
