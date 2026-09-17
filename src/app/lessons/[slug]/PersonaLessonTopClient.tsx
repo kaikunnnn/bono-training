@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Book1, Briefcase, Lock1, Magicpen, Unlock } from "iconsax-react";
-import { ArrowRight, FileText, Minus, Play, Plus, Video } from "lucide-react";
+import { ArrowLeft, ArrowRight, FileText, Minus, Play, Plus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { personaLessonTopContent } from "@/lib/persona-lesson-top-config";
 import { formatVideoDuration } from "@/lib/utils";
@@ -172,7 +172,17 @@ function CurriculumQuest({
           <span className={s.questNumber}>{pad(index + 1)}</span>
           <span className={s.questTitleLine}>
             <strong>{quest.title}</strong>
-            <span>{availableCount ? `${availableCount}つ` : "準備中"}</span>
+            {availableCount ? (
+              <span
+                className={s.questContentCount}
+                aria-label={`${availableCount}コンテンツ`}
+              >
+                <strong>{availableCount}</strong>
+                <span>コンテンツ</span>
+              </span>
+            ) : (
+              <span className={s.questPending}>準備中</span>
+            )}
           </span>
           <span className={s.toggleIcon} aria-hidden="true">
             {open ? <Minus size={16} strokeWidth={1.8} /> : <Plus size={16} strokeWidth={1.8} />}
@@ -195,63 +205,97 @@ function CurriculumQuest({
   );
 }
 
-function OverviewMedia({ firstArticle }: { firstArticle?: PersonaLessonTopArticle }) {
-  const [active, setActive] = useState<0 | 1>(0);
-  const thumbnail = firstArticle?.thumbnailUrl;
+const overviewSlides = [
+  {
+    src: asset("slides/slide-01.jpg"),
+    alt: "課題と配慮からペルソナの理想体験をデザインするトレーニングの完成イメージ",
+  },
+  {
+    src: asset("slides/slide-02.jpg"),
+    alt: "課題を見つけ、理想体験をつくり、評価基準で確認する3ステップ",
+  },
+  {
+    src: asset("slides/slide-03.jpg"),
+    alt: "利用シーンからユーザーの課題と配慮を抽出するプロセス",
+  },
+  {
+    src: asset("slides/slide-04.jpg"),
+    alt: "ペルソナの課題と理想体験をUIデザインの指標にまとめる例",
+  },
+  {
+    src: asset("slides/slide-05.jpg"),
+    alt: "プロトタイプで分かったことをデザイン検討ドキュメントにまとめる例",
+  },
+] as const;
+
+function OverviewMedia() {
+  const [active, setActive] = useState(0);
+  const currentSlide = overviewSlides[active];
+  const showPrevious = () => {
+    setActive((current) =>
+      current === 0 ? overviewSlides.length - 1 : current - 1
+    );
+  };
+  const showNext = () => {
+    setActive((current) => (current + 1) % overviewSlides.length);
+  };
 
   return (
-    <div className={s.overviewMedia}>
+    <div
+      className={s.overviewMedia}
+      role="group"
+      aria-roledescription="カルーセル"
+      aria-label="トレーニングの進め方"
+    >
       <div className={s.mediaFrame}>
-        {active === 0 ? (
-          <Image
-            src={asset("overview-slide.png")}
-            alt="課題と配慮から、理想体験をプロトタイピングする図"
-            width={599}
-            height={338}
-            className={s.slideImage}
-          />
-        ) : firstArticle ? (
-          <Link href={`${CONTENT_BASE_PATH}/${firstArticle.slug.current}`} className={s.materialPreview}>
-            {thumbnail && (
-              <Image
-                src={thumbnail}
-                alt=""
-                fill
-                sizes="(min-width: 1000px) 888px, 100vw"
-                unoptimized
-                className={s.materialThumbnail}
-              />
-            )}
-            <span className={s.materialLabel}>最初の内容</span>
-            <strong>{firstArticle.title}</strong>
-            <span>内容を開く ↗</span>
-          </Link>
-        ) : (
-          <div className={s.materialPreview}>
-            <span>公開をお待ちください</span>
-          </div>
-        )}
+        <Image
+          key={currentSlide.src}
+          src={currentSlide.src}
+          alt={currentSlide.alt}
+          width={1920}
+          height={1080}
+          sizes="(min-width: 1000px) 888px, 100vw"
+          className={s.slideImage}
+        />
       </div>
-      <div className={s.mediaTabs} aria-label="トレーニングの紹介">
-        <Button
-          type="button"
-          variant="unstyled"
-          size="unstyled"
-          aria-pressed={active === 0}
-          onClick={() => setActive(0)}
-        >
-          01 / トレーニングの考え方
-        </Button>
-        <Button
-          type="button"
-          variant="unstyled"
-          size="unstyled"
-          aria-pressed={active === 1}
-          onClick={() => setActive(1)}
-        >
-          02 / 最初の内容
-          <Image src={asset("play.svg")} alt="" width={13} height={13} />
-        </Button>
+      <div className={s.slideControls}>
+        <p className={s.slideCounter} aria-live="polite">
+          {pad(active + 1)} <span aria-hidden="true">/</span> {pad(overviewSlides.length)}
+        </p>
+        <div className={s.slideDots} aria-label="表示するスライドを選ぶ">
+          {overviewSlides.map((slide, index) => (
+            <Button
+              key={slide.src}
+              type="button"
+              variant="unstyled"
+              size="unstyled"
+              className={s.slideDot}
+              aria-label={`${index + 1}枚目のスライドを表示`}
+              aria-current={index === active ? "true" : undefined}
+              onClick={() => setActive(index)}
+            />
+          ))}
+        </div>
+        <div className={s.slideArrows}>
+          <Button
+            type="button"
+            variant="unstyled"
+            size="unstyled"
+            aria-label="前のスライド"
+            onClick={showPrevious}
+          >
+            <ArrowLeft size={17} strokeWidth={1.7} />
+          </Button>
+          <Button
+            type="button"
+            variant="unstyled"
+            size="unstyled"
+            aria-label="次のスライド"
+            onClick={showNext}
+          >
+            <ArrowRight size={17} strokeWidth={1.7} />
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -355,7 +399,7 @@ export default function PersonaLessonTopClient({
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
-            <OverviewMedia firstArticle={firstArticle} />
+            <OverviewMedia />
           </div>
         </section>
 
