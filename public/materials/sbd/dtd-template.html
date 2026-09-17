@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>デザイン検討ドキュメント（テンプレート）</title>
+<style>
+  :root {
+    --ink: #1f2a24;
+    --ink-soft: #52605a;
+    --accent: #102720;
+    --accent-soft: #e8f0ec;
+    --paper: #faf9f6;
+    --card: #ffffff;
+    --line: #e4e1da;
+    --guide: #9aa39e;
+    --blank-border: #c9c1ad;
+    --rule: #e7e2d4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Yu Gothic", sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.9;
+    font-size: 15.5px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { max-width: 780px; margin: 0 auto; padding: 56px 24px 80px; }
+
+  .doc-label {
+    display: inline-block;
+    font-size: 12px; font-weight: 700; letter-spacing: .12em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 16px;
+  }
+  h1 { font-size: 27px; line-height: 1.5; font-weight: 800; margin-bottom: 12px; }
+  h1 .blank-inline {
+    display: inline-block;
+    min-width: 9em;
+    border-bottom: 2px dashed var(--blank-border);
+    color: #b3aca0; font-weight: 600; font-size: 20px;
+  }
+  .meta { color: var(--ink-soft); font-size: 14px; }
+  .meta .blank-inline {
+    display: inline-block; min-width: 16em;
+    border-bottom: 2px dashed var(--blank-border);
+    color: #b3aca0;
+  }
+
+  section { margin-top: 52px; }
+  h2 {
+    font-size: 19px; font-weight: 800;
+    padding-bottom: 12px; margin-bottom: 8px;
+    border-bottom: 2px solid var(--ink);
+  }
+  h3 { font-size: 15.5px; font-weight: 700; margin: 22px 0 6px; color: var(--accent); }
+
+  .guide {
+    font-size: 13px;
+    color: var(--guide);
+    margin-bottom: 10px;
+  }
+
+  /* 記入欄：ワークシートの空欄。ノートの罫線＋破線枠＋「ここに書く」ラベル */
+  .blank {
+    position: relative;
+    border: 2px dashed var(--blank-border);
+    border-radius: 10px;
+    padding: 34px 20px 10px;
+    margin: 18px 0 6px;
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent, transparent 34px,
+        var(--rule) 34px, var(--rule) 36px
+      );
+    background-position: 0 8px;
+    min-height: 108px;
+  }
+  .blank.tall { min-height: 144px; }
+  .write-tag {
+    position: absolute;
+    top: -13px; left: 14px;
+    background: var(--ink);
+    color: #fff;
+    font-size: 12px; font-weight: 700;
+    border-radius: 999px;
+    padding: 2px 12px;
+    letter-spacing: .04em;
+  }
+  .example {
+    font-size: 12.5px;
+    color: #b3aca0;
+    line-height: 1.8;
+    white-space: pre-line;
+    background: var(--paper);
+    display: inline-block;
+    border-radius: 4px;
+    padding: 0 4px;
+  }
+  .blank.conclusion .example { background: #f3f8f5; }
+  .example b { color: #a39c8e; font-weight: 700; }
+
+  /* 結論の空欄：一番大事な欄 */
+  .blank.conclusion {
+    border-color: var(--accent);
+    background:
+      repeating-linear-gradient(
+        180deg,
+        transparent, transparent 34px,
+        #dbe7e0 34px, #dbe7e0 36px
+      ),
+      #f3f8f5;
+    background-position: 0 8px;
+  }
+  .blank.conclusion .write-tag { background: var(--accent); }
+
+  /* プロトタイプ枠 */
+  .proto-grid { display: grid; gap: 22px; margin-top: 18px; }
+  .proto {
+    border: 2px dashed var(--blank-border);
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    position: relative;
+  }
+  .proto .thumb {
+    border-right: 2px dashed var(--blank-border);
+    display: flex; flex-direction: column; gap: 6px;
+    align-items: center; justify-content: center;
+    color: #b3aca0; font-size: 12.5px; font-weight: 600;
+    min-height: 150px;
+    text-align: center;
+    padding: 12px;
+  }
+  .proto .thumb .icon { font-size: 24px; }
+  .proto .body { padding: 28px 20px 16px; }
+  .proto .body .example { margin-bottom: 4px; display: block; width: fit-content; }
+  .proto .fake-btn {
+    display: inline-block; margin-top: 8px;
+    font-size: 13.5px; font-weight: 700; color: #b3aca0;
+    border: 1.5px dashed var(--blank-border);
+    border-radius: 999px; padding: 5px 16px;
+  }
+
+  footer {
+    margin-top: 60px; padding-top: 18px;
+    border-top: 1px solid var(--line);
+    font-size: 12.5px; color: var(--ink-soft);
+  }
+  footer .blank-inline {
+    display: inline-block; min-width: 12em;
+    border-bottom: 2px dashed var(--blank-border);
+    color: #b3aca0;
+  }
+
+  @media (max-width: 620px) {
+    .proto { grid-template-columns: 1fr; }
+    .proto .thumb { border-right: none; border-bottom: 2px dashed var(--blank-border); }
+    .page { padding-top: 40px; }
+    h1 { font-size: 23px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <span class="doc-label">デザイン検討ドキュメント</span>
+    <h1><span class="blank-inline">✍️ お題の名前を書く</span> の検討</h1>
+    <p class="meta">お題：<span class="blank-inline">✍️ 取り組んだお題・プロジェクトを1行で</span><br>目的：<span class="blank-inline">✍️ このデザインで達成したいこと（機能の説明ではなく目的）</span></p>
+  </header>
+
+  <section>
+    <h2>1. 検討の現在地：いま分かっていること・考えていること</h2>
+    <p class="guide">💡 結論を先に書きます。読む人が最初に知りたいのは結論で、根拠は後から追えれば十分です。</p>
+
+    <h3>考えた利用シーン</h3>
+    <p class="guide">誰が・どんな場面でそれを使うのか。1〜2文で。</p>
+    <div class="blank">
+      <span class="write-tag">✍️ ここに自分の利用シーンを書く</span>
+      <p class="example"><b>記入例：</b>1on1で改善点を話し、上司におすすめの本を教えてもらった新米デザイナーが、その本を社内にシェアしようとする場面。</p>
+    </div>
+
+    <h3>結論（現時点の結論）</h3>
+    <p class="guide">プロトタイプまで作って触ってみて、いま言えること。言い切れなくてOK。「〜の可能性が高い」「〜の方が目的に合いそう」の形で。</p>
+    <div class="blank conclusion">
+      <span class="write-tag">✍️ ここに現時点の結論を書く</span>
+      <p class="example"><b>記入例：</b>普通に◯◯を作ってしまうと、△△が起きない可能性が高い。□□寄りの形にする方が、目的に合いそう。</p>
+    </div>
+
+    <h3>課題</h3>
+    <p class="guide">そのゴールに向かうとき、何が妨げになるか。箇条書きで。「面倒くさい」で止めず、なぜそう感じるのかまで。</p>
+    <div class="blank tall">
+      <span class="write-tag">✍️ ここに課題を箇条書きで書く</span>
+      <p class="example"><b>記入例：</b>
+・投稿のハードルが高い：本を読み切らないといけない＋ちゃんとした文章にしないといけない
+・レビューだけでは聞きたいことが聞けない</p>
+    </div>
+
+    <h3>今考えている方向性</h3>
+    <p class="guide">課題を踏まえて、どんな体験・UIの方向で解こうとしているか。箇条書きで。</p>
+    <div class="blank">
+      <span class="write-tag">✍️ ここに方向性を箇条書きで書く</span>
+      <p class="example"><b>記入例：</b>
+・気になった本についてスレッドを立てて、意見が集まりやすい仕組みにする</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>2. 作成したプロトタイプ</h2>
+    <p class="guide">作った案を並べます。画像＋触れるリンク付きで。「良いと思う案」だけでなく「ダメだと思う案」も並べると、違いが伝わります。数は作った分だけでOK。</p>
+    <div class="proto-grid">
+
+      <div class="proto">
+        <span class="write-tag">✍️ 案1</span>
+        <div class="thumb"><span class="icon">🖼️</span><span>ここにプロトタイプの<br>スクリーンショットを貼る</span></div>
+        <div class="body">
+          <p class="example"><b>案の名前：</b>例）スレッド型コミュニティ</p>
+          <p class="example"><b>どんなパターンか（1〜2文）：</b>例）スレッドを立ててコメントでやり取りするパターン。一番オーソドックスな案。</p>
+          <span class="fake-btn">🔗 プロトタイプのリンクを貼る</span>
+        </div>
+      </div>
+
+      <div class="proto">
+        <span class="write-tag">✍️ 案2</span>
+        <div class="thumb"><span class="icon">🖼️</span><span>ここにプロトタイプの<br>スクリーンショットを貼る</span></div>
+        <div class="body">
+          <p class="example"><b>案の名前：</b></p>
+          <p class="example"><b>どんなパターンか（1〜2文）：</b></p>
+          <span class="fake-btn">🔗 プロトタイプのリンクを貼る</span>
+        </div>
+      </div>
+
+      <div class="proto">
+        <span class="write-tag">✍️ 案3</span>
+        <div class="thumb"><span class="icon">🖼️</span><span>ここにプロトタイプの<br>スクリーンショットを貼る</span></div>
+        <div class="body">
+          <p class="example"><b>案の名前：</b></p>
+          <p class="example"><b>どんなパターンか（1〜2文）：</b></p>
+          <span class="fake-btn">🔗 プロトタイプのリンクを貼る</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>3. 分かったこと</h2>
+    <p class="guide">プロトタイプを歩いて見えたことを箇条書きで。うまくいきそうなこと・まだ弱いこと、どちらも。「どの場面で、何が起き、どんな仮説が出たか」まで書けるとベスト。</p>
+    <div class="blank tall">
+      <span class="write-tag">✍️ ここに分かったことを箇条書きで書く</span>
+      <p class="example"><b>記入例：</b>
+・コミュニティ寄りにすれば投稿のハードルは下がりそう
+・ただ「投稿したくなる瞬間」のイメージがまだ弱い</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>4. 次にやること</h2>
+    <p class="guide">「もっと改善する」ではなく、次に手を動かすことを具体的に。「次は◯◯を確かめるために、△△をする」の形で。</p>
+    <div class="blank">
+      <span class="write-tag">✍️ ここに次にやることを書く</span>
+      <p class="example"><b>記入例：</b>次は「投稿したくなる瞬間」を確かめるために、STEP1へ戻って利用シーンを具体化し、プロトタイプに起こす。</p>
+    </div>
+  </section>
+
+  <footer>
+    <span class="blank-inline">✍️ 名前・日付を書く</span>
+  </footer>
+
+</div>
+</body>
+</html>
