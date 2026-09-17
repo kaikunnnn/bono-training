@@ -174,21 +174,57 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
           "ほとんどがWebサービスのデザインを想定した内容です。考え方自体はWebデザインにも活きます（特に提案やビジュアルのアイデア出し）が、直接的な「LPの作り方」などのコンテンツは少なめです。",
       },
       {
-        q: "退会は自由に可能でしょうか？",
+        q: "退会（サブスクリプションの解約）方法を教えてください",
         a: (
-          <p>
-            はい。メンバーログイン後の
-            <Link
-              href="/mypage"
-              className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
-            >
-              「マイページ＞アカウント」ページ
-            </Link>
-            にある「サブスクリプションを管理」からStripeのカスタマーポータルを開き、いつでも解約できます。解約後も更新日まではご利用いただけます。
-          </p>
+          <div className="space-y-5">
+            <p>
+              BONOの退会をご希望の場合は、現在ご利用中のサイトに応じて、以下の手順でお手続きください。
+            </p>
+
+            <div className="space-y-2">
+              <p className="font-medium text-foreground">
+                9月15日以降の新しいサイトをご利用の場合
+              </p>
+              <ol className="list-decimal space-y-1 pl-5">
+                <li>
+                  <Link
+                    href="https://www.bo-no.design/account"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-all text-foreground underline underline-offset-4 hover:text-muted-foreground"
+                  >
+                    https://www.bo-no.design/account
+                  </Link>
+                  にアクセスします。
+                </li>
+                <li>「サブスクリプション管理」を選択します。</li>
+                <li>「キャンセル」を選択し、画面の案内に沿ってお手続きください。</li>
+              </ol>
+            </div>
+
+            <div className="space-y-2">
+              <p className="font-medium text-foreground">
+                まだ新しいサイトへ移行されていない場合
+              </p>
+              <ol className="list-decimal space-y-1 pl-5">
+                <li>
+                  <Link
+                    href="https://legacy.bo-no.design/mypage"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-all text-foreground underline underline-offset-4 hover:text-muted-foreground"
+                  >
+                    https://legacy.bo-no.design/mypage
+                  </Link>
+                  にアクセスします。
+                </li>
+                <li>「プラン確認」から、キャンセルのお手続きを進めてください。</li>
+              </ol>
+            </div>
+          </div>
         ),
         plain:
-          "はい。メンバーログイン後の「マイページ＞アカウント」ページにある「サブスクリプションを管理」からStripeのカスタマーポータルを開き、いつでも解約できます。解約後も更新日まではご利用いただけます。",
+          "BONOの退会をご希望の場合は、現在ご利用中のサイトに応じてお手続きください。9月15日以降の新しいサイトをご利用の場合は、https://www.bo-no.design/account にアクセスし、「サブスクリプション管理」から「キャンセル」を選択して、画面の案内に沿ってお手続きください。まだ新しいサイトへ移行されていない場合は、https://legacy.bo-no.design/mypage にアクセスし、「プラン確認」からキャンセルのお手続きを進めてください。",
       },
     ],
   },
