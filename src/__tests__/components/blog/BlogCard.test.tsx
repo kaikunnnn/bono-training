@@ -25,10 +25,11 @@ describe("BlogCard", () => {
     expect(screen.getByText("Test Blog Post")).toBeInTheDocument();
   });
 
-  it("should render post description", () => {
-    render(<BlogCard post={mockPost} />);
+  it("should remove a leading emoji from the title", () => {
+    render(<BlogCard post={{ ...mockPost, title: "🎨 Test Blog Post" }} />);
 
-    expect(screen.getByText("Test blog description")).toBeInTheDocument();
+    expect(screen.getByText("Test Blog Post")).toBeInTheDocument();
+    expect(screen.queryByText("🎨 Test Blog Post")).not.toBeInTheDocument();
   });
 
   it("should render category badge", () => {
@@ -37,10 +38,10 @@ describe("BlogCard", () => {
     expect(screen.getByText("デザイン")).toBeInTheDocument();
   });
 
-  it("should render reading time", () => {
+  it("should render the publish date", () => {
     render(<BlogCard post={mockPost} />);
 
-    expect(screen.getByText("5分")).toBeInTheDocument();
+    expect(screen.getByText("2024年01月15日")).toBeInTheDocument();
   });
 
   it("should render link to blog detail page", () => {
@@ -50,20 +51,18 @@ describe("BlogCard", () => {
     expect(link).toHaveAttribute("href", "/blog/test-post");
   });
 
-  it("should render featured badge when featured is true", () => {
-    const featuredPost: BlogPost = {
-      ...mockPost,
-      featured: true,
-    };
-
-    render(<BlogCard post={featuredPost} />);
-
-    expect(screen.getByText("おすすめ")).toBeInTheDocument();
-  });
-
-  it("should not render featured badge when featured is false", () => {
+  it("should render the thumbnail", () => {
     render(<BlogCard post={mockPost} />);
 
-    expect(screen.queryByText("おすすめ")).not.toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "emoji Image" })).toHaveAttribute(
+      "src",
+      mockPost.thumbnail
+    );
+  });
+
+  it("should fall back to the category slug when category metadata is missing", () => {
+    render(<BlogCard post={{ ...mockPost, category: "unknown" }} />);
+
+    expect(screen.getByText("UNKNOWN")).toBeInTheDocument();
   });
 });

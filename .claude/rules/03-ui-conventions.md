@@ -2,16 +2,20 @@
 
 ## アイコン
 
-- **lucide-react** を使用（プロジェクト標準、86ファイルで使用中）
-- `iconsax-react` は Sidebar と Roadmap detail の一部で使用（レガシー）
-- 新規コードでは必ず lucide-react を使う
+- `iconsax-react` と `lucide-react` の両方を正式なアイコンライブラリとして使用できる
+- **プロダクトの機能・カテゴリ・ナビゲーションを表すアイコンは `iconsax-react` を第一選択**とする
+  - 左サイドナビの `MenuIcons`（レッスン、トレーニング、検索、マイページ、設定等）が基準
+  - 同じ導線・概念には、サイドナビと同じIconsaxアイコンを使う
+- 矢印、開閉、チェック、閉じる、ローディングなどの操作系アイコン、および既存のshadcn/ui部品では `lucide-react` を使用できる
+- 既存コンポーネントを修正するときは、その画面・コンポーネントですでに使われているアイコン体系へ揃える
+- 同じ役割のアイコンを画面ごとに別ライブラリへ置き換えない。ライブラリを混在させる場合は、概念アイコンと操作アイコンのように役割を分ける
 
 ```typescript
-// ✅ 正しい
-import { Check, Lock, Star } from "lucide-react";
+// ✅ プロダクト・ナビゲーションの概念アイコン
+import { Book, MessageQuestion, User } from "iconsax-react";
 
-// ❌ 間違い
-import { TickCircle } from "iconsax-react";
+// ✅ 操作系・shadcn/uiのアイコン
+import { Check, ChevronRight, X } from "lucide-react";
 ```
 
 ## UI コンポーネント

@@ -11,6 +11,7 @@ export interface SubSection {
   label: string;  // 補足（例: "実務・プロセス"）
   title: string;  // セクション名（例: "1本目立ち回り / デザインサイクル"）
   lessonTitles: string[];  // このセクションに属するレッスンタイトル（部分一致）
+  lessonSlugs?: string[];  // タイトル変更の影響を受けない固定掲載枠
 }
 
 export interface Section {
@@ -218,6 +219,7 @@ export const RECOMMENDED_SECTIONS: SubSection[] = [
     id: 'ux',
     label: 'UXデザイン',
     title: 'ユーザーの課題を解決しよう',
+    lessonSlugs: ['scenario-based-design'],
     // 実際のタイトル: UXデザインってなに？、FAILURE POINT 課題発見の方法、顧客体験デザインの基本、ゼロからはじめるユーザーインタビュー
     lessonTitles: ['UXデザインってなに？', 'FAILURE POINT 課題発見の方法', '顧客体験デザインの基本', 'ゼロからはじめるユーザーインタビュー']
   }

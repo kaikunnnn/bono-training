@@ -133,22 +133,27 @@ founder rather than a marketing team.
 
 ## Iconography
 
-BONO uses a *mix* of four icon systems:
+BONO uses a *mix* of five icon systems:
 
-1. **Lucide React** (`lucide-react`) — the default workhorse for UI icons
-   (Menu, Briefcase, chevrons, etc). Stroke-based, consistent weight. This
+1. **Iconsax React** (`iconsax-react`) — the first choice for product,
+   category, and navigation concepts. The global sidebar's lesson, training,
+   search, account, settings, and community icons define this visual language.
+   Reuse the same icon for the same destination across the product.
+2. **Lucide React** (`lucide-react`) — used for utility and interaction icons
+   (chevrons, checkmarks, close, loading, etc.) and existing shadcn/ui parts.
+   Stroke-based, consistent weight. This
    system is CDN-available; the UI kit links it via
    `https://unpkg.com/lucide-static@latest/font/lucide.css` for non-React
    surfaces. No substitution flag needed.
-2. **Hand-drawn SVG emoji** (`assets/emoji/*.svg`) — a small custom set
+3. **Hand-drawn SVG emoji** (`assets/emoji/*.svg`) — a small custom set
    (book, building, check, circus, coffee, dancer, home, muscle, parent,
    watch, wolf) drawn with thick black strokes. Used in section headings and
    decorative callouts. These **must be used as-is** — do not redraw them.
-3. **3D rendered emoji PNGs** (`assets/goal-buttons/*.png`) — Microsoft
+4. **3D rendered emoji PNGs** (`assets/goal-buttons/*.png`) — Microsoft
    Fluent Emoji 3D-style renders (flying-saucer, joystick, magic-wand,
    parachute) used only inside the top "goal" pill buttons. Copied from the
    codebase.
-4. **Unicode emoji sprinkled in copy** — `🙋`, `✨`, `🔥` used for *tone*,
+5. **Unicode emoji sprinkled in copy** — `🙋`, `✨`, `🔥` used for *tone*,
    one per paragraph at most.
 
 **Never:** invent new SVG icons, use a third icon set (Heroicons /

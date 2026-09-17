@@ -308,6 +308,7 @@ export interface LessonWithDetails extends Omit<Lesson, "quests" | "category"> {
       _id: string;
       articleNumber?: number;
       title: string;
+      excerpt?: string;
       slug: SanitySlug;
       articleType?: "explain" | "intro" | "practice" | "challenge" | "demo";
       thumbnail?: SanityImage;

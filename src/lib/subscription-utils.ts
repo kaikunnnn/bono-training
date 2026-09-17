@@ -78,6 +78,17 @@ export function canAccessContent(
 }
 
 /**
+ * 学習コンテンツの判定に使える有効なプランを返す。
+ * 失効済みレコードに planType が残っていてもアクセス権として扱わない。
+ */
+export function getEffectiveLearningPlanType(
+  planType: PlanType | null,
+  hasLearningAccess: boolean
+): PlanType | null {
+  return hasLearningAccess ? planType : null;
+}
+
+/**
  * コンテンツがロックされているかどうか
  */
 export function isContentLocked(

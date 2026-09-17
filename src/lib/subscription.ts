@@ -11,6 +11,7 @@ import type { PlanType, SubscriptionState } from "@/types/subscription";
 // ユーティリティ関数・定数を re-export（Server Component の既存importを壊さない）
 export {
   canAccessContent,
+  getEffectiveLearningPlanType,
   isContentLocked,
   hasAccessToContentByPlan,
   hasMemberAccessByPlan,
