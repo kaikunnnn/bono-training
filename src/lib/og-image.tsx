@@ -1,4 +1,6 @@
 import { ImageResponse } from "next/og";
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
@@ -41,11 +43,11 @@ async function loadMPlus1(weight: 400 | 500, text: string): Promise<ArrayBuffer>
 
 async function loadAssets() {
   // Node.js ランタイム前提（Edge は Hobby プランの 1MB 上限を超えるため不使用）。
-  // new URL(…, import.meta.url) 参照は Vercel のファイルトレースで同梱される。
-  const { readFile } = await import("node:fs/promises");
+  // Next.js 16 の OGP ガイドに従い、ローカルアセットはプロジェクトルート基準で読む。
+  // import.meta.url 基準の URL は webpack に公開URLへ変換され、readFile では扱えない。
   const [bgBuf, logoSvg] = await Promise.all([
-    readFile(new URL("./og-assets/og-bg.jpg", import.meta.url)),
-    readFile(new URL("./og-assets/bono-outline.svg", import.meta.url), "utf8"),
+    readFile(join(process.cwd(), "src/lib/og-assets/og-bg.jpg")),
+    readFile(join(process.cwd(), "src/lib/og-assets/bono-outline.svg"), "utf8"),
   ]);
   const bg = bgBuf.buffer.slice(bgBuf.byteOffset, bgBuf.byteOffset + bgBuf.byteLength);
   // SVG は data URI で渡す（ArrayBuffer だと Satori が MIME を判別できない）

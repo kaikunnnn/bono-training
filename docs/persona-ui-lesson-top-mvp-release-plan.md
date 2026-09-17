@@ -4,7 +4,7 @@
 - 対象レッスン: `scenario-based-design`（ペルソナ中心のUIデザイン）
 - デザイン確認ページ: `http://localhost:3001/dev/lesson-top-v8-editorial`
 - 本番想定URL: `/lessons/scenario-based-design`
-- ステータス: 実装済み・ローカル検証済み（リリース前レビュー待ち）
+- ステータス: リリース候補・ローカル検証完了（PRレビュー待ち）
 
 ## 1. このドキュメントの目的
 
@@ -420,13 +420,23 @@ MVPリリース用コミットへ含めるファイルは、原則として次�
 
 ## 18. 実装後の検証結果
 
-- TypeScript: `npx tsc --noEmit` 成功
+- 基準ブランチ: `origin/main` の `816efccb` からクリーンなリリースブランチを作成
+- TypeScript: production build内の型検査に成功
 - 対象ファイルのESLint: 成功
-- 購読判定テスト: 3件成功
-- 対象URLと対象外レッスンURL: どちらもHTTP 200
-- CTAとカリキュラム: `/contents/{article-slug}` だけを出力し、`/dev` URLの混入なし
-- PC・モバイル: ローカルChromeでページ全体を画像確認済み
-- production build（webpack）: コンパイルとTypeScriptは成功。ページ生成時に今回未変更の `/lessons/opengraph-image` がNode.js v25環境の `URL` 型エラーで失敗
-- 全テスト: 122件中119件成功。今回未変更の `BlogCard.test.tsx` 3件が、現コンポーネントから削除済みの説明・読了時間・おすすめ表示を期待して失敗
+- 重点テスト: 13件成功
+  - PersonaトップのCTA、開閉、サムネイル、動画時間、無料・鍵・解錠表示
+  - Standard、Feedback、無料、失効済みプランのアクセス判定
+  - slugによるレッスン一覧への固定掲載
+  - h1が1つで、h1〜h3に見出し欠番がないこと
+- 全テスト: 18ファイル・132件すべて成功
+- production build: Node.js `22.17.1`、Next.js `16.3.3`、webpackで成功
+- OGP: Next.js 16のガイドに沿ってローカルアセット読込を修正し、root・blog・guide・lessons・roadmapのOG画像をすべて静的生成
+- レッスン一覧: `/lessons` の生成HTMLに対象カードと `/lessons/scenario-based-design` を確認
+- 対象トップ: `/lessons/scenario-based-design` がHTTP 200で、新デザインを表示
+- 対象外トップ: `/lessons/failurepoint` がHTTP 200で、既存の `LessonDetailClient` を表示
+- CTA: 最初の公開済み記事 `/contents/scenario-based-design-overview` がHTTP 200で、対象トップへ戻るリンクも確認
+- カリキュラム: `/contents/{article-slug}` だけを出力し、`/dev` URLの混入なし
+- PC・モバイル: 1440px幅と390px幅のローカルChromeでページ全体を画像確認済み
+- アカウント別UI: 実アカウントへのログイン操作は行わず、未ログイン・有効会員・失効会員をコンポーネントテストと純粋関数テストで検証
 
-上記2つの既存失敗は今回の差分外。対応するCIのNode.jsバージョンで再ビルドし、既存テスト期待値の更新状況を確認してからリリース判定する。
+以上から、コードとローカル環境のリリースゲートは通過済み。PRレビュー後にマージ・デプロイできる状態とする。

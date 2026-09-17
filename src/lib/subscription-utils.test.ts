@@ -9,16 +9,28 @@ describe("learning content access", () => {
     expect(canAccessContent(false, null)).toBe(true);
   });
 
-  it("allows premium content for an active learning plan", () => {
-    const planType = getEffectiveLearningPlanType("standard", true);
+  it.each(["standard", "feedback"] as const)(
+    "allows premium content for an active %s plan",
+    (storedPlanType) => {
+      const planType = getEffectiveLearningPlanType(storedPlanType, true);
 
-    expect(canAccessContent(true, planType)).toBe(true);
-  });
+      expect(canAccessContent(true, planType)).toBe(true);
+    }
+  );
 
-  it("locks premium content when a stored plan is inactive", () => {
-    const planType = getEffectiveLearningPlanType("standard", false);
+  it.each(["standard", "feedback"] as const)(
+    "locks premium content when a stored %s plan is inactive",
+    (storedPlanType) => {
+      const planType = getEffectiveLearningPlanType(storedPlanType, false);
 
-    expect(planType).toBeNull();
+      expect(planType).toBeNull();
+      expect(canAccessContent(true, planType)).toBe(false);
+    }
+  );
+
+  it("locks premium content for a free member", () => {
+    const planType = getEffectiveLearningPlanType(null, false);
+
     expect(canAccessContent(true, planType)).toBe(false);
   });
 });

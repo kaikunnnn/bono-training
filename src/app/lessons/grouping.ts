@@ -130,6 +130,14 @@ export function groupRecommendedLessons(lessons: Lesson[]) {
 
   // 各おすすめセクションのlessonTitlesでマッチング
   RECOMMENDED_SECTIONS.forEach(section => {
+    // 固定掲載するレッスンはslugで先に追加し、Sanity上のタイトル変更に影響されないようにする。
+    section.lessonSlugs?.forEach(slug => {
+      const matchedLesson = lessons.find(lesson => lesson.slug.current === slug);
+      if (matchedLesson && !groups[section.id].some(l => l._id === matchedLesson._id)) {
+        groups[section.id].push(matchedLesson);
+      }
+    });
+
     section.lessonTitles.forEach(titlePattern => {
       const matchedLesson = lessons.find(lesson =>
         lesson.title.toLowerCase().includes(titlePattern.toLowerCase())
