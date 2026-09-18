@@ -43,7 +43,7 @@
 .backLink:focus-visible,
 .curriculumLink:focus-visible,
 .articleLink:focus-visible,
-.materialPreview:focus-visible {
+.slideThumbnail:focus-visible {
   outline: 2px solid var(--text-link);
   outline-offset: 3px;
 }
@@ -259,7 +259,7 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  aspect-ratio: 599 / 338;
+  aspect-ratio: 16 / 9;
   border: 1px solid var(--persona-media-border);
   border-radius: var(--radius-lg);
   background: var(--bg-muted-strong);
@@ -272,67 +272,39 @@
   object-fit: cover;
 }
 
-.materialPreview {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
+.slideThumbnails {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--s-2);
-  width: 100%;
-  height: 100%;
-  padding: var(--s-6);
-  overflow: hidden;
-  background: var(--bg-muted);
-  color: var(--text-primary);
-  text-decoration: none;
-}
-
-.materialThumbnail {
-  object-fit: cover;
-  opacity: 0.5;
-}
-
-.materialPreview > span,
-.materialPreview > strong {
-  position: relative;
-  z-index: 1;
-}
-
-.materialPreview strong {
-  font-family: var(--font-heading);
-  font-size: var(--text-2xl);
-  line-height: 1.5;
-}
-
-.materialLabel {
-  font-family: var(--font-mono);
-  font-size: var(--text-xs);
-  letter-spacing: 0.08em;
-}
-
-.mediaTabs {
-  display: flex;
-  align-items: center;
-  gap: 22px;
   padding-top: 15px;
 }
 
-.mediaTabs button {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--s-2);
-  padding: 7px 0;
-  border-bottom: 1px solid transparent;
-  color: var(--text-muted);
-  font-family: var(--font-jp);
-  font-size: var(--text-xs);
-  font-weight: 400;
-  line-height: 1.8;
+.slideThumbnail {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted-strong);
+  opacity: 0.58;
+  transition: border-color 180ms ease, opacity 180ms ease;
 }
 
-.mediaTabs button[aria-pressed="true"] {
-  border-bottom-color: var(--text-secondary);
-  color: var(--text-secondary);
+.slideThumbnail:hover {
+  opacity: 0.82;
+}
+
+.slideThumbnail[aria-current="true"] {
+  border-color: var(--text-link-hover);
+  opacity: 1;
+}
+
+.slideThumbnail img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .section,
@@ -424,7 +396,26 @@
   font-weight: 700;
 }
 
-.questTitleLine > span {
+.questContentCount {
+  display: inline-flex;
+  align-items: center;
+  color: var(--text-muted);
+  font-family: var(--font-jp);
+  line-height: 28.8px;
+  white-space: nowrap;
+}
+
+.questContentCount > strong {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.questContentCount > span {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.questPending {
   color: var(--text-muted);
   font-weight: 400;
   white-space: nowrap;
@@ -856,10 +847,22 @@ a.articleLink:hover {
     font-size: var(--text-sm);
   }
 
-  .heroActions,
-  .mediaTabs {
+  .heroActions {
     flex-wrap: wrap;
     gap: var(--s-3);
+  }
+
+  .slideThumbnails {
+    grid-auto-flow: column;
+    grid-auto-columns: 112px;
+    grid-template-columns: none;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .slideThumbnails::-webkit-scrollbar {
+    display: none;
   }
 
   .heroActions {
