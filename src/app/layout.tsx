@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import localFont from "next/font/local";
 import {
   Geist_Mono,
   Noto_Sans_JP,
@@ -34,17 +33,6 @@ const mplus1 = M_PLUS_1({
   variable: "--font-mplus-1-var",
   subsets: ["latin"],
   weight: ["500", "600", "700"],
-  display: "swap",
-});
-
-const lineSeedJP = localFont({
-  src: [
-    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Th.otf", weight: "300", style: "normal" },
-    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Rg.otf", weight: "400", style: "normal" },
-    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Bd.otf", weight: "700", style: "normal" },
-    { path: "../../.claude/design-system/fonts/LINESeedJP_OTF_Eb.otf", weight: "800", style: "normal" },
-  ],
-  variable: "--font-line-seed-jp",
   display: "swap",
 });
 
@@ -97,7 +85,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistMono.variable} ${notoSansJp.variable} ${mplus1.variable} ${lineSeedJP.variable} antialiased`}
+        className={`${geistMono.variable} ${notoSansJp.variable} ${mplus1.variable} antialiased`}
       >
         <GoogleAnalytics />
         <ServiceWorkerRegistrar />
