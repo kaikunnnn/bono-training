@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import { NewTopContent } from "@/components/top-next/NewTopContent";
+import { MembershipCta } from "@/components/top-next/organisms/HeroSection";
+import { traceServerStep } from "@/lib/performance/server-trace";
 
 export const metadata: Metadata = {
   title: "BONO - UIUXデザインを学ぶ",
@@ -19,7 +22,23 @@ export const metadata: Metadata = {
  * 利用できるURLとして /top を用意する（リダイレクトなし）。会員（standard/feedback）
  * はヒーローの入会CTAを非表示。重複コンテンツ回避のため canonical=/ + noindex。
  */
-export default async function TopPage() {
-  const subscription = await getSubscriptionStatus();
-  return <NewTopContent isMember={subscription.hasMemberAccess} />;
+async function TopMembershipCta() {
+  const subscription = await traceServerStep(
+    "top.subscription",
+    getSubscriptionStatus,
+  );
+
+  return subscription.hasMemberAccess ? null : <MembershipCta />;
+}
+
+export default function TopPage() {
+  return (
+    <NewTopContent
+      membershipCta={
+        <Suspense fallback={null}>
+          <TopMembershipCta />
+        </Suspense>
+      }
+    />
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { PortableTextBlock } from "@portabletext/types";
 import { LessonHeaderLayout } from "@/components/lesson/header";
@@ -51,12 +51,16 @@ interface LessonDetailClientProps {
   lesson: Lesson;
   progress: number;
   questProgressMap: Record<string, { completed: number; total: number; completedArticleIds: string[] }>;
+  progressContent?: ReactNode;
+  contentTab?: ReactNode;
 }
 
 export default function LessonDetailClient({
   lesson,
   progress,
   questProgressMap,
+  progressContent,
+  contentTab,
 }: LessonDetailClientProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<"content" | "overview">("content");
@@ -85,6 +89,7 @@ export default function LessonDetailClient({
       <LessonHeaderLayout
         lesson={lesson}
         progress={progress}
+        progressContent={progressContent}
         onStart={handleStart}
         onViewAllDetails={hasOverviewData ? handleViewAllDetails : undefined}
       >
@@ -94,11 +99,13 @@ export default function LessonDetailClient({
             onTabChange={setActiveTab}
             showOverviewTab={hasOverviewData}
             contentTab={
-              <QuestList
-                contentHeading={lesson.contentHeading}
-                quests={lesson.quests || []}
-                questProgressMap={questProgressMap}
-              />
+              contentTab ?? (
+                <QuestList
+                  contentHeading={lesson.contentHeading}
+                  quests={lesson.quests || []}
+                  questProgressMap={questProgressMap}
+                />
+              )
             }
             overviewTab={
               hasOverviewData ? (

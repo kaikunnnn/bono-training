@@ -1,17 +1,26 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
-import { getLesson, getLessonMetadata, urlFor } from "@/lib/sanity";
-import { getLessonProgress } from "@/lib/services/progress";
+import { getLessonMetadata, urlFor } from "@/lib/sanity";
 import {
   getEffectiveLearningPlanType,
-  getSubscriptionStatus,
   isContentLocked,
 } from "@/lib/subscription";
 import LessonDetailClient from "./LessonDetailClient";
 import PersonaLessonTopClient from "./PersonaLessonTopClient";
 import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
 import { generateCourseJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import { traceServerStep } from "@/lib/performance/server-trace";
+import { LessonProgressBar } from "@/components/ui/LessonProgressBar";
+import { Skeleton } from "@/components/ui/skeleton";
+import QuestList from "@/components/lesson/QuestList";
+import {
+  buildPublicLesson,
+  startLessonPageData,
+  startStandardLessonPresentation,
+  type LessonPageLesson,
+} from "./lesson-page-data";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -20,10 +29,72 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+type LessonPresentationPromise = ReturnType<
+  typeof startStandardLessonPresentation
+>;
+
+async function PersonalizedLessonProgress({
+  presentationPromise,
+}: {
+  presentationPromise: LessonPresentationPromise;
+}) {
+  const { progressPercent } = await presentationPromise;
+  return <LessonProgressBar progress={progressPercent} width="64%" />;
+}
+
+async function PersonalizedLessonCurriculum({
+  lesson,
+  presentationPromise,
+}: {
+  lesson: LessonPageLesson;
+  presentationPromise: LessonPresentationPromise;
+}) {
+  const { processedLesson, questProgressMap } = await presentationPromise;
+  return (
+    <QuestList
+      contentHeading={lesson.contentHeading}
+      quests={processedLesson.quests || []}
+      questProgressMap={questProgressMap}
+    />
+  );
+}
+
+function LessonProgressFallback() {
+  return (
+    <div
+      className="flex items-center gap-[9px]"
+      style={{ width: "64%" }}
+      aria-label="レッスン進捗を読み込み中"
+    >
+      <Skeleton className="flex-1 h-[7px] rounded-full" />
+      <Skeleton className="h-6 w-10" />
+    </div>
+  );
+}
+
+function LessonCurriculumFallback() {
+  return (
+    <div className="w-full space-y-6" aria-label="カリキュラムを読み込み中">
+      {Array.from({ length: 2 }).map((_, questIndex) => (
+        <div key={questIndex} className="space-y-3">
+          <Skeleton className="h-5 w-40" />
+          <div className="rounded-[24px] bg-white p-4 space-y-3">
+            {Array.from({ length: 3 }).map((__, articleIndex) => (
+              <Skeleton key={articleIndex} className="h-[77px] w-full rounded-lg" />
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // OGP用メタデータ生成
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const lesson = await getLessonMetadata(slug);
+  const lesson = await traceServerStep("lesson.metadata.cms", () =>
+    getLessonMetadata(slug)
+  );
 
   if (!lesson) {
     return {
@@ -58,21 +129,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 // ページコンポーネント（Server Component）
 export default async function LessonPage({ params }: PageProps) {
   const { slug } = await params;
-  const [lesson, subscription] = await Promise.all([
-    getLesson(slug),
-    getSubscriptionStatus(),
-  ]);
+  const lessonRequest = startLessonPageData(slug);
+  const lesson = await lessonRequest.lessonPromise;
 
   if (!lesson) {
     notFound();
   }
 
-  const effectivePlanType = getEffectiveLearningPlanType(
-    subscription.planType,
-    subscription.hasLearningAccess
-  );
-
   if (slug === PERSONA_LESSON_SLUG) {
+    // 専用ページは通常レッスンと表示構造が異なるため、このバッチでは
+    // 従来どおりアクセス判定完了後に一体で描画する。
+    const subscription = await lessonRequest.subscriptionPromise;
+    const effectivePlanType = getEffectiveLearningPlanType(
+      subscription.planType,
+      subscription.hasLearningAccess
+    );
     const personaLesson = {
       _id: lesson._id,
       title: lesson.title,
@@ -134,51 +205,13 @@ export default async function LessonPage({ params }: PageProps) {
     );
   }
 
-  // クエストごとの進捗マップを構築
-  const questProgressMap: Record<string, { completed: number; total: number; completedArticleIds: string[] }> = {};
-  let totalCompleted = 0;
-  let totalArticles = 0;
-
-  // 全クエストの記事IDを一括収集し、進捗を1回だけ取得（N+1 の直列待ちを回避）
-  const allArticleIds = (lesson.quests || []).flatMap(
-    (q) => q.articles?.map((a) => a._id) || []
+  // CMSシェルを先に返し、購読と進捗は同じPromiseを共有して段階表示する。
+  // 進捗はlesson取得直後に開始するため、購読完了後のwaterfallにならない。
+  const publicLesson = buildPublicLesson(lesson);
+  const presentationPromise = startStandardLessonPresentation(
+    lesson,
+    lessonRequest.subscriptionPromise,
   );
-  const progress = await getLessonProgress(lesson._id, allArticleIds);
-  const completedSet = new Set(progress.completedArticleIds);
-
-  // クエストごとの内訳はローカルで計算（await なし）
-  for (const quest of lesson.quests || []) {
-    const qArticleIds = quest.articles?.map((a) => a._id) || [];
-    const completedIds = qArticleIds.filter((id) => completedSet.has(id));
-
-    questProgressMap[quest._id] = {
-      completed: completedIds.length,
-      total: qArticleIds.length,
-      completedArticleIds: completedIds,
-    };
-
-    totalCompleted += completedIds.length;
-    totalArticles += qArticleIds.length;
-  }
-
-  // 全体の進捗率を計算
-  const overallProgress = totalArticles > 0
-    ? Math.round((totalCompleted / totalArticles) * 100)
-    : 0;
-
-  // クエストに articleNumber と isLocked を付与
-  const processedLesson = {
-    ...lesson,
-    quests: lesson.quests?.map((quest, questIndex) => ({
-      ...quest,
-      questNumber: quest.questNumber || questIndex + 1,
-      articles: quest.articles?.map((article, articleIndex) => ({
-        ...article,
-        articleNumber: articleIndex + 1,
-        isLocked: isContentLocked(article.isPremium || false, effectivePlanType),
-      })) || [],
-    })) || [],
-  };
 
   return (
     <>
@@ -193,9 +226,24 @@ export default async function LessonPage({ params }: PageProps) {
         )}
       />
       <LessonDetailClient
-        lesson={processedLesson}
-        progress={overallProgress}
-        questProgressMap={questProgressMap}
+        lesson={publicLesson}
+        progress={0}
+        questProgressMap={{}}
+        progressContent={
+          <Suspense fallback={<LessonProgressFallback />}>
+            <PersonalizedLessonProgress
+              presentationPromise={presentationPromise}
+            />
+          </Suspense>
+        }
+        contentTab={
+          <Suspense fallback={<LessonCurriculumFallback />}>
+            <PersonalizedLessonCurriculum
+              lesson={lesson}
+              presentationPromise={presentationPromise}
+            />
+          </Suspense>
+        }
       />
     </>
   );

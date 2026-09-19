@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useState } from "react";
 import { urlFor } from "@/lib/sanity";
 import { ChevronRight, Check, Play, FileText } from "lucide-react";
 import { GradientLockIcon } from "@/components/ui/icon-lock-gradient";
@@ -56,6 +57,7 @@ export function ArticleItem({
   isPremium = false,
   isLocked,
 }: ArticleItemProps) {
+  const [prefetchOnIntent, setPrefetchOnIntent] = useState(false);
   // isLocked が明示的に渡されない場合は isPremium をフォールバック
   const showLock = isLocked ?? isPremium;
   const formattedDuration = formatVideoDuration(videoDuration);
@@ -76,6 +78,9 @@ export function ArticleItem({
   return (
     <Link
       href={"/contents/" + slug}
+      prefetch={prefetchOnIntent ? null : false}
+      onMouseEnter={() => setPrefetchOnIntent(true)}
+      onFocus={() => setPrefetchOnIntent(true)}
       className="flex items-center gap-4 px-8 py-4 border-b border-black/[0.08] cursor-pointer hover:bg-gray-50 transition w-full"
     >
       {isCompleted ? (

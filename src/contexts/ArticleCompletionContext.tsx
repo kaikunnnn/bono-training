@@ -1,8 +1,6 @@
 'use client';
 
 import { createContext, useContext } from 'react';
-import type { LessonStatus } from '@/lib/services/progress';
-
 export type CompletionLevel = 'article' | 'quest' | 'lesson';
 
 export interface ArticleCompletionContextValue {
@@ -18,8 +16,6 @@ export interface ArticleCompletionContextValue {
   resetCompletionLevel: () => void;
   /** 共有される完了状態（複数ボタン同期用） */
   sharedIsCompleted: boolean | null;
-  /** レッスン status（手動完了済み判定。CompletionButton の OFF 時に使用） */
-  lessonStatus: LessonStatus;
 }
 
 export const ArticleCompletionContext =

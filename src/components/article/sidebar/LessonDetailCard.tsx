@@ -10,6 +10,7 @@ interface LessonDetailCardProps {
   icon?: SanityImage;
   title: string;
   progress: number;
+  isProgressPending?: boolean;
   href?: string;
 }
 
@@ -22,6 +23,7 @@ export function LessonDetailCard({
   icon,
   title,
   progress,
+  isProgressPending = false,
   href,
 }: LessonDetailCardProps) {
   // 画像URL取得
@@ -55,19 +57,31 @@ export function LessonDetailCard({
           </p>
 
           {/* プログレスバー */}
-          <div className="w-full px-8 flex items-center gap-[9px]">
+          <div
+            className="w-full px-8 flex items-center gap-[9px]"
+            aria-busy={isProgressPending}
+            aria-label={isProgressPending ? "進捗を読み込み中" : undefined}
+          >
             {/* バー */}
             <div className="flex-1 h-[7px] bg-bg-muted-strong rounded-full overflow-hidden">
               <div
-                className="h-full bg-black rounded-[40px] transition-all duration-400"
-                style={{ width: `${Math.min(100, progress)}%` }}
+                className={
+                  isProgressPending
+                    ? "h-full w-1/3 bg-gray-300 rounded-[40px] animate-pulse"
+                    : "h-full bg-black rounded-[40px] transition-all duration-400"
+                }
+                style={
+                  isProgressPending
+                    ? undefined
+                    : { width: `${Math.min(100, progress)}%` }
+                }
               />
             </div>
 
             {/* パーセント */}
             <div className="flex items-end text-black font-bold font-rounded-mplus">
               <span className="text-2xl tracking-[-0.48px] leading-none">
-                {progress}
+                {isProgressPending ? "—" : progress}
               </span>
               <span className="text-[10px] leading-none">%</span>
             </div>

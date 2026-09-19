@@ -1,10 +1,10 @@
 import "server-only";
 import { getArticleWithContext } from "@/lib/sanity";
 import { redirectMissingContent } from "@/lib/missingContentRedirect";
-import { getLessonProgress, getLessonStatus } from "@/lib/services/progress";
 import ArticleDetailClient from "./ArticleDetailClient";
+import { traceServerStep } from "@/lib/performance/server-trace";
 
-// ISR: 1時間キャッシュ（ユーザー固有データはレッスンID単位で再フェッチ）
+// ISR: 公開CMSデータは1時間。個人進捗はArticleDetailClientがhydration後に取得する。
 export const revalidate = 3600;
 
 interface LayoutProps {
@@ -24,7 +24,9 @@ interface LayoutProps {
  */
 export default async function ArticleDetailLayout({ params, children }: LayoutProps) {
   const { slug } = await params;
-  const article = await getArticleWithContext(slug);
+  const article = await traceServerStep("article.layout.cms", () =>
+    getArticleWithContext(slug)
+  );
 
   if (!article) {
     // 記事が Sanity に無い場合: 本番 Webflow に存在すれば legacy へリダイレクト、
@@ -43,22 +45,12 @@ export default async function ArticleDetailLayout({ params, children }: LayoutPr
   }
   const lessonId = article.lessonInfo?._id || "";
 
-  // レッスン進捗・status を並列取得
-  const [lessonProgress, lessonStatus] = await Promise.all([
-    lessonId && allLessonArticleIds.length > 0
-      ? getLessonProgress(lessonId, allLessonArticleIds)
-      : Promise.resolve(null),
-    lessonId ? getLessonStatus(lessonId) : Promise.resolve("not_started" as const),
-  ]);
-
-  const initialCompletedArticleIds = lessonProgress?.completedArticleIds ?? [];
-
   return (
     <ArticleDetailClient
       key={lessonId || slug}
       article={article}
-      initialCompletedArticleIds={initialCompletedArticleIds}
-      initialLessonStatus={lessonStatus}
+      lessonId={lessonId}
+      lessonArticleIds={allLessonArticleIds}
     >
       {children}
     </ArticleDetailClient>

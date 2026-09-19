@@ -11,8 +11,8 @@ import { calculateLessonProgress } from "@/lib/completion-detection-client";
 interface ArticleSideNavNewProps {
   article: ArticleWithContext;
   currentArticleId: string;
-  /** Client side で楽観的に管理される完了済み記事 ID 一覧（ArticleDetailClient から） */
-  completedArticleIds: string[];
+  /** null の間は hydration 後の進捗取得中 */
+  completedArticleIds: string[] | null;
   /** 右サイド配置などでロゴをメイン側に出したい場合にfalse */
   showLogo?: boolean;
   /** ロゴブロック右側に置くアクション（例: 閉じるボタン） */
@@ -36,6 +36,12 @@ export function ArticleSideNavNew({
   logoRightAction,
   questArticleItemLayoutVariant = "B",
 }: ArticleSideNavNewProps) {
+  const isProgressPending = completedArticleIds === null;
+  const resolvedCompletedArticleIds = useMemo(
+    () => completedArticleIds ?? [],
+    [completedArticleIds]
+  );
+
   // サイドナビゲーション用のデータを整形
   const navData = useMemo(() => {
     if (!article.lessonInfo) {
@@ -48,7 +54,7 @@ export function ArticleSideNavNew({
     // Client side で進捗を計算
     const { percentage } = calculateLessonProgress(
       quests.map((q) => ({ articles: (q.articles || []).map((a) => ({ _id: a._id })) })),
-      completedArticleIds
+      resolvedCompletedArticleIds
     );
 
     // 各クエストのデータを変換
@@ -57,7 +63,7 @@ export function ArticleSideNavNew({
         id: a._id,
         title: a.title,
         tag: a.articleType,
-        isCompleted: completedArticleIds.includes(a._id),
+        isCompleted: resolvedCompletedArticleIds.includes(a._id),
         href: `/contents/${a.slug.current}`,
       }));
 
@@ -77,7 +83,7 @@ export function ArticleSideNavNew({
       progressPercent: percentage,
       quests: questsData,
     };
-  }, [article, completedArticleIds]);
+  }, [article, resolvedCompletedArticleIds]);
 
   if (!navData) {
     return (
@@ -98,6 +104,7 @@ export function ArticleSideNavNew({
         icon={navData.lessonIcon}
         title={navData.lessonTitle}
         progress={navData.progressPercent}
+        isProgressPending={isProgressPending}
         href={`/lessons/${navData.lessonSlug}`}
       />
 
@@ -110,6 +117,7 @@ export function ArticleSideNavNew({
             questTitle={quest.questTitle}
             articles={quest.articles}
             activeArticleId={currentArticleId}
+            isProgressPending={isProgressPending}
             articleItemLayoutVariant={questArticleItemLayoutVariant}
           />
         ))}

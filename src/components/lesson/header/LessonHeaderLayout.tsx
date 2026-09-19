@@ -20,6 +20,8 @@ interface LessonHeaderLayoutProps {
   lesson: Lesson;
   /** 進捗率 0-100 */
   progress: number;
+  /** 進捗だけを別のSuspense境界で描画する場合の差し替え */
+  progressContent?: React.ReactNode;
   /** 「スタートする」クリック時のコールバック */
   onStart?: () => void;
   /** 「概要・目的ですべてみる」クリック時のコールバック（タブ切替） */
@@ -43,6 +45,7 @@ interface LessonHeaderLayoutProps {
 export function LessonHeaderLayout({
   lesson,
   progress,
+  progressContent,
   onStart,
   onViewAllDetails,
   children,
@@ -65,6 +68,7 @@ export function LessonHeaderLayout({
           <LessonTitleArea
             lesson={lesson}
             progress={progress}
+            progressContent={progressContent}
             onStart={onStart}
             onViewAllDetails={onViewAllDetails}
           />
