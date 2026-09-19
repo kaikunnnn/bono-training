@@ -18,6 +18,9 @@ const GA_MEASUREMENT_ID = "G-MH9NGKFBCM";
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+  // Code font: keep it available where used, but do not fetch it on every page.
+  // The member top does not use it (23 KB of otherwise unnecessary preload).
+  preload: false,
 });
 
 const notoSansJp = Noto_Sans_JP({

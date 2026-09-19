@@ -3,6 +3,7 @@ import { cache } from 'react'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { User } from '@supabase/supabase-js'
+import { traceServerStep } from '@/lib/performance/server-trace'
 
 export async function createClient() {
   const cookieStore = await cookies()
@@ -32,7 +33,7 @@ export async function createClient() {
 }
 
 /**
- * リクエストスコープでメモ化した auth.getUser()。
+ * リクエストスコープでメモ化した auth.getUser() とセッションエラー分類。
  *
  * 掲示板詳細ページでは getSubscriptionStatus / getCurrentUser / getMyReactions が
  * それぞれ独立に supabase.auth.getUser() を呼んでおり、1リクエストで最大4回
@@ -43,15 +44,32 @@ export async function createClient() {
  * ない）であり、Next.js の unstable_cache（デプロイ全体で共有）とは別物。したがって
  * 別ユーザーのリクエスト間でユーザー情報が漏洩することはない。
  */
-export const getCachedUser = cache(async (): Promise<User | null> => {
+export interface CachedAuthResult {
+  user: User | null;
+  invalidSession: boolean;
+}
+
+export const getCachedAuth = cache(async (): Promise<CachedAuthResult> => {
+  // Keep client initialization outside the catch: existing getCachedUser callers
+  // still see configuration/cookie-store failures. UserProvider handles those.
   const supabase = await createClient()
   try {
     const {
       data: { user },
-    } = await supabase.auth.getUser()
-    return user
+      error,
+    } = await traceServerStep("auth.get_user", () => supabase.auth.getUser())
+    if (user) return { user, invalidSession: false }
+    return {
+      user: null,
+      invalidSession: !!error && typeof error.status === 'number' && [400, 401, 403].includes(error.status),
+    }
   } catch {
-    // セッションが stale 等で auth が落ちた場合は未ログイン扱い
-    return null
+    // Do not clear otherwise valid cookies on transient/unknown failures.
+    return { user: null, invalidSession: false }
   }
 })
+
+/** Layout and page/service callers must use the same request-scoped gateway. */
+export async function getCachedUser(): Promise<User | null> {
+  return (await getCachedAuth()).user
+}

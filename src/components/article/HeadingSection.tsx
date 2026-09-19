@@ -2,6 +2,7 @@
 
 import { ArticleTag, TagType } from "@/components/article/ArticleTag";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
+import type { ReactNode } from "react";
 
 interface HeadingSectionProps {
   tagType?: TagType;
@@ -18,6 +19,8 @@ interface HeadingSectionProps {
   isCompleted?: boolean;
   isPremium?: boolean;
   onNext?: () => void;
+  /** Server Component からアクション領域だけをストリーミングする場合の差し替え */
+  actions?: ReactNode;
 }
 
 /**
@@ -43,6 +46,7 @@ const HeadingSection = ({
   isCompleted = false,
   isPremium = false,
   onNext,
+  actions,
 }: HeadingSectionProps) => {
   return (
     <div className="w-full px-6 py-4 bg-white rounded-[20px] shadow-[0px_0px_4px_0px_rgba(0,0,0,0.08)] inline-flex flex-col justify-start items-start gap-3">
@@ -77,15 +81,21 @@ const HeadingSection = ({
       </div>
 
       {/* Action Area — ArticleActionButtonsに委譲（main準拠） */}
-      <ArticleActionButtons
-        articleId={articleId}
-        lessonId={lessonId}
-        title={title}
-        isBookmarked={isBookmarked}
-        isCompleted={isCompleted}
-        isPremium={isPremium}
-        onNext={onNext}
-      />
+      <div className="w-full min-h-[100px] md:min-h-[54px]">
+        {actions !== undefined ? (
+          actions
+        ) : (
+          <ArticleActionButtons
+            articleId={articleId}
+            lessonId={lessonId}
+            title={title}
+            isBookmarked={isBookmarked}
+            isCompleted={isCompleted}
+            isPremium={isPremium}
+            onNext={onNext}
+          />
+        )}
+      </div>
     </div>
   );
 };

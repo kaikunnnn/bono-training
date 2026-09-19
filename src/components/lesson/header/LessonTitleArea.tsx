@@ -5,6 +5,7 @@ import Link from "next/link";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { LessonProgressBar } from "@/components/ui/LessonProgressBar";
 import { Button } from "@/components/ui/button";
+import type { ReactNode } from "react";
 
 interface LinkedRoadmap {
   slug: string;
@@ -22,6 +23,7 @@ interface LessonTitleAreaProps {
   };
   /** 進捗率 0-100 */
   progress: number;
+  progressContent?: ReactNode;
   /** 「スタートする」クリック時のコールバック */
   onStart?: () => void;
   /** 「概要・目的ですべてみる」クリック時のコールバック（タブ切替） */
@@ -39,6 +41,7 @@ interface LessonTitleAreaProps {
 export function LessonTitleArea({
   lesson,
   progress,
+  progressContent,
   onStart,
   onViewAllDetails,
 }: LessonTitleAreaProps) {
@@ -83,7 +86,7 @@ export function LessonTitleArea({
       </div>
 
       {/* 進捗バー（レスポンシブ: 64%幅） */}
-      <LessonProgressBar progress={progress} width="64%" />
+      {progressContent ?? <LessonProgressBar progress={progress} width="64%" />}
 
       {/* 説明文エリア */}
       {lesson.description && (

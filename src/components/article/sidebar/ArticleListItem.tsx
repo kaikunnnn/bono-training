@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { IconCheck } from "@/components/ui/icon-check";
 import ArticleTag, { type TagType } from "./ArticleTag";
@@ -11,6 +12,7 @@ interface ArticleListItemProps {
   title: string;
   tag?: TagType;
   isCompleted: boolean;
+  isProgressPending?: boolean;
   isActive?: boolean;
   href: string;
   /** クエストアイテムのレイアウト比較 */
@@ -25,10 +27,12 @@ export function ArticleListItem({
   title,
   tag,
   isCompleted,
+  isProgressPending = false,
   isActive = false,
   href,
   layoutVariant = "C",
 }: ArticleListItemProps) {
+  const [prefetchOnIntent, setPrefetchOnIntent] = useState(false);
   const titleClassName = cn(
     "text-xs font-noto-sans-jp leading-5",
     isActive ? "text-neutral-900 font-medium" : "text-gray-600 font-normal",
@@ -37,6 +41,17 @@ export function ArticleListItem({
   return (
     <Link
       href={href}
+      // A lesson can expose dozens of article links at once. Viewport prefetching
+      // every dynamic destination reruns its personalized layout queries. Start
+      // only when a desktop/keyboard user signals intent; touch navigation still
+      // uses the route loading UI immediately after the click.
+      prefetch={!isActive && prefetchOnIntent ? null : false}
+      onMouseEnter={() => {
+        if (!isActive) setPrefetchOnIntent(true);
+      }}
+      onFocus={() => {
+        if (!isActive) setPrefetchOnIntent(true);
+      }}
       className={cn(
         // 共通ベース
         "group w-full pl-3 pr-3 py-0.5 inline-flex flex-col justify-start items-start gap-2.5",
@@ -48,7 +63,14 @@ export function ArticleListItem({
     >
       <div className="self-stretch py-2 rounded-md inline-flex justify-between items-center">
         {/* 完了状態アイコン */}
-        <IconCheck isCompleted={isCompleted} />
+        {isProgressPending ? (
+          <div
+            className="size-4 rounded-full bg-gray-100 animate-pulse flex-shrink-0"
+            aria-hidden="true"
+          />
+        ) : (
+          <IconCheck isCompleted={isCompleted} />
+        )}
 
         {/* コンテンツエリア */}
         {layoutVariant === "A" && (

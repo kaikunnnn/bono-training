@@ -1,6 +1,7 @@
 import "server-only";
 import { cache } from "react";
-import { createClient } from "@/lib/supabase/server";
+import { getCachedAuth } from "@/lib/supabase/server";
+import { traceServerStep } from "@/lib/performance/server-trace";
 
 export interface UserProviderResult {
   user: { id: string; email: string } | null;
@@ -13,32 +14,25 @@ export interface UserProviderResult {
 }
 
 /**
- * サーバーサイドでユーザー情報を取得する
- * Suspense boundary 内で呼び出すことで、
- * ページコンテンツの描画をブロックしない
+ * サーバーサイドのユーザー情報をレイアウト向けに絞る。
+ * ページ/サービスと同じgetCachedAuthを使い、認証の往復を重複させない。
+ * レイアウトが認証を待つ既存の挙動は変えない。
  */
 export const UserProvider = cache(async (): Promise<UserProviderResult> => {
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser();
+  return traceServerStep("layout.user_provider", async () => {
+    try {
+      const { user, invalidSession } = await getCachedAuth();
 
-    if (user) {
-      return {
-        user: { id: user.id, email: user.email || "" },
-        invalidSession: false,
-      };
+      if (user) {
+        return {
+          user: { id: user.id, email: user.email || "" },
+          invalidSession: false,
+        };
+      }
+
+      return { user: null, invalidSession };
+    } catch {
+      return { user: null, invalidSession: false };
     }
-
-    // 400/401/403 = トークン・セッション自体が無効（stale cookie）。
-    // それ以外（5xx や AuthRetryableFetchError）は一時的失敗として扱う
-    const invalidSession =
-      !!error && typeof error.status === "number" && [400, 401, 403].includes(error.status);
-
-    return { user: null, invalidSession };
-  } catch {
-    return { user: null, invalidSession: false };
-  }
+  });
 });

@@ -7,6 +7,7 @@ import 'server-only'
  */
 import { createClient, getCachedUser } from "@/lib/supabase/server";
 import type { PlanType, SubscriptionState } from "@/types/subscription";
+import { traceServerStep } from "@/lib/performance/server-trace";
 
 // ユーティリティ関数・定数を re-export（Server Component の既存importを壊さない）
 export {
@@ -36,81 +37,86 @@ export type {
  * サーバーサイドでサブスクリプション状態を取得
  */
 export async function getSubscriptionStatus(): Promise<SubscriptionState> {
-  const supabase = await createClient();
+  return traceServerStep("subscription.total", async () => {
+    const supabase = await createClient();
 
-  // auth.getUser() はリクエストスコープでキャッシュ済み（getCurrentUser 等との
-  // 認証往復の重複を排除。詳細は supabase/server.ts の getCachedUser）
-  const user = await getCachedUser();
+    // auth.getUser() はリクエストスコープでキャッシュ済み（getCurrentUser 等との
+    // 認証往復の重複を排除。詳細は supabase/server.ts の getCachedUser）
+    const user = await getCachedUser();
 
-  if (!user) {
-    return {
-      isLoggedIn: false,
-      isSubscribed: false,
-      planType: null,
-      duration: null,
-      cancelAtPeriodEnd: false,
-      cancelAt: null,
-      renewalDate: null,
-      hasMemberAccess: false,
-      hasLearningAccess: false,
-    };
-  }
+    if (!user) {
+      return {
+        isLoggedIn: false,
+        isSubscribed: false,
+        planType: null,
+        duration: null,
+        cancelAtPeriodEnd: false,
+        cancelAt: null,
+        renewalDate: null,
+        hasMemberAccess: false,
+        hasLearningAccess: false,
+      };
+    }
 
-  // 環境に応じたフィルタ（test/live混在を防止）
-  const environment = process.env.NODE_ENV === "production" ? "live" : "test";
+    // 環境に応じたフィルタ（test/live混在を防止）
+    const environment = process.env.NODE_ENV === "production" ? "live" : "test";
 
-  // 直接データベースから購読情報を取得
-  const { data: subscription, error } = await supabase
-    .from("user_subscriptions")
-    .select(
-      "plan_type, duration, is_active, cancel_at_period_end, cancel_at, current_period_end"
-    )
-    .eq("user_id", user.id)
-    .eq("environment", environment)
-    .maybeSingle();
+    // 直接データベースから購読情報を取得
+    const { data: subscription, error } = await traceServerStep(
+      "subscription.query",
+      async () => await supabase
+        .from("user_subscriptions")
+        .select(
+          "plan_type, duration, is_active, cancel_at_period_end, cancel_at, current_period_end"
+        )
+        .eq("user_id", user.id)
+        .eq("environment", environment)
+        .maybeSingle(),
+    );
 
-  if (error || !subscription) {
+    if (error || !subscription) {
+      return {
+        isLoggedIn: true,
+        isSubscribed: false,
+        planType: null,
+        duration: null,
+        cancelAtPeriodEnd: false,
+        cancelAt: null,
+        renewalDate: null,
+        hasMemberAccess: false,
+        hasLearningAccess: false,
+      };
+    }
+
+    const isActive = subscription.is_active || false;
+    const planType = (subscription.plan_type as PlanType) || null;
+    const duration = subscription.duration || null;
+    const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
+    const cancelAt = subscription.cancel_at || null;
+    const currentPeriodEnd = subscription.current_period_end || null;
+
+    // renewalDate の決定
+    const renewalDate =
+      cancelAtPeriodEnd && cancelAt ? cancelAt : currentPeriodEnd;
+
+    // アクセス権限を計算
+    const hasMemberAccess =
+      isActive && (planType === "standard" || planType === "feedback");
+    const hasLearningAccess =
+      isActive && (planType === "standard" || planType === "feedback");
+
     return {
       isLoggedIn: true,
-      isSubscribed: false,
-      planType: null,
-      duration: null,
-      cancelAtPeriodEnd: false,
-      cancelAt: null,
-      renewalDate: null,
-      hasMemberAccess: false,
-      hasLearningAccess: false,
+      isSubscribed: isActive,
+      planType,
+      duration,
+      cancelAtPeriodEnd,
+      cancelAt,
+      renewalDate,
+      hasMemberAccess,
+      hasLearningAccess,
     };
-  }
-
-  const isActive = subscription.is_active || false;
-  const planType = (subscription.plan_type as PlanType) || null;
-  const duration = subscription.duration || null;
-  const cancelAtPeriodEnd = subscription.cancel_at_period_end || false;
-  const cancelAt = subscription.cancel_at || null;
-  const currentPeriodEnd = subscription.current_period_end || null;
-
-  // renewalDate の決定
-  const renewalDate =
-    cancelAtPeriodEnd && cancelAt ? cancelAt : currentPeriodEnd;
-
-  // アクセス権限を計算
-  const hasMemberAccess =
-    isActive && (planType === "standard" || planType === "feedback");
-  const hasLearningAccess =
-    isActive && (planType === "standard" || planType === "feedback");
-
-  return {
-    isLoggedIn: true,
-    isSubscribed: isActive,
-    planType,
-    duration,
-    cancelAtPeriodEnd,
-    cancelAt,
-    renewalDate,
-    hasMemberAccess,
-    hasLearningAccess,
-  };
+  });
 }
 
 /**

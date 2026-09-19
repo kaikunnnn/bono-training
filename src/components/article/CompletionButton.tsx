@@ -6,6 +6,7 @@ import { IconCheck } from "@/components/ui/icon-check";
 import { useToast } from "@/hooks/use-toast";
 import {
   setArticleCompletion,
+  getLessonStatus,
   removeLessonCompletion,
 } from "@/lib/services/progress";
 import { useArticleCompletionOptional } from "@/contexts/ArticleCompletionContext";
@@ -42,6 +43,8 @@ export function CompletionButton({
   // useTransition は startTransition のためだけに使用（isPending はガードに使わない）
   const [, startTransition] = useTransition();
   const [showUndoConfirmDialog, setShowUndoConfirmDialog] = useState(false);
+  const [isCheckingLessonStatus, setIsCheckingLessonStatus] = useState(false);
+  const isCheckingLessonStatusRef = useRef(false);
   const [burstKey, setBurstKey] = useState(0);
   const prevCompletedRef = useRef(isCompleted);
   const completionCtx = useArticleCompletionOptional();
@@ -69,27 +72,49 @@ export function CompletionButton({
     completionCtx?.onCompletionChange(next);
   };
 
+  const persistCompletionChange = async (nextState: boolean) => {
+    // setArticleCompletion は target state を明示的に指定 → race condition 回避
+    const result = await setArticleCompletion(articleId, lessonId, nextState);
+
+    if (!result.success) {
+      // rollback
+      applyState(!nextState);
+      toast({ title: result.message, variant: "destructive" });
+    } else if (!completionCtx) {
+      toast({ title: result.message });
+    }
+  };
+
   const handleToggle = () => {
-    // 完了 OFF 操作で、レッスンが手動完了済みなら確認ダイアログ
-    if (isCompleted && completionCtx?.lessonStatus === "completed") {
-      setShowUndoConfirmDialog(true);
+    if (!isCompleted) {
+      // 完了 ON は従来どおり即時に楽観的更新する。
+      applyState(true);
+      startTransition(() => persistCompletionChange(true));
       return;
     }
 
-    // 楽観的に即時 UI 更新（連続クリックを許可、isPending ガードなし）
-    const nextState = !isCompleted;
-    applyState(nextState);
+    // レッスン手動完了 status は記事表示をブロックせず、解除操作の時だけ
+    // 最新値を確認する。手動完了済みなら従来どおり確認ダイアログを出す。
+    if (isCheckingLessonStatusRef.current) return;
+    isCheckingLessonStatusRef.current = true;
+    setIsCheckingLessonStatus(true);
 
     startTransition(async () => {
-      // setArticleCompletion は target state を明示的に指定 → race condition 回避
-      const result = await setArticleCompletion(articleId, lessonId, nextState);
+      try {
+        const lessonStatus = lessonId
+          ? await getLessonStatus(lessonId)
+          : "not_started";
 
-      if (!result.success) {
-        // rollback
-        applyState(!nextState);
-        toast({ title: result.message, variant: "destructive" });
-      } else if (!completionCtx) {
-        toast({ title: result.message });
+        if (lessonStatus === "completed") {
+          setShowUndoConfirmDialog(true);
+          return;
+        }
+
+        applyState(false);
+        await persistCompletionChange(false);
+      } finally {
+        isCheckingLessonStatusRef.current = false;
+        setIsCheckingLessonStatus(false);
       }
     });
   };
@@ -129,7 +154,15 @@ export function CompletionButton({
             drawMs={360}
           />
         }
-        label={showLabel ? (isCompleted ? "完了済み" : "完了にする") : ""}
+        label={
+          showLabel
+            ? isCheckingLessonStatus
+              ? "確認中..."
+              : isCompleted
+                ? "完了済み"
+                : "完了にする"
+            : ""
+        }
         onClick={handleToggle}
         burstKey={burstKey}
         burstSync="press-release-start"

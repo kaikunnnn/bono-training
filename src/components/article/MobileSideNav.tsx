@@ -12,8 +12,8 @@ interface MobileSideNavProps {
   onClose: () => void;
   article: ArticleWithContext;
   currentArticleId: string;
-  /** Client side で楽観的に管理される完了済み記事 ID 一覧 */
-  completedArticleIds: string[];
+  /** null の間は hydration 後の進捗取得中 */
+  completedArticleIds: string[] | null;
   /** 表示対象: mobile(〜md) / desktop(md〜) */
   display?: SideNavDisplay;
   /**

@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+  useTransition,
+} from "react";
 import type { ArticleWithContext } from "@/types/sanity";
 import ArticleSideNavNew from "@/components/article/sidebar/ArticleSideNavNew";
 import MobileMenuButton from "@/components/article/MobileMenuButton";
@@ -15,6 +22,8 @@ import { detectCompletionLevelClient } from "@/lib/completion-detection-client";
 import { useCelebration } from "@/hooks/useCelebration";
 import dynamic from "next/dynamic";
 import { trackArticleView } from "@/lib/analytics";
+import { getLessonProgress } from "@/lib/services/progress";
+import { mergeCompletedArticleIds } from "./article-progress-state";
 
 // Modal 系はユーザー操作後に表示されるため dynamic import
 // → 初回ロード時に framer-motion を含む chunk を読み込まない
@@ -35,10 +44,8 @@ const QuestCompletionModal = dynamic(
 
 interface ArticleDetailClientProps {
   article: ArticleWithContext;
-  /** lesson 全体の完了済み記事 ID 一覧（楽観的 UI の初期値） */
-  initialCompletedArticleIds: string[];
-  /** lesson の手動完了 status（CompletionButton OFF 時の確認に使用） */
-  initialLessonStatus: import("@/lib/services/progress").LessonStatus;
+  lessonId: string;
+  lessonArticleIds: string[];
   children: React.ReactNode;
 }
 
@@ -48,8 +55,8 @@ interface ArticleDetailClientProps {
  */
 export default function ArticleDetailClient({
   article,
-  initialCompletedArticleIds,
-  initialLessonStatus,
+  lessonId,
+  lessonArticleIds,
   children,
 }: ArticleDetailClientProps) {
   // セレブレーションシステム
@@ -77,10 +84,47 @@ export default function ArticleDetailClient({
 
   const lastOpenWidthRef = useRef<number>(320);
 
-  // 完了済み記事 ID（Client side で楽観的に管理。サイドバー進捗もここから計算）
-  const [completedArticleIds, setCompletedArticleIds] = useState<string[]>(
-    initialCompletedArticleIds
+  // サイドバー進捗は記事本文を止めないよう hydration 後に取得する。
+  // null の間は「0%」ではなく読み込み中として描画する。
+  const [completedArticleIds, setCompletedArticleIds] = useState<string[] | null>(
+    null
   );
+  const [, startProgressTransition] = useTransition();
+  const completionOverridesRef = useRef(new Map<string, boolean>());
+  const lessonArticleIdsKey = lessonArticleIds.join(",");
+
+  useEffect(() => {
+    let cancelled = false;
+    completionOverridesRef.current.clear();
+    setCompletedArticleIds(null);
+
+    if (!lessonId || lessonArticleIds.length === 0) {
+      setCompletedArticleIds([]);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    // Next.js 16 requires client-invoked Server Functions to be dispatched in
+    // a transition. This secondary personalization must not block the article.
+    startProgressTransition(async () => {
+      const progress = await getLessonProgress(lessonId, lessonArticleIds);
+      if (cancelled) return;
+
+      setCompletedArticleIds(
+        mergeCompletedArticleIds(
+          progress.completedArticleIds,
+          completionOverridesRef.current,
+        )
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+    // The stable content key avoids restarting when the array identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lessonId, lessonArticleIdsKey]);
 
   // 共有される完了状態（複数CompletionButton間の同期用）
   const [sharedIsCompleted, setSharedIsCompleted] = useState<boolean | null>(null);
@@ -104,11 +148,13 @@ export default function ArticleDetailClient({
     (isCompleted: boolean) => {
       // 共有完了状態を更新（複数ボタンの同期）
       setSharedIsCompleted(isCompleted);
+      completionOverridesRef.current.set(article._id, isCompleted);
 
       // 完了済み記事 ID 一覧を楽観的に更新（サイドバー進捗もここから計算）
+      const currentCompletedIds = completedArticleIds ?? [];
       const nextCompletedIds = isCompleted
-        ? Array.from(new Set([...completedArticleIds, article._id]))
-        : completedArticleIds.filter((id) => id !== article._id);
+        ? Array.from(new Set([...currentCompletedIds, article._id]))
+        : currentCompletedIds.filter((id) => id !== article._id);
       setCompletedArticleIds(nextCompletedIds);
 
       if (isCompleted && article.lessonInfo?.quests && article.questInfo) {
@@ -191,7 +237,6 @@ export default function ArticleDetailClient({
       completedLessonTitle,
       resetCompletionLevel,
       sharedIsCompleted,
-      lessonStatus: initialLessonStatus,
     }),
     [
       handleCompletionChange,
@@ -200,7 +245,6 @@ export default function ArticleDetailClient({
       completedLessonTitle,
       resetCompletionLevel,
       sharedIsCompleted,
-      initialLessonStatus,
     ]
   );
 

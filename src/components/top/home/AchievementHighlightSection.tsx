@@ -61,6 +61,8 @@ export interface AchievementHighlightSectionProps {
    */
   cardGridClassName?: string;
   className?: string;
+  /** Three cards per group, matching the top-page query limit. */
+  loading?: boolean;
 }
 
 export default function AchievementHighlightSection({
@@ -75,12 +77,14 @@ export default function AchievementHighlightSection({
   headingSlot,
   cardGridClassName,
   className,
+  loading = false,
 }: AchievementHighlightSectionProps) {
   const subheadingClass =
     "font-rounded-mplus text-[20px] font-medium leading-[1.4] tracking-[1.6px] text-text-primary";
 
   return (
     <section
+      aria-busy={loading || undefined}
       className={cn("border-b border-black/[0.12] py-[120px]", className)}
       style={
         paddingY !== undefined
@@ -93,7 +97,7 @@ export default function AchievementHighlightSection({
           <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />
         )}
 
-        {storyItems.length > 0 && (
+        {(loading || storyItems.length > 0) && (
           <div className="flex flex-col gap-12">
             <h3 className={subheadingClass}>{storyHeading}</h3>
             <div
@@ -102,6 +106,7 @@ export default function AchievementHighlightSection({
                 cardGridClassName,
               )}
             >
+              {loading && <AchievementCardPlaceholders />}
               {storyItems.map((item) => (
                 <AchievementCard
                   key={`story-${item.href}`}
@@ -113,7 +118,7 @@ export default function AchievementHighlightSection({
           </div>
         )}
 
-        {outputItems.length > 0 && (
+        {(loading || outputItems.length > 0) && (
           <div className="flex flex-col gap-12">
             <h3 className={subheadingClass}>{outputHeading}</h3>
             <div
@@ -122,6 +127,7 @@ export default function AchievementHighlightSection({
                 cardGridClassName,
               )}
             >
+              {loading && <AchievementCardPlaceholders />}
               {outputItems.map((item) => (
                 <AchievementCard
                   key={`output-${item.href}`}
@@ -135,4 +141,15 @@ export default function AchievementHighlightSection({
       </div>
     </section>
   );
+}
+
+function AchievementCardPlaceholders() {
+  return Array.from({ length: 3 }, (_, index) => (
+    <div key={index} aria-hidden="true" className="flex flex-col gap-3">
+      <div className="aspect-video w-full rounded-[16px] bg-muted-custom" />
+      <div className="h-4 w-24 rounded bg-muted-custom" />
+      <div className="h-[54px] rounded bg-muted-custom" />
+      <div className="h-7 w-1/2 rounded bg-muted-custom" />
+    </div>
+  ));
 }

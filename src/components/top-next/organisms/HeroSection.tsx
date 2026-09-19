@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 
 /**
@@ -19,9 +20,24 @@ import { Button } from "@/components/ui/button";
 export interface HeroSectionProps {
   /** アクティブ会員なら true（standard/feedback）。true のとき入会 CTA を非表示にする */
   isMember?: boolean;
+  /** `/top` で会員判定だけをストリーミングするための差し込み口 */
+  membershipCta?: ReactNode;
 }
 
-export function HeroSection({ isMember = false }: HeroSectionProps) {
+export function MembershipCta() {
+  return (
+    <div className="flex max-w-full flex-wrap items-center gap-4 pt-6">
+      <Button variant="primary" size="top-cta" className="w-fit" asChild>
+        <Link href="/subscription">メンバーになってはじめる</Link>
+      </Button>
+    </div>
+  );
+}
+
+export function HeroSection({
+  isMember = false,
+  membershipCta,
+}: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden px-6 lg:px-12">
       <div className="pt-12 pb-8 lg:pt-16">
@@ -46,13 +62,9 @@ export function HeroSection({ isMember = false }: HeroSectionProps) {
             <p className="font-noto-sans-jp text-sm font-normal leading-[1.8] tracking-[0.7px] text-text-primary">
               ユーザーのゴールから逆算し、自ら考えて提案できるUI/UX・AIのデザインスキルを、実践形式で身につけるトレーニングサービスです。
             </p>
-            {!isMember && (
-              <div className="flex max-w-full flex-wrap items-center gap-4 pt-6">
-                <Button variant="primary" size="top-cta" className="w-fit" asChild>
-                  <Link href="/subscription">メンバーになってはじめる</Link>
-                </Button>
-              </div>
-            )}
+            {membershipCta !== undefined
+              ? membershipCta
+              : !isMember && <MembershipCta />}
           </div>
         </div>
       </div>

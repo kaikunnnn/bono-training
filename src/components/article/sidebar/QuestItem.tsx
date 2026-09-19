@@ -16,6 +16,7 @@ interface QuestItemProps {
   questTitle: string;
   articles: ArticleItemData[];
   activeArticleId?: string;
+  isProgressPending?: boolean;
   articleItemLayoutVariant?: QuestArticleItemLayoutVariant;
 }
 
@@ -57,6 +58,7 @@ export function QuestItem({
   questTitle,
   articles,
   activeArticleId,
+  isProgressPending = false,
   articleItemLayoutVariant = "C",
 }: QuestItemProps) {
   return (
@@ -71,6 +73,7 @@ export function QuestItem({
             title={article.title}
             tag={article.tag}
             isCompleted={article.isCompleted}
+            isProgressPending={isProgressPending}
             isActive={article.id === activeArticleId}
             href={article.href}
             layoutVariant={articleItemLayoutVariant}

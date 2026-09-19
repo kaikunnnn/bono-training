@@ -51,6 +51,10 @@ export interface LessonHighlightSectionProps {
   /** viewAllHref 指定時のリンク文言（デフォルト "レッスン一覧を見る"） */
   viewAllLabel?: string;
   className?: string;
+  /** Use the same section geometry for a streaming fallback, without fake links. */
+  loading?: boolean;
+  /** Opt in for sections well below the fold; preserve other callers' behavior. */
+  imageLoading?: "lazy" | "eager";
 }
 
 export default function LessonHighlightSection({
@@ -62,9 +66,12 @@ export default function LessonHighlightSection({
   viewAllHref,
   viewAllLabel = "レッスン一覧を見る",
   className,
+  loading = false,
+  imageLoading,
 }: LessonHighlightSectionProps) {
   return (
     <section
+      aria-busy={loading || undefined}
       className={cn("border-b border-black/[0.12] pt-[24px] pb-[25px]", className)}
       style={
         paddingY !== undefined
@@ -94,10 +101,21 @@ export default function LessonHighlightSection({
 
             {/* カード群: 既存 LessonCardRenderer をそのまま流用（PC 3枚横並び / gap 27px） */}
             <div className="flex overflow-x-auto scrollbar-hide gap-[27px] pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:pb-0 sm:overflow-visible">
+              {loading && Array.from({ length: 3 }, (_, index) => (
+                <div key={index} aria-hidden="true" className="w-[232px] shrink-0 rounded-[20px] bg-white p-3 sm:w-auto sm:rounded-[24px] sm:p-4 md:rounded-[29px] md:p-5">
+                  <div className="mb-4 h-5 w-16 rounded-full bg-muted-custom" />
+                  <div className="flex justify-center py-1 sm:py-2">
+                    <div className="aspect-[2/3] w-[90px] rounded bg-muted-custom sm:w-[45%] sm:max-w-[120px]" />
+                  </div>
+                  <div className="mt-4 h-12 rounded bg-muted-custom" />
+                  <div className="mt-2 h-10 rounded bg-muted-custom" />
+                </div>
+              ))}
               {row.lessons.map((lesson, i) => (
                 <LessonCardRenderer
                   key={lesson._id}
                   lesson={{ ...lesson, index: i }}
+                  imageLoading={imageLoading}
                 />
               ))}
             </div>

@@ -25,6 +25,7 @@ interface LessonCardProps {
   lesson: Lesson;
   onClick?: () => void;
   className?: string;
+  imageLoading?: "lazy" | "eager";
 }
 
 /**
@@ -38,6 +39,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
   lesson,
   onClick,
   className,
+  imageLoading,
 }) => {
   const hasRoadmap = lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0;
 
@@ -73,6 +75,8 @@ const LessonCard: React.FC<LessonCardProps> = ({
               <img
                 src={lesson.thumbnail}
                 alt={`${lesson.title}のサムネイル`}
+                loading={imageLoading}
+                decoding={imageLoading === "lazy" ? "async" : undefined}
                 className="w-full h-full object-cover"
               />
             </div>

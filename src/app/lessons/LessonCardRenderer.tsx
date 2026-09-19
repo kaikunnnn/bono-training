@@ -12,13 +12,14 @@ import { LessonCard } from "@/components/lessons/LessonCard";
 
 interface LessonCardRendererProps {
   lesson: Lesson & { index?: number };
+  imageLoading?: "lazy" | "eager";
 }
 
 /**
  * レッスンカードをレンダリングする Server Component
  * mainブランチの renderLessonCard に対応
  */
-export function LessonCardRenderer({ lesson }: LessonCardRendererProps) {
+export function LessonCardRenderer({ lesson, imageLoading }: LessonCardRendererProps) {
   const categoryValue = lesson.tags?.[0] || "";
 
   const thumbnailUrl =
@@ -39,6 +40,7 @@ export function LessonCardRenderer({ lesson }: LessonCardRendererProps) {
     >
       <Link href={`/lessons/${lesson.slug.current}`}>
         <LessonCard
+          imageLoading={imageLoading}
           lesson={{
             id: lesson._id,
             title: lesson.title,
