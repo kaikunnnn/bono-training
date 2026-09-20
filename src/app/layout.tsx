@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import {
   Geist_Mono,
-  Noto_Sans_JP,
   M_PLUS_1,
 } from "next/font/google";
 import Script from "next/script";
@@ -21,13 +20,6 @@ const geistMono = Geist_Mono({
   // Code font: keep it available where used, but do not fetch it on every page.
   // The member top does not use it (23 KB of otherwise unnecessary preload).
   preload: false,
-});
-
-const notoSansJp = Noto_Sans_JP({
-  variable: "--font-noto-sans-jp-var",
-  subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  display: "swap",
 });
 
 // 見出し専用。主力は 700 / 500。加えて 600(SemiBold) を料金ページの見出し用に読み込む。
@@ -88,7 +80,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body
-        className={`${geistMono.variable} ${notoSansJp.variable} ${mplus1.variable} antialiased`}
+        className={`${geistMono.variable} ${mplus1.variable} antialiased`}
       >
         <GoogleAnalytics />
         <ServiceWorkerRegistrar />

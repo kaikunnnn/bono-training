@@ -21,19 +21,25 @@ const styles = links.filter(link => link.rel === 'stylesheet' && link.href)
   .map(link => new URL(link.href, base));
 if (!styles.length) throw new Error('No stylesheet links found');
 const monoFiles = new Set();
+let notoJapaneseFaceCount = 0;
 for (const url of styles) {
   if (url.origin !== base.origin) throw new Error('Unexpected stylesheet origin');
   const css = await read(url);
   for (const [, body] of css.matchAll(/@font-face\{([^}]+)\}/g)) {
+    if (/font-family:[^;]*Noto Sans JP/.test(body)) notoJapaneseFaceCount += 1;
     if (!/font-family:[^;]*Geist Mono/.test(body)) continue;
     const source = body.match(/url\(["']?([^"')]+)["']?\)/)?.[1];
     if (source) monoFiles.add(new URL(source, url).pathname);
   }
 }
 if (!monoFiles.size) throw new Error('Code font CSS missing: it must remain available on demand');
+if (notoJapaneseFaceCount) {
+  throw new Error(`Japanese body web font returned (${notoJapaneseFaceCount} faces); use the system stack`);
+}
 const fontPreloads = links.filter(link => link.rel === 'preload' && link.as === 'font' && link.href);
 if (!fontPreloads.length) throw new Error('No font preloads observed; cannot validate this response shape');
 const unwanted = fontPreloads.filter(link => monoFiles.has(new URL(link.href, base).pathname));
 if (unwanted.length) throw new Error(`Unused code font is still preloaded (${unwanted.length} link)`);
 console.log(JSON.stringify({ page: new URL('/top', base).href, codeFontAvailable: true,
-  codeFontPreloads: 0, otherFontPreloads: fontPreloads.length }));
+  codeFontPreloads: 0, japaneseBodyFont: 'system', japaneseWebFontFaces: 0,
+  otherFontPreloads: fontPreloads.length }));
