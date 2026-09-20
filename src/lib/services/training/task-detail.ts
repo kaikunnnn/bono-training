@@ -2,6 +2,7 @@ import 'server-only'
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { getTrainingTaskDetailFromSanity } from "@/lib/sanity";
+import type { SanityTrainingTaskDetail } from "@/lib/sanity";
 import type { TaskDetailData } from "@/types/training";
 import { TrainingError } from "@/lib/errors";
 
@@ -93,13 +94,50 @@ const validateAndTransformResponse = (
 };
 
 /**
- * タスク詳細を取得（Storage + Edge Functionベース）
+ * SanityのPortable Textタスクを画面用の型へ変換する。
+ */
+const transformSanityTaskDetail = (
+  data: SanityTrainingTaskDetail,
+  fallbackTrainingSlug: string
+): TaskDetailData => {
+  const allTasks = data.allTasks || [];
+  const currentIndex = allTasks.findIndex((task) => task.slug === data.slug);
+
+  return {
+    id: data._id,
+    slug: data.slug,
+    title: data.title,
+    content: "",
+    is_premium: data.isPremium || false,
+    order_index: data.orderIndex ?? 1,
+    training_id: data.training?._id || "",
+    created_at: null,
+    video_full: data.videoFull || null,
+    video_preview: data.videoPreview || null,
+    preview_sec: data.previewSec || null,
+    trainingTitle: data.training?.title || "",
+    trainingSlug: data.training?.slug || fallbackTrainingSlug,
+    trainingType: data.training?.type,
+    prev_task: currentIndex > 0 ? allTasks[currentIndex - 1].slug : null,
+    next_task:
+      currentIndex >= 0 && currentIndex < allTasks.length - 1
+        ? allTasks[currentIndex + 1].slug
+        : null,
+    isPremiumCut: false,
+    hasAccess: true,
+    description: data.description,
+    sanitySections: data.sections || [],
+  };
+};
+
+/**
+ * タスク詳細を取得
  *
  * 3段階フォールバック:
- * 1. Edge Function（get-training-content）
- * 2. Sanity CMS からトレーニング詳細を取得し、タスクメタ情報を返す
- *    （タスク本文は Storage にしかないため、コンテンツなしで返す）
- * 3. TrainingError をスロー（呼び出し元で notFound() 処理）
+ * 1. 無料かつPortable Text本文があるタスクはSanityキャッシュ
+ * 2. 有料・Sanity未移行・Sanity障害時は認証付きEdge Function
+ * 3. Edge失敗時は従来互換としてSanityへフォールバック
+ * 4. TrainingError をスロー（呼び出し元で notFound() 処理）
  */
 export const getTrainingTaskDetail = cache(async (
   trainingSlug: string,
@@ -113,7 +151,30 @@ export const getTrainingTaskDetail = cache(async (
     );
   }
 
-  // 1. Edge Function（第1段階）
+  const normalizedTrainingSlug = trainingSlug.trim();
+  const normalizedTaskSlug = taskSlug.trim();
+  let sanityData: SanityTrainingTaskDetail | null = null;
+
+  // 現在の無料タスクはSanityに完全なPortable Text本文があるため、認証・Edge往復を省く。
+  // 将来の有料タスクはhasAccess判定を維持するため、必ず従来のEdge経路へ進める。
+  try {
+    sanityData = await getTrainingTaskDetailFromSanity(
+      normalizedTrainingSlug,
+      normalizedTaskSlug
+    );
+
+    if (
+      sanityData &&
+      !sanityData.isPremium &&
+      (sanityData.sections || []).length > 0
+    ) {
+      return transformSanityTaskDetail(sanityData, normalizedTrainingSlug);
+    }
+  } catch (sanityError) {
+    console.warn("[getTrainingTaskDetail] Sanity 先行取得失敗、Edge Functionへ:", sanityError);
+  }
+
+  // 2. 有料・未移行・Sanity障害時は認証付きEdge Functionを使う。
   try {
     const supabase = await createClient();
 
@@ -121,8 +182,8 @@ export const getTrainingTaskDetail = cache(async (
       "get-training-content",
       {
         body: {
-          trainingSlug: trainingSlug.trim(),
-          taskSlug: taskSlug.trim(),
+          trainingSlug: normalizedTrainingSlug,
+          taskSlug: normalizedTaskSlug,
         },
       }
     );
@@ -138,23 +199,35 @@ export const getTrainingTaskDetail = cache(async (
     const responseData = data.data || data;
     const taskDetail = validateAndTransformResponse(
       responseData as Record<string, unknown>,
-      trainingSlug,
-      taskSlug
+      normalizedTrainingSlug,
+      normalizedTaskSlug
     );
 
     // Edge Function が空コンテンツを返した場合、Sanity から Portable Text セクションを補完
     if (!taskDetail.content && !taskDetail.sanitySections?.length) {
       try {
-        const sanityData = await getTrainingTaskDetailFromSanity(trainingSlug, taskSlug);
-        if (sanityData?.sections?.length) {
-          taskDetail.sanitySections = sanityData.sections;
-          taskDetail.description = taskDetail.description || sanityData.description;
+        const supplement =
+          sanityData ||
+          (await getTrainingTaskDetailFromSanity(
+            normalizedTrainingSlug,
+            normalizedTaskSlug
+          ));
+        if (supplement?.sections?.length) {
+          taskDetail.sanitySections = supplement.sections;
+          taskDetail.description =
+            taskDetail.description || supplement.description;
           // Sanityのナビゲーション情報も補完
           if (!taskDetail.next_task && !taskDetail.prev_task) {
-            const allTasks = sanityData.allTasks || [];
-            const currentIndex = allTasks.findIndex((t) => t.slug === taskSlug);
-            taskDetail.prev_task = currentIndex > 0 ? allTasks[currentIndex - 1].slug : null;
-            taskDetail.next_task = currentIndex < allTasks.length - 1 ? allTasks[currentIndex + 1].slug : null;
+            const allTasks = supplement.allTasks || [];
+            const currentIndex = allTasks.findIndex(
+              (task) => task.slug === normalizedTaskSlug
+            );
+            taskDetail.prev_task =
+              currentIndex > 0 ? allTasks[currentIndex - 1].slug : null;
+            taskDetail.next_task =
+              currentIndex < allTasks.length - 1
+                ? allTasks[currentIndex + 1].slug
+                : null;
           }
         }
       } catch (sanitySupplementError) {
@@ -166,11 +239,14 @@ export const getTrainingTaskDetail = cache(async (
   } catch (edgeFnError) {
     console.warn("[getTrainingTaskDetail] Edge Function 失敗、Sanity フォールバックへ:", edgeFnError);
 
-    // 2. Sanity CMS フォールバック（第2段階）
-    // mainと同じGROQクエリでPortable Textコンテンツを含むタスクデータを取得
+    // 3. 従来互換のSanityフォールバック。
     try {
-      console.log("[getTrainingTaskDetail] Sanity フォールバック開始:", trainingSlug, taskSlug);
-      const data = await getTrainingTaskDetailFromSanity(trainingSlug, taskSlug);
+      const data =
+        sanityData ||
+        (await getTrainingTaskDetailFromSanity(
+          normalizedTrainingSlug,
+          normalizedTaskSlug
+        ));
 
       if (!data) {
         throw new TrainingError(
@@ -180,37 +256,15 @@ export const getTrainingTaskDetail = cache(async (
         );
       }
 
-      // 前後のタスクを算出（mainと同じロジック）
-      const allTasks = data.allTasks || [];
-      const currentIndex = allTasks.findIndex((t) => t.slug === taskSlug);
-      const prevTask = currentIndex > 0 ? allTasks[currentIndex - 1].slug : null;
-      const nextTask = currentIndex < allTasks.length - 1 ? allTasks[currentIndex + 1].slug : null;
+      // 有料本文は権限確認に成功したEdgeレスポンスからだけ返す。
+      if (data.isPremium) {
+        throw new TrainingError(
+          "有料タスクの権限を確認できませんでした",
+          "FETCH_ERROR"
+        );
+      }
 
-      console.log("[getTrainingTaskDetail] Sanity フォールバック成功:", data.title);
-
-      return {
-        id: data._id,
-        slug: data.slug,
-        title: data.title,
-        content: "", // Portable TextはsanitySectionsで提供
-        is_premium: data.isPremium || false,
-        order_index: data.orderIndex ?? 1,
-        training_id: data.training?._id || "",
-        created_at: null,
-        video_full: data.videoFull || null,
-        video_preview: data.videoPreview || null,
-        preview_sec: data.previewSec || null,
-        trainingTitle: data.training?.title || "",
-        trainingSlug: data.training?.slug || trainingSlug,
-        trainingType: data.training?.type,
-        next_task: nextTask,
-        prev_task: prevTask,
-        isPremiumCut: false,
-        hasAccess: true,
-        description: data.description,
-        // Sanity Portable Text セクション
-        sanitySections: data.sections || [],
-      };
+      return transformSanityTaskDetail(data, normalizedTrainingSlug);
     } catch (sanityError) {
       // Sanity からの NOT_FOUND はそのまま再スロー
       if (sanityError instanceof TrainingError) {
@@ -219,7 +273,7 @@ export const getTrainingTaskDetail = cache(async (
 
       console.error("[getTrainingTaskDetail] Sanity フォールバックも失敗:", sanityError);
 
-      // 3. エラーをスロー（第3段階）— ページの notFound() で処理される
+      // 4. エラーをスロー（第4段階）— ページの notFound() で処理される
       throw new TrainingError(
         "タスク詳細の取得に失敗しました",
         "FETCH_ERROR"
