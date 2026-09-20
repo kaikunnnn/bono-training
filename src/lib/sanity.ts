@@ -1212,7 +1212,7 @@ export const getTrainingDetailFromSanity = unstable_cache(
  * タスク詳細をSanityから直接取得（mainと同じGROQクエリ）
  * sections[]（Portable Text）を含む完全なタスクデータを返す
  */
-export interface SanityTrainingTaskDetail {
+interface SanityTrainingTaskDetail {
   _id: string;
   title: string;
   slug: string;
