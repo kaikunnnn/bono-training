@@ -2,7 +2,10 @@ import React from 'react';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 import { IntentPrefetchLink } from '@/components/common/IntentPrefetchLink';
-import { getOptimizedTrainingImage } from '@/lib/training-images';
+import {
+  getOptimizedTrainingImage,
+  TRAINING_CARD_BACKGROUND_IMAGE,
+} from '@/lib/training-images';
 import { cn } from '@/lib/utils';
 import type { Training } from '@/types/training';
 import CategoryTag from './CategoryTag';
@@ -32,7 +35,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({
         <div
           className="absolute inset-0"
           style={{
-            backgroundImage: 'url(/assets/backgrounds/gradation/bg-gradation/bg-gradation-training-list.svg)',
+            backgroundImage: `url(${TRAINING_CARD_BACKGROUND_IMAGE})`,
             backgroundSize: 'contain',
             backgroundPosition: 'center'
           }}

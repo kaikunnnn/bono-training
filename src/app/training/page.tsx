@@ -7,6 +7,7 @@ import TrainingGrid from "@/components/training/TrainingGrid";
 import SectionHeading from "@/components/training/SectionHeading";
 import ContentWrapper from "@/components/training/ContentWrapper";
 import TrainingCardSkeleton from "@/components/training/TrainingCardSkeleton";
+import TrainingBackgroundPreload from "@/components/training/TrainingBackgroundPreload";
 import { Separator } from "@/components/ui/separator";
 import type { Training } from "@/types/training";
 
@@ -128,6 +129,7 @@ async function TrainingContent() {
 export default function TrainingPage() {
   return (
     <ContentWrapper>
+      <TrainingBackgroundPreload />
       {/* Hero は即時表示 */}
       <TrainingHero />
 

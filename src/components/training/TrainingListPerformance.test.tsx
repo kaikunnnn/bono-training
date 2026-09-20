@@ -6,7 +6,11 @@ import type {
 } from "react";
 import { describe, expect, it, vi } from "vitest";
 import TrainingGrid from "./TrainingGrid";
-import { getOptimizedTrainingImage } from "@/lib/training-images";
+import TrainingBackgroundPreload from "./TrainingBackgroundPreload";
+import {
+  getOptimizedTrainingImage,
+  TRAINING_CARD_BACKGROUND_IMAGE,
+} from "@/lib/training-images";
 import type { Training } from "@/types/training";
 
 vi.mock("next/link", () => ({
@@ -73,6 +77,17 @@ const challengeTraining: Training = {
 };
 
 describe("training list performance", () => {
+  it("preloads the shared first-card LCP background from the static shell", () => {
+    render(<TrainingBackgroundPreload />);
+    const preload = document.head.querySelector(
+      'link[rel="preload"][as="image"]'
+    );
+
+    expect(preload?.getAttribute("href")).toBe(TRAINING_CARD_BACKGROUND_IMAGE);
+    expect(preload?.getAttribute("type")).toBe("image/svg+xml");
+    expect(preload?.getAttribute("fetchpriority")).toBe("high");
+  });
+
   it("maps only known oversized emoji assets to lightweight WebP files", () => {
     expect(getOptimizedTrainingImage("/assets/emoji/building.svg")).toBe(
       "/assets/emoji/optimized/building.webp"
