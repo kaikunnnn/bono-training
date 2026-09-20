@@ -14,6 +14,9 @@ const OPTIMIZED_EMOJI_NAMES = new Set([
 
 const LOCAL_EMOJI_PATTERN = /^\/assets\/emoji\/([^/?]+)\.svg(?:\?.*)?$/;
 
+export const TRAINING_CARD_BACKGROUND_IMAGE =
+  "/assets/backgrounds/gradation/bg-gradation/bg-gradation-training-list.svg";
+
 /**
  * トレーニング一覧で使う既存の巨大SVG（内部に1024px PNGを埋め込んだもの）を、
  * 同じ絵柄の軽量WebPへ差し替える。未登録の画像やCMS画像は変更しない。
