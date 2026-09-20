@@ -1,21 +1,25 @@
 import React from "react";
-import Link from "next/link";
 import Image from "next/image";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { getOptimizedTrainingImage } from "@/lib/training-images";
 import { cn } from "@/lib/utils";
 import type { Training } from "@/types/training";
 
 interface TrainingCardProps {
   training: Training;
   className?: string;
+  imageLoading?: "eager" | "lazy";
 }
 
-const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
-  // デフォルトのダミー画像URL
-  const dummyImage =
-    "https://images.unsplash.com/photo-1649972904349-6e44c42644a7";
+const TrainingCard: React.FC<TrainingCardProps> = ({
+  training,
+  className,
+  imageLoading = "lazy",
+}) => {
+  const thumbnailImage = getOptimizedTrainingImage(training.thumbnailImage);
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/training/${training.slug}`}
       className={cn("w-full max-w-[400px] flex flex-col gap-6", className)}
     >
@@ -23,30 +27,26 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
         {/* カードの上部 */}
         <div className="relative h-[499.554px] flex flex-col justify-center items-center px-0 pt-16 pb-8 rounded-[320px_320px_32px_32px] border-2 border-[#374151] bg-[#FAFBF8] overflow-hidden">
           {/* 背景画像（ブラー効果付き） */}
-          <div className="absolute inset-0 w-[957px] h-[638px] flex justify-center items-center">
+          <div className="absolute inset-0 scale-110">
             <Image
-              src={training.thumbnailImage || dummyImage}
+              src={thumbnailImage}
               alt=""
-              width={957}
-              height={638}
+              fill
+              sizes="(min-width: 1024px) 400px, (min-width: 768px) 46vw, calc(100vw - 32px)"
+              loading="lazy"
               className="object-cover filter blur-[8.89px]"
-              style={{
-                position: "absolute",
-                right: "-252.199px",
-                bottom: "-73.446px",
-              }}
-              unoptimized
             />
           </div>
 
           {/* メインのサムネイル画像 */}
           <div className="relative w-[342.161px] h-[293.827px] flex justify-center items-center">
             <Image
-              src={training.thumbnailImage || dummyImage}
+              src={thumbnailImage}
               alt={training.title}
               fill
+              sizes="(min-width: 1024px) 342px, (min-width: 768px) 40vw, calc(100vw - 64px)"
+              loading={imageLoading}
               className="object-cover"
-              unoptimized
             />
           </div>
         </div>
@@ -94,14 +94,14 @@ const TrainingCard: React.FC<TrainingCardProps> = ({ training, className }) => {
           </div>
 
           {/* CTAボタン */}
-          <button className="w-full mt-2 py-2.5 px-4 flex justify-center items-center rounded-full border border-[#020617] hover:bg-gray-50 transition-colors">
+          <div className="w-full mt-2 py-2.5 px-4 flex justify-center items-center rounded-full border border-[#020617] hover:bg-gray-50 transition-colors">
             <span className="text-[14px] font-extrabold font-rounded-mplus tracking-[0.75px] text-text-primary">
               トレーニングを見る
             </span>
-          </button>
+          </div>
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 

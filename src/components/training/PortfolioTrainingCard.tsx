@@ -1,6 +1,8 @@
 import React from 'react';
-import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import { IntentPrefetchLink } from '@/components/common/IntentPrefetchLink';
+import { getOptimizedTrainingImage } from '@/lib/training-images';
 import { cn } from '@/lib/utils';
 import type { Training } from '@/types/training';
 import CategoryTag from './CategoryTag';
@@ -8,11 +10,18 @@ import CategoryTag from './CategoryTag';
 interface PortfolioTrainingCardProps {
   training: Training;
   className?: string;
+  imageLoading?: 'eager' | 'lazy';
 }
 
-const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training, className }) => {
+const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({
+  training,
+  className,
+  imageLoading = 'lazy',
+}) => {
+  const iconImage = getOptimizedTrainingImage(training.icon);
+
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/training/${training.slug}`}
       className={cn("block w-full min-w-[280px] max-w-[400px]", className)}
     >
@@ -43,10 +52,13 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
                 </span>
               ) : (
                 // URL（CDNまたはローカルパス）の場合
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={training.icon || '/assets/emoji/book.svg'}
+                <Image
+                  src={iconImage}
                   alt={training.title}
+                  width={50}
+                  height={50}
+                  sizes="50px"
+                  loading={imageLoading}
                   className="w-[49.5px] h-[49.5px] object-cover rounded-lg"
                 />
               )}
@@ -110,7 +122,7 @@ const PortfolioTrainingCard: React.FC<PortfolioTrainingCardProps> = ({ training,
           </div>
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 
