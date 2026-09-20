@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { Star } from "lucide-react";
 import { toggleBookmark } from "@/lib/services/bookmarks";
 import { useToast } from "@/hooks/use-toast";
 import { MySection } from "../_shared/MySection";
 import { EmptyState } from "../_shared/EmptyState";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 export interface BookmarkedArticle {
   _id: string;
@@ -117,7 +117,7 @@ function BookmarkItem({
       className="w-full flex items-center gap-3 bg-white cursor-pointer"
       style={{ minHeight: "68px", padding: "16px" }}
     >
-      <Link
+      <IntentPrefetchLink
         href={`/contents/${article.slug.current}`}
         className="flex items-center gap-3 flex-1 min-w-0 no-underline"
       >
@@ -165,7 +165,7 @@ function BookmarkItem({
             </div>
           )}
         </div>
-      </Link>
+      </IntentPrefetchLink>
 
       {/* お気に入りボタン */}
       <div

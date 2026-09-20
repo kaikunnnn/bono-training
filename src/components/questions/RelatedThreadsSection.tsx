@@ -58,23 +58,25 @@ export async function RelatedThreadsSection({
   categorySlug,
   showEngagement,
 }: RelatedThreadsSectionProps) {
-  // 関連（同カテゴリ）→ そこに出した ID も除外して最近を取得
-  const related = categorySlug
-    ? await getRelatedQuestions({
-        categorySlug,
-        excludeIds: [currentQuestionId],
-        limit: 2,
-      })
-    : [];
-
-  const recentExcludeIds = [
-    currentQuestionId,
-    ...related.map((item) => item.question._id),
-  ];
-  const recent = await getRecentQuestions({
-    excludeIds: recentExcludeIds,
-    limit: 2,
-  });
+  // 関連と最近候補を並列取得する。最近は重複除去分を見込んで4件取得し、
+  // 関連に出したIDをサーバー上で除いてから既存どおり最大2件にする。
+  const [related, recentCandidates] = await Promise.all([
+    categorySlug
+      ? getRelatedQuestions({
+          categorySlug,
+          excludeIds: [currentQuestionId],
+          limit: 2,
+        })
+      : Promise.resolve([]),
+    getRecentQuestions({
+      excludeIds: [currentQuestionId],
+      limit: 4,
+    }),
+  ]);
+  const relatedIds = new Set(related.map((item) => item.question._id));
+  const recent = recentCandidates
+    .filter((item) => !relatedIds.has(item.question._id))
+    .slice(0, 2);
 
   // どちらも無ければコーナーごと非表示
   if (related.length === 0 && recent.length === 0) return null;

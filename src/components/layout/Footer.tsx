@@ -1,7 +1,7 @@
-import Link from "next/link";
 import { Youtube, Twitter } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Logo from "@/components/common/Logo";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import {
   FOOTER_DESCRIPTION,
   FOOTER_GROUPS,
@@ -38,9 +38,9 @@ export function Footer({ className }: FooterProps) {
       <div className="flex flex-col gap-9 lg:flex-row lg:items-start lg:justify-between lg:gap-[72px]">
         {/* ブランド領域 */}
         <div className="max-w-[320px]">
-          <Link href="/" aria-label="BONO ホームへ" className="inline-block leading-none">
+          <IntentPrefetchLink href="/" aria-label="BONO ホームへ" className="inline-block leading-none">
             <Logo width={82} height={24} />
-          </Link>
+          </IntentPrefetchLink>
           <p className="mt-4 text-sm leading-relaxed text-text-secondary">
             {FOOTER_DESCRIPTION}
           </p>
@@ -89,13 +89,13 @@ export function Footer({ className }: FooterProps) {
       <div className="mt-10 flex flex-col gap-3 border-t border-border-light pt-5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-x-5 gap-y-2">
           {FOOTER_LEGAL.map((link) => (
-            <Link
+            <IntentPrefetchLink
               key={link.label}
               href={link.href}
               className="text-xs text-text-muted transition-colors hover:text-text-primary"
             >
               {link.label}
-            </Link>
+            </IntentPrefetchLink>
           ))}
         </div>
         <p className="text-xs text-text-muted">© BONO. All rights reserved.</p>
@@ -104,7 +104,7 @@ export function Footer({ className }: FooterProps) {
   );
 }
 
-/** 内部リンク=next/link、外部リンク=新規タブ + rel="noopener noreferrer"。 */
+/** 内部リンク=操作意図時だけprefetch、外部リンク=新規タブ + rel="noopener noreferrer"。 */
 function FooterAnchor({ link }: { link: FooterLink }) {
   const cls =
     "text-sm text-text-secondary transition-colors hover:text-text-primary";
@@ -116,9 +116,9 @@ function FooterAnchor({ link }: { link: FooterLink }) {
     );
   }
   return (
-    <Link href={link.href} className={cls}>
+    <IntentPrefetchLink href={link.href} className={cls}>
       {link.label}
-    </Link>
+    </IntentPrefetchLink>
   );
 }
 

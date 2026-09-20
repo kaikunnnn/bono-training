@@ -27,6 +27,15 @@ export interface LessonProgress {
 
 export type LessonStatus = "not_started" | "in_progress" | "completed";
 
+export interface MypageProgressSnapshot {
+  completedArticles: Array<{
+    lessonId: string;
+    articleId: string;
+    updatedAt: string;
+  }>;
+  lessonStatuses: Record<string, LessonStatus>;
+}
+
 // ============================================
 // 記事の進捗管理
 // ============================================
@@ -393,6 +402,54 @@ export async function getMultipleLessonProgress(
   } catch (error) {
     console.error("Get multiple lesson progress error:", error);
     return progressMap;
+  }
+}
+
+/**
+ * マイページで表示候補を決めるための本人進捗スナップショット。
+ * article/lesson の2テーブルは並列で読み、共有キャッシュには保存しない。
+ */
+export async function getMypageProgressSnapshot(
+  userId: string
+): Promise<MypageProgressSnapshot> {
+  try {
+    const supabase = await createClient();
+    const [articleResult, lessonResult] = await Promise.all([
+      supabase
+        .from("article_progress")
+        .select("lesson_id, article_id, updated_at")
+        .eq("user_id", userId)
+        .eq("status", "completed")
+        .order("updated_at", { ascending: false }),
+      supabase
+        .from("lesson_progress")
+        .select("lesson_id, status")
+        .eq("user_id", userId),
+    ]);
+
+    if (articleResult.error) {
+      console.error("Get mypage article progress error:", articleResult.error);
+    }
+    if (lessonResult.error) {
+      console.error("Get mypage lesson status error:", lessonResult.error);
+    }
+
+    const lessonStatuses: Record<string, LessonStatus> = {};
+    for (const row of lessonResult.data || []) {
+      lessonStatuses[row.lesson_id] = row.status as LessonStatus;
+    }
+
+    return {
+      completedArticles: (articleResult.data || []).map((row) => ({
+        lessonId: row.lesson_id,
+        articleId: row.article_id,
+        updatedAt: row.updated_at,
+      })),
+      lessonStatuses,
+    };
+  } catch (error) {
+    console.error("Get mypage progress snapshot error:", error);
+    return { completedArticles: [], lessonStatuses: {} };
   }
 }
 

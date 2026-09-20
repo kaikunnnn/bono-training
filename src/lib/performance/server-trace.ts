@@ -22,7 +22,14 @@ export type ServerTraceLabel =
   | "lesson.metadata.cms"
   | "lesson.page.cms"
   | "lesson.page.subscription"
-  | "lesson.page.progress";
+  | "lesson.page.progress"
+  | "mypage.progress.snapshot"
+  | "mypage.progress.cms"
+  | "mypage.bookmarks"
+  | "mypage.history"
+  | "questions.list.access"
+  | "questions.list.data"
+  | "questions.detail.reactions";
 
 /**
  * Local preview only: log an allow-listed step name, duration and outcome.

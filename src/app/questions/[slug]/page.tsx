@@ -8,7 +8,6 @@ import {
   getQuestionBySlug,
   getReactionCountsMap,
   getMyReactions,
-  type ReactionKey,
 } from "@/lib/services/questions";
 import { emptyReactionCounts } from "@/lib/services/questions-utils";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
@@ -23,6 +22,7 @@ import { ReactionButtons } from "@/components/questions/ReactionButtons";
 import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
 import { PostActions } from "@/components/questions/PostActions";
 import { portableBlocksToText } from "@/lib/questions/text-format";
+import { traceServerStep } from "@/lib/performance/server-trace";
 
 const PREVIEW_LINES_FOR_GUEST = 3;
 
@@ -125,6 +125,50 @@ interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+async function QuestionReactionContent({
+  questionId,
+  currentUserId,
+}: {
+  questionId: string;
+  currentUserId: string | null;
+}) {
+  const [reactionMap, mine] = await traceServerStep(
+    "questions.detail.reactions",
+    () => Promise.all([
+      getReactionCountsMap({
+        targetType: "question",
+        targetIds: [questionId],
+      }),
+      currentUserId
+        ? getMyReactions({
+            targetType: "question",
+            targetIds: [questionId],
+          })
+        : Promise.resolve([]),
+    ])
+  );
+
+  return (
+    <ReactionButtons
+      targetType="question"
+      targetId={questionId}
+      counts={reactionMap[questionId] ?? emptyReactionCounts()}
+      myReactions={mine.map((reaction) => reaction.reaction)}
+      canReact={currentUserId !== null}
+    />
+  );
+}
+
+function QuestionReactionSkeleton() {
+  return (
+    <div className="flex gap-2" aria-hidden="true">
+      {[0, 1, 2].map((index) => (
+        <div key={index} className="h-8 w-20 animate-pulse rounded-[9px] bg-muted" />
+      ))}
+    </div>
+  );
+}
+
 export default async function Page({ params }: PageProps) {
   const { slug } = await params;
 
@@ -152,30 +196,6 @@ export default async function Page({ params }: PageProps) {
   const profileIncomplete = currentUser
     ? isProfileIncomplete(currentUser.user_metadata)
     : false;
-
-  // メンバーのみ「質問本体」へのリアクションを取得（質問カードのフッターに即時表示する）。
-  // コメント一覧・コメントリアクションは重い（コメント件数に比例）ため、ここでは待たず
-  // QuestionCommentsBoundary（Suspense 内）へ切り出してストリーミングする（#160 S2）。
-  let questionReactionCounts = emptyReactionCounts();
-  let myQuestionReactions: ReactionKey[] = [];
-
-  if (hasFullAccess) {
-    // 質問本体に対するリアクション集計・自分のリアクションを並列取得（軽量・単一ID）。
-    const [qReactionMap, qMine] = await Promise.all([
-      getReactionCountsMap({
-        targetType: "question",
-        targetIds: [question._id],
-      }),
-      currentUserId
-        ? getMyReactions({
-            targetType: "question",
-            targetIds: [question._id],
-          })
-        : Promise.resolve([]),
-    ]);
-    questionReactionCounts = qReactionMap[question._id] ?? emptyReactionCounts();
-    myQuestionReactions = qMine.map((r) => r.reaction);
-  }
 
   return (
     <div className="mx-auto max-w-[800px] px-4 py-10 sm:px-6">
@@ -294,13 +314,12 @@ export default async function Page({ params }: PageProps) {
         {/* フッター：左=リアクション / 右=日付（Figma 13:2617） */}
         {hasFullAccess && (
           <div className="flex items-start justify-between border-t border-border pt-6">
-            <ReactionButtons
-              targetType="question"
-              targetId={question._id}
-              counts={questionReactionCounts}
-              myReactions={myQuestionReactions}
-              canReact={currentUserId !== null}
-            />
+            <Suspense fallback={<QuestionReactionSkeleton />}>
+              <QuestionReactionContent
+                questionId={question._id}
+                currentUserId={currentUserId}
+              />
+            </Suspense>
             <span className="text-[13px] leading-5 text-muted-foreground">
               {formatDate(question.publishedAt)}
             </span>
