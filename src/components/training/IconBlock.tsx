@@ -1,4 +1,6 @@
 import React from 'react';
+import Image from 'next/image';
+import { getOptimizedTrainingImage } from '@/lib/training-images';
 
 interface IconBlockProps {
   iconSrc?: string;
@@ -36,6 +38,12 @@ export default function IconBlock({
   const isUrl = iconSrc && (/^https?:\/\//.test(iconSrc) || iconSrc.startsWith('/'));
   // URL でなければ絵文字またはテキストとして扱う
   const isEmoji = iconSrc && !isUrl;
+  const optimizedIconSrc = isUrl ? getOptimizedTrainingImage(iconSrc) : undefined;
+  const imageSizes: IconBlockSizes = {
+    sm: "44px",
+    md: "56px",
+    lg: "68px",
+  };
 
   return (
     <div
@@ -64,11 +72,13 @@ export default function IconBlock({
             </span>
           ) : (
             // 画像URLの場合
-            <div
-              className="absolute bg-center bg-cover bg-no-repeat inset-0"
-              style={{ backgroundImage: `url('${iconSrc}')` }}
-              role="img"
-              aria-label={iconAlt}
+            <Image
+              src={optimizedIconSrc!}
+              alt=""
+              fill
+              sizes={imageSizes[size]}
+              loading="eager"
+              className="object-contain"
             />
           )
         ) : (

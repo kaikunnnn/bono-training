@@ -1164,6 +1164,9 @@ export interface SanityTrainingDetailItem {
     slug: string;
     orderIndex: number;
     isPremium: boolean;
+    description?: string;
+    category?: string;
+    tags?: string[];
   }>;
 }
 
@@ -1192,7 +1195,10 @@ export const getTrainingDetailFromSanity = unstable_cache(
           title,
           "slug": slug.current,
           orderIndex,
-          isPremium
+          isPremium,
+          description,
+          category,
+          tags
         }
       }
     `;
@@ -1206,7 +1212,7 @@ export const getTrainingDetailFromSanity = unstable_cache(
  * タスク詳細をSanityから直接取得（mainと同じGROQクエリ）
  * sections[]（Portable Text）を含む完全なタスクデータを返す
  */
-interface SanityTrainingTaskDetail {
+export interface SanityTrainingTaskDetail {
   _id: string;
   title: string;
   slug: string;
