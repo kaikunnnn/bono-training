@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Image from "next/image";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { getCategoryInfo } from "@/lib/guideCategories";
 import type { Guide } from "@/types/guide";
 import { GuideCardImage } from "./GuideCardImage";
@@ -7,20 +7,36 @@ import { getVideoInfo } from "@/lib/videoUtils";
 
 interface GuideCardProps {
   guide: Guide;
+  imagePreload?: boolean;
 }
 
 /**
  * ガイドカードメディア部分
  * 優先順位: サムネイル画像 > 動画サムネイル > プレースホルダー
  */
-function GuideCardMedia({ title, thumbnail, videoUrl }: { title: string; thumbnail?: string; videoUrl?: string }) {
+function GuideCardMedia({
+  title,
+  thumbnail,
+  videoUrl,
+  imagePreload = false,
+}: {
+  title: string;
+  thumbnail?: string;
+  videoUrl?: string;
+  imagePreload?: boolean;
+}) {
   const videoInfo = videoUrl ? getVideoInfo(videoUrl) : null;
   const displayImage = thumbnail || videoInfo?.thumbnailUrl;
 
   return (
     <div className="w-full aspect-video rounded-[19px] overflow-hidden bg-muted">
       {displayImage ? (
-        <GuideCardImage src={displayImage} alt={title} />
+        <GuideCardImage
+          src={displayImage}
+          alt={title}
+          sizes="(min-width: 1024px) 31vw, (min-width: 768px) 46vw, calc(100vw - 48px)"
+          preload={imagePreload}
+        />
       ) : (
         <GuideCardPlaceholder title={title} />
       )}
@@ -44,7 +60,7 @@ export function GuideCardPlaceholder({ title }: { title: string }) {
   );
 }
 
-export function GuideCard({ guide }: GuideCardProps) {
+export function GuideCard({ guide, imagePreload = false }: GuideCardProps) {
   const categoryInfo = getCategoryInfo(guide.category);
   const publishedDate = guide.publishedAt
     ? new Date(guide.publishedAt).toLocaleDateString("ja-JP", {
@@ -55,11 +71,16 @@ export function GuideCard({ guide }: GuideCardProps) {
     : null;
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/guide/${guide.slug}`}
       className="group flex flex-col gap-5 bg-white rounded-[22px] pt-4 pb-6 px-4 shadow-[0px_1px_7px_rgba(0,0,0,0.04)] hover:shadow-[0px_4px_16px_rgba(0,0,0,0.08)] transition-shadow duration-200"
     >
-      <GuideCardMedia title={guide.title} thumbnail={guide.thumbnailUrl} videoUrl={guide.videoUrl} />
+      <GuideCardMedia
+        title={guide.title}
+        thumbnail={guide.thumbnailUrl}
+        videoUrl={guide.videoUrl}
+        imagePreload={imagePreload}
+      />
 
       <div className="flex flex-col gap-5 px-3">
         <div className="flex flex-col gap-2">
@@ -100,7 +121,7 @@ export function GuideCard({ guide }: GuideCardProps) {
           )}
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 }
 

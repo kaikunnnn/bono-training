@@ -52,8 +52,12 @@ export default async function OutputsPage() {
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {outputs.map((output) => (
-              <OutputBannerCardItem key={output._id} output={output} />
+            {outputs.map((output, index) => (
+              <OutputBannerCardItem
+                key={output._id}
+                output={output}
+                imagePreload={index === 0}
+              />
             ))}
           </div>
         )}

@@ -14,21 +14,25 @@
  * Sanity の StorySummary をそのまま受ける。
  */
 
-import Link from "next/link";
 import Image from "next/image";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import type { StorySummary } from "@/types/sanity";
 
 interface StoryCardItemProps {
   story: StorySummary;
+  imagePreload?: boolean;
 }
 
 const FALLBACK_HERO = "/placeholder-thumbnail.svg";
 
-export default function StoryCardItem({ story }: StoryCardItemProps) {
+export default function StoryCardItem({
+  story,
+  imagePreload = false,
+}: StoryCardItemProps) {
   const heroUrl = story.heroImageUrl || FALLBACK_HERO;
 
   return (
-    <Link href={`/stories/${story.slug.current}`} className="group block">
+    <IntentPrefetchLink href={`/stories/${story.slug.current}`} className="group block">
       <article className="bg-surface rounded-[24px] sm:rounded-[32px] overflow-hidden border-4 border-white shadow-sm transition-transform duration-300 ease-out group-hover:scale-[1.02] group-hover:shadow-md">
         {/* アイキャッチ画像 */}
         <div className="bg-muted-custom rounded-[20px] sm:rounded-[28px] overflow-hidden w-full aspect-[16/9] relative">
@@ -36,8 +40,10 @@ export default function StoryCardItem({ story }: StoryCardItemProps) {
             src={heroUrl}
             alt={story.title}
             fill
+            sizes="(min-width: 1024px) 360px, (min-width: 640px) 46vw, calc(100vw - 40px)"
+            preload={imagePreload}
+            loading={imagePreload ? undefined : "lazy"}
             className="object-cover"
-            unoptimized
           />
         </div>
 
@@ -62,8 +68,9 @@ export default function StoryCardItem({ story }: StoryCardItemProps) {
                   src={story.person.profileImageUrl}
                   alt={story.person.name}
                   fill
+                  sizes="36px"
+                  loading="lazy"
                   className="object-cover"
-                  unoptimized
                 />
               </div>
             )}
@@ -94,6 +101,6 @@ export default function StoryCardItem({ story }: StoryCardItemProps) {
           )}
         </div>
       </article>
-    </Link>
+    </IntentPrefetchLink>
   );
 }
