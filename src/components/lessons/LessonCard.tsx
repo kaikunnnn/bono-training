@@ -1,9 +1,7 @@
-"use client";
-
 import React from 'react';
+import Image from 'next/image';
 import { Map } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { HoverCard } from '@/components/common/HoverCard';
 
 interface LinkedRoadmap {
   slug: string;
@@ -44,16 +42,11 @@ const LessonCard: React.FC<LessonCardProps> = ({
   const hasRoadmap = lesson.linkedRoadmaps && lesson.linkedRoadmaps.length > 0;
 
   return (
-    <HoverCard
-      as="article"
+    <article
       className={cn(
-        'bg-white flex flex-col p-3 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[24px] md:rounded-[29px] cursor-pointer w-full h-full text-[#0d221d] opacity-100',
+        'bg-white flex flex-col p-3 sm:p-4 md:p-5 rounded-[20px] sm:rounded-[24px] md:rounded-[29px] cursor-pointer w-full h-full text-[#0d221d] opacity-100 shadow-[0px_1px_8px_0px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-200 ease-out will-change-transform hover:-translate-y-1 hover:scale-[1.01] hover:shadow-[0px_4px_18px_0px_rgba(0,0,0,0.16)]',
         className
       )}
-      hoverTransform="translateY(-4px) scale(1.01)"
-      hoverShadow="0px 4px 18px 0px rgba(0,0,0,0.16)"
-      baseShadow="0px 1px 8px 0px rgba(0,0,0,0.08)"
-      transitionTiming="0.2s ease"
       onClick={onClick}
     >
       <div className="flex h-full flex-col justify-between gap-2 sm:gap-3 md:gap-4">
@@ -71,13 +64,14 @@ const LessonCard: React.FC<LessonCardProps> = ({
         {/* 画像エリア */}
         <div className="flex justify-center items-center py-1 sm:py-2 flex-1">
           {lesson.thumbnail ? (
-            <div className="w-[90px] sm:w-[45%] sm:max-w-[120px] aspect-[2/3] rounded-tr-[4px] rounded-br-[4px] shadow-[0px_0px_32px_0px_rgba(0,0,0,0.16)] overflow-hidden">
-              <img
+            <div className="relative w-[90px] sm:w-[45%] sm:max-w-[120px] aspect-[2/3] rounded-tr-[4px] rounded-br-[4px] shadow-[0px_0px_32px_0px_rgba(0,0,0,0.16)] overflow-hidden">
+              <Image
                 src={lesson.thumbnail}
                 alt={`${lesson.title}のサムネイル`}
+                fill
+                sizes="(min-width: 1280px) 120px, (min-width: 640px) 10vw, 90px"
                 loading={imageLoading}
-                decoding={imageLoading === "lazy" ? "async" : undefined}
-                className="w-full h-full object-cover"
+                className="object-cover"
               />
             </div>
           ) : (
@@ -111,7 +105,7 @@ const LessonCard: React.FC<LessonCardProps> = ({
           )}
         </div>
       </div>
-    </HoverCard>
+    </article>
   );
 };
 

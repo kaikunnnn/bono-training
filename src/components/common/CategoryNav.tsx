@@ -1,11 +1,11 @@
 'use client';
 
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useRef, useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 export interface CategoryNavItem {
   /** リンクラベル */
@@ -62,8 +62,9 @@ export default function CategoryNav({
 }: CategoryNavProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentUrl = searchParams.toString()
-    ? `${pathname}?${searchParams.toString()}`
+  const search = searchParams.toString();
+  const currentUrl = search
+    ? `${pathname}?${search}`
     : pathname;
   const navRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -111,19 +112,19 @@ export default function CategoryNav({
   };
 
   // アクティブ判定（完全一致 or パス先頭一致、searchParamsも考慮）
-  const isActive = (href: string) => {
+  const isActive = useCallback((href: string) => {
     // searchParams付きのhrefの場合（例: /roadmap?category=career）
     if (href.includes("?")) {
       return currentUrl === href;
     }
     // 完全一致（searchParamsなし）
-    if (pathname === href && !searchParams.toString()) return true;
+    if (pathname === href && !search) return true;
     // "すべて"以外は前方一致でも判定（サブページ対応）
     if (href !== items[0]?.href && pathname.startsWith(href + "/")) {
       return true;
     }
     return false;
-  };
+  }, [currentUrl, items, pathname, search]);
 
   // アクティブタブの位置を計算してインジケーターを移動
   useEffect(() => {
@@ -139,7 +140,7 @@ export default function CategoryNav({
         width: activeRect.width,
       });
     }
-  }, [pathname, searchParams, items]);
+  }, [isActive, items]);
 
   return (
     <nav
@@ -174,7 +175,7 @@ export default function CategoryNav({
             {items.map((item, index) => {
               const active = isActive(item.href);
               return (
-                <Link
+                <IntentPrefetchLink
                   key={item.href}
                   href={item.href}
                   ref={(el) => { itemRefs.current[index] = el; }}
@@ -198,7 +199,7 @@ export default function CategoryNav({
                       {item.count}
                     </span>
                   )}
-                </Link>
+                </IntentPrefetchLink>
               );
             })}
             {/* スライドするインジケーター（タブコンテナ内） */}
