@@ -1,5 +1,6 @@
 import "server-only";
 import { hasUnseenBoard } from "@/lib/services/board-views";
+import { BoardNewDot } from "@/components/questions/BoardNewDot";
 
 interface BoardNewDotServerProps {
   userId: string;
@@ -19,11 +20,5 @@ export async function BoardNewDotServer({ userId }: BoardNewDotServerProps) {
   const unseen = await hasUnseenBoard(userId);
   if (!unseen) return null;
 
-  return (
-    <span
-      className="block h-2 w-2 rounded-full bg-[var(--notification-badge)]"
-      role="status"
-      aria-label="新着あり"
-    />
-  );
+  return <BoardNewDot />;
 }

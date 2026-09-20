@@ -300,6 +300,106 @@ export const getAllLessonsWithArticleIds = unstable_cache(
   { tags: ["lesson", "article", "quest"], revalidate: 3600 }
 );
 
+/**
+ * マイページ用: 本人の進捗が存在するレッスンだけを取得する。
+ * 全レッスン・全記事を毎回送らず、表示に必要なフィールドへ限定する。
+ */
+export const getMypageLessonsByIds = unstable_cache(
+  async (lessonIds: string[]): Promise<LessonWithArticleIds[]> => {
+    if (lessonIds.length === 0) return [];
+
+    const query = `
+      *[_type == "lesson" && _id in $lessonIds] | order(lessonNumber asc) {
+        _id,
+        _type,
+        title,
+        slug,
+        lessonNumber,
+        "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+        "articleIds": quests[]->articles[]->_id,
+        "quests": quests[]-> {
+          "articles": articles[]-> {
+            _id,
+            title,
+            slug
+          }
+        }
+      }
+    `;
+    const lessons = await getClient().fetch<LessonWithArticleIds[]>(query, {
+      lessonIds,
+    });
+
+    return lessons.map((lesson) => ({
+      ...lesson,
+      articleIds: (lesson.articleIds || []).filter(Boolean),
+    }));
+  },
+  ["sanity:mypage:lessonsByIds"],
+  { tags: ["lesson", "article", "quest"], revalidate: 3600 }
+);
+
+export interface MypageArticleSummary {
+  _id: string;
+  title: string;
+  slug: { current: string };
+  thumbnailUrl?: string;
+  resolvedThumbnailUrl?: string;
+  videoDuration?: string | number;
+  articleNumber?: number;
+  excerpt?: string;
+  isPremium?: boolean;
+  questInfo?: {
+    _id: string;
+    questNumber: number;
+    title: string;
+    lessonInfo?: {
+      _id: string;
+      title: string;
+      slug: { current: string };
+    };
+  };
+}
+
+/**
+ * マイページのお気に入り・履歴で共有する公開記事サマリ。
+ * 本人のIDや日時は含めず、CMS更新タグで無効化できる範囲だけをキャッシュする。
+ */
+export const getMypageArticlesByIds = unstable_cache(
+  async (articleIds: string[]): Promise<MypageArticleSummary[]> => {
+    if (articleIds.length === 0) return [];
+
+    const query = `*[_type == "article" && _id in $articleIds] {
+      _id,
+      title,
+      slug,
+      thumbnailUrl,
+      "resolvedThumbnailUrl": coalesce(
+        thumbnailUrl,
+        thumbnail.asset->url
+      ),
+      videoDuration,
+      articleNumber,
+      excerpt,
+      isPremium,
+      "questInfo": *[_type == "quest" && references(^._id)][0] {
+        _id,
+        questNumber,
+        title,
+        "lessonInfo": *[_type == "lesson" && references(^._id)][0] {
+          _id,
+          title,
+          slug
+        }
+      }
+    }`;
+
+    return getClient().fetch<MypageArticleSummary[]>(query, { articleIds });
+  },
+  ["sanity:mypage:articlesByIds"],
+  { tags: ["article", "quest", "lesson"], revalidate: 3600 }
+);
+
 // ============================================
 // Article 関連のクエリ（Server Components用）
 // ============================================

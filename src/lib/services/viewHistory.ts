@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { client as getClient } from "@/lib/sanity";
+import { getMypageArticlesByIds } from "@/lib/sanity";
 
 // ============================================
 // 定数
@@ -153,10 +153,12 @@ export async function getViewHistoryIds(): Promise<string[]> {
 /**
  * 閲覧履歴の記事詳細を取得（最新20件）
  * @param userId オプション: 認証済みユーザーID
+ * @param limit オプション: 取得件数。未指定時はfull表示の上限20件
  * @returns 閲覧した記事の配列（Sanityから取得、閲覧日時順）
  */
 export async function getViewHistory(
-  userId?: string
+  userId?: string,
+  limit: number = DISPLAY_LIMIT
 ): Promise<ViewedArticle[]> {
   try {
     const supabase = await createClient();
@@ -176,7 +178,7 @@ export async function getViewHistory(
       .select("article_id, viewed_at")
       .eq("user_id", uid)
       .order("viewed_at", { ascending: false })
-      .limit(DISPLAY_LIMIT);
+      .limit(Math.min(DISPLAY_LIMIT, Math.max(1, Math.floor(limit))));
 
     if (error) throw error;
     if (!historyData || historyData.length === 0) return [];
@@ -186,36 +188,11 @@ export async function getViewHistory(
       historyData.map((h) => [h.article_id, h.viewed_at])
     );
 
-    // 2. SanityからArticle情報を取得
-    const query = `*[_type == "article" && _id in $ids] {
-      _id,
-      title,
-      slug,
-      thumbnail,
-      thumbnailUrl,
-      "resolvedThumbnailUrl": coalesce(
-        thumbnailUrl,
-        thumbnail.asset->url
-      ),
-      videoDuration,
-      articleNumber,
-      excerpt,
-      isPremium,
-      "questInfo": *[_type == "quest" && references(^._id)][0] {
-        _id,
-        questNumber,
-        title,
-        "lessonInfo": *[_type == "lesson" && references(^._id)][0] {
-          _id,
-          title,
-          slug
-        }
-      }
-    }`;
-
-    const articles: ViewedArticle[] = await getClient().fetch(query, {
-      ids: articleIds,
-    });
+    // 2. 公開CMS情報だけを共有キャッシュから取得する。
+    // 本人の閲覧日時と順序はこの後にリクエスト内で付与する。
+    const articles: ViewedArticle[] = await getMypageArticlesByIds(
+      [...articleIds].sort()
+    );
 
     // 3. 閲覧日時を付与し、閲覧日時順にソート
     const articlesWithViewedAt = articles.map((article) => ({

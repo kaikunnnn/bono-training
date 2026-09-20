@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { SidebarMenuItemProps } from "./types";
 import { cn } from "@/lib/utils";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 /**
  * サイドバーメニュー項目コンポーネント
@@ -71,7 +71,7 @@ export function SidebarMenuItem({
   }
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={href}
       onClick={onClick}
       className={cn(
@@ -82,6 +82,6 @@ export function SidebarMenuItem({
       aria-current={isActive ? "page" : undefined}
     >
       {content}
-    </Link>
+    </IntentPrefetchLink>
   );
 }

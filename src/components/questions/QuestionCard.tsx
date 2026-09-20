@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { extractPreviewText } from "@/lib/portable-text-utils";
 import type { QuestionListItem, ReactionKey } from "@/lib/services/questions";
 
@@ -42,7 +42,7 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
     : [];
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/questions/${question.slug.current}`}
       className="group block w-full rounded-[24px] border border-[var(--card-border-subtle)] bg-surface p-6 shadow-[var(--shadow-board-card)] transition hover:bg-muted/30 hover:shadow-md"
     >
@@ -127,6 +127,6 @@ export function QuestionCard({ item, showEngagement }: QuestionCardProps) {
           </span>
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 }

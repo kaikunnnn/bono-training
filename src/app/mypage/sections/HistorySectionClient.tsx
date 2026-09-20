@@ -1,8 +1,8 @@
-import Link from "next/link";
 import Image from "next/image";
 import { Clock } from "lucide-react";
 import { MySection } from "../_shared/MySection";
 import { EmptyState } from "../_shared/EmptyState";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 export interface ViewedArticle {
   _id: string;
@@ -57,7 +57,7 @@ function HistoryItem({ article }: { article: ViewedArticle }) {
   const lessonTitle = article.questInfo?.lessonInfo?.title || "";
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/contents/${article.slug.current}`}
       className="w-full block no-underline"
       style={{
@@ -125,7 +125,7 @@ function HistoryItem({ article }: { article: ViewedArticle }) {
           </span>
         </div>
       )}
-    </Link>
+    </IntentPrefetchLink>
   );
 }
 

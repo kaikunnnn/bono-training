@@ -27,12 +27,11 @@ export default async function MyPage({
 }: {
   searchParams: Promise<{ tab?: string | string[] }>;
 }) {
-  const user = await getCurrentUser();
+  const [user, params] = await Promise.all([getCurrentUser(), searchParams]);
   if (!user) {
     redirect("/login?reauth=1&redirectTo=/mypage");
   }
 
-  const params = await searchParams;
   const tab = parseTab(params.tab);
 
   const showProgress = tab === "all" || tab === "progress";

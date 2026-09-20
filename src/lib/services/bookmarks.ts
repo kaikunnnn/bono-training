@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient, getCachedUser } from "@/lib/supabase/server";
-import { client as getClient } from "@/lib/sanity";
+import { getMypageArticlesByIds } from "@/lib/sanity";
 
 // ============================================
 // 型定義
@@ -146,9 +146,13 @@ export async function isBookmarked(articleId: string): Promise<boolean> {
 /**
  * ユーザーのブックマーク一覧を取得
  * @param userId オプション: 認証済みユーザーID
+ * @param limit オプション: 取得件数。previewでは画面に必要な件数だけ取得する
  * @returns ブックマークした記事ID一覧
  */
-export async function getBookmarks(userId?: string): Promise<string[]> {
+export async function getBookmarks(
+  userId?: string,
+  limit?: number
+): Promise<string[]> {
   try {
     const supabase = await createClient();
 
@@ -161,11 +165,17 @@ export async function getBookmarks(userId?: string): Promise<string[]> {
       uid = user.id;
     }
 
-    const { data, error } = await supabase
+    let query = supabase
       .from("article_bookmarks")
       .select("article_id")
       .eq("user_id", uid)
       .order("created_at", { ascending: false });
+
+    if (limit !== undefined) {
+      query = query.limit(Math.max(1, Math.floor(limit)));
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
 
@@ -179,48 +189,32 @@ export async function getBookmarks(userId?: string): Promise<string[]> {
 /**
  * ブックマークした記事の詳細情報を取得
  * @param userId オプション: 認証済みユーザーID
+ * @param limit オプション: SupabaseとSanityの両方へ渡す最大件数
  * @returns ブックマーク済み記事の配列（Sanityから取得）
  */
 export async function getBookmarkedArticles(
-  userId?: string
+  userId?: string,
+  limit?: number
 ): Promise<BookmarkedArticle[]> {
   try {
     // 1. Supabaseからブックマークした記事IDを取得
-    const bookmarkIds = await getBookmarks(userId);
+    const bookmarkIds = await getBookmarks(userId, limit);
 
     if (bookmarkIds.length === 0) {
       return [];
     }
 
-    // 2. SanityからArticle情報を取得
-    const query = `*[_type == "article" && _id in $ids] {
-      _id,
-      title,
-      slug,
-      thumbnail,
-      thumbnailUrl,
-      "resolvedThumbnailUrl": coalesce(
-        thumbnailUrl,
-        thumbnail.asset->url
-      ),
-      videoDuration,
-      articleNumber,
-      excerpt,
-      isPremium,
-      "questInfo": *[_type == "quest" && references(^._id)][0] {
-        _id,
-        questNumber,
-        title,
-        "lessonInfo": *[_type == "lesson" && references(^._id)][0] {
-          _id,
-          title,
-          slug
-        }
-      }
-    } | order(_createdAt desc)`;
-
-    const articles = await getClient().fetch(query, { ids: bookmarkIds });
-    return articles;
+    // 2. 公開CMS情報だけを安定したID順で共有キャッシュから取得する。
+    // 本人のブックマーク順はこの後にリクエスト内で戻す。
+    const articles = await getMypageArticlesByIds([...bookmarkIds].sort());
+    const bookmarkOrder = new Map(
+      bookmarkIds.map((articleId, index) => [articleId, index])
+    );
+    return articles.sort(
+      (a, b) =>
+        (bookmarkOrder.get(a._id) ?? Number.MAX_SAFE_INTEGER) -
+        (bookmarkOrder.get(b._id) ?? Number.MAX_SAFE_INTEGER)
+    );
   } catch (error) {
     console.error("Get bookmarked articles error:", error);
     return [];

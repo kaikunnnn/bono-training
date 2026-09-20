@@ -47,7 +47,7 @@ export function ProgressPreview({
       emptyLink="/lessons"
       horizontal
     >
-      {inProgressLessons.slice(0, 2).map((lesson) => (
+      {inProgressLessons.map((lesson) => (
         <ProgressLessonCard
           key={lesson._id}
           lesson={lesson}
@@ -125,6 +125,7 @@ function ProgressLessonCard({
   lesson: LessonWithProgress;
   onComplete: (lessonId: string) => void;
 }) {
+  const router = useRouter();
   const [isCardHovered, setIsCardHovered] = useState(false);
   const [isNextHovered, setIsNextHovered] = useState(false);
   const [isCompleteHovered, setIsCompleteHovered] = useState(false);
@@ -139,14 +140,22 @@ function ProgressLessonCard({
   const iconImageUrl = lesson.iconImageUrl || "/placeholder-thumbnail.svg";
 
   const handleCardClick = () => {
-    window.location.href = `/lessons/${lesson.slug.current}`;
+    router.push(`/lessons/${lesson.slug.current}`);
   };
 
   const handleNextArticleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (nextArticleUrl) {
-      window.location.href = nextArticleUrl;
+      router.push(nextArticleUrl);
     }
+  };
+
+  const handleCardIntent = () => {
+    router.prefetch(`/lessons/${lesson.slug.current}`);
+  };
+
+  const handleNextArticleIntent = () => {
+    if (nextArticleUrl) router.prefetch(nextArticleUrl);
   };
 
   const handleCompleteClick = async (e: React.MouseEvent) => {
@@ -164,7 +173,11 @@ function ProgressLessonCard({
         role="article"
         aria-label={`${lesson.title}の進捗状況`}
         onClick={handleCardClick}
-        onMouseEnter={() => setIsCardHovered(true)}
+        onMouseEnter={() => {
+          setIsCardHovered(true);
+          handleCardIntent();
+        }}
+        onFocus={handleCardIntent}
         onMouseLeave={() => setIsCardHovered(false)}
         style={{
           backgroundColor: "#FFFFFF",
@@ -193,7 +206,7 @@ function ProgressLessonCard({
           <div style={{ display: "flex", gap: "16px", alignItems: "center", flex: "1 1 0", minWidth: 0 }}>
             {/* アイコン */}
             <div style={{ width: 48, height: 73, borderTopRightRadius: 8, borderBottomRightRadius: 8, position: "relative", flexShrink: 0, overflow: "hidden", backgroundColor: "#F5F5F5" }}>
-              <Image src={iconImageUrl} alt="" fill style={{ objectFit: "cover", pointerEvents: "none" }} />
+              <Image src={iconImageUrl} alt="" fill sizes="48px" style={{ objectFit: "cover", pointerEvents: "none" }} />
             </div>
 
             {/* テキスト + プログレスバー */}
@@ -260,7 +273,11 @@ function ProgressLessonCard({
           role="link"
           tabIndex={0}
           onClick={handleNextArticleClick}
-          onMouseEnter={() => setIsNextHovered(true)}
+          onMouseEnter={() => {
+            setIsNextHovered(true);
+            handleNextArticleIntent();
+          }}
+          onFocus={handleNextArticleIntent}
           onMouseLeave={() => setIsNextHovered(false)}
           style={{
             backgroundColor: isNextHovered ? "#E5E5E5" : "#EFEFEF",
@@ -298,8 +315,10 @@ function CompletedLessonCard({
 }: {
   lesson: LessonWithProgress;
 }) {
+  const router = useRouter();
+  const lessonUrl = `/lessons/${lesson.slug.current}`;
   const handleClick = () => {
-    window.location.href = `/lessons/${lesson.slug.current}`;
+    router.push(lessonUrl);
   };
 
   const iconImageUrl = lesson.iconImageUrl || "/placeholder-thumbnail.svg";
@@ -307,6 +326,10 @@ function CompletedLessonCard({
   return (
     <div
       onClick={handleClick}
+      onMouseEnter={() => router.prefetch(lessonUrl)}
+      onFocus={() => router.prefetch(lessonUrl)}
+      role="link"
+      tabIndex={0}
       className="bg-white rounded-2xl p-4 shadow-[0px_2px_8px_rgba(0,0,0,0.08)] cursor-pointer transition-shadow hover:shadow-[0px_4px_12px_rgba(0,0,0,0.12)]"
     >
       <div className="flex items-center gap-3">

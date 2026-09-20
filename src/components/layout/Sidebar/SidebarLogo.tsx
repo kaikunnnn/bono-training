@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Logo from "@/components/common/Logo";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { cn } from "@/lib/utils";
 
 interface SidebarLogoProps {
@@ -16,9 +16,9 @@ export function SidebarLogo({ className }: SidebarLogoProps) {
   return (
     <div className={cn("w-full", className)}>
       <div className="w-full px-[30px] py-[33px]">
-        <Link href="/" className="flex items-center">
+        <IntentPrefetchLink href="/" className="flex items-center">
           <Logo width={81} height={24} />
-        </Link>
+        </IntentPrefetchLink>
       </div>
     </div>
   );

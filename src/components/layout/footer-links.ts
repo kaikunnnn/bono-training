@@ -7,7 +7,7 @@
 export type FooterLink = {
   label: string;
   href: string;
-  /** 外部リンク（新規タブ + rel="noopener noreferrer"）。内部は next/link。 */
+  /** 外部リンク（新規タブ + rel="noopener noreferrer"）。内部は操作意図時のみprefetch。 */
   external?: boolean;
 };
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import { recordBoardSeen } from "@/lib/services/board-views";
+import { markBoardSeenInCurrentDocument } from "@/components/questions/BoardNewDot";
 
 /**
  * 掲示板一覧（/questions）を開いたら既読を記録するクライアント副作用（掲示板の新着ドット）。
@@ -10,14 +10,12 @@ import { recordBoardSeen } from "@/lib/services/board-views";
  * 記事ページの閲覧記録（recordViewHistory）と同じ発想で、Server Component から
  * 副作用を直接呼ばず、マウント時に1回だけ recordBoardSeen() を呼ぶ。
  *
- * サイドバーの新着ドットはルートレイアウトに存在し、App Router のレイアウトは
- * ソフトナビゲーションでは再レンダリングされない。そのため記録後に router.refresh() を
- * 呼び、レイアウト（＝ドット）を再計算させてドットを消す。
+ * サイドバーの新着ドットはルートレイアウトに存在するため、記録後は同じ文書内の
+ * ドットだけをイベントで隠す。ページ全体のrouter.refreshは行わない。
  *
  * ログイン済みユーザーでのみレンダリングする想定（recordBoardSeen 側でも未認証は no-op）。
  */
 export function BoardSeenRecorder() {
-  const router = useRouter();
   const didRun = useRef(false);
 
   useEffect(() => {
@@ -27,13 +25,12 @@ export function BoardSeenRecorder() {
 
     void recordBoardSeen()
       .then(() => {
-        // レイアウト（新着ドット）を再計算させてドットを消す
-        router.refresh();
+        markBoardSeenInCurrentDocument();
       })
       .catch((e) => {
         console.error("[BoardSeenRecorder] recordBoardSeen", e);
       });
-  }, [router]);
+  }, []);
 
   return null;
 }
