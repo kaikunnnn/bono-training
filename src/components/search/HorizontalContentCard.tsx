@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
+import Image from "next/image";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { cn } from "@/lib/utils";
 import { Clock, Map } from "lucide-react";
 import { GradientLockIcon } from "@/components/ui/icon-lock-gradient";
@@ -54,7 +55,7 @@ const LessonRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> = 
   const hasRoadmap = !!linkedRoadmaps && linkedRoadmaps.length > 0;
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={href}
       className={cn(
         "group bg-white flex items-stretch gap-4 p-3 sm:p-4 rounded-[16px] sm:rounded-[20px]",
@@ -68,11 +69,13 @@ const LessonRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> = 
       {/* サムネイル（縦長 2:3、本表紙風） */}
       <div className="flex-shrink-0 w-[180px] sm:w-[240px] aspect-video p-3 rounded-xl bg-[#F5F5F5] flex items-center justify-center">
         {thumbnailUrl ? (
-          <div className="h-full aspect-[2/3] rounded-[4px] shadow-[0px_0px_16px_0px_rgba(0,0,0,0.12)] overflow-hidden bg-white">
-            <img
+          <div className="relative h-full aspect-[2/3] rounded-[4px] shadow-[0px_0px_16px_0px_rgba(0,0,0,0.12)] overflow-hidden bg-white">
+            <Image
               src={thumbnailUrl}
               alt={`${title}のサムネイル`}
-              className="w-full h-full object-cover"
+              fill
+              sizes="(min-width: 640px) 90px, 68px"
+              className="object-cover"
               loading="lazy"
             />
           </div>
@@ -118,7 +121,7 @@ const LessonRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> = 
           </div>
         )}
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 
@@ -140,7 +143,7 @@ const GuideRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> = (
   const formattedDate = formatPublishedDate(publishedDate);
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={href}
       className={cn(
         "group bg-white flex items-stretch gap-4 sm:gap-5 p-3 sm:p-4 rounded-2xl",
@@ -182,10 +185,14 @@ const GuideRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> = (
           {author && (
             <div className="flex items-center gap-1.5">
               {author.avatarUrl ? (
-                <img
+                <Image
                   src={author.avatarUrl}
                   alt=""
+                  width={20}
+                  height={20}
+                  sizes="20px"
                   className="w-5 h-5 rounded-full object-cover"
+                  loading="lazy"
                 />
               ) : (
                 <div className="w-5 h-5 rounded-full bg-muted flex items-center justify-center">
@@ -204,7 +211,7 @@ const GuideRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> = (
           )}
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 
@@ -222,7 +229,7 @@ const ArticleRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> =
   className,
 }) => {
   return (
-    <Link
+    <IntentPrefetchLink
       href={href}
       className={cn(
         "group bg-white flex items-stretch gap-4 p-3 sm:p-4 rounded-2xl",
@@ -233,12 +240,14 @@ const ArticleRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> =
       )}
     >
       {/* サムネ（横長コンパクト） */}
-      <div className="flex-shrink-0 w-[180px] sm:w-[240px] aspect-video rounded-xl overflow-hidden bg-[#F5F5F5]">
+      <div className="relative flex-shrink-0 w-[180px] sm:w-[240px] aspect-video rounded-xl overflow-hidden bg-[#F5F5F5]">
         {thumbnailUrl ? (
-          <img
+          <Image
             src={thumbnailUrl}
             alt={title}
-            className="w-full h-full object-cover"
+            fill
+            sizes="(min-width: 640px) 240px, 180px"
+            className="object-cover"
             loading="lazy"
           />
         ) : (
@@ -274,7 +283,7 @@ const ArticleRow: React.FC<HorizontalContentCardProps & { showLock: boolean }> =
           </p>
         )}
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 
