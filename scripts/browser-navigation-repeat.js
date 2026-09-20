@@ -5,6 +5,16 @@
  */
 window.bonoRun = async function (n) {
   const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+  const waitForAnchor = async path => {
+    const limit = performance.now() + 15000;
+    while (performance.now() < limit) {
+      const anchor = [...document.querySelectorAll('a[href]')].find(a =>
+        new URL(a.href).origin === location.origin && new URL(a.href).pathname === path);
+      if (anchor) return anchor;
+      await wait(50);
+    }
+    throw Error('Missing existing link ' + path);
+  };
   const paths = [
     '/',
     '/top',
@@ -17,9 +27,9 @@ window.bonoRun = async function (n) {
   for (let round = 1; round <= n; round++) {
     for (const path of paths) {
       if (path === '/' && location.pathname === '/mypage') continue;
-      const anchor = [...document.querySelectorAll('a[href]')].find(a =>
-        new URL(a.href).origin === location.origin && new URL(a.href).pathname === path);
-      if (!anchor) throw Error('Missing existing link ' + path);
+      // The lesson heading streams before its curriculum. Wait for the actual
+      // existing link instead of treating a healthy Suspense boundary as missing.
+      const anchor = await waitForAnchor(path);
       const count = window.bonoNavigationProbe.results.length;
       const heading = document.querySelector('main h1')?.textContent;
       const limit = performance.now() + 16000;

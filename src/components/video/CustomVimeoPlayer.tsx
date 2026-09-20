@@ -36,7 +36,6 @@ export function CustomVimeoPlayer({
     seek,
     setVolume,
     setPlaybackRate,
-    toggleFullscreen,
     enableTextTrack,
     disableTextTrack,
   } = useVimeoPlayer(vimeoId, { autoPlay, muted });
@@ -47,17 +46,7 @@ export function CustomVimeoPlayer({
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const hasPlayedRef = useRef(false);
   const hasEndedRef = useRef(false);
-
-  // デバッグ: state変化を監視
-  useEffect(() => {
-    console.log('[CustomVimeoPlayer] State changed:', {
-      isPlaying: state.isPlaying,
-      currentTime: state.currentTime,
-      duration: state.duration,
-      isReady: state.isReady,
-      showControls,
-    });
-  }, [state.isPlaying, state.currentTime, state.duration, state.isReady, showControls]);
+  const controlsVisible = !state.isPlaying || showControls;
 
   // GA4: 初回再生イベント
   useEffect(() => {
@@ -124,17 +113,18 @@ export function CustomVimeoPlayer({
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // 再生状態が変わったらコントロール表示を更新
+  // 再生中だけコントロールを自動で隠す。再表示はユーザー操作から行い、
+  // effect内の同期setStateによる追加レンダーを避ける。
   useEffect(() => {
+    clearControlsTimer();
     if (state.isPlaying) {
-      // 再生開始したら3秒後に非表示
-      resetControlsTimer();
-    } else {
-      // 一時停止したら常に表示
-      clearControlsTimer();
-      setShowControls(true);
+      controlsTimeoutRef.current = setTimeout(() => {
+        setShowControls(false);
+      }, 3000);
     }
-  }, [state.isPlaying, resetControlsTimer, clearControlsTimer]);
+
+    return clearControlsTimer;
+  }, [state.isPlaying, clearControlsTimer]);
 
   // コンポーネントアンマウント時にタイマークリア
   useEffect(() => {
@@ -156,9 +146,9 @@ export function CustomVimeoPlayer({
 
   // 動画エリアクリックで再生/一時停止
   const handleVideoClick = useCallback(() => {
-    togglePlay();
-    // 操作後にタイマーリセット（次のレンダリングで state.isPlaying が更新される）
-  }, [togglePlay]);
+    resetControlsTimer();
+    void togglePlay();
+  }, [togglePlay, resetControlsTimer]);
 
   // コントロール操作時のラッパー（タイマーリセット付き）
   const handleSeek = useCallback((time: number) => {
@@ -209,8 +199,7 @@ export function CustomVimeoPlayer({
         case ' ':
         case 'k':
           e.preventDefault();
-          togglePlay();
-          resetControlsTimer();
+          handleVideoClick();
           break;
         case 'ArrowLeft':
           e.preventDefault();
@@ -241,7 +230,7 @@ export function CustomVimeoPlayer({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePlay, seek, setVolume, handleToggleFullscreen, state.currentTime, state.duration, state.volume, resetControlsTimer]);
+  }, [handleVideoClick, seek, setVolume, handleToggleFullscreen, state.currentTime, state.duration, state.volume, resetControlsTimer]);
 
   return (
     <div
@@ -263,7 +252,7 @@ export function CustomVimeoPlayer({
           onClick={handleVideoClick}
           style={{
             // コントロールバーの領域を除外
-            bottom: showControls ? '80px' : '0'
+            bottom: controlsVisible ? '80px' : '0'
           }}
         />
       )}
@@ -276,7 +265,7 @@ export function CustomVimeoPlayer({
       )}
 
       {/* 中央の再生ボタン（一時停止中のみ表示） */}
-      {state.isReady && !state.isPlaying && showControls && (
+      {state.isReady && !state.isPlaying && controlsVisible && (
         <button
           onClick={handleVideoClick}
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 rounded-full flex items-center justify-center cursor-pointer transition-[transform,filter] hover:scale-105 hover:brightness-110 z-10 will-change-transform"
@@ -293,12 +282,12 @@ export function CustomVimeoPlayer({
       {state.isReady && (
         <div
           className={`absolute bottom-0 left-0 right-0 transition-opacity duration-300 z-20 ${
-            showControls ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            controlsVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
           <VideoControls
             state={state}
-            onTogglePlay={togglePlay}
+            onTogglePlay={handleVideoClick}
             onSeek={handleSeek}
             onVolumeChange={handleVolumeChange}
             onPlaybackRateChange={handlePlaybackRateChange}
