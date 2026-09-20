@@ -46,7 +46,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Sanityから検索データを取得
-  const { data: searchData, isLoading: isLoadingData } = useSearchData();
+  const { data: searchData, isLoading: isLoadingData } = useSearchData(
+    showSuggestions
+  );
 
   // デバウンス用タイマー
   const debounceRef = useRef<NodeJS.Timeout | undefined>(undefined);
@@ -60,8 +62,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
 
     if (query.trim().length < 1) {
-      setSuggestions([]);
-      setIsOpen(false);
       return;
     }
 
@@ -207,7 +207,14 @@ const SearchBar: React.FC<SearchBarProps> = ({
             ref={inputRef}
             type="text"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              const nextQuery = e.target.value;
+              setQuery(nextQuery);
+              if (!nextQuery.trim()) {
+                setSuggestions([]);
+                setIsOpen(false);
+              }
+            }}
             onFocus={() => {
               if (suggestions.length > 0) setIsOpen(true);
             }}

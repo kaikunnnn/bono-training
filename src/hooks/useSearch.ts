@@ -83,11 +83,12 @@ function filterSearchResults(
 /**
  * 検索データを取得するフック
  */
-export function useSearchData(enabled = true) {
+export function useSearchData(enabled = true, initialData?: SearchResult[]) {
   return useQuery({
     queryKey: ["searchData"],
     queryFn: fetchSearchData,
     enabled,
+    initialData,
     staleTime: 5 * 60 * 1000, // 5分
     gcTime: 10 * 60 * 1000, // 10分
     refetchOnWindowFocus: false,
@@ -101,9 +102,10 @@ export function useSearchData(enabled = true) {
 export function useSearch(
   query: string,
   contentTypes: SearchContentType[],
-  enabled = true
+  enabled = true,
+  initialData?: SearchResult[]
 ) {
-  const { data: allData, isLoading, error } = useSearchData(enabled);
+  const { data: allData, isLoading, error } = useSearchData(enabled, initialData);
 
   const results = allData ? filterSearchResults(allData, query, contentTypes) : [];
 
