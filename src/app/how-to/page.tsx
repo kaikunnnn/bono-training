@@ -8,7 +8,7 @@
 
 import type { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { ArrowRight, ClipboardCheck, HelpCircle, MessageSquareText, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -87,7 +87,7 @@ export default function HowToIndexPage() {
           {GUIDES.map((guide) => {
             const Icon = guide.icon;
             return (
-              <Link
+              <IntentPrefetchLink
                 key={guide.href}
                 href={guide.href}
                 className="group flex items-start gap-4 rounded-2xl border border-border bg-white p-6 shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_3px_0px_rgba(0,0,0,0.04)] transition-shadow hover:border-border-strong hover:shadow-md"
@@ -107,7 +107,7 @@ export default function HowToIndexPage() {
                   className="mt-1 size-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5"
                   aria-hidden="true"
                 />
-              </Link>
+              </IntentPrefetchLink>
             );
           })}
         </div>
