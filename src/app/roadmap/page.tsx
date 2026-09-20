@@ -116,9 +116,10 @@ interface RoadmapPageProps {
 }
 
 export default async function RoadmapPage({ searchParams }: RoadmapPageProps) {
-  const { category: categoryId } = await searchParams;
-
-  const roadmaps = await getAllRoadmaps();
+  const [{ category: categoryId }, roadmaps] = await Promise.all([
+    searchParams,
+    getAllRoadmaps(),
+  ]);
 
   const categoriesWithRoadmaps = groupRoadmapsByCategory(
     roadmaps,
@@ -180,6 +181,8 @@ export default async function RoadmapPage({ searchParams }: RoadmapPageProps) {
                       variant="gradient"
                       orientation="vertical"
                       thumbnailStyle="wave"
+                      imageLoading={index === 0 && i === 0 ? "eager" : "lazy"}
+                      imageSizes="(min-width: 768px) 45vw, calc(100vw - 64px)"
                     />
                     </div>
                   ))}

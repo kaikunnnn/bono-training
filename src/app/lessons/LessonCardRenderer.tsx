@@ -5,10 +5,10 @@
  * Next.js適応: motion.div → 静的div、navigate → Link
  */
 
-import Link from "next/link";
 import { urlFor } from "@/lib/sanity";
 import type { Lesson } from "@/types/sanity";
 import { LessonCard } from "@/components/lessons/LessonCard";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 interface LessonCardRendererProps {
   lesson: Lesson & { index?: number };
@@ -38,7 +38,10 @@ export function LessonCardRenderer({ lesson, imageLoading }: LessonCardRendererP
       className="w-[232px] flex-shrink-0 sm:w-auto animate-fade-in-up"
       style={{ animationDelay: `${(lesson.index ?? 0) * 60}ms` }}
     >
-      <Link href={`/lessons/${lesson.slug.current}`}>
+      <IntentPrefetchLink
+        href={`/lessons/${lesson.slug.current}`}
+        className="block h-full"
+      >
         <LessonCard
           imageLoading={imageLoading}
           lesson={{
@@ -50,7 +53,7 @@ export function LessonCardRenderer({ lesson, imageLoading }: LessonCardRendererP
             slug: lesson.slug.current,
           }}
         />
-      </Link>
+      </IntentPrefetchLink>
     </div>
   );
 }

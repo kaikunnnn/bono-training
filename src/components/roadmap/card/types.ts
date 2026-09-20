@@ -31,6 +31,10 @@ export interface RoadmapCardV2Props {
   label?: string;
   /** 追加のクラス名 */
   className?: string;
+  /** 一覧の先頭画像だけをeagerにするなど、画像取得タイミングを明示する */
+  imageLoading?: 'lazy' | 'eager';
+  /** 利用レイアウトに合わせたレスポンシブ画像幅 */
+  imageSizes?: string;
 }
 
 export type TextVariant = 'light' | 'dark';

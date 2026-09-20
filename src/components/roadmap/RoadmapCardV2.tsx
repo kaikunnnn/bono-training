@@ -17,12 +17,10 @@
  * - thumbnailStyle="wave": 波形マスク（詳細ページHeroと同様）
  */
 
-"use client";
-
-import React, { useState } from 'react';
-import Link from 'next/link';
+import React from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { IntentPrefetchLink } from '@/components/common/IntentPrefetchLink';
 import { stripLineBreakMarker } from '@/utils/textFormat';
 import { type GradientPreset, GRADIENTS } from '@/styles/gradients';
 import {
@@ -56,6 +54,8 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   basePath = '/roadmap/',
   label = 'ロードマップ',
   className,
+  imageLoading,
+  imageSizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 64px)',
 }) => {
   // フォールバック: 未知のプリセットの場合はcareer-changeを使用
   const gradient = customGradient || GRADIENTS[gradientPreset] || GRADIENTS['career-change'];
@@ -67,20 +67,16 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   // バッジに表示するテキスト（shortTitleがあればそれを優先）
   const badgeText = shortTitle || label;
 
-  const [isHovered, setIsHovered] = useState(false);
-
   // 縦型レイアウト
   if (orientation === 'vertical') {
     return (
-      <Link
+      <IntentPrefetchLink
         href={linkPath}
         className={cn('block group', className)}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
       >
         <div
           className={cn(
-            'overflow-hidden',
+            'overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-300 ease-out will-change-transform group-hover:scale-[1.02] group-hover:shadow-[0px_4px_18px_0px_rgba(0,0,0,0.16)]',
             // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
             isWaveStyle
               ? 'rounded-[32px] border-4 border-white'
@@ -89,12 +85,6 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
           )}
           style={{
             ...(variant === 'gradient' ? { background: gradientCSS } : {}),
-            transform: isHovered ? 'scale(1.02)' : 'none',
-            boxShadow: isHovered
-              ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
-              : '0px 1px 12px 0px rgba(0,0,0,0.08)',
-            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-            willChange: 'transform',
           }}
         >
           {/* サムネイルエリア */}
@@ -112,9 +102,9 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
                     src={thumbnailUrl}
                     alt={title}
                     fill
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                    sizes={imageSizes}
+                    loading={imageLoading}
                     className="object-cover"
-                    unoptimized
                   />
                 )}
               </div>
@@ -130,10 +120,10 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
                   src={thumbnailUrl}
                   alt={title}
                   fill
-                  sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+                  sizes={imageSizes}
+                  loading={imageLoading}
                   className="absolute inset-0 w-full h-full object-cover rounded-[16px] sm:rounded-[22px] lg:rounded-[30px] m-1.5 sm:m-2 lg:m-2.5"
                   style={{ width: 'calc(100% - 12px)', height: 'calc(100% - 12px)' }}
-                  unoptimized
                 />
               )}
             </div>
@@ -186,21 +176,19 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
             </div>
           </div>
         </div>
-      </Link>
+      </IntentPrefetchLink>
     );
   }
 
   // 横型レイアウト（モバイルでは縦型にフォールバック）
   return (
-    <Link
+    <IntentPrefetchLink
       href={linkPath}
       className={cn('block group', className)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
       <div
         className={cn(
-          'flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 overflow-hidden',
+          'flex flex-col lg:flex-row lg:items-center gap-3 sm:gap-4 overflow-hidden shadow-[0px_1px_12px_0px_rgba(0,0,0,0.08)] transition-[transform,box-shadow] duration-300 ease-out will-change-transform group-hover:scale-[1.01] group-hover:shadow-[0px_4px_18px_0px_rgba(0,0,0,0.16)]',
           // Figma仕様: waveスタイルは角丸24px + 白ボーダー4px
           isWaveStyle
             ? 'rounded-[32px] border-4 border-white'
@@ -209,12 +197,6 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
         )}
         style={{
           ...(variant === 'gradient' ? { background: gradientCSS } : {}),
-          transform: isHovered ? 'scale(1.01)' : 'none',
-          boxShadow: isHovered
-            ? '0px 4px 18px 0px rgba(0,0,0,0.16)'
-            : '0px 1px 12px 0px rgba(0,0,0,0.08)',
-          transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-          willChange: 'transform',
         }}
       >
         {/* サムネイルエリア */}
@@ -232,9 +214,9 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
                   src={thumbnailUrl}
                   alt={title}
                   fill
-                  sizes="(min-width: 1280px) 435px, (min-width: 1024px) 320px, 100vw"
+                  sizes={imageSizes}
+                  loading={imageLoading}
                   className="object-cover"
-                  unoptimized
                 />
               )}
             </div>
@@ -251,9 +233,9 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
                   src={thumbnailUrl}
                   alt={title}
                   fill
-                  sizes="(min-width: 1280px) 435px, (min-width: 1024px) 320px, 100vw"
+                  sizes={imageSizes}
+                  loading={imageLoading}
                   className="object-cover"
-                  unoptimized
                 />
               </div>
             )}
@@ -307,7 +289,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
           </div>
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 

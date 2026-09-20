@@ -154,9 +154,9 @@ describe("top-page streaming contract", () => {
       lesson={{ _id: "test", _type: "lesson", title: "テスト", slug: { _type: "slug", current: "test" }, thumbnailUrl: "/book.webp" }}
       imageLoading={imageLoading}
     />);
-    if (imageLoading) expect(html).toContain(`loading="${imageLoading}"`);
-    else expect(html).not.toContain('loading="');
-    if (imageLoading === "lazy") {
+    const expectedLoading = imageLoading ?? "lazy";
+    expect(html).toContain(`loading="${expectedLoading}"`);
+    if (expectedLoading === "lazy") {
       expect(html).toContain('decoding="async"');
       expect(html).not.toContain('rel="preload"');
     }
