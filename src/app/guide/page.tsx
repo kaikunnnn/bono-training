@@ -75,8 +75,12 @@ export default async function GuidePage({ searchParams }: PageProps) {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {guides.map((guide) => (
-              <GuideCard key={guide.slug} guide={guide} />
+            {guides.map((guide, index) => (
+              <GuideCard
+                key={guide.slug}
+                guide={guide}
+                imagePreload={index === 0}
+              />
             ))}
           </div>
         )}

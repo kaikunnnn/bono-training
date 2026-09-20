@@ -22,7 +22,11 @@ export function GuideCardMedia({ title, thumbnail, videoUrl, className }: GuideC
   return (
     <div className={cn("w-full aspect-video rounded-[19px] overflow-hidden bg-muted", className)}>
       {displayImage ? (
-        <GuideCardImage src={displayImage} alt={title} />
+        <GuideCardImage
+          src={displayImage}
+          alt={title}
+          sizes="(min-width: 768px) 320px, 40vw"
+        />
       ) : (
         <GuideCardPlaceholder title={title} />
       )}

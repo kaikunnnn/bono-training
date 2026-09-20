@@ -70,8 +70,12 @@ export default async function StoriesPage() {
           </p>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {stories.map((story) => (
-              <StoryCardItem key={story._id} story={story} />
+            {stories.map((story, index) => (
+              <StoryCardItem
+                key={story._id}
+                story={story}
+                imagePreload={index === 0}
+              />
             ))}
           </div>
         )}

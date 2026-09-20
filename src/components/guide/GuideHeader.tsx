@@ -108,7 +108,14 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
                 );
               }
               if (guide.thumbnailUrl) {
-                return <GuideCardImage src={guide.thumbnailUrl} alt={guide.title} />;
+                return (
+                  <GuideCardImage
+                    src={guide.thumbnailUrl}
+                    alt={guide.title}
+                    sizes="(min-width: 768px) 648px, calc(100vw - 32px)"
+                    preload
+                  />
+                );
               }
               return <GuideCardPlaceholder title={guide.title} />;
             })()}

@@ -10,6 +10,7 @@ import type { UserOutputSummary } from "@/types/sanity";
 
 interface OutputBannerCardItemProps {
   output: UserOutputSummary;
+  imagePreload?: boolean;
 }
 
 const FALLBACK_THUMB = "/placeholder-thumbnail.svg";
@@ -48,7 +49,10 @@ function getAvatarColor(name: string): { bg: string; fg: string } {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
 }
 
-export default function OutputBannerCardItem({ output }: OutputBannerCardItemProps) {
+export default function OutputBannerCardItem({
+  output,
+  imagePreload = false,
+}: OutputBannerCardItemProps) {
   const thumb = output.articleImage || FALLBACK_THUMB;
   const title = output.articleTitle || output.articleUrl;
   const authorName = output.author?.displayName || "受講者";
@@ -67,8 +71,10 @@ export default function OutputBannerCardItem({ output }: OutputBannerCardItemPro
             src={thumb}
             alt={title}
             fill
+            sizes="(min-width: 1024px) 360px, (min-width: 640px) 46vw, calc(100vw - 40px)"
+            preload={imagePreload}
+            loading={imagePreload ? undefined : "lazy"}
             className="object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-            unoptimized
           />
         </div>
         <div className="p-4 sm:p-5">

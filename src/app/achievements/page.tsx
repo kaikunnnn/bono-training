@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
 import StoryCardItem from "@/components/story/StoryCardItem";
@@ -64,19 +64,23 @@ export default async function AchievementsPage() {
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {stories.map((story) => (
-                  <StoryCardItem key={story._id} story={story} />
+                {stories.map((story, index) => (
+                  <StoryCardItem
+                    key={story._id}
+                    story={story}
+                    imagePreload={index === 0}
+                  />
                 ))}
               </div>
 
               <div className="mt-6 text-right">
-                <Link
+                <IntentPrefetchLink
                   href="/stories"
                   className="inline-flex items-center gap-1 text-sm font-bold text-text-primary hover:opacity-70 transition-opacity font-noto-sans-jp"
                 >
                   ストーリーをすべて見る
                   <span aria-hidden>→</span>
-                </Link>
+                </IntentPrefetchLink>
               </div>
             </>
           )}
@@ -108,13 +112,13 @@ export default async function AchievementsPage() {
               </div>
 
               <div className="mt-6 text-right">
-                <Link
+                <IntentPrefetchLink
                   href="/outputs"
                   className="inline-flex items-center gap-1 text-sm font-bold text-text-primary hover:opacity-70 transition-opacity font-noto-sans-jp"
                 >
                   アウトプットをすべて見る
                   <span aria-hidden>→</span>
-                </Link>
+                </IntentPrefetchLink>
               </div>
             </>
           )}

@@ -209,6 +209,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "*.st-note.com",
       },
+      {
+        protocol: "https",
+        hostname: "img.youtube.com",
+      },
+      {
+        protocol: "https",
+        hostname: "vumbnail.com",
+      },
     ],
   },
 };
