@@ -30,4 +30,10 @@ describe("Vimeo player performance", () => {
   it("does not log every playback state render in production", () => {
     expect(playerSource).not.toContain("[CustomVimeoPlayer] State changed:");
   });
+
+  it("keeps controls visible whenever playback is paused", () => {
+    expect(playerSource).toContain(
+      "const controlsVisible = !state.isPlaying || showControls;",
+    );
+  });
 });
