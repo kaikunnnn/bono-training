@@ -3,7 +3,6 @@ import {
   Geist_Mono,
   M_PLUS_1,
 } from "next/font/google";
-import Script from "next/script";
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
@@ -11,8 +10,6 @@ import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar"
 import "./globals.css";
 import "@/styles/blog.css";
 import "@/styles/blog/link-card.css";
-
-const GA_MEASUREMENT_ID = "G-MH9NGKFBCM";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -65,20 +62,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <head>
-        <Script
-          src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
-          strategy="afterInteractive"
-        />
-        <Script id="ga4-init" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${GA_MEASUREMENT_ID}');
-          `}
-        </Script>
-      </head>
       <body
         className={`${geistMono.variable} ${mplus1.variable} antialiased`}
       >
