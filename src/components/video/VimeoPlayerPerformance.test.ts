@@ -31,9 +31,9 @@ describe("Vimeo player performance", () => {
     expect(playerSource).not.toContain("[CustomVimeoPlayer] State changed:");
   });
 
-  it("keeps controls visible whenever playback is paused", () => {
+  it("keeps controls visible while paused, scrubbing, or using a menu", () => {
     expect(playerSource).toContain(
-      "const controlsVisible = !state.isPlaying || showControls;",
+      "const controlsVisible = !state.isPlaying || showControls || isScrubbing || isMenuOpen;",
     );
   });
 });

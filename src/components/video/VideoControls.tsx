@@ -2,18 +2,22 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Play, Pause, Volume2, VolumeX, Volume1, Maximize, Minimize, Loader2, Subtitles, List } from 'lucide-react';
-import type { VimeoPlayerState, TextTrack, Chapter } from './hooks/useVimeoPlayer';
+import type { VimeoPlayerState, Chapter } from './hooks/useVimeoPlayer';
 
 interface VideoControlsProps {
   state: VimeoPlayerState;
   onTogglePlay: () => void;
   onSeek: (time: number) => void;
+  onSeekStart?: () => void;
+  onSeekCancel?: () => void;
   onVolumeChange: (volume: number) => void;
   onPlaybackRateChange: (rate: number) => void;
   onToggleFullscreen: () => void;
   onEnableTextTrack: (language: string) => void;
   onDisableTextTrack: () => void;
   isFullscreen?: boolean;
+  maxChapterMenuHeight?: number;
+  onMenuOpenChange?: (open: boolean) => void;
 }
 
 const PLAYBACK_RATES = [0.5, 0.75, 1, 1.25, 1.5, 2];
@@ -22,28 +26,35 @@ export function VideoControls({
   state,
   onTogglePlay,
   onSeek,
+  onSeekStart,
+  onSeekCancel,
   onVolumeChange,
   onPlaybackRateChange,
   onToggleFullscreen,
   onEnableTextTrack,
   onDisableTextTrack,
   isFullscreen = false,
+  maxChapterMenuHeight = 300,
+  onMenuOpenChange,
 }: VideoControlsProps) {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showSubtitleMenu, setShowSubtitleMenu] = useState(false);
   const [showChapterMenu, setShowChapterMenu] = useState(false);
   const [isSeeking, setIsSeeking] = useState(false);
+  const [seekTime, setSeekTime] = useState<number | null>(null);
   const [isHoveringProgress, setIsHoveringProgress] = useState(false);
   const [hoverTime, setHoverTime] = useState<number | null>(null);
   const [hoverPosition, setHoverPosition] = useState(0);
   const [hoverChapter, setHoverChapter] = useState<Chapter | null>(null);
   const progressRef = useRef<HTMLDivElement>(null);
+  const activePointerRef = useRef<number | null>(null);
   const speedMenuRef = useRef<HTMLDivElement>(null);
   const subtitleMenuRef = useRef<HTMLDivElement>(null);
+  const chapterButtonRef = useRef<HTMLButtonElement>(null);
   const chapterMenuRef = useRef<HTMLDivElement>(null);
 
-  const { isPlaying, currentTime, duration, volume, muted, playbackRate, isLoading, textTracks, activeTextTrack, chapters, currentChapter } = state;
+  const { isPlaying, currentTime, pendingSeekTime, duration, volume, muted, playbackRate, isLoading, textTracks, activeTextTrack, chapters, currentChapter } = state;
 
   // 時間フォーマット (長い動画はH:MM:SS、短い動画はM:SS)
   const formatTime = (seconds: number) => {
@@ -57,26 +68,33 @@ export function VideoControls({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // プログレスバーのクリック/ドラッグ処理
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!progressRef.current || duration === 0) return;
+  // ポインターを捕捉し、指がバーから外れても位置を追う。
+  const timeAtPosition = (clientX: number) => {
+    if (!progressRef.current || duration <= 0) return null;
     const rect = progressRef.current.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    const newTime = pos * duration;
-    onSeek(Math.max(0, Math.min(newTime, duration)));
+    if (rect.width <= 0) return null;
+    return Math.max(0, Math.min(((clientX - rect.left) / rect.width) * duration, duration));
   };
 
-  const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleProgressPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (activePointerRef.current !== null || !e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+    const time = timeAtPosition(e.clientX);
+    if (time === null) return;
+    activePointerRef.current = e.pointerId;
+    e.currentTarget.setPointerCapture(e.pointerId);
     setIsSeeking(true);
-    handleProgressClick(e);
+    setSeekTime(time);
+    onSeekStart?.();
   };
 
-  const handleProgressHover = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!progressRef.current || duration === 0) return;
-    const rect = progressRef.current.getBoundingClientRect();
-    const pos = (e.clientX - rect.left) / rect.width;
-    const time = pos * duration;
-    setHoverPosition(pos * 100);
+  const handleProgressPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const time = timeAtPosition(e.clientX);
+    if (time === null) return;
+    if (activePointerRef.current === e.pointerId) {
+      setSeekTime(time);
+    }
+    if (e.pointerType !== 'mouse') return;
+    setHoverPosition((time / duration) * 100);
     setHoverTime(time);
 
     // ホバー位置のチャプターを特定
@@ -92,29 +110,46 @@ export function VideoControls({
     }
   };
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isSeeking || !progressRef.current || duration === 0) return;
-      const rect = progressRef.current.getBoundingClientRect();
-      const pos = (e.clientX - rect.left) / rect.width;
-      const newTime = pos * duration;
-      onSeek(Math.max(0, Math.min(newTime, duration)));
-    };
-
-    const handleMouseUp = () => {
-      setIsSeeking(false);
-    };
-
-    if (isSeeking) {
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+  const finishSeeking = (e: React.PointerEvent<HTMLDivElement>, cancelled: boolean) => {
+    if (activePointerRef.current !== e.pointerId) return;
+    activePointerRef.current = null;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+      e.currentTarget.releasePointerCapture(e.pointerId);
     }
+    setIsSeeking(false);
+    setSeekTime(null);
+    const time = timeAtPosition(e.clientX);
+    if (!cancelled && time !== null) {
+      onSeek(time);
+    } else {
+      onSeekCancel?.();
+    }
+  };
 
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-  }, [isSeeking, duration, onSeek]);
+  const handleProgressKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    let time: number;
+    switch (e.key) {
+      case 'ArrowLeft':
+      case 'ArrowDown':
+        time = currentTime - 5;
+        break;
+      case 'ArrowRight':
+      case 'ArrowUp':
+        time = currentTime + 5;
+        break;
+      case 'Home':
+        time = 0;
+        break;
+      case 'End':
+        time = duration;
+        break;
+      default:
+        return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+    if (duration > 0) onSeek(Math.max(0, Math.min(time, duration)));
+  };
 
   // メニューの外側クリックで閉じる
   useEffect(() => {
@@ -125,7 +160,11 @@ export function VideoControls({
       if (subtitleMenuRef.current && !subtitleMenuRef.current.contains(e.target as Node)) {
         setShowSubtitleMenu(false);
       }
-      if (chapterMenuRef.current && !chapterMenuRef.current.contains(e.target as Node)) {
+      if (
+        chapterMenuRef.current &&
+        !chapterMenuRef.current.contains(e.target as Node) &&
+        !chapterButtonRef.current?.contains(e.target as Node)
+      ) {
         setShowChapterMenu(false);
       }
     };
@@ -139,7 +178,12 @@ export function VideoControls({
     };
   }, [showSpeedMenu, showSubtitleMenu, showChapterMenu]);
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  useEffect(() => {
+    onMenuOpenChange?.(showSpeedMenu || showSubtitleMenu || showChapterMenu);
+  }, [showSpeedMenu, showSubtitleMenu, showChapterMenu, onMenuOpenChange]);
+
+  const displayedTime = seekTime ?? pendingSeekTime ?? currentTime;
+  const progress = duration > 0 ? (displayedTime / duration) * 100 : 0;
 
   // 音量アイコンの選択（muted状態も考慮）
   const VolumeIcon = (muted || volume === 0) ? VolumeX : volume < 0.5 ? Volume1 : Volume2;
@@ -155,18 +199,30 @@ export function VideoControls({
       {/* プログレスバー */}
       <div
         ref={progressRef}
-        className={`relative cursor-pointer mb-4 group transition-all duration-150 ${
-          isHoveringProgress || isSeeking ? 'h-1.5' : 'h-1'
-        }`}
-        onMouseDown={handleProgressMouseDown}
-        onMouseEnter={() => setIsHoveringProgress(true)}
-        onMouseLeave={() => {
+        role="slider"
+        tabIndex={duration > 0 ? 0 : -1}
+        aria-label="再生位置"
+        aria-valuemin={0}
+        aria-valuemax={Math.floor(duration)}
+        aria-valuenow={Math.floor(displayedTime)}
+        aria-valuetext={`${formatTime(displayedTime)} / ${formatTime(duration)}`}
+        className="relative h-8 mb-2 cursor-pointer touch-none select-none group focus-visible:outline-2 focus-visible:outline-white"
+        onPointerDown={handleProgressPointerDown}
+        onPointerEnter={(e) => {
+          if (e.pointerType === 'mouse') setIsHoveringProgress(true);
+        }}
+        onPointerLeave={(e) => {
+          if (e.pointerType !== 'mouse') return;
           setIsHoveringProgress(false);
           setHoverTime(null);
           setHoverChapter(null);
         }}
-        onMouseMove={handleProgressHover}
+        onPointerMove={handleProgressPointerMove}
+        onPointerUp={(e) => finishSeeking(e, false)}
+        onPointerCancel={(e) => finishSeeking(e, true)}
+        onKeyDown={handleProgressKeyDown}
       >
+        <div className={`absolute inset-x-0 top-1/2 -translate-y-1/2 ${isHoveringProgress || isSeeking ? 'h-1.5' : 'h-1'}`}>
         {/* チャプターがある場合はセグメント分割、ない場合は従来の1本バー */}
         {hasChapters ? (
           // セグメント分割プログレスバー
@@ -180,10 +236,10 @@ export function VideoControls({
 
               // このセグメント内での再生進捗を計算
               let segmentProgress = 0;
-              if (currentTime >= segmentEnd) {
+              if (displayedTime >= segmentEnd) {
                 segmentProgress = 100;
-              } else if (currentTime > segmentStart) {
-                segmentProgress = ((currentTime - segmentStart) / segmentDuration) * 100;
+              } else if (displayedTime > segmentStart) {
+                segmentProgress = ((displayedTime - segmentStart) / segmentDuration) * 100;
               }
 
               // このセグメント内でのホバー進捗を計算
@@ -251,6 +307,7 @@ export function VideoControls({
           }`}
           style={{ left: `calc(${progress}% - 6px)` }}
         />
+        </div>
 
         {/* ホバー時の時間・チャプター表示 */}
         {isHoveringProgress && hoverTime !== null && (
@@ -334,7 +391,7 @@ export function VideoControls({
 
           {/* 時間表示 */}
           <div className="text-white text-sm font-medium tabular-nums">
-            <span>{formatTime(currentTime)}</span>
+            <span>{formatTime(displayedTime)}</span>
             <span className="text-white/60 mx-1">/</span>
             <span className="text-white/80">{formatTime(duration)}</span>
           </div>
@@ -400,8 +457,9 @@ export function VideoControls({
 
           {/* チャプター選択（チャプターがある場合のみ表示） */}
           {hasChapters && (
-            <div ref={chapterMenuRef} className="relative">
+            <div className="relative">
               <button
+                ref={chapterButtonRef}
                 onClick={() => setShowChapterMenu(!showChapterMenu)}
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                   showChapterMenu ? 'bg-white text-black' : 'bg-white/20 hover:bg-white/30 text-white'
@@ -410,31 +468,6 @@ export function VideoControls({
               >
                 <List className="w-5 h-5" />
               </button>
-
-              {/* チャプター選択メニュー */}
-              {showChapterMenu && (
-                <div className="absolute bottom-full right-0 mb-2 bg-black/95 backdrop-blur-sm rounded-lg shadow-xl py-2 min-w-[200px] max-h-[300px] overflow-y-auto border border-white/10">
-                  {chapters.map((chapter) => (
-                    <button
-                      key={chapter.index}
-                      onClick={() => {
-                        onSeek(chapter.startTime);
-                        setShowChapterMenu(false);
-                      }}
-                      className={`w-full px-4 py-2 text-sm text-left transition-colors cursor-pointer flex items-center justify-between gap-3 ${
-                        currentChapter?.index === chapter.index
-                          ? 'text-white bg-white/10'
-                          : 'text-white/70 hover:text-white hover:bg-white/5'
-                      }`}
-                    >
-                      <span className="truncate">{chapter.title}</span>
-                      <span className="text-white/50 text-xs tabular-nums flex-shrink-0">
-                        {formatTime(chapter.startTime)}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
@@ -487,6 +520,35 @@ export function VideoControls({
           </button>
         </div>
       </div>
+
+      {/* プレイヤーの右端に固定し、狭い画面でも一覧が枠内に収まるようにする。 */}
+      {showChapterMenu && (
+        <div
+          ref={chapterMenuRef}
+          className="absolute bottom-[60px] right-4 z-30 bg-black/95 backdrop-blur-sm rounded-lg shadow-xl py-2 min-w-[200px] overflow-y-auto border border-white/10"
+          style={{ maxHeight: maxChapterMenuHeight, maxWidth: 'calc(100% - 2rem)' }}
+        >
+          {chapters.map((chapter) => (
+            <button
+              key={chapter.index}
+              onClick={() => {
+                onSeek(chapter.startTime);
+                setShowChapterMenu(false);
+              }}
+              className={`w-full px-4 py-2 text-sm text-left transition-colors cursor-pointer flex items-center justify-between gap-3 ${
+                currentChapter?.index === chapter.index
+                  ? 'text-white bg-white/10'
+                  : 'text-white/70 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <span className="truncate">{chapter.title}</span>
+              <span className="text-white/50 text-xs tabular-nums flex-shrink-0">
+                {formatTime(chapter.startTime)}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
