@@ -17,6 +17,8 @@ export interface Chapter {
 export interface VimeoPlayerState {
   isPlaying: boolean;
   currentTime: number;
+  /** Vimeoのシーク完了を待つ間、操作部に即時表示する位置 */
+  pendingSeekTime: number | null;
   duration: number;
   volume: number;
   muted: boolean;
@@ -64,12 +66,14 @@ function findCurrentChapter(
 export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}): UseVimeoPlayerReturn {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<Player | null>(null);
+  const seekRequestRef = useRef(0);
   const autoPlay = options.autoPlay ?? false;
   const configuredMuted = options.muted ?? false;
 
   const [state, setState] = useState<VimeoPlayerState>({
     isPlaying: false,
     currentTime: 0,
+    pendingSeekTime: null,
     duration: 0,
     volume: 1,
     muted: configuredMuted,
@@ -210,6 +214,7 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
     });
 
     return () => {
+      seekRequestRef.current += 1;
       player.destroy();
       playerRef.current = null;
     };
@@ -239,8 +244,27 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
   }, []);
 
   const seek = useCallback(async (time: number) => {
-    if (playerRef.current) {
-      await playerRef.current.setCurrentTime(time);
+    const player = playerRef.current;
+    if (!player) return;
+
+    const requestId = ++seekRequestRef.current;
+    // ネットワーク越しのVimeo応答を待たず、バーと時刻は指を離した位置に保つ。
+    // 実際の視聴進捗はtimeupdate由来のcurrentTimeだけで判定する。
+    setState(prev => ({ ...prev, pendingSeekTime: time }));
+    try {
+      const actualTime = await player.setCurrentTime(time);
+      if (playerRef.current !== player || seekRequestRef.current !== requestId) return;
+      setState(prev => ({
+        ...prev,
+        currentTime: actualTime,
+        currentChapter: findCurrentChapter(prev.chapters, actualTime),
+        pendingSeekTime: null,
+      }));
+    } catch (error) {
+      if (playerRef.current === player && seekRequestRef.current === requestId) {
+        setState(prev => ({ ...prev, pendingSeekTime: null }));
+      }
+      console.error('[VimeoPlayer] Seek error:', error);
     }
   }, []);
 
