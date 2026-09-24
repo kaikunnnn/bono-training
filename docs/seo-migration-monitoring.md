@@ -83,7 +83,7 @@ Search Console の `https://www.bo-no.design/` プロパティ。2026-09-24に�
 | `/guide/portfolio-01` | 登録済み。最終クロール9/24、Google選択の正規URLは検査対象URL。 | 9/24のmetadata修正を再評価してもらうため、登録を再リクエスト。受理済み。 |
 | `/guide/beginner-to-uiux-designer-examples` | 検出・未クロール。 | インデックス登録をリクエスト。受理済み。 |
 | `/guide/rdm-howtostart-roadmap` | 検出・未クロール。 | インデックス登録をリクエスト。受理済み。 |
-| `/guide/uiux-interview-tips-and-checkpoints` | 検出・未クロール。 | リクエスト前にGSC画面への接続が切れたため未実施。 |
+| `/guide/uiux-interview-tips-and-checkpoints` | 検出・未クロール。 | インデックス登録をリクエスト。受理済み。 |
 
 リクエスト受理はクロールや登録の完了を意味しない。次回は最終クロール日とGoogle選択の正規URLを再確認する。
 
