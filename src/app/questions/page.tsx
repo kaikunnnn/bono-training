@@ -62,13 +62,23 @@ async function PostQuestionAction() {
   );
 }
 
-async function QuestionListContent() {
-  const [items, access] = await Promise.all([
-    traceServerStep("questions.list.data", () =>
-      getQuestionList({ limit: LIST_LIMIT })
-    ),
-    getQuestionsAccess(),
-  ]);
+async function EmptyQuestionAction() {
+  const { hasFullAccess, isLoggedIn } = await getQuestionsAccess();
+  return (
+    <PostQuestionButton
+      hasMemberAccess={hasFullAccess}
+      isLoggedIn={isLoggedIn}
+      variant="secondary"
+      label="スレッドを作成"
+      icon="message-square"
+    />
+  );
+}
+
+export async function QuestionListContent() {
+  const items = await traceServerStep("questions.list.data", () =>
+    getQuestionList({ limit: LIST_LIMIT })
+  );
 
   return (
     <>
@@ -76,7 +86,8 @@ async function QuestionListContent() {
         <QuestionCard
           key={item.question._id}
           item={item}
-          showEngagement={access.hasFullAccess}
+          // 集計ViewのRLSが非会員へ0行を返すため、別の購読判定を待たず安全に描画できる。
+          showEngagement
         />
       ))}
 
@@ -91,13 +102,11 @@ async function QuestionListContent() {
                 デザインの気づきや聞いてみたいことを、メンバーと共有できます。
               </p>
             </div>
-            <PostQuestionButton
-              hasMemberAccess={access.hasFullAccess}
-              isLoggedIn={access.isLoggedIn}
-              variant="secondary"
-              label="スレッドを作成"
-              icon="message-square"
-            />
+            <Suspense
+              fallback={<div className="h-10 w-40 animate-pulse rounded-xl bg-muted" />}
+            >
+              <EmptyQuestionAction />
+            </Suspense>
           </CardContent>
         </Card>
       )}

@@ -1,12 +1,13 @@
 import { Children, isValidElement, Suspense, type ReactElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import QuestionsPage from "./page";
+import QuestionsPage, { QuestionListContent } from "./page";
 import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
 import {
   getQuestionList,
   getRecentQuestions,
   getRelatedQuestions,
 } from "@/lib/services/questions";
+import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 
 vi.mock("server-only", () => ({}));
 vi.mock("@/lib/services/questions", () => ({
@@ -49,6 +50,28 @@ describe("questions performance contracts", () => {
       (element) => element.type === "h1" && element.props.children === "みんなの掲示板"
     )).toBe(true);
     expect(getQuestionList).not.toHaveBeenCalled();
+  });
+
+  it("renders populated list data without waiting for subscription access", async () => {
+    vi.mocked(getQuestionList).mockResolvedValue([
+      {
+        question: {
+          _id: "question-1",
+          title: "表示を待たせない質問",
+          slug: { _type: "slug", current: "question-1" },
+        },
+        commentCount: 0,
+        reactionCounts: { cheer: 0, thanks: 0, insight: 0 },
+        lastActivityAt: "2026-09-24T00:00:00.000Z",
+        recentCommenters: [],
+      } as Awaited<ReturnType<typeof getQuestionList>>[number],
+    ]);
+
+    await QuestionListContent();
+
+    expect(getQuestionList).toHaveBeenCalledWith({ limit: 6 });
+    expect(getSubscriptionStatus).not.toHaveBeenCalled();
+    expect(getCurrentUser).not.toHaveBeenCalled();
   });
 
   it("starts related and recent thread requests together", async () => {
