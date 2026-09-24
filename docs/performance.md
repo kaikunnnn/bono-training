@@ -6,6 +6,7 @@
 
 - `NewTopContent` の冒頭で CMS 全件を `await` しない。Hero・固定リンクは同期的なシェル、新着・ガイド・レッスン・実績は独立した Server Component + Suspense とする。
 - 会員 `/top` はページ冒頭で `getSubscriptionStatus()` をawaitしない。Heroの見出し・説明文をシェルに残し、会員で非表示になる入会CTAだけをasync Server Component + Suspenseにする。公開 `/` のゲストCTAは待たせない。
+- ファーストビューの特集レッスンと新着記事は、viewportへ入っただけで各dynamic routeを一括prefetchしない。初期値は `prefetch={false}`、`mouseenter` / `focus` 後だけ通常prefetchへ切り替える。
 - 認証・契約判定は route/layout に維持する。個人データを `unstable_cache` やモジュール変数でユーザー間共有しない。
 - LayoutのUserProviderとページ/サービスのgetCachedUserは、同じ `getCachedAuth`（React cache、RSCリクエスト内）を使う。400/401/403と一時障害の分類を保ち、getClaimsへの置換は混ぜない。
 - トップ下部のLessonCardだけ `imageLoading="lazy"` を明示する。共有カードの既定値やLCP候補を一括lazy化しない。縦横比を保持し、スクロール前の未取得とスクロール後の表示を両方確認する。

@@ -3,7 +3,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { NewTopContent } from "./NewTopContent";
 import { HeroSection, MembershipCta } from "./organisms/HeroSection";
+import { FeaturedSeries } from "./organisms/FeaturedSeries";
+import { ArticleRow } from "./molecules/ArticleRow";
 import { LessonCardRenderer } from "@/app/lessons/LessonCardRenderer";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import {
   getAllLessonsWithArticleIds,
   getAchievementGroups,
@@ -161,5 +164,23 @@ describe("top-page streaming contract", () => {
       expect(html).not.toContain('rel="preload"');
     }
     expect(html).toContain("aspect-[2/3]");
+  });
+
+  it("defers top detail prefetch until the visitor shows navigation intent", () => {
+    const featured = FeaturedSeries({
+      cards: [{ title: "特集", desc: "説明", href: "/lessons/test", image: "/test.jpg" }],
+    });
+    expect(descendants(featured).some((element) => element.type === IntentPrefetchLink)).toBe(true);
+
+    const latest = ArticleRow({ category: "記事", title: "新着", href: "/contents/test" });
+    expect(latest.type).toBe(IntentPrefetchLink);
+
+    const updates = ArticleRow({
+      category: "記事",
+      title: "一覧",
+      href: "/contents/test",
+      variant: "updates",
+    });
+    expect(updates.type).not.toBe(IntentPrefetchLink);
   });
 });
