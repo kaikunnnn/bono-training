@@ -136,7 +136,7 @@ function CurriculumArticle({
       {pending ? (
         <span className={`${s.articleLink} ${s.pendingArticle}`}>{content}</span>
       ) : (
-        <Link className={s.articleLink} href={`${CONTENT_BASE_PATH}/${article.slug.current}`}>
+        <Link data-intro-action="article_open" data-intro-component={`article:${article._id}`} data-intro-article={article._id} data-intro-access={article.isLocked ? "locked" : "open"} data-intro-destination={`${CONTENT_BASE_PATH}/${article.slug.current}`} className={s.articleLink} href={`${CONTENT_BASE_PATH}/${article.slug.current}`}>
           {content}
         </Link>
       )}
@@ -165,6 +165,8 @@ function CurriculumQuest({
           variant="unstyled"
           size="unstyled"
           className={s.questButton}
+          data-intro-action="chapter_toggle"
+          data-intro-component={`chapter:${quest._id}`}
           onClick={() => setOpen((current) => !current)}
           aria-expanded={open}
           aria-controls={panelId}
@@ -260,6 +262,8 @@ function OverviewMedia() {
             className={s.slideThumbnail}
             aria-label={`${index + 1}枚目のスライドを表示`}
             aria-current={index === active ? "true" : undefined}
+            data-intro-action="slide_select"
+            data-intro-component={`slide:${index + 1}`}
             onClick={() => setActive(index)}
           >
             <Image
@@ -302,10 +306,10 @@ export default function PersonaLessonTopClient({
     <div className={s.page}>
       <div className={s.shell}>
         <nav className={s.breadcrumb} aria-label="パンくずリスト">
-          <Link href="/lessons" className={s.backLink} aria-label="レッスン一覧へ戻る">
+          <Link data-intro-action="navigation" data-intro-component="back_to_lessons" href="/lessons" className={s.backLink} aria-label="レッスン一覧へ戻る">
             <Image src={asset("back.svg")} alt="" width={20} height={20} />
           </Link>
-          <Link href="/lessons">レッスン</Link>
+          <Link data-intro-action="navigation" data-intro-component="back_to_lessons" href="/lessons">レッスン</Link>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{lesson.title}</span>
         </nav>
@@ -324,7 +328,7 @@ export default function PersonaLessonTopClient({
               <div className={s.heroActions}>
                 {startHref ? (
                   <Button asChild variant="persona-gradient" size="persona-cta">
-                    <Link href={startHref}>
+                    <Link data-intro-action="article_open" data-intro-component="hero_start" data-intro-article={firstArticle?._id} data-intro-access={firstArticle?.isLocked ? "locked" : "open"} data-intro-destination={startHref} href={startHref}>
                       トレーニングをはじめる
                       <Image src={asset("start.svg")} alt="" width={18} height={18} />
                     </Link>
@@ -332,7 +336,7 @@ export default function PersonaLessonTopClient({
                 ) : (
                   <span className={s.startUnavailable}>公開をお待ちください</span>
                 )}
-                <a href="#curriculum" className={s.curriculumLink}>
+                <a data-intro-action="curriculum_jump" data-intro-component="hero_curriculum" href="#curriculum" className={s.curriculumLink}>
                   カリキュラムを見る
                   <Image src={asset("down.svg")} alt="" width={15} height={15} />
                 </a>
@@ -352,7 +356,7 @@ export default function PersonaLessonTopClient({
           </div>
           <div className={s.heroFooter}>
             <span>FROM USER INSIGHT TO UI EXPERIENCE</span>
-            <a href="#overview">
+            <a data-intro-action="overview_jump" data-intro-component="hero_overview" href="#overview">
               コースを知る
               <Image src={asset("down.svg")} alt="" width={14} height={14} />
             </a>
@@ -362,7 +366,7 @@ export default function PersonaLessonTopClient({
         <section id="overview" className={s.overview} aria-labelledby="persona-overview-title">
           <div className={s.overviewHead}>
             <p className={s.kicker}>トレーニングの概要</p>
-            <h2 id="persona-overview-title">
+            <h2 data-intro-section="overview" id="persona-overview-title">
               {content.overview.titleLines.map((line) => (
                 <span key={line}>{line}</span>
               ))}
@@ -378,10 +382,10 @@ export default function PersonaLessonTopClient({
           </div>
         </section>
 
-        <section id="curriculum" className={s.section} aria-labelledby="persona-curriculum-title">
+        <section data-intro-curriculum id="curriculum" className={s.section} aria-labelledby="persona-curriculum-title">
           <div className={s.sectionHeading}>
             <p className={s.kicker}>進める内容</p>
-            <h2 id="persona-curriculum-title">カリキュラム</h2>
+            <h2 data-intro-section="curriculum" id="persona-curriculum-title">カリキュラム</h2>
             <p>実際のデザイン依頼に取り組みながら、ペルソナ中心のデザインフローを習得します。</p>
           </div>
           <div className={s.questList}>
@@ -399,7 +403,7 @@ export default function PersonaLessonTopClient({
         <section className={s.section} aria-labelledby="persona-briefs-title">
           <div className={s.sectionHeading}>
             <p className={s.kicker}>アウトプット</p>
-            <h2 id="persona-briefs-title">制作するもの</h2>
+            <h2 data-intro-section="briefs" id="persona-briefs-title">制作するもの</h2>
             <p className={s.briefQuestion}>あなたなら、どんな体験をデザインする？</p>
             <p>実際のデザイン依頼に取り組みながら、ペルソナ中心のデザインフローを習得します。題材は3つから選べます。</p>
           </div>

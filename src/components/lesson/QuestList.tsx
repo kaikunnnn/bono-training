@@ -38,6 +38,7 @@ interface QuestListProps {
 export default function QuestList({ contentHeading, quests, questProgressMap = {} }: QuestListProps) {
   return (
     <div className="w-full">
+      <div data-intro-section="curriculum" aria-hidden="true" style={{ height: 1 }} />
       {contentHeading && (
         <h2 className="font-rounded-mplus font-bold text-2xl text-lesson-quest-title mb-6">
           {contentHeading}

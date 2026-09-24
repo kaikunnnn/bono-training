@@ -66,6 +66,8 @@ export default function LessonDetailClient({
   const [activeTab, setActiveTab] = useState<"content" | "overview">("content");
   const tabsRef = useRef<HTMLDivElement>(null);
 
+  const firstArticle = lesson.quests?.[0]?.articles?.[0];
+
   const handleStart = () => {
     if (lesson?.quests?.[0]?.articles?.[0]) {
       const firstArticle = lesson.quests[0].articles[0];
@@ -91,6 +93,7 @@ export default function LessonDetailClient({
         progress={progress}
         progressContent={progressContent}
         onStart={handleStart}
+        startArticle={firstArticle ? { id: firstArticle._id, path: `/contents/${firstArticle.slug.current}`, access: firstArticle.isPremium ? "premium" : "open" } : undefined}
         onViewAllDetails={hasOverviewData ? handleViewAllDetails : undefined}
       >
         <div ref={tabsRef}>

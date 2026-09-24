@@ -31,6 +31,8 @@ export function LessonHeader({
       <div className="flex items-start">
         <Button
           variant="outline"
+          data-intro-action="navigation"
+          data-intro-component="back_to_lessons"
           onClick={handleBack}
           className="h-auto gap-2 border-border-light px-3 py-[7px] rounded-xl shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_0px_0px_rgba(0,0,0,0),0px_0px_3px_0px_rgba(0,0,0,0.04)] [&_svg]:size-5"
         >

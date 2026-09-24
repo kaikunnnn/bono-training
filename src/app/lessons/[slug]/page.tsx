@@ -7,6 +7,9 @@ import {
   getEffectiveLearningPlanType,
   isContentLocked,
 } from "@/lib/subscription";
+import LessonIntroAnalytics from "@/components/lesson/LessonIntroAnalytics";
+import { INTRO_VERSIONS } from "@/lib/analytics/lesson-intro";
+import type { SubscriptionState } from "@/types/subscription";
 import LessonDetailClient from "./LessonDetailClient";
 import PersonaLessonTopClient from "./PersonaLessonTopClient";
 import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
@@ -57,6 +60,12 @@ async function PersonalizedLessonCurriculum({
       questProgressMap={questProgressMap}
     />
   );
+}
+
+async function LessonMemberMarker({ promise }: { promise: Promise<SubscriptionState> }) {
+  const subscription = await promise;
+  const member = !subscription.isLoggedIn ? "guest" : subscription.isSubscribed ? "paid" : "free";
+  return <span hidden data-lesson-member={member} />;
 }
 
 function LessonProgressFallback() {
@@ -197,10 +206,13 @@ export default async function LessonPage({ params }: PageProps) {
             })
           )}
         />
-        <PersonaLessonTopClient
-          lesson={personaLesson}
-          hasFullAccess={subscription.hasLearningAccess}
-        />
+        <LessonIntroAnalytics lessonId={lesson._id} path={`/lessons/${slug}`} version={INTRO_VERSIONS.persona}>
+          <LessonMemberMarker promise={lessonRequest.subscriptionPromise} />
+          <PersonaLessonTopClient
+            lesson={personaLesson}
+            hasFullAccess={subscription.hasLearningAccess}
+          />
+        </LessonIntroAnalytics>
       </>
     );
   }
@@ -225,15 +237,17 @@ export default async function LessonPage({ params }: PageProps) {
           })
         )}
       />
-      <LessonDetailClient
-        lesson={publicLesson}
-        progress={0}
-        questProgressMap={{}}
-        progressContent={
-          <Suspense fallback={<LessonProgressFallback />}>
-            <PersonalizedLessonProgress
-              presentationPromise={presentationPromise}
-            />
+      <LessonIntroAnalytics lessonId={lesson._id} path={`/lessons/${slug}`} version={INTRO_VERSIONS.standard}>
+        <Suspense fallback={null}><LessonMemberMarker promise={lessonRequest.subscriptionPromise} /></Suspense>
+        <LessonDetailClient
+          lesson={publicLesson}
+          progress={0}
+          questProgressMap={{}}
+          progressContent={
+            <Suspense fallback={<LessonProgressFallback />}>
+              <PersonalizedLessonProgress
+                presentationPromise={presentationPromise}
+              />
           </Suspense>
         }
         contentTab={
@@ -245,6 +259,7 @@ export default async function LessonPage({ params }: PageProps) {
           </Suspense>
         }
       />
+      </LessonIntroAnalytics>
     </>
   );
 }

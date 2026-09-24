@@ -44,6 +44,7 @@ export function QuestCard({
           {articles.map((article, index) => (
             <ArticleItem
               key={article._id}
+              articleId={article._id}
               articleNumber={index + 1}
               title={article.title}
               slug={article.slug.current}

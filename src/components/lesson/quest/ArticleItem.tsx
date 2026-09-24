@@ -9,6 +9,7 @@ import { GradientLockIcon } from "@/components/ui/icon-lock-gradient";
 import { ArticleTag, type TagType } from "@/components/article/sidebar/ArticleTag";
 
 interface ArticleItemProps {
+  articleId?: string;
   articleNumber: number;
   title: string;
   slug: string;
@@ -45,6 +46,7 @@ function formatVideoDuration(duration?: string | number): string | null {
 }
 
 export function ArticleItem({
+  articleId,
   articleNumber,
   title,
   slug,
@@ -77,6 +79,11 @@ export function ArticleItem({
 
   return (
     <Link
+      data-intro-action="article_open"
+      data-intro-component={`article:${articleId || slug}`}
+      data-intro-article={articleId}
+      data-intro-access={showLock ? "locked" : "open"}
+      data-intro-destination={"/contents/" + slug}
       href={"/contents/" + slug}
       prefetch={prefetchOnIntent ? null : false}
       onMouseEnter={() => setPrefetchOnIntent(true)}
