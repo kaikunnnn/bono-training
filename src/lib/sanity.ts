@@ -1282,6 +1282,7 @@ export const getTrainingTaskDetailFromSanity = unstable_cache(
 
 const GUIDE_FIELDS = `
   _id,
+  "sanityUpdatedAt": _updatedAt,
   title,
   "slug": slug.current,
   category,

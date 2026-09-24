@@ -37,6 +37,7 @@ export interface Guide {
   author: string;
   publishedAt: string;
   updatedAt?: string;
+  sanityUpdatedAt?: string;
   readingTime?: string;
 
   // アクセス制限

@@ -14,6 +14,7 @@ import RelatedGuides from "@/components/guide/RelatedGuides";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import { guideSeoDescription } from "@/lib/seo/guideDescriptions";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -35,26 +36,30 @@ export async function generateMetadata({
   const ogImages = guide.thumbnailUrl
     ? [{ url: guide.thumbnailUrl, width: 1200, height: 630 }]
     : [];
+  const description = guideSeoDescription(slug, guide.description);
 
   return {
     title: `${guide.title} | 読みもの`,
-    description: guide.description,
+    description,
     openGraph: {
       ...OG_DEFAULTS,
       title: `${guide.title} | 読みもの`,
-      description: guide.description,
+      description,
       type: "article",
       ...(ogImages.length > 0 && { images: ogImages }),
       ...(guide.publishedAt && { publishedTime: guide.publishedAt }),
-      ...(guide.updatedAt && { modifiedTime: guide.updatedAt }),
+      ...((guide.updatedAt || guide.sanityUpdatedAt) && {
+        modifiedTime: guide.updatedAt || guide.sanityUpdatedAt,
+      }),
     },
     twitter: {
       card: "summary_large_image",
       title: `${guide.title} | 読みもの`,
-      description: guide.description,
+      description,
       ...(guide.thumbnailUrl && { images: [guide.thumbnailUrl] }),
     },
     alternates: { canonical: `/guide/${slug}` },
+    robots: guide.isPremium ? { index: false, follow: true } : undefined,
   };
 }
 
@@ -81,10 +86,10 @@ export default async function GuideDetailPage({ params }: PageProps) {
         {...jsonLdScriptProps(
           generateArticleJsonLd({
             title: guide.title,
-            description: guide.description,
+            description: guideSeoDescription(slug, guide.description) ?? "",
             url: `/guide/${slug}`,
             publishedAt: guide.publishedAt,
-            modifiedAt: guide.updatedAt,
+            modifiedAt: guide.updatedAt || guide.sanityUpdatedAt,
             author: guide.author,
           })
         )}
