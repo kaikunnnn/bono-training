@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 function LessonTabsStaticHeader({ label }: { label: string }) {
@@ -27,6 +28,7 @@ export default function LessonTabs({
   onTabChange,
   showOverviewTab = true,
 }: LessonTabsProps) {
+  const root = useRef<HTMLDivElement>(null);
   if (!showOverviewTab) {
     return (
       <div className="w-full text-gray-900">
@@ -39,11 +41,15 @@ export default function LessonTabs({
   }
 
   return (
-    <div className="w-full">
+    <div ref={root} className="w-full">
       <Tabs
         defaultValue="content"
         value={activeTab}
-        onValueChange={(value) => onTabChange?.(value as "content" | "overview")}
+        onValueChange={(value) => {
+          root.current?.querySelector(`[data-intro-component="${value}_tab"]`)
+            ?.dispatchEvent(new Event("bono:intro-activate", { bubbles: true }));
+          onTabChange?.(value as "content" | "overview");
+        }}
         className="w-full"
       >
         <TabsList className="w-full justify-start border-b border-gray-200 bg-transparent rounded-none h-auto p-0 mb-[32px]">

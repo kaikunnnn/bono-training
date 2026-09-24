@@ -75,7 +75,7 @@ async function EmptyQuestionAction() {
   );
 }
 
-export async function QuestionListContent() {
+async function QuestionListContent() {
   const items = await traceServerStep("questions.list.data", () =>
     getQuestionList({ limit: LIST_LIMIT })
   );
