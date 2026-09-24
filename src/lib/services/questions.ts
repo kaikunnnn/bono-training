@@ -8,6 +8,7 @@ import { revalidatePath } from "next/cache";
 import type { Question, QuestionCategory } from "@/types/sanity";
 import { adjustBoardUserStats } from "@/lib/questions/board-user-stats";
 import { createNotification } from "@/lib/services/notifications-create";
+import { traceServerStep } from "@/lib/performance/server-trace";
 
 // ============================================
 // 型定義
@@ -106,21 +107,38 @@ type RecentCommenterRow = {
 async function buildListItems(questions: Question[]): Promise<QuestionListItem[]> {
   if (questions.length === 0) return [];
 
+  // Layout/UserProvider と同じリクエストスコープの認証結果を再利用する。
+  // ゲストは集計ViewのRLSで必ず0行になるため、Supabaseへの2往復自体を省く。
+  const user = await getCachedUser();
+  if (!user) {
+    return questions.map((question) => ({
+      question,
+      commentCount: 0,
+      reactionCounts: { cheer: 0, thanks: 0, insight: 0 },
+      lastActivityAt: question.publishedAt ?? "",
+      recentCommenters: [],
+    }));
+  }
+
   const ids = questions.map((q) => q._id);
   const supabase = await createClient();
 
   // コメント集計（数・最新時刻・直近コメント者）は新 View question_comment_summaries に統合し、
   // リアクション集計は既存 View と合わせて 2 並列で取得する（#153・転送量削減）。
   const [summaryResult, reactionCountsResult] = await Promise.all([
-    supabase
-      .from("question_comment_summaries")
-      .select("question_id, comment_count, latest_commented_at, recent_commenters")
-      .in("question_id", ids),
-    supabase
-      .from("question_reaction_counts")
-      .select("target_type, target_id, reaction, count")
-      .eq("target_type", "question")
-      .in("target_id", ids),
+    traceServerStep("questions.engagement.summaries", async () =>
+      await supabase
+        .from("question_comment_summaries")
+        .select("question_id, comment_count, latest_commented_at, recent_commenters")
+        .in("question_id", ids)
+    ),
+    traceServerStep("questions.engagement.reactions", async () =>
+      await supabase
+        .from("question_reaction_counts")
+        .select("target_type, target_id, reaction, count")
+        .eq("target_type", "question")
+        .in("target_id", ids)
+    ),
   ]);
 
   // 失敗時は空にフォールバックしページはクラッシュさせない。ただし黙殺せず console.error に残す（#153）。
@@ -193,10 +211,13 @@ export async function getQuestionList(params?: {
   // 浮上ソートのため候補を多めに取得してから JS 側で並べ替える
   const sanityQuery = `*[_type == "question" ${categoryFilter}] | order(publishedAt desc)[0...${CANDIDATE_POOL}]${QUESTION_CARD_PROJECTION}`;
 
-  const questions = await getClient().fetch<Question[]>(
-    sanityQuery,
-    params?.categorySlug ? { categorySlug: params.categorySlug } : {},
-    { next: { revalidate: 60, tags: ["questions"] } },
+  const questions = await traceServerStep(
+    "questions.list.cms",
+    () => getClient().fetch<Question[]>(
+      sanityQuery,
+      params?.categorySlug ? { categorySlug: params.categorySlug } : {},
+      { next: { revalidate: 60, tags: ["questions"] } },
+    ),
   );
 
   const items = await buildListItems(questions);
@@ -976,4 +997,3 @@ export async function getReactionCountsMap(input: {
   });
   return map;
 }
-

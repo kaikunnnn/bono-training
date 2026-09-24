@@ -29,6 +29,9 @@ export type ServerTraceLabel =
   | "mypage.history"
   | "questions.list.access"
   | "questions.list.data"
+  | "questions.list.cms"
+  | "questions.engagement.summaries"
+  | "questions.engagement.reactions"
   | "questions.detail.reactions";
 
 /**
