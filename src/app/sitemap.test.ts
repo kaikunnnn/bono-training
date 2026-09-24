@@ -8,6 +8,8 @@ import {
   getAllLessonSlugs,
   getAllRoadmapSlugs,
 } from "@/lib/sanity";
+import { LEGACY_ONLY_CONTENT_SLUGS } from "@/lib/migration/legacy-only-content-slugs";
+import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
 import sitemap from "./sitemap";
 
 vi.mock("@/lib/sanity", () => ({
@@ -22,10 +24,20 @@ vi.mock("@/lib/sanity", () => ({
 afterEach(() => vi.restoreAllMocks());
 
 describe("sitemap", () => {
+  it("only includes legacy public articles handled by the production rewrite", () => {
+    expect(LEGACY_PUBLIC_ARTICLE_SLUGS.size).toBe(29);
+    expect(
+      [...LEGACY_PUBLIC_ARTICLE_SLUGS].every((slug) =>
+        LEGACY_ONLY_CONTENT_SLUGS.has(slug),
+      ),
+    ).toBe(true);
+  });
+
   it("keeps free article URLs stable without reading its own published sitemap", async () => {
     vi.mocked(getAllArticles).mockResolvedValue([
       { _id: "free", title: "Free", slug: { current: "free-article" } },
       { _id: "paid", title: "Paid", slug: { current: "paid-article" }, isPremium: true },
+      { _id: "paid-legacy", title: "Paid legacy", slug: { current: "question-ui-contrast" }, isPremium: true },
       {
         _id: "duplicate",
         title: "Guide copy",
@@ -66,6 +78,9 @@ describe("sitemap", () => {
 
     expect(first).toEqual(second);
     expect(first).toContain("/contents/free-article");
+    expect(first).toContain("/contents/designer-uiux-mac-2025");
+    expect(first).not.toContain("/contents/figma-ru-men-taitoru1-intoro");
+    expect(first).not.toContain("/contents/question-ui-contrast");
     expect(first).toContain("/guide/beginner-to-uiux-designer-examples");
     expect(first).not.toContain("/contents/paid-article");
     expect(first).not.toContain("/guide/paid-guide");
