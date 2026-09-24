@@ -8,6 +8,7 @@ import {
 } from "@/lib/sanity";
 import { getAllGuideSlugsFromSanity } from "@/lib/sanity";
 import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
+import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design";
@@ -86,7 +87,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const articlePages: MetadataRoute.Sitemap = articles
-    .filter((article) => !productionSlugs.has(article.slug.current))
+    .filter(
+      (article) =>
+        !GUIDE_CONTENT_DUPLICATE_SLUGS.has(article.slug.current) &&
+        !productionSlugs.has(article.slug.current),
+    )
     .map((article) => ({
       url: `${BASE_URL}/contents/${article.slug.current}`,
       lastModified: article.publishedAt
