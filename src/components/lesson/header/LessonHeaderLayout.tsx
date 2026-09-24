@@ -24,6 +24,7 @@ interface LessonHeaderLayoutProps {
   progressContent?: React.ReactNode;
   /** 「スタートする」クリック時のコールバック */
   onStart?: () => void;
+  startArticle?: { id: string; path: string; access: string };
   /** 「概要・目的ですべてみる」クリック時のコールバック（タブ切替） */
   onViewAllDetails?: () => void;
   /** 右側ブロックに追加するコンテンツ（タブなど） */
@@ -47,6 +48,7 @@ export function LessonHeaderLayout({
   progress,
   progressContent,
   onStart,
+  startArticle,
   onViewAllDetails,
   children,
 }: LessonHeaderLayoutProps) {
@@ -70,6 +72,7 @@ export function LessonHeaderLayout({
             progress={progress}
             progressContent={progressContent}
             onStart={onStart}
+            startArticle={startArticle}
             onViewAllDetails={onViewAllDetails}
           />
           {/* タブコンテンツ等 */}

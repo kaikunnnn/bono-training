@@ -26,6 +26,7 @@ interface LessonTitleAreaProps {
   progressContent?: ReactNode;
   /** 「スタートする」クリック時のコールバック */
   onStart?: () => void;
+  startArticle?: { id: string; path: string; access: string };
   /** 「概要・目的ですべてみる」クリック時のコールバック（タブ切替） */
   onViewAllDetails?: () => void;
 }
@@ -43,6 +44,7 @@ export function LessonTitleArea({
   progress,
   progressContent,
   onStart,
+  startArticle,
   onViewAllDetails,
 }: LessonTitleAreaProps) {
   return (
@@ -99,6 +101,8 @@ export function LessonTitleArea({
           {onViewAllDetails && (
             <Button
               variant="ghost"
+              data-intro-action="overview_jump"
+              data-intro-component="hero_overview"
               onClick={onViewAllDetails}
               className="h-auto p-0 font-noto-sans-jp font-medium text-[14px] text-text-link leading-[1.6] hover:underline hover:text-text-link hover:bg-transparent active:bg-transparent"
             >
@@ -113,6 +117,11 @@ export function LessonTitleArea({
         <Button
           size="large"
           variant="primary"
+          data-intro-action={startArticle ? "article_open" : undefined}
+          data-intro-component="hero_start"
+          data-intro-article={startArticle?.id}
+          data-intro-access={startArticle?.access}
+          data-intro-destination={startArticle?.path}
           onClick={onStart}
         >
           スタートする
