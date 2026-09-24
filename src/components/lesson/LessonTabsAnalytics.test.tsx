@@ -17,7 +17,7 @@ it('records a Radix tab selection once when activation happens on mousedown befo
  render(<Example/>);
  const overview=screen.getByRole('tab',{name:'概要・目的'});
  fireEvent.mouseDown(overview,{button:0,ctrlKey:false});fireEvent.click(overview);
- expect(overview).toHaveAttribute('aria-selected','true');
+ expect(overview.getAttribute('aria-selected')).toBe('true');
  expect(clickEvents()).toHaveLength(1);
  expect(clickEvents()[0][1]?.button_id).toBe('overview_tab');
  fireEvent.mouseDown(overview,{button:0,ctrlKey:false});fireEvent.click(overview);
@@ -27,6 +27,6 @@ it('records keyboard selection without requiring a click',async()=>{
  render(<Example/>);
  const content=screen.getByRole('tab',{name:'コンテンツ'});content.focus();
  fireEvent.keyDown(content,{key:'ArrowRight'});
- await waitFor(()=>expect(screen.getByRole('tab',{name:'概要・目的'})).toHaveAttribute('aria-selected','true'));
+ await waitFor(()=>expect(screen.getByRole('tab',{name:'概要・目的'}).getAttribute('aria-selected')).toBe('true'));
  expect(clickEvents()).toHaveLength(1);
 });

@@ -1,6 +1,6 @@
 import { Children, isValidElement, Suspense, type ReactElement, type ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import QuestionsPage, { QuestionListContent } from "./page";
+import QuestionsPage from "./page";
 import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
 import {
   getQuestionList,
@@ -67,7 +67,11 @@ describe("questions performance contracts", () => {
       } as Awaited<ReturnType<typeof getQuestionList>>[number],
     ]);
 
-    await QuestionListContent();
+    const list = descendants(QuestionsPage()).find(
+      element => typeof element.type === "function" && element.type.name === "QuestionListContent"
+    );
+    expect(list).toBeDefined();
+    await (list!.type as () => Promise<ReactNode>)();
 
     expect(getQuestionList).toHaveBeenCalledWith({ limit: 6 });
     expect(getSubscriptionStatus).not.toHaveBeenCalled();
