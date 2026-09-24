@@ -8,6 +8,8 @@ import {
   getAllGuidesFromSanity,
 } from "@/lib/sanity";
 import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
+import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
+import { LEGACY_ONLY_CONTENT_SLUGS } from "@/lib/migration/legacy-only-content-slugs";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design";
@@ -81,6 +83,25 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
+  // Webflow経由で同じ公開URLに配信される記事も、正規URLとして伝える。
+  // Sanityに移植されたslugは重複させず、有料化されても再掲載しない。
+  const sanityArticleSlugs = new Set(
+    articles.map((article) => article.slug.current),
+  );
+  const legacyArticlePages: MetadataRoute.Sitemap = [
+    ...LEGACY_PUBLIC_ARTICLE_SLUGS,
+  ]
+    .filter(
+      (slug) =>
+        LEGACY_ONLY_CONTENT_SLUGS.has(slug) &&
+        !sanityArticleSlugs.has(slug),
+    )
+    .map((slug) => ({
+      url: `${BASE_URL}/contents/${slug}`,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+
   const feedbackPages: MetadataRoute.Sitemap = feedbackSlugs.map((slug) => ({
     url: `${BASE_URL}/feedbacks/${slug}`,
     changeFrequency: "monthly",
@@ -113,6 +134,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...lessonPages,
     ...articlePages,
+    ...legacyArticlePages,
     ...feedbackPages,
     ...blogPages,
     ...roadmapPages,
