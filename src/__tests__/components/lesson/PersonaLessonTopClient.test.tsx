@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import PersonaLessonTopClient, {
   type PersonaLessonTopLesson,
 } from "@/app/lessons/[slug]/PersonaLessonTopClient";
+import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
 
 vi.mock("next/image", () => ({
   default: ({ alt, src }: { alt: string; src: string | { src: string } }) => (
@@ -14,7 +15,7 @@ vi.mock("next/image", () => ({
 const lesson: PersonaLessonTopLesson = {
   _id: "persona-lesson",
   title: "ペルソナ中心のUIデザイン",
-  slug: { current: "scenario-based-design" },
+  slug: { current: PERSONA_LESSON_SLUG },
   quests: [
     {
       _id: "quest-1",

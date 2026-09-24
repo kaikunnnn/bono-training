@@ -1,3 +1,5 @@
+import { PERSONA_LESSON_SLUG } from '@/lib/persona-lesson-top-config';
+
 /**
  * レッスン一覧のセクション・サブセクション定義
  *
@@ -219,7 +221,7 @@ export const RECOMMENDED_SECTIONS: SubSection[] = [
     id: 'ux',
     label: 'UXデザイン',
     title: 'ユーザーの課題を解決しよう',
-    lessonSlugs: ['scenario-based-design'],
+    lessonSlugs: [PERSONA_LESSON_SLUG],
     // 実際のタイトル: UXデザインってなに？、FAILURE POINT 課題発見の方法、顧客体験デザインの基本、ゼロからはじめるユーザーインタビュー
     lessonTitles: ['UXデザインってなに？', 'FAILURE POINT 課題発見の方法', '顧客体験デザインの基本', 'ゼロからはじめるユーザーインタビュー']
   }

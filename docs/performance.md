@@ -43,7 +43,7 @@
 - 進捗と購読から作る`presentationPromise`は進捗バーとカリキュラムで共有する。境界ごとに同じ個人DB読取を再実行しない。
 - 進捗fallbackは最終バーと同じ64%幅を予約し、0%と誤表示しない。カリキュラムfallbackも上端と記事行高を予約する。
 - 通常レッスンの記事リンクは初期 `prefetch={false}`、`mouseenter` / `focus` 後に通常prefetchを有効化する。表示だけで複数のarticle dynamic layoutを実行しない。
-- 専用 `scenario-based-design` は別UI。通常レッスンの境界を無理に適用せず、変更時は専用テストと実画面を別に確認する。
+- 専用 `persona-based-design` は別UI。通常レッスンの境界を無理に適用せず、変更時は専用テストと実画面を別に確認する。
 
 初回の文書読込には `scripts/browser-top-load-probe.js` を使う。固定条件でフルナビゲーション後にConsoleで実行し、TTFB/FCP/LCP・font受信・サイズを記録する。ルーターcache再訪と混ぜず、サーバー/CDNの完全coldとは呼ばない。採用判断にはばらつきも含める。
 
