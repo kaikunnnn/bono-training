@@ -91,7 +91,9 @@ export function observeLessonIntro(root: HTMLElement, identity: IntroIdentity) {
     if (!el || !root.contains(el) || el.hasAttribute("disabled") || el.getAttribute("aria-disabled") === "true") return;
     // No selection change, no slide/tab action. Runs in capture before React updates it.
     if (el.dataset.introAction === "slide_select" && el.getAttribute("aria-current") === "true") return;
-    if (el.dataset.introAction === "tab_select" && el.getAttribute("aria-selected") === "true") return;
+    // Radix activates tabs on mousedown/focus, before native click. Its confirmed
+    // onValueChange emits this semantic event for pointer AND keyboard actions.
+    if (el.dataset.introAction === "tab_select" && event.type !== "bono:intro-activate") return;
     if (!ensureView()) return;
     const component = el.dataset.introComponent!;
     exposure(component); // A fast click also proves that its control was exposed.
@@ -113,6 +115,7 @@ export function observeLessonIntro(root: HTMLElement, identity: IntroIdentity) {
   };
   document.addEventListener("click", click, true);
   document.addEventListener("auxclick", click, true);
+  document.addEventListener("bono:intro-activate", click as EventListener, true);
   const mutation = new MutationObserver(inspect);
   mutation.observe(root, { childList: true, subtree: true, attributes: true,
     attributeFilter: ["hidden", "data-state", "data-lesson-member"] });
@@ -122,6 +125,7 @@ export function observeLessonIntro(root: HTMLElement, identity: IntroIdentity) {
     disposed = true;
     document.removeEventListener("click", click, true);
     document.removeEventListener("auxclick", click, true);
+    document.removeEventListener("bono:intro-activate", click as EventListener, true);
     document.removeEventListener("visibilitychange", inspect);
     mutation.disconnect();
     observer?.disconnect();
