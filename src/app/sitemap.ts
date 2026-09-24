@@ -7,7 +7,6 @@ import {
   getAllRoadmapSlugs,
 } from "@/lib/sanity";
 import { getAllGuideSlugsFromSanity } from "@/lib/sanity";
-import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
 import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
 
 const BASE_URL =
@@ -73,12 +72,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // ローカルファイルのガイドスラッグ
   const guideSlugs = await getAllGuideSlugsFromSanity();
 
-  // サイト移行 Week1 / SEO止血:
-  // Webflow 本番（www.bo-no.design）に同一 slug で存在する記事は
-  // ベータ側 sitemap から除外し、本番のクロール評価を守る。
-  // 取得失敗時は空 Set（＝除外なし＝従来通り全出力の安全側）に倒れる。
-  const productionSlugs = await getProductionContentSlugs();
-
   const lessonPages: MetadataRoute.Sitemap = lessonSlugs.map((slug) => ({
     url: `${BASE_URL}/lessons/${slug}`,
     lastModified: new Date(),
@@ -89,8 +82,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articlePages: MetadataRoute.Sitemap = articles
     .filter(
       (article) =>
-        !GUIDE_CONTENT_DUPLICATE_SLUGS.has(article.slug.current) &&
-        !productionSlugs.has(article.slug.current),
+        !article.isPremium &&
+        !GUIDE_CONTENT_DUPLICATE_SLUGS.has(article.slug.current),
     )
     .map((article) => ({
       url: `${BASE_URL}/contents/${article.slug.current}`,
