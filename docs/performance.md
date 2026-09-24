@@ -6,6 +6,7 @@
 
 - `NewTopContent` の冒頭で CMS 全件を `await` しない。Hero・固定リンクは同期的なシェル、新着・ガイド・レッスン・実績は独立した Server Component + Suspense とする。
 - 会員 `/top` はページ冒頭で `getSubscriptionStatus()` をawaitしない。Heroの見出し・説明文をシェルに残し、会員で非表示になる入会CTAだけをasync Server Component + Suspenseにする。公開 `/` のゲストCTAは待たせない。
+- ファーストビューの特集レッスンと新着記事は、viewportへ入っただけで各dynamic routeを一括prefetchしない。初期値は `prefetch={false}`、`mouseenter` / `focus` 後だけ通常prefetchへ切り替える。
 - 認証・契約判定は route/layout に維持する。個人データを `unstable_cache` やモジュール変数でユーザー間共有しない。
 - LayoutのUserProviderとページ/サービスのgetCachedUserは、同じ `getCachedAuth`（React cache、RSCリクエスト内）を使う。400/401/403と一時障害の分類を保ち、getClaimsへの置換は混ぜない。
 - トップ下部のLessonCardだけ `imageLoading="lazy"` を明示する。共有カードの既定値やLCP候補を一括lazy化しない。縦横比を保持し、スクロール前の未取得とスクロール後の表示を両方確認する。
@@ -44,6 +45,12 @@
 - 進捗fallbackは最終バーと同じ64%幅を予約し、0%と誤表示しない。カリキュラムfallbackも上端と記事行高を予約する。
 - 通常レッスンの記事リンクは初期 `prefetch={false}`、`mouseenter` / `focus` 後に通常prefetchを有効化する。表示だけで複数のarticle dynamic layoutを実行しない。
 - 専用 `persona-based-design` は別UI。通常レッスンの境界を無理に適用せず、変更時は専用テストと実画面を別に確認する。
+
+## 掲示板一覧の設計ルール
+
+- 質問カードは一覧データの完了後に表示し、投稿ボタン用の購読判定を待たせない。空一覧の投稿導線だけは独立したSuspense境界で購読判定を待つ。
+- コメント・リアクション集計ViewはRLSで会員だけに行を返す。リクエストスコープの認証結果がゲストなら、必ず空になる2本のSupabase集計を実行せず0件として扱う。
+- 会員のコメント者・集計値を共有キャッシュへ入れない。会員では従来どおり2集計を並列実行し、浮上ソートとカード表示を維持する。
 
 初回の文書読込には `scripts/browser-top-load-probe.js` を使う。固定条件でフルナビゲーション後にConsoleで実行し、TTFB/FCP/LCP・font受信・サイズを記録する。ルーターcache再訪と混ぜず、サーバー/CDNの完全coldとは呼ばない。採用判断にはばらつきも含める。
 

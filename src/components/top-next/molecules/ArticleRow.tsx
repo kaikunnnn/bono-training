@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 export type ArticleRowVariant = "plain" | "updates";
 
@@ -41,17 +42,15 @@ export function ArticleRow({
   variant = "plain",
 }: ArticleRowProps) {
   const TitleTag = titleAs;
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "group flex items-center gap-4 text-left outline-none transition duration-200",
-        variant === "plain" &&
-          "-mx-3 w-[calc(100%+24px)] rounded-[8px] px-3 py-3 hover:bg-black/[0.03]",
-        variant === "updates" &&
-          "w-full rounded-[8px] border-b border-black/[0.1] px-1 py-3 hover:bg-black/[0.035] active:scale-[0.995] active:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2"
-      )}
-    >
+  const className = cn(
+    "group flex items-center gap-4 text-left outline-none transition duration-200",
+    variant === "plain" &&
+      "-mx-3 w-[calc(100%+24px)] rounded-[8px] px-3 py-3 hover:bg-black/[0.03]",
+    variant === "updates" &&
+      "w-full rounded-[8px] border-b border-black/[0.1] px-1 py-3 hover:bg-black/[0.035] active:scale-[0.995] active:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2"
+  );
+  const content = (
+    <>
       <div
         className={cn(
           "relative aspect-video w-[101px] shrink-0 overflow-hidden bg-muted-custom lg:w-[115px]",
@@ -91,6 +90,20 @@ export function ArticleRow({
           />
         </span>
       )}
+    </>
+  );
+
+  if (variant === "plain") {
+    return (
+      <IntentPrefetchLink href={href} className={className}>
+        {content}
+      </IntentPrefetchLink>
+    );
+  }
+
+  return (
+    <Link href={href} className={className}>
+      {content}
     </Link>
   );
 }

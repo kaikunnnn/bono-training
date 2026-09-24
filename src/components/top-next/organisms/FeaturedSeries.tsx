@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Image from "next/image";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 /**
  * おすすめシリーズ（新トップページ /dev/top5 / FeaturedSeries）
@@ -27,7 +27,7 @@ export function FeaturedSeries({ cards }: FeaturedSeriesProps) {
       <div className="border-b border-black/[0.12] py-1">
         <div className="flex flex-col sm:-mx-3 sm:flex-row">
           {cards.map((card) => (
-            <Link
+            <IntentPrefetchLink
               key={card.href}
               href={card.href}
               className="group -mx-3 flex flex-1 flex-col gap-4 rounded-[8px] px-3 py-8 transition-colors duration-200 hover:bg-black/[0.02] sm:mx-0"
@@ -55,7 +55,7 @@ export function FeaturedSeries({ cards }: FeaturedSeriesProps) {
                   詳しく見る →
                 </span>
               </div>
-            </Link>
+            </IntentPrefetchLink>
           ))}
         </div>
       </div>
