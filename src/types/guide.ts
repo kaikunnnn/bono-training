@@ -3,7 +3,7 @@ import type { PortableTextBlock } from "@portabletext/types";
 /**
  * ガイドカテゴリの型定義
  */
-export type GuideCategory = "career" | "learning" | "industry" | "tools" | "practice";
+export type GuideCategory = "career" | "learning" | "industry" | "tools" | "practice" | "blog";
 
 /**
  * 記事タイプ
@@ -37,6 +37,7 @@ export interface Guide {
   author: string;
   publishedAt: string;
   updatedAt?: string;
+  sanityUpdatedAt?: string;
   readingTime?: string;
 
   // アクセス制限

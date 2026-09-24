@@ -502,6 +502,7 @@ export interface ArticleMetadata {
   excerpt?: string;
   thumbnailUrl?: string;
   lessonTitle?: string;
+  isPremium?: boolean;
 }
 
 export const getArticleMetadata = unstable_cache(
@@ -510,6 +511,7 @@ export const getArticleMetadata = unstable_cache(
       *[_type == "article" && slug.current == $slug][0] {
         title,
         excerpt,
+        isPremium,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
         "lessonTitle": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->title
       }
@@ -1280,6 +1282,7 @@ export const getTrainingTaskDetailFromSanity = unstable_cache(
 
 const GUIDE_FIELDS = `
   _id,
+  "sanityUpdatedAt": _updatedAt,
   title,
   "slug": slug.current,
   category,

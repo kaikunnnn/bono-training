@@ -1,5 +1,5 @@
 // Google Analytics 4 utility functions
-// 測定ID: G-MH9NGKFBCM
+import { GA_MEASUREMENT_ID, isAnalyticsHost } from "./analytics/config";
 
 declare global {
   interface Window {
@@ -12,42 +12,10 @@ declare global {
   }
 }
 
-const GA_MEASUREMENT_ID = 'G-MH9NGKFBCM';
-
-/**
- * 開発環境かどうかを判定
- * localhost または 127.0.0.1 の場合は開発環境とみなす
- */
-const isDevelopment = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  const hostname = window.location.hostname;
-  return hostname === 'localhost' || hostname === '127.0.0.1';
-};
-
-/**
- * GAが有効かどうかを判定
- * 開発環境では無効化される
- */
-const isGAEnabled = (): boolean => {
-  return !isDevelopment() && typeof window.gtag === 'function';
-};
-
-/**
- * SPAページビューを送信
- */
-export const trackPageView = (path: string, title?: string) => {
-  if (!isGAEnabled()) {
-    if (isDevelopment()) {
-      console.log('[GA] Page View (dev):', path, title);
-    }
-    return;
-  }
-
-  window.gtag('config', GA_MEASUREMENT_ID, {
-    page_path: path,
-    page_title: title,
-  });
-};
+/** All event helpers use the same allowlist as the bootstrap. */
+const isGAEnabled = (): boolean => typeof window !== 'undefined'
+  && isAnalyticsHost(window.location.hostname)
+  && typeof window.gtag === 'function';
 
 /**
  * カスタムイベントを送信
@@ -57,13 +25,10 @@ export const trackEvent = (
   params?: Record<string, unknown>
 ) => {
   if (!isGAEnabled()) {
-    if (isDevelopment()) {
-      console.log('[GA] Event (dev):', eventName, params);
-    }
     return;
   }
 
-  window.gtag('event', eventName, params);
+  window.gtag('event', eventName, { ...params, send_to: GA_MEASUREMENT_ID });
 };
 
 // ===== ユーザー属性設定 =====
@@ -73,14 +38,12 @@ export const trackEvent = (
  */
 export const setUserId = (userId: string) => {
   if (!isGAEnabled()) {
-    if (isDevelopment()) {
-      console.log('[GA] Set User ID (dev):', userId);
-    }
     return;
   }
 
   window.gtag('config', GA_MEASUREMENT_ID, {
     user_id: userId,
+    send_page_view: false,
   });
 };
 
@@ -89,14 +52,12 @@ export const setUserId = (userId: string) => {
  */
 export const setUserProperties = (properties: Record<string, string | number | boolean>) => {
   if (!isGAEnabled()) {
-    if (isDevelopment()) {
-      console.log('[GA] Set User Properties (dev):', properties);
-    }
     return;
   }
 
   window.gtag('config', GA_MEASUREMENT_ID, {
     user_properties: properties,
+    send_page_view: false,
   });
 };
 

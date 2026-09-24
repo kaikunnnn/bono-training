@@ -41,12 +41,25 @@ export function CustomVimeoPlayer({
   } = useVimeoPlayer(vimeoId, { autoPlay, muted });
 
   const [showControls, setShowControls] = useState(true);
+  const [isScrubbing, setIsScrubbing] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [playerHeight, setPlayerHeight] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
   const hasPlayedRef = useRef(false);
   const hasEndedRef = useRef(false);
-  const controlsVisible = !state.isPlaying || showControls;
+  const controlsVisible = !state.isPlaying || showControls || isScrubbing || isMenuOpen;
+
+  useEffect(() => {
+    const wrapper = playerWrapperRef.current;
+    if (!wrapper) return;
+    const observer = new ResizeObserver(([entry]) => {
+      setPlayerHeight(entry.contentRect.height);
+    });
+    observer.observe(wrapper);
+    return () => observer.disconnect();
+  }, []);
 
   // GA4: 初回再生イベント
   useEffect(() => {
@@ -138,23 +151,36 @@ export function CustomVimeoPlayer({
 
   // マウスがプレーヤーから離れたらコントロールを非表示（再生中のみ）
   const handleMouseLeave = useCallback(() => {
-    if (state.isPlaying) {
+    if (state.isPlaying && !isScrubbing) {
       clearControlsTimer();
       setShowControls(false);
     }
-  }, [state.isPlaying, clearControlsTimer]);
+  }, [state.isPlaying, isScrubbing, clearControlsTimer]);
 
   // 動画エリアクリックで再生/一時停止
   const handleVideoClick = useCallback(() => {
     resetControlsTimer();
+    // タッチ端末ではホバーで操作部を再表示できないため、非表示中の最初のタップは表示に使う。
+    if (state.isPlaying && !showControls) return;
     void togglePlay();
-  }, [togglePlay, resetControlsTimer]);
+  }, [state.isPlaying, showControls, togglePlay, resetControlsTimer]);
 
   // コントロール操作時のラッパー（タイマーリセット付き）
   const handleSeek = useCallback((time: number) => {
-    seek(time);
+    setIsScrubbing(false);
+    void seek(time);
     resetControlsTimer();
   }, [seek, resetControlsTimer]);
+
+  const handleSeekStart = useCallback(() => {
+    clearControlsTimer();
+    setIsScrubbing(true);
+  }, [clearControlsTimer]);
+
+  const handleSeekCancel = useCallback(() => {
+    setIsScrubbing(false);
+    resetControlsTimer();
+  }, [resetControlsTimer]);
 
   const handleVolumeChange = useCallback((volume: number) => {
     setVolume(volume);
@@ -289,12 +315,16 @@ export function CustomVimeoPlayer({
             state={state}
             onTogglePlay={handleVideoClick}
             onSeek={handleSeek}
+            onSeekStart={handleSeekStart}
+            onSeekCancel={handleSeekCancel}
             onVolumeChange={handleVolumeChange}
             onPlaybackRateChange={handlePlaybackRateChange}
             onToggleFullscreen={handleToggleFullscreen}
             onEnableTextTrack={handleEnableTextTrack}
             onDisableTextTrack={handleDisableTextTrack}
             isFullscreen={isFullscreen}
+            maxChapterMenuHeight={Math.max(72, Math.min(300, playerHeight - 72))}
+            onMenuOpenChange={setIsMenuOpen}
           />
         </div>
       )}

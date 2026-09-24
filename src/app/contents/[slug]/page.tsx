@@ -15,7 +15,7 @@ import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 import { OG_DEFAULTS, DEFAULT_OG_IMAGE } from "@/lib/seo-metadata";
-import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
+import { guideCanonicalForContent } from "@/lib/seo/guideContentDuplicates";
 import { traceServerStep } from "@/lib/performance/server-trace";
 import { startArticlePageData } from "./article-page-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -194,22 +194,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : `${article.title}`;
   const description = article.excerpt || `${article.title}の学習コンテンツ`;
 
-  // サイト移行 Week1 / SEO止血:
-  // Webflow 本番（www.bo-no.design）に同一 slug の記事が存在する場合、
-  // canonical を本番の絶対 URL に向けて重複評価を本番へ集約する。
-  // 本番に無いベータ独自記事は従来通り自己 canonical（相対パス）のまま。
-  // metadataBase 設定に依存させないため、cross-domain 側は絶対 URL を指定する。
-  const productionSlugs = await traceServerStep(
-    "article.metadata.production_slugs",
-    getProductionContentSlugs,
-  );
-  const canonical = productionSlugs.has(slug)
-    ? `https://www.bo-no.design/contents/${slug}`
-    : `/contents/${slug}`;
+  // 本番サイト自身のサイトマップを参照すると URL の有無で判定が循環する。
+  // 同一本文の6件は /guide、それ以外は公開中の /contents を正規 URL にする。
+  const canonical =
+    guideCanonicalForContent(slug) ??
+    `https://www.bo-no.design/contents/${slug}`;
 
   return {
     title,
     description,
+    robots: article.isPremium ? { index: false, follow: true } : undefined,
     openGraph: {
       ...OG_DEFAULTS,
       title,
@@ -298,17 +292,19 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <>
-      <script
-        {...jsonLdScriptProps(
-          generateArticleJsonLd({
-            title: article.title,
-            description: article.excerpt || `${article.title}の学習コンテンツ`,
-            url: `/contents/${slug}`,
-            publishedAt: article.publishedAt || new Date().toISOString(),
-            image: article.thumbnailUrl,
-          })
-        )}
-      />
+      {!guideCanonicalForContent(slug) && (
+        <script
+          {...jsonLdScriptProps(
+            generateArticleJsonLd({
+              title: article.title,
+              description: article.excerpt || `${article.title}の学習コンテンツ`,
+              url: `/contents/${slug}`,
+              publishedAt: article.publishedAt || new Date().toISOString(),
+              image: article.thumbnailUrl,
+            })
+          )}
+        />
+      )}
 
       {/* メインコンテンツエリア */}
       <main className="flex-1 min-w-0 flex flex-col items-center gap-4 pb-12">

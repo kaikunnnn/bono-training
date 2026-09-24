@@ -5,9 +5,11 @@ import {
   getAllFeedbackSlugs,
   getAllBlogSlugs,
   getAllRoadmapSlugs,
+  getAllGuidesFromSanity,
 } from "@/lib/sanity";
-import { getAllGuideSlugsFromSanity } from "@/lib/sanity";
-import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
+import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
+import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
+import { LEGACY_ONLY_CONTENT_SLUGS } from "@/lib/migration/legacy-only-content-slugs";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://app.bo-no.design";
@@ -17,117 +19,122 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: BASE_URL,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${BASE_URL}/lessons`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.9,
     },
     {
       url: `${BASE_URL}/roadmap`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.9,
     },
     {
       url: `${BASE_URL}/guide`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/blog`,
-      lastModified: new Date(),
       changeFrequency: "daily",
       priority: 0.8,
     },
     {
       url: `${BASE_URL}/feedbacks`,
-      lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.7,
     },
     {
       url: `${BASE_URL}/subscription`,
-      lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.8,
     },
   ];
 
   // Sanity CMS から動的ページのスラッグを並行取得
-  const [lessonSlugs, articles, feedbackSlugs, blogSlugs, roadmapSlugs] =
+  const [lessonSlugs, articles, feedbackSlugs, blogSlugs, roadmapSlugs, guides] =
     await Promise.all([
       getAllLessonSlugs().catch(() => [] as string[]),
       getAllArticles().catch(() => []),
       getAllFeedbackSlugs().catch(() => [] as string[]),
       getAllBlogSlugs().catch(() => [] as string[]),
       getAllRoadmapSlugs().catch(() => [] as string[]),
+      getAllGuidesFromSanity().catch(() => []),
     ]);
-
-  // ローカルファイルのガイドスラッグ
-  const guideSlugs = await getAllGuideSlugsFromSanity();
-
-  // サイト移行 Week1 / SEO止血:
-  // Webflow 本番（www.bo-no.design）に同一 slug で存在する記事は
-  // ベータ側 sitemap から除外し、本番のクロール評価を守る。
-  // 取得失敗時は空 Set（＝除外なし＝従来通り全出力の安全側）に倒れる。
-  const productionSlugs = await getProductionContentSlugs();
 
   const lessonPages: MetadataRoute.Sitemap = lessonSlugs.map((slug) => ({
     url: `${BASE_URL}/lessons/${slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.8,
   }));
 
   const articlePages: MetadataRoute.Sitemap = articles
-    .filter((article) => !productionSlugs.has(article.slug.current))
+    .filter(
+      (article) =>
+        !article.isPremium &&
+        !GUIDE_CONTENT_DUPLICATE_SLUGS.has(article.slug.current),
+    )
     .map((article) => ({
       url: `${BASE_URL}/contents/${article.slug.current}`,
-      lastModified: article.publishedAt
-        ? new Date(article.publishedAt)
-        : new Date(),
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
+
+  // Webflow経由で同じ公開URLに配信される記事も、正規URLとして伝える。
+  // Sanityに移植されたslugは重複させず、有料化されても再掲載しない。
+  const sanityArticleSlugs = new Set(
+    articles.map((article) => article.slug.current),
+  );
+  const legacyArticlePages: MetadataRoute.Sitemap = [
+    ...LEGACY_PUBLIC_ARTICLE_SLUGS,
+  ]
+    .filter(
+      (slug) =>
+        LEGACY_ONLY_CONTENT_SLUGS.has(slug) &&
+        !sanityArticleSlugs.has(slug),
+    )
+    .map((slug) => ({
+      url: `${BASE_URL}/contents/${slug}`,
       changeFrequency: "monthly",
       priority: 0.7,
     }));
 
   const feedbackPages: MetadataRoute.Sitemap = feedbackSlugs.map((slug) => ({
     url: `${BASE_URL}/feedbacks/${slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.6,
   }));
 
   const blogPages: MetadataRoute.Sitemap = blogSlugs.map((slug) => ({
     url: `${BASE_URL}/blog/${slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.7,
   }));
 
   const roadmapPages: MetadataRoute.Sitemap = roadmapSlugs.map((slug) => ({
     url: `${BASE_URL}/roadmap/${slug}`,
-    lastModified: new Date(),
     changeFrequency: "monthly",
     priority: 0.8,
   }));
 
-  const guidePages: MetadataRoute.Sitemap = guideSlugs.map((slug) => ({
-    url: `${BASE_URL}/guide/${slug}`,
-    lastModified: new Date(),
-    changeFrequency: "monthly",
-    priority: 0.7,
-  }));
+  const guidePages: MetadataRoute.Sitemap = guides
+    .filter((guide) => !guide.isPremium)
+    .map((guide) => ({
+      url: `${BASE_URL}/guide/${guide.slug}`,
+      lastModified:
+        guide.sanityUpdatedAt ?? guide.updatedAt ?? guide.publishedAt,
+      changeFrequency: "monthly",
+      priority: 0.7,
+    }));
 
   return [
     ...staticPages,
     ...lessonPages,
     ...articlePages,
+    ...legacyArticlePages,
     ...feedbackPages,
     ...blogPages,
     ...roadmapPages,

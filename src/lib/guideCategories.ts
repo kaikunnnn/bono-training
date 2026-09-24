@@ -29,6 +29,12 @@ export const GUIDE_CATEGORIES: GuideCategoryInfo[] = [
     icon: "wrench",
   },
   {
+    id: "blog",
+    label: "ブログ",
+    description: "BONOの運営や制作、日々の試行錯誤についての記事",
+    icon: "pen-line",
+  },
+  {
     id: "practice",
     label: "デザイン実践",
     description: "デザインの基礎から現場ケース別の進め方まで、実際に手を動かすための知識",
