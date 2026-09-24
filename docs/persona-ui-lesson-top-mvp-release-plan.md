@@ -1,9 +1,9 @@
 # ペルソナ中心のUIデザイン：レッスントップ MVPリリース計画
 
 - 作成日: 2026-09-16
-- 対象レッスン: `scenario-based-design`（ペルソナ中心のUIデザイン）
+- 対象レッスン: `persona-based-design`（ペルソナ中心のUIデザイン）
 - デザイン確認ページ: `http://localhost:3001/dev/lesson-top-v8-editorial`
-- 本番想定URL: `/lessons/scenario-based-design`
+- 本番想定URL: `/lessons/persona-based-design`
 - ステータス: リリース候補・ローカル検証完了（PRレビュー待ち）
 
 ## 1. このドキュメントの目的
@@ -19,7 +19,7 @@
 
 ## 2. 結論
 
-実装は可能。DB移行やSanityスキーマ変更は不要で、`scenario-based-design` だけを判定するslug分岐をリリースコミットで新設し、対象レッスンのトップだけを差し替えられる。
+実装は可能。DB移行やSanityスキーマ変更は不要で、`persona-based-design` だけを判定するslug分岐をリリースコミットで新設し、対象レッスンのトップだけを差し替えられる。
 
 `origin/main` の `/lessons/[slug]/page.tsx` にはslug分岐がなく、すべてのレッスンが `LessonDetailClient` を表示している。現在のworktreeにある `LessonTopV2Client` への分岐は未コミットの試作であり、本番の既存機能として扱わない。
 
@@ -44,7 +44,7 @@
 
 ### 変更するもの
 
-- `/lessons/scenario-based-design` のレッスントップ
+- `/lessons/persona-based-design` のレッスントップ
 - 対象トップで使用する専用コンポーネントとCSS
 - 対象トップで使用する静的画像・SVG
 - 対象トップへ渡すデータの整形処理
@@ -68,14 +68,14 @@ BONOでは記事一覧が `/articles`、実際の教材閲覧ページが `/cont
 
 | URL | リリース後の挙動 |
 | --- | --- |
-| `/lessons/scenario-based-design` | 今回の確定デザインを表示 |
+| `/lessons/persona-based-design` | 今回の確定デザインを表示 |
 | `/lessons/{その他のslug}` | 現行の `LessonDetailClient` を表示 |
 | `/articles` | 現行の記事一覧を表示 |
 | `/contents/{article-slug}` | 現行の教材本文を表示 |
 | `/dev/lesson-top-v8-editorial` | 現worktreeのデザイン比較用。MVPリリースコミットには含めない |
 | `/dev/persona-editorial/{slug}` | 現worktreeの検証用。MVPリリースコミットには含めない |
 
-記事ページのサイドナビにあるレッスンカードは、既存どおり `/lessons/scenario-based-design` へ戻る。そのため、対象トップを差し替えるだけで往復の導線がつながる。
+記事ページのサイドナビにあるレッスンカードは、既存どおり `/lessons/persona-based-design` へ戻る。そのため、対象トップを差し替えるだけで往復の導線がつながる。
 
 ## 5. 確定デザインの仕様
 
@@ -289,7 +289,7 @@ public/images/lesson-persona-ui/
 
 1. `origin/main` を取り込み、競合を解消する
 2. main取り込み後の状態で既存テストとビルドを通す
-3. `scenario-based-design` を対象とするslug定数を新設する
+3. `persona-based-design` を対象とするslug定数を新設する
 4. 開発版から確定デザインだけを本番用コンポーネントへ抽出する
 5. 固定コピーを `persona-lesson-top-config.ts` へ一本化する
 6. CSSから比較用・不採用パターンを削除する
@@ -389,13 +389,13 @@ MVPリリース用コミットへ含めるファイルは、原則として次�
 
 ## 15. ロールバック方法
 
-問題が発生した場合は、リリースで追加した `scenario-based-design` 分岐を削除し、対象レッスンも含めて既存の `LessonDetailClient` を表示する状態へ戻す。
+問題が発生した場合は、リリースで追加した `persona-based-design` 分岐を削除し、対象レッスンも含めて既存の `LessonDetailClient` を表示する状態へ戻す。
 
 記事URL、記事ID、Sanityスキーマを変更しないため、ロールバック時にも学習履歴やブックマークは失われない。
 
 ## 16. レビュー時の確認事項
 
-- [x] 対象slugが `scenario-based-design` で確定している
+- [x] 対象slugが `persona-based-design` で確定している
 - [x] `origin/main` を取り込み、競合解消後に検証をやり直した
 - [x] `/articles` と `/contents/[slug]` のレイアウトを変更しない
 - [x] 開始CTAは最初の公開済み記事へ遷移する
@@ -431,8 +431,8 @@ MVPリリース用コミットへ含めるファイルは、原則として次�
 - 全テスト: 18ファイル・132件すべて成功
 - production build: Node.js `22.17.1`、Next.js `16.3.3`、webpackで成功
 - OGP: Next.js 16のガイドに沿ってローカルアセット読込を修正し、root・blog・guide・lessons・roadmapのOG画像をすべて静的生成
-- レッスン一覧: `/lessons` の生成HTMLに対象カードと `/lessons/scenario-based-design` を確認
-- 対象トップ: `/lessons/scenario-based-design` がHTTP 200で、新デザインを表示
+- レッスン一覧: `/lessons` の生成HTMLに対象カードと `/lessons/persona-based-design` を確認
+- 対象トップ: `/lessons/persona-based-design` がHTTP 200で、新デザインを表示
 - 対象外トップ: `/lessons/failurepoint` がHTTP 200で、既存の `LessonDetailClient` を表示
 - CTA: 最初の公開済み記事 `/contents/scenario-based-design-overview` がHTTP 200で、対象トップへ戻るリンクも確認
 - カリキュラム: `/contents/{article-slug}` だけを出力し、`/dev` URLの混入なし

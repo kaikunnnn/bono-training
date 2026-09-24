@@ -1,4 +1,4 @@
-export const PERSONA_LESSON_SLUG = "scenario-based-design";
+export const PERSONA_LESSON_SLUG = "persona-based-design";
 
 export const personaLessonTopContent = {
   hero: {
@@ -98,4 +98,3 @@ export const personaLessonTopContent = {
     image: "/images/authors/kaikun.jpg",
   },
 } as const;
-

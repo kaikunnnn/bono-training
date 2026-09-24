@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Lesson } from "@/types/sanity";
+import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
 import { groupRecommendedLessons } from "./grouping";
 
 const lesson = (id: string, title: string, slug: string): Lesson => ({
@@ -14,7 +15,7 @@ describe("groupRecommendedLessons", () => {
     const personaLesson = lesson(
       "persona",
       "Sanityでタイトルを変更しても表示される",
-      "scenario-based-design"
+      PERSONA_LESSON_SLUG
     );
 
     const groups = groupRecommendedLessons([
@@ -30,7 +31,7 @@ describe("groupRecommendedLessons", () => {
     const personaLesson = lesson(
       "persona",
       "UXデザインってなに？ ペルソナ中心のUIデザイン",
-      "scenario-based-design"
+      PERSONA_LESSON_SLUG
     );
 
     const groups = groupRecommendedLessons([personaLesson]);
