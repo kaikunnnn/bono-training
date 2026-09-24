@@ -74,6 +74,19 @@ Search Console の `https://www.bo-no.design/` プロパティ。2026-09-24に�
 
 未クロール24件のうち画面で確認できた10URLを公開サイトと照合した。`/guide` 4件、`/feedbacks` 3件、`/blog` 1件、`/lessons` 1件はいずれもHTTP 200・自己canonical・noindexなし・現行サイトマップ掲載。残る `/contents/uidesigncycle_ui_research_04` は有料記事で、現在は`noindex,follow`・サイトマップ除外。24件の分類は9/21時点のため、9/24に更新したサイトマップ332件の評価には使わない。
 
+### 9/24のURL検査による更新
+
+9/21更新のページ登録レポートで「検出 - インデックス未登録」だった `/guide` 4件を、9/24に個別のURL検査で再確認した。レポートの集計日時より後の状態を区別して記録する。
+
+| URL | 9/24のURL検査 | 実施した操作 |
+| --- | --- | --- |
+| `/guide/portfolio-01` | 登録済み。最終クロール9/24、Google選択の正規URLは検査対象URL。 | 9/24のmetadata修正を再評価してもらうため、登録を再リクエスト。受理済み。 |
+| `/guide/beginner-to-uiux-designer-examples` | 検出・未クロール。 | インデックス登録をリクエスト。受理済み。 |
+| `/guide/rdm-howtostart-roadmap` | 検出・未クロール。 | インデックス登録をリクエスト。受理済み。 |
+| `/guide/uiux-interview-tips-and-checkpoints` | 検出・未クロール。 | リクエスト前にGSC画面への接続が切れたため未実施。 |
+
+リクエスト受理はクロールや登録の完了を意味しない。次回は最終クロール日とGoogle選択の正規URLを再確認する。
+
 ## 次回以降の確認
 
 最初の再確認を9/28に行い、その後はデプロイから約1週・2週・4週を目安に、Search Console のレポート更新日を添えて同じ条件で記録する。公開・デプロイ前後のデータを混同しない。
