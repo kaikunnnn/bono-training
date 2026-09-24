@@ -15,7 +15,6 @@ import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 import { OG_DEFAULTS, DEFAULT_OG_IMAGE } from "@/lib/seo-metadata";
-import { getProductionContentSlugs } from "@/lib/productionContentSlugs";
 import { guideCanonicalForContent } from "@/lib/seo/guideContentDuplicates";
 import { traceServerStep } from "@/lib/performance/server-trace";
 import { startArticlePageData } from "./article-page-data";
@@ -195,23 +194,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     : `${article.title}`;
   const description = article.excerpt || `${article.title}の学習コンテンツ`;
 
-  // 同じ本文を公開している /guide を正規 URL にする。レッスン用の
-  // /contents は動画・進捗のため残す。その他の記事は従来の判定を維持する。
-  const guideCanonical = guideCanonicalForContent(slug);
-  const productionSlugs = guideCanonical
-    ? null
-    : await traceServerStep(
-        "article.metadata.production_slugs",
-        getProductionContentSlugs,
-      );
-  const canonical = guideCanonical ??
-    (productionSlugs?.has(slug)
-      ? `https://www.bo-no.design/contents/${slug}`
-      : `/contents/${slug}`);
+  // 本番サイト自身のサイトマップを参照すると URL の有無で判定が循環する。
+  // 同一本文の6件は /guide、それ以外は公開中の /contents を正規 URL にする。
+  const canonical =
+    guideCanonicalForContent(slug) ??
+    `https://www.bo-no.design/contents/${slug}`;
 
   return {
     title,
     description,
+    robots: article.isPremium ? { index: false, follow: true } : undefined,
     openGraph: {
       ...OG_DEFAULTS,
       title,
