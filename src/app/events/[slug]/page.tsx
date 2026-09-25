@@ -36,6 +36,7 @@ export async function generateMetadata({
 // 日付表示のヘルパー
 function getDateDisplay(event: {
   publishedAt?: string;
+  eventStartAt?: string;
   eventMonth?: number;
   eventPeriod?: string;
 }) {
@@ -45,7 +46,12 @@ function getDateDisplay(event: {
     late: "下旬",
   };
 
-  const eventDate = event.publishedAt ? new Date(event.publishedAt) : null;
+  // 開催日時を公開日時から分離。eventStartAt が未導入の既存イベントは、
+  // eventMonth/eventPeriod があれば従来の概算表示を優先し、旧形式の
+  // exact 日付イベント（概算フィールドを持たないもの）だけ publishedAt を使う。
+  const eventDateValue =
+    event.eventStartAt ?? (!event.eventMonth ? event.publishedAt : undefined);
+  const eventDate = eventDateValue ? new Date(eventDateValue) : null;
 
   if (eventDate) {
     return {

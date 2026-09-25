@@ -197,6 +197,9 @@ export interface Event {
   thumbnailUrl?: string;
   eventMonth?: number;
   eventPeriod?: "early" | "mid" | "late";
+  /** 開催開始日時。公開日時(publishedAt)とは別に管理する新フィールド。 */
+  eventStartAt?: string;
+  eventEndAt?: string;
   content: PortableTextBlock[];
   publishedAt?: string;
 }

@@ -1372,6 +1372,8 @@ export const getEvent = unstable_cache(
         thumbnailUrl,
         eventMonth,
         eventPeriod,
+        eventStartAt,
+        eventEndAt,
         content[] {
           ...,
           _type == "image" => {
@@ -1382,13 +1384,15 @@ export const getEvent = unstable_cache(
             }
           }
         },
-        publishedAt
+        publishedAt,
+        _createdAt
       }
     `;
     return getClient().fetch(query, { slug });
   },
   ["sanity:event"],
-  { tags: ["event"], revalidate: 3600 }
+  // イベントは公開直後に新着へ反映したいため、他の長期キャッシュより短くする。
+  { tags: ["event"], revalidate: 300 }
 );
 
 /**
@@ -1401,50 +1405,55 @@ export interface EventListItem {
   summary?: string;
   thumbnailUrl?: string;
   publishedAt?: string;
+  eventStartAt?: string;
 }
 
 /**
  * すべてのイベントを取得（一覧・新着コンテンツ用）
- * publishedAt 降順でソートして返す。
+ * 公開日時（publishedAt）降順でソートして返す。
+ * 旧イベントなど publishedAt が未入力の場合は _createdAt を公開日時相当として
+ * フォールバックし、新着一覧から消えないようにする。
  */
 export const getAllEvents = unstable_cache(
   async (): Promise<EventListItem[]> => {
     const query = `
-      *[_type == "event"] | order(publishedAt desc) {
+      *[_type == "event"] | order(coalesce(publishedAt, _createdAt) desc) {
         _id,
         title,
         slug,
         summary,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-        publishedAt
+        "publishedAt": coalesce(publishedAt, _createdAt),
+        eventStartAt
       }
     `;
     return getClient().fetch<EventListItem[]>(query);
   },
   ["sanity:events:all"],
-  { tags: ["event"], revalidate: 3600 }
+  { tags: ["event"], revalidate: 300 }
 );
 
 /**
  * 最新イベントを limit 件だけ取得（新着コンテンツ用）
- * publishedAt 降順で先頭 limit 件のみ取得する。射影は getAllEvents と同一。
+ * 公開日時（publishedAt）降順で先頭 limit 件のみ取得する。射影は getAllEvents と同一。
  */
 export const getLatestEvents = unstable_cache(
   async (limit: number): Promise<EventListItem[]> => {
     const query = `
-      *[_type == "event"] | order(publishedAt desc) [0...$limit] {
+      *[_type == "event"] | order(coalesce(publishedAt, _createdAt) desc) [0...$limit] {
         _id,
         title,
         slug,
         summary,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-        publishedAt
+        "publishedAt": coalesce(publishedAt, _createdAt),
+        eventStartAt
       }
     `;
     return getClient().fetch<EventListItem[]>(query, { limit });
   },
   ["sanity:events:latest"],
-  { tags: ["event"], revalidate: 3600 }
+  { tags: ["event"], revalidate: 300 }
 );
 
 // ============================================
