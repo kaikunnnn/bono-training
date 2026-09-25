@@ -1,4 +1,5 @@
 import { Fragment, Suspense, type ReactNode } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PortableText, type PortableTextComponents } from "@portabletext/react";
 import { linkifyText } from "@/lib/questions/linkify";
@@ -22,6 +23,7 @@ import { ReactionButtons } from "@/components/questions/ReactionButtons";
 import { RelatedThreadsSection } from "@/components/questions/RelatedThreadsSection";
 import { PostActions } from "@/components/questions/PostActions";
 import { portableBlocksToText } from "@/lib/questions/text-format";
+import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { traceServerStep } from "@/lib/performance/server-trace";
 
 const PREVIEW_LINES_FOR_GUEST = 3;
@@ -123,6 +125,43 @@ const ptComponents: PortableTextComponents = {
 
 interface PageProps {
   params: Promise<{ slug: string }>;
+}
+
+const QUESTION_DESCRIPTION_MAX_LENGTH = 160;
+
+function buildQuestionDescription(
+  content: Parameters<typeof portableBlocksToText>[0],
+): string {
+  const text = portableBlocksToText(content).replace(/\s+/g, " ").trim();
+  if (!text) return "BONOみんなの掲示板の投稿です。";
+  return text.length > QUESTION_DESCRIPTION_MAX_LENGTH
+    ? `${text.slice(0, QUESTION_DESCRIPTION_MAX_LENGTH - 1)}…`
+    : text;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { slug } = await params;
+  const question = await getQuestionBySlug(slug);
+
+  if (!question) {
+    return { title: "掲示板の投稿が見つかりません" };
+  }
+
+  const title = question.title.trim() || "みんなの掲示板";
+  const description = buildQuestionDescription(question.questionContent);
+  const canonical = `/questions/${slug}`;
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { ...OG_DEFAULTS, title, description, url: canonical },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+    },
+  };
 }
 
 async function QuestionReactionContent({
