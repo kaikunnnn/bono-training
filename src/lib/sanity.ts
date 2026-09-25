@@ -2061,6 +2061,24 @@ export interface LatestQuestionItem {
   publishedAt: string;
 }
 
+export interface QuestionSitemapItem {
+  slug: string;
+  publishedAt?: string;
+}
+
+/** 公開対象の掲示板詳細ページをサイトマップ用に取得する。 */
+export const getQuestionsForSitemap = unstable_cache(
+  async (): Promise<QuestionSitemapItem[]> => {
+    const query = `*[_type == "question" && (isPublic == true || !defined(isPublic)) && defined(slug.current)] | order(publishedAt desc) {
+      "slug": slug.current,
+      publishedAt
+    }`;
+    return getClient().fetch<QuestionSitemapItem[]>(query);
+  },
+  ["sanity:questions:sitemap:v1"],
+  { tags: ["question"], revalidate: 300 }
+);
+
 /**
  * 最新の質問（掲示板スレッド）を取得。
  * フィルタは本番リポジトリ（bono-training）の getAllQuestions と同じ:

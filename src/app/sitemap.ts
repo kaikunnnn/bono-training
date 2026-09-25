@@ -6,6 +6,7 @@ import {
   getAllBlogSlugs,
   getAllRoadmapSlugs,
   getAllGuidesFromSanity,
+  getQuestionsForSitemap,
 } from "@/lib/sanity";
 import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
 import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
@@ -55,7 +56,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Sanity CMS から動的ページのスラッグを並行取得
-  const [lessonSlugs, articles, feedbackSlugs, blogSlugs, roadmapSlugs, guides] =
+  const [lessonSlugs, articles, feedbackSlugs, blogSlugs, roadmapSlugs, guides, questions] =
     await Promise.all([
       getAllLessonSlugs().catch(() => [] as string[]),
       getAllArticles().catch(() => []),
@@ -63,6 +64,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getAllBlogSlugs().catch(() => [] as string[]),
       getAllRoadmapSlugs().catch(() => [] as string[]),
       getAllGuidesFromSanity().catch(() => []),
+      getQuestionsForSitemap().catch(() => []),
     ]);
 
   const lessonPages: MetadataRoute.Sitemap = lessonSlugs.map((slug) => ({
@@ -130,6 +132,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.7,
     }));
 
+  const questionPages: MetadataRoute.Sitemap = questions.map((question) => ({
+    url: `${BASE_URL}/questions/${question.slug}`,
+    ...(question.publishedAt
+      ? { lastModified: new Date(question.publishedAt) }
+      : {}),
+    changeFrequency: "weekly",
+    priority: 0.5,
+  }));
+
   return [
     ...staticPages,
     ...lessonPages,
@@ -139,5 +150,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...blogPages,
     ...roadmapPages,
     ...guidePages,
+    ...questionPages,
   ];
 }
