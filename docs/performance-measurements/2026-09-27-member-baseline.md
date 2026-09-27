@@ -91,3 +91,44 @@
 - タスクF（掲示板会員集計）: **判定保留**。同上
 
 判定にはタスクBのRUMデータ（`route_group × device × navigation_type` のp75）を使う。ラボ1回の値でDB変更・認証レイアウト変更に踏み込まない。
+
+## セクション3: 会員ログイン状態のDOM検査（完了・可視性に依存しない項目）
+
+本番 `https://www.bo-no.design/top`、ログイン済み会員セッション、Chrome（macOS）。
+
+### 見出し構造（SEO）
+
+- `h1` は1個のみ
+- 階層は `h1` → `h2` → `h3` で、レベル飛びなし（`.claude/rules/08-seo-semantics.md` 準拠）
+
+### Service Worker
+
+- `navigator.serviceWorker.controller` あり（登録・制御されている）
+- ただし `public/sw.js` は `push` と `notificationclick` のみで `fetch` handler と Cache Storage を持たない（ローカル・本番の配信物の両方をgrepで確認済み）
+- したがって **SWはページ/RSCのoffline cache要因ではない。「SW cache削除」を改善策として実施しない**（引き継ぎ書 §6 の前提を本番で検証済み）
+
+### 画像
+
+`/top` の `img` 要素32個の内訳。
+
+| 項目 | 件数 |
+| --- | ---: |
+| 合計 | 32 |
+| `loading="lazy"` | 29 |
+| `loading="eager"` | 0 |
+| `fetchPriority="high"` | **0** |
+| width/height未指定 | 0 |
+
+- width/height が全画像で指定済み。縦横比が予約されており、画像起因のCLSリスクは低い
+- **⚠️ 所見: LCP候補の画像が優先されていない。** 計測時のLCP要素は above-the-fold のカード画像（`IMG.object-cover transition-transform`、top=433px）だったが、この3枚は `loading="auto"` / `fetchPriority="auto"` で、`fetchPriority="high"` の画像がページ内に1枚も存在しない。Next.js の `<Image priority>` を付けると `fetchpriority="high"` とpreloadが入るが、現状は付いていない
+- 補足: BONOロゴ（top=36px、above-the-fold）が `loading="lazy"` になっている。小さいので影響は限定的だが、above-the-fold要素をlazyにする理由はない
+
+この2点は**推測ではなく本番DOMの実測**だが、改善効果は未検証。LCPの実測値（下記ブロック解消後）と合わせて判断する。
+
+### 計測上の制約（重要）
+
+初回計測時、タブが前面になく `document.visibilityState === "hidden"` だった。この状態ではブラウザが描画を遅延させるため、
+FCP `5800 ms` / LCP `5800 ms` という値が出たが、**同じ読み込みのTTFBは `309 ms`**。描画だけが止められた値であり、
+**これらのpaint系数値は無効として破棄する**。
+
+→ 以降の計測は `document.visibilityState === "visible"` かつ `document.hasFocus() === true` を各runで検証してから記録する。
