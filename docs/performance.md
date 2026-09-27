@@ -95,6 +95,75 @@ node scripts/perf-production-auth.mjs --allow-production-auth --dir=/absolute/pa
 
 参考: [Soft navigation](https://developer.chrome.com/docs/web-platform/soft-navigations?hl=ja)、[ResourceTiming](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming)、[img loading](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/img)。
 
+## 本番Web Vitals（RUM）の運用ルール
+
+単発の開発者計測ではなく、実ユーザーのp75で改善・回帰を判断するための継続収集。実装は `src/components/common/WebVitals.tsx`（`useReportWebVitals` を使う唯一のclient境界）と `src/lib/analytics/web-vitals.ts`（純粋な整形・重複排除ロジック）。RootLayoutはServer Componentのまま。
+
+### 送信内容
+
+送信先は既存の本番GA4ストリーム `GA_MEASUREMENT_ID`（`G-T8RTCENVBF`）。新しい測定IDは作らない。hostガードは `isAnalyticsHost()` を再利用するため、localhostとpreviewでは送らない（GA未初期化時も送らない）。
+
+イベント名は `web_vitals` の1本だけ。metric名はイベント名に混ぜず `metric_name` で持つ。
+
+| パラメータ | 内容 |
+| --- | --- |
+| `metric_name` | `TTFB` / `FCP` / `LCP` / `CLS` / `INP` のみ。FIDと `Next.js-*` は送らない |
+| `metric_value` | 整数。**CLSだけ `value × 1000`**。CLS以外はms |
+| `metric_id` | web-vitalsの識別子。1ページロードに一意 |
+| `metric_rating` | `good` / `needs-improvement` / `poor` |
+| `metric_delta` | 直前報告からの差分。`metric_value` と同じ倍率 |
+| `navigation_type` | `navigate` / `reload` / `back-forward` / `back-forward-cache` / `prerender` / `restore` |
+| `route_group` | `top` / `lesson` / `article` / `training` / `questions` / `mypage` / `other` |
+
+**CLSの倍率**: GA4のイベントパラメータは整数の方が集計が安定するため1000倍して送る。`metric_value` 83 は CLS 0.083。分析時は必ず1000で割る。`metric_delta` も同じ倍率。
+
+`route_group` は `article` = 学習記事 `/contents/[slug]`。公開ブログ `/articles`・`/blog` は別レイアウトなので意図的に `other`。slugとURL query、ユーザーID、メールアドレス、契約情報、記事タイトル、cookie、storage、レスポンス本文は送らない。グループを増やすときは `ROUTE_PREFIX_GROUPS` と対応テストの両方を更新する。
+
+**重複送信方針**: Next.js 16の `useReportWebVitals` は `reportAllChanges` を渡さないため、各metricは原則1ページロード1回だけ報告される（`node_modules/next/dist/client/web-vitals.js` で確認）。ただしCLSとINPは visible→hidden を繰り返すと、同じ `metric_id` のまま値が増えた時だけ再報告される。そのため同じ `metric_id` で整数値が変わった報告は送り、同じ整数値の報告は送らない。集計側は `metric_id` ごとに `MAX(metric_value)` を取ってから percentile を出す。これで1ページロード1サンプルになる。
+
+**SPAの注意**: CLSとINPはページ寿命全体で累積するため、soft navigation後に届いた報告は「ずれが起きた画面」ではなく「報告時点の画面」の `route_group` を持つ。LCP/FCP/TTFBはhard navigationのみの指標だが、LCPは最初のクリックまたはhiddenで確定するため、画面遷移を起こすクリックで確定したLCPは遷移先のpathnameに紐づくことがある。いずれも仕様として受け入れ、補正しない。
+
+### デプロイ後にまず一度やること（これをやらないとGA4で絞り込めない）
+
+1. GA4管理 → カスタム定義で、イベントスコープの**カスタムディメンション**として `metric_name` / `metric_id` / `metric_rating` / `navigation_type` / `route_group` を登録する。
+2. **カスタム指標**として `metric_value`（単位: 標準）を登録する。CLSは1000倍で入っている前提で読む。
+3. DebugViewで `web_vitals` の受信を確認する。LCPだけでなく **TTFBとFCPも届いているか**を明示的に見る（GA bootstrapは `afterInteractive` なので、早い報告がgtag未初期化に当たり得る。実装側では250ms間隔の再試行を入れているが、実測で確認する）。
+4. 登録は過去データに遡らないため、**登録完了日以降**のデータだけを判断に使う。
+
+### p75の確認手順（`route_group × device × navigation_type`）
+
+GA4の標準画面にpercentileは無い。イベント送信だけで「p75が取れる」と完了扱いにしない。次の2手順を使い分ける。
+
+- **手順A（GA4だけで見る良好率）**: 探索（Exploration）で行に `route_group`・デバイスカテゴリ・`navigation_type`、列に `metric_rating`、値に「イベント数」。`metric_name` でフィルタして1指標ずつ見る。Core Web Vitalsの定義そのままで、**`good` の比率が75%以上なら p75 は good 閾値内**と判断できる。これが日常の判定に使う手順。ただし数えるのはイベント行なので、同じ `metric_id` で値が増えて再報告されたCLS/INPは2行として入り、good比率はわずかに悲観的に出る。厳密な数値は手順Bを使う。
+- **手順B（厳密なp75）**: BigQuery Export（または同等の基盤）で、まず `metric_id` ごとに `MAX(metric_value)` へ畳んでから `APPROX_QUANTILES(v, 100)[OFFSET(75)]` を取る。`route_group`・デバイス・`navigation_type` でGROUP BYする。CLSは1000で割る。数値をレポートに載せるときはこちらを使う。
+
+### 回帰アラート閾値
+
+good目安はCore Web Vitalsの公式閾値（bundleされた web-vitals の `LCPThresholds` 等と一致）。
+
+| 指標 | good | needs-improvement 上限 | BONOの回帰アラート |
+| --- | --- | --- | --- |
+| LCP | ≤ 2.5s | 4.0s | p75 が 2.5s を超える、または前回基準比 +20% |
+| INP | ≤ 200ms | 500ms | p75 が 200ms を超える、または +20% |
+| CLS | ≤ 0.1（`metric_value` 100） | 0.25（250） | p75 が 0.1 を超える、または +0.02 |
+| FCP | ≤ 1.8s | 3.0s | p75 が 1.8s を超える（補助指標） |
+| TTFB | ≤ 800ms | 1800ms | p75 が 800ms を超える（補助指標） |
+
+判定単位は `route_group × device`。いずれかのgood比率が75%を割った、または上表の増分を超えた `route_group` が出たらアラート扱いにし、その導線だけを調査する。全画面を一括で書き換えない。
+
+### 待つ基準
+
+- デプロイ後 **7日間**、または対象 `route_group × device` あたり **1,000イベント以上**のどちらか早い方を満たすまで、改善・回帰の結論を出さない。
+- INPは操作が必要なため溜まりが遅い。サンプルが足りない `route_group` は「不足」と書き、0や良好と書かない。
+- 1日だけの上下やリリース直後の値で結論を出さない。比較は同じ曜日構成の期間同士で行う。
+
+### 出典
+
+- `node_modules/next/dist/docs/01-app/03-api-reference/04-functions/use-report-web-vitals.md`（同梱ガイド。CLSの `value * 1000` と `id` によるdistribution集計の記述を含む）。Web版: [useReportWebVitals](https://nextjs.org/docs/app/api-reference/functions/use-report-web-vitals)
+- `node_modules/next/dist/client/web-vitals.js`（`reportAllChanges` 未指定・`onFID` も登録されることの確認元）
+- [Web Vitals（閾値の定義）](https://web.dev/articles/vitals)、[LCP](https://web.dev/articles/lcp)、[INP](https://web.dev/articles/inp)、[CLS](https://web.dev/articles/cls)、[TTFB](https://web.dev/articles/ttfb)
+- [Send the results to Google Analytics](https://github.com/GoogleChrome/web-vitals#send-the-results-to-google-analytics)
+
 ## 記録先と根拠
 
 計画・決定・本番計測は `rebono/02_Projects/14_読み込み速度改善/`。今回の改善はローカル実装段階で、デプロイ・本番実ユーザー測定は別工程。
