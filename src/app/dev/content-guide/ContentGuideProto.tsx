@@ -8,7 +8,9 @@
  *
  * - 状態は URL クエリだけで持つ（保存しない）。ステップの前進は push（ブラウザの戻るで1つ前へ）、
  *   チェックの切り替えは replace。
- * - h1 はこのコンポーネントに1つだけ。各ステップの見出しは h2。
+ * - h1 はこのコンポーネントに1つだけ。各ステップの見出しは h2（ステップ1は段階グループが h2・カードが h3）。
+ * - ステップの切り替えは軽いフェード＋スライド（motion-safe のみ。reduced-motion では動きなし）。
+ * - 背景は --bg-base（独立レビュー 低4: `bg-base` クラスは存在せず効いていなかった）。
  * - ステップが変わったら、そのステップの見出しにフォーカスを移す（キーボード・読み上げ向け）。
  */
 
@@ -47,7 +49,7 @@ export function ContentGuideProto() {
   );
 
   // ステップが変わったら先頭へスクロールし、見出しにフォーカスを移す（初回表示では動かさない）
-  const stepHeadingRef = useRef<HTMLHeadingElement>(null);
+  const stepHeadingRef = useRef<HTMLElement>(null);
   const prevStepKey = useRef<string | null>(null);
   const stepKey = `${query.step}:${query.goal ?? ""}`;
   useEffect(() => {
@@ -83,18 +85,20 @@ export function ContentGuideProto() {
   const handleViewer = (viewer: Viewer) => navigate({ ...query, viewer }, "replace");
 
   return (
-    <div className="min-h-screen bg-base">
+    <div className="min-h-screen bg-[var(--bg-base)]">
       <div className="mx-auto w-full min-w-0 max-w-[752px] px-4 py-8 sm:px-6 sm:py-12">
         <DevControls viewer={query.viewer} onViewer={handleViewer} />
 
         <header className="mt-6">
           <p className="text-xs font-bold tracking-wider text-text-muted">コンテンツガイド</p>
           <h1 className="mt-1 font-heading text-2xl font-bold leading-snug text-text-primary sm:text-3xl">
-            なりたいスキル状態から、最初のテーマを見つける
+            何から始めるか、一緒に決めよう
           </h1>
-          <p className="mt-3 text-sm leading-relaxed text-text-secondary">
-            なりたい状態を1つ選ぶと、いまの自分からそこまでの道筋と、すぐ始められるレッスンがわかります。
-          </p>
+          {query.step !== "result" && (
+            <p className="mt-3 text-sm leading-relaxed text-text-secondary">
+              なりたい状態をひとつ選ぶと、そこまでの道筋と、最初に始めるレッスンがわかります。
+            </p>
+          )}
         </header>
 
         <StepIndicator
@@ -103,7 +107,10 @@ export function ContentGuideProto() {
           skipCheck={query.goal !== null && !hasPrerequisites(query.goal)}
         />
 
-        <div className="mt-8" key={stepKey}>
+        <div
+          className="mt-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-2 motion-safe:duration-300"
+          key={stepKey}
+        >
           {query.step === "goal" || query.goal === null ? (
             <GoalStep headingRef={stepHeadingRef} onSelect={handleSelectGoal} />
           ) : query.step === "check" ? (
