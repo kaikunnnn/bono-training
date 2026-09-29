@@ -32,6 +32,7 @@ export function DomainTag({ domain, className }: { domain: string; className?: s
   const IconComp = DOMAIN_ICONS[domain];
   return (
     <span
+      data-cg-text="aux"
       className={cn(
         "inline-flex max-w-full items-center gap-1 rounded-full bg-muted-custom px-2 py-0.5 text-[11px] font-medium leading-4 text-text-secondary",
         className

@@ -138,18 +138,18 @@ export function FirstStepSection({ model, viewer, variant, encouragement }: Sect
         {SHORT_TITLES[first]}
       </h3>
       {firstIsGoal ? (
-        <p className="mt-1 text-xs leading-5 text-text-secondary">目指す状態に、そのまま取り組めます。</p>
+        <p data-cg-text="body" className="mt-1 text-xs leading-5 text-text-secondary">目指す状態に、そのまま取り組めます。</p>
       ) : (
-        <p className="mt-1 text-xs leading-5 text-text-secondary">{SKILL_STATES[first].label}</p>
+        <p data-cg-text="body" className="mt-1 text-xs leading-5 text-text-secondary">{SKILL_STATES[first].label}</p>
       )}
 
       {entryLesson ? (
         <div className="mt-4 rounded-[16px] bg-muted-custom p-4">
-          <p className="text-[11px] font-bold text-text-muted">
+          <p data-cg-text="aux" className="text-[11px] font-bold text-text-muted">
             {firstMissing || firstNear ? "近い内容のレッスン" : "まずはこのレッスン"}
           </p>
           <p className="mt-0.5 text-[15px] font-bold leading-6 text-text-primary">{entryLesson.title}</p>
-          {entryLesson.note && <p className="text-xs leading-5 text-text-secondary">{entryLesson.note}</p>}
+          {entryLesson.note && <p data-cg-text="body" className="text-xs leading-5 text-text-secondary">{entryLesson.note}</p>}
           <div>
             <LessonMeta lesson={entryLesson} viewer={viewer} />
           </div>
@@ -179,7 +179,7 @@ export function FirstStepSection({ model, viewer, variant, encouragement }: Sect
       ) : null}
 
       {(firstMissing || firstNear) && (
-        <p className="mt-3 text-xs leading-5 text-text-muted">
+        <p data-cg-text="body" className="mt-3 text-xs leading-5 text-text-muted">
           {firstMissing
             ? "この状態にぴったりの教材は準備中です。"
             : "ぴったりの教材はまだないため、近い内容のレッスンを出しています。"}
@@ -275,6 +275,7 @@ export function PathSection({ model, viewer, variant }: SectionProps) {
                     </div>
                     <a
                       href="#content-guide-first-step"
+                      data-cg-text="body"
                       className="mt-1 inline-block rounded-[6px] text-xs text-text-link underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     >
                       「最初の一歩」のレッスンから始めましょう
@@ -320,15 +321,15 @@ export function PathSection({ model, viewer, variant }: SectionProps) {
                       hidden={!isOpen}
                       className="mt-2 space-y-2 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-1 motion-safe:duration-200"
                     >
-                      <p className="text-xs leading-5 text-text-secondary">{SKILL_STATES[id].label}</p>
+                      <p data-cg-text="body" className="text-xs leading-5 text-text-secondary">{SKILL_STATES[id].label}</p>
                       {entry.coverage === "×" && (
-                        <p className="text-xs leading-5 text-text-muted">
+                        <p data-cg-text="body" className="text-xs leading-5 text-text-muted">
                           この状態にぴったりの教材は準備中です。
                           {lessons.length > 0 ? "近い内容のレッスンから始められます。" : ""}
                         </p>
                       )}
                       {entry.coverage === "△" && (
-                        <p className="text-xs leading-5 text-text-muted">
+                        <p data-cg-text="body" className="text-xs leading-5 text-text-muted">
                           ぴったりの教材はまだないため、近い内容のレッスンを出しています。
                         </p>
                       )}

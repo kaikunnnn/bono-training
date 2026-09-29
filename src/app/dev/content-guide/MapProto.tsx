@@ -9,6 +9,7 @@
  *
  * - 詳細（元の長い文・段階・領域・無料/会員の目安）: デスクトップ（lg 以上）は地図の横のパネル、
  *   モバイルは下から出るシート（vaul Drawer）。Q2 はタップが付け外しなので、詳細はシートにせず地図の下に出す。
+ *   結果（デスクトップ）は、星を押すまで詳細の枠を出さない（右の列は空けておき、押したら画面に追従するパネルで出す。閉じられる）。
  * - 見出し: h1「スキルマップ診断」/ h2 = 各画面の問い・地図・結果の各セクション / h3 = 地図の段階の行・詳細の見出し。
  * - 進捗「質問 1／2」「質問 2／2」。ブラウザの戻るで前の画面へ。
  *
@@ -18,7 +19,7 @@
  */
 
 import { useEffect, useRef, useState, type RefObject } from "react";
-import { ArrowRight, ChevronLeft, Lock } from "lucide-react";
+import { ArrowRight, ChevronLeft, Lock, X } from "lucide-react";
 import { Sun1 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerTitle } from "@/components/ui/drawer";
@@ -43,7 +44,7 @@ import {
 } from "./FlowShared";
 import { LessonMeta } from "./LessonList";
 import { SkillMap } from "./SkillMap";
-import { DAWN_PANEL, DawnSky } from "./Dawn";
+import { DAWN_PANEL, DAWN_TEXT_OVERRIDES, DawnSky } from "./Dawn";
 import type { Viewer } from "./query";
 
 function statusNote(mode: MapMode, state: NodeState): string {
@@ -89,15 +90,15 @@ function NodeDetailBody({
         <DomainTag domain={skill.domain} />
       </div>
       {note && (
-        <p className="inline-flex items-center gap-1 text-xs font-bold text-text-secondary">
-          {state.locked && <Lock aria-hidden="true" className="size-3" />}
+        <p className="inline-flex items-center gap-1 text-sm font-bold leading-6 text-text-secondary">
+          {state.locked && <Lock aria-hidden="true" className="size-3.5 shrink-0" />}
           {note}
         </p>
       )}
       <div className="rounded-[12px] bg-muted-custom px-3 py-2.5">
         {lessons[0] ? (
           <>
-            <p className="text-[11px] font-bold text-text-muted">
+            <p className="text-xs font-bold text-text-muted">
               {entry.coverage === "×" || entry.coverage === "△" ? "近い内容のレッスン" : "入口のレッスン"}
               {lessons.length > 1 && `（ほか${lessons.length - 1}件）`}
             </p>
@@ -105,7 +106,7 @@ function NodeDetailBody({
             <LessonMeta lesson={lessons[0]} viewer={viewer} />
           </>
         ) : (
-          <p className="text-xs text-text-muted">この状態にぴったりの教材は準備中です。</p>
+          <p className="text-sm leading-6 text-text-muted">この状態にぴったりの教材は準備中です。</p>
         )}
       </div>
     </div>
@@ -200,7 +201,28 @@ export function MapProto() {
     <aside aria-labelledby="content-guide-map-detail-heading" className={cn(DAWN_PANEL, "lg:sticky lg:top-6")} data-detail-panel>
       {selected ? (
         <>
-          <p className="text-xs font-bold text-text-muted">詳細</p>
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-xs font-bold text-text-muted">詳細</p>
+            {mode === "result" && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="-my-2 -mr-2 size-11"
+                aria-label="詳細を閉じる"
+                onClick={() => {
+                  // 閉じたら、押した星へフォーカスを戻す（ボタンが消えてフォーカスが迷子にならないように）
+                  const id = selected;
+                  setSelected(null);
+                  requestAnimationFrame(() =>
+                    document.querySelector<HTMLButtonElement>(`[data-node-id="${id}"] button`)?.focus()
+                  );
+                }}
+              >
+                <X aria-hidden="true" />
+              </Button>
+            )}
+          </div>
           <h3 id="content-guide-map-detail-heading" className="mt-1 font-heading text-lg font-bold leading-7 text-text-primary">
             {SHORT_TITLES[selected]}
           </h3>
@@ -218,7 +240,7 @@ export function MapProto() {
           <h3 id="content-guide-map-detail-heading" className="text-sm font-bold text-text-primary">
             詳細
           </h3>
-          <p className="mt-1 text-xs leading-5 text-text-muted">
+          <p className="mt-1 text-sm leading-6 text-text-muted">
             {mode === "pick"
               ? "星を押すと、ここに詳しい内容が出ます。"
               : mode === "check"
@@ -377,7 +399,7 @@ export function MapProto() {
                   >
                     夜明けのスキルマップ
                   </h2>
-                  <p className="mt-0.5 text-xs leading-5 text-[var(--dawn-star-dim)]">
+                  <p className="mt-0.5 text-sm leading-6 text-[var(--dawn-star-dim)]">
                     灯った星が、あなたのいまの光。数字の順に、行き先の太陽まで光の道がつながります。
                   </p>
                 </div>
@@ -428,7 +450,10 @@ export function MapProto() {
           >
             {main}
           </div>
-          {withPanel && !diagnosing && isDesktop && <div className="hidden lg:block">{detailPanel}</div>}
+          {/* 結果は星を押したときだけ出す（列は空けたまま＝メインの幅・位置は変わらない）。列を行の高さまで伸ばし、パネルを画面に追従させる */}
+          {withPanel && !diagnosing && isDesktop && (mode !== "result" || selected !== null) && (
+            <div className={cn("hidden lg:block", mode === "result" && "lg:self-stretch")}>{detailPanel}</div>
+          )}
         </div>
       </div>
 
@@ -438,8 +463,9 @@ export function MapProto() {
           <DrawerContent
             className={cn(
               "rounded-t-[20px] border-[var(--card-border-subtle)] bg-surface",
-              // シートは空の外（ポータル）に出るため、空と同じ上書きをここにも付ける（AA の補助文字・reduced-motion）
-              "[&_.bg-muted-custom_.text-text-muted]:text-text-secondary motion-reduce:transition-none! motion-reduce:animate-none!"
+              // シートは空の外（ポータル）に出るため、空と同じ上書きをここにも付ける（AA の補助文字・文字サイズ・reduced-motion）
+              DAWN_TEXT_OVERRIDES,
+              "motion-reduce:transition-none! motion-reduce:animate-none!"
             )}
             overlayClassName="motion-reduce:animate-none! motion-reduce:transition-none!"
           >

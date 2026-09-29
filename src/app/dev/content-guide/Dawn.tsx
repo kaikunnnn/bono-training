@@ -14,6 +14,14 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /** 空の上に置く、不透明で読みやすいカード（文字はこの上） */
+/**
+ * 夜明けの画面の中だけで、共有部品（現行の一覧型と共用）の文字を読みやすくする上書き。空の中と、空の外に出るシート（ポータル）の両方に付ける。
+ * - 淡い面（bg-muted-custom）の上の補助文字は AA（4.5:1）を満たす濃さにする
+ * - data-cg-text="body"（本文・説明文）は 14px 以上、data-cg-text="aux"（補助のラベル・チップ）は 12px 以上
+ */
+export const DAWN_TEXT_OVERRIDES =
+  "[&_.bg-muted-custom_.text-text-muted]:text-text-secondary [&_[data-cg-text=body]]:text-sm [&_[data-cg-text=body]]:leading-6 [&_[data-cg-text=aux]]:text-xs";
+
 export const DAWN_PANEL =
   "rounded-[24px] border border-[var(--card-border-subtle)] bg-surface p-5 shadow-[var(--dawn-card-glow)] sm:p-6";
 
@@ -45,12 +53,12 @@ export function DawnSky({ progress, durationMs = 900, children }: DawnSkyProps) 
   return (
     <div
       className={cn(
-        "relative isolate min-h-screen overflow-hidden bg-[var(--dawn-night)]",
+        // overflow-clip: はみ出しは切るが、スクロールの箱にはしない（中の sticky がページのスクロールで効くように）
+        "relative isolate min-h-screen overflow-clip bg-[var(--dawn-night)]",
         // reduced-motion: 空の中の動き（トランジション）をすべて止める（13_ §8）
         "motion-reduce:[&_*]:transition-none!",
-        // 淡い面（bg-muted-custom）の上の補助文字は、夜明けの画面では AA（4.5:1）を満たす濃さにする
-        // （共有部品は現行の一覧型と共用のため、部品自体は変えずにこの画面の中だけで上書きする）
-        "[&_.bg-muted-custom_.text-text-muted]:text-text-secondary"
+        // 共有部品は現行の一覧型と共用のため、部品自体の見た目は変えずにこの画面の中だけで上書きする（AA の補助文字・文字サイズ）
+        DAWN_TEXT_OVERRIDES
       )}
       style={{ "--dawn-progress": p } as CSSProperties}
       data-dawn-sky

@@ -179,7 +179,7 @@ export function QuizProto() {
                   <p className="text-xs text-text-muted">
                     {c.motif}・{g.stageLabel}・{g.stateIds.length}個のスキル
                   </p>
-                  <p className="text-xs leading-5 text-text-secondary">
+                  <p className="text-sm leading-6 text-text-secondary">
                     例: {g.stateIds.slice(0, 3).map((id) => SHORT_TITLES[id]).join("／")}
                   </p>
                 </div>
@@ -216,7 +216,7 @@ export function QuizProto() {
                   {SHORT_TITLES[id]}
                 </button>
               </h3>
-              <p className="text-xs leading-5 text-text-secondary">{SKILL_STATES[id].label}</p>
+              <p className="text-sm leading-6 text-text-secondary">{SKILL_STATES[id].label}</p>
               <ArrowRight
                 aria-hidden="true"
                 className="absolute right-4 top-4 size-4 text-text-muted motion-safe:transition-transform motion-safe:group-hover:translate-x-0.5 sm:top-5"

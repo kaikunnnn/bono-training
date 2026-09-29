@@ -4,7 +4,9 @@
  * A案: スキルマップ＝星空（12_診断UI_A案B案_仕様書 §4-1 / 13_夜明けデザイン仕様書 §6）。
  *
  * - 夜空の面（不透明な --dawn-night）の上に、段階（基礎／実践／応用）ごとの3つの星座（行）。行の中はチップ状の星が折り返す。
- * - ノード = 短い見出し（1行）+ アイコン。長い文は出さない（詳細パネル／シートでだけ）。押せるノードは高さ44px以上。
+ * - ノード = 短い見出し + アイコン。長い文は出さない（詳細パネル／シートでだけ）。押せるノードは高さ44px以上。
+ *   文字はモバイル・デスクトップとも 14px（対象外の小さいノードも文字は 14px のまま、高さと余白だけ小さい）。補助のラベルは 12px 以上。
+ * - 対象外は「小さく淡く」= 高さ・余白を小さく、色を淡く（文字の大きさは同じ 14px）。
  * - 状態は色と形（アイコン・枠線の種類・塗り・順番の数字）の両方で区別し、aria-label にも状態を入れる。凡例つき:
  *   選べる = 淡い星（☆）／ゴール = 太陽（旗の意味: 行き先）／できている = 灯った星（暖色で塗り＋チェック・光が滲む）／
  *   いまここ = 明け方の一番星（白く強調・脈動）／これから = 光の道（破線の暖色の枠＋道筋の順番）／対象外 = 小さく淡く（押せない）
@@ -51,8 +53,8 @@ interface SkillMapProps {
 
 const nodeBase =
   "relative inline-flex max-w-full items-center gap-1 rounded-full border-2 text-left font-bold motion-safe:transition-[background-color,box-shadow,border-color] motion-safe:duration-300 motion-reduce:transition-none sm:gap-1.5";
-const nodeSize = "min-h-11 px-2.5 py-2 text-xs leading-5 sm:px-3 sm:text-[13px]";
-const nodeSizeSmall = "min-h-8 px-2 py-1 text-[11px] leading-4";
+const nodeSize = "min-h-11 px-2.5 py-2 text-sm leading-5 sm:px-3";
+const nodeSizeSmall = "min-h-8 px-2.5 py-1 text-sm leading-5";
 
 const statusClass: Record<NodeStatus, string> = {
   selectable: "border-[var(--dawn-line)] bg-[var(--dawn-predawn)] text-[var(--dawn-star)]",
@@ -64,7 +66,7 @@ const statusClass: Record<NodeStatus, string> = {
 };
 
 function NodeIcon({ state, small }: { state: NodeState; small?: boolean }) {
-  const size = small ? 12 : 14;
+  const size = small ? 14 : 16;
   if (state.status === "done") return <TickCircle aria-hidden size={size} color="currentColor" variant="Bold" className="shrink-0" />;
   if (state.isGoal && state.status !== "current")
     return <Sun1 aria-hidden size={size} color="currentColor" variant="Bold" className="shrink-0 text-[var(--dawn-sun)]" />;
@@ -173,7 +175,7 @@ export function SkillMap({
                       {order !== undefined && state.status !== "current" && (
                         <span
                           aria-hidden="true"
-                          className="ml-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--dawn-night)] font-latin text-[10px] text-[var(--dawn-star)]"
+                          className="ml-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full bg-[var(--dawn-night)] font-latin text-xs leading-none text-[var(--dawn-star)]"
                         >
                           {order}
                         </span>

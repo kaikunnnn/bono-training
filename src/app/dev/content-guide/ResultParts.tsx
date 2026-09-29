@@ -18,6 +18,7 @@ export function Chip({
 }) {
   return (
     <span
+      data-cg-text="aux"
       className={cn(
         "inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold leading-4",
         tone === "primary" && "bg-cta-primary-bg text-text-inverse",

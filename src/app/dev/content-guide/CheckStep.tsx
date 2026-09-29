@@ -78,7 +78,7 @@ export function CheckStep({
       <div className="rounded-[16px] bg-muted-custom px-4 py-3">
         <p className="text-xs text-text-muted">目指す状態</p>
         <p className="mt-0.5 text-sm font-bold leading-6 text-text-primary">{SHORT_TITLES[goal]}</p>
-        <p className="text-xs leading-5 text-text-secondary">{SKILL_STATES[goal].label}</p>
+        <p data-cg-text="body" className="text-xs leading-5 text-text-secondary">{SKILL_STATES[goal].label}</p>
       </div>
 
       <div className="space-y-1">
@@ -121,9 +121,9 @@ export function CheckStep({
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block text-[15px] font-bold leading-6 text-text-primary">{SHORT_TITLES[id]}</span>
-                    <span className="block text-xs leading-5 text-text-secondary">{SKILL_STATES[id].label}</span>
+                    <span data-cg-text="body" className="block text-xs leading-5 text-text-secondary">{SKILL_STATES[id].label}</span>
                     {isImplied && (
-                      <span className="mt-1 inline-flex items-center gap-1 text-xs text-text-muted">
+                      <span data-cg-text="body" className="mt-1 inline-flex items-center gap-1 text-xs text-text-muted">
                         <Lock aria-hidden="true" className="size-3" />
                         チェックした状態の前提なので、できている扱いです
                       </span>

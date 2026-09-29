@@ -82,7 +82,7 @@ export function CompactLessonList({ lessons, indexOffset = 0, ...ctx }: CompactL
               <span className="block text-sm font-medium leading-6 text-text-primary group-hover:underline">
                 {lesson.title}
               </span>
-              {lesson.note && <span className="block text-xs leading-5 text-text-secondary">{lesson.note}</span>}
+              {lesson.note && <span data-cg-text="body" className="block text-xs leading-5 text-text-secondary">{lesson.note}</span>}
               <LessonMeta lesson={lesson} viewer={ctx.viewer} />
             </span>
             <ChevronRight aria-hidden="true" className="size-4 shrink-0 text-text-muted" />
