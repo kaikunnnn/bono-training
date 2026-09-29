@@ -153,6 +153,34 @@
   --persona-dark-overlay-soft: rgba(2, 23, 16, 0.66);
   --persona-recommendation: #FDFF80;
 
+  /* 診断「夜明け」（/dev/content-guide/map・quiz。rebono 15_コンテンツガイド/13_夜明けデザイン仕様書.md §3）
+   * BONO＝曙。診断が進むほど、夜→夜明け前→暁→朝焼け→朝へ空が明ける。
+   * 値はすべて既存トークンから導いた:
+   *   夜 = --grad-career-change の #141520 / #2A2C42、--persona-gradient-middle #25408D
+   *   暁 = --grad-ux-design の #764749 / #E27979 / #F1BAC1
+   *   朝焼け = --grad-feedback-border の #F99487、朝 = --training-gradient の #E0E5F8 / #FAF4F0
+   *   太陽 = --accent-orange #F95A16、星 = --hero-gradient の #FDFBF5
+   * 文字は空の上に直接置かない（不透明なカードの上）。夜の地図（A案）の文字色は --dawn-star / --dawn-star-dim。 */
+  --dawn-night:        #141520;  /* 夜（地図の星空） */
+  --dawn-night-raised: #1D1F30;  /* 夜の上の面（地図の段階の行）。#141520 と #2A2C42 の中間 */
+  --dawn-predawn:      #2A2C42;  /* 夜明け前（ノードの面） */
+  --dawn-sunrise:      #F99487;  /* 朝焼け（光の線・進捗） */
+  --dawn-sun:          #F95A16;  /* 太陽（= --accent-orange） */
+  --dawn-sun-soft:     #FDE1CC;  /* 太陽の面（ゴールのノード）。#F95A16 を #FDFBF5 に 20% で重ねた色 */
+  --dawn-star:         #FDFBF5;  /* 星・夜の上の文字 */
+  --dawn-star-dim:     #A9ADCB;  /* 淡い星・夜の上の補助文字（#FDFBF5 と #2A2C42 の 60:40。#1D1F30 に対し 7:1 以上） */
+  --dawn-star-lit:     #F7C59F;  /* 灯った星（できている）。#F99487 と #FDFBF5 の 55:45 */
+  --dawn-ink:          #141520;  /* 灯った星・太陽の上の文字 */
+  --dawn-line:         #4A4D6E;  /* 夜の上の枠線（#2A2C42 と #A9ADCB の 75:25） */
+  --dawn-sky-night:    linear-gradient(180deg, #141520 0%, #2A2C42 55%, #25408D 100%);
+  --dawn-sky-dawn:     linear-gradient(180deg, #2A2C42 0%, #764749 42%, #E27979 74%, #F1BAC1 100%);
+  --dawn-sky-morning:  linear-gradient(180deg, #E0E5F8 0%, #FAF4F0 52%, #F99487 100%);
+  --dawn-sun-glow:     radial-gradient(closest-side, rgba(249, 90, 22, 0.55), rgba(249, 148, 135, 0.28) 55%, rgba(249, 148, 135, 0) 100%);
+  --dawn-horizon-glow: radial-gradient(60% 100% at 50% 100%, rgba(249, 148, 135, 0.45), rgba(249, 148, 135, 0) 100%);
+  --dawn-star-glow:    0 0 0 3px rgba(247, 197, 159, 0.22), 0 0 14px rgba(247, 197, 159, 0.45);
+  --dawn-sun-ring:     0 0 0 4px rgba(249, 90, 22, 0.28), 0 0 22px rgba(249, 90, 22, 0.45);
+  --dawn-card-glow:    0 8px 32px rgba(249, 148, 135, 0.30), 0 1px 4px rgba(0, 0, 0, 0.06);
+
   /* 料金ページ feedbackカード（強調・Figma 37:421）: グラデ枠＋影 */
   /* ※グラデ停止点は Figma API が単色 #f99487 に平坦化したためスクショから近似（要ユーザー確認） */
   --grad-feedback-border: linear-gradient(135deg, #9B7FE8 0%, #F472B6 55%, #F99487 100%);
