@@ -227,10 +227,10 @@ export const LESSON_MAP: Record<SkillStateId, StateLessons> = {
 /**
  * 「会員限定が多い」の判定しきい値。無料記事の割合がこれ未満なら、
  * 未ログインでは続きが見られない部分が大きいレッスンとして注記する。
- * （07 の表で「会員限定が多い」と書かれた UIビジュアル基礎 7/37・UI PATTERN 7/23・
- *  AIでUIスタイリング 3/14 などが全て該当する値として 0.5 を採用）
+ * 11_UI改善仕様書 §2C / 独立レビュー 中1: 「無料が3分の1未満」に絞る（0.5 は入口レッスンにまで付き広すぎた）。
+ * 07 で「会員限定が多い」と明記された UIビジュアル基礎 7/37・UI PATTERN 7/23・AIでUIスタイリング 3/14 は該当する。
  */
-export const MEMBER_HEAVY_FREE_RATIO = 0.5;
+export const MEMBER_HEAVY_FREE_RATIO = 1 / 3;
 
 export function isMemberHeavy(lesson: Pick<GuideLesson, "freeCount" | "totalCount">): boolean {
   if (lesson.totalCount <= 0) return false;
