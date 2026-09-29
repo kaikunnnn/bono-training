@@ -13,7 +13,7 @@
  * 「何を作るか（課題の中身）」は表示しない。
  */
 
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SKILL_STATES, WEEKS_PER_STATE, type SkillStateId } from "@/lib/content-guide/skill-states";
@@ -62,18 +62,23 @@ export function ResultView({ headingRef, goal, checked, viewer, onRestart, onEdi
   const doneList = prerequisitesOf(goal).filter((id) => done.has(id));
   const showMemberNotice = viewer === "guest" && hasMemberHeavyLesson(path);
 
+  // 目標・チェックの組み合わせごとに1回だけ送る（開発時の StrictMode の二重実行も防ぐ。
+  // viewer の切り替えは開発用なので送り直さない）
   const checkedKey = checked.join(",");
+  const viewKey = `${goal}|${checkedKey}`;
+  const sentViewKey = useRef<string | null>(null);
   useEffect(() => {
+    if (sentViewKey.current === viewKey) return;
+    sentViewKey.current = viewKey;
     trackContentGuide("content_guide_result_view", {
       goal_state_id: goal,
       first_state: first,
       path_length: path.length,
-      checked_count: checkedKey ? checkedKey.split(",").length : 0,
+      checked_count: checked.length,
       viewer,
     });
-    // 目標・チェックが変わったときだけ送る（viewer の切り替えは開発用なので送り直さない）
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [goal, checkedKey]);
+  }, [viewKey]);
 
   return (
     <div className="space-y-6">
@@ -175,6 +180,7 @@ export function ResultView({ headingRef, goal, checked, viewer, onRestart, onEdi
                         position="path"
                         pathIndex={i}
                         headingLevel="h4"
+                        maxVisible={2}
                       />
                     )}
                   </div>
