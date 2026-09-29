@@ -29,9 +29,25 @@ interface CheckStepProps {
   onChange: (checked: SkillStateId[]) => void;
   onBack: () => void;
   onNext: () => void;
+  /** 戻るボタンの文言（B案で使う。既定は現行のまま） */
+  backLabel?: string;
+  /** 次へボタンの文言（できている数で切り替える。既定は現行のまま） */
+  nextLabel?: (doneCount: number) => string;
 }
 
-export function CheckStep({ headingRef, goal, checked, onChange, onBack, onNext }: CheckStepProps) {
+const defaultNextLabel = (doneCount: number) =>
+  doneCount === 0 ? "まだどれもできない。最初から始める" : "結果を見る";
+
+export function CheckStep({
+  headingRef,
+  goal,
+  checked,
+  onChange,
+  onBack,
+  onNext,
+  backLabel = "目標を選び直す",
+  nextLabel = defaultNextLabel,
+}: CheckStepProps) {
   const candidates = prerequisitesOf(goal);
 
   // 最新のチェック（URL の反映を待たずに次のチェックへ使う）
@@ -126,10 +142,10 @@ export function CheckStep({ headingRef, goal, checked, onChange, onBack, onNext 
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Button type="button" variant="ghost" size="large" onClick={onBack}>
-          目標を選び直す
+          {backLabel}
         </Button>
         <Button type="button" size="large" onClick={onNext} className="whitespace-normal">
-          {doneCount === 0 ? "まだどれもできない。最初から始める" : "結果を見る"}
+          {nextLabel(doneCount)}
         </Button>
       </div>
     </section>
