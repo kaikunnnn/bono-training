@@ -95,6 +95,8 @@ export function useDiagnosing(stepKey: string) {
         return;
       }
       setStartedAt(stepKey);
+      // 「診断中」は短い画面なので、先頭に戻して見えるようにする
+      window.scrollTo({ top: 0, behavior: "auto" });
       window.clearTimeout(timer.current);
       timer.current = window.setTimeout(done, DIAGNOSING_MS);
     },

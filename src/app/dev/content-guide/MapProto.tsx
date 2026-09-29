@@ -22,7 +22,7 @@ import { SKILL_STATES, type SkillStateId } from "@/lib/content-guide/skill-state
 import { SHORT_TITLES, STAGE_GROUPS } from "@/lib/content-guide/display";
 import { hasPrerequisites, prerequisitesOf } from "@/lib/content-guide/path";
 import { LESSON_MAP, orderLessonsForResult } from "@/lib/content-guide/lesson-map";
-import { mapNodeStates, NODE_STATUS_LABELS, type MapMode, type NodeState } from "@/lib/content-guide/map-state";
+import { mapNodeStates, type MapMode, type NodeState } from "@/lib/content-guide/map-state";
 import { trackContentGuide } from "@/lib/content-guide/tracking";
 import { cn } from "@/lib/utils";
 import { DevControls } from "./DevControls";
@@ -85,7 +85,6 @@ function NodeDetailBody({
       {note && (
         <p className="inline-flex items-center gap-1 text-xs font-bold text-text-secondary">
           {state.locked && <Lock aria-hidden="true" className="size-3" />}
-          {mode !== "pick" && <span className="font-normal text-text-muted">{NODE_STATUS_LABELS[state.status]}:</span>}
           {note}
         </p>
       )}
