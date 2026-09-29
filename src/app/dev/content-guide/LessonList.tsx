@@ -14,6 +14,7 @@ import { isMemberHeavy, type GuideLesson } from "@/lib/content-guide/lesson-map"
 import type { SkillStateId } from "@/lib/content-guide/skill-states";
 import { trackContentGuide } from "@/lib/content-guide/tracking";
 import type { Viewer } from "./query";
+import type { Variant } from "./flow-query";
 
 export type LessonPosition = "first_step_primary" | "first_step_list" | "sticky_cta" | "path";
 
@@ -24,6 +25,8 @@ export interface LessonClickContext {
   position: LessonPosition;
   /** 道筋の中での順番（0始まり） */
   pathIndex: number;
+  /** どの案の画面か（12_仕様書 §1: 計測に variant を足す） */
+  variant: Variant;
 }
 
 export function trackLessonClick(lesson: GuideLesson, lessonIndex: number, ctx: LessonClickContext) {
@@ -36,6 +39,7 @@ export function trackLessonClick(lesson: GuideLesson, lessonIndex: number, ctx: 
     lesson_index: lessonIndex,
     is_goal_state: ctx.stateId === ctx.goal,
     viewer: ctx.viewer,
+    variant: ctx.variant,
   });
 }
 

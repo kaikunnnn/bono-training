@@ -65,6 +65,7 @@ export function ContentGuideProto() {
       goal_state_id: goal,
       has_prerequisites: hasPrerequisites(goal),
       viewer: query.viewer,
+      variant: "list",
     });
     navigate(
       { goal, checked: [], step: hasPrerequisites(goal) ? "check" : "result", viewer: query.viewer },
@@ -87,7 +88,12 @@ export function ContentGuideProto() {
   return (
     <div className="min-h-screen bg-[var(--bg-base)]">
       <div className="mx-auto w-full min-w-0 max-w-[752px] px-4 py-8 sm:px-6 sm:py-12">
-        <DevControls viewer={query.viewer} onViewer={handleViewer} />
+        <DevControls
+          viewer={query.viewer}
+          onViewer={handleViewer}
+          variant="list"
+          carry={{ goal: query.goal, checked: query.checked, isResult: query.step === "result" }}
+        />
 
         <header className="mt-6">
           <p className="text-xs font-bold tracking-wider text-text-muted">コンテンツガイド</p>
