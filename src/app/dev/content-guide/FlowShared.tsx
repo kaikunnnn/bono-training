@@ -9,12 +9,14 @@
  * - QuestionProgress: 「質問 n／m」。
  * - DiagnosisSummaryCard: 診断結果の要約（現在地・目指す状態・次に身につける状態・ゴールまで）。
  * - FlowResult: 要約 + 最初の一歩 + 会員案内 + 道筋 + やり直し + モバイル固定ボタン（ResultSections を再利用）。
+ *
+ * 夜明けの表現（13_夜明けデザイン仕様書）: 文字はすべて不透明なカードの上。勇気づけのコピーは §5 の原則
+ * （できていること＝光／ゼロでも肯定／未達は「まだ」／目標は「行き先」／否定語を使わない）。
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type RefObject } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowRight2, Flag, Location } from "iconsax-react";
-import { Loader2 } from "lucide-react";
+import { Location, Routing, Star1, Sun1 } from "iconsax-react";
 import type { SkillStateId } from "@/lib/content-guide/skill-states";
 import { SHORT_TITLES } from "@/lib/content-guide/display";
 import { isMemberHeavy } from "@/lib/content-guide/lesson-map";
@@ -28,10 +30,10 @@ import {
   RestartActions,
   StickyStartBar,
   computeResultModel,
-  resultCardClass,
   useRedirectTo,
   useResultViewTracking,
 } from "./ResultSections";
+import { DAWN_PANEL, SunriseArt } from "./Dawn";
 import { buildFlowSearch, parseFlowQuery, type FlowQuery, type Variant } from "./flow-query";
 import type { Viewer } from "./query";
 
@@ -106,21 +108,16 @@ export function useDiagnosing(stepKey: string) {
 }
 
 export function DiagnosingScreen({ headingRef }: { headingRef: RefObject<HTMLElement | null> }) {
-  const [width, setWidth] = useState(0);
-  useEffect(() => {
-    const raf = requestAnimationFrame(() => setWidth(100));
-    return () => cancelAnimationFrame(raf);
-  }, []);
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
   }, [headingRef]);
   return (
     <section
       aria-labelledby="content-guide-diagnosing-heading"
-      className={cn(resultCardClass, "flex flex-col items-center px-6 py-12 text-center sm:py-16")}
+      className={cn(DAWN_PANEL, "flex flex-col items-center px-6 py-10 text-center sm:py-12")}
       data-screen="diagnosing"
     >
-      <Loader2 aria-hidden="true" className="size-8 text-text-muted motion-safe:animate-spin" />
+      <SunriseArt />
       <h2
         id="content-guide-diagnosing-heading"
         ref={headingRef as RefObject<HTMLHeadingElement | null>}
@@ -130,19 +127,13 @@ export function DiagnosingScreen({ headingRef }: { headingRef: RefObject<HTMLEle
         診断中…
       </h2>
       <p role="status" className="mt-2 text-sm text-text-secondary">
-        目標までの道筋と、最初の一歩を選んでいます
+        あなたの夜明けを、見える形にしています
       </p>
-      <div className="mt-6 h-2 w-full max-w-xs overflow-hidden rounded-full bg-muted-strong" aria-hidden="true">
-        <div
-          className="h-full rounded-full bg-cta-primary-bg motion-safe:transition-[width] motion-safe:duration-1000 motion-safe:ease-out"
-          style={{ width: `${width}%` }}
-        />
-      </div>
     </section>
   );
 }
 
-/** 「質問 n／m」＋細い進捗 */
+/** 「質問 n／m」＋細い進捗（A案。空の上ではなくカードの中に置く） */
 export function QuestionProgress({ current, total, className }: { current: number; total: number; className?: string }) {
   return (
     <div className={cn("flex items-center gap-3", className)}>
@@ -153,7 +144,7 @@ export function QuestionProgress({ current, total, className }: { current: numbe
         {Array.from({ length: total }, (_, i) => (
           <li
             key={i}
-            className={cn("h-1.5 flex-1 rounded-full", i < current ? "bg-cta-primary-bg" : "bg-muted-strong")}
+            className={cn("h-1.5 flex-1 rounded-full", i < current ? "bg-[var(--dawn-sunrise)]" : "bg-muted-strong")}
           />
         ))}
       </ol>
@@ -161,7 +152,7 @@ export function QuestionProgress({ current, total, className }: { current: numbe
   );
 }
 
-/** 段階ごとの できている数を、数と同じ数のマスで見せる（色だけに頼らない: 数字も併記） */
+/** 段階ごとの灯っている数を、数と同じ数の星で見せる（色だけに頼らない: 数字も併記） */
 function StageMeter({ label, done, total }: { label: string; done: number; total: number }) {
   return (
     <div className="min-w-0">
@@ -172,14 +163,14 @@ function StageMeter({ label, done, total }: { label: string; done: number; total
           <span className="font-latin">/{total}</span>
         </span>
       </p>
-      <div className="mt-1.5 flex gap-0.5" aria-hidden="true">
+      <div className="mt-1.5 flex flex-wrap gap-0.5" aria-hidden="true">
         {Array.from({ length: total }, (_, i) => (
-          <span
+          <Star1
             key={i}
-            className={cn(
-              "h-2 flex-1 rounded-[3px]",
-              i < done ? "bg-cta-primary-bg" : "border border-border-default bg-surface"
-            )}
+            size={14}
+            color="currentColor"
+            variant={i < done ? "Bold" : "Linear"}
+            className={i < done ? "text-[var(--dawn-sun)]" : "text-text-muted"}
           />
         ))}
       </div>
@@ -188,8 +179,9 @@ function StageMeter({ label, done, total }: { label: string; done: number; total
 }
 
 /**
- * 診断結果の要約（§6）: 現在地（段階別の数＋ラベル）、目指す状態、次に身につける状態、ゴールまで。
- * size="large" は B案（結果カードとして大きく）。
+ * 診断結果の要約（12_ §6 / 13_ §5）: 現在地（夜明けの言葉）、行き先、ゴールまで（進み具合）、次に身につけること、
+ * 補助として段階別の灯っている数。モバイルのファーストビューに「行き先・進み具合」が入る順に並べる。
+ * size="large" は B案（結果カードとして大きく）。表示時に光が広がってから現れる（motion-safe）。
  */
 export function DiagnosisSummaryCard({
   goal,
@@ -204,10 +196,18 @@ export function DiagnosisSummaryCard({
 }) {
   const s = computeSummary(goal, checked);
   const large = size === "large";
+  const cheer =
+    s.requiredDone > 0
+      ? `もう ${s.requiredDone} 個、光が灯っています。ここから、もっと明るくなります。`
+      : "ここから、いちばんきれいな夜明けが始まります。";
   return (
     <section
       aria-labelledby="content-guide-diagnosis-heading"
-      className={cn(resultCardClass, large && "sm:p-8")}
+      className={cn(
+        DAWN_PANEL,
+        large && "sm:p-8",
+        "motion-safe:animate-in motion-safe:fade-in motion-safe:zoom-in-95 motion-safe:duration-700"
+      )}
       data-summary-label={s.label}
     >
       <h2
@@ -226,52 +226,51 @@ export function DiagnosisSummaryCard({
           {s.label}
         </span>
       </h2>
-      <p className="mt-1 text-xs text-text-muted">
-        できている状態 {s.doneTotal}／18（チェックした状態と、その前提）
-      </p>
+      <p className="mt-1.5 text-sm leading-6 text-text-secondary">{cheer}</p>
 
-      <div className="mt-4 grid grid-cols-3 gap-3 sm:gap-4">
-        {s.stages.map((st) => (
-          <StageMeter key={st.id} label={st.stageLabel} done={st.done} total={st.total} />
-        ))}
-      </div>
-
-      <dl className="mt-5 grid gap-3 border-t border-[var(--card-border-subtle)] pt-4 sm:grid-cols-2">
+      <dl className="mt-4 space-y-3">
         <div className="flex items-start gap-2">
-          <Flag aria-hidden="true" size={18} color="currentColor" className="mt-0.5 shrink-0 text-text-muted" />
-          <div className="min-w-0">
-            <dt className="text-xs text-text-muted">目指す状態</dt>
-            <dd className={cn("font-bold text-text-primary", large ? "text-base leading-7" : "text-[15px] leading-6")}>
+          <Sun1 aria-hidden="true" size={20} color="currentColor" variant="Bold" className="mt-0.5 shrink-0 text-[var(--dawn-sun)]" />
+          <div className="min-w-0 flex-1">
+            <dt className="text-xs text-text-muted">行き先（目指す状態）</dt>
+            <dd className={cn("font-bold text-text-primary", large ? "text-lg leading-7" : "text-base leading-7")}>
               {SHORT_TITLES[s.goal]}
             </dd>
           </div>
         </div>
         <div className="flex items-start gap-2">
-          <Location aria-hidden="true" size={18} color="currentColor" className="mt-0.5 shrink-0 text-text-muted" />
-          <div className="min-w-0">
-            <dt className="text-xs text-text-muted">次に身につけるのは</dt>
-            <dd className={cn("font-bold text-text-primary", large ? "text-base leading-7" : "text-[15px] leading-6")}>
-              {SHORT_TITLES[s.next]}
-            </dd>
-          </div>
-        </div>
-        <div className="flex items-start gap-2 sm:col-span-2">
-          <ArrowRight2 aria-hidden="true" size={18} color="currentColor" className="mt-0.5 shrink-0 text-text-muted" />
+          <Routing aria-hidden="true" size={20} color="currentColor" className="mt-0.5 shrink-0 text-text-muted" />
           <div className="min-w-0 flex-1">
             <dt className="text-xs text-text-muted">ゴールまで</dt>
             <dd className="text-sm text-text-primary">
               あと<span className="font-bold">{s.remainingSteps}</span>ステップ・約
-              <span className="font-bold">{s.weeks}</span>週間
-              <span className="text-xs text-text-muted">
-                （全{s.requiredTotal}ステップ中 {s.requiredDone}つできている）
-              </span>
+              <span className="font-bold">{s.weeks}</span>週間で見える景色
               <span className="mt-2 block">
-                <ProgressBar value={s.requiredDone} max={s.requiredTotal} label="目指す状態までの進み具合" />
+                <ProgressBar value={s.requiredDone} max={s.requiredTotal} label="行き先までの進み具合" />
+              </span>
+              <span className="mt-1 block text-xs text-text-muted">
+                全{s.requiredTotal}ステップのうち、灯っている光 {s.requiredDone}
               </span>
             </dd>
           </div>
         </div>
+        <div className="flex items-start gap-2">
+          <Location aria-hidden="true" size={20} color="currentColor" className="mt-0.5 shrink-0 text-text-muted" />
+          <div className="min-w-0 flex-1">
+            <dt className="text-xs text-text-muted">次に身につけるのは</dt>
+            <dd className="text-[15px] font-bold leading-6 text-text-primary">{SHORT_TITLES[s.next]}</dd>
+          </div>
+        </div>
       </dl>
+
+      <div className="mt-5 border-t border-[var(--card-border-subtle)] pt-4">
+        <p className="mb-2 text-xs font-bold text-text-muted">灯っている光（段階別・18個のうち {s.doneTotal}）</p>
+        <div className="grid grid-cols-3 gap-3 sm:gap-4">
+          {s.stages.map((st) => (
+            <StageMeter key={st.id} label={st.stageLabel} done={st.done} total={st.total} />
+          ))}
+        </div>
+      </div>
     </section>
   );
 }
@@ -283,8 +282,8 @@ interface FlowResultProps {
   variant: Exclude<Variant, "list">;
   headingRef?: RefObject<HTMLElement | null>;
   summarySize?: "default" | "large";
-  /** 要約の前に置くもの（A案の地図） */
-  before?: ReactNode;
+  /** 「最初の一歩」（と会員案内）のあと、道筋の前に置くもの（A案の塗られた地図） */
+  afterFirstStep?: ReactNode;
   onRestart: () => void;
   onEditChecked: () => void;
 }
@@ -296,7 +295,7 @@ export function FlowResult({
   variant,
   headingRef,
   summarySize,
-  before,
+  afterFirstStep,
   onRestart,
   onEditChecked,
 }: FlowResultProps) {
@@ -308,10 +307,19 @@ export function FlowResult({
 
   return (
     <div className="space-y-5 pb-28 md:pb-0" data-screen="result">
-      {before}
       <DiagnosisSummaryCard goal={goal} checked={checked} headingRef={headingRef} size={summarySize} />
-      <FirstStepSection model={model} viewer={viewer} variant={variant} />
+      <FirstStepSection
+        model={model}
+        viewer={viewer}
+        variant={variant}
+        encouragement={
+          model.firstIsGoal
+            ? "行き先に、もう手が届きます。この一歩から、朝が始まります。"
+            : "ここが、あなたの夜明けの最初の一歩です。"
+        }
+      />
       {showMemberNotice && <MemberNotice redirectTo={redirectTo} />}
+      {afterFirstStep}
       {model.total > 1 && <PathSection model={model} viewer={viewer} variant={variant} />}
       <RestartActions
         goal={goal}

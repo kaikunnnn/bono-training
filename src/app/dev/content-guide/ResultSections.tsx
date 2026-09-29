@@ -113,8 +113,11 @@ interface SectionProps {
   variant: Variant;
 }
 
-/** 最初の一歩: 最初の状態と、主ボタン「このレッスンから始める」（無料の入口）。ほかのレッスンは小さなリスト */
-export function FirstStepSection({ model, viewer, variant }: SectionProps) {
+/**
+ * 最初の一歩: 最初の状態と、主ボタン「このレッスンから始める」（無料の入口）。ほかのレッスンは小さなリスト。
+ * encouragement: 主ボタンの上に添える励ましの一言（A案・B案。13_夜明けデザイン仕様書 §5-4。現行では出さない）
+ */
+export function FirstStepSection({ model, viewer, variant, encouragement }: SectionProps & { encouragement?: string }) {
   const { goal, first, firstIsGoal, entryLesson, otherLessons, firstMissing, firstNear } = model;
   const primaryLabel = firstMissing ? "近いレッスンから始める" : "このレッスンから始める";
   return (
@@ -150,6 +153,11 @@ export function FirstStepSection({ model, viewer, variant }: SectionProps) {
           <div>
             <LessonMeta lesson={entryLesson} viewer={viewer} />
           </div>
+          {encouragement && (
+            <p className="mt-3 text-sm font-bold leading-6 text-text-primary" data-encouragement>
+              {encouragement}
+            </p>
+          )}
           <Button asChild size="large" className="mt-3 flex w-full sm:inline-flex sm:w-auto">
             <Link
               href={`/lessons/${entryLesson.slug}`}
