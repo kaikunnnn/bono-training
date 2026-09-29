@@ -16,7 +16,7 @@ import {
 } from "iconsax-react";
 import { cn } from "@/lib/utils";
 
-const DOMAIN_ICONS: Record<string, Icon> = {
+export const DOMAIN_ICONS: Record<string, Icon> = {
   ビジュアルデザイン: Colorfilter,
   "ツール・プロトタイピング": Designtools,
   "情報設計・インタラクション": Hierarchy,
