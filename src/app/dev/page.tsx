@@ -24,6 +24,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/content-guide",
+    issue: "#212",
+    title: "コンテンツガイド：スキル状態の診断プロトタイプ",
+    summary:
+      "なりたいスキル状態（18個）を選び、いまできることをチェックすると、最初に取り掛かる状態・目指す状態・道筋と各状態の該当レッスンが出る。未ログイン/会員の表示切り替えつき。認証・DB・Sanityなし、結果は保存しない。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/branch-review",
     issue: "REVIEW",
     title: "chivalrous-appendix ブランチレビュー",
