@@ -20,9 +20,23 @@ interface DevProjectEntry {
   title: string;
   summary: string;
   status: "in-progress" | "shipped" | "archived";
+  /** 同じ検討の別案など、カード内に並べる追加のリンク */
+  links?: { href: string; label: string }[];
 }
 
 const projects: DevProjectEntry[] = [
+  {
+    href: "/dev/content-guide",
+    issue: "#212",
+    title: "コンテンツガイド：スキル状態の診断プロトタイプ",
+    summary:
+      "なりたいスキル状態（18個）を選び、いまできることをチェックすると、最初に取り掛かる状態・目指す状態・道筋と各状態の該当レッスンが出る。未ログイン/会員の表示切り替えつき。認証・DB・Sanityなし、結果は保存しない。A案（スキルマップ）・B案（1問ずつのクイズ）を比較中。",
+    status: "in-progress",
+    links: [
+      { href: "/dev/content-guide/map", label: "A案: スキルマップ診断" },
+      { href: "/dev/content-guide/quiz", label: "B案: 1問ずつのクイズ型" },
+    ],
+  },
   {
     href: "/dev/branch-review",
     issue: "REVIEW",
@@ -157,7 +171,46 @@ export default function DevPortalPage() {
             PROJECTS
           </h2>
           <div className="grid grid-cols-1 gap-4">
-            {projects.map((entry) => (
+            {projects.map((entry) =>
+              entry.links ? (
+                <div
+                  key={entry.href}
+                  className="group relative bg-surface rounded-[20px] border border-gray-200/60 shadow-sm p-6 hover:shadow-md hover:border-gray-300 transition-all"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span className="text-xs font-bold text-text-primary/40 font-noto-sans-jp tracking-wider flex-shrink-0">
+                        {entry.issue}
+                      </span>
+                      <h3 className="text-base sm:text-lg font-bold text-text-primary font-rounded-mplus group-hover:underline truncate">
+                        {/* カード全体を押せるように、主リンクの疑似要素をカード全体に広げる（リンクの入れ子を避ける） */}
+                        <Link href={entry.href} className="after:absolute after:inset-0 after:rounded-[20px] after:content-['']">
+                          {entry.title}
+                        </Link>
+                      </h3>
+                    </div>
+                    <StatusBadge status={entry.status} />
+                  </div>
+                  <p className="text-sm text-text-primary/70 font-noto-sans-jp leading-relaxed">
+                    {entry.summary}
+                  </p>
+                  <p className="text-xs text-text-primary/40 mt-3 font-noto-sans-jp">
+                    {entry.href} →
+                  </p>
+                  <ul className="relative z-10 mt-3 flex flex-wrap gap-2">
+                    {entry.links.map((l) => (
+                      <li key={l.href}>
+                        <Link
+                          href={l.href}
+                          className="inline-flex min-h-9 items-center rounded-full border border-gray-200 bg-surface px-3 text-xs font-bold text-text-primary font-noto-sans-jp hover:bg-gray-50"
+                        >
+                          {l.label} →
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
               <Link
                 key={entry.href}
                 href={entry.href}
@@ -181,7 +234,8 @@ export default function DevPortalPage() {
                   {entry.href} →
                 </p>
               </Link>
-            ))}
+              )
+            )}
           </div>
         </section>
       </div>
