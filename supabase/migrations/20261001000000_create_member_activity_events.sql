@@ -63,3 +63,16 @@ CREATE POLICY "member_activity_events_insert_own"
 
 COMMENT ON TABLE public.member_activity_events IS
   '会員の活動ログ（#213 A1）: 1イベント1行。本人insertのみ・利用者selectなし。ダッシュボードは読み取り専用ロールで集計';
+
+-- 数字ページ（health_check）の読み取り専用ロールに集計用の SELECT を許可する。
+-- 既存の article_progress 等と同じ hc_readonly_select パターン。ロールが無い環境（ローカル）では何もしない。
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'health_check_readonly') THEN
+    GRANT SELECT ON public.member_activity_events TO health_check_readonly;
+    DROP POLICY IF EXISTS "hc_readonly_select" ON public.member_activity_events;
+    CREATE POLICY "hc_readonly_select"
+      ON public.member_activity_events FOR SELECT TO health_check_readonly
+      USING (true);
+  END IF;
+END $$;
