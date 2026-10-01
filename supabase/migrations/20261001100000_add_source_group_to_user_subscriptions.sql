@@ -9,8 +9,9 @@
 --   9グループ（src/lib/activity-utils.ts PRICING_CTA_SOURCE_GROUPS /
 --   supabase/functions/_shared/pricing-source.ts と同じ）または NULL（直接・不明・A2以前の契約）。
 -- 書き込み:
---   stripe-webhook（checkout.session.completed / customer.subscription.created）が
---   metadata.source_group から、既存値が NULL のときだけ書く（プラン変更等で上書きしない）。
+--   stripe-webhook（checkout.session.completed / customer.subscription.created / .updated）が
+--   metadata.source_group から書く。新しい契約（保存済みと違う subscription id。解約後の再入会を含む）
+--   は今回の値で上書き（無効・無しなら NULL）。同じ契約の更新・プラン変更では既存値を保持する。
 -- 既存データ: 触らない（すべて NULL のまま）。
 -- =============================================================================
 

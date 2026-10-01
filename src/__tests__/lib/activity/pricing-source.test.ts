@@ -117,26 +117,113 @@ describe("normalizePricingSourceGroup（Edge Function 側の再検証）", () =>
 });
 
 describe("resolveSourceGroupPatch（webhook の保存ルール）", () => {
-  it("既存が null で有効な値なら書く", () => {
-    expect(resolveSourceGroupPatch(null, "lesson_lock")).toEqual({
-      source_group: "lesson_lock",
-    });
+  const row = (subId: string | null, group: string | null) => ({
+    stripe_subscription_id: subId,
+    source_group: group,
   });
 
-  it("行が無い（undefined）場合も書く", () => {
-    expect(resolveSourceGroupPatch(undefined, "event")).toEqual({
-      source_group: "event",
-    });
+  it("行が無い（初回の契約）なら今回の値を書く", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: null,
+        incomingSubscriptionId: "sub_new",
+        incomingSourceGroup: "lesson_lock",
+      })
+    ).toEqual({ source_group: "lesson_lock" });
   });
 
-  it("既存値があれば上書きしない（プラン変更・イベント順序の入れ替わり）", () => {
-    expect(resolveSourceGroupPatch("lesson_lock", "nav")).toEqual({});
-    expect(resolveSourceGroupPatch("lesson_lock", "lesson_lock")).toEqual({});
+  it("新しい subscription（解約後の再入会）は今回の値で上書きする", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_old", "lesson_lock"),
+        incomingSubscriptionId: "sub_new",
+        incomingSourceGroup: "nav",
+      })
+    ).toEqual({ source_group: "nav" });
   });
 
-  it("受け取った値が無い・不正なら触らない（null で消さない）", () => {
-    expect(resolveSourceGroupPatch(null, undefined)).toEqual({});
-    expect(resolveSourceGroupPatch(null, "direct")).toEqual({});
-    expect(resolveSourceGroupPatch("top", undefined)).toEqual({});
+  it("新しい subscription で from が無い・不正なら null に上書きする（直接/不明）", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_old", "lesson_lock"),
+        incomingSubscriptionId: "sub_new",
+        incomingSourceGroup: undefined,
+      })
+    ).toEqual({ source_group: null });
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_old", "lesson_lock"),
+        incomingSubscriptionId: "sub_new",
+        incomingSourceGroup: "direct",
+      })
+    ).toEqual({ source_group: null });
+  });
+
+  it("既存行の subscription id が null なら新しい契約として扱う", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row(null, "top"),
+        incomingSubscriptionId: "sub_new",
+        incomingSourceGroup: "event",
+      })
+    ).toEqual({ source_group: "event" });
+  });
+
+  it("同じ subscription（created と checkout.completed の重複・更新）は既存値を保持する", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_1", "lesson_lock"),
+        incomingSubscriptionId: "sub_1",
+        incomingSourceGroup: "nav",
+      })
+    ).toEqual({});
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_1", "lesson_lock"),
+        incomingSubscriptionId: "sub_1",
+        incomingSourceGroup: undefined,
+      })
+    ).toEqual({});
+  });
+
+  it("同じ subscription で既存が null・今回が有効なら書く（イベント順序の入れ替わり）", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_1", null),
+        incomingSubscriptionId: "sub_1",
+        incomingSourceGroup: "roadmap",
+      })
+    ).toEqual({ source_group: "roadmap" });
+  });
+
+  it("同じ subscription で既存が null・今回も無しなら触らない", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_1", null),
+        incomingSubscriptionId: "sub_1",
+        incomingSourceGroup: undefined,
+      })
+    ).toEqual({});
+  });
+
+  it("プラン変更（置き換え checkout）は新しい subscription id でも既存値を保持する", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_old", "lesson_lock"),
+        incomingSubscriptionId: "sub_new",
+        incomingSourceGroup: undefined,
+        isReplacement: true,
+      })
+    ).toEqual({});
+  });
+
+  it("今回の subscription id が無ければ触らない（判定不能）", () => {
+    expect(
+      resolveSourceGroupPatch({
+        existing: row("sub_1", "top"),
+        incomingSubscriptionId: undefined,
+        incomingSourceGroup: "nav",
+      })
+    ).toEqual({});
   });
 });

@@ -442,18 +442,21 @@ async function resolveIsActivePatch(
 
 /**
  * #213 A2: 料金ページの出どころ（source_group）を user_subscriptions に保存するためのパッチ。
- * 既存行の source_group が入っていれば保持（プラン変更・イベント順序で上書きしない）。
+ * 新しい契約（保存済みと違う subscription id）なら今回の値で上書き（無効なら null）、
+ * 同じ契約の再通知・更新・プラン変更では既存値を保持する（ルールは _shared/pricing-source.ts）。
  * 読み取りに失敗したら安全側で触らない（空オブジェクト）。
  */
 async function resolveSourceGroupPatchForUser(
   supabase: any,
   userId: string,
-  incoming: unknown
-): Promise<{ source_group?: string }> {
+  incomingSubscriptionId: string,
+  incomingSourceGroup: unknown,
+  isReplacement = false
+): Promise<{ source_group?: string | null }> {
   try {
     const { data, error } = await supabase
       .from("user_subscriptions")
-      .select("source_group")
+      .select("stripe_subscription_id, source_group")
       .eq("user_id", userId)
       .eq("environment", ENVIRONMENT)
       .maybeSingle();
@@ -461,7 +464,12 @@ async function resolveSourceGroupPatchForUser(
       console.warn("⚠️ [webhook] source_group の既存値取得に失敗。source_group は更新しません:", error);
       return {};
     }
-    return resolveSourceGroupPatch(data?.source_group ?? null, incoming);
+    return resolveSourceGroupPatch({
+      existing: data ?? null,
+      incomingSubscriptionId,
+      incomingSourceGroup,
+      isReplacement,
+    });
   } catch (e) {
     console.warn("⚠️ [webhook] source_group の解決に失敗。source_group は更新しません:", e);
     return {};
@@ -628,7 +636,9 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
     const sourceGroupPatch = await resolveSourceGroupPatchForUser(
       supabase,
       userId,
-      session.metadata?.source_group ?? subscription.metadata?.source_group
+      subscriptionId,
+      session.metadata?.source_group ?? subscription.metadata?.source_group,
+      !!replaceSubscriptionId
     );
 
     // user_subscriptionsテーブルにサブスクリプション情報を保存または更新（環境を含む）
@@ -1111,6 +1121,7 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
     const sourceGroupPatch = await resolveSourceGroupPatchForUser(
       supabase,
       userId,
+      subscriptionId,
       subscription.metadata?.source_group
     );
     const { error: userSubError } = await supabase
@@ -1247,12 +1258,22 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
     // user_subscriptionsテーブルを更新
     // BUG-1対策: incomplete のスナップショットで is_active=true を潰さない（同上）。
     const isActivePatch = await resolveIsActivePatch(stripe, subscription);
+    // #213 A2: この update は stripe_subscription_id も書き換えるため、新しい契約の
+    // updated が created/checkout.completed より先に届くと「同じ契約」に見えてしまう。
+    // 同じルールで source_group も決める（同じ契約＝プラン変更なら既存値を保持）。
+    const sourceGroupPatch = await resolveSourceGroupPatchForUser(
+      supabase,
+      userId,
+      subscriptionId,
+      subscription.metadata?.source_group
+    );
     const { error: updateError } = await supabase
       .from("user_subscriptions")
       .update({
         plan_type: planType,
         duration: duration,
         ...isActivePatch,
+        ...sourceGroupPatch,
         stripe_subscription_id: subscriptionId,
         cancel_at_period_end: cancelAtPeriodEnd,
         cancel_at: cancelAt,
