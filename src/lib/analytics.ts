@@ -4,7 +4,7 @@ import { GA_MEASUREMENT_ID, isAnalyticsHost } from "./analytics/config";
 declare global {
   interface Window {
     gtag: (
-      command: 'config' | 'event' | 'js',
+      command: 'config' | 'event' | 'js' | 'set',
       targetId: string | Date,
       config?: Record<string, unknown>
     ) => void;
@@ -49,16 +49,17 @@ export const setUserId = (userId: string) => {
 
 /**
  * ユーザープロパティを設定（サブスク状態など）
+ *
+ * GA4 公式の `gtag('set', 'user_properties', ...)` を使う。以降に送られる全イベントに
+ * 付与される（config の再実行はしない）。
+ * https://developers.google.com/analytics/devguides/collection/ga4/user-properties
  */
 export const setUserProperties = (properties: Record<string, string | number | boolean>) => {
   if (!isGAEnabled()) {
     return;
   }
 
-  window.gtag('config', GA_MEASUREMENT_ID, {
-    user_properties: properties,
-    send_page_view: false,
-  });
+  window.gtag('set', 'user_properties', properties);
 };
 
 // ===== 定義済みイベント =====
