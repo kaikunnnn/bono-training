@@ -10,6 +10,7 @@ import { sendEmailSafe } from "../_shared/resend.ts";
 import { generateWelcomeEmail, generateCancellationEmail, generatePlanChangeEmail, getPlanDisplayName } from "../_shared/email-templates.ts";
 import { syncToMemberstack, removePlanFromMemberstack, changePlanInMemberstack } from "../_shared/memberstack.ts";
 import { derivePlanFromPrice } from "../_shared/plan-utils.ts";
+import { resolveSourceGroupPatch } from "../_shared/pricing-source.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -439,6 +440,34 @@ async function resolveIsActivePatch(
   return { is_active: false };
 }
 
+/**
+ * #213 A2: 料金ページの出どころ（source_group）を user_subscriptions に保存するためのパッチ。
+ * 既存行の source_group が入っていれば保持（プラン変更・イベント順序で上書きしない）。
+ * 読み取りに失敗したら安全側で触らない（空オブジェクト）。
+ */
+async function resolveSourceGroupPatchForUser(
+  supabase: any,
+  userId: string,
+  incoming: unknown
+): Promise<{ source_group?: string }> {
+  try {
+    const { data, error } = await supabase
+      .from("user_subscriptions")
+      .select("source_group")
+      .eq("user_id", userId)
+      .eq("environment", ENVIRONMENT)
+      .maybeSingle();
+    if (error) {
+      console.warn("⚠️ [webhook] source_group の既存値取得に失敗。source_group は更新しません:", error);
+      return {};
+    }
+    return resolveSourceGroupPatch(data?.source_group ?? null, incoming);
+  } catch (e) {
+    console.warn("⚠️ [webhook] source_group の解決に失敗。source_group は更新しません:", e);
+    return {};
+  }
+}
+
 async function handleCheckoutCompleted(stripe: any, supabase: any, session: any) {
   console.log("🚀 [LIVE環境] checkout.session.completedイベントを処理中");
 
@@ -595,6 +624,13 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       delete isActivePatch.is_active;
     }
 
+    // #213 A2: 出どころ（新規契約のときだけ create-checkout が metadata に載せる）
+    const sourceGroupPatch = await resolveSourceGroupPatchForUser(
+      supabase,
+      userId,
+      session.metadata?.source_group ?? subscription.metadata?.source_group
+    );
+
     // user_subscriptionsテーブルにサブスクリプション情報を保存または更新（環境を含む）
     // ※ is_active は isActivePatch で決定（空なら既存値保持 / 新規行はDB既定 false）
     const { error: userSubError } = await supabase
@@ -602,6 +638,7 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       .upsert({
         user_id: userId,
         ...isActivePatch,
+        ...sourceGroupPatch,
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
@@ -1070,11 +1107,18 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
     // BUG-1対策: incomplete の並行書き込みで is_active=true を潰さない
     // （現在statusをStripeから再取得＋incompleteではis_activeを書かないdowngradeガード）。
     const isActivePatch = await resolveIsActivePatch(stripe, subscription);
+    // #213 A2: 出どころ（create-checkout が subscription_data.metadata に載せたもの）
+    const sourceGroupPatch = await resolveSourceGroupPatchForUser(
+      supabase,
+      userId,
+      subscription.metadata?.source_group
+    );
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
       .upsert({
         user_id: userId,
         ...isActivePatch,
+        ...sourceGroupPatch,
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,

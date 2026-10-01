@@ -16,6 +16,7 @@ import {
   type FullStripeSubscriptionLike,
   type LinkSupabaseLike,
 } from "../_shared/subscription-link.ts";
+import { normalizePricingSourceGroup } from "../_shared/pricing-source.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -47,9 +48,13 @@ serve(async (req) => {
       returnUrl,
       planType = "standard",
       duration = 1,
+      sourceGroup: rawSourceGroup,
     } = await req.json();
 
-    logDebug("リクエスト受信", { returnUrl, planType, duration, environment: ENVIRONMENT });
+    // #213 A2: 料金ページの出どころ。9グループ以外（無し・不正）は null=直接扱い
+    const sourceGroup = normalizePricingSourceGroup(rawSourceGroup);
+
+    logDebug("リクエスト受信", { returnUrl, planType, duration, sourceGroup, environment: ENVIRONMENT });
 
     if (!returnUrl) {
       throw new Error("リダイレクトURLが指定されていません");
@@ -270,6 +275,13 @@ serve(async (req) => {
       sessionMetadata.replace_subscription_id = activeSubscriptions[0].stripe_subscription_id;
     }
 
+    // #213 A2: 新規契約のときだけ出どころを載せる（プラン変更=既存契約ありは載せない）。
+    // session と subscription の両方に載せる（webhook のイベント順序に依存しないため）。
+    const attachSourceGroup = sourceGroup !== null && activeSubscriptions.length === 0;
+    if (attachSourceGroup) {
+      sessionMetadata.source_group = sourceGroup;
+    }
+
     // セッション設定オブジェクト
     const sessionConfig: any = {
       customer: stripeCustomerId,
@@ -288,6 +300,12 @@ serve(async (req) => {
       allow_promotion_codes: true, // クーポンコード入力欄を表示
     };
 
+    if (attachSourceGroup) {
+      sessionConfig.subscription_data = {
+        metadata: { source_group: sourceGroup },
+      };
+    }
+
     // 【重要】既存サブスクリプションのキャンセルはWebhook（checkout.session.completed）で実行
     // Checkout作成「前」にキャンセルすると、ユーザーが離脱時に無課金状態になるため
     // stripe-webhook/index.ts Lines 178-196 でキャンセル処理を実行
@@ -299,6 +317,7 @@ serve(async (req) => {
       url: session.url,
       planType,
       duration,
+      sourceGroup: attachSourceGroup ? sourceGroup : null,
     });
 
     // セッションURLをフロントエンドに返す
