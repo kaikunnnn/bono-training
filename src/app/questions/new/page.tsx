@@ -8,6 +8,7 @@ import { BOARD_CATEGORIES } from "@/lib/questions/categories";
 import type { QuestionCategory } from "@/types/sanity";
 import { PostFlowClient } from "@/components/questions/post-flow/PostFlowClient";
 import { isProfileIncomplete } from "@/lib/profile-utils";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 /** プレビュー用モックカテゴリ（BOARD_CATEGORIES の post から生成。contact は Sanity に存在しない） */
 const PREVIEW_CATEGORIES: QuestionCategory[] = BOARD_CATEGORIES.filter(
@@ -81,7 +82,7 @@ export default async function Page({ searchParams }: PageProps) {
               投稿はメンバーのみご利用いただけます
             </p>
             <Button asChild>
-              <Link href="/subscription">プランを確認する</Link>
+              <PricingCtaLink group="questions">プランを確認する</PricingCtaLink>
             </Button>
           </CardContent>
         </Card>

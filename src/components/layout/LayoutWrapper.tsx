@@ -4,6 +4,7 @@ import { Bell } from "lucide-react";
 import { Layout } from "./Layout";
 import { UserProvider } from "./UserProvider";
 import { StaleSessionCleaner } from "@/components/auth/StaleSessionCleaner";
+import { SiteVisitRecorder } from "@/components/analytics/SiteVisitRecorder";
 import { NotificationBellServer } from "@/components/notifications/NotificationBellServer";
 import { BoardNewDotServer } from "@/components/questions/BoardNewDotServer";
 
@@ -62,6 +63,8 @@ export async function LayoutWrapper({ children }: LayoutWrapperProps) {
   return (
     <Layout user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot}>
       {hasStaleAuthCookie && <StaleSessionCleaner />}
+      {/* 活動ログ site_visit（#213 A1）: ログイン中のみ・1人1日1回 */}
+      {user && <SiteVisitRecorder userId={user.id} />}
       {children}
     </Layout>
   );

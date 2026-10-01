@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, ExternalLink, Lock, Play } from "lucide-react";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -201,7 +202,7 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
                   動画レビューと詳細なフィードバックは、Standard・Feedbackプランのメンバー限定コンテンツです。
                 </p>
                 <Button asChild>
-                  <Link href="/subscription">プランを見る</Link>
+                  <PricingCtaLink group="feedback">プランを見る</PricingCtaLink>
                 </Button>
               </div>
             </CardContent>

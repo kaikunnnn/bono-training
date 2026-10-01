@@ -5,6 +5,7 @@ import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import { PostQuestionButton } from "@/components/questions/PostQuestionButton";
 import { QuestionCard } from "@/components/questions/QuestionCard";
 import { BoardSeenRecorder } from "@/components/questions/BoardSeenRecorder";
+import { ActivityRecorder } from "@/components/analytics/ActivityRecorder";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { traceServerStep } from "@/lib/performance/server-trace";
 
@@ -137,6 +138,8 @@ export default function Page() {
       <Suspense fallback={null}>
         <BoardSeenBoundary />
       </Suspense>
+      {/* 活動ログ questions_view（#213 A1）。未ログインは記録されない */}
+      <ActivityRecorder eventType="questions_view" path="/questions" />
       {/* センター揃えヘッダー（Figma 13:1437）。
           Figma原値は上余白48px(pt-12)だが、グローバルヘッダーが上に積み上がるため
           体感が広すぎる。24px(pt-6)に詰めて調整（T4・レビューで微調整）。 */}

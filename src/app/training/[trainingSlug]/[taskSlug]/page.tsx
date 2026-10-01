@@ -12,6 +12,7 @@ import ContentSection from "@/components/training/ContentSection";
 import DesignSolutionSection from "@/components/training/DesignSolutionSection";
 import { parseContentSections } from "@/utils/parseContentSections";
 import type { SanitySection } from "@/types/training";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 interface PageProps {
   params: Promise<{ trainingSlug: string; taskSlug: string }>;
@@ -149,12 +150,12 @@ export default async function TaskDetailPage({ params }: PageProps) {
                             <div className="text-orange-600 text-sm mb-4">
                               このセクションはメンバー限定コンテンツです。
                             </div>
-                            <Link
-                              href="/subscription"
+                            <PricingCtaLink
+                              group="content_lock"
                               className="inline-block bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg text-sm transition-colors"
                             >
                               プランを確認
-                            </Link>
+                            </PricingCtaLink>
                           </div>
                         )
                       ) : (

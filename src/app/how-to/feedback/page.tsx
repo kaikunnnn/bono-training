@@ -12,6 +12,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import TopSectionHeading from "@/components/top2/TopSectionHeading";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 const FEEDBACK_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSe4lS_upTGN99sktg7CPFQtx3A3dgLYpvnuzspWH9lc2T2JDA/viewform?usp=header";
@@ -45,7 +46,7 @@ function ApplyButton({
       size="large"
       className={`bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold ${className ?? ""}`}
     >
-      <Link href="/subscription">グロースプランで応募 →</Link>
+      <PricingCtaLink group="feedback">グロースプランで応募 →</PricingCtaLink>
     </Button>
   );
 }

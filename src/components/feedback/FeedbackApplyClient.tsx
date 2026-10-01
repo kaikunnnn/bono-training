@@ -11,6 +11,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
+import { withPricingFrom } from "@/lib/activity-utils";
+import { trackPricingCtaClick } from "@/lib/activity-client";
 
 interface FeedbackApplyClientProps {
   isLoggedIn: boolean;
@@ -32,7 +35,8 @@ export function FeedbackApplyClient({
       return;
     }
     if (!canApply) {
-      router.push("/subscription");
+      trackPricingCtaClick("feedback");
+      router.push(withPricingFrom("/subscription", "feedback"));
       return;
     }
     router.push("/feedback-apply/submit");
@@ -45,7 +49,7 @@ export function FeedbackApplyClient({
     if (!isLoggedIn || !canApply) {
       const headerHref = !isLoggedIn
         ? "/login?redirectTo=/feedback-apply/submit"
-        : "/subscription";
+        : withPricingFrom("/subscription", "feedback");
 
       return (
         <Button
@@ -53,7 +57,10 @@ export function FeedbackApplyClient({
           size="large"
           className="bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold"
         >
-          <Link href={headerHref}>
+          <Link
+            href={headerHref}
+            onClick={isLoggedIn ? () => trackPricingCtaClick("feedback") : undefined}
+          >
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -77,7 +84,7 @@ export function FeedbackApplyClient({
   if (!isLoggedIn || !canApply) {
     const ctaHref = !isLoggedIn
       ? "/login?redirectTo=/feedback-apply/submit"
-      : "/subscription";
+      : withPricingFrom("/subscription", "feedback");
 
     return (
       <>
@@ -86,7 +93,10 @@ export function FeedbackApplyClient({
           size="lg"
           className="bg-slate-900 hover:bg-slate-800 text-white rounded-xl px-8 py-3 shadow-sm"
         >
-          <Link href={ctaHref}>
+          <Link
+            href={ctaHref}
+            onClick={isLoggedIn ? () => trackPricingCtaClick("feedback") : undefined}
+          >
             {buttonText}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
@@ -94,12 +104,12 @@ export function FeedbackApplyClient({
 
         <p className="mt-4 text-sm text-muted-foreground">
           15分フィードバックはStandard・Growthプラン限定の機能です。
-          <Link
-            href="/subscription"
+          <PricingCtaLink
+            group="feedback"
             className="text-primary underline ml-1"
           >
             プランを確認する
-          </Link>
+          </PricingCtaLink>
         </p>
       </>
     );

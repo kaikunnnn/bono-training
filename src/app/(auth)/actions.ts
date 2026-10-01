@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { translateAuthError } from "@/lib/auth-error-messages";
 import { reportAuthError } from "@/lib/monitoring";
+import { withSignUpMarker } from "@/lib/auth-markers";
 
 export interface AuthResult {
   error?: string;
@@ -132,7 +133,9 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
   // Checkout へ遷移するためトーストが見えない/一瞬で流れる → フラグを付けない。
   // 注意: redirect() は NEXT_REDIRECT を throw して動作するため try/catch の外で呼ぶ。
   // オープンリダイレクト対策（F-5）: 外部URLは "/" に落とす。内部パス+queryは保持。
-  const target = sanitizeRedirect(redirectTo);
+  // GA4 sign_up（#213 A1）: 新規作成の着地だけに `signup=1` を付け、SignUpTracker が
+  // 1回だけ送って消す。ログインには付かないので二重発火しない。intentフローも計測する。
+  const target = withSignUpMarker(sanitizeRedirect(redirectTo));
   if (target.includes("intent_plan")) {
     redirect(target);
   }

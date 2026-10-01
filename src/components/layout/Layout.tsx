@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { WelcomeToast } from "@/components/auth/WelcomeToast";
+import { SignUpTracker } from "@/components/analytics/SignUpTracker";
 import { Menu } from "lucide-react";
 
 interface LayoutProps {
@@ -86,6 +87,7 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
         <Toaster />
         <Suspense fallback={null}>
           <WelcomeToast />
+        <SignUpTracker />
         </Suspense>
       </>
     );
@@ -188,6 +190,7 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
       <Toaster />
       <Suspense fallback={null}>
         <WelcomeToast />
+        <SignUpTracker />
       </Suspense>
     </div>
   );

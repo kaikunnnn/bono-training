@@ -18,6 +18,7 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { trackSuccessNextClick } from "@/lib/activity-client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, ArrowRight } from "lucide-react";
 import { getPlanDisplayName } from "@/lib/subscription-utils";
@@ -70,7 +71,7 @@ export const ChangeSubscriberSuccessContent: React.FC<
                 {error}
               </p>
               <Button asChild>
-                <Link href="/account">アカウント設定を開く</Link>
+                <Link href="/account" onClick={() => trackSuccessNextClick("/account")}>アカウント設定を開く</Link>
               </Button>
             </div>
           </CardContent>
@@ -133,7 +134,7 @@ export const ChangeSubscriberSuccessContent: React.FC<
             {/* 主役CTA: 学習に戻る（光沢スイープ） */}
             <CtaSheen className="rounded-[16px] mt-6 block">
               <Button asChild variant="primary" size="large" className="w-full">
-                <Link href="/mypage">
+                <Link href="/mypage" onClick={() => trackSuccessNextClick("/mypage")}>
                   学習に戻る
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -146,6 +147,7 @@ export const ChangeSubscriberSuccessContent: React.FC<
         <Reveal index={2} className="py-5 text-center block">
           <Link
             href="/account"
+            onClick={() => trackSuccessNextClick("/account")}
             className="text-sm text-text-primary underline underline-offset-2 font-noto-sans-jp"
           >
             プランの確認・変更はアカウント設定から

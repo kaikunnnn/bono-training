@@ -4,6 +4,8 @@ import { useState } from "react";
 import { LogIn, UserPlus, ExternalLink, CheckCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { withPricingFrom } from "@/lib/activity-utils";
+import { trackPricingCtaClick } from "@/lib/activity-client";
 import {
   Modal,
   ModalContainer,
@@ -49,7 +51,8 @@ export default function EventRegistrationButton({
   };
 
   const handleMemberRegister = () => {
-    router.push("/subscription");
+    trackPricingCtaClick("event");
+    router.push(withPricingFrom("/subscription", "event"));
   };
 
   // メンバーの場合: 参加申し込みボタンを表示

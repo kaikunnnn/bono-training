@@ -10,6 +10,7 @@ import {
   removeLessonCompletion,
 } from "@/lib/services/progress";
 import { useArticleCompletionOptional } from "@/contexts/ArticleCompletionContext";
+import { logActivity } from "@/lib/activity-client";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -80,7 +81,14 @@ export function CompletionButton({
       // rollback
       applyState(!nextState);
       toast({ title: result.message, variant: "destructive" });
-    } else if (!completionCtx) {
+      return;
+    }
+
+    // 活動ログ article_complete（#213 A1）: 完了にできた時だけ（未完了に戻す操作は記録しない）
+    if (nextState) {
+      logActivity({ eventType: "article_complete", articleId, lessonId });
+    }
+    if (!completionCtx) {
       toast({ title: result.message });
     }
   };

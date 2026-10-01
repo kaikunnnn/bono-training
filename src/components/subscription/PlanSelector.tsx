@@ -9,6 +9,7 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { trackViewPlans } from "@/lib/analytics";
+import { parsePricingFrom } from "@/lib/activity-utils";
 import { PlanCard } from "@/components/subscription/PlanCard";
 import type { PlanType, PlanDuration } from "@/types/subscription";
 
@@ -50,9 +51,18 @@ export function PlanSelector({
   const [selectedDuration, setSelectedDuration] = useState<PlanDuration>(1);
 
   // プランページ表示イベント（mainと同じ: 初回表示時に1回だけ発火）
+  // from: CTA の出どころ（?from=）。document.referrer はクライアント遷移で更新されないため
   useEffect(() => {
     const referrer = document.referrer || undefined;
-    trackViewPlans(referrer);
+    let from: string | undefined;
+    try {
+      from = parsePricingFrom(
+        new URLSearchParams(window.location.search).get("from")
+      );
+    } catch {
+      from = undefined;
+    }
+    trackViewPlans(referrer, from);
   }, []);
 
   return (

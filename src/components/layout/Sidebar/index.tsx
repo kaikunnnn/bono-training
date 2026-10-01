@@ -10,6 +10,8 @@ import { SidebarMenuItem } from "./SidebarMenuItem";
 import { MenuIcons } from "./icons";
 import { ICON_SIZE } from "./icon-utils";
 import { Home2 } from "iconsax-react";
+import { withPricingFrom } from "@/lib/activity-utils";
+import { trackPricingCtaClick } from "@/lib/activity-client";
 
 // 旧BONOサイト（Webflow）。ドメイン切替後は legacy サブドメインから提供する。
 const OLD_BONO_URL = "https://legacy.bo-no.design";
@@ -133,7 +135,8 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
       {/* PC(lg以上)では「その他」をサイドバー下端に固定。モバイルSheet内では通常フロー */}
       <SidebarMenuGroup label="その他" className="lg:mt-auto lg:pb-6">
         <SidebarMenuItem
-          href="/subscription"
+          href={withPricingFrom("/subscription", "nav")}
+          onClick={() => trackPricingCtaClick("nav")}
           icon={<MenuIcons.pricing size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/subscription")}
         >

@@ -23,7 +23,8 @@ import { PlanCards } from "@/components/pricing/PlanCards";
 import { PlanDetail } from "@/components/pricing/PlanDetail";
 import { getPlanPriceView } from "@/lib/pricing/price";
 import { createCheckoutSession } from "@/lib/services/stripe";
-import { trackBeginCheckout } from "@/lib/analytics";
+import { trackBeginCheckout, trackViewPlans } from "@/lib/analytics";
+import { parsePricingFrom } from "@/lib/activity-utils";
 
 interface PricingFinalProps {
   /** 実績・アウトプット（Server Component で Sanity 取得済みの ReactNode） */
@@ -63,6 +64,16 @@ export function PricingFinal({
   const pathname = usePathname();
   // intent の多重消費防止（同一マウント中に一度だけ自動 checkout を起動する）。
   const intentConsumed = useRef(false);
+
+  // GA4 view_plans（#213 A1）: 料金ページ表示時に1回。from=CTA の出どころ（?from=）。
+  // document.referrer はクライアント遷移で更新されないため、出どころは from で見る。
+  const viewPlansTracked = useRef(false);
+  const fromParam = parsePricingFrom(searchParams.get("from"));
+  useEffect(() => {
+    if (viewPlansTracked.current) return;
+    viewPlansTracked.current = true;
+    trackViewPlans(document.referrer || undefined, fromParam);
+  }, [fromParam]);
 
   // 上下 2 つの PlanCards / PlanDetail に共通で渡す購読状態。
   const subscriptionProps = {

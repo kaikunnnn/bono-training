@@ -22,6 +22,7 @@ import { detectCompletionLevelClient } from "@/lib/completion-detection-client";
 import { useCelebration } from "@/hooks/useCelebration";
 import dynamic from "next/dynamic";
 import { trackArticleView } from "@/lib/analytics";
+import { logActivity } from "@/lib/activity-client";
 import { getLessonProgress } from "@/lib/services/progress";
 import { mergeCompletedArticleIds } from "./article-progress-state";
 
@@ -70,7 +71,13 @@ export default function ArticleDetailClient({
       lessonId: article.lessonInfo?._id,
       category: article.articleType,
     });
-  }, [article._id, article.title, article.lessonInfo?._id, article.articleType]);
+    // 活動ログ article_view（#213 A1）。未ログインは記録されない
+    logActivity({
+      eventType: "article_view",
+      articleId: article._id,
+      lessonId: article.lessonInfo?._id || lessonId || undefined,
+    });
+  }, [article._id, article.title, article.lessonInfo?._id, article.articleType, lessonId]);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDesktopSideNavOpen, setIsDesktopSideNavOpen] = useState<boolean>(

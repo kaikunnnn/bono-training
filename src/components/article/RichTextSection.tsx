@@ -7,6 +7,12 @@ import Link from "next/link";
 import Image from "next/image";
 import React from "react";
 import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
+import { CommunityJoinLink } from "@/components/analytics/CommunityJoinLink";
+
+/** Slack ワークスペースへの招待リンク（join.slack.com）か */
+function isSlackInviteUrl(href: string): boolean {
+  return href.startsWith("https://join.slack.com/");
+}
 
 interface RichTextSectionProps {
   content: PortableTextBlock[];
@@ -202,6 +208,21 @@ const RichTextSection = ({
       // リンク
       link: ({ children, value }) => {
         const href = value?.href || "#";
+        // Slack コミュニティの招待リンク（オンボーディング記事等）はクリックを
+        // 活動ログ community_join_click に記録する（#213 A1）。見た目は同じ。
+        if (isSlackInviteUrl(href)) {
+          return (
+            <CommunityJoinLink
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              placement="article_rich_text"
+              className="text-text-link underline hover:text-text-link-hover transition-colors [overflow-wrap:anywhere]"
+            >
+              {children}
+            </CommunityJoinLink>
+          );
+        }
         return (
           <a
             href={href}
