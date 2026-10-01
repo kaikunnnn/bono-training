@@ -61,6 +61,13 @@ CREATE POLICY "member_activity_events_insert_own"
   TO authenticated
   WITH CHECK (auth.uid() = user_id);
 
+-- 最小権限: Supabase は public の新規表に anon/authenticated へ全権限を付けるため、
+-- RLS に頼るだけでなく権限自体を絞る（TRUNCATE は RLS の対象外のため特に外す）。
+-- 未ログイン(anon)は一切触れない。ログイン会員は INSERT のみ（本人行は RLS で強制）。
+REVOKE ALL ON public.member_activity_events FROM anon;
+REVOKE ALL ON public.member_activity_events FROM authenticated;
+GRANT INSERT ON public.member_activity_events TO authenticated;
+
 COMMENT ON TABLE public.member_activity_events IS
   '会員の活動ログ（#213 A1）: 1イベント1行。本人insertのみ・利用者selectなし。ダッシュボードは読み取り専用ロールで集計';
 
