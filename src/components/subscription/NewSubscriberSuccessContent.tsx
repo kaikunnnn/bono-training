@@ -17,6 +17,7 @@
 import React, { useEffect, useRef } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { trackSuccessNextClick } from "@/lib/activity-client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, ArrowRight } from "lucide-react";
 import { getPlanDisplayName } from "@/lib/subscription-utils";
@@ -81,7 +82,7 @@ export const NewSubscriberSuccessContent: React.FC<
                 {error}
               </p>
               <Button asChild>
-                <Link href="/account">アカウント設定を開く</Link>
+                <Link href="/account" onClick={() => trackSuccessNextClick("/account")}>アカウント設定を開く</Link>
               </Button>
             </div>
           </CardContent>
@@ -160,7 +161,7 @@ function NewSubscriberSuccessView({
             {/* 主役CTA（光沢スイープ） */}
             <CtaSheen className="rounded-[16px]">
               <Button asChild variant="primary" size="large" className="w-full">
-                <Link href={ONBOARDING_ENTRY_HREF}>
+                <Link href={ONBOARDING_ENTRY_HREF} onClick={() => trackSuccessNextClick(ONBOARDING_ENTRY_HREF)}>
                   使い方をセットアップする
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -219,6 +220,7 @@ function NewSubscriberSuccessView({
               プラン情報を反映中です。数分後に
               <Link
                 href="/account"
+                onClick={() => trackSuccessNextClick("/account")}
                 className="text-text-primary underline underline-offset-2"
               >
                 アカウント設定
@@ -232,6 +234,7 @@ function NewSubscriberSuccessView({
         <Reveal index={3} className="py-5 text-center block">
           <Link
             href="/account"
+            onClick={() => trackSuccessNextClick("/account")}
             className="text-sm text-text-primary underline underline-offset-2 font-noto-sans-jp"
           >
             プランの確認・変更はアカウント設定から

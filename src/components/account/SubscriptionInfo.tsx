@@ -2,12 +2,12 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCustomerPortalUrl } from "@/lib/services/stripe";
 import { getPlanDisplayName } from "@/lib/subscription-utils";
 import type { PlanType } from "@/types/subscription";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 interface SubscriptionInfoProps {
   planType: PlanType | null;
@@ -104,12 +104,12 @@ export default function SubscriptionInfo({
           <p className="font-noto-sans-jp text-sm text-yellow-800 mb-2">
             ⚠️ サブスクリプションがキャンセルされています
           </p>
-          <Link
-            href="/subscription"
+          <PricingCtaLink
+            group="other"
             className="inline-flex items-center text-blue-600 hover:text-blue-800 font-noto-sans-jp text-sm font-medium"
           >
             プランを再開する →
-          </Link>
+          </PricingCtaLink>
         </div>
       )}
 
@@ -150,7 +150,7 @@ export default function SubscriptionInfo({
             asChild
             className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 h-auto rounded-lg shadow-md hover:shadow-lg font-noto-sans-jp text-sm"
           >
-            <Link href="/subscription">プランを見る</Link>
+            <PricingCtaLink group="other">プランを見る</PricingCtaLink>
           </Button>
         </div>
       )}

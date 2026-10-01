@@ -23,6 +23,8 @@ import {
   SLACK_ANNOUNCEMENTS_URL,
 } from "@/lib/external-links";
 import HowToTocLayout from "@/components/how-to/HowToTocLayout";
+import { CommunityJoinLink } from "@/components/analytics/CommunityJoinLink";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 import HowToSection from "@/components/how-to/HowToSection";
 import HowToSubheading from "@/components/how-to/HowToSubheading";
 
@@ -69,20 +71,21 @@ function JoinButton({
   if (isMember) {
     return (
       <Button asChild variant="primary" size="large" className={className}>
-        <Link
+        <CommunityJoinLink
           href={SLACK_COMMUNITY_INVITE_URL}
           target="_blank"
           rel="noopener noreferrer"
+          placement="how_to_community"
         >
           コミュニティに参加する →
-        </Link>
+        </CommunityJoinLink>
       </Button>
     );
   }
 
   return (
     <Button asChild variant="primary" size="large" className={className}>
-      <Link href="/subscription">メンバーになって参加する →</Link>
+      <PricingCtaLink group="other">メンバーになって参加する →</PricingCtaLink>
     </Button>
   );
 }

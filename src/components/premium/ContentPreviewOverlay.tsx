@@ -3,6 +3,7 @@
 import { Lock, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 interface ContentPreviewOverlayProps {
   isLoggedIn?: boolean;
@@ -55,9 +56,9 @@ export default function ContentPreviewOverlay({
               size="large"
               className="flex-1 font-noto-sans-jp text-base"
             >
-              <Link href="/subscription">
+              <PricingCtaLink group="content_lock">
                 メンバーシップ登録へ
-              </Link>
+              </PricingCtaLink>
             </Button>
           ) : (
             <>
@@ -77,10 +78,10 @@ export default function ContentPreviewOverlay({
                 size="large"
                 className="flex-1 font-noto-sans-jp text-base"
               >
-                <Link href="/subscription">
+                <PricingCtaLink group="content_lock">
                   <UserPlus className="mr-2 h-4 w-4" />
                   メンバーシップ登録へ
-                </Link>
+                </PricingCtaLink>
               </Button>
             </>
           )}

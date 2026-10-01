@@ -1,7 +1,6 @@
 import { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import {
   getGuideFromSanity,
   getGuidesByCategoryFromSanity,
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
 import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
 import { guideSeoDescription } from "@/lib/seo/guideDescriptions";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -126,7 +126,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
                 メンバーになってすべてのコンテンツにアクセスしましょう。
               </p>
               <Button asChild>
-                <Link href="/subscription">プランを見る</Link>
+                <PricingCtaLink group="other">プランを見る</PricingCtaLink>
               </Button>
             </div>
           </div>

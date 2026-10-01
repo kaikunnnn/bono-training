@@ -3,6 +3,7 @@
 import { Lock, LogIn, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 interface PremiumVideoLockProps {
   isLoggedIn?: boolean;
@@ -58,9 +59,9 @@ export default function PremiumVideoLock({
               size="large"
               className="flex-1 font-noto-sans-jp text-base"
             >
-              <Link href="/subscription">
+              <PricingCtaLink group="lesson_lock">
                 メンバーシップ登録へ
-              </Link>
+              </PricingCtaLink>
             </Button>
           ) : (
             <>
@@ -80,10 +81,10 @@ export default function PremiumVideoLock({
                 size="large"
                 className="flex-1 font-noto-sans-jp text-base"
               >
-                <Link href="/subscription">
+                <PricingCtaLink group="lesson_lock">
                   <UserPlus className="mr-2 h-4 w-4" />
                   メンバーシップ登録へ
-                </Link>
+                </PricingCtaLink>
               </Button>
             </>
           )}

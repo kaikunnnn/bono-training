@@ -1,6 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 /**
  * ヒーロー（新トップページ /dev/top5 / HeroSection）
@@ -28,7 +28,7 @@ export function MembershipCta() {
   return (
     <div className="flex max-w-full flex-wrap items-center gap-4 pt-6">
       <Button variant="primary" size="top-cta" className="w-fit" asChild>
-        <Link href="/subscription">メンバーになってはじめる</Link>
+        <PricingCtaLink group="top">メンバーになってはじめる</PricingCtaLink>
       </Button>
     </div>
   );

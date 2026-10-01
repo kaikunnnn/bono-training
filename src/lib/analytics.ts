@@ -173,10 +173,13 @@ export const trackSubscriptionStart = (planName: string, planPrice: number) => {
 
 /**
  * プランページ表示
+ * @param referrer document.referrer（クライアント遷移では更新されないため参考値）
+ * @param from 料金ページへ来たCTAの出どころ（URL の `?from=` / source_group）
  */
-export const trackViewPlans = (referrer?: string) => {
+export const trackViewPlans = (referrer?: string, from?: string) => {
   trackEvent('view_plans', {
     referrer: referrer,
+    from: from,
   });
 };
 

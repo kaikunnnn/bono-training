@@ -9,6 +9,8 @@ import {
   FOOTER_SNS,
   type FooterLink,
 } from "./footer-links";
+import { withPricingFrom } from "@/lib/activity-utils";
+import { trackPricingCtaClick } from "@/lib/activity-client";
 
 interface FooterProps {
   className?: string;
@@ -113,6 +115,18 @@ function FooterAnchor({ link }: { link: FooterLink }) {
       <a href={link.href} target="_blank" rel="noopener noreferrer" className={cls}>
         {link.label}
       </a>
+    );
+  }
+  // 料金ページへのリンクは出どころ（nav）を計測する（#213 A1 pricing_cta_click）
+  if (link.href === "/subscription") {
+    return (
+      <IntentPrefetchLink
+        href={withPricingFrom(link.href, "nav")}
+        onClick={() => trackPricingCtaClick("nav")}
+        className={cls}
+      >
+        {link.label}
+      </IntentPrefetchLink>
     );
   }
   return (

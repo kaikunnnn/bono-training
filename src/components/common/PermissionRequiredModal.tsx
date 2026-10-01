@@ -7,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Modal, ModalContainer, ModalClose } from "@/components/ui/modal";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
+import {
+  withPricingFrom,
+  type PricingCtaSourceGroup,
+} from "@/lib/activity-utils";
+import { trackPricingCtaClick } from "@/lib/activity-client";
 
 interface PermissionRequiredModalProps {
   open: boolean;
@@ -21,6 +26,8 @@ interface PermissionRequiredModalProps {
   badgeLabel?: string | null;
   /** アイコンエリアの中身。省略時 Lock */
   icon?: React.ReactNode;
+  /** 「メンバー登録へ」の出どころ（料金ページCTAの計測用）。省略時 questions */
+  pricingSourceGroup?: PricingCtaSourceGroup;
 }
 
 const DEFAULT_TITLE = "投稿にはメンバーシップが必要です";
@@ -36,12 +43,18 @@ export function PermissionRequiredModal({
   description = DEFAULT_DESCRIPTION,
   badgeLabel = "メンバー限定",
   icon,
+  pricingSourceGroup = "questions",
 }: PermissionRequiredModalProps) {
   const router = useRouter();
 
   const goTo = (href: string) => {
     onOpenChange(false);
     router.push(href);
+  };
+
+  const goToPricing = () => {
+    trackPricingCtaClick(pricingSourceGroup);
+    goTo(withPricingFrom("/subscription", pricingSourceGroup));
   };
 
   return (
@@ -88,7 +101,7 @@ export function PermissionRequiredModal({
               <Button
                 type="button"
                 className="h-10 w-full"
-                onClick={() => goTo("/subscription")}
+                onClick={goToPricing}
               >
                 <UserRoundPlus className="h-4 w-4" />
                 メンバー登録へ
@@ -110,7 +123,7 @@ export function PermissionRequiredModal({
                   type="button"
                   variant="default"
                   className="h-10 flex-1"
-                  onClick={() => goTo("/subscription")}
+                  onClick={goToPricing}
                 >
                   <UserRoundPlus className="h-4 w-4" />
                   メンバー登録へ

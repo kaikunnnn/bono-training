@@ -13,6 +13,7 @@ import {
 import { emptyReactionCounts } from "@/lib/services/questions-utils";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
 import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
+import { ActivityRecorder } from "@/components/analytics/ActivityRecorder";
 import { extractPreviewText } from "@/lib/portable-text-utils";
 import {
   QuestionCommentsBoundary,
@@ -242,6 +243,15 @@ export default async function Page({ params }: PageProps) {
           mode="href": 履歴戻りだと投稿完了→詳細と来たとき投稿フローに戻ってしまうため、
           常に /questions へ遷移する（#137-0715 バグ修正） */}
       <BackButton label="掲示板へ戻る" href="/questions" mode="href" />
+
+      {/* 活動ログ questions_view（#213 A1）: ログイン中のみ */}
+      {currentUserId && (
+        <ActivityRecorder
+          eventType="questions_view"
+          path={`/questions/${slug}`}
+          meta={{ question_id: question._id }}
+        />
+      )}
 
       {/*
         タイトルブロック + 元投稿カードを PostActions（Client）で包み、

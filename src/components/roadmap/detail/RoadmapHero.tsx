@@ -14,6 +14,8 @@ import { BackButton } from "@/components/common/BackButton";
 import type { GradientPreset } from "@/types/sanity-roadmap";
 import { getGradientStyle } from "@/types/sanity-roadmap";
 import { formatTitleWithLineBreaks, stripLineBreakMarker } from "@/utils/textFormat";
+import { withPricingFrom } from "@/lib/activity-utils";
+import { trackPricingCtaClick } from "@/lib/activity-client";
 
 // SVGマスクパス
 const MASK_DESKTOP = "/shapes/roadmap-hero-shape-flexible.svg"; // 振幅2.1%
@@ -41,12 +43,18 @@ interface RoadmapHeroProps {
   isSubscribed?: boolean;
 }
 
-const PrimaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
+const PrimaryCTAButton: React.FC<{
+  href: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}> = ({
   href,
   children,
+  onClick,
 }) => (
   <Link
     href={href}
+    onClick={onClick}
     className="w-full sm:flex-1 flex items-center justify-center h-12 bg-white border border-white/90 rounded-[14px] text-[14px] font-bold text-cta-primary tracking-[0.35px] shadow-[0_4px_8px_rgba(0,0,0,0.25)] hover:bg-gray-50 transition-colors"
   >
     {children}
@@ -254,7 +262,10 @@ export default function RoadmapHero({
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-                  <PrimaryCTAButton href="/subscription">
+                  <PrimaryCTAButton
+                    href={withPricingFrom("/subscription", "roadmap")}
+                    onClick={() => trackPricingCtaClick("roadmap")}
+                  >
                     メンバーになってはじめる
                   </PrimaryCTAButton>
                   <SecondaryCTAButton href="#curriculum">
