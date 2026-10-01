@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import {
   createStripeClient,
@@ -16,6 +15,7 @@ import {
   type FullStripeSubscriptionLike,
   type LinkSupabaseLike,
 } from "../_shared/subscription-link.ts";
+import { normalizePricingSourceGroup } from "../_shared/pricing-source.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -35,7 +35,8 @@ const logDebug = (message: string, details?: any) => {
   );
 };
 
-serve(async (req) => {
+// 組み込みの Deno.serve を使う（deno.land/std の serve はデプロイ時のバンドルで到達不可になるため）
+Deno.serve(async (req) => {
   // CORSプリフライトリクエストの処理
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -47,9 +48,13 @@ serve(async (req) => {
       returnUrl,
       planType = "standard",
       duration = 1,
+      sourceGroup: rawSourceGroup,
     } = await req.json();
 
-    logDebug("リクエスト受信", { returnUrl, planType, duration, environment: ENVIRONMENT });
+    // #213 A2: 料金ページの出どころ。9グループ以外（無し・不正）は null=直接扱い
+    const sourceGroup = normalizePricingSourceGroup(rawSourceGroup);
+
+    logDebug("リクエスト受信", { returnUrl, planType, duration, sourceGroup, environment: ENVIRONMENT });
 
     if (!returnUrl) {
       throw new Error("リダイレクトURLが指定されていません");
@@ -270,6 +275,13 @@ serve(async (req) => {
       sessionMetadata.replace_subscription_id = activeSubscriptions[0].stripe_subscription_id;
     }
 
+    // #213 A2: 新規契約のときだけ出どころを載せる（プラン変更=既存契約ありは載せない）。
+    // session と subscription の両方に載せる（webhook のイベント順序に依存しないため）。
+    const attachSourceGroup = sourceGroup !== null && activeSubscriptions.length === 0;
+    if (attachSourceGroup) {
+      sessionMetadata.source_group = sourceGroup;
+    }
+
     // セッション設定オブジェクト
     const sessionConfig: any = {
       customer: stripeCustomerId,
@@ -286,7 +298,25 @@ serve(async (req) => {
       metadata: sessionMetadata,
       locale: "ja", // 日本語UI
       allow_promotion_codes: true, // クーポンコード入力欄を表示
+      // 領収書対応（任意入力）: 住所は必要時のみ収集（必須にしない）。
+      billing_address_collection: "auto",
+      // 領収書の宛名（法人名・氏名）を任意で収集。入力があれば webhook で Stripe 顧客名に反映し、
+      // 次回以降の請求書/領収書に表示する（初回は請求確定済みのため反映されない場合あり）。
+      custom_fields: [
+        {
+          key: "receipt_name",
+          label: { type: "custom", custom: "領収書の宛名（法人名・任意）" },
+          type: "text",
+          optional: true,
+        },
+      ],
     };
+
+    if (attachSourceGroup) {
+      sessionConfig.subscription_data = {
+        metadata: { source_group: sourceGroup },
+      };
+    }
 
     // 【重要】既存サブスクリプションのキャンセルはWebhook（checkout.session.completed）で実行
     // Checkout作成「前」にキャンセルすると、ユーザーが離脱時に無課金状態になるため
@@ -299,6 +329,7 @@ serve(async (req) => {
       url: session.url,
       planType,
       duration,
+      sourceGroup: attachSourceGroup ? sourceGroup : null,
     });
 
     // セッションURLをフロントエンドに返す

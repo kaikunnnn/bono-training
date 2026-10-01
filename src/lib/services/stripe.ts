@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/client";
 import type { PlanType, PlanDuration } from "@/types/subscription";
+import { readPricingSource } from "@/lib/pricing-source";
 
 /**
  * Stripeチェックアウトセッションを作成する
@@ -33,7 +34,13 @@ export async function createCheckoutSession(
       throw new Error("認証されていません。ログインしてください。");
     }
 
-    console.log(`Checkout開始: プラン=${planType}, 期間=${duration}ヶ月`);
+    // #213 A2: 料金ページの出どころ（9グループ / 無しは null=直接）。
+    // Edge Function 側でも再検証し、新規契約のときだけ Stripe metadata に載せる。
+    const sourceGroup = readPricingSource();
+
+    console.log(
+      `Checkout開始: プラン=${planType}, 期間=${duration}ヶ月, 出どころ=${sourceGroup ?? "direct"}`
+    );
 
     // Supabase Edge Functionを呼び出してCheckoutセッションを作成
     const response = await supabase.functions.invoke("create-checkout", {
@@ -41,6 +48,7 @@ export async function createCheckoutSession(
         returnUrl,
         planType,
         duration,
+        sourceGroup,
       },
     });
 

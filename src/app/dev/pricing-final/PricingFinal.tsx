@@ -25,6 +25,7 @@ import { getPlanPriceView } from "@/lib/pricing/price";
 import { createCheckoutSession } from "@/lib/services/stripe";
 import { trackBeginCheckout, trackViewPlans } from "@/lib/analytics";
 import { parsePricingFrom } from "@/lib/activity-utils";
+import { rememberPricingSource } from "@/lib/pricing-source";
 
 interface PricingFinalProps {
   /** 実績・アウトプット（Server Component で Sanity 取得済みの ReactNode） */
@@ -73,6 +74,13 @@ export function PricingFinal({
     if (viewPlansTracked.current) return;
     viewPlansTracked.current = true;
     trackViewPlans(document.referrer || undefined, fromParam);
+  }, [fromParam]);
+
+  // #213 A2: 出どころ（from）を決済まで持ち回る（last-click・cookie）。
+  // 有効な from のときだけ上書きし、from 無し（ログイン/登録後の戻り等）では消さない。
+  // 保存値は createCheckoutSession が読み、Stripe metadata.source_group に載る。
+  useEffect(() => {
+    if (fromParam) rememberPricingSource(fromParam);
   }, [fromParam]);
 
   // 上下 2 つの PlanCards / PlanDetail に共通で渡す購読状態。
