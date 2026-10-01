@@ -2,6 +2,8 @@
 
 最初の対象は `/top`（会員）、公開 `/`（ゲスト）。トップ → 記事 → レッスンの順で改善し、会員の学習中のページ移動を優先する。
 
+次に実施する計測、条件付き改善、他エージェントへの分担と完了条件は [`docs/performance-next-tasks.md`](./performance-next-tasks.md) にまとめる。新しい最適化へ着手する前に、同文書の開始条件を確認する。
+
 ## トップの設計ルール
 
 - `NewTopContent` の冒頭で CMS 全件を `await` しない。Hero・固定リンクは同期的なシェル、新着・ガイド・レッスン・実績は独立した Server Component + Suspense とする。
