@@ -5,6 +5,12 @@ import { Layout } from "./Layout";
 import { UserProvider } from "./UserProvider";
 import { StaleSessionCleaner } from "@/components/auth/StaleSessionCleaner";
 import { SiteVisitRecorder } from "@/components/analytics/SiteVisitRecorder";
+import { MemberStatusRecorder } from "@/components/analytics/MemberStatusRecorder";
+import { getSubscriptionStatus } from "@/lib/subscription";
+import {
+  deriveMemberStatus,
+  type MemberStatus,
+} from "@/lib/analytics/member-status";
 import { NotificationBellServer } from "@/components/notifications/NotificationBellServer";
 import { BoardNewDotServer } from "@/components/questions/BoardNewDotServer";
 
@@ -60,9 +66,27 @@ export async function LayoutWrapper({ children }: LayoutWrapperProps) {
     </Suspense>
   ) : null;
 
+  // GA4 ユーザープロパティ member_status（#213 T4）。未ログインは DB を引かない。
+  // getSubscriptionStatus は cache() 済みなので、同じリクエストでページ側が呼んでも1クエリ。
+  // 取得に失敗したら誤った値を送らないよう recorder 自体を出さない。
+  let memberStatus: MemberStatus | null = "anonymous";
+  if (user) {
+    try {
+      const subscription = await getSubscriptionStatus();
+      memberStatus = deriveMemberStatus({
+        isLoggedIn: true,
+        isSubscribed: subscription.isSubscribed,
+      });
+    } catch {
+      memberStatus = null;
+    }
+  }
+
   return (
     <Layout user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot}>
       {hasStaleAuthCookie && <StaleSessionCleaner />}
+      {/* GA4 member_status（#213 T4）: children より前に置き、ページの view_plans 等より先に設定する */}
+      {memberStatus && <MemberStatusRecorder status={memberStatus} />}
       {/* 活動ログ site_visit（#213 A1）: ログイン中のみ・1人1日1回 */}
       {user && <SiteVisitRecorder userId={user.id} />}
       {children}

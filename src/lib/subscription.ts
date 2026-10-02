@@ -5,6 +5,7 @@ import 'server-only'
  *
  * クライアントコンポーネントからは @/lib/subscription-utils を使用すること
  */
+import { cache } from "react";
 import { createClient, getCachedUser } from "@/lib/supabase/server";
 import type { PlanType, SubscriptionState } from "@/types/subscription";
 import { traceServerStep } from "@/lib/performance/server-trace";
@@ -35,8 +36,11 @@ export type {
 
 /**
  * サーバーサイドでサブスクリプション状態を取得
+ *
+ * React cache() でリクエストスコープにメモ化する。LayoutWrapper（GA4 member_status 用）と
+ * 各ページが同じリクエスト内で呼んでも DB クエリは1回で済む。
  */
-export async function getSubscriptionStatus(): Promise<SubscriptionState> {
+export const getSubscriptionStatus = cache(async (): Promise<SubscriptionState> => {
   return traceServerStep("subscription.total", async () => {
     const supabase = await createClient();
 
@@ -117,7 +121,7 @@ export async function getSubscriptionStatus(): Promise<SubscriptionState> {
       hasLearningAccess,
     };
   });
-}
+});
 
 /**
  * サーバーサイドでユーザー情報を取得
