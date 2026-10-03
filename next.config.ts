@@ -60,6 +60,14 @@ const nextConfig: NextConfig = {
         destination: "/contents/:slug",
         permanent: true,
       },
+      // 検索結果が過去に生成していた /lessons/:lesson/:article（実在しないルート）を
+      // 記事ページ /contents/:article へ308で救済。コピー・共有済みのURLを保護する。
+      // /lessons/category/:categoryId は実在ページなので正規表現で除外する。
+      {
+        source: "/lessons/:lesson((?!category/)[^/]+)/:article",
+        destination: "/contents/:article",
+        permanent: true,
+      },
       // フィードバックのやり方ガイドを使い方系(/how-to)配下へ移動。旧URLを308で恒久保護。
       {
         source: "/feedback-apply/guide",
