@@ -15,9 +15,7 @@ export const resolveSearchResultHref = (r: SearchResult): string => {
     case "lesson":
       return `/lessons/${r.slug}`;
     case "article":
-      if (isArticleResult(r) && r.parentLessonSlug) {
-        return `/lessons/${r.parentLessonSlug}/${r.slug}`;
-      }
+      // 記事ページは /contents/:slug のみ（/lessons/:lesson/:article というルートは存在しない）
       return `/contents/${r.slug}`;
     case "guide":
       return `/guide/${r.slug}`;
