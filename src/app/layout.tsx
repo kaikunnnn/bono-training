@@ -6,6 +6,7 @@ import {
 import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
+import { WebVitals } from "@/components/common/WebVitals";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import "./globals.css";
 import "@/styles/blog.css";
@@ -66,6 +67,8 @@ export default function RootLayout({
         className={`${geistMono.variable} ${mplus1.variable} antialiased`}
       >
         <GoogleAnalytics />
+        {/* GA bootstrapの直後に置く。RootLayoutはServer Componentのまま。 */}
+        <WebVitals />
         <ServiceWorkerRegistrar />
         <QueryProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
