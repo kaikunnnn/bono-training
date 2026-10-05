@@ -17,7 +17,11 @@ import {
 import { RegistrationFlowGuide } from "@/components/auth/RegistrationFlowGuide";
 
 interface EventRegistrationButtonProps {
-  registrationUrl: string;
+  /**
+   * Googleフォーム等の申込URL。サイト上申込（#218）のイベントでは渡さない
+   * （その場合、会員には page 側で EventOnsiteRegistration を出し、ここは未ログイン・非会員の案内だけを担う）
+   */
+  registrationUrl?: string;
   isLoggedIn: boolean;
   hasMemberAccess: boolean;
 }
@@ -57,6 +61,7 @@ export default function EventRegistrationButton({
 
   // メンバーの場合: 参加申し込みボタンを表示
   if (isLoggedIn && hasMemberAccess) {
+    if (!registrationUrl) return null;
     return (
       <div className="relative overflow-hidden rounded-lg">
         <Button variant="default" size="large" asChild className="relative">

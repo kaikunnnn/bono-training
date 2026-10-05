@@ -7,6 +7,9 @@ import { getCachedUser } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import RichTextSection from "@/components/article/RichTextSection";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
+import EventOnsiteRegistration from "@/components/event/EventOnsiteRegistration";
+import { isOnsiteRegistrationEvent } from "@/lib/events/onsite-registration";
+import { getMyEventRegistration } from "@/lib/events/registration";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -97,6 +100,27 @@ export default async function EventDetailPage({ params }: PageProps) {
     }
   }
 
+  // サイト上申込（#218）の対象イベントか。対象なら registrationUrl が空でも申込UIを出す
+  const isOnsite = isOnsiteRegistrationEvent(slug);
+  // 会員本人の申込状況（getEvent のキャッシュとは別に毎回最新を読む）
+  const myRegistration =
+    isOnsite && user && hasMemberAccess
+      ? await getMyEventRegistration(event._id, user.id)
+      : null;
+  const showRegistration = isOnsite || !!event.registrationUrl;
+
+  // 申込UI（上部と本文下の2か所で同じものを出す）
+  const registrationUi =
+    isOnsite && user && hasMemberAccess ? (
+      <EventOnsiteRegistration slug={slug} registration={myRegistration} />
+    ) : (
+      <EventRegistrationButton
+        registrationUrl={isOnsite ? undefined : event.registrationUrl}
+        isLoggedIn={!!user}
+        hasMemberAccess={hasMemberAccess}
+      />
+    );
+
   const dateDisplay = getDateDisplay(event);
   const thumbnailSrc = event.thumbnail?.asset?.url || event.thumbnailUrl;
 
@@ -178,14 +202,8 @@ export default async function EventDetailPage({ params }: PageProps) {
               </p>
             )}
 
-            {/* 参加フォームボタン */}
-            {event.registrationUrl && (
-              <EventRegistrationButton
-                registrationUrl={event.registrationUrl}
-                isLoggedIn={!!user}
-                hasMemberAccess={hasMemberAccess}
-              />
-            )}
+            {/* 参加フォームボタン（サイト上申込のイベントは申込UI） */}
+            {showRegistration && registrationUi}
 
             {/* サムネイル画像 */}
             {thumbnailSrc && (
@@ -210,15 +228,11 @@ export default async function EventDetailPage({ params }: PageProps) {
           )}
 
           {/* 下部の参加フォームボタン（本文がある場合のみ） */}
-          {event.registrationUrl &&
+          {showRegistration &&
             event.content &&
             event.content.length > 0 && (
               <div className="w-full max-w-[640px] mx-auto pt-6 border-t border-gray-200 flex justify-center">
-                <EventRegistrationButton
-                  registrationUrl={event.registrationUrl}
-                  isLoggedIn={!!user}
-                  hasMemberAccess={hasMemberAccess}
-                />
+                {registrationUi}
               </div>
             )}
         </div>
