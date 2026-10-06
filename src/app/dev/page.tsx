@@ -26,6 +26,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/event-registration",
+    issue: "#218",
+    title: "イベントのサイト上参加申込：参加者表示と申込UIの状態一覧",
+    summary:
+      "参加者アイコン列（0/1/3/4/5/12人）、申込UIの全状態（未ログイン・非会員・会員の未申込/申込済み/編集中/取り消し確認/エラー）、会員だけに見せるコメント一覧、ページ全体の並び（会員/非会員）。本物のコンポーネントにモックデータを渡して表示。ボタンは何も送信しない。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/content-guide",
     issue: "#212",
     title: "コンテンツガイド：スキル状態の診断プロトタイプ",
