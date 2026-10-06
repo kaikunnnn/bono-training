@@ -215,7 +215,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             <span className="text-sm text-gray-500">（ Event ）</span>
 
             {/* タイトル */}
-            <h1 className="text-3xl md:text-[44px] font-bold text-[#101828] font-rounded-mplus leading-[148%] max-w-[720px] text-balance">
+            <h1 className="text-3xl md:text-5xl lg:text-[52px] font-bold text-[#101828] font-rounded-mplus leading-[148%] max-w-[720px] text-balance">
               {event.title}
             </h1>
 
