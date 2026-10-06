@@ -15,10 +15,39 @@ import {
   REGISTRATION_COMMENT_MAX_LENGTH,
 } from "@/lib/events/onsite-registration";
 
+type RegistrationAction = (
+  prev: EventRegistrationActionResult | null,
+  formData: FormData,
+) => Promise<EventRegistrationActionResult | null>;
+
+export type EventRegistrationActions = {
+  register: RegistrationAction;
+  update: RegistrationAction;
+  cancel: RegistrationAction;
+};
+
+/** 実際の Server Actions（本番のページはこれを使う） */
+const SERVER_ACTIONS: EventRegistrationActions = {
+  register: registerForEvent,
+  update: updateRegistrationComment,
+  cancel: cancelRegistration,
+};
+
+export type RegisteredMode = "view" | "edit" | "confirm-cancel";
+
 interface EventOnsiteRegistrationProps {
   slug: string;
   /** 本人の申込（未申込なら null）。サーバーで毎回最新を読んだ値 */
   registration: { comment: string; updatedAt: string } | null;
+  /**
+   * 以下は /dev/event-registration のプレビュー用（本番のページでは渡さない）。
+   * actions: Server Actions の代わりに呼ぶ関数（プレビューでは何もしない関数を渡す）
+   * initialMode: 申込済みのときの最初の表示（編集中・取り消し確認中を再現する）
+   * initialError: 最初から出しておくエラー文言（エラー表示を再現する）
+   */
+  actions?: EventRegistrationActions;
+  initialMode?: RegisteredMode;
+  initialError?: string;
 }
 
 /**
@@ -33,9 +62,21 @@ interface EventOnsiteRegistrationProps {
 export default function EventOnsiteRegistration({
   slug,
   registration,
+  actions = SERVER_ACTIONS,
+  initialMode = "view",
+  initialError,
 }: EventOnsiteRegistrationProps) {
+  const initialState: EventRegistrationActionResult | null = initialError
+    ? { ok: false, error: initialError }
+    : null;
   if (!registration) {
-    return <RegisterForm slug={slug} />;
+    return (
+      <RegisterForm
+        slug={slug}
+        action={actions.register}
+        initialState={initialState}
+      />
+    );
   }
   // 申込内容が更新されたら（編集・再申込）、編集モードなどの手元の状態をリセットする
   return (
@@ -43,6 +84,9 @@ export default function EventOnsiteRegistration({
       key={registration.updatedAt}
       slug={slug}
       comment={registration.comment}
+      actions={actions}
+      initialMode={initialMode}
+      initialState={initialState}
     />
   );
 }
@@ -90,9 +134,17 @@ function CommentField({
   );
 }
 
-function RegisterForm({ slug }: { slug: string }) {
+function RegisterForm({
+  slug,
+  action,
+  initialState,
+}: {
+  slug: string;
+  action: RegistrationAction;
+  initialState: EventRegistrationActionResult | null;
+}) {
   const [comment, setComment] = useState(DEFAULT_REGISTRATION_COMMENT);
-  const [state, formAction, pending] = useActionState(registerForEvent, null);
+  const [state, formAction, pending] = useActionState(action, initialState);
   const fieldId = `event-register-comment-${useId()}`;
 
   return (
@@ -120,16 +172,29 @@ function RegisterForm({ slug }: { slug: string }) {
   );
 }
 
-function RegisteredView({ slug, comment }: { slug: string; comment: string }) {
-  const [mode, setMode] = useState<"view" | "edit" | "confirm-cancel">("view");
+function RegisteredView({
+  slug,
+  comment,
+  actions,
+  initialMode,
+  initialState,
+}: {
+  slug: string;
+  comment: string;
+  actions: EventRegistrationActions;
+  initialMode: RegisteredMode;
+  initialState: EventRegistrationActionResult | null;
+}) {
+  const [mode, setMode] = useState<RegisteredMode>(initialMode);
   const [draft, setDraft] = useState(comment);
+  // initialState（プレビュー用のエラー）は、いま開いている方（編集 or 取り消し確認）にだけ出す
   const [editState, editAction, editPending] = useActionState(
-    updateRegistrationComment,
-    null,
+    actions.update,
+    initialMode === "edit" ? initialState : null,
   );
   const [cancelState, cancelAction, cancelPending] = useActionState(
-    cancelRegistration,
-    null,
+    actions.cancel,
+    initialMode === "confirm-cancel" ? initialState : null,
   );
   const fieldId = `event-edit-comment-${useId()}`;
 

@@ -8,8 +8,14 @@ import { getSubscriptionStatus } from "@/lib/subscription";
 import RichTextSection from "@/components/article/RichTextSection";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
 import EventOnsiteRegistration from "@/components/event/EventOnsiteRegistration";
+import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
+import EventParticipantList from "@/components/event/EventParticipantList";
 import { isOnsiteRegistrationEvent } from "@/lib/events/onsite-registration";
-import { getMyEventRegistration } from "@/lib/events/registration";
+import {
+  getEventParticipantSummary,
+  getEventParticipantsForMember,
+  getMyEventRegistration,
+} from "@/lib/events/registration";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -102,24 +108,32 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   // サイト上申込（#218）の対象イベントか。対象なら registrationUrl が空でも申込UIを出す
   const isOnsite = isOnsiteRegistrationEvent(slug);
-  // 会員本人の申込状況（getEvent のキャッシュとは別に毎回最新を読む）
-  const myRegistration =
-    isOnsite && user && hasMemberAccess
-      ? await getMyEventRegistration(event._id, user.id)
-      : null;
+  const isOnsiteMember = isOnsite && !!user && hasMemberAccess;
+  // getEvent のキャッシュとは別に、申込状況・参加者は毎回最新を読む（どれも失敗時は「なし」扱い）
+  // - 参加者のアイコンと人数: 誰にでも見せる
+  // - 参加者の名前とコメント: サーバーで会員と確認できたときだけ取得する（非会員には渡さない）
+  const [myRegistration, participantSummary, participants] = await Promise.all([
+    isOnsiteMember ? getMyEventRegistration(event._id, user.id) : null,
+    isOnsite ? getEventParticipantSummary(event._id) : null,
+    isOnsiteMember ? getEventParticipantsForMember(event._id) : null,
+  ]);
   const showRegistration = isOnsite || !!event.registrationUrl;
 
-  // 申込UI（上部と本文下の2か所で同じものを出す）
-  const registrationUi =
-    isOnsite && user && hasMemberAccess ? (
-      <EventOnsiteRegistration slug={slug} registration={myRegistration} />
-    ) : (
-      <EventRegistrationButton
-        registrationUrl={isOnsite ? undefined : event.registrationUrl}
-        isLoggedIn={!!user}
-        hasMemberAccess={hasMemberAccess}
-      />
-    );
+  // 申込UI（上部と本文下の2か所で同じものを出す）。サイト上申込のイベントは真上に参加者アイコンを出す
+  const registrationUi = (
+    <div className="flex w-full flex-col items-center gap-3">
+      {participantSummary && <EventParticipantAvatars {...participantSummary} />}
+      {isOnsiteMember ? (
+        <EventOnsiteRegistration slug={slug} registration={myRegistration} />
+      ) : (
+        <EventRegistrationButton
+          registrationUrl={isOnsite ? undefined : event.registrationUrl}
+          isLoggedIn={!!user}
+          hasMemberAccess={hasMemberAccess}
+        />
+      )}
+    </div>
+  );
 
   const dateDisplay = getDateDisplay(event);
   const thumbnailSrc = event.thumbnail?.asset?.url || event.thumbnailUrl;
@@ -224,6 +238,13 @@ export default async function EventDetailPage({ params }: PageProps) {
           {event.content && event.content.length > 0 && (
             <div className="w-full max-w-[640px] mx-auto">
               <RichTextSection content={event.content} />
+            </div>
+          )}
+
+          {/* 参加者のコメント（会員だけ。本文の後・下部の申込UIの前） */}
+          {participants && participants.length > 0 && (
+            <div className="w-full max-w-[640px] mx-auto">
+              <EventParticipantList participants={participants} />
             </div>
           )}
 

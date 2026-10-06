@@ -46,3 +46,32 @@ export function validateRegistrationComment(
   }
   return { ok: true, comment };
 }
+
+// ---------------------------------------------------------------------------
+// 参加者の表示（#218 スライスD）
+// ---------------------------------------------------------------------------
+
+/** 参加者アイコンを重ねて並べる最大数 */
+export const PARTICIPANT_AVATAR_MAX = 4;
+
+/** この人数以上で「N人が参加中」を出す（1〜4人はアイコンだけ） */
+export const PARTICIPANT_COUNT_THRESHOLD = 5;
+
+/**
+ * 誰にでも見せる参加者の要約（アイコンと人数だけ）。
+ * 名前・コメントは含めない（非会員の props / RSC payload / HTML に入れないため）。
+ */
+export interface EventParticipantSummary {
+  totalCount: number;
+  /** 新しい申込順。最大 PARTICIPANT_AVATAR_MAX 件。null はアイコン未設定 */
+  avatarUrls: (string | null)[];
+}
+
+/** 会員だけに見せる参加者（名前・アイコン・コメント） */
+export interface EventParticipant {
+  id: string;
+  name: string;
+  avatarUrl: string | null;
+  comment: string;
+  createdAt: string;
+}
