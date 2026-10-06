@@ -15,7 +15,14 @@
 --   関数は既定で PUBLIC が実行できるため、REVOKE しないと非会員が PostgREST から直接
 --   名前・コメントを取れてしまう。呼び出しはサーバー側（src/lib/events/registration.ts）のみ。
 --   - get_event_participant_summary: 誰にでも見せるアイコン（最大4件）と人数だけを返す。
---     名前・コメントは返さない
+--     名前・コメントは返さない。アイコンURLはこのプロジェクトの Storage avatars バケット
+--     （プロフィール画面のアップロード先 …/storage/v1/object/public/avatars/）のものだけ返し、
+--     それ以外（user_metadata.avatar_url に任意URLを入れた場合など）は NULL＝代替アイコンにする。
+--     非会員にも配るページに外部URLの画像を載せない（閲覧者の IP 収集・不適切画像の防止）。
+--     ホストは本番と開発で違うので固定せず、*.supabase.co（本番）と 127.0.0.1/localhost
+--     （supabase start）に限る。アプリは OAuth ログインを使っておらず、avatar_url の正規の
+--     出どころは avatars バケットへのアップロード（src/app/profile/actions.ts）だけ。
+--     Supabase のカスタムドメインに移す場合はこの正規表現も更新すること。
 --   - get_event_participants: 名前・アイコン・コメントを返す。サーバーが閲覧者の
 --     hasMemberAccess を確かめたあとにだけ呼ぶ
 -- =============================================================================
@@ -40,8 +47,13 @@ AS $$
   SELECT
     (SELECT count(*)::integer FROM active),
     -- アイコン未設定（NULL）も1人として並べる（表示側で共通の代替アイコンを出す）
+    -- 許可外のURLも NULL にして1人分として残す（人数とアイコン数をずらさない）
     ARRAY(
-      SELECT a.author_avatar_url
+      SELECT CASE
+        WHEN a.author_avatar_url ~ '^(https://[a-z0-9]+\.supabase\.co|http://(127\.0\.0\.1|localhost)(:[0-9]+)?)/storage/v1/object/public/avatars/[^?#]+(\?v=[0-9]+)?$'
+          AND a.author_avatar_url NOT LIKE '%..%'
+        THEN a.author_avatar_url
+      END
       FROM active a
       ORDER BY a.created_at DESC
       LIMIT 4

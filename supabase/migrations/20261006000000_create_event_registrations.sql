@@ -47,23 +47,46 @@ CREATE INDEX IF NOT EXISTS idx_event_registrations_user
 COMMENT ON TABLE public.event_registrations IS 'イベント参加申込。Sanityイベントとは弱結合（event_id は Sanity _id）。1人1イベント1行、取り消しは deleted_at による論理削除';
 
 -- -----------------------------------------------------------------------------
--- 2. updated_at の自動更新
+-- 2. 書き込み時の列ガード（created_at/updated_at の強制・不変列の保護）
 -- -----------------------------------------------------------------------------
-CREATE OR REPLACE FUNCTION public.touch_event_registration_updated_at()
+-- 有料会員は自分のセッションで Supabase REST API を直接呼べるため、アプリの upsert を
+-- 通らない書き込みもありうる。RLS は「どの行を触れるか」しか見ないので、列の値は
+-- トリガーで守る:
+--   INSERT: created_at / updated_at はクライアントの値を捨てて now() にする
+--           （申込順＝表示順を過去日付で先頭に割り込ませない）。
+--   UPDATE: id / event_id / user_id / created_at の変更はエラーにする
+--           （申込を別イベントへ付け替える・申込順をずらすのを防ぐ）。updated_at は now()。
+-- アプリの upsert（ON CONFLICT (event_id, user_id) DO UPDATE）は created_at を送らず、
+-- event_id / user_id は同じ値で上書きするだけなので、このガードに引っかからない。
+CREATE OR REPLACE FUNCTION public.guard_event_registration_write()
 RETURNS trigger
 LANGUAGE plpgsql
 SET search_path = ''
 AS $$
 BEGIN
-  NEW.updated_at = now();
+  IF TG_OP = 'INSERT' THEN
+    NEW.created_at = pg_catalog.now();
+    NEW.updated_at = pg_catalog.now();
+    RETURN NEW;
+  END IF;
+
+  IF NEW.id IS DISTINCT FROM OLD.id
+     OR NEW.event_id IS DISTINCT FROM OLD.event_id
+     OR NEW.user_id IS DISTINCT FROM OLD.user_id
+     OR NEW.created_at IS DISTINCT FROM OLD.created_at THEN
+    RAISE EXCEPTION 'event_registrations: id, event_id, user_id, created_at cannot be changed'
+      USING ERRCODE = 'P0001';
+  END IF;
+
+  NEW.updated_at = pg_catalog.now();
   RETURN NEW;
 END;
 $$;
 
-DROP TRIGGER IF EXISTS trg_event_registrations_updated_at ON public.event_registrations;
-CREATE TRIGGER trg_event_registrations_updated_at
-  BEFORE UPDATE ON public.event_registrations
-  FOR EACH ROW EXECUTE FUNCTION public.touch_event_registration_updated_at();
+DROP TRIGGER IF EXISTS trg_event_registrations_guard_write ON public.event_registrations;
+CREATE TRIGGER trg_event_registrations_guard_write
+  BEFORE INSERT OR UPDATE ON public.event_registrations
+  FOR EACH ROW EXECUTE FUNCTION public.guard_event_registration_write();
 
 -- -----------------------------------------------------------------------------
 -- 3. RLS
@@ -73,6 +96,7 @@ ALTER TABLE public.event_registrations ENABLE ROW LEVEL SECURITY;
 -- 未ログインには一切公開しない（ポリシーが無いので元々読めないが、権限からも外す）
 REVOKE ALL ON public.event_registrations FROM anon;
 
+DROP POLICY IF EXISTS "members can read registrations" ON public.event_registrations;
 CREATE POLICY "members can read registrations"
   ON public.event_registrations
   FOR SELECT
@@ -82,6 +106,7 @@ CREATE POLICY "members can read registrations"
     OR user_id = (select auth.uid())
   );
 
+DROP POLICY IF EXISTS "member can register self" ON public.event_registrations;
 CREATE POLICY "member can register self"
   ON public.event_registrations
   FOR INSERT
@@ -91,6 +116,7 @@ CREATE POLICY "member can register self"
     AND public.is_active_member((select auth.uid()))
   );
 
+DROP POLICY IF EXISTS "member can update own registration" ON public.event_registrations;
 CREATE POLICY "member can update own registration"
   ON public.event_registrations
   FOR UPDATE
