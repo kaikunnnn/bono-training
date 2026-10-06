@@ -218,7 +218,7 @@ function FullPageMock({ view }: { view: FullPageView }) {
               日付カード
             </div>
             <span className="text-sm text-gray-500">（ Event ）</span>
-            <h1 className="max-w-[720px] text-balance font-rounded-mplus text-3xl font-bold leading-[148%] text-[#101828] md:text-5xl lg:text-6xl">
+            <h1 className="max-w-[720px] text-balance font-rounded-mplus text-3xl font-bold leading-[148%] text-[#101828] md:text-[44px]">
               BONOの数字改善をしようぜ
             </h1>
             <p className="max-w-[560px] text-balance text-base leading-relaxed text-[#4B5563] md:text-lg">
