@@ -75,3 +75,33 @@ export interface EventParticipant {
   comment: string;
   createdAt: string;
 }
+
+// ---------------------------------------------------------------------------
+// 申込者のプロフィール（申込カードの「自分のアイコン＋名前」と、DB に保存する名前・アイコン）
+// ---------------------------------------------------------------------------
+
+/** 申込者の表示名とアイコン */
+export interface RegistrantProfile {
+  name: string;
+  avatarUrl: string | null;
+}
+
+/**
+ * ログインユーザーから申込者の名前・アイコンを導出する（question_comments の addComment と同じ順）。
+ * 申込カードの表示（page.tsx）と、申込時に保存する値（actions.ts）で同じ結果になるよう共通化している。
+ * user_metadata は本人が書き換えられる値なので、表示用にだけ使う（権限の判定には使わない）。
+ */
+export function getRegistrantProfile(user: {
+  email?: string;
+  user_metadata?: Record<string, unknown> | null;
+}): RegistrantProfile {
+  const meta = user.user_metadata ?? {};
+  return {
+    name:
+      (meta.display_name as string | undefined) ||
+      (meta.name as string | undefined) ||
+      user.email?.split("@")[0] ||
+      "メンバー",
+    avatarUrl: (meta.avatar_url as string | undefined) ?? null,
+  };
+}

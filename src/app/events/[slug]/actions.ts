@@ -7,6 +7,7 @@ import { createClient, getCachedUser } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import { getEvent } from "@/lib/sanity";
 import {
+  getRegistrantProfile,
   isOnsiteRegistrationEvent,
   validateRegistrationComment,
 } from "@/lib/events/onsite-registration";
@@ -91,19 +92,6 @@ function toUserError(
   return fallback;
 }
 
-/** 申込者プロフィール（question_comments の addComment と同じ導出） */
-function authorProfile(user: User) {
-  const meta = user.user_metadata ?? {};
-  return {
-    authorName:
-      (meta.display_name as string | undefined) ||
-      (meta.name as string | undefined) ||
-      user.email?.split("@")[0] ||
-      "メンバー",
-    authorAvatarUrl: (meta.avatar_url as string | undefined) ?? null,
-  };
-}
-
 /** Slack の mrkdwn 制御文字をエスケープする */
 function escapeSlack(text: string): string {
   return text
@@ -182,7 +170,10 @@ export async function registerForEvent(
   }
   const wasActive = !!existing && existing.deleted_at === null;
 
-  const { authorName, authorAvatarUrl } = authorProfile(auth.user);
+  // 申込カードに出している名前・アイコンと同じ導出（getRegistrantProfile）
+  const { name: authorName, avatarUrl: authorAvatarUrl } = getRegistrantProfile(
+    auth.user,
+  );
   const { error } = await supabase.from("event_registrations").upsert(
     {
       event_id: auth.event._id,

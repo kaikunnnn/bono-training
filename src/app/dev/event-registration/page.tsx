@@ -2,9 +2,9 @@
  * /dev/event-registration — イベントのサイト上参加申込（#218）の表示確認
  *
  * 本物のコンポーネント（EventParticipantAvatars / EventParticipantList /
- * EventOnsiteRegistration / EventRegistrationButton）にモックデータを渡して、
+ * EventOnsiteRegistration / EventRegistrationButton / RichTextSection）にモックデータを渡して、
  * 人数・状態ごとの見た目と、ページ全体の並びを一覧する。
- * DB・Sanity には触れない。申込UIのボタンは何も送信しない（PreviewOnsiteRegistration）。
+ * DB・Sanity には触れない。申込カードの送信ボタンは何も送信しない（PreviewOnsiteRegistration）。
  * 未ログイン・非会員の案内ボタンは本物と同じく /login・/subscription へ移動する。
  */
 
@@ -13,9 +13,12 @@ import Link from "next/link";
 import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
 import EventParticipantList from "@/components/event/EventParticipantList";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
+import RichTextSection from "@/components/article/RichTextSection";
+import type { PortableTextBlock } from "@portabletext/types";
 import type {
   EventParticipant,
   EventParticipantSummary,
+  RegistrantProfile,
 } from "@/lib/events/onsite-registration";
 import PreviewOnsiteRegistration from "./PreviewOnsiteRegistration";
 
@@ -93,10 +96,55 @@ function summaryOf(n: number): EventParticipantSummary {
   };
 }
 
+/** 申込カードに出す「自分」（プレビュー用） */
+const ME: RegistrantProfile = {
+  name: "かい",
+  avatarUrl: mockAvatar("#F97316", "K"),
+};
+
 const REGISTERED = {
   comment: "数字を見ながら改善するのは初めてなので楽しみです。よろしくお願いします！",
   updatedAt: "2026-10-06T00:00:00.000Z",
 };
+
+/** 本文のモック（本物の RichTextSection で描画して、本文の文字サイズを実際のページと揃える） */
+function span(key: string, text: string) {
+  return { _type: "span", _key: key, text, marks: [] };
+}
+function block(
+  key: string,
+  text: string,
+  style: "normal" | "h2" = "normal",
+): PortableTextBlock {
+  return { _type: "block", _key: key, style, markDefs: [], children: [span(`${key}-s`, text)] };
+}
+function bullet(key: string, text: string): PortableTextBlock {
+  return {
+    _type: "block",
+    _key: key,
+    style: "normal",
+    listItem: "bullet",
+    level: 1,
+    markDefs: [],
+    children: [span(`${key}-s`, text)],
+  };
+}
+
+const MOCK_CONTENT: PortableTextBlock[] = [
+  block(
+    "p1",
+    "1か月かけて、自分のプロダクトの数字を見ながら改善するイベントです。毎週日曜の午前に4回集まり、改善の前後で数字がどう変わったかを共有します。",
+  ),
+  block("h1", "こんな人におすすめ", "h2"),
+  bullet("l1", "作った画面を、数字で振り返ったことがない人"),
+  bullet("l2", "改善案は出せるけれど、効果を確かめる方法がわからない人"),
+  bullet("l3", "ひとりだと途中で止まってしまう人"),
+  block("h2", "日程", "h2"),
+  block(
+    "p2",
+    "キックオフ・相談会2回・成果発表の4回です。各回の内容と準備するものは、参加申込のあとに Slack でお知らせします。",
+  ),
+];
 
 // ---------------------------------------------------------------------------
 // 表示用の小物
@@ -125,7 +173,7 @@ function Variant({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-dashed border-gray-300 bg-white p-4">
+    <div className="flex min-w-0 flex-col gap-3 rounded-2xl border border-dashed border-gray-300 bg-base p-4">
       <span className="self-start rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 font-noto-sans-jp">
         {label}
       </span>
@@ -144,23 +192,25 @@ function EmptyNote() {
 // ページ全体の並び（src/app/events/[slug]/page.tsx と同じ順・同じクラス）
 // ---------------------------------------------------------------------------
 
-function FullPageMock({ view }: { view: "member" | "non-member" }) {
+type FullPageView = "guest" | "non-member" | "member" | "member-registered";
+
+function FullPageMock({ view }: { view: FullPageView }) {
   const summary = summaryOf(12);
-  const isMember = view === "member";
+  const isMember = view === "member" || view === "member-registered";
 
   const registrationUi = (
-    <div className="flex w-full flex-col items-center gap-3">
+    <div className="flex w-full flex-col items-center gap-8">
       <EventParticipantAvatars {...summary} />
-      {isMember ? (
-        <PreviewOnsiteRegistration registration={null} />
-      ) : (
-        <EventRegistrationButton isLoggedIn hasMemberAccess={false} />
-      )}
+      <PreviewOnsiteRegistration
+        access={isMember ? "member" : view === "guest" ? "guest" : "non-member"}
+        viewer={ME}
+        registration={view === "member-registered" ? REGISTERED : null}
+      />
     </div>
   );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-background">
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-base">
       <div className="mx-auto max-w-[800px] px-4 py-12 sm:px-6">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col items-center gap-6 text-center">
@@ -168,7 +218,7 @@ function FullPageMock({ view }: { view: "member" | "non-member" }) {
               日付カード
             </div>
             <span className="text-sm text-gray-500">（ Event ）</span>
-            <h1 className="max-w-[720px] text-balance font-rounded-mplus text-3xl font-bold leading-[148%] text-[#101828] md:text-5xl">
+            <h1 className="max-w-[720px] text-balance font-rounded-mplus text-3xl font-bold leading-[148%] text-[#101828] md:text-5xl lg:text-6xl">
               BONOの数字改善をしようぜ
             </h1>
             <p className="max-w-[560px] text-balance text-base leading-relaxed text-[#4B5563] md:text-lg">
@@ -180,15 +230,9 @@ function FullPageMock({ view }: { view: "member" | "non-member" }) {
             </div>
           </div>
 
-          <div className="mx-auto flex w-full max-w-[640px] flex-col gap-3 text-sm leading-relaxed text-gray-500">
-            <p className="font-bold text-gray-700">（本文のプレースホルダー）</p>
-            <p>
-              イベントの概要、日程、対象者、当日の流れなどが入ります。ここは Sanity
-              のリッチテキストが表示される場所です。
-            </p>
-            <p>
-              キックオフ・相談会2回・成果発表の4回。各回の内容と準備するものを書きます。
-            </p>
+          {/* 本文: 本物と同じ RichTextSection（文字サイズ・余白を実際のページと揃える） */}
+          <div className="mx-auto w-full max-w-[640px]">
+            <RichTextSection content={MOCK_CONTENT} />
           </div>
 
           {isMember && (
@@ -247,45 +291,87 @@ export default function Page() {
             </div>
           </section>
 
-          {/* 2. 申込UIの状態 */}
+          {/* 2. 申込カードの状態 */}
           <section>
             <SectionHeading
-              title="2. 申込UIの状態"
-              note="未ログイン・非会員は既存の EventRegistrationButton（今まで通りの案内）。会員は EventOnsiteRegistration。"
+              title="2. 申込カードの状態（サイト上申込のイベント）"
+              note="全状態を同じカード（Figma 1:314）で表示。未ログイン・非会員には入力欄を出さず「メンバー限定」を先に伝える。未ログインの「ログインして参加する」はログイン後このイベントページへ戻る（/login?redirectTo=）。"
             />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Variant label="1. 未ログイン">
+                <PreviewOnsiteRegistration access="guest" registration={null} />
+              </Variant>
+              <Variant label="2. ログイン済み・非会員">
+                <PreviewOnsiteRegistration access="non-member" registration={null} />
+              </Variant>
+              <Variant label="3. 会員・未申込（Figma どおり）">
+                <PreviewOnsiteRegistration viewer={ME} registration={null} />
+              </Variant>
+              <Variant label="4. 会員・申込済み">
+                <PreviewOnsiteRegistration viewer={ME} registration={REGISTERED} />
+              </Variant>
+              <Variant label="5. 会員・コメント編集中">
+                <PreviewOnsiteRegistration
+                  viewer={ME}
+                  registration={REGISTERED}
+                  initialMode="edit"
+                />
+              </Variant>
+              <Variant label="6. 会員・取り消し確認">
+                <PreviewOnsiteRegistration
+                  viewer={ME}
+                  registration={REGISTERED}
+                  initialMode="confirm-cancel"
+                />
+              </Variant>
+              <Variant label="7. エラー（申込に失敗）">
+                <PreviewOnsiteRegistration
+                  viewer={ME}
+                  registration={null}
+                  initialError="参加申込に失敗しました。時間をおいてもう一度お試しください"
+                />
+              </Variant>
+              <Variant label="7. エラー（コメント更新に失敗）">
+                <PreviewOnsiteRegistration
+                  viewer={ME}
+                  registration={REGISTERED}
+                  initialMode="edit"
+                  initialError="コメントの更新に失敗しました。時間をおいてもう一度お試しください"
+                />
+              </Variant>
+              <Variant label="アイコン未設定・長い名前">
+                <PreviewOnsiteRegistration
+                  viewer={{ name: NAMES[4], avatarUrl: null }}
+                  registration={null}
+                />
+              </Variant>
+              <Variant label="申込済み・長いコメント（折り返し）">
+                <PreviewOnsiteRegistration
+                  viewer={ME}
+                  registration={{ comment: COMMENTS[4], updatedAt: REGISTERED.updatedAt }}
+                />
+              </Variant>
+            </div>
+          </section>
+
+          {/* 2b. Googleフォームのイベント（従来どおり） */}
+          <section>
+            <SectionHeading
+              title="2b. Googleフォームのイベント（従来どおり・変更なし）"
+              note="サイト上申込の対象に入っていないイベントは、これまでの EventRegistrationButton のまま。"
+            />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <Variant label="未ログイン">
                 <EventRegistrationButton isLoggedIn={false} hasMemberAccess={false} />
               </Variant>
               <Variant label="ログイン済み・非会員">
                 <EventRegistrationButton isLoggedIn hasMemberAccess={false} />
               </Variant>
-              <Variant label="会員・未申込">
-                <PreviewOnsiteRegistration registration={null} />
-              </Variant>
-              <Variant label="会員・申込済み">
-                <PreviewOnsiteRegistration registration={REGISTERED} />
-              </Variant>
-              <Variant label="会員・コメント編集中">
-                <PreviewOnsiteRegistration registration={REGISTERED} initialMode="edit" />
-              </Variant>
-              <Variant label="会員・取り消し確認">
-                <PreviewOnsiteRegistration
-                  registration={REGISTERED}
-                  initialMode="confirm-cancel"
-                />
-              </Variant>
-              <Variant label="エラー（申込に失敗）">
-                <PreviewOnsiteRegistration
-                  registration={null}
-                  initialError="参加申込に失敗しました。時間をおいてもう一度お試しください"
-                />
-              </Variant>
-              <Variant label="エラー（コメント更新に失敗）">
-                <PreviewOnsiteRegistration
-                  registration={REGISTERED}
-                  initialMode="edit"
-                  initialError="コメントの更新に失敗しました。時間をおいてもう一度お試しください"
+              <Variant label="会員">
+                <EventRegistrationButton
+                  isLoggedIn
+                  hasMemberAccess
+                  registrationUrl="https://forms.gle/example"
                 />
               </Variant>
             </div>
@@ -311,19 +397,22 @@ export default function Page() {
           <section>
             <SectionHeading
               title="4. ページ全体の並び（12人参加）"
-              note="ヘッダー → アイコン列 → 申込UI → サムネイル → 本文 → 参加者のコメント（会員のみ）→ 下部のアイコン列＋申込UI。非会員には一覧を出さない（代わりの一言も出さない）。"
+              note="ヘッダー → アイコン列 → 申込カード → サムネイル → 本文（本物の RichTextSection）→ 参加者のコメント（会員のみ）→ 下部のアイコン列＋申込カード。非会員には一覧を出さない（代わりの一言も出さない）。"
             />
             <div className="flex flex-col gap-8">
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-bold text-gray-700">会員の見え方（未申込）</span>
-                <FullPageMock view="member" />
-              </div>
-              <div className="flex flex-col gap-2">
-                <span className="text-sm font-bold text-gray-700">
-                  非会員（ログイン済み）の見え方
-                </span>
-                <FullPageMock view="non-member" />
-              </div>
+              {(
+                [
+                  ["guest", "未ログインの見え方"],
+                  ["non-member", "非会員（ログイン済み）の見え方"],
+                  ["member", "会員の見え方（未申込）"],
+                  ["member-registered", "会員の見え方（申込済み）"],
+                ] as const
+              ).map(([view, label]) => (
+                <div key={view} className="flex flex-col gap-2">
+                  <span className="text-sm font-bold text-gray-700">{label}</span>
+                  <FullPageMock view={view} />
+                </div>
+              ))}
             </div>
           </section>
         </div>

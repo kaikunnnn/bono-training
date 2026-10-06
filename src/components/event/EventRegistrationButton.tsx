@@ -1,25 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { LogIn, UserPlus, ExternalLink, CheckCircle } from "lucide-react";
+import { LogIn, UserPlus, ExternalLink } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { withPricingFrom } from "@/lib/activity-utils";
 import { trackPricingCtaClick } from "@/lib/activity-client";
-import {
-  Modal,
-  ModalContainer,
-  ModalHeader,
-  ModalTitle,
-  ModalDescription,
-  ModalContent,
-} from "@/components/ui/modal";
-import { RegistrationFlowGuide } from "@/components/auth/RegistrationFlowGuide";
+import MembershipGuideModal from "@/components/event/MembershipGuideModal";
 
 interface EventRegistrationButtonProps {
   /**
    * Googleフォーム等の申込URL。サイト上申込（#218）のイベントでは渡さない
-   * （その場合、会員には page 側で EventOnsiteRegistration を出し、ここは未ログイン・非会員の案内だけを担う）
+   * （サイト上申込のイベントは page 側で EventOnsiteRegistration を出し、このボタンは使わない）
    */
   registrationUrl?: string;
   isLoggedIn: boolean;
@@ -41,9 +33,6 @@ export default function EventRegistrationButton({
 }: EventRegistrationButtonProps) {
   const router = useRouter();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalStep, setModalStep] = useState<"pre-register" | "post-register">(
-    "pre-register"
-  );
 
   const handleLogin = () => {
     router.push("/login");
@@ -51,7 +40,6 @@ export default function EventRegistrationButton({
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
-    setModalStep("pre-register");
   };
 
   const handleMemberRegister = () => {
@@ -126,56 +114,7 @@ export default function EventRegistrationButton({
       </div>
 
       {/* 初めての方向けモーダル */}
-      <Modal
-        open={isModalOpen}
-        onOpenChange={(open) => {
-          setIsModalOpen(open);
-          if (!open) setModalStep("pre-register");
-        }}
-      >
-        <ModalContainer>
-          <ModalHeader
-            badge={
-              modalStep === "post-register"
-                ? "メンバー登録完了後"
-                : "はじめての方へ"
-            }
-          >
-            {modalStep === "post-register" && (
-              <div className="mb-4">
-                <CheckCircle className="w-12 h-12 text-green-500" />
-              </div>
-            )}
-            <ModalTitle>
-              {modalStep === "post-register" ? (
-                <>
-                  ログインページから
-                  <br />
-                  <span className="font-bold">パスワードを設定しましょう</span>
-                </>
-              ) : (
-                <>
-                  BONO本サイトで
-                  <br />
-                  メンバー登録をすると
-                  <br />
-                  <span className="font-bold">イベントに参加できます</span>
-                </>
-              )}
-            </ModalTitle>
-            <ModalDescription className="sr-only">
-              bo-no.designでの会員登録手順を説明します
-            </ModalDescription>
-          </ModalHeader>
-          <ModalContent>
-            <RegistrationFlowGuide
-              variant="modal"
-              showLoginLink
-              onStepChange={(step) => setModalStep(step)}
-            />
-          </ModalContent>
-        </ModalContainer>
-      </Modal>
+      <MembershipGuideModal open={isModalOpen} onOpenChange={setIsModalOpen} />
     </>
   );
 }

@@ -10,7 +10,10 @@ import EventRegistrationButton from "@/components/event/EventRegistrationButton"
 import EventOnsiteRegistration from "@/components/event/EventOnsiteRegistration";
 import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
 import EventParticipantList from "@/components/event/EventParticipantList";
-import { isOnsiteRegistrationEvent } from "@/lib/events/onsite-registration";
+import {
+  getRegistrantProfile,
+  isOnsiteRegistrationEvent,
+} from "@/lib/events/onsite-registration";
 import {
   getEventParticipantSummary,
   getEventParticipantsForMember,
@@ -119,15 +122,22 @@ export default async function EventDetailPage({ params }: PageProps) {
   ]);
   const showRegistration = isOnsite || !!event.registrationUrl;
 
-  // 申込UI（上部と本文下の2か所で同じものを出す）。サイト上申込のイベントは真上に参加者アイコンを出す
+  // 申込UI（上部と本文下の2か所で同じものを出す）
+  // サイト上申込のイベントは、参加者アイコンの下に申込カード（未ログイン・非会員にも同じカードで案内）
   const registrationUi = (
-    <div className="flex w-full flex-col items-center gap-3">
+    <div className="flex w-full flex-col items-center gap-8">
       {participantSummary && <EventParticipantAvatars {...participantSummary} />}
-      {isOnsiteMember ? (
-        <EventOnsiteRegistration slug={slug} registration={myRegistration} />
+      {isOnsite ? (
+        <EventOnsiteRegistration
+          slug={slug}
+          isLoggedIn={!!user}
+          hasMemberAccess={hasMemberAccess}
+          viewer={user && hasMemberAccess ? getRegistrantProfile(user) : null}
+          registration={myRegistration}
+        />
       ) : (
         <EventRegistrationButton
-          registrationUrl={isOnsite ? undefined : event.registrationUrl}
+          registrationUrl={event.registrationUrl}
           isLoggedIn={!!user}
           hasMemberAccess={hasMemberAccess}
         />
