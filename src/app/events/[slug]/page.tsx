@@ -11,8 +11,10 @@ import EventOnsiteRegistration from "@/components/event/EventOnsiteRegistration"
 import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
 import EventParticipantList from "@/components/event/EventParticipantList";
 import {
+  formatRegistrationDeadline,
   getRegistrantProfile,
   isOnsiteRegistrationEvent,
+  isRegistrationClosed,
 } from "@/lib/events/onsite-registration";
 import {
   getEventParticipantSummary,
@@ -121,6 +123,13 @@ export default async function EventDetailPage({ params }: PageProps) {
     isOnsiteMember ? getEventParticipantsForMember(event._id) : null,
   ]);
   const showRegistration = isOnsite || !!event.registrationUrl;
+  // 申込の締め切り（開催日の日本時間 23:59:59.999 まで）。リクエストごとにサーバーの現在時刻で判定する
+  // （このページは cookies を読むので毎回描画される。受付終了の状態はキャッシュしない）
+  const registrationClosed =
+    isOnsite && isRegistrationClosed(event.eventStartAt, new Date());
+  const registrationDeadlineLabel = isOnsite
+    ? formatRegistrationDeadline(event.eventStartAt)
+    : null;
 
   // 申込UI（上部と本文下の2か所で同じものを出す）
   // サイト上申込のイベントは、参加者アイコンの下に申込カード（未ログイン・非会員にも同じカードで案内）
@@ -134,6 +143,8 @@ export default async function EventDetailPage({ params }: PageProps) {
           hasMemberAccess={hasMemberAccess}
           viewer={user && hasMemberAccess ? getRegistrantProfile(user) : null}
           registration={myRegistration}
+          closed={registrationClosed}
+          deadlineLabel={registrationDeadlineLabel}
         />
       ) : (
         <EventRegistrationButton

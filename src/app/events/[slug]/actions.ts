@@ -9,6 +9,7 @@ import { getEvent } from "@/lib/sanity";
 import {
   getRegistrantProfile,
   isOnsiteRegistrationEvent,
+  isRegistrationClosed,
   validateRegistrationComment,
 } from "@/lib/events/onsite-registration";
 
@@ -30,7 +31,7 @@ type Authorized = {
   ok: true;
   user: User;
   slug: string;
-  event: { _id: string; title: string };
+  event: { _id: string; title: string; eventStartAt?: string };
 };
 
 async function authorize(
@@ -61,7 +62,8 @@ async function authorize(
     return { ok: false, error: "このイベントはサイト上での申込に対応していません" };
   }
 
-  let event: { _id?: string; title?: string } | null = null;
+  let event: { _id?: string; title?: string; eventStartAt?: string } | null =
+    null;
   try {
     event = await getEvent(slug);
   } catch (error) {
@@ -74,7 +76,11 @@ async function authorize(
     ok: true,
     user,
     slug,
-    event: { _id: event._id, title: event.title ?? slug },
+    event: {
+      _id: event._id,
+      title: event.title ?? slug,
+      eventStartAt: event.eventStartAt,
+    },
   };
 }
 
@@ -145,6 +151,9 @@ function notifyRegistrationToSlack(input: {
  * 参加申込。初回は行を作り、取り消し済みの行があれば同じ行を復活させる
  * （UNIQUE (event_id, user_id) の upsert。deleted_at を NULL に戻し、コメントと名前・アイコンを更新）。
  * 新規・復活のときだけ Slack に通知する（申込済みの再送信はコメント更新扱いで通知しない）。
+ * 締め切り（開催日の日本時間 23:59:59.999）を過ぎたら、新規・復活とも受け付けない。
+ * 判定はサーバーの現在時刻で毎回行う（クライアントの値は使わない）。
+ * コメント編集・取り消しは締め切り後も申込済みの人だけ使える（下の2つには締め切り判定を入れない）。
  */
 export async function registerForEvent(
   _prev: EventRegistrationActionResult | null,
@@ -152,6 +161,10 @@ export async function registerForEvent(
 ): Promise<EventRegistrationActionResult> {
   const auth = await authorize(formData);
   if (!auth.ok) return auth;
+
+  if (isRegistrationClosed(auth.event.eventStartAt, new Date())) {
+    return { ok: false, error: "申込の受付は終了しました" };
+  }
 
   const validated = validateRegistrationComment(formData.get("comment"));
   if (!validated.ok) return validated;

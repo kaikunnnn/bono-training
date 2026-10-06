@@ -15,10 +15,11 @@ import EventParticipantList from "@/components/event/EventParticipantList";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
 import RichTextSection from "@/components/article/RichTextSection";
 import type { PortableTextBlock } from "@portabletext/types";
-import type {
-  EventParticipant,
-  EventParticipantSummary,
-  RegistrantProfile,
+import {
+  formatRegistrationDeadline,
+  type EventParticipant,
+  type EventParticipantSummary,
+  type RegistrantProfile,
 } from "@/lib/events/onsite-registration";
 import PreviewOnsiteRegistration from "./PreviewOnsiteRegistration";
 
@@ -106,6 +107,9 @@ const REGISTERED = {
   comment: "数字を見ながら改善するのは初めてなので楽しみです。よろしくお願いします！",
   updatedAt: "2026-10-06T00:00:00.000Z",
 };
+
+/** 締め切り日の表示（本番イベントの開始 2026-10-21 20:00 JST から出す → 「10月21日（水）」） */
+const DEADLINE = formatRegistrationDeadline("2026-10-21T11:00:00.000Z");
 
 /** 本文のモック（本物の RichTextSection で描画して、本文の文字サイズを実際のページと揃える） */
 function span(key: string, text: string) {
@@ -205,6 +209,7 @@ function FullPageMock({ view }: { view: FullPageView }) {
         access={isMember ? "member" : view === "guest" ? "guest" : "non-member"}
         viewer={ME}
         registration={view === "member-registered" ? REGISTERED : null}
+        deadlineLabel={DEADLINE}
       />
     </div>
   );
@@ -295,17 +300,17 @@ export default function Page() {
           <section>
             <SectionHeading
               title="2. 申込カードの状態（サイト上申込のイベント）"
-              note="全状態を同じカード（Figma 1:314）で表示。未ログイン・非会員には入力欄を出さず「メンバー限定」を先に伝える。未ログインの「ログインして参加する」はログイン後このイベントページへ戻る（/login?redirectTo=）。"
+              note="全状態を同じカード（Figma 1:314）で表示。未ログイン・非会員には入力欄を出さず「メンバー限定」を先に伝える。未ログインの「ログインして参加する」はログイン後このイベントページへ戻る（/login?redirectTo=）。受付中の未申込カードには「締め切り：10月21日（水）」を小さく出す（締め切り＝開催日の日本時間 23:59:59.999）。"
             />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Variant label="1. 未ログイン">
-                <PreviewOnsiteRegistration access="guest" registration={null} />
+                <PreviewOnsiteRegistration access="guest" registration={null} deadlineLabel={DEADLINE} />
               </Variant>
               <Variant label="2. ログイン済み・非会員">
-                <PreviewOnsiteRegistration access="non-member" registration={null} />
+                <PreviewOnsiteRegistration access="non-member" registration={null} deadlineLabel={DEADLINE} />
               </Variant>
               <Variant label="3. 会員・未申込（Figma どおり）">
-                <PreviewOnsiteRegistration viewer={ME} registration={null} />
+                <PreviewOnsiteRegistration viewer={ME} registration={null} deadlineLabel={DEADLINE} />
               </Variant>
               <Variant label="4. 会員・申込済み">
                 <PreviewOnsiteRegistration viewer={ME} registration={REGISTERED} />
@@ -329,6 +334,7 @@ export default function Page() {
                   viewer={ME}
                   registration={null}
                   initialError="参加申込に失敗しました。時間をおいてもう一度お試しください"
+                  deadlineLabel={DEADLINE}
                 />
               </Variant>
               <Variant label="7. エラー（コメント更新に失敗）">
@@ -343,12 +349,43 @@ export default function Page() {
                 <PreviewOnsiteRegistration
                   viewer={{ name: NAMES[4], avatarUrl: null }}
                   registration={null}
+                  deadlineLabel={DEADLINE}
                 />
               </Variant>
               <Variant label="申込済み・長いコメント（折り返し）">
                 <PreviewOnsiteRegistration
                   viewer={ME}
                   registration={{ comment: COMMENTS[4], updatedAt: REGISTERED.updatedAt }}
+                />
+              </Variant>
+            </div>
+          </section>
+
+          {/* 2a. 受付終了 */}
+          <section>
+            <SectionHeading
+              title="2a. 受付終了（開催日の日本時間 23:59:59.999 を過ぎた後）"
+              note="未ログイン・非会員・未申込の会員は、帯「受付終了」＋終了の案内だけ（入力欄・ログイン/課金ボタンなし）。申込済みの会員はコメント編集・取り消しができる。取り消すと再申込できないので、確認文に一言添える。申込はサーバー側でも現在時刻で拒否する（「申込の受付は終了しました」）。"
+            />
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+              <Variant label="1. 受付終了・未ログイン">
+                <PreviewOnsiteRegistration access="guest" registration={null} closed deadlineLabel={DEADLINE} />
+              </Variant>
+              <Variant label="2. 受付終了・ログイン済み・非会員">
+                <PreviewOnsiteRegistration access="non-member" registration={null} closed deadlineLabel={DEADLINE} />
+              </Variant>
+              <Variant label="3. 受付終了・会員・未申込（取り消し後も同じ）">
+                <PreviewOnsiteRegistration viewer={ME} registration={null} closed deadlineLabel={DEADLINE} />
+              </Variant>
+              <Variant label="4. 受付終了・会員・申込済み（編集・取り消し可）">
+                <PreviewOnsiteRegistration viewer={ME} registration={REGISTERED} closed />
+              </Variant>
+              <Variant label="5. 受付終了・会員・取り消し確認">
+                <PreviewOnsiteRegistration
+                  viewer={ME}
+                  registration={REGISTERED}
+                  initialMode="confirm-cancel"
+                  closed
                 />
               </Variant>
             </div>

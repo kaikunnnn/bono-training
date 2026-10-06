@@ -47,7 +47,9 @@ export type RegisteredMode = "view" | "edit" | "confirm-cancel";
 const COUNTER_VISIBLE_FROM = REGISTRATION_COMMENT_MAX_LENGTH - 20;
 
 const DEFAULT_BAND = "参加はこちら";
+const CLOSED_BAND = "受付終了";
 const MEMBERS_ONLY_MESSAGE = "このイベントはBONOメンバー限定です";
+const CLOSED_MESSAGE = "このイベントの申込受付は終了しました";
 
 interface EventOnsiteRegistrationProps {
   slug: string;
@@ -57,6 +59,13 @@ interface EventOnsiteRegistrationProps {
   viewer: RegistrantProfile | null;
   /** 本人の申込（未申込なら null）。サーバーで毎回最新を読んだ値 */
   registration: { comment: string; updatedAt: string } | null;
+  /**
+   * 申込の受付が終了しているか（開催日の日本時間 23:59:59.999 を過ぎた）。サーバーで毎回判定した値。
+   * 終了後は未申込の人には「受付終了」だけを出す。申込済みの人はコメント編集・取り消しができる
+   */
+  closed?: boolean;
+  /** 締め切り日の表示（例: 「10月21日（水）」）。受付中の未申込カードにだけ小さく出す。無ければ出さない */
+  deadlineLabel?: string | null;
   /**
    * 以下は /dev/event-registration のプレビュー用（本番のページでは渡さない）。
    * actions: Server Actions の代わりに呼ぶ関数（プレビューでは何もしない関数を渡す）
@@ -76,6 +85,8 @@ interface EventOnsiteRegistrationProps {
  * - ログイン済み・非会員: 「メンバー限定」の案内＋「メンバーになって参加する」
  * - 会員・未申込: 自分のアイコンと名前＋コメント入力（初期値「参加します！」）＋「参加する」
  * - 会員・申込済み: 帯が「✓ 参加申込済み」＋コメント（読み取り専用）＋編集・取り消し
+ * - 受付終了（未ログイン・非会員・未申込の会員）: 帯が「受付終了」＋終了の案内だけ（入力・ボタンなし）
+ * - 受付終了（申込済みの会員）: 申込済みの表示のまま編集・取り消しできる（取り消すと再申込はできない）
  *
  * 表示の切り替えは props（サーバーの値）で決める。上部と本文下の2か所に置かれるため、
  * 操作後は revalidatePath で両方が同じ状態に揃う。
@@ -86,12 +97,19 @@ export default function EventOnsiteRegistration({
   hasMemberAccess,
   viewer,
   registration,
+  closed = false,
+  deadlineLabel = null,
   actions = SERVER_ACTIONS,
   initialMode = "view",
   initialError,
 }: EventOnsiteRegistrationProps) {
-  if (!isLoggedIn) return <GuestCard slug={slug} />;
-  if (!hasMemberAccess) return <NonMemberCard />;
+  // 受付終了後は、申込済みの会員以外には「受付終了」だけを出す（ログイン・課金への案内も出さない）
+  if (closed && !(isLoggedIn && hasMemberAccess && registration)) {
+    return <ClosedCard />;
+  }
+  const deadline = closed ? null : deadlineLabel;
+  if (!isLoggedIn) return <GuestCard slug={slug} deadlineLabel={deadline} />;
+  if (!hasMemberAccess) return <NonMemberCard deadlineLabel={deadline} />;
 
   const profile = viewer ?? { name: "メンバー", avatarUrl: null };
   const initialState: EventRegistrationActionResult | null = initialError
@@ -104,6 +122,7 @@ export default function EventOnsiteRegistration({
         viewer={profile}
         action={actions.register}
         initialState={initialState}
+        deadlineLabel={deadline}
       />
     );
   }
@@ -117,6 +136,7 @@ export default function EventOnsiteRegistration({
       actions={actions}
       initialMode={initialMode}
       initialState={initialState}
+      closed={closed}
     />
   );
 }
@@ -132,9 +152,12 @@ export default function EventOnsiteRegistration({
  */
 function RegistrationCard({
   band,
+  deadlineLabel,
   children,
 }: {
   band: ReactNode;
+  /** 受付中の未申込カードにだけ、ボタンの下に「締め切り：10月21日（水）」を小さく出す */
+  deadlineLabel?: string | null;
   children: ReactNode;
 }) {
   return (
@@ -142,7 +165,14 @@ function RegistrationCard({
       <p className="mx-px mt-px flex items-center justify-center gap-1 rounded-t-[22px] bg-[var(--event-card-band-bg)] py-[7px] text-center text-sm font-medium leading-[21px] text-[var(--event-card-band-text)]">
         {band}
       </p>
-      <div className="flex flex-col gap-4 px-4 py-3">{children}</div>
+      <div className="flex flex-col gap-4 px-4 py-3">
+        {children}
+        {deadlineLabel && (
+          <p className="-mt-2 text-center text-[13px] leading-5 text-text-muted">
+            締め切り：{deadlineLabel}
+          </p>
+        )}
+      </div>
     </div>
   );
 }
@@ -256,14 +286,31 @@ function CommentField({
 // 状態ごとの中身
 // ---------------------------------------------------------------------------
 
-function GuestCard({ slug }: { slug: string }) {
+/** 受付終了（未ログイン・非会員・未申込の会員）。入力欄・ボタンは出さない */
+function ClosedCard() {
+  return (
+    <RegistrationCard band={CLOSED_BAND}>
+      <p className="text-balance py-2 text-center text-base font-bold text-text-primary">
+        {CLOSED_MESSAGE}
+      </p>
+    </RegistrationCard>
+  );
+}
+
+function GuestCard({
+  slug,
+  deadlineLabel,
+}: {
+  slug: string;
+  deadlineLabel: string | null;
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   // ログイン後にこのイベントページへ戻す（ログイン側の sanitizeRedirect で "/" 始まりだけ許可される）
   const loginHref = `/login?redirectTo=${encodeURIComponent(`/events/${slug}`)}`;
 
   return (
     <>
-      <RegistrationCard band={DEFAULT_BAND}>
+      <RegistrationCard band={DEFAULT_BAND} deadlineLabel={deadlineLabel}>
         <MembersOnlyMessage sub="参加するにはログインしてください" />
         <div className="flex flex-col items-center gap-1">
           <Button asChild size="large" className="w-full">
@@ -284,7 +331,7 @@ function GuestCard({ slug }: { slug: string }) {
   );
 }
 
-function NonMemberCard() {
+function NonMemberCard({ deadlineLabel }: { deadlineLabel: string | null }) {
   const router = useRouter();
   const handleMemberRegister = () => {
     trackPricingCtaClick("event");
@@ -292,7 +339,7 @@ function NonMemberCard() {
   };
 
   return (
-    <RegistrationCard band={DEFAULT_BAND}>
+    <RegistrationCard band={DEFAULT_BAND} deadlineLabel={deadlineLabel}>
       <MembersOnlyMessage />
       <Button
         type="button"
@@ -311,11 +358,13 @@ function RegisterForm({
   viewer,
   action,
   initialState,
+  deadlineLabel,
 }: {
   slug: string;
   viewer: RegistrantProfile;
   action: RegistrationAction;
   initialState: EventRegistrationActionResult | null;
+  deadlineLabel: string | null;
 }) {
   const [comment, setComment] = useState(DEFAULT_REGISTRATION_COMMENT);
   const [state, formAction, pending] = useActionState(action, initialState);
@@ -323,7 +372,7 @@ function RegisterForm({
   const errorId = `${fieldId}-error`;
 
   return (
-    <RegistrationCard band={DEFAULT_BAND}>
+    <RegistrationCard band={DEFAULT_BAND} deadlineLabel={deadlineLabel}>
       <form action={formAction} className="flex flex-col gap-4">
         <input type="hidden" name="slug" value={slug} />
         <div className="flex flex-col gap-2">
@@ -358,6 +407,7 @@ function RegisteredView({
   actions,
   initialMode,
   initialState,
+  closed,
 }: {
   slug: string;
   viewer: RegistrantProfile;
@@ -365,6 +415,8 @@ function RegisteredView({
   actions: EventRegistrationActions;
   initialMode: RegisteredMode;
   initialState: EventRegistrationActionResult | null;
+  /** 受付終了後か（取り消すと再申込できないことを確認文に添える） */
+  closed: boolean;
 }) {
   const [mode, setMode] = useState<RegisteredMode>(initialMode);
   const [draft, setDraft] = useState(comment);
@@ -439,9 +491,16 @@ function RegisteredView({
       {mode === "confirm-cancel" ? (
         <form action={cancelAction} className="flex flex-col gap-3">
           <input type="hidden" name="slug" value={slug} />
-          <p className="text-center text-sm font-medium text-text-primary">
-            参加を取り消しますか？
-          </p>
+          <div className="flex flex-col items-center gap-1 text-center">
+            <p className="text-sm font-medium text-text-primary">
+              参加を取り消しますか？
+            </p>
+            {closed && (
+              <p className="text-balance text-[13px] leading-5 text-text-muted">
+                受付終了後に取り消すと、再度申し込むことはできません
+              </p>
+            )}
+          </div>
           <ErrorMessage id={cancelErrorId} state={cancelState} />
           <div className="flex gap-2">
             <Button
