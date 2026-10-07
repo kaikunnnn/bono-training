@@ -1,5 +1,6 @@
 import TopSectionHeading from "@/components/top2/TopSectionHeading";
 import { PromoCard } from "@/components/top-next/molecules/PromoCard";
+import type { HomeClickSurface, HomeClickTracking } from "@/lib/activity-utils";
 
 /**
  * 課題解決のデザインをはじめる（新トップページ Figma Make HANDOFF / TrainingSection）
@@ -12,9 +13,13 @@ import { PromoCard } from "@/components/top-next/molecules/PromoCard";
 export interface TrainingSectionProps {
   image1?: string;
   image2?: string;
+  /** 指定時はクリックを計測する（#232 home_click / section: training） */
+  surface?: HomeClickSurface;
 }
 
-export function TrainingSection({ image1, image2 }: TrainingSectionProps) {
+export function TrainingSection({ image1, image2, surface }: TrainingSectionProps) {
+  const track = (position: number, contentId: string): HomeClickTracking | undefined =>
+    surface && { surface, section: "training", itemType: "roadmap", position, contentId };
   return (
     <section className="px-6 lg:px-12">
       <div className="border-b border-black/[0.1] pt-[64px] pb-[65px]">
@@ -29,12 +34,14 @@ export function TrainingSection({ image1, image2 }: TrainingSectionProps) {
             description="ユーザーと目的から最適なUIを設計しよう"
             href="/roadmap/information-architecture"
             image={image1}
+            tracking={track(1, "information-architecture")}
           />
           <PromoCard
             title="UXリサーチで顧客課題を解決するデザインの基本"
             description="インタビューで課題を定義してUIを考える"
             href="/roadmap/ux-design-basic"
             image={image2}
+            tracking={track(2, "ux-design-basic")}
           />
         </div>
       </div>

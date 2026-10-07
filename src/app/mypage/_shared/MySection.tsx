@@ -8,6 +8,7 @@ import { EmptyState } from "./EmptyState";
  */
 export function MySection({
   title,
+  section,
   viewAllTab,
   isEmpty,
   emptyMessage,
@@ -16,6 +17,8 @@ export function MySection({
   children,
 }: {
   title: string;
+  /** クリック計測（#232 home_click）のブロックID（例: progress / bookmarks / history） */
+  section: string;
   viewAllTab: string;
   isEmpty: boolean;
   emptyMessage: string;
@@ -37,10 +40,10 @@ export function MySection({
         >
           {title}
         </h2>
-        <ViewAllButton tab={viewAllTab} />
+        <ViewAllButton tab={viewAllTab} section={section} />
       </div>
       {isEmpty ? (
-        <EmptyState message={emptyMessage} link={emptyLink} />
+        <EmptyState message={emptyMessage} link={emptyLink} section={section} />
       ) : horizontal ? (
         <div className="flex flex-col sm:flex-row gap-[10px] w-full">
           {React.Children.map(children, (child) => (

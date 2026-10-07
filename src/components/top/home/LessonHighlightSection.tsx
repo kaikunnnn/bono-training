@@ -3,6 +3,8 @@ import type { LessonWithArticleIds } from "@/lib/sanity";
 import { LessonCardRenderer } from "@/app/lessons/LessonCardRenderer";
 import { cn } from "@/lib/utils";
 import TopSectionHeading from "@/components/top2/TopSectionHeading";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import type { HomeClickSurface } from "@/lib/activity-utils";
 
 /**
  * レッスン特集セクション（新トップ 2026 / ブロックE）
@@ -55,6 +57,11 @@ export interface LessonHighlightSectionProps {
   loading?: boolean;
   /** Opt in for sections well below the fold; preserve other callers' behavior. */
   imageLoading?: "lazy" | "eager";
+  /**
+   * 指定時はクリックを計測する（#232 home_click / section: lesson_highlight）。
+   * position は行をまたいだ通し番号（1行目1〜3、2行目4〜6）。
+   */
+  surface?: HomeClickSurface;
 }
 
 export default function LessonHighlightSection({
@@ -68,7 +75,15 @@ export default function LessonHighlightSection({
   className,
   loading = false,
   imageLoading,
+  surface,
 }: LessonHighlightSectionProps) {
+  const viewAllClassName =
+    "font-noto-sans-jp text-sm text-text-link underline-offset-4 hover:text-text-link-hover hover:underline";
+  // 行をまたいだ通し番号の起点
+  const rowOffsets = rows.reduce<number[]>((offsets, _row, index) => {
+    offsets.push(index === 0 ? 0 : offsets[index - 1] + rows[index - 1].lessons.length);
+    return offsets;
+  }, []);
   return (
     <section
       aria-busy={loading || undefined}
@@ -82,17 +97,23 @@ export default function LessonHighlightSection({
       <div className="flex flex-col gap-16 py-[64px]">
         <div className="flex flex-col gap-2">
           <TopSectionHeading badgeLabel={badgeLabel} heading={heading} />
-          {viewAllHref && (
-            <Link
-              href={viewAllHref}
-              className="font-noto-sans-jp text-sm text-text-link underline-offset-4 hover:text-text-link-hover hover:underline"
-            >
-              {viewAllLabel} →
-            </Link>
-          )}
+          {viewAllHref &&
+            (surface ? (
+              <HomeClickLink
+                href={viewAllHref}
+                className={viewAllClassName}
+                tracking={{ surface, section: "lesson_highlight", itemType: "view_all" }}
+              >
+                {viewAllLabel} →
+              </HomeClickLink>
+            ) : (
+              <Link href={viewAllHref} className={viewAllClassName}>
+                {viewAllLabel} →
+              </Link>
+            ))}
         </div>
 
-        {rows.map((row) => (
+        {rows.map((row, rowIndex) => (
           <div key={row.subheading} className="flex flex-col gap-12">
             {/* サブ見出し（20px） */}
             <h3 className="font-rounded-mplus text-[20px] font-medium leading-[1.4] tracking-[1.6px] text-text-primary">
@@ -116,6 +137,16 @@ export default function LessonHighlightSection({
                   key={lesson._id}
                   lesson={{ ...lesson, index: i }}
                   imageLoading={imageLoading}
+                  tracking={
+                    surface && {
+                      surface,
+                      section: "lesson_highlight",
+                      itemType: "lesson",
+                      position: rowOffsets[rowIndex] + i + 1,
+                      contentId: lesson.slug.current,
+                      lessonId: lesson._id,
+                    }
+                  }
                 />
               ))}
             </div>

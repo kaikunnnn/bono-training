@@ -12,7 +12,7 @@ import {
 import { withSignUpMarker } from "@/lib/auth-markers";
 
 describe("activity event types (DB CHECK と一致)", () => {
-  it("固定8種のみ", () => {
+  it("固定10種のみ（#232 で home_click / event_view を追加）", () => {
     expect(ACTIVITY_EVENT_TYPES).toEqual([
       "site_visit",
       "article_view",
@@ -22,8 +22,12 @@ describe("activity event types (DB CHECK と一致)", () => {
       "community_join_click",
       "success_next_click",
       "pricing_cta_click",
+      "home_click",
+      "event_view",
     ]);
     expect(isActivityEventType("site_visit")).toBe(true);
+    expect(isActivityEventType("home_click")).toBe(true);
+    expect(isActivityEventType("event_view")).toBe(true);
     expect(isActivityEventType("page_view")).toBe(false);
     expect(isActivityEventType(undefined)).toBe(false);
   });

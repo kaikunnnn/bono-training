@@ -7,7 +7,7 @@ import { toggleBookmark } from "@/lib/services/bookmarks";
 import { useToast } from "@/hooks/use-toast";
 import { MySection } from "../_shared/MySection";
 import { EmptyState } from "../_shared/EmptyState";
-import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
 
 export interface BookmarkedArticle {
   _id: string;
@@ -30,14 +30,17 @@ export function BookmarksPreview({
   return (
     <MySection
       title="お気に入り"
+      section="bookmarks"
       viewAllTab="favorite"
       isEmpty={bookmarks.length === 0}
       emptyMessage="記事をお気に入りするとこちらに表示されます"
     >
-      {bookmarks.slice(0, 4).map((article) => (
+      {bookmarks.slice(0, 4).map((article, index) => (
         <BookmarkItem
           key={article._id}
           article={article}
+          section="bookmarks"
+          position={index + 1}
           onRemove={handleRemoveBookmark}
           isUnbookmarked={unbookmarkedIds.has(article._id)}
         />
@@ -54,15 +57,22 @@ export function BookmarksFull({
   const { unbookmarkedIds, handleRemoveBookmark } = useBookmarkActions();
 
   if (bookmarks.length === 0) {
-    return <EmptyState message="記事をお気に入りするとこちらに表示されます" />;
+    return (
+      <EmptyState
+        message="記事をお気に入りするとこちらに表示されます"
+        section="bookmarks_tab"
+      />
+    );
   }
 
   return (
     <div className="flex w-full flex-col gap-0 rounded-2xl overflow-hidden shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)]">
-      {bookmarks.map((article) => (
+      {bookmarks.map((article, index) => (
         <BookmarkItem
           key={article._id}
           article={article}
+          section="bookmarks_tab"
+          position={index + 1}
           onRemove={handleRemoveBookmark}
           isUnbookmarked={unbookmarkedIds.has(article._id)}
         />
@@ -103,10 +113,15 @@ function BookmarkItem({
   article,
   onRemove,
   isUnbookmarked,
+  section,
+  position,
 }: {
   article: BookmarkedArticle;
   onRemove: (id: string, isPremium?: boolean) => void;
   isUnbookmarked?: boolean;
+  /** クリック計測（#232 home_click）のブロックID */
+  section: string;
+  position: number;
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const thumbnailUrl = article.resolvedThumbnailUrl || "/placeholder-thumbnail.svg";
@@ -117,8 +132,17 @@ function BookmarkItem({
       className="w-full flex items-center gap-3 bg-white cursor-pointer"
       style={{ minHeight: "68px", padding: "16px" }}
     >
-      <IntentPrefetchLink
+      <HomeClickLink
         href={`/contents/${article.slug.current}`}
+        intentPrefetch
+        tracking={{
+          surface: "mypage",
+          section,
+          itemType: "article",
+          position,
+          contentId: article.slug.current,
+          articleId: article._id,
+        }}
         className="flex items-center gap-3 flex-1 min-w-0 no-underline"
       >
         {/* サムネイル */}
@@ -165,7 +189,7 @@ function BookmarkItem({
             </div>
           )}
         </div>
-      </IntentPrefetchLink>
+      </HomeClickLink>
 
       {/* お気に入りボタン */}
       <div

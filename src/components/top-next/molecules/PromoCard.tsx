@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import type { HomeClickTracking } from "@/lib/activity-utils";
 
 /**
  * サムネイル＋タイトル＋説明（任意）＋ボタンのカード（新トップページ top-next共通）
@@ -32,6 +34,8 @@ export interface PromoCardProps {
   external?: boolean;
   /** ダーク背景用に白系へ反転（デフォルト false。旧GuideCard相当） */
   inverse?: boolean;
+  /** 指定時はクリックを計測する（#232 home_click）。未指定なら従来どおりの Link */
+  tracking?: HomeClickTracking;
 }
 
 export function PromoCard({
@@ -45,6 +49,7 @@ export function PromoCard({
   aspectRatio = "16/9",
   external = false,
   inverse = false,
+  tracking,
 }: PromoCardProps) {
   const resolvedCtaLabel = ctaLabel ?? (inverse ? "詳細を見る" : "詳しく見る");
 
@@ -58,14 +63,16 @@ export function PromoCard({
     </h3>
   );
 
-  return (
-    <Link
-      href={href}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className={`group -m-3 flex flex-1 flex-col gap-4 rounded-[8px] p-3 transition-colors duration-200 ${
-        inverse ? "hover:bg-white/[0.06]" : "hover:bg-black/[0.03]"
-      }`}
-    >
+  const linkProps = {
+    href,
+    ...(external ? { target: "_blank", rel: "noopener noreferrer" } : {}),
+    className: `group -m-3 flex flex-1 flex-col gap-4 rounded-[8px] p-3 transition-colors duration-200 ${
+      inverse ? "hover:bg-white/[0.06]" : "hover:bg-black/[0.03]"
+    }`,
+  };
+
+  const content = (
+    <>
       {titlePosition === "above" && titleEl}
       <div
         className={`relative w-full overflow-hidden ${inverse ? "bg-white/10" : "bg-muted-custom"}`}
@@ -101,6 +108,14 @@ export function PromoCard({
           <span>{resolvedCtaLabel}</span>
         </Button>
       </div>
-    </Link>
+    </>
+  );
+
+  return tracking ? (
+    <HomeClickLink {...linkProps} tracking={tracking}>
+      {content}
+    </HomeClickLink>
+  ) : (
+    <Link {...linkProps}>{content}</Link>
   );
 }

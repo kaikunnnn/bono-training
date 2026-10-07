@@ -1,7 +1,7 @@
 "use client";
 
 import { IconButton } from "@/components/ui/button/IconButton";
-import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
 
 export type TabId = "all" | "progress" | "favorite" | "history";
 
@@ -32,9 +32,13 @@ export function MyPageShell({
           <h1 className="text-2xl font-semibold leading-6 font-rounded-mplus text-slate-950">
             マイページ
           </h1>
-          <IntentPrefetchLink href="/profile">
+          <HomeClickLink
+            href="/profile"
+            intentPrefetch
+            tracking={{ surface: "mypage", section: "header", itemType: "profile" }}
+          >
             <IconButton icon={null} label="プロフィール" onClick={() => {}} />
-          </IntentPrefetchLink>
+          </HomeClickLink>
         </div>
 
         {/* タブナビ */}
@@ -42,14 +46,22 @@ export function MyPageShell({
           className="p-[3px] bg-zinc-100 rounded-lg outline outline-1 outline-offset-[-1px] outline-black/5 inline-flex items-center gap-2"
           role="tablist"
         >
-          {TABS.map((tab) => {
+          {TABS.map((tab, index) => {
             const isActive = activeTab === tab.id;
             const href = tab.id === "all" ? "/mypage" : `/mypage?tab=${tab.id}`;
 
             return (
-              <IntentPrefetchLink
+              <HomeClickLink
                 key={tab.id}
                 href={href}
+                intentPrefetch
+                tracking={{
+                  surface: "mypage",
+                  section: "tabs",
+                  itemType: "tab",
+                  position: index + 1,
+                  contentId: tab.id,
+                }}
                 role="tab"
                 aria-selected={isActive}
                 aria-current={isActive ? "page" : undefined}
@@ -62,7 +74,7 @@ export function MyPageShell({
                 style={{ fontFamily: "'Rounded Mplus 1c', sans-serif" }}
               >
                 {tab.label}
-              </IntentPrefetchLink>
+              </HomeClickLink>
             );
           })}
         </div>

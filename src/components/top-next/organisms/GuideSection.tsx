@@ -1,5 +1,9 @@
 import TopSectionHeading from "@/components/top2/TopSectionHeading";
 import { PromoCard } from "@/components/top-next/molecules/PromoCard";
+import {
+  classifyHomeHref,
+  type HomeClickSurface,
+} from "@/lib/activity-utils";
 
 /**
  * デザインとキャリアを考える（新トップページ Figma Make HANDOFF / GuideSection）
@@ -19,9 +23,11 @@ export interface GuideSectionItem {
 
 export interface GuideSectionProps {
   guides: GuideSectionItem[];
+  /** 指定時はクリックを計測する（#232 home_click / section: guide） */
+  surface?: HomeClickSurface;
 }
 
-export function GuideSection({ guides }: GuideSectionProps) {
+export function GuideSection({ guides, surface }: GuideSectionProps) {
   return (
     <section className="bg-dark-section px-6 pt-[64px] pb-[80px] lg:px-[69px]">
       <div className="pt-[64px]">
@@ -32,8 +38,20 @@ export function GuideSection({ guides }: GuideSectionProps) {
           className="mb-[64px]"
         />
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:gap-12">
-          {guides.map((guide) => (
-            <PromoCard key={guide.title} {...guide} inverse />
+          {guides.map((guide, index) => (
+            <PromoCard
+              key={guide.title}
+              {...guide}
+              inverse
+              tracking={
+                surface && {
+                  surface,
+                  section: "guide",
+                  ...classifyHomeHref(guide.href),
+                  position: index + 1,
+                }
+              }
+            />
           ))}
         </div>
       </div>

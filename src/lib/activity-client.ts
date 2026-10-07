@@ -6,11 +6,14 @@
  *   （匿名の閲覧ごとに無駄な POST を飛ばさないため。最終判定はサーバー側）
  * - trackPricingCtaClick: 料金ページへの CTA クリックを GA4 と活動ログの両方に送る
  *   （未ログインは活動ログが no-op になるため GA4 側で数える）
+ * - trackHomeClick: /top・マイページで押したもの（#232）を GA4 と活動ログの両方に送る
  */
 import { recordActivity } from "@/lib/services/activity";
 import { trackEvent } from "@/lib/analytics";
 import {
+  buildHomeClickParams,
   isPricingCtaSourceGroup,
+  type HomeClickTracking,
   type PricingCtaSourceGroup,
   type RecordActivityInput,
 } from "@/lib/activity-utils";
@@ -70,5 +73,30 @@ export function trackCommunityJoinClick(placement: string): void {
   logActivity({
     eventType: "community_join_click",
     meta: { placement },
+  });
+}
+
+/**
+ * /top・マイページで押したもの（#232 home_click）。
+ * GA4 には surface / section / item_type / position / content_id だけを送る（user_id・個人情報は送らない）。
+ * 活動ログには同じ値を meta に入れ、記事・レッスンの ID があれば article_id / lesson_id 列にも入れる。
+ */
+export function trackHomeClick(tracking: HomeClickTracking): void {
+  let built: ReturnType<typeof buildHomeClickParams>;
+  try {
+    built = buildHomeClickParams(tracking);
+  } catch {
+    return;
+  }
+  try {
+    trackEvent("home_click", built.params);
+  } catch {
+    // GA 失敗で遷移を止めない
+  }
+  logActivity({
+    eventType: "home_click",
+    articleId: built.articleId,
+    lessonId: built.lessonId,
+    meta: built.params,
   });
 }

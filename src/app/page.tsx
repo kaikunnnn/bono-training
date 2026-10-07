@@ -49,5 +49,5 @@ export default async function IndexPage({
     redirect(welcome === "1" ? "/mypage?welcome=1" : "/mypage");
   }
 
-  return <NewTopContent isMember={false} />;
+  return <NewTopContent isMember={false} surface="root" />;
 }

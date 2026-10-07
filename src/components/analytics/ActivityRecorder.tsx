@@ -8,7 +8,7 @@ interface ActivityRecorderProps {
   /** マウント時に記録するイベント（閲覧系） */
   eventType: Extract<
     ActivityEventType,
-    "article_view" | "lesson_view" | "questions_view"
+    "article_view" | "lesson_view" | "questions_view" | "event_view"
   >;
   articleId?: string;
   lessonId?: string;

@@ -7,6 +7,9 @@ import { FeaturedSeries } from "./organisms/FeaturedSeries";
 import { ArticleRow } from "./molecules/ArticleRow";
 import { LessonCardRenderer } from "@/app/lessons/LessonCardRenderer";
 import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import { PurposeNav } from "./organisms/PurposeNav";
+import { NewContentSection } from "./organisms/NewContentSection";
 import {
   getAllLessonsWithArticleIds,
   getAchievementGroups,
@@ -182,5 +185,43 @@ describe("top-page streaming contract", () => {
       variant: "updates",
     });
     expect(updates.type).not.toBe(IntentPrefetchLink);
+  });
+
+  it.each(["top", "root"] as const)("passes the click-tracking surface to every linked section (%s)", (surface) => {
+    const elements = descendants(NewTopContent({ surface }));
+    expect(elements.find((element) => element.type === PurposeNav)?.props).toEqual({ surface });
+    expect(elements.find((element) => element.type === FeaturedSeries)?.props).toMatchObject({ surface });
+    expect(elements.find((element) => element.type === HeroSection)?.props).not.toHaveProperty("surface");
+    const boundaries = elements.filter((element) => element.type === Suspense);
+    for (const boundary of boundaries) {
+      const child = Children.only(boundary.props.children) as ReactElement<{ surface?: string }>;
+      expect(child.props.surface).toBe(surface);
+    }
+  });
+
+  it("classifies mixed latest items (events, board posts) by URL when tracking", () => {
+    const section = NewContentSection({
+      surface: "top",
+      viewAllHref: "/updates",
+      articles: [
+        { category: "イベント", title: "勉強会", href: "/events/oct-meetup" },
+        { category: "掲示板", title: "質問", href: "/questions/q1" },
+      ],
+    });
+    const rows = descendants(section).filter((element) => element.type === ArticleRow) as ReactElement<{
+      tracking?: unknown;
+    }>[];
+    expect(rows.map((row) => row.props.tracking)).toEqual([
+      { surface: "top", section: "new_content", itemType: "event", contentId: "oct-meetup", position: 1 },
+      { surface: "top", section: "new_content", itemType: "question", contentId: "q1", position: 2 },
+    ]);
+    const viewAll = descendants(section).find((element) => element.type === HomeClickLink);
+    expect(viewAll?.props).toMatchObject({ href: "/updates" });
+
+    const tracked = ArticleRow({ category: "記事", title: "新着", href: "/contents/test", tracking: {
+      surface: "top", section: "new_content", itemType: "article", position: 1,
+    } });
+    expect(tracked.type).toBe(HomeClickLink);
+    expect(tracked.props).toMatchObject({ intentPrefetch: true });
   });
 });

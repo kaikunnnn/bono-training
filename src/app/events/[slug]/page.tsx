@@ -7,6 +7,7 @@ import { getCachedUser } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import RichTextSection from "@/components/article/RichTextSection";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
+import { ActivityRecorder } from "@/components/analytics/ActivityRecorder";
 import EventOnsiteRegistration from "@/components/event/EventOnsiteRegistration";
 import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
 import EventParticipantList from "@/components/event/EventParticipantList";
@@ -189,6 +190,14 @@ export default async function EventDetailPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen w-full">
+      {/* 活動ログ event_view（#232）: ログイン中のみ。何も描画しない */}
+      {user && (
+        <ActivityRecorder
+          eventType="event_view"
+          path={`/events/${slug}`}
+          meta={{ slug, event_id: event._id }}
+        />
+      )}
       {/* メインコンテンツ */}
       <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-12">
         <div className="flex flex-col gap-8">
