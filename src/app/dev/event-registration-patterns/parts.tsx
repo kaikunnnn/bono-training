@@ -117,6 +117,17 @@ function SuccessCheck({ className }: { className?: string }) {
  * ⋯ ボタン＋メニュー。掲示板のコメント（QuestionCommentItem）と同じ組み方。
  * メニューから開くモーダルはメニューの外（兄弟）に置くこと（中に置くとメニューと一緒に閉じる）。
  */
+export type MoreMenuItem = {
+  label: string;
+  onSelect: () => void;
+  destructive?: boolean;
+  /**
+   * true: メニューを閉じたあと ⋯ にフォーカスを戻さない（選んだ先でフォーカスを移すとき。
+   * 戻すと ⋯ へスクロールが引き戻される）
+   */
+  keepFocus?: boolean;
+};
+
 export function MoreMenu({
   label,
   items,
@@ -125,10 +136,11 @@ export function MoreMenu({
 }: {
   /** ボタンの読み上げ名（例: 「参加のメニュー」） */
   label: string;
-  items: { label: string; onSelect: () => void; destructive?: boolean }[];
+  items: MoreMenuItem[];
   className?: string;
   triggerRef?: Ref<HTMLButtonElement>;
 }) {
+  const skipReturnFocus = useRef(false);
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -146,11 +158,23 @@ export function MoreMenu({
           <MoreHorizontal className="size-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-[10rem]">
+      <DropdownMenuContent
+        align="end"
+        className="min-w-[10rem]"
+        onCloseAutoFocus={(e) => {
+          if (skipReturnFocus.current) {
+            e.preventDefault();
+            skipReturnFocus.current = false;
+          }
+        }}
+      >
         {items.map((item) => (
           <DropdownMenuItem
             key={item.label}
-            onSelect={item.onSelect}
+            onSelect={() => {
+              skipReturnFocus.current = !!item.keepFocus;
+              item.onSelect();
+            }}
             className={cn(
               "cursor-pointer",
               item.destructive && "text-destructive focus:text-destructive",
@@ -242,10 +266,13 @@ export function CancelMenu({
   closed,
   onConfirm,
   triggerClassName,
+  extraItems = [],
 }: {
   closed: boolean;
   onConfirm: () => void;
   triggerClassName?: string;
+  /** 「参加を取り消す」より上に足す項目（例: 「コメントを見る」） */
+  extraItems?: MoreMenuItem[];
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -256,6 +283,7 @@ export function CancelMenu({
         label="参加のメニュー"
         className={triggerClassName}
         items={[
+          ...extraItems,
           {
             label: "参加を取り消す",
             destructive: true,
@@ -417,9 +445,11 @@ export function P2Card({
 export function P3Compact({
   closed,
   onCancel,
+  extraMenuItems,
 }: {
   closed: boolean;
   onCancel: () => void;
+  extraMenuItems?: MoreMenuItem[];
 }) {
   return (
     <div className="inline-flex h-10 max-w-full items-center gap-2 rounded-full border border-text-success/15 bg-success-feedback pl-3 pr-1.5">
@@ -428,7 +458,11 @@ export function P3Compact({
         参加中
       </span>
       <ViewerAvatar />
-      <CancelMenu closed={closed} onConfirm={onCancel} />
+      <CancelMenu
+        closed={closed}
+        onConfirm={onCancel}
+        extraItems={extraMenuItems}
+      />
     </div>
   );
 }
@@ -438,6 +472,28 @@ export function P3Compact({
 // ---------------------------------------------------------------------------
 
 export type StripVariant = "right-label" | "left-label";
+
+/** 重ねたアイコン（最大4個・32px）。読み上げは親でまとめるので aria-hidden */
+export function AvatarStack({ avatarUrls }: { avatarUrls: (string | null)[] }) {
+  return (
+    <div className="flex shrink-0 -space-x-2" aria-hidden="true">
+      {avatarUrls.slice(0, 4).map((url, i) => (
+        // URL も key に含める（同じ位置の人が入れ替わったとき、Radix Avatar の「読み込み済み」状態を持ち越さない）
+        <Avatar key={`${i}-${url ?? "none"}`} className="size-8 ring-2 ring-background">
+          {url && <AvatarImage src={url} alt="" />}
+          <AvatarFallback className="text-muted-foreground">
+            <User size={16} color="currentColor" />
+          </AvatarFallback>
+        </Avatar>
+      ))}
+    </div>
+  );
+}
+
+/** ラベルA: 1〜4人「参加中」/ 5人以上「N人が参加中」 */
+export function stripLabel(count: number): string {
+  return count >= 5 ? `${count}人が参加中` : "参加中";
+}
 
 /**
  * 参加者アイコン列（ラベル付き）。
@@ -454,19 +510,7 @@ export function LabeledAvatarStrip({
   variant?: StripVariant;
 }) {
   if (count <= 0) return null;
-  const visible = avatarUrls.slice(0, 4);
-  const avatars = (
-    <div className="flex shrink-0 -space-x-2" aria-hidden="true">
-      {visible.map((url, i) => (
-        <Avatar key={i} className="size-8 ring-2 ring-background">
-          {url && <AvatarImage src={url} alt="" />}
-          <AvatarFallback className="text-muted-foreground">
-            <User size={16} color="currentColor" />
-          </AvatarFallback>
-        </Avatar>
-      ))}
-    </div>
-  );
+  const avatars = <AvatarStack avatarUrls={avatarUrls} />;
   const labelClass = "whitespace-nowrap text-sm text-text-muted";
 
   if (variant === "left-label") {
@@ -497,7 +541,7 @@ export function LabeledAvatarStrip({
     >
       {avatars}
       <span className={labelClass} aria-hidden="true">
-        {count >= 5 ? `${count}人が参加中` : "参加中"}
+        {stripLabel(count)}
       </span>
     </div>
   );

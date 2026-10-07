@@ -10,6 +10,7 @@ import Link from "next/link";
 import RichTextSection from "@/components/article/RichTextSection";
 import { CancelFlowDemo, FullPageDemo, OwnRowListDemo, PatternDemo } from "./demos";
 import { LabeledAvatarStrip } from "./parts";
+import { NavPatternsSection } from "./nav";
 import { MOCK_CONTENT, stripAvatars } from "./mock";
 
 export const metadata: Metadata = {
@@ -115,10 +116,31 @@ export default function Page() {
         </header>
 
         <div className="flex flex-col gap-16">
+          {/* 0. 決定事項と、コメント一覧への動線 */}
+          <section>
+            <NavPatternsSection
+              intro={
+                <SectionHeading
+                  title="0. 決定：P3＋ラベルA と、コメント一覧への動線"
+                  note="申込済みは P3（「✓ 参加中（自分のアイコン）⋯」の1行。自分のコメントは出さない）、アイコン列はラベルA（1〜4人「参加中」/ 5人以上「N人が参加中」）に決定。そのうえで、本文のあと（ページのずっと下）にある参加者のコメント一覧へ行く動線を比べる。コメント一覧は有料会員にだけ見せるので、ゲストには行き先の無いリンクを出さない。リンクを押すとなめらかにスクロールし（動きを減らす設定の人には一瞬で移動）、着いたら一覧の見出しにフォーカスを移す。上の「見ている人」を切り替えると全パターンが切り替わる。"
+                />
+              }
+            />
+          </section>
+
+          {/* ここから下は比較済み（参考） */}
+          <div className="flex items-center gap-4" role="separator" aria-label="比較済み（参考）">
+            <div className="h-px flex-1 bg-gray-300" />
+            <span className="rounded-full bg-muted-custom px-3 py-1 text-xs font-bold text-text-secondary">
+              比較済み（参考）
+            </span>
+            <div className="h-px flex-1 bg-gray-300" />
+          </div>
+
           {/* 1. パターン比較 */}
           <section className="flex flex-col gap-10">
             <SectionHeading
-              title="1. 申込済みカードのパターン（PC 640px / スマホ 343px）"
+              title="1. 申込済みカードのパターン（PC 640px / スマホ 343px）→ P3 に決定"
               note="どのパターンも、上のアイコン列に自分が入り「5人が参加中」に変わる（本人以外4人のモック）。⋯ →「参加を取り消す」→ 確認モーダル →「取り消す」で未申込のカードに戻る。"
             />
 
@@ -188,7 +210,7 @@ export default function Page() {
               note="いまは1〜4人だとアイコンだけで、何の列か分からない。人数にかかわらず必ず文字を添える。"
             />
             <div className="flex flex-col gap-3">
-              <PatternHeading title="A. アイコンの右に「参加中」/「N人が参加中」" recommended>
+              <PatternHeading title="A. アイコンの右に「参加中」/「N人が参加中」（決定）" recommended>
                 1〜4人は「参加中」、5人以上は「N人が参加中」。いまの5人以上の表示はそのままで、4人以下に一言足すだけ。左右の幅が短く、スマホでも1行に収まる。
               </PatternHeading>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">

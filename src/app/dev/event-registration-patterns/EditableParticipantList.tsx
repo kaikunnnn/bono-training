@@ -35,9 +35,15 @@ export default function EditableParticipantList({
     <section
       id={id}
       aria-labelledby={headingId}
-      className="flex w-full scroll-mt-6 flex-col gap-4 text-left"
+      className="flex w-full scroll-mt-24 flex-col gap-4 text-left"
     >
-      <h2 id={headingId} className="text-lg font-bold text-text-primary">
+      {/* ページ内リンクで飛んできたとき、キーボード利用者のためにここへフォーカスを移す */}
+      <h2
+        id={headingId}
+        tabIndex={-1}
+        data-scroll-focus
+        className="text-lg font-bold text-text-primary outline-none"
+      >
         参加者のコメント（{participants.length}人）
       </h2>
       <ul className="flex flex-col divide-y divide-gray-100">
