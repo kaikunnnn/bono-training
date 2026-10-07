@@ -69,7 +69,7 @@ export function AnnouncementBar({
         data-announcement-bar={announcement.id}
         // 閉じ済みの場合、直後のスクリプトがサーバーHTMLに hidden を付ける
         suppressHydrationWarning
-        className="relative w-full border-b border-border-light bg-warm"
+        className="relative w-full border-b border-border-light/50"
       >
         {/* 初期表示の動的ルートを viewport だけで prefetch しない（docs/performance.md） */}
         <IntentPrefetchLink
