@@ -16,6 +16,7 @@ import {
   type LinkSupabaseLike,
 } from "../_shared/subscription-link.ts";
 import { normalizePricingSourceGroup } from "../_shared/pricing-source.ts";
+import { buildAttributionMetadata } from "../_shared/purchase-attribution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -49,10 +50,17 @@ Deno.serve(async (req) => {
       planType = "standard",
       duration = 1,
       sourceGroup: rawSourceGroup,
+      sourcePath: rawSourcePath,
+      firstTouch: rawFirstTouch,
     } = await req.json();
 
     // #213 A2: 料金ページの出どころ。9グループ以外（無し・不正）は null=直接扱い
     const sourceGroup = normalizePricingSourceGroup(rawSourceGroup);
+    // #233: ボタンを押したページのパス・最初に来たページ。再検証して不正値は捨てる（パス・印・ドメインのみ）
+    const attributionMetadata = buildAttributionMetadata({
+      sourcePath: rawSourcePath,
+      firstTouch: rawFirstTouch,
+    });
 
     logDebug("リクエスト受信", { returnUrl, planType, duration, sourceGroup, environment: ENVIRONMENT });
 
@@ -281,6 +289,13 @@ Deno.serve(async (req) => {
     if (attachSourceGroup) {
       sessionMetadata.source_group = sourceGroup;
     }
+    // #233: ボタンを押したページ・最初に来たページも同じ条件（新規契約のみ）で載せる。
+    // source_group が無い（直接来た）人でも最初に来たページは載せる。
+    const attachAttribution =
+      activeSubscriptions.length === 0 && Object.keys(attributionMetadata).length > 0;
+    if (attachAttribution) {
+      Object.assign(sessionMetadata, attributionMetadata);
+    }
 
     // セッション設定オブジェクト
     const sessionConfig: any = {
@@ -312,9 +327,12 @@ Deno.serve(async (req) => {
       ],
     };
 
-    if (attachSourceGroup) {
+    if (attachSourceGroup || attachAttribution) {
       sessionConfig.subscription_data = {
-        metadata: { source_group: sourceGroup },
+        metadata: {
+          ...(attachSourceGroup ? { source_group: sourceGroup } : {}),
+          ...(attachAttribution ? attributionMetadata : {}),
+        },
       };
     }
 
@@ -330,6 +348,7 @@ Deno.serve(async (req) => {
       planType,
       duration,
       sourceGroup: attachSourceGroup ? sourceGroup : null,
+      attribution: attachAttribution ? attributionMetadata : null,
     });
 
     // セッションURLをフロントエンドに返す

@@ -19,6 +19,7 @@ vi.mock("@/lib/sanity", () => ({
   getAllGuidesFromSanity: vi.fn(),
   getAllLessonSlugs: vi.fn(),
   getAllRoadmapSlugs: vi.fn(),
+  getQuestionsForSitemap: vi.fn(async () => []),
 }));
 
 afterEach(() => vi.restoreAllMocks());

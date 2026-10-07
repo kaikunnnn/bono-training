@@ -7,6 +7,7 @@ import { LayoutWrapper } from "@/components/layout/LayoutWrapper";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { GoogleAnalytics } from "@/components/common/GoogleAnalytics";
 import { WebVitals } from "@/components/common/WebVitals";
+import { AttributionTracker } from "@/components/analytics/AttributionTracker";
 import { ServiceWorkerRegistrar } from "@/components/pwa/ServiceWorkerRegistrar";
 import "./globals.css";
 import "@/styles/blog.css";
@@ -69,6 +70,8 @@ export default function RootLayout({
         <GoogleAnalytics />
         {/* GA bootstrapの直後に置く。RootLayoutはServer Componentのまま。 */}
         <WebVitals />
+        {/* #233: 最初に来たページ・ボタンを押したページの記録（何も描画しない） */}
+        <AttributionTracker />
         <ServiceWorkerRegistrar />
         <QueryProvider>
           <LayoutWrapper>{children}</LayoutWrapper>
