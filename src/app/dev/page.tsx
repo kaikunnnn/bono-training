@@ -26,6 +26,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/event-registration-patterns",
+    issue: "#218",
+    title: "イベント申込済みカードのパターン比較",
+    summary:
+      "申込後のカードの見せ方を比較（P1「参加中」カード／P2 無効ボタン「申込済み」／P3 コンパクト1行）。⋯メニュー→取り消し確認モーダル、参加者一覧の自分の行でのコメント編集、アイコン列のラベル案、ページ全体の並び。モックのみで何も送信しない。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/announcement-bar",
     issue: "#220",
     title: "イベント告知のお知らせバー",
