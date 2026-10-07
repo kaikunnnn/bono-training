@@ -102,6 +102,14 @@
   /* 開いた状態の通知ベル背景（Figma 394:3827・半透明白72%）。 */
   --bell-open-bg: rgba(255, 255, 255, 0.72);
 
+  /* イベント申込カード（#218 / Figma 3llH8MesLY3NzoU0hj5AGF 1:314）。
+     半透明の白カード＋上部の「参加はこちら」帯。帯と名前は #151515 系の墨色。 */
+  --event-card-bg:        rgba(255, 255, 255, 0.8);
+  --event-card-border:    rgba(255, 255, 255, 0.16);
+  --event-card-band-bg:   rgba(21, 21, 21, 0.04);
+  --event-card-band-text: rgba(21, 21, 21, 0.64);
+  --event-card-ink:       #151515;  /* 自分の名前（text-primary #021710 とは別色） */
+
   /* リアクションボタン（Figma 135:4348）。
      枠線は黒15%。ON状態は「明るい色」指定のためリンク色（--text-link #0829BF）系統で表現
      （primaryが黒のための暫定。primaryカラー導入時に差し替え） */
@@ -261,6 +269,8 @@
   --shadow-input:       0px 1px 6px rgba(0, 0, 0, 0.08);
   /* 通知ボックス（Popover）の影（Figma 394:3871）。既存 --shadow-md より濃く広い専用値。 */
   --shadow-popover:     0px 4px 24px 0px rgba(0, 0, 0, 0.18);
+  /* イベント申込カードの影（Figma 1:314）。 */
+  --shadow-event-card:  0px 2px 16px 0px rgba(0, 0, 0, 0.1);
 
   /* =========================================================
      SPACING — 4px base

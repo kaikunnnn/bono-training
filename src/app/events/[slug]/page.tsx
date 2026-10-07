@@ -7,6 +7,20 @@ import { getCachedUser } from "@/lib/supabase/server";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import RichTextSection from "@/components/article/RichTextSection";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
+import EventOnsiteRegistration from "@/components/event/EventOnsiteRegistration";
+import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
+import EventParticipantList from "@/components/event/EventParticipantList";
+import {
+  formatRegistrationDeadline,
+  getRegistrantProfile,
+  isOnsiteRegistrationEvent,
+  isRegistrationClosed,
+} from "@/lib/events/onsite-registration";
+import {
+  getEventParticipantSummary,
+  getEventParticipantsForMember,
+  getMyEventRegistration,
+} from "@/lib/events/registration";
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -97,6 +111,51 @@ export default async function EventDetailPage({ params }: PageProps) {
     }
   }
 
+  // サイト上申込（#218）の対象イベントか。対象なら registrationUrl が空でも申込UIを出す
+  const isOnsite = isOnsiteRegistrationEvent(slug);
+  const isOnsiteMember = isOnsite && !!user && hasMemberAccess;
+  // getEvent のキャッシュとは別に、申込状況・参加者は毎回最新を読む（どれも失敗時は「なし」扱い）
+  // - 参加者のアイコンと人数: 誰にでも見せる
+  // - 参加者の名前とコメント: サーバーで会員と確認できたときだけ取得する（非会員には渡さない）
+  const [myRegistration, participantSummary, participants] = await Promise.all([
+    isOnsiteMember ? getMyEventRegistration(event._id, user.id) : null,
+    isOnsite ? getEventParticipantSummary(event._id) : null,
+    isOnsiteMember ? getEventParticipantsForMember(event._id) : null,
+  ]);
+  const showRegistration = isOnsite || !!event.registrationUrl;
+  // 申込の締め切り（開催日の日本時間 23:59:59.999 まで）。リクエストごとにサーバーの現在時刻で判定する
+  // （このページは cookies を読むので毎回描画される。受付終了の状態はキャッシュしない）
+  const registrationClosed =
+    isOnsite && isRegistrationClosed(event.eventStartAt, new Date());
+  const registrationDeadlineLabel = isOnsite
+    ? formatRegistrationDeadline(event.eventStartAt)
+    : null;
+
+  // 申込UI（上部と本文下の2か所で同じものを出す）
+  // サイト上申込のイベントは、参加者アイコンの下に申込カード（未ログイン・非会員にも同じカードで案内）
+  const registrationUi = (
+    <div className="flex w-full flex-col items-center gap-8">
+      {participantSummary && <EventParticipantAvatars {...participantSummary} />}
+      {isOnsite ? (
+        <EventOnsiteRegistration
+          slug={slug}
+          isLoggedIn={!!user}
+          hasMemberAccess={hasMemberAccess}
+          viewer={user && hasMemberAccess ? getRegistrantProfile(user) : null}
+          registration={myRegistration}
+          closed={registrationClosed}
+          deadlineLabel={registrationDeadlineLabel}
+        />
+      ) : (
+        <EventRegistrationButton
+          registrationUrl={event.registrationUrl}
+          isLoggedIn={!!user}
+          hasMemberAccess={hasMemberAccess}
+        />
+      )}
+    </div>
+  );
+
   const dateDisplay = getDateDisplay(event);
   const thumbnailSrc = event.thumbnail?.asset?.url || event.thumbnailUrl;
 
@@ -167,7 +226,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             <span className="text-sm text-gray-500">（ Event ）</span>
 
             {/* タイトル */}
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-[#101828] font-rounded-mplus leading-[148%] max-w-[720px] text-balance">
+            <h1 className="text-3xl md:text-5xl lg:text-[52px] font-bold text-[#101828] font-rounded-mplus leading-[148%] max-w-[720px] text-balance">
               {event.title}
             </h1>
 
@@ -178,14 +237,8 @@ export default async function EventDetailPage({ params }: PageProps) {
               </p>
             )}
 
-            {/* 参加フォームボタン */}
-            {event.registrationUrl && (
-              <EventRegistrationButton
-                registrationUrl={event.registrationUrl}
-                isLoggedIn={!!user}
-                hasMemberAccess={hasMemberAccess}
-              />
-            )}
+            {/* 参加フォームボタン（サイト上申込のイベントは申込UI） */}
+            {showRegistration && registrationUi}
 
             {/* サムネイル画像 */}
             {thumbnailSrc && (
@@ -209,16 +262,19 @@ export default async function EventDetailPage({ params }: PageProps) {
             </div>
           )}
 
+          {/* 参加者のコメント（会員だけ。本文の後・下部の申込UIの前） */}
+          {participants && participants.length > 0 && (
+            <div className="w-full max-w-[640px] mx-auto">
+              <EventParticipantList participants={participants} />
+            </div>
+          )}
+
           {/* 下部の参加フォームボタン（本文がある場合のみ） */}
-          {event.registrationUrl &&
+          {showRegistration &&
             event.content &&
             event.content.length > 0 && (
               <div className="w-full max-w-[640px] mx-auto pt-6 border-t border-gray-200 flex justify-center">
-                <EventRegistrationButton
-                  registrationUrl={event.registrationUrl}
-                  isLoggedIn={!!user}
-                  hasMemberAccess={hasMemberAccess}
-                />
+                {registrationUi}
               </div>
             )}
         </div>

@@ -43,6 +43,7 @@ function getSanityWriteClient(): SanityClient {
  *
  * - Sanity: `question` ドキュメントの author.displayName / author.avatarUrl を patch
  * - Supabase: 自分の question_comments の author_name / author_avatar_url を update
+ * - Supabase: 自分の event_registrations（イベント参加申込 #218）の author_name / author_avatar_url を update
  *
  * 投稿者情報は投稿時のスナップショットを非正規化保存する設計のため、プロフィール変更を
  * 明示的に伝播する必要がある。渡された項目のみ更新する（displayName だけ / avatarUrl だけ も可）。
@@ -98,6 +99,20 @@ async function propagateProfileToBoard(
       .is("deleted_at", null);
     if (error) {
       console.error("[propagateProfileToBoard] Supabase update failed:", error);
+    }
+
+    // イベント参加申込（#218）の名前・アイコンも同じ値に揃える（RLS の owner update 内。
+    // 非会員は UPDATE ポリシーの is_active_member で弾かれるが、表示も会員だけなので影響なし）
+    const { error: eventError } = await supabase
+      .from("event_registrations")
+      .update(updateFields)
+      .eq("user_id", userId)
+      .is("deleted_at", null);
+    if (eventError) {
+      console.error(
+        "[propagateProfileToBoard] event_registrations update failed:",
+        eventError,
+      );
     }
   } catch (error) {
     console.error("[propagateProfileToBoard] Supabase update threw:", error);
