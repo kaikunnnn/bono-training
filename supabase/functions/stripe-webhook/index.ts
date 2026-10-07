@@ -11,6 +11,11 @@ import { generateWelcomeEmail, generateCancellationEmail, generatePlanChangeEmai
 import { syncToMemberstack, removePlanFromMemberstack, changePlanInMemberstack } from "../_shared/memberstack.ts";
 import { derivePlanFromPrice } from "../_shared/plan-utils.ts";
 import { resolveSourceGroupPatch } from "../_shared/pricing-source.ts";
+import {
+  ATTRIBUTION_COLUMNS,
+  mergeAttributionMetadata,
+  resolveAttributionPatch,
+} from "../_shared/purchase-attribution.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -476,6 +481,43 @@ async function resolveSourceGroupPatchForUser(
   }
 }
 
+/**
+ * #233: ボタンを押したページ・最初に来たページ（source_path / first_touch_*）のパッチ。
+ * ルールは source_group と同じ（_shared/purchase-attribution.ts resolveAttributionPatch）。
+ * source_group とは別に既存値を読む: 列がまだ無い（マイグレーション未適用）・読み取り失敗のときは
+ * 空オブジェクトを返し、upsert に未知の列を混ぜない（source_group と契約の保存は止めない）。
+ */
+async function resolveAttributionPatchForUser(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 他の webhook ヘルパーと同じ supabase クライアント
+  supabase: any,
+  userId: string,
+  incomingSubscriptionId: string,
+  incomingMetadata: Record<string, unknown>,
+  isReplacement = false
+): Promise<Record<string, string | null>> {
+  try {
+    const { data, error } = await supabase
+      .from("user_subscriptions")
+      .select(["stripe_subscription_id", ...ATTRIBUTION_COLUMNS].join(", "))
+      .eq("user_id", userId)
+      .eq("environment", ENVIRONMENT)
+      .maybeSingle();
+    if (error) {
+      console.warn("⚠️ [webhook] attribution の既存値取得に失敗。attribution は更新しません:", error);
+      return {};
+    }
+    return resolveAttributionPatch({
+      existing: data ?? null,
+      incomingSubscriptionId,
+      incomingMetadata,
+      isReplacement,
+    });
+  } catch (e) {
+    console.warn("⚠️ [webhook] attribution の解決に失敗。attribution は更新しません:", e);
+    return {};
+  }
+}
+
 async function handleCheckoutCompleted(stripe: any, supabase: any, session: any) {
   console.log("🚀 [LIVE環境] checkout.session.completedイベントを処理中");
 
@@ -655,6 +697,14 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       session.metadata?.source_group ?? subscription.metadata?.source_group,
       !!replaceSubscriptionId
     );
+    // #233: ボタンを押したページ・最初に来たページ（キーごとに session → subscription の順で拾う）
+    const attributionPatch = await resolveAttributionPatchForUser(
+      supabase,
+      userId,
+      subscriptionId,
+      mergeAttributionMetadata(session.metadata, subscription.metadata),
+      !!replaceSubscriptionId
+    );
 
     // user_subscriptionsテーブルにサブスクリプション情報を保存または更新（環境を含む）
     // ※ is_active は isActivePatch で決定（空なら既存値保持 / 新規行はDB既定 false）
@@ -664,6 +714,7 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
         user_id: userId,
         ...isActivePatch,
         ...sourceGroupPatch,
+        ...attributionPatch,
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
@@ -1139,12 +1190,20 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
       subscriptionId,
       subscription.metadata?.source_group
     );
+    // #233: ボタンを押したページ・最初に来たページ（同じく subscription_data.metadata）
+    const attributionPatch = await resolveAttributionPatchForUser(
+      supabase,
+      userId,
+      subscriptionId,
+      mergeAttributionMetadata(subscription.metadata)
+    );
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
       .upsert({
         user_id: userId,
         ...isActivePatch,
         ...sourceGroupPatch,
+        ...attributionPatch,
         plan_type: planType,
         plan_members: hasMemberAccess,
         stripe_subscription_id: subscriptionId,
@@ -1282,6 +1341,13 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
       subscriptionId,
       subscription.metadata?.source_group
     );
+    // #233: 同じルールで source_path / first_touch_* も決める
+    const attributionPatch = await resolveAttributionPatchForUser(
+      supabase,
+      userId,
+      subscriptionId,
+      mergeAttributionMetadata(subscription.metadata)
+    );
     const { error: updateError } = await supabase
       .from("user_subscriptions")
       .update({
@@ -1289,6 +1355,7 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
         duration: duration,
         ...isActivePatch,
         ...sourceGroupPatch,
+        ...attributionPatch,
         stripe_subscription_id: subscriptionId,
         cancel_at_period_end: cancelAtPeriodEnd,
         cancel_at: cancelAt,

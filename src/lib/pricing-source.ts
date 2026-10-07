@@ -15,6 +15,7 @@ import {
   isPricingCtaSourceGroup,
   type PricingCtaSourceGroup,
 } from "@/lib/activity-utils";
+import { normalizeAttributionPath } from "../../supabase/functions/_shared/purchase-attribution";
 
 export const PRICING_SOURCE_COOKIE = "bono_pricing_from";
 
@@ -75,6 +76,135 @@ export function readPricingSource(): PricingCtaSourceGroup | null {
   if (typeof document === "undefined") return null;
   try {
     return parsePricingSourceCookie(document.cookie);
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// ボタンを押したページのパス（source_path・rebono issue #233 / D3）
+//
+// 料金ページへの導線は PricingCtaLink 以外にも router.push / Sidebar / Footer / モーダル等が
+// あり、クリック地点で拾うと漏れる。そこで全ページ共通のトラッカー（AttributionTracker）が
+// 「料金ページ・認証ページ以外で最後に表示したパス」を sessionStorage に記録し、
+// 料金ページで有効な `from` を見た瞬間（= rememberPricingSource と同じタイミング）に
+// その値を cookie に写す。cookie にするのは source_group と同じ理由（メール確認リンクを
+// 別タブで開く signup → intent 自動 checkout の経路で sessionStorage は届かないため）。
+// group と path は必ず同時に更新する（path が取れなければ path の cookie を消して、
+// 古いページと新しい group の組み合わせが残らないようにする）。
+// ---------------------------------------------------------------------------
+
+export const PRICING_SOURCE_PATH_COOKIE = "bono_pricing_path";
+export const LAST_PAGE_PATH_STORAGE_KEY = "bono_last_page_path";
+
+/** 料金ページ・認証まわり（ボタンを押したページにはならない）のパスの接頭辞 */
+const NON_SOURCE_PATH_PREFIXES = [
+  "/subscription",
+  "/dev/pricing-final",
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/auth",
+];
+
+/** ボタンを押したページとして記録してよいパスか（純粋関数） */
+export function isAttributableSourcePath(path: string): boolean {
+  return !NON_SOURCE_PATH_PREFIXES.some(
+    (prefix) => path === prefix || path.startsWith(`${prefix}/`)
+  );
+}
+
+/** パスの Set-Cookie 文字列を作る（純粋関数）。不正なパスは null */
+export function buildPricingSourcePathCookie(
+  path: unknown,
+  secure: boolean
+): string | null {
+  const safe = normalizeAttributionPath(path);
+  if (!safe || !isAttributableSourcePath(safe)) return null;
+  const parts = [
+    `${PRICING_SOURCE_PATH_COOKIE}=${encodeURIComponent(safe)}`,
+    "Path=/",
+    `Max-Age=${PRICING_SOURCE_MAX_AGE_SECONDS}`,
+    "SameSite=Lax",
+  ];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
+/** document.cookie 形式の文字列からパスを読む（純粋関数）。不正・無しは null */
+export function parsePricingSourcePathCookie(
+  cookieString: string | null | undefined
+): string | null {
+  if (!cookieString) return null;
+  for (const part of cookieString.split(";")) {
+    const eq = part.indexOf("=");
+    if (eq < 0) continue;
+    if (part.slice(0, eq).trim() !== PRICING_SOURCE_PATH_COOKIE) continue;
+    try {
+      const safe = normalizeAttributionPath(
+        decodeURIComponent(part.slice(eq + 1).trim())
+      );
+      return safe && isAttributableSourcePath(safe) ? safe : null;
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
+/** 表示したページのパスを記録する（AttributionTracker から毎ページ呼ぶ） */
+export function recordPagePath(path: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    const safe = normalizeAttributionPath(path);
+    if (!safe || !isAttributableSourcePath(safe)) return;
+    window.sessionStorage.setItem(LAST_PAGE_PATH_STORAGE_KEY, safe);
+  } catch {
+    // sessionStorage が使えない環境では記録しない
+  }
+}
+
+/** 同一オリジンの document.referrer からパスを取る（フルリロードで来た場合の予備） */
+function sameOriginReferrerPath(): string | null {
+  try {
+    if (!document.referrer) return null;
+    const ref = new URL(document.referrer);
+    if (ref.origin !== window.location.origin) return null;
+    return ref.pathname;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * 料金ページで有効な `from` を見たときに呼ぶ。直前のページのパスを cookie に写す。
+ * 取れなければ path の cookie を消す（group と組がずれないように）。
+ */
+export function rememberPricingSourcePath(): void {
+  if (typeof document === "undefined") return;
+  try {
+    let last: string | null = null;
+    try {
+      last = window.sessionStorage.getItem(LAST_PAGE_PATH_STORAGE_KEY);
+    } catch {
+      last = null;
+    }
+    const secure = window.location.protocol === "https:";
+    const cookie =
+      buildPricingSourcePathCookie(last, secure) ??
+      buildPricingSourcePathCookie(sameOriginReferrerPath(), secure);
+    document.cookie =
+      cookie ?? `${PRICING_SOURCE_PATH_COOKIE}=; Path=/; Max-Age=0; SameSite=Lax`;
+  } catch {
+    // cookie が使えない環境では持ち回らない
+  }
+}
+
+/** 保存済みのパスを読む。無し・不正・読めない場合は null */
+export function readPricingSourcePath(): string | null {
+  if (typeof document === "undefined") return null;
+  try {
+    return parsePricingSourcePathCookie(document.cookie);
   } catch {
     return null;
   }

@@ -2,7 +2,8 @@
 
 import { createClient } from "@/lib/supabase/client";
 import type { PlanType, PlanDuration } from "@/types/subscription";
-import { readPricingSource } from "@/lib/pricing-source";
+import { readPricingSource, readPricingSourcePath } from "@/lib/pricing-source";
+import { readFirstTouch } from "@/lib/first-touch";
 
 /**
  * Stripeチェックアウトセッションを作成する
@@ -37,6 +38,10 @@ export async function createCheckoutSession(
     // #213 A2: 料金ページの出どころ（9グループ / 無しは null=直接）。
     // Edge Function 側でも再検証し、新規契約のときだけ Stripe metadata に載せる。
     const sourceGroup = readPricingSource();
+    // #233: ボタンを押したページのパスと、最初に来たページ（入口・yt・utm・参照元ドメイン）。
+    // どちらも個人を特定しない値だけ。Edge Function 側で再検証し、新規契約のときだけ metadata に載せる。
+    const sourcePath = readPricingSourcePath();
+    const firstTouch = readFirstTouch();
 
     console.log(
       `Checkout開始: プラン=${planType}, 期間=${duration}ヶ月, 出どころ=${sourceGroup ?? "direct"}`
@@ -49,6 +54,8 @@ export async function createCheckoutSession(
         planType,
         duration,
         sourceGroup,
+        sourcePath,
+        firstTouch,
       },
     });
 
