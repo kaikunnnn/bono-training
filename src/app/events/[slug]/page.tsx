@@ -162,7 +162,7 @@ export default async function EventDetailPage({ params }: PageProps) {
   return (
     <div className="min-h-screen w-full">
       {/* メインコンテンツ */}
-      <main className="max-w-[800px] lg:max-w-[848px] mx-auto px-4 sm:px-6 py-12">
+      <main className="max-w-[800px] mx-auto px-4 sm:px-6 py-12">
         <div className="flex flex-col gap-8">
           {/* イベントヘッダー - センター揃え */}
           <div className="flex flex-col items-center text-center gap-6">
@@ -226,7 +226,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             <span className="text-sm text-gray-500">（ Event ）</span>
 
             {/* タイトル */}
-            <h1 className="text-3xl md:text-5xl lg:text-[52px] font-bold text-[#101828] font-rounded-mplus leading-[148%] max-w-[720px] text-balance">
+            <h1 className="text-3xl md:text-5xl font-bold text-[#101828] font-rounded-mplus leading-[148%] text-balance">
               {event.title}
             </h1>
 
@@ -242,7 +242,7 @@ export default async function EventDetailPage({ params }: PageProps) {
 
             {/* サムネイル画像 */}
             {thumbnailSrc && (
-              <div className="w-full max-w-[640px] lg:max-w-[800px] mt-4 relative">
+              <div className="w-full max-w-[640px] mt-4 relative">
                 <Image
                   src={thumbnailSrc}
                   alt={event.title}
@@ -257,14 +257,14 @@ export default async function EventDetailPage({ params }: PageProps) {
 
           {/* 詳細本文 */}
           {event.content && event.content.length > 0 && (
-            <div className="w-full max-w-[640px] lg:max-w-[800px] mx-auto">
+            <div className="w-full max-w-[640px] mx-auto">
               <RichTextSection content={event.content} />
             </div>
           )}
 
           {/* 参加者のコメント（会員だけ。本文の後・下部の申込UIの前） */}
           {participants && participants.length > 0 && (
-            <div className="w-full max-w-[640px] lg:max-w-[800px] mx-auto">
+            <div className="w-full max-w-[640px] mx-auto">
               <EventParticipantList participants={participants} />
             </div>
           )}
@@ -273,7 +273,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           {showRegistration &&
             event.content &&
             event.content.length > 0 && (
-              <div className="w-full max-w-[640px] lg:max-w-[800px] mx-auto pt-6 border-t border-gray-200 flex justify-center">
+              <div className="w-full max-w-[640px] mx-auto pt-6 border-t border-gray-200 flex justify-center">
                 {registrationUi}
               </div>
             )}

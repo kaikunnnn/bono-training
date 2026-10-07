@@ -161,7 +161,7 @@ function RegistrationCard({
   children: ReactNode;
 }) {
   return (
-    <div className="w-full max-w-[640px] lg:max-w-[800px] rounded-[24px] border border-[var(--event-card-border)] bg-[var(--event-card-bg)] text-left shadow-[var(--shadow-event-card)]">
+    <div className="w-full max-w-[640px] rounded-[24px] border border-[var(--event-card-border)] bg-[var(--event-card-bg)] text-left shadow-[var(--shadow-event-card)]">
       <p className="mx-px mt-px flex items-center justify-center gap-1 rounded-t-[22px] bg-[var(--event-card-band-bg)] py-[7px] text-center text-sm font-medium leading-[21px] text-[var(--event-card-band-text)]">
         {band}
       </p>
