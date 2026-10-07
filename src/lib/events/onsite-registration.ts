@@ -119,8 +119,31 @@ export function validateRegistrationComment(
 /** 参加者アイコンを重ねて並べる最大数 */
 export const PARTICIPANT_AVATAR_MAX = 4;
 
-/** この人数以上で「N人が参加中」を出す（1〜4人はアイコンだけ） */
+/** この人数以上で「N人が参加中」を出す（1〜4人は「参加中」だけ） */
 export const PARTICIPANT_COUNT_THRESHOLD = 5;
+
+/**
+ * 参加者アイコン列の横に出す文字（#218 ラベルA）。
+ * アイコンだけだと何の列か分からないので、人数にかかわらず必ず文字を添える。
+ * 1〜4人: 「参加中」 / 5人以上: 「N人が参加中」
+ */
+export function formatParticipantLabel(totalCount: number): string {
+  return totalCount >= PARTICIPANT_COUNT_THRESHOLD
+    ? `${totalCount}人が参加中`
+    : "参加中";
+}
+
+/**
+ * 参加者のコメント一覧（会員）／会員だけが見られる案内（非会員）の置き場所の id。
+ * アイコン列の下の「みんなのコメントを見る ↓」がここへ飛ぶ。
+ */
+export const PARTICIPANTS_ANCHOR_ID = "participants";
+
+/**
+ * 飛び先に付けるスクロール余白（Tailwind のクラス）。
+ * lg 未満は固定ヘッダー（h-14 = 56px）があるので、その下に見出しが来るよう 72px あける
+ */
+export const PARTICIPANTS_SCROLL_MARGIN = "scroll-mt-[72px] lg:scroll-mt-6";
 
 /**
  * 誰にでも見せる参加者の要約（アイコンと人数だけ）。

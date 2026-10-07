@@ -108,6 +108,13 @@ export default function Page() {
           <h1 className="mt-1 font-rounded-mplus text-2xl font-bold text-text-primary">
             申込済みカードのパターン比較
           </h1>
+          <p className="mt-3 rounded-[12px] bg-success-feedback px-4 py-3 font-noto-sans-jp text-sm font-bold leading-relaxed text-text-success">
+            決定済み: 申込済みは P3（1行）、アイコン列はラベルA、コメント一覧への動線は N2。本番コンポーネントに反映済みです（実物の見え方は
+            <Link href="/dev/event-registration" className="mx-1 underline">
+              /dev/event-registration
+            </Link>
+            ）。このページは比較の記録として残しています。
+          </p>
           <p className="mt-2 font-noto-sans-jp text-sm leading-relaxed text-text-primary/60">
             申込後のカードには自分のコメントを出さず（下の参加者一覧に出ているため）、コメントの編集は一覧の自分の行で行う案です。
             「参加を取り消す」は ⋯ メニューの中に入れ、確認モーダルを挟みます。本番のページはまだ変えていません。

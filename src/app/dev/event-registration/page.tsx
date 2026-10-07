@@ -11,7 +11,10 @@
 import { Metadata } from "next";
 import Link from "next/link";
 import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
-import EventParticipantList from "@/components/event/EventParticipantList";
+import {
+  EventParticipantsLink,
+  EventParticipantsMembersOnly,
+} from "@/components/event/EventParticipantsNav";
 import EventRegistrationButton from "@/components/event/EventRegistrationButton";
 import RichTextSection from "@/components/article/RichTextSection";
 import type { PortableTextBlock } from "@portabletext/types";
@@ -22,6 +25,7 @@ import {
   type RegistrantProfile,
 } from "@/lib/events/onsite-registration";
 import PreviewOnsiteRegistration from "./PreviewOnsiteRegistration";
+import PreviewParticipantList from "./PreviewParticipantList";
 
 export const metadata: Metadata = {
   title: "イベント参加申込の表示確認 (/dev/event-registration)",
@@ -202,9 +206,16 @@ function FullPageMock({ view }: { view: FullPageView }) {
   const summary = summaryOf(12);
   const isMember = view === "member" || view === "member-registered";
 
-  const registrationUi = (
-    <div className="flex w-full flex-col items-center gap-8">
-      <EventParticipantAvatars {...summary} />
+  const registered = view === "member-registered";
+  // 本物の page.tsx と同じ: 上部だけアイコン列の下に「コメント一覧への動線」（N2）
+  const registrationUi = (position: "top" | "bottom") => (
+    <div className={`flex w-full flex-col items-center ${registered ? "gap-4" : "gap-8"}`}>
+      <div className="flex flex-col items-center gap-2">
+        <EventParticipantAvatars {...summary} />
+        {position === "top" && (
+          <EventParticipantsLink variant={isMember ? "member" : "guest"} />
+        )}
+      </div>
       <PreviewOnsiteRegistration
         access={isMember ? "member" : view === "guest" ? "guest" : "non-member"}
         viewer={ME}
@@ -229,7 +240,7 @@ function FullPageMock({ view }: { view: FullPageView }) {
             <p className="max-w-[560px] text-balance text-base leading-relaxed text-[#4B5563] md:text-lg">
               1か月かけて、自分のプロダクトの数字を見ながら改善する。毎週日曜の午前に4回集まります。
             </p>
-            {registrationUi}
+            {registrationUi("top")}
             <div className="mt-4 flex aspect-video w-full max-w-[640px] items-center justify-center rounded-xl bg-gray-100 text-xs text-gray-400">
               サムネイル
             </div>
@@ -240,14 +251,19 @@ function FullPageMock({ view }: { view: FullPageView }) {
             <RichTextSection content={MOCK_CONTENT} />
           </div>
 
-          {isMember && (
-            <div className="mx-auto w-full max-w-[640px]">
-              <EventParticipantList participants={participantsOf(12)} />
-            </div>
-          )}
+          <div className="mx-auto w-full max-w-[640px]">
+            {isMember ? (
+              <PreviewParticipantList
+                participants={participantsOf(12)}
+                ownRegistrationId={registered ? ALL_PARTICIPANTS[0].id : null}
+              />
+            ) : (
+              <EventParticipantsMembersOnly slug="dev-preview" isLoggedIn={view !== "guest"} />
+            )}
+          </div>
 
           <div className="mx-auto flex w-full max-w-[640px] justify-center border-t border-gray-200 pt-6">
-            {registrationUi}
+            {registrationUi("bottom")}
           </div>
         </div>
       </div>
@@ -285,7 +301,7 @@ export default function Page() {
           <section>
             <SectionHeading
               title="1. 参加者アイコン列（誰にでも表示）"
-              note="0人は何も出さない／1〜4人はアイコンだけ／5人以上はアイコン4個＋「N人が参加中」。アイコン未設定の人は人型の代替アイコン（非会員に名前を渡さないため頭文字は使わない）。読み上げは role=group と「N人が参加」。"
+              note="0人は何も出さない／1〜4人はアイコン＋「参加中」／5人以上はアイコン4個＋「N人が参加中」（ラベルA。アイコンだけだと何の列か分からないため必ず文字を添える）。アイコン未設定の人は人型の代替アイコン（非会員に名前を渡さないため頭文字は使わない）。読み上げは role=group と「N人が参加中」。"
             />
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {[0, 1, 3, 4, 5, 12].map((n) => (
@@ -300,7 +316,7 @@ export default function Page() {
           <section>
             <SectionHeading
               title="2. 申込カードの状態（サイト上申込のイベント）"
-              note="全状態を同じカード（Figma 1:314）で表示。未ログイン・非会員には入力欄を出さず「メンバー限定」を先に伝える。未ログインの「ログインして参加する」はログイン後このイベントページへ戻る（/login?redirectTo=）。受付中の未申込カードには「締め切り：10月21日（水）」を小さく出す（締め切り＝開催日の日本時間 23:59:59.999）。"
+              note="未申込の状態は同じカード（Figma 1:314）で表示。申込済みはカードではなく「✓ 参加中（自分のアイコン）⋯」の1行（#218 決定 P3。自分のコメントは出さず、本文のあとの一覧の自分の行で編集）。取り消しは ⋯ → 確認モーダル（プレビューでは成功扱いでモーダルが閉じるだけ）。未ログイン・非会員には入力欄を出さず「メンバー限定」を先に伝える。未ログインの「ログインして参加する」はログイン後このイベントページへ戻る（/login?redirectTo=）。受付中の未申込カードには「締め切り：10月21日（水）」を小さく出す（締め切り＝開催日の日本時間 23:59:59.999）。"
             />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Variant label="1. 未ログイン">
@@ -312,22 +328,8 @@ export default function Page() {
               <Variant label="3. 会員・未申込（Figma どおり）">
                 <PreviewOnsiteRegistration viewer={ME} registration={null} deadlineLabel={DEADLINE} />
               </Variant>
-              <Variant label="4. 会員・申込済み">
+              <Variant label="4. 会員・申込済み（参加中の1行。⋯ →「参加を取り消す」→ 確認モーダル）">
                 <PreviewOnsiteRegistration viewer={ME} registration={REGISTERED} />
-              </Variant>
-              <Variant label="5. 会員・コメント編集中">
-                <PreviewOnsiteRegistration
-                  viewer={ME}
-                  registration={REGISTERED}
-                  initialMode="edit"
-                />
-              </Variant>
-              <Variant label="6. 会員・取り消し確認">
-                <PreviewOnsiteRegistration
-                  viewer={ME}
-                  registration={REGISTERED}
-                  initialMode="confirm-cancel"
-                />
               </Variant>
               <Variant label="7. エラー（申込に失敗）">
                 <PreviewOnsiteRegistration
@@ -337,14 +339,6 @@ export default function Page() {
                   deadlineLabel={DEADLINE}
                 />
               </Variant>
-              <Variant label="7. エラー（コメント更新に失敗）">
-                <PreviewOnsiteRegistration
-                  viewer={ME}
-                  registration={REGISTERED}
-                  initialMode="edit"
-                  initialError="コメントの更新に失敗しました。時間をおいてもう一度お試しください"
-                />
-              </Variant>
               <Variant label="アイコン未設定・長い名前">
                 <PreviewOnsiteRegistration
                   viewer={{ name: NAMES[4], avatarUrl: null }}
@@ -352,10 +346,10 @@ export default function Page() {
                   deadlineLabel={DEADLINE}
                 />
               </Variant>
-              <Variant label="申込済み・長いコメント（折り返し）">
+              <Variant label="申込済み・アイコン未設定">
                 <PreviewOnsiteRegistration
-                  viewer={ME}
-                  registration={{ comment: COMMENTS[4], updatedAt: REGISTERED.updatedAt }}
+                  viewer={{ name: NAMES[4], avatarUrl: null }}
+                  registration={REGISTERED}
                 />
               </Variant>
             </div>
@@ -365,7 +359,7 @@ export default function Page() {
           <section>
             <SectionHeading
               title="2a. 受付終了（開催日の日本時間 23:59:59.999 を過ぎた後）"
-              note="未ログイン・非会員・未申込の会員は、帯「受付終了」＋終了の案内だけ（入力欄・ログイン/課金ボタンなし）。申込済みの会員はコメント編集・取り消しができる。取り消すと再申込できないので、確認文に一言添える。申込はサーバー側でも現在時刻で拒否する（「申込の受付は終了しました」）。"
+              note="未ログイン・非会員・未申込の会員は、帯「受付終了」＋終了の案内だけ（入力欄・ログイン/課金ボタンなし）。申込済みの会員は参加中の1行のまま取り消しができる（コメント編集は一覧の自分の行で）。取り消すと再申込できないので、確認モーダルに赤字で一言添える（4 の ⋯ から確認）。申込はサーバー側でも現在時刻で拒否する（「申込の受付は終了しました」）。"
             />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Variant label="1. 受付終了・未ログイン">
@@ -377,16 +371,8 @@ export default function Page() {
               <Variant label="3. 受付終了・会員・未申込（取り消し後も同じ）">
                 <PreviewOnsiteRegistration viewer={ME} registration={null} closed deadlineLabel={DEADLINE} />
               </Variant>
-              <Variant label="4. 受付終了・会員・申込済み（編集・取り消し可）">
+              <Variant label="4. 受付終了・会員・申込済み（⋯ から取り消し可。再申込不可の注意つき）">
                 <PreviewOnsiteRegistration viewer={ME} registration={REGISTERED} closed />
-              </Variant>
-              <Variant label="5. 受付終了・会員・取り消し確認">
-                <PreviewOnsiteRegistration
-                  viewer={ME}
-                  registration={REGISTERED}
-                  initialMode="confirm-cancel"
-                  closed
-                />
               </Variant>
             </div>
           </section>
@@ -418,14 +404,20 @@ export default function Page() {
           <section>
             <SectionHeading
               title="3. 参加者のコメント（会員だけに表示）"
-              note="新しい申込順。アイコン未設定の人は掲示板のコメントと同じく名前の頭文字。長いコメント・長い名前は折り返す。"
+              note="新しい申込順。アイコン未設定の人は掲示板のコメントと同じく名前の頭文字。長いコメント・長い名前は折り返す。自分の行には「あなた」と ⋯ →「コメントを編集」（その場で1行入力・300字まで。プレビューでは保存しても中身は変わらない）。未ログイン・非会員には一覧の代わりに「メンバーだけが見られます」の案内（上部の「メンバーはみんなのコメントが見られます ↓」の飛び先）。※このページは一覧が複数あるため、上部の動線リンクは最初の id=participants へ飛ぶ。動作確認は本物のイベントページで。"
             />
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
               <Variant label="3人">
-                <EventParticipantList participants={participantsOf(3)} />
+                <PreviewParticipantList participants={participantsOf(3)} />
               </Variant>
-              <Variant label="12人">
-                <EventParticipantList participants={participantsOf(12)} />
+              <Variant label="12人・自分が申込済み（自分の行で編集）">
+                <PreviewParticipantList
+                  participants={participantsOf(12)}
+                  ownRegistrationId={ALL_PARTICIPANTS[1].id}
+                />
+              </Variant>
+              <Variant label="非会員・未ログイン（一覧の代わりの案内）">
+                <EventParticipantsMembersOnly slug="dev-preview" isLoggedIn={false} />
               </Variant>
             </div>
           </section>
@@ -434,7 +426,7 @@ export default function Page() {
           <section>
             <SectionHeading
               title="4. ページ全体の並び（12人参加）"
-              note="ヘッダー → アイコン列 → 申込カード → サムネイル → 本文（本物の RichTextSection）→ 参加者のコメント（会員のみ）→ 下部のアイコン列＋申込カード。非会員には一覧を出さない（代わりの一言も出さない）。"
+              note="ヘッダー → アイコン列＋動線（上部だけ）→ 申込カード／参加中の1行 → サムネイル → 本文（本物の RichTextSection）→ 参加者のコメント（会員）／「メンバーだけが見られます」の案内（非会員）→ 下部のアイコン列＋申込カード。"
             />
             <div className="flex flex-col gap-8">
               {(

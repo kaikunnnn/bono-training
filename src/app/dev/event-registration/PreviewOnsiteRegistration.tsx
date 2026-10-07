@@ -2,7 +2,6 @@
 
 import EventOnsiteRegistration, {
   type EventRegistrationActions,
-  type RegisteredMode,
 } from "@/components/event/EventOnsiteRegistration";
 import type { RegistrantProfile } from "@/lib/events/onsite-registration";
 
@@ -11,7 +10,8 @@ const noop = async () => null;
 const PREVIEW_ACTIONS: EventRegistrationActions = {
   register: noop,
   update: noop,
-  cancel: noop,
+  // 取り消しは成功扱いにして、確認モーダルが閉じるところまで見られるようにする（表示は申込済みのまま）
+  cancel: async () => ({ ok: true }),
 };
 
 /** プレビュー用の本人（会員のときにカードへ出す名前・アイコン） */
@@ -36,7 +36,6 @@ export default function PreviewOnsiteRegistration({
   access?: "guest" | "non-member" | "member";
   viewer?: RegistrantProfile;
   registration: { comment: string; updatedAt: string } | null;
-  initialMode?: RegisteredMode;
   initialError?: string;
   /** 受付終了の表示を再現する */
   closed?: boolean;

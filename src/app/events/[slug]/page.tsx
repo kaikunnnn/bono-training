@@ -11,6 +11,10 @@ import EventOnsiteRegistration from "@/components/event/EventOnsiteRegistration"
 import EventParticipantAvatars from "@/components/event/EventParticipantAvatars";
 import EventParticipantList from "@/components/event/EventParticipantList";
 import {
+  EventParticipantsLink,
+  EventParticipantsMembersOnly,
+} from "@/components/event/EventParticipantsNav";
+import {
   formatRegistrationDeadline,
   getRegistrantProfile,
   isOnsiteRegistrationEvent,
@@ -131,11 +135,35 @@ export default async function EventDetailPage({ params }: PageProps) {
     ? formatRegistrationDeadline(event.eventStartAt)
     : null;
 
+  // 参加者のコメント一覧への動線（#218 N2）。行き先が無いときは出さない
+  // - 会員: 一覧に1人以上いるとき「みんなのコメントを見る ↓」→ 一覧
+  // - 未ログイン・非会員: 参加者が1人以上いるとき「メンバーはみんなのコメントが見られます ↓」
+  //   → 一覧の位置に置く「メンバーだけが見られます」の案内（名前・コメントは渡さない）
+  const hasParticipantList = !!participants && participants.length > 0;
+  const showMembersOnlyNotice =
+    isOnsite && !isOnsiteMember && (participantSummary?.totalCount ?? 0) > 0;
+  const participantsLinkVariant = hasParticipantList
+    ? ("member" as const)
+    : showMembersOnlyNotice
+      ? ("guest" as const)
+      : null;
+
   // 申込UI（上部と本文下の2か所で同じものを出す）
   // サイト上申込のイベントは、参加者アイコンの下に申込カード（未ログイン・非会員にも同じカードで案内）
-  const registrationUi = (
-    <div className="flex w-full flex-col items-center gap-8">
-      {participantSummary && <EventParticipantAvatars {...participantSummary} />}
+  // コメント一覧への動線は上部だけ（下部は一覧のすぐ後なので出さない）
+  // 申込済み（参加中の1行）のときは、アイコン列との間を詰める
+  const renderRegistrationUi = (position: "top" | "bottom") => (
+    <div
+      className={`flex w-full flex-col items-center ${myRegistration ? "gap-4" : "gap-8"}`}
+    >
+      {participantSummary && participantSummary.totalCount > 0 && (
+        <div className="flex flex-col items-center gap-2">
+          <EventParticipantAvatars {...participantSummary} />
+          {position === "top" && participantsLinkVariant && (
+            <EventParticipantsLink variant={participantsLinkVariant} />
+          )}
+        </div>
+      )}
       {isOnsite ? (
         <EventOnsiteRegistration
           slug={slug}
@@ -238,7 +266,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             )}
 
             {/* 参加フォームボタン（サイト上申込のイベントは申込UI） */}
-            {showRegistration && registrationUi}
+            {showRegistration && renderRegistrationUi("top")}
 
             {/* サムネイル画像 */}
             {thumbnailSrc && (
@@ -263,9 +291,20 @@ export default async function EventDetailPage({ params }: PageProps) {
           )}
 
           {/* 参加者のコメント（会員だけ。本文の後・下部の申込UIの前） */}
-          {participants && participants.length > 0 && (
+          {hasParticipantList && (
             <div className="w-full max-w-[640px] mx-auto">
-              <EventParticipantList participants={participants} />
+              <EventParticipantList
+                participants={participants}
+                slug={slug}
+                ownRegistrationId={myRegistration?.id ?? null}
+              />
+            </div>
+          )}
+
+          {/* 非会員: 一覧の位置に「メンバーだけが見られます」の案内（上部の動線の飛び先） */}
+          {showMembersOnlyNotice && (
+            <div className="w-full max-w-[640px] mx-auto">
+              <EventParticipantsMembersOnly slug={slug} isLoggedIn={!!user} />
             </div>
           )}
 
@@ -274,7 +313,7 @@ export default async function EventDetailPage({ params }: PageProps) {
             event.content &&
             event.content.length > 0 && (
               <div className="w-full max-w-[640px] mx-auto pt-6 border-t border-gray-200 flex justify-center">
-                {registrationUi}
+                {renderRegistrationUi("bottom")}
               </div>
             )}
         </div>
