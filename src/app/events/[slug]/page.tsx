@@ -304,7 +304,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           {/* 非会員: 一覧の位置に「メンバーだけが見られます」の案内（上部の動線の飛び先） */}
           {showMembersOnlyNotice && (
             <div className="w-full max-w-[640px] mx-auto">
-              <EventParticipantsMembersOnly slug={slug} isLoggedIn={!!user} />
+              <EventParticipantsMembersOnly />
             </div>
           )}
 

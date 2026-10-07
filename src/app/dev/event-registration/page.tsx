@@ -258,7 +258,7 @@ function FullPageMock({ view }: { view: FullPageView }) {
                 ownRegistrationId={registered ? ALL_PARTICIPANTS[0].id : null}
               />
             ) : (
-              <EventParticipantsMembersOnly slug="dev-preview" isLoggedIn={view !== "guest"} />
+              <EventParticipantsMembersOnly />
             )}
           </div>
 
@@ -417,7 +417,7 @@ export default function Page() {
                 />
               </Variant>
               <Variant label="非会員・未ログイン（一覧の代わりの案内）">
-                <EventParticipantsMembersOnly slug="dev-preview" isLoggedIn={false} />
+                <EventParticipantsMembersOnly />
               </Variant>
             </div>
           </section>

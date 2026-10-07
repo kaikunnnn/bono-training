@@ -13,12 +13,7 @@
  */
 
 import { useId, type MouseEvent } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowDown } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { withPricingFrom } from "@/lib/activity-utils";
-import { trackPricingCtaClick } from "@/lib/activity-client";
 import {
   PARTICIPANTS_ANCHOR_ID,
   PARTICIPANTS_SCROLL_MARGIN,
@@ -68,20 +63,13 @@ export function EventParticipantsLink({
 }
 
 /**
- * 非会員向け: コメント一覧の位置に置く「メンバーだけが見られます」の案内。
- * ボタンは申込カードと同じ動き（未ログイン → ログイン後このページへ戻る / 非会員 → 料金ページ）。
+ * 非会員向け: コメント一覧の位置に置く「メンバーだけが見られます」の案内（文章のみ）。
+ * ログイン・メンバー登録のボタンは、すぐ下の申込カードにあるので、ここには置かない
+ * （行き先が同じボタンが2つ続かないようにするため。2026-10-07 ユーザー判断）。
  * 名前・コメントは非会員に渡さないので、ここには中身を一切出さない。
  */
-export function EventParticipantsMembersOnly({
-  slug,
-  isLoggedIn,
-}: {
-  slug: string;
-  isLoggedIn: boolean;
-}) {
-  const router = useRouter();
+export function EventParticipantsMembersOnly() {
   const headingId = useId();
-  const loginHref = `/login?redirectTo=${encodeURIComponent(`/events/${slug}`)}`;
 
   return (
     <section
@@ -100,22 +88,6 @@ export function EventParticipantsMembersOnly({
       <p className="text-balance text-sm text-text-muted">
         参加者のコメントは、BONOメンバーだけが見られます
       </p>
-      {isLoggedIn ? (
-        <Button
-          type="button"
-          size="large"
-          onClick={() => {
-            trackPricingCtaClick("event");
-            router.push(withPricingFrom("/subscription", "event"));
-          }}
-        >
-          メンバーになってコメントを見る
-        </Button>
-      ) : (
-        <Button asChild size="large">
-          <Link href={loginHref}>ログインしてコメントを見る</Link>
-        </Button>
-      )}
     </section>
   );
 }
