@@ -12,6 +12,8 @@ import type {
 } from "@/lib/events/onsite-registration";
 
 export interface MyEventRegistration {
+  /** 申込の id（参加者一覧で「自分の行」を見分けるのに使う。会員本人にだけ渡す） */
+  id: string;
   comment: string;
   updatedAt: string;
 }
@@ -29,7 +31,7 @@ export async function getMyEventRegistration(
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("event_registrations")
-    .select("comment, updated_at")
+    .select("id, comment, updated_at")
     .eq("event_id", eventId)
     .eq("user_id", userId)
     .is("deleted_at", null)
@@ -41,6 +43,7 @@ export async function getMyEventRegistration(
   }
   if (!data) return null;
   return {
+    id: data.id as string,
     comment: data.comment as string,
     updatedAt: data.updated_at as string,
   };

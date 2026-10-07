@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   DEFAULT_REGISTRATION_COMMENT,
   REGISTRATION_COMMENT_MAX_LENGTH,
+  formatParticipantLabel,
   isOnsiteRegistrationEvent,
   validateRegistrationComment,
 } from "@/lib/events/onsite-registration";
@@ -37,5 +38,16 @@ describe("validateRegistrationComment (#218)", () => {
 describe("isOnsiteRegistrationEvent (#218)", () => {
   it("一覧に無い slug は false（今まで通りGoogleフォーム）", () => {
     expect(isOnsiteRegistrationEvent("not-listed-event")).toBe(false);
+  });
+});
+
+describe("formatParticipantLabel (#218 ラベルA)", () => {
+  it("1〜4人は「参加中」だけ（アイコンだけにしない）", () => {
+    expect(formatParticipantLabel(1)).toBe("参加中");
+    expect(formatParticipantLabel(4)).toBe("参加中");
+  });
+  it("5人以上は「N人が参加中」", () => {
+    expect(formatParticipantLabel(5)).toBe("5人が参加中");
+    expect(formatParticipantLabel(12)).toBe("12人が参加中");
   });
 });

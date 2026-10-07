@@ -1,6 +1,13 @@
 "use client";
 
-import { useActionState, useId, useState, type ReactNode } from "react";
+import {
+  useActionState,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
@@ -8,6 +15,15 @@ import { User } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  Modal,
+  ModalAction,
+  ModalContainer,
+  ModalDescription,
+  ModalHeader,
+  ModalTitle,
+} from "@/components/ui/modal";
+import EventMoreMenu from "@/components/event/EventMoreMenu";
 import MembershipGuideModal from "@/components/event/MembershipGuideModal";
 import { withPricingFrom } from "@/lib/activity-utils";
 import { trackPricingCtaClick } from "@/lib/activity-client";
@@ -41,8 +57,6 @@ const SERVER_ACTIONS: EventRegistrationActions = {
   cancel: cancelRegistration,
 };
 
-export type RegisteredMode = "view" | "edit" | "confirm-cancel";
-
 /** 文字数カウンターを出し始める文字数（上限が近づいたときだけ控えめに出す） */
 const COUNTER_VISIBLE_FROM = REGISTRATION_COMMENT_MAX_LENGTH - 20;
 
@@ -61,7 +75,7 @@ interface EventOnsiteRegistrationProps {
   registration: { comment: string; updatedAt: string } | null;
   /**
    * 申込の受付が終了しているか（開催日の日本時間 23:59:59.999 を過ぎた）。サーバーで毎回判定した値。
-   * 終了後は未申込の人には「受付終了」だけを出す。申込済みの人はコメント編集・取り消しができる
+   * 終了後は未申込の人には「受付終了」だけを出す。申込済みの人は取り消しができる（コメント編集は参加者一覧の自分の行で）
    */
   closed?: boolean;
   /** 締め切り日の表示（例: 「10月21日（水）」）。受付中の未申込カードにだけ小さく出す。無ければ出さない */
@@ -69,11 +83,9 @@ interface EventOnsiteRegistrationProps {
   /**
    * 以下は /dev/event-registration のプレビュー用（本番のページでは渡さない）。
    * actions: Server Actions の代わりに呼ぶ関数（プレビューでは何もしない関数を渡す）
-   * initialMode: 申込済みのときの最初の表示（編集中・取り消し確認中を再現する）
    * initialError: 最初から出しておくエラー文言（エラー表示を再現する）
    */
   actions?: EventRegistrationActions;
-  initialMode?: RegisteredMode;
   initialError?: string;
 }
 
@@ -84,9 +96,10 @@ interface EventOnsiteRegistrationProps {
  * - 未ログイン: 「メンバー限定」の案内＋「ログインして参加する」（ログイン後このページに戻る）＋はじめての方向けモーダル
  * - ログイン済み・非会員: 「メンバー限定」の案内＋「メンバーになって参加する」
  * - 会員・未申込: 自分のアイコンと名前＋コメント入力（初期値「参加します！」）＋「参加する」
- * - 会員・申込済み: 帯が「✓ 参加申込済み」＋コメント（読み取り専用）＋編集・取り消し
+ * - 会員・申込済み: カードではなく1行「✓ 参加中（自分のアイコン）⋯」。⋯ →「参加を取り消す」→ 確認モーダル。
+ *   自分のコメントはここには出さない（本文のあとの参加者一覧に出ていて、編集もそこの自分の行で行う）
  * - 受付終了（未ログイン・非会員・未申込の会員）: 帯が「受付終了」＋終了の案内だけ（入力・ボタンなし）
- * - 受付終了（申込済みの会員）: 申込済みの表示のまま編集・取り消しできる（取り消すと再申込はできない）
+ * - 受付終了（申込済みの会員）: 参加中の1行のまま取り消しできる（取り消すと再申込はできない。確認モーダルで伝える）
  *
  * 表示の切り替えは props（サーバーの値）で決める。上部と本文下の2か所に置かれるため、
  * 操作後は revalidatePath で両方が同じ状態に揃う。
@@ -100,12 +113,22 @@ export default function EventOnsiteRegistration({
   closed = false,
   deadlineLabel = null,
   actions = SERVER_ACTIONS,
-  initialMode = "view",
   initialError,
 }: EventOnsiteRegistrationProps) {
+  // 取り消した直後か。取り消すとこの場所が「参加する」のカード（受付終了後は「受付終了」）に変わるので、
+  // そこへフォーカスを移す（⋯ ボタンが消えてフォーカスの行き先がなくなるため）。
+  // 上下2か所のうち、取り消しを操作した方だけが true になる
+  const [focusAfterCancel, setFocusAfterCancel] = useState(false);
+  const clearFocusAfterCancel = () => setFocusAfterCancel(false);
+
   // 受付終了後は、申込済みの会員以外には「受付終了」だけを出す（ログイン・課金への案内も出さない）
   if (closed && !(isLoggedIn && hasMemberAccess && registration)) {
-    return <ClosedCard />;
+    return (
+      <ClosedCard
+        autoFocus={focusAfterCancel}
+        onAutoFocused={clearFocusAfterCancel}
+      />
+    );
   }
   const deadline = closed ? null : deadlineLabel;
   if (!isLoggedIn) return <GuestCard slug={slug} deadlineLabel={deadline} />;
@@ -123,20 +146,18 @@ export default function EventOnsiteRegistration({
         action={actions.register}
         initialState={initialState}
         deadlineLabel={deadline}
+        autoFocus={focusAfterCancel}
+        onAutoFocused={clearFocusAfterCancel}
       />
     );
   }
-  // 申込内容が更新されたら（編集・再申込）、編集モードなどの手元の状態をリセットする
   return (
-    <RegisteredView
-      key={registration.updatedAt}
+    <RegisteredRow
       slug={slug}
       viewer={profile}
-      comment={registration.comment}
-      actions={actions}
-      initialMode={initialMode}
-      initialState={initialState}
+      cancelAction={actions.cancel}
       closed={closed}
+      onCancelled={() => setFocusAfterCancel(true)}
     />
   );
 }
@@ -177,15 +198,6 @@ function RegistrationCard({
   );
 }
 
-function RegisteredBand() {
-  return (
-    <>
-      <Check className="size-4 text-text-success" aria-hidden="true" />
-      参加申込済み
-    </>
-  );
-}
-
 /** 未ログイン・非会員向けの「メンバー限定」案内 */
 function MembersOnlyMessage({ sub }: { sub?: string }) {
   return (
@@ -199,15 +211,21 @@ function MembersOnlyMessage({ sub }: { sub?: string }) {
 }
 
 /** 自分のアイコン（20px）＋名前 */
+function ViewerAvatar({ viewer }: { viewer: RegistrantProfile }) {
+  return (
+    <Avatar className="size-5 shrink-0">
+      {viewer.avatarUrl && <AvatarImage src={viewer.avatarUrl} alt="" />}
+      <AvatarFallback className="text-muted-foreground">
+        <User size={12} color="currentColor" />
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
 function ViewerRow({ viewer }: { viewer: RegistrantProfile }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <Avatar className="size-5">
-        {viewer.avatarUrl && <AvatarImage src={viewer.avatarUrl} alt="" />}
-        <AvatarFallback className="text-muted-foreground">
-          <User size={12} color="currentColor" />
-        </AvatarFallback>
-      </Avatar>
+      <ViewerAvatar viewer={viewer} />
       <span className="min-w-0 truncate text-sm font-medium leading-6 text-[var(--event-card-ink)]">
         {viewer.name}
       </span>
@@ -287,10 +305,24 @@ function CommentField({
 // ---------------------------------------------------------------------------
 
 /** 受付終了（未ログイン・非会員・未申込の会員）。入力欄・ボタンは出さない */
-function ClosedCard() {
+function ClosedCard({
+  autoFocus = false,
+  onAutoFocused,
+}: {
+  /** 取り消した直後（ここへフォーカスを移す） */
+  autoFocus?: boolean;
+  onAutoFocused?: () => void;
+}) {
+  const messageRef = useAutoFocus<HTMLParagraphElement>(autoFocus, onAutoFocused);
   return (
     <RegistrationCard band={CLOSED_BAND}>
-      <p className="text-balance py-2 text-center text-base font-bold text-text-primary">
+      <p
+        ref={messageRef}
+        // 取り消し直後にフォーカスを受けるため（Tab では止まらない）。
+        // autoFocus のときだけ付けると、フォーカス直後に外れてフォーカスが body に落ちるので常に付ける
+        tabIndex={-1}
+        className="text-balance py-2 text-center text-base font-bold text-text-primary outline-none"
+      >
         {CLOSED_MESSAGE}
       </p>
     </RegistrationCard>
@@ -359,13 +391,19 @@ function RegisterForm({
   action,
   initialState,
   deadlineLabel,
+  autoFocus = false,
+  onAutoFocused,
 }: {
   slug: string;
   viewer: RegistrantProfile;
   action: RegistrationAction;
   initialState: EventRegistrationActionResult | null;
   deadlineLabel: string | null;
+  /** 取り消した直後（「参加する」へフォーカスを移す） */
+  autoFocus?: boolean;
+  onAutoFocused?: () => void;
 }) {
+  const submitRef = useAutoFocus<HTMLButtonElement>(autoFocus, onAutoFocused);
   const [comment, setComment] = useState(DEFAULT_REGISTRATION_COMMENT);
   const [state, formAction, pending] = useActionState(action, initialState);
   const fieldId = `event-register-comment-${useId()}`;
@@ -388,6 +426,7 @@ function RegisterForm({
           <ErrorMessage id={errorId} state={state} />
         </div>
         <Button
+          ref={submitRef}
           type="submit"
           size="large"
           className="w-full"
@@ -400,116 +439,162 @@ function RegisterForm({
   );
 }
 
-function RegisteredView({
+/**
+ * 表示されたときに一度だけフォーカスを移す（取り消し直後に、変わった先のカードへフォーカスを渡す）。
+ * 取り消し確認モーダルが閉じるときのフォーカス復帰（⋯ はもう無い）より後に効くよう、描画後に移す。
+ */
+function useAutoFocus<T extends HTMLElement>(
+  enabled: boolean,
+  onDone?: () => void,
+) {
+  const ref = useRef<T>(null);
+  useEffect(() => {
+    if (!enabled) return;
+    ref.current?.focus();
+    onDone?.();
+    // 表示されたときの1回だけ
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return ref;
+}
+
+/**
+ * 申込済み（#218 決定: P3）。カードではなく1行「✓ 参加中（自分のアイコン）⋯」。
+ * 自分のコメントは出さない（参加者一覧の自分の行で見る・編集する）。
+ * ⋯ →「参加を取り消す」→ 確認モーダル →「取り消す」で cancelRegistration を呼ぶ。
+ */
+function RegisteredRow({
   slug,
   viewer,
-  comment,
-  actions,
-  initialMode,
-  initialState,
+  cancelAction,
   closed,
+  onCancelled,
 }: {
   slug: string;
   viewer: RegistrantProfile;
-  comment: string;
-  actions: EventRegistrationActions;
-  initialMode: RegisteredMode;
-  initialState: EventRegistrationActionResult | null;
-  /** 受付終了後か（取り消すと再申込できないことを確認文に添える） */
+  cancelAction: RegistrationAction;
+  /** 受付終了後か（取り消すと再申込できないことを確認モーダルで伝える） */
   closed: boolean;
+  /** 取り消しに成功したとき（親が、変わった先のカードへフォーカスを移す） */
+  onCancelled: () => void;
 }) {
-  const [mode, setMode] = useState<RegisteredMode>(initialMode);
-  const [draft, setDraft] = useState(comment);
-  // initialState（プレビュー用のエラー）は、いま開いている方（編集 or 取り消し確認）にだけ出す
-  const [editState, editAction, editPending] = useActionState(
-    actions.update,
-    initialMode === "edit" ? initialState : null,
-  );
-  const [cancelState, cancelAction, cancelPending] = useActionState(
-    actions.cancel,
-    initialMode === "confirm-cancel" ? initialState : null,
-  );
-  const fieldId = `event-edit-comment-${useId()}`;
-  const editErrorId = `${fieldId}-error`;
-  const cancelErrorId = `${fieldId}-cancel-error`;
-
-  if (mode === "edit") {
-    return (
-      <RegistrationCard band={<RegisteredBand />}>
-        <form action={editAction} className="flex flex-col gap-4">
-          <input type="hidden" name="slug" value={slug} />
-          <div className="flex flex-col gap-2">
-            <ViewerRow viewer={viewer} />
-            <CommentField
-              id={fieldId}
-              errorId={editErrorId}
-              hasError={!!editState && !editState.ok}
-              value={draft}
-              onChange={setDraft}
-              disabled={editPending}
-            />
-            <ErrorMessage id={editErrorId} state={editState} />
-          </div>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="large"
-              className="flex-1"
-              disabled={editPending}
-              onClick={() => {
-                setDraft(comment);
-                setMode("view");
-              }}
-            >
-              やめる
-            </Button>
-            <Button
-              type="submit"
-              size="large"
-              className="flex-1"
-              disabled={editPending || draft.trim().length === 0}
-            >
-              {editPending ? "保存中…" : "保存する"}
-            </Button>
-          </div>
-        </form>
-      </RegistrationCard>
-    );
-  }
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <RegistrationCard band={<RegisteredBand />}>
-      <div className="flex flex-col gap-2">
-        <ViewerRow viewer={viewer} />
-        {/* 送ったコメント（読み取り専用）。入力欄と同じピル型で控えめな色。長いコメントは折り返す */}
-        <p className="min-h-12 whitespace-pre-wrap break-words rounded-[24px] border border-input bg-muted-custom px-[21px] py-[11px] text-base leading-6 text-text-secondary">
-          {comment}
-        </p>
-      </div>
+    <div className="inline-flex h-10 max-w-full items-center gap-2 rounded-full border border-text-success/15 bg-success-feedback pl-3 pr-1.5">
+      <span className="flex shrink-0 items-center gap-1 text-sm font-bold text-text-success">
+        <Check className="size-4 shrink-0" aria-hidden="true" />
+        参加中
+      </span>
+      <ViewerAvatar viewer={viewer} />
+      <span className="sr-only">{viewer.name}</span>
+      <EventMoreMenu
+        triggerRef={triggerRef}
+        label="参加のメニュー"
+        className="text-[var(--event-card-band-text)]"
+        items={[
+          {
+            label: "参加を取り消す",
+            destructive: true,
+            onSelect: () => setConfirmOpen(true),
+          },
+        ]}
+      />
+      <CancelConfirmModal
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        slug={slug}
+        closed={closed}
+        cancelAction={cancelAction}
+        onCancelled={onCancelled}
+        returnFocusTo={triggerRef}
+      />
+    </div>
+  );
+}
 
-      {mode === "confirm-cancel" ? (
-        <form action={cancelAction} className="flex flex-col gap-3">
+/** 「参加を取り消しますか？」の確認モーダル（既存の Modal。ブラウザの confirm は使わない） */
+function CancelConfirmModal({
+  open,
+  onOpenChange,
+  slug,
+  closed,
+  cancelAction,
+  onCancelled,
+  returnFocusTo,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  slug: string;
+  closed: boolean;
+  cancelAction: RegistrationAction;
+  onCancelled: () => void;
+  /** 閉じたときにフォーカスを戻す先（⋯ ボタン） */
+  returnFocusTo: { current: HTMLElement | null };
+}) {
+  const errorId = `event-cancel-error-${useId()}`;
+  const [state, formAction, pending] = useActionState(
+    async (
+      prev: EventRegistrationActionResult | null,
+      formData: FormData,
+    ) => {
+      const result = await cancelAction(prev, formData);
+      if (result?.ok) {
+        // 成功するとこの1行ごと「参加する」のカードに変わる（revalidatePath）。
+        // 変わった先のカードへフォーカスを移すよう親に伝え、モーダルも閉じておく
+        onCancelled();
+        onOpenChange(false);
+      }
+      return result;
+    },
+    null,
+  );
+
+  return (
+    <Modal
+      open={open}
+      onOpenChange={(next) => {
+        // 送信中は閉じない（Esc・外側クリックも）
+        if (!pending) onOpenChange(next);
+      }}
+    >
+      <ModalContainer
+        className="max-w-sm gap-5"
+        onCloseAutoFocus={(e) => {
+          // メニューから開いたモーダルは、開く直前のフォーカス（消えたメニュー項目）に戻ろうとするので、
+          // ⋯ が残っていれば ⋯ へ戻す。取り消し成功で ⋯ が消えたときは、変わった先のカードが
+          // 自分でフォーカスを取るので、ここでは何もしない（body へ落とさない）
+          e.preventDefault();
+          const target = returnFocusTo.current;
+          if (target?.isConnected) target.focus();
+        }}
+      >
+        <form action={formAction} className="grid gap-5">
           <input type="hidden" name="slug" value={slug} />
-          <div className="flex flex-col items-center gap-1 text-center">
-            <p className="text-sm font-medium text-text-primary">
-              参加を取り消しますか？
-            </p>
-            {closed && (
-              <p className="text-balance text-[13px] leading-5 text-text-muted">
-                受付終了後に取り消すと、再度申し込むことはできません
-              </p>
-            )}
-          </div>
-          <ErrorMessage id={cancelErrorId} state={cancelState} />
-          <div className="flex gap-2">
+          <ModalHeader hideCloseButton>
+            <ModalTitle className="text-xl">参加を取り消しますか？</ModalTitle>
+            <ModalDescription className="text-sm leading-relaxed text-text-secondary">
+              取り消すと、参加者一覧からも表示されなくなります。
+              {closed && (
+                <>
+                  <br />
+                  <span className="font-medium text-text-error">
+                    受付終了後に取り消すと、再度申し込むことはできません。
+                  </span>
+                </>
+              )}
+            </ModalDescription>
+          </ModalHeader>
+          <ErrorMessage id={errorId} state={state} />
+          <ModalAction vertical={false}>
             <Button
               type="button"
-              variant="outline"
+              variant="secondary"
               size="large"
               className="flex-1"
-              disabled={cancelPending}
-              onClick={() => setMode("view")}
+              disabled={pending}
+              onClick={() => onOpenChange(false)}
             >
               やめる
             </Button>
@@ -518,33 +603,14 @@ function RegisteredView({
               variant="destructive"
               size="large"
               className="flex-1"
-              disabled={cancelPending}
+              disabled={pending}
+              aria-describedby={state && !state.ok ? errorId : undefined}
             >
-              {cancelPending ? "取り消し中…" : "取り消す"}
+              {pending ? "取り消し中…" : "取り消す"}
             </Button>
-          </div>
+          </ModalAction>
         </form>
-      ) : (
-        <div className="flex justify-center gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => setMode("edit")}
-          >
-            コメントを編集
-          </Button>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-text-muted"
-            onClick={() => setMode("confirm-cancel")}
-          >
-            参加を取り消す
-          </Button>
-        </div>
-      )}
-    </RegistrationCard>
+      </ModalContainer>
+    </Modal>
   );
 }
