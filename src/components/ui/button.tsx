@@ -56,6 +56,8 @@ const buttonVariants = cva(
         sm: "h-9 px-4 rounded-[10px]",
         lg: "h-11 px-8 rounded-[14px]",
         icon: "h-10 w-10 rounded-[12px]",
+        // 小さめのアイコンボタン（お知らせバーの閉じる等・#220）
+        "icon-sm": "h-9 w-9 rounded-[10px]",
         // カスタムサイズ（HeadingSection等で使用）
         action: "px-[12px] py-[8px] text-[14px] leading-[20px] rounded-xl",
         // 大CTA（ログイン・レッスン詳細等）

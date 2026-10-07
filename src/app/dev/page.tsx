@@ -26,6 +26,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/announcement-bar",
+    issue: "#220",
+    title: "イベント告知のお知らせバー",
+    summary:
+      "/top・/mypage 上部に出す細いお知らせバーの単体確認。❌で閉じた記録のリセット、期限切れ時の非表示も確認できる。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/event-registration",
     issue: "#218",
     title: "イベントのサイト上参加申込：参加者表示と申込UIの状態一覧",

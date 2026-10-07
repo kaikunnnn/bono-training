@@ -15,6 +15,8 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // DSのプライマリ（Deep forest green）塗り。お知らせバーのラベル等（#220）
+        dark: "border-transparent bg-cta-primary-bg text-text-inverse",
       },
     },
     defaultVariants: {
