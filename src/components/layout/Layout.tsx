@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Toaster } from "@/components/ui/toaster";
 import { WelcomeToast } from "@/components/auth/WelcomeToast";
 import { SignUpTracker } from "@/components/analytics/SignUpTracker";
+import { AnnouncementBar } from "./AnnouncementBar";
 import { Menu } from "lucide-react";
 
 interface LayoutProps {
@@ -100,6 +101,8 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
   const isHome = pathname === "/" || pathname === "/top";
   // `/`, /top, /dev/top5, /dev/top6: ヘッダーグラデーションの高さを半分にする（新トップの見た目）
   const isHalfGradient = isHome || isTop5 || isTop6;
+  // お知らせバー（#220）は /top と /mypage のみ（`/` には出さない）
+  const showAnnouncement = pathname === "/top" || pathname === "/mypage";
 
   return (
     <div className={cn("min-h-screen flex relative", isTop6 ? "bg-white" : "bg-base", className)}>
@@ -183,6 +186,9 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
       {/* メインコンテンツエリア */}
       <div className="flex-1 flex flex-col lg:ml-[200px] relative z-[1] min-w-0 w-full lg:w-[calc(100%-200px)]">
         <main className="flex-1 pt-14 lg:pt-0 min-w-0 w-full">
+          {/* お知らせバー: main の先頭に置く。タブレット以下は pt-14 により固定ヘッダーの真下、
+              PC はサイドバー右のメインブロック最上部（全幅）になる */}
+          {showAnnouncement && <AnnouncementBar />}
           {children}
         </main>
         <Footer />
