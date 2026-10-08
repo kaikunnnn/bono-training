@@ -26,6 +26,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/events-list-patterns",
+    issue: "#234",
+    title: "イベント一覧ページの行パターン比較",
+    summary:
+      "/events に置く一覧の行を3案で比較（A 新着型＝/updates と同じ行、B 日付ブロック型、C 大サムネ型）。本番イベント7件のモック、新しい順の1本リスト、状態バッジ「募集中/終了」、終了を淡くするトグル、PC枠とスマホ375px枠を並べて表示。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/event-registration-patterns",
     issue: "#218",
     title: "イベント申込済みカードのパターン比較（決定済み）",
