@@ -8,6 +8,7 @@
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { PatternDList } from "./pattern-d";
 import {
   EventsPageHeader,
   ROW_COMPONENTS,
@@ -16,6 +17,11 @@ import {
 } from "./rows";
 
 const PATTERNS: { id: RowPattern; title: string; note: string }[] = [
+  {
+    id: "d",
+    title: "D. 日付ブロック＋「募集中」「過去のイベント」の2ブロック（B ベース）",
+    note: "B を元に、一覧を「募集中」（開催が近い順）と「過去のイベント」（新しい順）の2つに分けた案。日付ブロックは両ブロック共通の固定幅で、右の区切り線がそろう。年（小）→ 月日（大）→ 曜日（小）の3段。募集中の行は月日をさらに大きくし、開始時刻（20:00〜）と「あと◯日」（当日は「今日」）を出す。状態はブロック名で分かるので「募集中」「終了」バッジは出さない。「終了イベントを淡くする」は過去のブロックだけに効く。",
+  },
   {
     id: "a",
     title: "A. 新着型（/updates と同じ行）",
@@ -34,6 +40,13 @@ const PATTERNS: { id: RowPattern; title: string; note: string }[] = [
 ];
 
 type PatternFilter = "all" | RowPattern;
+
+export interface PatternDData {
+  upcoming: EventListItem[];
+  ended: EventListItem[];
+  /** 年見出し: あり のときだけ過去ブロックの最後に足すダミー（2025年） */
+  dummy2025: EventListItem;
+}
 
 function SegmentedControl<T extends string>({
   label,
@@ -97,34 +110,68 @@ function Frame({
   );
 }
 
+interface PreviewOptions {
+  fadeEnded: boolean;
+  emptyUpcoming: boolean;
+  yearHeadings: boolean;
+}
+
 function EventsListPreview({
   pattern,
   events,
-  fadeEnded,
+  dData,
+  options,
 }: {
   pattern: RowPattern;
   events: EventListItem[];
-  fadeEnded: boolean;
+  dData: PatternDData;
+  options: PreviewOptions;
 }) {
-  const Row = ROW_COMPONENTS[pattern];
+  let list: ReactNode;
+  if (pattern === "d") {
+    list = (
+      <PatternDList
+        upcoming={options.emptyUpcoming ? [] : dData.upcoming}
+        // ダミーは 2025年12月 で既存の過去イベントより古いので、新しい順の末尾に足せばよい
+        ended={options.yearHeadings ? [...dData.ended, dData.dummy2025] : dData.ended}
+        fadeEnded={options.fadeEnded}
+        yearHeadings={options.yearHeadings}
+      />
+    );
+  } else {
+    const Row = ROW_COMPONENTS[pattern];
+    list = (
+      <div className="mt-8 flex flex-col">
+        {events.map((event) => (
+          <Row key={event.slug} event={event} fadeEnded={options.fadeEnded} />
+        ))}
+      </div>
+    );
+  }
   return (
     // /updates と同じ余白（px-6 lg:px-12 / py-8）。lg: の代わりに枠幅の @4xl: で切り替える
     <section className="px-6 @4xl:px-12">
       <div className="py-8">
         <EventsPageHeader as="div" />
-        <div className="mt-8 flex flex-col">
-          {events.map((event) => (
-            <Row key={event.slug} event={event} fadeEnded={fadeEnded} />
-          ))}
-        </div>
+        {list}
       </div>
     </section>
   );
 }
 
-export function EventsListPatterns({ events }: { events: EventListItem[] }) {
-  const [filter, setFilter] = useState<PatternFilter>("all");
+export function EventsListPatterns({
+  events,
+  dData,
+}: {
+  events: EventListItem[];
+  dData: PatternDData;
+}) {
+  const [filter, setFilter] = useState<PatternFilter>("d");
   const [fadeEnded, setFadeEnded] = useState(false);
+  const [emptyUpcoming, setEmptyUpcoming] = useState(false);
+  const [yearHeadings, setYearHeadings] = useState(false);
+  const options: PreviewOptions = { fadeEnded, emptyUpcoming, yearHeadings };
+  const showDControls = filter === "all" || filter === "d";
 
   const shown = filter === "all" ? PATTERNS : PATTERNS.filter((p) => p.id === filter);
 
@@ -137,6 +184,7 @@ export function EventsListPatterns({ events }: { events: EventListItem[] }) {
           onChange={setFilter}
           options={[
             { id: "all", label: "すべて" },
+            { id: "d", label: "D 2ブロック" },
             { id: "a", label: "A 新着型" },
             { id: "b", label: "B 日付ブロック" },
             { id: "c", label: "C 大サムネ" },
@@ -151,6 +199,28 @@ export function EventsListPatterns({ events }: { events: EventListItem[] }) {
             { id: "on", label: "淡くする" },
           ]}
         />
+        {showDControls && (
+          <>
+            <SegmentedControl<"real" | "empty">
+              label="D 募集中"
+              value={emptyUpcoming ? "empty" : "real"}
+              onChange={(v) => setEmptyUpcoming(v === "empty")}
+              options={[
+                { id: "real", label: "実データ" },
+                { id: "empty", label: "0件" },
+              ]}
+            />
+            <SegmentedControl<"off" | "on">
+              label="D 年見出し"
+              value={yearHeadings ? "on" : "off"}
+              onChange={(v) => setYearHeadings(v === "on")}
+              options={[
+                { id: "off", label: "なし" },
+                { id: "on", label: "あり（2025年ダミー追加）" },
+              ]}
+            />
+          </>
+        )}
       </div>
 
       {shown.map((p) => (
@@ -161,10 +231,10 @@ export function EventsListPatterns({ events }: { events: EventListItem[] }) {
           </div>
           <div className="flex flex-col items-start gap-6 xl:flex-row">
             <Frame label="PC（最大960px）">
-              <EventsListPreview pattern={p.id} events={events} fadeEnded={fadeEnded} />
+              <EventsListPreview pattern={p.id} events={events} dData={dData} options={options} />
             </Frame>
             <Frame label="スマホ（375px）" mobile>
-              <EventsListPreview pattern={p.id} events={events} fadeEnded={fadeEnded} />
+              <EventsListPreview pattern={p.id} events={events} dData={dData} options={options} />
             </Frame>
           </div>
         </section>

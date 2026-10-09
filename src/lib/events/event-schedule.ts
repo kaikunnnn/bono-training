@@ -164,3 +164,69 @@ export function sortEventsNewestFirst<T extends EventScheduleInput>(events: read
     })
     .map(({ event }) => event);
 }
+
+// ---------------------------------------------------------------------------
+// 募集中 / 過去の2ブロック表示（#234 パターン D）
+// ---------------------------------------------------------------------------
+
+/**
+ * 開催日まであと何日か（日本時間の暦日で数える。当日は 0、過ぎていれば負の数）。
+ * 正確な日時 eventStartAt があるときだけ数える。概算（8月下旬など）は「あと◯日」を言えないので null。
+ * 例: 今 10/9 15:00 JST、開催 10/21 20:00 JST → 12
+ */
+export function getDaysUntilEvent(
+  event: EventScheduleInput,
+  now: Date = new Date(),
+): number | null {
+  const parts = getEventDateParts(event);
+  if (!parts || parts.kind !== "exact") return null;
+  const nowShifted = new Date(now.getTime() + JST_OFFSET_MS);
+  const today = Date.UTC(
+    nowShifted.getUTCFullYear(),
+    nowShifted.getUTCMonth(),
+    nowShifted.getUTCDate(),
+  );
+  const eventDay = Date.UTC(parts.year, parts.month - 1, parts.day);
+  return Math.round((eventDay - today) / (24 * 60 * 60 * 1000));
+}
+
+/** 「今日」「あと12日」。過ぎている・数えられないときは null */
+export function formatDaysUntil(days: number | null): string | null {
+  if (days === null || days < 0) return null;
+  return days === 0 ? "今日" : `あと${days}日`;
+}
+
+/** 開始時刻の表示「20:00〜」（日本時間）。正確な日時が無ければ null */
+export function formatEventStartTime(event: EventScheduleInput): string | null {
+  const startMs = parseIso(event.eventStartAt);
+  if (startMs === null) return null;
+  const shifted = new Date(startMs + JST_OFFSET_MS);
+  const hh = String(shifted.getUTCHours()).padStart(2, "0");
+  const mm = String(shifted.getUTCMinutes()).padStart(2, "0");
+  return `${hh}:${mm}〜`;
+}
+
+/**
+ * 「募集中」と「過去」に分ける。
+ * - upcoming: 開催が近い順（昇順）
+ * - ended: 新しい順（降順）。判定できないものは最後
+ */
+export function groupEventsByStatus<T extends EventScheduleInput>(
+  events: readonly T[],
+  now: Date = new Date(),
+): { upcoming: T[]; ended: T[] } {
+  const upcoming = events
+    .map((event, index) => ({ event, index, time: getEventSortTime(event) }))
+    .filter(({ event }) => getEventStatus(event, now) === "upcoming")
+    .sort((a, b) => {
+      if (a.time === b.time) return a.index - b.index;
+      if (a.time === null) return 1;
+      if (b.time === null) return -1;
+      return a.time - b.time;
+    })
+    .map(({ event }) => event);
+  const ended = sortEventsNewestFirst(events).filter(
+    (e) => getEventStatus(e, now) === "ended",
+  );
+  return { upcoming, ended };
+}

@@ -28,6 +28,12 @@ export interface EventListItem {
   /** time 要素の機械可読値（正確な日時があるときだけ） */
   dateTime?: string;
   dateParts: EventDateParts | null;
+  /** 「20:00〜」（正確な日時があるときだけ。パターン D 用） */
+  startTimeLabel: string | null;
+  /** 「今日」「あと12日」（募集中で正確な日時があるときだけ。パターン D 用） */
+  daysUntilLabel: string | null;
+  /** 年見出し用の開催年（不明なら null。パターン D 用） */
+  year: number | null;
 }
 
 export interface EventRowProps {
@@ -36,7 +42,7 @@ export interface EventRowProps {
   fadeEnded: boolean;
 }
 
-export type RowPattern = "a" | "b" | "c";
+export type RowPattern = "a" | "b" | "c" | "d";
 
 // ---------------------------------------------------------------------------
 // 共通パーツ
@@ -80,7 +86,7 @@ function isSanityImage(url: string) {
   }
 }
 
-function EventThumbnail({
+export function EventThumbnail({
   url,
   sizes,
   faded,
@@ -98,27 +104,29 @@ function EventThumbnail({
         className,
       )}
     >
-      <Image
-        src={url}
-        alt=""
-        fill
-        sizes={sizes}
-        // remotePatterns に無い外部URL（Unsplash など）は最適化を通さずそのまま出す
-        unoptimized={!isSanityImage(url)}
-        className={cn(
-          "object-cover transition duration-500 group-hover:scale-[1.06]",
-          faded && "opacity-50 group-hover:opacity-100",
-        )}
-      />
+      {url && (
+        <Image
+          src={url}
+          alt=""
+          fill
+          sizes={sizes}
+          // remotePatterns に無い外部URL（Unsplash など）は最適化を通さずそのまま出す
+          unoptimized={!isSanityImage(url)}
+          className={cn(
+            "object-cover transition duration-500 group-hover:scale-[1.06]",
+            faded && "opacity-50 group-hover:opacity-100",
+          )}
+        />
+      )}
     </div>
   );
 }
 
 /** /updates の ArticleRow（variant "updates"）と同じ行の外枠 */
-const rowClassName =
+export const rowClassName =
   "group flex w-full items-center gap-4 rounded-[8px] border-b border-black/[0.1] px-1 py-3 text-left outline-none transition duration-200 hover:bg-black/[0.035] active:scale-[0.995] active:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2";
 
-function titleClassName(faded: boolean) {
+export function titleClassName(faded: boolean) {
   return cn(
     "font-rounded-mplus text-sm font-medium leading-[24px] group-hover:underline",
     faded ? "text-text-primary/[0.56]" : "text-text-primary",
@@ -126,7 +134,7 @@ function titleClassName(faded: boolean) {
 }
 
 /** ArticleRow と同じ丸い矢印 */
-function RowArrow({ className }: { className?: string }) {
+export function RowArrow({ className }: { className?: string }) {
   return (
     <span
       className={cn(
@@ -192,9 +200,13 @@ function DateBlock({
   faded: boolean;
 }) {
   const main =
-    parts?.kind === "exact" ? `${parts.month}/${parts.day}` : parts ? `${parts.month}月` : "未定";
+    parts?.kind === "exact"
+      ? `${parts.month}/${parts.day}`
+      : parts
+        ? `${parts.month}月`
+        : "未定";
   const sub =
-    parts?.kind === "exact" ? `(${parts.weekday})` : parts?.period ?? "";
+    parts?.kind === "exact" ? `(${parts.weekday})` : (parts?.period ?? "");
   // 正確な日時があるときだけ time 要素（「8月下旬」は time の値にできないので span）
   const Tag = dateTime ? "time" : "span";
   return (
@@ -221,8 +233,15 @@ function DateBlock({
 export function EventRowB({ event, fadeEnded }: EventRowProps) {
   const faded = fadeEnded && event.status === "ended";
   return (
-    <Link href={`/events/${event.slug}`} className={cn(rowClassName, "gap-3 @2xl:gap-4")}>
-      <DateBlock parts={event.dateParts} dateTime={event.dateTime} faded={faded} />
+    <Link
+      href={`/events/${event.slug}`}
+      className={cn(rowClassName, "gap-3 @2xl:gap-4")}
+    >
+      <DateBlock
+        parts={event.dateParts}
+        dateTime={event.dateTime}
+        faded={faded}
+      />
       <span aria-hidden="true" className="w-px self-stretch bg-black/[0.1]" />
       <EventThumbnail
         url={event.thumbnailUrl}
@@ -246,7 +265,10 @@ export function EventRowB({ event, fadeEnded }: EventRowProps) {
 export function EventRowC({ event, fadeEnded }: EventRowProps) {
   const faded = fadeEnded && event.status === "ended";
   return (
-    <Link href={`/events/${event.slug}`} className={cn(rowClassName, "items-start py-4")}>
+    <Link
+      href={`/events/${event.slug}`}
+      className={cn(rowClassName, "items-start py-4")}
+    >
       <EventThumbnail
         url={event.thumbnailUrl}
         sizes="160px"
@@ -255,7 +277,9 @@ export function EventRowC({ event, fadeEnded }: EventRowProps) {
       />
       <div className="min-w-0 flex-1">
         <StatusDateLine event={event} />
-        <h2 className={cn(titleClassName(faded), "line-clamp-2")}>{event.title}</h2>
+        <h2 className={cn(titleClassName(faded), "line-clamp-2")}>
+          {event.title}
+        </h2>
         <p
           className={cn(
             "mt-1 line-clamp-2 font-noto-sans-jp text-xs leading-[1.6]",
@@ -269,7 +293,10 @@ export function EventRowC({ event, fadeEnded }: EventRowProps) {
   );
 }
 
-export const ROW_COMPONENTS: Record<RowPattern, (props: EventRowProps) => React.ReactNode> = {
+export const ROW_COMPONENTS: Record<
+  Exclude<RowPattern, "d">,
+  (props: EventRowProps) => React.ReactNode
+> = {
   a: EventRowA,
   b: EventRowB,
   c: EventRowC,

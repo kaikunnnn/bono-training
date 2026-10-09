@@ -11,6 +11,7 @@ export interface MockEvent extends EventScheduleInput {
   slug: string;
   title: string;
   summary: string;
+  /** 空文字ならサムネなし */
   thumbnailUrl: string;
 }
 
@@ -91,3 +92,17 @@ export const MOCK_EVENTS: MockEvent[] = [
     eventPeriod: "late",
   },
 ];
+
+/**
+ * 年見出し（パターン D）の効果を見るためのダミー。実在しないイベント。
+ * 「年見出し: あり」のときだけ過去セクションに足す。
+ */
+export const DUMMY_EVENT_2025: MockEvent = {
+  slug: "dummy-bonenkai-2025",
+  title: "忘年会（ダミー）",
+  summary: "年見出しの確認用のダミーです。",
+  thumbnailUrl: "",
+  eventYear: 2025,
+  eventMonth: 12,
+  eventPeriod: "mid",
+};

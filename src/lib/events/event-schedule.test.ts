@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  formatDaysUntil,
   formatEventDate,
+  formatEventStartTime,
+  getDaysUntilEvent,
   getEventDateParts,
   getEventEndBoundary,
   getEventStatus,
+  groupEventsByStatus,
   sortEventsNewestFirst,
 } from "./event-schedule";
 
@@ -102,5 +106,60 @@ describe("並び順（開催時期の新しい順）", () => {
       "feb-b",
       "unknown",
     ]);
+  });
+});
+
+describe("あと◯日・開始時刻（パターン D）", () => {
+  const event = { eventStartAt: "2026-10-21T11:00:00.000Z" }; // 10/21(水) 20:00 JST
+
+  it("日本時間の暦日で数える", () => {
+    // 10/9 15:00 JST
+    expect(getDaysUntilEvent(event, new Date("2026-10-09T06:00:00.000Z"))).toBe(12);
+    // 10/20 23:59 JST → 1日、10/21 0:00 JST → 0日（UTC ではまだ 10/20）
+    expect(getDaysUntilEvent(event, new Date("2026-10-20T14:59:00.000Z"))).toBe(1);
+    expect(getDaysUntilEvent(event, new Date("2026-10-20T15:00:00.000Z"))).toBe(0);
+    // 翌日は -1
+    expect(getDaysUntilEvent(event, new Date("2026-10-21T15:00:00.000Z"))).toBe(-1);
+  });
+
+  it("概算の日付は数えない", () => {
+    expect(getDaysUntilEvent({ eventYear: 2026, eventMonth: 12, eventPeriod: "late" })).toBeNull();
+  });
+
+  it("表示は「今日」「あと12日」、過ぎたら null", () => {
+    expect(formatDaysUntil(0)).toBe("今日");
+    expect(formatDaysUntil(12)).toBe("あと12日");
+    expect(formatDaysUntil(-1)).toBeNull();
+    expect(formatDaysUntil(null)).toBeNull();
+  });
+
+  it("開始時刻は日本時間で「20:00〜」", () => {
+    expect(formatEventStartTime(event)).toBe("20:00〜");
+    expect(formatEventStartTime({ eventStartAt: "2026-10-21T00:30:00.000Z" })).toBe("09:30〜");
+    expect(formatEventStartTime({ eventYear: 2026, eventMonth: 8 })).toBeNull();
+  });
+});
+
+describe("募集中 / 過去に分ける（パターン D）", () => {
+  it("募集中は開催が近い順、過去は新しい順", () => {
+    const now = new Date("2026-10-09T06:00:00.000Z");
+    const events = [
+      { id: "aug", eventYear: 2026, eventMonth: 8, eventPeriod: "late" as const },
+      { id: "dec", eventYear: 2026, eventMonth: 12, eventPeriod: "mid" as const },
+      { id: "oct21", eventStartAt: "2026-10-21T11:00:00.000Z" },
+      { id: "jul", eventYear: 2026, eventMonth: 7, eventPeriod: "mid" as const },
+      { id: "nov", eventStartAt: "2026-11-05T11:00:00.000Z" },
+    ];
+    const { upcoming, ended } = groupEventsByStatus(events, now);
+    expect(upcoming.map((e) => e.id)).toEqual(["oct21", "nov", "dec"]);
+    expect(ended.map((e) => e.id)).toEqual(["aug", "jul"]);
+  });
+
+  it("募集中が無ければ空配列", () => {
+    const { upcoming } = groupEventsByStatus(
+      [{ eventYear: 2026, eventMonth: 2, eventPeriod: "late" as const }],
+      new Date("2026-10-09T06:00:00.000Z"),
+    );
+    expect(upcoming).toEqual([]);
   });
 });
