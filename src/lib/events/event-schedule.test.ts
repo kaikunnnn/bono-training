@@ -9,6 +9,7 @@ import {
   getEventStatus,
   groupEventsByStatus,
   sortEventsNewestFirst,
+  toEventScheduleInput,
 } from "./event-schedule";
 
 describe("正確な日時（eventStartAt）", () => {
@@ -161,5 +162,35 @@ describe("募集中 / 過去に分ける（パターン D）", () => {
       new Date("2026-10-09T06:00:00.000Z"),
     );
     expect(upcoming).toEqual([]);
+  });
+});
+
+describe("Sanity のイベントから判定用の入力を作る", () => {
+  it("eventStartAt があればそのまま", () => {
+    expect(
+      toEventScheduleInput({ eventStartAt: "2026-10-21T11:00:00.000Z", publishedAt: "2026-09-01T00:00:00.000Z" })
+        .eventStartAt,
+    ).toBe("2026-10-21T11:00:00.000Z");
+  });
+
+  it("概算があれば publishedAt は使わない（eventYear が空でも壊れない）", () => {
+    const input = toEventScheduleInput({
+      eventMonth: 8,
+      eventPeriod: "late",
+      publishedAt: "2026-08-01T00:00:00.000Z",
+    });
+    expect(input).toEqual({ eventStartAt: null, eventYear: null, eventMonth: 8, eventPeriod: "late" });
+    expect(formatEventDate(input)).toBe("8月下旬");
+    expect(getEventStatus(input)).toBe("ended");
+  });
+
+  it("どちらも無い旧形式は publishedAt を開催日として使う", () => {
+    expect(toEventScheduleInput({ publishedAt: "2025-05-10T03:00:00.000Z" }).eventStartAt).toBe(
+      "2025-05-10T03:00:00.000Z",
+    );
+  });
+
+  it("想定外の eventPeriod は無視する", () => {
+    expect(toEventScheduleInput({ eventYear: 2026, eventMonth: 3, eventPeriod: "foo" }).eventPeriod).toBeNull();
   });
 });

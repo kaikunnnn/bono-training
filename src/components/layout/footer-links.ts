@@ -47,6 +47,7 @@ export const FOOTER_GROUPS: FooterGroup[] = [
     links: [
       { label: "掲示板", href: "/questions" },
       { label: "みんなの実績", href: "/achievements" },
+      { label: "イベント", href: "/events" },
       { label: "使い方", href: "/how-to" },
     ],
   },

@@ -195,6 +195,8 @@ export interface Event {
   registrationUrl?: string;
   thumbnail?: SanityImage & { asset?: { _id: string; url: string } };
   thumbnailUrl?: string;
+  /** 概算の開催年（eventMonth/eventPeriod とセット）。未入力のイベントもある */
+  eventYear?: number;
   eventMonth?: number;
   eventPeriod?: "early" | "mid" | "late";
   /** 開催開始日時。公開日時(publishedAt)とは別に管理する新フィールド。 */

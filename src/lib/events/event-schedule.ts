@@ -230,3 +230,27 @@ export function groupEventsByStatus<T extends EventScheduleInput>(
   );
   return { upcoming, ended };
 }
+
+/**
+ * Sanity のイベントから判定用の入力を作る（一覧・詳細で共通）。
+ * eventStartAt も eventMonth も無い旧形式のイベントは、公開日時 publishedAt を開催日の代わりに使う
+ * （詳細ページの従来の挙動と同じ）。
+ */
+export function toEventScheduleInput(event: {
+  eventStartAt?: string | null;
+  eventYear?: number | null;
+  eventMonth?: number | null;
+  eventPeriod?: string | null;
+  publishedAt?: string | null;
+}): EventScheduleInput {
+  const period =
+    event.eventPeriod === "early" || event.eventPeriod === "mid" || event.eventPeriod === "late"
+      ? event.eventPeriod
+      : null;
+  return {
+    eventStartAt: event.eventStartAt ?? (!event.eventMonth ? event.publishedAt : null) ?? null,
+    eventYear: event.eventYear ?? null,
+    eventMonth: event.eventMonth ?? null,
+    eventPeriod: period,
+  };
+}

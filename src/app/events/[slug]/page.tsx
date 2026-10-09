@@ -20,6 +20,7 @@ import {
   isOnsiteRegistrationEvent,
   isRegistrationClosed,
 } from "@/lib/events/onsite-registration";
+import { getEventDateParts, toEventScheduleInput } from "@/lib/events/event-schedule";
 import {
   getEventParticipantSummary,
   getEventParticipantsForMember,
@@ -52,45 +53,33 @@ export async function generateMetadata({
 }
 
 // 日付表示のヘルパー
+// 一覧（/events）と同じ event-schedule.ts で日本時間の年月日・曜日を出す（サーバーの TZ に左右されない）。
+// eventStartAt が未導入の既存イベントは、eventMonth/eventPeriod があれば概算表示を優先し、
+// どちらも無い旧形式だけ publishedAt を開催日として使う（toEventScheduleInput）。
 function getDateDisplay(event: {
   publishedAt?: string;
   eventStartAt?: string;
+  eventYear?: number;
   eventMonth?: number;
   eventPeriod?: string;
 }) {
-  const periodLabels: Record<string, string> = {
-    early: "上旬",
-    mid: "中旬",
-    late: "下旬",
-  };
+  const parts = getEventDateParts(toEventScheduleInput(event));
+  if (!parts) return null;
 
-  // 開催日時を公開日時から分離。eventStartAt が未導入の既存イベントは、
-  // eventMonth/eventPeriod があれば従来の概算表示を優先し、旧形式の
-  // exact 日付イベント（概算フィールドを持たないもの）だけ publishedAt を使う。
-  const eventDateValue =
-    event.eventStartAt ?? (!event.eventMonth ? event.publishedAt : undefined);
-  const eventDate = eventDateValue ? new Date(eventDateValue) : null;
-
-  if (eventDate) {
+  if (parts.kind === "exact") {
     return {
       type: "exact" as const,
-      month: eventDate.getMonth() + 1,
-      day: eventDate.getDate(),
-      dayOfWeek: ["日", "月", "火", "水", "木", "金", "土"][
-        eventDate.getDay()
-      ],
+      month: parts.month,
+      day: parts.day,
+      dayOfWeek: parts.weekday,
     };
   }
 
-  if (event.eventMonth) {
-    return {
-      type: "approximate" as const,
-      month: event.eventMonth,
-      period: event.eventPeriod ? periodLabels[event.eventPeriod] : null,
-    };
-  }
-
-  return null;
+  return {
+    type: "approximate" as const,
+    month: parts.month,
+    period: parts.period,
+  };
 }
 
 export default async function EventDetailPage({ params }: PageProps) {
