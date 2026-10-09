@@ -8,7 +8,7 @@ import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
  * 仕様（Figma）:
  * - padding: px-[14px] py-[9px]
  * - gap: 10px
- * - フォント: Noto Sans JP, 13px, Medium
+ * - フォント: Noto Sans JP, 13px, Medium（現在地は Bold）
  * - アイコン: 20x20px
  */
 export function SidebarMenuItem({
@@ -23,8 +23,9 @@ export function SidebarMenuItem({
     "relative w-full rounded-[20px] px-[14px] py-[9px] inline-flex items-center gap-[10px]" +
     " font-noto-sans-jp text-[13px] font-medium leading-none text-text-primary" +
     " transition-colors duration-150 border border-transparent";
+  // 現在地の項目は文字を太くして、背景だけでなく文字でも選択中が分かるようにする
   const stateClasses = isActive
-    ? "border border-[rgba(47,48,55,0.08)] bg-[linear-gradient(111.3507deg,rgba(47,48,55,0.08)_9.1965%,rgba(47,48,55,0.03)_79.127%)]"
+    ? "font-bold border border-[rgba(47,48,55,0.08)] bg-[linear-gradient(111.3507deg,rgba(47,48,55,0.08)_9.1965%,rgba(47,48,55,0.03)_79.127%)]"
     : "bg-transparent hover:bg-[rgba(47,48,55,0.04)] active:bg-[rgba(47,48,55,0.08)]";
   const isExternal = /^https?:\/\//.test(href);
 
