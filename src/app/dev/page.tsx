@@ -70,6 +70,15 @@ const projects: DevProjectEntry[] = [
     status: "in-progress",
   },
   {
+    href: "/dev/top-classic-full",
+    issue: "TOP-旧",
+    title: "過去のトップページ（アニメーションあり・全セクション）",
+    summary:
+      "新トップに切り替える前まで本番 / に出ていた旧トップをそのまま表示。ヒーローのアニメーション、パートナーシップ、ゴール選択、キャリア/UX/UIの各セクションまで確認できる。",
+    status: "archived",
+    links: [{ href: "/dev/top-classic", label: "アイキャッチだけの再現版" }],
+  },
+  {
     href: "/dev/top",
     issue: "TOP-2026",
     title: "新トップページ v1（初期実装）",
