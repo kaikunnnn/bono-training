@@ -1,11 +1,14 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 import { ChevronRight, X } from "lucide-react";
 import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { trackEvent } from "@/lib/analytics";
+import { trackHomeClick } from "@/lib/activity-client";
+import { classifyHomeHref } from "@/lib/activity-utils";
 import {
   CURRENT_ANNOUNCEMENT,
   buildAnnouncementPrePaintScript,
@@ -39,6 +42,9 @@ export function AnnouncementBar({
   now,
 }: AnnouncementBarProps) {
   const id = announcement?.id ?? "";
+  // 出すのは /top と /mypage だけ（Layout 側で決定）。home_click の surface に使う（#232）
+  const pathname = usePathname();
+  const surface = pathname === "/mypage" ? "mypage" : "top";
 
   // サーバー描画 / hydration 中だけ true。インラインスクリプトはこの間だけ出す
   // （クライアント描画の <script> は実行されず、React が警告するため）
@@ -74,12 +80,19 @@ export function AnnouncementBar({
         {/* 初期表示の動的ルートを viewport だけで prefetch しない（docs/performance.md） */}
         <IntentPrefetchLink
           href={announcement.href}
-          onClick={() =>
+          onClick={() => {
             trackEvent("announcement_click", {
               announcement_id: announcement.id,
               link_url: announcement.href,
-            })
-          }
+            });
+            // 活動ログにも残す（#232）。種類はリンク先から、content_id はお知らせのID
+            trackHomeClick({
+              surface,
+              section: "announcement_bar",
+              itemType: classifyHomeHref(announcement.href).itemType,
+              contentId: announcement.id,
+            });
+          }}
           className="group flex min-h-11 w-full items-center justify-center gap-2 py-2 pl-4 pr-12 text-xs leading-5 text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring sm:px-12 sm:text-sm"
         >
           <Badge variant="dark" className="shrink-0">
