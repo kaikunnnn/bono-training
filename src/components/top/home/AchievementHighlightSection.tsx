@@ -4,6 +4,10 @@ import AchievementCard, {
 } from "@/components/top/home/AchievementCard";
 import { cn } from "@/lib/utils";
 import TopSectionHeading from "@/components/top2/TopSectionHeading";
+import {
+  classifyHomeHref,
+  type HomeClickSurface,
+} from "@/lib/activity-utils";
 
 /**
  * みんなの実績セクション（新トップ 2026 / ブロックF）
@@ -63,6 +67,11 @@ export interface AchievementHighlightSectionProps {
   className?: string;
   /** Three cards per group, matching the top-page query limit. */
   loading?: boolean;
+  /**
+   * 指定時はクリックを計測する（#232 home_click /
+   * section: achievement_stories・achievement_outputs）
+   */
+  surface?: HomeClickSurface;
 }
 
 export default function AchievementHighlightSection({
@@ -78,6 +87,7 @@ export default function AchievementHighlightSection({
   cardGridClassName,
   className,
   loading = false,
+  surface,
 }: AchievementHighlightSectionProps) {
   const subheadingClass =
     "font-rounded-mplus text-[20px] font-medium leading-[1.4] tracking-[1.6px] text-text-primary";
@@ -107,11 +117,20 @@ export default function AchievementHighlightSection({
               )}
             >
               {loading && <AchievementCardPlaceholders />}
-              {storyItems.map((item) => (
+              {storyItems.map((item, index) => (
                 <AchievementCard
                   key={`story-${item.href}`}
                   {...item}
                   compact={compact}
+                  tracking={
+                    surface && {
+                      surface,
+                      section: "achievement_stories",
+                      itemType: "story",
+                      position: index + 1,
+                      contentId: classifyHomeHref(item.href).contentId,
+                    }
+                  }
                 />
               ))}
             </div>
@@ -128,11 +147,19 @@ export default function AchievementHighlightSection({
               )}
             >
               {loading && <AchievementCardPlaceholders />}
-              {outputItems.map((item) => (
+              {outputItems.map((item, index) => (
                 <AchievementCard
                   key={`output-${item.href}`}
                   {...item}
                   compact={compact}
+                  tracking={
+                    surface && {
+                      surface,
+                      section: "achievement_outputs",
+                      itemType: "output",
+                      position: index + 1,
+                    }
+                  }
                 />
               ))}
             </div>

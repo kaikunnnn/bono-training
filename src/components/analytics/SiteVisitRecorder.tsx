@@ -21,7 +21,9 @@ export function SiteVisitRecorder({ userId }: { userId: string }) {
     } catch {
       // storage が使えない環境では毎回送る（DB 側で重複は弾かれる）
     }
-    logActivity({ eventType: "site_visit" });
+    // その日最初に開いたページ（#232）。path 列に入る。
+    // logActivity も既定で pathname を入れるが、来訪の分析で使う値なので明示する
+    logActivity({ eventType: "site_visit", path: window.location.pathname });
     try {
       window.localStorage.setItem(key, today);
     } catch {

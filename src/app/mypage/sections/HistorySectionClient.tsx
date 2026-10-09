@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Clock } from "lucide-react";
 import { MySection } from "../_shared/MySection";
 import { EmptyState } from "../_shared/EmptyState";
-import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
 
 export interface ViewedArticle {
   _id: string;
@@ -23,12 +23,18 @@ export function HistoryPreview({
   return (
     <MySection
       title="閲覧履歴"
+      section="history"
       viewAllTab="history"
       isEmpty={viewHistory.length === 0}
       emptyMessage="記事を閲覧した履歴がこちらに表示されます"
     >
-      {viewHistory.slice(0, 4).map((article) => (
-        <HistoryItem key={article._id} article={article} />
+      {viewHistory.slice(0, 4).map((article, index) => (
+        <HistoryItem
+          key={article._id}
+          article={article}
+          section="history"
+          position={index + 1}
+        />
       ))}
     </MySection>
   );
@@ -40,25 +46,53 @@ export function HistoryFull({
   viewHistory: ViewedArticle[];
 }) {
   if (viewHistory.length === 0) {
-    return <EmptyState message="記事を閲覧した履歴がこちらに表示されます" />;
+    return (
+      <EmptyState
+        message="記事を閲覧した履歴がこちらに表示されます"
+        section="history_tab"
+      />
+    );
   }
 
   return (
     <div className="flex w-full flex-col gap-0 rounded-2xl overflow-hidden shadow-[0px_1px_3px_0px_rgba(0,0,0,0.04)]">
-      {viewHistory.map((article) => (
-        <HistoryItem key={article._id} article={article} />
+      {viewHistory.map((article, index) => (
+        <HistoryItem
+          key={article._id}
+          article={article}
+          section="history_tab"
+          position={index + 1}
+        />
       ))}
     </div>
   );
 }
 
-function HistoryItem({ article }: { article: ViewedArticle }) {
+function HistoryItem({
+  article,
+  section,
+  position,
+}: {
+  article: ViewedArticle;
+  /** クリック計測（#232 home_click）のブロックID */
+  section: string;
+  position: number;
+}) {
   const thumbnailUrl = article.resolvedThumbnailUrl || "/placeholder-thumbnail.svg";
   const lessonTitle = article.questInfo?.lessonInfo?.title || "";
 
   return (
-    <IntentPrefetchLink
+    <HomeClickLink
       href={`/contents/${article.slug.current}`}
+      intentPrefetch
+      tracking={{
+        surface: "mypage",
+        section,
+        itemType: "article",
+        position,
+        contentId: article.slug.current,
+        articleId: article._id,
+      }}
       className="w-full block no-underline"
       style={{
         minHeight: 68,
@@ -125,7 +159,7 @@ function HistoryItem({ article }: { article: ViewedArticle }) {
           </span>
         </div>
       )}
-    </IntentPrefetchLink>
+    </HomeClickLink>
   );
 }
 

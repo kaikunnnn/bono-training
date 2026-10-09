@@ -18,6 +18,7 @@ import {
   getAllGuidesFromSanity,
 } from "@/lib/sanity";
 import { traceServerStep } from "@/lib/performance/server-trace";
+import type { HomeClickSurface } from "@/lib/activity-utils";
 
 const guideDefinitions = [
   {
@@ -67,7 +68,12 @@ const lessonDefinitions = [
   },
 ];
 
-async function LatestContent() {
+/** どの画面のクリックとして記録するか（#232 home_click）。未指定なら計測しない */
+interface SurfaceProps {
+  surface?: HomeClickSurface;
+}
+
+async function LatestContent({ surface }: SurfaceProps) {
   const items = await traceServerStep("top.cms.latest", () => getLatestMixedContent(4));
   const articles = items.map((item) => ({
     category: item.type,
@@ -75,10 +81,10 @@ async function LatestContent() {
     href: item.href,
     image: item.thumbnail || undefined,
   }));
-  return <NewContentSection articles={articles} viewAllHref="/updates" />;
+  return <NewContentSection articles={articles} viewAllHref="/updates" surface={surface} />;
 }
 
-async function Guides() {
+async function Guides({ surface }: SurfaceProps) {
   const guides = await traceServerStep("top.cms.guides", getAllGuidesFromSanity);
   const items = guideDefinitions.map(({ title, description, slug }) => ({
     title,
@@ -86,7 +92,7 @@ async function Guides() {
     href: `/guide/${slug}`,
     image: guides.find((guide) => guide.slug === slug)?.thumbnailUrl,
   }));
-  return <GuideSection guides={items} />;
+  return <GuideSection guides={items} surface={surface} />;
 }
 
 const lessonSectionProps = {
@@ -97,7 +103,7 @@ const lessonSectionProps = {
   imageLoading: "lazy" as const,
 };
 
-async function Lessons() {
+async function Lessons({ surface }: SurfaceProps) {
   const lessons = await traceServerStep("top.cms.lessons", getAllLessonsWithArticleIds);
   const rows: LessonHighlightRow[] = lessonDefinitions.map(
     ({ subheading, titles }) => ({
@@ -107,16 +113,17 @@ async function Lessons() {
         .filter((lesson): lesson is NonNullable<typeof lesson> => Boolean(lesson)),
     }),
   );
-  return <LessonHighlightSection {...lessonSectionProps} rows={rows} />;
+  return <LessonHighlightSection {...lessonSectionProps} rows={rows} surface={surface} />;
 }
 
-async function Achievements() {
+async function Achievements({ surface }: SurfaceProps) {
   const groups = await traceServerStep("top.cms.achievements", () => getAchievementGroups(3));
   return (
     <AchievementHighlightSection
       compact
       storyItems={groups.stories}
       outputItems={groups.outputs}
+      surface={surface}
     />
   );
 }
@@ -132,11 +139,17 @@ export interface NewTopContentProps {
   isMember?: boolean;
   /** Hero本文を止めず、会員判定後のCTAだけを差し込むためのスロット */
   membershipCta?: ReactNode;
+  /**
+   * クリック計測（#232 home_click）の surface。`/top` は "top"、未ログイン向けの `/` は "root"。
+   * Hero の入会CTAは PricingCtaLink で別途計測済みのため対象外。
+   */
+  surface?: HomeClickSurface;
 }
 
 export function NewTopContent({
   isMember = false,
   membershipCta,
+  surface,
 }: NewTopContentProps) {
   const featuredCards = [
     {
@@ -167,27 +180,29 @@ export function NewTopContent({
           sm以上は PurposeNav → FeaturedSeries の元の順序を維持 */}
       <div className="flex flex-col">
         <div className="order-2 sm:order-1">
-          <PurposeNav />
+          <PurposeNav surface={surface} />
         </div>
         <div className="order-1 sm:order-2">
-          <FeaturedSeries cards={featuredCards} />
+          <FeaturedSeries cards={featuredCards} surface={surface} />
         </div>
       </div>
       <Suspense
-        fallback={<NewContentSection articles={[]} viewAllHref="/updates" loading />}
+        fallback={<NewContentSection articles={[]} viewAllHref="/updates" loading surface={surface} />}
       >
-        <LatestContent />
+        <LatestContent surface={surface} />
       </Suspense>
       <TrainingSection
         image1="/images/top5/training-info-architecture.jpg"
         image2="/images/top5/training-ux-research.jpg"
+        surface={surface}
       />
       <CareerSection
         image1="/images/top5/career-uiux-roadmap.jpg"
         image2="/images/top5/career-uiux-guide.jpg"
+        surface={surface}
       />
-      <Suspense fallback={<GuideSection guides={guidePlaceholders} />}>
-        <Guides />
+      <Suspense fallback={<GuideSection guides={guidePlaceholders} surface={surface} />}>
+        <Guides surface={surface} />
       </Suspense>
       <div className="container">
         <div className="flex flex-col">
@@ -197,15 +212,16 @@ export function NewTopContent({
                 {...lessonSectionProps}
                 rows={lessonDefinitions.map(({ subheading }) => ({ subheading, lessons: [] }))}
                 loading
+                surface={surface}
               />
             }
           >
-            <Lessons />
+            <Lessons surface={surface} />
           </Suspense>
           <Suspense
             fallback={<AchievementHighlightSection compact storyItems={[]} outputItems={[]} loading />}
           >
-            <Achievements />
+            <Achievements surface={surface} />
           </Suspense>
         </div>
       </div>

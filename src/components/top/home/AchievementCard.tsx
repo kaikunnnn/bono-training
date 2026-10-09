@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import type { HomeClickTracking } from "@/lib/activity-utils";
 
 /**
  * みんなの実績カード（新トップ 2026 / ブロックF）
@@ -34,6 +36,8 @@ export interface AchievementCardProps {
    */
   compact?: boolean;
   className?: string;
+  /** 指定時はクリックを計測する（#232 home_click）。未指定なら従来どおり */
+  tracking?: HomeClickTracking;
 }
 
 const TYPE_LABEL: Record<AchievementCardProps["type"], string> = {
@@ -51,6 +55,7 @@ export default function AchievementCard({
   href,
   compact = false,
   className,
+  tracking,
 }: AchievementCardProps) {
   const thumb = thumbnailUrl || FALLBACK_THUMB;
   const isExternal = type === "output";
@@ -114,6 +119,20 @@ export default function AchievementCard({
       </div>
     </article>
   );
+
+  if (tracking) {
+    // 外部リンク（output）も next/link は素の <a> を描くので DOM は同じ
+    return (
+      <HomeClickLink
+        href={href}
+        {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        className={cn("group block", className)}
+        tracking={tracking}
+      >
+        {body}
+      </HomeClickLink>
+    );
+  }
 
   if (isExternal) {
     return (

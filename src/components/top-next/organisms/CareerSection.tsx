@@ -1,5 +1,6 @@
 import TopSectionHeading from "@/components/top2/TopSectionHeading";
 import { PromoCard } from "@/components/top-next/molecules/PromoCard";
+import type { HomeClickSurface } from "@/lib/activity-utils";
 
 /**
  * UIUXデザイナーに転職する（新トップページ Figma Make HANDOFF / CareerSection）
@@ -14,9 +15,11 @@ import { PromoCard } from "@/components/top-next/molecules/PromoCard";
 export interface CareerSectionProps {
   image1?: string;
   image2?: string;
+  /** 指定時はクリックを計測する（#232 home_click / section: career） */
+  surface?: HomeClickSurface;
 }
 
-export function CareerSection({ image1, image2 }: CareerSectionProps) {
+export function CareerSection({ image1, image2, surface }: CareerSectionProps) {
   return (
     <section className="px-6 lg:px-12">
       <div className="border-b border-black/[0.1] pt-[64px] pb-[65px]">
@@ -32,6 +35,9 @@ export function CareerSection({ image1, image2 }: CareerSectionProps) {
             href="/roadmap"
             rounded="16px"
             image={image1}
+            tracking={
+              surface && { surface, section: "career", itemType: "roadmap", position: 1 }
+            }
           />
           <PromoCard
             title="未経験からのUIUXデザイナー転職ガイド"
@@ -39,6 +45,15 @@ export function CareerSection({ image1, image2 }: CareerSectionProps) {
             href="https://kaikun.bo-no.design/career/beginner"
             image={image2}
             external
+            tracking={
+              surface && {
+                surface,
+                section: "career",
+                itemType: "guide",
+                position: 2,
+                contentId: "career-beginner-external",
+              }
+            }
           />
         </div>
       </div>

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import { classifyHomeHref, type HomeClickSurface } from "@/lib/activity-utils";
 
 /**
  * おすすめシリーズ（新トップページ /dev/top5 / FeaturedSeries）
@@ -19,44 +21,70 @@ export interface FeaturedSeriesCard {
 
 export interface FeaturedSeriesProps {
   cards: FeaturedSeriesCard[];
+  /** 指定時はクリックを計測する（#232 home_click / section: featured_series） */
+  surface?: HomeClickSurface;
 }
 
-export function FeaturedSeries({ cards }: FeaturedSeriesProps) {
+export function FeaturedSeries({ cards, surface }: FeaturedSeriesProps) {
   return (
     <section className="px-6 lg:px-12">
       <div className="border-b border-black/[0.12] py-1">
         <div className="flex flex-col sm:-mx-3 sm:flex-row">
-          {cards.map((card) => (
-            <IntentPrefetchLink
-              key={card.href}
-              href={card.href}
-              className="group -mx-3 flex flex-1 flex-col gap-4 rounded-[8px] px-3 py-8 transition-colors duration-200 hover:bg-black/[0.02] sm:mx-0"
-            >
-              <div
-                className="relative w-full overflow-hidden rounded-[4px] border border-black/[0.03] bg-muted-custom"
-                style={{ aspectRatio: "16/9" }}
+          {cards.map((card, index) => {
+            const linkClassName =
+              "group -mx-3 flex flex-1 flex-col gap-4 rounded-[8px] px-3 py-8 transition-colors duration-200 hover:bg-black/[0.02] sm:mx-0";
+            const content = (
+              <>
+                <div
+                  className="relative w-full overflow-hidden rounded-[4px] border border-black/[0.03] bg-muted-custom"
+                  style={{ aspectRatio: "16/9" }}
+                >
+                  {card.image && (
+                    <Image
+                      src={card.image}
+                      alt=""
+                      fill
+                      priority
+                      sizes="(min-width: 640px) 33vw, 100vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <h3 className="font-rounded-mplus text-[16px] font-medium leading-[28px] tracking-[0.22px] text-text-primary transition-opacity duration-300 group-hover:opacity-70">
+                    {card.title}
+                  </h3>
+                  <span className="font-noto-sans-jp text-xs text-text-link underline-offset-4 group-hover:text-text-link-hover group-hover:underline">
+                    詳しく見る →
+                  </span>
+                </div>
+              </>
+            );
+            return surface ? (
+              <HomeClickLink
+                key={card.href}
+                href={card.href}
+                className={linkClassName}
+                intentPrefetch
+                tracking={{
+                  surface,
+                  section: "featured_series",
+                  ...classifyHomeHref(card.href),
+                  position: index + 1,
+                }}
               >
-                {card.image && (
-                  <Image
-                    src={card.image}
-                    alt=""
-                    fill
-                    priority
-                    sizes="(min-width: 640px) 33vw, 100vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-                  />
-                )}
-              </div>
-              <div className="flex flex-col gap-2">
-                <h3 className="font-rounded-mplus text-[16px] font-medium leading-[28px] tracking-[0.22px] text-text-primary transition-opacity duration-300 group-hover:opacity-70">
-                  {card.title}
-                </h3>
-                <span className="font-noto-sans-jp text-xs text-text-link underline-offset-4 group-hover:text-text-link-hover group-hover:underline">
-                  詳しく見る →
-                </span>
-              </div>
-            </IntentPrefetchLink>
-          ))}
+                {content}
+              </HomeClickLink>
+            ) : (
+              <IntentPrefetchLink
+                key={card.href}
+                href={card.href}
+                className={linkClassName}
+              >
+                {content}
+              </IntentPrefetchLink>
+            );
+          })}
         </div>
       </div>
     </section>

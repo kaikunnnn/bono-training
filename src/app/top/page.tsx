@@ -34,6 +34,7 @@ async function TopMembershipCta() {
 export default function TopPage() {
   return (
     <NewTopContent
+      surface="top"
       membershipCta={
         <Suspense fallback={null}>
           <TopMembershipCta />

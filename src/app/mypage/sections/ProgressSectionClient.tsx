@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import type { LessonProgress } from "@/lib/services/progress";
 import { MySection } from "../_shared/MySection";
 import { EmptyState } from "../_shared/EmptyState";
+import { trackHomeClick } from "@/lib/activity-client";
 
 export interface LessonWithProgress {
   _id: string;
@@ -41,17 +42,20 @@ export function ProgressPreview({
   return (
     <MySection
       title="進行中"
+      section="progress"
       viewAllTab="progress"
       isEmpty={inProgressLessons.length === 0}
       emptyMessage="デザインスキルの獲得をはじめよう"
       emptyLink="/lessons"
       horizontal
     >
-      {inProgressLessons.map((lesson) => (
+      {inProgressLessons.map((lesson, index) => (
         <ProgressLessonCard
           key={lesson._id}
           lesson={lesson}
           onComplete={handleCompleteLesson}
+          section="progress"
+          position={index + 1}
         />
       ))}
     </MySection>
@@ -81,6 +85,7 @@ export function ProgressFull({
       <EmptyState
         message="デザインスキルの獲得をはじめよう"
         link="/lessons"
+        section="progress_tab"
       />
     );
   }
@@ -92,11 +97,13 @@ export function ProgressFull({
           <h3 className="text-sm font-semibold text-black/60 font-rounded-mplus">
             取り組み中
           </h3>
-          {inProgressLessons.map((lesson) => (
+          {inProgressLessons.map((lesson, index) => (
             <ProgressLessonCard
               key={lesson._id}
               lesson={lesson}
               onComplete={handleCompleteLesson}
+              section="progress_tab"
+              position={index + 1}
             />
           ))}
         </div>
@@ -106,8 +113,13 @@ export function ProgressFull({
           <h3 className="text-sm font-semibold text-black/60 font-rounded-mplus">
             完了
           </h3>
-          {completedLessons.map((lesson) => (
-            <CompletedLessonCard key={lesson._id} lesson={lesson} />
+          {completedLessons.map((lesson, index) => (
+            <CompletedLessonCard
+              key={lesson._id}
+              lesson={lesson}
+              section="progress_tab_completed"
+              position={index + 1}
+            />
           ))}
         </div>
       )}
@@ -121,9 +133,14 @@ export function ProgressFull({
 function ProgressLessonCard({
   lesson,
   onComplete,
+  section,
+  position,
 }: {
   lesson: LessonWithProgress;
   onComplete: (lessonId: string) => void;
+  /** クリック計測（#232 home_click）のブロックID */
+  section: string;
+  position: number;
 }) {
   const router = useRouter();
   const [isCardHovered, setIsCardHovered] = useState(false);
@@ -140,12 +157,29 @@ function ProgressLessonCard({
   const iconImageUrl = lesson.iconImageUrl || "/placeholder-thumbnail.svg";
 
   const handleCardClick = () => {
+    trackHomeClick({
+      surface: "mypage",
+      section,
+      itemType: "lesson",
+      position,
+      contentId: lesson.slug.current,
+      lessonId: lesson._id,
+    });
     router.push(`/lessons/${lesson.slug.current}`);
   };
 
   const handleNextArticleClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (nextArticleUrl) {
+      // 「次👉️」= 続きの記事。マイページで続きを押した割合を見るための計測
+      trackHomeClick({
+        surface: "mypage",
+        section: `${section}_next`,
+        itemType: "article",
+        position,
+        contentId: lesson.firstIncompleteArticle?.slug,
+        lessonId: lesson._id,
+      });
       router.push(nextArticleUrl);
     }
   };
@@ -312,12 +346,25 @@ function ProgressLessonCard({
  */
 function CompletedLessonCard({
   lesson,
+  section,
+  position,
 }: {
   lesson: LessonWithProgress;
+  /** クリック計測（#232 home_click）のブロックID */
+  section: string;
+  position: number;
 }) {
   const router = useRouter();
   const lessonUrl = `/lessons/${lesson.slug.current}`;
   const handleClick = () => {
+    trackHomeClick({
+      surface: "mypage",
+      section,
+      itemType: "lesson",
+      position,
+      contentId: lesson.slug.current,
+      lessonId: lesson._id,
+    });
     router.push(lessonUrl);
   };
 

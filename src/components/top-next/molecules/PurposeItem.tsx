@@ -1,6 +1,8 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { PURPOSE_ICON_GRADIENT } from "@/styles/gradients";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import type { HomeClickTracking } from "@/lib/activity-utils";
 
 /**
  * アイコン＋ラベル（新トップページ /dev/top5 / PurposeNav用）
@@ -13,32 +15,45 @@ export interface PurposeItemProps {
   label: string;
   icon: ReactNode;
   href: string;
+  /** 指定時はクリックを計測する（#232 home_click）。未指定なら従来どおりの Link */
+  tracking?: HomeClickTracking;
 }
 
-export function PurposeItem({ subLabel, label, icon, href }: PurposeItemProps) {
+export function PurposeItem({ subLabel, label, icon, href, tracking }: PurposeItemProps) {
+  const className =
+    "group -mx-3 flex items-center gap-4 rounded-[8px] px-3 py-3 text-left transition-colors duration-200 hover:bg-black/[0.03]";
+  const content = (
+    <>
+      <div
+        className="flex size-14 shrink-0 items-center justify-center rounded-[4px] border-[0.5px] border-black/10 transition-transform duration-300 group-hover:scale-[1.08]"
+        style={{ backgroundImage: PURPOSE_ICON_GRADIENT }}
+      >
+        {icon}
+      </div>
+      <div>
+        <p className="font-noto-sans-jp text-xs font-medium leading-[24px] text-text-primary/[0.56]">
+          {subLabel}
+        </p>
+        <p className="font-noto-sans-jp text-sm font-medium leading-[24px] text-text-primary">
+          {label}
+        </p>
+      </div>
+    </>
+  );
+
   return (
     // 外側: レイアウト上の行間隔を維持するための余白のみ（ホバー背景には含めない）
     <div className="py-1 lg:py-5">
       {/* 内側: ホバー背景の範囲。コンテンツにタイトに沿わせる */}
-      <Link
-        href={href}
-        className="group -mx-3 flex items-center gap-4 rounded-[8px] px-3 py-3 text-left transition-colors duration-200 hover:bg-black/[0.03]"
-      >
-        <div
-          className="flex size-14 shrink-0 items-center justify-center rounded-[4px] border-[0.5px] border-black/10 transition-transform duration-300 group-hover:scale-[1.08]"
-          style={{ backgroundImage: PURPOSE_ICON_GRADIENT }}
-        >
-          {icon}
-        </div>
-        <div>
-          <p className="font-noto-sans-jp text-xs font-medium leading-[24px] text-text-primary/[0.56]">
-            {subLabel}
-          </p>
-          <p className="font-noto-sans-jp text-sm font-medium leading-[24px] text-text-primary">
-            {label}
-          </p>
-        </div>
-      </Link>
+      {tracking ? (
+        <HomeClickLink href={href} className={className} tracking={tracking}>
+          {content}
+        </HomeClickLink>
+      ) : (
+        <Link href={href} className={className}>
+          {content}
+        </Link>
+      )}
     </div>
   );
 }

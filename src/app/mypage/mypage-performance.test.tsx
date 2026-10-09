@@ -2,7 +2,7 @@ import { Children, isValidElement, type ReactElement, type ReactNode } from "rea
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { MyPageShell } from "./MyPageShell";
 import { ViewAllButton } from "./_shared/ViewAllButton";
-import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
 import { BookmarksSection } from "./sections/BookmarksSection";
 import { HistorySection } from "./sections/HistorySection";
 import { ProgressSection } from "./sections/ProgressSection";
@@ -105,7 +105,7 @@ describe("mypage performance contracts", () => {
 
   it("uses intent-prefetched links for all tabs without eager auth requests", () => {
     const links = descendants(MyPageShell({ activeTab: "favorite", children: null }))
-      .filter((element) => element.type === IntentPrefetchLink);
+      .filter((element) => element.type === HomeClickLink && (element.props as { intentPrefetch?: boolean }).intentPrefetch === true);
     const tabLinks = links.filter((element) => element.props.href?.startsWith("/mypage"));
 
     expect(tabLinks.map((element) => element.props.href)).toEqual([
@@ -115,15 +115,22 @@ describe("mypage performance contracts", () => {
       "/mypage?tab=history",
     ]);
     expect(tabLinks.find((element) => element.props.href === "/mypage?tab=favorite")?.props)
-      .toMatchObject({ role: "tab", "aria-selected": true, "aria-current": "page" });
+      .toMatchObject({
+        role: "tab",
+        "aria-selected": true,
+        "aria-current": "page",
+        tracking: { surface: "mypage", section: "tabs", itemType: "tab", position: 3, contentId: "favorite" },
+      });
   });
 
   it("uses the same intent-prefetched route for preview view-all links", () => {
-    const viewAll = ViewAllButton({ tab: "history" });
-    expect(viewAll.type).toBe(IntentPrefetchLink);
+    const viewAll = ViewAllButton({ tab: "history", section: "history" });
+    expect(viewAll.type).toBe(HomeClickLink);
     expect(viewAll.props).toMatchObject({
       href: "/mypage?tab=history",
       scroll: false,
+      intentPrefetch: true,
+      tracking: { surface: "mypage", section: "history", itemType: "view_all" },
     });
   });
 });

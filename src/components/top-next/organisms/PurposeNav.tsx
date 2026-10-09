@@ -1,6 +1,7 @@
 import { Map, ClipboardCheck } from "lucide-react";
 import { Book, MessageQuestion } from "iconsax-react";
 import { PurposeItem } from "@/components/top-next/molecules/PurposeItem";
+import type { HomeClickItemType, HomeClickSurface } from "@/lib/activity-utils";
 
 /**
  * 目的から探すナビ（新トップページ Figma Make HANDOFF / PurposeNav）
@@ -19,12 +20,14 @@ const PURPOSE_ITEMS = [
     label: "スキルアップ計画を立てる",
     icon: <Map className="size-5 text-text-primary" aria-hidden />,
     href: "/roadmap",
+    itemType: "roadmap",
   },
   {
     sub: "フィードバック",
     label: "プロに改善点をもらう",
     icon: <ClipboardCheck className="size-5 text-text-primary" aria-hidden />,
     href: "/how-to/feedback",
+    itemType: "feedback",
   },
   {
     sub: "掲示板",
@@ -33,29 +36,44 @@ const PURPOSE_ITEMS = [
       <MessageQuestion size={ICONSAX_SIZE} color="#2F3037" variant="Outline" />
     ),
     href: "/questions",
+    itemType: "question",
   },
   {
     sub: "レッスン",
     label: "UI・UXのコンテンツ",
     icon: <Book size={ICONSAX_SIZE} color="#2F3037" variant="Outline" />,
     href: "/lessons",
+    itemType: "lesson",
   },
-];
+] satisfies { href: string; itemType: HomeClickItemType; [key: string]: unknown }[];
 
-export function PurposeNav() {
+export interface PurposeNavProps {
+  /** 指定時はクリックを計測する（#232 home_click / section: purpose_nav） */
+  surface?: HomeClickSurface;
+}
+
+export function PurposeNav({ surface }: PurposeNavProps = {}) {
   return (
     <section className="px-6 lg:px-12">
       <div className="border-b border-black/[0.12] pt-1 pb-[5px]">
         {/* 視覚的には非表示だが、h1→h2→h3... の見出し階層を保つために構造上は残す */}
         <h2 className="sr-only">目的から探す</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:gap-[21px]">
-          {PURPOSE_ITEMS.map((item) => (
+          {PURPOSE_ITEMS.map((item, index) => (
             <PurposeItem
               key={item.label}
               subLabel={item.sub}
               label={item.label}
               icon={item.icon}
               href={item.href}
+              tracking={
+                surface && {
+                  surface,
+                  section: "purpose_nav",
+                  itemType: item.itemType,
+                  position: index + 1,
+                }
+              }
             />
           ))}
         </div>

@@ -3,6 +3,8 @@ import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
+import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import type { HomeClickTracking } from "@/lib/activity-utils";
 
 export type ArticleRowVariant = "plain" | "updates";
 
@@ -29,6 +31,8 @@ export interface ArticleRowProps {
   titleAs?: "h2" | "h3";
   /** updates は新着一覧用。plain はトップページで使う既存表示。 */
   variant?: ArticleRowVariant;
+  /** 指定時はクリックを計測する（#232 home_click。plain のみ）。未指定なら従来どおり */
+  tracking?: HomeClickTracking;
 }
 
 export function ArticleRow({
@@ -40,6 +44,7 @@ export function ArticleRow({
   dateTime,
   titleAs = "h3",
   variant = "plain",
+  tracking,
 }: ArticleRowProps) {
   const TitleTag = titleAs;
   const className = cn(
@@ -94,6 +99,18 @@ export function ArticleRow({
   );
 
   if (variant === "plain") {
+    if (tracking) {
+      return (
+        <HomeClickLink
+          href={href}
+          className={className}
+          tracking={tracking}
+          intentPrefetch
+        >
+          {content}
+        </HomeClickLink>
+      );
+    }
     return (
       <IntentPrefetchLink href={href} className={className}>
         {content}
