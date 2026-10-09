@@ -1370,6 +1370,7 @@ export const getEvent = unstable_cache(
           }
         },
         thumbnailUrl,
+        eventYear,
         eventMonth,
         eventPeriod,
         eventStartAt,
@@ -1396,7 +1397,7 @@ export const getEvent = unstable_cache(
 );
 
 /**
- * イベント一覧の軽量型（新着コンテンツ横断取得用）
+ * イベント一覧の軽量型（/events 一覧・新着コンテンツ横断取得用）
  */
 export interface EventListItem {
   _id: string;
@@ -1405,11 +1406,18 @@ export interface EventListItem {
   summary?: string;
   thumbnailUrl?: string;
   publishedAt?: string;
+  _updatedAt?: string;
+  /** 開催開始日時（正確な日時があるイベントだけ） */
   eventStartAt?: string;
+  eventEndAt?: string;
+  /** 概算の開催時期（年・月・上旬/中旬/下旬）。eventYear は未入力のイベントもある */
+  eventYear?: number;
+  eventMonth?: number;
+  eventPeriod?: "early" | "mid" | "late";
 }
 
 /**
- * すべてのイベントを取得（一覧・新着コンテンツ用）
+ * すべてのイベントを取得（/events 一覧・サイトマップ・新着コンテンツ用）
  * 公開日時（publishedAt）降順でソートして返す。
  * 旧イベントなど publishedAt が未入力の場合は _createdAt を公開日時相当として
  * フォールバックし、新着一覧から消えないようにする。
@@ -1424,7 +1432,12 @@ export const getAllEvents = unstable_cache(
         summary,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
         "publishedAt": coalesce(publishedAt, _createdAt),
-        eventStartAt
+        _updatedAt,
+        eventStartAt,
+        eventEndAt,
+        eventYear,
+        eventMonth,
+        eventPeriod
       }
     `;
     return getClient().fetch<EventListItem[]>(query);
@@ -1447,7 +1460,12 @@ export const getLatestEvents = unstable_cache(
         summary,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
         "publishedAt": coalesce(publishedAt, _createdAt),
-        eventStartAt
+        _updatedAt,
+        eventStartAt,
+        eventEndAt,
+        eventYear,
+        eventMonth,
+        eventPeriod
       }
     `;
     return getClient().fetch<EventListItem[]>(query, { limit });

@@ -2,6 +2,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   getAllArticles,
+  getAllEvents,
   getAllBlogSlugs,
   getAllFeedbackSlugs,
   getAllGuidesFromSanity,
@@ -20,6 +21,7 @@ vi.mock("@/lib/sanity", () => ({
   getAllLessonSlugs: vi.fn(),
   getAllRoadmapSlugs: vi.fn(),
   getQuestionsForSitemap: vi.fn(async () => []),
+  getAllEvents: vi.fn(async () => []),
 }));
 
 afterEach(() => vi.restoreAllMocks());
@@ -95,5 +97,57 @@ describe("sitemap", () => {
       firstEntries.find(({ url }) => url.endsWith("/roadmap"))?.lastModified,
     ).toBeUndefined();
     expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("includes the events list and each event detail page", async () => {
+    vi.mocked(getAllArticles).mockResolvedValue([]);
+    vi.mocked(getAllGuidesFromSanity).mockResolvedValue([]);
+    vi.mocked(getAllLessonSlugs).mockResolvedValue([]);
+    vi.mocked(getAllFeedbackSlugs).mockResolvedValue([]);
+    vi.mocked(getAllBlogSlugs).mockResolvedValue([]);
+    vi.mocked(getAllRoadmapSlugs).mockResolvedValue([]);
+    vi.mocked(getAllEvents).mockResolvedValue([
+      {
+        _id: "event-1",
+        title: "Challenge",
+        slug: { _type: "slug", current: "uidesign-challenge-2026-10" },
+        _updatedAt: "2026-10-05T00:00:00.000Z",
+        eventStartAt: "2026-10-21T11:00:00.000Z",
+      },
+      {
+        _id: "event-2",
+        title: "Meetup",
+        slug: { _type: "slug", current: "meetup-spring-2026" },
+        eventMonth: 2,
+        eventPeriod: "late",
+      },
+    ]);
+
+    const entries = await sitemap();
+    const paths = entries.map(({ url }) => new URL(url).pathname);
+
+    expect(paths).toContain("/events");
+    expect(paths).toContain("/events/uidesign-challenge-2026-10");
+    expect(paths).toContain("/events/meetup-spring-2026");
+    expect(
+      entries.find(({ url }) => url.endsWith("/events/uidesign-challenge-2026-10"))?.lastModified,
+    ).toBe("2026-10-05T00:00:00.000Z");
+    expect(
+      entries.find(({ url }) => url.endsWith("/events/meetup-spring-2026"))?.lastModified,
+    ).toBeUndefined();
+  });
+
+  it("keeps the sitemap working when events cannot be fetched", async () => {
+    vi.mocked(getAllArticles).mockResolvedValue([]);
+    vi.mocked(getAllGuidesFromSanity).mockResolvedValue([]);
+    vi.mocked(getAllLessonSlugs).mockResolvedValue([]);
+    vi.mocked(getAllFeedbackSlugs).mockResolvedValue([]);
+    vi.mocked(getAllBlogSlugs).mockResolvedValue([]);
+    vi.mocked(getAllRoadmapSlugs).mockResolvedValue([]);
+    vi.mocked(getAllEvents).mockRejectedValue(new Error("sanity down"));
+
+    const paths = (await sitemap()).map(({ url }) => new URL(url).pathname);
+    expect(paths).toContain("/events");
+    expect(paths.some((p) => p.startsWith("/events/"))).toBe(false);
   });
 });

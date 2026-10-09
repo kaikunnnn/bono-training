@@ -124,6 +124,13 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
           みんなの実績
         </SidebarMenuItem>
         <SidebarMenuItem
+          href="/events"
+          icon={<MenuIcons.events size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+          isActive={isActive("/events")}
+        >
+          イベント
+        </SidebarMenuItem>
+        <SidebarMenuItem
           href="/how-to"
           icon={<MenuIcons.howto size={ICON_SIZE} color="#2F3037" variant="Outline" />}
           isActive={isActive("/how-to")}

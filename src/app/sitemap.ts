@@ -7,6 +7,7 @@ import {
   getAllRoadmapSlugs,
   getAllGuidesFromSanity,
   getQuestionsForSitemap,
+  getAllEvents,
 } from "@/lib/sanity";
 import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
 import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
@@ -44,6 +45,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     },
     {
+      url: `${BASE_URL}/events`,
+      changeFrequency: "weekly",
+      priority: 0.7,
+    },
+    {
       url: `${BASE_URL}/feedbacks`,
       changeFrequency: "weekly",
       priority: 0.7,
@@ -56,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   // Sanity CMS から動的ページのスラッグを並行取得
-  const [lessonSlugs, articles, feedbackSlugs, blogSlugs, roadmapSlugs, guides, questions] =
+  const [lessonSlugs, articles, feedbackSlugs, blogSlugs, roadmapSlugs, guides, questions, events] =
     await Promise.all([
       getAllLessonSlugs().catch(() => [] as string[]),
       getAllArticles().catch(() => []),
@@ -65,6 +71,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getAllRoadmapSlugs().catch(() => [] as string[]),
       getAllGuidesFromSanity().catch(() => []),
       getQuestionsForSitemap().catch(() => []),
+      getAllEvents().catch(() => []),
     ]);
 
   const lessonPages: MetadataRoute.Sitemap = lessonSlugs.map((slug) => ({
@@ -141,6 +148,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.5,
   }));
 
+  // イベント詳細は公開ページ（申込UI・参加者一覧は会員向けだが本文は誰でも読める）
+  const eventPages: MetadataRoute.Sitemap = events.map((event) => ({
+    url: `${BASE_URL}/events/${event.slug.current}`,
+    ...(event._updatedAt ? { lastModified: event._updatedAt } : {}),
+    changeFrequency: "monthly",
+    priority: 0.6,
+  }));
+
   return [
     ...staticPages,
     ...lessonPages,
@@ -151,5 +166,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...roadmapPages,
     ...guidePages,
     ...questionPages,
+    ...eventPages,
   ];
 }
