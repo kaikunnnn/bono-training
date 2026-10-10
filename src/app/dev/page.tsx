@@ -26,6 +26,22 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/course-card-patterns/top",
+    issue: "#235",
+    title: "コースカードをトップに横3枚で並べた見え方",
+    summary:
+      "本番トップの小さい4導線（PurposeNav）と「AIにUIデザインの見た目〜」の3枚（FeaturedSeries）を、コースカード横3枚に差し替えた確認ページ。画面下のバーで A/B/C/C2（3枚目は推測の段階2コース）と Figma 参考の D/E/F（他サイト風カード、文言は Figma ダミー）、カード背景（直置き/白/枠線）、仮タグを切り替え。URL ?pattern=&surface=&kari=1 でも指定可。D/E/F のサムネ画像は Git に入れていないため、画像を置いていない環境ではグレー表示。",
+    status: "in-progress",
+  },
+  {
+    href: "/dev/course-card-patterns",
+    issue: "#235",
+    title: "コースカードのパターン比較",
+    summary:
+      "コース再編に向けたコースカード3案の比較。A＝Figma案1（説明文＋得られる変化・期間・制作物）、B＝Figma案2（1行の変化＋期間・制作物＋制作者・価格）、C＝対象者を見せる案（タイトル→こんな人向け→このコースで得られる変化→期間・制作物）、C2＝Bベースで対象者を下に置く案（タイトル→できること→期間・制作物→こんな人向け）。同じ2コース（AIコース／段階1）を2列で並べ、仮で作った文言はトグルで「仮」タグ表示（初期はオフ）。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/events-list-patterns",
     issue: "#234",
     title: "イベント一覧ページの行パターン比較",
