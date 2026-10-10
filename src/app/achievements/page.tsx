@@ -3,6 +3,7 @@ import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
+import { PageTitleSection } from "@/components/common/PageTitleSection";
 import StoryCardItem from "@/components/story/StoryCardItem";
 import OutputBannerCardItem from "@/components/output/OutputBannerCardItem";
 import { getStoriesList, getOutputsList } from "@/lib/sanity";
@@ -37,12 +38,11 @@ export default async function AchievementsPage() {
   return (
     <div className="min-h-screen">
       {/* ヒーロー（/guide と同じ独自セクションスタイル、幅はコンテンツに合わせる） */}
-      <section className="px-4 sm:px-6 pt-16 pb-10 max-w-[1200px] mx-auto">
-        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">みんなの成果</h1>
-        <p className="text-muted-foreground text-base leading-relaxed max-w-[600px]">
-          BONOで動き出した人たち
-        </p>
-      </section>
+      <PageTitleSection
+        title="みんなの成果"
+        description="BONOで動き出した人たち"
+        className="px-4 sm:px-6 max-w-[1200px]"
+      />
 
       <div className="max-w-[1200px] w-full mx-auto px-4 sm:px-6 pb-8 min-w-0">
 

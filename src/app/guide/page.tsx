@@ -4,6 +4,7 @@ import { getAllGuidesFromSanity, getGuidesByCategoryFromSanity } from "@/lib/san
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
 import { GuideCard } from "@/components/guide/GuideCard";
 import CategoryNav from "@/components/common/CategoryNav";
+import { PageTitleSection } from "@/components/common/PageTitleSection";
 import type { GuideCategory } from "@/types/guide";
 
 // ISR: 1時間キャッシュ
@@ -55,12 +56,11 @@ export default async function GuidePage({ searchParams }: PageProps) {
   return (
     <div className="min-h-screen">
       {/* ヒーロー */}
-      <section className="px-6 pt-16 pb-10 max-w-[1440px] mx-auto">
-        <h1 className="text-4xl font-bold font-rounded-mplus mb-4">読みもの</h1>
-        <p className="text-muted-foreground text-base leading-relaxed max-w-[600px]">
-          デザインスキルを身につける上でのヒントになる記事置き場です。何か書いて欲しい内容があれば質問で教えてください
-        </p>
-      </section>
+      <PageTitleSection
+        title="読みもの"
+        description="デザインスキルを身につける上でのヒントになる記事置き場です。何か書いて欲しい内容があれば質問で教えてください"
+        className="px-6 max-w-[1440px]"
+      />
 
       {/* カテゴリタブ */}
       <div className="px-6 max-w-[1440px] mx-auto">
