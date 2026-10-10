@@ -8,6 +8,7 @@ import type { EventDateParts } from "@/lib/events/event-schedule";
  * イベント一覧（/events）の1行。#234 パターン D。
  *
  * 左から「日付ブロック｜区切り線｜サムネ｜（あと◯日）タイトル｜矢印」。
+ * - サムネは募集中・過去で同じ大きさ
  * - 日付ブロックは募集中・過去で同じ固定幅にして、区切り線の位置をそろえる
  * - 年（小）→ 月日（大）→ 曜日（小）の3段。募集中の行は月日をさらに大きくし、開始時刻も出す
  * - 状態はセクション名（募集中 / 過去のイベント）で分かるので、状態バッジは出さない
@@ -32,13 +33,26 @@ export interface EventListRowProps {
 /** 日付ブロックの幅（募集中・過去で共通） */
 const DATE_BLOCK_WIDTH = "w-[68px] md:w-[84px]";
 
-/** Sanity 以外の外部URL（Unsplash など）は next.config の remotePatterns に無いので最適化を通さない */
-function isSanityImage(url: string) {
+/** サムネの表示幅（募集中・過去で共通） */
+const THUMBNAIL_WIDTH = "w-[80px] md:w-[128px]";
+
+/**
+ * Sanity の画像は Sanity の画像CDNで縮小して直接読む（Vercel の画像最適化は通さない）。
+ * Vercel 側の画像最適化は月の上限を超えると 402 になり、未変換の画像が出なくなるため。
+ * 256x144（表示幅128pxの2倍・16:9）に切り抜き、形式はブラウザに合わせる（auto=format）。
+ * https://www.sanity.io/docs/image-urls
+ */
+function toThumbnailSrc(url: string) {
   try {
-    const host = new URL(url).hostname;
-    return host === "cdn.sanity.io" || host.endsWith(".sanity.io");
+    const parsed = new URL(url);
+    if (parsed.hostname !== "cdn.sanity.io") return url;
+    parsed.searchParams.set("w", "256");
+    parsed.searchParams.set("h", "144");
+    parsed.searchParams.set("fit", "crop");
+    parsed.searchParams.set("auto", "format");
+    return parsed.toString();
   } catch {
-    return false;
+    return url;
   }
 }
 
@@ -117,16 +131,15 @@ export function EventListRow({
       <div
         className={cn(
           "relative aspect-video shrink-0 overflow-hidden rounded-[8px] bg-muted-custom",
-          upcoming ? "w-[80px] md:w-[128px]" : "w-[72px] md:w-[96px]",
+          THUMBNAIL_WIDTH,
         )}
       >
         {thumbnailUrl && (
           <Image
-            src={thumbnailUrl}
+            src={toThumbnailSrc(thumbnailUrl)}
             alt=""
             fill
-            sizes={upcoming ? "(min-width: 768px) 128px, 80px" : "(min-width: 768px) 96px, 72px"}
-            unoptimized={!isSanityImage(thumbnailUrl)}
+            unoptimized
             className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
           />
         )}

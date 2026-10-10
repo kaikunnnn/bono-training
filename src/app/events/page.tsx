@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
+import { PageTitleSection } from "@/components/common/PageTitleSection";
 import { EventListSection } from "@/components/event/EventListSection";
 import type { EventListRowProps } from "@/components/event/EventListRow";
 import { getAllEvents, type EventListItem } from "@/lib/sanity";
@@ -72,16 +73,11 @@ export default async function EventsPage() {
   });
 
   return (
-    <section className="px-6 lg:px-12">
-      <div className="py-8">
-        <h1 className="font-rounded-mplus text-[28px] font-medium leading-[1.5] text-text-primary">
-          イベント
-        </h1>
-        <p className="mt-2 font-noto-sans-jp text-sm leading-[1.71] text-text-primary/[0.56]">
-          {DESCRIPTION}
-        </p>
+    <div className="min-h-screen">
+      <PageTitleSection title="イベント" description={DESCRIPTION} className="px-6 max-w-[1440px]" />
 
-        <div className="mt-8 flex flex-col gap-10">
+      <div className="px-6 pb-16 max-w-[1440px] mx-auto">
+        <div className="flex flex-col gap-10">
           <EventListSection
             title="募集中"
             rows={upcoming.map((s) => toRow(s, true))}
@@ -94,6 +90,6 @@ export default async function EventsPage() {
           />
         </div>
       </div>
-    </section>
+    </div>
   );
 }
