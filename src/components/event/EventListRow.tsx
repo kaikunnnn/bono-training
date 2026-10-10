@@ -10,7 +10,7 @@ import type { EventDateParts } from "@/lib/events/event-schedule";
  * 左から「日付ブロック｜区切り線｜サムネ｜（あと◯日）タイトル｜矢印」。
  * - サムネは募集中・過去で同じ大きさ
  * - 日付ブロックは募集中・過去で同じ固定幅にして、区切り線の位置をそろえる
- * - 年（小）→ 月日（大）→ 曜日（小）の3段。募集中の行は月日をさらに大きくし、開始時刻も出す
+ * - 年（小）→ 月日（大）→ 曜日（小）の3段。月日の大きさは募集中・過去で同じ。募集中の行は開始時刻も出す
  * - 状態はセクション名（募集中 / 過去のイベント）で分かるので、状態バッジは出さない
  * - 行の外枠・ホバー・矢印は /updates の ArticleRow（variant "updates"）と同じ
  */
@@ -83,12 +83,7 @@ function DateBlock({
       <span className="font-noto-sans-jp text-[11px] font-medium leading-[16px] text-text-primary/[0.56]">
         {dateParts?.year ?? ""}
       </span>
-      <span
-        className={cn(
-          "font-rounded-mplus font-bold leading-[1.2] tabular-nums",
-          upcoming ? "text-[26px] md:text-[32px]" : "text-xl md:text-[22px]",
-        )}
-      >
+      <span className="font-rounded-mplus text-[26px] font-bold leading-[1.2] tabular-nums md:text-[32px]">
         {main}
       </span>
       <span className="font-noto-sans-jp text-xs font-medium leading-[18px] text-text-primary/[0.56]">
