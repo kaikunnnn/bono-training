@@ -1,6 +1,7 @@
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { Suspense } from "react";
-import { getArticleMetadata } from "@/lib/sanity";
+import { getArticleMetadata, getArticleWithContext } from "@/lib/sanity";
 import { redirectMissingContent } from "@/lib/missingContentRedirect";
 import {
   canAccessContent,
@@ -25,6 +26,12 @@ import {
   leadBlocksOf,
   PREMIUM_PREVIEW_BLOCK_COUNT,
 } from "@/lib/seo/articleDescription";
+import {
+  freeBlockCountForIndexablePremium,
+  isIndexablePremiumSlug,
+  PAYWALLED_CONTENT_CLASS,
+} from "@/lib/seo/indexablePremium";
+import { isVerifiedGooglebot } from "@/lib/seo/googlebot";
 import { traceServerStep } from "@/lib/performance/server-trace";
 import { startArticlePageData } from "./article-page-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -125,13 +132,26 @@ async function PersonalizedArticleBody({
   const { subscription, bookmarked, progressStatus } = await dataPromise;
   const hasAccess = canViewArticle(article, subscription);
 
+  // #236 検索に戻す会員限定記事: 非会員には「最初の区切り」まで見せる。
+  // 確認済みの Googlebot だけ全文を返し、有料部分を .paywalled-content で囲む（JSON-LD の hasPart と対応）。
+  // 判定はリクエストごと（headers() を読む＝このルートは毎回サーバーで描画され、共有キャッシュに乗らない）
+  const freeBlockCount = article.isPremium
+    ? freeBlockCountForIndexablePremium(slug, article.content)
+    : undefined;
+  const isCrawlerFullView =
+    !hasAccess &&
+    freeBlockCount !== undefined &&
+    (await isVerifiedGooglebot(await headers()));
+
   return (
     <>
       {article.content && (
         <RichTextSection
           content={article.content}
           isPremium={article.isPremium}
-          hasAccess={hasAccess}
+          hasAccess={hasAccess || isCrawlerFullView}
+          previewBlockCount={freeBlockCount}
+          paywalledFrom={isCrawlerFullView ? freeBlockCount : undefined}
           isLoggedIn={subscription.isLoggedIn}
           redirectTo={`/contents/${slug}`}
           afterContent={
@@ -202,6 +222,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = article.lessonTitle
     ? `${article.title} | ${article.lessonTitle}`
     : `${article.title}`;
+  // #236 検索に戻す会員限定記事は、広げた無料範囲（非会員に見えている範囲）から description を作る
+  const indexablePremium = !!article.isPremium && isIndexablePremiumSlug(slug);
+  const indexablePremiumContent = indexablePremium
+    ? (await getArticleWithContext(slug))?.content
+    : undefined;
+  const indexablePreviewCount = indexablePremiumContent
+    ? freeBlockCountForIndexablePremium(slug, indexablePremiumContent)
+    : undefined;
+
   // #236: 全記事同じ型の文をやめ、excerpt → 本文冒頭の要約 → 従来文 の順で記事ごとに作る
   const description = buildArticleDescription({
     title: article.title,
@@ -209,7 +238,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     content: article.leadBlocks,
     // 会員限定は非会員に見えている先頭ブロックだけ（有料部分の文を出さない）
     isPremium: article.isPremium,
-    previewBlocks: article.previewBlocks,
+    previewBlocks:
+      indexablePremiumContent && indexablePreviewCount !== undefined
+        ? indexablePremiumContent.slice(0, indexablePreviewCount)
+        : article.previewBlocks,
+    previewBlockCount: indexablePreviewCount,
   });
 
   // 本番サイト自身のサイトマップを参照すると URL の有無で判定が循環する。
@@ -221,7 +254,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
-    robots: article.isPremium ? { index: false, follow: true } : undefined,
+    // 会員限定は noindex。ただし検索に戻す対象（indexablePremium）は index（#236）
+    robots:
+      article.isPremium && !indexablePremium
+        ? { index: false, follow: true }
+        : undefined,
     openGraph: {
       ...OG_DEFAULTS,
       title,
@@ -303,6 +340,11 @@ export default async function ArticlePage({ params }: PageProps) {
     return { previous: previousArticle, next: nextArticle };
   })();
 
+  // #236 検索に戻す会員限定記事の無料範囲（非会員に見える先頭ブロック数）
+  const indexableFreeBlockCount = article.isPremium
+    ? freeBlockCountForIndexablePremium(slug, article.content)
+    : undefined;
+
   // 記事のインデックス番号を取得
   const articleIndex = article.questInfo?.articles
     ? article.questInfo.articles.findIndex((a) => a._id === article._id) + 1
@@ -341,11 +383,20 @@ export default async function ArticlePage({ params }: PageProps) {
                 excerpt: article.excerpt,
                 content: leadBlocksOf(article.content),
                 isPremium: article.isPremium,
-                previewBlocks: article.content?.slice(0, PREMIUM_PREVIEW_BLOCK_COUNT),
+                previewBlocks: article.content?.slice(
+                  0,
+                  indexableFreeBlockCount ?? PREMIUM_PREVIEW_BLOCK_COUNT,
+                ),
+                previewBlockCount: indexableFreeBlockCount,
               }),
               url: `/contents/${slug}`,
               publishedAt: article.publishedAt || new Date().toISOString(),
               image: article.thumbnailUrl,
+              // 有料コンテンツの構造化データ（Googlebot に返す HTML では有料部分が .paywalled-content）
+              paywalledCssSelector:
+                indexableFreeBlockCount !== undefined
+                  ? `.${PAYWALLED_CONTENT_CLASS}`
+                  : undefined,
             })
           )}
         />

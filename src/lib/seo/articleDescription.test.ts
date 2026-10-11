@@ -78,7 +78,7 @@ describe("buildArticleDescription（会員限定記事）", () => {
   it("非会員に見えている先頭3ブロックだけを使い、有料部分の文を含めない", () => {
     const blocks = [
       { _type: "block", style: "h2", children: [{ text: "見出し" }] },
-      p("無料で見える導入文。"),
+      p("無料で見える導入文で、この記事で学べることを説明する。"),
       { _type: "image" },
       p(paid),
       p(paid),
@@ -90,7 +90,7 @@ describe("buildArticleDescription（会員限定記事）", () => {
       previewBlocks: blocks,
       content: leadBlocksOf(blocks),
     });
-    expect(result).toBe("無料で見える導入文。");
+    expect(result).toBe("無料で見える導入文で、この記事で学べることを説明する。");
     expect(result).not.toContain("有料");
   });
 
@@ -104,6 +104,34 @@ describe("buildArticleDescription（会員限定記事）", () => {
     expect(
       buildArticleDescription({ title: "T", excerpt: " 要約 ", isPremium: true, previewBlocks: blocks }),
     ).toBe("要約");
+    expect(
+      buildArticleDescription({ title: "記事A", isPremium: true, previewBlocks: blocks }),
+    ).toBe("記事Aの学習コンテンツ");
+  });
+
+  it("検索に戻す会員限定記事は広げた無料範囲（previewBlockCount）まで使い、その先は使わない", () => {
+    const blocks = [
+      { _type: "block", style: "h2", children: [{ text: "見出し" }] },
+      { _type: "image" },
+      p("https://example.com"),
+      p("4つ目の無料の文で、記事の内容を短く紹介する。"),
+      p("有料の文。"),
+    ];
+    const result = buildArticleDescription({
+      title: "T",
+      isPremium: true,
+      previewBlocks: blocks,
+      previewBlockCount: 4,
+    });
+    expect(result).toBe("4つ目の無料の文で、記事の内容を短く紹介する。");
+    expect(result).not.toContain("有料");
+  });
+
+  it("見えている部分の文が短すぎるときは excerpt を優先する", () => {
+    const blocks = [{ _type: "block", style: "h1", children: [{ text: "見出し" }] }, p("ちなみに書くと")];
+    expect(
+      buildArticleDescription({ title: "T", excerpt: "要約の文", isPremium: true, previewBlocks: blocks }),
+    ).toBe("要約の文");
     expect(
       buildArticleDescription({ title: "記事A", isPremium: true, previewBlocks: blocks }),
     ).toBe("記事Aの学習コンテンツ");

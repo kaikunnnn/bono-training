@@ -96,6 +96,9 @@ export function leadBlocksOf(
  */
 export const PREMIUM_PREVIEW_BLOCK_COUNT = 3;
 
+/** 会員限定記事で、見えている部分の要約として使う最小文字数（これ未満なら excerpt を優先） */
+export const PREMIUM_SUMMARY_MIN_LENGTH = 20;
+
 export function buildArticleDescription(article: {
   title: string;
   excerpt?: string | null;
@@ -107,14 +110,25 @@ export function buildArticleDescription(article: {
    * 非会員に見えている先頭 PREMIUM_PREVIEW_BLOCK_COUNT 件だけを使い、有料部分の文は使わない
    */
   previewBlocks?: DescriptionSourceBlock[] | null;
+  /**
+   * 会員限定記事で非会員に見えているブロック数。既定は PREMIUM_PREVIEW_BLOCK_COUNT。
+   * 検索に戻す会員限定記事（indexablePremium）は広げた無料範囲の数を渡す
+   */
+  previewBlockCount?: number;
 }): string {
   const excerpt = article.excerpt?.replace(/\s+/g, " ").trim();
   const fallback = `${article.title}の学習コンテンツ`;
 
   if (article.isPremium) {
     // 会員限定: ロックの前に見えている部分 → excerpt → 従来文
-    const visible = (article.previewBlocks ?? []).slice(0, PREMIUM_PREVIEW_BLOCK_COUNT);
-    return summarizePortableText(visible) ?? (excerpt || fallback);
+    const visible = (article.previewBlocks ?? []).slice(
+      0,
+      article.previewBlockCount ?? PREMIUM_PREVIEW_BLOCK_COUNT,
+    );
+    // 見えている部分が「ちなみに書くと」のような短い一文だけなら要約にならないので使わない
+    const summary = summarizePortableText(visible);
+    if (summary && summary.length >= PREMIUM_SUMMARY_MIN_LENGTH) return summary;
+    return excerpt || fallback;
   }
 
   if (excerpt) return excerpt;

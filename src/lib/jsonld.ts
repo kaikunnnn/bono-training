@@ -53,6 +53,12 @@ export function generateArticleJsonLd(params: {
   modifiedAt?: string;
   author?: string;
   image?: string;
+  /**
+   * 会員限定（有料）記事として検索に出すとき、有料部分を囲む要素の CSS class セレクタ（例 ".paywalled-content"）。
+   * isAccessibleForFree:false と hasPart を付ける（#236）
+   * https://developers.google.com/search/docs/appearance/structured-data/paywalled-content
+   */
+  paywalledCssSelector?: string;
 }) {
   return {
     "@context": "https://schema.org",
@@ -84,6 +90,16 @@ export function generateArticleJsonLd(params: {
       "@type": "WebPage",
       "@id": `${SITE_URL}${params.url}`,
     },
+    ...(params.paywalledCssSelector && {
+      isAccessibleForFree: false,
+      hasPart: [
+        {
+          "@type": "WebPageElement",
+          isAccessibleForFree: false,
+          cssSelector: params.paywalledCssSelector,
+        },
+      ],
+    }),
   };
 }
 
