@@ -59,10 +59,13 @@ const HeadingSection = ({
           </div>
 
           {/* Title */}
-          <h1 className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-noto-sans-jp leading-[148%]">
-            {articleIndex ? `${articleIndex}. ` : ""}
-            {title}
-          </h1>
+          {/* #236: 番号（クエスト内の順番）は表示だけに残し、h1 は記事タイトルのみにする。
+              見た目は従来の h1 と同じ（外側の div に同じ文字スタイルを当て、h1 は inline で継承）。
+              subpixel-antialiased は globals.css の見出し用スムージングを番号にもそろえるため */}
+          <div className="self-stretch justify-center text-gray-900 text-2xl md:text-[28px] font-semibold font-noto-sans-jp leading-[148%] subpixel-antialiased">
+            {articleIndex ? <span>{`${articleIndex}. `}</span> : null}
+            <h1 className="inline font-noto-sans-jp">{title}</h1>
+          </div>
 
           {/* Quest Info */}
           {questInfo && (

@@ -86,45 +86,79 @@ const RichTextSection = ({
   const displayContent =
     isPremium && !hasAccess ? content.slice(0, previewBlockCount) : content;
 
+  // #236 見出し階層: ページの h1 は記事タイトル1つだけにする。
+  // 1. 本文に h1 ブロックがある記事は本文の見出しを全部1段下げる（h1→h2 … h4→h5）
+  // 2. さらに、直前の見出しより2段以上深くならないよう詰める（h2 の次の h4 → h3 など。
+  //    最初の見出しは h2 から）。Sanity 上で段を飛ばして書かれた記事への対策
+  // 見た目は元のスタイル（h1/h2/h3/h4）のクラスをそのまま使い、タグだけ変える。
+  // 段の飛ばしが無く h1 も無い記事は従来どおり（変化なし）。
+  const headingOffset = content.some(
+    (block) => (block as { style?: string } | null)?.style === "h1"
+  )
+    ? 1
+    : 0;
+  const headingLevelByKey = new Map<string, number>();
+  {
+    let previousLevel = 1; // ページの h1（記事タイトル）
+    for (const block of displayContent) {
+      const { _key, style } = (block ?? {}) as { _key?: string; style?: string };
+      const match = /^h([1-6])$/.exec(style ?? "");
+      if (!match || !_key) continue;
+      const level = Math.min(Number(match[1]) + headingOffset, previousLevel + 1, 6);
+      headingLevelByKey.set(_key, level);
+      previousLevel = level;
+    }
+  }
+  const headingTag = (style: number, key?: string) =>
+    `h${(key && headingLevelByKey.get(key)) || Math.min(style + headingOffset, 6)}` as React.ElementType;
+
   const components: PortableTextComponents = {
     block: {
+      // Heading 1: 従来は PortableText 既定の素の <h1>（クラスなし）。見た目はそのままでタグだけ下げる
+      h1: ({ children, value }) => {
+        const H1Tag = headingTag(1, value._key);
+        return <H1Tag>{children}</H1Tag>;
+      },
       // Heading 2: 24px(desktop) / 20px(mobile), semibold, lh:32px
       h2: ({ children, value }) => {
         const id = generateHeadingId(children, value._key || "");
+        const H2Tag = headingTag(2, value._key);
         return (
-          <h2
+          <H2Tag
             id={id}
             className={`!text-[20px] md:!text-[24px] !font-semibold !leading-[32px] !text-text-primary !mt-[96px] !mb-[48px] first:!mt-0 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
-          </h2>
+          </H2Tag>
         );
       },
       // Heading 3: 20px(desktop) / 18px(mobile), semibold, lh:28px
       h3: ({ children, value }) => {
         const id = generateHeadingId(children, value._key || "");
+        const H3Tag = headingTag(3, value._key);
         return (
-          <h3
+          <H3Tag
             id={id}
             className={`!text-[18px] md:!text-[20px] !font-semibold !leading-[28px] !text-text-primary !mt-[64px] !mb-[32px] !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
-          </h3>
+          </H3Tag>
         );
       },
       // Heading 4: 18px(desktop) / 16px(mobile), semibold, lh:24px
       h4: ({ children, value }) => {
         const id = generateHeadingId(children, value._key || "");
+        const H4Tag = headingTag(4, value._key);
         return (
-          <h4
+          <H4Tag
             id={id}
             className={`!text-[16px] md:!text-[18px] !font-semibold !leading-[24px] !text-text-primary !mt-6 !mb-3 !font-rounded-mplus scroll-mt-20 ${textContainerClassName}`}
             style={{ letterSpacing: "-0.02em" }}
           >
             {children}
-          </h4>
+          </H4Tag>
         );
       },
       // Blockquote (引用): 18px(desktop) / 16px(mobile), lh:200%, letter-spacing:3%
