@@ -70,7 +70,8 @@ async function PersonalizedVideo({
     <>
       {hasAccess && <ViewHistoryRecorder articleId={article._id} />}
       <VideoSection
-        videoUrl={article.videoUrl}
+        // VideoSection は Client Component（props が HTML に載る）。権限が無いときは URL を渡さない
+        videoUrl={hasAccess ? article.videoUrl : undefined}
         thumbnail={article.thumbnail}
         thumbnailUrl={article.thumbnailUrl}
         isPremium={article.isPremium}

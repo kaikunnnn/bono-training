@@ -8,7 +8,7 @@ import {
   useMemo,
   useTransition,
 } from "react";
-import type { ArticleWithContext } from "@/types/sanity";
+import type { ArticleNavContext } from "@/types/sanity";
 import ArticleSideNavNew from "@/components/article/sidebar/ArticleSideNavNew";
 import MobileMenuButton from "@/components/article/MobileMenuButton";
 import MobileSideNav from "@/components/article/MobileSideNav";
@@ -44,7 +44,7 @@ const QuestCompletionModal = dynamic(
 );
 
 interface ArticleDetailClientProps {
-  article: ArticleWithContext;
+  article: ArticleNavContext;
   lessonId: string;
   lessonArticleIds: string[];
   children: React.ReactNode;

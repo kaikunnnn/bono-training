@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import ArticleSideNavNew from "./sidebar/ArticleSideNavNew";
-import type { ArticleWithContext } from "@/types/sanity";
+import type { ArticleNavContext } from "@/types/sanity";
 import { PanelRight } from "lucide-react";
 
 type SideNavDisplay = "mobile" | "desktop";
@@ -10,7 +10,7 @@ type SideNavDisplay = "mobile" | "desktop";
 interface MobileSideNavProps {
   isOpen: boolean;
   onClose: () => void;
-  article: ArticleWithContext;
+  article: ArticleNavContext;
   currentArticleId: string;
   /** null の間は hydration 後の進捗取得中 */
   completedArticleIds: string[] | null;
