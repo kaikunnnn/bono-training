@@ -44,9 +44,17 @@ export function HeroSection({
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-4 lg:items-end lg:gap-[21px]">
           {/* 左: 見出しのみ */}
           <div className="w-full shrink-0 lg:col-span-2">
-            {/* ページの主見出し。h1はページ内でここのみ */}
-            <h1
-              className="text-[28px] font-medium leading-[1.6] tracking-[1px] text-text-primary lg:text-[32px]"
+            {/*
+              ページの主見出し。h1はページ内でここのみ（#236 キーワードSEO）。
+              検索向けの短い見出しを小さめのアイブロウとして置き、従来の大きな
+              キャッチコピーは見た目を変えずに <p> へ回す（見出しレベルと文字サイズは無関係）。
+            */}
+            <h1 className="mb-3 font-heading text-sm font-bold leading-[1.6] tracking-[0.7px] text-text-secondary lg:text-base">
+              UI/UXデザインを実践でトレーニング
+            </h1>
+            {/* globals.css の h1〜h6 と同じ字面の太さを保つため subpixel-antialiased を付ける */}
+            <p
+              className="subpixel-antialiased text-[28px] font-medium leading-[1.6] tracking-[1px] text-text-primary lg:text-[32px]"
               style={{
                 fontFamily:
                   "var(--font-mplus-1-var), 'M PLUS 1', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Meiryo', sans-serif",
@@ -55,7 +63,7 @@ export function HeroSection({
               <span className="block">UI/UXデザインとAIで</span>
               <span className="block">ユーザーのきもちを動かす力を</span>
               <span className="block">実践でトレーニングしよう</span>
-            </h1>
+            </p>
           </div>
           {/* 右: 説明文 + CTA2つ（PurposeNav 3番目の項目と左端を揃える） */}
           <div className="w-full lg:col-span-2">

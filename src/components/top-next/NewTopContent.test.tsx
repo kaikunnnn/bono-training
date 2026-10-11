@@ -129,6 +129,9 @@ describe("top-page streaming contract", () => {
     expect(member).not.toContain("メンバーになってはじめる");
     expect(guest).toContain("メンバーになってはじめる");
     expect(member.match(/<h1[ >]/g)).toHaveLength(1);
+    // #236: h1 は検索向けの短い見出し。従来のキャッチコピーは h1 の外（p）に残す
+    expect(member).toMatch(/<h1[^>]*>UI\/UXデザインを実践でトレーニング<\/h1>/);
+    expect(member).toMatch(/<p[^>]*>(?:(?!<\/p>).)*ユーザーのきもちを動かす力を/);
   });
 
   it("can stream only the membership CTA without blocking the hero shell", () => {
