@@ -72,9 +72,11 @@ export function Footer({ className }: FooterProps) {
         >
           {FOOTER_GROUPS.map((group) => (
             <div key={group.label} className="min-w-[140px]">
-              <h2 className="mb-4 font-heading text-xs font-bold tracking-wide text-text-primary">
+              {/* #236: リンク列のラベルは文書の見出しではない（全ページに h2 が並ぶのを避ける）。
+                  見た目は従来の h2 と同じ（subpixel-antialiased は見出し用スムージングの再現） */}
+              <p className="mb-4 font-heading text-xs font-bold tracking-wide text-text-primary subpixel-antialiased">
                 {group.label}
-              </h2>
+              </p>
               <ul className="flex flex-col gap-3">
                 {group.links.map((link) => (
                   <li key={link.label}>
