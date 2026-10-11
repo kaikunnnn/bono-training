@@ -50,7 +50,7 @@ export function isIndexablePremiumSlug(slug: string): boolean {
 // ---------------------------------------------------------------------------
 // 会員限定ストーリー（/stories/<slug>）のうち、検索に戻すもの（rebono#18 残り分）
 //
-// 対象6本は同じ slug の article（/contents/<slug>、レッスン内の記事）と本文が同じ。
+// 対象5本は同じ slug の article（/contents/<slug>、レッスン内の記事）と本文が同じ。
 // 正規ページは /stories/<slug>。/contents/<slug> はレッスン導線（進捗・前後移動）に使うので
 // リダイレクトせず、canonical だけ /stories/<slug> に向ける（storyCanonicalForContent）。
 // 追加前に story と article の本文を照合すること。
@@ -61,7 +61,6 @@ export const INDEXABLE_PREMIUM_STORIES: readonly IndexablePremiumArticle[] = [
   { slug: "youhadouyatedezainanihanzo" },
   { slug: "youhadouyatedezainaniyudai" },
   { slug: "howtobedesigner-mone" },
-  { slug: "howareyoubecomethedesigner-genta" },
   { slug: "youhadouyatedesigner-yifan-01" },
 ];
 

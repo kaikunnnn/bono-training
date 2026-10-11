@@ -27,6 +27,7 @@ vi.mock("@/lib/sanity", () => ({
     { _id: "s2", title: "Paid story", slug: { _type: "slug", current: "paid-story" }, publishedAt: "2026-01-01", isPremium: true },
     // 検索に戻す会員限定ストーリー（rebono#18 INDEXABLE_PREMIUM_STORIES）
     { _id: "s3", title: "Indexable paid story", slug: { _type: "slug", current: "howtobedesigner-mone" }, publishedAt: "2026-01-01", isPremium: true },
+    { _id: "s4", title: "Excluded paid story", slug: { _type: "slug", current: "howareyoubecomethedesigner-genta" }, publishedAt: "2026-01-01", isPremium: true },
   ]),
   getTrainingListFromSanity: vi.fn(async () => [
     { _id: "t1", title: "Training", slug: " book-lending-system " },
@@ -204,6 +205,7 @@ describe("sitemap", () => {
     expect(paths).not.toContain("/stories/paid-story");
     // 検索に戻す会員限定ストーリーは載せる（rebono#18）
     expect(paths).toContain("/stories/howtobedesigner-mone");
+    expect(paths).not.toContain("/stories/howareyoubecomethedesigner-genta");
     expect(paths.some((p) => p.startsWith("/dev") || p === "/top" || p === "/search")).toBe(false);
     expect(new Set(paths).size).toBe(paths.length);
   });

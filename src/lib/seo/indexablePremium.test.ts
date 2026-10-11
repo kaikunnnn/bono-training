@@ -33,10 +33,13 @@ describe("indexablePremium allowlist", () => {
 });
 
 describe("indexablePremium stories allowlist (rebono#18)", () => {
-  it("has the 6 interview stories without duplicates", () => {
+  it("has the 5 interview stories without duplicates", () => {
     const slugs = INDEXABLE_PREMIUM_STORIES.map((a) => a.slug);
-    expect(slugs).toHaveLength(6);
-    expect(new Set(slugs).size).toBe(6);
+    expect(slugs).toHaveLength(5);
+    expect(new Set(slugs).size).toBe(5);
+    // genta は本文が未編集のため対象外（従来どおり noindex・ロック）
+    expect(isIndexablePremiumStorySlug("howareyoubecomethedesigner-genta")).toBe(false);
+    expect(storyCanonicalForContent("howareyoubecomethedesigner-genta")).toBeNull();
     expect(isIndexablePremiumStorySlug("howtobedesigner-mone")).toBe(true);
     expect(isIndexablePremiumStorySlug("youhadouyatedesigner-yifan-01")).toBe(true);
   });
@@ -47,7 +50,7 @@ describe("indexablePremium stories allowlist (rebono#18)", () => {
     }
   });
 
-  it("points the /contents canonical at /stories only for the 6 stories", () => {
+  it("points the /contents canonical at /stories only for the 5 stories", () => {
     expect(storyCanonicalForContent("howtobedesigner-mone")).toBe(
       "https://www.bo-no.design/stories/howtobedesigner-mone",
     );
