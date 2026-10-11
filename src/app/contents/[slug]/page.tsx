@@ -13,7 +13,11 @@ import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
-import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import {
+  generateArticleJsonLd,
+  generateBreadcrumbJsonLd,
+  jsonLdScriptProps,
+} from "@/lib/jsonld";
 import { OG_DEFAULTS, DEFAULT_OG_IMAGE } from "@/lib/seo-metadata";
 import { guideCanonicalForContent } from "@/lib/seo/guideContentDuplicates";
 import { buildArticleDescription, leadBlocksOf } from "@/lib/seo/articleDescription";
@@ -298,6 +302,26 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <>
+      {/* #236 パンくず: レッスン一覧 → レッスン → 記事（画面のサイドナビと同じ道筋）。
+          正規URLが /guide の6本は Article と同じく出さない */}
+      {!guideCanonicalForContent(slug) && (
+        <script
+          {...jsonLdScriptProps(
+            generateBreadcrumbJsonLd([
+              { name: "レッスン", url: "/lessons" },
+              ...(article.lessonInfo?.slug?.current
+                ? [
+                    {
+                      name: article.lessonInfo.title,
+                      url: `/lessons/${article.lessonInfo.slug.current}`,
+                    },
+                  ]
+                : []),
+              { name: article.title },
+            ])
+          )}
+        />
+      )}
       {!guideCanonicalForContent(slug) && (
         <script
           {...jsonLdScriptProps(

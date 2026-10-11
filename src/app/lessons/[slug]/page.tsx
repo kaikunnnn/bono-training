@@ -13,7 +13,11 @@ import type { SubscriptionState } from "@/types/subscription";
 import LessonDetailClient from "./LessonDetailClient";
 import PersonaLessonTopClient from "./PersonaLessonTopClient";
 import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
-import { generateCourseJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import {
+  generateBreadcrumbJsonLd,
+  generateCourseJsonLd,
+  jsonLdScriptProps,
+} from "@/lib/jsonld";
 import { traceServerStep } from "@/lib/performance/server-trace";
 import { LessonProgressBar } from "@/components/ui/LessonProgressBar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -197,6 +201,14 @@ export default async function LessonPage({ params }: PageProps) {
       <>
         <script
           {...jsonLdScriptProps(
+            generateBreadcrumbJsonLd([
+              { name: "レッスン", url: "/lessons" },
+              { name: lesson.title },
+            ])
+          )}
+        />
+        <script
+          {...jsonLdScriptProps(
             generateCourseJsonLd({
               title: lesson.title,
               description:
@@ -227,6 +239,14 @@ export default async function LessonPage({ params }: PageProps) {
 
   return (
     <>
+      <script
+        {...jsonLdScriptProps(
+          generateBreadcrumbJsonLd([
+            { name: "レッスン", url: "/lessons" },
+            { name: lesson.title },
+          ])
+        )}
+      />
       <script
         {...jsonLdScriptProps(
           generateCourseJsonLd({
