@@ -5,6 +5,10 @@ import { cache } from "react";
 import type { LessonWithDetails, LessonMetadata, Lesson, ArticleWithContext, Feedback, FeedbackCategory, Story, StorySummary, UserOutputSummary, SanitySlug } from "@/types/sanity";
 import type { SanityRoadmapListItem, SanityRoadmapDetail } from "@/types/sanity-roadmap";
 import type { Guide, GuideCategory } from "@/types/guide";
+import {
+  ARTICLE_DESCRIPTION_LEAD_BLOCKS,
+  type DescriptionSourceBlock,
+} from "@/lib/seo/articleDescription";
 
 // Sanity client（遅延初期化：ビルド時のpage data収集でenv未設定エラーを防ぐ）
 function createSanityClient(useCdn: boolean): ReturnType<typeof createClient> {
@@ -503,6 +507,8 @@ export interface ArticleMetadata {
   thumbnailUrl?: string;
   lessonTitle?: string;
   isPremium?: boolean;
+  /** description 生成用の本文冒頭（通常の段落のみ・先頭数件） */
+  leadBlocks?: DescriptionSourceBlock[];
 }
 
 export const getArticleMetadata = unstable_cache(
@@ -513,13 +519,17 @@ export const getArticleMetadata = unstable_cache(
         excerpt,
         isPremium,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-        "lessonTitle": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->title
+        "lessonTitle": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->title,
+        "leadBlocks": content[_type == "block" && (!defined(style) || style == "normal") && !defined(listItem)][0...${ARTICLE_DESCRIPTION_LEAD_BLOCKS}]{
+          _type, style, listItem, "children": children[]{ text }
+        }
       }
     `;
 
     return getClient().fetch<ArticleMetadata | null>(query, { slug });
   },
-  ["sanity:article:metadata"],
+  // v2: leadBlocks を追加（#236。古い形のキャッシュを使わないようキーを更新）
+  ["sanity:article:metadata:v2"],
   { tags: ["article", "quest", "lesson"], revalidate: 3600 }
 );
 
