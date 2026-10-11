@@ -4,6 +4,8 @@
 // 検索向けに文言を決めたページだけコード側で上書きする（Sanity 本番データは変更しない）。
 // ここに無い slug は従来どおり Sanity の値を使う。
 
+import { stripLineBreakMarker } from "@/utils/textFormat";
+
 export interface RoadmapSeoOverride {
   /** <title>。root layout の title.template を付けず、この文字列をそのまま使う */
   title: string;
@@ -30,4 +32,15 @@ export function getRoadmapSeoOverride(
   return Object.hasOwn(ROADMAP_SEO_OVERRIDES, slug)
     ? ROADMAP_SEO_OVERRIDES[slug]
     : undefined;
+}
+
+/**
+ * Sanity のロードマップ名を <title> / og:title 用に整える（#236）。
+ * 名前の `|` はヒーロー h1 の改行マーカー（formatTitleWithLineBreaks）なので、
+ * メタデータでは取り除く（h1 の文字列と同じになる。例「Figmaからデザインを|はじめる…」
+ * →「Figmaからデザインをはじめる…」）。h1 側の表示には使わないこと。
+ */
+export function roadmapTitleForMetadata(title: string): string {
+  // 既存の SEO 用ユーティリティ（stripLineBreakMarker）で「|」を除き、前後の余分な空白を詰める
+  return stripLineBreakMarker(title.replace(/\s*\|\s*/g, "|")).trim();
 }

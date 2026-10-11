@@ -19,7 +19,7 @@ import ClearBlock from "@/components/roadmap/detail/ClearBlock";
 import OtherRoadmapsSection from "@/components/roadmap/detail/OtherRoadmapsSection";
 import DottedDivider from "@/components/common/DottedDivider";
 import type { GradientPreset } from "@/styles/gradients";
-import { getRoadmapSeoOverride } from "@/lib/roadmap-seo";
+import { getRoadmapSeoOverride, roadmapTitleForMetadata } from "@/lib/roadmap-seo";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -61,17 +61,20 @@ export async function generateMetadata({
     };
   }
 
+  // #236: Sanity の名前の「|」は h1 の改行マーカー。title/og では表示されないようスペースにする
+  const metaTitle = roadmapTitleForMetadata(roadmap.title);
+
   return {
-    title: roadmap.title,
+    title: metaTitle,
     description: roadmap.description,
     openGraph: {
       ...OG_DEFAULTS,
-      title: `${roadmap.title}`,
+      title: metaTitle,
       description: roadmap.description,
       ...(roadmap.thumbnailUrl && { images: [{ url: roadmap.thumbnailUrl }] }),
     },
     twitter: {
-      title: `${roadmap.title}`,
+      title: metaTitle,
       description: roadmap.description,
     },
     alternates: { canonical: `/roadmap/${slug}` },
