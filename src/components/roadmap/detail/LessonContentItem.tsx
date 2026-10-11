@@ -10,11 +10,17 @@ import { ChevronRight, BookOpen } from "lucide-react";
 import type { SanityReferenceContent } from "@/types/sanity-roadmap";
 
 interface LessonContentItemProps {
+  /** タイトルの見出しレベル（#236: セクション見出し h4 の有無で h5 / h4 を切り替える） */
+  headingLevel?: "h4" | "h5";
   /** コンテンツデータ */
   content: SanityReferenceContent;
 }
 
-export default function LessonContentItem({ content }: LessonContentItemProps) {
+export default function LessonContentItem({
+  content,
+  headingLevel = "h5",
+}: LessonContentItemProps) {
+  const TitleTag = headingLevel;
   // slugが存在しない場合はフォールバック
   const slugValue = content.slug?.current || content._id || "";
   const lessonUrl = `/lessons/${slugValue}`;
@@ -50,9 +56,9 @@ export default function LessonContentItem({ content }: LessonContentItemProps) {
         {/* ラベル + タイトル */}
         <div className="space-y-1">
           <p className="text-[10px] font-bold text-text-muted">レッスン</p>
-          <h5 className="text-base font-bold text-text-primary leading-[1.4] group-hover:text-primary transition-colors">
+          <TitleTag className="text-base font-bold text-text-primary leading-[1.4] group-hover:text-primary transition-colors">
             {content.title}
-          </h5>
+          </TitleTag>
         </div>
 
         {/* 区切り線 */}

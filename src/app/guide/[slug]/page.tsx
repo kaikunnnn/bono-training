@@ -12,7 +12,12 @@ import GuideShareSection from "@/components/guide/GuideShareSection";
 import RelatedGuides from "@/components/guide/RelatedGuides";
 import { Button } from "@/components/ui/button";
 import { Lock } from "lucide-react";
-import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import {
+  generateArticleJsonLd,
+  generateBreadcrumbJsonLd,
+  jsonLdScriptProps,
+} from "@/lib/jsonld";
+import { getCategoryInfo } from "@/lib/guideCategories";
 import { guideSeoDescription } from "@/lib/seo/guideDescriptions";
 import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
@@ -82,6 +87,19 @@ export default async function GuideDetailPage({ params }: PageProps) {
 
   return (
     <>
+      {/* #236 パンくず: 画面上のパンくず（GuideHeader）と同じ ガイド → カテゴリ → 記事 */}
+      <script
+        {...jsonLdScriptProps(
+          generateBreadcrumbJsonLd([
+            { name: "ガイド", url: "/guide" },
+            {
+              name: getCategoryInfo(guide.category)?.label ?? guide.category,
+              url: `/guide?category=${guide.category}`,
+            },
+            { name: guide.title },
+          ])
+        )}
+      />
       <script
         {...jsonLdScriptProps(
           generateArticleJsonLd({

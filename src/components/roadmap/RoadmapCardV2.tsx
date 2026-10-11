@@ -56,6 +56,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   className,
   imageLoading,
   imageSizes = '(min-width: 1024px) 33vw, (min-width: 640px) 50vw, calc(100vw - 64px)',
+  titleAs: TitleTag = 'h3',
 }) => {
   // フォールバック: 未知のプリセットの場合はcareer-changeを使用
   const gradient = customGradient || GRADIENTS[gradientPreset] || GRADIENTS['career-change'];
@@ -142,14 +143,14 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
             <div className="flex flex-col gap-2.5">
               <div className="flex flex-col items-start gap-2">
                 <LabelBadge variant={textVariant}>{badgeText}</LabelBadge>
-                <h3
+                <TitleTag
                   className={cn(
                     'text-base sm:text-lg lg:text-xl font-bold leading-[1.65]',
                     textVariant === 'light' ? 'text-white' : 'text-text-secondary'
                   )}
                 >
                   {renderTitleWithLineBreaks(title)}
-                </h3>
+                </TitleTag>
               </div>
               <p
                 className={cn(
@@ -255,14 +256,14 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
           <div className="flex flex-col gap-2.5">
             <div className="flex flex-col items-start gap-2">
               <LabelBadge variant={textVariant}>{badgeText}</LabelBadge>
-              <h3
+              <TitleTag
                 className={cn(
                   'text-base sm:text-lg lg:text-xl font-bold leading-[1.65]',
                   textVariant === 'light' ? 'text-white' : 'text-text-secondary'
                 )}
               >
                 {renderTitleWithLineBreaks(title)}
-              </h3>
+              </TitleTag>
             </div>
             <p
               className={cn(

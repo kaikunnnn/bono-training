@@ -116,9 +116,14 @@ export function generateCourseJsonLd(params: {
 
 /**
  * BreadcrumbList schema（パンくずリスト用）
+ *
+ * Google の仕様（https://developers.google.com/search/docs/appearance/structured-data/breadcrumb）:
+ * - ListItem は2つ以上必要
+ * - 最後の項目（今いるページ）は item を省略でき、省略時はそのページの URL が使われる
+ * - URL の階層ではなく、ユーザーがたどる典型的な道筋を表す
  */
 export function generateBreadcrumbJsonLd(
-  items: { name: string; url: string }[]
+  items: { name: string; url?: string }[]
 ) {
   return {
     "@context": "https://schema.org",
@@ -127,7 +132,7 @@ export function generateBreadcrumbJsonLd(
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: `${SITE_URL}${item.url}`,
+      ...(item.url !== undefined && { item: `${SITE_URL}${item.url}` }),
     })),
   };
 }

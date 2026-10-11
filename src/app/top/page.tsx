@@ -4,11 +4,12 @@ import { getSubscriptionStatus } from "@/lib/subscription";
 import { NewTopContent } from "@/components/top-next/NewTopContent";
 import { MembershipCta } from "@/components/top-next/organisms/HeroSection";
 import { traceServerStep } from "@/lib/performance/server-trace";
+import { HOME_DESCRIPTION, HOME_TITLE } from "@/lib/seo-metadata";
 
 export const metadata: Metadata = {
-  title: "BONO - UIUXデザインを学ぶ",
-  description:
-    "UIUXデザインを体系的に学べるオンライン学習プラットフォーム。ロードマップ、レッスン、記事で効率的にスキルアップ。未経験からUIUXデザイナーへ。",
+  // #236: / と同じ文言（absolute でテンプレの「| BONO」二重付与を防ぐ）
+  title: { absolute: HOME_TITLE },
+  description: HOME_DESCRIPTION,
   // `/` と同一内容のため重複コンテンツを避ける（正規URLは / 、/top はインデックスさせない）
   alternates: { canonical: "/" },
   robots: { index: false, follow: true },

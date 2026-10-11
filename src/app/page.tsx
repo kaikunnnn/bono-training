@@ -1,14 +1,11 @@
 import type { Metadata } from "next";
-import { OG_DEFAULTS } from "@/lib/seo-metadata";
+import { HOME_DESCRIPTION, HOME_TITLE, OG_DEFAULTS } from "@/lib/seo-metadata";
 import { redirect } from "next/navigation";
 import { UserProvider } from "@/components/layout/UserProvider";
 import { NewTopContent } from "@/components/top-next/NewTopContent";
 
-// #236 キーワードSEO: オーナー決定の文言（一字一句変更しない）。
+// #236 キーワードSEO: 文言は lib/seo-metadata.ts（/top と共有）。
 // root layout の title.template（"%s | BONO"）を避けるため absolute を使う。
-const HOME_TITLE = "UI/UXデザインを実践で学ぶ｜動画とお題で手を動かすBONO";
-const HOME_DESCRIPTION =
-  "現役UIデザイナーがつくるUI/UXデザインの学習サービス。これから始める人も、現場のデザイナーやエンジニアも、動画とお題で手を動かしながらUI/UXデザインとAIの使い方を身につけられます。月額制。";
 
 export const metadata: Metadata = {
   title: { absolute: HOME_TITLE },

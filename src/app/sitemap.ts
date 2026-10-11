@@ -8,6 +8,8 @@ import {
   getAllGuidesFromSanity,
   getQuestionsForSitemap,
   getAllEvents,
+  getStoriesList,
+  getTrainingListFromSanity,
 } from "@/lib/sanity";
 import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
 import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
@@ -59,10 +61,47 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    // #236: 公開・index 対象なのに漏れていたページ（本番で 200・noindex なし・canonical 自分自身を確認）。
+    // /search（検索結果）と /dev・/notes・/community/feedback（proxy で本番 404）、
+    // noindex の /top・/studio・/component・/docs は入れない。
+    ...(
+      [
+        ["/how-to", "monthly", 0.6],
+        ["/how-to/faq", "monthly", 0.6],
+        ["/how-to/community", "monthly", 0.5],
+        ["/how-to/feedback", "monthly", 0.6],
+        ["/stories", "weekly", 0.6],
+        ["/questions", "daily", 0.6],
+        ["/training", "weekly", 0.7],
+        ["/articles", "weekly", 0.6],
+        ["/updates", "weekly", 0.5],
+        ["/achievements", "weekly", 0.5],
+        ["/outputs", "weekly", 0.4],
+        ["/feedback-apply", "monthly", 0.5],
+        ["/terms", "yearly", 0.2],
+        ["/privacy", "yearly", 0.2],
+        ["/tokushoho", "yearly", 0.2],
+      ] as const
+    ).map(([path, changeFrequency, priority]) => ({
+      url: `${BASE_URL}${path}`,
+      changeFrequency,
+      priority,
+    })),
   ];
 
   // Sanity CMS から動的ページのスラッグを並行取得
-  const [lessonSlugs, articles, feedbackSlugs, blogSlugs, roadmapSlugs, guides, questions, events] =
+  const [
+    lessonSlugs,
+    articles,
+    feedbackSlugs,
+    blogSlugs,
+    roadmapSlugs,
+    guides,
+    questions,
+    events,
+    stories,
+    trainings,
+  ] =
     await Promise.all([
       getAllLessonSlugs().catch(() => [] as string[]),
       getAllArticles().catch(() => []),
@@ -72,6 +111,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       getAllGuidesFromSanity().catch(() => []),
       getQuestionsForSitemap().catch(() => []),
       getAllEvents().catch(() => []),
+      getStoriesList().catch(() => []),
+      // getTrainings() は Supabase(cookies) のフォールバックを含むため使わず、Sanity を直接読む
+      getTrainingListFromSanity().catch(() => []),
     ]);
 
   const lessonPages: MetadataRoute.Sitemap = lessonSlugs.map((slug) => ({
@@ -156,6 +198,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const storyPages: MetadataRoute.Sitemap = stories
+    .filter((story) => story.slug?.current)
+    .map((story) => ({
+      url: `${BASE_URL}/stories/${story.slug.current}`,
+      ...(story.publishedAt ? { lastModified: story.publishedAt } : {}),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }));
+
+  const trainingPages: MetadataRoute.Sitemap = trainings
+    .map((training) => (training.slug || "").trim())
+    .filter((slug) => slug.length > 0)
+    .map((slug) => ({
+      url: `${BASE_URL}/training/${slug}`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }));
+
   return [
     ...staticPages,
     ...lessonPages,
@@ -167,5 +227,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...guidePages,
     ...questionPages,
     ...eventPages,
+    ...storyPages,
+    ...trainingPages,
   ];
 }

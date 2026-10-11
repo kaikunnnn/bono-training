@@ -16,3 +16,10 @@ export const OG_DEFAULTS = {
 // 動的記事などでサムネイル未設定時に使う既定 OGP 画像（root の生成 OGP ルート）。
 // og:image が消えないようフォールバック先として参照する。
 export const DEFAULT_OG_IMAGE = "/opengraph-image";
+
+// #236 キーワードSEO: トップの title / description（オーナー決定の文言。一字一句変更しない）。
+// `/` と `/top`（同じ中身・noindex）で共有する。root layout の title.template（"%s | BONO"）を
+// 避けるため、使う側は title: { absolute: HOME_TITLE } にする。
+export const HOME_TITLE = "UI/UXデザインを実践で学ぶ｜動画とお題で手を動かすBONO";
+export const HOME_DESCRIPTION =
+  "現役UIデザイナーがつくるUI/UXデザインの学習サービス。これから始める人も、現場のデザイナーやエンジニアも、動画とお題で手を動かしながらUI/UXデザインとAIの使い方を身につけられます。月額制。";

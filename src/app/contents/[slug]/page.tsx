@@ -13,9 +13,18 @@ import TodoSection from "@/components/article/TodoSection";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentNavigation from "@/components/article/ContentNavigation";
 import { ArticleActionButtons } from "@/components/article/ArticleActionButtons";
-import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import {
+  generateArticleJsonLd,
+  generateBreadcrumbJsonLd,
+  jsonLdScriptProps,
+} from "@/lib/jsonld";
 import { OG_DEFAULTS, DEFAULT_OG_IMAGE } from "@/lib/seo-metadata";
 import { guideCanonicalForContent } from "@/lib/seo/guideContentDuplicates";
+import {
+  buildArticleDescription,
+  leadBlocksOf,
+  PREMIUM_PREVIEW_BLOCK_COUNT,
+} from "@/lib/seo/articleDescription";
 import { traceServerStep } from "@/lib/performance/server-trace";
 import { startArticlePageData } from "./article-page-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -192,7 +201,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const title = article.lessonTitle
     ? `${article.title} | ${article.lessonTitle}`
     : `${article.title}`;
-  const description = article.excerpt || `${article.title}の学習コンテンツ`;
+  // #236: 全記事同じ型の文をやめ、excerpt → 本文冒頭の要約 → 従来文 の順で記事ごとに作る
+  const description = buildArticleDescription({
+    title: article.title,
+    excerpt: article.excerpt,
+    content: article.leadBlocks,
+    // 会員限定は非会員に見えている先頭ブロックだけ（有料部分の文を出さない）
+    isPremium: article.isPremium,
+    previewBlocks: article.previewBlocks,
+  });
 
   // 本番サイト自身のサイトマップを参照すると URL の有無で判定が循環する。
   // 同一本文の6件は /guide、それ以外は公開中の /contents を正規 URL にする。
@@ -292,12 +309,39 @@ export default async function ArticlePage({ params }: PageProps) {
 
   return (
     <>
+      {/* #236 パンくず: レッスン一覧 → レッスン → 記事（画面のサイドナビと同じ道筋）。
+          正規URLが /guide の6本は Article と同じく出さない */}
+      {!guideCanonicalForContent(slug) && (
+        <script
+          {...jsonLdScriptProps(
+            generateBreadcrumbJsonLd([
+              { name: "レッスン", url: "/lessons" },
+              ...(article.lessonInfo?.slug?.current
+                ? [
+                    {
+                      name: article.lessonInfo.title,
+                      url: `/lessons/${article.lessonInfo.slug.current}`,
+                    },
+                  ]
+                : []),
+              { name: article.title },
+            ])
+          )}
+        />
+      )}
       {!guideCanonicalForContent(slug) && (
         <script
           {...jsonLdScriptProps(
             generateArticleJsonLd({
               title: article.title,
-              description: article.excerpt || `${article.title}の学習コンテンツ`,
+              // meta description（generateMetadata の leadBlocks）と同じ材料で作る
+              description: buildArticleDescription({
+                title: article.title,
+                excerpt: article.excerpt,
+                content: leadBlocksOf(article.content),
+                isPremium: article.isPremium,
+                previewBlocks: article.content?.slice(0, PREMIUM_PREVIEW_BLOCK_COUNT),
+              }),
               url: `/contents/${slug}`,
               publishedAt: article.publishedAt || new Date().toISOString(),
               image: article.thumbnailUrl,
