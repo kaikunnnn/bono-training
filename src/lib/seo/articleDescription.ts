@@ -107,13 +107,21 @@ export function buildArticleDescription(article: {
    * 非会員に見えている先頭 PREMIUM_PREVIEW_BLOCK_COUNT 件だけを使い、有料部分の文は使わない
    */
   previewBlocks?: DescriptionSourceBlock[] | null;
+  /**
+   * 会員限定記事で非会員に見えているブロック数。既定は PREMIUM_PREVIEW_BLOCK_COUNT。
+   * 検索に戻す会員限定記事（indexablePremium）は広げた無料範囲の数を渡す
+   */
+  previewBlockCount?: number;
 }): string {
   const excerpt = article.excerpt?.replace(/\s+/g, " ").trim();
   const fallback = `${article.title}の学習コンテンツ`;
 
   if (article.isPremium) {
     // 会員限定: ロックの前に見えている部分 → excerpt → 従来文
-    const visible = (article.previewBlocks ?? []).slice(0, PREMIUM_PREVIEW_BLOCK_COUNT);
+    const visible = (article.previewBlocks ?? []).slice(
+      0,
+      article.previewBlockCount ?? PREMIUM_PREVIEW_BLOCK_COUNT,
+    );
     return summarizePortableText(visible) ?? (excerpt || fallback);
   }
 

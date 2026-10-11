@@ -109,6 +109,24 @@ describe("buildArticleDescription（会員限定記事）", () => {
     ).toBe("記事Aの学習コンテンツ");
   });
 
+  it("検索に戻す会員限定記事は広げた無料範囲（previewBlockCount）まで使い、その先は使わない", () => {
+    const blocks = [
+      { _type: "block", style: "h2", children: [{ text: "見出し" }] },
+      { _type: "image" },
+      p("https://example.com"),
+      p("4つ目の無料の文。"),
+      p("有料の文。"),
+    ];
+    const result = buildArticleDescription({
+      title: "T",
+      isPremium: true,
+      previewBlocks: blocks,
+      previewBlockCount: 4,
+    });
+    expect(result).toBe("4つ目の無料の文。");
+    expect(result).not.toContain("有料");
+  });
+
   it("無料記事は従来どおり excerpt 優先", () => {
     expect(
       buildArticleDescription({ title: "T", excerpt: "要約", isPremium: false, previewBlocks: [p("本文")] }),

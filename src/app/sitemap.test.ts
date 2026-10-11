@@ -24,6 +24,7 @@ vi.mock("@/lib/sanity", () => ({
   getAllEvents: vi.fn(async () => []),
   getStoriesList: vi.fn(async () => [
     { _id: "s1", title: "Story", slug: { _type: "slug", current: "wake" }, publishedAt: "2026-01-01" },
+    { _id: "s2", title: "Paid story", slug: { _type: "slug", current: "paid-story" }, publishedAt: "2026-01-01", isPremium: true },
   ]),
   getTrainingListFromSanity: vi.fn(async () => [
     { _id: "t1", title: "Training", slug: " book-lending-system " },
@@ -106,6 +107,23 @@ describe("sitemap", () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it("includes allowlisted premium articles (#236 indexablePremium) but not other premium ones", async () => {
+    vi.mocked(getAllArticles).mockResolvedValue([
+      { _id: "p1", title: "Indexable", slug: { current: "portfolio-02" }, isPremium: true },
+      { _id: "p2", title: "Still locked", slug: { current: "some-other-premium" }, isPremium: true },
+    ]);
+    vi.mocked(getAllGuidesFromSanity).mockResolvedValue([]);
+    vi.mocked(getAllLessonSlugs).mockResolvedValue([]);
+    vi.mocked(getAllFeedbackSlugs).mockResolvedValue([]);
+    vi.mocked(getAllBlogSlugs).mockResolvedValue([]);
+    vi.mocked(getAllRoadmapSlugs).mockResolvedValue([]);
+    vi.mocked(getAllEvents).mockResolvedValue([]);
+
+    const paths = (await sitemap()).map(({ url }) => new URL(url).pathname);
+    expect(paths).toContain("/contents/portfolio-02");
+    expect(paths).not.toContain("/contents/some-other-premium");
+  });
+
   it("includes the events list and each event detail page", async () => {
     vi.mocked(getAllArticles).mockResolvedValue([]);
     vi.mocked(getAllGuidesFromSanity).mockResolvedValue([]);
@@ -180,6 +198,8 @@ describe("sitemap", () => {
       expect(paths).toContain(path);
     }
     expect(paths).not.toContain("/training/");
+    // 会員限定ストーリーは本文が見えないロック画面なので載せない（#236）
+    expect(paths).not.toContain("/stories/paid-story");
     expect(paths.some((p) => p.startsWith("/dev") || p === "/top" || p === "/search")).toBe(false);
     expect(new Set(paths).size).toBe(paths.length);
   });

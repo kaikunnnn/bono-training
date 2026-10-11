@@ -10,6 +10,7 @@ import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
 import { CommunityJoinLink } from "@/components/analytics/CommunityJoinLink";
 // meta description（会員限定記事）と同じ「非会員に見える先頭ブロック数」を共有する
 import { PREMIUM_PREVIEW_BLOCK_COUNT } from "@/lib/seo/articleDescription";
+import { PAYWALLED_CONTENT_CLASS } from "@/lib/seo/indexablePremium";
 
 /** Slack ワークスペースへの招待リンク（join.slack.com）か */
 function isSlackInviteUrl(href: string): boolean {
@@ -25,6 +26,12 @@ interface RichTextSectionProps {
   redirectTo?: string;
   previewBlockCount?: number; // プレビューで表示するブロック数（デフォルト: 3）
   afterContent?: React.ReactNode;
+  /**
+   * 検索に戻す会員限定記事を確認済み Googlebot へ全文で返すとき（#236）:
+   * 先頭この数のブロックを無料部分、残りを有料部分として `.paywalled-content` で囲む。
+   * JSON-LD の hasPart.cssSelector と対応する。会員・通常の表示では渡さない
+   */
+  paywalledFrom?: number;
   /** 外側の白カード（bg-white / rounded / shadow / padding）を外す。デフォルト false */
   bare?: boolean;
 }
@@ -80,6 +87,7 @@ const RichTextSection = ({
   redirectTo,
   previewBlockCount = PREMIUM_PREVIEW_BLOCK_COUNT,
   afterContent,
+  paywalledFrom,
   bare = false,
 }: RichTextSectionProps) => {
   const textContainerClassName = "w-full max-w-[60ch] md:max-w-[66ch]";
@@ -515,7 +523,23 @@ const RichTextSection = ({
   return (
     <div className={wrapperClass}>
       <div className="w-full">
-        <PortableText value={displayContent} components={components} />
+        {typeof paywalledFrom === "number" &&
+        paywalledFrom < displayContent.length ? (
+          <>
+            <PortableText
+              value={displayContent.slice(0, paywalledFrom)}
+              components={components}
+            />
+            <div className={PAYWALLED_CONTENT_CLASS}>
+              <PortableText
+                value={displayContent.slice(paywalledFrom)}
+                components={components}
+              />
+            </div>
+          </>
+        ) : (
+          <PortableText value={displayContent} components={components} />
+        )}
       </div>
 
       {afterContent}
