@@ -22,6 +22,13 @@ vi.mock("@/lib/sanity", () => ({
   getAllRoadmapSlugs: vi.fn(),
   getQuestionsForSitemap: vi.fn(async () => []),
   getAllEvents: vi.fn(async () => []),
+  getStoriesList: vi.fn(async () => [
+    { _id: "s1", title: "Story", slug: { _type: "slug", current: "wake" }, publishedAt: "2026-01-01" },
+  ]),
+  getTrainingListFromSanity: vi.fn(async () => [
+    { _id: "t1", title: "Training", slug: " book-lending-system " },
+    { _id: "t2", title: "No slug", slug: "" },
+  ]),
 }));
 
 afterEach(() => vi.restoreAllMocks());
@@ -149,5 +156,31 @@ describe("sitemap", () => {
     const paths = (await sitemap()).map(({ url }) => new URL(url).pathname);
     expect(paths).toContain("/events");
     expect(paths.some((p) => p.startsWith("/events/"))).toBe(false);
+  });
+
+  it("includes public pages that were missing (#236) and excludes dev/noindex pages", async () => {
+    vi.mocked(getAllArticles).mockResolvedValue([]);
+    vi.mocked(getAllGuidesFromSanity).mockResolvedValue([]);
+    vi.mocked(getAllLessonSlugs).mockResolvedValue([]);
+    vi.mocked(getAllFeedbackSlugs).mockResolvedValue([]);
+    vi.mocked(getAllBlogSlugs).mockResolvedValue([]);
+    vi.mocked(getAllRoadmapSlugs).mockResolvedValue([]);
+    vi.mocked(getAllEvents).mockResolvedValue([]);
+
+    const paths = (await sitemap()).map(({ url }) => new URL(url).pathname);
+    for (const path of [
+      "/how-to",
+      "/how-to/faq",
+      "/stories",
+      "/stories/wake",
+      "/questions",
+      "/training",
+      "/training/book-lending-system",
+    ]) {
+      expect(paths).toContain(path);
+    }
+    expect(paths).not.toContain("/training/");
+    expect(paths.some((p) => p.startsWith("/dev") || p === "/top" || p === "/search")).toBe(false);
+    expect(new Set(paths).size).toBe(paths.length);
   });
 });
