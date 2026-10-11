@@ -19,6 +19,7 @@ import {
 } from "@/lib/jsonld";
 import { getCategoryInfo } from "@/lib/guideCategories";
 import { guideSeoDescription } from "@/lib/seo/guideDescriptions";
+import { getGuideSeoOverride } from "@/lib/guide-seo";
 import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
 // ISR: 1時間キャッシュ
@@ -41,14 +42,19 @@ export async function generateMetadata({
   const ogImages = guide.thumbnailUrl
     ? [{ url: guide.thumbnailUrl, width: 1200, height: 630 }]
     : [];
-  const description = guideSeoDescription(slug, guide.description);
+  // rebono#24: 検索向けに文言を決めたガイドはコード側の値で上書きする（Sanityは変更しない）
+  const seo = getGuideSeoOverride(slug);
+  const description =
+    seo?.description ?? guideSeoDescription(slug, guide.description);
+  const metaTitle = seo?.title ?? `${guide.title} | 読みもの`;
 
   return {
-    title: `${guide.title} | 読みもの`,
+    // 上書き文言は「| BONO」を含むため root の title.template を付けない
+    title: seo ? { absolute: seo.title } : metaTitle,
     description,
     openGraph: {
       ...OG_DEFAULTS,
-      title: `${guide.title} | 読みもの`,
+      title: metaTitle,
       description,
       type: "article",
       ...(ogImages.length > 0 && { images: ogImages }),
@@ -59,7 +65,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${guide.title} | 読みもの`,
+      title: metaTitle,
       description,
       ...(guide.thumbnailUrl && { images: [guide.thumbnailUrl] }),
     },

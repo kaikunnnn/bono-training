@@ -5,9 +5,9 @@ describe("getRoadmapSeoOverride", () => {
   it("returns the career-change override (#236)", () => {
     expect(getRoadmapSeoOverride("uiux-career-change")).toEqual({
       title:
-        "未経験からUI/UXデザイナーに転職するロードマップ｜6ヶ月のオンラインコース｜BONO",
+        "UI/UXデザインの勉強ロードマップ｜未経験から転職まで6ヶ月の学ぶ順番｜BONO",
       description:
-        "未経験からUI/UXデザイナーを目指す人の6ヶ月の学習ロードマップ。UIデザインの基礎、情報設計、UXデザイン、ポートフォリオ制作までを順番に学べます。",
+        "UI/UXデザインを何から勉強すればいいか迷う人へ。UIの基礎→情報設計→UXデザイン→ポートフォリオの順に、未経験から転職まで6ヶ月で進める学習ロードマップです。",
       heading: "未経験からUI/UXデザイナーになる|転職ロードマップ",
     });
   });
