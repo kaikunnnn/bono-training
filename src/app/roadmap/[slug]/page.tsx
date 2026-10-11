@@ -19,6 +19,7 @@ import ClearBlock from "@/components/roadmap/detail/ClearBlock";
 import OtherRoadmapsSection from "@/components/roadmap/detail/OtherRoadmapsSection";
 import DottedDivider from "@/components/common/DottedDivider";
 import type { GradientPreset } from "@/styles/gradients";
+import { getRoadmapSeoOverride } from "@/lib/roadmap-seo";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -37,6 +38,27 @@ export async function generateMetadata({
 
   if (!roadmap) {
     return { title: "ロードマップが見つかりません" };
+  }
+
+  // #236: 検索向けに文言を決めたページはコード側の値で上書きする（Sanityは変更しない）
+  const seo = getRoadmapSeoOverride(slug);
+  if (seo) {
+    return {
+      // 文言に「｜BONO」を含むため root の title.template を付けない
+      title: { absolute: seo.title },
+      description: seo.description,
+      openGraph: {
+        ...OG_DEFAULTS,
+        title: seo.title,
+        description: seo.description,
+        ...(roadmap.thumbnailUrl && { images: [{ url: roadmap.thumbnailUrl }] }),
+      },
+      twitter: {
+        title: seo.title,
+        description: seo.description,
+      },
+      alternates: { canonical: `/roadmap/${slug}` },
+    };
   }
 
   return {
@@ -102,6 +124,7 @@ export default async function RoadmapDetailPage({
       {/* ヒーローセクション */}
       <RoadmapHero
         title={roadmap.title}
+        heading={getRoadmapSeoOverride(slug)?.heading}
         shortTitle={roadmap.shortTitle}
         tagline={roadmap.tagline || roadmap.description}
         stepCount={stepCount}

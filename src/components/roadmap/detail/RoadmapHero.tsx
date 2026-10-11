@@ -25,6 +25,11 @@ const MOBILE_BREAKPOINT = 640;
 interface RoadmapHeroProps {
   /** ロードマップタイトル */
   title: string;
+  /**
+   * h1 に出す見出し（省略時は title）。SEO 文言をページ単位で上書きするときだけ渡す（#236）。
+   * パンくず・画像altは従来どおり title を使う。
+   */
+  heading?: string;
   /** 短縮タイトル（バッジ表示用） */
   shortTitle?: string;
   /** キャッチコピー */
@@ -91,6 +96,7 @@ const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> 
 
 export default function RoadmapHero({
   title,
+  heading,
   shortTitle,
   tagline,
   stepCount,
@@ -201,7 +207,7 @@ export default function RoadmapHero({
 
           {/* タイトル（|マーカーで改行） */}
           <h1 className="text-[32px] md:text-[40px] font-bold text-white text-center leading-[1.6]">
-            {formatTitleWithLineBreaks(title)}
+            {formatTitleWithLineBreaks(heading ?? title)}
           </h1>
 
           {/* サブタイトル（tagline） */}
