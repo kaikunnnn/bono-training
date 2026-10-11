@@ -143,6 +143,13 @@ export interface ArticleWithContext extends Article {
   };
 }
 
+/**
+ * 記事レイアウトのクライアント部品（サイドナビ等）へ渡す記事データ。
+ * Client Component の props は RSC ペイロードとして HTML に埋め込まれるため、
+ * 会員限定の本文（content）と動画URL（videoUrl）は渡さない（#236）。
+ */
+export type ArticleNavContext = Omit<ArticleWithContext, "content" | "videoUrl">;
+
 // サイドナビゲーション用の型
 export interface SideNavLesson {
   title: string;

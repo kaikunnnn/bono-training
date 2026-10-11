@@ -45,10 +45,15 @@ export default async function ArticleDetailLayout({ params, children }: LayoutPr
   }
   const lessonId = article.lessonInfo?._id || "";
 
+  // Client Component の props は RSC ペイロードとして HTML に埋め込まれる。
+  // 会員限定の本文・動画URLが非会員の HTML に載らないよう、サイドナビ等に要るものだけ渡す（#236）
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { content: _content, videoUrl: _videoUrl, ...navArticle } = article;
+
   return (
     <ArticleDetailClient
       key={lessonId || slug}
-      article={article}
+      article={navArticle}
       lessonId={lessonId}
       lessonArticleIds={allLessonArticleIds}
     >

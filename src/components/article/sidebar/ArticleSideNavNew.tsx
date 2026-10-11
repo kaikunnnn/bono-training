@@ -5,11 +5,11 @@ import LogoBlock from "./LogoBlock";
 import LessonDetailCard from "./LessonDetailCard";
 import QuestItem from "./QuestItem";
 import type { QuestArticleItemLayoutVariant } from "./ArticleListItem";
-import type { ArticleWithContext } from "@/types/sanity";
+import type { ArticleNavContext } from "@/types/sanity";
 import { calculateLessonProgress } from "@/lib/completion-detection-client";
 
 interface ArticleSideNavNewProps {
-  article: ArticleWithContext;
+  article: ArticleNavContext;
   currentArticleId: string;
   /** null の間は hydration 後の進捗取得中 */
   completedArticleIds: string[] | null;
