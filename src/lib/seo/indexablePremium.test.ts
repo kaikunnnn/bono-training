@@ -2,8 +2,12 @@ import { describe, expect, it } from "vitest";
 import {
   computeFreeBlockCount,
   freeBlockCountForIndexablePremium,
+  freeBlockCountForIndexablePremiumStory,
   INDEXABLE_PREMIUM_ARTICLES,
+  INDEXABLE_PREMIUM_STORIES,
   isIndexablePremiumSlug,
+  isIndexablePremiumStorySlug,
+  storyCanonicalForContent,
 } from "./indexablePremium";
 
 // 本文の中身は使わず、ブロックの種類だけで組み立てる（公開リポジトリのため実記事の文は置かない）
@@ -25,6 +29,40 @@ describe("indexablePremium allowlist", () => {
     expect(isIndexablePremiumSlug("some-other-premium")).toBe(false);
     expect(isIndexablePremiumSlug("")).toBe(false);
     expect(freeBlockCountForIndexablePremium("some-other-premium", [p, p, p, p])).toBeUndefined();
+  });
+});
+
+describe("indexablePremium stories allowlist (rebono#18)", () => {
+  it("has the 5 interview stories without duplicates", () => {
+    const slugs = INDEXABLE_PREMIUM_STORIES.map((a) => a.slug);
+    expect(slugs).toHaveLength(5);
+    expect(new Set(slugs).size).toBe(5);
+    // genta は本文が未編集のため対象外（従来どおり noindex・ロック）
+    expect(isIndexablePremiumStorySlug("howareyoubecomethedesigner-genta")).toBe(false);
+    expect(storyCanonicalForContent("howareyoubecomethedesigner-genta")).toBeNull();
+    expect(isIndexablePremiumStorySlug("howtobedesigner-mone")).toBe(true);
+    expect(isIndexablePremiumStorySlug("youhadouyatedesigner-yifan-01")).toBe(true);
+  });
+
+  it("is separate from the /contents pilot list (not indexed under /contents)", () => {
+    for (const { slug } of INDEXABLE_PREMIUM_STORIES) {
+      expect(isIndexablePremiumSlug(slug)).toBe(false);
+    }
+  });
+
+  it("points the /contents canonical at /stories only for the 5 stories", () => {
+    expect(storyCanonicalForContent("howtobedesigner-mone")).toBe(
+      "https://www.bo-no.design/stories/howtobedesigner-mone",
+    );
+    expect(storyCanonicalForContent("portfolio-02")).toBeNull();
+    expect(storyCanonicalForContent("some-other-premium")).toBeNull();
+  });
+
+  it("computes the free range the same way as articles", () => {
+    const content = [h(3), p, p, p, h(2), ...Array(20).fill(p)];
+    expect(freeBlockCountForIndexablePremiumStory("howtobedesigner-mone", content)).toBe(4);
+    expect(freeBlockCountForIndexablePremiumStory("some-other-story", content)).toBeUndefined();
+    expect(freeBlockCountForIndexablePremiumStory("portfolio-02", content)).toBeUndefined();
   });
 });
 

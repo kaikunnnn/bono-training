@@ -13,7 +13,10 @@ import {
 } from "@/lib/sanity";
 import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
 import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
-import { isIndexablePremiumSlug } from "@/lib/seo/indexablePremium";
+import {
+  isIndexablePremiumSlug,
+  isIndexablePremiumStorySlug,
+} from "@/lib/seo/indexablePremium";
 import { LEGACY_ONLY_CONTENT_SLUGS } from "@/lib/migration/legacy-only-content-slugs";
 
 const BASE_URL =
@@ -200,9 +203,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  // 会員限定ストーリーは本文が見えないロック画面なので載せない（#236）
+  // 会員限定ストーリーは本文が見えないロック画面なので載せない（#236）。
+  // ただし検索に戻す会員限定ストーリー（rebono#18 INDEXABLE_PREMIUM_STORIES）は載せる
   const storyPages: MetadataRoute.Sitemap = stories
-    .filter((story) => story.slug?.current && !story.isPremium)
+    .filter(
+      (story) =>
+        story.slug?.current &&
+        (!story.isPremium || isIndexablePremiumStorySlug(story.slug.current)),
+    )
     .map((story) => ({
       url: `${BASE_URL}/stories/${story.slug.current}`,
       ...(story.publishedAt ? { lastModified: story.publishedAt } : {}),
