@@ -35,6 +35,8 @@ export interface RoadmapCardV2Props {
   imageLoading?: 'lazy' | 'eager';
   /** 利用レイアウトに合わせたレスポンシブ画像幅 */
   imageSizes?: string;
+  /** タイトルの見出しタグ（既定 h3。#236: ロードマップ詳細のカリキュラム内では h4/h5 にする） */
+  titleAs?: 'h3' | 'h4' | 'h5';
 }
 
 export type TextVariant = 'light' | 'dark';

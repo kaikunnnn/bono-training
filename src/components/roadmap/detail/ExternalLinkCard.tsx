@@ -9,6 +9,8 @@ import { ChevronRight, ExternalLink, Link as LinkIcon } from "lucide-react";
 import type { SanityExternalLink } from "@/types/sanity-roadmap";
 
 interface ExternalLinkCardProps {
+  /** タイトルの見出しレベル（#236: セクション見出し h4 の有無で h5 / h4 を切り替える） */
+  headingLevel?: "h4" | "h5";
   /** リンクデータ */
   link: SanityExternalLink;
 }
@@ -25,7 +27,11 @@ function isExternalUrl(url: string): boolean {
   }
 }
 
-export default function ExternalLinkCard({ link }: ExternalLinkCardProps) {
+export default function ExternalLinkCard({
+  link,
+  headingLevel = "h5",
+}: ExternalLinkCardProps) {
+  const TitleTag = headingLevel;
   const isExternal = isExternalUrl(link.url);
 
   const cardContent = (
@@ -56,9 +62,9 @@ export default function ExternalLinkCard({ link }: ExternalLinkCardProps) {
           <p className="text-[10px] font-bold text-text-muted">
             {isExternal ? "外部リンク" : "リンク"}
           </p>
-          <h5 className="text-base font-bold text-text-primary leading-[1.4] group-hover:text-primary transition-colors">
+          <TitleTag className="text-base font-bold text-text-primary leading-[1.4] group-hover:text-primary transition-colors">
             {link.title}
-          </h5>
+          </TitleTag>
         </div>
 
         {/* 説明 */}

@@ -23,6 +23,10 @@ export default function CurriculumSectionBlock({
 }: CurriculumSectionBlockProps) {
   const sectionTitle = section.title || "";
   const startsWithSection = sectionTitle.startsWith("セクション");
+  // #236 見出し順: 親はステップ h3。セクション見出し h4 を出すときは中のカードを h5、
+  // 出さないときは h4 にする（h3 → h5 の飛ばし・h4 の下に h3 を防ぐ）
+  const hasSectionHeading = Boolean(sectionTitle && !startsWithSection);
+  const itemHeadingLevel = hasSectionHeading ? "h5" : "h4";
 
   return (
     <div className="space-y-4">
@@ -36,7 +40,7 @@ export default function CurriculumSectionBlock({
         </div>
 
         {/* セクションタイトル */}
-        {sectionTitle && !startsWithSection && (
+        {hasSectionHeading && (
           <h4 className="text-lg font-bold text-text-primary leading-[1.4] px-1.5">
             {sectionTitle}
           </h4>
@@ -61,6 +65,7 @@ export default function CurriculumSectionBlock({
                 <ExternalLinkCard
                   key={extLink._key || `external-${index}`}
                   link={extLink}
+                  headingLevel={itemHeadingLevel}
                 />
               );
             }
@@ -85,6 +90,7 @@ export default function CurriculumSectionBlock({
                   variant="gradient"
                   orientation="horizontal"
                   thumbnailStyle="wave"
+                  titleAs={itemHeadingLevel}
                 />
               );
             }
@@ -94,6 +100,7 @@ export default function CurriculumSectionBlock({
               <LessonContentItem
                 key={itemKey}
                 content={refContent}
+                headingLevel={itemHeadingLevel}
               />
             );
           })}
