@@ -47,6 +47,39 @@ export function isIndexablePremiumSlug(slug: string): boolean {
   return ENTRY_BY_SLUG.has(slug);
 }
 
+// ---------------------------------------------------------------------------
+// 会員限定ストーリー（/stories/<slug>）のうち、検索に戻すもの（rebono#18 残り分）
+//
+// 対象6本は同じ slug の article（/contents/<slug>、レッスン内の記事）と本文が同じ。
+// 正規ページは /stories/<slug>。/contents/<slug> はレッスン導線（進捗・前後移動）に使うので
+// リダイレクトせず、canonical だけ /stories/<slug> に向ける（storyCanonicalForContent）。
+// 追加前に story と article の本文を照合すること。
+// ---------------------------------------------------------------------------
+
+export const INDEXABLE_PREMIUM_STORIES: readonly IndexablePremiumArticle[] = [
+  { slug: "youhadouyatedezainanishooochn" },
+  { slug: "youhadouyatedezainanihanzo" },
+  { slug: "youhadouyatedezainaniyudai" },
+  { slug: "howtobedesigner-mone" },
+  { slug: "howareyoubecomethedesigner-genta" },
+  { slug: "youhadouyatedesigner-yifan-01" },
+];
+
+const STORY_ENTRY_BY_SLUG = new Map(
+  INDEXABLE_PREMIUM_STORIES.map((entry) => [entry.slug, entry]),
+);
+
+export function isIndexablePremiumStorySlug(slug: string): boolean {
+  return STORY_ENTRY_BY_SLUG.has(slug);
+}
+
+/** 同じ本文の /stories/<slug> が正規ページになる /contents/<slug> の canonical（対象外は null） */
+export function storyCanonicalForContent(slug: string): string | null {
+  return STORY_ENTRY_BY_SLUG.has(slug)
+    ? `https://www.bo-no.design/stories/${slug}`
+    : null;
+}
+
 /** 有料部分を囲む要素の class（JSON-LD の hasPart.cssSelector と同じ値） */
 export const PAYWALLED_CONTENT_CLASS = "paywalled-content";
 
@@ -104,6 +137,16 @@ export function freeBlockCountForIndexablePremium(
   content: readonly (FreeRangeBlock | null | undefined)[] | null | undefined,
 ): number | undefined {
   const entry = getIndexablePremiumEntry(slug);
+  if (!entry) return undefined;
+  return computeFreeBlockCount(content, entry.freeBlockCount);
+}
+
+/** ストーリーの slug と本文から、非会員に見せるブロック数を返す（対象外は undefined） */
+export function freeBlockCountForIndexablePremiumStory(
+  slug: string,
+  content: readonly (FreeRangeBlock | null | undefined)[] | null | undefined,
+): number | undefined {
+  const entry = STORY_ENTRY_BY_SLUG.get(slug);
   if (!entry) return undefined;
   return computeFreeBlockCount(content, entry.freeBlockCount);
 }

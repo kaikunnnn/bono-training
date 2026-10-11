@@ -30,6 +30,7 @@ import {
   freeBlockCountForIndexablePremium,
   isIndexablePremiumSlug,
   PAYWALLED_CONTENT_CLASS,
+  storyCanonicalForContent,
 } from "@/lib/seo/indexablePremium";
 import { isVerifiedGooglebot } from "@/lib/seo/googlebot";
 import { traceServerStep } from "@/lib/performance/server-trace";
@@ -246,17 +247,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   });
 
   // 本番サイト自身のサイトマップを参照すると URL の有無で判定が循環する。
-  // 同一本文の6件は /guide、それ以外は公開中の /contents を正規 URL にする。
+  // 同一本文の6件は /guide、同一本文のインタビュー6件は /stories（rebono#18）、
+  // それ以外は公開中の /contents を正規 URL にする。
+  const storyCanonical = storyCanonicalForContent(slug);
   const canonical =
     guideCanonicalForContent(slug) ??
+    storyCanonical ??
     `https://www.bo-no.design/contents/${slug}`;
 
   return {
     title,
     description,
-    // 会員限定は noindex。ただし検索に戻す対象（indexablePremium）は index（#236）
+    // 会員限定は noindex。ただし検索に戻す対象（indexablePremium）は index（#236）。
+    // 正規 URL を /stories に向ける記事は noindex を付けない（canonical と noindex を併用しない。
+    // Google は同一サイト内の正規化に noindex を使わず rel=canonical を推奨）
+    // https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
     robots:
-      article.isPremium && !indexablePremium
+      article.isPremium && !indexablePremium && !storyCanonical
         ? { index: false, follow: true }
         : undefined,
     openGraph: {
@@ -340,6 +347,10 @@ export default async function ArticlePage({ params }: PageProps) {
     return { previous: previousArticle, next: nextArticle };
   })();
 
+  // 正規 URL が別ページ（/guide・/stories）の記事は、パンくず・Article の構造化データを出さない
+  const hasExternalCanonical =
+    !!guideCanonicalForContent(slug) || !!storyCanonicalForContent(slug);
+
   // #236 検索に戻す会員限定記事の無料範囲（非会員に見える先頭ブロック数）
   const indexableFreeBlockCount = article.isPremium
     ? freeBlockCountForIndexablePremium(slug, article.content)
@@ -353,8 +364,8 @@ export default async function ArticlePage({ params }: PageProps) {
   return (
     <>
       {/* #236 パンくず: レッスン一覧 → レッスン → 記事（画面のサイドナビと同じ道筋）。
-          正規URLが /guide の6本は Article と同じく出さない */}
-      {!guideCanonicalForContent(slug) && (
+          正規URLが /guide・/stories の記事は Article と同じく出さない */}
+      {!hasExternalCanonical && (
         <script
           {...jsonLdScriptProps(
             generateBreadcrumbJsonLd([
@@ -372,7 +383,7 @@ export default async function ArticlePage({ params }: PageProps) {
           )}
         />
       )}
-      {!guideCanonicalForContent(slug) && (
+      {!hasExternalCanonical && (
         <script
           {...jsonLdScriptProps(
             generateArticleJsonLd({

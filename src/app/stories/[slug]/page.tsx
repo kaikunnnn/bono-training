@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { headers } from "next/headers";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -9,6 +10,12 @@ import StoryCardItem from "@/components/story/StoryCardItem";
 import RichTextSection from "@/components/article/RichTextSection";
 import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
 import { getSubscriptionStatus, canAccessContent } from "@/lib/subscription";
+import { generateArticleJsonLd, jsonLdScriptProps } from "@/lib/jsonld";
+import {
+  freeBlockCountForIndexablePremiumStory,
+  PAYWALLED_CONTENT_CLASS,
+} from "@/lib/seo/indexablePremium";
+import { isVerifiedGooglebot } from "@/lib/seo/googlebot";
 
 /**
  * 動画URLから iframe embed URL を構築
@@ -95,10 +102,38 @@ export default async function StoryDetailPage({ params }: PageProps) {
   // 動画以降を一括ブロックするかどうか
   const showLockedContent = !!story.isPremium && !hasAccess;
 
+  // rebono#18 検索に戻す会員限定ストーリー（indexablePremium の INDEXABLE_PREMIUM_STORIES）:
+  // 非会員には本文の「最初の区切り」までを見せる。確認済みの Googlebot だけ全文を返し、
+  // 有料部分を .paywalled-content で囲む（JSON-LD の hasPart と対応）。
+  // 動画 URL（Vimeo の限定公開ハッシュ）は非会員にも Googlebot にも渡さない。
+  const freeBlockCount = story.isPremium
+    ? freeBlockCountForIndexablePremiumStory(slug, story.body)
+    : undefined;
+  const showFreeRange =
+    showLockedContent && freeBlockCount !== undefined && freeBlockCount > 0;
+  const isCrawlerFullView =
+    showFreeRange && (await isVerifiedGooglebot(await headers()));
+
   const relatedStories = await getRelatedStories(story._id, 3);
 
   return (
     <div className="min-h-screen">
+      {freeBlockCount !== undefined && (
+        <script
+          {...jsonLdScriptProps(
+            generateArticleJsonLd({
+              title: story.title,
+              // meta description と同じ（非会員にも見えているリード文）
+              description: story.excerpt,
+              url: `/stories/${slug}`,
+              publishedAt: story.publishedAt,
+              author: story.person.name,
+              image: story.heroImageUrl,
+              paywalledCssSelector: `.${PAYWALLED_CONTENT_CLASS}`,
+            })
+          )}
+        />
+      )}
       <main className="px-4 sm:px-6 pb-24">
         <div className="max-w-[700px] mx-auto">
           {/* パンくず（メタ風） */}
@@ -181,7 +216,40 @@ export default async function StoryDetailPage({ params }: PageProps) {
               </div>
             </header>
 
-            {showLockedContent ? (
+            {showFreeRange ? (
+              /* === 検索に戻す会員限定ストーリー・未契約: 本文の最初の区切りまで見せてロック（rebono#18） === */
+              <>
+                {/* 動画は会員限定なので、アイキャッチだけ見せる */}
+                {story.heroImageUrl && (
+                  <div className="w-full mb-16 rounded-[8px] overflow-hidden aspect-[16/9] relative bg-[#e8e9e2]">
+                    <Image
+                      src={story.heroImageUrl}
+                      alt={story.title}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                      priority
+                    />
+                  </div>
+                )}
+                <RichTextSection
+                  content={story.body}
+                  isPremium
+                  hasAccess={isCrawlerFullView}
+                  previewBlockCount={freeBlockCount}
+                  paywalledFrom={isCrawlerFullView ? freeBlockCount : undefined}
+                  isLoggedIn={subscription.isLoggedIn}
+                  redirectTo={`/stories/${slug}`}
+                  afterContent={
+                    !isCrawlerFullView && (
+                      <p className="w-full text-center mt-8 text-[15px] text-text-primary/70 font-noto-sans-jp leading-relaxed">
+                        BONOメンバーになると、メンバーのリアルな体験談を知ることができます。
+                      </p>
+                    )
+                  }
+                />
+              </>
+            ) : showLockedContent ? (
               /* === 有料コンテンツ・未契約: 動画位置で一括ロック（/articles と同じUI） === */
               <div className="w-full mb-16">
                 {/* 訴求コピー（ロックブロックの外・本番コンポーネントは触らない） */}
