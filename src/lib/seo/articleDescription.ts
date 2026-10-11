@@ -96,6 +96,9 @@ export function leadBlocksOf(
  */
 export const PREMIUM_PREVIEW_BLOCK_COUNT = 3;
 
+/** 会員限定記事で、見えている部分の要約として使う最小文字数（これ未満なら excerpt を優先） */
+export const PREMIUM_SUMMARY_MIN_LENGTH = 20;
+
 export function buildArticleDescription(article: {
   title: string;
   excerpt?: string | null;
@@ -122,7 +125,10 @@ export function buildArticleDescription(article: {
       0,
       article.previewBlockCount ?? PREMIUM_PREVIEW_BLOCK_COUNT,
     );
-    return summarizePortableText(visible) ?? (excerpt || fallback);
+    // 見えている部分が「ちなみに書くと」のような短い一文だけなら要約にならないので使わない
+    const summary = summarizePortableText(visible);
+    if (summary && summary.length >= PREMIUM_SUMMARY_MIN_LENGTH) return summary;
+    return excerpt || fallback;
   }
 
   if (excerpt) return excerpt;
