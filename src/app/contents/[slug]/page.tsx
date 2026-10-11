@@ -20,7 +20,11 @@ import {
 } from "@/lib/jsonld";
 import { OG_DEFAULTS, DEFAULT_OG_IMAGE } from "@/lib/seo-metadata";
 import { guideCanonicalForContent } from "@/lib/seo/guideContentDuplicates";
-import { buildArticleDescription, leadBlocksOf } from "@/lib/seo/articleDescription";
+import {
+  buildArticleDescription,
+  leadBlocksOf,
+  PREMIUM_PREVIEW_BLOCK_COUNT,
+} from "@/lib/seo/articleDescription";
 import { traceServerStep } from "@/lib/performance/server-trace";
 import { startArticlePageData } from "./article-page-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -202,6 +206,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: article.title,
     excerpt: article.excerpt,
     content: article.leadBlocks,
+    // 会員限定は非会員に見えている先頭ブロックだけ（有料部分の文を出さない）
+    isPremium: article.isPremium,
+    previewBlocks: article.previewBlocks,
   });
 
   // 本番サイト自身のサイトマップを参照すると URL の有無で判定が循環する。
@@ -332,6 +339,8 @@ export default async function ArticlePage({ params }: PageProps) {
                 title: article.title,
                 excerpt: article.excerpt,
                 content: leadBlocksOf(article.content),
+                isPremium: article.isPremium,
+                previewBlocks: article.content?.slice(0, PREMIUM_PREVIEW_BLOCK_COUNT),
               }),
               url: `/contents/${slug}`,
               publishedAt: article.publishedAt || new Date().toISOString(),

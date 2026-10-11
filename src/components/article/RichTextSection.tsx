@@ -8,6 +8,8 @@ import Image from "next/image";
 import React from "react";
 import ContentPreviewOverlay from "@/components/premium/ContentPreviewOverlay";
 import { CommunityJoinLink } from "@/components/analytics/CommunityJoinLink";
+// meta description（会員限定記事）と同じ「非会員に見える先頭ブロック数」を共有する
+import { PREMIUM_PREVIEW_BLOCK_COUNT } from "@/lib/seo/articleDescription";
 
 /** Slack ワークスペースへの招待リンク（join.slack.com）か */
 function isSlackInviteUrl(href: string): boolean {
@@ -76,7 +78,7 @@ const RichTextSection = ({
   hasAccess = true,
   isLoggedIn = false,
   redirectTo,
-  previewBlockCount = 3,
+  previewBlockCount = PREMIUM_PREVIEW_BLOCK_COUNT,
   afterContent,
   bare = false,
 }: RichTextSectionProps) => {

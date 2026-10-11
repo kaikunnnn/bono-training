@@ -71,3 +71,47 @@ describe("leadBlocksOf", () => {
     ]);
   });
 });
+
+describe("buildArticleDescription（会員限定記事）", () => {
+  const paid = "ここから先は有料部分の文章です。";
+
+  it("非会員に見えている先頭3ブロックだけを使い、有料部分の文を含めない", () => {
+    const blocks = [
+      { _type: "block", style: "h2", children: [{ text: "見出し" }] },
+      p("無料で見える導入文。"),
+      { _type: "image" },
+      p(paid),
+      p(paid),
+    ];
+    const result = buildArticleDescription({
+      title: "T",
+      excerpt: "要約",
+      isPremium: true,
+      previewBlocks: blocks,
+      content: leadBlocksOf(blocks),
+    });
+    expect(result).toBe("無料で見える導入文。");
+    expect(result).not.toContain("有料");
+  });
+
+  it("見えている部分に文が無ければ excerpt、それも無ければ従来文", () => {
+    const blocks = [
+      { _type: "block", style: "h2", children: [{ text: "見出し" }] },
+      { _type: "image" },
+      p("https://example.com"),
+      p(paid),
+    ];
+    expect(
+      buildArticleDescription({ title: "T", excerpt: " 要約 ", isPremium: true, previewBlocks: blocks }),
+    ).toBe("要約");
+    expect(
+      buildArticleDescription({ title: "記事A", isPremium: true, previewBlocks: blocks }),
+    ).toBe("記事Aの学習コンテンツ");
+  });
+
+  it("無料記事は従来どおり excerpt 優先", () => {
+    expect(
+      buildArticleDescription({ title: "T", excerpt: "要約", isPremium: false, previewBlocks: [p("本文")] }),
+    ).toBe("要約");
+  });
+});
