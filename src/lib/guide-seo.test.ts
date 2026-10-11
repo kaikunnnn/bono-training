@@ -11,6 +11,15 @@ describe("getGuideSeoOverride", () => {
     });
   });
 
+  it("overrides only the title of the roadmap explainer (rebono#20)", () => {
+    const seo = getGuideSeoOverride("rdm-howtostart-roadmap");
+    expect(seo).toEqual({
+      title:
+        "転職ロードマップの中身を解説｜フェーズごとに目指すレベルと習得すること | BONO",
+    });
+    expect(seo?.description).toBeUndefined();
+  });
+
   it("leaves other guides on Sanity values", () => {
     expect(getGuideSeoOverride("become-uiux-designer-beginner-guide")).toBeUndefined();
     expect(getGuideSeoOverride("constructor")).toBeUndefined();

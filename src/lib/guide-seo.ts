@@ -8,8 +8,11 @@
 export interface GuideSeoOverride {
   /** <title>。root layout の title.template を付けず、この文字列をそのまま使う */
   title: string;
-  /** meta description（OGP / Twitter も同じ文言） */
-  description: string;
+  /**
+   * meta description（OGP / Twitter も同じ文言）。
+   * 省略時は従来どおり Sanity の説明文（guideSeoDescription）を使い、title だけ上書きする。
+   */
+  description?: string;
 }
 
 export const GUIDE_SEO_OVERRIDES: Record<string, GuideSeoOverride> = {
@@ -19,6 +22,12 @@ export const GUIDE_SEO_OVERRIDES: Record<string, GuideSeoOverride> = {
       "未経験からUI/UXデザイナーになるには？必要なスキル3つと書類で落ちない条件 | BONO",
     description:
       "未経験からUI/UXデザイナーをめざす人向けに、採用で見られる3つのスキル（ふつうに使えるUIを作る基礎・課題解決の力・未経験者のポテンシャル）と、その身につけ方を解説します。",
+  },
+  // rebono#20: /roadmap/uiux-career-change と検索で競合しないよう、解説記事であることを title で分ける
+  // （オーナー承認済み）。description は Sanity のまま。
+  "rdm-howtostart-roadmap": {
+    title:
+      "転職ロードマップの中身を解説｜フェーズごとに目指すレベルと習得すること | BONO",
   },
 };
 
