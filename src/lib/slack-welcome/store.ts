@@ -135,17 +135,34 @@ export function createSupabaseWelcomeStore(client: SupabaseClient): WelcomeStore
     },
 
     async claim(id, now, lockedUntil, token) {
+      // PATCH では or() を使わない: PostgREST は or() を更新「後」の行（RETURNING）にも再適用するため、
+      // status=processing に変えた行が条件から外れて空配列が返り、確保できたのに not_claimed 扱いになる
+      // （ローカル PostgREST v12.2.3 で再現）。条件ごとに1文ずつ試す。各文は単独で原子的。
       const nowIso = now.toISOString();
-      const { data, error } = await client
+      const patch = { status: "processing", claim_token: token, locked_until: lockedUntil.toISOString() };
+
+      const fresh = await client
         .from(DELIVERIES)
-        .update({ status: "processing", claim_token: token, locked_until: lockedUntil.toISOString() })
+        .update(patch)
         .eq("id", id)
         .lte("next_attempt_at", nowIso)
-        .or(claimableOrFilter(nowIso))
+        .in("status", CLAIMABLE_STATUSES)
         .select("*");
-      if (error) throw new Error(`delivery claim failed: ${error.code ?? "unknown"}`);
-      if (!data || data.length === 0) return null;
-      return mapRow(data[0] as DbRow);
+      if (fresh.error) throw new Error(`delivery claim failed: ${fresh.error.code ?? "unknown"}`);
+      if (fresh.data && fresh.data.length > 0) return mapRow(fresh.data[0] as DbRow);
+
+      // 確保の期限が切れた processing（処理中に落ちた行）を取り直す
+      const expired = await client
+        .from(DELIVERIES)
+        .update(patch)
+        .eq("id", id)
+        .lte("next_attempt_at", nowIso)
+        .eq("status", "processing")
+        .lt("locked_until", nowIso)
+        .select("*");
+      if (expired.error) throw new Error(`delivery claim failed: ${expired.error.code ?? "unknown"}`);
+      if (!expired.data || expired.data.length === 0) return null;
+      return mapRow(expired.data[0] as DbRow);
     },
 
     async update(id, token, expectedStatus, patch) {
