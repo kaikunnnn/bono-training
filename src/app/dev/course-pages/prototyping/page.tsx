@@ -119,33 +119,51 @@ export default async function PrototypingHubPage() {
               完成形（v2）
             </h2>
             <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">
-              分析の問1で出た改善点をすべて入れた版。今は AI コースだけ。v1 は残してあるので、行き来して比べられます。
+              分析の問1で出た改善点をすべて入れた版（4コース）。v1 は残してあるので、行き来して比べられます。
             </p>
             <ul className="mt-3 flex flex-col gap-1 text-[13px] leading-[1.8] text-text-secondary">
               <li>・ヒーローに「こんな人向け」、得られる変化を書き直し、FAQ に「向いていない人」</li>
               <li>・会員の途中は「あなたが目指していること」、レッスンと全体の目安時間</li>
               <li>・「修了したら次は」、未制作は「近日公開」、料金の一文、マイページの「続きから」</li>
             </ul>
-            <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
-              {[
-                { href: "/dev/course-pages/v2/ai-ui-design", label: "v2：AI×UIデザイン入門コース", sub: "進捗なし（未ログイン・未課金の見え方）" },
-                { href: "/dev/course-pages/v2/ai-ui-design?progress=1", label: "v2：進行中の会員の見え方", sub: "?progress=1" },
-                { href: "/dev/course-pages/ai-ui-design", label: "v1 と比べる", sub: "今のコースページ（v1）" },
-                { href: "/dev/course-pages/v2/mypage", label: "マイページの「続きから」", sub: "マイページ上部のモック" },
-              ].map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="group flex items-center gap-3 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
-                >
-                  <div className="min-w-0 flex-1">
-                    <p className="font-heading text-[15px] font-bold leading-[1.5]">{l.label}</p>
-                    <p className="text-xs text-text-muted">{l.sub}</p>
-                  </div>
-                  <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
-                </Link>
-              ))}
-            </div>
+            <ul className="mt-5 flex flex-col gap-2.5">
+              {list.map((course) => {
+                const { main } = splitTitle(course.title.text);
+                return (
+                  <li key={course.slug} className="flex items-center gap-2">
+                    <Link
+                      href={`/dev/course-pages/v2/${course.slug}`}
+                      className="group flex min-w-0 flex-1 items-center gap-4 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
+                    >
+                      <p className="min-w-0 flex-1 font-heading text-[15px] font-bold leading-[1.5]">v2：{main}</p>
+                      <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                    <Link
+                      href={`/dev/course-pages/v2/${course.slug}?progress=1`}
+                      className="shrink-0 rounded-full border border-border-light bg-surface px-3 py-1.5 text-[11px] font-bold text-text-secondary hover:border-border-default"
+                    >
+                      進捗あり
+                    </Link>
+                    <Link
+                      href={`/dev/course-pages/${course.slug}`}
+                      className="hidden shrink-0 rounded-full border border-border-light bg-surface px-3 py-1.5 text-[11px] font-bold text-text-secondary hover:border-border-default sm:inline"
+                    >
+                      v1 と比べる
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <Link
+              href="/dev/course-pages/v2/mypage"
+              className="group mt-2.5 flex items-center gap-4 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="font-heading text-[15px] font-bold leading-[1.5]">マイページの「続きから」</p>
+                <p className="text-xs text-text-muted">マイページ上部のモック</p>
+              </div>
+              <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </section>
 
           {/* 4. 分析 */}

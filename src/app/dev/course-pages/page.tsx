@@ -84,6 +84,12 @@ export default async function CourseListPage() {
                       </p>
                     </div>
                   </Link>
+                  <Link
+                    href={`/dev/course-pages/v2/${course.slug}`}
+                    className="mt-3 ml-1 inline-flex items-center gap-1 rounded-full border border-border-light bg-surface px-2.5 py-1 text-[11px] font-bold text-text-link hover:border-border-default"
+                  >
+                    v2（完成形）を見る →
+                  </Link>
                 </li>
               );
             })}

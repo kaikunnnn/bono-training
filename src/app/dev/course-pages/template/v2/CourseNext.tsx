@@ -1,6 +1,6 @@
 /**
  * テンプレート v2（完成形）: 修了したら次は — #242
- * 次のおすすめのコース／転職ロードマップのどこまで来たか（モック）／15分フィードバック。
+ * 次のおすすめのコース（v2 へ）／ロードマップのどこまで来たか（モック、data/roadmaps.ts）／15分フィードバック。
  * 3つとも押せるので白いカード。
  */
 
@@ -17,11 +17,8 @@ const CARD =
 
 export default function CourseNext({ v2, nextCourse }: { v2: CourseV2; nextCourse: Course | null }) {
   const next = nextCourse ? splitTitle(nextCourse.title.text) : null;
-  const nextHref = nextCourse
-    ? nextCourse.v2
-      ? `/dev/course-pages/v2/${nextCourse.slug}`
-      : `/dev/course-pages/${nextCourse.slug}`
-    : null;
+  const nextHref = nextCourse ? `/dev/course-pages/v2/${nextCourse.slug}` : null;
+  const { path, position } = v2.roadmap;
 
   return (
     <section aria-labelledby="course-next" className="border-t border-border-light py-16 md:py-20">
@@ -52,19 +49,30 @@ export default function CourseNext({ v2, nextCourse }: { v2: CourseV2; nextCours
           </li>
         ) : null}
         <li>
-          <Link href="/roadmap/uiux-career-change" className={CARD}>
+          <Link href={path.href} className={CARD}>
             <span className="flex items-center gap-1.5 text-xs font-bold text-text-muted">
               <Map1 size={16} color="currentColor" variant="Linear" />
-              転職ロードマップ
+              ロードマップ：{path.name}
             </span>
             <h3 className="mt-3 font-heading text-[17px] font-bold leading-[1.5] text-text-primary">
-              転職ロードマップの {v2.roadmap.position}/{v2.roadmap.total} まで
+              {position}/{path.stops.length} まで進む
             </h3>
-            <div className="mt-3 flex gap-1" aria-hidden="true">
-              {Array.from({ length: v2.roadmap.total }, (_, i) => (
-                <ProgressBar key={i} value={i < v2.roadmap.position ? 100 : 0} className="h-1.5 flex-1" />
+            <ol className="mt-3 flex gap-1">
+              {path.stops.map((stop, i) => (
+                <li key={stop} className="min-w-0 flex-1">
+                  <ProgressBar value={i < position ? 100 : 0} className="h-1.5" />
+                  <span
+                    className={
+                      i === position - 1
+                        ? "mt-1 block truncate text-[10px] font-bold text-text-primary"
+                        : "mt-1 block truncate text-[10px] text-text-muted"
+                    }
+                  >
+                    {stop}
+                  </span>
+                </li>
               ))}
-            </div>
+            </ol>
             <p className="mt-3 text-[13px] leading-[1.8] text-text-secondary">
               <T f={v2.roadmap.note} />
             </p>

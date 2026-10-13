@@ -5,6 +5,7 @@
  * それ以外の文言は推測で書いた仮の文（kari: true）。
  */
 
+import { careerChangeRoadmap } from "./roadmaps";
 import type { Course } from "./types";
 
 const k = (text: string) => ({ text, kari: true as const });
@@ -124,6 +125,24 @@ export const uiDesignVisualCourse: Course = {
       "UI・UXデザインを学ぶコミュニティ「BONO」を運営。良いデザインを分解して真似する練習を通じて、見た目を自分で整えられるようになるための教材をつくっています。"
     ),
     image: "/images/authors/kaikun.jpg",
+  },
+
+  v2: {
+    audienceLine: k("1画面はつくれるが、見た目の良し悪しを根拠を持って判断できない人向け"),
+    change: k("世の中のデザインを分解して学ぶ習慣と、余白・文字・色など見た目の6要素の基本が身につき、その結果、自分の画面のどこが良くてどこを直すべきかを言葉で説明できる"),
+    notFor: {
+      question: k("どんな人には向いていませんか？"),
+      answer: k("Figmaでまだ1画面もつくったことがない人は、先に「はじめてのUIデザイン入門コース」で土台をつくるのがおすすめです。また、画面遷移や操作の流れを設計したい人には「UI体験デザイン基礎コース」が合っています。"),
+    },
+    nextCourse: {
+      slug: "ui-experience",
+      reason: k("見た目を整えられるようになったら、次は画面と画面のつながりです。作成・検索・ナビゲーションなど、サービスとして使える流れを設計します。"),
+    },
+    roadmap: {
+      path: careerChangeRoadmap,
+      position: 2,
+      note: k("このコースを終えると、2/5 まで。次は「UI体験デザイン基礎コース」で画面の流れをつくります。"),
+    },
   },
 
   faq: [

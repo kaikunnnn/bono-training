@@ -72,7 +72,13 @@ export interface CourseV2 {
   /** 修了したら次は: おすすめのコース */
   nextCourse: { slug: string; reason: Field };
   /** 修了したら次は: 転職ロードマップのどこまで来たか（モック） */
-  roadmap: { position: number; total: number; note: Field };
+  roadmap: {
+    /** 行き先（data/roadmaps.ts） */
+    path: { name: string; href: string; stops: string[] };
+    /** このコースを終えると何区切り目まで来るか（1始まり） */
+    position: number;
+    note: Field;
+  };
 }
 
 export interface Course {

@@ -6,6 +6,7 @@
  * ナビゲーションの基本: Figma の「ページ内側ナビゲーション」の位置に、オーナー指定で navigation-basics を当てている。
  */
 
+import { careerChangeRoadmap } from "./roadmaps";
 import type { Course } from "./types";
 
 const k = (text: string) => ({ text, kari: true as const });
@@ -164,6 +165,24 @@ export const uiExperienceCourse: Course = {
       "UI・UXデザインを学ぶコミュニティ「BONO」を運営。画面の見た目だけでなく、使う流れまで考えたUIデザインをつくれるようになるための教材をつくっています。"
     ),
     image: "/images/authors/kaikun.jpg",
+  },
+
+  v2: {
+    audienceLine: k("見た目は整えられるが、画面同士のつながりや操作の流れを設計したことがない人向け"),
+    change: k("データの作成・編集・検索、操作への反応、ナビゲーションを設計できるようになり、その結果、1枚絵ではなく、触って使えるサービスの流れとして画面をまとめられる"),
+    notFor: {
+      question: k("どんな人には向いていませんか？"),
+      answer: k("画面を1枚も仕上げたことがない人や、見た目の整え方に自信がない人は、先に「はじめて」「基礎」のコースで土台をつくると進めやすくなります。また、レッスンの多くが近日公開のため、すぐに全部を進めたい人には向いていません。"),
+    },
+    nextCourse: {
+      slug: "ai-ui-design",
+      reason: k("設計した画面の流れを、AIと一緒にコードで動くプロトタイプにします。静止画では伝わらない操作の手触りまで確かめられます。"),
+    },
+    roadmap: {
+      path: careerChangeRoadmap,
+      position: 3,
+      note: k("このコースを終えると、3/5 まで。次はポートフォリオづくりです。"),
+    },
   },
 
   faq: [

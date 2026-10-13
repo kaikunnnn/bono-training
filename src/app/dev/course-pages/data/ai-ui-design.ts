@@ -5,6 +5,7 @@
  * それ以外の文言は推測で書いた仮の文（kari: true）。
  */
 
+import { aiDesignRoadmap } from "./roadmaps";
 import type { Course } from "./types";
 
 const k = (text: string) => ({ text, kari: true as const });
@@ -162,13 +163,15 @@ export const aiUiDesignCourse: Course = {
       ),
     },
     nextCourse: {
-      slug: "ui-experience",
-      reason: k("つくれるようになった動きを、画面同士のつながりやナビゲーションまで広げて、サービス全体の体験として設計します。"),
+      slug: "ui-design-visual",
+      reason: k(
+        "AIが出した画面を「なんとなく良い」で採用しないために、余白・文字・色などの見た目を判断する目を、世の中のデザインから学んで身につけます。"
+      ),
     },
     roadmap: {
-      position: 3,
-      total: 5,
-      note: k("このコースを終えると、転職ロードマップの 3/5 まで。次はポートフォリオづくりです。"),
+      path: aiDesignRoadmap,
+      position: 1,
+      note: k("このコースを終えると、1/3 まで。次は「UIデザイン基礎コース」で、AIの出力を判断する目を持ちます。"),
     },
   },
 
