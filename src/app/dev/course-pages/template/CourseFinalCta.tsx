@@ -12,9 +12,12 @@ import { courseCounts, splitTitle } from "./shared";
 export default function CourseFinalCta({
   course,
   startHref,
+  price,
 }: {
   course: Course;
   startHref: string | null;
+  /** v2: ボタンの下に料金の一文を出す */
+  price?: React.ReactNode;
 }) {
   const counts = courseCounts(course);
   const { main } = splitTitle(course.title.text);
@@ -51,6 +54,7 @@ export default function CourseFinalCta({
             </a>
           </Button>
         </div>
+        {price ? <div className="mt-5 text-text-inverse">{price}</div> : null}
       </div>
     </section>
   );

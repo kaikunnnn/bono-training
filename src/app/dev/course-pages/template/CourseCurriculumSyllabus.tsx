@@ -13,11 +13,24 @@ import Link from "next/link";
 import { Check, ChevronRight } from "lucide-react";
 import { Magicpen } from "iconsax-react";
 import { cn } from "@/lib/utils";
-import type { Course, CourseStep, LessonMap, PlannedLessonRef, ResolvedLesson } from "../data/types";
+import type {
+  Course,
+  CourseStep,
+  LessonMap,
+  PlannedLessonRef,
+  ResolvedLesson,
+} from "../data/types";
 import { T } from "./kari";
 import { ProgressBar } from "./path";
 import type { CourseProgress, LessonProgress, StepProgress } from "./progress";
-import { LessonCover, SectionHead, courseCounts, numberSteps, pad2 } from "./shared";
+import {
+  LessonCover,
+  SectionHead,
+  courseCounts,
+  formatMinutes,
+  numberSteps,
+  pad2,
+} from "./shared";
 
 const ROW = "flex items-center gap-4 px-5 py-3 md:px-6";
 /** シラバス（大）: 見た目は同じで大きさだけ変える */
@@ -30,27 +43,51 @@ function LessonLine({
   lesson,
   progress,
   large = false,
+  v2 = false,
 }: {
   slug: string;
   lesson: ResolvedLesson | null;
   progress?: LessonProgress;
   large?: boolean;
+  /** v2: 1行の情報に動画の目安時間（約◯分）を足す */
+  v2?: boolean;
 }) {
+  const time =
+    v2 && lesson?.videoMinutes ? `・${formatMinutes(lesson.videoMinutes)}` : "";
   const done = Boolean(progress && progress.done === progress.total);
   const partial = Boolean(progress && progress.done > 0 && !done);
   return (
-    <Link href={`/lessons/${slug}`} className={cn(large ? ROW_LG : ROW, "group transition-colors hover:bg-hover")}>
+    <Link
+      href={`/lessons/${slug}`}
+      className={cn(
+        large ? ROW_LG : ROW,
+        "group transition-colors hover:bg-hover",
+      )}
+    >
       <LessonCover
         lesson={lesson}
         slug={slug}
         sizes={large ? "72px" : "40px"}
-        className={cn(large ? COVER_LG : "w-10", "shadow-[var(--shadow-quest)]")}
+        className={cn(
+          large ? COVER_LG : "w-10",
+          "shadow-[var(--shadow-quest)]",
+        )}
       />
       <div className="min-w-0 flex-1">
-        <h4 className={cn(large ? TITLE_LG : "text-[15px]", "font-bold leading-[1.5] text-text-primary")}>
+        <h4
+          className={cn(
+            large ? TITLE_LG : "text-[15px]",
+            "font-bold leading-[1.5] text-text-primary",
+          )}
+        >
           {lesson?.title ?? slug}
         </h4>
-        <p className={cn(large ? "mt-1 text-[13px]" : "mt-0.5 text-xs", "text-text-muted")}>
+        <p
+          className={cn(
+            large ? "mt-1 text-[13px]" : "mt-0.5 text-xs",
+            "text-text-muted",
+          )}
+        >
           {!lesson ? (
             <span className="font-mono">Sanity 未取得: {slug}</span>
           ) : partial && progress ? (
@@ -58,14 +95,19 @@ function LessonLine({
               <span className="font-bold text-text-primary">
                 記事 {progress.done}/{progress.total}
               </span>
-              <ProgressBar value={(progress.done / progress.total) * 100} className="w-14" />
+              <ProgressBar
+                value={(progress.done / progress.total) * 100}
+                className="w-14"
+              />
             </span>
           ) : large ? (
             <>
-              {lesson.questCount}クエスト・記事 {lesson.articleCount}本
+              {lesson.questCount}クエスト・記事 {lesson.articleCount}本{time}
             </>
           ) : (
-            <>記事 {lesson.articleCount}本</>
+            <>
+              記事 {lesson.articleCount}本{time}
+            </>
           )}
         </p>
       </div>
@@ -77,23 +119,46 @@ function LessonLine({
           完了
         </span>
       ) : null}
-      <ChevronRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+      <ChevronRight
+        size={18}
+        className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5"
+      />
     </Link>
   );
 }
 
-function PlannedLine({ item, large = false }: { item: PlannedLessonRef; large?: boolean }) {
+function PlannedLine({
+  item,
+  large = false,
+  v2 = false,
+}: {
+  item: PlannedLessonRef;
+  large?: boolean;
+  /** v2: 「未制作」ではなく「近日公開」と出す */
+  v2?: boolean;
+}) {
   return (
     <div className={large ? ROW_LG : ROW}>
-      <LessonCover plannedTitle="" sizes={large ? "72px" : "40px"} className={cn(large ? COVER_LG : "w-10", "opacity-70")} />
+      <LessonCover
+        plannedTitle=""
+        sizes={large ? "72px" : "40px"}
+        className={cn(large ? COVER_LG : "w-10", "opacity-70")}
+      />
       <div className="min-w-0 flex-1">
-        <h4 className={cn(large ? TITLE_LG : "text-[15px]", "font-bold leading-[1.5] text-text-disabled")}>
+        <h4
+          className={cn(
+            large ? TITLE_LG : "text-[15px]",
+            "font-bold leading-[1.5] text-text-disabled",
+          )}
+        >
           <T f={item.title} />
         </h4>
-        <p className="mt-0.5 text-xs text-text-disabled">公開準備中</p>
+        {v2 ? null : (
+          <p className="mt-0.5 text-xs text-text-disabled">公開準備中</p>
+        )}
       </div>
       <span className="shrink-0 rounded-full border border-border-light px-2 py-0.5 text-[11px] font-bold text-text-muted">
-        未制作
+        {v2 ? "近日公開" : "未制作"}
       </span>
     </div>
   );
@@ -126,7 +191,7 @@ function StepStatusText({ sp }: { sp?: StepProgress }) {
       <span
         className={cn(
           "shrink-0 text-xs font-bold",
-          sp.status === "done" ? "text-text-success" : "text-text-secondary"
+          sp.status === "done" ? "text-text-success" : "text-text-secondary",
         )}
       >
         {sp.status === "done" ? "✓ " : ""}
@@ -142,10 +207,13 @@ export default function CourseCurriculumSyllabus({
   lessons,
   progress,
   size = "md",
+  v2 = false,
 }: {
   course: Course;
   lessons: LessonMap;
   progress: CourseProgress | null;
+  /** v2（完成形）: 未制作→近日公開、件数を「公開中・近日公開」に分ける、レッスンの目安時間を出す */
+  v2?: boolean;
   /** lg = シラバス（大）: 見た目は同じで、レッスンの行の表紙・文字・余白だけ大きくする */
   size?: "md" | "lg";
 }) {
@@ -154,7 +222,9 @@ export default function CourseCurriculumSyllabus({
   const numbered = numberSteps(course);
   const summary = [
     `ステップ ${counts.goals}つ`,
-    `レッスン ${counts.lessons}本${counts.planned > 0 ? `（うち未制作 ${counts.planned}本）` : ""}`,
+    v2
+      ? `公開中 ${counts.lessons - counts.planned}本・近日公開 ${counts.planned}本`
+      : `レッスン ${counts.lessons}本${counts.planned > 0 ? `（うち未制作 ${counts.planned}本）` : ""}`,
     counts.hasChallenge ? "チャレンジ 1つ" : null,
   ].filter(Boolean);
 
@@ -164,11 +234,19 @@ export default function CourseCurriculumSyllabus({
       aria-labelledby="course-curriculum"
       className="scroll-mt-16 border-t border-border-light py-16 md:py-20"
     >
-      <SectionHead id="course-curriculum" kicker="Curriculum" title="カリキュラム" />
+      <SectionHead
+        id="course-curriculum"
+        kicker="Curriculum"
+        title="カリキュラム"
+      />
       <p className="mt-3 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm font-medium text-text-secondary">
         {summary.map((s, i) => (
           <span key={i} className="flex items-center gap-2.5">
-            {i > 0 ? <span aria-hidden="true" className="text-text-disabled">•</span> : null}
+            {i > 0 ? (
+              <span aria-hidden="true" className="text-text-disabled">
+                •
+              </span>
+            ) : null}
             {s}
           </span>
         ))}
@@ -182,13 +260,16 @@ export default function CourseCurriculumSyllabus({
           return (
             <li key={index}>
               {index > 0 ? (
-                <span aria-hidden="true" className="ml-8 block h-8 w-px bg-border-default md:ml-9" />
+                <span
+                  aria-hidden="true"
+                  className="ml-8 block h-8 w-px bg-border-default md:ml-9"
+                />
               ) : null}
               <div
                 id={`curriculum-step-${index + 1}`}
                 className={cn(
                   "scroll-mt-24 overflow-hidden rounded-[20px] border",
-                  current ? "border-text-primary/40" : "border-border-light"
+                  current ? "border-text-primary/40" : "border-border-light",
                 )}
               >
                 <div className="px-5 pb-4 pt-5 md:px-6">
@@ -196,10 +277,12 @@ export default function CourseCurriculumSyllabus({
                     <p
                       className={cn(
                         "font-latin text-[11px] font-bold tracking-[0.12em]",
-                        challenge ? "text-text-link-hover" : "text-text-muted"
+                        challenge ? "text-text-link-hover" : "text-text-muted",
                       )}
                     >
-                      {challenge ? "CHALLENGE" : `STEP ${pad2(goalNumber ?? 0)}`}
+                      {challenge
+                        ? "CHALLENGE"
+                        : `STEP ${pad2(goalNumber ?? 0)}`}
                     </p>
                     <StepStatusText sp={sp} />
                   </div>
@@ -207,7 +290,9 @@ export default function CourseCurriculumSyllabus({
                     <T f={step.title} />
                   </h3>
                   <p className="mt-1.5 text-[15px] leading-[1.75] text-text-secondary md:text-base">
-                    <span className="mr-1 font-bold text-text-primary">習得すること：</span>
+                    <span className="mr-1 font-bold text-text-primary">
+                      習得すること：
+                    </span>
                     <T f={step.gain} />
                   </p>
                 </div>
@@ -219,19 +304,20 @@ export default function CourseCurriculumSyllabus({
                   ) : null}
                   {/* チャレンジにもレッスンがあれば、お題の行と並べて出す */}
                   {step.items.map((item, i) => (
-                      <li key={i}>
-                        {item.type === "lesson" ? (
-                          <LessonLine
-                            slug={item.slug}
-                            lesson={lessons[item.slug] ?? null}
-                            progress={progress?.lessons[item.slug]}
-                            large={large}
-                          />
-                        ) : (
-                          <PlannedLine item={item} large={large} />
-                        )}
-                      </li>
-                    ))}
+                    <li key={i}>
+                      {item.type === "lesson" ? (
+                        <LessonLine
+                          slug={item.slug}
+                          lesson={lessons[item.slug] ?? null}
+                          progress={progress?.lessons[item.slug]}
+                          large={large}
+                          v2={v2}
+                        />
+                      ) : (
+                        <PlannedLine item={item} large={large} v2={v2} />
+                      )}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </li>

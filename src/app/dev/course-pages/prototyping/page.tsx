@@ -1,7 +1,7 @@
 /**
  * /dev/course-pages/prototyping — プロトタイピングのハブ（#241 / #242）
  *
- * コース一覧・コース詳細・分析の3つを1か所から見られるようにする入口。
+ * コース一覧・コース詳細・完成形（v2）・分析を1か所から見られるようにする入口。
  */
 
 import type { Metadata } from "next";
@@ -112,10 +112,46 @@ export default async function PrototypingHubPage() {
             </ul>
           </section>
 
-          {/* 3. 分析 */}
+          {/* 3. 完成形（v2） */}
+          <section aria-labelledby="hub-v2" className="rounded-[24px] border border-border-light p-5 md:p-7">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">03 · v2</p>
+            <h2 id="hub-v2" className="mt-1.5 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] md:text-[22px]">
+              完成形（v2）
+            </h2>
+            <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">
+              分析の問1で出た改善点をすべて入れた版。今は AI コースだけ。v1 は残してあるので、行き来して比べられます。
+            </p>
+            <ul className="mt-3 flex flex-col gap-1 text-[13px] leading-[1.8] text-text-secondary">
+              <li>・ヒーローに「こんな人向け」、得られる変化を書き直し、FAQ に「向いていない人」</li>
+              <li>・会員の途中は「あなたが目指していること」、レッスンと全体の目安時間</li>
+              <li>・「修了したら次は」、未制作は「近日公開」、料金の一文、マイページの「続きから」</li>
+            </ul>
+            <div className="mt-5 grid gap-2.5 sm:grid-cols-2">
+              {[
+                { href: "/dev/course-pages/v2/ai-ui-design", label: "v2：AI×UIデザイン入門コース", sub: "進捗なし（未ログイン・未課金の見え方）" },
+                { href: "/dev/course-pages/v2/ai-ui-design?progress=1", label: "v2：進行中の会員の見え方", sub: "?progress=1" },
+                { href: "/dev/course-pages/ai-ui-design", label: "v1 と比べる", sub: "今のコースページ（v1）" },
+                { href: "/dev/course-pages/v2/mypage", label: "マイページの「続きから」", sub: "マイページ上部のモック" },
+              ].map((l) => (
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="group flex items-center gap-3 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="font-heading text-[15px] font-bold leading-[1.5]">{l.label}</p>
+                    <p className="text-xs text-text-muted">{l.sub}</p>
+                  </div>
+                  <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+                </Link>
+              ))}
+            </div>
+          </section>
+
+          {/* 4. 分析 */}
           <Link href="/dev/course-pages/prototyping/analysis" className={CARD}>
             <CardHead
-              kicker="03 · Analysis"
+              kicker="04 · Analysis"
               title="分析：コースとロードマップ"
               lead="ロードマップとコースを「払う」「続ける」で比べ、言葉と役割分担を整理した読みもの（2026-10-13）。"
             />

@@ -86,12 +86,15 @@ export function LessonCover({
   lesson,
   slug,
   plannedTitle,
+  plannedLabel = "未制作",
   sizes,
   className,
 }: {
   lesson?: ResolvedLesson | null;
   slug?: string;
   plannedTitle?: string;
+  /** 未制作の表紙に出すラベル（v2 は「近日公開」） */
+  plannedLabel?: string;
   sizes: string;
   className?: string;
 }) {
@@ -123,7 +126,7 @@ export function LessonCover({
               "border border-text-primary/15 text-text-muted"
             )}
           >
-            {planned ? "未制作" : lesson ? "画像なし" : "未取得"}
+            {planned ? plannedLabel : lesson ? "画像なし" : "未取得"}
           </span>
           <span
             className={cn(
@@ -139,4 +142,12 @@ export function LessonCover({
       <span className="pointer-events-none absolute inset-y-0 left-[5%] w-px bg-text-primary/10" aria-hidden="true" />
     </div>
   );
+}
+
+/** 分 → 「約45分」「約2時間40分」 */
+export function formatMinutes(minutes: number): string {
+  if (minutes < 60) return `約${minutes}分`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m === 0 ? `約${h}時間` : `約${h}時間${m}分`;
 }

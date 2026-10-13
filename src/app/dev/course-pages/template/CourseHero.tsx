@@ -39,12 +39,16 @@ export default function CourseHero({
 
   return (
     <section aria-labelledby="course-title" className="pb-16 pt-6 md:pt-10 lg:pb-20">
-      <Link
-        href="/dev/course-pages/prototyping"
-        className="mb-4 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
-      >
-        ← プロトタイピングに戻る
-      </Link>
+      <div className="mb-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
+        <Link href="/dev/course-pages/prototyping" className="hover:text-text-primary">
+          ← プロトタイピングに戻る
+        </Link>
+        {course.v2 ? (
+          <Link href={`/dev/course-pages/v2/${course.slug}`} className="font-bold text-text-link hover:underline">
+            完成形（v2）を見る →
+          </Link>
+        ) : null}
+      </div>
       <nav aria-label="パンくずリスト" className="flex items-center gap-2 text-xs text-text-muted">
         <Link href="/dev/course-pages" className="hover:text-text-primary">
           コース

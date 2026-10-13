@@ -61,6 +61,20 @@ export interface CourseFaqItem {
   answer: Field;
 }
 
+/** v2（完成形）で足す項目 — #242 問1の改善点 */
+export interface CourseV2 {
+  /** ヒーローのタイトル直下「こんな人向け」1行 */
+  audienceLine: Field;
+  /** 得られる変化（「〜できるようになり、その結果〜できる」の形。Figma 原文は Course.change に残す） */
+  change: Field;
+  /** FAQ に足す「向いていない人」 */
+  notFor: CourseFaqItem;
+  /** 修了したら次は: おすすめのコース */
+  nextCourse: { slug: string; reason: Field };
+  /** 修了したら次は: 転職ロードマップのどこまで来たか（モック） */
+  roadmap: { position: number; total: number; note: Field };
+}
+
 export interface Course {
   slug: string;
   /** 正式タイトル。「：」の前を主見出し、後ろをサブ行として表示する */
@@ -93,6 +107,8 @@ export interface Course {
     image: string;
   };
   faq: CourseFaqItem[];
+  /** v2（完成形）用。入っているコースだけ /dev/course-pages/v2/[course] で見られる */
+  v2?: CourseV2;
 }
 
 /** Sanity から引いたレッスンの表示用データ（template に渡す） */
@@ -104,6 +120,10 @@ export interface ResolvedLesson {
   purposes: string[];
   questCount: number;
   articleCount: number;
+  /** 記事の動画の長さ（videoDuration）の合計（分）。1本も取れなければ null */
+  videoMinutes: number | null;
+  /** 長さが取れた記事の数（articleCount より少なければ一部だけの合計） */
+  videoTimedCount: number;
 }
 
 /** slug → 取得結果（見つからない・取得失敗は null） */

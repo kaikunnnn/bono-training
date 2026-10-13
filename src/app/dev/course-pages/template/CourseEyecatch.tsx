@@ -64,6 +64,7 @@ export default function CourseEyecatch({
   meta,
   sizes = "(min-width: 1024px) 130px, 25vw",
   className,
+  plannedLabel,
 }: {
   covers: CoverSpec[];
   /** 左下のコース名ラベル */
@@ -72,6 +73,8 @@ export default function CourseEyecatch({
   meta?: string;
   sizes?: string;
   className?: string;
+  /** 未制作の表紙のラベル（v2 は「近日公開」） */
+  plannedLabel?: string;
 }) {
   const shown = covers.slice(0, 4);
   const layout = LAYOUTS[shown.length] ?? [];
@@ -113,6 +116,7 @@ export default function CourseEyecatch({
               lesson={cover.lesson}
               slug={cover.slug}
               plannedTitle={cover.plannedTitle}
+              plannedLabel={plannedLabel}
               sizes={sizes}
               className="w-full border-[0.6cqw] border-surface shadow-[var(--shadow-lift)]"
             />
