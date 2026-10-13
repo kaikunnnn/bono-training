@@ -6,7 +6,7 @@
  *   区切り線のあとにレッスンの行（行の間も区切り線。h4）
  * 枠と枠の間は短い縦のコネクタで「下へ進む」流れを見せる。全幅の横線・横の道のりは使わない。
  * 枠は背景なし（白はクリックできる行のホバーにも使わない。行のホバーは淡い色）。
- * size="lg"（シラバス（大））はレッスンの行だけ、表紙 72×108 の白いカードにする。
+ * size="lg"（シラバス（大））は見た目はそのままで、レッスンの行の表紙（72×108）・文字・余白だけ大きくする。
  */
 
 import Link from "next/link";
@@ -20,24 +20,37 @@ import type { CourseProgress, LessonProgress, StepProgress } from "./progress";
 import { LessonCover, SectionHead, courseCounts, numberSteps, pad2 } from "./shared";
 
 const ROW = "flex items-center gap-4 px-5 py-3 md:px-6";
+/** シラバス（大）: 見た目は同じで大きさだけ変える */
+const ROW_LG = "flex items-center gap-4 px-5 py-4 md:gap-5 md:px-6 md:py-5";
+const COVER_LG = "w-[60px] md:w-[72px]";
+const TITLE_LG = "text-base md:text-[18px]";
 
 function LessonLine({
   slug,
   lesson,
   progress,
+  large = false,
 }: {
   slug: string;
   lesson: ResolvedLesson | null;
   progress?: LessonProgress;
+  large?: boolean;
 }) {
   const done = Boolean(progress && progress.done === progress.total);
   const partial = Boolean(progress && progress.done > 0 && !done);
   return (
-    <Link href={`/lessons/${slug}`} className={cn(ROW, "group transition-colors hover:bg-hover")}>
-      <LessonCover lesson={lesson} slug={slug} sizes="40px" className="w-10 shadow-[var(--shadow-quest)]" />
+    <Link href={`/lessons/${slug}`} className={cn(large ? ROW_LG : ROW, "group transition-colors hover:bg-hover")}>
+      <LessonCover
+        lesson={lesson}
+        slug={slug}
+        sizes={large ? "72px" : "40px"}
+        className={cn(large ? COVER_LG : "w-10", "shadow-[var(--shadow-quest)]")}
+      />
       <div className="min-w-0 flex-1">
-        <h4 className="text-[15px] font-bold leading-[1.5] text-text-primary">{lesson?.title ?? slug}</h4>
-        <p className="mt-0.5 text-xs text-text-muted">
+        <h4 className={cn(large ? TITLE_LG : "text-[15px]", "font-bold leading-[1.5] text-text-primary")}>
+          {lesson?.title ?? slug}
+        </h4>
+        <p className={cn(large ? "mt-1 text-[13px]" : "mt-0.5 text-xs", "text-text-muted")}>
           {!lesson ? (
             <span className="font-mono">Sanity 未取得: {slug}</span>
           ) : partial && progress ? (
@@ -47,6 +60,10 @@ function LessonLine({
               </span>
               <ProgressBar value={(progress.done / progress.total) * 100} className="w-14" />
             </span>
+          ) : large ? (
+            <>
+              {lesson.questCount}クエスト・記事 {lesson.articleCount}本
+            </>
           ) : (
             <>記事 {lesson.articleCount}本</>
           )}
@@ -65,97 +82,17 @@ function LessonLine({
   );
 }
 
-function PlannedLine({ item }: { item: PlannedLessonRef }) {
+function PlannedLine({ item, large = false }: { item: PlannedLessonRef; large?: boolean }) {
   return (
-    <div className={ROW}>
-      <LessonCover plannedTitle="" sizes="40px" className="w-10 opacity-70" />
+    <div className={large ? ROW_LG : ROW}>
+      <LessonCover plannedTitle="" sizes={large ? "72px" : "40px"} className={cn(large ? COVER_LG : "w-10", "opacity-70")} />
       <div className="min-w-0 flex-1">
-        <h4 className="text-[15px] font-bold leading-[1.5] text-text-disabled">
+        <h4 className={cn(large ? TITLE_LG : "text-[15px]", "font-bold leading-[1.5] text-text-disabled")}>
           <T f={item.title} />
         </h4>
         <p className="mt-0.5 text-xs text-text-disabled">公開準備中</p>
       </div>
       <span className="shrink-0 rounded-full border border-border-light px-2 py-0.5 text-[11px] font-bold text-text-muted">
-        未制作
-      </span>
-    </div>
-  );
-}
-
-/** シラバス（大）: 表紙 72×108 の白いカード。1冊ずつ目立たせる（既存レッスンはリンクなので白） */
-function LessonCard({
-  slug,
-  lesson,
-  progress,
-}: {
-  slug: string;
-  lesson: ResolvedLesson | null;
-  progress?: LessonProgress;
-}) {
-  const done = Boolean(progress && progress.done === progress.total);
-  const partial = Boolean(progress && progress.done > 0 && !done);
-  return (
-    <Link
-      href={`/lessons/${slug}`}
-      className="group flex items-center gap-4 rounded-[16px] border border-border-light bg-surface p-4 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)] md:gap-6 md:px-5"
-    >
-      <LessonCover
-        lesson={lesson}
-        slug={slug}
-        sizes="72px"
-        className="w-[60px] shadow-[var(--shadow-lift)] md:w-[72px]"
-      />
-      <div className="min-w-0 flex-1">
-        <h4 className="font-heading text-base font-bold leading-[1.5] text-text-primary md:text-[18px]">
-          {lesson?.title ?? slug}
-        </h4>
-        <p className="mt-1.5 text-[13px] text-text-muted">
-          {!lesson ? (
-            <span className="font-mono">Sanity 未取得: {slug}</span>
-          ) : partial && progress ? (
-            <span className="flex items-center gap-2">
-              <span className="font-bold text-text-primary">
-                記事 {progress.done}/{progress.total}
-              </span>
-              <ProgressBar value={(progress.done / progress.total) * 100} className="w-20" />
-            </span>
-          ) : (
-            <>
-              {lesson.questCount}クエスト・記事 {lesson.articleCount}本
-            </>
-          )}
-        </p>
-        {done ? (
-          <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-text-success">
-            <span className="flex size-5 items-center justify-center rounded-full bg-text-success text-text-inverse">
-              <Check size={12} strokeWidth={3.5} />
-            </span>
-            完了
-          </p>
-        ) : null}
-      </div>
-      <ChevronRight size={20} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
-    </Link>
-  );
-}
-
-/** シラバス（大）: 未制作。押せないので白にせず、点線＋灰色の表紙＋薄い文字 */
-function PlannedCard({ item }: { item: PlannedLessonRef }) {
-  return (
-    <div className="flex items-center gap-4 rounded-[16px] border-2 border-dashed border-border-light p-4 md:gap-6 md:px-5">
-      <LessonCover plannedTitle="" sizes="72px" className="w-[60px] md:w-[72px]" />
-      <div className="min-w-0 flex-1">
-        <h4 className="font-heading text-base font-bold leading-[1.5] text-text-disabled md:text-[18px]">
-          <T f={item.title} />
-        </h4>
-        <p className="mt-1.5 text-[13px] text-text-disabled">
-          <span className="mr-2 rounded-full border border-border-light px-2 py-0.5 text-[11px] font-bold text-text-muted sm:hidden">
-            未制作
-          </span>
-          公開準備中
-        </p>
-      </div>
-      <span className="hidden shrink-0 rounded-full border border-border-light px-2 py-0.5 text-[11px] font-bold text-text-muted sm:inline">
         未制作
       </span>
     </div>
@@ -209,7 +146,7 @@ export default function CourseCurriculumSyllabus({
   course: Course;
   lessons: LessonMap;
   progress: CourseProgress | null;
-  /** lg = シラバス（大）: レッスンを表紙 72×108 の白いカードで1冊ずつ目立たせる */
+  /** lg = シラバス（大）: 見た目は同じで、レッスンの行の表紙・文字・余白だけ大きくする */
   size?: "md" | "lg";
 }) {
   const large = size === "lg";
@@ -274,45 +211,28 @@ export default function CourseCurriculumSyllabus({
                     <T f={step.gain} />
                   </p>
                 </div>
-                {large && !challenge ? (
-                  <ul className="flex flex-col gap-3 border-t border-border-light p-3 md:p-4">
-                    {step.items.map((item, i) => (
+                <ul className="divide-y divide-border-light border-t border-border-light">
+                  {challenge ? (
+                    <li>
+                      <ChallengeLine step={step} />
+                    </li>
+                  ) : (
+                    step.items.map((item, i) => (
                       <li key={i}>
                         {item.type === "lesson" ? (
-                          <LessonCard
+                          <LessonLine
                             slug={item.slug}
                             lesson={lessons[item.slug] ?? null}
                             progress={progress?.lessons[item.slug]}
+                            large={large}
                           />
                         ) : (
-                          <PlannedCard item={item} />
+                          <PlannedLine item={item} large={large} />
                         )}
                       </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <ul className="divide-y divide-border-light border-t border-border-light">
-                    {challenge ? (
-                      <li>
-                        <ChallengeLine step={step} />
-                      </li>
-                    ) : (
-                      step.items.map((item, i) => (
-                        <li key={i}>
-                          {item.type === "lesson" ? (
-                            <LessonLine
-                              slug={item.slug}
-                              lesson={lessons[item.slug] ?? null}
-                              progress={progress?.lessons[item.slug]}
-                            />
-                          ) : (
-                            <PlannedLine item={item} />
-                          )}
-                        </li>
-                      ))
-                    )}
-                  </ul>
-                )}
+                    ))
+                  )}
+                </ul>
               </div>
             </li>
           );
