@@ -17,16 +17,16 @@ export default function CourseAudience({ course }: { course: Course }) {
       className="border-t border-border-light py-16 md:py-20"
     >
       <SectionHead id="course-audience" kicker="For you" title="こんな人向け" />
-      <ul className="mt-10 grid gap-4 md:grid-cols-3">
+      <ul className="mt-10 grid gap-8 md:grid-cols-3 md:gap-8">
         {course.audience.map((item, index) => {
           const Icon = ICONS[index % ICONS.length];
           return (
             <li
               key={index}
-              className="rounded-[24px] border border-border-light bg-surface p-6"
+              className="border-t-2 border-text-primary pt-5"
             >
-              <span className="flex size-10 items-center justify-center rounded-full bg-muted-custom text-text-primary">
-                <Icon size={20} color="currentColor" variant="Bulk" />
+              <span className="flex text-text-secondary">
+                <Icon size={24} color="currentColor" variant="Linear" />
               </span>
               <h3 className="mt-4 font-heading text-base font-bold leading-[1.6] text-text-primary">
                 <T f={item.title} />

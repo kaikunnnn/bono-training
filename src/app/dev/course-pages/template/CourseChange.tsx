@@ -23,18 +23,18 @@ export default function CourseChange({ course }: { course: Course }) {
       />
 
       <div className="mt-10">
-        <div className="hidden grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)] px-7 pb-3 text-xs font-bold text-text-muted md:grid">
+        <div className="hidden grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)] pb-3 text-xs font-bold text-text-muted md:grid">
           <span>受ける前</span>
           <span />
           <span>受けた後</span>
         </div>
-        <ul className="flex flex-col gap-3">
+        <ul className="border-t border-text-secondary">
           {course.changeRows.map((row, index) => (
             <li
               key={index}
-              className="grid gap-3 rounded-[20px] border border-border-light bg-surface px-6 py-5 md:grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)] md:items-center md:gap-0 md:px-7"
+              className="grid gap-2 border-b border-border-light py-5 md:grid-cols-[minmax(0,1fr)_48px_minmax(0,1fr)] md:items-center md:gap-0"
             >
-              <p className="text-sm leading-[1.8] text-text-muted md:pr-4">
+              <p className="text-sm leading-[1.8] text-text-muted md:pr-6">
                 <span className="mr-2 text-xs font-bold md:hidden">受ける前</span>
                 <T f={row.before} />
               </p>

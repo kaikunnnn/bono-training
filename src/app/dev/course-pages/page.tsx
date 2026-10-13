@@ -86,16 +86,13 @@ export default async function CourseListPage() {
               const { main, sub } = splitTitle(course.title);
               return (
                 <li key={course.title}>
-                  <div className="opacity-80">
-                    <CourseEyecatch
-                      covers={[0, 1, 2].map((i) => ({ key: `${course.shortTitle}-${i}`, plannedTitle: "" }))}
-                      label={course.shortTitle}
-                      meta="Coming soon"
-                      className="grayscale"
-                    />
+                  {/* クリックできないので白や画像は使わず、点線の枠だけ（未制作レッスンと同じ考え方） */}
+                  <div className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-1.5 rounded-[32px] border-2 border-dashed border-border-default text-center">
+                    <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-muted">Coming soon</span>
+                    <span className="font-heading text-base font-bold text-text-muted">{course.shortTitle}</span>
                   </div>
                   <div className="mt-5 px-1">
-                    <span className="inline-flex rounded-full border border-border-default bg-surface px-2 py-px text-[11px] font-bold text-text-muted">
+                    <span className="inline-flex rounded-full border border-border-default px-2 py-px text-[11px] font-bold text-text-muted">
                       準備中
                     </span>
                     <h2 className="mt-2 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] text-text-secondary">

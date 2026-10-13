@@ -24,7 +24,7 @@ export default function CourseOutput({ course }: { course: Course }) {
           <ul className="mt-6 flex flex-col gap-3">
             {course.output.points.map((point, index) => (
               <li key={index} className="flex gap-3 text-sm leading-[1.8] text-text-primary">
-                <span className="mt-[3px] flex size-5 shrink-0 items-center justify-center rounded-full bg-muted-custom">
+                <span className="mt-[3px] flex size-5 shrink-0 items-center justify-center">
                   <Check size={12} strokeWidth={3} className="text-text-success" />
                 </span>
                 <span>
@@ -37,21 +37,21 @@ export default function CourseOutput({ course }: { course: Course }) {
 
         {/* 完成イメージの枠（ブラウザ風） */}
         <div className={`overflow-hidden rounded-[32px] p-5 md:p-8 ${EYECATCH_BG}`}>
-          <div className="overflow-hidden rounded-[16px] bg-surface shadow-[var(--shadow-lift)]">
-            <div className="flex items-center gap-1.5 border-b border-border-light px-4 py-2.5">
-              <span className="size-2 rounded-full bg-border-light" />
-              <span className="size-2 rounded-full bg-border-light" />
-              <span className="size-2 rounded-full bg-border-light" />
-              <span className="ml-3 h-4 flex-1 rounded bg-muted-custom" />
+          <div className="overflow-hidden rounded-[16px] border border-text-primary/15">
+            <div className="flex items-center gap-1.5 border-b border-text-primary/15 px-4 py-2.5">
+              <span className="size-2 rounded-full bg-text-primary/15" />
+              <span className="size-2 rounded-full bg-text-primary/15" />
+              <span className="size-2 rounded-full bg-text-primary/15" />
+              <span className="ml-3 h-4 flex-1 rounded bg-text-primary/10" />
             </div>
             <div className="grid grid-cols-3 gap-3 p-4">
               {["Hover", "Accordion", "Modal"].map((name) => (
-                <div key={name} className="flex aspect-[4/3] flex-col justify-end rounded-[10px] bg-muted-custom p-2">
+                <div key={name} className="flex aspect-[4/3] flex-col justify-end rounded-[10px] bg-text-primary/[0.06] p-2">
                   <span className="font-mono text-[10px] text-text-muted">{name}</span>
                 </div>
               ))}
-              <div className="col-span-3 h-3 w-2/3 rounded bg-muted-custom" />
-              <div className="col-span-3 h-3 w-1/2 rounded bg-muted-custom" />
+              <div className="col-span-3 h-3 w-2/3 rounded bg-text-primary/10" />
+              <div className="col-span-3 h-3 w-1/2 rounded bg-text-primary/10" />
             </div>
           </div>
           <p className="mt-3 text-center text-[11px] text-text-secondary">完成イメージ（画像は準備中）</p>

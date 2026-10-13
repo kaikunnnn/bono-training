@@ -74,7 +74,7 @@ export default function CourseHero({
             <T f={course.tagline} />
           </p>
 
-          <dl className="mt-7 max-w-[540px] divide-y divide-dashed divide-border-light rounded-[20px] border border-border-light bg-surface px-5">
+          <dl className="mt-7 max-w-[540px] divide-y divide-dashed divide-border-light border-y border-border-light">
             {meta.map(({ label, icon: Icon, field }) => (
               <div key={label} className="flex flex-col gap-1 py-3.5 sm:flex-row sm:gap-4">
                 <dt className="flex shrink-0 items-center gap-2 self-start text-xs font-bold leading-[1.9] text-text-muted sm:w-[108px]">

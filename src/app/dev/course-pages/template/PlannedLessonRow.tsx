@@ -15,13 +15,13 @@ export default function PlannedLessonRow({
   order: number;
 }) {
   return (
-    <div className="flex gap-4 rounded-[20px] border-2 border-dashed border-border-light bg-[var(--bg-base)] p-4 md:gap-6 md:p-5">
+    <div className="flex gap-4 rounded-[20px] border-2 border-dashed border-border-default bg-transparent p-4 md:gap-6 md:p-5">
       <LessonCover plannedTitle={item.title.text} sizes="72px" className="w-[60px] self-start md:w-[72px]" />
 
       <div className="min-w-0 flex-1">
         <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-text-muted">
           <span className="font-latin tracking-[0.04em]">LESSON {String(order).padStart(2, "0")}</span>
-          <span className="rounded-full border border-border-default bg-surface px-2 py-px text-[10px] text-text-secondary">
+          <span className="rounded-full border border-border-default px-2 py-px text-[10px] text-text-secondary">
             未制作
           </span>
         </p>

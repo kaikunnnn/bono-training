@@ -2,18 +2,13 @@
  * テンプレート＝全コース共通: セクション間で使い回す小さな部品 — #241
  *
  * - SectionHead: セクション見出し（小ラベル＋h2＋リード）
- * - StepBadge: ロードマップ詳細のステップ番号バッジを寄せたもの
+ * - ChapterLabel: カリキュラムの章の頭（STEP 01 / CHALLENGE ＋横線）
  * - LessonCover: レッスンの表紙（2:3）。画像がなければ灰色の表紙
  */
 
 import Image from "next/image";
-import { Cup } from "iconsax-react";
 import { cn } from "@/lib/utils";
 import type { Course, ResolvedLesson } from "../data/types";
-
-/** ロードマップのバッジの淡いグラデーションを、既存トークンで組んだもの */
-export const PASTEL_GRADIENT =
-  "bg-[image:linear-gradient(90deg,hsl(var(--training-gradient-start))_0%,var(--persona-hero-surface)_55%,var(--bg-warm)_100%)]";
 
 /** ペルソナページのヒーローの雰囲気（グラデーション画像＋淡い色） */
 export const EYECATCH_BG =
@@ -82,50 +77,32 @@ export function SectionHead({
   );
 }
 
-/** ステップ番号バッジ（size: lg=カリキュラム / sm=流れ） */
-export function StepBadge({
-  number,
-  challenge = false,
-  size = "lg",
+/** 章の頭のラベル＋横線（チャレンジと共通） */
+export function ChapterLabel({
+  label,
+  meta,
+  accent = false,
 }: {
-  number?: number;
-  challenge?: boolean;
-  size?: "lg" | "sm";
+  label: string;
+  meta?: string;
+  accent?: boolean;
 }) {
-  const lg = size === "lg";
   return (
-    <div
-      className={cn(
-        "shrink-0 overflow-hidden bg-surface shadow-[var(--shadow-input)]",
-        lg ? "w-[72px] rounded-[16px]" : "w-[56px] rounded-[12px]"
-      )}
-      aria-hidden="true"
-    >
-      <div
-        className={cn(
-          "text-center font-bold",
-          lg ? "px-2 py-1.5 text-[9px]" : "px-1.5 py-1 text-[8px]",
-          challenge
-            ? "bg-[image:var(--persona-cta-gradient)] text-text-inverse"
-            : cn(PASTEL_GRADIENT, "text-text-primary")
-        )}
+    <div className="flex items-center gap-4">
+      <span
+        className={
+          accent
+            ? "bg-[image:var(--persona-cta-gradient)] bg-clip-text font-latin text-xl font-bold tracking-[0.06em] text-transparent md:text-2xl"
+            : "font-latin text-xl font-bold tracking-[0.06em] text-text-primary md:text-2xl"
+        }
       >
-        {challenge ? "チャレンジ" : "ステップ"}
-      </div>
-      <div className={cn("flex items-center justify-center", lg ? "h-[42px]" : "h-[32px]")}>
-        {challenge ? (
-          <Cup size={lg ? 26 : 20} color="currentColor" variant="Bulk" className="text-text-primary" />
-        ) : (
-          <span
-            className={cn(
-              "font-latin font-bold leading-none tracking-[-0.02em] text-text-primary",
-              lg ? "text-[26px]" : "text-[19px]"
-            )}
-          >
-            {pad2(number ?? 0)}
-          </span>
-        )}
-      </div>
+        {label}
+      </span>
+      <span
+        aria-hidden="true"
+        className={accent ? "h-px flex-1 bg-[image:var(--persona-cta-gradient)] opacity-60" : "h-px flex-1 bg-border-default"}
+      />
+      {meta ? <span className="shrink-0 text-xs font-bold text-text-muted">{meta}</span> : null}
     </div>
   );
 }
@@ -174,7 +151,7 @@ export function LessonCover({
           <span
             className={cn(
               "self-start rounded-[3px] px-[5cqw] py-[1.5cqw] text-[8.5cqw] font-bold leading-[1.4]",
-              planned ? "bg-surface text-text-muted" : "bg-surface/70 text-text-muted"
+              "border border-text-primary/15 text-text-muted"
             )}
           >
             {planned ? "未制作" : lesson ? "画像なし" : "未取得"}

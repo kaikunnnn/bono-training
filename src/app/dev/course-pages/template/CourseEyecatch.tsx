@@ -121,7 +121,7 @@ export default function CourseEyecatch({
       })}
 
       <div className="absolute bottom-[7%] left-[5%] right-[5%] flex">
-        <span className="max-w-full truncate rounded-full bg-surface/85 px-[clamp(10px,2.4cqw,16px)] py-[clamp(4px,1cqw,7px)] font-heading text-[clamp(11px,2.3cqw,15px)] font-bold leading-[1.4] text-text-primary shadow-[var(--shadow-xs)] backdrop-blur-sm">
+        <span className="max-w-full truncate font-heading text-[clamp(12px,2.6cqw,17px)] font-bold leading-[1.4] text-text-primary">
           {label}
         </span>
       </div>
