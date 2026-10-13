@@ -4,7 +4,7 @@
  * テンプレート＝全コース共通: 確認用の固定バー — #241
  *
  * - 「仮」タグの表示（初期OFF・画面内の状態）。KariProvider の中の <T f={field} /> が見る
- * - 進捗なし／進行中の会員（URL ?progress=1）
+ * - 進捗なし／進行中の会員（URL ?progress=1）、カリキュラムの版 シラバス／リスト（URL ?curriculum=list）
  *   ※ 詳細ページだけ。URL を書き換えてサーバー側で描き直す
  */
 
@@ -16,8 +16,11 @@ import type { Field } from "../data/types";
 
 const KariContext = createContext(false);
 
+export type CurriculumVariant = "syllabus" | "list";
+
 export interface PreviewState {
   progress: boolean;
+  curriculum: CurriculumVariant;
 }
 
 function Segmented<V extends string>({
@@ -89,6 +92,15 @@ export function KariProvider({
           <span className="hidden text-text-muted md:inline">確認用</span>
           {preview ? (
             <>
+              <Segmented
+                label="カリキュラム"
+                value={preview.curriculum}
+                options={[
+                  { value: "syllabus", label: "シラバス" },
+                  { value: "list", label: "リスト" },
+                ]}
+                onChange={(v) => setParam("curriculum", v === "syllabus" ? null : v)}
+              />
               <Segmented
                 label="進捗"
                 value={preview.progress ? "on" : "off"}

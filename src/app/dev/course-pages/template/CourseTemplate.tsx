@@ -13,23 +13,27 @@ import CourseAudience from "./CourseAudience";
 import CourseAuthor from "./CourseAuthor";
 import CourseChange from "./CourseChange";
 import CourseCurriculum from "./CourseCurriculum";
+import CourseCurriculumSyllabus from "./CourseCurriculumSyllabus";
 import CourseFaq from "./CourseFaq";
 import CourseFinalCta from "./CourseFinalCta";
 import CourseFlow from "./CourseFlow";
 import CourseHero from "./CourseHero";
 import CourseOutput from "./CourseOutput";
-import { KariProvider } from "./kari";
+import { KariProvider, type CurriculumVariant } from "./kari";
 import { computeProgress } from "./progress";
 
 export default function CourseTemplate({
   course,
   lessons,
   progressMock,
+  curriculum,
 }: {
   course: Course;
   lessons: LessonMap;
   /** 進行中の会員として見せるときの進捗（確認用 ?progress=1）。null は未ログイン・未課金の見え方 */
   progressMock: ProgressMock | null;
+  /** カリキュラムの版（確認用 ?curriculum=list。既定はシラバス） */
+  curriculum: CurriculumVariant;
 }) {
   const progress = progressMock ? computeProgress(course, lessons, progressMock) : null;
   const firstLesson = course.steps
@@ -38,13 +42,17 @@ export default function CourseTemplate({
   const startHref = firstLesson && firstLesson.type === "lesson" ? `/lessons/${firstLesson.slug}` : null;
 
   return (
-    <KariProvider preview={{ progress: Boolean(progressMock) }}>
+    <KariProvider preview={{ progress: Boolean(progressMock), curriculum }}>
       <div className="min-h-screen w-full bg-[var(--bg-base)] font-noto-sans-jp text-text-primary">
         <div className="mx-auto w-full max-w-[1180px] px-4 md:px-10">
           <CourseHero course={course} lessons={lessons} startHref={startHref} progress={progress} />
           <CourseChange course={course} />
           <CourseFlow course={course} statuses={progress?.steps.map((st) => st.status)} />
-          <CourseCurriculum course={course} lessons={lessons} progress={progress} />
+          {curriculum === "list" ? (
+            <CourseCurriculum course={course} lessons={lessons} progress={progress} />
+          ) : (
+            <CourseCurriculumSyllabus course={course} lessons={lessons} progress={progress} />
+          )}
           <CourseOutput course={course} />
           <CourseAudience course={course} />
           <CourseAuthor course={course} />
