@@ -1,7 +1,7 @@
 /**
  * /dev/course-pages/prototyping — プロトタイピングのハブ（#241 / #242）
  *
- * コース一覧・コース詳細・完成形（v2）・分析を1か所から見られるようにする入口。
+ * コース一覧・コース詳細・完成形（v2）・分析・ロードマップを1か所から見られるようにする入口。
  */
 
 import type { Metadata } from "next";
@@ -181,6 +181,15 @@ export default async function PrototypingHubPage() {
                 </li>
               ))}
             </ul>
+          </Link>
+
+          {/* 5. ロードマップ */}
+          <Link href="/dev/course-pages/prototyping/roadmap" className={CARD}>
+            <CardHead
+              kicker="05 · Roadmap"
+              title="ロードマップ"
+              lead="コースを束ねた地図としてのロードマップのプロト（#243）。サイト内の見せ方、行き先を選ぶ一覧、6本の詳細。"
+            />
           </Link>
         </div>
       </div>
