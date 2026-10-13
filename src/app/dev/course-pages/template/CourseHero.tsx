@@ -39,6 +39,12 @@ export default function CourseHero({
 
   return (
     <section aria-labelledby="course-title" className="pb-16 pt-6 md:pt-10 lg:pb-20">
+      <Link
+        href="/dev/course-pages/prototyping"
+        className="mb-4 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
+      >
+        ← プロトタイピングに戻る
+      </Link>
       <nav aria-label="パンくずリスト" className="flex items-center gap-2 text-xs text-text-muted">
         <Link href="/dev/course-pages" className="hover:text-text-primary">
           コース

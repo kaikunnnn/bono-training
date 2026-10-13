@@ -26,13 +26,17 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
-    href: "/dev/course-pages",
-    issue: "#241",
-    title: "コースページのプロトタイプ",
+    href: "/dev/course-pages/prototyping",
+    issue: "#241 / #242",
+    title: "プロトタイピング：コースページ",
     summary:
-      "コースの元（template/）にコースごとのデータ（data/）を当てはめる形のコースページ。4コース（はじめてのUIデザイン入門／UIデザイン基礎／AI×UIデザイン入門／UI体験デザイン基礎）。カリキュラムは既定がシラバス（大）、?curriculum=syllabus|list で切り替え、?progress=1 で進行中の会員の見え方。レッスンは Sanity の実データ（タイトル・表紙・概要・ゴール）、未制作は点線＋灰色の表紙。画面下のトグルで推測の文言に「仮」タグを表示。",
+      "コースページのプロトタイプの入口。コースの一覧（4コース）、コースの詳細（?progress=1 で会員の進捗、?curriculum=syllabus|list でカリキュラムの版。既定はシラバス（大））、分析「コースとロードマップ」を1か所から見られる。推測の文言は画面下のトグルで「仮」タグ表示。",
     status: "in-progress",
-    links: [{ href: "/dev/course-pages/ai-ui-design", label: "AIコースの詳細" }],
+    links: [
+      { href: "/dev/course-pages", label: "コースの一覧" },
+      { href: "/dev/course-pages/ai-ui-design", label: "AIコースの詳細" },
+      { href: "/dev/course-pages/prototyping/analysis", label: "分析：コースとロードマップ" },
+    ],
   },
   {
     href: "/dev/course-card-patterns/top",

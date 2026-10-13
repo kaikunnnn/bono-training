@@ -27,6 +27,12 @@ export default async function CourseListPage() {
     <KariProvider>
       <div className="min-h-screen w-full bg-[var(--bg-base)] font-noto-sans-jp text-text-primary">
         <div className="mx-auto w-full max-w-[1180px] px-4 pb-28 pt-10 md:px-10 md:pt-14">
+          <Link
+            href="/dev/course-pages/prototyping"
+            className="mb-6 inline-flex items-center gap-1 text-xs text-text-muted hover:text-text-primary"
+          >
+            ← プロトタイピングに戻る
+          </Link>
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Courses</p>
           <h1 className="mt-3 font-heading text-[30px] font-bold leading-[1.4] tracking-[-0.05em] md:text-[40px]">
             コース
