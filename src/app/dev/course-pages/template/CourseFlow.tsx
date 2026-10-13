@@ -76,9 +76,9 @@ export default function CourseFlow({
                 <T f={step.gain} />
               </p>
               <p className="mt-2 text-[11px] font-bold text-text-muted">
-                {challenge
+                {challenge && step.items.length === 0
                   ? "お題に取り組む"
-                  : `レッスン ${step.items.length}本${plannedCount > 0 ? `（未制作 ${plannedCount}）` : ""}`}
+                  : `${challenge ? "お題＋" : ""}レッスン ${step.items.length}本${plannedCount > 0 ? `（未制作 ${plannedCount}）` : ""}`}
               </p>
             </li>
           );

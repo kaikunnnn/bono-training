@@ -216,8 +216,9 @@ export default function CourseCurriculumSyllabus({
                     <li>
                       <ChallengeLine step={step} />
                     </li>
-                  ) : (
-                    step.items.map((item, i) => (
+                  ) : null}
+                  {/* チャレンジにもレッスンがあれば、お題の行と並べて出す */}
+                  {step.items.map((item, i) => (
                       <li key={i}>
                         {item.type === "lesson" ? (
                           <LessonLine
@@ -230,8 +231,7 @@ export default function CourseCurriculumSyllabus({
                           <PlannedLine item={item} large={large} />
                         )}
                       </li>
-                    ))
-                  )}
+                    ))}
                 </ul>
               </div>
             </li>

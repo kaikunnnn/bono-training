@@ -32,7 +32,7 @@ export default function CourseTemplate({
   lessons: LessonMap;
   /** 進行中の会員として見せるときの進捗（確認用 ?progress=1）。null は未ログイン・未課金の見え方 */
   progressMock: ProgressMock | null;
-  /** カリキュラムの版（確認用 ?curriculum=syllabus-large|list。既定はシラバス） */
+  /** カリキュラムの版（確認用 ?curriculum=syllabus|list。既定はシラバス（大）） */
   curriculum: CurriculumVariant;
 }) {
   const progress = progressMock ? computeProgress(course, lessons, progressMock) : null;

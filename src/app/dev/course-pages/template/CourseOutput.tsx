@@ -45,7 +45,7 @@ export default function CourseOutput({ course }: { course: Course }) {
               <span className="ml-3 h-4 flex-1 rounded bg-text-primary/10" />
             </div>
             <div className="grid grid-cols-3 gap-3 p-4">
-              {["Hover", "Accordion", "Modal"].map((name) => (
+              {(course.output.samples ?? ["Sample 1", "Sample 2", "Sample 3"]).map((name) => (
                 <div key={name} className="flex aspect-[4/3] flex-col justify-end rounded-[10px] bg-text-primary/[0.06] p-2">
                   <span className="font-mono text-[10px] text-text-muted">{name}</span>
                 </div>

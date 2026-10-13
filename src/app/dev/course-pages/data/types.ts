@@ -37,7 +37,7 @@ export interface CourseStep {
   why: Field;
   /** 終えるとできるようになること（1文。ステップの最後にチェックポイントとして出す） */
   gain: Field;
-  /** goal のときのレッスン並び */
+  /** レッスンの並び（チャレンジにもレッスンがあれば入れる。お題の行と並べて出す） */
   items: CourseItem[];
   /** challenge のときのお題 */
   brief?: {
@@ -82,6 +82,8 @@ export interface Course {
   output: {
     lead: Field;
     points: Field[];
+    /** 完成イメージ枠に並べる見本のラベル（3つ。画像ができるまでの仮） */
+    samples?: string[];
   };
   audience: CourseAudienceItem[];
   author: {

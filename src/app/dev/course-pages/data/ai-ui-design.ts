@@ -115,6 +115,7 @@ export const aiUiDesignCourse: Course = {
       k("開閉・タブ切り替え・モーダルなど、状態が変わるインタラクション"),
       k("ブラウザで触れて、URLで人に見せられるプロトタイプ"),
     ],
+    samples: ["Hover", "Accordion", "Modal"],
   },
 
   audience: [

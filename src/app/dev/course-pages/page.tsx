@@ -1,14 +1,14 @@
 /**
  * /dev/course-pages — コース一覧のプロトタイプ（#241）
  *
- * data/index.ts の courses をカードで並べる。データ未投入のコースは「準備中」カード。
+ * data/index.ts の courses をカードで並べる（4コースとも同じ形・クリック可）。
  * カードのサムネは詳細ページと同じ CourseEyecatch を使う。
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { courses, lessonSlugs, upcomingCourses } from "./data";
+import { courses, lessonSlugs } from "./data";
 import { fetchLessons } from "./data/sanity-lessons";
 import CourseEyecatch, { pickCovers } from "./template/CourseEyecatch";
 import { KariProvider, T } from "./template/kari";
@@ -82,30 +82,6 @@ export default async function CourseListPage() {
               );
             })}
 
-            {upcomingCourses.map((course) => {
-              const { main, sub } = splitTitle(course.title);
-              return (
-                <li key={course.title}>
-                  {/* クリックできないので白や画像は使わず、点線の枠だけ（未制作レッスンと同じ考え方） */}
-                  <div className="flex aspect-[16/10] w-full flex-col items-center justify-center gap-1.5 rounded-[32px] border-2 border-dashed border-border-default text-center">
-                    <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-muted">Coming soon</span>
-                    <span className="font-heading text-base font-bold text-text-muted">{course.shortTitle}</span>
-                  </div>
-                  <div className="mt-5 px-1">
-                    <span className="inline-flex rounded-full border border-border-default px-2 py-px text-[11px] font-bold text-text-muted">
-                      準備中
-                    </span>
-                    <h2 className="mt-2 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] text-text-secondary">
-                      {main}
-                      {sub ? <span className="mt-0.5 block text-[15px] text-text-muted">{sub}</span> : null}
-                    </h2>
-                    <p className="mt-3 text-[13px] leading-[1.7] text-text-muted">
-                      カリキュラムを準備しています。AIコースの形が固まったら、同じテンプレートで中身を入れます。
-                    </p>
-                  </div>
-                </li>
-              );
-            })}
           </ul>
         </div>
       </div>

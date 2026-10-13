@@ -80,10 +80,9 @@ export default function CourseCurriculum({
                 </p>
 
                 <div className="mt-5">
-                  {challenge ? (
-                    <ChallengeBlock step={step} />
-                  ) : (
-                    <ol className="flex flex-col gap-2.5">
+                  {challenge ? <ChallengeBlock step={step} /> : null}
+                  {step.items.length > 0 ? (
+                    <ol className={challenge ? "mt-4 flex flex-col gap-2.5" : "flex flex-col gap-2.5"}>
                       {step.items.map((item, itemIndex) => (
                         <li key={itemIndex}>
                           {item.type === "lesson" ? (
@@ -99,7 +98,7 @@ export default function CourseCurriculum({
                         </li>
                       ))}
                     </ol>
-                  )}
+                  ) : null}
                 </div>
 
                 {/* チェックポイント（押せないので白にしない） */}

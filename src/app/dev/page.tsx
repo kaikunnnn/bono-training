@@ -30,7 +30,7 @@ const projects: DevProjectEntry[] = [
     issue: "#241",
     title: "コースページのプロトタイプ",
     summary:
-      "コースの元（template/）にコースごとのデータ（data/）を当てはめる形のコースページ。今は AI×UIデザイン入門コースのみ（残り3コースは一覧で準備中）。レッスンは Sanity の実データ（タイトル・表紙・概要・ゴール）、未制作は点線＋灰色の表紙。画面下のトグルで推測の文言に「仮」タグを表示。",
+      "コースの元（template/）にコースごとのデータ（data/）を当てはめる形のコースページ。4コース（はじめてのUIデザイン入門／UIデザイン基礎／AI×UIデザイン入門／UI体験デザイン基礎）。カリキュラムは既定がシラバス（大）、?curriculum=syllabus|list で切り替え、?progress=1 で進行中の会員の見え方。レッスンは Sanity の実データ（タイトル・表紙・概要・ゴール）、未制作は点線＋灰色の表紙。画面下のトグルで推測の文言に「仮」タグを表示。",
     status: "in-progress",
     links: [{ href: "/dev/course-pages/ai-ui-design", label: "AIコースの詳細" }],
   },

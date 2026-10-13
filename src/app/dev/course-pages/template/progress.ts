@@ -2,7 +2,7 @@
  * テンプレート＝全コース共通: 進捗の計算（純粋関数）— #241
  *
  * 構造: コース < ステップ < レッスン < 記事。進み具合は記事数で数える。
- * 未制作レッスン（記事がない）は計算に入れない。
+ * 未制作レッスン（記事がない）は計算に入れない。既存レッスンがないステップは「今のステップ」にしない。
  */
 
 import type { Course, LessonMap, ProgressMock } from "../data/types";
@@ -70,7 +70,7 @@ export function computeProgress(
     const complete = r.lessonsTotal > 0 && r.lessonsDone === r.lessonsTotal;
     let status: StepStatus = "todo";
     if (complete) status = "done";
-    else if (!currentFound) {
+    else if (!currentFound && r.lessonsTotal > 0) {
       status = "current";
       currentFound = true;
     }

@@ -100,7 +100,7 @@ export function KariProvider({
                   { value: "syllabus-large", label: "シラバス（大）" },
                   { value: "list", label: "リスト" },
                 ]}
-                onChange={(v) => setParam("curriculum", v === "syllabus" ? null : v)}
+                onChange={(v) => setParam("curriculum", v === "syllabus-large" ? null : v)}
               />
               <Segmented
                 label="進捗"

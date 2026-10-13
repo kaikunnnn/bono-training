@@ -1,7 +1,7 @@
 /**
  * /dev/course-pages/[course] — コース詳細のプロトタイプ（#241）
  *
- * 確認用: ?progress=1（進行中の会員の見え方・進捗はモック）、?curriculum=syllabus|syllabus-large|list（既定 syllabus）
+ * 確認用: ?progress=1（進行中の会員の見え方・進捗はモック）、?curriculum=syllabus|syllabus-large|list（既定 syllabus-large）
  * ここはつなぎ役だけ: data（Course）を slug で引き、Sanity からレッスンの実データを取り、
  * template の CourseTemplate に渡す。見た目は template/、中身は data/。
  */
@@ -42,7 +42,7 @@ export default async function CourseDetailPage({
       course={course}
       lessons={lessons}
       progressMock={progress === "1" ? (progressMocks[course.slug] ?? null) : null}
-      curriculum={curriculum === "list" || curriculum === "syllabus-large" ? curriculum : "syllabus"}
+      curriculum={curriculum === "list" || curriculum === "syllabus" ? curriculum : "syllabus-large"}
     />
   );
 }
