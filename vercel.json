@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/sanity-health",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/slack-welcome",
+      "schedule": "0 1 * * *"
     }
   ]
 }
