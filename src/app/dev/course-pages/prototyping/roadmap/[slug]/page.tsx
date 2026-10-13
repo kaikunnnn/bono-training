@@ -23,6 +23,7 @@ import type { LessonMap } from "../../../data/types";
 import CourseEyecatch, { pickCovers } from "../../../template/CourseEyecatch";
 import { KariProvider, T } from "../../../template/kari";
 import { courseCounts, pad2, splitTitle } from "../../../template/shared";
+import { hereLabel } from "../../../template/path";
 import { MiniPath, ROADMAP_BASE, StopIcon, firstCourseSlug, roadmapStats } from "../parts";
 
 type Params = Promise<{ slug: string }>;
@@ -232,7 +233,7 @@ export default async function RoadmapDetailPage({ params, searchParams }: { para
             {done !== null ? (
               <div className="mt-6 max-w-[560px]">
                 <p className="text-xs font-bold text-text-secondary">
-                  いまここ：{done}/{stats.stops} まで
+                  {hereLabel(done, stats.stops)}
                 </p>
                 <MiniPath roadmap={roadmap} done={done} className="mt-2" />
               </div>

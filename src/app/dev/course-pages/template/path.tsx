@@ -71,3 +71,9 @@ export function ProgressBar({ value, className }: { value: number; className?: s
     </span>
   );
 }
+
+/** 「いまここ 2/5（1つ完了）」の形。done = 終えた区切りの数 */
+export function hereLabel(done: number, total: number): string {
+  if (done >= total) return `いまここ ${total}/${total}（すべて完了）`;
+  return `いまここ ${done + 1}/${total}（${done}つ完了）`;
+}

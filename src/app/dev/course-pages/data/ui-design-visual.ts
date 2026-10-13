@@ -141,7 +141,7 @@ export const uiDesignVisualCourse: Course = {
     roadmap: {
       path: careerChangeRoadmap,
       position: 2,
-      note: k("このコースを終えると、2/5 まで。次は「UI体験デザイン基礎コース」で画面の流れをつくります。"),
+      note: k("このコースを終えると、いまここ 3/5（2つ完了）。次は「UI体験デザイン基礎コース」で画面の流れをつくります。"),
     },
   },
 

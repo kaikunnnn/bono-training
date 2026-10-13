@@ -181,7 +181,7 @@ export const uiExperienceCourse: Course = {
     roadmap: {
       path: careerChangeRoadmap,
       position: 3,
-      note: k("このコースを終えると、3/5 まで。次はポートフォリオづくりです。"),
+      note: k("このコースを終えると、いまここ 4/5（3つ完了）。次はポートフォリオづくりです。"),
     },
   },
 

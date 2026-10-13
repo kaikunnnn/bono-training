@@ -5,7 +5,7 @@
  * 1. サイドナビの並び（マイページ → コース → ロードマップ）
  * 2. 未ログインのトップ:「目的から選ぶ」入口で6本を短く
  * 3. マイページ: 行き先を選んだ人の「いまここ」の小さな地図（「続きから」の下）
- * 4. コース修了の画面: 「〇〇ロードマップの 2/5 まで。次はこのコース」
+ * 4. コース修了の画面: 「〇〇ロードマップ いまここ 3/5（2つ完了）。次はこのコース」
  * どれも静的なモック。押せる見た目のものだけ白。
  */
 
@@ -19,7 +19,7 @@ import { getRoadmap, roadmaps } from "../../../data/roadmaps";
 import { fetchLessons } from "../../../data/sanity-lessons";
 import CourseEyecatch, { pickCovers } from "../../../template/CourseEyecatch";
 import { KariProvider, T } from "../../../template/kari";
-import { ProgressBar } from "../../../template/path";
+import { ProgressBar, hereLabel } from "../../../template/path";
 import { computeProgress } from "../../../template/progress";
 import { splitTitle } from "../../../template/shared";
 import { MiniPath, ROADMAP_BASE } from "../parts";
@@ -254,7 +254,7 @@ export default async function PlacementPage() {
                 >
                   <p className="flex items-center justify-between text-xs font-bold text-text-muted">
                     <span>あなたの行き先：{career.name}</span>
-                    <span>いまここ 2/{career.stops.length}</span>
+                    <span>{hereLabel(1, career.stops.length)}</span>
                   </p>
                   <MiniPath roadmap={career} done={1} className="mt-3" />
                 </Link>
@@ -279,7 +279,7 @@ export default async function PlacementPage() {
                 <p className="text-3xl" aria-hidden="true">🎉</p>
                 <p className="mt-2 font-heading text-xl font-bold">UIデザイン基礎コースを修了しました</p>
                 <p className="mt-2 text-sm text-text-secondary">
-                  {career.name}ロードマップの <strong className="text-text-primary">2/{career.stops.length}</strong> まで来ました。
+                  {career.name}ロードマップ <strong className="text-text-primary">{hereLabel(2, career.stops.length)}</strong>
                 </p>
                 <MiniPath roadmap={career} done={2} className="mx-auto mt-4 max-w-[400px]" />
                 <p className="mt-6 text-left text-xs font-bold text-text-muted">次はこのコース</p>

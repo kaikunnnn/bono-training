@@ -9,7 +9,7 @@ import { ArrowRight } from "lucide-react";
 import { Map1, MessageText, Teacher } from "iconsax-react";
 import type { Course, CourseV2 } from "../../data/types";
 import { T } from "../kari";
-import { ProgressBar } from "../path";
+import { ProgressBar, hereLabel } from "../path";
 import { SectionHead, splitTitle } from "../shared";
 
 const CARD =
@@ -55,7 +55,7 @@ export default function CourseNext({ v2, nextCourse }: { v2: CourseV2; nextCours
               ロードマップ：{path.name}
             </span>
             <h3 className="mt-3 font-heading text-[17px] font-bold leading-[1.5] text-text-primary">
-              {position}/{path.stops.length} まで進む
+              修了すると {hereLabel(position, path.stops.length)}
             </h3>
             <ol className="mt-3 flex gap-1">
               {path.stops.map((stop, i) => (

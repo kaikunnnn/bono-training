@@ -171,7 +171,7 @@ export const aiUiDesignCourse: Course = {
     roadmap: {
       path: aiDesignRoadmap,
       position: 1,
-      note: k("このコースを終えると、1/3 まで。次は「UIデザイン基礎コース」で、AIの出力を判断する目を持ちます。"),
+      note: k("このコースを終えると、いまここ 2/3（1つ完了）。次は「UIデザイン基礎コース」で、AIの出力を判断する目を持ちます。"),
     },
   },
 
