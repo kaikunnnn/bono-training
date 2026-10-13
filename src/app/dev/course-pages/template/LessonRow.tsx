@@ -1,78 +1,72 @@
 /**
- * テンプレート＝全コース共通: 既存レッスンの行 — #241
+ * テンプレート＝全コース共通: レッスンの行（ステップの「やること」そのもの）— #241
  *
- * 表紙（2:3, 72×108）／タイトル h4／概要（2行）／このレッスンのゴール（purposes 最大2つ）／クエスト数。
- * Sanity から取れなかった slug も落とさず、灰色の表紙＋slug で出す。
+ * 順番の番号、表紙（56×84）、タイトル（h4）、1行の情報だけ。概要文と purposes は出さない。
+ * 既存レッスンはリンクなので白。progress を渡すと、完了は ✓、途中は「記事 4/7」の小さな表示。
  */
 
 import Link from "next/link";
 import { Check, ChevronRight } from "lucide-react";
 import type { ResolvedLesson } from "../data/types";
+import { ProgressBar } from "./path";
+import type { LessonProgress } from "./progress";
 import { LessonCover } from "./shared";
+
+export function RowNumber({ n, done = false }: { n: number; done?: boolean }) {
+  return (
+    <span
+      className={
+        done
+          ? "flex size-6 shrink-0 items-center justify-center rounded-full bg-text-success text-text-inverse"
+          : "flex size-6 shrink-0 items-center justify-center rounded-full border border-border-default font-latin text-[11px] font-bold text-text-secondary"
+      }
+    >
+      {done ? <Check size={13} strokeWidth={3.5} /> : n}
+    </span>
+  );
+}
 
 export default function LessonRow({
   slug,
   lesson,
-  order,
+  number,
+  progress,
 }: {
   slug: string;
   lesson: ResolvedLesson | null;
-  order: number;
+  number: number;
+  progress?: LessonProgress;
 }) {
-  const purposes = lesson?.purposes.slice(0, 2) ?? [];
+  const done = Boolean(progress && progress.done === progress.total);
+  const partial = Boolean(progress && progress.done > 0 && !done);
 
   return (
     <Link
       href={`/lessons/${slug}`}
-      className="group flex gap-4 rounded-[20px] border border-border-light bg-surface p-4 shadow-[var(--shadow-card)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)] md:gap-6 md:p-5"
+      className="group flex items-center gap-4 rounded-[16px] border border-border-light bg-surface py-2.5 pl-4 pr-4 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
     >
-      <LessonCover
-        lesson={lesson}
-        slug={slug}
-        sizes="72px"
-        className="w-[60px] self-start shadow-[var(--shadow-quest)] md:w-[72px]"
-      />
-
+      <RowNumber n={number} done={done} />
+      <LessonCover lesson={lesson} slug={slug} sizes="56px" className="w-14 shadow-[var(--shadow-quest)]" />
       <div className="min-w-0 flex-1">
-        <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-bold text-text-muted">
-          <span className="font-latin tracking-[0.04em]">LESSON {String(order).padStart(2, "0")}</span>
-          {lesson ? (
-            <span className="font-medium">
-              {lesson.questCount}クエスト・{lesson.articleCount}本
+        <h4 className="text-[15px] font-bold leading-[1.5] text-text-primary">{lesson?.title ?? slug}</h4>
+        <p className="mt-1 text-xs text-text-muted">
+          {!lesson ? (
+            <span className="font-mono">Sanity 未取得: {slug}</span>
+          ) : done ? (
+            <span className="font-bold text-text-success">完了</span>
+          ) : partial && progress ? (
+            <span className="flex items-center gap-2">
+              <span className="font-bold text-text-primary">
+                記事 {progress.done}/{progress.total}
+              </span>
+              <ProgressBar value={(progress.done / progress.total) * 100} className="w-16" />
             </span>
           ) : (
-            <span className="rounded bg-muted-strong px-1.5 py-px font-mono font-medium">
-              Sanity 未取得: {slug}
-            </span>
+            <>記事 {lesson.articleCount}本</>
           )}
         </p>
-        <h4 className="mt-1 font-heading text-base font-bold leading-[1.5] text-text-primary md:text-[17px]">
-          {lesson?.title ?? slug}
-        </h4>
-        {lesson?.description ? (
-          <p className="mt-1.5 line-clamp-2 text-[13px] leading-[1.75] text-text-secondary">
-            {lesson.description}
-          </p>
-        ) : null}
-
-        {purposes.length > 0 ? (
-          <div className="mt-3 border-t border-dashed border-border-light pt-3">
-            <p className="text-[11px] font-bold text-text-muted">このレッスンのゴール</p>
-            <ul className="mt-1.5 flex flex-col gap-1">
-              {purposes.map((purpose) => (
-                <li key={purpose} className="flex gap-2 text-[13px] leading-[1.7] text-text-primary">
-                  <Check size={14} strokeWidth={2.5} className="mt-[4px] shrink-0 text-text-success" />
-                  <span>{purpose}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
       </div>
-
-      <span className="hidden size-8 shrink-0 items-center justify-center self-center rounded-full border border-border-light text-text-muted transition-colors group-hover:bg-hover group-hover:text-text-primary md:flex">
-        <ChevronRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-      </span>
+      <ChevronRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
     </Link>
   );
 }

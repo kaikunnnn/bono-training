@@ -2,7 +2,6 @@
  * テンプレート＝全コース共通: セクション間で使い回す小さな部品 — #241
  *
  * - SectionHead: セクション見出し（小ラベル＋h2＋リード）
- * - ChapterLabel: カリキュラムの章の頭（STEP 01 / CHALLENGE ＋横線）
  * - LessonCover: レッスンの表紙（2:3）。画像がなければ灰色の表紙
  */
 
@@ -73,36 +72,6 @@ export function SectionHead({
       {lead ? (
         <p className="mt-3 text-sm leading-[1.9] text-text-secondary md:text-[15px]">{lead}</p>
       ) : null}
-    </div>
-  );
-}
-
-/** 章の頭のラベル＋横線（チャレンジと共通） */
-export function ChapterLabel({
-  label,
-  meta,
-  accent = false,
-}: {
-  label: string;
-  meta?: string;
-  accent?: boolean;
-}) {
-  return (
-    <div className="flex items-center gap-4">
-      <span
-        className={
-          accent
-            ? "bg-[image:var(--persona-cta-gradient)] bg-clip-text font-latin text-xl font-bold tracking-[0.06em] text-transparent md:text-2xl"
-            : "font-latin text-xl font-bold tracking-[0.06em] text-text-primary md:text-2xl"
-        }
-      >
-        {label}
-      </span>
-      <span
-        aria-hidden="true"
-        className={accent ? "h-px flex-1 bg-[image:var(--persona-cta-gradient)] opacity-60" : "h-px flex-1 bg-border-default"}
-      />
-      {meta ? <span className="shrink-0 text-xs font-bold text-text-muted">{meta}</span> : null}
     </div>
   );
 }

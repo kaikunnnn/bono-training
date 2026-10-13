@@ -8,7 +8,7 @@
  *       → こんな人向け → つくった人 → よくある質問 → 最後のCTA
  */
 
-import type { Course, LessonMap } from "../data/types";
+import type { Course, LessonMap, ProgressMock } from "../data/types";
 import CourseAudience from "./CourseAudience";
 import CourseAuthor from "./CourseAuthor";
 import CourseChange from "./CourseChange";
@@ -19,27 +19,32 @@ import CourseFlow from "./CourseFlow";
 import CourseHero from "./CourseHero";
 import CourseOutput from "./CourseOutput";
 import { KariProvider } from "./kari";
+import { computeProgress } from "./progress";
 
 export default function CourseTemplate({
   course,
   lessons,
+  progressMock,
 }: {
   course: Course;
   lessons: LessonMap;
+  /** 進行中の会員として見せるときの進捗（確認用 ?progress=1）。null は未ログイン・未課金の見え方 */
+  progressMock: ProgressMock | null;
 }) {
+  const progress = progressMock ? computeProgress(course, lessons, progressMock) : null;
   const firstLesson = course.steps
     .flatMap((step) => step.items)
     .find((item) => item.type === "lesson");
   const startHref = firstLesson && firstLesson.type === "lesson" ? `/lessons/${firstLesson.slug}` : null;
 
   return (
-    <KariProvider>
+    <KariProvider preview={{ progress: Boolean(progressMock) }}>
       <div className="min-h-screen w-full bg-[var(--bg-base)] font-noto-sans-jp text-text-primary">
         <div className="mx-auto w-full max-w-[1180px] px-4 md:px-10">
-          <CourseHero course={course} lessons={lessons} startHref={startHref} />
+          <CourseHero course={course} lessons={lessons} startHref={startHref} progress={progress} />
           <CourseChange course={course} />
-          <CourseFlow course={course} />
-          <CourseCurriculum course={course} lessons={lessons} />
+          <CourseFlow course={course} statuses={progress?.steps.map((st) => st.status)} />
+          <CourseCurriculum course={course} lessons={lessons} progress={progress} />
           <CourseOutput course={course} />
           <CourseAudience course={course} />
           <CourseAuthor course={course} />

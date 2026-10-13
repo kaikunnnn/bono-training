@@ -1,40 +1,27 @@
 /**
  * テンプレート＝全コース共通: コースの流れ（横の道のり）— #241
  *
+ * 進行中の会員のときは点の見た目で進み具合を示す。
  * 横一本の線上に 01●─02●─03●─チャレンジ◆─ゴール⚑ を等間隔に置き、各点の下に中身を書く。
  * カード・背景なし（白はクリックできる場所だけに使う方針）。モバイルは縦の線＋点。
  * 見出しの重複を避けるため、ここのステップ名は h3 にせず <p>（h3 はカリキュラム側）。
  */
 
-import { Flag } from "iconsax-react";
 import { cn } from "@/lib/utils";
 import type { Course } from "../data/types";
 import { T } from "./kari";
+import { PathMarker } from "./path";
+import type { StepStatus } from "./progress";
 import { SectionHead, numberSteps, pad2 } from "./shared";
 
-function Marker({ kind }: { kind: "goal" | "challenge" | "finish" }) {
-  if (kind === "finish") {
-    return (
-      <span className="flex size-5 items-center justify-center text-text-primary">
-        <Flag size={20} color="currentColor" variant="Bold" />
-      </span>
-    );
-  }
-  return (
-    <span className="flex size-5 items-center justify-center">
-      <span
-        className={cn(
-          "block ring-4 ring-[var(--bg-base)]",
-          kind === "challenge"
-            ? "size-3 rotate-45 bg-[image:var(--persona-cta-gradient)]"
-            : "size-3.5 rounded-full bg-text-primary"
-        )}
-      />
-    </span>
-  );
-}
-
-export default function CourseFlow({ course }: { course: Course }) {
+export default function CourseFlow({
+  course,
+  statuses,
+}: {
+  course: Course;
+  /** 進行中の会員のときだけ: 完了は塗り＋✓、今のステップは強調リング、未着手は白抜き */
+  statuses?: StepStatus[];
+}) {
   const steps = numberSteps(course);
   const columns = steps.length + 1; // 最後にゴール
 
@@ -69,7 +56,7 @@ export default function CourseFlow({ course }: { course: Course }) {
                 className="absolute bottom-0 left-[10px] top-[10px] w-px bg-border-strong lg:hidden"
               />
               <span className="absolute left-0 top-0 lg:static lg:block">
-                <Marker kind={challenge ? "challenge" : "goal"} />
+                <PathMarker kind={challenge ? "challenge" : "goal"} status={statuses?.[index] ?? "plain"} />
               </span>
 
               <a href={`#curriculum-step-${index + 1}`} className="group block lg:mt-5">
@@ -86,7 +73,7 @@ export default function CourseFlow({ course }: { course: Course }) {
                 </p>
               </a>
               <p className="mt-2 text-xs leading-[1.8] text-text-secondary">
-                <T f={step.goal} />
+                <T f={step.gain} />
               </p>
               <p className="mt-2 text-[11px] font-bold text-text-muted">
                 {challenge
@@ -99,7 +86,7 @@ export default function CourseFlow({ course }: { course: Course }) {
 
         <li className="relative pl-10 lg:pl-0">
           <span className="absolute left-0 top-0 lg:static lg:block">
-            <Marker kind="finish" />
+            <PathMarker kind="finish" status={statuses ? (statuses.every((st) => st === "done") ? "done" : "todo") : "plain"} />
           </span>
           <p className="font-latin text-xs font-bold tracking-[0.08em] text-text-primary lg:mt-5">GOAL</p>
           <p className="mt-1.5 font-heading text-[15px] font-bold leading-[1.55] text-text-primary">

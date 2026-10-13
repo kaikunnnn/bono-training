@@ -6,7 +6,8 @@
  */
 
 import { aiUiDesignCourse } from "./ai-ui-design";
-import type { Course, CourseItem, LessonRef } from "./types";
+import { aiUiDesignProgressMock } from "./progress-mock";
+import type { Course, CourseItem, LessonRef, ProgressMock } from "./types";
 
 export const courses: Record<string, Course> = {
   [aiUiDesignCourse.slug]: aiUiDesignCourse,
@@ -27,6 +28,11 @@ export const upcomingCourses: { title: string; shortTitle: string }[] = [
     shortTitle: "UI体験デザイン基礎",
   },
 ];
+
+/** 「進行中の会員」表示用の進捗モック（コースごと） */
+export const progressMocks: Record<string, ProgressMock> = {
+  [aiUiDesignCourse.slug]: aiUiDesignProgressMock,
+};
 
 export function getCourse(slug: string): Course | null {
   return courses[slug] ?? null;

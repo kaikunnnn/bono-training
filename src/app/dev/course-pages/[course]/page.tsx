@@ -1,17 +1,19 @@
 /**
  * /dev/course-pages/[course] — コース詳細のプロトタイプ（#241）
  *
+ * 確認用: ?progress=1（進行中の会員の見え方・進捗はモック）
  * ここはつなぎ役だけ: data（Course）を slug で引き、Sanity からレッスンの実データを取り、
  * template の CourseTemplate に渡す。見た目は template/、中身は data/。
  */
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getCourse, lessonSlugs } from "../data";
+import { getCourse, lessonSlugs, progressMocks } from "../data";
 import { fetchLessons } from "../data/sanity-lessons";
 import CourseTemplate from "../template/CourseTemplate";
 
 type Params = Promise<{ course: string }>;
+type SearchParams = Promise<{ progress?: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { course: slug } = await params;
@@ -22,11 +24,24 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   };
 }
 
-export default async function CourseDetailPage({ params }: { params: Params }) {
+export default async function CourseDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Params;
+  searchParams: SearchParams;
+}) {
   const { course: slug } = await params;
+  const { progress } = await searchParams;
   const course = getCourse(slug);
   if (!course) notFound();
 
   const lessons = await fetchLessons(lessonSlugs(course));
-  return <CourseTemplate course={course} lessons={lessons} />;
+  return (
+    <CourseTemplate
+      course={course}
+      lessons={lessons}
+      progressMock={progress === "1" ? (progressMocks[course.slug] ?? null) : null}
+    />
+  );
 }

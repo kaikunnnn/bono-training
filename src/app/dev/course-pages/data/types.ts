@@ -33,8 +33,10 @@ export interface CourseStep {
   kind: "goal" | "challenge";
   /** ステップ名（Figma のカリキュラム名） */
   title: Field;
-  /** このステップを終えるとできること（1文） */
-  goal: Field;
+  /** なぜやるのか（1文。控えめに見出しの下へ） */
+  why: Field;
+  /** 終えるとできるようになること（1文。ステップの最後にチェックポイントとして出す） */
+  gain: Field;
   /** goal のときのレッスン並び */
   items: CourseItem[];
   /** challenge のときのお題 */
@@ -104,3 +106,6 @@ export interface ResolvedLesson {
 
 /** slug → 取得結果（見つからない・取得失敗は null） */
 export type LessonMap = Record<string, ResolvedLesson | null>;
+
+/** 進捗モック: slug → 完了した記事数（"all" は全記事、"half" は半分） */
+export type ProgressMock = Record<string, number | "all" | "half">;

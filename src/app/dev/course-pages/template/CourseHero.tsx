@@ -12,16 +12,21 @@ import { Button } from "@/components/ui/button";
 import type { Course, LessonMap } from "../data/types";
 import CourseEyecatch, { pickCovers } from "./CourseEyecatch";
 import { T } from "./kari";
+import { ProgressBar } from "./path";
+import type { CourseProgress } from "./progress";
 import { courseCounts, splitTitle } from "./shared";
 
 export default function CourseHero({
   course,
   lessons,
   startHref,
+  progress,
 }: {
   course: Course;
   lessons: LessonMap;
   startHref: string | null;
+  /** 進行中の会員のときだけ。進捗バーと「続きから」を出す */
+  progress: CourseProgress | null;
 }) {
   const { main, sub } = splitTitle(course.title.text);
   const counts = courseCounts(course);
@@ -102,8 +107,27 @@ export default function CourseHero({
             </span>
           </p>
 
+          {progress ? (
+            <div className="mt-7 flex max-w-[540px] items-center gap-3">
+              <ProgressBar value={progress.percent} className="h-1.5 flex-1" />
+              <span className="shrink-0 text-xs font-bold text-text-secondary">
+                {progress.percent}% 完了・記事 {progress.articlesDone}/{progress.articlesTotal}
+              </span>
+            </div>
+          ) : null}
+
           <div className="mt-8 flex flex-wrap items-center gap-3">
-            {startHref ? (
+            {progress?.resume ? (
+              <Button asChild size="large" className="h-auto min-h-12 whitespace-normal py-2.5 text-left">
+                <Link href={`/lessons/${progress.resume.slug}`}>
+                  <span>
+                    <span className="block text-[11px] font-medium opacity-80">続きから</span>
+                    {progress.resume.title}の記事{progress.resume.articleNumber}
+                  </span>
+                  <ArrowRight strokeWidth={2.5} />
+                </Link>
+              </Button>
+            ) : startHref ? (
               <Button asChild size="large">
                 <Link href={startHref}>
                   このコースをはじめる
