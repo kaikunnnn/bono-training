@@ -1,0 +1,106 @@
+/**
+ * コースの元（データの形）— #241
+ *
+ * data/ ＝ コースごとに差し替える「中身」。このファイルはその形を決める。
+ * template/ ＝ 全コース共通の「見た目」。この形を受け取って描画するだけ。
+ *
+ * kari: true の文言は推測で書いた仮の文。画面下のトグルで「仮」タグを表示して区別する。
+ */
+
+/** 文言＋仮フラグ（course-card-patterns の MockField と同じ形） */
+export interface Field {
+  text: string;
+  kari?: boolean;
+}
+
+/** 既存レッスン（Sanity の slug で参照。タイトルや画像は Sanity から引く） */
+export interface LessonRef {
+  type: "lesson";
+  slug: string;
+}
+
+/** 未制作レッスン（予定タイトルと概要だけを持つ） */
+export interface PlannedLessonRef {
+  type: "planned";
+  title: Field;
+  summary: Field;
+}
+
+export type CourseItem = LessonRef | PlannedLessonRef;
+
+/** 小ゴール（ステップ）またはチャレンジ */
+export interface CourseStep {
+  kind: "goal" | "challenge";
+  /** ステップ名（Figma のカリキュラム名） */
+  title: Field;
+  /** このステップを終えるとできること（1文） */
+  goal: Field;
+  /** goal のときのレッスン並び */
+  items: CourseItem[];
+  /** challenge のときのお題 */
+  brief?: {
+    description: Field;
+    deliverables: Field[];
+  };
+}
+
+export interface CourseChangeRow {
+  before: Field;
+  after: Field;
+}
+
+export interface CourseAudienceItem {
+  title: Field;
+  body: Field;
+}
+
+export interface CourseFaqItem {
+  question: Field;
+  answer: Field;
+}
+
+export interface Course {
+  slug: string;
+  /** 正式タイトル。「：」の前を主見出し、後ろをサブ行として表示する */
+  title: Field;
+  /** コース名の短い呼び名（アイキャッチのラベル・カード用） */
+  shortTitle: Field;
+  /** ヒーローのひとこと説明 */
+  tagline: Field;
+  /** 得られる変化／期間／制作物（カードと共通の3点） */
+  change: Field;
+  period: Field;
+  deliverable: Field;
+  /** 目指す状態（受ける前 → 受けた後） */
+  changeRows: CourseChangeRow[];
+  /** コース全体のゴール（流れの終着点に出す1文） */
+  finalGoal: Field;
+  steps: CourseStep[];
+  /** 制作するもの（最終お題）の詳細 */
+  output: {
+    lead: Field;
+    points: Field[];
+  };
+  audience: CourseAudienceItem[];
+  author: {
+    name: Field;
+    role: Field;
+    bio: Field;
+    image: string;
+  };
+  faq: CourseFaqItem[];
+}
+
+/** Sanity から引いたレッスンの表示用データ（template に渡す） */
+export interface ResolvedLesson {
+  slug: string;
+  title: string;
+  iconImageUrl: string | null;
+  description: string | null;
+  purposes: string[];
+  questCount: number;
+  articleCount: number;
+}
+
+/** slug → 取得結果（見つからない・取得失敗は null） */
+export type LessonMap = Record<string, ResolvedLesson | null>;

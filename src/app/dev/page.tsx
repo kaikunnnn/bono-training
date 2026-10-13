@@ -26,6 +26,15 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/course-pages",
+    issue: "#241",
+    title: "コースページのプロトタイプ",
+    summary:
+      "コースの元（template/）にコースごとのデータ（data/）を当てはめる形のコースページ。今は AI×UIデザイン入門コースのみ（残り3コースは一覧で準備中）。レッスンは Sanity の実データ（タイトル・表紙・概要・ゴール）、未制作は点線＋灰色の表紙。画面下のトグルで推測の文言に「仮」タグを表示。",
+    status: "in-progress",
+    links: [{ href: "/dev/course-pages/ai-ui-design", label: "AIコースの詳細" }],
+  },
+  {
     href: "/dev/course-card-patterns/top",
     issue: "#235",
     title: "コースカードをトップに横3枚で並べた見え方",
