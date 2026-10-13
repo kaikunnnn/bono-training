@@ -9,7 +9,7 @@ import "server-only";
  * - 以降の書き込みはすべて claim_token 一致を条件にする（期限切れで横取りされたら止まる）
  * - 投稿の直前に status=sending を永続化してから chat.postMessage
  * - 投稿でタイムアウト・5xx・応答不明 → needs_review（自動で送り直さない）
- * - 投稿前と確実に分かる失敗だけ有限回リトライ（最大5回・最初の受信から20時間以内）
+ * - 投稿前と確実に分かる失敗だけ有限回リトライ（最大5回・最初の受信から26時間以内）
  * - sending は自動では拾い直さない（古い sending は cron が needs_review にする）
  * - 1人1行・削除しないので、退出→再参加や本文の版変更でも二度と送らない
  */
@@ -20,10 +20,14 @@ import type { SlackCallResult, SlackClient } from "./slack-api";
 import type { DeliveryPatch, DeliveryRow, DeliveryStatus, WelcomeStore } from "./types";
 
 export const MAX_ATTEMPTS = 5;
-export const MAX_AGE_MS = 20 * 60 * 60 * 1000;
+/**
+ * 最初の受信からこれを過ぎた行は送らない（dry_run → live の切り替えで過去の参加者にまとめて送らないため）。
+ * cron は日次（10:00 JST）なので、直後に参加して失敗した人も次の cron（最大24時間後）で拾えるよう26時間にする。
+ */
+export const MAX_AGE_MS = 26 * 60 * 60 * 1000;
 /**
  * 招待中（pending_activation）だった人は、参加の完了が数日後になりうるので待つ期間を長くする。
- * cron が日次なので、20時間では再確認の前に期限切れになってしまうため。
+ * cron が日次なので、26時間では参加完了を待ちきれないため。
  */
 export const PENDING_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
 const INVITED_CODE = "invited_user";
@@ -206,7 +210,7 @@ async function runOnce(ctx: Ctx): Promise<Step> {
   const { deps, row } = ctx;
   const now = deps.now();
 
-  // 最初の受信から20時間（招待中だった人は7日）を過ぎたら送らない（過去の参加者にまとめて送らない）
+  // 最初の受信から26時間（招待中だった人は7日）を過ぎたら送らない（過去の参加者にまとめて送らない）
   if (now.getTime() > deadlineOf(row)) {
     return ctx.attempts > 0
       ? finish(ctx, { status: "failed", lastErrorCode: "retry_window_expired" }, "failed")

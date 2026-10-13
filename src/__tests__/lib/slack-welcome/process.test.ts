@@ -90,7 +90,7 @@ describe("processDelivery: 対象外の除外", () => {
     expect(slack.postCalls).toHaveLength(1);
   });
 
-  it("招待中だった人は、20時間を過ぎても7日以内なら参加完了後に送る", async () => {
+  it("招待中だった人は、26時間を過ぎても7日以内なら参加完了後に送る", async () => {
     const { deps, nowRef } = makeDeps({ store, slack });
     slack.userFor = (u) => ({ kind: "ok", data: makeUser({ id: u, isInvitedUser: true }) });
     const id = await seed(store);
@@ -308,10 +308,17 @@ describe("processDelivery: 失敗時", () => {
     expect(slack.postCalls).toHaveLength(1);
   });
 
-  it("最初の受信から20時間を過ぎた行は送らない", async () => {
+  it("日次 cron の間隔（24時間）を空けて拾い直しても送れる", async () => {
     const { deps, nowRef } = makeDeps({ store, slack });
     const id = await seed(store);
-    nowRef.now = new Date(nowRef.now.getTime() + 21 * 60 * 60 * 1000);
+    nowRef.now = new Date(nowRef.now.getTime() + 24 * 60 * 60 * 1000);
+    expect(await processDelivery(deps, id)).toBe("sent");
+  });
+
+  it("最初の受信から26時間を過ぎた行は送らない", async () => {
+    const { deps, nowRef } = makeDeps({ store, slack });
+    const id = await seed(store);
+    nowRef.now = new Date(nowRef.now.getTime() + 27 * 60 * 60 * 1000);
     expect(await processDelivery(deps, id)).toBe("skipped");
     expect(store.get("U0NEW")!.lastErrorCode).toBe("expired");
     expect(slack.usersInfoCalls).toHaveLength(0);
