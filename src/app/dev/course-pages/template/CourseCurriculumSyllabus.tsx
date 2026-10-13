@@ -6,6 +6,7 @@
  *   区切り線のあとにレッスンの行（行の間も区切り線。h4）
  * 枠と枠の間は短い縦のコネクタで「下へ進む」流れを見せる。全幅の横線・横の道のりは使わない。
  * 枠は背景なし（白はクリックできる行のホバーにも使わない。行のホバーは淡い色）。
+ * size="lg"（シラバス（大））はレッスンの行だけ、表紙 72×108 の白いカードにする。
  */
 
 import Link from "next/link";
@@ -81,6 +82,86 @@ function PlannedLine({ item }: { item: PlannedLessonRef }) {
   );
 }
 
+/** シラバス（大）: 表紙 72×108 の白いカード。1冊ずつ目立たせる（既存レッスンはリンクなので白） */
+function LessonCard({
+  slug,
+  lesson,
+  progress,
+}: {
+  slug: string;
+  lesson: ResolvedLesson | null;
+  progress?: LessonProgress;
+}) {
+  const done = Boolean(progress && progress.done === progress.total);
+  const partial = Boolean(progress && progress.done > 0 && !done);
+  return (
+    <Link
+      href={`/lessons/${slug}`}
+      className="group flex items-center gap-4 rounded-[16px] border border-border-light bg-surface p-4 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)] md:gap-6 md:px-5"
+    >
+      <LessonCover
+        lesson={lesson}
+        slug={slug}
+        sizes="72px"
+        className="w-[60px] shadow-[var(--shadow-lift)] md:w-[72px]"
+      />
+      <div className="min-w-0 flex-1">
+        <h4 className="font-heading text-base font-bold leading-[1.5] text-text-primary md:text-[18px]">
+          {lesson?.title ?? slug}
+        </h4>
+        <p className="mt-1.5 text-[13px] text-text-muted">
+          {!lesson ? (
+            <span className="font-mono">Sanity 未取得: {slug}</span>
+          ) : partial && progress ? (
+            <span className="flex items-center gap-2">
+              <span className="font-bold text-text-primary">
+                記事 {progress.done}/{progress.total}
+              </span>
+              <ProgressBar value={(progress.done / progress.total) * 100} className="w-20" />
+            </span>
+          ) : (
+            <>
+              {lesson.questCount}クエスト・記事 {lesson.articleCount}本
+            </>
+          )}
+        </p>
+        {done ? (
+          <p className="mt-2 flex items-center gap-1.5 text-xs font-bold text-text-success">
+            <span className="flex size-5 items-center justify-center rounded-full bg-text-success text-text-inverse">
+              <Check size={12} strokeWidth={3.5} />
+            </span>
+            完了
+          </p>
+        ) : null}
+      </div>
+      <ChevronRight size={20} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+    </Link>
+  );
+}
+
+/** シラバス（大）: 未制作。押せないので白にせず、点線＋灰色の表紙＋薄い文字 */
+function PlannedCard({ item }: { item: PlannedLessonRef }) {
+  return (
+    <div className="flex items-center gap-4 rounded-[16px] border-2 border-dashed border-border-light p-4 md:gap-6 md:px-5">
+      <LessonCover plannedTitle="" sizes="72px" className="w-[60px] md:w-[72px]" />
+      <div className="min-w-0 flex-1">
+        <h4 className="font-heading text-base font-bold leading-[1.5] text-text-disabled md:text-[18px]">
+          <T f={item.title} />
+        </h4>
+        <p className="mt-1.5 text-[13px] text-text-disabled">
+          <span className="mr-2 rounded-full border border-border-light px-2 py-0.5 text-[11px] font-bold text-text-muted sm:hidden">
+            未制作
+          </span>
+          公開準備中
+        </p>
+      </div>
+      <span className="hidden shrink-0 rounded-full border border-border-light px-2 py-0.5 text-[11px] font-bold text-text-muted sm:inline">
+        未制作
+      </span>
+    </div>
+  );
+}
+
 function ChallengeLine({ step }: { step: CourseStep }) {
   if (!step.brief) return null;
   return (
@@ -123,11 +204,15 @@ export default function CourseCurriculumSyllabus({
   course,
   lessons,
   progress,
+  size = "md",
 }: {
   course: Course;
   lessons: LessonMap;
   progress: CourseProgress | null;
+  /** lg = シラバス（大）: レッスンを表紙 72×108 の白いカードで1冊ずつ目立たせる */
+  size?: "md" | "lg";
 }) {
+  const large = size === "lg";
   const counts = courseCounts(course);
   const numbered = numberSteps(course);
   const summary = [
@@ -189,27 +274,45 @@ export default function CourseCurriculumSyllabus({
                     <T f={step.gain} />
                   </p>
                 </div>
-                <ul className="divide-y divide-border-light border-t border-border-light">
-                  {challenge ? (
-                    <li>
-                      <ChallengeLine step={step} />
-                    </li>
-                  ) : (
-                    step.items.map((item, i) => (
+                {large && !challenge ? (
+                  <ul className="flex flex-col gap-3 border-t border-border-light p-3 md:p-4">
+                    {step.items.map((item, i) => (
                       <li key={i}>
                         {item.type === "lesson" ? (
-                          <LessonLine
+                          <LessonCard
                             slug={item.slug}
                             lesson={lessons[item.slug] ?? null}
                             progress={progress?.lessons[item.slug]}
                           />
                         ) : (
-                          <PlannedLine item={item} />
+                          <PlannedCard item={item} />
                         )}
                       </li>
-                    ))
-                  )}
-                </ul>
+                    ))}
+                  </ul>
+                ) : (
+                  <ul className="divide-y divide-border-light border-t border-border-light">
+                    {challenge ? (
+                      <li>
+                        <ChallengeLine step={step} />
+                      </li>
+                    ) : (
+                      step.items.map((item, i) => (
+                        <li key={i}>
+                          {item.type === "lesson" ? (
+                            <LessonLine
+                              slug={item.slug}
+                              lesson={lessons[item.slug] ?? null}
+                              progress={progress?.lessons[item.slug]}
+                            />
+                          ) : (
+                            <PlannedLine item={item} />
+                          )}
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                )}
               </div>
             </li>
           );

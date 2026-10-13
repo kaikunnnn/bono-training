@@ -4,7 +4,7 @@
  * テンプレート＝全コース共通: 確認用の固定バー — #241
  *
  * - 「仮」タグの表示（初期OFF・画面内の状態）。KariProvider の中の <T f={field} /> が見る
- * - 進捗なし／進行中の会員（URL ?progress=1）、カリキュラムの版 シラバス／リスト（URL ?curriculum=list）
+ * - 進捗なし／進行中の会員（URL ?progress=1）、カリキュラムの版 シラバス／シラバス（大）／リスト（URL ?curriculum=syllabus-large|list）
  *   ※ 詳細ページだけ。URL を書き換えてサーバー側で描き直す
  */
 
@@ -16,7 +16,7 @@ import type { Field } from "../data/types";
 
 const KariContext = createContext(false);
 
-export type CurriculumVariant = "syllabus" | "list";
+export type CurriculumVariant = "syllabus" | "syllabus-large" | "list";
 
 export interface PreviewState {
   progress: boolean;
@@ -97,6 +97,7 @@ export function KariProvider({
                 value={preview.curriculum}
                 options={[
                   { value: "syllabus", label: "シラバス" },
+                  { value: "syllabus-large", label: "シラバス（大）" },
                   { value: "list", label: "リスト" },
                 ]}
                 onChange={(v) => setParam("curriculum", v === "syllabus" ? null : v)}
