@@ -7,7 +7,9 @@
 export type NotificationType =
   | "question_comment"
   | "question_reaction"
-  | "comment_reaction";
+  | "comment_reaction"
+  // 運営からのお知らせ（#245）。actor は NULL、本文は payload.title
+  | "announcement";
 
 /** サイト内通知1件（Dropdown 一覧・表示用） */
 export interface NotificationItem {
