@@ -211,6 +211,13 @@ export default async function PlacementPage() {
                 </Link>
               </div>
             </MockFrame>
+            <Link
+              href={`${ROADMAP_BASE}/applied/top`}
+              className="mt-4 inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
+            >
+              実物のトップに当てはめると
+              <ArrowRight size={14} />
+            </Link>
           </Block>
 
           {/* 3. マイページ */}

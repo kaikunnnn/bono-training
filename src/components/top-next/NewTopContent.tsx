@@ -144,12 +144,18 @@ export interface NewTopContentProps {
    * Hero の入会CTAは PricingCtaLink で別途計測済みのため対象外。
    */
   surface?: HomeClickSurface;
+  /**
+   * ヒーロー直下に差し込むセクション（/dev のプロトで実物のトップに案を当てはめる用）。
+   * 本番の `/`・`/top` は渡さない（未指定なら何も描画しない）。
+   */
+  afterHero?: ReactNode;
 }
 
 export function NewTopContent({
   isMember = false,
   membershipCta,
   surface,
+  afterHero,
 }: NewTopContentProps) {
   const featuredCards = [
     {
@@ -176,6 +182,7 @@ export function NewTopContent({
     <>
       <script {...jsonLdScriptProps(generateWebSiteJsonLd())} />
       <HeroSection isMember={isMember} membershipCta={membershipCta} />
+      {afterHero}
       {/* スマホ(sm未満)のみ PurposeNav と FeaturedSeries の並びを逆にする。
           sm以上は PurposeNav → FeaturedSeries の元の順序を維持 */}
       <div className="flex flex-col">
