@@ -9,6 +9,26 @@ import type { HomeClickTracking } from "@/lib/activity-utils";
 export type ArticleRowVariant = "plain" | "updates";
 
 /**
+ * サムネは Vercel の画像最適化（/_next/image）を通さずに読む。
+ * 最適化は月の上限を超えると 402 になり、未変換の新しい画像が出なくなるため（/events と同じ回避策）。
+ * Sanity の画像は Sanity の画像CDNで 256x144（表示幅115pxの約2倍・16:9）に切り抜き、形式はブラウザに合わせる。
+ * https://www.sanity.io/docs/image-urls
+ */
+export function toArticleRowImageSrc(url: string) {
+  try {
+    const parsed = new URL(url);
+    if (parsed.hostname !== "cdn.sanity.io") return url;
+    parsed.searchParams.set("w", "256");
+    parsed.searchParams.set("h", "144");
+    parsed.searchParams.set("fit", "crop");
+    parsed.searchParams.set("auto", "format");
+    return parsed.toString();
+  } catch {
+    return url;
+  }
+}
+
+/**
  * 横並び小サムネイル＋タイトル（新トップページ Figma Make HANDOFF由来 / NewContentSection用）
  *
  * -mx / px / w-[calc] の組み合わせで、ホバー背景を広げつつコンテンツ左端は
@@ -64,9 +84,10 @@ export function ArticleRow({
       >
         {image && (
           <Image
-            src={image}
+            src={toArticleRowImageSrc(image)}
             alt=""
             fill
+            unoptimized
             sizes="(min-width: 1024px) 115px, 101px"
             className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
           />
