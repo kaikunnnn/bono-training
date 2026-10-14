@@ -16,6 +16,7 @@
  */
 export const ONSITE_REGISTRATION_EVENTS: readonly string[] = [
   "uidesign-challenge-2026-10",
+  "design-hours-2026-10-17",
 ];
 
 export function isOnsiteRegistrationEvent(slug: string): boolean {
