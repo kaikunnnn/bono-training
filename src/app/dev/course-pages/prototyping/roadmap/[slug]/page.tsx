@@ -265,6 +265,11 @@ export default async function RoadmapDetailPage({ params, searchParams }: { para
             <Link href={`${ROADMAP_BASE}/vs-course`} className="font-bold text-text-link hover:underline">
               コースとの違い →
             </Link>
+            {roadmap.slug === "career-change" ? (
+              <Link href={`${ROADMAP_BASE}/career-change-v3`} className="font-bold text-text-link hover:underline">
+                新しい形（ポートフォリオが育つ）を見る →
+              </Link>
+            ) : null}
           </div>
 
           {/* 1. ヒーロー */}

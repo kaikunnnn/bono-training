@@ -90,7 +90,29 @@ export default function RoadmapHubPage() {
             <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">
               見るポイント：行き先・道のり・コースの外でやること・進め方がわかるか。まずは「未経験から転職」から。「進捗あり」は会員の見え方（いまここ）。
             </p>
-            <ul className="mt-5 flex flex-col gap-2.5">
+            <div className="mt-5 flex items-center gap-2">
+              <Link
+                href={`${ROADMAP_BASE}/career-change-v3`}
+                className="group flex min-w-0 flex-1 items-center gap-4 rounded-[16px] border-2 border-text-primary bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-shadow hover:shadow-[var(--shadow-md)]"
+              >
+                <div className="min-w-0 flex-1">
+                  <p className="flex flex-wrap items-center gap-2 font-heading text-[15px] font-bold leading-[1.5]">
+                    未経験から転職（新しい形・試作）
+                    <span className="rounded-full bg-text-primary px-2 py-0.5 font-noto-sans-jp text-[10px] text-text-inverse">NEW</span>
+                  </p>
+                  <p className="text-xs text-text-muted">区切りごとにポートフォリオが育つ形。まずはここから確認</p>
+                </div>
+                <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+              </Link>
+              <Link
+                href={`${ROADMAP_BASE}/career-change-v3?progress=1`}
+                className="shrink-0 rounded-full border border-border-light bg-surface px-3 py-1.5 text-[11px] font-bold text-text-secondary hover:border-border-default"
+              >
+                進捗あり
+              </Link>
+            </div>
+            <p className="mt-5 text-xs font-bold text-text-muted">前の形（6本）</p>
+            <ul className="mt-2 flex flex-col gap-2.5">
               {roadmaps.map((r) => {
                 const s = roadmapStats(r);
                 return (
