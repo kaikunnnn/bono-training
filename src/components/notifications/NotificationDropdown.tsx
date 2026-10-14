@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Loader2, Inbox } from "lucide-react";
+import { Loader2, Inbox, Megaphone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,19 +79,35 @@ export function NotificationDropdown({
         const actorName = item.actorName?.trim() || "メンバー";
         const relative = formatRelativeTime(item.createdAt);
         const isUnread = item.readAt === null;
+        // 運営からのお知らせ（#245）は actor が NULL。アバターの代わりに BONO アイコンを出す
+        const isAnnouncement = item.type === "announcement";
+        // 外部URL（Slack 等）は新しいタブで開く。既読化は Bell を開いた時点で済んでいるため影響しない
+        const isExternal = /^https?:\/\//.test(item.linkUrl);
         return (
           <li key={item.id}>
             <Link
               href={item.linkUrl}
               onClick={onNavigate}
+              {...(isExternal
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
               className="flex items-start gap-3 px-3 py-3 transition-colors hover:bg-accent focus:bg-accent focus:outline-none"
             >
-              <Avatar className="h-8 w-8 shrink-0 border border-border bg-muted">
-                {item.actorAvatarUrl && (
-                  <AvatarImage src={item.actorAvatarUrl} alt={actorName} />
-                )}
-                <AvatarFallback>{actorName.slice(0, 1) || "?"}</AvatarFallback>
-              </Avatar>
+              {isAnnouncement ? (
+                <Avatar className="h-8 w-8 shrink-0 border border-border bg-muted">
+                  <AvatarImage src="/icons/icon-192.png" alt="BONO" />
+                  <AvatarFallback>
+                    <Megaphone className="h-4 w-4 text-muted-foreground" />
+                  </AvatarFallback>
+                </Avatar>
+              ) : (
+                <Avatar className="h-8 w-8 shrink-0 border border-border bg-muted">
+                  {item.actorAvatarUrl && (
+                    <AvatarImage src={item.actorAvatarUrl} alt={actorName} />
+                  )}
+                  <AvatarFallback>{actorName.slice(0, 1) || "?"}</AvatarFallback>
+                </Avatar>
+              )}
               <div className="min-w-0 flex-1">
                 {/* 既読は一段落としたグレー（--text-secondary）で表示する */}
                 <p

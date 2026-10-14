@@ -29,6 +29,8 @@ function defaultPreferenceMap(): NotificationPreferenceMap {
     question_comment: true,
     question_reaction: true,
     comment_reaction: true,
+    // 設定UIは未提供（#245）。型をそろえるためのデフォルト ON
+    announcement: true,
   };
 }
 

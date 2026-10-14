@@ -9,6 +9,9 @@ import type { NotificationItem, NotificationType } from "@/types/notification";
 /** actorName が無い場合の表示名フォールバック */
 const FALLBACK_ACTOR_NAME = "メンバー";
 
+/** 運営からのお知らせ（#245）で payload.title が無い場合の文言 */
+const FALLBACK_ANNOUNCEMENT_TITLE = "運営からのお知らせ";
+
 /**
  * 通知の本文を type に応じて組み立てる。
  * 将来 type を追加したら case を足すこと（default は汎用文言でクラッシュさせない）。
@@ -22,6 +25,11 @@ export function buildNotificationMessage(item: NotificationItem): string {
       return `${actor}さんが質問にリアクションしました`;
     case "comment_reaction":
       return `${actor}さんがコメントにリアクションしました`;
+    case "announcement": {
+      // お知らせは actor が NULL のため actor 名は使わず、payload.title をそのまま本文にする
+      const title = item.payload?.title;
+      return (typeof title === "string" && title.trim()) || FALLBACK_ANNOUNCEMENT_TITLE;
+    }
     default:
       // 未知の type でも「通知が届いた」ことは伝える（拡張時の安全側フォールバック）
       return `${actor}さんからの新しい通知`;
