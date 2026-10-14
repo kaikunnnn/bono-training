@@ -17,6 +17,13 @@ export const metadata: Metadata = {
 const CARD =
   "group block rounded-[24px] border border-border-light bg-surface p-5 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)] md:p-7";
 
+const APPLIED: { title: string; note: string; href?: string }[] = [
+  { title: "未ログインのトップ", note: "ヒーローの直下に「目的から選ぶ」（6本）", href: `${ROADMAP_BASE}/applied/top` },
+  { title: "サイドナビ", note: "マイページ（続きから）→ コース → ロードマップ" },
+  { title: "マイページ", note: "「続きから」と「いまここ」の小さな地図" },
+  { title: "コース修了の画面", note: "修了から、ロードマップの次の1コースへ" },
+];
+
 function Head({ kicker, title, lead }: { kicker: string; title: string; lead: string }) {
   return (
     <div className="flex items-start gap-4">
@@ -53,6 +60,41 @@ export default function RoadmapHubPage() {
               lead="サイドナビの並び、未ログインのトップ、マイページの「いまここ」、コース修了の画面。4つのモックに「どこで・誰に・何を」の注釈つき。"
             />
           </Link>
+          <section aria-labelledby="rm-hub-applied" className="rounded-[24px] border border-border-light p-5 md:p-7">
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">A-2 · Applied</p>
+            <h2 id="rm-hub-applied" className="mt-1.5 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] md:text-[22px]">
+              実物のページに当てはめる
+            </h2>
+            <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">
+              A のアイデアを、本番のページにそのまま足した見た目。
+            </p>
+            <ul className="mt-5 flex flex-col gap-2.5">
+              {APPLIED.map((a) => (
+                <li key={a.title}>
+                  {a.href ? (
+                    <Link
+                      href={a.href}
+                      className="group flex items-center gap-4 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-heading text-[15px] font-bold leading-[1.5]">{a.title}</p>
+                        <p className="truncate text-xs text-text-muted">{a.note}</p>
+                      </div>
+                      <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+                    </Link>
+                  ) : (
+                    <div className="flex items-center gap-4 rounded-[16px] border border-dashed border-border-light px-4 py-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-heading text-[15px] font-bold leading-[1.5] text-text-muted">{a.title}</p>
+                        <p className="truncate text-xs text-text-muted">{a.note}</p>
+                      </div>
+                      <span className="shrink-0 text-[11px] font-bold text-text-muted">準備中</span>
+                    </div>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </section>
           <Link href={`${ROADMAP_BASE}/list`} className={CARD}>
             <Head
               kicker="B · List"
