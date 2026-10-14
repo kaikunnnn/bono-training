@@ -123,7 +123,7 @@ export function PortfolioStrip({
   return (
     <ol
       className={cn(
-        "flex snap-x gap-3 overflow-x-auto pb-2 pt-3 sm:grid sm:grid-cols-5 sm:overflow-visible",
+        "-mx-1 flex snap-x scroll-px-1 gap-3 overflow-x-auto px-1 pb-2 pt-3 sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0",
         className
       )}
     >

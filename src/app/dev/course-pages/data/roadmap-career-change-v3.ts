@@ -58,8 +58,6 @@ export interface V3Stage {
   make: { items: Field[]; mock: WorkMockKind; caption: string };
   /** ポートフォリオに足されるもの（1行）と、記録しておくこと */
   adds: { line: Field; record: Field[] };
-  /** この区切りで既存の作品に起きる変化（ポートフォリオの区切り: 説明ページがつく） */
-  upgrade?: Field;
   checkpoint: Field;
   links: V3Link[];
 }
@@ -189,7 +187,6 @@ export const careerChangeV3 = {
           k("終わりに: 結果と反省"),
         ],
       },
-      upgrade: k("説明ページつき"),
       checkpoint: k("フィードバックの指摘を直し、代表作3つを人に見せられる形にしている"),
       links: [
         { label: "ポートフォリオの作り方", href: "/lessons/portfolio", image: PORTFOLIO_LESSON_IMG },

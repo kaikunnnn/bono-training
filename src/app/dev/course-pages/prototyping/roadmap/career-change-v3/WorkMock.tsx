@@ -131,7 +131,7 @@ function Trace3({ compact }: P) {
         ))}
         {compact ? null : (
           <div className="mt-auto self-end">
-            <Note>文字 14 / 行間 1.6</Note>
+            <Note>文字 14</Note>
           </div>
         )}
       </Phone>
