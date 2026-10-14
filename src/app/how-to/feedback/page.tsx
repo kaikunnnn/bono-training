@@ -31,7 +31,7 @@ function ApplyButton({
       <Button
         asChild
         size="large"
-        className={`bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold ${className ?? ""}`}
+        className={className}
       >
         <Link href={FEEDBACK_FORM_URL} target="_blank" rel="noopener noreferrer">
           応募する →
@@ -44,7 +44,7 @@ function ApplyButton({
     <Button
       asChild
       size="large"
-      className={`bg-slate-900 hover:bg-slate-800 text-white shadow-sm font-extrabold ${className ?? ""}`}
+      className={className}
     >
       <PricingCtaLink group="feedback">グロースプランで応募 →</PricingCtaLink>
     </Button>
