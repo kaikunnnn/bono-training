@@ -1853,7 +1853,8 @@ export async function getLatestMixedContent(
       publishedAt: a.publishedAt ?? "",
     })),
     ...guides.slice(0, limit).map((g) => ({
-      type: "ガイド",
+      // 一覧ページ(/guide)のタイトルに合わせる
+      type: "読みもの",
       title: g.title,
       thumbnail: g.thumbnailUrl ?? "",
       href: `/guide/${g.slug}`,
