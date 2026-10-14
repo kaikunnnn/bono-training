@@ -169,6 +169,13 @@ export default async function PlacementPage() {
                 <li>「レッスン」は単体で探したい人向けに残すが、コースの下へ下げる</li>
               </ul>
             </div>
+            <Link
+              href={`${ROADMAP_BASE}/applied/mypage`}
+              className="mt-4 inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
+            >
+              実物のサイドナビに当てはめると
+              <ArrowRight size={14} />
+            </Link>
           </Block>
 
           {/* 2. 未ログインのトップ */}
@@ -267,6 +274,13 @@ export default async function PlacementPage() {
                 </Link>
               </div>
             </MockFrame>
+            <Link
+              href={`${ROADMAP_BASE}/applied/mypage`}
+              className="mt-4 inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
+            >
+              実物のマイページに当てはめると
+              <ArrowRight size={14} />
+            </Link>
           </Block>
 
           {/* 4. コース修了の画面 */}
@@ -305,6 +319,13 @@ export default async function PlacementPage() {
                 </Link>
               </div>
             </MockFrame>
+            <Link
+              href={`${ROADMAP_BASE}/applied/course-complete`}
+              className="mt-4 inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
+            >
+              実物の見た目に当てはめると
+              <ArrowRight size={14} />
+            </Link>
           </Block>
         </div>
       </div>

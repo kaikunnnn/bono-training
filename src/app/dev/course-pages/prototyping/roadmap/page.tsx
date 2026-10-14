@@ -19,9 +19,9 @@ const CARD =
 
 const APPLIED: { title: string; note: string; href?: string }[] = [
   { title: "未ログインのトップ", note: "ヒーローの直下に「目的から選ぶ」（6本）", href: `${ROADMAP_BASE}/applied/top` },
-  { title: "サイドナビ", note: "マイページ（続きから）→ コース → ロードマップ" },
-  { title: "マイページ", note: "「続きから」と「いまここ」の小さな地図" },
-  { title: "コース修了の画面", note: "修了から、ロードマップの次の1コースへ" },
+  { title: "サイドナビ", note: "マイページ（続きから）→ コース → ロードマップ", href: `${ROADMAP_BASE}/applied/mypage` },
+  { title: "マイページ", note: "「続きから」と「いまここ」の小さな地図", href: `${ROADMAP_BASE}/applied/mypage` },
+  { title: "コース修了の画面", note: "修了から、ロードマップの次の1コースへ", href: `${ROADMAP_BASE}/applied/course-complete` },
 ];
 
 function Head({ kicker, title, lead }: { kicker: string; title: string; lead: string }) {
