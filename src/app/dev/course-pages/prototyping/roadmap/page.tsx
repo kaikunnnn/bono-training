@@ -1,6 +1,6 @@
 /**
  * /dev/course-pages/prototyping/roadmap — ロードマッププロトのハブ（#243）
- * A サイト内の見せ方／B 行き先を選ぶ／C 詳細（6本）へのリンク。
+ * オーナーが上から順に確認できるよう、前提→置き場所→実物→入口→中身 の順に並べる。
  */
 
 import type { Metadata } from "next";
@@ -14,28 +14,37 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-const CARD =
-  "group block rounded-[24px] border border-border-light bg-surface p-5 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)] md:p-7";
-
-const APPLIED: { title: string; note: string; href?: string }[] = [
-  { title: "未ログインのトップ", note: "ヒーローの直下に「目的から選ぶ」（6本）", href: `${ROADMAP_BASE}/applied/top` },
-  { title: "サイドナビ", note: "マイページ（続きから）→ コース → ロードマップ", href: `${ROADMAP_BASE}/applied/mypage` },
-  { title: "マイページ", note: "「続きから」と「いまここ」の小さな地図", href: `${ROADMAP_BASE}/applied/mypage` },
-  { title: "コース修了の画面", note: "修了から、ロードマップの次の1コースへ", href: `${ROADMAP_BASE}/applied/course-complete` },
+/** 確認する順番。上から順に見れば、前提 → 置き場所 → 実物 → 入口 → 中身 の流れになる */
+const STEPS: { kicker: string; title: string; point: string; links: { label: string; href: string }[] }[] = [
+  {
+    kicker: "Step 1 · 前提",
+    title: "コースとロードマップの違い",
+    point: "見るポイント：2つの役割の分け方に違和感がないか",
+    links: [{ label: "違いのページ", href: `${ROADMAP_BASE}/vs-course` }],
+  },
+  {
+    kicker: "Step 2 · 置き場所",
+    title: "サイト内の見せ方（注釈つきモック）",
+    point: "見るポイント：どこで・誰に・何を見せるか。サイドナビ、トップ、マイページ、修了画面の4か所",
+    links: [{ label: "4つのモック", href: `${ROADMAP_BASE}/placement` }],
+  },
+  {
+    kicker: "Step 3 · 実物",
+    title: "実物のページに当てはめる",
+    point: "見るポイント：本番に入れたときの見た目。サイドナビは新しい並びになっていて、クリックで行き来できる",
+    links: [
+      { label: "未ログインのトップ", href: `${ROADMAP_BASE}/applied/top` },
+      { label: "サイドナビ＋マイページ", href: `${ROADMAP_BASE}/applied/mypage` },
+      { label: "コース修了の画面", href: `${ROADMAP_BASE}/applied/course-complete` },
+    ],
+  },
+  {
+    kicker: "Step 4 · 入口",
+    title: "行き先を選ぶ",
+    point: "見るポイント：迷っている人が3問で1本に決められるか",
+    links: [{ label: "行き先を選ぶページ", href: `${ROADMAP_BASE}/list` }],
+  },
 ];
-
-function Head({ kicker, title, lead }: { kicker: string; title: string; lead: string }) {
-  return (
-    <div className="flex items-start gap-4">
-      <div className="min-w-0 flex-1">
-        <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">{kicker}</p>
-        <h2 className="mt-1.5 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] md:text-[22px]">{title}</h2>
-        <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">{lead}</p>
-      </div>
-      <ArrowRight size={20} className="mt-1 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
-    </div>
-  );
-}
 
 export default function RoadmapHubPage() {
   return (
@@ -49,66 +58,37 @@ export default function RoadmapHubPage() {
           ロードマップのプロト
         </h1>
         <p className="mt-3 max-w-[680px] text-[15px] leading-[1.9] text-text-secondary">
-          コース＝中身、ロードマップ＝地図（#242）。ロードマップにはレッスンを並べず、コースとコースの外でやることを並べます。サイトのどこで見せるか（A）、行き先の選び方（B）、地図の中身（C）を確かめるためのページです。
+          コース＝中身、ロードマップ＝地図（#242）。ロードマップにはレッスンを並べず、コースとコースの外でやることを並べます。上から順に見ていくと、前提 → 置き場所 → 実物 → 入口 → 中身 の流れで確認できます。
         </p>
 
         <div className="mt-10 flex flex-col gap-6">
-          <Link href={`${ROADMAP_BASE}/placement`} className={CARD}>
-            <Head
-              kicker="A · Placement"
-              title="サイト内の見せ方"
-              lead="サイドナビの並び、未ログインのトップ、マイページの「いまここ」、コース修了の画面。4つのモックに「どこで・誰に・何を」の注釈つき。"
-            />
-          </Link>
-          <section aria-labelledby="rm-hub-applied" className="rounded-[24px] border border-border-light p-5 md:p-7">
-            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">A-2 · Applied</p>
-            <h2 id="rm-hub-applied" className="mt-1.5 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] md:text-[22px]">
-              実物のページに当てはめる
-            </h2>
-            <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">
-              A のアイデアを、本番のページにそのまま足した見た目。
-            </p>
-            <ul className="mt-5 flex flex-col gap-2.5">
-              {APPLIED.map((a) => (
-                <li key={a.title}>
-                  {a.href ? (
+          {STEPS.map((step) => (
+            <section key={step.kicker} aria-label={step.title} className="rounded-[24px] border border-border-light p-5 md:p-7">
+              <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">{step.kicker}</p>
+              <h2 className="mt-1.5 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] md:text-[22px]">{step.title}</h2>
+              <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">{step.point}</p>
+              <ul className="mt-5 flex flex-col gap-2.5">
+                {step.links.map((l) => (
+                  <li key={l.href}>
                     <Link
-                      href={a.href}
+                      href={l.href}
                       className="group flex items-center gap-4 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
                     >
-                      <div className="min-w-0 flex-1">
-                        <p className="font-heading text-[15px] font-bold leading-[1.5]">{a.title}</p>
-                        <p className="truncate text-xs text-text-muted">{a.note}</p>
-                      </div>
+                      <p className="min-w-0 flex-1 font-heading text-[15px] font-bold leading-[1.5]">{l.label}</p>
                       <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
                     </Link>
-                  ) : (
-                    <div className="flex items-center gap-4 rounded-[16px] border border-dashed border-border-light px-4 py-3">
-                      <div className="min-w-0 flex-1">
-                        <p className="font-heading text-[15px] font-bold leading-[1.5] text-text-muted">{a.title}</p>
-                        <p className="truncate text-xs text-text-muted">{a.note}</p>
-                      </div>
-                      <span className="shrink-0 text-[11px] font-bold text-text-muted">準備中</span>
-                    </div>
-                  )}
-                </li>
-              ))}
-            </ul>
-          </section>
-          <Link href={`${ROADMAP_BASE}/list`} className={CARD}>
-            <Head
-              kicker="B · List"
-              title="行き先を選ぶ"
-              lead="3問の簡単な診断で1本をおすすめし、6つの行き先をカードで並べる。迷っている人の無料の入口。"
-            />
-          </Link>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
           <section aria-labelledby="rm-hub-detail" className="rounded-[24px] border border-border-light p-5 md:p-7">
-            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">C · Detail</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-text-muted">Step 5 · 中身</p>
             <h2 id="rm-hub-detail" className="mt-1.5 font-heading text-xl font-bold leading-[1.5] tracking-[-0.03em] md:text-[22px]">
               ロードマップの詳細（6本）
             </h2>
             <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">
-              ?progress=1 で「いまここ」と次の1コース（モック）。
+              見るポイント：行き先・道のり・コースの外でやること・進め方がわかるか。まずは「未経験から転職」から。「進捗あり」は会員の見え方（いまここ）。
             </p>
             <ul className="mt-5 flex flex-col gap-2.5">
               {roadmaps.map((r) => {
