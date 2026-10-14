@@ -103,7 +103,7 @@ export function FeedbackApplyClient({
         </Button>
 
         <p className="mt-4 text-sm text-muted-foreground">
-          15分フィードバックはStandard・Growthプラン限定の機能です。
+          15分フィードバックはスタンダード・フィードバックプラン限定の機能です。
           <PricingCtaLink
             group="feedback"
             className="text-primary underline ml-1"

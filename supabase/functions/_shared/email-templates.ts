@@ -33,7 +33,7 @@ const SITE_URL = (Deno.env.get("SITE_URL") || "https://bono-training.vercel.app"
 export function getPlanDisplayName(planType: string, duration: number): string {
   const planNames: Record<string, string> = {
     'standard': 'スタンダードプラン',
-    'feedback': 'グロースプラン',
+    'feedback': 'フィードバックプラン',
   };
   const baseName = planNames[planType] || 'スタンダードプラン';
   return `${baseName}（${duration}ヶ月）`;

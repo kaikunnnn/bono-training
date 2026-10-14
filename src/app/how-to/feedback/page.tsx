@@ -17,7 +17,7 @@ import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 const FEEDBACK_FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSe4lS_upTGN99sktg7CPFQtx3A3dgLYpvnuzspWH9lc2T2JDA/viewform?usp=header";
 
-// このフィードバック機能はグロースプラン（planType === "feedback"）限定。
+// このフィードバック機能はフィードバックプラン（planType === "feedback"）限定。
 // standardプラン・非メンバー・非ログインは全て対象外
 function ApplyButton({
   canApply,
@@ -46,7 +46,7 @@ function ApplyButton({
       size="large"
       className={className}
     >
-      <PricingCtaLink group="feedback">グロースプランで応募 →</PricingCtaLink>
+      <PricingCtaLink group="feedback">フィードバックプランで応募 →</PricingCtaLink>
     </Button>
   );
 }
@@ -113,7 +113,7 @@ function ChoiceItem({
 
 export default async function FeedbackGuidePage() {
   const subscription = await getSubscriptionStatus();
-  // このフィードバックはグロースプラン（planType === "feedback"）限定。
+  // このフィードバックはフィードバックプラン（planType === "feedback"）限定。
   // standardプラン・非メンバー・非ログインは応募不可
   const canApply = subscription.planType === "feedback";
 
