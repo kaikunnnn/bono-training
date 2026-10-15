@@ -19,8 +19,11 @@ const STEPS: { kicker: string; title: string; point: string; links: { label: str
   {
     kicker: "Step 1 · 前提",
     title: "コースとロードマップの違い",
-    point: "見るポイント：2つの役割の分け方に違和感がないか",
-    links: [{ label: "違いのページ", href: `${ROADMAP_BASE}/vs-course` }],
+    point: "見るポイント：2つの役割の分け方に違和感がないか。進めるのはコースだけ、ロードマップは選ばない",
+    links: [
+      { label: "違いのページ", href: `${ROADMAP_BASE}/vs-course` },
+      { label: "コースを進める仕組み（イメージ）", href: `${ROADMAP_BASE}/flow` },
+    ],
   },
   {
     kicker: "Step 2 · 置き場所",
@@ -33,8 +36,9 @@ const STEPS: { kicker: string; title: string; point: string; links: { label: str
     title: "実物のページに当てはめる",
     point: "見るポイント：本番に入れたときの見た目。サイドナビは新しい並びになっていて、クリックで行き来できる",
     links: [
+      { label: "課金ユーザーのトップ（ホーム）", href: `${ROADMAP_BASE}/applied/home` },
       { label: "未ログインのトップ", href: `${ROADMAP_BASE}/applied/top` },
-      { label: "サイドナビ＋マイページ", href: `${ROADMAP_BASE}/applied/mypage` },
+      { label: "マイページ", href: `${ROADMAP_BASE}/applied/mypage` },
       { label: "コース修了の画面", href: `${ROADMAP_BASE}/applied/course-complete` },
     ],
   },

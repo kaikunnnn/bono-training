@@ -2,9 +2,9 @@
  * /dev/course-pages/prototyping/roadmap/placement — A サイト内の見せ方（#243）
  *
  * 4つのモックを縦に並べ、それぞれに「どこで・誰に・何を訴求するか」の注釈を付ける。
- * 1. サイドナビの並び（マイページ → コース → ロードマップ）
+ * 1. サイドナビの並び（トップ（続きから）→ コース → ロードマップ）
  * 2. 未ログインのトップ:「目的から選ぶ」入口で6本を短く
- * 3. マイページ: 行き先を選んだ人の「いまここ」の小さな地図（「続きから」の下）
+ * 3. 続きから: コースを親にした1枚のカード（ContinueCourseCard。会員のトップの最初に置く）
  * 4. コース修了の画面: 「〇〇ロードマップ いまここ 3/5（2つ完了）。次はこのコース」
  * どれも静的なモック。押せる見た目のものだけ白。
  */
@@ -14,14 +14,15 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Book1, Calendar2, Home2, Map, MessageQuestion, Teacher, User } from "iconsax-react";
 import { cn } from "@/lib/utils";
-import { courses, getCourse, lessonSlugs, progressMocks } from "../../../data";
+import { courses, getCourse, lessonSlugs } from "../../../data";
 import { getRoadmap, roadmaps } from "../../../data/roadmaps";
 import { fetchLessons } from "../../../data/sanity-lessons";
 import CourseEyecatch, { pickCovers } from "../../../template/CourseEyecatch";
 import { KariProvider, T } from "../../../template/kari";
-import { ProgressBar, hereLabel } from "../../../template/path";
-import { computeProgress } from "../../../template/progress";
+import { hereLabel } from "../../../template/path";
 import { splitTitle } from "../../../template/shared";
+import { ContinueCourseCard } from "../ContinueCourseCard";
+import { fetchContinueMock } from "../continue-data";
 import { MiniPath, ROADMAP_BASE } from "../parts";
 
 export const metadata: Metadata = {
@@ -111,9 +112,8 @@ export default async function PlacementPage() {
   const lessons = await fetchLessons(Object.values(courses).flatMap(lessonSlugs));
   const career = getRoadmap("career-change")!;
 
-  // マイページ: 進行中のコース（基礎）と、選んだ行き先（未経験から転職）
-  const visual = getCourse("ui-design-visual")!;
-  const visualProgress = computeProgress(visual, lessons, progressMocks[visual.slug] ?? {});
+  // 続きから: 進行中のコース（基礎）が親、次の記事が主、いまここは小さく
+  const { card } = await fetchContinueMock();
   // 修了画面: 基礎を修了 → 次は体験
   const nextCourse = getCourse("ui-experience")!;
   const next = splitTitle(nextCourse.title.text);
@@ -131,7 +131,7 @@ export default async function PlacementPage() {
             サイト内の見せ方
           </h1>
           <p className="mt-3 max-w-[680px] text-[15px] leading-[1.9] text-text-secondary">
-            迷っている人はロードマップで行き先を選び、決まっている人はコースへ直接、会員は普段マイページの「続きから」。ロードマップを、どこで誰に見せるかの4つのモックです。
+            迷っている人はロードマップで行き先を選び、決まっている人はコースへ直接、会員は普段トップの「続きから」。ロードマップを、どこで誰に見せるかの4つのモックです。
           </p>
 
           {/* 1. サイドナビ */}
@@ -142,21 +142,21 @@ export default async function PlacementPage() {
               <Annotation
                 where="全ページの左のサイドナビ（モバイルはメニュー）"
                 who="会員と未ログインの全員"
-                what="会員は一番上の「マイページ（続きから）」で今日の1つへ。決まっている人は「コース」、迷っている人は「ロードマップ（目的から選ぶ）」へ分かれる並びにする"
+                what="会員は一番上の「トップ（続きから）」で今日の1つへ。決まっている人は「コース」、迷っている人は「ロードマップ（目的から選ぶ）」へ分かれる並びにする。マイページは記録・お気に入り・設定の場所として下へ"
               />
             }
           >
             <div className="grid gap-6 md:grid-cols-[260px_minmax(0,1fr)]">
               <MockFrame label="Sidebar（モック）" className="bg-muted-custom">
                 <ul className="flex flex-col gap-1 p-3">
-                  <NavItem icon={<User {...icon} />} label="マイページ" sub="続きから" active />
+                  <NavItem icon={<Home2 {...icon} />} label="トップ" sub="続きから" active />
                   <NavItem icon={<Book1 {...icon} />} label="コース" />
                   <NavItem icon={<Map {...icon} />} label="ロードマップ" sub="目的から選ぶ" />
                   <li className="my-1 border-t border-border-light" aria-hidden="true" />
-                  <NavItem icon={<Home2 {...icon} />} label="トップ" />
                   <NavItem icon={<Teacher {...icon} />} label="レッスン" />
                   <NavItem icon={<MessageQuestion {...icon} />} label="掲示板" />
                   <NavItem icon={<Calendar2 {...icon} />} label="イベント" />
+                  <NavItem icon={<User {...icon} />} label="マイページ" sub="記録・お気に入り・設定" />
                 </ul>
               </MockFrame>
               <ul className="flex flex-col gap-3 text-[13px] leading-[1.8] text-text-secondary">
@@ -164,13 +164,13 @@ export default async function PlacementPage() {
                   <strong className="text-text-primary">今の本番</strong>：マイページ → トップ → ロードマップ → 掲示板 → レッスン …（コースの項目はない）
                 </li>
                 <li>
-                  <strong className="text-text-primary">この案</strong>：毎日使う「続きから」を一番上に。中身の単位である「コース」を2番目、地図である「ロードマップ」を3番目に置き、ラベルの下に役割を小さく書く
+                  <strong className="text-text-primary">この案</strong>：毎日開く「トップ（続きから）」を一番上に。中身の単位である「コース」を2番目、地図である「ロードマップ」を3番目に置き、ラベルの下に役割を小さく書く
                 </li>
                 <li>「レッスン」は単体で探したい人向けに残すが、コースの下へ下げる</li>
               </ul>
             </div>
             <Link
-              href={`${ROADMAP_BASE}/applied/mypage`}
+              href={`${ROADMAP_BASE}/applied/home`}
               className="mt-4 inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
             >
               実物のサイドナビに当てはめると
@@ -227,60 +227,40 @@ export default async function PlacementPage() {
             </Link>
           </Block>
 
-          {/* 3. マイページ */}
+          {/* 3. 続きから */}
           <Block
             no="03"
-            title="マイページ：「いまここ」の小さな地図"
+            title="続きから：コースを親にした1枚のカード"
             note={
               <Annotation
-                where="マイページの「続きから」のすぐ下（行き先を選んだ人だけ）"
-                who="課金中で、行き先（ロードマップ）を選んでいる会員"
-                what="今日の1つ（続きから）の先に、長いゴールのどこまで来たかを見せる。止まっていた人が戻る理由にする"
+                where="会員のトップの最初の画面（今のマイページの一番上から移す）"
+                who="コースを進めている会員"
+                what="コースが親、次に進める記事が主役（押す場所はここだけ）、ロードマップのいまここは小さく1行。ほかに進めているコースは下に1行ずつ"
               />
             }
           >
-            <MockFrame label="Mypage（モック）" className="mx-auto max-w-3xl">
-              <div className="flex flex-col gap-4 px-5 py-5">
-                <div>
-                  <p className="mb-2 font-heading text-base font-bold">続きから</p>
-                  <Link
-                    href={`/dev/course-pages/v2/${visual.slug}?progress=1`}
-                    className="flex items-center gap-4 rounded-[18px] border border-border-light bg-surface p-4 shadow-[var(--shadow-xs)] hover:border-border-default"
-                  >
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-bold text-text-muted">{splitTitle(visual.title.text).main}</p>
-                      <p className="mt-0.5 font-heading text-[15px] font-bold">
-                        {visualProgress.resume
-                          ? `${visualProgress.resume.title}の記事${visualProgress.resume.articleNumber}`
-                          : "すべて完了"}
-                      </p>
-                      <div className="mt-2 flex items-center gap-3">
-                        <ProgressBar value={visualProgress.percent} className="h-1.5 flex-1" />
-                        <span className="text-xs font-bold text-text-secondary">{visualProgress.percent}%</span>
-                      </div>
-                    </div>
-                    <ArrowRight size={18} className="text-text-muted" />
-                  </Link>
-                </div>
-                <Link
-                  href={`${ROADMAP_BASE}/${career.slug}?progress=1`}
-                  className="block rounded-[18px] border border-border-light bg-surface px-4 py-3.5 shadow-[var(--shadow-xs)] hover:border-border-default"
-                >
-                  <p className="flex items-center justify-between text-xs font-bold text-text-muted">
-                    <span>あなたの行き先：{career.name}</span>
-                    <span>{hereLabel(1, career.stops.length)}</span>
-                  </p>
-                  <MiniPath roadmap={career} done={1} className="mt-3" />
-                </Link>
+            <MockFrame label="Continue（モック）" className="mx-auto max-w-3xl">
+              <div className="px-5 py-5">
+                <p className="mb-2 font-heading text-base font-bold">続きから</p>
+                <ContinueCourseCard data={card} />
               </div>
             </MockFrame>
-            <Link
-              href={`${ROADMAP_BASE}/applied/mypage`}
-              className="mt-4 inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
-            >
-              実物のマイページに当てはめると
-              <ArrowRight size={14} />
-            </Link>
+            <div className="mt-4 flex flex-wrap gap-x-6 gap-y-1">
+              <Link
+                href={`${ROADMAP_BASE}/applied/home`}
+                className="inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
+              >
+                実物のトップ（会員）に当てはめると
+                <ArrowRight size={14} />
+              </Link>
+              <Link
+                href={`${ROADMAP_BASE}/applied/mypage`}
+                className="inline-flex items-center gap-1 text-[13px] font-bold text-text-link hover:underline"
+              >
+                マイページに置いた場合
+                <ArrowRight size={14} />
+              </Link>
+            </div>
           </Block>
 
           {/* 4. コース修了の画面 */}

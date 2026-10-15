@@ -27,6 +27,8 @@ export default function CourseHeroV2({
   startHref,
   progress,
   totalMinutes,
+  started = null,
+  resumeArticleTitle = null,
 }: {
   course: Course;
   v2: CourseV2;
@@ -35,7 +37,12 @@ export default function CourseHeroV2({
   progress: CourseProgress | null;
   /** 公開中レッスンの動画の合計（分）。取れなければ null */
   totalMinutes: number | null;
+  /** #243 トピック4: false=まだ始めていない（押すと ?started=1）／true=進めているコース／null=従来どおり */
+  started?: boolean | null;
+  /** 続きからの記事タイトル。無ければ「レッスン名の記事N」 */
+  resumeArticleTitle?: string | null;
 }) {
+  const startLink = started === false ? `/dev/course-pages/v2/${course.slug}?started=1` : startHref;
   const { main, sub } = splitTitle(course.title.text);
   const counts = courseCounts(course);
   const published = counts.lessons - counts.planned;
@@ -68,8 +75,15 @@ export default function CourseHeroV2({
 
       <div className="mt-8 grid items-center gap-10 lg:mt-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:gap-12">
         <div className="min-w-0">
-          <p className="inline-flex items-center rounded-full border border-text-secondary px-2.5 py-0.5 text-xs font-bold text-text-secondary">
-            コース
+          <p className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center rounded-full border border-text-secondary px-2.5 py-0.5 text-xs font-bold text-text-secondary">
+              コース
+            </span>
+            {started ? (
+              <span className="inline-flex items-center rounded-full bg-text-primary px-2.5 py-0.5 text-xs font-bold text-text-inverse">
+                進めているコース
+              </span>
+            ) : null}
           </p>
           <h1 className="mt-5 font-heading font-bold tracking-[-0.05em] text-text-primary" id="course-title">
             <span className="block text-[32px] leading-[1.35] [word-break:keep-all] md:text-[40px]">
@@ -151,15 +165,15 @@ export default function CourseHeroV2({
                 <Link href={`/lessons/${progress.resume.slug}`}>
                   <span>
                     <span className="block text-[11px] font-medium opacity-80">続きから</span>
-                    {progress.resume.title}の記事{progress.resume.articleNumber}
+                    {resumeArticleTitle ?? `${progress.resume.title}の記事${progress.resume.articleNumber}`}
                   </span>
                   <ArrowRight strokeWidth={2.5} />
                 </Link>
               </Button>
-            ) : startHref ? (
+            ) : startLink ? (
               <Button asChild size="large">
-                <Link href={startHref}>
-                  このコースをはじめる
+                <Link href={startLink}>
+                  このコースを始める
                   <ArrowRight strokeWidth={2.5} />
                 </Link>
               </Button>

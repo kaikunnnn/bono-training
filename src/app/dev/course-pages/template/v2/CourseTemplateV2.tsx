@@ -33,11 +33,17 @@ export default function CourseTemplateV2({
   lessons,
   progressMock,
   nextCourse,
+  started = null,
+  resumeArticleTitle = null,
 }: {
   course: Course;
   lessons: LessonMap;
   progressMock: ProgressMock | null;
   nextCourse: Course | null;
+  /** #243 トピック4: 進めているコースか（null は従来どおり） */
+  started?: boolean | null;
+  /** 続きからの記事タイトル（進めているときだけ） */
+  resumeArticleTitle?: string | null;
 }) {
   const v2 = course.v2!;
   // 書き直した「得られる変化」で描く（Figma 原文は course.change に残っている）
@@ -69,6 +75,8 @@ export default function CourseTemplateV2({
             startHref={startHref}
             progress={progress}
             totalMinutes={totalMinutes}
+            started={started}
+            resumeArticleTitle={resumeArticleTitle}
           />
           {progress ? (
             <GoalReminder finalGoal={course.finalGoal} step={current?.step ?? null} stepLabel={currentLabel} />

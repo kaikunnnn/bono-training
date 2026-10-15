@@ -6,10 +6,11 @@
  * /dev/course-pages 配下だけで、本番の Sidebar の代わりに描く。
  * placement の「01 サイドナビの並び」を実物の部品（SidebarLogo / SidebarSearchBox /
  * SidebarMenuGroup / SidebarMenuItem）で組んだもの。本番のメニューは変えない。
- * - 一番上: マイページ（続きから）→ コース → ロードマップ（目的から選ぶ）
- * - 次: トップ → レッスン → 掲示板 → イベント
+ * - 一番上: トップ（続きから）→ コース → ロードマップ（目的から選ぶ）
+ * - 次: レッスン → 掲示板 → イベント → マイページ（記録・お気に入り・設定）
+ *   （#243 トピック2: 会員のトップを「続きから」にし、マイページは記録の場所へ下げる）
  * - サブ・その他: 本番と同じ（イベントは上へ移したので除く）
- * 行き先はプロトのページ（マイページ・トップ・コース一覧・ロードマップ一覧）。
+ * 行き先はプロトのページ（会員のトップ・マイページ・コース一覧・ロードマップ一覧）。
  * 本番バンドルに course-pages のデータを持ち込まないよう、パスは文字列で持つ。
  * プロトを片付けるときは、このファイルと index.tsx の分岐を消す。
  */
@@ -36,7 +37,7 @@ const HREF = {
   mypage: `${APPLIED}/mypage`,
   course: COURSE_PROTO_PREFIX,
   roadmap: `${ROADMAP}/list`,
-  top: `${APPLIED}/top`,
+  top: `${APPLIED}/home`,
 } as const;
 
 type ProtoKey = "mypage" | "course" | "roadmap" | "top" | null;
@@ -44,13 +45,13 @@ type ProtoKey = "mypage" | "course" | "roadmap" | "top" | null;
 /** 現在地。ロードマップ → マイページ → トップ → コース の順に判定する（コースが全部で光らないように） */
 function protoActiveKey(pathname: string): ProtoKey {
   if (pathname.startsWith(`${APPLIED}/mypage`) || pathname === `${COURSE_PROTO_PREFIX}/v2/mypage`) return "mypage";
-  if (pathname.startsWith(`${APPLIED}/top`)) return "top";
+  if (pathname.startsWith(`${APPLIED}/home`) || pathname.startsWith(`${APPLIED}/top`)) return "top";
   // 修了画面はコースの一部として扱う
   if (pathname.startsWith(`${APPLIED}/course-complete`)) return "course";
   // ロードマップの一覧・詳細（ハブ・placement・applied は「見せ方の検討ページ」なので光らせない）
   if (pathname.startsWith(`${ROADMAP}/`)) {
     const rest = pathname.slice(ROADMAP.length + 1);
-    if (rest.startsWith("placement") || rest.startsWith("applied")) return null;
+    if (rest.startsWith("placement") || rest.startsWith("applied") || rest.startsWith("flow")) return null;
     return "roadmap";
   }
   if (pathname.startsWith(`${COURSE_PROTO_PREFIX}/prototyping`)) return null;
@@ -95,10 +96,10 @@ export function PrototypeSidebar({
         <SidebarSearchBox />
       </div>
 
-      {/* プロトでは未ログインでもマイページ（モック）を見られるようにする */}
+      {/* プロトでは未ログインでも会員のトップ（モック）を見られるようにする */}
       <SidebarMenuGroup>
-        <SidebarMenuItem href={HREF.mypage} icon={<MenuIcons.mypage {...icon} />} isActive={active === "mypage"}>
-          <Label main="マイページ" sub="続きから" />
+        <SidebarMenuItem href={HREF.top} icon={<Home2 {...icon} />} isActive={active === "top"}>
+          <Label main="トップ" sub="続きから" />
         </SidebarMenuItem>
         <SidebarMenuItem href={HREF.course} icon={<Book1 {...icon} />} isActive={active === "course"}>
           コース
@@ -109,9 +110,6 @@ export function PrototypeSidebar({
       </SidebarMenuGroup>
 
       <SidebarMenuGroup>
-        <SidebarMenuItem href={HREF.top} icon={<Home2 {...icon} />} isActive={active === "top"}>
-          トップ
-        </SidebarMenuItem>
         <SidebarMenuItem href="/lessons" icon={<MenuIcons.lesson {...icon} />} isActive={isActive("/lessons")}>
           レッスン
         </SidebarMenuItem>
@@ -125,6 +123,9 @@ export function PrototypeSidebar({
         </SidebarMenuItem>
         <SidebarMenuItem href="/events" icon={<MenuIcons.events {...icon} />} isActive={isActive("/events")}>
           イベント
+        </SidebarMenuItem>
+        <SidebarMenuItem href={HREF.mypage} icon={<MenuIcons.mypage {...icon} />} isActive={active === "mypage"}>
+          <Label main="マイページ" sub="記録・お気に入り・設定" />
         </SidebarMenuItem>
       </SidebarMenuGroup>
 

@@ -4,6 +4,9 @@
  * v1（/dev/course-pages/[course]）は残して比較できるようにしている。
  * v2 の項目（Course.v2）が入っているコースだけ表示する（4コースとも入っている）。
  * 確認用: ?progress=1（進行中の会員の見え方・進捗はモック）
+ * ?started=0|1（#243 トピック4「進めるのはコース」のイメージ）
+ * - 0: まだ始めていない →「このコースを始める」（押すと ?started=1 ＝ 進めているコースとして登録した想定）
+ * - 1: 進めている →「進めているコース」の印と進み具合、ボタンは「続きから：次の記事」
  */
 
 import type { Metadata } from "next";
@@ -11,9 +14,11 @@ import { notFound } from "next/navigation";
 import { getCourse, lessonSlugs, progressMocks } from "../../data";
 import { fetchLessons } from "../../data/sanity-lessons";
 import CourseTemplateV2 from "../../template/v2/CourseTemplateV2";
+import { computeProgress } from "../../template/progress";
+import { fetchNextArticle } from "../../prototyping/roadmap/continue-data";
 
 type Params = Promise<{ course: string }>;
-type SearchParams = Promise<{ progress?: string }>;
+type SearchParams = Promise<{ progress?: string; started?: string }>;
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { course: slug } = await params;
@@ -32,17 +37,34 @@ export default async function CourseDetailV2Page({
   searchParams: SearchParams;
 }) {
   const { course: slug } = await params;
-  const { progress } = await searchParams;
+  const { progress, started: startedParam } = await searchParams;
+  // ?started が無いときは今まで通り（null）
+  const started = startedParam === "1" ? true : startedParam === "0" ? false : null;
   const course = getCourse(slug);
   if (!course || !course.v2) notFound();
 
   const lessons = await fetchLessons(lessonSlugs(course));
+  const progressMock =
+    started === true || (started === null && progress === "1") ? (progressMocks[course.slug] ?? null) : null;
+
+  // 進めているとき: 続きからの記事タイトル（Sanity の実データ）
+  let resumeArticleTitle: string | null = null;
+  if (started === true && progressMock) {
+    const resume = computeProgress(course, lessons, progressMock).resume;
+    if (resume) {
+      const { next } = await fetchNextArticle(resume.slug, resume.articleNumber - 1);
+      resumeArticleTitle = next?.articleTitle ?? null;
+    }
+  }
+
   return (
     <CourseTemplateV2
       course={course}
       lessons={lessons}
-      progressMock={progress === "1" ? (progressMocks[course.slug] ?? null) : null}
+      progressMock={progressMock}
       nextCourse={getCourse(course.v2.nextCourse.slug)}
+      started={started}
+      resumeArticleTitle={resumeArticleTitle}
     />
   );
 }
