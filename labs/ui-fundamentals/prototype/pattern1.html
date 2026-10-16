@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI Trainer — プロトタイプ v0.4</title>
+<style>
+  :root {
+    --ink: #000000; --sec: #4B4B4B; --ter: #5E5E5E;
+    --surface: #F3F3F3; --bg: #FAFAFA; --card: #FFFFFF;
+    --border: rgba(0,0,0,0.12); --accent: #276EF1;
+    --green: #0E8345; --red: #DE1135; --radius: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.7; }
+  .topbar { display: flex; align-items: center; gap: 24px; padding: 14px 32px; background: var(--card);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .topbar .logo { font-weight: 700; font-size: 15px; }
+  .topbar .crumb { color: var(--ter); font-size: 13px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .container { max-width: 720px; margin: 0 auto; padding: 40px 24px 96px; }
+  .container.wide { max-width: 960px; }
+  h1 { font-size: 26px; line-height: 1.4; margin-bottom: 8px; }
+  .lead { color: var(--sec); font-size: 15px; margin-bottom: 24px; }
+  .sectionlabel { font-size: 13px; font-weight: 600; color: var(--ter); margin-bottom: 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 24px; margin-bottom: 16px; }
+  .pill { display: inline-block; background: var(--surface); border-radius: 999px; padding: 3px 12px;
+    font-size: 12px; font-weight: 600; color: var(--sec); margin-right: 6px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 48px; padding: 0 24px;
+    border-radius: var(--radius); font-size: 15px; font-weight: 600; cursor: pointer; border: none;
+    font-family: inherit; transition: opacity .15s; }
+  .btn:hover { opacity: .85; }
+  .btn.primary { background: var(--ink); color: #fff; width: 100%; }
+  .btn.secondary { background: var(--card); color: var(--ink); border: 1px solid var(--ink); width: 100%; }
+  .btn.ghost { background: none; color: var(--accent); height: auto; padding: 4px 8px; }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .btnrow { display: flex; gap: 12px; margin-top: 8px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  textarea { width: 100%; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px; font-size: 14px; font-family: inherit; resize: vertical; background: var(--card); }
+  textarea:focus { outline: 2px solid var(--ink); border-color: transparent; }
+
+  /* ===== レッスンカード(v0.4) ===== */
+  .toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 28px; margin-bottom: 24px; }
+  .toc .toctitle { font-size: 16px; font-weight: 700; margin-bottom: 12px; }
+  .tocitem { display: flex; gap: 12px; padding: 8px 0; font-size: 14px; align-items: baseline;
+    border-bottom: 1px solid var(--border); }
+  .tocitem:last-child { border-bottom: none; }
+  .tocitem .tocnum { font-weight: 700; color: var(--accent); font-size: 12px; min-width: 64px; }
+  .tocitem .tocdo { color: var(--green); }
+  .lesson { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px 32px; margin-bottom: 24px; }
+  .lesson .lessonnum { display: inline-block; background: var(--ink); color: #fff; border-radius: 999px;
+    padding: 3px 14px; font-size: 12px; font-weight: 700; margin-bottom: 12px; }
+  .lesson .lessonnum.do { background: var(--green); }
+  .lesson h2 { font-size: 20px; margin-bottom: 14px; }
+  .goalbox { background: var(--surface); border-radius: var(--radius); padding: 14px 18px; margin-bottom: 6px; font-size: 14px; }
+  .goalbox b { display: inline-block; }
+  .whybox { border-left: 3px solid var(--accent); padding: 6px 16px; margin: 6px 0 16px; font-size: 13px; color: var(--sec); }
+  .lesson .body p { color: var(--sec); margin: 10px 0; font-size: 15px; }
+  .lesson .body b { color: var(--ink); }
+  /* 引用リンクカード */
+  .refsec { margin-top: 18px; }
+  .refsec .reftitle { font-size: 12px; font-weight: 700; color: var(--ter); margin-bottom: 8px; letter-spacing: .05em; }
+  a.reflink { display: block; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 18px; margin-bottom: 10px; color: inherit; background: var(--card); transition: border-color .15s; }
+  a.reflink:hover { border-color: var(--accent); text-decoration: none; }
+  a.reflink.primary { border-left: 4px solid var(--accent); }
+  .refhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .refbadge { font-size: 11px; font-weight: 700; border-radius: 4px; padding: 2px 8px; background: var(--accent); color: #fff; }
+  .refbadge.sub { background: var(--surface); color: var(--ter); }
+  .refsrc { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .refopen { margin-left: auto; font-size: 12px; color: var(--accent); white-space: nowrap; }
+  .refquote { font-size: 13px; color: var(--ink); margin-top: 8px; line-height: 1.7; }
+  .refquote::before { content: "“"; color: var(--ter); }
+  .refquote::after { content: "”"; color: var(--ter); }
+  .refnote { font-size: 12px; color: var(--ter); margin-top: 6px; }
+  /* フィールドワーク */
+  .fieldwork { background: #EAF3EC; border: 1px solid rgba(14,131,69,.3); border-radius: var(--radius);
+    padding: 18px 22px; margin: 14px 0; }
+  .fieldwork .fwtitle { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: var(--green); }
+  .fieldwork ol { margin: 8px 0 8px 20px; font-size: 14px; color: var(--sec); }
+  .fieldwork li { margin: 4px 0; }
+  .kanten { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 12px 16px; margin: 10px 0; font-size: 14px; }
+  .kanten b { color: var(--green); }
+  .policy { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; }
+  .policy th, .policy td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+  .policy th { background: var(--surface); font-size: 12px; color: var(--ter); }
+  .policy .kaishaku { color: var(--ter); }
+  .duo { display: flex; gap: 16px; margin: 12px 0; }
+  .duo .dcol { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .duo .dtitle { font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+  .duo .dnote { font-size: 12px; color: var(--ter); margin-top: 8px; line-height: 1.6; }
+  .mockfield { border: 1px solid #B0B0B0; border-radius: 8px; padding: 8px 12px; background: #fff; }
+  .mockfield .flabel { font-size: 10px; color: var(--ter); }
+  .mockfield .fval { font-size: 13px; }
+  .mocklabel { font-size: 12px; margin-bottom: 4px; }
+  .decidebox { background: var(--surface); border-radius: var(--radius); padding: 16px 20px; font-size: 14px; }
+  .decidebox ol { margin: 6px 0 0 20px; }
+  .decidebox li { margin: 4px 0; }
+
+  .checklist label { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; font-size: 14px; cursor: pointer; }
+  .checklist input { margin-top: 4px; accent-color: var(--ink); }
+  .checklist .why { color: var(--ter); font-size: 12px; }
+  details.hint { border: 1px solid var(--border); border-radius: var(--radius); background: var(--card); margin-bottom: 8px; }
+  details.hint summary { padding: 12px 16px; font-size: 14px; font-weight: 600; cursor: pointer; list-style: none; }
+  details.hint summary::before { content: "▸ "; color: var(--ter); }
+  details.hint[open] summary::before { content: "▾ "; }
+  details.hint .hintbody { padding: 0 16px 14px; font-size: 14px; color: var(--sec); }
+  .three { display: flex; gap: 16px; margin: 16px 0; }
+  .three .tcol { flex: 1; }
+  .three .tlabel { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+  .three .timg { width: 100%; height: 420px; object-fit: contain; background: var(--surface);
+    border: 1px solid var(--border); border-radius: var(--radius); display: block; }
+  .three .tsub { font-size: 11px; color: var(--ter); margin-top: 6px; line-height: 1.5; }
+  .uploadbox { width: 100%; height: 420px; background: var(--surface); border: 1px dashed #B0B0B0;
+    border-radius: var(--radius); display: flex; align-items: center; justify-content: center;
+    color: var(--ter); font-size: 13px; font-weight: 600; cursor: pointer; text-align: center; }
+  .obsbox { width: 100%; height: 420px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; font-size: 12px; color: var(--sec); overflow-y: auto; line-height: 1.9; }
+  .aspect { display: flex; gap: 16px; align-items: flex-start; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 10px; }
+  .aspect .aname { font-weight: 700; font-size: 14px; min-width: 80px; }
+  .aspect .adesc { flex: 1; font-size: 13px; color: var(--sec); }
+  .aspect select { border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; font-family: inherit; font-size: 13px; }
+  .grid { display: flex; gap: 16px; }
+  .odai { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+  .odai.locked { opacity: .45; }
+  .odai h3 { font-size: 16px; margin-bottom: 6px; }
+  .odai .meta { font-size: 12px; color: var(--ter); margin-bottom: 10px; }
+  .footer-note { color: var(--ter); font-size: 12px; margin-top: 32px; border-top: 1px solid var(--border); padding-top: 16px; }
+  .tagrow { margin: 8px 0 16px; }
+  .learned { display: inline-block; background: #EAF3EC; color: var(--green); border-radius: 999px;
+    padding: 4px 14px; font-size: 13px; font-weight: 600; margin: 0 6px 6px 0; }
+  .err { color: var(--red); font-size: 13px; display: none; margin-top: 6px; }
+  .whylist { display:none; font-size:12px; background:var(--surface); border-radius:8px; padding:12px 16px; margin-top:8px; line-height:2; }
+  .flowbar { display:flex; gap:8px; align-items:center; font-size:12px; color:var(--ter); margin-bottom:20px; flex-wrap:wrap; }
+  .flowbar .fstep { background: var(--surface); border-radius: 999px; padding: 4px 12px; font-weight: 600; }
+  .flowbar .fstep.now { background: var(--ink); color: #fff; }
+  .qlabel { font-weight: 600; font-size: 15px; margin: 16px 0 4px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">UI Trainer <span style="font-weight:400;color:var(--ter);font-size:12px">パターン1(v0.4)</span></span>
+  <span class="crumb" id="crumb">お題</span>
+  <span style="margin-left:auto;font-size:12px"><a href="pattern2.html">パターン2を見る →</a></span>
+</div>
+
+<section class="screen active" id="s1"><div class="container wide">
+  <h1>今日のお題</h1>
+  <p class="lead">実務で本当に作る画面だけ。<b>作ることが主役</b>です — 短いインプットのあと、すぐFigmaで制作に入ります。すべての教えは実在のデザインシステムと実測観察から引用します。</p>
+  <div class="grid" id="odaiGrid"></div>
+  <p class="footer-note">流れ: ブリーフ(1分)→ インプット(10分・いつでも見返せる)→ 制作(25分)→ 実物・模範と見比べる → 学びを言葉に。</p>
+</div></section>
+
+<section class="screen" id="s2"><div class="container" id="briefContainer"></div></section>
+<section class="screen" id="s3"><div class="container" id="inputContainer"></div></section>
+<section class="screen" id="s4"><div class="container" id="buildContainer"></div></section>
+<section class="screen" id="s5"><div class="container wide" id="compareContainer"></div></section>
+<section class="screen" id="s6"><div class="container" id="doneContainer"></div></section>
+
+<script>
+/* =====================================================================
+   引用DB — docs/10-ledger/ から転記(記憶からの記述なし)
+===================================================================== */
+const CITES = {
+  "S-14": { src:"GOV.UK Service Manual — Structuring forms", quote:"Start by splitting the form across multiple pages with each page containing just one thing", url:"https://www.gov.uk/service-manual/design/form-structure" },
+  "S-11": { src:"Laws of UX — Jakob's Law(ヤコブの法則)", quote:"Users spend most of their time on other sites. This means that users prefer your site to work the same way as all the other sites they already know.", url:"https://lawsofux.com/jakobs-law/" },
+  "S-06": { src:"NN/g — 10 Usability Heuristics #6", quote:"Minimize the user's memory load by making elements, actions, and options visible.", url:"https://www.nngroup.com/articles/ten-usability-heuristics/" },
+  "S-01": { src:"NN/g — Visual Hierarchy in UX", quote:"the organization of the design elements on the page so that the eye is guided to consume each design element in the order of intended importance", url:"https://www.nngroup.com/articles/visual-hierarchy-ux-definition/" },
+  "S-02": { src:"NN/g — Proximity Principle(近接の原則)", quote:"Items close together are likely to be perceived as part of the same group — sharing similar functionality or traits.", url:"https://www.nngroup.com/articles/gestalt-proximity/" },
+  "P-02": { src:"GOV.UK Design System — Text input", quote:"All text inputs must have labels, and in most cases the label should be visible.", url:"https://design-system.service.gov.uk/components/text-input/" },
+  "P-03": { src:"NN/g — Website Forms Usability", quote:"Placeholder text causes many usability problems, and is best avoided.", url:"https://www.nngroup.com/articles/web-form-design/" },
+  "P-05": { src:"NN/g — Website Forms Usability", quote:"Eliminating unnecessary fields requires more time, but the reduced user effort and increased completion rates make it worthwhile.", url:"https://www.nngroup.com/articles/web-form-design/" },
+  "P-06": { src:"NN/g — Website Forms Usability", quote:"Multiple columns interrupt the vertical momentum of moving down the form.", url:"https://www.nngroup.com/articles/web-form-design/" },
+  "P-08": { src:"GOV.UK Design System — Error message", quote:"Avoid messages like: 'An error occurred', 'Answer the question', 'Select an option', 'This field is required'.", url:"https://design-system.service.gov.uk/components/error-message/" },
+  "P-10": { src:"GOV.UK Design System — Error message", quote:"Do not clear any form fields when showing the Error message component. Keep both passing and failing answers.", url:"https://design-system.service.gov.uk/components/error-message/" },
+  "P-12": { src:"GOV.UK Design System — Button", quote:"Write button text in sentence case, describing the action it performs.", url:"https://design-system.service.gov.uk/components/button/" },
+  "P-14": { src:"GOV.UK Design System — Text input(ヒント)", quote:"Keep hint text to a single short sentence, without any full stops.", url:"https://design-system.service.gov.uk/components/text-input/" },
+  "P-16": { src:"GOV.UK Design System — Passwords(パターン)", quote:"You should follow this pattern whenever you need users to create or enter a password.", url:"https://design-system.service.gov.uk/patterns/passwords/" },
+  "F-05": { src:"Apple HIG — Accessibility(タップ領域)", quote:"iOS, iPadOS — Default control size: 44x44 pt", url:"https://developer.apple.com/design/human-interface-guidelines/accessibility" },
+  "Q-09": { src:"Uber Base 公式コード — Button実トークン", quote:"buttonPrimaryFill = black(#000000)/ buttonBorderRadius: '8px' / default高さ48px", url:"https://github.com/uber/baseweb" },
+  "V-06": { src:"Airbnb ログイン画面(実物スクリーンショット 2026-07-04)", quote:"見出しは Welcome to Airbnb / 入力は1枠 / Continue → or → Continue with Apple/Facebook/Google(全て同一サイズ)/ 最下部に Log in", url:"assets/real-airbnb.png" },
+  "V-obs": { src:"実測観察 — Uber / Spotify / Vercel の登録画面(2026-07-04取得)", quote:"4サービス全てで、初期画面の入力は1つだけ・ソーシャルは「Continue with ◯◯」の統一文言・見出しは質問または価値提案の1文だった", url:"https://auth.uber.com/login/" },
+  "SET-01": { src:"Apple HIG — Settings", quote:"Minimize the number of settings you offer. (中略) too many settings can make the experience feel less approachable, while also making it hard to find a particular setting.", url:"https://developer.apple.com/design/human-interface-guidelines/settings" },
+  "SET-03": { src:"Apple HIG — Settings", quote:"Putting this type of option in a separate settings area disconnects it from its context, requiring people to suspend their task to make adjustments", url:"https://developer.apple.com/design/human-interface-guidelines/settings" },
+  "SET-05": { src:"Apple HIG — Lists and tables", quote:"the grouped style uses headers, footers, and additional space to separate groups of data", url:"https://developer.apple.com/design/human-interface-guidelines/lists-and-tables" },
+  "SET-06": { src:"Material Design 3 — Lists", quote:"Container and label text are required. All other elements are optional", url:"https://m3.material.io/components/lists/guidelines" },
+  "SET-07": { src:"Apple HIG — Lists and tables(シェブロンの約束)", quote:"A disclosure indicator reveals the next level in a hierarchy; it doesn't show details about the item.", url:"https://developer.apple.com/design/human-interface-guidelines/lists-and-tables" },
+  "SET-08": { src:"Apple HIG — Toggles", quote:"Use the switch toggle style only in a list row.", url:"https://developer.apple.com/design/human-interface-guidelines/toggles" },
+  "SET-09": { src:"NN/g — Toggle-Switch Guidelines", quote:"Toggle switches should take immediate effect and should not require the user to click Save or Submit to apply the new state.", url:"https://www.nngroup.com/articles/toggle-switch-guidelines/" },
+  "SET-11": { src:"NN/g — Toggle-Switch Guidelines(ラベル)", quote:"The toggle labels should describe what the control will do when the switch is on.", url:"https://www.nngroup.com/articles/toggle-switch-guidelines/" },
+  "SET-12": { src:"NN/g — Confirmation Dialogs", quote:"Instead of Yes/No answers, provide response options that summarize what will happen for each possible response. (例: Delete file / Keep file)", url:"https://www.nngroup.com/articles/confirmation-dialog/" },
+  "SET-15": { src:"Material Design 3 — Lists(区切り線)", quote:"Limit dividers to uncontained or complex lists, only when a stronger visual separation is necessary", url:"https://m3.material.io/components/lists/guidelines" },
+  "OBS-ACC": { src:"実測観察 — GitHub / Slack / Notion / Firefox の設定(2026-07-06取得)", quote:"4サービスすべてで、アカウント/プロフィールが設定の入口・最上位に置かれていた(例: Firefoxの第1パネルは Account and sync)", url:"https://support.mozilla.org/en-US/kb/firefox-options-preferences-and-settings" },
+  "OBS-DEL": { src:"GitHub Docs — アカウント削除の実物手順", quote:"削除ボタンは Account 設定ページ下部の Delete account セクションにあり、実行前にユーザー名+提示フレーズの二重タイプ確認を要求する", url:"https://docs.github.com/en/account-and-profile/setting-up-and-managing-your-personal-account-on-github/managing-personal-account-settings/deleting-your-personal-account" },
+  "OBS-GATE": { src:"Apple サポート — iOS通知設定の実物手順", quote:"Settings → Apps → 通知 → Allow Notifications(親トグル)をオンにすると、配下でサウンド・配置・見た目を調整できる。手順に保存ボタンは一切登場しない", url:"https://support.apple.com/en-us/120681" },
+};
+
+/* =====================================================================
+   お題レジストリ(v0.4: 1カード=学ぶこと1つ)
+   card: { type:'basic'|'do'|'wrap', title, goal(🎯学ぶこと), why(🧭制作のどこで使うか),
+           body(html), refs:[{c:CITE-ID, w:'必読'|'参考', note}] }
+===================================================================== */
+const ODAI = {
+  "01": {
+    title:"お題01 — Sign Up", level:"初級", time:"約60分",
+    tags:["フォーム","入力パターン","CTA"], paceLabel:"はじめてのパターン(インプット厚め)",
+    cardDesc:"音楽アプリの登録画面。ラベル・タップ領域・視覚階層の基礎。",
+    make:"音楽アプリ「Tempo」の新規登録画面(iOS 390×844)をFigmaで1枚",
+    scenario:`10〜20代向け音楽アプリ<b>「Tempo」</b>の新規登録画面。登録は<b>メール確認コード式+ソーシャル(Apple / Google)</b>。ユーザーの目的は音楽を聴くことで、登録は通過点——<b>「考えずに30秒で通過できる」</b>が勝ち筋です。`,
+    elements:[
+      "Tempoのロゴ",
+      "見出し(機能名ではなく、歓迎か価値を伝える1文)",
+      "メールアドレスの入力欄",
+      "「続行すると確認コードが届く」ことの予告(1文)",
+      "続行ボタン(CTA)",
+      "「または」の区切り",
+      "ソーシャルボタン2本(Appleで続行 / Googleで続行)",
+      "ログイン導線(すでにアカウントがある人の脱出路)",
+    ],
+    checklist:[
+      ["入力欄のラベルが常時見える","P-02"],
+      ["プレースホルダーをラベル代わりにしていない","P-03"],
+      ["押せる要素は44×44pt以上","F-05"],
+      ["有彩色はCTA系の1色だけ","V-obs"],
+      ["ソーシャルボタンが完全に同一サイズ","V-06"],
+      ["CTAの文言が動作を表している","P-12"],
+      ["既存ユーザーの脱出路(ログイン導線)がある","S-06"],
+      ["余白が8の倍数で、グループ間 > グループ内","S-02"],
+      ["1カラム縦積み","P-06"],
+      ["「続行すると何が起きるか」の予告がある","P-14"],
+      ["本文コントラスト4.5:1以上",null],
+    ],
+    parts:[["テキスト入力","GOV.UK Design System","https://design-system.service.gov.uk/components/text-input/"],
+           ["ボタン(黒CTA)","Uber Base 実トークン","https://github.com/uber/baseweb"],
+           ["タップ領域 44pt","Apple HIG","https://developer.apple.com/design/human-interface-guidelines/accessibility"]],
+    inputCards:[
+      { type:'basic', title:"1画面には、1つの用事だけ",
+        goal:"登録画面の役割は「連絡先を渡して次へ進む」——それだけ、と捉えること",
+        why:"制作の最初、「画面に何を載せて何を削るか」を決めるときの物差しになる",
+        body:`<p>Tempoのユーザーは音楽を聴きたくてここに来ます。登録は目的ではなく<b>通過点</b>です。だからこの画面に載せるものは、用事(連絡先を渡す)に効くものだけ。載せたいものではなく、<b>ユーザーの用事に必要なもの</b>で選びます。</p>
+        <p>GOV.UK(英国政府のデザインシステム)はこれを「One thing per page — 1画面に1つのことだけ」という原則として明文化しています。項目を減らすほど完了率が上がることも、NN/gの調査が裏づけています。</p>`,
+        refs:[
+          { c:"S-14", w:"必読", note:"「1画面に1つのこと」の原典。フォーム設計の出発点" },
+          { c:"P-05", w:"参考", note:"項目を減らすと完了率が上がる(NN/gの知見)" },
+        ] },
+      { type:'basic', title:"登録画面には「定番の型」がある",
+        goal:"実在サービスの登録画面は「入力1つ+続行ボタン+ソーシャル+ログイン導線」という共通の骨格を持つ、と知ること",
+        why:"レイアウトの骨組み(何を・どの順に・縦に積むか)を決めるとき、ゼロから発明しないため",
+        body:`<p>ユーザーは1日の大半を他のアプリで過ごしています。だからあなたの画面も「知っている形」で動くことを期待される——これが<b>ヤコブの法則</b>です。奇抜な構成は、それだけでユーザーに学習コストを払わせます。</p>
+        <p>実際に測ってみると、Uber・Spotify・Vercel・Airbnbの登録開始画面は驚くほど同じでした: <b>①入力欄は1つだけ ②ボタンは「続行(Continue)」 ③「◯◯で続行」のソーシャルボタン ④見出しは機能名でなく問いかけや価値提案</b>。今日はこの実在する型を、根拠を知ったうえで自分の文脈に組み直します。</p>`,
+        refs:[
+          { c:"S-11", w:"必読", note:"なぜ定番に従うのか、の理論的根拠" },
+          { c:"V-obs", w:"必読", note:"4サービスの実測記録(Uberの実物ページに飛べます)" },
+        ] },
+      { type:'do', title:"フィールドワーク: 実物を触る(5分)",
+        goal:"上の「型」と、サービスごとの「方針の違い」を自分の目で確かめること — デザインの基本は、世の中のものを見て・触って・学ぶこと",
+        why:"スクショを眺めるのと、自分で触るのとでは、身につき方がまったく違う。制作の判断はこの観察から生まれる",
+        body:`<div class="fieldwork">
+          <div class="fwtitle">✅ やること(登録の完了はしなくてOK)</div>
+          <ol>
+            <li><a href="https://www.airbnb.jp/" target="_blank">Airbnb ↗</a> を開く(右上メニュー →「ログインまたは登録」)</li>
+            <li><a href="https://www.spotify.com/jp/signup" target="_blank">Spotify の登録 ↗</a> を開く</li>
+            <li><a href="https://auth.uber.com/login/" target="_blank">Uber のログイン/登録 ↗</a> を開く</li>
+          </ol>
+        </div>
+        <div class="kanten"><b>観点①</b> 最初の画面に、入力欄はいくつある?</div>
+        <div class="kanten"><b>観点②</b> パスワードはいつ求められる?(最初? 後? そもそも無い?)</div>
+        <div class="kanten"><b>観点③</b> ボタンには何と書いてある?</div>
+        <div class="qlabel" style="font-size:14px">観察メモ(任意 — 気づいたことを自分の言葉で)</div>
+        <textarea id="fwMemo" rows="2" placeholder="例: Spotifyは本当に1画面1個しか聞いてこなかった。Airbnbは電話が先なのが意外…"></textarea>
+        <details class="hint" style="margin-top:12px"><summary>触れない環境の人向け: スクショで確認する</summary>
+          <div class="hintbody"><img src="assets/real-airbnb.png" style="width:200px;border:1px solid var(--border);border-radius:8px" alt="Airbnb実物"><br>Airbnbのログイン/登録(2026-07-04時点の実物)</div></details>`,
+        refs:[] },
+      { type:'basic', title:"「パスワードをいつ作らせるか」は方針で分かれる",
+        goal:"確認コード式は普遍の正解ではなく、サービスの性質で分かれる「方針」だと理解すること",
+        why:"Tempoのメール欄まわりの構成を、「みんなそうしてるから」ではなく理由を持って決めるため",
+        body:`<p>フィールドワークで見たとおり、UberやAirbnbは登録の最初にパスワードを作らせません(コード確認式)。ただし——<b>これは普遍法則ではありません</b>。GOV.UKは今もパスワード式を標準パターンとして定義しています。方針の違いを並べると:</p>
+        <table class="policy">
+          <tr><th>サービス</th><th>観察された事実(2026-07取得)</th><th class="kaishaku">方針の読み(解釈です)</th></tr>
+          <tr><td>Uber</td><td>電話番号かメールを1欄。パスワードはその場で作らせない(コード確認)</td><td class="kaishaku">世界中で使われ、電話番号が主なID</td></tr>
+          <tr><td>Airbnb</td><td>国+電話番号の複合欄が先頭。コード確認式</td><td class="kaishaku">予約に電話連絡が必須の事業</td></tr>
+          <tr><td>Spotify</td><td>メール1欄→「次へ」の段階式。最初の画面にパスワードは無い</td><td class="kaishaku">まず聴かせて離脱を防ぐ。若年層のスピード優先</td></tr>
+          <tr><td>GOV.UK(行政)</td><td><b>今もパスワード式を標準パターンとして定義</b></td><td class="kaishaku">長期アカウント・本人性が重い行政手続き</td></tr>
+        </table>
+        <p>Tempoは10〜20代向けの音楽アプリで「30秒で通過」が勝ち筋——今回のお題は確認コード式を採用しています。<b>どちら側の性質のサービスか</b>で決まる、という見方を持ち帰ってください。</p>`,
+        refs:[
+          { c:"P-16", w:"必読", note:"反例の原典: パスワード式は今も現役の標準(GOV.UK)" },
+        ] },
+      { type:'basic', title:"入力欄とラベルの基本",
+        goal:"ラベルは常時見えるべき。型は「外置き」と「フローティング」の2つ、と知ること",
+        why:"メール欄を描いた瞬間に、最初にぶつかる判断だから",
+        body:`<p>唯一の禁止事項: <b>入力すると消えるプレースホルダーを、ラベルの代わりにしない</b>こと。入力中に「何の欄だっけ?」となり、見直しもできなくなります。その上で、ラベルの置き方には2つの型があります:</p>
+        <div class="duo">
+          <div class="dcol"><div class="dtitle">A. 外置きラベル</div>
+            <div class="mocklabel">メールアドレス</div>
+            <div class="mockfield"><span class="fval">hello@tempo.jp</span></div>
+            <div class="dnote">GOV.UK / NN/g が推奨。公共サービスの標準。最も堅い</div></div>
+          <div class="dcol"><div class="dtitle">B. フローティングラベル</div>
+            <div class="mockfield"><div class="flabel">メールアドレス</div><div class="fval">hello@tempo.jp</div></div>
+            <div class="dnote">Airbnb実物の型。省スペース。常時見えるなら「可視ラベル」の趣旨は満たす</div></div>
+        </div>
+        <p>欄の下に「確認コードを送ります」のような<b>1文の予告</b>を添えると、ユーザーは安心して次へ進めます。</p>`,
+        refs:[
+          { c:"P-02", w:"必読", note:"「すべての入力にラベルを、原則常時見える形で」の原典" },
+          { c:"P-03", w:"必読", note:"プレースホルダーが起こす問題(NN/g)" },
+          { c:"P-14", w:"参考", note:"ヒント文は1文で短く(GOV.UK)" },
+        ] },
+      { type:'basic', title:"ボタンの基本 — CTAとソーシャル",
+        goal:"CTAは「押した結果が分かる言葉」で1画面に1つ。ソーシャルボタンは統一文言・完全同一サイズ、と知ること",
+        why:"ボタン群を並べ、「画面で一番目立つものはどれか」を決めるとき",
+        body:`<p><b>CTA(主ボタン)</b>: 文言は押した結果が分かる言葉で(「続行」はマルチステップ向き、「アカウントを作成」は結果明示)。主役のボタンは1画面に1つだけ——複数あると視線が割れます。有彩色をCTA系の1色に絞るのも、視線を集める同じ技術です。</p>
+        <p><b>ソーシャルボタン</b>: 実測4サービスが同じ型でした——「◯◯で続行」の統一文言・白背景・細い枠・左端にブランドアイコン・<b>全ボタン完全同一サイズ</b>で縦積み。アイコンは各社ブランドガイドライン準拠(色変え・変形は不可)。</p>
+        <p><b>エラーが出たとき</b>: 「エラーが発生しました」は禁止。何をどう直すかを書き、<b>入力ずみの値は絶対に消さない</b>。</p>`,
+        refs:[
+          { c:"P-12", w:"必読", note:"ボタン文言は動作を表す言葉で(GOV.UK)" },
+          { c:"Q-09", w:"参考", note:"Uberの実トークン: 黒・高さ48px・角丸8px(公式コード)" },
+          { c:"P-08", w:"参考", note:"エラー文言のNG集(GOV.UK)" },
+          { c:"P-10", w:"参考", note:"エラー時も入力値を消さない(GOV.UK)" },
+        ] },
+      { type:'wrap', title:"インプット完了 — 制作で決めるのは3つ",
+        goal:"学んだ基本を「自分の判断」に変える準備",
+        why:"ここから先は、正解がひとつではない領域。あなたが決めて、あとで実物・模範と見比べます",
+        body:`<div class="decidebox">🎨 <b>制作中にあなたが決めること</b>
+          <ol>
+            <li><b>ラベルの型</b> — 外置き(GOV.UK型)か、フローティング(Airbnb型)か</li>
+            <li><b>並び順</b> — メール欄とソーシャル、どちらを上に置くか</li>
+            <li><b>CTAの文言</b> — 「続行」か「アカウントを作成」か</li>
+          </ol></div>
+        <p style="font-size:13px;color:var(--ter);margin-top:12px">完成条件のチェックリストは制作画面に常駐しています。このインプットにも「📖 見返す」でいつでも戻れます。</p>`,
+        refs:[] },
+    ],
+    hints:[
+      ["ヒント1 — 問い","この画面で一番大事な「行動」は何でしたか? 今の画面で、最初に目が行くのはそこですか?"],
+      ["ヒント2 — 見るべき根拠","ソーシャルボタンが野暮ったいときは: 完全同一サイズ・アイコン左端固定・ラベル中央(実物の型)。余白が変なときは「グループ間 > グループ内」を数値で確認(<a href='https://www.nngroup.com/articles/gestalt-proximity/' target='_blank'>NN/g 近接の原則 →</a>)"],
+      ["ヒント3 — 模範の構造だけ見る","上から: ロゴ → ウェルカム見出し → メール欄+予告キャプション → 黒CTA →「または」→ ソーシャル2本 → 最下部にログイン導線。1カラム縦積み。"],
+    ],
+    compare:{
+      model:{ img:"assets/model-v3.png", label:"模範(Tempo v3)", sub:"全判断に出典つき。", why:[
+        "見出しは機能名でなく「ようこそ」型 — 実測4サービス共通",
+        "メール欄はフローティングラベル — Airbnb実物の型。外置き(GOV.UK型)を選んだあなたが間違いなわけではない — 方針の違い",
+        "キャプションで確認コードを予告 — 見れば分かる状態に(NN/g #6)",
+        "CTAは黒・高さ48・角丸8 — Uber Base実トークン。有彩色を絞り視線を集中",
+        "ソーシャル2本は完全同一サイズ・「◯◯で続行」— 実測4サービス共通",
+        "最下部にログイン導線 — 既存ユーザーの脱出路(NN/g #6)"] },
+      real:{ img:"assets/real-airbnb.png", label:"実物(Airbnb)",
+        sub:"フィールドワークで触った実物。あなたが観察した「方針の違い」も思い出しながら比べてください" },
+      aspects:[
+        ["階層","一番目立つのはCTAですか? 模範は有彩色をCTA系1色に制限(実測4サービス)"],
+        ["余白","グループ間の余白 > グループ内の余白 になっていますか(NN/g 近接の原則)"],
+        ["部品の型","ソーシャルボタンは完全同一サイズ? ラベルは常時可視? タップ領域44pt?"],
+        ["言葉","CTAは動作を表す文言? 続行後の予告はある?"]],
+      q3:"実物(Airbnb)と模範の「方針の違い」をひとつ — なぜ違うと思いますか?",
+      q3ph:"例: Airbnbは電話番号が先。予約の連絡に電話が要る事業だからで、Tempoは…",
+    },
+    learned:["フォームのラベル(2つの型)","ソーシャルログインの型","サービスごとの方針の違い","視覚階層(有彩色1色)"],
+    next:{ text:"<b>お題02 — 設定画面</b>: 今日の「グルーピング」を、インプット薄めの再出題で。" },
+  },
+  "02": {
+    title:"お題02 — 設定画面", level:"初級", time:"約45分",
+    tags:["リスト","グルーピング(再)","トグル"], paceLabel:"再出題(インプット薄め・自力多め)",
+    cardDesc:"Tempoの設定画面。グルーピングの再練習+リスト行・トグルの型。",
+    make:"Tempoの設定画面(iOS 390×844)をFigmaで1枚",
+    scenario:`同じTempoの<b>設定画面</b>を作ります。設定は「たまに来て、目的の1つを探し、変えて、すぐ去る」画面——<b>迷わず見つかる</b>が勝ち筋です。`,
+    elements:[
+      "プロフィール","メールアドレス","音質","Wi-Fi接続時のみダウンロード","プッシュ通知",
+      "通知の詳細","ヘルプセンター","利用規約","ログアウト","アカウント削除",
+    ],
+    checklist:[
+      ["アカウント系のセクションが最上部にある","OBS-ACC"],
+      ["ログアウト/削除は最下部に隔離され、色で区別されている","OBS-DEL"],
+      ["セクションは見出し+余白で区切っている(線は最終手段)","SET-15"],
+      ["トグル行にシェブロン(›)が共存していない","SET-07"],
+      ["トグルのラベルが「ONのとき何が起きるか」を説明している","SET-11"],
+      ["保存ボタンが存在しない(トグル=即時反映)","SET-09"],
+      ["タスク固有の設定(イコライザー等)を置いていない","SET-03"],
+      ["行の高さがタップ領域44pt以上","F-05"],
+      ["余白が8の倍数",null],
+      ["行にはラベル必須・補足は1〜3行まで","SET-06"],
+    ],
+    parts:[["groupedリスト","Apple HIG — Lists and tables","https://developer.apple.com/design/human-interface-guidelines/lists-and-tables"],
+           ["スイッチ(トグル)","Apple HIG / NN:g","https://www.nngroup.com/articles/toggle-switch-guidelines/"],
+           ["destructive表現","GitHub Primer — ActionList","https://primer.style/components/action-list"]],
+    inputCards:[
+      { type:'basic', title:"設定の用事は「探す→変える→去る」",
+        goal:"設定画面は通過する画面ではなく、目的の1項目を最速で見つける画面だと捉えること",
+        why:"10個の項目を「どうグループ分けし、どう並べるか」を決めるときの物差しになる",
+        body:`<p>Sign Upは一直線に通過する画面でした。設定は<b>たまに来て、目的の1項目を探し、変えて、すぐ去る</b>画面です。だからApple HIGは何より先に「項目を最小限に」と言います——多いほど探しにくくなるから。</p>
+        <p>もうひとつの基本: <b>タスク固有の設定は設定画面に置かない</b>。たとえばイコライザー(再生中に触りたい)を設定画面に隔離すると「作業を中断させ、結果も見えなくなる」とHIGは明言しています。お題01で学んだ「削る」が、設定では「置き場所を分ける」に進化します。</p>`,
+        refs:[
+          { c:"SET-01", w:"必読", note:"「設定は最小限に」の原典(Apple HIG)" },
+          { c:"SET-03", w:"必読", note:"タスク固有の設定を隔離してはいけない理由(Apple HIG)" },
+        ] },
+      { type:'do', title:"フィールドワーク: あなたのスマホが教材(5分)",
+        goal:"実在の設定画面の「並び順・区切り方・トグルの挙動」を自分の目で確かめること",
+        why:"グループ分けの判断は、観察した実物との照合から強くなる",
+        body:`<div class="fieldwork">
+          <div class="fwtitle">✅ やること</div>
+          <ol>
+            <li>自分のスマホの<b>「設定」アプリ</b>を開く</li>
+            <li>普段使うアプリ(LINE・Spotify・Instagramなど)の<b>設定画面</b>を1つ開く</li>
+          </ol>
+        </div>
+        <div class="kanten"><b>観点①</b> 一番上のセクションには何がある?</div>
+        <div class="kanten"><b>観点②</b> ログアウトや削除は、どこに・どんな見た目である?</div>
+        <div class="kanten"><b>観点③</b> 「保存」ボタンはある? トグルを倒したら何が起きる?</div>
+        <p style="margin-top:12px">観察と照合するための、実測記録(2026-07取得):</p>
+        <table class="policy">
+          <tr><th>サービス</th><th>観察された事実</th></tr>
+          <tr><td>GitHub</td><td>削除は Account ページ<b>最下部</b>の Delete account セクション。実行にはユーザー名+フレーズの<b>二重タイプ確認</b></td></tr>
+          <tr><td>iOS(Apple公式手順)</td><td>「Allow Notifications」<b>親トグル</b>をONにすると配下で詳細調整。手順に保存ボタンは<b>一切登場しない</b></td></tr>
+          <tr><td>Notion</td><td>「アカウント情報」と「環境設定」を別グループに分離</td></tr>
+          <tr><td>Firefox</td><td>第1パネルが Account and sync、末尾が Labs / About</td></tr>
+        </table>
+        <div class="qlabel" style="font-size:14px">観察メモ(任意)</div>
+        <textarea id="fwMemo" rows="2" placeholder="例: LINEの設定は一番上がプロフィールだった。保存ボタンはどこにもない…"></textarea>`,
+        refs:[
+          { c:"OBS-ACC", w:"参考", note:"アカウント最上位は4サービスで一致(実測の代表ページへ)" },
+          { c:"OBS-DEL", w:"参考", note:"GitHubの削除フローの実物手順(公式Docs)" },
+        ] },
+      { type:'basic', title:"リストの基本 — 区切り方と、行の記号の約束",
+        goal:"区切りは「見出し+余白」で作る(線は最終手段)。行末の「›」とトグルは意味が固定された記号、と知ること",
+        why:"10項目をセクションに分け、1行1行を描くときの文法になる",
+        body:`<p><b>区切り方</b>: iOSの設定でおなじみの「セクション見出し+角丸カード+間の余白」がgroupedスタイル。線を全行に引くのは冗長で、M3は「余白と見出しで区切り、線は強い分離が必要なときだけ」と明言します。</p>
+        <p><b>行の記号の約束</b>: 行末の「›」(シェブロン)=<b>次の階層へ進む</b>合図。トグル=<b>その場で完結する</b>合図。この2つは意味が固定されていて、<b>同じ行に混ぜられません</b>。行の構造は「ラベル(必須)+現在の値+操作」で、補足は1〜3行まで。</p>`,
+        refs:[
+          { c:"SET-05", w:"必読", note:"groupedスタイル(見出し+余白)の原典(Apple HIG)" },
+          { c:"SET-07", w:"必読", note:"シェブロンの意味は固定(Apple HIG)" },
+          { c:"SET-15", w:"参考", note:"区切り線は最終手段(M3)" },
+          { c:"SET-06", w:"参考", note:"行はラベル必須・他は任意(M3)" },
+        ] },
+      { type:'basic', title:"トグルの約束と、危険な操作の扱い",
+        goal:"トグルは倒した瞬間に効く(保存ボタン禁止)。危険な操作は隔離+結果を書いた確認、と知ること",
+        why:"「プッシュ通知」行の型と、ログアウト/削除の見せ方を決めるとき",
+        body:`<p><b>トグルの約束</b>: 物理スイッチと同じで、倒した瞬間に効きます。保存ボタンを要求してはいけない——NN/gとMaterialが完全に同じ文言で一致する、最も強いルールのひとつです。ラベルは「ONのとき何が起きるか」を書く(例:「Wi-Fi接続時のみダウンロード」)。</p>
+        <p><b>危険な操作</b>: ログアウト・削除は通常項目と混ぜず、見た目で区別します(実測ではGitHub/Notionとも最下部に隔離)。確認ダイアログのボタンは「はい/いいえ」ではなく<b>「削除する/やめる」のように結果そのもの</b>を書きます。</p>
+        <p>実物のiOSでは「Allow Notifications」という<b>親トグル</b>がONのときだけ配下の詳細が調整できる二層構造でした——通知のように詳細がある設定は「トグル行+ナビ行」の組み合わせも選べます。</p>`,
+        refs:[
+          { c:"SET-09", w:"必読", note:"トグル=即時反映・保存ボタン禁止(NN/g。M3も同文言)" },
+          { c:"SET-12", w:"必読", note:"確認ボタンは結果を書く(NN/g)" },
+          { c:"SET-11", w:"参考", note:"トグルのラベルはONの動作を(NN/g)" },
+          { c:"OBS-GATE", w:"参考", note:"親トグル→詳細の二層(iOS実物手順)" },
+        ] },
+      { type:'wrap', title:"インプット完了 — 制作で決めるのは3つ",
+        goal:"学んだ基本を「自分の判断」に変える準備",
+        why:"今回はインプット薄め・自力多めの回。前回の「近いものは仲間」を自分で使います",
+        body:`<div class="decidebox">🎨 <b>制作中にあなたが決めること</b>
+          <ol>
+            <li><b>グループ分けと並び順</b> — 10項目を3〜5グループに(グループ名も自分で)</li>
+            <li><b>「プッシュ通知」の型</b> — トグル行か、ナビ行か、両方(親トグル+詳細)か</li>
+            <li><b>ログアウト/削除の見せ方</b> — どこに置き、どう区別するか</li>
+          </ol></div>`,
+        refs:[] },
+    ],
+    hints:[
+      ["ヒント1 — 問い","ユーザーが一番よく開く項目はどれ? それは3秒で見つかる位置にありますか?"],
+      ["ヒント2 — 見るべき根拠","区切り線を引きすぎていませんか? 「余白と見出しで区切り、線は最終手段」(<a href='https://m3.material.io/components/lists/guidelines' target='_blank'>M3 Lists →</a>)。トグル行に「›」が混ざっていないかも確認"],
+      ["ヒント3 — 模範の構造だけ見る","セクション構成: アカウント → 再生 → 通知 → サポート → (最下部に)ログアウト・削除の危険域。"],
+    ],
+    compare:{
+      model:{ img:"assets/model-settings.png", label:"模範(Tempo 設定)", sub:"全判断に出典つき。", why:[
+        "アカウント系を最上位に — 実測4サービスで一致",
+        "見出し+余白のgroupedスタイル、線は行間の薄い1本のみ",
+        "「Wi-Fi接続時のみダウンロード」— ONの動作を書くトグルラベル",
+        "「プッシュ通知を受け取る」(親トグル)+「通知の詳細」(ナビ行)の二層 — iOS実物の型",
+        "イコライザーは置かない — タスク固有は再生画面へ",
+        "ログアウト・削除は最下部に隔離し赤で区別 — GitHub実物の配置+Primerのdanger"] },
+      real:{ img:null, label:"実物(あなたの観察)",
+        sub:"フィールドワークで見た自分のスマホの設定画面と見比べてください。参考: 実測観察の記録↓",
+        obs:[
+        "<b>GitHub</b>: 削除は最下部+二重タイプ確認",
+        "<b>iOS</b>: 親トグル→詳細の二層。保存ボタンなし",
+        "<b>Slack</b>: 通知は「How to notify you / What to…」と説明的なセクション名で分解",
+        "<b>Notion</b>: アカウントと環境設定を分離",
+        "<b>Firefox</b>: アカウント先頭・Labs/Aboutは末尾"] },
+      aspects:[
+        ["並び順","アカウントが最上部、危険な操作が最下部に隔離されていますか(実測)"],
+        ["区切り方","見出し+余白で区切れていますか? 線を引きすぎていませんか"],
+        ["行の型","トグル行に › が混ざっていませんか? 行の高さは44pt以上?"],
+        ["言葉","トグルのラベルはONの動作を説明? 保存ボタンを置いていない?"]],
+      q3:"あなたのスマホで観察した実物と、模範の違いをひとつ — なぜ違うと思いますか?",
+      q3ph:"例: LINEはセクション見出しがなかった。項目数が多いから代わりに…",
+    },
+    learned:["グルーピング(自力)","設定リスト行の解剖","トグルの約束(即時反映)","破壊的操作の扱い"],
+    next:{ text:"<b>お題03 — ログインとエラー回復</b>(カリキュラム地図参照・未実装)" },
+  },
+};
+
+/* =====================================================================
+   エンジン
+===================================================================== */
+const state = { odai:"01", notes:{}, compare:{}, finalWord:{}, startedAt:{}, finished:{}, citesOpened:0 };
+const cur = () => ODAI[state.odai];
+
+function go(id) {
+  saveMemo();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  const o = cur();
+  const crumbs = { s1:'お題', s2:o.title+' — ブリーフ', s3:o.title+' — インプット', s4:o.title+' — 制作', s5:o.title+' — 比較', s6:o.title+' — 完了' };
+  document.getElementById('crumb').textContent = crumbs[id] || '';
+  if (id === 's1') renderHome();
+  if (id === 's2') renderBrief();
+  if (id === 's3') renderInput();
+  if (id === 's4') { renderBuild(); if (!state.startedAt[state.odai]) state.startedAt[state.odai] = Date.now(); tick(); }
+  if (id === 's5') renderCompare();
+  if (id === 's6') renderDone();
+  save();
+}
+function startOdai(id) { state.odai = id; go('s2'); }
+function saveMemo() {
+  const m = document.getElementById('fwMemo');
+  if (m) state.notes[state.odai] = m.value.trim();
+}
+function flowbar(now) {
+  const steps = ['ブリーフ','インプット','制作','比較','言語化'];
+  return `<div class="flowbar">` + steps.map((s,i)=>`<span class="fstep ${i===now?'now':''}">${s}</span>${i<4?'→':''}`).join('') + `</div>`;
+}
+
+/* ---- 引用リンクカード ---- */
+function refsHtml(refs) {
+  if (!refs || !refs.length) return '';
+  return `<div class="refsec"><div class="reftitle">📚 参考(引用元 — クリックで原文へ)</div>` +
+    refs.map(r => {
+      const c = CITES[r.c];
+      const isAsset = c.url.startsWith('assets/');
+      const openLabel = isAsset ? '実物を見る ↗' : '原文を開く ↗';
+      const quote = r.w === '必読' ? `<div class="refquote">${c.quote}</div>` : '';
+      return `<a class="reflink ${r.w==='必読'?'primary':''}" href="${c.url}" target="_blank">
+        <div class="refhead"><span class="refbadge ${r.w==='必読'?'':'sub'}">${r.w}</span>
+          <span class="refsrc">${c.src}</span><span class="refopen">${openLabel}</span></div>
+        ${quote}
+        <div class="refnote">${r.note}</div>
+      </a>`;
+    }).join('') + `</div>`;
+}
+
+/* ---- S1 ---- */
+function renderHome() {
+  document.getElementById('odaiGrid').innerHTML = Object.entries(ODAI).map(([id,o]) => `
+    <div class="odai">
+      <h3>${o.title}</h3>
+      <div class="meta">${o.level}・${o.time}・${o.paceLabel}</div>
+      ${o.tags.map(t=>`<span class="pill">${t}</span>`).join('')}
+      <p style="font-size:13px;color:var(--sec);margin:10px 0 16px">${o.cardDesc}</p>
+      <button class="btn primary" onclick="startOdai('${id}')">${state.finished[id] ? 'もう一度' : 'はじめる'}</button>
+    </div>`).join('') + `
+    <div class="odai locked">
+      <h3>お題03 — ログインとエラー回復</h3>
+      <div class="meta">初級・45分</div>
+      <span class="pill">エラー表示</span><span class="pill">フォーム(再)</span>
+      <p style="font-size:13px;color:var(--sec);margin:10px 0 16px">GOV.UKのエラー回復パターンを経典に。</p>
+      <button class="btn secondary" disabled>本実装で提供</button>
+    </div>`;
+}
+
+/* ---- S2 ブリーフ ---- */
+function checklistHtml(o) {
+  return o.checklist.map(([label, cite]) => {
+    const c = cite && CITES[cite];
+    const link = c && !c.url.startsWith('assets/')
+      ? ` <a class="why" href="${c.url}" target="_blank">根拠→</a>`
+      : (cite ? ` <span class="why">(${cite})</span>` : '');
+    return `<label><input type="checkbox"><span>${label}${link}</span></label>`;
+  }).join('');
+}
+function renderBrief() {
+  const o = cur();
+  document.getElementById('briefContainer').innerHTML = `
+    ${flowbar(0)}
+    <div class="tagrow"><span class="pill">${o.level}</span><span class="pill">${o.time}</span><span class="pill">${o.paceLabel}</span></div>
+    <h1>${o.title}</h1>
+    <p class="lead" style="margin-bottom:12px">🎨 <b>今日つくるもの: ${o.make}</b></p>
+    <p class="lead" style="font-size:13px;margin-bottom:24px">流れ: 短いインプット(約10分・制作中も見返せます)→ Figmaで制作(約25分)→ 実物・模範と見比べて、学びを言葉にします。</p>
+    <div class="card"><div class="sectionlabel">① シナリオ</div><p>${o.scenario}</p></div>
+    <div class="card"><div class="sectionlabel">② 画面に載せるもの(この画面の情報)</div>
+      <p style="font-size:13px;color:var(--ter);margin-bottom:10px">実務でも「何を載せるか」は要件として与えられることが多いもの。<b>これをどう組むか(構造・順番・見た目)があなたの仕事</b>です。お題が進むと、このリスト自体を削ったり定義したりする側に回ります。</p>
+      ${o.elements.map(e=>`<div style="display:flex;gap:10px;padding:5px 0;font-size:14px;border-bottom:1px solid var(--border)"><span style="color:var(--ter)">▫︎</span><span>${e}</span></div>`).join('')}
+    </div>
+    <div class="card"><div class="sectionlabel">③ 完成条件(=品質の物差し。最後もこれで見比べます)</div>
+      <div class="checklist">${checklistHtml(o)}</div></div>
+    <div class="card"><div class="sectionlabel">④ 使ってよい部品(実在デザインシステムから引用)</div>
+      <div class="grid" style="margin-top:8px">${o.parts.map(([n,s,u])=>`
+        <div style="flex:1;background:var(--surface);border-radius:8px;padding:12px 14px">
+          <b style="font-size:14px">${n}</b><br><a href="${u}" target="_blank" style="font-size:12px">出典: ${s} →</a>
+        </div>`).join('')}</div></div>
+    <div class="card"><div class="sectionlabel">⑤ 提出のかたち</div>
+      <p style="font-size:14px">完成画面のスクショ+<b>「なぜその判断をしたか」</b>の一言。説明が丁寧なほど、比較が深くなります。</p></div>
+    <button class="btn primary" onclick="go('s3')">インプットへ(約10分)</button>`;
+}
+
+/* ---- S3 インプット ---- */
+function renderInput() {
+  const o = cur();
+  const started = !!state.startedAt[state.odai];
+  const basics = o.inputCards.filter(c => c.type === 'basic');
+  let bIdx = 0, tocIdx = 0;
+  const toc = o.inputCards.filter(c => c.type !== 'wrap').map(c => {
+    tocIdx++;
+    if (c.type === 'do') return `<div class="tocitem"><span class="tocnum tocdo">やること</span><span>${c.title} — <span style="color:var(--ter)">${c.goal}</span></span></div>`;
+    bIdx++;
+    return `<div class="tocitem"><span class="tocnum">基本 ${bIdx}</span><span><b>${c.title}</b> — <span style="color:var(--ter)">${c.goal}</span></span></div>`;
+  }).join('');
+  let bNum = 0;
+  const cards = o.inputCards.map(c => {
+    let badge;
+    if (c.type === 'do') badge = `<span class="lessonnum do">🔍 やること — フィールドワーク</span>`;
+    else if (c.type === 'wrap') badge = `<span class="lessonnum" style="background:var(--surface);color:var(--ink)">✅ まとめ</span>`;
+    else { bNum++; badge = `<span class="lessonnum">この制作で学ぶ基本 ${bNum}/${basics.length}</span>`; }
+    return `<div class="lesson">
+      ${badge}
+      <h2>${c.title}</h2>
+      <div class="goalbox">🎯 <b>ここで学ぶこと:</b> ${c.goal}</div>
+      <div class="whybox">🧭 <b>制作のどこで使う?</b> — ${c.why}</div>
+      <div class="body">${c.body}</div>
+      ${refsHtml(c.refs)}
+    </div>`;
+  }).join('');
+  document.getElementById('inputContainer').innerHTML = `
+    ${flowbar(1)}
+    <h1 style="font-size:22px">${o.title} — インプット</h1>
+    <p class="lead">読むだけでOK、テストはありません。制作中も<b>いつでも見返せます</b>。</p>
+    <div class="toc">
+      <div class="toctitle">このお題で学ぶUIデザインの基本(${basics.length}つ)+やること</div>
+      ${toc}
+    </div>
+    ${cards}
+    <button class="btn primary" onclick="go('s4')">${started ? '制作にもどる' : 'Figmaで作りはじめる'}</button>`;
+  const memo = document.getElementById('fwMemo');
+  if (memo && state.notes[state.odai]) memo.value = state.notes[state.odai];
+}
+
+/* ---- S4 制作 ---- */
+function renderBuild() {
+  const o = cur();
+  document.getElementById('buildContainer').innerHTML = `
+    ${flowbar(2)}
+    <h1>制作タイム</h1>
+    <p class="lead">Figmaで「${o.make}」。この画面は横に置いて使ってください。<span id="timer" style="font-weight:600"></span></p>
+    <div class="btnrow" style="margin-bottom:20px">
+      <button class="btn secondary" style="max-width:260px" onclick="go('s3')">📖 インプットを見返す</button>
+    </div>
+    <div class="card"><div class="sectionlabel">完成条件チェックリスト(自分でチェックしながら)</div>
+      <div class="checklist">${checklistHtml(o)}</div></div>
+    <div class="sectionlabel">詰まったら(開くのは任意・段階式)</div>
+    ${o.hints.map(([s,b])=>`<details class="hint"><summary>${s}</summary><div class="hintbody">${b}</div></details>`).join('')}
+    <div class="btnrow" style="margin-top:24px">
+      <button class="btn primary" onclick="go('s5')">完成した — 見比べる</button>
+    </div>
+    <p class="hintnote" style="font-size:12px;color:var(--ter)">まだ途中でも見比べられます(未完成でも学びは成立します)。</p>`;
+}
+function tick() {
+  const t0 = state.startedAt[state.odai];
+  if (!t0) return;
+  const m = Math.floor((Date.now()-t0)/60000), s = Math.floor((Date.now()-t0)/1000)%60;
+  const el = document.getElementById('timer');
+  if (el) el.textContent = `(経過 ${m}:${String(s).padStart(2,'0')})`;
+  setTimeout(tick, 1000);
+}
+
+/* ---- S5 比較 ---- */
+function renderCompare() {
+  const o = cur(), c = o.compare;
+  const saved = state.compare[state.odai] || {};
+  const realCol = c.real.img
+    ? `<img class="timg" src="${c.real.img}" alt="${c.real.label}">`
+    : `<div class="obsbox">${c.real.obs.map(x=>'・'+x).join('<br>')}</div>`;
+  document.getElementById('compareContainer').innerHTML = `
+    ${flowbar(3)}
+    <h1>見比べましょう</h1>
+    <p class="lead">答え合わせではありません。<b>「判断」を比べます</b> — 模範も「方針の一例」で、理由がお題に合っていればあなたの判断が優ります。</p>
+    <div class="three">
+      <div class="tcol">
+        <div class="tlabel">あなたの作品</div>
+        <label class="uploadbox" id="uploadbox">＋ スクショをアップロード<br><span style="font-weight:400">(この端末内でのみ表示・送信されません)</span>
+          <input type="file" accept="image/*" style="display:none" onchange="loadOwn(this)"></label>
+        <img class="timg" id="ownimg" style="display:none">
+        <div class="tsub">Figmaで作った画面のスクリーンショット</div>
+      </div>
+      <div class="tcol">
+        <div class="tlabel">${c.model.label}</div>
+        <img class="timg" src="${c.model.img}" alt="模範">
+        <div class="tsub">${c.model.sub}<a href="#" onclick="toggleWhy(event)">なぜこの判断か一覧を見る</a></div>
+        <div class="whylist" id="whyList">${c.model.why.map(x=>'・'+x).join('<br>')}</div>
+      </div>
+      <div class="tcol">
+        <div class="tlabel">${c.real.label}</div>
+        ${realCol}
+        <div class="tsub">${c.real.sub}</div>
+      </div>
+    </div>
+    <div class="sectionlabel" style="margin-top:24px">観点別に見る(自分の画面を判定してみましょう)</div>
+    ${c.aspects.map(([n,d])=>`<div class="aspect"><div class="aname">${n}</div><div class="adesc">${d}</div>
+      <select><option>未判定</option><option>✓ できた</option><option>△ 要修正</option></select></div>`).join('')}
+    <div class="card" style="margin-top:24px">
+      <div class="sectionlabel">完成条件の最終判定(ブリーフと同じ物差し)</div>
+      <div class="checklist">${checklistHtml(o)}</div></div>
+    <div class="card" style="margin-top:24px">
+      <div class="sectionlabel">3つの問い(作ったいま、あなたなら答えられます)</div>
+      <div class="qlabel">① あなたと模範で「同じ判断」をひとつ</div>
+      <textarea id="q1" rows="2">${saved.q1||''}</textarea>
+      <div class="qlabel">② 「違う判断」をひとつ — どちらの理由がお題に合っていますか?</div>
+      <textarea id="q2" rows="2">${saved.q2||''}</textarea>
+      <div class="qlabel">③ ${c.q3}</div>
+      <textarea id="q3" rows="2" placeholder="${c.q3ph}">${saved.q3||''}</textarea>
+    </div>
+    <div class="btnrow">
+      <button class="btn secondary" onclick="go('s4')">直して再比較する</button>
+      <button class="btn primary" onclick="finishCompare()">完了して言語化へ</button>
+    </div>
+    <p class="err" id="compareErr">3つの問いのうち、最低1つは書いてから進みましょう(ここがこの教材の核です)</p>`;
+}
+function loadOwn(input) {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    document.getElementById('ownimg').src = e.target.result;
+    document.getElementById('ownimg').style.display = 'block';
+    document.getElementById('uploadbox').style.display = 'none';
+  };
+  r.readAsDataURL(f);
+}
+function toggleWhy(e) {
+  e.preventDefault();
+  const el = document.getElementById('whyList');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+function finishCompare() {
+  const v = id => document.getElementById(id).value.trim();
+  const qs = { q1: v('q1'), q2: v('q2'), q3: v('q3') };
+  if (!qs.q1 && !qs.q2 && !qs.q3) { document.getElementById('compareErr').style.display='block'; return; }
+  state.compare[state.odai] = qs;
+  go('s6');
+}
+
+/* ---- S6 完了 ---- */
+function renderDone() {
+  const o = cur();
+  const lines = [];
+  if (state.notes[state.odai]) lines.push(`<b>フィールドワークの観察</b>: ${state.notes[state.odai]}`);
+  const cp = state.compare[state.odai] || {};
+  ['q1','q2','q3'].forEach((k,i)=>{ if(cp[k]) lines.push(`<b>比較の問い${i+1}</b>: ${cp[k]}`); });
+  document.getElementById('doneContainer').innerHTML = `
+    ${flowbar(4)}
+    <h1>${o.title} 完了 🎉</h1>
+    <p class="lead">最後に、今日の判断をあなたの言葉にしましょう。これがあなたの設計言語になります。</p>
+    <div class="card"><div class="sectionlabel">学びの言語化(必須)</div>
+      <p style="font-size:13px;color:var(--ter);margin-bottom:8px">「私は◯◯のとき、◯◯という理由で◯◯する」の形で。</p>
+      <textarea id="finalWord" rows="3" placeholder="私は…">${state.finalWord[state.odai]||''}</textarea>
+      <p class="err" id="finalErr">ここだけは書いて終わりましょう — 言語化がこのトレーニングの成果物です</p></div>
+    <div class="card"><div class="sectionlabel">今日 身についたパターン</div>
+      ${o.learned.map(t=>`<span class="learned">${t}</span>`).join('')}</div>
+    <div class="card"><div class="sectionlabel">あなたのセッション記録(ポートフォリオの種)</div>
+      <div id="sessionLog" style="font-size:13px;line-height:2">${lines.join('<br>') || '(記録なし)'}</div>
+      <button class="btn ghost" onclick="copyLog()">記録をコピーする</button></div>
+    <div class="card"><div class="sectionlabel">次のお題</div><p style="font-size:14px">${o.next.text}</p></div>
+    <button class="btn primary" onclick="completeAll()">完了する</button>`;
+}
+function copyLog() {
+  navigator.clipboard.writeText(document.getElementById('sessionLog').innerText)
+    .then(()=>alert('コピーしました。ポートフォリオの解説文の種にどうぞ。'));
+}
+function completeAll() {
+  const w = document.getElementById('finalWord').value.trim();
+  if (!w) { document.getElementById('finalErr').style.display='block'; return; }
+  state.finalWord[state.odai] = w;
+  state.finished[state.odai] = true;
+  save();
+  alert(cur().title + ' 完了!\n\nあなたの設計言語:\n「' + w + '」');
+  go('s1');
+}
+
+/* ---- 保存 ---- */
+function save() { try { localStorage.setItem('uitrainer-v04', JSON.stringify(state)); } catch(e){} }
+function load() {
+  try { const s = JSON.parse(localStorage.getItem('uitrainer-v04')); if (s) Object.assign(state, s); } catch(e){}
+  if (!ODAI[state.odai]) state.odai = "01";
+}
+load();
+renderHome();
+</script>
+</body>
+</html>

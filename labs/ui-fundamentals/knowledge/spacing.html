@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIの余白で知るべき9個 — UIデザインの基礎知識</title>
+<meta name="description" content="8pxグリッド・近接・タッチターゲット・行送り・レスポンシブ余白まで。UIの余白を「数値と根拠」で語れるようになるための9個を、一次ソースに紐づけて解説します。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--color-accent); }
+
+  .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 var(--space-24); }
+  @media (min-width: 1024px) { .wrap { padding: 0 var(--space-48); } }
+
+  /* --- ヒーロー --- */
+  .hero {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--grad-1), var(--grad-3) 45%, var(--grad-2) 72%, var(--grad-4));
+    color: var(--color-on-grad);
+    border-radius: 0 0 var(--radius-l) var(--radius-l);
+  }
+  .hero canvas.shader { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.9; pointer-events: none; }
+  .hero__inner { position: relative; z-index: 1; max-width: var(--measure); margin: 0 auto; padding: var(--space-96) var(--space-24) var(--space-64); }
+  @media (min-width: 1024px) { .hero__inner { padding: var(--space-128) var(--space-48) var(--space-96); } }
+  .hero .eyebrow { font-size: var(--text-small); font-weight: 700; letter-spacing: 0.14em; opacity: 0.85; margin: 0 0 var(--space-16); }
+  .hero .eyebrow a { color: var(--color-on-grad); text-decoration: none; opacity: 0.9; }
+  .hero h1 { font-size: 38px; font-weight: 900; line-height: var(--leading-heading); margin: 0 0 var(--space-20); }
+  @media (min-width: 768px) { .hero h1 { font-size: 52px; } }
+  .hero p.lede { font-size: 18px; font-weight: 500; max-width: 34rem; margin: 0 0 var(--space-24); opacity: 0.95; }
+  .hero .meta { font-size: var(--text-small); opacity: 0.82; margin: 0; }
+
+  /* --- 本文プローズ --- */
+  main { padding: var(--space-56) 0 var(--space-40); }
+  .prose p { max-width: var(--measure); margin: 0 0 var(--space-16); line-height: var(--leading-body); }
+  .prose p.note { color: var(--color-ink-3); font-size: var(--text-small); line-height: var(--leading-small); }
+
+  /* --- 凡例 --- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: var(--space-12);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-m); padding: var(--space-20) var(--space-24);
+    margin: var(--space-24) 0 0;
+  }
+  .legend .li { display: flex; align-items: flex-start; gap: var(--space-8); flex: 1; min-width: 240px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 4px; flex: none; margin: var(--space-4) 0 0; }
+  .legend .sw.f { background: var(--color-fact); }
+  .legend .sw.i { background: var(--color-interp); }
+  .legend .lt { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); }
+  .legend .lt b { color: var(--color-ink); }
+
+  /* --- 目次 --- */
+  .toc { background: var(--color-surface-2); border-radius: var(--radius-m); padding: var(--space-24); margin: var(--space-32) 0 0; }
+  .toc h2 { font-size: 15px; color: var(--color-ink-3); letter-spacing: 0.06em; margin: 0 0 var(--space-12); }
+  .toc ol { list-style: none; counter-reset: t; display: grid; grid-template-columns: 1fr; gap: var(--space-8); }
+  @media (min-width: 680px) { .toc ol { grid-template-columns: 1fr 1fr; } }
+  .toc li { counter-increment: t; }
+  .toc a { display: flex; gap: var(--space-10); text-decoration: none; color: var(--color-ink); font-size: var(--text-small); line-height: var(--leading-small); }
+  .toc a::before { content: counter(t); color: var(--color-accent); font-weight: 700; min-width: 20px; }
+  .toc a:hover { color: var(--color-accent); }
+
+  /* --- 項目 --- */
+  .item { padding: var(--space-56) 0 0; scroll-margin-top: var(--space-24); }
+  .item__no { font-size: var(--text-small); font-weight: 700; color: var(--color-accent); letter-spacing: 0.08em; margin: 0 0 var(--space-8); }
+  .item h2 { font-size: 26px; font-weight: 700; line-height: var(--leading-heading); margin: 0 0 var(--space-16); }
+  @media (min-width: 768px) { .item h2 { font-size: 30px; } }
+
+  /* --- 事実/解釈ブロック（視覚的に分離） --- */
+  .claim { display: block; border-radius: var(--radius-s); padding: var(--space-16) var(--space-20); margin: var(--space-16) 0; border-left: 4px solid; line-height: var(--leading-body); }
+  .claim::before { display: block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; margin: 0 0 var(--space-6); }
+  span[data-type="fact"] { background: var(--color-fact-bg); border-color: var(--color-fact); color: var(--color-ink); }
+  span[data-type="fact"]::before { content: "事実 — 一次ソースの記述"; color: var(--color-fact); }
+  span[data-type="interpretation"] { background: var(--color-interp-bg); border-color: var(--color-interp); color: var(--color-ink); }
+  span[data-type="interpretation"]::before { content: "解釈 — 実務での使い方"; color: var(--color-interp); }
+
+  /* --- 出典チップ --- */
+  .cites { display: flex; flex-wrap: wrap; gap: var(--space-8); margin: var(--space-12) 0 0; }
+  a.cite {
+    display: inline-flex; align-items: center; gap: var(--space-6);
+    font-size: var(--text-caption); font-weight: 500; text-decoration: none;
+    color: var(--color-ink-2); background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: var(--radius-l);
+    padding: var(--space-4) var(--space-12); line-height: var(--leading-small);
+  }
+  a.cite::before { content: "🔗"; font-size: 11px; }
+  a.cite:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+  /* --- 図解 --- */
+  figure.fig { margin: var(--space-24) 0 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-24); overflow-x: auto; box-shadow: var(--shadow-card); }
+  figure.fig svg { width: 100%; height: auto; display: block; max-width: 100%; }
+  figure.fig figcaption { margin: var(--space-16) 0 0; font-size: var(--text-small); color: var(--color-ink-3); line-height: var(--leading-small); }
+
+  /* --- セクション区切り --- */
+  .band { height: 3px; background: linear-gradient(90deg, var(--grad-2), var(--color-accent-2) 50%, var(--grad-4)); border-radius: var(--radius-s); opacity: 0.5; margin: var(--space-56) 0 0; }
+
+  /* --- カウンターexample枠 --- */
+  .counter { border: 2px dashed var(--color-interp); background: var(--color-interp-bg); border-radius: var(--radius-m); padding: var(--space-20) var(--space-24); margin: var(--space-20) 0 0; }
+  .counter .tag { display: inline-block; font-size: var(--text-caption); font-weight: 700; color: var(--color-interp); letter-spacing: 0.06em; margin: 0 0 var(--space-8); }
+  .counter p { margin: 0; line-height: var(--leading-body); }
+
+  /* --- まとめ / 次に読む --- */
+  .summary { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-32); margin: var(--space-56) 0 0; box-shadow: var(--shadow-card); }
+  .summary h2 { font-size: 22px; margin: 0 0 var(--space-16); line-height: var(--leading-heading); }
+  .summary ul { margin: 0; padding: 0 0 0 var(--space-20); }
+  .summary li { margin: 0 0 var(--space-8); line-height: var(--leading-body); }
+  .next { display: grid; grid-template-columns: 1fr; gap: var(--space-16); margin: var(--space-32) 0 0; }
+  @media (min-width: 680px) { .next { grid-template-columns: 1fr 1fr; } }
+  .next a { display: block; text-decoration: none; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-24); color: var(--color-ink); }
+  .next a:hover { border-color: var(--color-accent); }
+  .next .k { font-size: var(--text-caption); color: var(--color-ink-3); letter-spacing: 0.06em; margin: 0 0 var(--space-6); }
+  .next .t { font-size: 17px; font-weight: 700; margin: 0 0 var(--space-6); }
+  .next .d { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); margin: 0; }
+
+  footer { padding: var(--space-48) 0 var(--space-96); }
+  footer p { font-size: var(--text-caption); color: var(--color-ink-3); border-top: 1px solid var(--color-border); padding: var(--space-20) 0 0; margin: 0; }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <canvas class="shader" aria-hidden="true"></canvas>
+    <div class="hero__inner">
+      <p class="eyebrow"><a href="index.html">← UIデザインの基礎知識</a></p>
+      <h1>UIの余白で<br>知るべき9個</h1>
+      <p class="lede">余白は「なんとなく空ける」ものではありません。8pxグリッドから近接・タッチターゲット・行送り・レスポンシブ余白まで、余白を「数値と根拠」で語れるようになる9個を、一次ソースに紐づけて解説します。</p>
+      <p class="meta">読了目安 約10分（日本語の読速 約400〜600字/分を前提）／出典はすべて台帳ID付き</p>
+    </div>
+  </header>
+
+  <main class="wrap prose">
+    <p>この記事を読み終えるころには、世の中のUIの余白が「見える目」に変わっているはずです。感覚で決めていた余白を、「グループ内より、グループ間を広く」「本文の行間は1.5倍以上」のように、根拠のある初期値で語れるようになります。</p>
+    <p>大事なのは、断定を鵜呑みにしないことです。「8の倍数が絶対」のような素朴なルールには、実在するデザインシステムの中に反例があります。だからこの記事では、一次ソースが実際に書いていること(事実)と、それを実務でどう使うか(解釈)を、色を分けて示します。</p>
+
+    <div class="legend" aria-label="事実と解釈の凡例">
+      <div class="li"><span class="sw f" aria-hidden="true"></span><span class="lt"><b>事実</b>＝WCAGやMaterialなど一次ソースの記述を、原文に忠実に言い換えたもの。末尾に出典チップ(台帳ID+URL)が付きます。</span></div>
+      <div class="li"><span class="sw i" aria-hidden="true"></span><span class="lt"><b>解釈</b>＝その事実を、初心者が実務でどう使えばよいかに落とした推奨。断定は避け「原則」「定番」で示します。</span></div>
+    </div>
+
+    <nav class="toc" aria-label="目次">
+      <h2>この記事の9個</h2>
+      <ol>
+        <li><a href="#item1">余白は"機能"である</a></li>
+        <li><a href="#item2">8pxグリッド(基本の物差し)</a></li>
+        <li><a href="#item3">近接：距離が"仲間"を伝える</a></li>
+        <li><a href="#item4">フォームの余白の実値</a></li>
+        <li><a href="#item5">タッチターゲットと"押せる余白"</a></li>
+        <li><a href="#item6">行送り(文字の中の余白)</a></li>
+        <li><a href="#item7">画面のマージンと密度</a></li>
+        <li><a href="#item8">レスポンシブな余白</a></li>
+        <li><a href="#item9">「8の倍数が絶対」ではない</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1 -->
+    <section class="item" id="item1" data-item="1">
+      <p class="item__no">01</p>
+      <h2>余白は"機能"である</h2>
+      <span class="claim" data-type="fact">Material 3 は「レイアウトは画面上の全要素を組織化し、階層を示し、キーアクションに注意を引くために使う」と定義しています。また NN/g は「インターフェースに足す余分な情報の1単位ごとに、重要な情報の相対的な視認性が下がる」と述べています。
+        <span class="cites">
+          <a class="cite" href="https://m3.material.io/foundations/layout/understanding-layout/" data-ledger="S-12">S-12 · Material 3</a>
+          <a class="cite" href="https://www.nngroup.com/articles/ten-usability-heuristics/" data-ledger="S-07">S-07 · NN/g</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">だから余白は「何もない場所」ではなく、整理する・階層を示す・注意を導く、という仕事をしている"機能"です。詰めれば詰めるほど情報が伝わるわけではありません。まず「この余白は何の仕事をしているか」を言えるようにするのが第一歩です。</span>
+      <p>初心者がやりがちなのは、空いた場所を「もったいない」と感じて要素で埋めてしまうことです。けれど画面は、余白があるからこそ「どれが見出しで、どれが本文で、どこを押せばいいか」が一目で分かります。余白は削るコストではなく、伝わりやすさを生む投資だと考え方を切り替えましょう。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 210" role="img" aria-label="余白なしの詰まったカードと、余白ありの整理されたカードの比較">
+          <rect x="14" y="20" width="205" height="170" rx="10" fill="#FFFFFF" stroke="#E3DED4"/>
+          <text x="24" y="40" font-family="sans-serif" font-size="11" fill="#8A5A12" font-weight="700">Before・余白なし</text>
+          <rect x="24" y="50" width="185" height="16" rx="3" fill="#201C29"/>
+          <rect x="24" y="68" width="185" height="10" rx="3" fill="#C6C6C6"/>
+          <rect x="24" y="80" width="185" height="10" rx="3" fill="#C6C6C6"/>
+          <rect x="24" y="92" width="150" height="10" rx="3" fill="#C6C6C6"/>
+          <rect x="24" y="106" width="185" height="16" rx="3" fill="#201C29"/>
+          <rect x="24" y="124" width="185" height="10" rx="3" fill="#C6C6C6"/>
+          <rect x="24" y="136" width="120" height="10" rx="3" fill="#C6C6C6"/>
+          <rect x="24" y="152" width="90" height="26" rx="6" fill="#5B3FD6"/>
+          <rect x="261" y="20" width="205" height="170" rx="10" fill="#FFFFFF" stroke="#0E6E4E" stroke-width="1.5"/>
+          <text x="271" y="40" font-family="sans-serif" font-size="11" fill="#0E6E4E" font-weight="700">After・余白あり</text>
+          <rect x="271" y="52" width="150" height="14" rx="3" fill="#201C29"/>
+          <rect x="271" y="78" width="185" height="9" rx="3" fill="#C6C6C6"/>
+          <rect x="271" y="91" width="160" height="9" rx="3" fill="#C6C6C6"/>
+          <rect x="271" y="122" width="130" height="14" rx="3" fill="#201C29"/>
+          <rect x="271" y="146" width="150" height="9" rx="3" fill="#C6C6C6"/>
+          <rect x="271" y="166" width="96" height="14" rx="7" fill="#5B3FD6"/>
+        </svg>
+        <figcaption>同じ要素でも、余白の有無だけで「読める塊」に見えるかどうかが変わる。右は見出し・本文・ボタンのまとまりが余白で分かれている。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 2 -->
+    <section class="item" id="item2" data-item="2">
+      <p class="item__no">02</p>
+      <h2>8pxグリッド(基本の物差し)</h2>
+      <span class="claim" data-type="fact">Android の公式ガイドは「Android の UI はレイアウト・コンポーネント・スペーシングに 8dp グリッドを使う」「アイコンなどの小さな要素は 4dp グリッドに揃えるとよい」としています。Material 3 のスペーシングトークンも「スペーシング単位は 8dp スケールに従う(space100 = 8dp)」と明記しています。
+        <span class="cites">
+          <a class="cite" href="https://developer.android.com/design/ui/mobile/guides/layout-and-content/grids-and-units" data-ledger="F-09">F-09 · Android Developers</a>
+          <a class="cite" href="https://m3.material.io/m3/pages/spacing/overview" data-ledger="S-15">S-15 · Material 3</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">余白の値に迷ったら、まず 8 の倍数(8 / 16 / 24 / 32 …)から選ぶのが定番です。値の選択肢が絞られるので全体のリズムが揃い、実装への指定もシンプルになります。小さなアイコンまわりだけは 4 の倍数まで許容、と覚えておきましょう。</span>
+      <p>「8px」を物差しとして持つと、余白を1pxや3pxずつ微調整して迷子になることがなくなります。デザインは「正解の値を当てる」より「使う値の候補を減らす」ほうが速く安定します。8pxグリッドは、その候補を減らすための最初の道具です。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 170" role="img" aria-label="8pxグリッドのスケール定規。8/16/24/32/40が目盛りで示されている">
+          <rect x="14" y="20" width="452" height="60" fill="#F4F1EB" rx="8"/>
+          <g stroke="#C6C6C6" stroke-width="1">
+            <line x1="30" y1="20" x2="30" y2="80"/><line x1="62" y1="20" x2="62" y2="80"/>
+            <line x1="94" y1="20" x2="94" y2="80"/><line x1="126" y1="20" x2="126" y2="80"/>
+            <line x1="158" y1="20" x2="158" y2="80"/><line x1="190" y1="20" x2="190" y2="80"/>
+          </g>
+          <text x="30" y="103" font-family="sans-serif" font-size="11" fill="#5E5968">← 8px 間隔のグリッド線 →</text>
+          <g font-family="sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">
+            <rect x="30" y="120" width="32" height="30" fill="#5B3FD6" rx="4"/><text x="38" y="140">8</text>
+            <rect x="70" y="120" width="48" height="30" fill="#5B3FD6" rx="4"/><text x="82" y="140">16</text>
+            <rect x="126" y="120" width="64" height="30" fill="#5B3FD6" rx="4"/><text x="146" y="140">24</text>
+            <rect x="198" y="120" width="80" height="30" fill="#5B3FD6" rx="4"/><text x="226" y="140">32</text>
+            <rect x="286" y="120" width="96" height="30" fill="#5B3FD6" rx="4"/><text x="322" y="140">40</text>
+          </g>
+          <text x="250" y="103" font-family="sans-serif" font-size="10" fill="#8A5A12">※ 4dp はアイコンなど小要素のみ</text>
+        </svg>
+        <figcaption>8の倍数を「使ってよい値のセット」として持つ。棒の長さが 8→16→24→32→40 と揃うと、画面全体のリズムが整う。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 3 -->
+    <section class="item" id="item3" data-item="3">
+      <p class="item__no">03</p>
+      <h2>近接：距離が"仲間"を伝える</h2>
+      <span class="claim" data-type="fact">ゲシュタルトの近接の原則では「近くにあるアイテム同士は、同じグループ——似た機能や特徴を共有するもの——として知覚されやすい」とされます。NN/g もフォームについて「ラベルは対応する入力欄の近くに置き、関連するフィールドをグループ化せよ」としています。
+        <span class="cites">
+          <a class="cite" href="https://www.nngroup.com/articles/gestalt-proximity/" data-ledger="S-02">S-02 · NN/g</a>
+          <a class="cite" href="https://lawsofux.com/law-of-proximity/" data-ledger="S-10">S-10 · Laws of UX</a>
+          <a class="cite" href="https://www.nngroup.com/articles/form-design-white-space/" data-ledger="S-16">S-16 · NN/g</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">実務ルールはシンプルで「グループ内の余白 < グループ間の余白」。線や枠を引く前に、まず余白の差だけでまとまりを作れないか考えます。距離そのものが「これは仲間」という情報を運んでくれます。</span>
+      <p>たとえばラベルと入力欄はセットなので近づけ、別々の質問の間はぐっと離す。たったこれだけで、罫線を1本も引かずに「どこからどこまでが一つの項目か」が伝わります。逆に、間隔が全部同じだと、どれが仲間なのか読み手が判断できません。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 200" role="img" aria-label="等間隔で仲間が分からない例と、グループ内を詰めグループ間を空けた例の比較">
+          <text x="14" y="26" font-family="sans-serif" font-size="11" font-weight="700" fill="#8A5A12">間隔が全部同じ → 仲間が不明</text>
+          <g fill="#DDDDDD">
+            <rect x="14" y="34" width="150" height="16" rx="3"/><rect x="14" y="60" width="150" height="16" rx="3"/>
+            <rect x="14" y="86" width="150" height="16" rx="3"/><rect x="14" y="112" width="150" height="16" rx="3"/>
+          </g>
+          <text x="266" y="26" font-family="sans-serif" font-size="11" font-weight="700" fill="#0E6E4E">近接あり → 2グループが見える</text>
+          <rect x="266" y="34" width="150" height="14" rx="3" fill="#201C29"/>
+          <rect x="266" y="50" width="150" height="14" rx="3" fill="#DDDDDD"/>
+          <rect x="266" y="98" width="150" height="14" rx="3" fill="#201C29"/>
+          <rect x="266" y="114" width="150" height="14" rx="3" fill="#DDDDDD"/>
+          <path d="M428 34 L428 64" stroke="#0E6E4E" stroke-width="1.5"/>
+          <text x="432" y="52" font-family="sans-serif" font-size="10" fill="#0E6E4E">8</text>
+          <path d="M428 64 L428 98" stroke="#0E6E4E" stroke-width="1.5"/>
+          <text x="432" y="86" font-family="sans-serif" font-size="10" fill="#0E6E4E">32</text>
+        </svg>
+        <figcaption>左は全部8pxで並び、まとまりが読めない。右はグループ内8px・グループ間32pxにするだけで、2つの塊が浮かび上がる。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 4 -->
+    <section class="item" id="item4" data-item="4">
+      <p class="item__no">04</p>
+      <h2>フォームの余白の実値</h2>
+      <span class="claim" data-type="fact">実在プロダクトのデザインシステム Uber Base の実測値では、フォーム項目全体の下マージンは 16px、ラベルと入力欄の間隔は 8px と定義されています。入力欄(default サイズ)の内側パディングは上下10px・左右14pxです。
+        <span class="cites">
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/form-control/styled-components.ts" data-ledger="Q-08">Q-08 · Uber Base</a>
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/input/styled-components.ts" data-ledger="Q-07">Q-07 · Uber Base</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">これはまさに「グループ内8px < グループ間16px」の実例です。初心者は、この実測値をそのまま初期値として使ってかまいません。自分でゼロから数字を発明するより、実在DSの値を借りるほうが速く、外しません。</span>
+      <p>数字を暗記する必要はありません。大事なのは「ラベルと欄はセット(=近い8px)」「項目と項目は別(=遠い16px)」という関係です。この関係さえ守れば、値が多少違っても読みやすいフォームになります。まずは 8 と 16、この2つの数から始めましょう。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 220" role="img" aria-label="入力欄まわりの余白の解剖図。ラベル下8px、内側パディング、項目間16pxを注記">
+          <text x="20" y="30" font-family="sans-serif" font-size="12" font-weight="700" fill="#201C29">メールアドレス</text>
+          <path d="M150 26 L150 44" stroke="#0E6E4E" stroke-width="1.5"/><text x="156" y="40" font-family="sans-serif" font-size="10" fill="#0E6E4E">8px（ラベル下）</text>
+          <rect x="20" y="44" width="300" height="44" rx="8" fill="#F3F3F3" stroke="#DDDDDD"/>
+          <text x="34" y="71" font-family="sans-serif" font-size="12" fill="#727272">you@example.com</text>
+          <path d="M20 44 L20 60 M34 44 L34 60" stroke="#5B3FD6" stroke-width="1"/>
+          <text x="40" y="105" font-family="sans-serif" font-size="10" fill="#5B3FD6">左右14px / 上下10px の内側パディング</text>
+          <path d="M330 44 L330 88" stroke="#8A5A12" stroke-width="1.5"/><text x="336" y="70" font-family="sans-serif" font-size="10" fill="#8A5A12">項目下 16px</text>
+          <rect x="20" y="130" width="120" height="14" rx="3" fill="#201C29"/>
+          <rect x="20" y="152" width="300" height="44" rx="8" fill="#F3F3F3" stroke="#DDDDDD"/>
+        </svg>
+        <figcaption>Uber Base の実値。ラベル〜入力欄=8px、項目の下=16px、欄の内側=上下10/左右14px。数字ではなく「近い/遠い」の関係で覚える。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 5 -->
+    <section class="item" id="item5" data-item="5">
+      <p class="item__no">05</p>
+      <h2>タッチターゲットと"押せる余白"</h2>
+      <span class="claim" data-type="fact">押せる領域のサイズ基準は3つあります。WCAG は 24×24 CSSピクセル以上(間隔の例外あり)、Apple HIG はデフォルト 44×44pt(周囲に約12/24ptのパディング推奨)、Material / Android は 48×48dp 以上・ターゲット間 8dp 以上、としています。
+        <span class="cites">
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/target-size-minimum.html" data-ledger="F-04">F-04 · WCAG 2.2</a>
+          <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/accessibility" data-ledger="F-05">F-05 · Apple HIG</a>
+          <a class="cite" href="https://support.google.com/accessibility/android/answer/7101858" data-ledger="F-06">F-06 · Google / Material</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">24px は「規格上の最低ライン」、44pt / 48dp が「快適さの基準」と捉えるとよいです。モバイルでは 48dp を既定にし、アイコンの見た目が小さくても、周囲に透明な"押せる余白"(ヒット領域)を足して確保するのが定番です。</span>
+      <p>ここでの余白は、目に見えない余白です。16pxのアイコンでも、その外側に見えないタップ領域を広げれば48dpを満たせます。見た目の大きさと、押せる大きさは別物——この感覚を持つと、小さなアイコンボタンの押しにくさをちゃんと直せるようになります。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 190" role="img" aria-label="24pxアイコンと48dp透明ヒット領域の重ね図、および3規格の比較">
+          <rect x="30" y="40" width="96" height="96" rx="10" fill="#EDE9FB" stroke="#5B3FD6" stroke-dasharray="5 4"/>
+          <text x="30" y="30" font-family="sans-serif" font-size="10" fill="#5B3FD6">48dp 透明ヒット領域</text>
+          <rect x="60" y="70" width="36" height="36" rx="6" fill="#201C29"/>
+          <text x="60" y="156" font-family="sans-serif" font-size="10" fill="#5E5968">見た目のアイコン(小)</text>
+          <g font-family="sans-serif">
+            <text x="200" y="46" font-size="12" font-weight="700" fill="#201C29">3つの基準</text>
+            <rect x="200" y="58" width="240" height="26" rx="5" fill="#F4F1EB"/>
+            <text x="210" y="75" font-size="11" fill="#201C29">WCAG　最低 24×24px（例外あり）</text>
+            <rect x="200" y="90" width="240" height="26" rx="5" fill="#F4F1EB"/>
+            <text x="210" y="107" font-size="11" fill="#201C29">Apple　44×44pt が基準</text>
+            <rect x="200" y="122" width="240" height="26" rx="5" fill="#F4F1EB"/>
+            <text x="210" y="139" font-size="11" fill="#201C29">Material　48×48dp・間隔8dp</text>
+          </g>
+        </svg>
+        <figcaption>アイコンは小さくても、外側の透明な領域で48dpを確保すれば快適に押せる。「見た目」と「押せる範囲」を分けて考えるのがコツ。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 6 -->
+    <section class="item" id="item6" data-item="6">
+      <p class="item__no">06</p>
+      <h2>行送り(文字の中の余白)</h2>
+      <span class="claim" data-type="fact">WCAG 1.4.12(Text Spacing)が要求しているのは「ユーザーが行の高さをフォントサイズの1.5倍(段落後2倍・字間0.12倍・語間0.16倍)まで広げても、内容や機能が失われないこと」です。これは著者に1.5倍を強制する基準ではありません。一方 Material 3 の本文トークン body-large は 16px / 行送り24px = ちょうど1.5倍で、Uber Base の実測行送りも同様です。
+        <span class="cites">
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/text-spacing.html" data-ledger="F-11">F-11 · WCAG 2.2</a>
+          <a class="cite" href="https://raw.githubusercontent.com/material-components/material-web/main/tokens/versions/v0_192/_md-sys-typescale.scss" data-ledger="F-08">F-08 · Material 3</a>
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/themes/shared/typography.ts" data-ledger="Q-02">Q-02 · Uber Base</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">つまり「本文の行間1.5倍」は規格が命じる数字ではなく、堅牢性の基準と実在DSの実値から導かれる"安全な初期値"です。だから本文は行間1.5倍以上を初期値に。ここは「規格の数字を、根拠ごと理解する」練習台でもあります。</span>
+      <p>行間は「文字の中にある余白」です。詰まった行送りは、行を目で追うときに隣の行と混ざり、読む速度を落とします。和文はとくに、欧文より少し広め(1.7〜1.8倍)にすると読みやすくなります。この記事の本文自体、行間を広めに取っているので見比べてみてください。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 180" role="img" aria-label="行間が狭い文章と1.5倍以上の文章の可読性比較">
+          <text x="14" y="24" font-family="sans-serif" font-size="11" font-weight="700" fill="#8A5A12">行間が狭い(1.1倍)</text>
+          <g fill="#727272">
+            <rect x="14" y="34" width="200" height="8" rx="2"/><rect x="14" y="45" width="200" height="8" rx="2"/>
+            <rect x="14" y="56" width="200" height="8" rx="2"/><rect x="14" y="67" width="170" height="8" rx="2"/>
+          </g>
+          <text x="266" y="24" font-family="sans-serif" font-size="11" font-weight="700" fill="#0E6E4E">行間1.5倍以上</text>
+          <g fill="#201C29">
+            <rect x="266" y="34" width="200" height="8" rx="2"/><rect x="266" y="52" width="200" height="8" rx="2"/>
+            <rect x="266" y="70" width="200" height="8" rx="2"/><rect x="266" y="88" width="170" height="8" rx="2"/>
+          </g>
+          <text x="14" y="120" font-family="sans-serif" font-size="11" fill="#5E5968">左は行が近すぎて視線が隣に迷い込む。右は行ごとの"余白"で目が迷わない。</text>
+          <text x="14" y="150" font-family="sans-serif" font-size="11" fill="#5B3FD6">Material body-large：16px / 行送り24px（=1.5倍）</text>
+        </svg>
+        <figcaption>行の高さ＝文字の余白。1.5倍を下回ると視線が隣の行に迷い込む。和文は1.7〜1.8倍が読みやすい。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 7 -->
+    <section class="item" id="item7" data-item="7">
+      <p class="item__no">07</p>
+      <h2>画面のマージンと密度</h2>
+      <span class="claim" data-type="fact">Material の画面左右マージンは、モバイル/タブレットで16dp、タブレット/デスクトップで24dpです。また Material 3 は余白の道具を3種類に分けます——パディング(要素の内側)、ギャップ(要素と要素の間)、マージン(それ以上)——そして「コンポーネントでマージンはめったに使わない。まずパディングとギャップで組む」としています。
+        <span class="cites">
+          <a class="cite" href="https://m1.material.io/layout/metrics-keylines.html" data-ledger="F-10">F-10 · Material</a>
+          <a class="cite" href="https://m3.material.io/m3/pages/spacing/overview" data-ledger="S-15">S-15 · Material 3</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">まず画面端にコンテンツを貼り付けないこと(モバイルは左右16dpから)。そして余白を設計するとき「これは要素の内側(パディング)か、要素の間(ギャップ)か」を区別して言葉にすると、レイアウトが崩れにくくなります。</span>
+      <p>「なんか窮屈」と感じる画面の多くは、画面端の余白が足りていません。逆に大画面で余白を増やさないと、文章が横に間延びして読みにくくなります。余白を「内側/間/外側」の3種で捉えると、どこを足せばいいかを迷わず指させるようになります。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 200" role="img" aria-label="モバイルとデスクトップの画面外周マージン16dpと24dpの比較図">
+          <rect x="40" y="20" width="120" height="160" rx="12" fill="#FFFFFF" stroke="#E3DED4"/>
+          <rect x="56" y="40" width="88" height="120" rx="6" fill="#EDE9FB"/>
+          <path d="M40 190 L56 190" stroke="#5B3FD6" stroke-width="1.5"/><text x="62" y="194" font-family="sans-serif" font-size="10" fill="#5B3FD6">16dp</text>
+          <text x="60" y="14" font-family="sans-serif" font-size="11" fill="#5E5968">モバイル</text>
+          <rect x="230" y="20" width="230" height="160" rx="12" fill="#FFFFFF" stroke="#E3DED4"/>
+          <rect x="254" y="40" width="182" height="120" rx="6" fill="#EDE9FB"/>
+          <path d="M230 190 L254 190" stroke="#5B3FD6" stroke-width="1.5"/><text x="260" y="194" font-family="sans-serif" font-size="10" fill="#5B3FD6">24dp</text>
+          <text x="250" y="14" font-family="sans-serif" font-size="11" fill="#5E5968">大画面</text>
+          <text x="268" y="104" font-family="sans-serif" font-size="11" fill="#201C29" font-weight="700">内側=パディング / 間=ギャップ</text>
+        </svg>
+        <figcaption>画面端の余白はモバイル16dp・大画面24dpが目安。余白は「内側(パディング)/間(ギャップ)/外側(マージン)」で言い分ける。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 8 -->
+    <section class="item" id="item8" data-item="8">
+      <p class="item__no">08</p>
+      <h2>レスポンシブな余白</h2>
+      <span class="claim" data-type="fact">GOV.UK デザインシステムのスペーシングは、画面幅640px(タブレットのブレークポイント)を境に、同じ"単位"でも実際の値が変わるレスポンシブスケールです。たとえば Unit 4 は小画面15px / 大画面20px、Unit 9 は小画面40px / 大画面60px、といった具合です。
+        <span class="cites">
+          <a class="cite" href="https://design-system.service.gov.uk/styles/spacing/" data-ledger="F-12">F-12 · GOV.UK</a>
+          <a class="cite" href="https://m1.material.io/layout/metrics-keylines.html" data-ledger="F-10">F-10 · Material</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">余白は「1つの固定値」ではなく「画面幅に応じて段階的に変えるスケール」として設計するのが定番です。大画面ほど余白を増やすと、要素が窮屈にならず、視線の移動も落ち着きます。このページ自身も、広い画面では左右の余白が広がるようにしています。</span>
+      <p>スマホで気持ちよかった余白が、そのままだとPCではスカスカ・逆に詰まって見えることがあります。だから「同じ意味の余白でも、画面が広ければ少し大きく」という発想を持ちます。値を1つ決めて終わりにせず、2段階(小/大)で考えるだけでも、見え方は大きく安定します。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 180" role="img" aria-label="狭い画面から広い画面へ余白が段階的に増えるレスポンシブ余白の図">
+          <text x="14" y="24" font-family="sans-serif" font-size="11" fill="#5E5968">同じ「Unit 9」でも、画面幅で余白量が変わる</text>
+          <rect x="14" y="40" width="150" height="110" rx="10" fill="#F4F1EB"/>
+          <rect x="54" y="70" width="70" height="50" rx="6" fill="#5B3FD6"/>
+          <path d="M14 60 L54 60" stroke="#8A5A12" stroke-width="1.5"/><text x="20" y="56" font-family="sans-serif" font-size="10" fill="#8A5A12">40px</text>
+          <text x="40" y="168" font-family="sans-serif" font-size="10" fill="#5E5968">640px以下</text>
+          <rect x="210" y="40" width="256" height="110" rx="10" fill="#F4F1EB"/>
+          <rect x="290" y="70" width="96" height="50" rx="6" fill="#5B3FD6"/>
+          <path d="M210 60 L290 60" stroke="#0E6E4E" stroke-width="1.5"/><text x="230" y="56" font-family="sans-serif" font-size="10" fill="#0E6E4E">60px</text>
+          <text x="300" y="168" font-family="sans-serif" font-size="10" fill="#5E5968">640px超</text>
+        </svg>
+        <figcaption>GOV.UK は640pxを境に、同じ単位でも余白量を切り替える。「小/大の2段階」で余白を持つだけで、どの画面でも落ち着いて見える。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 9 -->
+    <section class="item" id="item9" data-item="9">
+      <p class="item__no">09</p>
+      <h2>「8の倍数が絶対」ではない(反例と方針比較)</h2>
+      <span class="claim" data-type="fact">実在のデザインシステムには、8の倍数でないスケールが複数あります。Uber Base のスペーシングは2px刻みで、10px や 14px を含みます。GOV.UK は5px刻み(0 / 5 / 10 / 15 / 20 / 25 / 30 / 40 / 50 / 60px)です。
+        <span class="cites">
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/themes/shared/sizing.ts" data-ledger="Q-06">Q-06 · Uber Base</a>
+          <a class="cite" href="https://design-system.service.gov.uk/styles/spacing/" data-ledger="F-12">F-12 · GOV.UK</a>
+        </span>
+      </span>
+      <div class="counter" data-role="counterexample">
+        <span class="tag">反例</span>
+        <p>だから「8の倍数が絶対」は誤りです。Uber Base(2px刻み)も GOV.UK(5px刻み)も、8の倍数だけには従っていません。本質は倍数そのものではなく「宣言したスケール上の値だけを使い、恣意的な値を発明しないこと」。サービスによって刻み幅の方針は異なります。</p>
+      </div>
+      <span class="claim" data-type="interpretation">ここが、事実と解釈を分ける練習の総仕上げです。「8pxグリッド」は強力な出発点ですが、唯一の正解ではありません。大事なのは"自分のスケールを一つ決めて、その中の値だけを使う"こと。8でも、5でも、2刻みでも、決めて守れば品質は保てます。</span>
+      <p>初心者ほど「絶対のルール」を求めがちですが、実物のDSを覗くと「文脈で正解が変わる」ことが分かります。ルールを覚えるより、「なぜそのスケールなのか」を観察できる目のほうが長く役立ちます。8を疑えるようになったら、あなたの余白の解像度はもう一段上がっています。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 190" role="img" aria-label="8の倍数スケールとUber Baseスケールの並置比較表">
+          <text x="14" y="24" font-family="sans-serif" font-size="11" font-weight="700" fill="#0E6E4E">8の倍数(原則)</text>
+          <g font-family="sans-serif" font-size="11" fill="#FFFFFF">
+            <rect x="14" y="34" width="30" height="24" rx="4" fill="#0E6E4E"/><text x="22" y="51">8</text>
+            <rect x="52" y="34" width="40" height="24" rx="4" fill="#0E6E4E"/><text x="60" y="51">16</text>
+            <rect x="100" y="34" width="50" height="24" rx="4" fill="#0E6E4E"/><text x="112" y="51">24</text>
+            <rect x="158" y="34" width="60" height="24" rx="4" fill="#0E6E4E"/><text x="176" y="51">32</text>
+          </g>
+          <text x="14" y="94" font-family="sans-serif" font-size="11" font-weight="700" fill="#8A5A12">Uber Base(2px刻み・反例)</text>
+          <g font-family="sans-serif" font-size="11" fill="#FFFFFF">
+            <rect x="14" y="104" width="26" height="24" rx="4" fill="#5B3FD6"/><text x="20" y="121">8</text>
+            <rect x="48" y="104" width="32" height="24" rx="4" fill="#B14BC8"/><text x="53" y="121">10</text>
+            <rect x="88" y="104" width="38" height="24" rx="4" fill="#5B3FD6"/><text x="98" y="121">12</text>
+            <rect x="134" y="104" width="44" height="24" rx="4" fill="#B14BC8"/><text x="146" y="121">14</text>
+            <rect x="186" y="104" width="50" height="24" rx="4" fill="#5B3FD6"/><text x="200" y="121">16</text>
+          </g>
+          <text x="14" y="160" font-family="sans-serif" font-size="10" fill="#5E5968">紫=8の倍数 / マゼンタ=8の倍数でない値(10・14)。実在DSは2px刻みも使う。</text>
+        </svg>
+        <figcaption>8の倍数スケールと、10・14pxを含む Uber Base スケールの並置。「絶対」ではなく「決めたスケールを守る」ことが本質。</figcaption>
+      </figure>
+    </section>
+
+    <div class="summary">
+      <h2>まとめ：余白は根拠で語れる</h2>
+      <ul>
+        <li>余白は"機能"。整理・階層・注意という仕事をしている(項目1)。</li>
+        <li>迷ったら8の倍数から。ただし絶対ではなく「決めたスケールを守る」のが本質(項目2・9)。</li>
+        <li>グループ内 < グループ間。距離が"仲間"を伝える(項目3・4)。</li>
+        <li>押せる大きさは48dpを既定に。見えない"押せる余白"で確保(項目5)。</li>
+        <li>本文の行間は1.5倍以上を初期値に。和文は1.7〜1.8倍(項目6)。</li>
+        <li>画面端に貼り付けず、余白は画面幅で段階的に変える(項目7・8)。</li>
+      </ul>
+      <p class="note" style="margin-top: var(--space-16);">この記事は、日本語の読速 約400〜600字/分を前提に約10分で読める分量にしています。数値はすべて一次ソース(WCAG・Apple・Google・Material・GOV.UK・NN/g・Uber Base)に紐づけて管理しています。</p>
+    </div>
+
+    <div class="next">
+      <a href="color.html">
+        <p class="k">NEXT · UIクラフト</p>
+        <p class="t">配色（カラー）を読む</p>
+        <p class="d">余白の次は「色」。コントラスト比4.5:1・色だけに頼らない・アクセントの節度も、同じように数値と一次ソースから学べます。</p>
+      </a>
+      <a href="../prototype/index.html">
+        <p class="k">実践 · フィールドワーク</p>
+        <p class="t">この知識で実物を1つ観察しよう</p>
+        <p class="d">身近なアプリを1つ開いて、「この余白は近接?タップ領域は48dpある?」と今日学んだ目で見てみましょう。</p>
+      </a>
+    </div>
+
+    <footer>
+      <p>© BONO — UIデザインの基礎知識「UIの余白で知るべき9個」。出典・数値はすべて台帳ID付きで一次ソースに紐づけています。</p>
+    </footer>
+  </main>
+
+  <script>
+  /* 軽量Canvasシェーダー: index.html と同一方針。reduced-motion / JS無効時は
+     CSS静的グラデにフォールバック。本文テキストの背後には敷かない。 */
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    var canvas = document.querySelector("canvas.shader");
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext("2d");
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var blobs = [
+      { hue: 262, x: 0.2, y: 0.3, r: 0.55, sx: 0.017, sy: 0.013, p: 0 },
+      { hue: 291, x: 0.7, y: 0.4, r: 0.5,  sx: 0.013, sy: 0.019, p: 2 },
+      { hue: 232, x: 0.5, y: 0.75, r: 0.6, sx: 0.019, sy: 0.011, p: 4 }
+    ];
+    function resize() {
+      canvas.width = Math.max(1, canvas.offsetWidth) * dpr;
+      canvas.height = Math.max(1, canvas.offsetHeight) * dpr;
+    }
+    function draw(t) {
+      var w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter";
+      for (var i = 0; i < blobs.length; i++) {
+        var b = blobs[i];
+        var cx = (b.x + Math.sin(t * b.sx + b.p) * 0.16) * w;
+        var cy = (b.y + Math.cos(t * b.sy + b.p) * 0.16) * h;
+        var rad = b.r * Math.min(w, h);
+        var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        g.addColorStop(0, "hsla(" + b.hue + ",70%,45%,0.42)");
+        g.addColorStop(1, "hsla(" + b.hue + ",70%,25%,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
+    var start = null;
+    function loop(now) {
+      if (start === null) start = now;
+      draw((now - start) / 1000);
+      requestAnimationFrame(loop);
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>

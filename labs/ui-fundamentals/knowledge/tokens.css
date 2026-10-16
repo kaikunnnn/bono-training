@@ -1,0 +1,105 @@
+/* ============================================================
+   tokens.css — 単一ソース（Single Source of Truth）
+   このファイルの数値は「発明」ではなく台帳からの転写である。
+   - スペーシング: F-09（8dpグリッド）を基本に、Uber Base の
+     実測スケール Q-06（2px刻み・10/14pxを含む）を転写。
+   - タイポ: Material 3（F-08）/ Uber Base（Q-02/Q-03）の実値。
+   - 本文 line-height は F-11 の「安全な初期値」1.5 以上を採用。
+   ページ内の margin / padding / gap は必ずこの変数のみで指定する。
+   生の px / rem を直書きしない（自己言及的品質・D-1チェックの前提）。
+   ============================================================ */
+
+:root {
+  /* --- スペーシング（Q-06 転写 / F-09 の8dpグリッド基本） --- */
+  --space-2: 2px;      /* Base scale0  */
+  --space-4: 4px;      /* Base scale100 / 4dpグリッド */
+  --space-6: 6px;      /* Base scale200 */
+  --space-8: 8px;      /* Base scale300 / 8dpグリッド基本単位 */
+  --space-10: 10px;    /* Base scale400（8の倍数でない実例） */
+  --space-12: 12px;    /* Base scale500 */
+  --space-14: 14px;    /* Base scale550（8の倍数でない実例） */
+  --space-16: 16px;    /* Base scale600 / 画面マージン・項目間 */
+  --space-18: 18px;    /* Base scale650 */
+  --space-20: 20px;    /* Base scale700 */
+  --space-22: 22px;    /* Base scale750 */
+  --space-24: 24px;    /* Base scale800 / 大画面マージン */
+  --space-28: 28px;    /* Base scale850 */
+  --space-32: 32px;    /* Base scale900 / セクション間 */
+  --space-36: 36px;    /* Base scale950 */
+  --space-40: 40px;    /* Base scale1000 */
+  --space-48: 48px;    /* Base scale1200 */
+  --space-56: 56px;    /* Base scale1400 */
+  --space-64: 64px;    /* Base scale1600 */
+  --space-96: 96px;    /* Base scale2400 */
+  --space-128: 128px;  /* Base scale3200 */
+
+  /* --- 読み幅（本文65〜75字相当） --- */
+  --measure: 42rem;    /* ≒ 672px。全角なら約34字/行、和欧混在で可読域 */
+
+  /* --- カラー（読み物向け・ライトのみ / F-01 コントラスト検証済み） --- */
+  --color-bg: #FBFAF7;         /* 温かみのある紙色 */
+  --color-surface: #FFFFFF;    /* カード面 */
+  --color-surface-2: #F4F1EB;  /* 微差のパネル面 */
+  --color-ink: #201C29;        /* 本文・見出し（対bg 約16:1） */
+  --color-ink-2: #4B4658;      /* 補助テキスト（対bg 約8.7:1） */
+  --color-ink-3: #5E5968;      /* メタ・キャプション（対bg 約6.5:1） */
+  --color-accent: #5B3FD6;     /* リンク・アクセント（対bg 約6.6:1） */
+  --color-accent-2: #B14BC8;   /* 図解グラデ用の副アクセント */
+  --color-border: #E3DED4;     /* 罫線・カード枠 */
+  --color-fact: #0E6E4E;       /* 事実ラベル（緑・対白 約4.9:1） */
+  --color-fact-bg: #E9F4EF;    /* 事実ラベル背景 */
+  --color-interp: #8A5A12;     /* 解釈ラベル（琥珀・対白 約4.9:1） */
+  --color-interp-bg: #F7EFDF;  /* 解釈ラベル背景 */
+
+  /* --- ヒーローのグラデ停止点（白文字を全停止点で4.5:1以上） --- */
+  --grad-1: #241B45;
+  --grad-2: #3A2560;
+  --grad-3: #4A2352;
+  --grad-4: #1C2450;
+  --color-on-grad: #FFFFFF;
+
+  /* --- タイポグラフィ（F-08 / Q-02・Q-03 実値） --- */
+  --font-body: "Noto Sans JP", system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+  --text-body: 16px;     /* body-large / ParagraphMedium */
+  --text-small: 14px;    /* ParagraphSmall */
+  --text-caption: 12px;  /* ParagraphXSmall */
+  --leading-body: 1.75;  /* F-11 の 1.5 を上回る安全な初期値（和文向け） */
+  --leading-small: 1.7;
+  --leading-heading: 1.3;
+
+  /* --- その他（D-1の対象外: 角丸・影・境界幅） --- */
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --shadow-card: 0 1px 2px rgba(32, 28, 41, 0.04), 0 8px 24px rgba(32, 28, 41, 0.06);
+
+  /* ============================================================
+     specimen（見本）トークン — 配色記事（color.html）専用
+     実在DSの「実hex」を図解で見せるための転写。chrome用トークンと
+     接頭辞 --swatch-* で分離。台帳IDコメント必須（発明禁止）。
+     ページ自身の基調色には使わない（D-5(d): 見本としてのみ登場）。
+     ※意図的に不合格な見本（低コントラスト/無効グレー）を含むため、
+       D-2 コントラスト検査の対象ペアには含めない（chromeテキストのみ検査）。
+     ============================================================ */
+  /* Uber Base — グレースケール階層（Q-04） */
+  --swatch-base-ink: #000000;        /* Q-04 contentPrimary / black */
+  --swatch-base-content2: #4B4B4B;   /* Q-04 contentSecondary / gray800 */
+  --swatch-base-content3: #5E5E5E;   /* Q-04 contentTertiary / gray700 */
+  --swatch-base-disabled: #A6A6A6;   /* Q-04 contentStateDisabled / gray400（対白4.5:1未満=無効表示の例外） */
+  --swatch-base-gray500: #868686;    /* Q-04 gray500 */
+  --swatch-base-gray300: #C6C6C6;    /* Q-04 gray300 */
+  --swatch-base-gray200: #DDDDDD;    /* Q-04 gray200（薄い枠線の例＝非テキスト3:1未満） */
+  --swatch-base-gray100: #E8E8E8;    /* Q-04 gray100 */
+  --swatch-base-gray50: #F3F3F3;     /* Q-04 gray50 / backgroundSecondary（入力欄塗り） */
+  --swatch-base-white: #FFFFFF;      /* Q-04 white / backgroundPrimary */
+  /* Uber Base — アクセント/意味色（Q-05） */
+  --swatch-base-accent: #276EF1;     /* Q-05 blue600 / contentAccent */
+  --swatch-base-positive: #0E8345;   /* Q-05 green600 / positive */
+  --swatch-base-warning: #9F6402;    /* Q-05 yellow600 / warning */
+  --swatch-base-error: #DE1135;      /* Q-05 red600 / negative(error) */
+  --swatch-base-error-bg: #FFF0EE;   /* Q-05 red50 / backgroundNegativeLight */
+  /* GOV.UK — カラー（F-15・反例） */
+  --swatch-govuk-ink: #0b0c0c;       /* F-15 本文/テキスト色（純黒でない） */
+  --swatch-govuk-link: #1a65a6;      /* F-15 リンク色 */
+  --swatch-govuk-brand: #1d70b8;     /* F-15 ブランド色 */
+}
