@@ -12,6 +12,7 @@ import { ICON_SIZE } from "./icon-utils";
 import { Home2 } from "iconsax-react";
 import { withPricingFrom } from "@/lib/activity-utils";
 import { trackPricingCtaClick } from "@/lib/activity-client";
+import { COURSE_PROTO_PREFIX, PrototypeSidebar } from "./PrototypeSidebar";
 
 // 旧BONOサイト（Webflow）。ドメイン切替後は legacy サブドメインから提供する。
 const OLD_BONO_URL = "https://legacy.bo-no.design";
@@ -26,6 +27,19 @@ const OLD_BONO_URL = "https://legacy.bo-no.design";
  */
 export function Sidebar({ className, user, notificationSlot, boardDotSlot }: SidebarProps) {
   const pathname = usePathname();
+
+  // コース／ロードマップのプロト（#243・/dev 配下のみ）では、新しい並びのサイドバーを出す。本番の並びは下のまま
+  if (pathname?.startsWith(COURSE_PROTO_PREFIX)) {
+    return (
+      <PrototypeSidebar
+        className={className}
+        user={user}
+        notificationSlot={notificationSlot}
+        boardDotSlot={boardDotSlot}
+        pathname={pathname}
+      />
+    );
+  }
 
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");

@@ -26,6 +26,19 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/course-pages/prototyping",
+    issue: "#241 / #242",
+    title: "プロトタイピング：コースページ",
+    summary:
+      "コースページのプロトタイプの入口。コースの一覧（4コース）、コースの詳細（?progress=1 で会員の進捗、?curriculum=syllabus|list でカリキュラムの版。既定はシラバス（大））、分析「コースとロードマップ」を1か所から見られる。推測の文言は画面下のトグルで「仮」タグ表示。",
+    status: "in-progress",
+    links: [
+      { href: "/dev/course-pages", label: "コースの一覧" },
+      { href: "/dev/course-pages/ai-ui-design", label: "AIコースの詳細" },
+      { href: "/dev/course-pages/prototyping/analysis", label: "分析：コースとロードマップ" },
+    ],
+  },
+  {
     href: "/dev/course-card-patterns/top",
     issue: "#235",
     title: "コースカードをトップに横3枚で並べた見え方",
