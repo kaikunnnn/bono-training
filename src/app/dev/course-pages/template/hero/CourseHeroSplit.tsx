@@ -3,20 +3,19 @@
  *
  * 左に文字（バッジ・コース名・サブ行・つくった人・ボタン）、右に画像パネル。
  * パネルはヒーローの上端まで裁ち落とし、右端は器の右端。角は四角。
- * 画像: Figma のグラデの上に「このコースでつくるもの」の仮画像（WorkMock）。
+ * 画像: Figma の正方形に近い端末画像（80:7139）をパネルいっぱいに cover で敷く。
  * スマホ: 文字 → ボタン → 画像パネル（画面幅いっぱい・4:3）。
  */
 
 import {
   CourseBadge,
   type CourseHeroProps,
-  FigmaGradient,
   HERO_CONTAINER,
   HeroAuthor,
   HeroCtas,
+  HeroImageSquare,
   HeroSub,
   HeroTitle,
-  OutcomeMock,
 } from "./parts";
 
 export default function CourseHeroSplit({
@@ -38,10 +37,7 @@ export default function CourseHeroSplit({
           </div>
 
           <div className="relative -mx-4 aspect-[4/3] overflow-hidden md:-mx-10 lg:mx-0 lg:aspect-auto">
-            <FigmaGradient priority />
-            <div className="absolute inset-0 flex items-center justify-center p-[6%]">
-              <OutcomeMock course={course} className="w-full max-w-[540px]" />
-            </div>
+            <HeroImageSquare priority />
           </div>
         </div>
       </div>

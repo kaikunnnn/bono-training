@@ -12,8 +12,6 @@ import { ArrowDown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Course, LessonMap } from "../../data/types";
-import type { WorkMockKind } from "../../data/roadmap-career-change-v3";
-import WorkMock from "../../prototyping/roadmap/career-change-v3/WorkMock";
 import { T } from "../kari";
 import { LessonCover, splitTitle } from "../shared";
 
@@ -153,47 +151,40 @@ export function HeroCtas({
 
 /* ---------- 画像 ---------- */
 
-/** Figma の下地（青〜薄紫のグラデーション画像）。親は relative */
-export function FigmaGradient({ priority = false }: { priority?: boolean }) {
+/**
+ * Figma の画像（Course2026 80:7141）。ノートPC＋スマホの端末画像がやわらかいグラデの上に載ったもの。
+ * どちらも親いっぱいに cover で敷く（親は relative ＋ 寸法あり）。端末は画像の中央にあるので中央基準で切る。
+ */
+const HERO_IMAGE_ALT = "ノートPCとスマホに表示した画面の例";
+
+/** 横長（1370×590・Figma 80:7131）。03・04 の帯で使う */
+export function HeroImageWide({ priority = false }: { priority?: boolean }) {
   return (
     <Image
-      src="/dev/course-hero/figma-gradient.png"
-      alt=""
+      src="/dev/course-hero/hero-wide.png"
+      alt={HERO_IMAGE_ALT}
       fill
       sizes="100vw"
       unoptimized
       priority={priority}
-      className="object-cover"
+      className="object-cover object-center"
     />
   );
 }
 
-/** Figma の端末画像（ノートPC＋スマホ。Figma の仮画像） */
-export function FigmaDevices({ className }: { className?: string }) {
+/** ほぼ正方形（581×559・Figma 80:7139）。01 の右パネル・02 の1枚目のカードで使う */
+export function HeroImageSquare({ priority = false }: { priority?: boolean }) {
   return (
     <Image
-      src="/dev/course-hero/figma-devices-crop.png"
-      alt="ノートPCとスマホに表示した画面の例（Figmaの仮画像）"
-      width={1200}
-      height={701}
+      src="/dev/course-hero/hero-square.png"
+      alt={HERO_IMAGE_ALT}
+      fill
+      sizes="(min-width: 1024px) 581px, 100vw"
       unoptimized
-      className={cn("h-auto", className)}
+      priority={priority}
+      className="object-cover object-center"
     />
   );
-}
-
-/** コースごとの「つくるもの」の仮画像（WorkMock の種類）。対応は仮 */
-const OUTCOME_MOCK: Record<string, WorkMockKind> = {
-  "ui-design-first": "todo-annotated",
-  "ui-design-visual": "dailyui-grid",
-  "ui-experience": "flow-app",
-  "ai-ui-design": "flow-saas",
-};
-
-/** つくるものの仮画像（下地なし。下地は呼ぶ側で敷く） */
-export function OutcomeMock({ course, className }: { course: Course; className?: string }) {
-  const kind = OUTCOME_MOCK[course.slug] ?? "flow-app";
-  return <WorkMock kind={kind} rounded="rounded-none" className={cn("bg-none bg-transparent", className)} />;
 }
 
 /** 実レッスンの表紙を横に並べる（Sanity の実画像）。最大 max 枚 */

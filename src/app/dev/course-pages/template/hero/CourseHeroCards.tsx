@@ -3,8 +3,8 @@
  *
  * 上の段: 左にバッジ＋コース名、右にサブ行（Regular → font-medium で近似）。つくった人は無し。
  * その下にボタン、さらに下に同じ大きさのカード3枚（371×444・角丸24）。
- * Figma は1枚目だけ端末画像・2〜3枚目は空なので、3枚とも中身を変えた:
- *   1. つくるもの（仮の作品画像 WorkMock）
+ * Figma は1枚目だけ端末画像・2〜3枚目は空なので、2〜3枚目は中身を足した:
+ *   1. Figma の端末画像（80:7139）をカードいっぱいに cover
  *   2. 使うレッスン（Sanity の実レッスン表紙）
  *   3. 進め方（ステップ名の並び・コースのデータ）
  * スマホ: 上の段は縦積み、カードは横スクロール（約80%幅・スナップ）。
@@ -16,13 +16,12 @@ import { numberSteps, pad2 } from "../shared";
 import {
   CourseBadge,
   type CourseHeroProps,
-  FigmaGradient,
   HERO_CONTAINER,
   HeroCtas,
+  HeroImageSquare,
   HeroSub,
   HeroTitle,
   LessonCoverRow,
-  OutcomeMock,
 } from "./parts";
 
 const CARD =
@@ -59,16 +58,9 @@ export default function CourseHeroCards({
         <HeroCtas startHref={startHref} curriculumHref={curriculumHref} className="mt-6 lg:mt-[26px]" />
 
         <ul className="-mx-4 mt-10 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0 lg:mt-[52px]">
-          {/* 1. つくるもの */}
+          {/* 1. Figma の端末画像 */}
           <li className={CARD}>
-            <FigmaGradient />
-            <CardLabel index={1}>つくるもの</CardLabel>
-            <div className="absolute inset-0 flex items-center justify-center p-[4%]">
-              <OutcomeMock course={course} className="w-full" />
-            </div>
-            <p className="absolute inset-x-5 bottom-4 z-10 text-[13px] font-bold leading-[1.6] text-text-primary">
-              <T f={course.deliverable} />
-            </p>
+            <HeroImageSquare />
           </li>
 
           {/* 2. 使うレッスン（実画像） */}

@@ -39,10 +39,10 @@ const PATTERNS: {
   image: string;
   Hero: (props: CourseHeroProps) => React.ReactNode;
 }[] = [
-  { id: "01", name: "左右分割", node: "70-5567", image: "つくるものの仮画像（Figmaのグラデの上）", Hero: CourseHeroSplit },
-  { id: "02", name: "見出し＋カード3枚", node: "70-5756", image: "つくるもの（仮）／使うレッスン（実画像）／進め方", Hero: CourseHeroCards },
-  { id: "03", name: "中央寄せ＋全幅の帯", node: "70-6403", image: "Figmaの素材そのまま", Hero: CourseHeroCentered },
-  { id: "04", name: "左右の見出し＋全幅の帯", node: "70-6929", image: "実レッスンの表紙（実画像）", Hero: CourseHeroBand },
+  { id: "01", name: "左右分割", node: "70-5567", image: "Figmaの端末画像（正方形・80:7139）", Hero: CourseHeroSplit },
+  { id: "02", name: "見出し＋カード3枚", node: "70-5756", image: "Figmaの端末画像（正方形）／使うレッスン（実画像）／進め方", Hero: CourseHeroCards },
+  { id: "03", name: "中央寄せ＋全幅の帯", node: "70-6403", image: "Figmaの端末画像（横長・80:7131）", Hero: CourseHeroCentered },
+  { id: "04", name: "左右の見出し＋全幅の帯", node: "70-6929", image: "Figmaの端末画像（横長・80:7131）", Hero: CourseHeroBand },
 ];
 
 type SearchParams = Promise<{ p?: string; course?: string }>;

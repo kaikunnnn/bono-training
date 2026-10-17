@@ -3,7 +3,7 @@
  *
  * 左: バッジ・コース名・ボタン。右: サブ行・つくった人（右の下端をボタンの下端に揃える）。
  * 下に高さ590の画像の帯（コンテンツ領域の端から端・角丸なし）。
- * 画像: Figma のグラデの上に、このコースの実レッスンの表紙（Sanity の実画像）を横に並べる。
+ * 画像: Figma の横長の端末画像（80:7131）を帯いっぱいに cover。端末は中央なので、スマホの4:3でも端末は残る。
  * スマホ: コース名 → サブ行・つくった人 → ボタン → 帯 の順に縦積み。
  */
 
@@ -11,18 +11,16 @@ import { cn } from "@/lib/utils";
 import {
   CourseBadge,
   type CourseHeroProps,
-  FigmaGradient,
   HERO_CONTAINER,
   HeroAuthor,
   HeroCtas,
+  HeroImageWide,
   HeroSub,
   HeroTitle,
-  LessonCoverRow,
 } from "./parts";
 
 export default function CourseHeroBand({
   course,
-  lessons,
   startHref,
   curriculumHref,
   headingLevel = 1,
@@ -48,15 +46,7 @@ export default function CourseHeroBand({
       </div>
 
       <div className="relative mt-12 aspect-[4/3] w-full overflow-hidden md:aspect-auto md:h-[590px] lg:mt-16">
-        <FigmaGradient />
-        <LessonCoverRow
-          course={course}
-          lessons={lessons}
-          max={6}
-          sizes="(min-width: 768px) 150px, 18vw"
-          className="absolute inset-0 px-[4%]"
-          coverClassName="-mx-[0.6%] w-[17%] md:w-[150px]"
-        />
+        <HeroImageWide />
       </div>
     </section>
   );

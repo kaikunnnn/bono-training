@@ -3,7 +3,7 @@
  *
  * 文字は幅492で中央寄せ（バッジ・コース名・サブ行・つくった人）、その下にボタン。
  * 下に高さ590の画像の帯（コンテンツ領域の端から端・角丸なし）。
- * 画像: Figma の素材そのまま（グラデ＋ノートPCとスマホの端末画像）。
+ * 画像: Figma の横長の端末画像（80:7131）を帯いっぱいに cover。端末は中央なので、スマホの4:3でも左右が切れるだけで端末は残る。
  * スマホ: 中央寄せのまま縦積み、帯は画面幅いっぱい（4:3）。
  */
 
@@ -11,11 +11,10 @@ import { cn } from "@/lib/utils";
 import {
   CourseBadge,
   type CourseHeroProps,
-  FigmaDevices,
-  FigmaGradient,
   HERO_CONTAINER,
   HeroAuthor,
   HeroCtas,
+  HeroImageWide,
   HeroSub,
   HeroTitle,
 } from "./parts";
@@ -39,10 +38,7 @@ export default function CourseHeroCentered({
       </div>
 
       <div className="relative mt-12 aspect-[4/3] w-full overflow-hidden md:mt-[71px] md:aspect-auto md:h-[590px]">
-        <FigmaGradient />
-        <div className="absolute inset-0 flex items-center justify-center px-[6%]">
-          <FigmaDevices className="w-full max-w-[648px]" />
-        </div>
+        <HeroImageWide />
       </div>
     </section>
   );
