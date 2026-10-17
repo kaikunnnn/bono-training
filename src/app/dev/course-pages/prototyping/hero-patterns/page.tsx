@@ -5,6 +5,7 @@
  * - ?course=<slug> でコースを切り替え
  * - ?p=01〜04 で1パターンだけを本番のページに近い形で見る（このときはコース名が h1）
  * 各パターンの下に「このコースで目指す状態」の頭だけを置いて、つながりを見られるようにしている。
+ * 「フルのコースページで見る」は v2 のコース詳細（/dev/course-pages/v2/<course>?hero=0N）へ。
  * 実測とトークン対応: rebono/issues/241-B_コースヒーロー_Figma仕様.md
  */
 
@@ -99,6 +100,8 @@ function heroProps(course: Course, lessons: LessonMap, headingLevel: 1 | 2): Cou
   };
 }
 
+const fullHref = (id: string, slug: string) => `/dev/course-pages/v2/${slug}?hero=${id}`;
+
 function href(p: string | null, slug: string) {
   const params = new URLSearchParams();
   if (p) params.set("p", p);
@@ -164,6 +167,13 @@ export default async function HeroPatternsPage({ searchParams }: { searchParams:
                 ))}
               </div>
               <CourseSwitch current={course.slug} p={single.id} />
+              <Link
+                href={fullHref(single.id, course.slug)}
+                className="inline-flex items-center gap-1 font-bold text-text-link hover:underline"
+              >
+                フルのコースページで見る
+                <ArrowRight size={12} />
+              </Link>
             </div>
           </div>
           <Hero {...heroProps(course, lessons, 1)} />
@@ -222,6 +232,13 @@ export default async function HeroPatternsPage({ searchParams }: { searchParams:
                     className="inline-flex items-center gap-1 font-bold text-text-link hover:underline"
                   >
                     このパターンだけ見る
+                    <ArrowRight size={12} />
+                  </Link>
+                  <Link
+                    href={fullHref(id, course.slug)}
+                    className="inline-flex items-center gap-1 font-bold text-text-link hover:underline"
+                  >
+                    フルのコースページで見る
                     <ArrowRight size={12} />
                   </Link>
                 </div>

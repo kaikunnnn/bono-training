@@ -23,17 +23,24 @@ export default function CourseHeroSplit({
   startHref,
   curriculumHref,
   headingLevel = 1,
+  started = null,
+  resume = null,
 }: CourseHeroProps) {
   return (
     <section className="w-full">
       <div className={HERO_CONTAINER}>
         <div className="grid lg:min-h-[560px] lg:grid-cols-[minmax(0,1fr)_minmax(0,581px)] lg:gap-12">
           <div className="max-w-[492px] pb-10 pt-10 lg:pb-[70px] lg:pt-[129px]">
-            <CourseBadge />
+            <CourseBadge started={started} />
             <HeroTitle course={course} level={headingLevel} className="mt-[15px]" />
             <HeroSub course={course} className="mt-[15px]" />
             <HeroAuthor course={course} className="mt-2.5" />
-            <HeroCtas startHref={startHref} curriculumHref={curriculumHref} className="mt-9" />
+            <HeroCtas
+              startHref={startHref}
+              resume={resume}
+              curriculumHref={curriculumHref}
+              className="mt-9"
+            />
           </div>
 
           <div className="relative -mx-4 aspect-[4/3] overflow-hidden md:-mx-10 lg:mx-0 lg:aspect-auto">

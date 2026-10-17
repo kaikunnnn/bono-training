@@ -25,17 +25,32 @@ export interface CourseHeroProps {
   curriculumHref: string;
   /** コース名の見出しレベル。ページの主見出しなら 1 */
   headingLevel?: 1 | 2;
+  /** 進めているコースのとき「進めているコース」の印を足す（#243 ?started=1） */
+  started?: boolean | null;
+  /** 続きから（あれば「このコースを始める」の代わりに出す） */
+  resume?: HeroResume | null;
+}
+
+/** 「続きから」ボタンの中身 */
+export interface HeroResume {
+  href: string;
+  title: string;
 }
 
 /** 器（既存テンプレートと同じ幅） */
 export const HERO_CONTAINER = "mx-auto w-full max-w-[1180px] px-4 md:px-10";
 
-export function CourseBadge({ className }: { className?: string }) {
+export function CourseBadge({ started = null, className }: { started?: boolean | null; className?: string }) {
   return (
-    <p className={className}>
+    <p className={cn("flex flex-wrap items-center gap-2", className)}>
       <span className="inline-flex h-[22px] items-center rounded-full border border-text-secondary px-2.5 text-xs font-bold leading-4 text-text-secondary">
         コース
       </span>
+      {started ? (
+        <span className="inline-flex h-[22px] items-center rounded-full bg-text-primary px-2.5 text-xs font-bold leading-4 text-text-inverse">
+          進めているコース
+        </span>
+      ) : null}
     </p>
   );
 }
@@ -123,15 +138,27 @@ export function HeroAuthor({ course, className }: { course: Course; className?: 
 export function HeroCtas({
   startHref,
   curriculumHref,
+  resume = null,
   className,
 }: {
   startHref: string | null;
   curriculumHref: string;
+  resume?: HeroResume | null;
   className?: string;
 }) {
   return (
     <div className={cn("flex flex-wrap items-center gap-2", className)}>
-      {startHref ? (
+      {resume ? (
+        <Button asChild size="large" className="h-auto min-h-12 whitespace-normal py-2.5 text-left">
+          <Link href={resume.href}>
+            <span>
+              <span className="block text-[11px] font-medium opacity-80">続きから</span>
+              {resume.title}
+            </span>
+            <ArrowRight strokeWidth={2.5} />
+          </Link>
+        </Button>
+      ) : startHref ? (
         <Button asChild size="large">
           <Link href={startHref}>
             このコースを始める

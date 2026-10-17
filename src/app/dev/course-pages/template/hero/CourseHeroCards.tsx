@@ -42,6 +42,8 @@ export default function CourseHeroCards({
   startHref,
   curriculumHref,
   headingLevel = 1,
+  started = null,
+  resume = null,
 }: CourseHeroProps) {
   const steps = numberSteps(course);
 
@@ -50,12 +52,17 @@ export default function CourseHeroCards({
       <div className={cn(HERO_CONTAINER, "pb-10 pt-10 lg:pt-24")}>
         <div className="grid gap-4 lg:grid-cols-[minmax(0,492px)_minmax(0,570px)] lg:items-end lg:justify-between lg:gap-10">
           <div>
-            <CourseBadge />
+            <CourseBadge started={started} />
             <HeroTitle course={course} level={headingLevel} className="mt-[15px]" />
           </div>
           <HeroSub course={course} weight="medium" />
         </div>
-        <HeroCtas startHref={startHref} curriculumHref={curriculumHref} className="mt-6 lg:mt-[26px]" />
+        <HeroCtas
+          startHref={startHref}
+          resume={resume}
+          curriculumHref={curriculumHref}
+          className="mt-6 lg:mt-[26px]"
+        />
 
         <ul className="-mx-4 mt-10 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-3 md:gap-6 md:overflow-visible md:px-0 md:pb-0 lg:mt-[52px]">
           {/* 1. Figma の端末画像 */}

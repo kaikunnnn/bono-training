@@ -9,6 +9,9 @@
  * 5. 未制作 → 近日公開、件数は「公開中・近日公開」
  * 6. 料金: ヒーローのボタン近くと最後の CTA
  * カリキュラムはシラバス（大）で固定。
+ *
+ * ヒーローの切り替え（#241）: hero=01〜04 のときは Figma のヒーローを器の外（全幅）に置き、
+ * v2 ヒーローにしか無い項目（こんな人向け・説明文・期間/件数/動画・料金・進み具合）は直下の HeroSummary にまとめる。
  */
 
 import type { Course, LessonMap, ProgressMock } from "../../data/types";
@@ -20,13 +23,27 @@ import CourseFaq from "../CourseFaq";
 import CourseFinalCta from "../CourseFinalCta";
 import CourseFlow from "../CourseFlow";
 import CourseOutput from "../CourseOutput";
+import CourseHeroBand from "../hero/CourseHeroBand";
+import CourseHeroCards from "../hero/CourseHeroCards";
+import CourseHeroCentered from "../hero/CourseHeroCentered";
+import CourseHeroSplit from "../hero/CourseHeroSplit";
+import type { CourseHeroProps } from "../hero/parts";
 import { KariProvider } from "../kari";
 import { computeProgress } from "../progress";
 import { numberSteps, pad2 } from "../shared";
 import CourseHeroV2 from "./CourseHeroV2";
 import CourseNext from "./CourseNext";
 import GoalReminder from "./GoalReminder";
+import HeroSummary from "./HeroSummary";
+import HeroSwitch, { type HeroVariant } from "./HeroSwitch";
 import PriceNote from "./PriceNote";
+
+const FIGMA_HEROES: Record<Exclude<HeroVariant, "v2">, (props: CourseHeroProps) => React.ReactNode> = {
+  "01": CourseHeroSplit,
+  "02": CourseHeroCards,
+  "03": CourseHeroCentered,
+  "04": CourseHeroBand,
+};
 
 export default function CourseTemplateV2({
   course,
@@ -35,6 +52,9 @@ export default function CourseTemplateV2({
   nextCourse,
   started = null,
   resumeArticleTitle = null,
+  hero = "v2",
+  heroHrefs,
+  startedHref,
 }: {
   course: Course;
   lessons: LessonMap;
@@ -44,6 +64,12 @@ export default function CourseTemplateV2({
   started?: boolean | null;
   /** 続きからの記事タイトル（進めているときだけ） */
   resumeArticleTitle?: string | null;
+  /** #241 ヒーローの版（v2 = 前の形） */
+  hero?: HeroVariant;
+  /** ヒーロー切り替えのリンク（渡したときだけ切り替えの帯を出す） */
+  heroHrefs?: Record<HeroVariant, string>;
+  /** started=0 のとき「このコースを始める」の行き先（?started=1。ほかのクエリを残したもの） */
+  startedHref?: string;
 }) {
   const v2 = course.v2!;
   // 書き直した「得られる変化」で描く（Figma 原文は course.change に残っている）
@@ -64,20 +90,51 @@ export default function CourseTemplateV2({
       : `STEP ${pad2(current.goalNumber ?? 0)}`
     : null;
 
+  const FigmaHero = hero === "v2" ? null : FIGMA_HEROES[hero];
+
   return (
     <KariProvider preview={{ progress: Boolean(progressMock) }}>
       <div className="min-h-screen w-full bg-[var(--bg-base)] font-noto-sans-jp text-text-primary">
-        <div className="mx-auto w-full max-w-[1180px] px-4 md:px-10">
-          <CourseHeroV2
-            course={course}
-            v2={v2}
-            lessons={lessons}
-            startHref={startHref}
-            progress={progress}
-            totalMinutes={totalMinutes}
-            started={started}
-            resumeArticleTitle={resumeArticleTitle}
+        {heroHrefs ? (
+          <HeroSwitch
+            current={hero}
+            hrefs={heroHrefs}
+            v1Href={hero === "v2" ? null : `/dev/course-pages/${course.slug}`}
           />
+        ) : null}
+        {FigmaHero ? (
+          <FigmaHero
+            course={course}
+            lessons={lessons}
+            startHref={started === false ? (startedHref ?? startHref) : startHref}
+            curriculumHref="#curriculum"
+            headingLevel={1}
+            started={started}
+            resume={
+              progress?.resume
+                ? {
+                    href: `/lessons/${progress.resume.slug}`,
+                    title: resumeArticleTitle ?? `${progress.resume.title}の記事${progress.resume.articleNumber}`,
+                  }
+                : null
+            }
+          />
+        ) : null}
+        <div className="mx-auto w-full max-w-[1180px] px-4 md:px-10">
+          {FigmaHero ? (
+            <HeroSummary course={course} v2={v2} progress={progress} totalMinutes={totalMinutes} />
+          ) : (
+            <CourseHeroV2
+              course={course}
+              v2={v2}
+              lessons={lessons}
+              startHref={startHref}
+              progress={progress}
+              totalMinutes={totalMinutes}
+              started={started}
+              resumeArticleTitle={resumeArticleTitle}
+            />
+          )}
           {progress ? (
             <GoalReminder finalGoal={course.finalGoal} step={current?.step ?? null} stepLabel={currentLabel} />
           ) : null}

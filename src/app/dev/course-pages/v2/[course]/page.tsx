@@ -7,6 +7,7 @@
  * ?started=0|1（#243 トピック4「進めるのはコース」のイメージ）
  * - 0: まだ始めていない →「このコースを始める」（押すと ?started=1 ＝ 進めているコースとして登録した想定）
  * - 1: 進めている →「進めているコース」の印と進み具合、ボタンは「続きから：次の記事」
+ * ?hero=01|02|03|04（#241 Figma のヒーロー4パターン）。無し or v2 は前の形（v2 のヒーロー）。上の帯で切り替え
  */
 
 import type { Metadata } from "next";
@@ -16,9 +17,26 @@ import { fetchLessons } from "../../data/sanity-lessons";
 import CourseTemplateV2 from "../../template/v2/CourseTemplateV2";
 import { computeProgress } from "../../template/progress";
 import { fetchNextArticle } from "../../prototyping/roadmap/continue-data";
+import { HERO_VARIANTS, type HeroVariant } from "../../template/v2/HeroSwitch";
 
 type Params = Promise<{ course: string }>;
-type SearchParams = Promise<{ progress?: string; started?: string }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+/** 今のクエリを残したまま、一部だけ差し替えたリンク */
+function withQuery(
+  path: string,
+  query: Record<string, string | string[] | undefined>,
+  patch: Record<string, string | null>
+) {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (key in patch || value === undefined) continue;
+    for (const v of Array.isArray(value) ? value : [value]) params.append(key, v);
+  }
+  for (const [key, value] of Object.entries(patch)) if (value !== null) params.set(key, value);
+  const qs = params.toString();
+  return qs ? `${path}?${qs}` : path;
+}
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { course: slug } = await params;
@@ -37,7 +55,12 @@ export default async function CourseDetailV2Page({
   searchParams: SearchParams;
 }) {
   const { course: slug } = await params;
-  const { progress, started: startedParam } = await searchParams;
+  const query = await searchParams;
+  const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v);
+  const progress = one(query.progress);
+  const startedParam = one(query.started);
+  const heroParam = one(query.hero);
+  const hero: HeroVariant = HERO_VARIANTS.some((v) => v.id === heroParam) ? (heroParam as HeroVariant) : "v2";
   // ?started が無いときは今まで通り（null）
   const started = startedParam === "1" ? true : startedParam === "0" ? false : null;
   const course = getCourse(slug);
@@ -57,6 +80,11 @@ export default async function CourseDetailV2Page({
     }
   }
 
+  const path = `/dev/course-pages/v2/${course.slug}`;
+  const heroHrefs = Object.fromEntries(
+    HERO_VARIANTS.map((v) => [v.id, withQuery(path, query, { hero: v.id === "v2" ? null : v.id })])
+  ) as Record<HeroVariant, string>;
+
   return (
     <CourseTemplateV2
       course={course}
@@ -65,6 +93,9 @@ export default async function CourseDetailV2Page({
       nextCourse={getCourse(course.v2.nextCourse.slug)}
       started={started}
       resumeArticleTitle={resumeArticleTitle}
+      hero={hero}
+      heroHrefs={heroHrefs}
+      startedHref={withQuery(path, query, { started: "1" })}
     />
   );
 }

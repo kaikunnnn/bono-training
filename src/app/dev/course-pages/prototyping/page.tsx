@@ -11,6 +11,7 @@ import { courses, lessonSlugs } from "../data";
 import { fetchLessons } from "../data/sanity-lessons";
 import CourseEyecatch, { pickCovers } from "../template/CourseEyecatch";
 import { courseCounts, splitTitle } from "../template/shared";
+import { HERO_VARIANTS } from "../template/v2/HeroSwitch";
 import { hubSummary } from "./analysis/analysis-content";
 
 export const metadata: Metadata = {
@@ -193,13 +194,27 @@ export default async function PrototypingHubPage() {
           </Link>
 
           {/* 6. ヒーロー 4パターン */}
-          <Link href="/dev/course-pages/prototyping/hero-patterns" className={CARD}>
-            <CardHead
-              kicker="06 · Hero"
-              title="コースのヒーロー 4パターン"
-              lead="Figma の4案（左右分割・カード3枚・中央寄せ＋帯・左右の見出し＋帯）を、今のコースページと同じ文言で組んだもの。?p=01〜04 で1パターンだけ、?course= でコースを切り替え。"
-            />
-          </Link>
+          <div>
+            <Link href="/dev/course-pages/prototyping/hero-patterns" className={CARD}>
+              <CardHead
+                kicker="06 · Hero"
+                title="コースのヒーロー 4パターン"
+                lead="Figma の4案（左右分割・カード3枚・中央寄せ＋帯・左右の見出し＋帯）を、今のコースページと同じ文言で組んだもの。?p=01〜04 で1パターンだけ、?course= でコースを切り替え。"
+              />
+            </Link>
+            <div className="mt-2.5 flex flex-wrap items-center gap-2 px-1">
+              <span className="text-xs font-bold text-text-muted">フルのコースページで見る</span>
+              {HERO_VARIANTS.map((v) => (
+                <Link
+                  key={v.id}
+                  href={`/dev/course-pages/v2/ui-experience${v.id === "v2" ? "" : `?hero=${v.id}`}`}
+                  className="rounded-full border border-border-light bg-surface px-3 py-1.5 text-[11px] font-bold text-text-secondary hover:border-border-default"
+                >
+                  {v.label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>

@@ -24,17 +24,24 @@ export default function CourseHeroCentered({
   startHref,
   curriculumHref,
   headingLevel = 1,
+  started = null,
+  resume = null,
 }: CourseHeroProps) {
   return (
     <section className="w-full">
       <div className={cn(HERO_CONTAINER, "pt-10 text-center")}>
         <div className="mx-auto flex max-w-[492px] flex-col items-center gap-4">
-          <CourseBadge />
+          <CourseBadge started={started} />
           <HeroTitle course={course} level={headingLevel} />
           <HeroSub course={course} />
           <HeroAuthor course={course} className="justify-center" />
         </div>
-        <HeroCtas startHref={startHref} curriculumHref={curriculumHref} className="mt-10 justify-center md:mt-11" />
+        <HeroCtas
+          startHref={startHref}
+          resume={resume}
+          curriculumHref={curriculumHref}
+          className="mt-10 justify-center md:mt-11"
+        />
       </div>
 
       <div className="relative mt-12 aspect-[4/3] w-full overflow-hidden md:mt-[71px] md:aspect-auto md:h-[590px]">

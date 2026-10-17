@@ -24,13 +24,15 @@ export default function CourseHeroBand({
   startHref,
   curriculumHref,
   headingLevel = 1,
+  started = null,
+  resume = null,
 }: CourseHeroProps) {
   return (
     <section className="w-full">
       <div className={cn(HERO_CONTAINER, "pt-10 lg:pt-20")}>
         <div className="grid gap-y-4 lg:grid-cols-[minmax(0,492px)_minmax(0,568px)] lg:justify-between lg:gap-x-10 lg:gap-y-6">
           <div className="lg:col-start-1 lg:row-start-1">
-            <CourseBadge />
+            <CourseBadge started={started} />
             <HeroTitle course={course} level={headingLevel} className="mt-4" />
           </div>
           <div className="lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:self-end">
@@ -39,6 +41,7 @@ export default function CourseHeroBand({
           </div>
           <HeroCtas
             startHref={startHref}
+            resume={resume}
             curriculumHref={curriculumHref}
             className="mt-4 lg:col-start-1 lg:row-start-2 lg:mt-0"
           />
