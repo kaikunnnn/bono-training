@@ -191,6 +191,15 @@ export default async function PrototypingHubPage() {
               lead="コースを束ねた地図としてのロードマップのプロト（#243）。サイト内の見せ方、行き先を選ぶ一覧、6本の詳細。"
             />
           </Link>
+
+          {/* 6. ヒーロー 4パターン */}
+          <Link href="/dev/course-pages/prototyping/hero-patterns" className={CARD}>
+            <CardHead
+              kicker="06 · Hero"
+              title="コースのヒーロー 4パターン"
+              lead="Figma の4案（左右分割・カード3枚・中央寄せ＋帯・左右の見出し＋帯）を、今のコースページと同じ文言で組んだもの。?p=01〜04 で1パターンだけ、?course= でコースを切り替え。"
+            />
+          </Link>
         </div>
       </div>
     </div>
