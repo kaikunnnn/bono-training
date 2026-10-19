@@ -26,6 +26,14 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/progress-feed",
+    issue: "#251",
+    title: "進捗フィードのプロトタイプ（パターンA）",
+    summary:
+      "学習者の「始めた」「終えた」が流れ、📣応援で1タップで励まし合える場所のプロト。A 自動で流れる型を、体験ガイド（始める→投稿する→他の人の投稿を見る→反応が届く→戻ってくる）に沿って通しで触れる。上部の「今やっている人」に自分が加わり「👋 がんばろ」が届く、終えると完了画面からフィードに流れる、ベルの通知から自分の投稿へ戻って強調表示。B 進捗日記型・C 同じコンテンツの仲間型は準備中。保存なし（リロードで初期状態）。",
+    status: "in-progress",
+  },
+  {
     href: "/dev/course-card-patterns/top",
     issue: "#235",
     title: "コースカードをトップに横3枚で並べた見え方",
