@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import SearchPageClient from "@/components/search/SearchPageClient";
 import { SearchPageFallback } from "@/components/search/SearchPageFallback";
 import { getSearchData } from "@/lib/search-data";
+
+// サイト内検索の結果ページは検索に出さない（robots.txt でも巡回を止めている。rebono#249）
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 

@@ -16,6 +16,8 @@ export default function robots(): MetadataRoute.Robots {
           "/settings",
           "/api/",
           "/auth/",
+          // サイト内検索の結果は検索語×ページ番号で無限に作れるため巡回させない（rebono#249）
+          "/search",
         ],
       },
     ],
