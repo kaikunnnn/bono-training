@@ -51,6 +51,8 @@ export function MockBell({ notifications, onOpenNotification, onMarkAllRead }: M
       <PopoverContent
         align="end"
         collisionPadding={15}
+        // 通知から投稿へ移動したとき、フォーカスがベルに戻って投稿から外れないようにする
+        onCloseAutoFocus={(e) => e.preventDefault()}
         className="w-[300px] rounded-[var(--radius-md)] border-[var(--border-hairline)] p-0 shadow-[var(--shadow-popover)]"
       >
         <div className="border-b px-4 py-3">
