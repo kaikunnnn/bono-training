@@ -84,12 +84,14 @@ export function contentLabel(c: ContentItem): string {
 }
 
 /** 流れる節目（お祝いしやすい区切りだけ） */
-export type Milestone = "first" | "streak3" | "lesson" | "content";
+export type Milestone = "first" | "streak3" | "lesson" | "quest" | "content";
 
 export const MILESTONE_LABEL: Record<Milestone, string> = {
   first: "はじめての完了",
   streak3: "3日続いた",
   lesson: "レッスン1本完了",
+  /** フェーズ2（実ページ組み込み版）でクエストの最後の記事を終えたとき */
+  quest: "クエスト完了",
   content: "コンテンツを1つ完走",
 };
 

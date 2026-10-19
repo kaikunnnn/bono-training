@@ -6,7 +6,7 @@
  */
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, X } from 'lucide-react';
 import { getQuestCompleteMessage } from '@/lib/celebration-messages';
@@ -16,6 +16,8 @@ interface QuestCompletionModalProps {
   onClose: () => void;
   questTitle: string;
   autoCloseDelay?: number; // ミリ秒（デフォルト5000）
+  /** メッセージの下に足す内容（省略時は何も出さない＝従来と同じ。#251 の /dev プロトで使用） */
+  children?: ReactNode;
 }
 
 export function QuestCompletionModal({
@@ -23,6 +25,7 @@ export function QuestCompletionModal({
   onClose,
   questTitle,
   autoCloseDelay = 5000,
+  children,
 }: QuestCompletionModalProps) {
   // メッセージを取得
   const message = getQuestCompleteMessage(questTitle);
@@ -109,6 +112,8 @@ export function QuestCompletionModal({
               >
                 {message.description}
               </motion.p>
+
+              {children}
 
               {/* プログレスバー（自動閉じインジケーター） */}
               <motion.div

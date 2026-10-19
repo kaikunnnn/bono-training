@@ -70,10 +70,11 @@ export function MockBell({ notifications, onOpenNotification, onMarkAllRead }: M
           <ul className="flex flex-col">
             {notifications.map((n) => {
               const first = findPerson(n.actorIds[0]);
+              // 「」が二重にならないよう、通知文と対象の投稿を2行に分ける
               const text =
                 n.actorIds.length > 1
-                  ? `${first.name}さんたち${n.actorIds.length}人が、あなたの「${n.contentText}を終えました」を応援しました`
-                  : `${first.name}さんが、あなたの「${n.contentText}を終えました」を応援しました`;
+                  ? `${first.name}さんたち${n.actorIds.length}人があなたの進捗を応援しました`
+                  : `${first.name}さんがあなたの進捗を応援しました`;
               return (
                 <li key={n.id}>
                   <Button
@@ -101,6 +102,7 @@ export function MockBell({ notifications, onOpenNotification, onMarkAllRead }: M
                       >
                         {text}
                       </span>
+                      <span className="mt-0.5 block text-xs text-text-secondary">{n.contentText}を終えました</span>
                       <span className="mt-0.5 block text-xs text-muted-foreground">たった今</span>
                     </span>
                     {!n.read && (
