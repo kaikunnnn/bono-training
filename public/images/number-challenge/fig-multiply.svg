@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 164" width="640" height="164" role="img" aria-label="流れの数字は掛け算でつながる。今は 100人×80%×38%×83%＝25人。どの段も1割ずつ良くすると 100人×88%×41%×92%＝33人。数字はイメージ">
+<style>
+.t{fill:#021710;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:13px}
+.q{fill:#677470;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:12px}
+.b{font-weight:700}
+.m{font-family:"SF Mono",Menlo,Consolas,"Hiragino Sans",monospace}
+.acct{fill:#047A53}
+.hott{fill:#B8430F}
+.box{fill:#FFFFFF;stroke:#D4D6CC;stroke-width:1.5}
+.acc{fill:#E6F2EC;stroke:#047A53;stroke-width:1.5}
+.big{fill:#F2F3F0;stroke:#677470;stroke-width:1.5}
+.hot{fill:#FDEBDD;stroke:#F95A16;stroke-width:2}
+.soft{fill:#F2F3F0;stroke:none}
+.dash{fill:none;stroke:#677470;stroke-dasharray:4 4;stroke-width:1.2;opacity:.7}
+.ln{stroke:#677470;stroke-width:1.3;fill:none}
+.grid{stroke:#D4D6CC;stroke-width:1;fill:none}
+.head{fill:#677470}
+</style>
+<rect x="0" y="0" width="640" height="164" fill="#F9F9F7"/>
+<g transform="translate(20,20)">
+<text class="q" x="165" y="14">スタート</text>
+<text class="q" x="252" y="14">1段目</text>
+<text class="q" x="335" y="14">2段目</text>
+<text class="q" x="418" y="14">3段目</text>
+<text class="q" x="505" y="14">成功</text>
+<rect x="0" y="26" width="600" height="44" rx="8" fill="#FFFFFF" stroke="#D4D6CC"/>
+<rect x="0" y="80" width="600" height="44" rx="8" fill="#E6F2EC" stroke="#047A53" stroke-width="1.5"/>
+<text class="t b" x="16" y="53">今</text>
+<text class="t b acct" x="16" y="107">どの段も1割良く</text>
+<text class="t m" x="165" y="53" style="font-size:15px">100人</text>
+<text class="t m" x="165" y="107" style="font-size:15px">100人</text>
+<text class="t m" x="252" y="53" style="font-size:15px">× 80%</text>
+<text class="t m acct" x="252" y="107" style="font-size:15px">× 88%</text>
+<text class="t m" x="335" y="53" style="font-size:15px">× 38%</text>
+<text class="t m acct" x="335" y="107" style="font-size:15px">× 41%</text>
+<text class="t m" x="418" y="53" style="font-size:15px">× 83%</text>
+<text class="t m acct" x="418" y="107" style="font-size:15px">× 92%</text>
+<text class="t m b" x="505" y="53" style="font-size:15px">= 25人</text>
+<text class="t m acct b" x="505" y="107" style="font-size:15px">= 33人</text>
+</g>
+</svg>
