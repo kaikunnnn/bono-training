@@ -4,15 +4,17 @@ import type { WorkshopDocMeta } from "@/lib/workshop/content";
 
 interface DocCardProps {
   doc: WorkshopDocMeta;
+  /** ドキュメント置き場のパス（既定: /docs/workshop） */
+  basePath?: string;
 }
 
 /**
  * ステップ内のドキュメントカード（白カード・クリッカブル）
  */
-export default function DocCard({ doc }: DocCardProps) {
+export default function DocCard({ doc, basePath = "/docs/workshop" }: DocCardProps) {
   return (
     <Link
-      href={`/docs/workshop/${doc.slug}`}
+      href={`${basePath}/${doc.slug}`}
       className="group flex items-center gap-4 bg-surface border border-border-light rounded-[16px] px-5 py-4 md:px-6 md:py-5 shadow-quest-card transition-all duration-200 hover:shadow-training-card hover:-translate-y-0.5"
     >
       <div className="flex-1 min-w-0">

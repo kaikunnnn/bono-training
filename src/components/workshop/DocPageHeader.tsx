@@ -1,25 +1,36 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { WORKSHOP_STEPS } from "@/lib/workshop/config";
+import { WORKSHOP_STEPS, type WorkshopStep } from "@/lib/workshop/config";
 import type { WorkshopDocMeta } from "@/lib/workshop/content";
 
 interface DocPageHeaderProps {
   doc: WorkshopDocMeta;
+  /** ステップ構成（既定: ワークショップ） */
+  steps?: WorkshopStep[];
+  /** トップのパス（既定: /docs/workshop） */
+  basePath?: string;
+  /** 戻るリンクの文言 */
+  backLabel?: string;
 }
 
 /**
  * ドキュメントページの上部：トップに戻るリンク + ステップラベル + タイトル
  */
-export default function DocPageHeader({ doc }: DocPageHeaderProps) {
-  const step = WORKSHOP_STEPS.find((s) => s.id === doc.step);
+export default function DocPageHeader({
+  doc,
+  steps = WORKSHOP_STEPS,
+  basePath = "/docs/workshop",
+  backLabel = "ワークショップトップに戻る",
+}: DocPageHeaderProps) {
+  const step = steps.find((s) => s.id === doc.step);
   return (
     <header>
       <Link
-        href="/docs/workshop"
+        href={basePath}
         className="inline-flex items-center gap-1.5 text-[14px] font-medium text-text-muted hover:text-text-primary transition-colors"
       >
         <ArrowLeft size={16} />
-        ワークショップトップに戻る
+        {backLabel}
       </Link>
 
       <div className="mt-8">

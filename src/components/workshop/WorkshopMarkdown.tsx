@@ -1,3 +1,4 @@
+import Image from "next/image";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { cn } from "@/lib/utils";
@@ -6,6 +7,12 @@ import { extractHeadings } from "@/lib/workshop/toc";
 interface WorkshopMarkdownProps {
   content: string;
   className?: string;
+  /**
+   * true のとき、サイト内の画像（/ から始まるパス）を next/image で描画し、
+   * Markdown の画像タイトル（![alt](src "図1 …")）を図のキャプションとして表示する。
+   * 横長の図は狭い画面で横スクロールにする。既定 false（/docs/workshop は従来どおり img）。
+   */
+  figureImages?: boolean;
 }
 
 // GuideContent（/guide 詳細）と同じ書式スタイルを Markdown 要素にマッピングしている
@@ -17,6 +24,7 @@ const liStyle =
 export default function WorkshopMarkdown({
   content,
   className,
+  figureImages = false,
 }: WorkshopMarkdownProps) {
   // 目次（DocToc）と同じ抽出結果を、h2/h3の出現順に消費してIDを一致させる
   const headings = extractHeadings(content);
@@ -109,16 +117,38 @@ export default function WorkshopMarkdown({
           ),
           li: ({ children }) => <li className={liStyle}>{children}</li>,
           hr: () => <hr className="my-12 border-border-light" />,
-          img: ({ src, alt }) => (
-            // 外部/サイズ不明画像のため raw img（コンテンツ内画像）
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={typeof src === "string" ? src : undefined}
-              alt={alt || ""}
-              // 画面に余力があれば本文幅の1.25倍（648px→810px）に広げて中央揃え
-              className="my-8 block w-full rounded-lg lg:w-[125%] lg:max-w-none lg:relative lg:left-1/2 lg:-translate-x-1/2"
-            />
-          ),
+          img: ({ src, alt, title }) =>
+            figureImages && typeof src === "string" && src.startsWith("/") ? (
+              // Markdown の画像は <p> の中に入るため、ブロック要素ではなく span で組む
+              <span className="my-8 block lg:w-[125%] lg:max-w-none lg:relative lg:left-1/2 lg:-translate-x-1/2">
+                {title && (
+                  <span className="mb-3 block text-[14px] md:text-[15px] font-bold leading-[1.7] tracking-[0.02em] text-text-primary">
+                    {title}
+                  </span>
+                )}
+                <span className="block overflow-x-auto rounded-lg border border-border-light bg-surface">
+                  <Image
+                    src={src}
+                    alt={alt || ""}
+                    width={0}
+                    height={0}
+                    sizes="(min-width: 1024px) 810px, 100vw"
+                    // SVG の図は最適化不要（/_next/image を通さない）
+                    unoptimized
+                    className="block h-auto w-full min-w-[600px]"
+                  />
+                </span>
+              </span>
+            ) : (
+              // 外部/サイズ不明画像のため raw img（コンテンツ内画像）
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={typeof src === "string" ? src : undefined}
+                alt={alt || ""}
+                // 画面に余力があれば本文幅の1.25倍（648px→810px）に広げて中央揃え
+                className="my-8 block w-full rounded-lg lg:w-[125%] lg:max-w-none lg:relative lg:left-1/2 lg:-translate-x-1/2"
+              />
+            ),
           table: ({ children }) => (
             <div className="my-6 overflow-x-auto">
               <table className="w-full border-collapse text-[14px]">{children}</table>
