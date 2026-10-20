@@ -8,7 +8,6 @@ import { createStripeClient, getWebhookSecret } from "../_shared/stripe-helpers.
 import Stripe from "https://esm.sh/stripe@17.7.0";
 import { sendEmailSafe } from "../_shared/resend.ts";
 import { generateWelcomeEmail, generateCancellationEmail, generatePlanChangeEmail, getPlanDisplayName } from "../_shared/email-templates.ts";
-import { syncToMemberstack, removePlanFromMemberstack, changePlanInMemberstack } from "../_shared/memberstack.ts";
 import { derivePlanFromPrice } from "../_shared/plan-utils.ts";
 import { resolveSourceGroupPatch } from "../_shared/pricing-source.ts";
 import {
@@ -16,6 +15,12 @@ import {
   mergeAttributionMetadata,
   resolveAttributionPatch,
 } from "../_shared/purchase-attribution.ts";
+import {
+  decideSubscriptionEventApply,
+  isFeeMigrationSubscription,
+  type SubscriptionEventGuardDecision,
+  type SubscriptionEventKind,
+} from "../_shared/subscription-event-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -518,6 +523,65 @@ async function resolveAttributionPatchForUser(
   }
 }
 
+/**
+ * #250: 届いた契約のイベントを user_subscriptions（ユーザーごとに1行）に反映してよいか。
+ * 記録されている今の契約と違い、今の契約が Stripe でまだ生きているなら見送る
+ * （Memberstack 手数料付き契約 → 新しい契約への移行中に、古い契約の終了・解約予約で
+ *  会員が無効化／解約予定表示にならないように）。判定ルールは _shared/subscription-event-guard.ts。
+ * Stripe への問い合わせは ids が違うときだけ行う。
+ */
+async function guardSubscriptionEvent(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 他の webhook ヘルパーと同じ stripe クライアント
+  stripe: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 他の webhook ヘルパーと同じ supabase クライアント
+  supabase: any,
+  userId: string,
+  kind: SubscriptionEventKind,
+  subscription: { id: string; created?: number | null }
+): Promise<SubscriptionEventGuardDecision> {
+  const { data, error } = await supabase
+    .from("user_subscriptions")
+    .select("stripe_subscription_id")
+    .eq("user_id", userId)
+    .eq("environment", ENVIRONMENT)
+    .maybeSingle();
+  if (error) {
+    console.error(`❌ [webhook] #250 今の契約の読み取りに失敗。${kind} の user_subscriptions 反映を見送ります:`, error);
+    return { apply: false, reason: "current_unavailable" };
+  }
+  const currentSubscriptionId: string | null = data?.stripe_subscription_id ?? null;
+  if (!currentSubscriptionId || currentSubscriptionId === subscription.id) {
+    return decideSubscriptionEventApply({ kind, eventSubscription: subscription, currentSubscriptionId });
+  }
+
+  let currentSubscription: { status?: string | null; created?: number | null } | "missing" | "unavailable";
+  try {
+    const current = await stripe.subscriptions.retrieve(currentSubscriptionId);
+    currentSubscription = { status: current?.status ?? null, created: current?.created ?? null };
+  } catch (e) {
+    const err = e as { code?: string; raw?: { code?: string } } | null;
+    const code = err?.code ?? err?.raw?.code;
+    if (code === "resource_missing") {
+      currentSubscription = "missing";
+    } else {
+      console.error(`❌ [webhook] #250 今の契約 ${currentSubscriptionId} の取得に失敗:`, e);
+      currentSubscription = "unavailable";
+    }
+  }
+  const decision = decideSubscriptionEventApply({
+    kind,
+    eventSubscription: subscription,
+    currentSubscriptionId,
+    currentSubscription,
+  });
+  console.log(
+    `🛡️ [webhook] #250 ${kind}: event=${subscription.id} current=${currentSubscriptionId} ` +
+      `(${typeof currentSubscription === "string" ? currentSubscription : currentSubscription.status}) → ` +
+      `${decision.apply ? "反映" : "見送り"} (${decision.reason})`
+  );
+  return decision;
+}
+
 async function handleCheckoutCompleted(stripe: any, supabase: any, session: any) {
   console.log("🚀 [LIVE環境] checkout.session.completedイベントを処理中");
 
@@ -747,33 +811,8 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       console.log(`✅ [LIVE環境] ${planType}プラン（${duration}ヶ月）のサブスクリプション情報を正常に保存しました`);
     }
 
-    // ========================================
-    // 🔄 Memberstack同期（新サイトからの課金のみ）
-    // ※ メール送信より先に実行（event loop errorで中断されないように）
-    // ========================================
+    // #250: 新サイト → Memberstack の同期は廃止（オーナー判断: 不要）
     const customerEmail = customer.email;
-    const isFromNewSite = !!session.metadata?.user_id;
-
-    if (isFromNewSite && customerEmail) {
-      try {
-        console.log(`🔄 [LIVE環境] Memberstack同期開始: ${customerEmail} → ${planType}`);
-        const syncResult = await syncToMemberstack(
-          customerEmail,
-          planType,
-          userId,
-          customerId
-        );
-        if (syncResult.success) {
-          console.log(`✅ [LIVE環境] Memberstack同期完了: member=${syncResult.memberId}`);
-        } else {
-          console.warn(`⚠️ [LIVE環境] Memberstack同期失敗（続行）: ${syncResult.error}`);
-        }
-      } catch (memberstackError) {
-        console.error(`❌ [LIVE環境] Memberstack同期例外（続行）:`, memberstackError);
-      }
-    } else if (!isFromNewSite) {
-      console.log(`⏭️ [LIVE環境] 旧サイトからの課金のためMemberstack同期をスキップ`);
-    }
 
     // ========================================
     // 📧 ウェルカムメール送信
@@ -917,6 +956,13 @@ async function handleInvoicePaid(stripe: any, supabase: any, invoice: any) {
       ? new Date(subscription.cancel_at * 1000).toISOString()
       : null;
 
+    // #250: 今の契約と違う契約の請求で、今の契約がまだ生きているなら user_subscriptions は触らない
+    const guard = await guardSubscriptionEvent(stripe, supabase, userId, "invoice_paid", subscription);
+    if (!guard.apply) {
+      console.log(`⏭️ [LIVE環境] invoice.paid: 今の契約ではないため user_subscriptions を更新しません (${subscriptionId})`);
+      return;
+    }
+
     // user_subscriptionsテーブルも更新
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
@@ -995,6 +1041,16 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
       console.error("🚀 [LIVE環境] サブスクリプション情報の更新エラー:", updateError);
     }
 
+    // #250: 終わったのが今の契約でなく、今の契約がまだ生きている（移行・置き換え後の古い契約）なら、
+    // 会員を無効にせず、解約メールも送らない。
+    const guard = await guardSubscriptionEvent(stripe, supabase, userId, "deleted", subscription);
+    if (!guard.apply) {
+      console.log(
+        `⏭️ [LIVE環境] subscription.deleted: 古い契約 ${subscriptionId} の終了。今の契約が有効なため会員状態・解約メールは変更しません`
+      );
+      return;
+    }
+
     // user_subscriptionsテーブルも更新
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
@@ -1016,11 +1072,9 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
     // ========================================
     // 📧 解約完了メール送信
     // ========================================
-    let customerEmail: string | null = null;
     try {
       const customer = await stripe.customers.retrieve(customerId);
       if (!customer.deleted && customer.email) {
-        customerEmail = customer.email;
         console.log(`📧 [LIVE環境] 解約メール送信: ${customer.email}`);
         const cancellationEmail = generateCancellationEmail();
         await sendEmailSafe({
@@ -1031,29 +1085,6 @@ async function handleSubscriptionDeleted(stripe: any, supabase: any, subscriptio
       }
     } catch (emailError) {
       console.warn(`⚠️ [LIVE環境] 解約メール送信失敗（続行）:`, emailError);
-    }
-
-    // ========================================
-    // 🔄 Memberstack同期（プラン削除）
-    // ========================================
-    if (customerEmail) {
-      // ユーザーのプランタイプを取得
-      const { data: userSubData } = await supabase
-        .from("user_subscriptions")
-        .select("plan_type")
-        .eq("user_id", userId)
-        .eq("environment", ENVIRONMENT)
-        .single();
-
-      const planType = userSubData?.plan_type || 'standard';
-      console.log(`🔄 [LIVE環境] Memberstackプラン削除開始: ${customerEmail} → ${planType}`);
-
-      const removeResult = await removePlanFromMemberstack(customerEmail, planType);
-      if (removeResult.success) {
-        console.log(`✅ [LIVE環境] Memberstackプラン削除完了`);
-      } else {
-        console.warn(`⚠️ [LIVE環境] Memberstackプラン削除失敗（続行）: ${removeResult.error}`);
-      }
     }
 
   } catch (error) {
@@ -1183,19 +1214,29 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
     // BUG-1対策: incomplete の並行書き込みで is_active=true を潰さない
     // （現在statusをStripeから再取得＋incompleteではis_activeを書かないdowngradeガード）。
     const isActivePatch = await resolveIsActivePatch(stripe, subscription);
+    // #250: Memberstack 手数料をなくす移行で作った契約は「新しい契約」ではなく既存契約の付け替え。
+    // 出どころ（source_group / attribution）は既存値を保持する（置き換えと同じ扱い）。
+    const isFeeMigration = isFeeMigrationSubscription(subscription.metadata);
+    if (isFeeMigration) {
+      console.log(
+        `🔁 [LIVE環境] #250 移行契約を検出: ${subscriptionId} (from ${subscription.metadata?.migrated_from_subscription})。出どころは既存値を保持`
+      );
+    }
     // #213 A2: 出どころ（create-checkout が subscription_data.metadata に載せたもの）
     const sourceGroupPatch = await resolveSourceGroupPatchForUser(
       supabase,
       userId,
       subscriptionId,
-      subscription.metadata?.source_group
+      subscription.metadata?.source_group,
+      isFeeMigration
     );
     // #233: ボタンを押したページ・最初に来たページ（同じく subscription_data.metadata）
     const attributionPatch = await resolveAttributionPatchForUser(
       supabase,
       userId,
       subscriptionId,
-      mergeAttributionMetadata(subscription.metadata)
+      mergeAttributionMetadata(subscription.metadata),
+      isFeeMigration
     );
     const { error: userSubError } = await supabase
       .from("user_subscriptions")
@@ -1211,6 +1252,10 @@ async function handleSubscriptionCreated(stripe: any, supabase: any, subscriptio
         duration: duration,
         current_period_end: currentPeriodEnd,
         cancel_at_period_end: subscription.cancel_at_period_end || false,
+        // #250: 前の契約の解約予約（cancel_at）を新しい契約に持ち越さない
+        cancel_at: subscription.cancel_at
+          ? new Date(subscription.cancel_at * 1000).toISOString()
+          : null,
         environment: ENVIRONMENT,
         updated_at: new Date().toISOString(),
       }, { onConflict: 'user_id,environment' });
@@ -1281,6 +1326,29 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
 
     const userId = customerData.user_id;
 
+    // #250: 今の契約と違う契約の更新（例: 移行で古い契約に「期間末で終了」を付けた）で、
+    // 今の契約がまだ生きているなら user_subscriptions は触らない（行が古い契約に戻り解約予定と出るのを防ぐ）。
+    // subscriptions テーブル（契約ごとの行）だけは更新する。
+    const guard = await guardSubscriptionEvent(stripe, supabase, userId, "updated", subscription);
+    if (!guard.apply) {
+      if (subscription.current_period_end) {
+        const { error: subOnlyError } = await supabase
+          .from("subscriptions")
+          .update({
+            end_timestamp: new Date(subscription.current_period_end * 1000).toISOString()
+          })
+          .eq("stripe_subscription_id", subscriptionId)
+          .eq("environment", ENVIRONMENT);
+        if (subOnlyError) {
+          console.error("🚀 [LIVE環境] subscriptions更新エラー:", subOnlyError);
+        }
+      }
+      console.log(
+        `⏭️ [LIVE環境] subscription.updated: 今の契約ではないため user_subscriptions を更新しません (${subscriptionId}, cancel_at_period_end=${subscription.cancel_at_period_end})`
+      );
+      return;
+    }
+
     // 現在のプラン情報を取得（プラン変更検知用）
     const { data: currentSubData } = await supabase
       .from("user_subscriptions")
@@ -1332,6 +1400,8 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
     // user_subscriptionsテーブルを更新
     // BUG-1対策: incomplete のスナップショットで is_active=true を潰さない（同上）。
     const isActivePatch = await resolveIsActivePatch(stripe, subscription);
+    // #250: 移行契約は出どころを既存値のまま保持（created より先に updated が届いても上書きしない）
+    const isFeeMigration = isFeeMigrationSubscription(subscription.metadata);
     // #213 A2: この update は stripe_subscription_id も書き換えるため、新しい契約の
     // updated が created/checkout.completed より先に届くと「同じ契約」に見えてしまう。
     // 同じルールで source_group も決める（同じ契約＝プラン変更なら既存値を保持）。
@@ -1339,14 +1409,16 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
       supabase,
       userId,
       subscriptionId,
-      subscription.metadata?.source_group
+      subscription.metadata?.source_group,
+      isFeeMigration
     );
     // #233: 同じルールで source_path / first_touch_* も決める
     const attributionPatch = await resolveAttributionPatchForUser(
       supabase,
       userId,
       subscriptionId,
-      mergeAttributionMetadata(subscription.metadata)
+      mergeAttributionMetadata(subscription.metadata),
+      isFeeMigration
     );
     const { error: updateError } = await supabase
       .from("user_subscriptions")
@@ -1388,7 +1460,6 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
     // 📧 プラン変更メール送信（実際にプランが変わった場合のみ）
     // ========================================
     const planActuallyChanged = previousPlanType !== planType || previousDuration !== duration;
-    const planTypeChanged = previousPlanType !== planType;
 
     if (planActuallyChanged && previousPlanType) {
       console.log(`📧 [LIVE環境] プラン変更検知: ${previousPlanType}(${previousDuration}ヶ月) → ${planType}(${duration}ヶ月)`);
@@ -1404,23 +1475,6 @@ async function handleSubscriptionUpdated(stripe: any, supabase: any, subscriptio
             html: planChangeEmail.html,
           });
 
-          // ========================================
-          // 🔄 Memberstack同期（プラン変更）
-          // ========================================
-          // プランタイプが変わった場合のみ（standard ↔ feedback）
-          if (planTypeChanged) {
-            console.log(`🔄 [LIVE環境] Memberstackプラン変更: ${previousPlanType} → ${planType}`);
-            const changeResult = await changePlanInMemberstack(
-              customer.email,
-              previousPlanType,
-              planType
-            );
-            if (changeResult.success) {
-              console.log(`✅ [LIVE環境] Memberstackプラン変更完了`);
-            } else {
-              console.warn(`⚠️ [LIVE環境] Memberstackプラン変更失敗（続行）: ${changeResult.error}`);
-            }
-          }
         }
       } catch (emailError) {
         console.warn(`⚠️ [LIVE環境] プラン変更メール送信失敗（続行）:`, emailError);
