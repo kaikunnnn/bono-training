@@ -19,9 +19,19 @@ export default function DocCard({ doc, basePath = "/docs/workshop" }: DocCardPro
     >
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <h3 className="text-[16px] md:text-[17px] font-bold leading-[1.6] text-text-primary font-line-seed-jp">
-            {doc.title}
-          </h3>
+          {doc.number ? (
+            // 記事番号つき（例: 「1-1 考え方｜タイトル」）
+            <h3 className="text-[16px] md:text-[17px] font-bold leading-[1.6] text-text-primary font-line-seed-jp">
+              <span className="text-text-muted">
+                {`${doc.number}${doc.role ? ` ${doc.role}` : ""}｜`}
+              </span>
+              {doc.title}
+            </h3>
+          ) : (
+            <h3 className="text-[16px] md:text-[17px] font-bold leading-[1.6] text-text-primary font-line-seed-jp">
+              {doc.title}
+            </h3>
+          )}
           {doc.note && (
             <span className="text-[11px] font-semibold text-text-muted border border-border-light rounded-full px-2 py-0.5 whitespace-nowrap">
               {doc.note}

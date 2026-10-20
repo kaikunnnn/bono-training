@@ -1,9 +1,13 @@
 ---
-title: 問題の仮説を解くUIをAIでプロトタイプにする
-description: STEP 2 の問題の仮説を解くUIを、AIでプロトタイプにする
+title: AIでプロトタイプを作り、動くはずの数字を書く
+description: STEP 2 の問題の仮説を解くUIをAIでプロトタイプにして、その打ち手で数字がどう動くはずかを書く
 step: step3
-order: 40
+order: 32
+number: "3-2"
+role: やること
 ---
+
+このページは STEP 3 のやることです。考え方は「[3-1 考え方｜1つの段を直す打ち手と、流れ全体を上げる打ち手](/docs/number-challenge/step3-method)」にあります。
 
 ## STEP 3 でやること
 

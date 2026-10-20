@@ -1,6 +1,7 @@
 /**
  * 数字改善チャレンジのドキュメント置き場（/docs/number-challenge）の構成定義。
  * 仕組みは /docs/workshop と共通（Markdown の frontmatter `step` / `order` で紐付く）。
+ * 各記事は frontmatter の `number`（例: "1-1"）と `role`（例: "考え方"）で、タイトルの頭に番号と役割を付けて表示する。
  */
 
 import type { WorkshopStep } from "@/lib/workshop/config";
@@ -17,14 +18,9 @@ export const NUMBER_CHALLENGE_META = {
 
 export const NUMBER_CHALLENGE_STEPS: WorkshopStep[] = [
   {
-    id: "intro",
-    label: null,
-    title: "チャレンジの全体像",
-  },
-  {
-    id: "lecture",
-    label: "LECTURE",
-    title: "数字を体験で見る",
+    id: "step0",
+    label: "STEP 0",
+    title: "はじめに",
   },
   {
     id: "step1",

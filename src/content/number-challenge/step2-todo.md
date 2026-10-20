@@ -1,9 +1,13 @@
 ---
-title: 数字の事実から、どこで・なぜ止まるかを考える
+title: 分析ページで確かめ、ヒアリングで理由を探る
 description: 分析ページで数字の事実を確かめ、どこで・なぜ止まるかを考える。ヒアリングはここが本命
 step: step2
-order: 30
+order: 22
+number: "2-2"
+role: やること
 ---
+
+このページは STEP 2 のやることです。考え方は「[2-1 考え方｜流れの下に人数を置いて、どこで減るかを見る](/docs/number-challenge/step2-method)」にあります。
 
 ## STEP 2 でやること
 
@@ -28,4 +32,4 @@ order: 30
 
 仮説シート（改善する範囲とその理由・つまずきの場面・問題の仮説・ヒアリングで分かったこと）。
 
-→ 次は [STEP 3　問題点に対してプロトタイピングする](/docs/number-challenge/step3-prototype)
+→ 次は [STEP 3　3-1 考え方｜1つの段を直す打ち手と、流れ全体を上げる打ち手](/docs/number-challenge/step3-method)

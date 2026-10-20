@@ -36,7 +36,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const doc = getDocBySlug(slug);
   if (!doc) return {};
   return {
-    title: `${doc.title} | ${NUMBER_CHALLENGE_META.title}`,
+    title: `${doc.number ? `STEP ${doc.number}${doc.role ? ` ${doc.role}` : ""}｜` : ""}${doc.title} | ${NUMBER_CHALLENGE_META.title}`,
     description: doc.description,
     robots: { index: false }, // テスト運用中のため noindex（/docs/workshop と同じ扱い）
   };

@@ -14,6 +14,10 @@ export interface WorkshopDocMeta {
   order: number;
   /** "スキップ可能" 等の補足ラベル */
   note?: string;
+  /** "1-1" のような記事番号（任意。指定するとタイトルの頭に番号と役割を付けて表示する） */
+  number?: string;
+  /** "考え方" / "やること" のような記事の役割（number とセットで使う） */
+  role?: string;
 }
 
 export interface WorkshopDoc extends WorkshopDocMeta {
@@ -65,6 +69,8 @@ export function createDocsContent({
       step: data.step ?? "intro",
       order: data.order ?? 99,
       note: data.note,
+      number: data.number,
+      role: data.role,
       content,
     };
   }
