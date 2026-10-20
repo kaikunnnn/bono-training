@@ -26,6 +26,18 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/design-together",
+    issue: "#253",
+    title: "いっしょにデザインのプロトタイプ",
+    summary:
+      "「これからデザインやります」で作業を始め、同じ時間に作業している人の顔が見える仕組み（機能A いま作業中）を、マイページ・動画ページの複製に組み込んだプロト。サイドナビはプロト用に複製して「いっしょに」（フィード / 仲間グループ）を足した。宣言（任意・60文字）→ どのページでも「作業中 ◯分・作業を終える」→ 終了で作業記録。0人のとき・3時間の自動終了は右下の体験ガイドで切り替えて確かめられる。日報・フィード（S2）と仲間グループ（S3）はこれから。状態は sessionStorage だけ（DB・保存なし）。",
+    links: [
+      { href: "/dev/design-together/mypage", label: "マイページ" },
+      { href: "/dev/design-together/contents/frame-and-layer", label: "動画ページ" },
+    ],
+    status: "in-progress",
+  },
+  {
     href: "/dev/progress-feed",
     issue: "#251",
     title: "進捗フィードのプロトタイプ（今のページに組み込んだ版）",
