@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 364" width="640" height="364" role="img" aria-label="ゴールから仮説までの手順5つ。1 ゴールの行動を決める（誰が・何をしたら成功か）。2 体験の流れを書く（段階・行動・気持ち。数字はまだ見ない）。3 段ごとの数字を当てる（測れる段・測れない段に分ける）。4 改善する範囲を決める（大きく減る段と、流れ全体の両方を見る）。5 つまずきから仮説（いつ・どこで・どんな気持ちで）">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 364" width="640" height="364" role="img" aria-label="ゴールから仮説までの手順5つ。1 ゴールの行動を決める（誰が・何をしたら成功か）。2 ユーザーの流れを想像する（段階・行動・気持ち。数字はまだ見ない）。3 段ごとの数字を当てる（測れる段・測れない段に分ける）。4 改善する範囲を決める（大きく減る段と、流れ全体の両方を見る）。5 つまずきから仮説（いつ・どこで・どんな気持ちで）">
 <style>
 .t{fill:#021710;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:13px}
 .q{fill:#677470;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:12px}
@@ -23,30 +23,30 @@
 <circle cx="30" cy="26" r="14" class="acc"/>
 <text class="t b m acct" x="30" y="31" text-anchor="middle" style="font-size:14px">1</text>
 <text class="t b" x="60" y="31" style="font-size:15px">ゴールの行動を決める</text>
-<text class="q" x="250" y="31" style="font-size:13px">誰が・何をしたら成功か</text>
+<text class="q" x="266" y="31" style="font-size:13px">誰が・何をしたら成功か</text>
 <path class="ln" d="M30 53 V67" marker-end="url(#ar3)"/>
 <rect class="box" x="0" y="68" width="600" height="52" rx="10"/>
 <circle cx="30" cy="94" r="14" class="acc"/>
 <text class="t b m acct" x="30" y="99" text-anchor="middle" style="font-size:14px">2</text>
-<text class="t b" x="60" y="99" style="font-size:15px">体験の流れを書く</text>
-<text class="q" x="250" y="99" style="font-size:13px">段階・行動・気持ち。数字はまだ見ない</text>
+<text class="t b" x="60" y="99" style="font-size:15px">ユーザーの流れを想像する</text>
+<text class="q" x="266" y="99" style="font-size:13px">段階・行動・気持ち。数字はまだ見ない</text>
 <path class="ln" d="M30 121 V135" marker-end="url(#ar3)"/>
 <rect class="box" x="0" y="136" width="600" height="52" rx="10"/>
 <circle cx="30" cy="162" r="14" class="acc"/>
 <text class="t b m acct" x="30" y="167" text-anchor="middle" style="font-size:14px">3</text>
 <text class="t b" x="60" y="167" style="font-size:15px">段ごとの数字を当てる</text>
-<text class="q" x="250" y="167" style="font-size:13px">測れる段・測れない段に分ける</text>
+<text class="q" x="266" y="167" style="font-size:13px">測れる段・測れない段に分ける</text>
 <path class="ln" d="M30 189 V203" marker-end="url(#ar3)"/>
 <rect class="box" x="0" y="204" width="600" height="52" rx="10"/>
 <circle cx="30" cy="230" r="14" class="acc"/>
 <text class="t b m acct" x="30" y="235" text-anchor="middle" style="font-size:14px">4</text>
 <text class="t b" x="60" y="235" style="font-size:15px">改善する範囲を決める</text>
-<text class="q" x="250" y="235" style="font-size:13px">大きく減る段と、流れ全体の両方を見る</text>
+<text class="q" x="266" y="235" style="font-size:13px">大きく減る段と、流れ全体の両方を見る</text>
 <path class="ln" d="M30 257 V271" marker-end="url(#ar3)"/>
 <rect class="box" x="0" y="272" width="600" height="52" rx="10"/>
 <circle cx="30" cy="298" r="14" class="acc"/>
 <text class="t b m acct" x="30" y="303" text-anchor="middle" style="font-size:14px">5</text>
 <text class="t b" x="60" y="303" style="font-size:15px">つまずきから仮説</text>
-<text class="q" x="250" y="303" style="font-size:13px">いつ・どこで・どんな気持ちで</text>
+<text class="q" x="266" y="303" style="font-size:13px">いつ・どこで・どんな気持ちで</text>
 </g>
 </svg>
