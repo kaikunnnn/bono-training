@@ -21,9 +21,9 @@ STEP 0 で準備をしてから、STEP 1〜3 の3ステップで進めます。S
 
 ### STEP 0　はじめに
 
-お題と、チャレンジ全体で使う考え方を読みます。今回取り組むのは、継続率を上げること＝DAUを上げることです。最初に、取り組むユーザーを A（入会したばかりの人）か B（学び始めた人）から選びます。
+チャレンジの内容と、チャレンジ全体で使う考え方を読みます。今回取り組むのは、継続率を上げること＝DAUを上げることです。最初に、取り組むユーザーを A（入会したばかりの人）か B（学び始めた人）から選びます。
 
-- [0-2 お題｜DAUを上げるために、A か B を選ぶ](/docs/number-challenge/step0-theme)
+- [0-2 チャレンジの内容｜継続率（DAU）を、A か B のユーザーで上げる](/docs/number-challenge/step0-theme)
 - [0-3 考え方｜数字で分かるのは事実、理由は仮説](/docs/number-challenge/step0-facts-and-hypotheses)
 - [0-4 例｜新規獲得で STEP 1〜3 を通してやってみる](/docs/number-challenge/step0-example)
 
