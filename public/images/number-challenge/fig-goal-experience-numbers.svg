@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 430" width="800" height="430" role="img" aria-label="ゴール・体験・数字の関係（例：新規獲得）。体験はユーザーの流れで、知る（YouTubeを見る）→来る（サイトに来る）→比べる（料金ページを見る）→決める（プランを選ぶ）→払う（決済する）。流れの最後の段「払う」がゴール。比べる段では「自分のレベルで大丈夫？」と迷っている（想像）。数字は各段を通った人数で、測れない・3,017人・412人・40人・6人（参考値）。ゴールの数字は、最後の段まで進んだ人を最初の段の人数で割ったもの。考える順は、ゴールを決める→そこまでの体験を想像する→体験の下に数字を置く。結果の順は、体験を良くする→各段を通る人が増える→ゴールの数字が上がる。課金ボタンを大きくするのは、体験を飛ばして数字だけ動かそうとする打ち手で、迷いは残る">
+<style>
+.t{fill:#021710;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:13px}
+.q{fill:#677470;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:12px}
+.b{font-weight:700}
+.m{font-family:"SF Mono",Menlo,Consolas,"Hiragino Sans",monospace}
+.acct{fill:#047A53}
+.hott{fill:#B8430F}
+.box{fill:#FFFFFF;stroke:#D4D6CC;stroke-width:1.5}
+.acc{fill:#E6F2EC;stroke:#047A53;stroke-width:2}
+.soft{fill:#F2F3F0;stroke:none}
+.hot{fill:#FDEBDD;stroke:#F95A16;stroke-width:1.5}
+.dash{fill:#FFFFFF;stroke:#677470;stroke-dasharray:4 4;stroke-width:1.2}
+.ln{stroke:#677470;stroke-width:1.3;fill:none}
+.lna{stroke:#047A53;stroke-width:1.5;fill:none}
+.head{fill:#677470}
+.heada{fill:#047A53}
+</style>
+<defs><marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="head" d="M0 0L10 5L0 10z"/></marker>
+<marker id="arga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="heada" d="M0 0L10 5L0 10z"/></marker></defs>
+<rect x="0" y="0" width="800" height="430" fill="#F9F9F7"/>
+<text class="t b" x="20" y="84">体験</text>
+<text class="q" x="20" y="103">ユーザーの流れ</text>
+<text class="q" x="20" y="146">気持ち（想像）</text>
+<text class="t b" x="20" y="196">数字</text>
+<text class="q" x="20" y="214">各段を通った人数</text>
+<rect x="652" y="22" width="116" height="24" rx="12" fill="#047A53"/>
+<text class="t b" x="710.0" y="39" text-anchor="middle" style="fill:#FFFFFF">ゴール</text>
+<path class="lna" d="M710.0 46 V56"/>
+<rect class="box" x="124" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="182.0" y="82" text-anchor="middle" style="font-size:15px">知る</text>
+<text class="q" x="182.0" y="102" text-anchor="middle">YouTubeを見る</text>
+<path class="ln" d="M242 86 H254" marker-end="url(#arg)"/>
+<rect class="soft" x="124" y="176" width="116" height="44" rx="8"/>
+<text class="t b m" x="182.0" y="203" text-anchor="middle" style="font-size:14px">測れない</text>
+<rect class="box" x="256" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="314.0" y="82" text-anchor="middle" style="font-size:15px">来る</text>
+<text class="q" x="314.0" y="102" text-anchor="middle">サイトに来る</text>
+<path class="ln" d="M374 86 H386" marker-end="url(#arg)"/>
+<rect class="soft" x="256" y="176" width="116" height="44" rx="8"/>
+<text class="t b m" x="314.0" y="203" text-anchor="middle" style="font-size:14px">3,017人</text>
+<rect class="box" x="388" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="446.0" y="82" text-anchor="middle" style="font-size:15px">比べる</text>
+<text class="q" x="446.0" y="102" text-anchor="middle">料金ページを見る</text>
+<path class="ln" d="M506 86 H518" marker-end="url(#arg)"/>
+<rect class="soft" x="388" y="176" width="116" height="44" rx="8"/>
+<text class="t b m" x="446.0" y="203" text-anchor="middle" style="font-size:14px">412人</text>
+<rect class="box" x="520" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="578.0" y="82" text-anchor="middle" style="font-size:15px">決める</text>
+<text class="q" x="578.0" y="102" text-anchor="middle">プランを選ぶ</text>
+<path class="ln" d="M638 86 H650" marker-end="url(#arg)"/>
+<rect class="soft" x="520" y="176" width="116" height="44" rx="8"/>
+<text class="t b m" x="578.0" y="203" text-anchor="middle" style="font-size:14px">40人</text>
+<rect class="acc" x="652" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="710.0" y="82" text-anchor="middle" style="font-size:15px">払う</text>
+<text class="q" x="710.0" y="102" text-anchor="middle">決済する</text>
+<rect class="soft" x="652" y="176" width="116" height="44" rx="8"/>
+<text class="t b m" x="710.0" y="203" text-anchor="middle" style="font-size:12px">6人（参考値）</text>
+<rect class="dash" x="346.0" y="128" width="200" height="30" rx="15"/>
+<text class="t" x="446.0" y="148" text-anchor="middle">「自分のレベルで大丈夫？」</text>
+<path class="lna" d="M314.0 226 V236 H710.0 V226"/>
+<text class="t b acct" x="512.0" y="256" text-anchor="middle">ゴールの数字 ＝ 最後の段（払う）まで進んだ人 ÷ 最初の段（来る）の人</text>
+<rect class="box" x="20" y="276" width="370" height="84" rx="10"/>
+<text class="t b" x="36" y="300">考える順</text>
+<text class="t" x="36" y="326">ゴール（流れの最後）を決める → そこまでの</text>
+<text class="t" x="36" y="346">体験を想像する → 体験の下に数字を置く</text>
+<rect class="box" x="410" y="276" width="370" height="84" rx="10"/>
+<text class="t b acct" x="426" y="300">結果の順</text>
+<text class="t" x="426" y="326">体験を良くする → 各段を通る人が増える</text>
+<text class="t" x="426" y="346">→ その結果、ゴールの数字が上がる</text>
+<rect class="hot" x="20" y="374" width="760" height="40" rx="10"/>
+<text class="t b hott" x="36" y="399">✕ 課金ボタンを大きくする</text>
+<text class="t" x="214" y="399">体験を飛ばして、数字だけ動かそうとする打ち手。「大丈夫？」の迷いは残る</text>
+</svg>
