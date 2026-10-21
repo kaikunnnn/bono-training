@@ -1,10 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { BASE_COUNTS, PATTERN_KEYS, type PatternKey } from "../_data";
+import { BASE_COUNTS, ME, PATTERN_KEYS, type PatternKey } from "../_data";
 import {
   PatternA,
   PatternB,
@@ -29,7 +29,7 @@ const RETURN_LABEL: Record<PatternKey, string> = {
 };
 
 /**
- * 同期が見えるプロト（#255）。1ページで4パターンをタブで切り替える。
+ * 同期が見えるプロト（#255）。PC幅（本物のサイドナビの右の本文エリア）で、4パターンをタブで切り替える。
  * 反応の状態は画面の中だけ（リロードで初期化）。パターンを切り替えても押した状態は残る。
  */
 export function PeersPrototype({
@@ -44,7 +44,6 @@ export function PeersPrototype({
 
   const selectPattern = (key: PatternKey) => {
     setPattern(key);
-    setReturnOpen(false);
     router.replace(`?pattern=${key}`, { scroll: false });
   };
 
@@ -56,54 +55,64 @@ export function PeersPrototype({
       setSent((prev) => ({ ...prev, [`${p}:${id}`]: !prev[`${p}:${id}`] })),
   };
 
-  const closeReturn = useCallback(() => setReturnOpen(false), []);
-
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-3.5rem)] w-full max-w-[390px] flex-col bg-base lg:min-h-dvh lg:border-x lg:border-[var(--card-border-subtle)]">
-      <div className="sticky top-14 z-30 border-b border-[var(--card-border-subtle)] bg-base/95 px-3 pb-2.5 pt-2 backdrop-blur-sm lg:top-0">
-        <h1 className="px-1 pb-1.5 text-[length:var(--text-2xs)] font-bold text-text-muted">
-          同期が見えるプロト（4パターン比較・#255）
+    <div className="mx-auto w-full max-w-5xl px-4 pb-36 pt-10">
+      <header>
+        <h1 className="font-heading text-2xl font-bold text-text-primary">
+          同期が見えるプロト
         </h1>
-        <div
-          role="tablist"
-          aria-label="見せ方のパターン"
-          className="grid grid-cols-4 gap-1 rounded-[14px] bg-muted p-1"
-        >
-          {PATTERN_KEYS.map((key) => {
-            const active = key === pattern;
-            return (
-              <Button
-                key={key}
-                type="button"
-                role="tab"
-                id={`peers-tab-${key}`}
-                aria-selected={active}
-                aria-controls="peers-panel"
-                variant="unstyled"
-                size="unstyled"
-                onClick={() => selectPattern(key)}
+        <p className="mt-2 text-sm text-text-muted">
+          #255 4パターン比較。同期＝あなた（{ME.name}）と同じ{ME.startedWeek}
+          にBONOを始めた8人です
+        </p>
+      </header>
+
+      <div
+        role="tablist"
+        aria-label="見せ方のパターン"
+        className="mt-6 grid grid-cols-2 gap-1 rounded-[16px] bg-muted p-1 sm:grid-cols-4"
+      >
+        {PATTERN_KEYS.map((key) => {
+          const active = key === pattern;
+          return (
+            <Button
+              key={key}
+              type="button"
+              role="tab"
+              id={`peers-tab-${key}`}
+              aria-selected={active}
+              aria-controls="peers-panel"
+              variant="unstyled"
+              size="unstyled"
+              onClick={() => selectPattern(key)}
+              className={cn(
+                "flex h-11 items-center justify-center gap-2 rounded-[12px] px-3 text-sm font-bold transition-colors",
+                active
+                  ? "bg-surface text-text-primary shadow-[var(--shadow-xs)]"
+                  : "text-text-muted hover:text-text-primary",
+              )}
+            >
+              <span
                 className={cn(
-                  "flex h-auto flex-col items-center gap-0 whitespace-normal rounded-[10px] px-1 py-1.5 text-center leading-tight transition-colors",
+                  "flex h-6 w-6 items-center justify-center rounded-full text-xs",
                   active
-                    ? "bg-surface text-text-primary shadow-[var(--shadow-xs)]"
-                    : "text-text-muted hover:text-text-primary",
+                    ? "bg-cta-primary-bg text-text-inverse"
+                    : "bg-surface text-text-muted",
                 )}
               >
-                <span className="text-xs font-bold">{TABS[key].letter}</span>
-                <span className="text-[length:var(--text-2xs)] font-bold">
-                  {TABS[key].name}
-                </span>
-              </Button>
-            );
-          })}
-        </div>
+                {TABS[key].letter}
+              </span>
+              {TABS[key].name}
+            </Button>
+          );
+        })}
       </div>
 
       <div
         id="peers-panel"
         role="tabpanel"
         aria-labelledby={`peers-tab-${pattern}`}
-        className="flex-1"
+        className="mt-8"
       >
         {pattern === "a" && <PatternA {...props} />}
         {pattern === "b" && <PatternB {...props} />}
@@ -114,8 +123,7 @@ export function PeersPrototype({
       <ReturnToTaskBar
         label={RETURN_LABEL[pattern]}
         open={returnOpen}
-        onOpen={() => setReturnOpen(true)}
-        onClose={closeReturn}
+        onOpenChange={setReturnOpen}
       />
     </div>
   );
