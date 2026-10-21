@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 164" width="640" height="164" role="img" aria-label="スタートから成功までの行動を順に並べる。目標の数字は、成功した人をスタートの人数で割ったもの。人数はまだ空欄">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 196" width="640" height="196" role="img" aria-label="スタートからゴール（流れの最後）までの段を順に並べる。スタートは A なら入会した、B なら学び始めた。ゴールは A なら7日以内に1本終える、B なら14日以内にまた来る。間の段は、ユーザーの行動と気持ちを想像して書く。目標の数字は、ゴールまで進んだ人をスタートの人数で割ったもの。人数は STEP 2 で入れるので、まだ空欄">
 <style>
 .t{fill:#021710;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:13px}
 .q{fill:#677470;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:12px}
@@ -16,25 +16,34 @@
 .grid{stroke:#D4D6CC;stroke-width:1;fill:none}
 .head{fill:#677470}
 </style>
-<rect x="0" y="0" width="640" height="164" fill="#F9F9F7"/>
+<rect x="0" y="0" width="640" height="196" fill="#F9F9F7"/>
 <defs><marker id="ar11" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="head" d="M0 0L10 5L0 10z"/></marker></defs>
 <g transform="translate(0,8)">
 <path class="ln" d="M10 36 V26 H630 V36"/>
-<text class="t b acct" x="320" y="18" text-anchor="middle">目標の数字（A か B）＝ 成功した人 ÷ スタートの人数</text>
-<rect class="box" x="10" y="44" width="140" height="56" rx="8"/>
-<text class="t b" x="80" y="68" text-anchor="middle">スタート</text><text class="q" x="80" y="88" text-anchor="middle" style="font-size:11.5px">例：入会した</text>
-<rect class="box" x="170" y="44" width="140" height="56" rx="8"/>
-<text class="t b" x="240" y="77" text-anchor="middle">行動 1</text>
-<rect class="box" x="330" y="44" width="140" height="56" rx="8"/>
-<text class="t b" x="400" y="77" text-anchor="middle">行動 2</text>
-<rect class="acc" x="490" y="44" width="140" height="56" rx="8"/>
-<text class="t b" x="560" y="68" text-anchor="middle">成功</text><text class="q" x="560" y="88" text-anchor="middle" style="font-size:11.5px">例：7日以内に1本完了</text>
-<line class="ln" x1="150" y1="72" x2="168" y2="72" marker-end="url(#ar11)"/>
-<line class="ln" x1="310" y1="72" x2="328" y2="72" marker-end="url(#ar11)"/>
-<line class="ln" x1="470" y1="72" x2="488" y2="72" marker-end="url(#ar11)"/>
-<rect class="dash" x="10" y="112" width="140" height="28" rx="6"/><text class="q" x="80" y="131" text-anchor="middle">？人</text>
-<rect class="dash" x="170" y="112" width="140" height="28" rx="6"/><text class="q" x="240" y="131" text-anchor="middle">？人</text>
-<rect class="dash" x="330" y="112" width="140" height="28" rx="6"/><text class="q" x="400" y="131" text-anchor="middle">？人</text>
-<rect class="dash" x="490" y="112" width="140" height="28" rx="6"/><text class="q" x="560" y="131" text-anchor="middle">？人</text>
+<text class="t b acct" x="320" y="18" text-anchor="middle">目標の数字（A か B）＝ ゴールまで進んだ人 ÷ スタートの人数</text>
+<rect class="box" x="10" y="44" width="140" height="78" rx="8"/>
+<text class="t b" x="80" y="68" text-anchor="middle">スタート</text>
+<text class="q" x="80" y="90" text-anchor="middle" style="font-size:11.5px">A：入会した</text>
+<text class="q" x="80" y="108" text-anchor="middle" style="font-size:11.5px">B：学び始めた</text>
+<rect class="box" x="170" y="44" width="140" height="78" rx="8"/>
+<text class="t b" x="240" y="68" text-anchor="middle">段 1</text>
+<text class="q" x="240" y="90" text-anchor="middle" style="font-size:11.5px">行動・気持ちを</text>
+<text class="q" x="240" y="108" text-anchor="middle" style="font-size:11.5px">想像して書く</text>
+<rect class="box" x="330" y="44" width="140" height="78" rx="8"/>
+<text class="t b" x="400" y="68" text-anchor="middle">段 2</text>
+<text class="q" x="400" y="90" text-anchor="middle" style="font-size:11.5px">行動・気持ちを</text>
+<text class="q" x="400" y="108" text-anchor="middle" style="font-size:11.5px">想像して書く</text>
+<rect class="acc" x="490" y="44" width="140" height="78" rx="8"/>
+<text class="t b" x="560" y="68" text-anchor="middle">ゴール（流れの最後）</text>
+<text class="q" x="560" y="90" text-anchor="middle" style="font-size:11.5px">A：7日以内に1本終える</text>
+<text class="q" x="560" y="108" text-anchor="middle" style="font-size:11.5px">B：14日以内にまた来る</text>
+<line class="ln" x1="150" y1="83" x2="168" y2="83" marker-end="url(#ar11)"/>
+<line class="ln" x1="310" y1="83" x2="328" y2="83" marker-end="url(#ar11)"/>
+<line class="ln" x1="470" y1="83" x2="488" y2="83" marker-end="url(#ar11)"/>
+<rect class="dash" x="10" y="134" width="140" height="28" rx="6"/><text class="q" x="80" y="153" text-anchor="middle">？人</text>
+<rect class="dash" x="170" y="134" width="140" height="28" rx="6"/><text class="q" x="240" y="153" text-anchor="middle">？人</text>
+<rect class="dash" x="330" y="134" width="140" height="28" rx="6"/><text class="q" x="400" y="153" text-anchor="middle">？人</text>
+<rect class="dash" x="490" y="134" width="140" height="28" rx="6"/><text class="q" x="560" y="153" text-anchor="middle">？人</text>
+<text class="q" x="630" y="182" text-anchor="end">人数は STEP 2 で入れる</text>
 </g>
 </svg>

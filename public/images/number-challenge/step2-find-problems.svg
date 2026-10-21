@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 310" width="640" height="310" role="img" aria-label="どの段の減り方も見て、なぜ減るかを考え、改善する範囲を決める。範囲は1つの段・いくつかの段・流れ全体のどれでもよい">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" width="640" height="300" role="img" aria-label="どの段の減り方も見て、段ごとに障壁を考え、流れ全体で1〜2個にまとめる。例ではスタート100人→段1 80人→段2 30人→ゴール25人で、目標の数字は25%。前の段からの割合は80%・38%・83%。段ごとに障壁を考え、同じ障壁がいくつかの段にかかっていればまとめる。その障壁がかかる段が、改善する範囲。障壁の仮説はヒアリングで確かめる">
 <style>
 .t{fill:#021710;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:13px}
 .q{fill:#677470;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:12px}
@@ -16,26 +16,25 @@
 .grid{stroke:#D4D6CC;stroke-width:1;fill:none}
 .head{fill:#677470}
 </style>
-<rect x="0" y="0" width="640" height="310" fill="#F9F9F7"/>
+<rect x="0" y="0" width="640" height="300" fill="#F9F9F7"/>
 <defs><marker id="ar12" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="head" d="M0 0L10 5L0 10z"/></marker></defs>
 <g transform="translate(0,8)">
 <path class="ln" d="M10 36 V26 H630 V36"/>
 <text class="t b acct" x="320" y="18" text-anchor="middle">目標の数字 ＝ 25人 ÷ 100人 ＝ 25%</text>
 <rect class="box" x="10" y="44" width="140" height="56" rx="8"/><text class="t b" x="80" y="68" text-anchor="middle">スタート</text><text class="t m" x="80" y="88" text-anchor="middle">100人</text>
-<rect class="box" x="170" y="44" width="140" height="56" rx="8"/><text class="t b" x="240" y="68" text-anchor="middle">行動 1</text><text class="t m" x="240" y="88" text-anchor="middle">80人</text>
-<rect class="box" x="330" y="44" width="140" height="56" rx="8"/><text class="t b" x="400" y="68" text-anchor="middle">行動 2</text><text class="t m" x="400" y="88" text-anchor="middle">30人</text>
-<rect class="acc" x="490" y="44" width="140" height="56" rx="8"/><text class="t b" x="560" y="68" text-anchor="middle">成功</text><text class="t m" x="560" y="88" text-anchor="middle">25人</text>
+<rect class="box" x="170" y="44" width="140" height="56" rx="8"/><text class="t b" x="240" y="68" text-anchor="middle">段 1</text><text class="t m" x="240" y="88" text-anchor="middle">80人</text>
+<rect class="box" x="330" y="44" width="140" height="56" rx="8"/><text class="t b" x="400" y="68" text-anchor="middle">段 2</text><text class="t m" x="400" y="88" text-anchor="middle">30人</text>
+<rect class="acc" x="490" y="44" width="140" height="56" rx="8"/><text class="t b" x="560" y="68" text-anchor="middle">ゴール</text><text class="t m" x="560" y="88" text-anchor="middle">25人</text>
 <line class="ln" x1="150" y1="72" x2="168" y2="72" marker-end="url(#ar12)"/>
 <line class="ln" x1="310" y1="72" x2="328" y2="72" marker-end="url(#ar12)"/>
 <line class="ln" x1="470" y1="72" x2="488" y2="72" marker-end="url(#ar12)"/>
-<text class="t m" x="160" y="122" text-anchor="middle">80%</text><rect class="soft" x="130" y="130" width="60" height="22" rx="11"/><text class="q" x="160" y="145" text-anchor="middle">なぜ？</text>
-<text class="t m" x="320" y="122" text-anchor="middle">38%</text><rect class="soft" x="290" y="130" width="60" height="22" rx="11"/><text class="q" x="320" y="145" text-anchor="middle">なぜ？</text>
-<text class="t m" x="480" y="122" text-anchor="middle">83%</text><rect class="soft" x="450" y="130" width="60" height="22" rx="11"/><text class="q" x="480" y="145" text-anchor="middle">なぜ？</text>
 <text class="q" x="10" y="122">前の段から</text>
-<text class="t b" x="10" y="184">どの段の減り方も見たうえで、改善する範囲を決める</text>
-<rect class="box" x="10" y="196" width="200" height="60" rx="8"/><text class="t b" x="110" y="221" text-anchor="middle">1つの段を大きく直す</text><text class="q" x="110" y="242" text-anchor="middle">例：大きく減っている段</text>
-<rect class="box" x="220" y="196" width="200" height="60" rx="8"/><text class="t b" x="320" y="221" text-anchor="middle">いくつかの段をまとめて直す</text><text class="q" x="320" y="242" text-anchor="middle">例：同じ迷いが続く段</text>
-<rect class="box" x="430" y="196" width="200" height="60" rx="8"/><text class="t b" x="530" y="221" text-anchor="middle">流れ全体を底上げする</text><text class="q" x="530" y="242" text-anchor="middle">例：続けたい理由を強める</text>
-<text class="t b acct" x="10" y="286">どの範囲でも、つまずきの理由は想像で仮説にして、ヒアリングで確かめる</text>
+<text class="t m" x="160" y="122" text-anchor="middle">80%</text><rect class="soft" x="126" y="130" width="68" height="22" rx="11"/><text class="q" x="160" y="145" text-anchor="middle">障壁は？</text>
+<text class="t m" x="320" y="122" text-anchor="middle">38%</text><rect class="soft" x="286" y="130" width="68" height="22" rx="11"/><text class="q" x="320" y="145" text-anchor="middle">障壁は？</text>
+<text class="t m" x="480" y="122" text-anchor="middle">83%</text><rect class="soft" x="446" y="130" width="68" height="22" rx="11"/><text class="q" x="480" y="145" text-anchor="middle">障壁は？</text>
+<path class="ln" d="M160 158 V168 H320 V158"/><path class="ln" d="M240 168 V184" marker-end="url(#ar12)"/>
+<rect class="acc" x="90" y="188" width="300" height="54" rx="8"/><text class="t b" x="240" y="210" text-anchor="middle">障壁の仮説：同じ障壁が2つの段にかかる</text><text class="q" x="240" y="230" text-anchor="middle">流れ全体で、障壁を1〜2個にまとめる</text>
+<text class="t b" x="406" y="210">この障壁がかかる段が</text><text class="t b" x="406" y="230">改善する範囲</text>
+<text class="t b acct" x="10" y="276">障壁の仮説は、ヒアリングで確かめる</text>
 </g>
 </svg>
