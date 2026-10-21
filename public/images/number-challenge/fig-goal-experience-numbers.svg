@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 236" width="800" height="236" role="img" aria-label="ゴール・体験・数字の関係（例：新規獲得）。体験はユーザーの流れで、知る（YouTubeを見る）→来る（サイトに来る）→比べる（料金ページを見る）→決める（プランを選ぶ）→払う（決済する）。流れの最後の段「払う」がゴール。数字は各段を通った人数で、STEP 2 で実際の数字を入れる（STEP 1 では空欄）。ゴールの数字は、最後の段まで進んだ人を最初の段の人数で割ったもの">
+<style>
+.t{fill:#021710;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:13px}
+.q{fill:#677470;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:12px}
+.b{font-weight:700}
+.m{font-family:"SF Mono",Menlo,Consolas,"Hiragino Sans",monospace}
+.acct{fill:#047A53}
+.hott{fill:#B8430F}
+.box{fill:#FFFFFF;stroke:#D4D6CC;stroke-width:1.5}
+.acc{fill:#E6F2EC;stroke:#047A53;stroke-width:2}
+.soft{fill:#F2F3F0;stroke:none}
+.hot{fill:#FDEBDD;stroke:#F95A16;stroke-width:1.5}
+.ln{stroke:#677470;stroke-width:1.3;fill:none}
+.lna{stroke:#047A53;stroke-width:1.5;fill:none}
+.head{fill:#677470}
+.heada{fill:#047A53}
+</style>
+<defs><marker id="arg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="head" d="M0 0L10 5L0 10z"/></marker>
+<marker id="arga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="heada" d="M0 0L10 5L0 10z"/></marker></defs>
+<rect x="0" y="0" width="800" height="236" fill="#F9F9F7"/>
+<text class="t b" x="20" y="84">体験</text>
+<text class="q" x="20" y="103">ユーザーの流れ</text>
+<text class="t b" x="20" y="150">数字</text>
+<text class="q" x="20" y="168">各段を通った人数</text>
+<text class="q" x="20" y="184">（STEP 2 で入れる）</text>
+<rect x="652" y="22" width="116" height="24" rx="12" fill="#047A53"/>
+<text class="t b" x="710.0" y="39" text-anchor="middle" style="fill:#FFFFFF">ゴール</text>
+<path class="lna" d="M710.0 46 V57"/>
+<rect class="box" x="124" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="182.0" y="82" text-anchor="middle" style="font-size:15px">知る</text>
+<text class="q" x="182.0" y="102" text-anchor="middle">YouTubeを見る</text>
+<path class="ln" d="M242 86 H254" marker-end="url(#arg)"/>
+<rect class="soft" x="124" y="130" width="116" height="44" rx="8"/>
+<text class="t b m" x="182.0" y="157" text-anchor="middle" style="font-size:14px">？人</text>
+<rect class="box" x="256" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="314.0" y="82" text-anchor="middle" style="font-size:15px">来る</text>
+<text class="q" x="314.0" y="102" text-anchor="middle">サイトに来る</text>
+<path class="ln" d="M374 86 H386" marker-end="url(#arg)"/>
+<rect class="soft" x="256" y="130" width="116" height="44" rx="8"/>
+<text class="t b m" x="314.0" y="157" text-anchor="middle" style="font-size:14px">？人</text>
+<rect class="box" x="388" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="446.0" y="82" text-anchor="middle" style="font-size:15px">比べる</text>
+<text class="q" x="446.0" y="102" text-anchor="middle">料金ページを見る</text>
+<path class="ln" d="M506 86 H518" marker-end="url(#arg)"/>
+<rect class="soft" x="388" y="130" width="116" height="44" rx="8"/>
+<text class="t b m" x="446.0" y="157" text-anchor="middle" style="font-size:14px">？人</text>
+<rect class="box" x="520" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="578.0" y="82" text-anchor="middle" style="font-size:15px">決める</text>
+<text class="q" x="578.0" y="102" text-anchor="middle">プランを選ぶ</text>
+<path class="ln" d="M638 86 H650" marker-end="url(#arg)"/>
+<rect class="soft" x="520" y="130" width="116" height="44" rx="8"/>
+<text class="t b m" x="578.0" y="157" text-anchor="middle" style="font-size:14px">？人</text>
+<rect class="acc" x="652" y="58" width="116" height="56" rx="10"/>
+<text class="t b" x="710.0" y="82" text-anchor="middle" style="font-size:15px">払う</text>
+<text class="q" x="710.0" y="102" text-anchor="middle">決済する</text>
+<rect class="soft" x="652" y="130" width="116" height="44" rx="8"/>
+<text class="t b m" x="710.0" y="157" text-anchor="middle" style="font-size:14px">？人</text>
+<path class="lna" d="M314.0 182 V192 H710.0 V182"/>
+<text class="t b acct" x="512.0" y="214" text-anchor="middle">ゴールの数字 ＝ 最後の段（払う）まで進んだ人 ÷ 最初の段（来る）の人</text>
+</svg>

@@ -53,6 +53,21 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // 数字改善チャレンジ（#252）: 構成変更前のURLを新しいURLへ。以後のURLは固定する
+      ...[
+        ["overview", "step0-overview"],
+        ["goal-metrics", "step0-theme"],
+        ["facts-and-hypotheses", "step0-facts-and-hypotheses"],
+        ["steps-and-example", "step1-method"],
+        ["step1-factorize", "step1-todo"],
+        ["flow-and-numbers", "step2-method"],
+        ["step2-find-problems", "step2-todo"],
+        ["step3-prototype", "step3-todo"],
+      ].map(([from, to]) => ({
+        source: `/docs/number-challenge/${from}`,
+        destination: `/docs/number-challenge/${to}`,
+        permanent: true,
+      })),
       // サイト移行 Week1: 個別記事ルートを /articles/:slug → /contents/:slug に統一。
       // ベータドメイン上で既にクロール・被リンクされている旧 URL を 308 で恒久保護する。
       {

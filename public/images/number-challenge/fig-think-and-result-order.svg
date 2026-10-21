@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 262" width="800" height="262" role="img" aria-label="数字は、体験が変わった結果として上がる（例：新規獲得）。良い打ち手：自分に合うプランが分かるようにする→ユーザーの体験：「自分のレベルで大丈夫？」の迷いが解ける→数字：プランを選ぶ人が増える。無理やりな打ち手：課金ボタンを大きくする→ユーザーの体験：迷いは残ったまま→数字：選ぶ理由は増えていない">
+<style>
+.t{fill:#021710;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:14px}
+.q{fill:#677470;font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic",Meiryo,sans-serif;font-size:12px}
+.b{font-weight:700}
+.acct{fill:#047A53}
+.hott{fill:#B8430F}
+.ok{fill:#E6F2EC;stroke:#047A53;stroke-width:1.5}
+.ng{fill:#FDEBDD;stroke:#F95A16;stroke-width:1.5}
+.ln{stroke:#677470;stroke-width:1.3;fill:none}
+.head{fill:#677470}
+</style>
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path class="head" d="M0 0L10 5L0 10z"/></marker></defs>
+<rect x="0" y="0" width="800" height="262" fill="#F9F9F7"/>
+<text class="q b" x="230" y="30" text-anchor="middle" style="letter-spacing:.06em">打ち手</text>
+<text class="q b" x="440" y="30" text-anchor="middle" style="letter-spacing:.06em">ユーザーの体験</text>
+<text class="q b" x="650" y="30" text-anchor="middle" style="letter-spacing:.06em">数字</text>
+<text class="t b acct" x="20" y="82">○ 体験から</text>
+<text class="t b acct" x="20" y="102">考えた打ち手</text>
+<rect class="ok" x="140" y="46" width="180" height="84" rx="10"/>
+<text class="t b" x="230" y="84" text-anchor="middle">自分に合うプランが</text>
+<text class="t b" x="230" y="106" text-anchor="middle">分かるようにする</text>
+<path class="ln" d="M323 88 H347" marker-end="url(#ar)"/>
+<rect class="ok" x="350" y="46" width="180" height="84" rx="10"/>
+<text class="t b" x="440" y="84" text-anchor="middle">「自分のレベルで大丈夫？」</text>
+<text class="t b" x="440" y="106" text-anchor="middle">の迷いが解ける</text>
+<path class="ln" d="M533 88 H557" marker-end="url(#ar)"/>
+<rect class="ok" x="560" y="46" width="180" height="84" rx="10"/>
+<text class="t b" x="650" y="84" text-anchor="middle">プランを選ぶ人が</text>
+<text class="t b" x="650" y="106" text-anchor="middle">増える</text>
+<text class="t b hott" x="20" y="184">✕ 数字だけを</text>
+<text class="t b hott" x="20" y="204">見た打ち手</text>
+<rect class="ng" x="140" y="148" width="180" height="84" rx="10"/>
+<text class="t b" x="230" y="186" text-anchor="middle">課金ボタンを</text>
+<text class="t b" x="230" y="208" text-anchor="middle">大きくする</text>
+<path class="ln" d="M323 190 H347" marker-end="url(#ar)"/>
+<rect class="ng" x="350" y="148" width="180" height="84" rx="10"/>
+<text class="t b" x="440" y="186" text-anchor="middle">迷いは</text>
+<text class="t b" x="440" y="208" text-anchor="middle">残ったまま</text>
+<path class="ln" d="M533 190 H557" marker-end="url(#ar)"/>
+<rect class="ng" x="560" y="148" width="180" height="84" rx="10"/>
+<text class="t b" x="650" y="186" text-anchor="middle">選ぶ理由は</text>
+<text class="t b" x="650" y="208" text-anchor="middle">増えていない</text>
+</svg>

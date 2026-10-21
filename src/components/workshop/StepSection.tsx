@@ -4,13 +4,15 @@ import { WS_THEME } from "./theme";
 
 interface StepSectionProps {
   step: WorkshopStepWithDocs;
+  /** ドキュメント置き場のパス（既定: /docs/workshop） */
+  basePath?: string;
 }
 
 /**
  * トップページ ブロック2（ダークエディトリアル版）
  * ステップ見出し + 白いクリッカブルカード。左端はヒーローと同じラインに揃える
  */
-export default function StepSection({ step }: StepSectionProps) {
+export default function StepSection({ step, basePath }: StepSectionProps) {
   return (
     <section>
       <div className="mb-5 md:mb-6">
@@ -39,7 +41,7 @@ export default function StepSection({ step }: StepSectionProps) {
       </div>
       <div className="flex flex-col gap-3">
         {step.docs.map((doc) => (
-          <DocCard key={doc.slug} doc={doc} />
+          <DocCard key={doc.slug} doc={doc} basePath={basePath} />
         ))}
       </div>
     </section>
