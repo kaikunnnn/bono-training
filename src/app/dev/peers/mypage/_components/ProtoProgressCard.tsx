@@ -1,0 +1,115 @@
+"use client";
+
+import React, { useState } from "react";
+import Image from "next/image";
+
+export interface ProtoLessonProgress {
+  id: string;
+  title: string;
+  progress: number;
+  nextStep: string;
+  iconImageUrl: string;
+}
+
+/**
+ * 進行中カード（src/app/mypage/sections/ProgressSectionClient.tsx の ProgressLessonCard の複製）。
+ * #253 の複製（design-together/_proto/mypage/ProtoProgressCard.tsx）を /dev/peers 内にコピーした。
+ * 変えたのは、進捗と「次」をダミーの props で受け取り、遷移（router.push）と計測を外したことだけ。
+ * inline style・色は本番のまま。
+ */
+export function ProtoProgressCard({ lesson }: { lesson: ProtoLessonProgress }) {
+  const [isCardHovered, setIsCardHovered] = useState(false);
+  const [isNextHovered, setIsNextHovered] = useState(false);
+
+  const progress = lesson.progress;
+  const currentStep = lesson.nextStep || "次のステップ";
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", position: "relative", width: "100%", height: "100%" }}>
+      {/* メインカード */}
+      <div
+        role="article"
+        aria-label={`${lesson.title}の進捗状況`}
+        onMouseEnter={() => setIsCardHovered(true)}
+        onMouseLeave={() => setIsCardHovered(false)}
+        style={{
+          backgroundColor: "#FFFFFF",
+          borderRadius: "20px",
+          paddingLeft: "24px",
+          paddingRight: "24px",
+          paddingTop: "19px",
+          paddingBottom: "19px",
+          marginBottom: "-18px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "12px",
+          width: "100%",
+          flexShrink: 0,
+          boxShadow: isCardHovered ? "0px 4px 16px rgba(0, 0, 0, 0.12)" : "0px 2px 8px rgba(0, 0, 0, 0.08)",
+          cursor: "pointer",
+          transition: "box-shadow 0.2s ease",
+          zIndex: 2,
+          overflow: "clip",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", flexShrink: 0 }}>
+          <div style={{ display: "flex", gap: "16px", alignItems: "center", flex: "1 1 0", minWidth: 0 }}>
+            <div style={{ width: 48, height: 73, borderTopRightRadius: 8, borderBottomRightRadius: 8, position: "relative", flexShrink: 0, overflow: "hidden", backgroundColor: "#F5F5F5" }}>
+              <Image src={lesson.iconImageUrl} alt="" fill sizes="48px" style={{ objectFit: "cover", pointerEvents: "none" }} />
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 9, alignItems: "flex-start", minWidth: 0, flex: "1 1 0" }}>
+              <div style={{ fontFamily: "'Rounded Mplus 1c', sans-serif", fontWeight: 600, fontSize: 16, color: "#000000", width: "100%", maxWidth: 320 }}>
+                <p style={{ margin: 0, lineHeight: "normal" }}>{lesson.title}</p>
+              </div>
+              <div
+                role="progressbar"
+                aria-valuenow={progress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                style={{ backgroundColor: "#EAEAEA", height: 6, width: "100%", borderRadius: 1000, overflow: "clip", position: "relative" }}
+              >
+                <div style={{ backgroundColor: "#000000", width: `${progress}%`, height: 6, minWidth: 1, borderRadius: 40, transition: "width 0.3s ease" }} />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: "flex", alignItems: "flex-end", fontFamily: "'Rounded Mplus 1c', sans-serif", fontWeight: 700, color: "#000000", whiteSpace: "nowrap", flexShrink: 0, lineHeight: 0 }}>
+            <div style={{ fontSize: 24, letterSpacing: "-0.48px" }}>
+              <p style={{ lineHeight: "normal", margin: 0 }}>{progress}</p>
+            </div>
+            <div style={{ fontSize: 10 }}>
+              <p style={{ lineHeight: "normal", margin: 0 }}>%</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 下部: 次の記事 */}
+      <div
+        style={{
+          backgroundColor: isNextHovered ? "#E5E5E5" : "#EFEFEF",
+          borderBottomLeftRadius: 20,
+          borderBottomRightRadius: 20,
+          paddingTop: 18,
+          display: "flex",
+          alignItems: "center",
+          width: "100%",
+          zIndex: 1,
+          transition: "background-color 0.2s ease",
+        }}
+      >
+        <div
+          onMouseEnter={() => setIsNextHovered(true)}
+          onMouseLeave={() => setIsNextHovered(false)}
+          style={{ display: "flex", gap: 8, alignItems: "center", paddingLeft: 24, paddingRight: 8, paddingTop: 8, paddingBottom: 8, flex: "1 1 0", minWidth: 0, cursor: "pointer" }}
+        >
+          <span style={{ fontFamily: "'Noto Sans JP', sans-serif", fontWeight: 400, fontSize: 10, color: "#4B5563", flexShrink: 0, whiteSpace: "nowrap" }}>
+            <span style={{ fontWeight: 700 }}>次</span>👉️
+          </span>
+          <span style={{ fontFamily: "'Inter', 'Noto Sans JP', sans-serif", fontWeight: 700, fontSize: 12, lineHeight: "20px", color: "#000000", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", minWidth: 0 }}>
+            {currentStep}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}

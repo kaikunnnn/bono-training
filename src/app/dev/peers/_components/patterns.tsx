@@ -200,7 +200,7 @@ export function PatternA(props: PatternProps) {
 /* ------------------------------------------------------------------ */
 /* B いま作業中：作業中3人を3列のカード、作業していない5人は下に小さく */
 
-function restLabel(status: TodayStatus) {
+export function restLabel(status: TodayStatus) {
   return status.kind === "done" ? "今日は終了" : "今日はまだ";
 }
 
@@ -349,7 +349,7 @@ const DAY_LABELS = [
   "今日",
 ];
 
-function DayDots({ days }: { days: boolean[] }) {
+export function DayDots({ days }: { days: boolean[] }) {
   const doneCount = days.filter(Boolean).length;
   return (
     <span className="flex items-center gap-1.5">
@@ -371,7 +371,7 @@ function DayDots({ days }: { days: boolean[] }) {
   );
 }
 
-function StatusChip({ status }: { status: TodayStatus | "me" }) {
+export function StatusChip({ status }: { status: TodayStatus | "me" }) {
   if (status === "me") {
     return (
       <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-bold text-text-secondary">

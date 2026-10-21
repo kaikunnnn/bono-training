@@ -88,7 +88,7 @@ export function PeersPrototype({
               className={cn(
                 "flex h-11 items-center justify-center gap-2 rounded-[12px] px-3 text-sm font-bold transition-colors",
                 active
-                  ? "bg-surface text-text-primary shadow-[var(--shadow-xs)]"
+                  ? "bg-surface text-text-primary shadow-[var(--shadow-xs)] hover:bg-surface"
                   : "text-text-muted hover:text-text-primary",
               )}
             >

@@ -53,38 +53,47 @@ export function ReturnToTaskBar({
         </div>
       </div>
 
-      <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-lg gap-0">
-          <p className="text-xs font-bold text-text-muted">
-            プロトの仮画面（ここで課題のページが開きます）
-          </p>
-          <p className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-text-secondary">
-            <Book1 size={16} color="currentColor" variant="Bulk" aria-hidden />
-            {COURSE_NAME}
-          </p>
-          <DialogTitle className="mt-1.5 font-heading text-[22px] font-bold leading-snug text-text-primary">
-            課題{ME.assignmentNo}「{ASSIGNMENTS[ME.assignmentNo]}」に戻ります
-          </DialogTitle>
-          <DialogDescription asChild>
-            <p className="mt-4 rounded-[14px] bg-muted px-4 py-3 text-sm leading-relaxed text-text-secondary">
-              前回は
-              <b className="font-bold text-text-primary">{ME.stuckOn}</b>
-              を考えているところで止まっています。今日は{ME.todayMinutes}
-              分作業しました。
-            </p>
-          </DialogDescription>
-          <DialogClose asChild>
-            <Button
-              variant="outline-ghost"
-              size="large"
-              className="mt-6 w-full"
-            >
-              <ArrowLeft aria-hidden />
-              同期のページにもどる
-            </Button>
-          </DialogClose>
-        </DialogContent>
-      </Dialog>
+      <ReturnDialog open={open} onOpenChange={onOpenChange} />
     </>
+  );
+}
+
+/** 「課題に戻る」を押したあとの仮画面（中央のダイアログ）。マイページ組み込み版でも使う */
+export function ReturnDialog({
+  open,
+  onOpenChange,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-lg gap-0">
+        <p className="text-xs font-bold text-text-muted">
+          プロトの仮画面（ここで課題のページが開きます）
+        </p>
+        <p className="mt-5 inline-flex items-center gap-1.5 text-xs font-bold text-text-secondary">
+          <Book1 size={16} color="currentColor" variant="Bulk" aria-hidden />
+          {COURSE_NAME}
+        </p>
+        <DialogTitle className="mt-1.5 font-heading text-[22px] font-bold leading-snug text-text-primary">
+          課題{ME.assignmentNo}「{ASSIGNMENTS[ME.assignmentNo]}」に戻ります
+        </DialogTitle>
+        <DialogDescription asChild>
+          <p className="mt-4 rounded-[14px] bg-muted px-4 py-3 text-sm leading-relaxed text-text-secondary">
+            前回は
+            <b className="font-bold text-text-primary">{ME.stuckOn}</b>
+            を考えているところで止まっています。今日は{ME.todayMinutes}
+            分作業しました。
+          </p>
+        </DialogDescription>
+        <DialogClose asChild>
+          <Button variant="outline-ghost" size="large" className="mt-6 w-full">
+            <ArrowLeft aria-hidden />
+            同期のページにもどる
+          </Button>
+        </DialogClose>
+      </DialogContent>
+    </Dialog>
   );
 }
