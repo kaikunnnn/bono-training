@@ -94,17 +94,27 @@ export default function RoadmapHubPage() {
             <p className="mt-1.5 text-sm leading-[1.8] text-text-secondary">
               見るポイント：行き先・道のり・コースの外でやること・進め方がわかるか。まずは「未経験から転職」から。「進捗あり」は会員の見え方（いまここ）。
             </p>
-            <div className="mt-5 flex items-center gap-2">
+            <Link
+              href={`${ROADMAP_BASE}/career-change-v4`}
+              className="group mt-5 flex min-w-0 items-center gap-4 rounded-[16px] border-2 border-text-primary bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-shadow hover:shadow-[var(--shadow-md)]"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="flex flex-wrap items-center gap-2 font-heading text-[15px] font-bold leading-[1.5]">
+                  未経験から転職（v4・記事ベースの中身）
+                  <span className="rounded-full bg-text-primary px-2 py-0.5 font-noto-sans-jp text-[10px] text-text-inverse">NEW</span>
+                </p>
+                <p className="text-xs text-text-muted">BONOの記事だけを材料に、何を・どの順で・なぜ を書いた形。まずはここから確認</p>
+              </div>
+              <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <div className="mt-2.5 flex items-center gap-2">
               <Link
                 href={`${ROADMAP_BASE}/career-change-v3`}
-                className="group flex min-w-0 flex-1 items-center gap-4 rounded-[16px] border-2 border-text-primary bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-shadow hover:shadow-[var(--shadow-md)]"
+                className="group flex min-w-0 flex-1 items-center gap-4 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="flex flex-wrap items-center gap-2 font-heading text-[15px] font-bold leading-[1.5]">
-                    未経験から転職（新しい形・試作）
-                    <span className="rounded-full bg-text-primary px-2 py-0.5 font-noto-sans-jp text-[10px] text-text-inverse">NEW</span>
-                  </p>
-                  <p className="text-xs text-text-muted">区切りごとにポートフォリオが育つ形。まずはここから確認</p>
+                  <p className="font-heading text-[15px] font-bold leading-[1.5]">未経験から転職（v3・区切りごとにポートフォリオが育つ形）</p>
+                  <p className="text-xs text-text-muted">見た目と流れの試作</p>
                 </div>
                 <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
               </Link>
