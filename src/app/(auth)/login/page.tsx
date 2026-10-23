@@ -51,10 +51,14 @@ function LoginForm() {
   // reauth=1 で来た場合、ブラウザに残った無効な auth cookie を掃除する。
   // これを消さないと middleware が cookie の存在だけで「ログイン済み」と誤判定し、
   // /login → /mypage → /login の無限リダイレクトループが再発する
+  //
+  // scope: "local" で、この端末の cookie だけを消す（既定の "global" はサーバー側で
+  // 全端末のセッションを失効させる）。reauth=1 は Supabase の一時障害でも付くため、
+  // global だと「障害中にトップを開いただけで全端末ログアウト」になりうる（#258 レビュー）
   useEffect(() => {
     if (!isReauth) return;
     createClient()
-      .auth.signOut()
+      .auth.signOut({ scope: "local" })
       .catch(() => {
         // 掃除に失敗しても reauth フラグでループ自体は防がれているので握りつぶす
       });
