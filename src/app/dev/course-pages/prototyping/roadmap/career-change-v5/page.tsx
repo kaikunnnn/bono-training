@@ -11,6 +11,7 @@
  * 5. 狭い入口の通り方
  * 6. 経験がある人 / 先輩の道のり / つまずき / よくある質問
  * 7. このロードマップの根拠
+ * 文章は「結論を言う小見出し＋3文まで」のブロックで並べる（オーナーFB 2026-10-23）。
  * 文字は本文 16px（ds-body-jp）。12px は出典・パンくずなどのメタ情報だけ。
  * 文言は data/roadmap-career-change-v5.ts（材料にない推測は「仮」）。
  */
@@ -21,7 +22,16 @@ import { ArrowRight, Plus } from "lucide-react";
 import { Calendar, Edit2, Flag, Map1, Profile2User } from "iconsax-react";
 import { cn } from "@/lib/utils";
 import { getCourse } from "../../../data";
-import { careerChangeV5 as rm, type Para, type Proof, type Src, type V5CourseRef, type V5Stage } from "../../../data/roadmap-career-change-v5";
+import {
+  careerChangeV5 as rm,
+  type Block as BlockData,
+  type Para,
+  type Proof,
+  type Src,
+  type StageSectionKey,
+  type V5CourseRef,
+  type V5Stage,
+} from "../../../data/roadmap-career-change-v5";
 import { roadmaps } from "../../../data/roadmaps";
 import { KariProvider, T } from "../../../template/kari";
 import { splitTitle } from "../../../template/shared";
@@ -39,11 +49,20 @@ const stageNo = (id: string) => stages.findIndex((s) => s.id === id) + 1;
 const SECTION = "scroll-mt-6 border-t border-border-light py-12 md:py-16";
 const H2 = "font-heading text-[24px] font-bold leading-[1.4] tracking-[-0.03em] md:text-[28px]";
 const H3 = "font-heading text-[18px] font-bold leading-[1.5]";
+/** 小見出し（ステップ内など1段深いところ） */
+const H4 = "font-heading text-base font-bold leading-[1.6] text-text-primary";
 /** 本文（ds-body-jp） */
 const BODY = "text-base leading-[1.8] text-text-secondary";
 const PANEL = "rounded-[20px] bg-[var(--bg-muted)]";
 
 const PROOF_LABEL: Record<Proof, string> = { ticket: "入場券", decider: "決め手" };
+
+const STAGE_SECTION_LABEL: Record<StageSectionKey, string> = {
+  can: "できるようになること",
+  why: "転職でなぜ要るか",
+  portfolio: "ポートフォリオに入るもの",
+  ai: "AIの使いどころ",
+};
 
 /* ---------- 部品 ---------- */
 
@@ -55,6 +74,18 @@ function P({ para, className }: { para: Para; className?: string }) {
         <T key={i} f={f} />
       ))}
     </p>
+  );
+}
+
+/** 小見出し＋本文（3文まで）＋出典 */
+function Block({ block, level = 3, className }: { block: BlockData; level?: 3 | 4; className?: string }) {
+  const Heading = level === 3 ? "h3" : "h4";
+  return (
+    <div className={className}>
+      <Heading className={level === 3 ? H3 : H4}>{block.h}</Heading>
+      <P para={block.para} className={level === 3 ? "mt-2" : "mt-1"} />
+      <Sources sources={block.sources} className="mt-1" />
+    </div>
   );
 }
 
@@ -144,24 +175,11 @@ function Stage({ stage, index }: { stage: V5Stage; index: number }) {
         {stage.title}
       </h3>
 
-      <div className="mt-4 space-y-4">
-        {stage.body.map((para, i) => (
-          <P key={i} para={para} />
+      <div className="mt-5 space-y-5">
+        {stage.sections.map((sec) => (
+          <Block key={sec.key} block={{ h: sec.h ?? STAGE_SECTION_LABEL[sec.key], para: sec.para }} level={4} />
         ))}
       </div>
-
-      {stage.extra ? (
-        <div className="mt-4">
-          <P para={[stage.extra.lead]} />
-          <ol className={cn(BODY, "mt-2 list-decimal space-y-1 pl-6")}>
-            {stage.extra.items.map((it, i) => (
-              <li key={i}>
-                <T f={it} />
-              </li>
-            ))}
-          </ol>
-        </div>
-      ) : null}
 
       {/* このステップの3行メモ */}
       <div className="mt-6 rounded-[16px] border border-border-default p-4 md:p-5">
@@ -288,19 +306,16 @@ export default function CareerChangeV5Page() {
             <h2 id="reality-title" className={H2}>
               入口の現実
             </h2>
-            <div className="mt-4 space-y-5">
-              {rm.reality.blocks.map((b, i) => (
-                <div key={i}>
-                  <P para={b.para} />
-                  <Sources sources={b.sources} className="mt-1" />
-                </div>
+            <div className="mt-6 space-y-8">
+              {rm.reality.blocks.map((b) => (
+                <Block key={b.h} block={b} />
               ))}
             </div>
             <p className={cn("mt-6 border-l-2 border-text-primary pl-4 text-base font-bold leading-[1.8] text-text-primary")}>
               <T f={rm.reality.goal} />
             </p>
             <div className={cn("mt-6 p-4 md:p-5", PANEL)}>
-              <P para={rm.reality.senpai} />
+              <Block block={rm.reality.senpai} />
               <div className="mt-3 flex flex-wrap gap-2">
                 <a href="#gate" className={cn("group inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-bold", CLICKABLE)}>
                   狭い入口の通り方を見る
@@ -336,26 +351,18 @@ export default function CareerChangeV5Page() {
               ))}
             </ul>
 
-            <div className="mt-8 space-y-5">
-              <div>
-                <P para={rm.wants.ticketWhy.para} />
-                <Sources sources={rm.wants.ticketWhy.sources} className="mt-1" />
-              </div>
-              {rm.wants.deciderWhy.map((b, i) => (
-                <div key={i}>
-                  <P para={b.para} />
-                  <Sources sources={b.sources} className="mt-1" />
-                </div>
+            <div className="mt-10 space-y-8">
+              <Block block={rm.wants.ticketWhy} />
+              {rm.wants.deciderWhy.map((b) => (
+                <Block key={b.h} block={b} />
               ))}
             </div>
 
             <div className={cn("mt-8 p-4 md:p-5", PANEL)}>
-              <h3 className={H3}>{rm.wants.potential.title}</h3>
-              <P para={rm.wants.potential.para} className="mt-2" />
-              <Sources sources={rm.wants.potential.sources} className="mt-1" />
+              <Block block={rm.wants.potential} />
             </div>
 
-            <h3 className={cn(H3, "mt-10")}>ポートフォリオの3つの作品</h3>
+            <h3 className={cn(H3, "mt-10")}>{rm.wants.worksTitle}</h3>
             <P para={[rm.wants.worksLead]} className="mt-2" />
             <ul className="mt-4 grid gap-3 md:grid-cols-3">
               {rm.wants.works.map((w) => (
@@ -382,12 +389,9 @@ export default function CareerChangeV5Page() {
             <h2 id="ai-title" className={H2}>
               AIで変わったこと、変わらないこと
             </h2>
-            <div className="mt-4 space-y-5">
-              {rm.ai.blocks.map((b, i) => (
-                <div key={i}>
-                  <P para={b.para} />
-                  <Sources sources={b.sources} className="mt-1" />
-                </div>
+            <div className="mt-6 space-y-8">
+              {rm.ai.blocks.map((b) => (
+                <Block key={b.h} block={b} />
               ))}
             </div>
           </section>
@@ -397,7 +401,11 @@ export default function CareerChangeV5Page() {
             <h2 id="overview-title" className={H2}>
               全体図と、なぜこの順か
             </h2>
-            <P para={rm.order} className="mt-3" />
+            <div className="mt-6 space-y-6">
+              {rm.order.map((b) => (
+                <Block key={b.h} block={b} />
+              ))}
+            </div>
             <ol className="mt-5 grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3">
               {stages.map((stage, i) => (
                 <li key={stage.id} className="min-w-0">
@@ -434,11 +442,15 @@ export default function CareerChangeV5Page() {
               ステップごとにやること
             </h2>
             <div className={cn("mt-4 p-4 md:p-5", PANEL)}>
-              <p className="flex items-center gap-2 text-sm font-bold text-text-primary">
-                <Edit2 size={16} color="currentColor" variant="Linear" className="shrink-0" />
-                全ステップ共通：つくったら「なぜこの形か」を3行で書く
-              </p>
-              <P para={rm.memoIntro.para} className="mt-2" />
+              <h3 className={cn(H3, "flex items-center gap-2")}>
+                <Edit2 size={18} color="currentColor" variant="Linear" className="shrink-0" />
+                {rm.memoIntro.title}
+              </h3>
+              <div className="mt-4 space-y-5">
+                {rm.memoIntro.blocks.map((b) => (
+                  <Block key={b.h} block={b} level={4} />
+                ))}
+              </div>
             </div>
             <div className="mt-10 flex flex-col gap-8">
               {stages.map((stage, i) => (
@@ -454,12 +466,8 @@ export default function CareerChangeV5Page() {
             </h2>
             <P para={rm.gate.lead} className="mt-3" />
             <div className="mt-6 flex flex-col gap-8">
-              {rm.gate.items.map((it) => (
-                <div key={it.title}>
-                  <h3 className={H3}>{it.title}</h3>
-                  <P para={it.body} className="mt-2" />
-                  <Sources sources={it.sources} className="mt-1" />
-                </div>
+              {rm.gate.items.map((b) => (
+                <Block key={b.h} block={b} />
               ))}
             </div>
           </section>
