@@ -176,6 +176,24 @@ export function proxy(request: NextRequest) {
   // /login → /mypage → /login … の無限リダイレクトループになる。
   // 保護ページからの差し戻しには reauth=1 を付け、ログイン画面を必ず表示させて
   // ループを構造的に断ち切る（ログイン画面側で stale cookie を signOut で掃除する）。
+  // 1.5. ログイン済みでトップ（/）→ /mypage へ（#257 S2）
+  //
+  // page.tsx 側の redirect() はレイアウトの描画開始後に呼ばれるため、本物の 307 ではなく
+  // 「トップページ全体（約74KB）＋埋め込みのリダイレクト指示」として 200 で返っていた。
+  // ブラウザはトップを受け取ってから /mypage へ移り直すことになり、bo-no.design から
+  // 開く大半の会員で 1 往復＋トップ描画分が無駄になる。ここで cookie の存在だけを見て
+  // 先に返す。無効な cookie なら /mypage 側（getCurrentUser = 本物の検証）が
+  // /login?reauth=1 へ差し戻すので、ループにはならない（上の 2. と同じ考え方）。
+  // page.tsx の redirect は proxy を通らない経路の保険として残す。
+  if (hasAuth && pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/mypage";
+    // signup直後の歓迎トースト用フラグだけ引き継ぐ（page.tsx と同じ挙動）
+    const welcome = request.nextUrl.searchParams.get("welcome");
+    url.search = welcome === "1" ? "?welcome=1" : "";
+    return NextResponse.redirect(url);
+  }
+
   const isAuthPage = AUTH_PAGE_PATHS.includes(pathname);
   const isReauth = request.nextUrl.searchParams.get("reauth") === "1";
   if (hasAuth && isAuthPage && !isReauth) {
@@ -196,6 +214,8 @@ export const config = {
    * 公開ページ (/lessons, /blog, /roadmap 等) は middleware を通らない → TTFB 短縮
    */
   matcher: [
+    // ログイン済みのトップ → /mypage（#257 S2）。"/" 完全一致のみで、配下の公開ページは通らない
+    "/",
     "/mypage/:path*",
     "/account/:path*",
     "/profile/:path*",
