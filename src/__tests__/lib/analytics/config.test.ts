@@ -1,10 +1,10 @@
 import { describe, it, expect, vi } from "vitest";
 import { GA_BOOTSTRAP, GA_MEASUREMENT_ID, isAnalyticsHost } from "@/lib/analytics/config";
 
-function bootstrap(hostname: string) {
+function bootstrap(hostname: string, webdriver = false) {
   const append = vi.fn();
   const create = vi.fn(() => ({}));
-  const win = { location: { hostname } } as Record<string, unknown>;
+  const win = { location: { hostname }, navigator: { webdriver } } as Record<string, unknown>;
   const doc = { head: { appendChild: append }, createElement: create };
   const run = new Function("window", "document", GA_BOOTSTRAP);
   run(win, doc);
@@ -25,5 +25,10 @@ describe("production analytics boundary", () => {
     expect(result.append.mock.calls[0][0].src).toContain(GA_MEASUREMENT_ID);
     const commands = (result.win.dataLayer as IArguments[]).map((entry) => Array.from(entry));
     expect(commands.filter((args) => args[0] === "config")).toEqual([["config", "G-T8RTCENVBF"]]);
+  });
+  it("does not load GA in automated browsers (Playwright E2E against production)", () => {
+    const result = bootstrap("www.bo-no.design", true);
+    expect(result.create).not.toHaveBeenCalled();
+    expect(result.win.dataLayer).toBeUndefined();
   });
 });

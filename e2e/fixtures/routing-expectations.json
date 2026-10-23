@@ -1,5 +1,5 @@
 {
-  "$comment": "本番ルーティングの期待値（#258）。これが正。e2e/routing-status.spec.ts と prod-check スクリプトはここだけを読む。cookie: none=cookieなし / dummy=ダミーauth cookie（proxy は cookie 名しか見ない）。expectStatus は数値か \"3xx\"。location は expectLocation（完全一致）か expectLocationPrefix（前方一致）。knownIssue があるものは現状この期待を満たさない既知の問題（直ったらテストが知らせる）。",
+  "$comment": "本番ルーティングの期待値（#258）。これが正。e2e/routing-status.spec.ts と prod-check スクリプトはここだけを読む。cookie: none=cookieなし / dummy=ダミーauth cookie（proxy は cookie 名しか見ない）。expectStatus は数値か \"3xx\"。location は expectLocation（完全一致）か expectLocationPrefix（前方一致）。knownIssue があるものは現状この期待を満たさない既知の問題（直ったらテストが知らせる）。 ダミー cookie は proxy か next.config が先に答えるURLにだけ使う（ページまで届くと本番のエラー一覧に Supabase のパース失敗が残る）。",
   "dummyAuthCookie": "sb-fryogvfhymnpiqwssmuu-auth-token=dummy",
   "routes": [
     {

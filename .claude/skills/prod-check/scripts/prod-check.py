@@ -21,7 +21,7 @@ FIXTURE = ROOT / "e2e" / "fixtures" / "routing-expectations.json"
 
 def fetch(base, path, cookie, dummy_cookie, body=False):
     """1ホップだけ取得して (status, headers, ttfb, html) を返す。"""
-    cmd = ["curl", "-s", "-D", "-", "-w", "__TTFB__%{time_starttransfer}", base + path]
+    cmd = ["curl", "-s", "--max-time", "20", "-D", "-", "-w", "__TTFB__%{time_starttransfer}", base + path]
     if not body:
         cmd[1:1] = ["-o", "/dev/null"]
     if cookie == "dummy":

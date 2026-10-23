@@ -20,7 +20,9 @@ allowed-tools: Read, Grep, Bash, Edit, mcp__claude_ai_Vercel__get_runtime_errors
 
 ### 0. 対象を決める
 
-- 既定は本番 `https://www.bo-no.design`。preview はデプロイ保護で 401 になることがあるので、その場合は本番デプロイ後に行う
+- マージ前: ローカル本番ビルド（`npm run build && npx next start -p 3016` → `http://localhost:3016`）。dev サーバーはストリーミングの挙動が違うことがあるので使わない
+- マージ後: 本番 `https://www.bo-no.design`。preview はデプロイ保護で 401 になることがある
+- まだ本番に出ていない変更の期待値は、マージ後まで本番では FAIL になるのが正しい（ローカルで PASS を確認しておく）
 - 変更したものに応じて、`e2e/fixtures/routing-expectations.json`（期待値の正）に確認したいURLが入っているか見る。足りなければ**ここに追加する**（スクリプトとE2Eの両方が読む。他の場所にURLを書かない）
 
 ### 1. ステータス・リダイレクト・リージョンを見る
@@ -33,6 +35,7 @@ E2E_BASE_URL=https://www.bo-no.design npm run test:e2e             # 同じ期�
 
 - 1行ごとに PASS / FAIL / KNOWN（既知の問題）/ FIXED?（既知の問題が直った）を出す
 - ダミー auth cookie（`sb-…-auth-token=dummy`）で「ログイン済みの入口の振る舞い」を確かめる。proxy は cookie 名しか見ないので本物のログインは要らない。本番DBへの書き込みは無い
+- ダミー cookie は **proxy か next.config が先に答えるURLだけ**に使う。ページまで届くと Supabase がダミー値を読めず、本番のエラー一覧に `Cannot create property 'user' on string 'dummy'` が残る（実害はないがノイズになる）
 
 ### 2. 偽リダイレクト・偽404を探す
 
@@ -60,10 +63,12 @@ E2E_BASE_URL=https://www.bo-no.design npm run test:e2e             # 同じ期�
 
 ## 合格基準
 
+- 本番E2E（`npm run test:e2e`）は Chromium で公開ページを開く。GA は `navigator.webdriver` で止めてあるので計測は汚れない（`src/lib/analytics/config.ts`）
+
 - ページ本体が返る 200 のURLで、`x-vercel-id` の2つ目が `hnd1`
   - 3xx には `hnd1` が付かないのが正常（proxy・next.config は入口で返す）
 - リダイレクトを期待するURLは**最初の応答が 3xx**で location が期待どおり。最終URLが合っているだけでは合格にしない
-- `NEXT_REDIRECT` を含む 200 は不合格
+- 固定の飛び先・cookie で決まる振り分けが `NEXT_REDIRECT` を含む 200 で返ったら不合格（DB/CMS を見ないと決まらないページ側の redirect は、200＋埋め込みを受け入れ済み。下の「直し方の定石」）
 - 表示時間が基準値から大きく悪化していない
 - 結果が issue MD に残っている
 
