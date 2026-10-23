@@ -53,6 +53,9 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // /settings は /account の旧入口（#258）。page.tsx の redirect() はルート loading.tsx の
+      // ストリーミングで 200＋埋め込みリダイレクトになるため、描画前に返るここで 308 にする
+      { source: "/settings", destination: "/account", permanent: true },
       // 数字改善チャレンジ（#252）: 構成変更前のURLを新しいURLへ。以後のURLは固定する
       ...[
         ["overview", "step0-overview"],

@@ -41,6 +41,8 @@
 - claude-in-chrome で実際にクリックして通す
 - コンソール・`.next/dev/logs/next-development.log`・SupabaseログまでE2Eで確認する
 - 実例: コメント削除のRLSバグは UPDATE+RETURNING と SELECTポリシーの衝突で、**実際に押すまで発見できなかった**（静的検証は全て通っていた）
+- **proxy・vercel.json・next.config の redirects・redirect()/notFound()・loading.tsx・root layout・認証/cookie・リージョン/キャッシュ設定に触れたら、マージ前後に `/prod-check` を実行し結果を issue MD に記録する**
+- **リダイレクトは「最初の応答が 3xx か」で確かめる（最終URLの一致だけで合格にしない）。** page/layout 内の `redirect()` はルート `loading.tsx` があると 200＋埋め込みになるため、固定の飛び先は next.config、cookie での振り分けは proxy に置く（#257/#258）
 
 ## issueのwiki運用
 

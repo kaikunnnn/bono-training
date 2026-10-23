@@ -40,15 +40,15 @@
       "id": "settings-anon",
       "path": "/settings",
       "cookie": "none",
-      "expectStatus": 307,
-      "expectLocationPrefix": "/login"
+      "expectStatus": 308,
+      "expectLocation": "/account"
     },
     {
       "id": "settings-authed",
       "path": "/settings",
       "cookie": "dummy",
-      "expectStatus": "3xx",
-      "knownIssue": "/settings はログイン済みだと200で中身のないページになる。/account への恒久リダイレクト（S5）で解消予定"
+      "expectStatus": 308,
+      "expectLocation": "/account"
     }
   ],
   "region": {
