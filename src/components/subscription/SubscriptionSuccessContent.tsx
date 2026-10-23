@@ -4,7 +4,6 @@
  *
  * オンボーディング情報を含む：
  * - 学習コンテンツへの導線
- * - 旧サイト（bo-no.design）へのアクセス案内（新規登録時のみ）
  * - アカウント管理への導線
  */
 
@@ -24,17 +23,12 @@ import {
   CheckCircle2,
   Loader2,
   BookOpen,
-  Globe,
   Settings,
-  ExternalLink,
 } from "lucide-react";
 import { getPlanDisplayName } from "@/lib/subscription-utils";
 import type { PlanType } from "@/types/subscription";
 
 export type SuccessType = "new" | "updated";
-
-// 旧サイト（Memberstack）のログインURL。切替後は legacy.bo-no.design（bo-no.design は新サイト）。
-const LEGACY_SITE_LOGIN_URL = "https://legacy.bo-no.design/login";
 
 interface SubscriptionSuccessContentProps {
   /** 成功タイプ: 新規登録 or プラン更新 */
@@ -228,29 +222,6 @@ export const SubscriptionSuccessContent: React.FC<
                   </Button>
                 </div>
               </OnboardingSection>
-
-              {/* 旧サイト案内セクション（新規登録時のみ表示） */}
-              {type === "new" && (
-                <OnboardingSection
-                  icon={<Globe className="h-5 w-5 text-blue-500" />}
-                  title="旧サイト（bo-no.design）もご利用いただけます"
-                >
-                  <p className="text-sm text-muted-foreground mb-3 font-noto-sans-jp">
-                    同じメールアドレスでアクセスできます。
-                    初回ログイン時は「パスワードを忘れた方」からパスワードリセットをお願いします。
-                  </p>
-                  <Button
-                    variant="outline"
-                    className="w-full font-noto-sans-jp"
-                    onClick={() =>
-                      window.open(LEGACY_SITE_LOGIN_URL, "_blank")
-                    }
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    旧サイトにログイン
-                  </Button>
-                </OnboardingSection>
-              )}
 
               {/* アカウント管理セクション */}
               <OnboardingSection
