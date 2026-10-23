@@ -6,6 +6,7 @@
  */
 'use client';
 
+import type { ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Flame, Zap, Trophy, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,8 @@ interface CelebrationModalProps {
   subTitle: string;
   body: string;
   footer: string;
+  /** フッターとボタンの間に足す内容（省略時は何も出さない＝従来と同じ。#251 の /dev プロトで使用） */
+  children?: ReactNode;
 }
 
 export function CelebrationModal({
@@ -26,6 +29,7 @@ export function CelebrationModal({
   subTitle,
   body,
   footer,
+  children,
 }: CelebrationModalProps) {
   return (
     <AnimatePresence mode="wait">
@@ -149,6 +153,8 @@ export function CelebrationModal({
             >
               {footer}
             </motion.p>
+
+            {children}
 
             {/* ボタン */}
             <motion.div

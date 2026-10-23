@@ -26,6 +26,46 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/peers",
+    issue: "#255",
+    title: "同期が見えるプロトタイプ（4パターン比較）",
+    summary:
+      "休憩中のスマホで、同じ週に始めた同期8人の取り組みが見えて1タップで反応できると「もう少しやろう」と課題に戻るかを確かめるプロト。上のタブで A 同期フィード / B いま作業中 / C 1歩先の人 / D いつもいる人 を切り替え（?pattern=a〜d で直接開ける）。どのパターンにも反応ボタン（押すと送った状態＋数が1増える・もう一度で取り消し）、もらった反応の数、下固定の「課題に戻る」（押すと課題3に戻る仮画面）がある。PC幅（サイドナビの右の本文エリア）が主役。データはすべてダミー、状態は画面の中だけ（リロードで初期化）。",
+    links: [
+      { href: "/dev/peers/mypage", label: "マイページに組み込んだ版" },
+      { href: "/dev/peers?pattern=a", label: "A 同期フィード" },
+      { href: "/dev/peers?pattern=b", label: "B いま作業中" },
+      { href: "/dev/peers?pattern=c", label: "C 1歩先の人" },
+      { href: "/dev/peers?pattern=d", label: "D いつもいる人" },
+    ],
+    status: "in-progress",
+  },
+  {
+    href: "/dev/design-together",
+    issue: "#253",
+    title: "いっしょにデザインのプロトタイプ",
+    summary:
+      "「これからデザインやります」で作業を始め、同じ時間に作業している人の顔が見える仕組み（機能A いま作業中）を、マイページ・動画ページの複製に組み込んだプロト。サイドナビはプロト用に複製して「いっしょに」（フィード / 仲間グループ）を足した。宣言（任意・60文字）→ どのページでも「作業中 ◯分・作業を終える」→ 終了で作業記録。0人のとき・3時間の自動終了は右下の体験ガイドで切り替えて確かめられる。日報・フィード（S2）と仲間グループ（S3）はこれから。状態は sessionStorage だけ（DB・保存なし）。",
+    links: [
+      { href: "/dev/design-together/mypage", label: "マイページ" },
+      { href: "/dev/design-together/contents/frame-and-layer", label: "動画ページ" },
+    ],
+    status: "in-progress",
+  },
+  {
+    href: "/dev/progress-feed",
+    issue: "#251",
+    title: "進捗フィードのプロトタイプ（今のページに組み込んだ版）",
+    summary:
+      "学習を始めた・終えたことがほかの学習者に見えて、📣応援で1タップで励まし合える仕組みを、マイページ・/top・記事ページの複製に組み込んだプロト（パターンA 自動で流れる型）。入口から「マイページ中心」「/top中心」の2案を開き、「今日はこれをやる」で始める → 記事ページで完了（クエストの最後の記事＝節目）→ クエスト完了の演出の中で「みんなの進捗に流れました（取り消す）」→ マイページで自分の投稿 → 右上の「プロト用の通知」のベル → 「みんな」タブで強調、まで本物の画面遷移で通せる。右下の体験ガイドで時間経過を進められ、「最初からやり直す」も置いた。状態は sessionStorage だけ（DB・保存なし）。前回の1ページデモは /dev/progress-feed/demo。",
+    links: [
+      { href: "/dev/progress-feed/mypage", label: "マイページ中心の案" },
+      { href: "/dev/progress-feed/top", label: "/top中心の案" },
+      { href: "/dev/progress-feed/demo", label: "1ページデモ（前回）" },
+    ],
+    status: "in-progress",
+  },
+  {
     href: "/dev/course-card-patterns/top",
     issue: "#235",
     title: "コースカードをトップに横3枚で並べた見え方",
