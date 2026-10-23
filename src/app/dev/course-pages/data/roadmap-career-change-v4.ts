@@ -24,6 +24,9 @@ const s = (text: string): Field => ({ text });
 
 export type V4CourseRef = { type: "course"; slug: string } | { type: "planned"; title: string };
 
+/** 段落 ＝ 文のつながり。仮の文だけ「仮」タグが付くよう、文ごとに Field を分ける */
+export type Para = Field[];
+
 export interface V4Stage {
   id: string;
   /** 全体図用の短い名前 */
@@ -31,24 +34,21 @@ export interface V4Stage {
   /** ステップの見出し */
   title: string;
   period: Field;
-  /** できるようになること（動詞で1行） */
-  can: Field;
-  /** 転職にとってのなぜ */
-  why: Field;
-  /** 飛ばすとどうなるか */
-  skip: Field;
-  /** ポートフォリオに入るもの */
-  portfolio: Field;
+  /**
+   * 本文（ふつうの文章）
+   * 段落1: できるようになること → 転職にとってのなぜ → 飛ばすとどうなるか
+   * 段落2: ポートフォリオに入るもの → AIの使いどころ
+   */
+  body: Para[];
   /** 全体図で使う: このステップで手に入るものが次でどう使われるか */
   handoff: Field;
   courses: V4CourseRef[];
   /** コースがないときの一言 */
   courseNote?: Field;
   links: { label: string; href: string }[];
-  ai: Field;
   senpai: { who: string; from: string; text: Field };
   /** 補足（面接の流れなど。あるステップだけ） */
-  extra?: { label: string; items: Field[] };
+  extra?: { lead: Field; items: Field[] };
   /** 経験がある人向け: これができるなら飛ばしてOK（早い段階だけ） */
   skipIf?: Field;
 }
@@ -69,7 +69,7 @@ export const careerChangeV4 = {
 
   /* ---------- 2. ゴール ---------- */
   goal: {
-    lead: s("採用で見られるのは3つ。まずはどれも60〜70点を目指します。"), // howtobe
+    lead: s("採用で見られるのは、次の3つです。未経験のうちに完璧な提案までは求められないので、まずはどれも60〜70点を目指します。"), // howtobe, become-uiux-designer-beginner-guide
     points: [
       {
         title: "UIの基礎",
@@ -87,8 +87,7 @@ export const careerChangeV4 = {
         body: s("自分から学び続けているか。学習ログや話す言葉から見られる"), // howtobe, portfolio-01（2-2）
       },
     ],
-    note: s("未経験のうちに完璧な提案までは求められません。"), // become-uiux-designer-beginner-guide
-    worksLead: s("それを見せるのがポートフォリオ。作品は最低3つ、種類を変えてそろえます。"), // portfolio-02
+    worksLead: s("それを見せるのがポートフォリオです。作品は最低3つ、種類を変えてそろえます。"), // portfolio-02
     works: [
       {
         label: "作品①",
@@ -109,15 +108,15 @@ export const careerChangeV4 = {
         stageId: "ui",
       },
     ],
-    whyThree: s("1つだけだと「まぐれかも？」「何かを真似した？」と思われます。3つあると、同じようにつくれる人だと伝わります。"), // portfolio-02
+    whyThree: s("作品が1つだけだと「まぐれかも？」「何かを真似した？」と思われます。3つあると、同じようにつくれる人だと伝わります。"), // portfolio-02
   },
 
   /* ---------- 3. 全体図となぜこの順か ---------- */
   order: [
     s("学ぶ順は、仕事の順（顧客理解 → 情報設計 → 見た目）の逆です。仕事の順ではなく、つまずきにくい順に並べています。"), // ai-future, howtostart
-    s("見た目が最初の大きなハードルです。ここを越えると、情報設計や顧客理解がぐっとラクになります。"), // howtostart
+    s("最初の大きなハードルは見た目で、ここを越えると情報設計や顧客理解がぐっとラクになります。"), // howtostart
     s("3つの基礎は完璧にせず、まず一通り通ります。量をこなすうちに分かってきます。"), // 7tips, way-phase02
-  ],
+  ] as Para,
 
   /* ---------- 4. ステップ ---------- */
   stages: [
@@ -126,15 +125,21 @@ export const careerChangeV4 = {
       short: "準備",
       title: "Figmaに慣れて、ゴールを知る",
       period: k("2週間〜1ヶ月"), // 記事は「1-2ヶ月目」。6〜9ヶ月に収めるため縮めた
-      can: s("Figmaで画面を真似してつくれる。採用で何を見られるかを知っている"), // howtostart, way-phase01
-      why: s("見せるものを先に知ると、各ステップの意味が分かり、材料を貯めながら学べる"), // howtostart
-      skip: s("いきなり理論から入ると手を動かす場がなく、後の学習の土台ができない"), // howtostart
-      portfolio: s("作品はまだ入らない。真似した画面は作成日をつけて残すと、成長の記録になる"), // portfolio-02
+      body: [
+        [
+          s("最初は、Figmaで既存のアプリの画面を真似してつくりながら、採用で何を見られるのかを知るところから始めます。"), // howtostart, way-phase01
+          s("見せるものを先に知っておくと、この先の各ステップが何のためにあるのかが分かり、ポートフォリオの材料を貯めながら学べます。"), // howtostart
+          s("いきなり理論から入ると手を動かす場がなく、後の学習の土台ができません。"), // howtostart
+        ],
+        [
+          s("この段階では、ポートフォリオに入る作品はまだありません。ただ、真似した画面に作成日をつけて残しておくと、あとで成長の記録として使えます。"), // portfolio-02
+          k("Figmaの操作で詰まったときは、AIに聞いて止まらずに先へ進みます。"),
+        ],
+      ],
       handoff: s("Figmaで手を動かした経験が、UIの基礎を学ぶ土台になる"), // howtostart
       courses: [],
-      courseNote: s("コースはなし。無料の記事と動画で進めます"), // howtostart（Figma入門・転職ガイドはすべて無料）
+      courseNote: s("コースはなく、無料の記事と動画で進めます"), // howtostart（Figma入門・転職ガイドはすべて無料）
       links: [CAREER_GUIDE],
-      ai: k("Figmaの操作で詰まったら、AIに聞いて止まらずに進める"),
       senpai: {
         who: "Kさん",
         from: "ディレクション職から",
@@ -147,10 +152,17 @@ export const careerChangeV4 = {
       short: "UIの基礎",
       title: "UIの基礎：ふつうのUIをつくれるようになる",
       period: k("1.5〜2.5ヶ月"), // 記事は基礎3つで6ヶ月。割り振りは推測
-      can: s("SNSやTodoサービスの基本の画面を、自分でつくれる"), // howtostart
-      why: s("UIの基礎は採用の足切り。ここがないと書類選考で落ちる"), // howtobe, portfolio-01
-      skip: s("書類で落ち、面接に進めない。後の情報設計や顧客理解も重くなる"), // howtobe, howtostart
-      portfolio: s("作品③ ビジュアル。Daily UI などでつくった画面から選ぶ"), // portfolio-02
+      body: [
+        [
+          s("SNSやTodoサービスにある基本の画面を、見本を横に置かずに自分でつくれるところまで進めます。"), // howtostart
+          s("UIの基礎は採用の足切りにあたり、ここが弱いと書類選考で落ちて面接に進めません。"), // howtobe, portfolio-01
+          s("後の情報設計や顧客理解も重くなるので、最初に越えておきたいところです。"), // howtobe, howtostart
+        ],
+        [
+          s("Daily UI などでつくった画面の中から、ポートフォリオの作品③（ビジュアルが分かるもの）を選びます。"), // portfolio-02
+          s("画面は自分の手でつくります。AIが出した画面の良し悪しを見分ける目は、手でつくった経験からつくからです。"), // ai-shift
+        ],
+      ],
       handoff: s("ふつうのUIをつくれる手が、情報設計で画面を組むときの土台になる"), // howtostart
       courses: [
         { type: "course", slug: "ui-design-first" },
@@ -158,7 +170,6 @@ export const careerChangeV4 = {
         { type: "course", slug: "ui-experience" },
       ],
       links: [],
-      ai: s("画面は自分の手でつくる。AIが出した画面の良し悪しを見分ける目は、手でつくった経験からつく"), // ai-shift
       senpai: {
         who: "Fさん",
         from: "海外営業から",
@@ -171,14 +182,20 @@ export const careerChangeV4 = {
       short: "情報設計",
       title: "情報設計：要件から画面の流れを組む",
       period: k("1〜1.5ヶ月"), // 割り振りは推測
-      can: s("機能のアイデアだけの状態から、複数画面のUIを組み立てられる"), // howtostart
-      why: s("採用で見られるのは1画面ではなく、複数画面にまたがるUI。実務にいちばん近い"), // portfolio-01, howtostart
-      skip: s("見た目だけ作れても、要件を画面に落とせない。1画面ずつ作って流れがつながらない"), // howtostart, C_材料 Kさん
-      portfolio: s("作品② 複数画面のUI。例: 求人サイトの検索と絞り込み"), // portfolio-02
+      body: [
+        [
+          s("「こんな機能がほしい」というアイデアだけがある状態から、複数の画面にまたがるUIを組み立てられるようにします。"), // howtostart
+          s("採用で見られるのは1枚の画面ではなく、画面から画面への流れで、ここが実務にいちばん近い部分です。"), // portfolio-01, howtostart
+          s("飛ばしてしまうと、見た目は作れても要件を画面に落とせず、1画面ずつ作って流れがつながらないままになります。"), // howtostart, C_材料 Kさん
+        ],
+        [
+          s("ここでつくったものが、作品②（複数画面のUI）になります。たとえば求人サイトの検索と絞り込みです。"), // portfolio-02
+          k("画面パターンのたたき台はAIで出して構いませんが、要件に合っているかは自分で決めます。"),
+        ],
+      ],
       handoff: k("要件から画面の流れを組む型が、顧客理解でつくるサービスの骨組みになる"),
       courses: [{ type: "planned", title: "情報設計のコース" }],
       links: [],
-      ai: k("画面パターンのたたき台はAIで出してよい。要件に合うかは自分で決める"),
       senpai: {
         who: "Eさん",
         from: "公務員から",
@@ -191,14 +208,20 @@ export const careerChangeV4 = {
       short: "顧客理解",
       title: "顧客理解：人の困りごとからつくる",
       period: k("約1ヶ月"), // 割り振りは推測
-      can: s("1人以上に話を聞き、その困りごとからサービスを考えられる"), // portfolio-01（一人でも十分）
-      why: s("デザイナーには顧客目線が求められる。完璧でなくてよいので、一度この流れを体験しておく"), // portfolio-01, howtostart
-      skip: s("面接で「自分の想像ではなく、実際のユーザーの課題を解決したものはある？」に答えられない"), // C_材料 Aさん
-      portfolio: s("作品① 顧客理解からつくったもの。先輩の多くは、これを推し作品にしている"), // portfolio-02, C_材料 共通するパターン1
+      body: [
+        [
+          s("1人でもいいので実際に人に話を聞き、その困りごとからサービスを考えます。"), // portfolio-01（一人でも十分）
+          s("デザイナーには顧客目線が求められます。完璧でなくてよいので、一度この流れを体験しておきます。"), // portfolio-01, howtostart
+          s("ここを飛ばすと、面接で「自分の想像ではなく、実際のユーザーの課題を解決したものはある？」と聞かれたときに答えられません。"), // C_材料 Aさん
+        ],
+        [
+          s("ここでつくるのが作品①（顧客理解からつくったもの）で、先輩の多くはこれを推し作品にしています。"), // portfolio-02, C_材料 共通するパターン1
+          s("どのUIが良いかを決めるのはAIではなく使う人なので、話は自分で聞きに行きます。"), // ai-future
+        ],
+      ],
       handoff: s("話を聞いてつくったサービスが、ポートフォリオの中心の作品になる"), // C_材料 共通するパターン1
       courses: [{ type: "planned", title: "顧客理解のコース" }],
       links: [],
-      ai: s("どのUIが良いかを決めるのはAIではなく、使う人。だから自分で話を聞く"), // ai-future
       senpai: {
         who: "Gさん",
         from: "デザイン未経験・子育て中",
@@ -211,10 +234,17 @@ export const careerChangeV4 = {
       short: "ポートフォリオ",
       title: "ポートフォリオ：3作品を説明できる形にまとめる",
       period: s("約1ヶ月"), // howtostart
-      can: s("3作品それぞれを「何をつくり、何のためで、なぜこの形か」から説明できる"), // portfolio-03
-      why: s("ポートフォリオは足切りの判定材料。ない、またはずれていると1次面接にも進めない"), // goaloverview
-      skip: s("画像を並べるだけだと見た目しか伝わらず、自分の頭で考えたかが分からない"), // portfolio-03
-      portfolio: s("3作品の説明（概要 → 結論 → プロセス → 終わりに）と、自己紹介・学習ログ"), // portfolio-03, portfolio-02
+      body: [
+        [
+          s("3つの作品それぞれについて、「何をつくり、何のためで、なぜこの形か」から説明できる形にまとめます。"), // portfolio-03
+          s("ポートフォリオは足切りの判定材料なので、ない、または求められているものとずれていると1次面接にも進めません。"), // goaloverview
+          s("画像を並べるだけだと見た目しか伝わらず、自分の頭で考えたのかが読み手に分かりません。"), // portfolio-03
+        ],
+        [
+          s("中身は、3作品の説明（概要 → 結論 → プロセス → 終わりに）と、自己紹介・学習ログです。"), // portfolio-03, portfolio-02
+          s("余力があれば、AIと一緒にサービスをつくってURLで公開してみると、大きな武器になります。"), // ai-shift
+        ],
+      ],
       handoff: s("3作品の説明が、面接で作品について話す中身になる"), // uiux-interview-tips-and-checkpoints（デザイン面接）
       courses: [],
       courseNote: s("コースの外でやります。基礎でつくったものをベースに仕上げ、締め切りを決めて応募へ進みます"), // howtostart
@@ -223,7 +253,6 @@ export const careerChangeV4 = {
         { label: "15分フィードバック", href: "/how-to/feedback" },
         { label: "メンバーのアウトプット", href: "/outputs" },
       ],
-      ai: s("AIと一緒にサービスをつくり、URLで公開してみると大きな武器になる"), // ai-shift
       senpai: {
         who: "Aさん",
         from: "営業から",
@@ -235,26 +264,32 @@ export const careerChangeV4 = {
       short: "転職活動",
       title: "転職活動：40社以上に応募し、面接で作品を話す",
       period: s("1〜2ヶ月"), // howtostart
-      can: s("会社ごとに作品の並びを変えて応募し、面接で作品のプロセスを説明できる"), // portfolio-01, uiux-interview-tips-and-checkpoints
-      why: s("未経験OKの求人は表にほぼ出ない。数を受けて、受け入れてくれる会社かを自分の行動で確かめる"), // how-to-find-jobs-for-beginner-designers
-      skip: s("受けたい会社だけに絞ると、全部落ちることもある"), // C_材料 Bさん
-      portfolio: s("会社ごとに作品の並びを変える。入りたい会社には、サービスの課題とUIの改善案を添える"), // portfolio-01, B_材料 ポートフォリオFB記事
+      body: [
+        [
+          s("会社ごとに作品の並びを変えて応募し、面接では作品のプロセスを自分の言葉で説明します。"), // portfolio-01, uiux-interview-tips-and-checkpoints
+          s("未経験OKの求人は表にほぼ出ないので、数を受けて、受け入れてくれる会社かどうかを自分の行動で確かめます。"), // how-to-find-jobs-for-beginner-designers
+          s("受けたい会社だけに絞ると、全部落ちることもあります。"), // C_材料 Bさん
+        ],
+        [
+          s("入りたい会社に応募するときは、そのサービスの課題とUIの改善案をポートフォリオに添えます。"), // portfolio-01, B_材料 ポートフォリオFB記事
+          s("先輩の中には、会社研究や模擬面接の練習にChatGPTを使った人もいます。"), // C_材料 Bさん・Dさん
+        ],
+      ],
       handoff: s("内定。1社目は完璧を求めず、デザインの実務経験を1年積める会社を選ぶ"), // how-to-find-jobs-for-beginner-designers
       courses: [],
       courseNote: s("コースの外でやります。1社あたり採用まで約1ヶ月かかります"), // howtostart
       links: [CAREER_GUIDE, { label: "転職の相談ができるイベント", href: "/events" }],
-      ai: s("会社研究や模擬面接の練習にChatGPTを使った先輩がいる"), // C_材料 Bさん・Dさん
       senpai: {
         who: "Bさん",
         from: "商品デザイナーから",
         text: s("本当に受けたい16社は全部不採用。幅広く47社にエントリーし、4社から内定"), // C_材料 Bさん
       },
       extra: {
-        label: "面接はたいてい3段階",
+        lead: s("面接はたいてい3段階で、それぞれ見られることが違います。"), // uiux-interview-tips-and-checkpoints
         items: [
-          s("1. スキル: ポートフォリオを元に、どんな課題にどう取り組んだか"), // uiux-interview-tips-and-checkpoints
-          s("2. 働き方・チーム: どう働きたいか、なぜこの会社か"), // uiux-interview-tips-and-checkpoints
-          s("3. 会社への貢献: 事業やビジョンに、自分がどう役立てるか"), // uiux-interview-tips-and-checkpoints
+          s("スキル：ポートフォリオを元に、どんな課題にどう取り組んだか"), // uiux-interview-tips-and-checkpoints
+          s("働き方・チーム：どう働きたいか、なぜこの会社か"), // uiux-interview-tips-and-checkpoints
+          s("会社への貢献：事業やビジョンに、自分がどう役立てるか"), // uiux-interview-tips-and-checkpoints
         ],
       },
     },
@@ -272,34 +307,38 @@ export const careerChangeV4 = {
     {
       who: "Gさん",
       from: "デザイン未経験・子育て中",
-      style: s("子育てしながら"),
-      period: s("本格的に始めてから内定まで 約7ヶ月"),
-      apply: s("20社応募 → 面接10社 → 内定"),
-      point: s("話を聞いて「投稿したくない」が本当の理由だと気づき、サービスに組み込んだ過程"),
+      body: [
+        s("子育てをしながら学び、本格的に始めてから約7ヶ月で内定しました。"),
+        s("応募は20社で、そのうち10社で面接を受けています。"),
+        s("評価されたのは、話を聞いて「投稿したくない」が本当の理由だと気づき、それをサービスに組み込んだ過程です。"),
+      ] as Para,
     }, // C_材料 Gさん
     {
       who: "Hさん",
-      from: "SE（システムエンジニア）",
-      style: s("退職して専念（1日平均3〜4時間）"),
-      period: s("約9ヶ月"),
-      apply: s("約30社 → 面接・面談15社 → 内定"),
-      point: s("「チケット取得が課題」という仮説が話を聞いて外れ、作り直した過程"),
+      from: "SE（システムエンジニア）から",
+      body: [
+        s("会社を辞めて学習に専念し、1日平均3〜4時間のペースで約9ヶ月かけて内定しました。"),
+        s("約30社に応募し、面接・面談まで進んだのは15社です。"),
+        s("「チケット取得が課題」という仮説が話を聞いて外れ、そこから作り直した過程が評価されました。"),
+      ] as Para,
     }, // C_材料 Hさん
     {
       who: "Eさん",
-      from: "公務員（経理）→ カフェのバリスタ",
-      style: s("働きながら（平日1時間・週末4〜5時間）"),
-      period: s("BONO入会から内定まで 約1年2ヶ月"),
-      apply: s("10社応募 → 面接2社 → 内定1社"),
-      point: s("毎月の目標と振り返りをnoteで公開し、計画を立てて続けていると伝わった"),
+      from: "公務員（経理）→ カフェのバリスタから",
+      body: [
+        s("働きながら、平日は1時間、週末は4〜5時間を学習にあてました。"),
+        s("BONOに入ってから内定まで約1年2ヶ月で、10社に応募し、面接は2社、内定は1社です。"),
+        s("毎月の目標と振り返りをnoteで公開していたことで、計画を立てて続けられる人だと伝わりました。"),
+      ] as Para,
     }, // C_材料 Eさん
     {
       who: "Iさん",
-      from: "飲料メーカーの総合職",
-      style: s("働きながら"),
-      period: s("約1年4ヶ月"),
-      apply: s("50社以上 → 面接4社 → 内定"),
-      point: s("作品のやり直しの過程も載せた（インタビュアーの感想:「変化が見えると、何を考えたかが分かる」）"),
+      from: "飲料メーカーの総合職から",
+      body: [
+        s("働きながら学び、約1年4ヶ月で内定しました。"),
+        s("50社以上に応募し、面接まで進んだのは4社です。"),
+        s("作品をやり直した過程もポートフォリオに載せていて、インタビュアーは「変化が見えると、何を考えたかが分かる」と話しています。"),
+      ] as Para,
     }, // C_材料 Iさん
   ],
 
@@ -307,20 +346,26 @@ export const careerChangeV4 = {
   pitfalls: [
     {
       title: "落ち続ける・実務経験の壁",
-      problem: s("カジュアル面談止まり、返事が来ない、「即戦力が欲しい」と言われる"), // C_材料 共通するパターン5
-      fix: s("数を受け、落ちたらポートフォリオを直して再応募する。期限を決めて続ける"), // C_材料 Dさん・Fさん, how-to-find-jobs-for-beginner-designers
+      body: [
+        s("先輩の多くが、カジュアル面談で止まったり、返事が来なかったり、「即戦力が欲しい」と言われたりしています。"), // C_材料 共通するパターン5
+        s("数を受け、落ちたらポートフォリオを直して再応募します。期限を決めて続けるのが大事です。"), // C_材料 Dさん・Fさん, how-to-find-jobs-for-beginner-designers
+      ] as Para,
       link: null as { label: string; href: string } | null,
     },
     {
       title: "一人だと正しいか分からない",
-      problem: s("自分のデザインが良いのか悪いのか、一人では判断がつかない"), // C_材料 共通するパターン5
-      fix: s("早めに現役デザイナーのフィードバックをもらう。Iさんは「最初からもらえばよかった」"), // C_材料 Iさん, portfolio-01
+      body: [
+        s("自分のデザインが良いのか悪いのか、一人では判断がつきません。"), // C_材料 共通するパターン5
+        s("早めに現役デザイナーのフィードバックをもらいます。Iさんも「最初からもらえばよかった」と振り返っています。"), // C_材料 Iさん, portfolio-01
+      ] as Para,
       link: { label: "15分フィードバック", href: "/how-to/feedback" },
     },
     {
       title: "情報設計で止まる",
-      problem: s("トレースには正解があるが、情報設計は文字の情報から自分で整理する必要がある"), // C_材料 Bさん
-      fix: s("完璧にせず一度最後まで通る。ポートフォリオで振り返ると分かることが多い"), // C_材料 Eさん, way-phase02
+      body: [
+        s("トレースには正解がありますが、情報設計は文字の情報から自分で整理する必要があり、ここで手が止まりがちです。"), // C_材料 Bさん
+        s("完璧にせず一度最後まで通ると、ポートフォリオで振り返ったときに分かることが多くあります。"), // C_材料 Eさん, way-phase02
+      ] as Para,
       link: null,
     },
   ],
