@@ -10,6 +10,8 @@ export function isAnalyticsHost(hostname: string): boolean {
 export const GA_BOOTSTRAP = `
 (function () {
   if (!${JSON.stringify(ANALYTICS_PRODUCTION_HOSTS)}.includes(window.location.hostname.toLowerCase())) return;
+  // 自動操作ブラウザ（Playwright の本番E2E等）は計測しない。新規・Direct の偽アクセスで数字が汚れるため（#258）
+  if (window.navigator && window.navigator.webdriver) return;
   if (window.__bonoAnalyticsStarted) return;
   window.__bonoAnalyticsStarted = true;
   window.dataLayer = window.dataLayer || [];
