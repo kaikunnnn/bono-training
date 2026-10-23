@@ -1,0 +1,72 @@
+{
+  "$comment": "本番ルーティングの期待値（#258）。これが正。e2e/routing-status.spec.ts と prod-check スクリプトはここだけを読む。cookie: none=cookieなし / dummy=ダミーauth cookie（proxy は cookie 名しか見ない）。expectStatus は数値か \"3xx\"。location は expectLocation（完全一致）か expectLocationPrefix（前方一致）。knownIssue があるものは現状この期待を満たさない既知の問題（直ったらテストが知らせる）。",
+  "dummyAuthCookie": "sb-fryogvfhymnpiqwssmuu-auth-token=dummy",
+  "routes": [
+    {
+      "id": "root-anon",
+      "path": "/",
+      "cookie": "none",
+      "expectStatus": 200
+    },
+    {
+      "id": "root-authed",
+      "path": "/",
+      "cookie": "dummy",
+      "expectStatus": 307,
+      "expectLocation": "/mypage"
+    },
+    {
+      "id": "root-authed-welcome",
+      "path": "/?welcome=1",
+      "cookie": "dummy",
+      "expectStatus": 307,
+      "expectLocation": "/mypage?welcome=1"
+    },
+    {
+      "id": "mypage-anon",
+      "path": "/mypage",
+      "cookie": "none",
+      "expectStatus": 307,
+      "expectLocationPrefix": "/login"
+    },
+    {
+      "id": "login-authed",
+      "path": "/login",
+      "cookie": "dummy",
+      "expectStatus": 307,
+      "expectLocation": "/mypage"
+    },
+    {
+      "id": "settings-anon",
+      "path": "/settings",
+      "cookie": "none",
+      "expectStatus": 307,
+      "expectLocationPrefix": "/login"
+    },
+    {
+      "id": "settings-authed",
+      "path": "/settings",
+      "cookie": "dummy",
+      "expectStatus": "3xx",
+      "knownIssue": "/settings はログイン済みだと200で中身のないページになる。/account への恒久リダイレクト（S5）で解消予定"
+    }
+  ],
+  "region": {
+    "path": "/",
+    "cookie": "none",
+    "expectRegion": "hnd1",
+    "$comment": "x-vercel-id に ::hnd1:: が含まれること。Vercel / bo-no.design 向けの実行時のみ"
+  },
+  "htmlMustNotContain": [
+    {
+      "path": "/",
+      "cookie": "none",
+      "text": "NEXT_REDIRECT"
+    },
+    {
+      "path": "/lessons",
+      "cookie": "none",
+      "text": "NEXT_REDIRECT"
+    }
+  ]
+}
