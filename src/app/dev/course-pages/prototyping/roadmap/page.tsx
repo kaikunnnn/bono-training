@@ -95,15 +95,25 @@ export default function RoadmapHubPage() {
               見るポイント：行き先・道のり・コースの外でやること・進め方がわかるか。まずは「未経験から転職」から。「進捗あり」は会員の見え方（いまここ）。
             </p>
             <Link
-              href={`${ROADMAP_BASE}/career-change-v5`}
+              href={`${ROADMAP_BASE}/career-change-v6`}
               className="group mt-5 flex min-w-0 items-center gap-4 rounded-[16px] border-2 border-text-primary bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-shadow hover:shadow-[var(--shadow-md)]"
             >
               <div className="min-w-0 flex-1">
                 <p className="flex flex-wrap items-center gap-2 font-heading text-[15px] font-bold leading-[1.5]">
-                  未経験から転職（v5・採用側の根拠と入口の現実）
+                  未経験からUIデザイナーへ（v6・全体／ステップ詳細／ゴール解説の3ページ）
                   <span className="rounded-full bg-text-primary px-2 py-0.5 font-noto-sans-jp text-[10px] text-text-inverse">NEW</span>
                 </p>
-                <p className="text-xs text-text-muted">日本の求人票と採用側の記事を根拠に、企業が何を・なぜ見ているか、AIで何が変わったかを足した形。まずはここから確認</p>
+                <p className="text-xs text-text-muted">全体のページで道のりを見て、ステップごとのページで1つずつ進み、解説のページで背景を読む形。まずはここから確認</p>
+              </div>
+              <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
+            </Link>
+            <Link
+              href={`${ROADMAP_BASE}/career-change-v5`}
+              className="group mt-2.5 flex min-w-0 items-center gap-4 rounded-[16px] border border-border-light bg-surface px-4 py-3 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]"
+            >
+              <div className="min-w-0 flex-1">
+                <p className="font-heading text-[15px] font-bold leading-[1.5]">未経験から転職（v5・採用側の根拠と入口の現実）</p>
+                <p className="text-xs text-text-muted">日本の求人票と採用側の記事を根拠に、企業が何を・なぜ見ているか、AIで何が変わったかを足した形</p>
               </div>
               <ArrowRight size={18} className="shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
             </Link>
