@@ -178,53 +178,56 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         a: (
           <div className="space-y-5">
             <p>
-              BONOの退会をご希望の場合は、現在ご利用中のサイトに応じて、以下の手順でお手続きください。
+              BONOの退会をご希望の場合は、以下の手順でお手続きください。
             </p>
 
-            <div className="space-y-2">
-              <p className="font-medium text-foreground">
-                9月15日以降の新しいサイトをご利用の場合
-              </p>
-              <ol className="list-decimal space-y-1 pl-5">
-                <li>
-                  <Link
-                    href="https://www.bo-no.design/account"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="break-all text-foreground underline underline-offset-4 hover:text-muted-foreground"
-                  >
-                    https://www.bo-no.design/account
-                  </Link>
-                  にアクセスします。
-                </li>
-                <li>「サブスクリプション管理」を選択します。</li>
-                <li>「キャンセル」を選択し、画面の案内に沿ってお手続きください。</li>
-              </ol>
-            </div>
+            <ol className="list-decimal space-y-1 pl-5">
+              <li>
+                <Link
+                  href="https://www.bo-no.design/account"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all text-foreground underline underline-offset-4 hover:text-muted-foreground"
+                >
+                  https://www.bo-no.design/account
+                </Link>
+                にアクセスします。
+              </li>
+              <li>「サブスクリプション管理」を選択します。</li>
+              <li>「キャンセル」を選択し、画面の案内に沿ってお手続きください。</li>
+            </ol>
 
             <div className="space-y-2">
               <p className="font-medium text-foreground">
-                まだ新しいサイトへ移行されていない場合
+                旧サイトからご利用の方
               </p>
-              <ol className="list-decimal space-y-1 pl-5">
-                <li>
-                  <Link
-                    href="https://legacy.bo-no.design/mypage"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="break-all text-foreground underline underline-offset-4 hover:text-muted-foreground"
-                  >
-                    https://legacy.bo-no.design/mypage
-                  </Link>
-                  にアクセスします。
-                </li>
-                <li>「プラン確認」から、キャンセルのお手続きを進めてください。</li>
-              </ol>
+              <p>
+                旧サイトからご利用の方も、同じメールアドレスでログインできます。新しいサイトでパスワードを設定していない場合は、
+                <Link
+                  href="/login"
+                  className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+                >
+                  ログインページ
+                </Link>
+                の「はじめての方」から確認コードを受け取り、パスワードを設定してください。
+              </p>
+              <p>
+                ログインできない場合は、
+                <Link
+                  href="https://forms.gle/mC445GwiNUoY9LD3A"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+                >
+                  お問い合わせフォーム
+                </Link>
+                からご連絡ください。
+              </p>
             </div>
           </div>
         ),
         plain:
-          "BONOの退会をご希望の場合は、現在ご利用中のサイトに応じてお手続きください。9月15日以降の新しいサイトをご利用の場合は、https://www.bo-no.design/account にアクセスし、「サブスクリプション管理」から「キャンセル」を選択して、画面の案内に沿ってお手続きください。まだ新しいサイトへ移行されていない場合は、https://legacy.bo-no.design/mypage にアクセスし、「プラン確認」からキャンセルのお手続きを進めてください。",
+          "BONOの退会をご希望の場合は、https://www.bo-no.design/account にアクセスし、「サブスクリプション管理」から「キャンセル」を選択して、画面の案内に沿ってお手続きください。旧サイトからご利用の方も、同じメールアドレスでログインできます。新しいサイトでパスワードを設定していない場合は、ログインページ（https://www.bo-no.design/login）の「はじめての方」から確認コードを受け取り、パスワードを設定してください。ログインできない場合は、お問い合わせフォーム（https://forms.gle/mC445GwiNUoY9LD3A）からご連絡ください。",
       },
     ],
   },
