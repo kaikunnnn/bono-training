@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ハナソ 新規登録プロト</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: 画面中央に iPhone（393×812）を1台。下に「いまの画面」と操作だけを置く */
+:root {
+  /* ページ（スマホの外側） */
+  --page-bg: #eceef2;
+  --page-fg: #2a2e38;
+  --page-muted: #6b7180;
+  --page-line: #d6d9e0;
+  --page-btn: #ffffff;
+  /* アプリ（iOSライトモードで固定） */
+  --app-bg: #f7f8fb;
+  --app-ink: #111318;
+  --app-ink-2: #5d6270;
+  --app-ink-3: #9aa0ac;
+  --app-field: rgba(118, 118, 128, 0.12);
+  --app-sep: rgba(60, 60, 67, 0.16);
+  --brand: #1f6f78;
+  --brand-2: #f2b84b;
+  --brand-3: #e8735a;
+  --ok: #2f9e5b;
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-page: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page-bg: #15171c; --page-fg: #e6e8ee; --page-muted: #9298a6; --page-line: #2c3039; --page-btn: #22252d; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --page-bg: #15171c; --page-fg: #e6e8ee; --page-muted: #9298a6; --page-line: #2c3039; --page-btn: #22252d; color-scheme: dark; }
+
+html, body { height: 100%; }
+body { margin: 0; }
+body {
+  background: var(--page-bg); color: var(--page-fg); font-family: var(--font-page);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px; box-sizing: border-box; overflow: hidden;
+}
+.stage { position: relative; flex: none; }
+.phone {
+  position: absolute; left: 0; top: 0; width: 393px; height: 812px; transform-origin: 0 0;
+  border-radius: 56px; background: #0b0c0f; padding: 0; box-shadow: 0 0 0 10px #1b1d22, 0 0 0 11px #3a3d45, 0 30px 60px rgba(0,0,0,.25);
+}
+.screen-wrap { position: absolute; inset: 0; border-radius: 56px; overflow: hidden; background: var(--app-bg); font-family: var(--font-ui); color: var(--app-ink); -webkit-font-smoothing: antialiased; }
+
+/* ステータスバー・ダイナミックアイランド・ホームインジケータ */
+.island { position: absolute; top: 11px; left: 50%; width: 126px; height: 37px; margin-left: -63px; background: #000; border-radius: 20px; z-index: 50; }
+.status { position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 6px 34px 0 46px; font-weight: 600; font-size: 17px; pointer-events: none; }
+.status svg { display: block; }
+.status .right { display: flex; gap: 6px; align-items: center; }
+.home-ind { position: absolute; bottom: 8px; left: 50%; width: 139px; height: 5px; margin-left: -69.5px; border-radius: 3px; background: #000; z-index: 50; pointer-events: none; }
+.on-dark .status { color: #fff; } .on-dark .status svg * { fill: #fff; stroke: #fff; }
+
+/* 画面 */
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 54px 0 0; background: var(--app-bg); transition: transform .38s cubic-bezier(.32,.72,0,1), opacity .38s; }
+.screen.hidden-right { transform: translateX(100%); pointer-events: none; }
+.screen.hidden-left { transform: translateX(-28%); opacity: 0; pointer-events: none; }
+.screen.fade { transition: opacity .5s; }
+@media (prefers-reduced-motion: reduce) { .screen { transition: none !important; } .spin, .pop { animation: none !important; } }
+
+/* Liquid Glass */
+.glass {
+  position: relative; isolation: isolate;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.28));
+  -webkit-backdrop-filter: blur(16px) saturate(190%); backdrop-filter: blur(16px) saturate(190%);
+  border: .5px solid rgba(255,255,255,.75);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 1.5px rgba(0,0,0,.06), 0 6px 20px rgba(17,19,24,.12), 0 1px 3px rgba(17,19,24,.08);
+}
+.glass-tint {
+  position: relative; color: #fff;
+  background: linear-gradient(180deg, rgba(53,140,150,.92), rgba(31,111,120,.95));
+  -webkit-backdrop-filter: blur(12px) saturate(180%); backdrop-filter: blur(12px) saturate(180%);
+  border: .5px solid rgba(255,255,255,.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 4px rgba(0,0,0,.12), 0 8px 22px rgba(31,111,120,.35);
+}
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible { outline: 3px solid rgba(31,111,120,.45); outline-offset: 2px; }
+.circle-btn { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+.capsule { height: 52px; border-radius: 26px; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform .12s; }
+.capsule:active, .circle-btn:active, .chip:active { transform: scale(.97); }
+
+.nav { height: 52px; display: flex; align-items: center; padding: 0 16px; flex: none; }
+.body { flex: 1; padding: 12px 24px 0; overflow: hidden; }
+.foot { padding: 12px 24px 42px; flex: none; display: flex; flex-direction: column; gap: 12px; }
+h1.t { font-size: 28px; line-height: 1.25; font-weight: 700; margin: 0 0 8px; letter-spacing: -.01em; }
+p.s { font-size: 15px; line-height: 1.55; color: var(--app-ink-2); margin: 0 0 28px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.field label { font-size: 13px; color: var(--app-ink-2); font-weight: 500; padding-left: 4px; }
+.field input { height: 50px; border-radius: 14px; border: 0; background: var(--app-field); padding: 0 16px; font: inherit; font-size: 17px; color: var(--app-ink); width: 100%; box-sizing: border-box; }
+.hint { font-size: 13px; color: var(--app-ink-3); padding-left: 4px; }
+.hint.ok { color: var(--ok); }
+.link { color: var(--brand); font-weight: 600; font-size: 15px; }
+.small { font-size: 12px; line-height: 1.6; color: var(--app-ink-3); text-align: center; }
+
+/* 1. ようこそ */
+.welcome { background: radial-gradient(120% 70% at 85% 10%, #ffe1a3 0%, rgba(255,225,163,0) 55%), radial-gradient(100% 60% at 0% 40%, #b9e3e0 0%, rgba(185,227,224,0) 60%), radial-gradient(90% 60% at 100% 85%, #ffc4b3 0%, rgba(255,196,179,0) 60%), #f7f8fb; }
+.bubbles { position: relative; height: 330px; margin-top: 18px; }
+.bub { position: absolute; padding: 12px 16px; border-radius: 22px; font-size: 16px; font-weight: 600; }
+.bub small { display: block; font-size: 11px; font-weight: 500; color: var(--app-ink-2); margin-top: 2px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 30px; letter-spacing: .02em; }
+.logo i { width: 40px; height: 40px; border-radius: 12px; background: var(--brand); display: grid; place-items: center; }
+.welcome .body { padding-top: 0; }
+.welcome h1.t { font-size: 30px; margin-top: 18px; }
+.sso-g { background: #fff; color: #1f1f1f; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+
+/* 3. 認証コード */
+.code { display: flex; gap: 8px; margin-bottom: 18px; }
+.code input { flex: 1; min-width: 0; height: 58px; border-radius: 14px; border: 0; background: var(--app-field); text-align: center; font: inherit; font-size: 26px; font-weight: 600; color: var(--app-ink); }
+.code input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
+.field input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
+
+/* 5. アイコン */
+.avatar-wrap { display: grid; place-items: center; margin: 12px 0 24px; }
+.avatar { width: 148px; height: 148px; border-radius: 50%; background: var(--app-field); display: grid; place-items: center; position: relative; overflow: visible; }
+.avatar.set { background: radial-gradient(circle at 35% 30%, #ffd88a, #f2a65a 45%, #e8735a); }
+.avatar .face { width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center; font-size: 56px; font-weight: 700; color: #fff; }
+.avatar .cam { position: absolute; right: -2px; bottom: 4px; }
+
+/* 6. ジャンル */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { height: 42px; padding: 0 16px; border-radius: 21px; background: var(--app-field); font-size: 15px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: background .15s, color .15s, transform .12s; }
+.chip.on { background: var(--brand); color: #fff; }
+.chip.on::before { content: ""; width: 14px; height: 14px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; }
+
+/* 7. 準備中 */
+.ready { background: linear-gradient(160deg, #1f6f78, #164f57); color: #fff; align-items: center; justify-content: center; text-align: center; }
+.ready .ring { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 24px; }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pop { animation: pop .35s cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+
+/* 8. タイムライン */
+.tl { padding-top: 0; background: #fff; }
+.tl-scroll { position: absolute; inset: 0; overflow-y: auto; padding: 54px 0 120px; scrollbar-width: none; }
+.tl-scroll::-webkit-scrollbar { display: none; }
+.tl-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 4px 20px; }
+.tl-head h2 { font-size: 34px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.seg { margin: 10px 16px 6px; height: 40px; border-radius: 20px; display: flex; padding: 3px; gap: 3px; background: var(--app-field); }
+.seg button { flex: 1; border-radius: 17px; font-size: 14px; font-weight: 600; color: var(--app-ink-2); }
+.seg button.on { background: #fff; color: var(--app-ink); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.post { display: flex; gap: 12px; padding: 14px 18px; border-bottom: .5px solid var(--app-sep); }
+.post .av { width: 42px; height: 42px; border-radius: 50%; flex: none; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 16px; }
+.post .meta { font-size: 14px; color: var(--app-ink-3); }
+.post .meta b { color: var(--app-ink); font-weight: 600; margin-right: 4px; }
+.post p { margin: 4px 0 8px; font-size: 15px; line-height: 1.55; }
+.post .tag { display: inline-block; font-size: 12px; color: var(--brand); background: rgba(31,111,120,.1); padding: 2px 8px; border-radius: 10px; }
+.post .acts { display: flex; gap: 28px; margin-top: 10px; color: var(--app-ink-3); font-size: 13px; align-items: center; }
+.post .acts span { display: inline-flex; align-items: center; gap: 5px; }
+.tl-photo { height: 150px; border-radius: 16px; margin-top: 4px; background: linear-gradient(135deg, #b9e3e0, #f2d7a6 60%, #f4b6a3); }
+.tabbar { position: absolute; left: 16px; right: 84px; bottom: 26px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: space-around; padding: 0 6px; z-index: 30; }
+.tabbar .tab { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; font-weight: 600; color: var(--app-ink); width: 64px; height: 52px; justify-content: center; border-radius: 26px; }
+.tabbar .tab.on { color: var(--brand); background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 .5px rgba(255,255,255,.8); }
+.fab { position: absolute; right: 16px; bottom: 26px; width: 62px; height: 62px; border-radius: 50%; z-index: 30; display: grid; place-items: center; }
+.toast { position: absolute; left: 16px; right: 16px; top: 64px; z-index: 35; border-radius: 22px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; transition: transform .45s cubic-bezier(.32,.72,0,1), opacity .45s; }
+.toast.gone { transform: translateY(-140%); opacity: 0; }
+
+/* ページ側の操作 */
+.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; font-size: 14px; }
+.bar .now { min-width: 0; font-weight: 600; }
+.bar .now span { color: var(--page-muted); font-weight: 500; margin-right: 6px; font-variant-numeric: tabular-nums; }
+.bar button { height: 34px; padding: 0 14px; border-radius: 17px; background: var(--page-btn); color: var(--page-fg); box-shadow: inset 0 0 0 1px var(--page-line); font-size: 13px; font-weight: 600; font-family: var(--font-page); }
+.spec { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); width: min(340px, calc(100vw - 32px)); max-height: 70vh; overflow-y: auto; background: var(--page-btn); color: var(--page-fg); border-radius: 16px; box-shadow: inset 0 0 0 1px var(--page-line), 0 12px 32px rgba(0,0,0,.18); padding: 18px 20px; font-size: 13px; line-height: 1.7; z-index: 100; box-sizing: border-box; }
+.spec h2 { font-size: 15px; margin: 0 0 8px; }
+.spec dt { font-weight: 700; margin-top: 10px; }
+.spec dd { margin: 2px 0 0; color: var(--page-muted); }
+.bar button:disabled { opacity: .4; cursor: default; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="phone" id="phone">
+    <div class="screen-wrap" id="wrap">
+      <div class="island"></div>
+      <div class="status">
+        <span>9:41</span>
+        <span class="right">
+          <svg width="19" height="12" viewBox="0 0 19 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#000"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#000"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#000"/></svg>
+          <svg width="17" height="12" viewBox="0 0 17 12"><path d="M8.5 2.3c2.4 0 4.6.9 6.2 2.5l1.2-1.2C14 1.6 11.4.5 8.5.5S3 1.6 1.1 3.6l1.2 1.2C3.9 3.2 6.1 2.3 8.5 2.3zm0 3.5c1.4 0 2.7.5 3.7 1.4l1.2-1.2c-1.3-1.2-3-2-4.9-2s-3.6.8-4.9 2l1.2 1.2c1-.9 2.3-1.4 3.7-1.4zm0 3.5c-.6 0-1.1.2-1.5.6L8.5 11.5 10 9.9c-.4-.4-.9-.6-1.5-.6z" fill="#000"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.8" fill="none" stroke="#000" stroke-opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2.5" fill="#000"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2z" fill="#000" fill-opacity=".4"/></svg>
+        </span>
+      </div>
+
+      <!-- 1. 登録方法を選ぶ -->
+      <section class="screen welcome" data-step="1" data-name="登録方法を選ぶ">
+        <div class="body">
+          <div class="bubbles" aria-hidden="true">
+            <div class="bub glass" style="left:6px;top:24px">Hello! 👋<small>はじめまして</small></div>
+            <div class="bub glass" style="right:4px;top:92px">こんにちは<small>Hi there</small></div>
+            <div class="bub glass" style="left:30px;top:168px">你好！<small>よろしくね</small></div>
+            <div class="bub glass" style="right:22px;top:236px">안녕하세요<small>Nice to meet you</small></div>
+          </div>
+          <div class="logo"><i><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z" fill="#fff"/><circle cx="9" cy="9.5" r="1.3" fill="#1f6f78"/><circle cx="12" cy="9.5" r="1.3" fill="#1f6f78"/><circle cx="15" cy="9.5" r="1.3" fill="#1f6f78"/></svg></i>ハナソ</div>
+          <h1 class="t">世界の友だちと、<br>話そう。</h1>
+        </div>
+        <div class="foot">
+          <button class="capsule sso-g" data-go="3"><svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Googleで続ける</button>
+          <button class="capsule glass" data-go="2">メールアドレスで登録</button>
+          <p class="small">続けると、<span class="link" style="font-size:12px">利用規約</span>と<span class="link" style="font-size:12px">プライバシーポリシー</span>に同意したものとみなされます</p>
+        </div>
+      </section>
+
+      <!-- 2. メール・パスワード -->
+      <section class="screen hidden-right" data-step="2" data-name="メール・パスワード">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="body">
+          <h1 class="t">メールアドレスで登録</h1>
+          <p class="s">ログインに使うメールアドレスとパスワードを入力してください。</p>
+          <div class="field"><label for="f-mail">メールアドレス</label><input id="f-mail" type="email" placeholder="example@mail.com" autocomplete="off"></div>
+          <div class="field"><label for="f-pass">パスワード</label><input id="f-pass" type="password" placeholder="パスワード" autocomplete="off"></div>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" data-go="3">登録する</button></div>
+      </section>
+
+      <!-- 3. 名前・ユーザー名 -->
+      <section class="screen hidden-right" data-step="3" data-name="名前・ユーザー名">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="body">
+          <h1 class="t">プロフィールを作ろう</h1>
+          <p class="s">あとから変更できます。</p>
+          <div class="field"><label for="f-name">名前</label><input id="f-name" type="text" placeholder="例：田中 あき" autocomplete="off"></div>
+          <div class="field"><label for="f-user">ユーザー名</label><input id="f-user" type="text" placeholder="例：aki_tanaka" autocomplete="off"></div>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" data-go="4">次へ</button></div>
+      </section>
+
+      <!-- 4. アイコン -->
+      <section class="screen hidden-right" data-step="4" data-name="アイコン（写真）">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="body">
+          <h1 class="t">アイコンを設定</h1>
+          <p class="s">顔がわかる写真だと、話しかけてもらいやすくなります。</p>
+          <div class="avatar-wrap">
+            <button class="avatar" id="avatar" aria-label="写真を選ぶ">
+              <span class="face" id="face"><svg width="64" height="64" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4" fill="#9aa0ac"/><path d="M4 20c.8-3.8 4-6 8-6s7.2 2.2 8 6" fill="#9aa0ac"/></svg></span>
+              <span class="cam circle-btn glass"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.2l1.1-1.6c.3-.4.8-.6 1.3-.6h3.8c.5 0 1 .2 1.3.6L16.3 6h1.2A2.5 2.5 0 0 1 20 8.5v8a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 4 16.5z" fill="none" stroke="#111318" stroke-width="1.8"/><circle cx="12" cy="12.3" r="3.3" fill="none" stroke="#111318" stroke-width="1.8"/></svg></span>
+            </button>
+          </div>
+        </div>
+        <div class="foot">
+          <button class="capsule glass-tint" data-go="5" id="icon-next">写真を選ぶ</button>
+          <button class="capsule" data-go="5" style="height:40px;font-size:15px;color:var(--app-ink-2)">あとで設定する</button>
+        </div>
+      </section>
+
+      <!-- 5. 興味のあるジャンル -->
+      <section class="screen hidden-right" data-step="5" data-name="興味のあるジャンル">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="body">
+          <h1 class="t">興味のあることは？</h1>
+          <p class="s">選んだジャンルの投稿がホームに表示されます。</p>
+          <div class="chips" id="chips">
+            <button class="chip">映画</button><button class="chip">音楽</button><button class="chip">旅行</button><button class="chip">ゲーム</button>
+            <button class="chip">料理</button><button class="chip">アニメ</button><button class="chip">スポーツ</button><button class="chip">ファッション</button>
+            <button class="chip">読書</button><button class="chip">カフェ</button><button class="chip">写真</button><button class="chip">ペット</button>
+            <button class="chip">アート</button><button class="chip">テクノロジー</button><button class="chip">K-POP</button>
+          </div>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" data-go="6">始める</button></div>
+      </section>
+
+      <!-- 準備中 → スタート -->
+      <section class="screen ready fade hidden-right" data-step="6" data-name="スタート" id="ready">
+        <div class="ring glass" id="ring"><svg class="spin" id="spinner" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="4"/><path d="M20 4a16 16 0 0 1 16 16" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg></div>
+        <h1 class="t" id="ready-t" style="color:#fff">準備しています…</h1>
+        <p class="s" id="ready-s" style="color:rgba(255,255,255,.75);margin:0">おすすめの投稿を集めています</p>
+      </section>
+
+      <!-- 6. ホーム（タイムライン） -->
+      <section class="screen tl fade hidden-right" data-step="6" data-name="ホーム（タイムライン）">
+        <div class="tl-scroll">
+          <div class="tl-head">
+            <h2>ホーム</h2>
+            <button class="circle-btn glass" aria-label="通知"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0v4l1.6 2.6c.3.5 0 1.1-.6 1.1H5c-.6 0-.9-.6-.6-1.1L6 14z" fill="none" stroke="#111318" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 20.2a2.2 2.2 0 0 0 4 0" fill="none" stroke="#111318" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="seg"><button class="on">おすすめ</button><button>フォロー中</button></div>
+          <div id="posts"></div>
+        </div>
+        <div class="toast glass gone" id="toast"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#2f9e5b"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-t">登録が完了しました。ようこそ！</span></div>
+        <nav class="tabbar glass" aria-label="タブ">
+          <button class="tab on"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3.5 10.5L12 4l8.5 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-4v-6h-6v6H5A1.5 1.5 0 0 1 3.5 19z" fill="currentColor"/></svg>ホーム</button>
+          <button class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>さがす</button>
+          <button class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>トーク</button>
+          <button class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c.8-3.6 3.8-5.7 7.5-5.7s6.7 2.1 7.5 5.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>マイページ</button>
+        </nav>
+        <button class="fab glass-tint" aria-label="投稿する"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+      </section>
+
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="now" id="now"><span>1 / 6</span>登録方法を選ぶ</div>
+  <button id="b-back">戻る</button>
+  <button id="b-reset">最初から</button>
+  <button id="b-spec" aria-expanded="false" aria-controls="spec">仕様メモ</button>
+</div>
+<aside class="spec" id="spec" hidden>
+  <h2>仕様メモ（想像版）</h2>
+  <dl>
+    <dt>ログイン方法</dt><dd>Google、メールアドレスの2つ</dd>
+    <dt>メールアドレスの確認</dt><dd>登録の途中で認証コードを入れる画面はない。登録後に確認メールを送り、メール内のリンクを押すと確認済みになる。確認する前でもアプリは使える</dd>
+    <dt>入力チェック</dt><dd>なし。空欄や形式の違う値でも次へ進める</dd>
+    <dt>聞く項目</dt><dd>メールアドレス、パスワード、名前、ユーザー名、アイコン、興味のあるジャンル</dd>
+    <dt>ホームに出る投稿</dt><dd>選んだジャンルに合う投稿を、言語や国に関係なく表示する</dd>
+  </dl>
+</aside>
+
+<script>
+(function () {
+  var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
+  var wrap = document.getElementById("wrap");
+  var history = [0];
+  var timers = [];
+
+  var POSTS = [
+    { c: "#e8735a", i: "ゆ", n: "ゆうた", h: "@yuta_m", t: "2分", p: "週末に観た映画がめちゃくちゃよかった。最近のおすすめあったら教えてください！", g: "映画" },
+    { c: "#4a7fd4", i: "E", n: "Emma", h: "@emma.lnd", t: "8分", p: "Just got back from Kyoto. The food was amazing! Where should I go next time?", g: "旅行", photo: true },
+    { c: "#b8913a", i: "李", n: "李明", h: "@liming88", t: "15分", p: "今天第一次做了日式咖喱，比想象的简单！", g: "料理" },
+    { c: "#1f6f78", i: "さ", n: "さき", h: "@saki_0412", t: "21分", p: "駅前に新しいカフェができてた。チーズケーキが絶品でした", g: "料理" },
+    { c: "#8a5cc2", i: "M", n: "Marco", h: "@marco_rossi", t: "34分", p: "Qualcuno ha visto il nuovo film di Miyazaki? Senza spoiler per favore!", g: "映画" },
+    { c: "#d4568a", i: "け", n: "けんた", h: "@kenta_travel", t: "1時間", p: "来月はじめての海外ひとり旅。荷物ってどれくらい持っていけばいいんだろう", g: "旅行" },
+    { c: "#3a9d7a", i: "J", n: "Jisoo", h: "@jisoo_k", t: "1時間", p: "오늘 저녁은 비빔밥! 다들 뭐 먹어요?", g: "料理" }
+  ];
+  var ICON = {
+    heart: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    reply: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>'
+  };
+  document.getElementById("posts").innerHTML = POSTS.map(function (x, k) {
+    return '<article class="post"><div class="av" style="background:' + x.c + '">' + x.i + '</div><div style="min-width:0;flex:1">' +
+      '<div class="meta"><b>' + x.n + '</b>' + x.h + ' · ' + x.t + '</div><p>' + x.p + '</p>' +
+      (x.photo ? '<div class="tl-photo"></div>' : '') +
+      '<span class="tag">#' + x.g + '</span>' +
+      '<div class="acts"><span>' + ICON.heart + (12 + k * 7) + '</span><span>' + ICON.reply + (2 + k) + '</span></div></div></article>';
+  }).join("");
+
+  function stepLabel(i) {
+    var s = screens[i];
+    return '<span>' + s.dataset.step + ' / 6</span>' + s.dataset.name;
+  }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function show(next, back) {
+    var cur = history[history.length - 1];
+    if (next === cur) return;
+    screens.forEach(function (s, i) {
+      s.classList.remove("hidden-left", "hidden-right");
+      if (i === next) return;
+      if (i === cur) s.classList.add(back ? "hidden-right" : "hidden-left");
+      else s.classList.add(i < next ? "hidden-left" : "hidden-right");
+    });
+    if (back) history.pop(); else history.push(next);
+    wrap.classList.toggle("on-dark", screens[next].id === "ready");
+    document.getElementById("now").innerHTML = stepLabel(next);
+    document.getElementById("b-back").disabled = history.length < 2 || screens[next].id === "ready";
+    if (screens[next].id === "ready") startReady();
+    if (next === screens.length - 1) startHome();
+  }
+
+  function startReady() {
+    clearTimers();
+    var ring = document.getElementById("ring");
+    ring.innerHTML = '<svg class="spin" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="4"/><path d="M20 4a16 16 0 0 1 16 16" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>';
+    document.getElementById("ready-t").textContent = "準備しています…";
+    var nm = document.getElementById("f-name").value.trim();
+    document.getElementById("ready-s").textContent = nm ? nm + "さんにおすすめの投稿を集めています" : "おすすめの投稿を集めています";
+    timers.push(setTimeout(function () {
+      ring.innerHTML = '<svg class="pop" width="44" height="44" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      document.getElementById("ready-t").textContent = "さあ、はじめよう！";
+      document.getElementById("ready-s").textContent = "ハナソへようこそ";
+    }, 1400));
+    timers.push(setTimeout(function () { show(screens.length - 1); }, 2500));
+  }
+  function startHome() {
+    var nm = document.getElementById("f-name").value.trim();
+    document.getElementById("toast-t").textContent = nm ? "登録が完了しました。ようこそ、" + nm + "さん！" : "登録が完了しました。ようこそ！";
+    var toast = document.getElementById("toast");
+    toast.classList.add("gone");
+    document.querySelector(".tl-scroll").scrollTop = 0;
+    timers.push(setTimeout(function () { toast.classList.remove("gone"); }, 350));
+    timers.push(setTimeout(function () { toast.classList.add("gone"); }, 3600));
+  }
+
+  function indexOfStep(go) {
+    // data-go は画面の並び順（1始まり）
+    return Number(go) - 1;
+  }
+  document.querySelectorAll("[data-go]").forEach(function (b) {
+    b.addEventListener("click", function () { show(indexOfStep(b.dataset.go)); });
+  });
+  document.querySelectorAll("[data-back]").forEach(function (b) {
+    b.addEventListener("click", function () { goBack(); });
+  });
+  function goBack() {
+    if (history.length < 2) return;
+    clearTimers();
+    show(history[history.length - 2], true);
+  }
+
+  // アイコン：写真を選ぶ → サンプル写真が入る
+  var avatar = document.getElementById("avatar"), face = document.getElementById("face"), iconNext = document.getElementById("icon-next");
+  var picked = false;
+  function pick() {
+    if (picked) return;
+    picked = true;
+    avatar.classList.add("set");
+    var nm = document.getElementById("f-name").value.trim();
+    face.textContent = nm ? nm.charAt(0) : "?";
+    iconNext.textContent = "次へ";
+  }
+  avatar.addEventListener("click", pick);
+  iconNext.addEventListener("click", function (e) {
+    if (!picked) { e.stopImmediatePropagation(); pick(); }
+  }, true);
+
+  var codes = Array.prototype.slice.call(document.querySelectorAll("#code input"));
+  codes.forEach(function (c, i) {
+    c.addEventListener("input", function () {
+      c.value = c.value.slice(-1);
+      if (c.value && codes[i + 1]) codes[i + 1].focus();
+    });
+    c.addEventListener("keydown", function (e) {
+      if (e.key === "Backspace" && !c.value && codes[i - 1]) codes[i - 1].focus();
+    });
+  });
+
+  document.querySelectorAll(".chip").forEach(function (c) {
+    c.addEventListener("click", function () { c.classList.toggle("on"); });
+  });
+  document.querySelectorAll(".seg button").forEach(function (b, i, all) {
+    b.addEventListener("click", function () { all.forEach(function (x) { x.classList.toggle("on", x === b); }); });
+  });
+
+  var spec = document.getElementById("spec"), bSpec = document.getElementById("b-spec");
+  bSpec.addEventListener("click", function () {
+    spec.hidden = !spec.hidden;
+    bSpec.setAttribute("aria-expanded", String(!spec.hidden));
+  });
+  document.getElementById("b-back").addEventListener("click", goBack);
+  document.getElementById("b-reset").addEventListener("click", function () {
+    clearTimers();
+    history = [0];
+    picked = false; avatar.classList.remove("set");
+    face.innerHTML = '<svg width="64" height="64" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4" fill="#9aa0ac"/><path d="M4 20c.8-3.8 4-6 8-6s7.2 2.2 8 6" fill="#9aa0ac"/></svg>';
+    iconNext.textContent = "写真を選ぶ";
+    document.querySelectorAll("#wrap input").forEach(function (i) { i.value = ""; });
+    document.querySelectorAll(".chip.on").forEach(function (c) { c.classList.remove("on"); });
+    screens.forEach(function (s, i) { s.classList.remove("hidden-left", "hidden-right"); if (i > 0) s.classList.add("hidden-right"); });
+    wrap.classList.remove("on-dark");
+    document.getElementById("now").innerHTML = stepLabel(0);
+    document.getElementById("b-back").disabled = true;
+  });
+  document.getElementById("b-back").disabled = true;
+
+  // 画面に収まるよう縮小（393×812 の比率は保つ）
+  var stage = document.getElementById("stage"), phone = document.getElementById("phone");
+  function fit() {
+    var pad = 22;
+    var w = window.innerWidth - 32 - pad * 2, h = window.innerHeight - 32 - 60 - pad * 2;
+    var s = Math.min(1, w / 393, h / 812);
+    phone.style.transform = "translate(" + pad * s + "px," + pad * s + "px) scale(" + s + ")";
+    stage.style.width = (393 + pad * 2) * s + "px";
+    stage.style.height = (812 + pad * 2) * s + "px";
+  }
+  window.addEventListener("resize", fit);
+  fit();
+})();
+</script>
+
+</body>
+</html>
