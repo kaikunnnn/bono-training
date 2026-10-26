@@ -152,6 +152,10 @@ const nextConfig: NextConfig = {
       { source: "/cancelmembersresumption/resumption-growth-perthreemonth", destination: "/subscription", permanent: true },
       { source: "/cancelmembersresumption/resumption-growth-permonth", destination: "/subscription", permanent: true },
       { source: "/blog/sharebeginnerforuidesignfromzero", destination: "/blog", permanent: true },
+      // #250 Memberstack解約準備: 旧サイト限定記事のうち、同じ動画・本文が新サイトのレッスン記事
+      // （UIビジュアル基礎 6-3.シャドウの基本）にあるものは legacy プロキシではなく新記事へ308。
+      // next.config の redirects は proxy より先に評価されるため、proxy の legacy rewrite より優先される。
+      { source: "/contents/tips-siyadounoshi-ifang", destination: "/contents/uivisual-6-4", permanent: true },
     ];
   },
   // セキュリティヘッダ（段階導入）: CSP以外の安全ヘッダ＋「壊れない範囲のCSP」を全パスに enforce。
