@@ -20,13 +20,13 @@ export interface Announcement {
   endsAt: string;
 }
 
-/** 現在表示するお知らせ。#218 イベント（申込締切 2026-10-21 23:59:59 JST） */
+/** 現在表示するお知らせ。Design Hours 10/28（水）20:00〜22:00（水曜いっぱい＝10/28 23:59:59 JST まで表示） */
 export const CURRENT_ANNOUNCEMENT: Announcement | null = {
-  id: "event-2026-10",
+  id: "design-hours-2026-10-28",
   label: "募集中",
-  text: "10/21スタート！BONOの数字を見てUIを改善する1ヶ月チャレンジ",
-  href: "/events/uidesign-challenge-2026-10",
-  endsAt: "2026-10-21T15:00:00.000Z",
+  text: "1人よりみんなで。水曜20時・作業会やります🙋",
+  href: "/events/design-hours-2026-10-28",
+  endsAt: "2026-10-28T15:00:00.000Z",
 };
 
 /** 閉じた状態が変わったことを同じタブ内に知らせるイベント名 */
