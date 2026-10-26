@@ -4,7 +4,7 @@
  * - レイアウトは how-to 共通の「型」（HowToTocLayout + HowToSection + HowToSubheading）を使用:
  *     全幅ヒーロー → 左sticky目次 + 本文カラム（max640）の2カラム（sm未満は1カラム）
  * - アイキャッチの「参加する」ボタンは課金判定で出し分け:
- *     課金メンバー → Slack 参加（招待URLは暫定プレースホルダ / SLACK_COMMUNITY_INVITE_URL）
+ *     課金メンバー → Slack 参加（招待URLはサーバー専用 env の SLACK_COMMUNITY_INVITE_URL）
  *     非課金・未ログイン → /subscription（登録促し）
  *
  * 画像は /public/how-to-community/（reaction.png=スタンプ例, times.png=Times例）。
@@ -17,7 +17,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import {
-  SLACK_COMMUNITY_INVITE_URL,
+  getSlackCommunityInviteUrl,
   SLACK_QUESTIONS_URL,
   SLACK_SELF_INTRO_URL,
   SLACK_ANNOUNCEMENTS_URL,
@@ -68,11 +68,16 @@ function JoinButton({
   isMember: boolean;
   className?: string;
 }) {
-  if (isMember) {
+  const inviteUrl = isMember ? getSlackCommunityInviteUrl() : null;
+  if (isMember && !inviteUrl) {
+    console.error("[how-to/community] SLACK_COMMUNITY_INVITE_URL が未設定のため参加ボタンを出せません");
+    return null;
+  }
+  if (inviteUrl) {
     return (
       <Button asChild variant="primary" size="large" className={className}>
         <CommunityJoinLink
-          href={SLACK_COMMUNITY_INVITE_URL}
+          href={inviteUrl}
           target="_blank"
           rel="noopener noreferrer"
           placement="how_to_community"
