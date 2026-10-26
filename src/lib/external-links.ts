@@ -17,7 +17,10 @@ export const SLACK_ANNOUNCEMENTS_URL =
 
 /**
  * Slack コミュニティへの参加（招待）URL。
- * 使用箇所: /how-to/community のアイキャッチ「参加する」ボタン（課金メンバー向け）
+ * 誰でも参加できる共有リンクなので、公開リポジトリに書かずサーバー専用の環境変数で持つ。
+ * 未設定なら null（参加ボタンを出さない）。リンクを作り直したら Vercel の env を差し替えて再デプロイする。
+ * 使用箇所: /how-to/community のアイキャッチ「参加する」ボタン（課金メンバー向け・サーバー側でのみ読む）
  */
-export const SLACK_COMMUNITY_INVITE_URL =
-  "https://join.slack.com/t/bonoco/shared_invite/zt-43pplmqn5-ySSnYu445~phEwtS2gZehA";
+export function getSlackCommunityInviteUrl(): string | null {
+  return process.env.SLACK_COMMUNITY_INVITE_URL || null;
+}
