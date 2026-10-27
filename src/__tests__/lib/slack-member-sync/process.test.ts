@@ -127,6 +127,13 @@ describe("runSync: 止めるスイッチ・ロック・取得失敗", () => {
     expect(store.states.size).toBe(0);
     expect(alerts).toContainEqual({ no_emails: 1 });
   });
+  it("全員が対象外（チームIDの取り違え等）なら no_targets で止める", async () => {
+    slack.members = [memberWithEmail("U1", "a@example.com", { teamId: "T0OTHER" })];
+    const { deps, alerts } = makeSyncDeps({ store, slack });
+    const r = await runSync(deps);
+    expect(r.error).toBe("no_targets");
+    expect(alerts).toContainEqual({ no_targets: 1 });
+  });
 });
 
 describe("runSync: dry_run", () => {

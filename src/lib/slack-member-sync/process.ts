@@ -550,6 +550,12 @@ async function runLocked(deps: SyncDeps, settings: SyncSettings, startedAt: Date
   result.members = members.length;
   const memberById = new Map(members.map((m) => [m.id, m]));
   const targets = members.filter((m) => excludedReasonOf(m, deps.teamId) === null);
+  if (members.length > 0 && targets.length === 0) {
+    // SLACK_WELCOME_TEAM_ID の取り違えなどで全員が対象外になっている（黙って「0人」にしない）
+    result.error = "no_targets";
+    await deps.notifyOps({ counts: { no_targets: 1 }, note: "対象のメンバーが0人です（SLACK_WELCOME_TEAM_ID を確認）。" });
+    return result;
+  }
   if (targets.length > 0 && targets.every((m) => m.emailHash === null)) {
     // users:read.email が無いと全員が「つながっていない」になり、全員につなぐお願いを送ってしまう
     result.error = "no_emails";
