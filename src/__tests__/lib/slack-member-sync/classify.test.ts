@@ -1,4 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
+
+vi.mock("server-only", () => ({}));
+
 import { classifyMember, endOf, isDueForRemoval, type ClassifyInput } from "@/lib/slack-member-sync/classify";
 import { addDays, formatJpDate, laterDate, toJstDate } from "@/lib/slack-member-sync/dates";
 import type { MemberMatch, SubscriptionSummary, SyncState } from "@/lib/slack-member-sync/types";

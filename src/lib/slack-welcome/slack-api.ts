@@ -47,9 +47,9 @@ export interface SlackClient {
   postMessage(channelId: string, text: string): Promise<SlackCallResult<{ channelId: string; ts: string }>>;
 }
 
-type FetchLike = typeof fetch;
+export type FetchLike = typeof fetch;
 
-async function callSlack(
+export async function callSlack(
   fetchImpl: FetchLike,
   method: string,
   token: string,

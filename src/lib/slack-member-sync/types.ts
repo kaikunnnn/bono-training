@@ -159,3 +159,32 @@ export interface SyncStore {
   }): Promise<void>;
   markOwnerReportSent(date: string): Promise<void>;
 }
+
+/** slack_member_link_claim の戻り値 */
+export type LinkClaimResult =
+  | "linked"
+  | "already_linked"
+  | "invalid"
+  | "used"
+  | "expired"
+  | "slack_linked_to_other"
+  | "user_linked_to_other"
+  | "conflict";
+
+/** つなぐページ（/slack/link）・マイページのカードが使う永続化 */
+export interface LinkStore {
+  getSettings(): Promise<SyncSettings | null>;
+  /** 使い捨てリンクの状態を見る（無効化はしない） */
+  peekToken(tokenHash: string): Promise<"valid" | "invalid" | "used" | "expired">;
+  /** 使い捨てリンクでつなぐ（SQL 関数で1トランザクション） */
+  claimLink(tokenHash: string, userId: string): Promise<LinkClaimResult>;
+  /** その BONO ユーザーのつながり。なければ null */
+  getLinkByUserId(userId: string): Promise<{ teamId: string; slackUserId: string } | null>;
+  /** その Slack ユーザーがつながっている BONO ユーザー。なければ null */
+  getLinkedUserId(teamId: string, slackUserId: string): Promise<string | null>;
+  /** その BONO ユーザーの課金の要約（最新の live 行）。BONO ユーザーがいなければ null */
+  getSubscription(userId: string): Promise<SubscriptionSummary | null>;
+  /** マイページからの申し込み回数（since 以降） */
+  countMypageRequests(userId: string, since: Date): Promise<number>;
+  insertLinkToken: SyncStore["insertLinkToken"];
+}

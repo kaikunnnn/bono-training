@@ -16,6 +16,10 @@
     {
       "path": "/api/cron/slack-welcome",
       "schedule": "0 1 * * *"
+    },
+    {
+      "path": "/api/cron/slack-member-sync",
+      "schedule": "30 1 * * *"
     }
   ]
 }
