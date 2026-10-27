@@ -9,7 +9,7 @@ export function SlackLinkResult({ status }: { status: LinkPageStatus }) {
   return (
     <div className="space-y-4" role="status">
       <h1 className="font-heading text-2xl font-bold leading-tight text-text-primary">{copy.title}</h1>
-      <p className="text-[15px] leading-relaxed text-text-secondary">{copy.body}</p>
+      <p className="text-base leading-relaxed text-text-secondary">{copy.body}</p>
       <p>
         <Link
           href="/mypage"

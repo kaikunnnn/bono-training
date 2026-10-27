@@ -8,6 +8,7 @@
 import { useActionState, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { MYPAGE_LINK_COPY } from "@/lib/slack-member-sync/link-copy";
 import { requestSlackLink, type RequestSlackLinkResult } from "@/app/slack/link/actions";
 
@@ -17,22 +18,18 @@ export function SlackLinkCard() {
   const noteId = useId();
 
   return (
+    // 外枠は隣のセクション（_shared/MySection）と同じ。色・文字はデザイントークン（text-text-* / border-border-light / bg-surface / font-heading）
     <section className="w-full pt-8 pb-10 flex flex-col items-start gap-3 border-b border-black/10">
-      <h2
-        className="text-slate-950"
-        style={{ fontFamily: "'Rounded Mplus 1c', sans-serif", fontSize: 16, fontWeight: 600, lineHeight: "24px" }}
-      >
-        Slackとつなぐ
-      </h2>
-      <div className="w-full rounded-2xl border border-border-light bg-white p-5 space-y-4">
-        <p className="text-[14px] leading-relaxed text-text-secondary">
+      <h2 className="font-heading text-base font-semibold leading-6 text-text-primary">Slackとつなぐ</h2>
+      <div className="w-full rounded-2xl border border-border-light bg-surface p-5 space-y-4">
+        <p className="text-sm leading-relaxed text-text-secondary">
           SlackのアカウントがBONOのアカウントとつながっていません。つながっていないと、課金メンバーかを確認できず、Slackから外れることがあります。Slackで使っているメールアドレスを入れると、確認のDMが届きます。
         </p>
         <form action={action} className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex-1 min-w-0 space-y-1.5">
-            <label htmlFor={inputId} className="text-[13px] font-medium text-text-primary">
+            <Label htmlFor={inputId} className="text-text-primary">
               Slackで使っているメールアドレス
-            </label>
+            </Label>
             <Input
               id={inputId}
               name="email"
@@ -50,7 +47,7 @@ export function SlackLinkCard() {
           </Button>
         </form>
         {result && (
-          <p id={noteId} role="status" className="text-[13px] leading-5 text-text-muted">
+          <p id={noteId} role="status" className="text-xs leading-5 text-text-muted">
             {MYPAGE_LINK_COPY[result.status]}
           </p>
         )}
