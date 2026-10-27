@@ -86,6 +86,16 @@ async function PersonalizedVideo({
         hasAccess={hasAccess}
         isLoggedIn={subscription.isLoggedIn}
         redirectTo={`/contents/${slug}`}
+        // #262 動画の再生・進捗・完了を GA4・活動ログへ（見られる人だけ動画が出る）
+        tracking={
+          hasAccess
+            ? {
+                articleId: article._id,
+                lessonId: article.lessonInfo?._id,
+                title: article.title,
+              }
+            : undefined
+        }
       />
     </>
   );

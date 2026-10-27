@@ -7,9 +7,15 @@
  * - trackPricingCtaClick: 料金ページへの CTA クリックを GA4 と活動ログの両方に送る
  *   （未ログインは活動ログが no-op になるため GA4 側で数える）
  * - trackHomeClick: /top・マイページで押したもの（#232）を GA4 と活動ログの両方に送る
+ * - trackArticleVideo*: 記事の動画の再生・進捗・完了（#262）を GA4 と活動ログの両方に送る
  */
 import { recordActivity } from "@/lib/services/activity";
-import { trackEvent } from "@/lib/analytics";
+import {
+  trackEvent,
+  trackVideoComplete,
+  trackVideoPlay,
+  trackVideoProgress,
+} from "@/lib/analytics";
 import {
   buildHomeClickParams,
   isPricingCtaSourceGroup,
@@ -99,4 +105,58 @@ export function trackHomeClick(tracking: HomeClickTracking): void {
     lessonId: built.lessonId,
     meta: built.params,
   });
+}
+
+// ===== 記事の動画（#262 video_play / video_progress / video_complete） =====
+
+/** どの記事の動画か。Server Component から props で渡すのでプレーンな値だけで持つ */
+export interface ArticleVideoTracking {
+  articleId: string;
+  lessonId?: string | null;
+  /** GA4 の article_title 用（活動ログには入れない） */
+  title: string;
+}
+
+function videoActivityIds(tracking: ArticleVideoTracking) {
+  return {
+    articleId: tracking.articleId,
+    lessonId: tracking.lessonId || undefined,
+  };
+}
+
+/** 最初の再生。呼び出し側（プレーヤー）でページ内1回に絞ってから呼ぶ */
+export function trackArticleVideoPlay(tracking: ArticleVideoTracking): void {
+  try {
+    trackVideoPlay(tracking.articleId, tracking.title);
+  } catch {
+    // GA 失敗で再生を止めない
+  }
+  logActivity({ eventType: "video_play", ...videoActivityIds(tracking) });
+}
+
+/** 25 / 50 / 75% 到達（各1回） */
+export function trackArticleVideoProgress(
+  tracking: ArticleVideoTracking,
+  percent: number
+): void {
+  try {
+    trackVideoProgress(tracking.articleId, tracking.title, percent);
+  } catch {
+    // 同上
+  }
+  logActivity({
+    eventType: "video_progress",
+    ...videoActivityIds(tracking),
+    meta: { percent },
+  });
+}
+
+/** 90% 以上 or 最後まで再生（1回） */
+export function trackArticleVideoComplete(tracking: ArticleVideoTracking): void {
+  try {
+    trackVideoComplete(tracking.articleId, tracking.title);
+  } catch {
+    // 同上
+  }
+  logActivity({ eventType: "video_complete", ...videoActivityIds(tracking) });
 }

@@ -14,7 +14,7 @@ const UNIQUE_VIOLATION = "23505";
  *
  * - Client Component の実操作・マウント時からのみ呼ぶ（サーバー描画/Link先読みでは呼ばない）
  * - 未ログインは何もしない（no-op）
- * - event_type は固定8種のみ。不正入力は記録せずログだけ残す
+ * - event_type は ACTIVITY_EVENT_TYPES（DB の CHECK 制約と同じ）のみ。不正入力は記録せずログだけ残す
  * - site_visit は 1人1日1回（部分一意インデックス）。重複は成功扱い（insert-ignore）
  * - 呼び出し側の体験を壊さないよう、決して throw しない
  *
