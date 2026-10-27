@@ -137,6 +137,26 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（#263）", () => {
     expect(await store.countMypageRequests(paidId, new Date(Date.now() - 3600e3))).toBe(1);
   });
 
+  it("つながりの相手が課金中でなければ、使い捨てリンクでつなぎ直せる。keep_user_ids の相手なら断る", async () => {
+    await admin.from("slack_member_links").delete().neq("team_id", "");
+    await admin.from("slack_member_links").insert({ user_id: freeId, team_id: TEAM_ID, slack_user_id: "U_RELINK", linked_via: "email" });
+    const raw = "m".repeat(43);
+    await store.insertLinkToken({
+      tokenHash: hashToken(raw),
+      teamId: TEAM_ID,
+      slackUserId: "U_RELINK",
+      purpose: "link_request",
+      expiresAt: new Date(Date.now() + 60_000),
+      requestedByUserId: null,
+    });
+    await admin.from("slack_member_sync_settings").update({ keep_user_ids: [freeId] }).eq("id", 1);
+    expect((await store.getSettings())?.keepUserIds).toEqual([freeId]);
+    expect(await store.claimLink(hashToken(raw), paidId)).toBe("slack_linked_to_other");
+    await admin.from("slack_member_sync_settings").update({ keep_user_ids: [] }).eq("id", 1);
+    expect(await store.claimLink(hashToken(raw), paidId)).toBe("linked");
+    expect(await store.getLinkedUserId(TEAM_ID, "U_RELINK")).toBe(paidId);
+  });
+
   it("anon キーでは読めない・書けない・関数を呼べない", async () => {
     const anon = createClient(URL, ANON, { auth: { persistSession: false } });
     expect((await anon.from("slack_member_sync_state").select("*")).error).not.toBeNull();
@@ -145,5 +165,6 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（#263）", () => {
     expect((await anon.from("slack_member_sync_settings").update({ mode: "live" }).eq("id", 1)).error).not.toBeNull();
     expect((await anon.rpc("slack_member_sync_lookup", { p_email_hashes: [], p_user_ids: [] })).error).not.toBeNull();
     expect((await anon.rpc("slack_member_link_claim", { p_token_hash: "x", p_user_id: paidId })).error).not.toBeNull();
+    expect((await anon.rpc("slack_member_sync_is_paid", { p_user_id: paidId })).error).not.toBeNull();
   });
 });

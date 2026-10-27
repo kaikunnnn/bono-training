@@ -25,7 +25,7 @@ import "server-only";
  */
 import { classifyMember, excludedReasonOf, isDueForRemoval, SOFT_REVIEW_REASON, type ClassifyResult } from "./classify";
 import { formatJpDate, toJstDate } from "./dates";
-import { escapeMrkdwn, renderSyncMessage, type SyncMessage } from "./messages/common";
+import { renderSyncMessage, type SyncMessage } from "./messages/common";
 import type { NotifyOps } from "./ops-alert";
 import type { SyncSlackClient } from "./slack-api";
 import { hashToken, LINK_REQUEST_TOKEN_EXTRA_DAYS, linkUrl } from "./tokens";
@@ -170,10 +170,16 @@ export function sameState(a: SyncState, b: SyncState): boolean {
   return true;
 }
 
-/** 同じメールの BONO アカウントが複数あるときは、課金中 > 課金の記録あり > それ以外 の順で選ぶ */
-function pickBest(subs: SubscriptionSummary[] | undefined): SubscriptionSummary | null {
+/** 課金中（live かつ stripe_subscription_id・is_active）か、手で残すと決めた BONO ユーザーか */
+export function isPaidOrKept(sub: SubscriptionSummary | null | undefined, keepUserIds: readonly string[]): boolean {
+  if (!sub) return false;
+  return (sub.hasPaidRecord && sub.isActive) || keepUserIds.includes(sub.userId);
+}
+
+/** 同じメールの BONO アカウントが複数あるときは、課金中（手で残す人を含む）> 課金の記録あり > それ以外 の順で選ぶ */
+function pickBest(subs: SubscriptionSummary[] | undefined, keepUserIds: readonly string[]): SubscriptionSummary | null {
   if (!subs || subs.length === 0) return null;
-  const score = (s: SubscriptionSummary) => (s.hasPaidRecord ? (s.isActive ? 2 : 1) : 0);
+  const score = (s: SubscriptionSummary) => (isPaidOrKept(s, keepUserIds) ? 2 : s.hasPaidRecord ? 1 : 0);
   return [...subs].sort((a, b) => score(b) - score(a))[0];
 }
 
@@ -207,7 +213,7 @@ interface DmPlan {
   dm: DmType;
 }
 
-function dryRunText(r: ClassifyResult, blockReason: string | null, prefix = ""): string {
+function dryRunText(r: ClassifyResult, blockReason: string | null, prefix = "", suffix = ""): string {
   const next = r.next!;
   let text: string;
   if (r.dm === "removal_notice") {
@@ -217,7 +223,7 @@ function dryRunText(r: ClassifyResult, blockReason: string | null, prefix = ""):
   } else {
     text = `${next.classification}${next.reason ? `:${next.reason}` : ""}${next.removeAfter ? `:remove_after=${next.removeAfter}` : ""}`;
   }
-  return `${prefix}${text}`;
+  return `${prefix}${text}${suffix}`;
 }
 
 /** 送る本文を作る（未承認などで送れないときは reason） */
@@ -290,7 +296,15 @@ async function sendOne(ctx: DmCtx, plan: DmPlan): Promise<{ outcome: SendOutcome
 
   // 3) 投稿直前の確保（sending の印を永続化）。確保できなければ送らない
   const claimed = await deps.store.claimDm(deps.teamId, id, plan.dm);
-  if (!claimed) return { outcome: "not_claimed" };
+  if (!claimed) {
+    // 送るはずなのに確保できない（送信済みの記録や確認待ちの印が残っている）。黙って毎日見送らないよう、
+    // 印がまだ無ければ確認待ちにしてオーナー報告に出す
+    const current = ctx.states.get(id);
+    if (current && !current.needsReview) {
+      await patch(ctx, id, { needsReview: true, reviewReason: `not_claimed:${plan.dm}` });
+    }
+    return { outcome: "not_claimed" };
+  }
   const sendingMark = { needsReview: true, reviewReason: `sending:${plan.dm}` };
   const current = ctx.states.get(id);
   if (current) ctx.states.set(id, { ...current, ...sendingMark });
@@ -391,8 +405,10 @@ async function sendDms(ctx: DmCtx, plans: DmPlan[]): Promise<void> {
       case "failed":
         result.dm.failed += 1;
         break;
-      case "deferred":
       case "not_claimed":
+        result.dm.needsReview += 1;
+        break;
+      case "deferred":
         result.dm.deferred += 1;
         break;
       case "aborted":
@@ -414,12 +430,13 @@ function reviewLabel(reason: string | null): string {
   if (!reason) return "確認が必要";
   if (reason.startsWith("sending:") || reason.startsWith("send_unknown:")) return "DMが届いたか不明";
   if (reason.startsWith("dm_failed:")) return `DMを送れなかった（${reason.slice("dm_failed:".length)}）`;
+  if (reason.startsWith("not_claimed:")) return "DMを送れる状態になっていない（記録の確認が必要）";
   return reason;
 }
 
-function profileLink(member: SlackMemberSummary | undefined, slackUserId: string): string {
-  const name = escapeMrkdwn(member?.displayName ?? slackUserId).replace(/\|/g, "｜");
-  return `<https://app.slack.com/team/${slackUserId}|${name}>`;
+/** Slack のメンション。名前は Slack が表示する（名前を扱わない・保存しない） */
+function mention(slackUserId: string): string {
+  return `<@${slackUserId}>`;
 }
 
 function listLines(lines: string[]): string {
@@ -429,7 +446,7 @@ function listLines(lines: string[]): string {
 
 /**
  * オーナー報告の差し込み値を作る。報告する人がいなければ null。純粋関数。
- * 名前は users.list の応答（members）からその場で入れる。
+ * 人は <@U…> のメンションで書く（名前は Slack が表示する）。members は削除済みかの確認に使う。
  */
 export function buildOwnerReport(
   states: SyncState[],
@@ -458,10 +475,10 @@ export function buildOwnerReport(
     .sort((a, b) => (a.removeAfter ?? "").localeCompare(b.removeAfter ?? ""))
     .map(
       (s) =>
-        `• ${profileLink(members.get(s.slackUserId), s.slackUserId)} ${REASON_LABEL[s.reason ?? ""] ?? "その他"}（外す日 ${formatJpDate(s.removeAfter ?? "")}）`,
+        `• ${mention(s.slackUserId)} ${REASON_LABEL[s.reason ?? ""] ?? "その他"}（外す日 ${formatJpDate(s.removeAfter ?? "")}）`,
     );
   const reviewLines = review.map(
-    (s) => `• ${profileLink(members.get(s.slackUserId), s.slackUserId)} ${reviewLabel(s.reviewReason)}`,
+    (s) => `• ${mention(s.slackUserId)} ${reviewLabel(s.reviewReason)}`,
   );
 
   return {
@@ -580,31 +597,48 @@ async function runLocked(deps: SyncDeps, settings: SyncSettings, startedAt: Date
   }
 
   // 4) 課金中のアカウントとメールが一致した人を自動でつなぐ
+  //    - つながりの相手が課金中でない（いない）のに、メールの一致で課金中の人が見つかれば、課金中の人で判定する
+  //    - dry_run ではつながりを書かない（「つなぐはず」を dry_run_result に残すだけ）。test は test_user_ids の人だけ書く
+  const keepUserIds = settings.keepUserIds;
   const matches = new Map<string, MemberMatch | null>();
+  const wouldLink = new Set<string>();
   for (const member of targets) {
     const linkedUser = linkBySlack.get(member.id);
-    if (linkedUser) {
-      const sub = byUserId.get(linkedUser);
-      matches.set(member.id, sub ? { via: "link", subscription: sub } : null);
+    const linkedSub = linkedUser ? byUserId.get(linkedUser) : undefined;
+    if (linkedSub && isPaidOrKept(linkedSub, keepUserIds)) {
+      matches.set(member.id, { via: "link", subscription: linkedSub });
       continue;
     }
-    const best = member.emailHash ? pickBest(byHash.get(member.emailHash)) : null;
-    if (best && best.hasPaidRecord && best.isActive && !linkedUserIds.has(best.userId)) {
-      const inserted = await deps.store.insertLink({
-        userId: best.userId,
-        teamId: deps.teamId,
-        slackUserId: member.id,
-        linkedVia: "email",
-      });
-      if (inserted === "inserted") {
-        result.linksCreated += 1;
-        linkedUserIds.add(best.userId);
-        linkBySlack.set(member.id, best.userId);
-        matches.set(member.id, { via: "link", subscription: best });
-        continue;
+    const best = member.emailHash ? pickBest(byHash.get(member.emailHash), keepUserIds) : null;
+    if (best && isPaidOrKept(best, keepUserIds)) {
+      if (!linkedUser && !linkedUserIds.has(best.userId)) {
+        const mayWrite =
+          settings.mode === "live" || (settings.mode === "test" && settings.testUserIds.includes(member.id));
+        if (!mayWrite) {
+          wouldLink.add(member.id);
+          linkedUserIds.add(best.userId);
+        } else {
+          const inserted = await deps.store.insertLink({
+            userId: best.userId,
+            teamId: deps.teamId,
+            slackUserId: member.id,
+            linkedVia: "email",
+          });
+          if (inserted === "inserted") {
+            result.linksCreated += 1;
+            linkedUserIds.add(best.userId);
+            linkBySlack.set(member.id, best.userId);
+            matches.set(member.id, { via: "link", subscription: best });
+            continue;
+          }
+        }
       }
+      matches.set(member.id, { via: "email", subscription: best });
+      continue;
     }
-    matches.set(member.id, best ? { via: "email", subscription: best } : null);
+    // 課金中の人が見つからない: つながりの相手（いれば）、なければメールの一致で判定する
+    if (linkedSub) matches.set(member.id, { via: "link", subscription: linkedSub });
+    else matches.set(member.id, best ? { via: "email", subscription: best } : null);
   }
 
   // 5) 判定して、変わった行だけ保存する
@@ -616,13 +650,17 @@ async function runLocked(deps: SyncDeps, settings: SyncSettings, startedAt: Date
 
   for (const member of members) {
     const prev = existing.get(member.id) ?? null;
+    const match = matches.get(member.id) ?? null;
     const r = classifyMember({
       member,
       teamId: deps.teamId,
-      match: matches.get(member.id) ?? null,
+      match,
       state: prev,
       settings,
       now,
+      manualKeep:
+        settings.keepSlackUserIds.includes(member.id) ||
+        (match !== null && keepUserIds.includes(match.subscription.userId)),
     });
     if (!r.next) continue;
     let next = r.next;
@@ -636,7 +674,9 @@ async function runLocked(deps: SyncDeps, settings: SyncSettings, startedAt: Date
     if (!sendable) {
       // dry_run・test の対象外: 判定だけ記録する
       const prefix = settings.mode === "test" ? "not_test_target:" : "";
-      next = { ...next, dryRunResult: dryRunText(r, blockCode, prefix), dryRunAt: now };
+      const text = dryRunText(r, blockCode, prefix, wouldLink.has(member.id) ? ":would_link" : "");
+      // 判定が前と同じなら dry_run_at も変えない（変わっていない行を毎日書き直さない）
+      next = { ...next, dryRunResult: text, dryRunAt: prev?.dryRunResult === text ? prev.dryRunAt : now };
     } else if (r.dm && blockCode) {
       // 本文が未承認などで送れない: 印を付けて数える（承認されれば次の実行で送る）
       blocked += 1;

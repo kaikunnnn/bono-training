@@ -350,8 +350,9 @@ describe("つながっていない・課金の記録がない → needs_link", (
     expect(r.next?.classification).toBe("keep");
     expect(r.next?.resolvedReason).toBe("linked");
     expect(r.next?.removeAfter).toBeNull();
-    // つなぐお願いの記録は残す（二度と送らない）
-    expect(r.next?.linkRequestDmAt).toEqual(new Date("2026-10-01T01:00:00Z"));
+    // つなぐ待ちの回が終わったので、つなぐお願いの記録も消す（また未接続になったら新しいDMと猶予から）
+    expect(r.next?.linkRequestDmAt).toBeNull();
+    expect(r.next?.linkDeadline).toBeNull();
   });
 
   it("つなぐ待ちの間につながった → keep（linked）", () => {
@@ -397,19 +398,24 @@ describe("Slack で外された（削除済み）→ resolved", () => {
     expect(r.next?.reason).toBe("deleted");
   });
 
-  it("外された後に戻され、まだ解約済みなら、お知らせ済みなので送らず報告対象に戻る", () => {
-    const state = makeState({
-      classification: "resolved",
-      resolvedReason: "deactivated",
-      reason: "canceled",
-      removalNoticeDmAt: new Date("2026-10-01T00:00:00Z"),
-      removeAfter: "2026-10-08",
-    });
-    const r = run({ state, match: match({ isActive: false }) });
+  it("外された後に戻され、まだ解約済みなら、新しい回としてお知らせし直す（いきなり外す日にしない）", () => {
+    const deleted = run({
+      member: makeMember({ deleted: true }),
+      state: makeState({
+        classification: "remove_scheduled",
+        reason: "canceled",
+        removalNoticeDmAt: new Date("2026-10-01T00:00:00Z"),
+        removeAfter: "2026-10-08",
+      }),
+    }).next!;
+    expect(deleted.removalNoticeDmAt).toBeNull();
+    expect(deleted.removeAfter).toBeNull();
+    const r = run({ state: deleted, match: match({ isActive: false }) });
     expect(r.next?.classification).toBe("remove_scheduled");
-    expect(r.dm).toBeNull();
-    expect(r.next?.resolvedReason).toBeNull();
-    expect(isDueForRemoval(r.next!, "2026-10-27")).toBe(true);
+    expect(r.dm).toBe("removal_notice");
+    expect(r.next?.removeAfter).toBeNull();
+    expect(isDueForRemoval(r.next!, "2026-10-27")).toBe(false);
+    expect(r.removeAfterIfSentToday).toBe("2026-11-03");
   });
 });
 
@@ -431,5 +437,93 @@ describe("isDueForRemoval", () => {
     expect(isDueForRemoval(makeState({ classification: "keep", removeAfter: "2026-10-01" }), "2026-10-27")).toBe(
       false,
     );
+  });
+});
+
+describe("回をまたいだ記録の扱い（外す日の前に必ず今の回の DM がある）", () => {
+  const noticed = makeState({
+    classification: "remove_scheduled",
+    reason: "canceled",
+    removalNoticeDmAt: new Date("2026-09-01T00:00:00Z"),
+    removalNoticeVersion: 1,
+    removeAfter: "2026-09-08",
+  });
+  const linkWaiting = makeState({
+    classification: "needs_link",
+    reason: "not_linked",
+    linkRequestDmAt: new Date("2026-09-01T00:00:00Z"),
+    linkRequestVersion: 1,
+    linkDeadline: "2026-09-15",
+  });
+
+  it("keep に戻ると、つなぐお願い・外れるお知らせの記録を両方消す", () => {
+    const r = run({ match: match(), state: { ...linkWaiting, removalNoticeDmAt: new Date(), removeAfter: "2026-09-08" } });
+    expect(r.next).toMatchObject({
+      linkRequestDmAt: null,
+      linkRequestVersion: null,
+      linkDeadline: null,
+      removalNoticeDmAt: null,
+      removeAfter: null,
+    });
+  });
+
+  it("以前のつなぐお願いの記録が keep で消えていれば、また未接続になったとき新しいDMと猶予から（いきなり期限切れにしない）", () => {
+    const keep = run({ match: match(), state: linkWaiting }).next!;
+    const r = run({ state: keep });
+    expect(r.next?.classification).toBe("needs_link");
+    expect(r.dm).toBe("link_request");
+    expect(r.linkDeadlineIfSentToday).toBe("2026-11-10");
+  });
+
+  it("外す予定の回から needs_link に移ると、外れるお知らせの記録を消す", () => {
+    const r = run({ match: null, state: noticed });
+    expect(r.next).toMatchObject({ classification: "needs_link", removalNoticeDmAt: null, removeAfter: null });
+    expect(r.dm).toBe("link_request");
+  });
+
+  it("外す予定の回から excluded に移ると記録を消し、戻ったら新しいお知らせを送る", () => {
+    const ex = run({ member: makeMember({ isRestricted: true }), state: noticed }).next!;
+    expect(ex).toMatchObject({ classification: "excluded", removalNoticeDmAt: null, removeAfter: null });
+    const back = run({ state: ex, match: match({ isActive: false }) });
+    expect(back.dm).toBe("removal_notice");
+    expect(back.next?.removeAfter).toBeNull();
+  });
+
+  it("つなぐ待ち以外の状態に残ったつなぐお願いの記録では、期限切れにしない", () => {
+    // 古いデータで keep に linkRequestDmAt が残っていても、新しい回として扱う
+    const r = run({ state: makeState({ classification: "keep", linkRequestDmAt: new Date("2026-01-01T00:00:00Z") }) });
+    expect(r.next?.classification).toBe("needs_link");
+    expect(r.dm).toBe("link_request");
+  });
+
+  it("外す予定の回でお知らせの記録が片方しかない（外す日なし）なら、お知らせからやり直す", () => {
+    const r = run({
+      match: match({ isActive: false }),
+      state: makeState({ classification: "remove_scheduled", reason: "canceled", removalNoticeDmAt: new Date(), removeAfter: null }),
+    });
+    expect(r.dm).toBe("removal_notice");
+    expect(r.next?.removalNoticeDmAt).toBeNull();
+  });
+});
+
+describe("手で残す人（manualKeep）", () => {
+  it("課金の記録がなくても keep（理由 manual_keep）、DMなし", () => {
+    const r = run({ match: null, manualKeep: true });
+    expect(r.next).toMatchObject({ classification: "keep", reason: "manual_keep" });
+    expect(r.dm).toBeNull();
+  });
+
+  it("外す予定だった人も keep に戻る", () => {
+    const r = run({
+      match: match({ isActive: false }),
+      manualKeep: true,
+      state: makeState({ classification: "remove_scheduled", reason: "canceled", removeAfter: "2026-10-20" }),
+    });
+    expect(r.next?.classification).toBe("keep");
+    expect(r.next?.removeAfter).toBeNull();
+  });
+
+  it("管理者などの対象外は、手で残す設定より優先", () => {
+    expect(run({ member: makeMember({ isAdmin: true }), manualKeep: true }).next).toBeNull();
   });
 });

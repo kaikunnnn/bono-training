@@ -28,6 +28,14 @@ CREATE TABLE IF NOT EXISTS public.slack_member_sync_settings (
   mode text NOT NULL DEFAULT 'off' CHECK (mode IN ('off', 'dry_run', 'test', 'live')),
   -- test モードで DM を送ってよい Slack ユーザーID（例: カイクンの別アカウント）
   test_user_ids text[] NOT NULL DEFAULT '{}',
+  -- test モードでマイページの「Slackとつなぐ」カードを見せる BONO ユーザーID
+  test_bono_user_ids uuid[] NOT NULL DEFAULT '{}',
+  -- 手で「残す」と決めた人。課金の定義（live かつ stripe_subscription_id）は変えず、例外を手で持つ:
+  --   Stripe では払っているが user_subscriptions に行がない人（旧 Memberstack・同期ズレ）、
+  --   live の is_active 行はあるが stripe_subscription_id がない人 など
+  -- keep_user_ids の BONO ユーザーは、つなぐページ・マイページでも課金中として扱う
+  keep_user_ids uuid[] NOT NULL DEFAULT '{}',
+  keep_slack_user_ids text[] NOT NULL DEFAULT '{}',
   -- 外れるお知らせDMから外す日までの最短日数（外す日 = max(終わる日の翌日, お知らせ日 + この日数)）
   min_notice_days integer NOT NULL DEFAULT 7 CHECK (min_notice_days BETWEEN 1 AND 60),
   -- つなぐお願いDMから、つながらなければ外す候補にするまでの日数
@@ -162,6 +170,8 @@ CREATE TRIGGER trg_slack_member_sync_settings_touch
 -- つながり（slack_member_links）経由の人は p_user_ids で渡す（Slack のメールが違っても判定できるように）。
 --
 -- 課金の数え方: environment='live' かつ stripe_subscription_id があるものだけ。その人の最新の行で判定する。
+-- environment='live' は固定（引数にしない）: Slack のメンバーは本番だけにある概念で、test 環境の課金で
+-- 本番の Slack に残す・外すを決めてはいけないため。ローカルで試すときは environment='live' の行を作る。
 -- 返すのは ID と課金の列だけ（メール・名前は返さない）。email_hash はメールで一致したときだけ入る。
 CREATE OR REPLACE FUNCTION public.slack_member_sync_lookup(p_email_hashes text[], p_user_ids uuid[])
 RETURNS TABLE (
@@ -218,11 +228,42 @@ COMMENT ON FUNCTION public.slack_member_sync_lookup(text[], uuid[]) IS
   'Slack 定期整理（#263）: メールのハッシュ(md5(lower(trim)))/ユーザーID → 最新の live 課金行の要約。メール・名前は返さない。service_role 専用';
 
 -- -----------------------------------------------------------------------------
+-- 6a. slack_member_sync_is_paid：課金中か（つなぎ直してよいかの判定用）
+-- -----------------------------------------------------------------------------
+-- 課金中 = 最新の live かつ stripe_subscription_id のある行が is_active、または settings.keep_user_ids にいる
+CREATE OR REPLACE FUNCTION public.slack_member_sync_is_paid(p_user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT
+    EXISTS (
+      SELECT 1 FROM public.slack_member_sync_settings st
+      WHERE st.id = 1 AND p_user_id = ANY (st.keep_user_ids)
+    )
+    OR COALESCE((
+      SELECT us.is_active
+      FROM public.user_subscriptions us
+      WHERE us.user_id = p_user_id
+        AND us.environment = 'live'
+        AND us.stripe_subscription_id IS NOT NULL
+      ORDER BY us.updated_at DESC, us.created_at DESC
+      LIMIT 1
+    ), false);
+$$;
+
+COMMENT ON FUNCTION public.slack_member_sync_is_paid(uuid) IS
+  'Slack 定期整理（#263）: 課金中（最新の live+stripe 行が is_active）または keep_user_ids か。service_role 専用';
+
+-- -----------------------------------------------------------------------------
 -- 6. slack_member_link_claim：使い捨てリンクでつなぐ
 -- -----------------------------------------------------------------------------
 -- 確認（ある・未使用・期限内）→ つながりの確認 → つなぐ → リンクを無効化 を1つのトランザクションで行う。
 -- 上書きはしない:
---   - その Slack アカウントが別の BONO アカウントとつながっている → slack_linked_to_other
+--   - その Slack アカウントが別の「課金中の」BONO アカウントとつながっている → slack_linked_to_other
+--     （つながりの相手が課金中でない・いないときは、ログイン中のアカウントでつなぎ直す）
 --   - この BONO アカウントが別の Slack アカウントとつながっている → user_linked_to_other
 -- 戻り値: linked / already_linked / invalid / used / expired / slack_linked_to_other / user_linked_to_other / conflict
 -- 課金中かどうかの確認は呼び出し側（Server Action）で先に行う。
@@ -253,17 +294,27 @@ BEGIN
 
   SELECT l.user_id INTO linked_user
   FROM public.slack_member_links l
-  WHERE l.team_id = t.team_id AND l.slack_user_id = t.slack_user_id;
+  WHERE l.team_id = t.team_id AND l.slack_user_id = t.slack_user_id
+  FOR UPDATE;
   IF FOUND THEN
     IF linked_user = p_user_id THEN
       UPDATE public.slack_link_tokens SET used_at = pg_catalog.now() WHERE id = t.id;
       RETURN 'already_linked';
     END IF;
-    RETURN 'slack_linked_to_other';
+    -- つながりの相手が課金中（手で残す人を含む）なら断る（上書きしない）
+    IF public.slack_member_sync_is_paid(linked_user) THEN
+      RETURN 'slack_linked_to_other';
+    END IF;
   END IF;
 
   IF EXISTS (SELECT 1 FROM public.slack_member_links l WHERE l.user_id = p_user_id) THEN
     RETURN 'user_linked_to_other';
+  END IF;
+
+  -- つながりの相手が課金中でない（解約した・いない）なら、ログイン中のアカウントでつなぎ直す
+  IF linked_user IS NOT NULL THEN
+    DELETE FROM public.slack_member_links l
+    WHERE l.team_id = t.team_id AND l.slack_user_id = t.slack_user_id AND l.user_id = linked_user;
   END IF;
 
   INSERT INTO public.slack_member_links (user_id, team_id, slack_user_id, linked_via)
@@ -302,5 +353,7 @@ REVOKE ALL ON public.slack_link_tokens FROM anon, authenticated;
 REVOKE ALL ON FUNCTION public.touch_slack_member_sync_updated_at() FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.slack_member_sync_lookup(text[], uuid[]) FROM PUBLIC, anon, authenticated;
 REVOKE ALL ON FUNCTION public.slack_member_link_claim(text, uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.slack_member_sync_is_paid(uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.slack_member_sync_is_paid(uuid) TO service_role;
 GRANT EXECUTE ON FUNCTION public.slack_member_sync_lookup(text[], uuid[]) TO service_role;
 GRANT EXECUTE ON FUNCTION public.slack_member_link_claim(text, uuid) TO service_role;

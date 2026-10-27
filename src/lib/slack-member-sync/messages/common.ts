@@ -33,14 +33,9 @@ export function getSyncMessageBlockReason(message: SyncMessage): string | null {
   return null;
 }
 
-/** Slack mrkdwn の制御文字をエスケープする（名前など、外から来た文字列を差し込むとき） */
-export function escapeMrkdwn(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-}
-
 /**
  * 差し込んで送る本文を作る。送れないとき（未承認・差し込み漏れ・https 以外のURL）は reason を返す。
- * vars の値はそのまま入る（外から来た文字列は escapeMrkdwn してから渡すこと）。
+ * vars の値はそのまま入る（外から来た文字列は入れない。人は <@U…> のメンションで書く）。
  */
 export function renderSyncMessage(
   message: SyncMessage,

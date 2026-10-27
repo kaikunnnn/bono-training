@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("server-only", () => ({}));
 
 import { buildOwnerReport, runSync } from "@/lib/slack-member-sync/process";
+import { isDueForRemoval } from "@/lib/slack-member-sync/classify";
 import { hashToken } from "@/lib/slack-member-sync/tokens";
 import { LINK_REQUEST_MESSAGE } from "@/lib/slack-member-sync/messages/link-request";
 import { REMOVAL_NOTICE_MESSAGE } from "@/lib/slack-member-sync/messages/removal-notice";
@@ -153,7 +154,9 @@ describe("runSync: dry_run", () => {
     expect(cancel.removeAfter).toBeNull(); // 送っていないので外す日は決まらない
     expect(cancel.dryRunResult).toBe("would_send:removal_notice:remove_after=2026-11-03");
     expect(store.states.get("U_STRANGER")!.dryRunResult).toBe("would_send:link_request:deadline=2026-11-10");
-    expect(store.states.get("U_PAID")!.dryRunResult).toBe("keep");
+    // dry_run ではつながりを書かず、「つなぐはず」だけ記録する
+    expect(store.states.get("U_PAID")!.dryRunResult).toBe("keep:would_link");
+    expect(store.links).toHaveLength(0);
     // ボット・オーナーは記録しない
     expect(store.states.has("U_BOT")).toBe(false);
     expect(store.states.has("U0OWNER")).toBe(false);
@@ -171,8 +174,33 @@ describe("runSync: dry_run", () => {
     expect(store.states.get("U_CANCEL")!.dryRunResult).toMatch(/^would_block:message_not_approved:removal_notice/);
   });
 
-  it("課金中のアカウントとメールが一致したら自動でつなぐ（大文字・空白の違いは同じとみなす）", async () => {
+  it("判定が前と同じなら dry_run_at を変えず、行を書き直さない", async () => {
     store.settings = { ...store.settings!, mode: "dry_run" };
+    seedTypical();
+    const { deps, nowRef } = makeSyncDeps({ store, slack });
+    await runSync(deps);
+    const firstAt = store.states.get("U_PAID")!.dryRunAt;
+    nowRef.now = new Date("2026-10-27T05:00:00Z");
+    const r = await runSync(deps);
+    expect(r.statesWritten).toBe(0);
+    expect(store.states.get("U_PAID")!.dryRunAt).toEqual(firstAt);
+  });
+
+  it("test モードでは test_user_ids の人だけつながりを書く", async () => {
+    seedTypical();
+    store.users.push({ userId: "user-paid2", email: "paid2@example.com", sub: PAID });
+    slack.members.push(memberWithEmail("U_PAID2", "paid2@example.com"));
+    store.settings = { ...store.settings!, mode: "test", testUserIds: ["U_PAID2"] };
+    const { deps } = makeSyncDeps({ store, slack });
+    const r = await runSync(deps);
+    expect(r.linksCreated).toBe(1);
+    expect(store.links.map((l) => l.slackUserId)).toEqual(["U_PAID2"]);
+    expect(store.states.get("U_PAID")!.dryRunResult).toBe("not_test_target:keep:would_link");
+  });
+});
+
+describe("runSync: つながり", () => {
+  it("課金中のアカウントとメールが一致したら自動でつなぐ（大文字・空白の違いは同じとみなす）", async () => {
     seedTypical();
     store.users.push({ userId: "user-paid2", email: "paid2@example.com", sub: PAID });
     slack.members.push(memberWithEmail("U_PAID2", "  PAID2@example.com "));
@@ -455,8 +483,8 @@ describe("runSync: 外す前の再課金・つながり・外された確認", (
 describe("オーナーへの報告", () => {
   function seedDue() {
     slack.members = [
-      memberWithEmail("U_CANCEL", "canceled@example.com", { displayName: "解約 <太郎>" }),
-      memberWithEmail("U_LINK", "l@example.com", { displayName: "未接続花子" }),
+      memberWithEmail("U_CANCEL", "canceled@example.com"),
+      memberWithEmail("U_LINK", "l@example.com"),
       memberWithEmail("U_LATER", "later@example.com"),
     ];
     store.users = [
@@ -495,7 +523,7 @@ describe("オーナーへの報告", () => {
     );
   }
 
-  it("外す日が来た人を、名前のプロフィールリンクと管理画面リンク付きで自分宛てに1通送る", async () => {
+  it("外す日が来た人を、メンションと管理画面リンク付きで自分宛てに1通送る", async () => {
     seedDue();
     const { deps } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
@@ -503,8 +531,9 @@ describe("オーナーへの報告", () => {
     expect(r.due).toBe(2);
     const [report] = slack.textsTo("U0OWNER");
     expect(report).toContain("今日Slackから外す人：2人（解約1・未接続1）");
-    expect(report).toContain("<https://app.slack.com/team/U_CANCEL|解約 &lt;太郎&gt;> 解約（外す日 10月27日）");
-    expect(report).toContain("<https://app.slack.com/team/U_LINK|未接続花子> 未接続（外す日 10月27日）");
+    // 人はメンションで書く（名前は Slack が表示する）
+    expect(report).toContain("• <@U_CANCEL> 解約（外す日 10月27日）");
+    expect(report).toContain("• <@U_LINK> 未接続（外す日 10月27日）");
     expect(report).not.toContain("U_LATER");
     expect(report).toContain("<https://bono.slack.com/admin|管理>");
     expect(store.settings!.ownerReportSentOn).toBe("2026-10-27");
@@ -520,7 +549,7 @@ describe("オーナーへの報告", () => {
   });
 
   it("確認が必要な人（送れたか不明）も報告する", async () => {
-    slack.members = [memberWithEmail("U_Q", "q@example.com", { displayName: "不明さん" })];
+    slack.members = [memberWithEmail("U_Q", "q@example.com")];
     store.states.set(
       "U_Q",
       makeState({ slackUserId: "U_Q", classification: "needs_link", needsReview: true, reviewReason: "send_unknown:timeout" }),
@@ -531,7 +560,7 @@ describe("オーナーへの報告", () => {
     const [report] = slack.textsTo("U0OWNER");
     expect(report).toContain("今日Slackから外す人：0人");
     expect(report).toContain("確認が必要な人：1人");
-    expect(report).toContain("<https://app.slack.com/team/U_Q|不明さん> DMが届いたか不明");
+    expect(report).toContain("• <@U_Q> DMが届いたか不明");
   });
 
   it("報告する人がいない日は送らない（auth.test も呼ばない）", async () => {
@@ -577,6 +606,100 @@ describe("オーナーへの報告", () => {
     const r = buildOwnerReport(states, members, "2026-10-27", "https://bono.slack.com/admin")!;
     expect(r.due).toBe(65);
     expect(r.vars.due_list).toContain("…ほか 5人");
+  });
+});
+
+describe("review の指摘への対応", () => {
+  it("つながりの相手が課金中でなくても、メールの一致で課金中の人がいれば keep", async () => {
+    slack.members = [memberWithEmail("U_S", "paid@example.com")];
+    store.users = [
+      { userId: "user-old", email: "old@example.com", sub: CANCELED },
+      { userId: "user-paid", email: "paid@example.com", sub: PAID },
+    ];
+    store.links = [{ userId: "user-old", teamId: TEAM_ID, slackUserId: "U_S", linkedVia: "dm_link" }];
+    const { deps } = makeSyncDeps({ store, slack });
+    const r = await runSync(deps);
+    expect(store.states.get("U_S")!.classification).toBe("keep");
+    expect(slack.postCalls).toHaveLength(0);
+    expect(r.linksCreated).toBe(0); // 古いつながりは cron では書き換えない（/slack/link・マイページでつなぎ直す）
+  });
+
+  it("つながりの相手が消えていても、メールの一致で課金中の人がいれば keep", async () => {
+    slack.members = [memberWithEmail("U_S", "paid@example.com")];
+    store.users = [{ userId: "user-paid", email: "paid@example.com", sub: PAID }];
+    store.links = [{ userId: "user-gone", teamId: TEAM_ID, slackUserId: "U_S", linkedVia: "dm_link" }];
+    const { deps } = makeSyncDeps({ store, slack });
+    await runSync(deps);
+    expect(store.states.get("U_S")!.classification).toBe("keep");
+  });
+
+  it("手で残す人（keep_slack_user_ids / keep_user_ids）は課金の記録がなくても keep。DMは送らない", async () => {
+    slack.members = [
+      memberWithEmail("U_KEEP_SLACK", "nobody@example.com"),
+      memberWithEmail("U_KEEP_USER", "legacy@example.com"),
+      memberWithEmail("U_X", "x@example.com"),
+    ];
+    store.users = [{ userId: "user-legacy", email: "legacy@example.com", sub: null }];
+    store.settings = { ...store.settings!, keepSlackUserIds: ["U_KEEP_SLACK"], keepUserIds: ["user-legacy"] };
+    const { deps } = makeSyncDeps({ store, slack });
+    await runSync(deps);
+    expect(store.states.get("U_KEEP_SLACK")!).toMatchObject({ classification: "keep", reason: "manual_keep" });
+    expect(store.states.get("U_KEEP_USER")!).toMatchObject({ classification: "keep", reason: "manual_keep" });
+    // 手で残す BONO ユーザーはメール一致で自動でつなぐ
+    expect(store.links).toContainEqual({ userId: "user-legacy", teamId: TEAM_ID, slackUserId: "U_KEEP_USER", linkedVia: "email" });
+    expect(slack.textsTo("U_KEEP_SLACK")).toHaveLength(0);
+    expect(slack.textsTo("U_KEEP_USER")).toHaveLength(0);
+    expect(slack.textsTo("U_X")).toHaveLength(1);
+  });
+
+  it("確保できなかった DM は黙って見送らず、確認待ちにして報告に出す", async () => {
+    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com")];
+    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    vi.spyOn(store, "claimDm").mockResolvedValue(false);
+    const { deps } = makeSyncDeps({ store, slack });
+    const r = await runSync(deps);
+    expect(r.dm.needsReview).toBe(1);
+    expect(store.states.get("U_CANCEL")!).toMatchObject({ needsReview: true, reviewReason: "not_claimed:removal_notice" });
+    expect(r.needsReview).toBe(1);
+    expect(r.ownerReport).toBe("sent");
+    expect(slack.textsTo("U0OWNER")[0]).toContain("<@U_CANCEL>");
+  });
+
+  it("課金中→解約→再課金→未接続… と回が変わっても、外す日はいつも今の回の DM から7日以上あと", async () => {
+    slack.members = [memberWithEmail("U_S", "s@example.com")];
+    store.users = [{ userId: "user-s", email: "s@example.com", sub: null }];
+    const { deps, nowRef } = makeSyncDeps({ store, slack });
+    // 1回目: 未接続 → つなぐお願い（10/27）
+    await runSync(deps);
+    expect(store.states.get("U_S")!.linkRequestDmAt).not.toBeNull();
+    // 課金して keep（11/1）
+    store.users[0].sub = PAID;
+    nowRef.now = new Date("2026-11-01T01:30:00Z");
+    await runSync(deps);
+    expect(store.states.get("U_S")!.classification).toBe("keep");
+    expect(store.states.get("U_S")!.linkRequestDmAt).toBeNull();
+    // 期限（11/10）をずっと過ぎてから、課金の記録がなくなった（12/20）→ 期限切れではなく新しいつなぐお願い
+    store.users[0].sub = null;
+    store.links = [];
+    nowRef.now = new Date("2026-12-20T01:30:00Z");
+    await runSync(deps);
+    const s = store.states.get("U_S")!;
+    expect(s.classification).toBe("needs_link");
+    expect(s.linkDeadline).toBe("2027-01-03");
+    expect(slack.textsTo("U_S")).toHaveLength(2);
+    expect(isDueForRemoval(s, "2026-12-20")).toBe(false);
+  });
+
+  it("猶予が min_notice_days より短くても、外す日は DM から min_notice_days 以上あと", async () => {
+    slack.members = [memberWithEmail("U_S", "s@example.com")];
+    store.settings = { ...store.settings!, linkGraceDays: 2, minNoticeDays: 7 };
+    const { deps, nowRef } = makeSyncDeps({ store, slack });
+    await runSync(deps); // 10/27 につなぐお願い、期限 10/29
+    nowRef.now = new Date("2026-10-30T01:30:00Z");
+    await runSync(deps);
+    const s = store.states.get("U_S")!;
+    expect(s.reason).toBe("link_expired");
+    expect(s.removeAfter).toBe("2026-11-03");
   });
 });
 

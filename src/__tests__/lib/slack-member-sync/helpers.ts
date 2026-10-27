@@ -35,7 +35,6 @@ export function makeMember(overrides: Partial<SlackMemberSummary> = {}): SlackMe
     isOwner: false,
     isPrimaryOwner: false,
     emailHash: null,
-    displayName: "テスト太郎",
     ...overrides,
   };
 }
@@ -92,6 +91,9 @@ export class MemorySyncStore implements SyncStore, LinkStore {
     minNoticeDays: 7,
     linkGraceDays: 14,
     ownerReportSentOn: null,
+    keepUserIds: [],
+    keepSlackUserIds: [],
+    testBonoUserIds: [],
   };
   /** 実行中に設定を書き換えるテスト用（getSettings の n 回目以降に適用） */
   settingsAfter: { calls: number; settings: SyncSettings } | null = null;
@@ -219,9 +221,11 @@ export class MemorySyncStore implements SyncStore, LinkStore {
         t.usedAt = this.clock();
         return "already_linked";
       }
-      return "slack_linked_to_other";
+      // SQL 関数と同じ: 相手が課金中（手で残す人を含む）なら断る
+      if (this.isPaid(bySlack.userId)) return "slack_linked_to_other";
     }
     if (this.links.some((l) => l.userId === userId)) return "user_linked_to_other";
+    if (bySlack) this.links = this.links.filter((l) => l !== bySlack);
     this.links.push({
       userId,
       teamId: t.teamId,
@@ -230,6 +234,12 @@ export class MemorySyncStore implements SyncStore, LinkStore {
     });
     t.usedAt = this.clock();
     return "linked";
+  }
+
+  isPaid(userId: string): boolean {
+    if (this.settings?.keepUserIds.includes(userId)) return true;
+    const u = this.users.find((x) => x.userId === userId);
+    return Boolean(u?.sub?.hasPaidRecord && u.sub.isActive);
   }
 
   async getLinkByUserId(userId: string) {
@@ -363,5 +373,5 @@ export function makeSyncDeps(
 
 /** メール付きの Slack メンバー */
 export function memberWithEmail(id: string, email: string | null, overrides: Partial<SlackMemberSummary> = {}) {
-  return makeMember({ id, emailHash: email ? hashEmail(email) : null, displayName: `名前${id}`, ...overrides });
+  return makeMember({ id, emailHash: email ? hashEmail(email) : null, ...overrides });
 }

@@ -5,7 +5,7 @@ vi.mock("server-only", () => ({}));
 
 import { createHash } from "node:crypto";
 import { createSyncSlackClient, hashEmail } from "@/lib/slack-member-sync/slack-api";
-import { getSyncMessageBlockReason, renderSyncMessage, escapeMrkdwn } from "@/lib/slack-member-sync/messages/common";
+import { getSyncMessageBlockReason, renderSyncMessage } from "@/lib/slack-member-sync/messages/common";
 import { LINK_REQUEST_MESSAGE } from "@/lib/slack-member-sync/messages/link-request";
 import { REMOVAL_NOTICE_MESSAGE } from "@/lib/slack-member-sync/messages/removal-notice";
 import { OWNER_REPORT_MESSAGE } from "@/lib/slack-member-sync/messages/owner-report";
@@ -58,10 +58,13 @@ describe("Slack API クライアント（#263）", () => {
     expect(result.data.nextCursor).toBe("dXNlcjpVMDYx");
     expect(result.data.members).toHaveLength(2);
     const [m1, m2] = result.data.members;
-    expect(m1).toMatchObject({ id: "U1", teamId: "T1", isAdmin: true, displayName: "表示名", emailHash: hashEmail("a@example.com") });
+    expect(m1).toMatchObject({ id: "U1", teamId: "T1", isAdmin: true, emailHash: hashEmail("a@example.com") });
+    // 名前は取り出さない
+    expect(JSON.stringify(m1)).not.toContain("表示名");
+    expect(JSON.stringify(m1)).not.toContain("本名");
     expect(JSON.stringify(m1)).not.toContain("example.com");
     expect(JSON.stringify(m1)).not.toContain("090");
-    expect(m2).toMatchObject({ id: "U2", deleted: true, emailHash: null, displayName: "U2" });
+    expect(m2).toMatchObject({ id: "U2", deleted: true, emailHash: null });
   });
 
   it("最後のページは next_cursor が空", async () => {
@@ -140,10 +143,6 @@ describe("DM 本文", () => {
       { summary: "{{x}}", due_list: "a", review: "", admin_url: "https://bono.slack.com/admin" },
     );
     expect(r.ok).toBe(true);
-  });
-
-  it("escapeMrkdwn は & < > をエスケープする", () => {
-    expect(escapeMrkdwn("<@U1> & co")).toBe("&lt;@U1&gt; &amp; co");
   });
 });
 

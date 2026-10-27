@@ -67,13 +67,18 @@ function fail(what: string, error: { code?: string } | null): never {
   throw new Error(`${what} failed: ${error?.code ?? "unknown"}`);
 }
 
+function strings(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((v): v is string => typeof v === "string") : [];
+}
+
 function mapSettings(data: DbRow): SyncSettings {
   const mode = MODES.includes(data.mode as SyncMode) ? (data.mode as SyncMode) : "off";
   return {
     mode,
-    testUserIds: Array.isArray(data.test_user_ids)
-      ? (data.test_user_ids as unknown[]).filter((v): v is string => typeof v === "string")
-      : [],
+    testUserIds: strings(data.test_user_ids),
+    keepUserIds: strings(data.keep_user_ids),
+    keepSlackUserIds: strings(data.keep_slack_user_ids),
+    testBonoUserIds: strings(data.test_bono_user_ids),
     minNoticeDays: Number(data.min_notice_days ?? 7),
     linkGraceDays: Number(data.link_grace_days ?? 14),
     ownerReportSentOn: typeof data.owner_report_sent_on === "string" ? data.owner_report_sent_on : null,
@@ -148,7 +153,9 @@ export function createSupabaseSyncStore(client: SupabaseClient): SyncStore & Lin
   async function getSettings(): Promise<SyncSettings | null> {
     const { data, error } = await client
       .from(SETTINGS)
-      .select("mode, test_user_ids, min_notice_days, link_grace_days, owner_report_sent_on")
+      .select(
+        "mode, test_user_ids, min_notice_days, link_grace_days, owner_report_sent_on, keep_user_ids, keep_slack_user_ids, test_bono_user_ids",
+      )
       .eq("id", 1)
       .maybeSingle();
     if (error) fail("settings read", error);

@@ -10,7 +10,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/subscription";
-import { inspectLinkToken, isPaidActive } from "@/lib/slack-member-sync/link-flow";
+import { inspectLinkToken, isPaidForLink } from "@/lib/slack-member-sync/link-flow";
 import { getSyncStore } from "@/lib/slack-member-sync/runtime";
 import { SlackLinkConfirm } from "./SlackLinkConfirm";
 import { SlackLinkResult } from "./SlackLinkResult";
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 function Frame({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-[60vh] px-4 py-16">
-      <div className="mx-auto max-w-[480px] rounded-2xl border border-border-light bg-white p-6 sm:p-8">{children}</div>
+      <div className="mx-auto max-w-[480px] rounded-2xl border border-border-light bg-surface p-6 sm:p-8">{children}</div>
     </div>
   );
 }
@@ -57,7 +57,7 @@ export default async function SlackLinkPage({
   try {
     [state, paid] = await Promise.all([
       inspectLinkToken(store, token),
-      store.getSubscription(user.id).then(isPaidActive),
+      isPaidForLink(store, user.id),
     ]);
   } catch (error) {
     console.error("[slack-member-sync] link page failed:", error instanceof Error ? error.message : "unknown");
@@ -76,7 +76,7 @@ export default async function SlackLinkPage({
       <Frame>
         <SlackLinkResult status="not_paid" />
         {user.email && (
-          <p className="mt-4 text-[13px] leading-5 text-text-muted">ログイン中：{user.email}</p>
+          <p className="mt-4 text-xs leading-5 text-text-muted">ログイン中：{user.email}</p>
         )}
       </Frame>
     );

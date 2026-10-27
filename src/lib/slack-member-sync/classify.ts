@@ -7,6 +7,7 @@
  *
  * ルール（rebono/issues/263 の「毎日のチェック」）:
  * - ボット・削除済み・ゲスト・招待中・別チーム・オーナー・管理者は対象外（excluded）
+ * - 手で残すと決めた人（keep_user_ids / keep_slack_user_ids）→ keep
  * - 課金中（is_active）→ keep。解約予約中も期間の終わりまでは Slack に残す
  * - 解約予約あり・解約済み → remove_scheduled。外れるお知らせDMを1回だけ送る
  *     外す日 = max(課金が終わる日の翌日, お知らせDMを送った日 + min_notice_days)
@@ -14,7 +15,9 @@
  *     外す日はお知らせDMを送れた時点で決まり、以後は計算し直さない（送れるまでは null）
  * - つながっていない・課金の記録がない → needs_link。つなぐお願いDMを1回だけ送る
  *     期限（DMを送った日 + link_grace_days）を過ぎてもつながらなければ remove_scheduled（link_expired）。
- *     つなぐお願いDMに期限と「外れることがある」を書いているので、2通目のDMは送らない。外す日は期限の翌日
+ *     つなぐお願いDMに期限と「外れることがある」を書いているので、2通目のDMは送らない。
+ *     外す日は max(期限の翌日, DMの日 + min_notice_days)
+ * - 外す予定・つなぐ待ちの「回」を抜けたら、その回の DM の記録を消す（また同じ状態になったら新しい DM から）
  * - 外す日の前に再課金・つながった → keep に戻し、外す予定を消す（DMは送らない）
  * - 外す予定・つなぐ待ちの人が Slack で削除済みになっていた → resolved（deactivated）
  * - needs_review が立っている人には DM を送らない（送れたか分からない等。オーナーが確認して外す）。
@@ -45,6 +48,8 @@ export interface ClassifyInput {
   state: SyncState | null;
   settings: Pick<SyncSettings, "minNoticeDays" | "linkGraceDays">;
   now: Date;
+  /** 手で「残す」と決めた人（settings.keep_user_ids / keep_slack_user_ids）。課金に関係なく keep */
+  manualKeep?: boolean;
 }
 
 export interface ClassifyResult {
@@ -129,8 +134,46 @@ function result(next: SyncState | null, extra: Partial<ClassifyResult> = {}): Cl
 
 const OPEN: Classification[] = ["remove_scheduled", "needs_link"];
 
+/** つなぐお願いの記録を消す（つなぐ待ちの「回」を終える。次に未接続になったら新しいDMと猶予から） */
+const CLEAR_LINK: Pick<SyncState, "linkRequestDmAt" | "linkRequestVersion" | "linkDeadline"> = {
+  linkRequestDmAt: null,
+  linkRequestVersion: null,
+  linkDeadline: null,
+};
+/** 外れるお知らせの記録を消す（外す予定の「回」を終える。次に外す予定になったら新しいお知らせから） */
+const CLEAR_REMOVAL: Pick<SyncState, "removalNoticeDmAt" | "removalNoticeVersion" | "removeAfter"> = {
+  removalNoticeDmAt: null,
+  removalNoticeVersion: null,
+  removeAfter: null,
+};
+
+/** 今の状態が「つなぐ待ちの回」の途中か（つなぐお願いを送ってある needs_link / link_expired） */
+function inLinkEpisode(state: SyncState | null): state is SyncState & { linkRequestDmAt: Date } {
+  if (!state || state.linkRequestDmAt === null) return false;
+  return (
+    state.classification === "needs_link" ||
+    (state.classification === "remove_scheduled" && state.reason === "link_expired")
+  );
+}
+
+/** 今の状態が「外す予定の回」で、お知らせを送ってあるか（解約予約・解約済み） */
+function inNoticedRemovalEpisode(state: SyncState | null): boolean {
+  return (
+    state !== null &&
+    state.classification === "remove_scheduled" &&
+    (state.reason === "canceled" || state.reason === "cancel_reserved") &&
+    state.removalNoticeDmAt !== null &&
+    state.removeAfter !== null
+  );
+}
+
+/**
+ * 守ること: 外す日が来る人には、必ず「今の回」で DM を送ってあり、
+ * 外す日はその DM の日 + min_notice_days 以降になる。
+ * そのため、外す予定・つなぐ待ちの回を抜けるとき（keep / excluded / resolved / 別の判定）は、その回の DM の記録を消す。
+ */
 export function classifyMember(input: ClassifyInput): ClassifyResult {
-  const { member, teamId, match, state, settings, now } = input;
+  const { member, teamId, match, state, settings, now, manualKeep = false } = input;
   const today = toJstDate(now);
   const base: SyncState = state ? { ...state } : freshState(member, teamId, now);
 
@@ -142,37 +185,30 @@ export function classifyMember(input: ClassifyInput): ClassifyResult {
       // 外す予定・つなぐ待ちだった人が外されていた → 閉じる
       return result({
         ...base,
+        ...CLEAR_LINK,
+        ...CLEAR_REMOVAL,
         classification: "resolved",
         resolvedAt: now,
         resolvedReason: "deactivated",
       });
     }
     if (state.classification === "resolved") return result(base);
-    return result({
-      ...base,
-      classification: "excluded",
-      reason: excluded,
-      removeAfter: null,
-      linkDeadline: null,
-    });
+    return result({ ...base, ...CLEAR_LINK, ...CLEAR_REMOVAL, classification: "excluded", reason: excluded });
   }
 
   const sub = match?.subscription ?? null;
 
-  // 2) 課金中（解約予約なし）→ 残す
-  if (sub && sub.hasPaidRecord && sub.isActive && !sub.cancelAtPeriodEnd) {
+  // 2) 手で残すと決めた人・課金中（解約予約なし）→ 残す
+  if (manualKeep || (sub && sub.hasPaidRecord && sub.isActive && !sub.cancelAtPeriodEnd)) {
     const wasOpen = state !== null && OPEN.includes(state.classification);
     const resolvedReason: ResolvedReason =
       state?.classification === "needs_link" || state?.reason === "link_expired" ? "linked" : "resubscribed";
     return result({
       ...base,
+      ...CLEAR_LINK,
+      ...CLEAR_REMOVAL,
       classification: "keep",
-      reason: null,
-      removeAfter: null,
-      linkDeadline: null,
-      // 次にまた解約したら、新しい外す日でお知らせし直す
-      removalNoticeDmAt: null,
-      removalNoticeVersion: null,
+      reason: manualKeep ? "manual_keep" : null,
       needsReview: base.reviewReason === SOFT_REVIEW_REASON ? false : base.needsReview,
       reviewReason: base.reviewReason === SOFT_REVIEW_REASON ? null : base.reviewReason,
       resolvedAt: wasOpen ? now : base.resolvedAt,
@@ -184,17 +220,16 @@ export function classifyMember(input: ClassifyInput): ClassifyResult {
   if (sub && sub.hasPaidRecord) {
     const reason = sub.isActive ? "cancel_reserved" : "canceled";
     const endDate = toJstDate(endOf(sub, now));
-    // お知らせ済みなら送り直さず、外す日も変えない（解約予約→解約済みになった人・削除済みから戻された人も同じ）。
-    // 再課金で keep に戻ったときにお知らせの記録を消すので、また解約したら新しい外す日でお知らせし直す
-    const noticed = state !== null && state.removalNoticeDmAt !== null && state.removeAfter !== null;
+    // この回でお知らせ済みなら送り直さず、外す日も変えない（解約予約→解約済みになった人も同じ回）
+    const noticed = inNoticedRemovalEpisode(state);
     const next: SyncState = {
       ...base,
+      ...CLEAR_LINK,
+      ...(noticed ? {} : CLEAR_REMOVAL),
       classification: "remove_scheduled",
       reason,
-      linkDeadline: null,
       resolvedAt: null,
       resolvedReason: null,
-      removeAfter: noticed ? base.removeAfter : null,
     };
     if (noticed) return result(next, { endDate });
     return result(next, {
@@ -206,37 +241,44 @@ export function classifyMember(input: ClassifyInput): ClassifyResult {
 
   // 4) つながっていない・課金の記録がない → つなぐお願い
   const needsLinkReason = match ? "no_paid_record" : "not_linked";
-  if (state?.linkRequestDmAt) {
-    const deadline = state.linkDeadline ?? addDays(toJstDate(state.linkRequestDmAt), settings.linkGraceDays);
+  if (inLinkEpisode(state)) {
+    const sentOn = toJstDate(state.linkRequestDmAt);
+    const deadline = state.linkDeadline ?? addDays(sentOn, settings.linkGraceDays);
     if (today > deadline) {
+      // 外す日は期限の翌日。ただし DM の日 + min_notice_days より前にはしない
+      const removeAfter =
+        state.reason === "link_expired" && state.removeAfter
+          ? state.removeAfter
+          : laterDate(addDays(deadline, 1), addDays(sentOn, settings.minNoticeDays));
       return result({
         ...base,
+        ...CLEAR_REMOVAL,
         classification: "remove_scheduled",
         reason: "link_expired",
         linkDeadline: deadline,
-        removeAfter:
-          state.reason === "link_expired" && state.removeAfter ? state.removeAfter : addDays(deadline, 1),
+        removeAfter,
         resolvedAt: null,
         resolvedReason: null,
       });
     }
     return result({
       ...base,
+      ...CLEAR_REMOVAL,
       classification: "needs_link",
       reason: needsLinkReason,
       linkDeadline: deadline,
-      removeAfter: null,
       resolvedAt: null,
       resolvedReason: null,
     });
   }
+  // 新しい「つなぐ待ちの回」: つなぐお願いを送る
   return result(
     {
       ...base,
+      ...CLEAR_LINK,
+      ...CLEAR_REMOVAL,
       classification: "needs_link",
       reason: needsLinkReason,
-      linkDeadline: null,
-      removeAfter: null,
       resolvedAt: null,
       resolvedReason: null,
     },

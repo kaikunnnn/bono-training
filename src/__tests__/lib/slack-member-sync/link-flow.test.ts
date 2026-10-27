@@ -3,7 +3,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("server-only", () => ({}));
 
-import { confirmLink, inspectLinkToken, MYPAGE_DAILY_LIMIT, requestMypageLink, type MypageLinkDeps } from "@/lib/slack-member-sync/link-flow";
+import {
+  canUseMypageCard,
+  confirmLink,
+  inspectLinkToken,
+  MYPAGE_DAILY_LIMIT,
+  requestMypageLink,
+  type MypageLinkDeps,
+} from "@/lib/slack-member-sync/link-flow";
 import { MYPAGE_CONFIRM_MESSAGE } from "@/lib/slack-member-sync/messages/mypage-confirm";
 import { hashToken } from "@/lib/slack-member-sync/tokens";
 import { FakeSyncSlack, MemorySyncStore, TEAM_ID, makeMember } from "./helpers";
@@ -86,6 +93,27 @@ describe("DM のリンクでつなぐ（/slack/link）", () => {
     expect(store.links[0].userId).toBe("user-paid2");
   });
 
+  it("Slack アカウントのつながりの相手が課金中でない（いない）なら、ログイン中の課金中アカウントでつなぎ直す", async () => {
+    store.users.push({ userId: "user-old", email: "old@example.com", sub: { ...PAID, isActive: false } });
+    store.links.push({ userId: "user-old", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "email" });
+    addToken(RAW);
+    expect(await confirmLink(store, RAW, "user-paid")).toBe("linked");
+    expect(store.links).toEqual([{ userId: "user-paid", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "dm_link" }]);
+  });
+
+  it("手で残す人（keep_user_ids）とつながっている Slack アカウントはつなぎ直さない", async () => {
+    store.settings = { ...store.settings!, keepUserIds: ["user-free"] };
+    store.links.push({ userId: "user-free", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "email" });
+    addToken(RAW);
+    expect(await confirmLink(store, RAW, "user-paid")).toBe("slack_linked_to_other");
+  });
+
+  it("手で残す人（keep_user_ids）は課金の記録がなくてもつなげる", async () => {
+    store.settings = { ...store.settings!, keepUserIds: ["user-free"] };
+    addToken(RAW);
+    expect(await confirmLink(store, RAW, "user-free")).toBe("linked");
+  });
+
   it("BONO アカウントが別の Slack アカウントとつながっていれば断る", async () => {
     store.links.push({ userId: "user-paid", teamId: TEAM_ID, slackUserId: "U_OTHER", linkedVia: "email" });
     addToken(RAW);
@@ -134,11 +162,24 @@ describe("マイページの「Slackとつなぐ」", () => {
     expect(store.tokens[0].slackUserId).toBeNull();
   });
 
-  it("別の BONO アカウントとつながっている Slack アカウントには送らない（同じ結果）", async () => {
+  it("別の課金中の BONO アカウントとつながっている Slack アカウントには送らない（同じ結果）", async () => {
+    store.users.push({ userId: "user-x", email: "x@example.com", sub: PAID });
     store.links.push({ userId: "user-x", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "email" });
     slack.lookupResult = () => ({ kind: "ok", data: makeMember({ id: "U_SLACK" }) });
     expect(await requestMypageLink(deps(), "user-paid", "a@example.com")).toBe("sent");
     expect(slack.postCalls).toHaveLength(0);
+  });
+
+  it("つながりの相手が課金中でない Slack アカウントには送る（つなぎ直せる）", async () => {
+    store.links.push({ userId: "user-free", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "email" });
+    slack.lookupResult = () => ({ kind: "ok", data: makeMember({ id: "U_SLACK" }) });
+    expect(await requestMypageLink(deps(), "user-paid", "a@example.com")).toBe("sent");
+    expect(slack.textsTo("U_SLACK")).toHaveLength(1);
+  });
+
+  it("手で残す人（keep_user_ids）は課金の記録がなくても使える", async () => {
+    store.settings = { ...store.settings!, keepUserIds: ["user-free"] };
+    expect(await requestMypageLink(deps(), "user-free", "a@example.com")).toBe("sent");
   });
 
   it("ボット・ゲスト・別チームには送らない（同じ結果）", async () => {
@@ -156,8 +197,10 @@ describe("マイページの「Slackとつなぐ」", () => {
     expect(store.tokens[0].slackUserId).toBeNull();
   });
 
-  it("test モードでは test_user_ids の人にだけ送る", async () => {
-    store.settings = { ...store.settings!, mode: "test", testUserIds: ["U_TEST"] };
+  it("test モードでは test_bono_user_ids の人だけが使え、DM は test_user_ids の人にだけ送る", async () => {
+    store.settings = { ...store.settings!, mode: "test", testUserIds: ["U_TEST"], testBonoUserIds: [] };
+    expect(await requestMypageLink(deps(), "user-paid", "a@example.com")).toBe("unavailable");
+    store.settings = { ...store.settings!, testBonoUserIds: ["user-paid"] };
     slack.lookupResult = () => ({ kind: "ok", data: makeMember({ id: "U_SLACK" }) });
     await requestMypageLink(deps(), "user-paid", "a@example.com");
     expect(slack.postCalls).toHaveLength(0);
@@ -190,5 +233,17 @@ describe("マイページの「Slackとつなぐ」", () => {
     const raw = /t=([A-Za-z0-9_-]+)\|/.exec(slack.textsTo("U_SLACK")[0])![1];
     expect(await confirmLink(store, raw, "user-paid")).toBe("linked");
     expect(store.links[0]).toMatchObject({ slackUserId: "U_SLACK", linkedVia: "mypage" });
+  });
+});
+
+describe("マイページのカードを見せる相手（canUseMypageCard）", () => {
+  it("live は全員・test は test_bono_user_ids だけ・off / dry_run は誰にも見せない", () => {
+    const base = store.settings!;
+    expect(canUseMypageCard({ ...base, mode: "live" }, "u1")).toBe(true);
+    expect(canUseMypageCard({ ...base, mode: "test", testBonoUserIds: [] }, "u1")).toBe(false);
+    expect(canUseMypageCard({ ...base, mode: "test", testBonoUserIds: ["u1"] }, "u1")).toBe(true);
+    expect(canUseMypageCard({ ...base, mode: "dry_run", testBonoUserIds: ["u1"] }, "u1")).toBe(false);
+    expect(canUseMypageCard({ ...base, mode: "off" }, "u1")).toBe(false);
+    expect(canUseMypageCard(null, "u1")).toBe(false);
   });
 });

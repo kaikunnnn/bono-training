@@ -2,7 +2,7 @@
  * Slack を課金メンバーだけに保つ定期整理（#263）の共通型。純粋な型のみ（どこからでも import 可）。
  *
  * 保存しない: 名前・メール・プロフィール・DM本文・トークン（使い捨てリンクの値はハッシュだけ）。
- * 表示名は日次 cron のメモリ上だけで使い（オーナーへの報告DM）、DB にもログにも出さない。
+ * 名前は扱わない（オーナー報告DMは <@U…> のメンションで Slack に名前を出してもらう）。
  */
 
 export type SyncMode = "off" | "dry_run" | "test" | "live";
@@ -17,6 +17,15 @@ export interface SyncSettings {
   linkGraceDays: number;
   /** オーナーへの報告DMを最後に送った日（JST, YYYY-MM-DD）。同じ日に二度送らない */
   ownerReportSentOn: string | null;
+  /**
+   * 手で「残す」と決めた BONO ユーザーID。課金の定義（live かつ stripe_subscription_id）に入らないが
+   * 実際は払っている人（旧 Memberstack・同期ズレ等）用。つなぐページ・マイページでも課金中として扱う
+   */
+  keepUserIds: string[];
+  /** 手で「残す」と決めた Slack ユーザーID */
+  keepSlackUserIds: string[];
+  /** test モードでマイページの「Slackとつなぐ」カードを見せる BONO ユーザーID */
+  testBonoUserIds: string[];
 }
 
 /** 判定 */
@@ -68,8 +77,6 @@ export interface SlackMemberSummary {
   isPrimaryOwner: boolean;
   /** md5(lower(trim(email)))。メールが取れない（スコープ不足・ボット等）なら null。メールそのものは持たない */
   emailHash: string | null;
-  /** 表示名（オーナー報告DMにだけ使う。保存・ログ出力しない） */
-  displayName: string;
 }
 
 /**

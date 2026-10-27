@@ -11,8 +11,7 @@ import "server-only";
  * - conversations.open / chat.postMessage: カイクンのユーザートークン（#238 と同じ）
  * - 429 は Retry-After 秒以上待つ（待つのは呼び出し側）: https://docs.slack.dev/apis/web-api/rate-limits/
  *
- * ★メールはここでハッシュ（md5(lower(trim))）にして捨てる。プロフィールはログに出さない。
- *   表示名は戻り値に入るが、オーナー報告DMに使うだけで保存しない。
+ * ★メールはここでハッシュ（md5(lower(trim))）にして捨てる。名前・プロフィールは取り出さない。
  */
 import { createHash } from "node:crypto";
 import { callSlack, createSlackClient, type FetchLike, type SlackCallResult } from "@/lib/slack-welcome/slack-api";
@@ -62,7 +61,6 @@ export function toMemberSummary(user: Record<string, unknown>): SlackMemberSumma
     isOwner: user.is_owner === true,
     isPrimaryOwner: user.is_primary_owner === true,
     emailHash: email ? hashEmail(email) : null,
-    displayName: str(profile.display_name) ?? str(profile.real_name) ?? str(user.real_name) ?? str(user.name) ?? id,
   };
 }
 

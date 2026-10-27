@@ -10,6 +10,10 @@ import "server-only";
  * - SLACK_WELCOME_TEAM_ID    … BONO の Slack ワークスペースID（T...）
  * - NEXT_PUBLIC_SITE_URL     … 使い捨てリンクの URL の元（未設定なら https://www.bo-no.design）
  * - SLACK_OPS_WEBHOOK_URL    … 運用アラート（件数だけ）
+ *
+ * 課金の照合は environment='live' の行だけを見る（SQL 関数で固定。Slack のメンバーは本番だけの概念のため）。
+ * NODE_ENV で test / live を切り替える getSubscriptionStatus とは違うので、ローカルで通しで試すときは
+ * テスト用ユーザーに environment='live' かつ stripe_subscription_id のある user_subscriptions 行を作る。
  */
 import { LINK_REQUEST_MESSAGE } from "./messages/link-request";
 import { OWNER_REPORT_MESSAGE } from "./messages/owner-report";
