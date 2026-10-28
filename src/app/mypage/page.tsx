@@ -6,6 +6,7 @@ import { MyPageShell, type TabId } from "./MyPageShell";
 import { ProgressSection } from "./sections/ProgressSection";
 import { BookmarksSection } from "./sections/BookmarksSection";
 import { HistorySection } from "./sections/HistorySection";
+import { SlackLinkSection } from "./sections/SlackLinkSection";
 import { ProgressSkeleton } from "./skeletons/ProgressSkeleton";
 import { BookmarksSkeleton } from "./skeletons/BookmarksSkeleton";
 import { HistorySkeleton } from "./skeletons/HistorySkeleton";
@@ -44,6 +45,12 @@ export default async function MyPage({
 
   return (
     <MyPageShell activeTab={tab}>
+      {/* 課金中で Slack と未接続の人にだけ出る（#263）。確認中は何も出さない */}
+      {tab === "all" && (
+        <Suspense fallback={null}>
+          <SlackLinkSection userId={user.id} />
+        </Suspense>
+      )}
       {showProgress && (
         <Suspense fallback={<ProgressSkeleton mode={progressMode} />}>
           <ProgressSection userId={user.id} mode={progressMode} />

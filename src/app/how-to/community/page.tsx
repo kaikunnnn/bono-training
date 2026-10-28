@@ -130,6 +130,9 @@ export default async function CommunityGuidePage() {
             <p>
               コミュニティ参加は専用リンクが必要です。上の「参加する」ボタンから進めましょう（参加は自動ではありません）。
             </p>
+            <p>
+              参加したあとは、SlackとBONOのアカウントが自動でつながります（メールアドレスが同じ場合）。つながらないときは、カイクンから届くDMのリンクからつないでください。
+            </p>
           </div>
           <div className="mt-7">
             <JoinButton isMember={isMember} className="w-fit" />
