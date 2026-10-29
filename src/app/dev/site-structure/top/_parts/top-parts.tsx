@@ -21,6 +21,11 @@ export const TOP_BASE = "/dev/site-structure/top";
 export const COMING_BASE = `${TOP_BASE}/coming`;
 /** 01 転職の入口ページ（v6 の本文＋悩み・次に整えたいこと。267-N） */
 export const CAREER_BASE = `${TOP_BASE}/career`;
+/** 各階層のハブ（267-Q 2章） */
+export const ROADMAP_HUB_BASE = `${TOP_BASE}/roadmap`;
+export const TROUBLES_HUB_BASE = `${TOP_BASE}/troubles`;
+export const STUDY_BASE = `${TOP_BASE}/study`;
+export const CAREER_GUIDE_BASE = `${TOP_BASE}/career-guide`;
 export const HERO_IMAGE = "/images/lesson-persona-ui/slides/slide-01.jpg";
 
 /** 試作の中のリンクには会員の見え方を引き継ぐ（本番ページへのリンクはそのまま） */

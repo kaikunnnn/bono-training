@@ -6,7 +6,7 @@
  * - 悩み → 主役（コースの章・単発のレッスン）: 267-J 4章。新しく足した項目は近いものを仮で当てた
  * - 入口（01〜03）: 267-L 4章を土台に、初心者が自然に当たるものを 01 に足した（仮）
  * - 親は1つだけ（267-O 1章）。悩み → 悩みの一覧、勉強法 → 勉強法、キャリア → キャリア
- * - 勉強法・キャリアの項目は S3 で使う（このスライスではデータだけ）
+ * - 勉強法・キャリアの項目は S3 のハブで使う。リンクは 2026-10-29 に localhost で実在を確かめた（/stories は名前の無い題で載せる）
  *
  * kari: true / nameKari: true は推測で書いた文言（画面では「仮」の印を付ける）。
  * 本番のページ（/lessons・/contents・/guide・/training・/questions・/how-to）はそのままの URL。
@@ -23,7 +23,7 @@ import { TOP_BASE } from "../_parts/top-parts";
 
 export type Parent = "troubles" | "study" | "career";
 export type EntryNo = "01" | "02" | "03";
-export type Kind = "記事" | "レッスン" | "お題" | "コース";
+export type Kind = "記事" | "レッスン" | "お題" | "コース" | "体験談";
 export type TroubleGroupId = "visual" | "structure" | "process" | "check";
 
 export interface TroubleGroup {
@@ -400,7 +400,8 @@ const TROUBLES: HubItem[] = [
     canDo: "聞いた話を、行動と気持ちに分けて整理できる",
     group: "process",
     entries: ["03"],
-    thumb: "persona-based-design",
+    // 一覧の中で同じ表紙が並ばないよう、主役とは別の実在レッスンの表紙にする（S1 のスクショへの指摘）
+    thumb: "zerokara-userinterview",
     main: {
       type: "lesson",
       slug: "persona-based-design",
@@ -477,7 +478,7 @@ const TROUBLES: HubItem[] = [
     canDo: "「誰の・何のために・だからこの形」の順で話せる",
     group: "check",
     entries: ["01", "03"],
-    thumb: "persona-based-design",
+    thumb: "purposeuidesign",
     main: {
       type: "lesson",
       slug: "persona-based-design",
@@ -499,7 +500,7 @@ const TROUBLES: HubItem[] = [
 ];
 
 // ------------------------------------------------------------
-// 勉強法（7。最後の1つは小さく置く）— S3 で使う
+// 勉強法（7。最後の1つは小さく置く）
 // ------------------------------------------------------------
 
 const STUDY: HubItem[] = [
@@ -511,7 +512,8 @@ const STUDY: HubItem[] = [
     canDo: "学ぶ順番の全体を知り、今週やることを決められる",
     links: [
       { kind: "記事", label: "現場10年目が教える、未経験からUIUXデザインを勉強する7つのコツ", href: "/guide/rdm-7-tips-for-learning-design" },
-      { kind: "記事", label: "転職ロードマップの中身を解説｜フェーズごとに目指すレベルと習得すること", href: "/guide/rdm-howtostart-roadmap" },
+      { kind: "記事", label: "未経験からUIUXデザイナーへ転職するロードマップ。プロが考えるスキル習得の流れ", href: "/guide/rdm-howtostart-roadmap" },
+      { kind: "レッスン", label: "デザインの学習環境", href: lessonHref("howtostudy") },
     ],
     related: [
       { id: "beginner-start", reason: "まったくの初めてなら、最初の1本から" },
@@ -526,6 +528,8 @@ const STUDY: HubItem[] = [
     canDo: "独学で行けるところと、人に見てもらう学び方の違いが分かる",
     links: [
       { kind: "記事", label: "デザイン学習の成功率UP「目標設定」のつくり方", href: "/guide/rdm-goalsetting" },
+      { kind: "レッスン", label: "UIが上手くなる人の“デザインサイクル”", href: lessonHref("ui-design-flow-lv1") },
+      { kind: "記事", label: "フィードバックの使い方", href: FEEDBACK_HREF },
     ],
     related: [
       { id: "get-feedback", reason: "見てもらう方法を、具体的に知る" },
@@ -541,6 +545,7 @@ const STUDY: HubItem[] = [
     links: [
       { kind: "レッスン", label: "はじめてのUIデザイン", href: lessonHref("uidesignbeginner") },
       { kind: "記事", label: "UI/UXデザイナーは未経験から転職できるのか？", href: "/guide/become-uiux-designer-beginner-guide" },
+      { kind: "レッスン", label: "Figmaの使い方入門", href: lessonHref("figmabeginner") },
     ],
     related: [
       { id: "practice", reason: "最初の1本のあとは、手を動かす練習へ" },
@@ -553,7 +558,11 @@ const STUDY: HubItem[] = [
     name: "働きながらUIデザインを学ぶ",
     when: "仕事と両立したい。始めても続かない",
     canDo: "平日と休日で、無理なく続く進め方を決められる",
-    links: [{ kind: "記事", label: "デザイン学習の成功率UP「目標設定」のつくり方", href: "/guide/rdm-goalsetting" }],
+    links: [
+      { kind: "体験談", label: "働きながらデザインを独学する方法（先輩の転職体験談）", href: "/stories/youhadouyatedezainanitara" },
+      { kind: "記事", label: "デザイン学習の成功率UP「目標設定」のつくり方", href: "/guide/rdm-goalsetting" },
+      { kind: "レッスン", label: "BONOのはじめかた", href: lessonHref("bono-onboarding") },
+    ],
     related: [
       { id: "practice", reason: "短い時間でも進む練習を選ぶ" },
       { id: "get-feedback", reason: "一人で続かないなら、見てもらう約束をつくる" },
@@ -568,6 +577,7 @@ const STUDY: HubItem[] = [
     links: [
       { kind: "レッスン", label: "UIトレース入門", href: lessonHref("uitrace") },
       { kind: "お題", label: "UIデザイン入門DailyUI", href: "/training/ui_starter_dailyui" },
+      { kind: "レッスン", label: "賃貸アプリで基本UIトレーニング", href: lessonHref("weeklyui-baseui-chintai") },
     ],
     related: [
       { id: "get-feedback", reason: "作ったものを見てもらうと、次の練習が決まる" },
@@ -584,6 +594,7 @@ const STUDY: HubItem[] = [
     links: [
       { kind: "記事", label: "フィードバックの使い方", href: FEEDBACK_HREF },
       { kind: "記事", label: "掲示板", href: BOARD_HREF },
+      { kind: "レッスン", label: "BONOフィードバック集", href: lessonHref("feedback") },
     ],
     related: [
       { id: "self-study", reason: "独学と、見てもらう学び方を比べる" },
@@ -597,13 +608,16 @@ const STUDY: HubItem[] = [
     when: "本や道具の学び方も知りたい",
     canDo: "手元に置く1冊と、Figmaの覚え方が分かる",
     small: true,
-    links: [{ kind: "レッスン", label: "Figmaの使い方入門", href: lessonHref("figmabeginner") }],
+    links: [
+      { kind: "レッスン", label: "Figmaの使い方入門", href: lessonHref("figmabeginner") },
+      { kind: "レッスン", label: "Figmaの使い方初級", href: lessonHref("figma-elementary") },
+    ],
     related: [{ id: "beginner-start", reason: "道具を覚えたら、最初の1画面へ" }],
   },
 ];
 
 // ------------------------------------------------------------
-// キャリア（7）— S3 で使う
+// キャリア（7）
 // ------------------------------------------------------------
 
 const CAREER: HubItem[] = [
@@ -614,7 +628,7 @@ const CAREER: HubItem[] = [
     when: "転職の進め方が分からない。年齢や経歴が不安。向いているか知りたい",
     canDo: "転職までの段取りと、今の自分の位置が分かる",
     links: [
-      { kind: "記事", label: "未経験からUI/UXデザイナーになるには？必要なスキル3つと書類で落ちない条件", href: "/guide/rdm-howtobeadesigner" },
+      { kind: "記事", label: "UIUXデザイナー転職で必要なスキルと要素は何？書類落ちしない条件をプロが解説", href: "/guide/rdm-howtobeadesigner" },
       { kind: "記事", label: "未経験からUI/UXデザイナーに転職した4つの事例", href: "/guide/beginner-to-uiux-designer-examples" },
       { kind: "記事", label: "UI/UXデザイナー転職を成功させる！“会社の調べ方”ガイド", href: "/guide/how-to-find-jobs-for-beginner-designers" },
     ],
@@ -646,6 +660,7 @@ const CAREER: HubItem[] = [
     canDo: "よく聞かれる質問に、ケーススタディで答えられる",
     links: [
       { kind: "記事", label: "UIUXデザイナー転職 面接質問集｜企業が見るポイントを学習に取り入れよう", href: "/guide/uiux-interview-tips-and-checkpoints" },
+      { kind: "体験談", label: "面接で気をつけること・受ける会社の選び方（先輩の転職体験談）", href: "/stories/youhadouyatedezainani-mos" },
     ],
     related: [
       { id: "portfolio", reason: "話す中身は、ポートフォリオで決まる" },
@@ -662,6 +677,7 @@ const CAREER: HubItem[] = [
     links: [
       { kind: "記事", label: "ジュニアUI/UXデザイナーのためのスキルマップ", href: "/guide/uiuxdesigner-skillmap" },
       { kind: "記事", label: "ユーザー理解がUIデザインを変える — 初心者が身につけるべきUXスキルの全体像", href: "/guide/uxresearch_and_uidesign" },
+      { kind: "レッスン", label: "UIUXデザイナーになる条件", href: lessonHref("wayofuiuxdesigner") },
     ],
     related: [
       { id: "become-designer", reason: "スキルが分かったら、転職の段取りへ" },
@@ -676,6 +692,7 @@ const CAREER: HubItem[] = [
     canDo: "デザインの理由を、相手の関心に合わせて話せる",
     links: [
       { kind: "記事", label: "プロダクトデザイナーの提案がPMに通らないときの考え方", href: "/guide/designer-proposal-after-mvp-marketing" },
+      { kind: "レッスン", label: "UIデザイナー1年目の立ち回り", href: lessonHref("rookiesaction") },
     ],
     related: [
       { id: "interview", reason: "面接でも、同じ話し方が使える" },
@@ -704,7 +721,10 @@ const CAREER: HubItem[] = [
     nameKari: true,
     when: "UIの案件を取りたい",
     canDo: "最初の案件までに準備することが分かる",
-    links: [],
+    links: [
+      { kind: "体験談", label: "副業・業務委託から始めたデザイナーへの道（先輩の転職体験談）", href: "/stories/howareyoubecomethedesigner-genta" },
+      { kind: "レッスン", label: "キャリア相談まとめ", href: lessonHref("dezainanokiyaria") },
+    ],
     related: [
       { id: "portfolio", reason: "案件でも、まず見られるのはポートフォリオ" },
       { id: "presentation", reason: "相手に提案を通す話し方" },
@@ -800,7 +820,7 @@ export function resolveMain(main: MainRef): ResolvedMain {
 }
 
 /** 形の印（主役＋リンクから。重複なし・決まった順） */
-const KIND_ORDER: Kind[] = ["コース", "レッスン", "記事", "お題"];
+const KIND_ORDER: Kind[] = ["コース", "レッスン", "記事", "お題", "体験談"];
 export function kindsOf(item: HubItem): Kind[] {
   const set = new Set<Kind>(item.links.map((l) => l.kind));
   if (item.main?.type === "course") set.add("コース");

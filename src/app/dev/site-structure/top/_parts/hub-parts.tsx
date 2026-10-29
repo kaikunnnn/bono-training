@@ -124,6 +124,7 @@ export function HubHeader({
   counts,
   covers,
   coversCaption,
+  aside,
 }: {
   crumbs: Crumb[];
   eyebrow: string;
@@ -135,6 +136,8 @@ export function HubHeader({
   /** 「ここで開けるレッスン」の表紙 */
   covers: (ResolvedLesson | null)[];
   coversCaption: string;
+  /** 表紙の扇の代わりに出す絵（表紙が少ないハブ用。キャリアは記事のサムネイルを並べる） */
+  aside?: ReactNode;
 }) {
   const shown = covers.filter((c): c is ResolvedLesson => Boolean(c?.iconImageUrl)).slice(0, 7);
   return (
@@ -162,7 +165,12 @@ export function HubHeader({
         </div>
 
         {/* ここで開けるレッスンの実物の表紙（「ここで何を作るか」が一目で分かる） */}
-        {shown.length > 0 ? (
+        {aside ? (
+          <figure className="min-w-0">
+            {aside}
+            <figcaption className="mt-3 font-noto-sans-jp text-xs leading-[1.6] text-text-muted">{coversCaption}</figcaption>
+          </figure>
+        ) : shown.length > 0 ? (
           <figure className="min-w-0">
             <div className="relative overflow-hidden rounded-[24px] border border-border-light bg-muted-custom px-4 pt-9 pb-12 sm:px-6 sm:pt-10 sm:pb-14">
               <ul className="flex items-end justify-center" aria-label="この一覧から開けるレッスンの表紙">
