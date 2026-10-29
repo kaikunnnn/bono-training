@@ -1,5 +1,5 @@
 /**
- * つなぐページ（/slack/link）・マイページの「Slackとつなぐ」の文言（#263）。純粋なデータ（クライアントからも import 可）。
+ * つなぐページ（/slack/link）・アカウント情報の「Slackとつなぐ」（/account/slack）の文言（#263）。純粋なデータ（クライアントからも import 可）。
  */
 
 export type LinkPageStatus =
@@ -15,7 +15,7 @@ export type LinkPageStatus =
   | "unavailable";
 
 const CONTACT = "つなぎ直したいときは、Slackでカイクンに連絡してください。";
-const RETRY = "マイページの「Slackとつなぐ」から、もう一度やり直してください。";
+const RETRY = "アカウント情報の「Slackとつなぐ」から、もう一度やり直してください。";
 
 export const LINK_PAGE_COPY: Record<LinkPageStatus, { title: string; body: string; ok: boolean }> = {
   linked: {
@@ -70,7 +70,7 @@ export const LINK_PAGE_COPY: Record<LinkPageStatus, { title: string; body: strin
   },
 };
 
-/** マイページの「Slackとつなぐ」の結果 */
+/** アカウント情報の「Slackとつなぐ」（/account/slack）の結果 */
 export type MypageLinkStatus = "sent" | "invalid_email" | "rate_limited" | "already_linked" | "not_paid" | "unavailable";
 
 export const MYPAGE_LINK_COPY: Record<MypageLinkStatus, string> = {

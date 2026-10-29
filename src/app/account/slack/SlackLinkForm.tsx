@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 「Slackとつなぐ」（#263）の入力フォーム。詳細ページ（/mypage/slack）で使う。
+ * 「Slackとつなぐ」（#263）の入力フォーム。詳細ページ（/account/slack）で使う。
  * Slack で使っているメールを入れると、その Slack アカウントに確認DMが届く。DM のリンクを開くとつながる。
  * 結果の文は、Slack にそのメールの人がいてもいなくても同じ（MYPAGE_LINK_COPY.sent）。
  */
@@ -18,7 +18,7 @@ export function SlackLinkForm() {
   const noteId = useId();
 
   return (
-    <div className="w-full rounded-2xl border border-border-light bg-surface p-5 space-y-4">
+    <div className="w-full space-y-3">
       <form action={action} className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1 min-w-0 space-y-1.5">
           <Label htmlFor={inputId} className="text-text-primary">

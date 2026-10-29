@@ -1,5 +1,5 @@
 /**
- * Slack とつなぐページ（/slack/link・#263）のカードの枠。マイページの外に置く独立したページ。
+ * Slack とつなぐページ（/slack/link・#263）のカードの枠。マイページ・アカウント情報の外に置く独立したページ。
  */
 export function SlackLinkFrame({ children }: { children: React.ReactNode }) {
   return (
