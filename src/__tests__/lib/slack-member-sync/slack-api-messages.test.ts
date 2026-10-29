@@ -112,13 +112,16 @@ describe("DM 本文", () => {
     expect(getSyncMessageBlockReason(LINK_REQUEST_MESSAGE)).toBeNull();
   });
 
-  it("オーナー報告・マイページ確認は承認待ち（approved: false）で、承認されるまで送らない", () => {
-    for (const m of [OWNER_REPORT_MESSAGE, MYPAGE_CONFIRM_MESSAGE]) {
-      expect(m.approved).toBe(false);
-      expect(getSyncMessageBlockReason(m)).toBe("message_not_approved");
-      // 承認すれば送れる形になっている（差し込みが本文にある）
-      expect(getSyncMessageBlockReason({ ...m, approved: true })).toBeNull();
-    }
+  it("マイページ確認DMは承認済みで送れる", () => {
+    expect(MYPAGE_CONFIRM_MESSAGE.approved).toBe(true);
+    expect(getSyncMessageBlockReason(MYPAGE_CONFIRM_MESSAGE)).toBeNull();
+  });
+
+  it("オーナー報告は承認待ち（approved: false）で、承認されるまで送らない", () => {
+    expect(OWNER_REPORT_MESSAGE.approved).toBe(false);
+    expect(getSyncMessageBlockReason(OWNER_REPORT_MESSAGE)).toBe("message_not_approved");
+    // 承認すれば送れる形になっている（差し込みが本文にある）
+    expect(getSyncMessageBlockReason({ ...OWNER_REPORT_MESSAGE, approved: true })).toBeNull();
   });
 
   it("つなぐお願いDM: 3つの差し込みを入れた本文を作る", () => {
