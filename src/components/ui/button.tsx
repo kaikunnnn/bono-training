@@ -68,6 +68,8 @@ const buttonVariants = cva(
         // flex-col の親（カード内）に置かれる想定なので self-start で全幅化を防ぐ
         "top-card": "h-8 w-fit self-start px-6 rounded-[6px] text-xs font-medium tracking-[0.6px]",
         "persona-cta": "h-14 px-6 rounded-[var(--radius-sm)]",
+        // 大きいヒーロー用CTA（DS の Primary CTA large: h-14 / 角丸14px）。#267 新しいトップの試作で使用
+        "hero-cta": "h-14 px-7 rounded-[14px] text-base font-bold tracking-[0.4px]",
         unstyled: "h-auto rounded-none p-0",
       },
     },
