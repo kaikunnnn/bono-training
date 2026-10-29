@@ -28,7 +28,7 @@ export function SlackLinkConfirm({ token, email }: { token: string; email: strin
       <Button type="submit" variant="primary" size="large" className="w-full" disabled={pending}>
         {pending ? "つないでいます…" : "つなぐ"}
       </Button>
-      <p className="text-xs leading-5 text-text-muted">
+      <p className="text-sm leading-relaxed text-text-secondary">
         別のBONOアカウントでつなぎたいときは、ログアウトしてから、もう一度DMのリンクを開いてください。
       </p>
     </form>
