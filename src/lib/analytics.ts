@@ -5,7 +5,7 @@ declare global {
   interface Window {
     gtag: (
       command: 'config' | 'event' | 'js' | 'set',
-      targetId: string | Date,
+      targetId: string | Date | Record<string, unknown>,
       config?: Record<string, unknown>
     ) => void;
     dataLayer: unknown[];
@@ -60,6 +60,21 @@ export const setUserProperties = (properties: Record<string, string | number | b
   }
 
   window.gtag('set', 'user_properties', properties);
+};
+
+/**
+ * イベントパラメータの既定値を設定する（#266 S1: member_status_at_event 等）
+ *
+ * `gtag('set', {...})` で設定した値は、そのページで以降に送られる全イベントに付く。
+ * パラメータ値は100文字以内にすること。
+ * https://developers.google.com/tag-platform/gtagjs/reference
+ */
+export const setEventDefaults = (params: Record<string, string | number | boolean>) => {
+  if (!isGAEnabled()) {
+    return;
+  }
+
+  window.gtag('set', params);
 };
 
 // ===== 定義済みイベント =====
