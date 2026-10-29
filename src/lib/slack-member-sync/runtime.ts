@@ -17,7 +17,6 @@ import "server-only";
  */
 import { LINK_REQUEST_MESSAGE } from "./messages/link-request";
 import { OWNER_REPORT_MESSAGE } from "./messages/owner-report";
-import { REMOVAL_NOTICE_MESSAGE } from "./messages/removal-notice";
 import { siteUrl } from "./messages/common";
 import { notifySyncOps } from "./ops-alert";
 import type { SyncDeps } from "./process";
@@ -55,7 +54,6 @@ export function createSyncDeps(store: SyncStore | null): SyncDeps | null {
     teamId: slack.teamId,
     messages: {
       linkRequest: LINK_REQUEST_MESSAGE,
-      removalNotice: REMOVAL_NOTICE_MESSAGE,
       ownerReport: OWNER_REPORT_MESSAGE,
     },
     notifyOps: notifySyncOps,

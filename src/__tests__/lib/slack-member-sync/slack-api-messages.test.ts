@@ -7,7 +7,6 @@ import { createHash } from "node:crypto";
 import { createSyncSlackClient, hashEmail } from "@/lib/slack-member-sync/slack-api";
 import { getSyncMessageBlockReason, renderSyncMessage } from "@/lib/slack-member-sync/messages/common";
 import { LINK_REQUEST_MESSAGE } from "@/lib/slack-member-sync/messages/link-request";
-import { REMOVAL_NOTICE_MESSAGE } from "@/lib/slack-member-sync/messages/removal-notice";
 import { OWNER_REPORT_MESSAGE } from "@/lib/slack-member-sync/messages/owner-report";
 import { MYPAGE_CONFIRM_MESSAGE } from "@/lib/slack-member-sync/messages/mypage-confirm";
 import { hashToken, isPlausibleToken, linkUrl, newRawToken } from "@/lib/slack-member-sync/tokens";
@@ -106,8 +105,15 @@ describe("Slack API クライアント（#263）", () => {
 });
 
 describe("DM 本文", () => {
-  it("すべて承認待ち（approved: false）で、承認されるまで送らない", () => {
-    for (const m of [LINK_REQUEST_MESSAGE, REMOVAL_NOTICE_MESSAGE, OWNER_REPORT_MESSAGE, MYPAGE_CONFIRM_MESSAGE]) {
+  it("つなぐお願いDMは承認済み（version 2・差し込み3つ）で送れる", () => {
+    expect(LINK_REQUEST_MESSAGE.approved).toBe(true);
+    expect(LINK_REQUEST_MESSAGE.version).toBe(2);
+    expect(LINK_REQUEST_MESSAGE.placeholders).toEqual(["link", "deadline", "signup_url"]);
+    expect(getSyncMessageBlockReason(LINK_REQUEST_MESSAGE)).toBeNull();
+  });
+
+  it("オーナー報告・マイページ確認は承認待ち（approved: false）で、承認されるまで送らない", () => {
+    for (const m of [OWNER_REPORT_MESSAGE, MYPAGE_CONFIRM_MESSAGE]) {
       expect(m.approved).toBe(false);
       expect(getSyncMessageBlockReason(m)).toBe("message_not_approved");
       // 承認すれば送れる形になっている（差し込みが本文にある）
@@ -115,26 +121,41 @@ describe("DM 本文", () => {
     }
   });
 
-  it("差し込んで送る本文を作る", () => {
-    const r = renderSyncMessage(
-      { ...LINK_REQUEST_MESSAGE, approved: true },
-      { link: "https://www.bo-no.design/slack/link?t=abc", deadline: "11月10日" },
-    );
+  it("つなぐお願いDM: 3つの差し込みを入れた本文を作る", () => {
+    const r = renderSyncMessage(LINK_REQUEST_MESSAGE, {
+      link: "https://www.bo-no.design/slack/link?t=abc",
+      deadline: "11月5日",
+      signup_url: "https://www.bo-no.design/subscription",
+    });
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    expect(r.text).toContain("<https://www.bo-no.design/slack/link?t=abc|BONOとつなぐ>");
-    expect(r.text).toContain("11月10日までに");
+    expect(r.version).toBe(2);
+    expect(r.text).toContain("👉 <https://www.bo-no.design/slack/link?t=abc|BONOとつなぐ>");
+    expect(r.text).toContain("11月5日までにつながらない場合は、Slackから自動的に外れます。");
+    expect(r.text).toContain("→ <https://www.bo-no.design/subscription|メンバー登録>");
+    expect(r.text).toContain("3. 「つなぐ」を押す");
+    expect(r.text).not.toMatch(/\{\{\w+\}\}/);
   });
 
   it("差し込みが足りない・本文に差し込みが無い・https 以外のURLなら送らない", () => {
-    const m = { ...LINK_REQUEST_MESSAGE, approved: true };
-    expect(renderSyncMessage(m, { link: "https://x" })).toEqual({ ok: false, reason: "message_missing_value" });
-    expect(getSyncMessageBlockReason({ ...m, text: "リンクなし {{deadline}}" })).toBe("message_missing_placeholder");
-    expect(renderSyncMessage(m, { link: "http://localhost:3000/slack/link?t=a", deadline: "1月1日" })).toEqual({
+    const m = LINK_REQUEST_MESSAGE;
+    const signup = "https://www.bo-no.design/subscription";
+    expect(renderSyncMessage(m, { link: "https://x", deadline: "1月1日" })).toEqual({
+      ok: false,
+      reason: "message_missing_value",
+    });
+    expect(getSyncMessageBlockReason({ ...m, text: "リンクなし {{deadline}} {{signup_url}}" })).toBe(
+      "message_missing_placeholder",
+    );
+    expect(
+      renderSyncMessage(m, { link: "http://localhost:3000/slack/link?t=a", deadline: "1月1日", signup_url: signup }),
+    ).toEqual({
       ok: false,
       reason: "message_non_https_url",
     });
-    expect(getSyncMessageBlockReason({ ...m, text: "TBD {{link}} {{deadline}}" })).toBe("message_placeholder");
+    expect(getSyncMessageBlockReason({ ...m, text: "TBD {{link}} {{deadline}} {{signup_url}}" })).toBe(
+      "message_placeholder",
+    );
   });
 
   it("差し込む値に {{…}} があっても誤判定しない", () => {
