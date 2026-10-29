@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/subscription";
 import { getNotificationPreferences } from "@/lib/services/notification-preferences";
 import {
+  SettingsBackLink,
   SettingsPageLayout,
   SettingsPageTitle,
   SettingsCard,
@@ -27,6 +28,7 @@ export default async function NotificationSettingsPage() {
 
   return (
     <SettingsPageLayout>
+      <SettingsBackLink href="/account">アカウント情報</SettingsBackLink>
       <SettingsPageTitle>通知設定</SettingsPageTitle>
 
       <SettingsCard title="サイト内通知">

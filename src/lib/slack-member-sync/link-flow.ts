@@ -8,7 +8,7 @@ import "server-only";
  *     - 課金中でない BONO アカウントではつながない（リンクは無効化しない。正しいアカウントでやり直せる）
  *     - 上書きしない（どちらかが別とつながっていれば断る）。ただし Slack 側のつながりの相手が
  *       課金中でない（いない）ときは、ログイン中の課金中アカウントでつなぎ直す（SQL 関数で判定）
- * (c) マイページの「Slackとつなぐ」: 入力されたメールで users.lookupByEmail → いればその人に確認DM
+ * (c) アカウント情報の「Slackとつなぐ」（/account/slack。DB 上の purpose は mypage のまま）: 入力されたメールで users.lookupByEmail → いればその人に確認DM
  *     - Slack にいてもいなくても同じ文を返す（誰が Slack にいるかを調べられないように）
  *     - メールは保存しない・ログに出さない
  *     - 1日3回まで（slack_link_tokens の purpose=mypage の行数で数える。該当者なしの申し込みも行を残す）
@@ -56,7 +56,7 @@ export async function confirmLink(store: LinkStore, raw: string | null, userId: 
 }
 
 /**
- * マイページの「Slackとつなぐ」を使える人か。
+ * 「Slackとつなぐ」（/account の Slack カード・/account/slack）を使える人か。
  * live: 全員 / test: settings.test_bono_user_ids の BONO ユーザーだけ / off・dry_run: 誰も使えない
  * （test の間に本番の会員にカードを見せないため。Slack ID は入力されるまで分からないので BONO の ID で絞る）
  */
@@ -64,6 +64,21 @@ export function canUseMypageCard(settings: SyncSettings | null, userId: string):
   if (!settings) return false;
   if (settings.mode === "live") return true;
   return settings.mode === "test" && settings.testBonoUserIds.includes(userId);
+}
+
+/** 「Slackとつなぐ」の出し分け。show: つなぐ入口を出す / linked: すでにつながっている / not_paid: 課金中でない / hidden: 使えない（off・dry_run・test の対象外） */
+export type SlackLinkState = "show" | "linked" | "not_paid" | "hidden";
+
+/**
+ * アカウント情報（/account）の Slack カードと詳細ページ（/account/slack）で同じ判定を使う。
+ * off / dry_run（と test の対象外）は設定の1回だけで終える（/account を重くしない）
+ */
+export async function getSlackLinkState(store: LinkStore, userId: string): Promise<SlackLinkState> {
+  const settings = await store.getSettings();
+  if (!canUseMypageCard(settings, userId)) return "hidden";
+  const [paid, link] = await Promise.all([isPaidForLink(store, userId, settings), store.getLinkByUserId(userId)]);
+  if (link) return "linked";
+  return paid ? "show" : "not_paid";
 }
 
 /** その Slack ユーザーが、別の課金中（手で残す人を含む）の BONO ユーザーとつながっているか */
