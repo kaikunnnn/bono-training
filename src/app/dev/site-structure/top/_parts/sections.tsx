@@ -3,7 +3,8 @@
  *
  * 並びは 267-L 6章（オーナー回答で 4=コース、5=転職の道のり に入れ替え）。
  * - ContinueBand: 会員だけ、ヒーローの上。データは course-pages の「続きから」モック（fetchContinueMock）
- * - TroubleBand / GuideBand: 参考サイトの「BEYOND THE JOB」の形（アイブロウ・見出し・右に一覧リンク・2列の行）
+ * - TroubleBand / GuideBand: 参考サイトの「BEYOND THE JOB」の形（アイブロウ・見出し・右に一覧リンク・2列の行）。
+ *   行は hierarchy.ts の項目から作り、悩みの項目ページ・勉強法／キャリアのハブのカードへつなぐ（S5）
  * - CourseSection: course-card-patterns のトップ横並び版の形（サムネ → タイトル → 1行 → 期間・制作物）。
  *   データは course-pages/data の4コース、サムネは一覧と同じ CourseEyecatch
  * - CareerPathSection: v6 のステップ（文言は roadmap-career-change-v6.ts から引く）。番号札は RoadmapPathway の形
@@ -31,7 +32,8 @@ import { courseCounts, splitTitle } from "../../../course-pages/template/shared"
 import { ProgressBar } from "../../../course-pages/template/path";
 import { fetchContinueMock } from "../../../course-pages/prototyping/roadmap/continue-data";
 import { Kari } from "../../_parts/shared";
-import { CAREER_BASE, COMING_BASE, withState } from "./top-parts";
+import { careerItems, getItem, studyItems, troubleHref, troubles } from "../_data/hierarchy";
+import { CAREER_BASE, CAREER_GUIDE_BASE, STUDY_BASE, TROUBLES_HUB_BASE, withState } from "./top-parts";
 
 /** 推測の文言（kari）なら「仮」を付けて出す */
 function F({ f }: { f: Field }) {
@@ -186,56 +188,94 @@ export function RowList({
   );
 }
 
-const TROUBLES = [
-  "最初の1画面を作りたい",
-  "お手本どおりに作れるようになりたい",
-  "見た目の素人っぽさを直したい",
-  "画面同士をつなげたい",
-  "使いやすい画面にしたい",
-  "何を解決するか決めたい",
-  "作ったものに自信を持ちたい",
-  "ポートフォリオに載せるものを決めたい",
-  "面接でうまく話したい",
-  "AIに頼り切りから抜けたい",
+/** トップの悩みの帯に出す悩み（267-P 2章の 14 から、作り始めに当たりやすい順に8つ。名前は hierarchy.ts のまま） */
+const BAND_TROUBLES = [
+  "wireframe",
+  "ui-spacing-type",
+  "ui-color",
+  "information-architecture",
+  "screen-flow",
+  "usability",
+  "self-check",
+  "ai-workflow",
 ];
 
 export function TroubleBand({ member }: { member: boolean }) {
-  const href = withState(`${COMING_BASE}?what=troubles`, member);
+  const rows: RowItem[] = BAND_TROUBLES.flatMap((id) => {
+    const item = getItem("troubles", id);
+    return item ? [{ label: item.name, href: withState(troubleHref(item.id), member) }] : [];
+  });
   return (
     <Section>
       <SectionHeader
         eyebrow="BEYOND THE BASICS / つまずきから探す"
         title="つまずきも、ひとつずつ。"
-        link={{ href, label: "悩みの一覧" }}
+        link={{ href: withState(TROUBLES_HUB_BASE, member), label: `悩みの一覧（${troubles.length}）` }}
       />
-      <RowList items={TROUBLES} href={href} />
+      <RowList items={rows} />
     </Section>
   );
 }
 
-const GUIDE_WANTS = [
-  "何から始めるか知りたい",
-  "仕事と両立して続けたい",
-  "独学の限界を越えたい",
-  "作ったものを見てもらいたい",
-  "転職の時期を決めたい",
-  "年齢や経歴の不安を整理したい",
-];
+/** 勉強法・キャリアから3つずつ（267-P 5章「2〜3個ずつ」）。行き先は各ハブのカード */
+const BAND_STUDY = ["how-to-study", "self-study", "while-working"];
+const BAND_CAREER = ["become-designer", "portfolio", "interview"];
 
-export function GuideBand() {
+function GuideColumn({
+  title,
+  hubHref,
+  hubLabel,
+  ids,
+  parent,
+}: {
+  title: string;
+  hubHref: string;
+  hubLabel: string;
+  ids: string[];
+  parent: "study" | "career";
+}) {
+  const rows: RowItem[] = ids.flatMap((id) => {
+    const item = getItem(parent, id);
+    // トップでは「未経験」を出さない決まりなので、名前の後ろの（補足）は外す（カードでは全部出る）
+    return item ? [{ label: item.name.replace(/（[^）]*）$/, ""), href: `${hubHref}#item-${item.id}` }] : [];
+  });
+  return (
+    <div className="min-w-0">
+      <div className="flex items-baseline justify-between gap-4">
+        <h3 className="font-heading text-xl font-bold leading-[1.4] text-text-primary">{title}</h3>
+        <Link
+          href={hubHref}
+          className="group inline-flex shrink-0 items-center gap-1.5 font-noto-sans-jp text-sm font-bold text-text-primary hover:underline hover:underline-offset-4"
+        >
+          {hubLabel}
+          <ArrowRight size={16} aria-hidden="true" className="transition-transform group-hover:translate-x-0.5 motion-reduce:transition-none" />
+        </Link>
+      </div>
+      <RowList items={rows} className="mt-5 md:grid-cols-1" />
+    </div>
+  );
+}
+
+export function GuideBand({ member }: { member: boolean }) {
   return (
     <Section className="bg-surface">
-      <SectionHeader
-        eyebrow="STUDY & CAREER / 学び方とキャリア"
-        title="続け方も、これからのことも。"
-        titleKari
-        link={{ href: "/guide", label: "勉強法・キャリア" }}
-      />
-      <RowList items={GUIDE_WANTS} href="/guide" />
-      <p className="mt-4 text-xs text-text-muted">
-        項目の文言は仮
-        <Kari />
-      </p>
+      <SectionHeader eyebrow="STUDY & CAREER / 学び方とキャリア" title="続け方も、これからのことも。" titleKari />
+      <div className="mt-10 grid grid-cols-1 gap-12 md:grid-cols-2">
+        <GuideColumn
+          title="勉強法"
+          hubHref={withState(STUDY_BASE, member)}
+          hubLabel={`勉強法（${studyItems.length}）`}
+          ids={BAND_STUDY}
+          parent="study"
+        />
+        <GuideColumn
+          title="キャリア"
+          hubHref={withState(CAREER_GUIDE_BASE, member)}
+          hubLabel={`キャリア（${careerItems.length}）`}
+          ids={BAND_CAREER}
+          parent="career"
+        />
+      </div>
     </Section>
   );
 }

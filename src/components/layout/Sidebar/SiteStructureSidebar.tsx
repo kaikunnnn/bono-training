@@ -6,9 +6,9 @@
  * /dev/site-structure/top 配下だけで、本番の Sidebar の代わりに描く。
  * 並びは 267-L 7章のグローバルナビ案。本番のメニューは変えない。
  * - ログイン中だけ: マイページ（続きから）
- * - 主: トップ／ロードマップ（今は 01 転職の入口ページへ）／悩みから探す／コース／掲示板
+ * - 主: トップ／ロードマップ（/top/roadmap。01 の入口ページと各ロードマップでも点灯）／悩みから探す（/top/troubles）／コース／掲示板
  * - 人と学ぶ: フィードバック／イベント／みんなの実績
- * - サブ: 勉強法・キャリア／使い方
+ * - サブ: 勉強法（/top/study）／キャリア（/top/career-guide）／使い方（267-P 5章で勉強法とキャリアを分けた）
  * - その他: 料金プラン（未ログインだけ）／ログイン または 設定
  * - 本番から外したもの: レッスン／トレーニング／旧サイト
  *
@@ -22,7 +22,6 @@ import { useSearchParams } from "next/navigation";
 import {
   Book1,
   Calendar2,
-  DocumentText,
   EmptyWallet,
   Home2,
   Lamp,
@@ -31,8 +30,10 @@ import {
   Medal,
   MessageQuestion,
   Messages1,
+  NoteText,
   Setting2,
   Teacher,
+  TrendUp,
   User,
 } from "iconsax-react";
 import { cn } from "@/lib/utils";
@@ -45,9 +46,13 @@ import type { SidebarProps } from "./types";
 
 export const SITE_STRUCTURE_TOP_PREFIX = "/dev/site-structure/top";
 
-const COMING = `${SITE_STRUCTURE_TOP_PREFIX}/coming`;
-/** ロードマップ: 4つの目標を選ぶ画面はまだ無いので、01 転職の入口ページへ直接つなぐ（267-N 3章） */
+/** 各階層のハブ（267-Q 2章）。点灯は 267-O 1章の親子に合わせる */
+const ROADMAP = `${SITE_STRUCTURE_TOP_PREFIX}/roadmap`;
+/** 01 転職の入口ページ（親はロードマップ） */
 const CAREER = `${SITE_STRUCTURE_TOP_PREFIX}/career`;
+const TROUBLES = `${SITE_STRUCTURE_TOP_PREFIX}/troubles`;
+const STUDY = `${SITE_STRUCTURE_TOP_PREFIX}/study`;
+const CAREER_GUIDE = `${SITE_STRUCTURE_TOP_PREFIX}/career-guide`;
 
 /** 試作の中のリンクには会員の見え方を引き継ぐ（本番ページへのリンクはそのまま） */
 function protoHref(href: string, member: boolean) {
@@ -73,8 +78,7 @@ function SiteStructureNav({
   boardDotSlot,
   pathname,
   member,
-  troublesActive,
-}: NavProps & { member: boolean; troublesActive: boolean }) {
+}: NavProps & { member: boolean }) {
   const isActive = (href: string) => pathname === href || pathname.startsWith(href + "/");
   // 色は SidebarMenuItem のアイコン枠（text-text-primary）から受け継ぐ
   const icon = { size: ICON_SIZE, color: "currentColor", variant: "Outline" as const };
@@ -111,14 +115,14 @@ function SiteStructureNav({
         >
           トップ
         </SidebarMenuItem>
-        <SidebarMenuItem href={protoHref(CAREER, member)} icon={<Map {...icon} />} isActive={isActive(CAREER)}>
+        <SidebarMenuItem
+          href={protoHref(ROADMAP, member)}
+          icon={<Map {...icon} />}
+          isActive={isActive(ROADMAP) || isActive(CAREER)}
+        >
           ロードマップ
         </SidebarMenuItem>
-        <SidebarMenuItem
-          href={protoHref(`${COMING}?what=troubles`, member)}
-          icon={<Lamp {...icon} />}
-          isActive={troublesActive}
-        >
+        <SidebarMenuItem href={protoHref(TROUBLES, member)} icon={<Lamp {...icon} />} isActive={isActive(TROUBLES)}>
           悩みから探す
         </SidebarMenuItem>
         <SidebarMenuItem href="/dev/course-pages" icon={<Book1 {...icon} />} isActive={false}>
@@ -147,8 +151,15 @@ function SiteStructureNav({
       </SidebarMenuGroup>
 
       <SidebarMenuGroup label="サブ">
-        <SidebarMenuItem href="/guide" icon={<DocumentText {...icon} />} isActive={isActive("/guide")}>
-          勉強法・キャリア
+        <SidebarMenuItem href={protoHref(STUDY, member)} icon={<NoteText {...icon} />} isActive={isActive(STUDY)}>
+          勉強法
+        </SidebarMenuItem>
+        <SidebarMenuItem
+          href={protoHref(CAREER_GUIDE, member)}
+          icon={<TrendUp {...icon} />}
+          isActive={isActive(CAREER_GUIDE)}
+        >
+          キャリア
         </SidebarMenuItem>
         <SidebarMenuItem href="/how-to" icon={<Teacher {...icon} />} isActive={false}>
           使い方
@@ -181,7 +192,6 @@ function SiteStructureNavFromUrl(props: NavProps) {
     <SiteStructureNav
       {...props}
       member={searchParams?.get("state") === "member"}
-      troublesActive={props.pathname === COMING && searchParams?.get("what") === "troubles"}
     />
   );
 }
@@ -189,7 +199,7 @@ function SiteStructureNavFromUrl(props: NavProps) {
 export function SiteStructureSidebar({ user: _user, ...props }: SidebarProps & { pathname: string }) {
   void _user; // 試作では本当のログイン状態を使わず、URL で見え方を決める
   return (
-    <Suspense fallback={<SiteStructureNav {...props} member={false} troublesActive={false} />}>
+    <Suspense fallback={<SiteStructureNav {...props} member={false} />}>
       <SiteStructureNavFromUrl {...props} />
     </Suspense>
   );

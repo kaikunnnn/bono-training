@@ -34,7 +34,7 @@ import {
   PHRASE,
   TocChips,
 } from "../_parts/hub-parts";
-import { CAREER_BASE, TOP_BASE, withState } from "../_parts/top-parts";
+import { CAREER_BASE, CAREER_GUIDE_BASE, STUDY_BASE, TOP_BASE, withState } from "../_parts/top-parts";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -188,8 +188,8 @@ export default async function TroublesHubPage({
                 reason: "悩みが道のりのどこにあるかが分かる",
               },
               { label: "コースで順番に身につける", href: "/dev/course-pages", reason: "悩みの答えを、最初から順に学べる" },
-              { label: "勉強法・キャリア", href: "/guide", reason: "続け方や、転職の準備も知っておく" },
-              { label: "新しいトップへ戻る", href: withState(TOP_BASE, member), reason: "ほかの入口から探し直す" },
+              { label: "勉強法", href: withState(STUDY_BASE, member), reason: "続け方や、練習の仕方を知っておく" },
+              { label: "キャリア", href: withState(CAREER_GUIDE_BASE, member), reason: "転職やポートフォリオの準備も知っておく" },
             ]}
           />
         </div>

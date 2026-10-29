@@ -1,9 +1,9 @@
 /**
- * #267 新しいトップの試作 — ヒーローと4つの入口（S2・オーナー指摘で組み直し）
+ * #267 新しいトップの試作 — ヒーローと5つの入口（S2・オーナー指摘で組み直し）
  *
  * レイアウトはエアコン屋（参考サイト）のヒーローを写す。見た目は今のBONOのトークン・字体・Button。
  * - TopHero: 左にアイブロウ／大きな2行の見出し（h1）／3行の説明／大きいボタン2つ、右に大きな画像
- * - EntryTiles: 全幅の上下線と縦の区切り線で4枠を1行に。アイコン枠（本番 PurposeItem のグラデーション）・小さな番号・太字ラベル・↗
+ * - EntryTiles: 全幅の上下線と縦の区切り線で5枠を1行に（267-P 5章で 04 勉強法・05 キャリアに分けた）。アイコン枠（本番 PurposeItem のグラデーション）・小さな番号・太字ラベル・↗
  * 計測（home_click・料金ボタンの計測）は付けない。試作のクリックを本番の数字に混ぜないため。
  */
 
@@ -11,7 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { Briefcase, Brush2, DocumentText, Personalcard } from "iconsax-react";
+import { Briefcase, Brush2, NoteText, Personalcard, TrendUp } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { PURPOSE_ICON_GRADIENT } from "@/styles/gradients";
 import { cn } from "@/lib/utils";
@@ -68,7 +68,7 @@ export function TopHero({ member }: { member: boolean }) {
               </Link>
             </Button>
             <Button variant="outline-ghost" size="hero-cta" asChild>
-              <Link href={withState(`${COMING_BASE}?what=troubles`, member)}>
+              <Link href={withState(TROUBLES_HUB_BASE, member)}>
                 悩みから探す
                 <ArrowUpRight aria-hidden="true" />
               </Link>
@@ -103,7 +103,7 @@ export function TopHero({ member }: { member: boolean }) {
 }
 
 // ------------------------------------------------------------
-// 4つの入口
+// 5つの入口
 // ------------------------------------------------------------
 
 interface Entry {
@@ -113,34 +113,30 @@ interface Entry {
   href: string;
 }
 
-// アイコンの色は枠（text-text-primary）から受け継ぐ。04 はサイドバーの「勉強法・キャリア」と同じアイコン
+// アイコンの色は枠（text-text-primary）から受け継ぐ。04・05 はサイドバーの「勉強法」「キャリア」と同じアイコン
 const ICON = { size: 26, color: "currentColor", variant: "Outline" as const };
 
+/** 5つの入口（267-P 5章）。01 は作り込み済みの入口ページ、02・03 はロードマップのハブの該当の段、04・05 はハブ */
 function entries(member: boolean): Entry[] {
   return [
     { no: "01", label: "UIUXデザイナーへの転職を進める", icon: <Personalcard {...ICON} />, href: withState(CAREER_BASE, member) },
-    {
-      no: "02",
-      label: "UIデザインのスキルを伸ばす",
-      icon: <Brush2 {...ICON} />,
-      href: withState(`${COMING_BASE}?what=skill`, member),
-    },
-    {
-      no: "03",
-      label: "実務の悩みを解決する",
-      icon: <Briefcase {...ICON} />,
-      href: withState(`${COMING_BASE}?what=work`, member),
-    },
-    { no: "04", label: "勉強法・キャリア", icon: <DocumentText {...ICON} />, href: "/guide" },
+    { no: "02", label: "UIデザインのスキルを伸ばす", icon: <Brush2 {...ICON} />, href: `${withState(ROADMAP_HUB_BASE, member)}#02` },
+    { no: "03", label: "実務の悩みを解決する", icon: <Briefcase {...ICON} />, href: `${withState(ROADMAP_HUB_BASE, member)}#03` },
+    { no: "04", label: "勉強法", icon: <NoteText {...ICON} />, href: withState(STUDY_BASE, member) },
+    { no: "05", label: "キャリア", icon: <TrendUp {...ICON} />, href: withState(CAREER_GUIDE_BASE, member) },
   ];
 }
 
-/** 区切り線: スマホ（2×2）は右列に左線・下段に上線、PC（1行4つ）は2つ目以降に左線。両端はヒーローの左右の余白にそろえる */
+/**
+ * 区切り線: スマホ（2列。5つ目は2列ぶち抜き）は右列に左線・2段目から上線、PC（1行5つ）は2つ目以降に左線。
+ * 両端はヒーローの左右の余白にそろえる
+ */
 const TILE_BY_INDEX = [
   "lg:pl-12",
   "border-l",
   "border-t lg:border-t-0 lg:border-l",
-  "border-l border-t lg:border-t-0 lg:pr-12",
+  "border-l border-t lg:border-t-0",
+  "col-span-2 border-t lg:col-span-1 lg:border-t-0 lg:border-l lg:pr-12",
 ];
 
 export function EntryTiles({ member }: { member: boolean }) {
@@ -148,12 +144,13 @@ export function EntryTiles({ member }: { member: boolean }) {
     <section className="border-y border-black/[0.12]">
       {/* 見た目は出さないが、h1 → h2 → h3 の階層を保つ（本番 PurposeNav と同じ） */}
       <h2 className="sr-only">目的から選ぶ</h2>
-      <ul className="grid grid-cols-2 lg:grid-cols-4">
+      {/* 両端の枠はヒーローにそろえた余白（pl-12 / pr-12）の分だけ広くし、01 の長い名前が1語の途中で折れないようにする */}
+      <ul className="grid grid-cols-2 lg:grid-cols-[1.35fr_1fr_1fr_1fr_1.15fr]">
         {entries(member).map((e, i) => (
           <li key={e.no} className={cn("border-black/[0.12]", TILE_BY_INDEX[i])}>
             <Link
               href={e.href}
-              className="group flex h-full min-h-[168px] flex-col justify-between gap-6 px-6 py-6 transition-colors duration-200 hover:bg-black/[0.03] lg:min-h-[200px] lg:px-8 lg:py-8"
+              className="group flex h-full min-h-[148px] flex-col justify-between gap-6 px-6 py-6 transition-colors duration-200 hover:bg-black/[0.03] lg:min-h-[200px] lg:px-6 lg:py-8 xl:px-8"
             >
               <div className="flex items-start justify-between">
                 <div

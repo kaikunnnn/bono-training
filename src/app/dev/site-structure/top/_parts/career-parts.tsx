@@ -1,11 +1,11 @@
 /**
  * #267 01 転職の入口ページ（/dev/site-structure/top/career）で v6 の本文に差し込む部品（267-N 2章）
  *
- * - CareerTopLinks: 冒頭の上の小さなリンク（新しいトップへ戻る・v6 の元ページ）
+ * - CareerTopLinks: 冒頭のパンくず（トップ > ロードマップ > 未経験からUI/UXデザイナーへ）と v6 の元ページへのリンク
  * - CareerContinue: 会員だけ。v6 試作の ContinueCourseCard ＋ continue-data（進み具合といまここ）
  * - CareerAudience: 見出しの下の「どんな人向け」の1行（仮）
- * - CareerTroubles: このタイプのよくある悩み（267-L 4章の 01 の4項目。項目ページはまだ無いので準備中の仮ページへ）
- * - CareerNext: 次に整えたいこと（02・03 は準備中の仮ページ、04 は本番の /guide）
+ * - CareerTroubles: このタイプのよくある悩み（hierarchy.ts で 01 に当たる悩み → 悩みの項目ページ）
+ * - CareerNext: 次に整えたいこと（02・03 はロードマップのハブの該当の段、04 勉強法、05 キャリア）
  * 見た目は v6 の SectionHead と、トップの RowList（行の一覧）をそのまま使う。色はトークンだけ・オレンジは使わない。
  */
 
@@ -17,20 +17,30 @@ import { v6Steps } from "../../../course-pages/data/roadmap-career-change-v6";
 import { cn } from "@/lib/utils";
 import { Kari, V6_BASE } from "../../_parts/shared";
 import { RowList, type RowItem } from "./sections";
-import { CAREER_BASE, COMING_BASE, TOP_BASE, withState } from "./top-parts";
+import { getRoadmap } from "../../../course-pages/data/roadmaps";
+import { TROUBLES_BASE, troubleHref, troubles } from "../_data/hierarchy";
+import { V6_SLUG } from "../_data/roadmap-hub";
+import { Breadcrumb } from "./hub-parts";
+import { CAREER_BASE, CAREER_GUIDE_BASE, ROADMAP_HUB_BASE, STUDY_BASE, TOP_BASE, withState } from "./top-parts";
 
 /** ページ内のステップへのリンク（?state=member を残したまま #step-n へ） */
 export function careerStepHref(n: number, member: boolean) {
   return `${withState(CAREER_BASE, member)}#step-${n}`;
 }
 
+/** 冒頭: パンくず（267-O 1章の親子: トップ > ロードマップ > このロードマップ）＋ v6 の元ページへの小さなリンク */
 export function CareerTopLinks({ member }: { member: boolean }) {
+  const name = getRoadmap(V6_SLUG)?.name ?? "未経験からUI/UXデザイナーへ";
   return (
-    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-muted">
-      <Link href={withState(TOP_BASE, member)} className={cn("rounded-[4px] hover:text-text-primary", FOCUS)}>
-        ← 新しいトップ
-      </Link>
-      <Link href={V6_BASE} className={cn("rounded-[4px] hover:text-text-primary", FOCUS)}>
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2">
+      <Breadcrumb
+        items={[
+          { label: "トップ", href: withState(TOP_BASE, member) },
+          { label: "ロードマップ", href: `${withState(ROADMAP_HUB_BASE, member)}#01` },
+          { label: name },
+        ]}
+      />
+      <Link href={V6_BASE} className={cn("rounded-[4px] text-xs text-text-muted hover:text-text-primary", FOCUS)}>
         v6 の元ページと比べる
       </Link>
     </div>
@@ -90,18 +100,13 @@ export function CareerAudience() {
 }
 
 // ------------------------------------------------------------
-// このタイプのよくある悩み（267-L 4章: 003 / 004 / 014 / 015）
+// このタイプのよくある悩み（hierarchy.ts で 01 の入口に当たる悩み。行き先は悩みの項目ページ）
 // ------------------------------------------------------------
 
-const TROUBLES = [
-  "最初の1画面が作れない",
-  "お手本を真似しても、同じ形にならない",
-  "ポートフォリオに何を載せればいいか分からない",
-  "面接で、ポートフォリオをうまく話せない",
-];
-
 export function CareerTroubles({ member }: { member: boolean }) {
-  const href = withState(`${COMING_BASE}?what=troubles`, member);
+  const rows: RowItem[] = troubles
+    .filter((t) => t.entries?.includes("01"))
+    .map((t) => ({ label: t.name, href: withState(troubleHref(t.id), member) }));
   return (
     <section id="troubles" aria-labelledby="troubles-title" className={SECTION}>
       <SectionHead
@@ -115,9 +120,10 @@ export function CareerTroubles({ member }: { member: boolean }) {
           </>
         }
       />
-      <RowList items={TROUBLES} href={href} className="mt-8" />
-      <div className="mt-6">
-        <TextLink href={href}>悩みの一覧を見る</TextLink>
+      <RowList items={rows} className="mt-8" />
+      <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3">
+        <TextLink href={withState(`${TROUBLES_BASE}?entry=01`, member)}>悩みの一覧を見る</TextLink>
+        <TextLink href={`${withState(CAREER_GUIDE_BASE, member)}#item-portfolio`}>ポートフォリオと面接はキャリアへ</TextLink>
       </div>
     </section>
   );
@@ -129,9 +135,10 @@ export function CareerTroubles({ member }: { member: boolean }) {
 
 export function CareerNext({ member }: { member: boolean }) {
   const items: RowItem[] = [
-    { no: "02", label: "UIデザインのスキルを伸ばす", href: withState(`${COMING_BASE}?what=skill`, member) },
-    { no: "03", label: "実務の悩みを解決する", href: withState(`${COMING_BASE}?what=work`, member) },
-    { no: "04", label: "勉強法・キャリア", href: "/guide" },
+    { no: "02", label: "UIデザインのスキルを伸ばす", href: `${withState(ROADMAP_HUB_BASE, member)}#02` },
+    { no: "03", label: "実務の悩みを解決する", href: `${withState(ROADMAP_HUB_BASE, member)}#03` },
+    { no: "04", label: "勉強法", href: withState(STUDY_BASE, member) },
+    { no: "05", label: "キャリア", href: withState(CAREER_GUIDE_BASE, member) },
   ];
   return (
     <section id="next" aria-labelledby="next-title" className={SECTION}>

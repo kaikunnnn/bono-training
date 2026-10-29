@@ -148,7 +148,7 @@ export const roadmaps: Roadmap[] = [
     outcome: k(
       "画面の見た目と構造、使う流れまでを自分で設計でき、その過程をポートフォリオで説明して、UIデザイナーとして応募できる状態になります。"
     ),
-    period: k("6ヶ月〜1年"),
+    period: k("6〜9ヶ月"), // #267: 01 の入口ページ（v6）の目安にそろえた
     progressDone: 1,
     stops: [
       {
