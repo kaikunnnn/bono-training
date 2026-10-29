@@ -19,7 +19,11 @@ export function SlackLinkConfirm({ token, email }: { token: string; email: strin
       <p className="text-base leading-relaxed text-text-secondary">
         DMを受け取ったSlackアカウントと、ログイン中のBONOアカウントをつなぎます。つなぐと、課金メンバーとしてSlackに残れます。
       </p>
-      {email && <p className="text-xs leading-5 text-text-muted">ログイン中：{email}</p>}
+      {email && (
+        <p className="text-base leading-relaxed text-text-secondary">
+          ログイン中：<span className="font-medium text-text-primary">{email}</span>
+        </p>
+      )}
       <input type="hidden" name="t" value={token} />
       <Button type="submit" variant="primary" size="large" className="w-full" disabled={pending}>
         {pending ? "つないでいます…" : "つなぐ"}

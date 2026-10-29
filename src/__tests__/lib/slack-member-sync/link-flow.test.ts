@@ -6,6 +6,7 @@ vi.mock("server-only", () => ({}));
 import {
   canUseMypageCard,
   confirmLink,
+  getMypageLinkState,
   inspectLinkToken,
   MYPAGE_DAILY_LIMIT,
   requestMypageLink,
@@ -245,5 +246,37 @@ describe("マイページのカードを見せる相手（canUseMypageCard）", 
     expect(canUseMypageCard({ ...base, mode: "dry_run", testBonoUserIds: ["u1"] }, "u1")).toBe(false);
     expect(canUseMypageCard({ ...base, mode: "off" }, "u1")).toBe(false);
     expect(canUseMypageCard(null, "u1")).toBe(false);
+  });
+});
+
+describe("マイページの入口・詳細ページの出し分け（getMypageLinkState）", () => {
+  beforeEach(() => {
+    store.settings = { ...store.settings!, mode: "live" };
+  });
+
+  it("課金中で未接続なら show", async () => {
+    expect(await getMypageLinkState(store, "user-paid")).toBe("show");
+  });
+
+  it("すでにつながっていれば linked", async () => {
+    store.links.push({ userId: "user-paid", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "email" });
+    expect(await getMypageLinkState(store, "user-paid")).toBe("linked");
+  });
+
+  it("課金中でなければ not_paid。手で残す人は show", async () => {
+    expect(await getMypageLinkState(store, "user-free")).toBe("not_paid");
+    store.settings = { ...store.settings!, keepUserIds: ["user-free"] };
+    expect(await getMypageLinkState(store, "user-free")).toBe("show");
+  });
+
+  it("off / dry_run・test の対象外は hidden", async () => {
+    store.settings = { ...store.settings!, mode: "off" };
+    expect(await getMypageLinkState(store, "user-paid")).toBe("hidden");
+    store.settings = { ...store.settings!, mode: "dry_run" };
+    expect(await getMypageLinkState(store, "user-paid")).toBe("hidden");
+    store.settings = { ...store.settings!, mode: "test", testBonoUserIds: [] };
+    expect(await getMypageLinkState(store, "user-paid")).toBe("hidden");
+    store.settings = { ...store.settings!, mode: "test", testBonoUserIds: ["user-paid"] };
+    expect(await getMypageLinkState(store, "user-paid")).toBe("show");
   });
 });

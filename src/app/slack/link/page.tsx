@@ -13,6 +13,7 @@ import { getCurrentUser } from "@/lib/subscription";
 import { inspectLinkToken, isPaidForLink } from "@/lib/slack-member-sync/link-flow";
 import { getSyncStore } from "@/lib/slack-member-sync/runtime";
 import { SlackLinkConfirm } from "./SlackLinkConfirm";
+import { SlackLinkFrame as Frame } from "./SlackLinkFrame";
 import { SlackLinkResult } from "./SlackLinkResult";
 
 export const dynamic = "force-dynamic";
@@ -21,14 +22,6 @@ export const metadata: Metadata = {
   title: "Slackとつなぐ",
   robots: { index: false, follow: false },
 };
-
-function Frame({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-[60vh] px-4 py-16">
-      <div className="mx-auto max-w-[480px] rounded-2xl border border-border-light bg-surface p-6 sm:p-8">{children}</div>
-    </div>
-  );
-}
 
 export default async function SlackLinkPage({
   searchParams,
@@ -76,7 +69,9 @@ export default async function SlackLinkPage({
       <Frame>
         <SlackLinkResult status="not_paid" />
         {user.email && (
-          <p className="mt-4 text-xs leading-5 text-text-muted">ログイン中：{user.email}</p>
+          <p className="mt-4 text-base leading-relaxed text-text-secondary">
+            ログイン中：<span className="font-medium text-text-primary">{user.email}</span>
+          </p>
         )}
       </Frame>
     );

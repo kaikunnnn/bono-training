@@ -66,6 +66,21 @@ export function canUseMypageCard(settings: SyncSettings | null, userId: string):
   return settings.mode === "test" && settings.testBonoUserIds.includes(userId);
 }
 
+/** マイページの「Slackとつなぐ」の出し分け。show: つなぐ入口を出す / linked: すでにつながっている / not_paid: 課金中でない / hidden: 使えない（off・dry_run・test の対象外） */
+export type MypageLinkState = "show" | "linked" | "not_paid" | "hidden";
+
+/**
+ * マイページの入口（/mypage）と詳細ページ（/mypage/slack）で同じ判定を使う。
+ * off / dry_run（と test の対象外）は設定の1回だけで終える（マイページを重くしない）
+ */
+export async function getMypageLinkState(store: LinkStore, userId: string): Promise<MypageLinkState> {
+  const settings = await store.getSettings();
+  if (!canUseMypageCard(settings, userId)) return "hidden";
+  const [paid, link] = await Promise.all([isPaidForLink(store, userId, settings), store.getLinkByUserId(userId)]);
+  if (link) return "linked";
+  return paid ? "show" : "not_paid";
+}
+
 /** その Slack ユーザーが、別の課金中（手で残す人を含む）の BONO ユーザーとつながっているか */
 async function isLinkedToOtherPaid(
   store: LinkStore,
