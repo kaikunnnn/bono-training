@@ -19,25 +19,23 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Check, Plus } from "lucide-react";
-import { Briefcase, Book1, Calendar, Flag, Map1, MessageText, Profile2User, Routing2, TickCircle } from "iconsax-react";
+import { Calendar, Flag, Map1, Profile2User, Routing2 } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { courses, getCourse, lessonSlugs } from "../../../data";
+import { courses, lessonSlugs } from "../../../data";
 import {
   getRoadmap,
   roadmaps,
   stopLabel,
-  type OutsideKind,
   type Roadmap,
-  type RoadmapStop,
 } from "../../../data/roadmaps";
 import { fetchLessons } from "../../../data/sanity-lessons";
 import type { Field, LessonMap } from "../../../data/types";
-import CourseEyecatch, { pickCovers } from "../../../template/CourseEyecatch";
 import { KariProvider, T } from "../../../template/kari";
-import { pad2, SectionHead, splitTitle } from "../../../template/shared";
+import { pad2, SectionHead } from "../../../template/shared";
 import { hereLabel } from "../../../template/path";
-import { MiniPath, ROADMAP_BASE, StopIcon, firstCourseSlug, roadmapStats } from "../parts";
+import { MiniPath, ROADMAP_BASE, firstCourseSlug, roadmapStats } from "../parts";
+import { CLICKABLE, CourseStopCard, GuideIcon, StopCard, StopReason, stopKindLabel } from "../stop-parts";
 
 type Params = Promise<{ slug: string }>;
 type SearchParams = Promise<{ progress?: string }>;
@@ -45,9 +43,6 @@ type SearchParams = Promise<{ progress?: string }>;
 const k = (text: string): Field => ({ text, kari: true });
 
 const SECTION = "border-t border-border-light py-14 md:py-16";
-/** 押せるもの（白） */
-const CLICKABLE =
-  "border border-border-light bg-surface shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]";
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params;
@@ -56,102 +51,6 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     title: r ? `${r.name}ロードマップ（プロト）` : "ロードマップ（プロト）",
     robots: { index: false, follow: false },
   };
-}
-
-function stopKindLabel(stop: RoadmapStop) {
-  if (stop.type === "course") return "コース";
-  if (stop.type === "planned-course") return "準備中のコース";
-  return "コースの外でやること";
-}
-
-function GuideIcon({ kind, size = 20 }: { kind: OutsideKind; size?: number }) {
-  if (kind === "portfolio") return <Book1 size={size} color="currentColor" variant="Linear" />;
-  if (kind === "feedback") return <MessageText size={size} color="currentColor" variant="Linear" />;
-  return <Briefcase size={size} color="currentColor" variant="Linear" />;
-}
-
-/* ---------- 道のりのカード ---------- */
-
-function CourseStopCard({
-  slug,
-  lessons,
-  note,
-  emphasized,
-}: {
-  slug: string;
-  lessons: LessonMap;
-  note: React.ReactNode;
-  emphasized: boolean;
-}) {
-  const course = getCourse(slug);
-  if (!course) return null;
-  const { main, sub } = splitTitle(course.title.text);
-  return (
-    <Link
-      href={`/dev/course-pages/v2/${slug}`}
-      className={cn(
-        "group flex flex-col gap-4 rounded-[20px] p-4 sm:flex-row sm:items-center sm:gap-5 md:p-5",
-        CLICKABLE,
-        emphasized && "border-text-primary hover:border-text-primary"
-      )}
-    >
-      <div className="hidden w-[156px] shrink-0 sm:block">
-        <CourseEyecatch covers={pickCovers(course, lessons)} label="" sizes="44px" className="rounded-[14px]" plannedLabel="近日公開" />
-      </div>
-      <div className="min-w-0 flex-1">
-        <h3 className="font-heading text-[17px] font-bold leading-[1.5] text-text-primary">{main}</h3>
-        {sub ? <p className="text-xs font-bold text-text-secondary">{sub}</p> : null}
-        <p className="mt-2 text-[13px] leading-[1.8] text-text-secondary">{note}</p>
-        <p className="mt-2 flex items-center gap-1 text-xs font-bold text-text-primary">
-          コースを見る
-          <ArrowRight size={13} className="transition-transform group-hover:translate-x-0.5" />
-        </p>
-      </div>
-    </Link>
-  );
-}
-
-function StopCard({ stop, lessons, emphasized }: { stop: RoadmapStop; lessons: LessonMap; emphasized: boolean }) {
-  const note = <T f={stop.note} />;
-  if (stop.type === "course") {
-    return <CourseStopCard slug={stop.slug} lessons={lessons} note={note} emphasized={emphasized} />;
-  }
-  if (stop.type === "planned-course") {
-    // 押せないので白にしない。点線＋薄く
-    return (
-      <div
-        className={cn(
-          "rounded-[20px] border-2 border-dashed p-4 md:p-5",
-          emphasized ? "border-text-primary/40" : "border-border-light"
-        )}
-      >
-        <h3 className="font-heading text-[17px] font-bold leading-[1.5] text-text-disabled">{stop.title}</h3>
-        <p className="mt-2 text-[13px] leading-[1.8] text-text-muted">{note}</p>
-      </div>
-    );
-  }
-  // コース外のやること: アイコン付きの別の見た目（押せるのでリンク）
-  const external = stop.href.startsWith("http");
-  return (
-    <Link
-      href={stop.href}
-      target={external ? "_blank" : undefined}
-      className={cn(
-        "group flex items-start gap-4 rounded-full py-3 pl-3 pr-5 max-sm:rounded-[20px]",
-        CLICKABLE,
-        emphasized && "border-text-primary hover:border-text-primary"
-      )}
-    >
-      <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[var(--persona-hero-surface)] text-text-primary">
-        <StopIcon stop={stop} />
-      </span>
-      <div className="min-w-0 flex-1 py-0.5">
-        <h3 className="font-heading text-[16px] font-bold leading-[1.5] text-text-primary">{stop.title}</h3>
-        <p className="mt-0.5 text-[13px] leading-[1.75] text-text-secondary">{note}</p>
-      </div>
-      <ArrowRight size={18} className="mt-3 shrink-0 text-text-muted transition-transform group-hover:translate-x-0.5" />
-    </Link>
-  );
 }
 
 function StatusTag({ status }: { status: "done" | "current" | "todo" | "plain" }) {
@@ -165,34 +64,6 @@ function StatusTag({ status }: { status: "done" | "current" | "todo" | "plain" }
   if (status === "current")
     return <span className="rounded-full bg-text-primary px-2 py-0.5 text-[11px] font-bold text-text-inverse">いまここ</span>;
   return null;
-}
-
-/** 区切りの下: なぜこの順番か／次へ進んでよい目安（終えた区切りは印つき） */
-function StopReason({ stop, done }: { stop: RoadmapStop; done: boolean }) {
-  return (
-    <dl className="mt-3 grid gap-2 px-1 text-[13px] leading-[1.75] sm:grid-cols-[auto_minmax(0,1fr)] sm:gap-x-3">
-      <dt className="text-xs font-bold leading-[1.75] text-text-muted sm:pt-px">なぜこの順番</dt>
-      <dd className="-mt-1.5 text-text-secondary sm:mt-0">
-        <T f={stop.whyHere} />
-      </dd>
-      <dt
-        className={cn(
-          "flex items-center gap-1 text-xs font-bold leading-[1.75] sm:pt-px",
-          done ? "text-text-success" : "text-text-muted"
-        )}
-      >
-        {done ? (
-          <TickCircle size={14} color="currentColor" variant="Bold" />
-        ) : (
-          <Flag size={14} color="currentColor" variant="Linear" />
-        )}
-        {done ? "目安クリア" : "次へ進む目安"}
-      </dt>
-      <dd className={cn("-mt-1.5 font-bold sm:mt-0", done ? "text-text-success" : "text-text-primary")}>
-        <T f={stop.checkpoint} />
-      </dd>
-    </dl>
-  );
 }
 
 /* ---------- 進行中の会員: 次の1コース ---------- */
