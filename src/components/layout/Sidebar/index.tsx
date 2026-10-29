@@ -13,6 +13,7 @@ import { Home2 } from "iconsax-react";
 import { withPricingFrom } from "@/lib/activity-utils";
 import { trackPricingCtaClick } from "@/lib/activity-client";
 import { COURSE_PROTO_PREFIX, PrototypeSidebar } from "./PrototypeSidebar";
+import { SITE_STRUCTURE_TOP_PREFIX, SiteStructureSidebar } from "./SiteStructureSidebar";
 
 // 旧BONOサイト（Webflow）。ドメイン切替後は legacy サブドメインから提供する。
 const OLD_BONO_URL = "https://legacy.bo-no.design";
@@ -32,6 +33,19 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
   if (pathname?.startsWith(COURSE_PROTO_PREFIX)) {
     return (
       <PrototypeSidebar
+        className={className}
+        user={user}
+        notificationSlot={notificationSlot}
+        boardDotSlot={boardDotSlot}
+        pathname={pathname}
+      />
+    );
+  }
+
+  // 新しいトップの試作（#267・/dev 配下のみ）では、267-L 7章のナビ案を出す。本番の並びは下のまま
+  if (pathname === SITE_STRUCTURE_TOP_PREFIX || pathname?.startsWith(SITE_STRUCTURE_TOP_PREFIX + "/")) {
+    return (
+      <SiteStructureSidebar
         className={className}
         user={user}
         notificationSlot={notificationSlot}

@@ -26,6 +26,18 @@ interface DevProjectEntry {
 
 const projects: DevProjectEntry[] = [
   {
+    href: "/dev/site-structure/top",
+    issue: "#267",
+    title: "新しいトップと左ナビの試作",
+    summary:
+      "267-L の並び（ヒーロー → 4つの入口 → …）を今のBONOの部品で組んだトップの試作。左のナビも新しい並び（レッスン・トレーニング・旧サイトを外し、悩みから探す・コース・人と学ぶを足した版）に差し替わる。上の切り替えか ?state=member で会員の見え方。いまはヒーローと4つの入口まで（S1〜S2）。",
+    status: "in-progress",
+    links: [
+      { href: "/dev/site-structure/top?state=member", label: "会員の見え方" },
+      { href: "/dev/site-structure", label: "サイト構造案の試作一覧" },
+    ],
+  },
+  {
     href: "/dev/course-pages/prototyping",
     issue: "#241 / #242",
     title: "プロトタイピング：コースページ",
