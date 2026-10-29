@@ -131,6 +131,30 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
     );
 }
 
+/**
+ * 戻り先（redirectTo）を同じサイト内の pathname + search に解決する。
+ * 外のサイトへ飛ばせる値（https://evil.com, //evil.com, /\evil.com 等）や
+ * 制御文字入りの値は null を返す（呼び出し側で /mypage に倒す）。
+ * 考え方は src/app/(auth)/actions.ts の sanitizeRedirect と同じ。
+ */
+function resolveSameOriginRedirect(
+  value: string | null,
+  origin: string
+): { pathname: string; search: string } | null {
+  if (!value) return null;
+  if (/[\x00-\x1f\x7f]/.test(value)) return null;
+  if (!value.startsWith("/")) return null;
+  if (value.startsWith("//") || value.startsWith("/\\")) return null;
+  let dest: URL;
+  try {
+    dest = new URL(value, origin);
+  } catch {
+    return null;
+  }
+  if (dest.origin !== origin) return null;
+  return { pathname: dest.pathname, search: dest.search };
+}
+
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -197,11 +221,17 @@ export function proxy(request: NextRequest) {
   const isAuthPage = AUTH_PAGE_PATHS.includes(pathname);
   const isReauth = request.nextUrl.searchParams.get("reauth") === "1";
   if (hasAuth && isAuthPage && !isReauth) {
-    const redirectTo =
-      request.nextUrl.searchParams.get("redirectTo") || "/mypage";
+    // redirectTo は「/subscription?intent_plan=…」のように ? 付きで来る。
+    // pathname にそのまま入れると ? が %3F にエスケープされて 404 になるため（#268-C）、
+    // URL として読み直してから pathname と search を分けて入れ直す。
+    const dest = resolveSameOriginRedirect(
+      request.nextUrl.searchParams.get("redirectTo"),
+      request.nextUrl.origin
+    );
     const url = request.nextUrl.clone();
-    url.pathname = redirectTo;
-    url.searchParams.delete("redirectTo");
+    url.pathname = dest?.pathname ?? "/mypage";
+    url.search = dest?.search ?? "";
+    url.hash = "";
     return NextResponse.redirect(url);
   }
 
