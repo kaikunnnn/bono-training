@@ -12,10 +12,10 @@ export function SlackLinkResult({ status }: { status: LinkPageStatus }) {
       <p className="text-base leading-relaxed text-text-secondary">{copy.body}</p>
       <p>
         <Link
-          href="/mypage"
+          href="/account"
           className="text-text-link underline underline-offset-2 hover:text-text-link-hover font-medium"
         >
-          マイページへ
+          アカウント情報へ
         </Link>
       </p>
     </div>

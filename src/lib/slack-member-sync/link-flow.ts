@@ -38,9 +38,15 @@ export async function isPaidForLink(store: LinkStore, userId: string, settings?:
 }
 
 /** ページを開いたときの表示（リンクは無効化しない） */
-export async function inspectLinkToken(store: LinkStore, raw: string | null): Promise<"valid" | LinkPageStatus> {
+export async function inspectLinkToken(
+  store: LinkStore,
+  raw: string | null,
+  userId?: string,
+): Promise<"valid" | LinkPageStatus> {
   if (!isPlausibleToken(raw)) return "invalid";
   const state = await store.peekToken(hashToken(raw));
+  // つないだあとに同じリンクを開き直した人には「使用済み」でなく「すでにつながっています」を出す
+  if (state === "used" && userId && (await store.getLinkByUserId(userId))) return "already_linked";
   return state;
 }
 
@@ -52,7 +58,10 @@ export async function confirmLink(store: LinkStore, raw: string | null, userId: 
     const state = await store.peekToken(hashToken(raw));
     return state === "valid" ? "not_paid" : state;
   }
-  return store.claimLink(hashToken(raw), userId);
+  const result = await store.claimLink(hashToken(raw), userId);
+  // 二度押し・つないだあとの押し直しも「すでにつながっています」にそろえる
+  if (result === "used" && (await store.getLinkByUserId(userId))) return "already_linked";
+  return result;
 }
 
 /**
