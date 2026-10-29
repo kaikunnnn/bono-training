@@ -88,8 +88,7 @@ export class MemorySyncStore implements SyncStore, LinkStore {
   settings: SyncSettings | null = {
     mode: "live",
     testUserIds: [],
-    minNoticeDays: 7,
-    linkGraceDays: 14,
+    linkGraceDays: 7,
     ownerReportSentOn: null,
     keepUserIds: [],
     keepSlackUserIds: [],
@@ -177,7 +176,7 @@ export class MemorySyncStore implements SyncStore, LinkStore {
     await Promise.resolve();
     const s = this.states.get(slackUserId);
     if (!s) return false;
-    const sentAt = dmType === "link_request" ? s.linkRequestDmAt : s.removalNoticeDmAt;
+    const sentAt = dmType === "link_request" ? s.linkRequestDmAt : null;
     const clean = !s.needsReview || s.reviewReason === SOFT_REVIEW_REASON;
     if (!clean || sentAt !== null) return false;
     s.needsReview = true;
@@ -330,10 +329,9 @@ const approved = (text: string, placeholders: string[]): SyncMessage => ({
 });
 
 export const APPROVED_MESSAGES = {
-  linkRequest: approved("つないでください <{{link}}|つなぐ> 期限 {{deadline}}", ["link", "deadline"]),
-  removalNotice: approved("{{end_date}}で終了、{{remove_date}}に外れます <{{signup_url}}|登録>", [
-    "end_date",
-    "remove_date",
+  linkRequest: approved("つないでください <{{link}}|つなぐ> 期限 {{deadline}} <{{signup_url}}|登録>", [
+    "link",
+    "deadline",
     "signup_url",
   ]),
   ownerReport: approved("*{{summary}}*\n{{due_list}}\n{{review}}\n<{{admin_url}}|管理>", [

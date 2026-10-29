@@ -192,7 +192,7 @@ describe("マイページの「Slackとつなぐ」", () => {
 
   it("本文が未承認なら送らない（同じ結果）", async () => {
     slack.lookupResult = () => ({ kind: "ok", data: makeMember({ id: "U_SLACK" }) });
-    expect(await requestMypageLink(deps({ message: MYPAGE_CONFIRM_MESSAGE }), "user-paid", "a@example.com")).toBe("sent");
+    expect(await requestMypageLink(deps({ message: { ...MYPAGE_CONFIRM_MESSAGE, approved: false } }), "user-paid", "a@example.com")).toBe("sent");
     expect(slack.postCalls).toHaveLength(0);
     expect(store.tokens[0].slackUserId).toBeNull();
   });

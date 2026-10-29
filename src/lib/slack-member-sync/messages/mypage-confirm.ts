@@ -6,13 +6,13 @@
  * 差し込み:
  *   {{link}} … 使い捨てリンク（24時間有効）
  *
- * 承認待ち（#263 未決Q1）。approved が false の間は送らない（マイページには常に同じ案内文を返す）。
+ * 2026-10-29 オーナー承認済み。
  */
 import type { SyncMessage } from "./common";
 
 export const MYPAGE_CONFIRM_MESSAGE: SyncMessage = {
   version: 1,
-  approved: false,
+  approved: true,
   placeholders: ["link"],
   text: [
     "BONOのマイページから、このSlackアカウントとBONOのアカウントをつなぐ操作がありました。",
