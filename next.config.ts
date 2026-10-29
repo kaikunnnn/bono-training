@@ -92,6 +92,9 @@ const nextConfig: NextConfig = {
         destination: "/how-to/feedback",
         permanent: true,
       },
+      // 旧「デザイナーのためのCursor入門」を新レッスンに統合（#260）。旧URLを308で恒久保護。
+      { source: "/lessons/cursor-for-designers", destination: "/lessons/cursor-ui-ai-design", permanent: true },
+      { source: "/contents/cursor-intro-for-designers", destination: "/lessons/cursor-ui-ai-design", permanent: true },
       // ── サイト移行 B-9: 旧サイト(Webflow)からの 301/308 リダイレクトマップ ──
       // 出典: rebono/issues/bono-training_URL移行/11_individual_301_map_2026-08-28.tsv
       // 3列目が 410 の行(80本)は next.config で 410 を返せないため実装しない
