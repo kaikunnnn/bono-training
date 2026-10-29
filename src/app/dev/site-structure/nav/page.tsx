@@ -13,12 +13,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { Book, Calendar2, DocumentText, Lamp, Map as MapIcon, Medal, MessageQuestion, PlayCircle, User } from "iconsax-react";
+import { Book, Calendar2, DocumentText, EmptyWallet, Lamp, Login, Map as MapIcon, Medal, MessageQuestion, PlayCircle, Setting2, User } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { SidebarMenuGroup } from "@/components/layout/Sidebar/SidebarMenuGroup";
 import { SidebarMenuItem } from "@/components/layout/Sidebar/SidebarMenuItem";
-import { MenuIcons } from "@/components/layout/Sidebar/icons";
 import { ICON_SIZE } from "@/components/layout/Sidebar/icon-utils";
 import { getCourse } from "../../course-pages/data";
 import { v6Steps, type V6Step } from "../../course-pages/data/roadmap-career-change-v6";
@@ -199,15 +198,15 @@ function SidebarMock({ mode }: { mode: Mode }) {
         </SidebarMenuItem>
       </SidebarMenuGroup>
       <SidebarMenuGroup label="その他" className="mt-3">
-        <SidebarMenuItem href="/subscription" icon={<MenuIcons.pricing {...ICON} />}>
+        <SidebarMenuItem href="/subscription" icon={<EmptyWallet {...ICON} />}>
           料金プラン
         </SidebarMenuItem>
         {isMember ? (
-          <SidebarMenuItem href="/account" icon={<MenuIcons.settings {...ICON} />}>
+          <SidebarMenuItem href="/account" icon={<Setting2 {...ICON} />}>
             設定
           </SidebarMenuItem>
         ) : (
-          <SidebarMenuItem href="/login" icon={<MenuIcons.login {...ICON} />}>
+          <SidebarMenuItem href="/login" icon={<Login {...ICON} />}>
             ログイン
           </SidebarMenuItem>
         )}
