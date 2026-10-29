@@ -49,7 +49,7 @@ export default async function SlackLinkPage({
   let paid = false;
   try {
     [state, paid] = await Promise.all([
-      inspectLinkToken(store, token),
+      inspectLinkToken(store, token, user.id),
       isPaidForLink(store, user.id),
     ]);
   } catch (error) {

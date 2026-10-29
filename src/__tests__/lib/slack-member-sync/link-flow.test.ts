@@ -61,7 +61,15 @@ describe("DM のリンクでつなぐ（/slack/link）", () => {
     addToken(RAW);
     expect(await confirmLink(store, RAW, "user-paid")).toBe("linked");
     expect(store.links).toEqual([{ userId: "user-paid", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "dm_link" }]);
-    expect(await confirmLink(store, RAW, "user-paid")).toBe("used");
+    expect(await confirmLink(store, RAW, "user-paid")).toBe("already_linked");
+  });
+
+  it("つないだあとに同じリンクを開き直すと「すでにつながっています」。つないでいない人には「使用済み」", async () => {
+    addToken(RAW);
+    await confirmLink(store, RAW, "user-paid");
+    expect(await inspectLinkToken(store, RAW, "user-paid")).toBe("already_linked");
+    expect(await inspectLinkToken(store, RAW, "user-free")).toBe("used");
+    expect(await inspectLinkToken(store, RAW)).toBe("used");
   });
 
   it("マイページ由来のリンクは linked_via=mypage", async () => {
