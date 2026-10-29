@@ -22,8 +22,16 @@
       "schedule": "30 1 * * *"
     },
     {
-      "path": "/api/cron/member-mail",
+      "path": "/api/cron/member-mail?run=8",
       "schedule": "0 23 * * 0,1"
+    },
+    {
+      "path": "/api/cron/member-mail?run=9",
+      "schedule": "0 0 * * 1,2"
+    },
+    {
+      "path": "/api/cron/member-mail?run=10",
+      "schedule": "0 1 * * 1,2"
     }
   ]
 }

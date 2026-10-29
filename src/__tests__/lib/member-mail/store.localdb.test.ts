@@ -201,6 +201,10 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
     const ev = await admin.from("member_mail_webhook_events").select("link_path").eq("webhook_id", `w-${RUN}-2`).single();
     expect(ev.data!.link_path).toBe("www.bo-no.design/lessons?from=email_weekly");
 
+    // 全員分を書き出した号は、次の回から拾い直さない
+    const due = await store.listDueCampaigns(new Date());
+    expect(due.map((d) => d.id)).not.toContain(campaignId);
+
     // 送信記録にメールアドレスの列は無い
     const sample = await admin.from("member_mail_deliveries").select("*").eq("id", row.data!.id).single();
     expect(JSON.stringify(sample.data)).not.toContain("@");

@@ -360,8 +360,9 @@ export async function runSendBatch(
   options: { limit?: number; timeBudgetMs?: number } = {},
 ): Promise<BatchResult> {
   const { store } = deps;
-  const limit = options.limit ?? 40;
-  const timeBudgetMs = options.timeBudgetMs ?? 40_000;
+  // 1回の上限は1日の上限（既定80）まで。実際に止めるのは時間の予算（関数の実行時間上限 60秒に収める）
+  const limit = options.limit ?? 100;
+  const timeBudgetMs = Math.max(0, options.timeBudgetMs ?? 40_000);
   const startedAt = deps.now();
   const outcomes: Partial<Record<DeliveryOutcome, number>> = {};
   let processed = 0;

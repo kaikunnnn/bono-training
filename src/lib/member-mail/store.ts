@@ -39,6 +39,8 @@ const UNSUBSCRIBES = "member_mail_unsubscribes";
 const SUPPRESSIONS = "member_mail_suppressions";
 const UNIQUE_VIOLATION = "23505";
 const PAGE = 1000;
+/** 送り始めの時刻からこの期間だけ、対象の書き出しを試みる */
+const DUE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 type DbRow = Record<string, unknown>;
 
@@ -182,10 +184,13 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
     },
 
     async listDueCampaigns(now) {
+      // 送り始めの時刻から7日以内で、まだ全員分を書き出していないものだけ（古い号を毎回拾い直さない）
       const { data, error } = await client
         .from(CAMPAIGNS)
         .select("*")
         .lte("scheduled_at", now.toISOString())
+        .gte("scheduled_at", new Date(now.getTime() - DUE_WINDOW_MS).toISOString())
+        .is("enqueued_at", null)
         .order("scheduled_at", { ascending: true })
         .limit(20);
       if (error) fail("campaign list", error);

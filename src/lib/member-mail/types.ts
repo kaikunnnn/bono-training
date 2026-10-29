@@ -144,7 +144,7 @@ export interface MailStore {
   releaseRunLock(): Promise<void>;
 
   getCampaign(id: string): Promise<Campaign | null>;
-  /** scheduled_at <= now の文面 */
+  /** scheduled_at <= now（7日以内）で、まだ全員分を書き出していない文面 */
   listDueCampaigns(now: Date): Promise<Campaign[]>;
   markEnqueued(campaignId: string, at: Date): Promise<void>;
   saveCount(campaignId: string, count: CountSummary, at: Date): Promise<void>;

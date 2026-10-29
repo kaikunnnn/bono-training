@@ -1,5 +1,8 @@
 // src/app/api/cron/member-mail/route.ts
-// 会員メール（#264 スライス1）の送る処理。Vercel Cron（月曜・火曜 8:00 JST）と、手動の実行（同じ CRON_SECRET）から GET で叩く。
+// 会員メール（#264 スライス1）の送る処理。Vercel Cron（月曜・火曜の 8:00 / 9:00 / 10:00 JST。1回で送り切れない分を次の回で送る）と、
+// 手動の実行（同じ CRON_SECRET）から GET で叩く。?run= は cron の区別用で、処理には使わない。
+// 1日の通数は member_mail_settings.daily_limit（既定80）で止まる（264 決定: Resend 無料枠のため2日に分けて送る）。
+// 対象が 上限×2 を超えると火曜に送り切れず、次の月曜の回で残りが送られる。その前に上限の見直しが要る。
 // 既存 cron と同じ型（CRON_SECRET の Bearer 検証・fail-closed / force-dynamic）。
 //
 // やること:
@@ -16,7 +19,11 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+/** 1通の処理中に締め切りを超えても60秒に収まるよう、新しい1通に着手するのはここまで */
+const SEND_BUDGET_MS = 45_000;
+
 export async function GET(request: NextRequest) {
+  const startedAt = Date.now();
   const cronSecret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
@@ -44,7 +51,11 @@ export async function GET(request: NextRequest) {
                 : undefined,
       });
     }
-    const batch = deps.mail ? await runSendBatch(deps) : { skippedReason: "mail_not_configured" };
+    // 対象の書き出しに使った時間を差し引いて、maxDuration（60秒）に収める
+    const timeBudgetMs = SEND_BUDGET_MS - (Date.now() - startedAt);
+    const batch = deps.mail
+      ? await runSendBatch(deps, { timeBudgetMs })
+      : { skippedReason: "mail_not_configured" };
     return NextResponse.json({ prepared, batch });
   } catch (error) {
     console.error("[member-mail] cron failed:", error instanceof Error ? error.message : "unknown");

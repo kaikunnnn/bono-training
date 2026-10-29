@@ -81,7 +81,9 @@ export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
     return c ? { ...c } : null;
   }
   async listDueCampaigns(now: Date) {
-    return [...this.campaigns.values()].filter((c) => c.scheduledAt && c.scheduledAt <= now);
+    return [...this.campaigns.values()].filter(
+      (c) => c.scheduledAt && c.scheduledAt <= now && now.getTime() - c.scheduledAt.getTime() <= 7 * 86400000 && !c.enqueuedAt,
+    );
   }
   async markEnqueued(id: string, at: Date) {
     this.campaigns.get(id)!.enqueuedAt = at;
