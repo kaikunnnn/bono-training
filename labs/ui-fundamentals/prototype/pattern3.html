@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI Trainer — パターン3(初心者テスト反映)</title>
+<style>
+  :root {
+    --ink: #1F1A14; --sec: #57504a; --ter: #7a7269;
+    --bg: #FAF7F2; --card: #FFFFFF; --border: rgba(60,40,20,0.14);
+    --green: #1F8A4C; --green-soft: #E8F4EC;
+    --blue: #2C63C8; --blue-soft: #EDF2FC;
+    --amber-soft: #FCF3E3; --amber: #9A6A1B;
+    --red: #C7392F; --radius: 14px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 16px; line-height: 1.85; }
+  .topbar { display: flex; align-items: center; gap: 20px; padding: 14px 32px; background: var(--card);
+    border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; }
+  .topbar .logo { font-weight: 700; font-size: 15px; }
+  .topbar .crumb { color: var(--ter); font-size: 13px; }
+  .topbar .plink { margin-left: auto; font-size: 12px; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .container { max-width: 680px; margin: 0 auto; padding: 36px 24px 120px; }
+  .container.wide { max-width: 980px; }
+  h1 { font-size: 27px; line-height: 1.4; margin-bottom: 10px; letter-spacing: .01em; }
+  .lead { color: var(--sec); font-size: 15px; margin-bottom: 24px; }
+  .sectionlabel { font-size: 13px; font-weight: 700; color: var(--ter); margin-bottom: 10px; letter-spacing: .04em; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 28px; margin-bottom: 18px; }
+  .pill { display: inline-block; background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+    padding: 3px 14px; font-size: 12px; font-weight: 600; color: var(--sec); margin-right: 6px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; height: 52px; padding: 0 28px;
+    border-radius: 999px; font-size: 15px; font-weight: 700; cursor: pointer; border: none;
+    font-family: inherit; transition: transform .1s, opacity .15s; }
+  .btn:hover { opacity: .9; transform: translateY(-1px); }
+  .btn.primary { background: var(--green); color: #fff; width: 100%; box-shadow: 0 3px 0 rgba(20,90,50,.35); }
+  .btn.secondary { background: var(--card); color: var(--ink); border: 1.5px solid var(--ink); width: 100%; }
+  .btn.ghost { background: none; color: var(--blue); height: auto; padding: 4px 8px; box-shadow: none; }
+  .btn:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+  .btnrow { display: flex; gap: 12px; margin-top: 10px; }
+  a { color: var(--blue); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; font-size: 15px; font-family: inherit; resize: vertical; background: var(--card); line-height: 1.8; }
+  textarea:focus { outline: 2.5px solid var(--green); border-color: transparent; }
+
+  /* ===== ガイド(ナビ)の吹き出し ===== */
+  .guide { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 26px; }
+  .guide .avatar { width: 46px; height: 46px; border-radius: 50%; background: var(--green-soft);
+    border: 1.5px solid var(--green); display: flex; align-items: center; justify-content: center;
+    font-size: 22px; flex-shrink: 0; }
+  .guide .speech { background: var(--card); border: 1px solid var(--border); border-radius: 4px 18px 18px 18px;
+    padding: 14px 20px; font-size: 15px; color: var(--ink); line-height: 1.9; }
+  .guide .speech .gname { font-size: 11px; font-weight: 700; color: var(--green); display: block; margin-bottom: 2px; }
+
+  /* ===== 進捗(大きく) ===== */
+  .journey { display: flex; gap: 0; margin-bottom: 28px; background: var(--card); border: 1px solid var(--border);
+    border-radius: 999px; padding: 6px; }
+  .journey .jstep { flex: 1; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--ter);
+    padding: 8px 4px; border-radius: 999px; }
+  .journey .jstep.now { background: var(--green); color: #fff; }
+  .journey .jstep.done { color: var(--green); }
+
+  /* ===== レッスンカード(色面で種類を区別) ===== */
+  .toc { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 28px; margin-bottom: 22px; }
+  .toc .toctitle { font-size: 17px; font-weight: 700; margin-bottom: 12px; }
+  .tocitem { display: flex; gap: 12px; padding: 9px 0; font-size: 14px; align-items: baseline;
+    border-bottom: 1px dashed var(--border); }
+  .tocitem:last-child { border-bottom: none; }
+  .tocitem .tocnum { font-weight: 700; color: var(--blue); font-size: 12px; min-width: 62px; }
+  .tocitem .tocdo { color: var(--green); }
+  .lesson { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+    margin-bottom: 8px; overflow: hidden; }
+  .lesson .lhead { padding: 14px 28px; font-size: 13px; font-weight: 700; }
+  .lesson .lhead.basic { background: var(--blue-soft); color: var(--blue); }
+  .lesson .lhead.do { background: var(--green-soft); color: var(--green); }
+  .lesson .lhead.wrap { background: var(--amber-soft); color: var(--amber); }
+  .lesson .lbody { padding: 22px 28px 26px; }
+  .lesson h2 { font-size: 21px; margin-bottom: 14px; line-height: 1.5; }
+  .goalbox { background: var(--bg); border-radius: 12px; padding: 13px 18px; margin-bottom: 8px; font-size: 14px; }
+  .whybox { border-left: 3px solid var(--blue); padding: 4px 16px; margin: 8px 0 16px; font-size: 13.5px; color: var(--sec); }
+  .lesson .body p { color: var(--sec); margin: 10px 0; font-size: 15.5px; }
+  .lesson .body b { color: var(--ink); }
+  .bridge { text-align: center; color: var(--ter); font-size: 13px; margin: 14px 0 22px; }
+  /* 引用リンクカード */
+  .refsec { margin-top: 20px; }
+  .refsec .reftitle { font-size: 12px; font-weight: 700; color: var(--ter); margin-bottom: 8px; letter-spacing: .05em; }
+  a.reflink { display: block; border: 1px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; margin-bottom: 10px; color: inherit; background: var(--card); transition: border-color .15s, transform .1s; }
+  a.reflink:hover { border-color: var(--blue); text-decoration: none; transform: translateY(-1px); }
+  a.reflink.primary { border-left: 4px solid var(--blue); background: var(--blue-soft); }
+  .refhead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .refbadge { font-size: 11px; font-weight: 700; border-radius: 5px; padding: 2px 9px; background: var(--blue); color: #fff; }
+  .refbadge.sub { background: var(--card); color: var(--ter); border: 1px solid var(--border); }
+  .refsrc { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .refopen { margin-left: auto; font-size: 12px; color: var(--blue); white-space: nowrap; }
+  .refquote { font-size: 13px; color: var(--ink); margin-top: 8px; line-height: 1.75; }
+  .refquote::before { content: "“"; color: var(--ter); }
+  .refquote::after { content: "”"; color: var(--ter); }
+  .refnote { font-size: 12.5px; color: var(--ter); margin-top: 6px; }
+  /* フィールドワーク */
+  .fieldwork { background: var(--green-soft); border: 1px solid rgba(31,138,76,.3); border-radius: 12px;
+    padding: 18px 22px; margin: 14px 0; }
+  .fieldwork .fwtitle { font-weight: 700; font-size: 14px; margin-bottom: 8px; color: var(--green); }
+  .fieldwork ol { margin: 8px 0 8px 20px; font-size: 14.5px; color: var(--sec); }
+  .fieldwork li { margin: 5px 0; }
+  .kanten { background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 12px 18px; margin: 10px 0; font-size: 14.5px; }
+  .kanten b { color: var(--green); }
+  .policy { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0; background: var(--card); }
+  .policy th, .policy td { border: 1px solid var(--border); padding: 9px 12px; text-align: left; vertical-align: top; }
+  .policy th { background: var(--bg); font-size: 12px; color: var(--ter); }
+  .policy .kaishaku { color: var(--ter); }
+  .duo2 { display: flex; gap: 16px; margin: 14px 0; }
+  .duo2 .dcol { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .duo2 .dtitle { font-weight: 700; font-size: 13.5px; margin-bottom: 10px; }
+  .duo2 .dnote { font-size: 12.5px; color: var(--ter); margin-top: 8px; line-height: 1.7; }
+  .mockfield { border: 1px solid #B0A79C; border-radius: 8px; padding: 8px 12px; background: #fff; }
+  .mockfield .flabel { font-size: 10px; color: var(--ter); }
+  .mockfield .fval { font-size: 13px; }
+  .mocklabel { font-size: 12px; margin-bottom: 4px; }
+  .decidebox { background: var(--amber-soft); border-radius: 12px; padding: 18px 22px; font-size: 14.5px; }
+  .decidebox ol { margin: 8px 0 0 20px; }
+  .decidebox li { margin: 6px 0; }
+  .checklist label { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; font-size: 14.5px; cursor: pointer; }
+  .checklist input { margin-top: 5px; accent-color: var(--green); width: 16px; height: 16px; }
+  .checklist .why { color: var(--ter); font-size: 12px; }
+  details.hint { border: 1px solid var(--border); border-radius: 12px; background: var(--card); margin-bottom: 10px; }
+  details.hint summary { padding: 14px 18px; font-size: 14.5px; font-weight: 700; cursor: pointer; list-style: none; }
+  details.hint summary::before { content: "▸ "; color: var(--green); }
+  details.hint[open] summary::before { content: "▾ "; }
+  details.hint .hintbody { padding: 0 18px 16px; font-size: 14.5px; color: var(--sec); }
+  .three { display: flex; gap: 16px; margin: 16px 0; }
+  .three .tcol { flex: 1; }
+  .three .tlabel { font-size: 13.5px; font-weight: 700; margin-bottom: 6px; }
+  .three .timg { width: 100%; height: 420px; object-fit: contain; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px; display: block; }
+  .three .tsub { font-size: 12px; color: var(--ter); margin-top: 6px; line-height: 1.6; }
+  .uploadbox { width: 100%; height: 420px; background: var(--card); border: 2px dashed #C4B8A8;
+    border-radius: 12px; display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center;
+    color: var(--ter); font-size: 13.5px; font-weight: 600; cursor: pointer; text-align: center; padding: 20px; }
+  .aspect { display: flex; gap: 16px; align-items: flex-start; background: var(--card);
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; }
+  .aspect .aname { font-weight: 700; font-size: 14px; min-width: 80px; }
+  .aspect .adesc { flex: 1; font-size: 13.5px; color: var(--sec); }
+  .aspect select { border: 1px solid var(--border); border-radius: 8px; padding: 5px 10px; font-family: inherit; font-size: 13px; }
+  .grid { display: flex; gap: 16px; }
+  .odai { flex: 1; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .odai.locked { opacity: .5; }
+  .odai h3 { font-size: 17px; margin-bottom: 6px; }
+  .odai .meta { font-size: 12px; color: var(--ter); margin-bottom: 10px; }
+  .footer-note { color: var(--ter); font-size: 12.5px; margin-top: 32px; border-top: 1px solid var(--border); padding-top: 16px; }
+  .tagrow { margin: 8px 0 16px; }
+  .learned { display: inline-block; background: var(--green-soft); color: var(--green); border-radius: 999px;
+    padding: 5px 16px; font-size: 13.5px; font-weight: 700; margin: 0 6px 8px 0; }
+  .err { color: var(--red); font-size: 13.5px; display: none; margin-top: 8px; background: #FCEEEC; border-radius: 8px; padding: 10px 14px; }
+  .whylist { display:none; font-size:12.5px; background:var(--bg); border-radius:10px; padding:14px 18px; margin-top:8px; line-height:2; }
+  .qlabel { font-weight: 700; font-size: 15px; margin: 18px 0 6px; }
+  /* オリエンテーション */
+  .orient { position: fixed; inset: 0; background: rgba(30,22,12,.55); z-index: 50; display: flex;
+    align-items: center; justify-content: center; padding: 24px; }
+  .orient .obox { background: var(--card); border-radius: 20px; max-width: 520px; padding: 36px 40px; text-align: center; }
+  .orient .steps3 { display: flex; gap: 14px; margin: 24px 0; }
+  .orient .o3 { flex: 1; background: var(--bg); border-radius: 14px; padding: 18px 10px; font-size: 13.5px; font-weight: 700; }
+  .orient .o3 .oico { font-size: 30px; display: block; margin-bottom: 6px; }
+  /* 祝福 */
+  .celebrate { text-align: center; padding: 30px 0 10px; position: relative; }
+  .celebrate .big { font-size: 60px; }
+  .confetti span { position: fixed; top: -20px; font-size: 20px; animation: fall 2.8s linear forwards; z-index: 40; }
+  @keyframes fall { to { transform: translateY(105vh) rotate(360deg); opacity: .7; } }
+  /* 画像・実例の引用 */
+  .embedbox { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin: 14px 0 4px; background: #fff; }
+  .embedbox iframe { width: 100%; height: 240px; border: 0; display: block; }
+  .figsrc { font-size: 11.5px; color: var(--ter); margin: 6px 0 14px; line-height: 1.6; }
+  .quotefig { display: flex; gap: 18px; align-items: flex-start; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin: 14px 0 4px; }
+  .quotefig img { width: 190px; border: 1px solid var(--border); border-radius: 10px; flex-shrink: 0; }
+  .quotefig .fignotes { flex: 1; font-size: 13.5px; color: var(--sec); line-height: 1.9; }
+  .quotefig .fignotes b { color: var(--ink); }
+  /* スタイルキット */
+  .kitnote { font-size: 13px; color: var(--ter); margin-bottom: 14px; }
+  .kitlabel { font-size: 12px; font-weight: 700; color: var(--ter); margin: 18px 0 8px; letter-spacing: .04em; }
+  .swatches { display: flex; gap: 10px; flex-wrap: wrap; }
+  .swatch { width: 108px; }
+  .swatch .chipclr { height: 48px; border-radius: 10px; border: 1px solid var(--border); }
+  .swatch .cname { font-size: 12px; font-weight: 700; margin-top: 5px; }
+  .swatch .cuse { font-size: 11px; color: var(--ter); line-height: 1.5; }
+  .typerow { display: flex; align-items: baseline; gap: 14px; padding: 6px 0; border-bottom: 1px dashed var(--border); }
+  .typerow .tsample { min-width: 150px; }
+  .typerow .tspec { font-size: 12px; color: var(--ter); }
+  .partdemo { display: flex; gap: 16px; align-items: center; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 10px; }
+  .partdemo .demo { flex-shrink: 0; width: 220px; }
+  .partdemo .dnote2 { flex: 1; font-size: 13px; color: var(--sec); line-height: 1.8; }
+  .partdemo .dnote2 b { color: var(--ink); }
+  .demo-btn { height: 48px; border-radius: 8px; background: #000; color: #fff; display: flex;
+    align-items: center; justify-content: center; font-size: 15px; font-weight: 700; }
+  .demo-social { height: 48px; border-radius: 8px; background: #fff; border: 1px solid #222;
+    display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600; color: #111; position: relative; }
+  .demo-social .sic { position: absolute; left: 14px; }
+  .demo-input { background: #fff; border: 1px solid #B0B0B0; border-radius: 8px; height: 52px;
+    padding: 8px 14px; display: flex; flex-direction: column; justify-content: center; }
+  .demo-input .dl { font-size: 10px; color: #5E5E5E; }
+  .demo-input .dv { font-size: 14px; color: #111; }
+  .demo-label { font-size: 12px; color: #111; margin-bottom: 4px; }
+  .firststep { background: var(--blue-soft); border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; }
+  .firststep .fstitle { font-weight: 700; font-size: 14px; color: var(--blue); margin-bottom: 6px; }
+  .firststep ol { margin: 4px 0 0 20px; font-size: 14.5px; color: var(--sec); }
+  .firststep li { margin: 4px 0; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="logo">UI Trainer <span style="font-weight:400;color:var(--ter);font-size:12px">パターン3</span></span>
+  <span class="crumb" id="crumb">お題</span>
+  <span class="plink"><a href="pattern4.html">パターン4</a> / <a href="pattern2.html">2</a> / <a href="pattern1.html">1</a></span>
+</div>
+
+<div class="orient" id="orient" style="display:none">
+  <div class="obox">
+    <div style="font-size:44px;margin-bottom:8px">🧭</div>
+    <h1 style="font-size:22px">はじめまして、ナビです</h1>
+    <p style="color:var(--sec);font-size:14.5px;margin-top:10px">ここは、<b>作りながらUIデザインの基本を身につける</b>場所です。<br>進み方はいつも同じ、この3つ:</p>
+    <div class="steps3">
+      <div class="o3"><span class="oico">📖</span>よむ<br><span style="font-weight:400;color:var(--ter)">15分</span></div>
+      <div class="o3"><span class="oico">🎨</span>つくる<br><span style="font-weight:400;color:var(--ter)">25分</span></div>
+      <div class="o3"><span class="oico">🔍</span>みくらべる<br><span style="font-weight:400;color:var(--ter)">10分</span></div>
+    </div>
+    <p style="color:var(--sec);font-size:14px">うまく作れなくても大丈夫。<b>見比べるところまでがワンセット</b>で、そこで一番学べます。教える内容はぜんぶ、実在するデザインのルールブックから引用します。</p>
+    <button class="btn primary" style="margin-top:20px" onclick="closeOrient()">はじめる</button>
+  </div>
+</div>
+
+<section class="screen active" id="s1"><div class="container wide">
+  <div class="guide"><div class="avatar">🧭</div><div class="speech"><span class="gname">ナビ</span>今日のお題を選びましょう。はじめての方は お題01 からどうぞ。1つのお題は約60分、途中でやめても続きから再開できます。<a href="#" onclick="showOrient(event)">進み方をもう一度見る</a></div></div>
+  <h1>今日のお題</h1>
+  <div class="grid" id="odaiGrid"></div>
+  <p class="footer-note">教える内容はすべて、実在するデザインシステム(AppleやGOV.UKなどの公式ルールブック)と、実際のアプリの観察から引用しています。</p>
+</div></section>
+
+<section class="screen" id="s2"><div class="container" id="briefContainer"></div></section>
+<section class="screen" id="s3"><div class="container" id="inputContainer"></div></section>
+<section class="screen" id="s4"><div class="container" id="buildContainer"></div></section>
+<section class="screen" id="s5"><div class="container wide" id="compareContainer"></div></section>
+<section class="screen" id="s6"><div class="container" id="doneContainer"></div></section>
+
+<script>
+/* 引用DB(台帳から転記・パターン1と同一) */
+const CITES = {
+  "S-14": { src:"GOV.UK Service Manual — Structuring forms", quote:"Start by splitting the form across multiple pages with each page containing just one thing", ja:"まず、フォームを複数のページに分けることから始める。1ページには1つのことだけを載せる", url:"https://www.gov.uk/service-manual/design/form-structure" },
+  "S-11": { src:"Laws of UX — Jakob's Law(ヤコブの法則)", quote:"Users spend most of their time on other sites. This means that users prefer your site to work the same way as all the other sites they already know.", ja:"ユーザーは大半の時間を他のサイトで過ごしている。だからあなたのサイトも、すでに知っているサイトと同じように動くことを望む", url:"https://lawsofux.com/jakobs-law/" },
+  "S-06": { src:"NN/g — 10 Usability Heuristics #6", quote:"Minimize the user's memory load by making elements, actions, and options visible.", url:"https://www.nngroup.com/articles/ten-usability-heuristics/" },
+  "S-02": { src:"NN/g — Proximity Principle(近接の原則)", quote:"Items close together are likely to be perceived as part of the same group — sharing similar functionality or traits.", url:"https://www.nngroup.com/articles/gestalt-proximity/" },
+  "P-02": { src:"GOV.UK Design System — Text input", quote:"All text inputs must have labels, and in most cases the label should be visible.", ja:"すべてのテキスト入力にはラベルが必要で、ほとんどの場合、ラベルは見えているべき", url:"https://design-system.service.gov.uk/components/text-input/" },
+  "P-03": { src:"NN/g — Website Forms Usability", quote:"Placeholder text causes many usability problems, and is best avoided.", ja:"プレースホルダー(消えるうす文字)は多くの使いにくさを生むので、避けるのがいちばん良い", url:"https://www.nngroup.com/articles/web-form-design/" },
+  "P-05": { src:"NN/g — Website Forms Usability", quote:"Eliminating unnecessary fields requires more time, but the reduced user effort and increased completion rates make it worthwhile.", url:"https://www.nngroup.com/articles/web-form-design/" },
+  "P-06": { src:"NN/g — Website Forms Usability", quote:"Multiple columns interrupt the vertical momentum of moving down the form.", url:"https://www.nngroup.com/articles/web-form-design/" },
+  "P-08": { src:"GOV.UK Design System — Error message", quote:"Avoid messages like: 'An error occurred', 'Answer the question', 'Select an option', 'This field is required'.", ja:"「エラーが発生しました」「質問に答えてください」「選択してください」「この項目は必須です」のような文言は避ける", url:"https://design-system.service.gov.uk/components/error-message/" },
+  "P-10": { src:"GOV.UK Design System — Error message", quote:"Do not clear any form fields when showing the Error message component. Keep both passing and failing answers.", url:"https://design-system.service.gov.uk/components/error-message/" },
+  "P-12": { src:"GOV.UK Design System — Button", quote:"Write button text in sentence case, describing the action it performs.", ja:"ボタンの文字は、そのボタンが実行する動作を表す言葉で書く", url:"https://design-system.service.gov.uk/components/button/" },
+  "P-14": { src:"GOV.UK Design System — Text input(ヒント)", quote:"Keep hint text to a single short sentence, without any full stops.", url:"https://design-system.service.gov.uk/components/text-input/" },
+  "P-16": { src:"GOV.UK Design System — Passwords(パターン)", quote:"You should follow this pattern whenever you need users to create or enter a password.", ja:"ユーザーにパスワードを作成・入力してもらう必要があるときは、常にこのパターンに従うこと(=パスワード方式は今も標準)", url:"https://design-system.service.gov.uk/patterns/passwords/" },
+  "F-05": { src:"Apple HIG — Accessibility(タップ領域)", quote:"iOS, iPadOS — Default control size: 44x44 pt", url:"https://developer.apple.com/design/human-interface-guidelines/accessibility" },
+  "Q-09": { src:"Uber Base 公式コード — Button実トークン", quote:"buttonPrimaryFill = black(#000000)/ buttonBorderRadius: '8px' / default高さ48px", url:"https://github.com/uber/baseweb" },
+  "Q-04": { src:"Uber Base 公式コード — カラートークン", quote:"contentPrimary = black(#000000)/ contentSecondary = gray800(#4B4B4B)/ backgroundSecondary = gray50(#F3F3F3)/ accent = blue600(#276EF1)/ negative = red600(#DE1135)", url:"https://github.com/uber/baseweb" },
+  "F-07": { src:"Apple HIG — Typography(最小文字サイズ)", quote:"Follow the recommended default and minimum text sizes for each platform — for both custom and system fonts — to ensure your text is legible on all devices.(iOSの最小は11pt)", url:"https://developer.apple.com/design/human-interface-guidelines/typography" },
+  "F-09": { src:"Android公式デザインガイド — 8dpグリッド", quote:"Android UI utilizes an 8 dp grid for layout, components, and spacing.", url:"https://developer.android.com/design/ui/mobile/guides/layout-and-content/grids-and-units" },
+  "V-06": { src:"Airbnb ログイン画面(実物スクリーンショット 2026-07-04)", quote:"見出しは Welcome to Airbnb / 入力は1枠 / Continue → or → Continue with Apple/Facebook/Google(全て同一サイズ)/ 最下部に Log in", url:"assets/real-airbnb.png" },
+  "V-obs": { src:"実際に調べた記録 — Uber / Spotify / Vercel の登録画面(2026-07-04)", quote:"4つのサービスすべてで、最初の画面の入力は1つだけ・ソーシャルは「Continue with ◯◯」の統一文言・見出しは問いかけか価値提案の1文だった", url:"https://auth.uber.com/login/" },
+};
+
+/* お題01(パターン2: 言葉・体験リデザイン版) */
+const ODAI = {
+  "01": {
+    title:"お題01 — 登録画面をつくる", level:"はじめて向け", time:"約60分",
+    tags:["フォーム","入力のパターン","ボタン"],
+    cardDesc:"音楽アプリの「新規登録」画面。入力欄・ボタン・並べ方の基本が身につきます。",
+    make:"音楽アプリ「Tempo」の新規登録画面(iPhoneサイズ)",
+    guideBrief:"今日は、音楽アプリの登録画面を作ります。まずこのページで「何を作るか」を1分でつかみましょう。うまく作れなくても大丈夫——あとで実物やプロの一例と見比べるところで、一番学べます。",
+    scenario:`10〜20代向けの音楽アプリ<b>「Tempo」</b>。この登録画面のゴールはひとつ、<b>「考えずに30秒で通過できる」</b>こと。ユーザーは登録がしたいのではなく、早く音楽が聴きたいのです。登録のしくみは<b>メール+確認コード(パスワードなし)とソーシャルログイン(Apple / Google)</b>です。`,
+    elements:[
+      "Tempoのロゴ",
+      "見出し(「登録」ではなく、歓迎や価値が伝わる1文)",
+      "メールアドレスの入力欄",
+      "「続けると確認コードが届く」ことを伝える1文",
+      "続行ボタン(いちばん目立つボタン)",
+      "「または」の区切り",
+      "ソーシャルボタン2本(Appleで続行 / Googleで続行)",
+      "ログインへの案内(すでにアカウントがある人向け)",
+    ],
+    checklist:[
+      ["入力欄の名前(ラベル)がずっと見えている","P-02"],
+      ["消えるうす文字(プレースホルダー)をラベル代わりにしていない","P-03"],
+      ["押せるものは、指で押せる大きさ(44px以上 — Appleの44ptルール)","F-05"],
+      ["色つきはメインのボタンまわりの1色だけ","V-obs"],
+      ["ソーシャルボタン2本が、ぴったり同じ大きさ","V-06"],
+      ["ボタンの文字を読めば、何が起きるか分かる","P-12"],
+      ["ログインへの案内がある","S-06"],
+      ["余白は8の倍数。かたまり同士の間 > かたまりの中","S-02"],
+      ["縦1列に並んでいる","P-06"],
+      ["「続けると何が起きるか」がひとこと書いてある","P-14"],
+      ["文字と背景の色の差がじゅうぶんある(「よむ」の5色を使っていれば確認済みでクリア)",null],
+    ],
+    parts:[["テキスト入力","GOV.UK Design System","https://design-system.service.gov.uk/components/text-input/"],
+           ["ボタン(黒)","Uber Base(公式コード)","https://github.com/uber/baseweb"],
+           ["押せる大きさ 44pt","Apple HIG","https://developer.apple.com/design/human-interface-guidelines/accessibility"]],
+    guideInput:"作る前に、基本だけ頭に入れましょう。読むだけなら10分、実物の探検もすると15分くらいです。テストはありません。作っている途中でも、いつでもここに戻ってこられます。",
+    inputCards:[
+      { type:'basic', title:"1画面には、1つの用事だけ",
+        goal:"登録画面の役目は「連絡先を渡して、次へ進む」——それだけ、ととらえること",
+        why:"最初の判断「画面に何を置いて、何を置かないか」の物差しになります",
+        bridge:"まずは、この画面の役目から。",
+        body:`<p>Tempoのユーザーは、音楽が聴きたくてここに来ます。登録は目的ではなく<b>通り道</b>です。</p>
+        <p>だから、置くものは「用事に効くもの」だけ。<b>GOV.UK</b>(英国政府が公開しているデザインのルールブック。誰でも読めて、理由がいちばん細かく書いてあるので、この教材でもよく引用します)は、これを<b>「One thing per page — 1画面に1つのことだけ」</b>という原則にしています。項目を減らすほど最後まで入力してもらえることも、調査で分かっています。</p>`,
+        refs:[
+          { c:"S-14", w:"必読", note:"「1画面に1つのこと」の原典。フォーム設計の出発点です" },
+          { c:"P-05", w:"参考", note:"項目を減らすと完了率が上がる、という調査(NN/g)" },
+        ] },
+      { type:'basic', title:"登録画面には「定番の型」がある",
+        goal:"実在アプリの登録画面は「入力1つ+続行+ソーシャル+ログイン案内」という同じ骨組みでできている、と知ること",
+        why:"レイアウトの骨組みを、ゼロから発明しなくてよくなります",
+        bridge:"つぎは、世の中の登録画面がどうなっているか。",
+        body:`<p>ユーザーは1日の大半を、ほかのアプリの中で過ごしています。だからあなたの画面も「知っている形」で動くと期待される——これが<b>ヤコブの法則</b>です。めずらしい構成は、それだけでユーザーに勉強を強います。</p>
+        <p>実際に調べてみると、Uber・Spotify・Vercel・Airbnbの登録画面はおどろくほど同じでした。実物で見てみましょう:</p>
+        <div class="quotefig">
+          <img src="assets/real-airbnb.png" alt="Airbnbのログイン/登録画面">
+          <div class="fignotes">
+            <b>Airbnbの実物で「型」を確認</b><br>
+            ① 入力欄は<b>1つだけ</b>(国+電話番号)<br>
+            ② ボタンは<b>「Continue(続行)」</b><br>
+            ③ その下に<b>「Continue with ◯◯」</b>のソーシャルボタン。ぜんぶ同じ大きさ<br>
+            ④ 見出しは「登録」ではなく<b>「Welcome to Airbnb」</b><br>
+            ⑤ いちばん下に<b>「Log in」</b>への案内
+          </div>
+        </div>
+        <div class="figsrc">引用: Airbnb(iOSアプリ)のログイン/登録画面。2026年7月4日時点のスクリーンショット。定番の型を解説する目的で引用しています。</div>
+        <p>今日はこの「実在する型」を、自分の文脈で組み直します。</p>`,
+        refs:[
+          { c:"S-11", w:"必読", note:"なぜ定番に合わせるのか、の理論的な根拠" },
+          { c:"V-obs", w:"必読", note:"4つのサービスを実際に調べた記録(Uberの実物ページに飛べます)" },
+        ] },
+      { type:'do', title:"実物を見に行く(5分)",
+        goal:"「定番の型」と「サービスごとの違い」を、自分の目でたしかめること",
+        why:"デザインの基本は、世の中のものを見て・触って・学ぶこと。この観察が、あなたの制作の判断のもとになります",
+        bridge:"読むのはいったん休憩。実物を触りに行きましょう。",
+        body:`<div class="fieldwork">
+          <div class="fwtitle">✅ やること — 見るだけでOK。<u>何も入力しなくて大丈夫</u>です(登録もされません)</div>
+          <ol>
+            <li><a href="https://www.airbnb.jp/" target="_blank">Airbnb ↗</a> を開く(右上のメニュー →「ログインまたは登録」)</li>
+            <li><a href="https://www.spotify.com/jp/signup" target="_blank">Spotifyの登録 ↗</a> を開く</li>
+            <li><a href="https://auth.uber.com/login/" target="_blank">Uberのログイン/登録 ↗</a> を開く</li>
+          </ol>
+        </div>
+        <div class="kanten"><b>見るポイント①</b> 最初の画面に、入力欄はいくつある?</div>
+        <div class="kanten"><b>見るポイント②</b> パスワードは、いつ聞かれる?(最初? あと? そもそも無い?)</div>
+        <div class="kanten"><b>見るポイント③</b> ボタンには、何と書いてある?</div>
+        <div class="qlabel" style="font-size:14px">気づいたことメモ(書かなくてもOK)</div>
+        <textarea id="fwMemo" rows="2" placeholder="例: Spotifyは本当に1画面に1個しか聞いてこなかった。Airbnbは電話番号が先なのが意外…"></textarea>
+        <details class="hint" style="margin-top:12px"><summary>いま開けない人へ: スクリーンショットで見る</summary>
+          <div class="hintbody"><img src="assets/real-airbnb.png" style="width:200px;border:1px solid var(--border);border-radius:10px" alt="Airbnb実物"><br>Airbnbのログイン/登録(2026年7月時点の実物)</div></details>`,
+        refs:[] },
+      { type:'basic', title:"「パスワードをいつ作らせるか」は、サービスの方針で分かれる",
+        goal:"確認コード式が絶対の正解なのではなく、サービスの性質で分かれる「方針」だと知ること",
+        why:"「みんなそうしてるから」ではなく、理由を持ってメール欄まわりを決められるようになります",
+        bridge:"見てきた実物、じつはサービスごとに方針がちがいます。",
+        body:`<p>UberやAirbnbは、登録の最初にパスワードを作らせません(コードで確認する方式)。ただし——<b>これがいつでも正解、ではありません</b>。英国政府のGOV.UKは、今もパスワード方式を標準のパターンとして定めています。ならべて見ると:</p>
+        <table class="policy">
+          <tr><th>サービス</th><th>調べて分かったこと(2026年7月)</th><th class="kaishaku">方針の読み(わたしたちの解釈)</th></tr>
+          <tr><td>Uber</td><td>電話番号かメールを1欄。パスワードはその場で作らせない</td><td class="kaishaku">世界中で使われ、電話番号がIDの中心</td></tr>
+          <tr><td>Airbnb</td><td>国+電話番号の欄が先頭。コード確認式</td><td class="kaishaku">予約のやりとりに電話が欠かせない事業</td></tr>
+          <tr><td>Spotify</td><td>メール1欄→「次へ」。最初の画面にパスワードは無い</td><td class="kaishaku">まず聴かせて、離脱を防ぐ。若い層のスピード優先</td></tr>
+          <tr><td>GOV.UK(英国政府)</td><td><b>今もパスワード方式を標準として定義</b></td><td class="kaishaku">長く使う口座・本人確認が重い行政の手続き</td></tr>
+        </table>
+        <p>Tempoは10〜20代向けの音楽アプリで、勝ち筋は「30秒で通過」。だから今回のお題は確認コード式です。<b>「うちのサービスはどちら側か」で決まる</b>——この見方を持ち帰ってください。</p>`,
+        refs:[
+          { c:"P-16", w:"必読", note:"反対側の原典: パスワード方式は今も現役の標準(GOV.UK)" },
+        ] },
+      { type:'basic', title:"入力欄とラベルの基本",
+        goal:"入力欄の名前(ラベル)はずっと見えているべき。置き方には2つの型がある、と知ること",
+        why:"メール欄を描いた瞬間に、最初にぶつかる判断だからです",
+        bridge:"ここからは部品の話。まずは入力欄。",
+        body:`<p>やってはいけないことは1つだけ。<b>入力すると消えるうす文字(プレースホルダー)を、名前の代わりにしない</b>こと。打っている途中で「何の欄だっけ?」となってしまいます。</p>
+        <p>そのうえで、ラベルの置き方には2つの型があります:</p>
+        <div class="duo2">
+          <div class="dcol"><div class="dtitle">A. 外に置く</div>
+            <div class="mocklabel">メールアドレス</div>
+            <div class="mockfield"><span class="fval">hello@tempo.jp</span></div>
+            <div class="dnote">GOV.UKやNN/gのおすすめ。いちばん堅実</div></div>
+          <div class="dcol"><div class="dtitle">B. 枠の中に小さく置く</div>
+            <div class="mockfield"><div class="flabel">メールアドレス</div><div class="fval">hello@tempo.jp</div></div>
+            <div class="dnote">Airbnbの実物の型。場所をとらない。ずっと見えていればOK</div></div>
+        </div>
+        <p>「外に置く」型の本物を見てみましょう。これは画像ではなく、<b>GOV.UKの本物の部品がそのまま動いています</b>(英語ですが読めなくてOK、形を見てください)。中をクリックして入力もできます:</p>
+        <div class="embedbox"><iframe src="https://design-system.service.gov.uk/components/text-input/default/index.html" title="GOV.UK Text input の実例" loading="lazy"></iframe></div>
+        <div class="figsrc">ライブ実例: GOV.UK Design System — Text input(<a href="https://design-system.service.gov.uk/components/text-input/" target="_blank">解説ページ ↗</a>)。Open Government Licence v3.0 / © Crown copyright のもとで表示しています。</div>
+        <p>欄の下に「確認コードを送ります」のような<b>ひとことの予告</b>をそえると、ユーザーは安心して次に進めます。</p>`,
+        refs:[
+          { c:"P-02", w:"必読", note:"「すべての入力に、見えるラベルを」の原典" },
+          { c:"P-03", w:"必読", note:"プレースホルダーが起こす問題(NN/g)" },
+          { c:"P-14", w:"参考", note:"予告や補足は、1文で短く(GOV.UK)" },
+        ] },
+      { type:'basic', title:"ボタンの基本 — 使い方と、かたち",
+        goal:"メインのボタンは「押すと何が起きるか分かる言葉」で1画面に1つ。かたちは 黒・高さ48・角丸8 で作れる、と知ること",
+        why:"ボタンを置いて「この画面でいちばん目立つもの」を決めるとき。かたちの数値もここで受け取ります",
+        bridge:"つぎは、いちばん大事な部品。ボタンです。",
+        body:`<p><b>使い方</b>: 主役のボタンは1画面に<b>1つだけ</b>。文字は、押した結果が分かる言葉で(「続行」「アカウントを作成」)。色つきをこのボタンまわりの1色にしぼると、視線が自然にそこへ集まります。</p>
+        <p><b>かたち</b>: 今日はこの見本をそのまま再現してOKです。数値はUberが実際のアプリで使っている公式の値です:</p>
+        <div class="partdemo">
+          <div class="demo"><div class="demo-btn">続行</div></div>
+          <div class="dnote2"><b>メインのボタン</b><br>高さ48 / 角丸8 / 黒 #000000 / 白文字16px太め</div>
+        </div>
+        <div class="partdemo">
+          <div class="demo"><div class="demo-social"><span class="sic"></span>Appleで続行</div></div>
+          <div class="dnote2"><b>ソーシャルボタン</b><br>高さ48 / 角丸8 / 白背景+細い枠 / 左端にアイコン・文字は中央。<b>2本ともぴったり同じ大きさ</b>。アイコンの色や形を変えるのは各社のルール違反です</div>
+        </div>
+        <p style="font-size:13px;color:var(--ter)">📏 単位のメモ: Appleのルールでは「44pt」と書かれますが、<b>Figmaで作るときは44pxと同じ感覚でOK</b>。今日の数値はぜんぶFigmaにそのまま打ち込めます。</p>
+        <p><b>👀 本物を触って確かめる(1分)</b>: 下は英国政府の本物のボタンです(英語ですが読めなくてOK、形と動きを見てください)。押してみて、大きさ・色・文字を観察しましょう:</p>
+        <div class="embedbox"><iframe src="https://design-system.service.gov.uk/components/button/default/index.html" title="GOV.UK Button の実例" loading="lazy" style="height:160px"></iframe></div>
+        <div class="figsrc">ライブ実例: GOV.UK Design System — Button(<a href="https://design-system.service.gov.uk/components/button/" target="_blank">解説ページ ↗</a>)。Open Government Licence v3.0 / © Crown copyright のもとで表示しています。</div>
+        <div class="kanten"><b>もうひとつ</b>: さっき開いたUberやSpotifyの画面に戻って、メインのボタンを見てください。①指で押せる大きさ? ②画面に色つきは何個? ③文字は何と書いてある?</div>`,
+        refs:[
+          { c:"P-12", w:"必読", note:"ボタンの文字は動作を表す言葉で(GOV.UK)" },
+          { c:"Q-09", w:"必読", note:"黒・高さ48px・角丸8px はUberの公式コードの値" },
+          { c:"F-05", w:"参考", note:"指で押せる大きさ=44pt以上(Apple)" },
+        ] },
+      { type:'basic', title:"色・文字・余白 — 「決めごと」で画面は整う",
+        goal:"色は5色、文字は4サイズ、余白は8の倍数。この決めごとだけで画面が整う、と知ること",
+        why:"Figmaで色やサイズを選ぶ、すべての場面で。迷いが消えます",
+        bridge:"さいごに、色と文字と余白の「決めごと」を受け取りましょう。",
+        body:`<p>きれいな画面は、センスではなく<b>決めごと</b>でできています。色を少なく決めておくと主役が目立ち、文字のサイズを段階で決めておくと「見る順番」が生まれ、余白を8の倍数にそろえると画面にリズムが出ます。プロのチームがデザインシステムを作るのは、この決めごとを毎回発明しないためです。</p>
+        <p><b>今日の色(5色だけ)</b>。Uberが実際に使っている公式の組み合わせで、白背景で文字が読みやすいことも確認ずみです:</p>
+        <div class="swatches">
+          <div class="swatch"><div class="chipclr" style="background:#000000"></div><div class="cname">#000000</div><div class="cuse">文字・メインボタン</div></div>
+          <div class="swatch"><div class="chipclr" style="background:#4B4B4B"></div><div class="cname">#4B4B4B</div><div class="cuse">補助の文字</div></div>
+          <div class="swatch"><div class="chipclr" style="background:#F3F3F3"></div><div class="cname">#F3F3F3</div><div class="cuse">うすい面・区切り</div></div>
+          <div class="swatch"><div class="chipclr" style="background:#276EF1"></div><div class="cname">#276EF1</div><div class="cuse">リンク(使うなら)</div></div>
+          <div class="swatch"><div class="chipclr" style="background:#DE1135"></div><div class="cname">#DE1135</div><div class="cuse">エラー(使うなら)</div></div>
+        </div>
+        <p style="margin-top:14px"><b>今日の文字(4サイズだけ)</b>:</p>
+        <div class="typerow"><span class="tsample" style="font-size:26px;font-weight:700">見出し</span><span class="tspec">26px・太字 — 画面に1つ</span></div>
+        <div class="typerow"><span class="tsample" style="font-size:16px">本文</span><span class="tspec">16px — 説明や入力の文字</span></div>
+        <div class="typerow"><span class="tsample" style="font-size:14px;font-weight:600">ラベル・ボタン</span><span class="tspec">14〜16px・やや太め</span></div>
+        <div class="typerow"><span class="tsample" style="font-size:12px;color:#5E5E5E">補足</span><span class="tspec">12px — これより小さくしない(Appleの下限は11pt)</span></div>
+        <p style="margin-top:14px"><b>今日の余白</b>: 8の倍数(8 / 16 / 24 / 32)だけを使う。画面の左右は24。似たもの同士は近く、ちがうかたまりの間は広く。</p>
+        <div class="kanten"><b>👀 本物で確かめる(1分)</b>: さっきのAirbnbかSpotifyの画面で、<b>色を数えてみてください</b>。おそらく「黒っぽい字+グレー+色つき1色」のはず。プロの画面ほど色が少ないことを、自分の目で確認しましょう。</div>`,
+        refs:[
+          { c:"Q-04", w:"必読", note:"今日の5色の出典: Uberの公式カラートークン" },
+          { c:"F-07", w:"参考", note:"文字の最小サイズの根拠(Apple)" },
+          { c:"F-09", w:"参考", note:"8の倍数の余白の根拠(Android公式)" },
+        ] },
+      { type:'basic', title:"まちがえたときの言葉",
+        goal:"エラーは「何をどう直すか」を書き、入力ずみの文字は消さない、と知ること",
+        why:"エラー状態まで作り込むとき(今日は余裕があれば)",
+        bridge:"おまけの基本。エラーの言葉です。",
+        body:`<p>「エラーが発生しました」はNG。<b>何をどう直せばいいか</b>を書いて、<b>入力ずみの文字は消さない</b>。責めない言葉で。良いエラーの本物はこちら——赤い線・具体的な直し方・入力が残っている、を確かめてください:</p>
+        <div class="embedbox"><iframe src="https://design-system.service.gov.uk/components/error-message/default/index.html" title="GOV.UK Error message の実例" loading="lazy" style="height:300px"></iframe></div>
+        <div class="figsrc">ライブ実例: GOV.UK Design System — Error message(<a href="https://design-system.service.gov.uk/components/error-message/" target="_blank">解説ページ ↗</a>)。Open Government Licence v3.0 / © Crown copyright のもとで表示しています。</div>`,
+        refs:[
+          { c:"P-08", w:"必読", note:"エラー文のNG集(GOV.UK)" },
+          { c:"P-10", w:"参考", note:"エラーでも入力を消さない(GOV.UK)" },
+        ] },
+      { type:'wrap', title:"よし、作りましょう。決めるのは3つ",
+        goal:"学んだ基本を、自分の判断に変える準備",
+        why:"ここから先は、正解がひとつではない世界。あなたが決めて、あとで実物とプロの一例と見比べます",
+        bridge:"インプットはここまで。おつかれさまでした!",
+        body:`<div class="decidebox">🎨 <b>作りながら、あなたが決めること</b>
+          <ol>
+            <li><b>ラベルの型</b> — 外に置く(GOV.UK型)か、枠の中(Airbnb型)か</li>
+            <li><b>並び順</b> — メール欄とソーシャルボタン、どちらを上にするか</li>
+            <li><b>ボタンの言葉</b> — 「続行」か「アカウントを作成」か</li>
+          </ol></div>
+        <p style="font-size:13.5px;color:var(--ter);margin-top:12px">どれも「実物がどうしていたか」と「Tempoはどんなサービスか」で決められます。まよったら、いつでもこのページに戻ってきてください。</p>`,
+        refs:[] },
+    ],
+    guideBuild:"ここからはFigmaの時間です。この画面は横に置いて、チェックしながら進めましょう。詰まったらヒントを開いてください——答えは渡しませんが、見る場所を渡します。",
+    firstSteps:[
+      "Figmaで新しいファイルを作る",
+      "「F」キーを押して、右のパネルから iPhone(390×844)を選ぶ",
+      "フレームの名前を「Sign Up」にする",
+      "まず四角(R)とテキスト(T)で、ざっくり上から置いていく(きれいにするのは後でOK)",
+      "オートレイアウトなどの機能は使わなくてOK。四角とテキストだけで最後まで作れます",
+    ],
+    hints:[
+      ["ヒント1 — まず考えてみる","この画面でいちばん大事な「行動」は何でしたか? いまの画面で、最初に目が行くのはそこですか?"],
+      ["ヒント2 — 見る場所を渡します","ソーシャルボタンがどこか野暮ったいときは: 2本をぴったり同じ大きさに、アイコンは左端、文字は中央(実物の型)。余白がへんなときは「かたまり同士の間 > かたまりの中」になっているか、数字で確認(<a href='https://www.nngroup.com/articles/gestalt-proximity/' target='_blank'>NN/g 近接の原則 →</a>)"],
+      ["ヒント3 — 骨組みだけ見る","上から: ロゴ → 歓迎の見出し → メール欄+予告のひとこと → メインボタン →「または」→ ソーシャル2本 → いちばん下にログイン案内。縦1列です。"],
+    ],
+    guideCompare:"おつかれさまです! ここは答え合わせではありません。あなた・プロの一例・実物の3枚を並べて、「判断のちがい」を見つける時間です。ちがい=まちがい、ではありません。",
+    compare:{
+      model:{ img:"assets/model-v3.png", label:"プロの一例(Tempo)", sub:"すべての判断に出典があります。", why:[
+        "見出しは「登録」ではなく「ようこそ」型 — 調べた4サービスに共通",
+        "メール欄は枠の中ラベル — Airbnb実物の型。外置きを選んだあなたが間違いなわけではありません(方針のちがい)",
+        "「確認コードを送ります」の予告 — 見れば分かる状態に(NN/g)",
+        "メインボタンは黒・高さ48・角丸8 — Uberの実物の数値(公式コード)。色つきをここだけにして視線を集中",
+        "ソーシャル2本はぴったり同じ大きさ・「◯◯で続行」— 4サービス共通",
+        "いちばん下にログイン案内 — すでにアカウントがある人の通り道"] },
+      real:{ img:"assets/real-airbnb.png", label:"実物(Airbnb)",
+        sub:"さっき見に行った実物です。観察した「方針のちがい」も思い出しながら、比べてみてください" },
+      aspects:[
+        ["目立ち方","いちばん目立っているのはメインのボタンですか?<br><span style='color:var(--ter)'>確かめ方: 画面から1歩はなれて(または目を細めて)見て、最初に目に入るのがメインのボタンならOK</span>"],
+        ["余白","かたまり同士の間 > かたまりの中、になっていますか<br><span style='color:var(--ter)'>確かめ方: メール欄とラベルの間隔より、メールのかたまりとソーシャルのかたまりの間隔のほうが広ければOK</span>"],
+        ["部品の型","ソーシャル2本は同じ大きさ? ラベルはずっと見えている?<br><span style='color:var(--ter)'>確かめ方: 2本のボタンの幅と高さの数値をFigmaで見比べる。1pxでも違えばそろえる</span>"],
+        ["言葉","ボタンの文字で、何が起きるか分かりますか?<br><span style='color:var(--ter)'>確かめ方: ボタンの文字だけを声に出して読んで、次に何が起きるか言えればOK</span>"]],
+      q3:"実物(Airbnb)とプロの一例の「方針のちがい」をひとつ。なぜ違うのだと思いますか?",
+      q3ph:"例: Airbnbは電話番号が先。予約の連絡に電話がいる事業だから。Tempoは…",
+    },
+    learned:["入力欄とラベルの2つの型","ソーシャルボタンの型","サービスごとの方針のちがい","色をしぼって目立たせる"],
+    next:{ text:"<b>お題02 — 設定画面</b>: 今日つかった「かたまりで分ける」を、こんどは自力でやってみる回です。(パターン2ではまだ準備中)" },
+  },
+};
+
+/* ===== エンジン ===== */
+const state = { odai:"01", notes:{}, compare:{}, finalWord:{}, startedAt:{}, finished:{}, oriented:false };
+const cur = () => ODAI[state.odai];
+
+function go(id) {
+  saveMemo();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  const o = cur();
+  const crumbs = { s1:'お題', s2:o.title, s3:'よむ', s4:'つくる', s5:'みくらべる', s6:'完了' };
+  document.getElementById('crumb').textContent = crumbs[id] || '';
+  if (id === 's1') renderHome();
+  if (id === 's2') renderBrief();
+  if (id === 's3') renderInput();
+  if (id === 's4') { renderBuild(); if (!state.startedAt[state.odai]) state.startedAt[state.odai] = Date.now(); tick(); }
+  if (id === 's5') renderCompare();
+  if (id === 's6') renderDone();
+  save();
+}
+function startOdai(id) { state.odai = id; go('s2'); }
+function saveMemo() {
+  const m = document.getElementById('fwMemo');
+  if (m) state.notes[state.odai] = m.value.trim();
+}
+function guide(text) {
+  return `<div class="guide"><div class="avatar">🧭</div><div class="speech"><span class="gname">ナビ</span>${text}</div></div>`;
+}
+function journey(now) {
+  const steps = ['お題','よむ','つくる','みくらべる','ひとこと'];
+  return `<div class="journey">` + steps.map((s,i)=>`<span class="jstep ${i===now?'now':(i<now?'done':'')}">${i<now?'✓ ':''}${s}</span>`).join('') + `</div>`;
+}
+function showOrient(e) { if (e) e.preventDefault(); document.getElementById('orient').style.display = 'flex'; }
+function closeOrient() { document.getElementById('orient').style.display = 'none'; state.oriented = true; save(); }
+
+function refsHtml(refs) {
+  if (!refs || !refs.length) return '';
+  return `<div class="refsec"><div class="reftitle">📚 引用元(クリックで原文が読めます)</div>` +
+    refs.map(r => {
+      const c = CITES[r.c];
+      const isAsset = c.url.startsWith('assets/');
+      const openLabel = isAsset ? '実物を見る ↗' : '原文を開く ↗';
+      const quote = r.w === '必読'
+        ? `<div class="refquote">${c.quote}</div>` + (c.ja ? `<div class="refnote" style="margin-top:4px">訳: ${c.ja}</div>` : '')
+        : '';
+      return `<a class="reflink ${r.w==='必読'?'primary':''}" href="${c.url}" target="_blank">
+        <div class="refhead"><span class="refbadge ${r.w==='必読'?'':'sub'}">${r.w}</span>
+          <span class="refsrc">${c.src}</span><span class="refopen">${openLabel}</span></div>
+        ${quote}
+        <div class="refnote">${r.note}</div>
+      </a>`;
+    }).join('') + `</div>`;
+}
+
+function renderHome() {
+  document.getElementById('odaiGrid').innerHTML = Object.entries(ODAI).map(([id,o]) => `
+    <div class="odai">
+      <h3>${o.title}</h3>
+      <div class="meta">${o.level}・${o.time}</div>
+      ${o.tags.map(t=>`<span class="pill">${t}</span>`).join('')}
+      <p style="font-size:13.5px;color:var(--sec);margin:10px 0 16px">${o.cardDesc}</p>
+      <button class="btn primary" onclick="startOdai('${id}')">${state.finished[id] ? 'もう一度やる' : 'はじめる'}</button>
+    </div>`).join('') + `
+    <div class="odai locked">
+      <h3>お題02 — 設定画面</h3>
+      <div class="meta">はじめて向け・約45分</div>
+      <span class="pill">リスト</span><span class="pill">かたまりで分ける</span>
+      <p style="font-size:13.5px;color:var(--sec);margin:10px 0 16px">お題01の技を、こんどは自力で使う回。</p>
+      <button class="btn secondary" disabled>パターン2では準備中</button>
+    </div>`;
+}
+
+/* スタイルキット(値はすべて docs/10-ledger/ のQ台帳=Uber Base公式コード、HIG、実測から転記) */
+function kitHtml(compact) {
+  return `
+    <div class="kitnote">今日は<b>スタイルで迷わなくてOK</b>。ここにある色とサイズをそのまま使ってください。プロも実務では、こうした「部品セット(デザインシステム)」から作りはじめます——それも今日の練習のうちです。</div>
+
+    <div class="kitlabel">🎨 色(この5色だけで足ります)</div>
+    <div class="swatches">
+      <div class="swatch"><div class="chipclr" style="background:#000000"></div><div class="cname">#000000</div><div class="cuse">文字・メインボタン</div></div>
+      <div class="swatch"><div class="chipclr" style="background:#4B4B4B"></div><div class="cname">#4B4B4B</div><div class="cuse">補助の文字</div></div>
+      <div class="swatch"><div class="chipclr" style="background:#F3F3F3"></div><div class="cname">#F3F3F3</div><div class="cuse">うすい面・区切り</div></div>
+      <div class="swatch"><div class="chipclr" style="background:#276EF1"></div><div class="cname">#276EF1</div><div class="cuse">リンク(使うなら)</div></div>
+      <div class="swatch"><div class="chipclr" style="background:#DE1135"></div><div class="cname">#DE1135</div><div class="cuse">エラー(使うなら)</div></div>
+    </div>
+    <div class="figsrc">出典: Uber Base の公式カラートークン(<a href="https://github.com/uber/baseweb" target="_blank">公式コード ↗</a>)。白背景に対して文字色のコントラストが基準(4.5:1)を満たすことを確認済みの組み合わせです。</div>
+
+    <div class="kitlabel">🔤 文字(4サイズだけ)</div>
+    <div class="typerow"><span class="tsample" style="font-size:26px;font-weight:700">見出し</span><span class="tspec">26px・太字 — 画面に1つ</span></div>
+    <div class="typerow"><span class="tsample" style="font-size:16px">本文</span><span class="tspec">16px — 説明や入力の文字</span></div>
+    <div class="typerow"><span class="tsample" style="font-size:14px;font-weight:600">ラベル・ボタン</span><span class="tspec">14〜16px・やや太め</span></div>
+    <div class="typerow"><span class="tsample" style="font-size:12px;color:#5E5E5E">補足</span><span class="tspec">12px — 予告や注釈。これより小さくしない</span></div>
+    <div class="figsrc">出典: Uber Base のタイプスケール(公式コード)+ Apple HIG の最小文字サイズ(11pt)。</div>
+
+    <div class="kitlabel">📐 寸法のルール(3つだけ)</div>
+    <div class="typerow"><span class="tsample" style="font-size:14px;font-weight:600">押せるものは 44pt 以上</span><span class="tspec">ボタン・入力欄・リンクの行(出典: Apple HIG)</span></div>
+    <div class="typerow"><span class="tsample" style="font-size:14px;font-weight:600">角丸は 8px</span><span class="tspec">ボタンも入力欄も統一(出典: Uber Base 公式コード)</span></div>
+    <div class="typerow"><span class="tsample" style="font-size:14px;font-weight:600">余白は 8 の倍数</span><span class="tspec">8 / 16 / 24 / 32。左右の余白は24(出典: 8ptグリッドの慣行+実測)</span></div>
+    ${compact ? '' : `
+    <div class="kitlabel">🧩 部品の見本(この見た目をそのまま再現してOK)</div>
+    <div class="partdemo">
+      <div class="demo"><div class="demo-btn">続行</div></div>
+      <div class="dnote2"><b>メインのボタン</b> — 高さ48 / 角丸8 / 黒 #000000 / 白文字16px太め。<b>1画面に1つだけ</b>。文字は押した結果が分かる言葉で。<br><span style="font-size:11.5px;color:var(--ter)">出典: Uber Base 公式コード(Q-09)+ GOV.UK Button</span></div>
+    </div>
+    <div class="partdemo">
+      <div class="demo"><div class="demo-social"><span class="sic"></span>Appleで続行</div></div>
+      <div class="dnote2"><b>ソーシャルボタン</b> — 高さ48 / 角丸8 / 白背景+細い枠 / 左端にアイコン・文字は中央。<b>2本ともぴったり同じ大きさ</b>で縦に並べる。<br><span style="font-size:11.5px;color:var(--ter)">出典: 実測4サービス共通の型(V-obs / V-06)</span></div>
+    </div>
+    <div class="partdemo">
+      <div class="demo"><div class="demo-label">メールアドレス</div><div class="demo-input"><div class="dv">hello@tempo.jp</div></div></div>
+      <div class="dnote2"><b>入力欄</b> — 高さ52 / 角丸8 / 枠1px #B0B0B0(外置きラベルの場合)。枠の中ラベル型にするなら、うす文字10pxのラベルを枠内上部に。<br><span style="font-size:11.5px;color:var(--ter)">出典: GOV.UK Text input + Airbnb実物 + Base公式コード</span></div>
+    </div>`}
+  `;
+}
+
+function checklistHtml(o) {
+  return o.checklist.map(([label, cite]) => {
+    const c = cite && CITES[cite];
+    const link = c && !c.url.startsWith('assets/')
+      ? ` <a class="why" href="${c.url}" target="_blank">根拠→</a>` : '';
+    return `<label><input type="checkbox"><span>${label}${link}</span></label>`;
+  }).join('');
+}
+
+function renderBrief() {
+  const o = cur();
+  document.getElementById('briefContainer').innerHTML = `
+    ${journey(0)}
+    ${guide(o.guideBrief)}
+    <div class="tagrow"><span class="pill">${o.level}</span><span class="pill">${o.time}</span></div>
+    <h1>${o.title}</h1>
+    <p class="lead" style="margin-bottom:24px">🎨 <b>今日つくるもの: ${o.make}</b></p>
+    <div class="card"><div class="sectionlabel">どんな画面?</div><p>${o.scenario}</p></div>
+    <div class="card"><div class="sectionlabel">画面に入れるもの(8つ)</div>
+      <p style="font-size:13px;color:var(--ter);margin-bottom:10px">実際の仕事でも「何を入れるか」は要件として渡されることが多いもの。<b>どう並べて、どう見せるかが、あなたの仕事</b>です。</p>
+      ${o.elements.map(e=>`<div style="display:flex;gap:10px;padding:6px 0;font-size:14.5px;border-bottom:1px dashed var(--border)"><span style="color:var(--green)">▫︎</span><span>${e}</span></div>`).join('')}
+    </div>
+    <div class="card"><div class="sectionlabel">できたかチェック(最後に、この同じリストで見比べます)</div>
+      <p style="font-size:13px;color:var(--ter);margin-bottom:10px">知らない言葉があっても大丈夫。<b>ぜんぶこのあとの「よむ」で学びます。</b>いまは「こういうことを見るんだな」と眺めるだけでOKです。</p>
+      <div class="checklist">${checklistHtml(o)}</div></div>
+    <div class="card"><div class="sectionlabel">色・サイズ・部品は?</div>
+      <p style="font-size:14.5px">このあとの「よむ」で、<b>学びながら受け取ります</b>(使う色5つ・文字4サイズ・ボタンのかたち)。制作中もいつでも早見が出ます。今日はスタイルで迷わなくて大丈夫です。</p></div>
+    <div class="card"><div class="sectionlabel">最後に出すもの</div>
+      <p style="font-size:14.5px">完成した画面のスクリーンショットと、<b>「なぜそうしたか」のひとこと</b>。ていねいに書くほど、見比べたときの学びが深くなります。</p></div>
+    <button class="btn primary" onclick="go('s3')">よむ へ進む(約10分)</button>`;
+}
+
+function renderInput() {
+  const o = cur();
+  const started = !!state.startedAt[state.odai];
+  const basics = o.inputCards.filter(c => c.type === 'basic');
+  let bIdx = 0;
+  const toc = o.inputCards.filter(c => c.type !== 'wrap').map(c => {
+    if (c.type === 'do') return `<div class="tocitem"><span class="tocnum tocdo">やること</span><span>${c.title}</span></div>`;
+    bIdx++;
+    return `<div class="tocitem"><span class="tocnum">基本 ${bIdx}</span><span><b>${c.title}</b></span></div>`;
+  }).join('');
+  let bNum = 0;
+  const cards = o.inputCards.map(c => {
+    let head;
+    if (c.type === 'do') head = `<div class="lhead do">🔍 やること — 実物を見に行く</div>`;
+    else if (c.type === 'wrap') head = `<div class="lhead wrap">✅ まとめ</div>`;
+    else { bNum++; head = `<div class="lhead basic">📖 この制作で学ぶ基本 ${bNum}/${basics.length}</div>`; }
+    return `${c.bridge ? `<div class="bridge">${c.bridge}</div>` : ''}
+    <div class="lesson">
+      ${head}
+      <div class="lbody">
+        <h2>${c.title}</h2>
+        <div class="goalbox">🎯 <b>ここでおぼえること:</b> ${c.goal}</div>
+        <div class="whybox">🧭 <b>どこで使う?</b> — ${c.why}</div>
+        <div class="body">${c.body}</div>
+        ${refsHtml(c.refs)}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('inputContainer').innerHTML = `
+    ${journey(1)}
+    ${guide(o.guideInput)}
+    <div class="toc">
+      <div class="toctitle">今日学ぶ基本は ${basics.length}つ + 実物を見に行きます</div>
+      ${toc}
+    </div>
+    ${cards}
+    <button class="btn primary" style="margin-top:16px" onclick="go('s4')">${started ? 'つくる にもどる' : 'Figmaで つくる へ'}</button>`;
+  const memo = document.getElementById('fwMemo');
+  if (memo && state.notes[state.odai]) memo.value = state.notes[state.odai];
+}
+
+function renderBuild() {
+  const o = cur();
+  document.getElementById('buildContainer').innerHTML = `
+    ${journey(2)}
+    ${guide(o.guideBuild)}
+    <h1>つくる</h1>
+    <p class="lead">目安は25分。<span id="timer" style="font-weight:700"></span></p>
+    <div class="firststep">
+      <div class="fstitle">🚀 Figmaのはじめの一歩(かたまったらここから)</div>
+      <ol>${o.firstSteps.map(s=>`<li>${s}</li>`).join('')}</ol>
+    </div>
+    <div class="btnrow" style="margin-bottom:20px">
+      <button class="btn secondary" style="max-width:280px;height:44px" onclick="go('s3')">📖 よむ を見返す</button>
+    </div>
+    <details class="hint" open><summary>🎨 部品とスタイル(色・文字・寸法の早見)</summary>
+      <div class="hintbody">${kitHtml(true)}</div></details>
+    <div class="card" style="margin-top:16px"><div class="sectionlabel">できたかチェック(作りながらどうぞ)</div>
+      <div class="checklist">${checklistHtml(o)}</div></div>
+    <div class="sectionlabel">詰まったら(開くのは自由・答えは渡しません)</div>
+    ${o.hints.map(([s,b])=>`<details class="hint"><summary>${s}</summary><div class="hintbody">${b}</div></details>`).join('')}
+    <div class="btnrow" style="margin-top:24px">
+      <button class="btn primary" onclick="go('s5')">できた — みくらべる へ</button>
+    </div>
+    <p style="font-size:12.5px;color:var(--ter);margin-top:6px">まだ途中でも大丈夫。見比べてから、また直しに戻れます。</p>`;
+}
+function tick() {
+  const t0 = state.startedAt[state.odai];
+  if (!t0) return;
+  const m = Math.floor((Date.now()-t0)/60000), s = Math.floor((Date.now()-t0)/1000)%60;
+  const el = document.getElementById('timer');
+  if (el) el.textContent = `いま ${m}分${String(s).padStart(2,'0')}秒`;
+  setTimeout(tick, 1000);
+}
+
+function renderCompare() {
+  const o = cur(), c = o.compare;
+  const saved = state.compare[state.odai] || {};
+  document.getElementById('compareContainer').innerHTML = `
+    ${journey(3)}
+    ${guide(o.guideCompare)}
+    <h1>みくらべる</h1>
+    <div class="three">
+      <div class="tcol">
+        <div class="tlabel">あなたの作品</div>
+        <label class="uploadbox" id="uploadbox">
+          <span style="font-size:26px">＋</span>
+          <span>スクリーンショットをここに</span>
+          <span style="font-weight:400;font-size:12px">Figmaでフレームを選んで、右下の「Export」からPNGで書き出せます。<br>画像はこの端末の中だけで表示されます</span>
+          <input type="file" accept="image/*" style="display:none" onchange="loadOwn(this)"></label>
+        <img class="timg" id="ownimg" style="display:none">
+      </div>
+      <div class="tcol">
+        <div class="tlabel">${c.model.label}</div>
+        <img class="timg" src="${c.model.img}" alt="プロの一例">
+        <div class="tsub">${c.model.sub} <a href="#" onclick="toggleWhy(event)">なぜこうしたか、を見る</a></div>
+        <div class="whylist" id="whyList">${c.model.why.map(x=>'・'+x).join('<br>')}</div>
+      </div>
+      <div class="tcol">
+        <div class="tlabel">${c.real.label}</div>
+        <img class="timg" src="${c.real.img}" alt="実物">
+        <div class="tsub">${c.real.sub}</div>
+      </div>
+    </div>
+    <div class="sectionlabel" style="margin-top:24px">4つの目で見てみる(自分で判定してみましょう)</div>
+    ${c.aspects.map(([n,d])=>`<div class="aspect"><div class="aname">${n}</div><div class="adesc">${d}</div>
+      <select><option>未判定</option><option>✓ できた</option><option>△ 直したい</option></select></div>`).join('')}
+    <div class="card" style="margin-top:24px">
+      <div class="sectionlabel">できたかチェック(ブリーフと同じリストです)</div>
+      <div class="checklist">${checklistHtml(o)}</div></div>
+    <div class="card" style="margin-top:24px">
+      <div class="sectionlabel">3つの問い(作ったいまなら、答えられます)</div>
+      <div class="qlabel">① あなたとプロの一例で「同じだった判断」をひとつ</div>
+      <textarea id="q1" rows="2">${saved.q1||''}</textarea>
+      <div class="qlabel">② 「ちがった判断」をひとつ。どちらの理由が、このお題に合っていますか?</div>
+      <textarea id="q2" rows="2">${saved.q2||''}</textarea>
+      <div class="qlabel">③ ${c.q3}</div>
+      <textarea id="q3" rows="2" placeholder="${c.q3ph}">${saved.q3||''}</textarea>
+    </div>
+    <div class="btnrow">
+      <button class="btn secondary" onclick="go('s4')">直しに戻る</button>
+      <button class="btn primary" onclick="finishCompare()">おわりにする</button>
+    </div>
+    <p class="err" id="compareErr">あとひとつだけ。3つのうちどれか1つに気づきを書いておくと、今日の学びがちゃんと残ります。</p>`;
+}
+function loadOwn(input) {
+  const f = input.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    document.getElementById('ownimg').src = e.target.result;
+    document.getElementById('ownimg').style.display = 'block';
+    document.getElementById('uploadbox').style.display = 'none';
+  };
+  r.readAsDataURL(f);
+}
+function toggleWhy(e) {
+  e.preventDefault();
+  const el = document.getElementById('whyList');
+  el.style.display = el.style.display === 'block' ? 'none' : 'block';
+}
+function finishCompare() {
+  const v = id => document.getElementById(id).value.trim();
+  const qs = { q1: v('q1'), q2: v('q2'), q3: v('q3') };
+  if (!qs.q1 && !qs.q2 && !qs.q3) { document.getElementById('compareErr').style.display='block'; return; }
+  state.compare[state.odai] = qs;
+  go('s6');
+}
+
+function renderDone() {
+  const o = cur();
+  const lines = [];
+  if (state.notes[state.odai]) lines.push(`<b>実物を見て気づいたこと</b>: ${state.notes[state.odai]}`);
+  const cp = state.compare[state.odai] || {};
+  ['q1','q2','q3'].forEach((k,i)=>{ if(cp[k]) lines.push(`<b>見比べての気づき${i+1}</b>: ${cp[k]}`); });
+  const answered = ['q1','q2','q3'].filter(k=>cp[k]).length;
+  document.getElementById('doneContainer').innerHTML = `
+    ${journey(4)}
+    <div class="celebrate"><div class="big">🎉</div>
+      <h1 style="margin-top:4px">お題01、完走です!</h1>
+      <p style="color:var(--sec);font-size:14.5px">実物を自分の目で観察して、見比べの気づきを${answered}つ書きました。<br>あとは今日の学びを、ひとことにするだけです。</p>
+    </div>
+    <div class="card"><div class="sectionlabel">今日の学びを、ひとことに</div>
+      <p style="font-size:13.5px;color:var(--ter);margin-bottom:8px">「私は◯◯のとき、◯◯という理由で◯◯する」のかたちで書いてみましょう。<br>例: 私は入力欄のラベルを置くとき、打っている間も見えるように外に置く。</p>
+      <textarea id="finalWord" rows="3" placeholder="私は…">${state.finalWord[state.odai]||''}</textarea>
+      <p class="err" id="finalErr">ここだけは書いて終わりましょう。このひとことが、今日いちばんの成果物です。</p></div>
+    <div class="card"><div class="sectionlabel">今日 身についたこと</div>
+      ${o.learned.map(t=>`<span class="learned">${t}</span>`).join('')}</div>
+    <div class="card"><div class="sectionlabel">あなたの記録(ポートフォリオの説明文の種になります)</div>
+      <div id="sessionLog" style="font-size:13.5px;line-height:2">${lines.join('<br>') || '(記録なし)'}</div>
+      <button class="btn ghost" onclick="copyLog()">記録をコピーする</button></div>
+    <div class="card"><div class="sectionlabel">つぎのお題</div><p style="font-size:14.5px">${o.next.text}</p></div>
+    <button class="btn primary" onclick="completeAll()">完了する</button>`;
+}
+function copyLog() {
+  navigator.clipboard.writeText(document.getElementById('sessionLog').innerText)
+    .then(()=>alert('コピーしました。ポートフォリオの説明文にどうぞ。'));
+}
+function confetti() {
+  const box = document.createElement('div');
+  box.className = 'confetti';
+  const emo = ['🎉','✨','🎊','⭐️','💚'];
+  for (let i = 0; i < 24; i++) {
+    const s = document.createElement('span');
+    s.textContent = emo[i % emo.length];
+    s.style.left = Math.random()*100 + 'vw';
+    s.style.animationDelay = (Math.random()*0.8) + 's';
+    s.style.fontSize = (14 + Math.random()*14) + 'px';
+    box.appendChild(s);
+  }
+  document.body.appendChild(box);
+  setTimeout(()=>box.remove(), 4000);
+}
+function completeAll() {
+  const w = document.getElementById('finalWord').value.trim();
+  if (!w) { document.getElementById('finalErr').style.display='block'; return; }
+  state.finalWord[state.odai] = w;
+  state.finished[state.odai] = true;
+  save();
+  confetti();
+  setTimeout(()=>go('s1'), 1800);
+}
+
+function save() { try { localStorage.setItem('uitrainer-p3', JSON.stringify(state)); } catch(e){} }
+function load() {
+  try { const s = JSON.parse(localStorage.getItem('uitrainer-p3')); if (s) Object.assign(state, s); } catch(e){}
+  if (!ODAI[state.odai]) state.odai = "01";
+}
+load();
+renderHome();
+if (!state.oriented) showOrient();
+</script>
+</body>
+</html>
