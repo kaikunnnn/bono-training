@@ -6,7 +6,7 @@
  * /dev/site-structure/top 配下だけで、本番の Sidebar の代わりに描く。
  * 並びは 267-L 7章のグローバルナビ案。本番のメニューは変えない。
  * - ログイン中だけ: マイページ（続きから）
- * - 主: トップ／ロードマップ／悩みから探す／コース／掲示板
+ * - 主: トップ／ロードマップ（今は 01 転職の入口ページへ）／悩みから探す／コース／掲示板
  * - 人と学ぶ: フィードバック／イベント／みんなの実績
  * - サブ: 勉強法・キャリア／使い方
  * - その他: 料金プラン（未ログインだけ）／ログイン または 設定
@@ -46,6 +46,8 @@ import type { SidebarProps } from "./types";
 export const SITE_STRUCTURE_TOP_PREFIX = "/dev/site-structure/top";
 
 const COMING = `${SITE_STRUCTURE_TOP_PREFIX}/coming`;
+/** ロードマップ: 4つの目標を選ぶ画面はまだ無いので、01 転職の入口ページへ直接つなぐ（267-N 3章） */
+const CAREER = `${SITE_STRUCTURE_TOP_PREFIX}/career`;
 
 /** 試作の中のリンクには会員の見え方を引き継ぐ（本番ページへのリンクはそのまま） */
 function protoHref(href: string, member: boolean) {
@@ -109,7 +111,7 @@ function SiteStructureNav({
         >
           トップ
         </SidebarMenuItem>
-        <SidebarMenuItem href="/roadmap" icon={<Map {...icon} />} isActive={isActive("/roadmap")}>
+        <SidebarMenuItem href={protoHref(CAREER, member)} icon={<Map {...icon} />} isActive={isActive(CAREER)}>
           ロードマップ
         </SidebarMenuItem>
         <SidebarMenuItem

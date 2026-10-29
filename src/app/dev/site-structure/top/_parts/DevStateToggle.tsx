@@ -9,7 +9,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { INDEX_HREF } from "../../_parts/shared";
 
-export function DevStateToggle({ base, member }: { base: string; member: boolean }) {
+export function DevStateToggle({ base, member, className }: { base: string; member: boolean; className?: string }) {
   const opt = (label: string, href: string, active: boolean) => (
     <Link
       href={href}
@@ -28,7 +28,10 @@ export function DevStateToggle({ base, member }: { base: string; member: boolean
     <div
       role="group"
       aria-label="試作の表示の切り替え（確認用）"
-      className="fixed bottom-4 right-4 z-[60] flex items-center gap-1.5 rounded-md border border-dashed border-border-strong bg-surface/95 px-2 py-1.5 font-mono text-[11px] leading-none shadow-[var(--shadow-xs)] backdrop-blur"
+      className={cn(
+        "fixed bottom-4 right-4 z-[60] flex items-center gap-1.5 rounded-md border border-dashed border-border-strong bg-surface/95 px-2 py-1.5 font-mono text-[11px] leading-none shadow-[var(--shadow-xs)] backdrop-blur",
+        className
+      )}
     >
       <Link href={INDEX_HREF} className="px-1 font-bold text-text-muted hover:text-text-primary" title="サイト構造案の試作一覧へ">
         DEV

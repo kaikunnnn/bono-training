@@ -53,7 +53,7 @@ export default async function SiteStructureTopPage({
         <Suspense fallback={<CourseSectionSkeleton />}>
           <CourseSection />
         </Suspense>
-        <CareerPathSection />
+        <CareerPathSection member={member} />
         <SupportSection />
         <GuideBand />
         <Suspense fallback={<AchievementsSkeleton />}>

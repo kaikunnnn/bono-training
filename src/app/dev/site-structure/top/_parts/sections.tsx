@@ -30,8 +30,8 @@ import CourseEyecatch, { pickCovers } from "../../../course-pages/template/Cours
 import { courseCounts, splitTitle } from "../../../course-pages/template/shared";
 import { ProgressBar } from "../../../course-pages/template/path";
 import { fetchContinueMock } from "../../../course-pages/prototyping/roadmap/continue-data";
-import { Kari, V6_BASE, v6Step } from "../../_parts/shared";
-import { COMING_BASE, withState } from "./top-parts";
+import { Kari } from "../../_parts/shared";
+import { CAREER_BASE, COMING_BASE, withState } from "./top-parts";
 
 /** 推測の文言（kari）なら「仮」を付けて出す */
 function F({ f }: { f: Field }) {
@@ -139,17 +139,40 @@ export function ContinueBandSkeleton() {
 // 3・7 「〜したい」の行（2列）
 // ------------------------------------------------------------
 
-function RowList({ items, href }: { items: string[]; href: string }) {
+/** 行ごとに行き先や番号を変えたいときは { label, href, no } で渡す（入口ページの「次に整えたいこと」など） */
+export interface RowItem {
+  label: string;
+  href: string;
+  /** 行頭の小さな番号（4つの入口の 02〜04 など） */
+  no?: string;
+}
+
+export function RowList({
+  items,
+  href,
+  className,
+}: {
+  items: (string | RowItem)[];
+  /** 文字列だけの行の行き先 */
+  href?: string;
+  className?: string;
+}) {
+  const rows = items.map((it) => (typeof it === "string" ? { label: it, href: href ?? "#", no: undefined } : it));
   return (
-    <ul className="mt-10 grid grid-cols-1 border-t border-black/[0.12] md:grid-cols-2 md:gap-x-12">
-      {items.map((label) => (
+    <ul className={cn("mt-10 grid grid-cols-1 border-t border-black/[0.12] md:grid-cols-2 md:gap-x-12", className)}>
+      {rows.map(({ label, href: to, no }) => (
         <li key={label} className="border-b border-black/[0.12]">
           <Link
-            href={href}
+            href={to}
             className="group -mx-3 flex items-center justify-between gap-4 rounded-[8px] px-3 py-5 transition-colors hover:bg-black/[0.03]"
           >
-            <span className="font-noto-sans-jp text-[15px] font-medium leading-[1.6] text-text-primary lg:text-base">
-              {label}
+            <span className="flex min-w-0 items-baseline gap-3 font-noto-sans-jp text-[15px] font-medium leading-[1.6] text-text-primary lg:text-base">
+              {no ? (
+                <span className="shrink-0 font-latin text-xs tracking-[0.2em] text-text-muted" aria-hidden="true">
+                  {no}
+                </span>
+              ) : null}
+              <span className="min-w-0">{label}</span>
             </span>
             <ArrowUpRight
               size={18}
@@ -296,21 +319,23 @@ export function CourseSectionSkeleton() {
 // 5 転職の道のり（v6 のステップ）
 // ------------------------------------------------------------
 
-export function CareerPathSection() {
+export function CareerPathSection({ member }: { member: boolean }) {
+  // 01 転職の入口ページへ。ステップはそのページの #step-n（新しい左ナビのまま読める）
+  const career = withState(CAREER_BASE, member);
   return (
     <Section className="bg-surface">
       <SectionHeader
         eyebrow="CAREER ROADMAP / 転職の道のり"
         title="UIUXデザイナーへの道のり"
         titleKari
-        link={{ href: V6_BASE, label: "ロードマップ全体を見る" }}
+        link={{ href: career, label: "ロードマップ全体を見る" }}
       />
       {/* 白いカードにステップを並べる（RoadmapPathway の形）。PC は2列 */}
       <ol className="mt-10 grid grid-cols-1 gap-2 rounded-[20px] border border-border-light bg-base p-2 lg:grid-cols-2">
         {v6Steps.map((step) => (
           <li key={step.id}>
             <Link
-              href={v6Step(step.n)}
+              href={`${career}#step-${step.n}`}
               className="group flex items-center gap-4 rounded-xl bg-surface p-4 transition-colors hover:bg-hover lg:p-5"
             >
               <span className="w-[52px] shrink-0 overflow-hidden rounded-xl bg-surface shadow-[var(--shadow-xs)]" aria-hidden="true">

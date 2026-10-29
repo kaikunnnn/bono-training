@@ -38,18 +38,27 @@ export interface ContinueCardData {
   others: ContinueCourseSummary[];
 }
 
-export function ContinueCourseCard({ data, className }: { data: ContinueCardData; className?: string }) {
+export function ContinueCourseCard({
+  data,
+  className,
+  titleAs: Title = "h3",
+}: {
+  data: ContinueCardData;
+  className?: string;
+  /** コース名のタグ。h1 より上に置くときは "p"（見出しの順を崩さない） */
+  titleAs?: "h2" | "h3" | "p";
+}) {
   const { course, next, roadmap, others } = data;
 
   return (
     <div className={cn("w-full rounded-[24px] bg-muted-custom p-4 md:p-5", className)}>
       {/* 親: コース */}
       <p className="text-[11px] font-bold text-text-muted">進めているコース</p>
-      <h3 className="mt-0.5 font-heading text-[17px] font-bold leading-[1.5] text-text-primary">
+      <Title className="mt-0.5 font-heading text-[17px] font-bold leading-[1.5] text-text-primary">
         <Link href={course.href} className="hover:underline">
           {course.title}
         </Link>
-      </h3>
+      </Title>
       <div className="mt-2 flex items-center gap-3">
         <ProgressBar value={course.percent} className="h-1 max-w-[280px] flex-1" />
         <span className="shrink-0 text-xs text-text-secondary">

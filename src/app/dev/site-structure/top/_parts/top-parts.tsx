@@ -15,10 +15,12 @@ import { Briefcase, Brush2, DocumentText, Personalcard } from "iconsax-react";
 import { Button } from "@/components/ui/button";
 import { PURPOSE_ICON_GRADIENT } from "@/styles/gradients";
 import { cn } from "@/lib/utils";
-import { Kari, V6_BASE } from "../../_parts/shared";
+import { Kari } from "../../_parts/shared";
 
 export const TOP_BASE = "/dev/site-structure/top";
 export const COMING_BASE = `${TOP_BASE}/coming`;
+/** 01 転職の入口ページ（v6 の本文＋悩み・次に整えたいこと。267-N） */
+export const CAREER_BASE = `${TOP_BASE}/career`;
 export const HERO_IMAGE = "/images/lesson-persona-ui/slides/slide-01.jpg";
 
 /** 試作の中のリンクには会員の見え方を引き継ぐ（本番ページへのリンクはそのまま） */
@@ -111,7 +113,7 @@ const ICON = { size: 26, color: "currentColor", variant: "Outline" as const };
 
 function entries(member: boolean): Entry[] {
   return [
-    { no: "01", label: "UIUXデザイナーへの転職を進める", icon: <Personalcard {...ICON} />, href: V6_BASE },
+    { no: "01", label: "UIUXデザイナーへの転職を進める", icon: <Personalcard {...ICON} />, href: withState(CAREER_BASE, member) },
     {
       no: "02",
       label: "UIデザインのスキルを伸ばす",
