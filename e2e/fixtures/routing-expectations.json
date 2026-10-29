@@ -49,6 +49,20 @@
       "cookie": "dummy",
       "expectStatus": 308,
       "expectLocation": "/account"
+    },
+    {
+      "id": "old-cursor-lesson",
+      "path": "/lessons/cursor-for-designers",
+      "cookie": "none",
+      "expectStatus": 308,
+      "expectLocation": "/lessons/cursor-ui-ai-design"
+    },
+    {
+      "id": "old-cursor-article",
+      "path": "/contents/cursor-intro-for-designers",
+      "cookie": "none",
+      "expectStatus": 308,
+      "expectLocation": "/lessons/cursor-ui-ai-design"
     }
   ],
   "region": {
