@@ -1,7 +1,7 @@
 /**
  * 会員の活動ログ（member_activity_events / #213 A1）の純粋ユーティリティ。
  *
- * - event_type は DB の CHECK 制約と同じ10種のみ（勝手に増やさない。増やすときはマイグレーションと同時）
+ * - event_type は DB の CHECK 制約と同じ種類のみ（勝手に増やさない。増やすときはマイグレーションと同時）
  * - Server Action（src/lib/services/activity.ts）が入力の検証・整形に使う
  * - "use server" ファイルは async 関数しか export できないため、定数・型・純粋関数はここに置く
  */
@@ -18,6 +18,8 @@ export const ACTIVITY_EVENT_TYPES = [
   // #232: /top・マイページで押したもの / イベントページを開いた
   "home_click",
   "event_view",
+  // #264 §6-1: ?from=email_xxx の付いたURLを開いた（メール経由の来訪）
+  "email_click",
 ] as const;
 
 export type ActivityEventType = (typeof ACTIVITY_EVENT_TYPES)[number];
@@ -289,4 +291,12 @@ function decodeURIComponentSafe(value: string): string {
   } catch {
     return value;
   }
+}
+
+// ===== メールのリンクから来た（#264 §6-1 email_click） =====
+
+/** メールのリンクに付ける印（?from=email_xxx）。英小文字だけ */
+export function parseEmailFrom(value: string | null | undefined): string | null {
+  if (typeof value !== "string") return null;
+  return /^email_[a-z]{1,30}$/.test(value) ? value : null;
 }
