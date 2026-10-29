@@ -9,8 +9,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ProtoBar } from "../../_parts/shared";
-import { TOP_BASE, withState } from "../_parts/top-parts";
+import { DevStateToggle } from "../_parts/DevStateToggle";
+import { COMING_BASE as COMING, TOP_BASE, withState } from "../_parts/top-parts";
 
 export const metadata: Metadata = {
   title: "準備中（#267 試作）",
@@ -57,8 +57,6 @@ export default async function ComingPage({
 
   return (
     <div className="pb-24">
-      <ProtoBar title="準備中の仮ページ" note="新しいトップの試作から、まだ無いページへのリンクはここに集めています。" />
-
       <div className="mx-auto w-full max-w-[720px] px-6 pt-12 font-noto-sans-jp">
         <p className="text-xs font-bold text-text-muted">準備中</p>
         <h1 className="mt-2 font-heading text-[28px] font-bold leading-[1.4] text-text-primary">
@@ -87,6 +85,8 @@ export default async function ComingPage({
           </Link>
         </Button>
       </div>
+
+      <DevStateToggle base={what ? `${COMING}?what=${encodeURIComponent(what)}` : COMING} member={member} />
     </div>
   );
 }

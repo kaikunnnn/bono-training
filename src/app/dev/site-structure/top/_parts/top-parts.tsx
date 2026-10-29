@@ -37,13 +37,13 @@ export function TopHero({ member }: { member: boolean }) {
       <div className="grid grid-cols-1 gap-10 xl:grid-cols-[1.2fr_1fr] xl:gap-12">
         {/* 左: アイブロウ → 見出し → 説明 → ボタン */}
         <div className="flex min-w-0 flex-col justify-center">
-          <p className="font-noto-sans-jp text-xs font-bold tracking-[0.16em] text-accent-orange sm:text-sm">
+          <p className="font-noto-sans-jp text-xs font-bold tracking-[0.16em] text-cta-primary-hover sm:text-sm">
             FOR UI/UX DESIGN LEARNERS / つくりながら、次の一歩へ。
             <Kari />
           </p>
           <h1 className="mt-5 font-heading text-[clamp(30px,4.1vw,64px)] font-bold leading-[1.18] tracking-[-0.01em] text-text-primary">
             <span className="block">UI/UXデザインを、</span>
-            <span className="block text-accent-orange">実践でトレーニング。</span>
+            <span className="block text-cta-primary-hover">実践でトレーニング。</span>
           </h1>
           <p className="mt-6 font-noto-sans-jp text-base leading-[1.9] text-text-muted sm:text-lg">
             <span className="block">UIデザインを学ぶ人のための実践ガイド。</span>
@@ -169,7 +169,7 @@ export function EntryTiles({ member }: { member: boolean }) {
                 <ArrowUpRight
                   size={18}
                   aria-hidden="true"
-                  className="mb-1 shrink-0 text-accent-orange transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0"
+                  className="mb-1 shrink-0 text-text-muted group-hover:text-text-primary transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0 motion-reduce:group-hover:translate-y-0"
                 />
               </div>
             </Link>
