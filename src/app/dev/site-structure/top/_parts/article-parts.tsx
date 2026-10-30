@@ -262,7 +262,7 @@ function MoreLinks({ links }: { links: LinkRef[] }) {
               href={l.href}
               className={cn("group -mx-3 flex items-start gap-3 rounded-[8px] px-3 py-4 transition-colors hover:bg-hover", FOCUS)}
             >
-              <span className="mt-[2px] w-[60px] shrink-0">
+              <span className="mt-[2px] w-[64px] shrink-0">
                 <KindBadge kind={l.kind} />
               </span>
               <span className="flex min-w-0 flex-1 flex-col gap-1">

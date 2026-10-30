@@ -79,7 +79,7 @@ export function Breadcrumb({ items, className }: { items: Crumb[]; className?: s
 
 export function KindBadge({ kind }: { kind: Kind }) {
   return (
-    <span className="inline-flex items-center rounded-full border border-border-light px-2 py-px font-noto-sans-jp text-[11px] font-medium leading-[1.6] text-text-secondary">
+    <span className="inline-flex items-center whitespace-nowrap rounded-full border border-border-light px-2 py-px font-noto-sans-jp text-[11px] font-medium leading-[1.6] text-text-secondary">
       {kind}
     </span>
   );
