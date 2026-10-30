@@ -43,6 +43,8 @@ export interface LinkRef {
   kind: Kind;
   label: string;
   href: string;
+  /** まとめ記事の「詳しくは」に添える一行の理由（仮） */
+  reason?: string;
 }
 
 export interface RelatedRef {
@@ -71,8 +73,10 @@ export interface HubItem {
   /** 記事・お題などのリンク（勉強法・キャリアは /guide の記事を最大3本） */
   links: LinkRef[];
   related: RelatedRef[];
-  /** 項目ページの要点（2〜3文・仮） */
+  /** 項目ページの要点（2〜3文・仮）。まとめ記事では節の「短い答え」 */
   summary?: string[];
+  /** まとめ記事の節の番号つきの手順（1〜3・仮） */
+  steps?: string[];
   /** 小さく置く項目（勉強法の本・Figma） */
   small?: boolean;
 }
@@ -510,10 +514,19 @@ const STUDY: HubItem[] = [
     name: "UIデザインの勉強方法",
     when: "何から、どの順で学べばいいか分からない",
     canDo: "学ぶ順番の全体を知り、今週やることを決められる",
+    summary: [
+      "UIデザインは「基本を知る → まねして作る → 自分で考えて作る → 見てもらって直す」の順で進めると迷いにくくなります。",
+      "読む時間より、手を動かす時間を多めにとるのが続けるコツです。",
+    ],
+    steps: [
+      "学ぶ順番の全体を見て、今どこにいるかを確かめる",
+      "今週やるレッスンかお題を1つに絞る",
+      "作ったら見返して、次の週の1つを決める",
+    ],
     links: [
-      { kind: "記事", label: "現場10年目が教える、未経験からUIUXデザインを勉強する7つのコツ", href: "/guide/rdm-7-tips-for-learning-design" },
-      { kind: "記事", label: "未経験からUIUXデザイナーへ転職するロードマップ。プロが考えるスキル習得の流れ", href: "/guide/rdm-howtostart-roadmap" },
-      { kind: "レッスン", label: "デザインの学習環境", href: lessonHref("howtostudy") },
+      { kind: "記事", label: "現場10年目が教える、未経験からUIUXデザインを勉強する7つのコツ", href: "/guide/rdm-7-tips-for-learning-design", reason: "続けるためのコツを、現場の目線でまとめた記事" },
+      { kind: "記事", label: "未経験からUIUXデザイナーへ転職するロードマップ。プロが考えるスキル習得の流れ", href: "/guide/rdm-howtostart-roadmap", reason: "学ぶ順番の全体を、スキルごとに確かめる" },
+      { kind: "レッスン", label: "デザインの学習環境", href: lessonHref("howtostudy"), reason: "始める前に、道具と学ぶ環境をそろえる" },
     ],
     related: [
       { id: "beginner-start", reason: "まったくの初めてなら、最初の1本から" },
@@ -526,10 +539,19 @@ const STUDY: HubItem[] = [
     name: "UIデザインは独学できる？",
     when: "一人だと限界を感じる。誰かに見てもらいたい",
     canDo: "独学で行けるところと、人に見てもらう学び方の違いが分かる",
+    summary: [
+      "基本の知識と、画面を作るところまでは独学で十分に進められます。むずかしいのは、自分の画面のどこが良くて、どこが足りないかを自分で見分けることです。",
+      "一人で進める部分と、人に見てもらう部分を分けておくと、独学でも遠回りしにくくなります。",
+    ],
+    steps: [
+      "何を、いつまでに作るかを決める",
+      "レッスンとお題で、1画面ずつ作る",
+      "迷ったところだけ、人に見てもらう",
+    ],
     links: [
-      { kind: "記事", label: "デザイン学習の成功率UP「目標設定」のつくり方", href: "/guide/rdm-goalsetting" },
-      { kind: "レッスン", label: "UIが上手くなる人の“デザインサイクル”", href: lessonHref("ui-design-flow-lv1") },
-      { kind: "記事", label: "フィードバックの使い方", href: FEEDBACK_HREF },
+      { kind: "記事", label: "デザイン学習の成功率UP「目標設定」のつくり方", href: "/guide/rdm-goalsetting", reason: "一人だと決めにくい「何のために、いつまでに」を先に決める" },
+      { kind: "レッスン", label: "UIが上手くなる人の“デザインサイクル”", href: lessonHref("ui-design-flow-lv1"), reason: "作って見直す流れを、一人でも回せるようにする" },
+      { kind: "記事", label: "フィードバックの使い方", href: FEEDBACK_HREF, reason: "自分では見分けにくいところを、現役のデザイナーに見てもらう" },
     ],
     related: [
       { id: "get-feedback", reason: "見てもらう方法を、具体的に知る" },
@@ -542,10 +564,19 @@ const STUDY: HubItem[] = [
     name: "UIデザイン初心者は何から始める",
     when: "右も左も分からない。最初の1本を知りたい",
     canDo: "最初に開くレッスンを1本に決められる",
+    summary: [
+      "最初の1本は「はじめてのUIデザイン」で十分です。道具の使い方を先に全部覚えようとせず、1画面を最後まで作りきることを優先します。",
+      "Figmaの操作は、作りながら分からないところだけ調べれば追いつきます。",
+    ],
+    steps: [
+      "Figmaを開いて、基本の操作だけ触っておく",
+      "「はじめてのUIデザイン」を通して、1画面を作りきる",
+      "作った画面を見返し、次に練習したいところを1つ決める",
+    ],
     links: [
-      { kind: "レッスン", label: "はじめてのUIデザイン", href: lessonHref("uidesignbeginner") },
-      { kind: "記事", label: "UI/UXデザイナーは未経験から転職できるのか？", href: "/guide/become-uiux-designer-beginner-guide" },
-      { kind: "レッスン", label: "Figmaの使い方入門", href: lessonHref("figmabeginner") },
+      { kind: "レッスン", label: "はじめてのUIデザイン", href: lessonHref("uidesignbeginner"), reason: "最初の1本。1画面を作りきるまでを一緒に進める" },
+      { kind: "記事", label: "UI/UXデザイナーは未経験から転職できるのか？", href: "/guide/become-uiux-designer-beginner-guide", reason: "仕事にすることまで考えているなら、先に全体を知っておく" },
+      { kind: "レッスン", label: "Figmaの使い方入門", href: lessonHref("figmabeginner"), reason: "操作で手が止まったときに開く" },
     ],
     related: [
       { id: "practice", reason: "最初の1本のあとは、手を動かす練習へ" },
@@ -558,10 +589,19 @@ const STUDY: HubItem[] = [
     name: "働きながらUIデザインを学ぶ",
     when: "仕事と両立したい。始めても続かない",
     canDo: "平日と休日で、無理なく続く進め方を決められる",
+    summary: [
+      "働きながら学ぶなら、平日は短い時間でできることだけ、休日にまとまった作業をする、と分けると続きやすくなります。",
+      "続かなくなる原因の多くは、その日にやることが決まっていないことです。",
+    ],
+    steps: [
+      "平日の15〜30分でやること（記事を1本読む・トレースを1枚）を決める",
+      "休日に、1画面を作る時間をまとめてとる",
+      "月に1回、作ったものを見てもらう日を決める",
+    ],
     links: [
-      { kind: "体験談", label: "働きながらデザインを独学する方法（先輩の転職体験談）", href: "/stories/youhadouyatedezainanitara" },
-      { kind: "記事", label: "デザイン学習の成功率UP「目標設定」のつくり方", href: "/guide/rdm-goalsetting" },
-      { kind: "レッスン", label: "BONOのはじめかた", href: lessonHref("bono-onboarding") },
+      { kind: "体験談", label: "働きながらデザインを独学する方法（先輩の転職体験談）", href: "/stories/youhadouyatedezainanitara", reason: "仕事を続けながら学んだ人が、どう時間をつくったか" },
+      { kind: "記事", label: "デザイン学習の成功率UP「目標設定」のつくり方", href: "/guide/rdm-goalsetting", reason: "無理のない目標と期限の決め方" },
+      { kind: "レッスン", label: "BONOのはじめかた", href: lessonHref("bono-onboarding"), reason: "BONOを使い始めるときの、最初の1週間の進め方" },
     ],
     related: [
       { id: "practice", reason: "短い時間でも進む練習を選ぶ" },
@@ -574,10 +614,19 @@ const STUDY: HubItem[] = [
     name: "UIデザインの練習方法（UIトレース・お題）",
     when: "見るだけで、手が止まってしまう",
     canDo: "トレースとお題で、毎日少しずつ手を動かせる",
+    summary: [
+      "見るだけで手が止まるときは、UIトレースでよくできた画面を自分の手で作り直すところから始めます。",
+      "慣れてきたら、お題で条件だけ決まった画面を自分で考えて作ります。",
+    ],
+    steps: [
+      "よく使うアプリの画面を1枚選び、UIトレースする",
+      "トレースで気づいた余白や文字の大きさをメモする",
+      "お題で、その気づきを使って1画面を作る",
+    ],
     links: [
-      { kind: "レッスン", label: "UIトレース入門", href: lessonHref("uitrace") },
-      { kind: "お題", label: "UIデザイン入門DailyUI", href: "/training/ui_starter_dailyui" },
-      { kind: "レッスン", label: "賃貸アプリで基本UIトレーニング", href: lessonHref("weeklyui-baseui-chintai") },
+      { kind: "レッスン", label: "UIトレース入門", href: lessonHref("uitrace"), reason: "トレースのやり方と、見るところを知る" },
+      { kind: "お題", label: "UIデザイン入門DailyUI", href: "/training/ui_starter_dailyui", reason: "短い時間で作れる、毎日のお題" },
+      { kind: "レッスン", label: "賃貸アプリで基本UIトレーニング", href: lessonHref("weeklyui-baseui-chintai"), reason: "基本のUIを、実際のアプリの形で練習する" },
     ],
     related: [
       { id: "get-feedback", reason: "作ったものを見てもらうと、次の練習が決まる" },
@@ -591,10 +640,19 @@ const STUDY: HubItem[] = [
     nameKari: true,
     when: "今の自分のレベルが分からない。質問しづらい",
     canDo: "何を見てほしいかを添えて、気軽に見てもらえる",
+    summary: [
+      "フィードバックは「どこを見てほしいか」を1つ添えるだけで、ずっともらいやすくなります。",
+      "完成してからではなく、迷っている途中で見せる方が直しやすくなります。",
+    ],
+    steps: [
+      "見てほしいところを1つ決める（例: 余白、情報の順番）",
+      "画面と一緒に、作った目的と迷っているところを書く",
+      "もらった意見から1つ選んで直し、もう一度見せる",
+    ],
     links: [
-      { kind: "記事", label: "フィードバックの使い方", href: FEEDBACK_HREF },
-      { kind: "記事", label: "掲示板", href: BOARD_HREF },
-      { kind: "レッスン", label: "BONOフィードバック集", href: lessonHref("feedback") },
+      { kind: "記事", label: "フィードバックの使い方", href: FEEDBACK_HREF, reason: "現役のデザイナーに見てもらうときの流れ" },
+      { kind: "記事", label: "掲示板", href: BOARD_HREF, reason: "ちょっとした疑問を、メンバーに気軽に聞く" },
+      { kind: "レッスン", label: "BONOフィードバック集", href: lessonHref("feedback"), reason: "実際のフィードバックから、見られるところを知る" },
     ],
     related: [
       { id: "self-study", reason: "独学と、見てもらう学び方を比べる" },
@@ -608,13 +666,57 @@ const STUDY: HubItem[] = [
     when: "本や道具の学び方も知りたい",
     canDo: "手元に置く1冊と、Figmaの覚え方が分かる",
     small: true,
+    summary: [
+      "Figmaは入門で基本の操作を覚え、初級でコンポーネントやオートレイアウトまで進めば、練習には十分です。",
+      "本は通して読むより、作っていて迷ったときに引く1冊として手元に置くと続きます。",
+    ],
     links: [
-      { kind: "レッスン", label: "Figmaの使い方入門", href: lessonHref("figmabeginner") },
-      { kind: "レッスン", label: "Figmaの使い方初級", href: lessonHref("figma-elementary") },
+      { kind: "レッスン", label: "Figmaの使い方入門", href: lessonHref("figmabeginner"), reason: "Figmaを初めて開く人向け。基本の操作をひととおり" },
+      { kind: "レッスン", label: "Figmaの使い方初級", href: lessonHref("figma-elementary"), reason: "入門のあと、作業を速くする機能を覚える" },
     ],
     related: [{ id: "beginner-start", reason: "道具を覚えたら、最初の1画面へ" }],
   },
 ];
+
+/**
+ * 勉強法のまとめ記事（267-R 4章の形・5章の節）。文言は上の STUDY から読む（二重に持たない）。
+ * ここにあるのは、記事の頭の文と、どの項目をどの節・小見出しにするかだけ。
+ */
+export interface ArticleSectionRef {
+  /** 節（h2）にする項目 */
+  id: string;
+  /** 節の中の小見出し（h3）にする項目 */
+  subIds?: string[];
+}
+
+export interface GuideArticle {
+  /** h1（検索の言葉） */
+  title: string;
+  /** h1 の下の小さな一言 */
+  sub: string;
+  /** 前置き（どんな人に、何が分かるか） */
+  intro: string;
+  sections: ArticleSectionRef[];
+  /** 書いた人（個人名は出さない） */
+  author: string;
+  /** 確認日（YYYY-MM-DD） */
+  checkedAt: string;
+}
+
+export const studyArticle: GuideArticle = {
+  title: "UIデザインの勉強法",
+  sub: "何から始めて、どう続けるか",
+  intro:
+    "これからUIデザインを学ぶ人と、学んでいるけれど進め方に迷っている人に向けたページです。最初の1本の選び方から、一人で進めるときのコツ、毎日の練習、仕事と両立する続け方までを順にまとめました。",
+  sections: [
+    { id: "beginner-start" },
+    { id: "self-study" },
+    { id: "how-to-study", subIds: ["practice", "books-and-figma"] },
+    { id: "while-working", subIds: ["get-feedback"] },
+  ],
+  author: "BONO 運営",
+  checkedAt: "2026-10-30",
+};
 
 // ------------------------------------------------------------
 // キャリア（7）
@@ -870,6 +972,11 @@ if (TROUBLES.length !== 14 || groupCounts.join(",") !== "3,5,4,2") {
 }
 if (STUDY.length !== 7 || CAREER.length !== 7) {
   throw new Error(`[hierarchy] 勉強法・キャリアの数が 267-P とずれている: ${STUDY.length} / ${CAREER.length}`);
+}
+for (const sec of studyArticle.sections) {
+  for (const id of [sec.id, ...(sec.subIds ?? [])]) {
+    if (!getItem("study", id)) throw new Error(`[hierarchy] 勉強法のまとめ記事の項目が無い: ${id}`);
+  }
 }
 for (const it of HUB_ITEMS) {
   for (const r of it.related) {
