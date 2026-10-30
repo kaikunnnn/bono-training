@@ -624,7 +624,7 @@ const STUDY: HubItem[] = [
       "お題で、その気づきを使って1画面を作る",
     ],
     links: [
-      { kind: "レッスン", label: "UIトレース入門", href: lessonHref("uitrace"), reason: "トレースのやり方と、見るところを知る" },
+      { kind: "記事", label: "【初心者】最短で基礎を得るUIデザイン勉強法、それは定番UIのマネです", href: "/contents/howtostudydesign-steal", reason: "定番のUIをまねして作るときの、見た目・機能・構造の3つの見方" },
       { kind: "お題", label: "UIデザイン入門DailyUI", href: "/training/ui_starter_dailyui", reason: "短い時間で作れる、毎日のお題" },
       { kind: "レッスン", label: "賃貸アプリで基本UIトレーニング", href: lessonHref("weeklyui-baseui-chintai"), reason: "基本のUIを、実際のアプリの形で練習する" },
     ],
@@ -652,7 +652,7 @@ const STUDY: HubItem[] = [
     links: [
       { kind: "記事", label: "フィードバックの使い方", href: FEEDBACK_HREF, reason: "現役のデザイナーに見てもらうときの流れ" },
       { kind: "記事", label: "掲示板", href: BOARD_HREF, reason: "ちょっとした疑問を、メンバーに気軽に聞く" },
-      { kind: "レッスン", label: "BONOフィードバック集", href: lessonHref("feedback"), reason: "実際のフィードバックから、見られるところを知る" },
+      { kind: "記事", label: "相談・質問を投稿しよう", href: "/contents/bono-onboarding-ask-question", reason: "掲示板に、画面と迷っているところを書いて投稿する手順" },
     ],
     related: [
       { id: "self-study", reason: "独学と、見てもらう学び方を比べる" },

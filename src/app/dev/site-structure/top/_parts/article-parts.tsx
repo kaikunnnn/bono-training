@@ -3,7 +3,7 @@
  *
  * 形（上から）: パンくず → h1＋一言 → 前置き → 目的から選ぶ（各節へのページ内リンク）
  *   → 節 01〜（h2: 短い答え → 番号つきの手順 → 実物のサムネイル → 詳しくは → 目的から選ぶ↑。h3 の小見出しも同じ形）
- *   → 次に整えたいこと（hub-parts の NextSteps）→ 書いた人と確認日
+ *   → コースで進める（ArticleCourseCta）→ 次に整えたいこと（hub-parts の NextSteps）→ 書いた人と確認日
  * 型の参考: エアコン屋の裏方「仕事まわりガイド」（型だけ借りる）。外の定石は 267-R 9章（柱のページ・ページ内リンク）。
  *
  * 文言は _data/hierarchy.ts の項目（name・when・summary・steps・links[].reason）から読む。
@@ -16,7 +16,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowDown, ArrowUp, ArrowUpRight } from "lucide-react";
+import { ArrowDown, ArrowRight, ArrowUp, ArrowUpRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { getAllGuidesFromSanity } from "@/lib/sanity";
 import { cn } from "@/lib/utils";
 import { fetchLessons } from "../../../course-pages/data/sanity-lessons";
@@ -25,7 +26,7 @@ import { LessonCover } from "../../../course-pages/template/shared";
 import { Kari } from "../../_parts/shared";
 import { getItem, type GuideArticle, type HubItem, type LinkRef, type Parent } from "../_data/hierarchy";
 import { isGenericCover } from "./guide-hub";
-import { Breadcrumb, FOCUS, KindBadge, PAGE, PHRASE, type Crumb } from "./hub-parts";
+import { Breadcrumb, FOCUS, FreeBadge, KindBadge, PAGE, PHRASE, type Crumb } from "./hub-parts";
 
 /** 本文の幅（1行を短く） */
 export const ARTICLE = "mx-auto w-full max-w-[760px]";
@@ -350,6 +351,107 @@ export function ArticleSectionView({ section }: { section: ArticleSection }) {
       ))}
       <div className="mt-10">
         <BackToChoose />
+      </div>
+    </section>
+  );
+}
+
+// ------------------------------------------------------------
+// コースで進める（次に整えたいことの直前。記事から、コースと料金へ進む道）
+// 検索から記事に来た人がコース・料金へ進む道がなかったため（GA4: 記事への検索流入 721 回 → 課金 1 件）。
+// 目立たせすぎない: 白い面＋細い線。ボタンは1つだけ（未ログインは料金、会員は続きから）。
+// ------------------------------------------------------------
+
+export interface CourseCtaItem {
+  /** 形の印（コース・ロードマップ） */
+  tag: "コース" | "ロードマップ";
+  label: string;
+  href: string;
+  reason: string;
+  /** 無料で読める範囲の一言（例: 最初のレッスンは無料） */
+  free?: string;
+}
+
+function CtaTag({ tag }: { tag: CourseCtaItem["tag"] }) {
+  if (tag === "コース") return <KindBadge kind="コース" />;
+  // KindBadge の Kind に「ロードマップ」は無いので、同じ見た目で出す
+  return (
+    <span className="inline-flex items-center whitespace-nowrap rounded-full border border-border-light px-2 py-px font-noto-sans-jp text-[11px] font-medium leading-[1.6] text-text-secondary">
+      {tag}
+    </span>
+  );
+}
+
+export function ArticleCourseCta({
+  id = "course",
+  title,
+  lead,
+  items,
+  action,
+}: {
+  id?: string;
+  title: ReactNode;
+  lead: ReactNode;
+  items: CourseCtaItem[];
+  action: { label: string; href: string; note?: ReactNode };
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-title`}
+      className="scroll-mt-24 rounded-[24px] border border-border-light bg-surface p-6 shadow-[var(--shadow-xs)] sm:p-8"
+    >
+      <h2 id={`${id}-title`} className={cn("font-heading text-[22px] font-bold leading-[1.45] text-text-primary lg:text-[24px]", PHRASE)}>
+        {title}
+      </h2>
+      <div className="mt-3 max-w-[36em] font-noto-sans-jp text-sm leading-[1.9] text-text-secondary">{lead}</div>
+      <ul className="mt-6 flex flex-col border-t border-border-light">
+        {items.map((it) => (
+          <li key={it.href} className="border-b border-border-light">
+            <Link
+              href={it.href}
+              className={cn("group -mx-3 flex items-start gap-3 rounded-[8px] px-3 py-4 transition-colors hover:bg-hover", FOCUS)}
+            >
+              <span className="mt-[2px] hidden w-[88px] shrink-0 sm:block">
+                <CtaTag tag={it.tag} />
+              </span>
+              <span className="flex min-w-0 flex-1 flex-col gap-1">
+                <span className="sm:hidden">
+                  <CtaTag tag={it.tag} />
+                </span>
+                <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span
+                    className={cn(
+                      "font-noto-sans-jp text-[15px] font-bold leading-[1.6] text-text-primary group-hover:underline group-hover:underline-offset-4",
+                      PHRASE
+                    )}
+                  >
+                    {it.label}
+                  </span>
+                  {it.free ? <FreeBadge>{it.free}</FreeBadge> : null}
+                </span>
+                <span className="font-noto-sans-jp text-[13px] leading-[1.7] text-text-muted">
+                  {it.reason}
+                  <Kari />
+                </span>
+              </span>
+              <ArrowUpRight
+                size={16}
+                aria-hidden="true"
+                className="mt-1 shrink-0 text-text-muted transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-text-primary motion-reduce:transition-none"
+              />
+            </Link>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-6 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-5">
+        <Button variant="default" size="lg" asChild>
+          <Link href={action.href}>
+            {action.label}
+            <ArrowRight aria-hidden="true" />
+          </Link>
+        </Button>
+        {action.note ? <p className="font-noto-sans-jp text-xs leading-[1.7] text-text-muted">{action.note}</p> : null}
       </div>
     </section>
   );
