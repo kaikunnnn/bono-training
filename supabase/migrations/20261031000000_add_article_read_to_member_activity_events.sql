@@ -12,6 +12,9 @@
 -- ★書き方の注意: 別ブランチ（#264/#268 feature/member-mail-foundation, PR #284）も同じ制約を
 --   作り直して email_click を足している。どちらが先に入っても相手の種類を消さないよう、
 --   PR #284 と同じく「今の制約にある種類 + 既知の種類 + article_read」で作り直す（何度当てても同じ結果）。
+--   今の制約の読み取りは2つの書き方に対応する:
+--     ARRAY['a'::text, ...] 形式（IN (...) で作ったとき）と '{a,b}'::text[] 形式（配列リテラルで作ったとき）
+--   作り直した制約は ARRAY['a'::text, ...] 形式にする（次に当てるマイグレーションが読める形）。
 -- =============================================================================
 
 DO $$
@@ -29,7 +32,7 @@ BEGIN
     SELECT DISTINCT t
       FROM unnest(
         COALESCE(
-          ARRAY(SELECT m[1] FROM regexp_matches(COALESCE(v_def, ''), '''([a-z_]+)''', 'g') AS m),
+          ARRAY(SELECT m[1] FROM regexp_matches(COALESCE(v_def, ''), '(?<=[''{,])([a-z_]+)(?=[''},])', 'g') AS m),
           '{}'::text[]
         )
         || ARRAY[
@@ -46,8 +49,8 @@ BEGIN
     DROP CONSTRAINT IF EXISTS member_activity_events_event_type_check;
 
   EXECUTE format(
-    'ALTER TABLE public.member_activity_events ADD CONSTRAINT member_activity_events_event_type_check CHECK (event_type = ANY (%L::text[]))',
-    v_types
+    'ALTER TABLE public.member_activity_events ADD CONSTRAINT member_activity_events_event_type_check CHECK (event_type = ANY (ARRAY[%s]))',
+    (SELECT string_agg(quote_literal(t) || '::text', ', ' ORDER BY t) FROM unnest(v_types) AS t)
   );
 END;
 $$;
