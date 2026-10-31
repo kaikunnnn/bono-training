@@ -48,6 +48,8 @@ export interface UseVimeoPlayerReturn {
 export interface VimeoPlayerOptions {
   autoPlay?: boolean;
   muted?: boolean;
+  /** Vimeo の ended イベント（state は更新しない。視聴完了の計測用 #262） */
+  onEnded?: () => void;
 }
 
 function findCurrentChapter(
@@ -69,6 +71,11 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
   const seekRequestRef = useRef(0);
   const autoPlay = options.autoPlay ?? false;
   const configuredMuted = options.muted ?? false;
+  // コールバックの差し替えでプレーヤーを作り直さないよう ref で持つ
+  const onEndedRef = useRef(options.onEnded);
+  useEffect(() => {
+    onEndedRef.current = options.onEnded;
+  }, [options.onEnded]);
 
   const [state, setState] = useState<VimeoPlayerState>({
     isPlaying: false,
@@ -176,6 +183,10 @@ export function useVimeoPlayer(vimeoId: string, options: VimeoPlayerOptions = {}
         currentTime: data.seconds,
         currentChapter: findCurrentChapter(prev.chapters, data.seconds),
       }));
+    });
+
+    player.on('ended', () => {
+      onEndedRef.current?.();
     });
 
     player.on('volumechange', (data: { volume: number }) => {
