@@ -8,9 +8,11 @@
  *   （未ログインは活動ログが no-op になるため GA4 側で数える）
  * - trackHomeClick: /top・マイページで押したもの（#232）を GA4 と活動ログの両方に送る
  * - trackArticleVideo*: 記事の動画の再生・進捗・完了（#262）を GA4 と活動ログの両方に送る
+ * - trackArticleReadEvent: 記事を読んだ（#262 article_read）を GA4 と活動ログの両方に送る
  */
 import { recordActivity } from "@/lib/services/activity";
 import {
+  trackArticleRead,
   trackEvent,
   trackVideoComplete,
   trackVideoPlay,
@@ -23,6 +25,7 @@ import {
   type PricingCtaSourceGroup,
   type RecordActivityInput,
 } from "@/lib/activity-utils";
+import { ARTICLE_READ_PERCENT } from "@/lib/article-read";
 
 /** @supabase/ssr の auth cookie（sb-<ref>-auth-token / 分割時は .0 .1 ...）があるか */
 export function hasSupabaseAuthCookie(): boolean {
@@ -159,4 +162,47 @@ export function trackArticleVideoComplete(tracking: ArticleVideoTracking): void 
     // 同上
   }
   logActivity({ eventType: "video_complete", ...videoActivityIds(tracking) });
+}
+
+// ===== 記事を読んだ（#262 article_read） =====
+
+/** どの記事を読んだか。Server Component から props で渡すのでプレーンな値だけで持つ */
+export interface ArticleReadTracking {
+  articleId: string;
+  lessonId?: string | null;
+  /** GA4 の article_title 用（活動ログには入れない） */
+  title: string;
+  slug: string;
+}
+
+/**
+ * 本文の70%まで届いた＋そのページに30秒以上。呼び出し側（ArticleReadTracker）で1ページ表示につき1回に絞ってから呼ぶ。
+ * meta.percent は判定のしきい値（70）、meta.seconds は実際に見ていた秒数、meta.max_percent は届いた一番深い位置
+ */
+export function trackArticleReadEvent(
+  tracking: ArticleReadTracking,
+  result: { percent: number; seconds: number }
+): void {
+  try {
+    trackArticleRead({
+      articleId: tracking.articleId,
+      articleTitle: tracking.title,
+      lessonId: tracking.lessonId || undefined,
+      percent: ARTICLE_READ_PERCENT,
+      seconds: result.seconds,
+    });
+  } catch {
+    // GA 失敗で読書を止めない
+  }
+  logActivity({
+    eventType: "article_read",
+    articleId: tracking.articleId,
+    lessonId: tracking.lessonId || undefined,
+    meta: {
+      slug: tracking.slug,
+      percent: ARTICLE_READ_PERCENT,
+      max_percent: result.percent,
+      seconds: result.seconds,
+    },
+  });
 }

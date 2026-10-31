@@ -12,7 +12,7 @@ import {
 import { withSignUpMarker } from "@/lib/auth-markers";
 
 describe("activity event types (DB CHECK と一致)", () => {
-  it("固定13種のみ（#232 で home_click / event_view、#262 で動画3種を追加）", () => {
+  it("固定14種のみ（#232 で home_click / event_view、#262 で動画3種と article_read を追加）", () => {
     expect(ACTIVITY_EVENT_TYPES).toEqual([
       "site_visit",
       "article_view",
@@ -27,11 +27,13 @@ describe("activity event types (DB CHECK と一致)", () => {
       "video_play",
       "video_progress",
       "video_complete",
+      "article_read",
     ]);
     expect(isActivityEventType("site_visit")).toBe(true);
     expect(isActivityEventType("video_play")).toBe(true);
     expect(isActivityEventType("video_progress")).toBe(true);
     expect(isActivityEventType("video_complete")).toBe(true);
+    expect(isActivityEventType("article_read")).toBe(true);
     expect(isActivityEventType("home_click")).toBe(true);
     expect(isActivityEventType("event_view")).toBe(true);
     expect(isActivityEventType("page_view")).toBe(false);
