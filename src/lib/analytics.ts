@@ -127,6 +127,25 @@ export const trackArticleComplete = (articleId: string, articleTitle: string) =>
 };
 
 /**
+ * 記事を読んだ（#262）。本文の70%まで届いた＋そのページに30秒以上（タブが裏の時間を除く）で1回
+ */
+export const trackArticleRead = (params: {
+  articleId: string;
+  articleTitle: string;
+  lessonId?: string;
+  percent: number;
+  seconds: number;
+}) => {
+  trackEvent('article_read', {
+    article_id: params.articleId,
+    article_title: params.articleTitle,
+    lesson_id: params.lessonId,
+    percent: params.percent,
+    engaged_seconds: params.seconds,
+  });
+};
+
+/**
  * 動画再生進捗（25%/50%/75%到達時に発火）
  */
 export const trackVideoProgress = (articleId: string, articleTitle: string, percent: number) => {

@@ -164,6 +164,17 @@ async function PersonalizedArticleBody({
           previewBlockCount={freeBlockCount}
           paywalledFrom={isCrawlerFullView ? freeBlockCount : undefined}
           isLoggedIn={subscription.isLoggedIn}
+          // #262 記事を読んだ（本文70%＋30秒）。本文を全部見られる人だけ（プレビューの短い本文で数えない）
+          readTracking={
+            hasAccess
+              ? {
+                  articleId: article._id,
+                  lessonId: article.lessonInfo?._id,
+                  title: article.title,
+                  slug,
+                }
+              : undefined
+          }
           redirectTo={`/contents/${slug}`}
           afterContent={
             hasAccess && (

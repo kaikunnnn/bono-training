@@ -29,7 +29,9 @@ describe("DB の CHECK 制約とアプリの種類一覧が一致する", () => 
         )
       );
     const latest = readFileSync(join(dir, files[files.length - 1]), "utf8");
-    const list = latest.match(/event_type IN \(([\s\S]*?)\)\)/)?.[1] ?? "";
+    // 固定の一覧（CHECK (event_type IN (...))）か、#264 の「今の制約 || ARRAY[...]」形式（別ブランチの種類を消さない書き方）
+    const list =
+      latest.match(/event_type IN \(([\s\S]*?)\)\)/)?.[1] ?? latest.match(/\|\|\s*ARRAY\[([\s\S]*?)\]/)?.[1] ?? "";
     const values = [...list.matchAll(/'([a-z_]+)'/g)].map((m) => m[1]);
     expect(values).toEqual([...ACTIVITY_EVENT_TYPES]);
   });
