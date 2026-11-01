@@ -3,6 +3,7 @@ import {
   LEGACY_ONLY_CONTENT_SLUGS,
   GUIDE_REDIRECT_MAP,
 } from "@/lib/migration/legacy-only-content-slugs";
+import { isGoneLegacyPath } from "@/lib/migration/gone-legacy-paths";
 
 /**
  * 軽量化された proxy（Next.js 16 で middleware.ts から改名。役割は同じ）
@@ -173,6 +174,15 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // #276: 旧 Webflow のパスで、移す先も検索の流入も無いものは 410 Gone
+  // （next.config の redirects では 410 を返せないためここで返す）
+  if (isGoneLegacyPath(pathname)) {
+    return new NextResponse("Gone", {
+      status: 410,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
+
   // サイト移行 #198: legacy 専用 226本の /contents/{slug} を救済（プロキシ）。
   // 認証判定より前に行う（/contents/* は認証状態で挙動が変わらないため副作用なし）。
   const rescued = rescueLegacyContent(request);
@@ -262,5 +272,9 @@ export const config = {
     "/notes",
     "/community/feedback/:path*",
     "/community/feedback",
+    // #276 410 Gone（src/lib/migration/gone-legacy-paths.ts と同じパス）
+    "/content/communitykomiyunitei",
+    "/corse/rdmhuezu3-taitoru",
+    "/news/news-bar",
   ],
 };

@@ -13,7 +13,7 @@ import {
 } from "@/lib/sanity";
 import { GUIDE_CONTENT_DUPLICATE_SLUGS } from "@/lib/seo/guideContentDuplicates";
 import { LEGACY_PUBLIC_ARTICLE_SLUGS } from "@/lib/seo/legacyPublicArticles";
-import { SITEMAP_EXCLUDED_ARTICLE_SLUGS } from "@/lib/seo/sitemapExcludedArticles";
+import { isPlaceholderArticleSlug } from "@/lib/seo/placeholderArticles";
 import {
   isIndexablePremiumSlug,
   isIndexablePremiumStorySlug,
@@ -128,13 +128,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   // 会員限定は noindex なので載せない。ただし検索に戻す会員限定記事（#236 indexablePremium）は載せる
-  // 作成中の仮ページ（#276 SITEMAP_EXCLUDED_ARTICLE_SLUGS）は載せない
+  // 作成中の仮ページ（#276 placeholderArticles、noindex）は載せない
   const articlePages: MetadataRoute.Sitemap = articles
     .filter(
       (article) =>
         (!article.isPremium || isIndexablePremiumSlug(article.slug.current)) &&
         !GUIDE_CONTENT_DUPLICATE_SLUGS.has(article.slug.current) &&
-        !SITEMAP_EXCLUDED_ARTICLE_SLUGS.has(article.slug.current),
+        !isPlaceholderArticleSlug(article.slug.current),
     )
     .map((article) => ({
       url: `${BASE_URL}/contents/${article.slug.current}`,

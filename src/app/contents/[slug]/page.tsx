@@ -33,6 +33,7 @@ import {
   storyCanonicalForContent,
 } from "@/lib/seo/indexablePremium";
 import { isVerifiedGooglebot } from "@/lib/seo/googlebot";
+import { isPlaceholderArticleSlug } from "@/lib/seo/placeholderArticles";
 import { traceServerStep } from "@/lib/performance/server-trace";
 import { startArticlePageData } from "./article-page-data";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -283,8 +284,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // 正規 URL を /stories に向ける記事は noindex を付けない（canonical と noindex を併用しない。
     // Google は同一サイト内の正規化に noindex を使わず rel=canonical を推奨）
     // https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
+    // 作成中の仮ページ（#276 placeholderArticles）も noindex
     robots:
-      article.isPremium && !indexablePremium && !storyCanonical
+      (article.isPremium && !indexablePremium && !storyCanonical) ||
+      isPlaceholderArticleSlug(slug)
         ? { index: false, follow: true }
         : undefined,
     openGraph: {
@@ -424,9 +427,12 @@ export default async function ArticlePage({ params }: PageProps) {
               url: `/contents/${slug}`,
               publishedAt: article.publishedAt || new Date().toISOString(),
               image: article.thumbnailUrl,
-              // 有料コンテンツの構造化データ（Googlebot に返す HTML では有料部分が .paywalled-content）
+              // 有料コンテンツの構造化データ（Googlebot に返す HTML では有料部分が .paywalled-content）。
+              // 本文が全部無料範囲に収まる記事（#276 ooui-11 など）は .paywalled-content の要素が無いので付けない
+              // （Googlebot にも利用者と同じ本文しか返さない＝隠している部分が無い）
               paywalledCssSelector:
-                indexableFreeBlockCount !== undefined
+                indexableFreeBlockCount !== undefined &&
+                indexableFreeBlockCount < (article.content?.length ?? 0)
                   ? `.${PAYWALLED_CONTENT_CLASS}`
                   : undefined,
             })
