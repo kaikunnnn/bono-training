@@ -19,6 +19,8 @@ export const GONE_LEGACY_PATHS: ReadonlySet<string> = new Set([
   "/corse/rdmhuezu3-taitoru",
   // 旧サイトのお知らせバー部品のページ。16ヶ月でクリック1・表示44
   "/news/news-bar",
+  // 旧タグ「施策アイデア-ドキュメンテーション」。記事0本の空タグ。Search Console に記録なし
+  "/designtag/document",
 ]);
 
 export function isGoneLegacyPath(pathname: string): boolean {
