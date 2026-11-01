@@ -20,8 +20,19 @@ describe("getGuideSeoOverride", () => {
     expect(seo?.description).toBeUndefined();
   });
 
+  it("narrows become-uiux to salary and future without 未経験 (#236 B / #276)", () => {
+    const seo = getGuideSeoOverride("become-uiux-designer-beginner-guide");
+    expect(seo?.title).toBe(
+      "UI/UXデザイナーの年収と将来性｜仕事の役割・年収の目安・キャリアの広げ方 | BONO",
+    );
+    for (const word of ["未経験", "なるには", "スクール", "講座"]) {
+      expect(seo?.title).not.toContain(word);
+      expect(seo?.description).not.toContain(word);
+    }
+  });
+
   it("leaves other guides on Sanity values", () => {
-    expect(getGuideSeoOverride("become-uiux-designer-beginner-guide")).toBeUndefined();
+    expect(getGuideSeoOverride("beginner-to-uiux-designer-examples")).toBeUndefined();
     expect(getGuideSeoOverride("constructor")).toBeUndefined();
     expect(getGuideSeoOverride("toString")).toBeUndefined();
   });

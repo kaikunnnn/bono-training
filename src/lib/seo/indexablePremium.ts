@@ -1,4 +1,4 @@
-// src/lib/seo/indexablePremium.ts — 会員限定記事のうち、検索に戻す記事（#236 / rebono#18 パイロット）
+// src/lib/seo/indexablePremium.ts — 会員限定記事のうち、検索に戻す記事（#236 / rebono#18 パイロット10本 + #276 残り27本）
 //
 // Google の正式な有料コンテンツの扱い（flexible sampling + paywalled content 構造化データ）で
 // 検索に出す会員限定記事を、ここで1か所管理する。Sanity のデータは書き換えない。
@@ -31,6 +31,35 @@ export const INDEXABLE_PREMIUM_ARTICLES: readonly IndexablePremiumArticle[] = [
   { slug: "ui-layout-basic05-2" },
   { slug: "ui-layout-basic04-4" },
   { slug: "material-design-tabui-01" },
+  // #276（2026-11-01 オーナー「戻して」）: 43本の残り27本。genta は本文が薄いので対象外のまま
+  // （#236 の決定どおり。ストーリー側も対象外）。無料範囲はパイロットと同じ自動計算。
+  { slug: "goaldirect-2-1" },
+  { slug: "bono-session03" },
+  { slug: "ui-architect-beginner-63" },
+  { slug: "figma-prototyping-animation-overlay" },
+  { slug: "three-structures-22" },
+  { slug: "material-design-selectui-01" },
+  { slug: "ui-idea-11" },
+  { slug: "bono-ui-refelence" },
+  { slug: "ooui-11" },
+  { slug: "uinavi04" },
+  { slug: "material-design-navigation-bar" },
+  { slug: "materialdesign-rindoku-04" },
+  { slug: "tutorial-uivisual-09" },
+  { slug: "ui-layout-basic04-7" },
+  { slug: "ooui-09" },
+  { slug: "uivisual-6-2" },
+  { slug: "ooui-10" },
+  { slug: "ui-pattern-10" },
+  { slug: "bannerbeginner-03-1" },
+  { slug: "uivisual-6-6" },
+  { slug: "ux-beginner15" },
+  { slug: "gu-ke-zhong-xin-dezain-0-jia-zhi-ding-yi-nituite" },
+  { slug: "materialdesign-spacingmethod" },
+  { slug: "sore-jie-keru-ke-ti-ninatuteru-dezainke-neng-na-ke-ti-wojian-fen-kerufang-fa" },
+  { slug: "tutorial-uivisual-07-02" },
+  { slug: "ui-architect-beginner-67" },
+  { slug: "ui-pattern-12" },
 ];
 
 const ENTRY_BY_SLUG = new Map(

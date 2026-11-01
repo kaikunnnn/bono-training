@@ -30,7 +30,6 @@ export const LEGACY_PUBLIC_ARTICLE_SLUGS: ReadonlySet<string> = new Set([
   "uiuxdesigner-workflow",
   "webdesign-nouidesign-howtostartcareer",
   "youhadouyatedezainanibebe",
-  "youhadouyatedezainani-wake",
   "zhi-wen-she-nei-tesutotoshi-ji-noyuzatesutonowei-iha",
   "zhi-wen-uinodong-kinochuan-efang-tutexian-chang-dedouyaruno",
   "zhi-wen-uinodong-kinochuan-efang-tutexian-chang-dedouyaruno-copy",

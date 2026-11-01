@@ -159,6 +159,9 @@ const nextConfig: NextConfig = {
       // （UIビジュアル基礎 6-3.シャドウの基本）にあるものは legacy プロキシではなく新記事へ308。
       // next.config の redirects は proxy より先に評価されるため、proxy の legacy rewrite より優先される。
       { source: "/contents/tips-siyadounoshi-ifang", destination: "/contents/uivisual-6-4", permanent: true },
+      // #276 タイトル重複: 旧サイトの体験談記事は同じ本文が /stories/wake にある（2026-11-01 本文照合済み）。
+      // 旧URLは legacy プロキシで canonical が無く、同じ title のページが2つ検索に出ていたので 308 でまとめる。
+      { source: "/contents/youhadouyatedezainani-wake", destination: "/stories/wake", permanent: true },
     ];
   },
   // セキュリティヘッダ（段階導入）: CSP以外の安全ヘッダ＋「壊れない範囲のCSP」を全パスに enforce。
