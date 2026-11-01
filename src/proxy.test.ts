@@ -104,3 +104,18 @@ describe("proxy: signed-in visitors on /signup and /login go back to redirectTo 
     expect(res.headers.get("x-middleware-next")).toBe("1");
   });
 });
+
+describe("proxy: legacy Webflow paths with no new page return 410 (#276)", () => {
+  it.each(["/content/communitykomiyunitei", "/corse/rdmhuezu3-taitoru", "/news/news-bar", "/news/news-bar/"])(
+    "%s → 410",
+    (path) => {
+      const res = proxy(request(path));
+      expect(res.status).toBe(410);
+    }
+  );
+
+  it("does not touch other legacy paths", () => {
+    const res = proxy(request("/news/other"));
+    expect(res.status).not.toBe(410);
+  });
+});

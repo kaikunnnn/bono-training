@@ -159,6 +159,22 @@ const nextConfig: NextConfig = {
       // （UIビジュアル基礎 6-3.シャドウの基本）にあるものは legacy プロキシではなく新記事へ308。
       // next.config の redirects は proxy より先に評価されるため、proxy の legacy rewrite より優先される。
       { source: "/contents/tips-siyadounoshi-ifang", destination: "/contents/uivisual-6-4", permanent: true },
+      // #276 タイトル重複: 旧サイトの体験談記事は同じ本文が /stories/wake にある（2026-11-01 本文照合済み）。
+      // 旧URLは legacy プロキシで canonical が無く、同じ title のページが2つ検索に出ていたので 308 でまとめる。
+      { source: "/contents/youhadouyatedezainani-wake", destination: "/stories/wake", permanent: true },
+      // #276（2026-11-01 オーナー回答）: 旧 Webflow の一覧・タグページのうち、同じ役割の新ページがあるもの。
+      // 無いもの（410）は src/lib/migration/gone-legacy-paths.ts（proxy）。
+      // 旧「新着コンテンツ一覧」（ページ送りのクエリ付きも同じ転送）→ 全記事の一覧
+      { source: "/content/newvideos", destination: "/articles", permanent: true },
+      // 旧「UXデザイン」カテゴリ一覧 → UXデザインのロードマップ
+      { source: "/content/uxdesign", destination: "/roadmap/ux-design-basic", permanent: true },
+      // 旧「面接」スキルタグ → 面接のポイントの記事
+      { source: "/designskill/jobinterview", destination: "/contents/uiux-interview-tips-and-checkpoints", permanent: true },
+      // rebono#22 と同じ考え方（タグ → 内容の近いレッスン）
+      // 「プロトタイピング - UIパターン検証」: 載っていた記事の多くが「ゼロからはじめるUI情報設計」
+      { source: "/designtag/uitest", destination: "/lessons/ui-architect-beginner", permanent: true },
+      // 「施策アイデア-ドキュメンテーション」: 記事0本のタグ。名前の近い「UIアイデア入門」へ
+      { source: "/designtag/document", destination: "/lessons/uiidea", permanent: true },
     ];
   },
   // セキュリティヘッダ（段階導入）: CSP以外の安全ヘッダ＋「壊れない範囲のCSP」を全パスに enforce。

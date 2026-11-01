@@ -50,6 +50,8 @@ export async function generateMetadata({
       title: `${event.title} | イベント`,
       description: event.summary || `${event.title}の詳細`,
     },
+    // #276: 他の詳細ページと同じく自分自身を canonical にする（metadataBase で絶対URLになる）
+    alternates: { canonical: `/events/${slug}` },
   };
 }
 

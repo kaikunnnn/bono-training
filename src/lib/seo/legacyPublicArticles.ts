@@ -3,6 +3,7 @@
  * 2026-09-24に各URLのHTTP 200、自己canonical、非会員向け本文を確認した。
  * 動画レッスンや会員向け本文だけのページは含めない。
  * 移植・非公開・会員限定化した場合は、この一覧と旧サイト救済ルートを更新する。
+ * 2026-11-01 #276: youhadouyatedezainani-wake は /stories/wake へ 308 にしたので外した（next.config.ts）。
  */
 export const LEGACY_PUBLIC_ARTICLE_SLUGS: ReadonlySet<string> = new Set([
   "content-osusume",
@@ -30,7 +31,6 @@ export const LEGACY_PUBLIC_ARTICLE_SLUGS: ReadonlySet<string> = new Set([
   "uiuxdesigner-workflow",
   "webdesign-nouidesign-howtostartcareer",
   "youhadouyatedezainanibebe",
-  "youhadouyatedezainani-wake",
   "zhi-wen-she-nei-tesutotoshi-ji-noyuzatesutonowei-iha",
   "zhi-wen-uinodong-kinochuan-efang-tutexian-chang-dedouyaruno",
   "zhi-wen-uinodong-kinochuan-efang-tutexian-chang-dedouyaruno-copy",
