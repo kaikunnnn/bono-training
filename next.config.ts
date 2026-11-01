@@ -173,8 +173,6 @@ const nextConfig: NextConfig = {
       // rebono#22 と同じ考え方（タグ → 内容の近いレッスン）
       // 「プロトタイピング - UIパターン検証」: 載っていた記事の多くが「ゼロからはじめるUI情報設計」
       { source: "/designtag/uitest", destination: "/lessons/ui-architect-beginner", permanent: true },
-      // 「施策アイデア-ドキュメンテーション」: 記事0本のタグ。名前の近い「UIアイデア入門」へ
-      { source: "/designtag/document", destination: "/lessons/uiidea", permanent: true },
     ];
   },
   // セキュリティヘッダ（段階導入）: CSP以外の安全ヘッダ＋「壊れない範囲のCSP」を全パスに enforce。

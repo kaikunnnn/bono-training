@@ -106,7 +106,7 @@ describe("proxy: signed-in visitors on /signup and /login go back to redirectTo 
 });
 
 describe("proxy: legacy Webflow paths with no new page return 410 (#276)", () => {
-  it.each(["/content/communitykomiyunitei", "/corse/rdmhuezu3-taitoru", "/news/news-bar", "/news/news-bar/"])(
+  it.each(["/content/communitykomiyunitei", "/corse/rdmhuezu3-taitoru", "/news/news-bar", "/news/news-bar/", "/designtag/document"])(
     "%s → 410",
     (path) => {
       const res = proxy(request(path));

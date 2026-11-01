@@ -276,5 +276,6 @@ export const config = {
     "/content/communitykomiyunitei",
     "/corse/rdmhuezu3-taitoru",
     "/news/news-bar",
+    "/designtag/document",
   ],
 };
