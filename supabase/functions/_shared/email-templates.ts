@@ -87,54 +87,178 @@ ${content}
 
 /**
  * ウェルカムメール（メンバーシップ登録完了）
+ *
+ * デザイン相談（30分・無料）への予約を主導線にした文面（#281）。
+ * 他のメールと違い baseTemplate は使わず、合意済みデザイン（welcome_v4.html）をそのまま返す。
+ * サイト内リンク・画像は SITE_URL から組み立て、全リンクに ?from=welcome_mail を付ける。
+ * 本文に「このメールに返信して候補日を送ってください」とあるため、送信側で replyTo を付けること。
  */
-export function generateWelcomeEmail(): { subject: string; html: string } {
-  const content = `
-              <h1 style="margin: 0 0 24px 0; font-size: 32px; font-weight: 700; color: #222222; line-height: 36px; text-align: left;">
-                BONOへようこそ！🎉
-              </h1>
-              <p style="margin: 0 0 24px 0; font-size: 18px; color: #222222; line-height: 28px; text-align: left; font-weight: 400;">
-                ご登録ありがとうございます！さっそくデザインを始めましょう。<br><br>まずは7ステップで、BONOをつかい倒す準備を整えます。
-              </p>
+export function generateWelcomeEmail(): { subject: string; html: string; text: string } {
+  const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BONOへようこそ</title>
+</head>
+<body style="margin:0;padding:0;background-color:#F9F9F7;font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',Meiryo,'Helvetica Neue',Arial,sans-serif;">
+<!-- プレヘッダー（受信一覧で件名の横に出る文。本文には表示しない） -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#F9F9F7;font-size:1px;line-height:1px;">デザインの進め方やBONOの使い方を、30分で一緒に決めましょう。</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F9F9F7;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;background-color:#FFFFFF;border:1px solid #E9EAE6;border-radius:16px;">
+        <!-- ロゴ -->
+        <tr>
+          <td style="padding:28px 28px 8px 28px;">
+            <img src="${SITE_URL}/images/bono-logo.png" alt="BONO" width="67" height="16" style="display:block;border:0;">
+          </td>
+        </tr>
 
-              <!-- 使い方をセットアップする（単一CTA・完了画面と統一） -->
-              <div style="margin-bottom: 32px;">
-                <h2 style="margin: 0 0 12px 0; font-size: 18px; font-weight: 700; color: #222222; line-height: 24px;">
-                  最短で成長する進め方を設定する
-                </h2>
-                <p style="margin: 0 0 16px 0; font-size: 16px; color: #222222; line-height: 24px;">
-                  7ステップで、コミュニティ参加・取り組むコンテンツの決定・2週間の計画までを一気に整えます。
-                </p>
-                <table cellpadding="0" cellspacing="0">
-                  <tr>
-                    <td>
-                      <a href="${SITE_URL}/lessons/bono-onboarding" style="display: inline-block; padding: 14px 24px; background-color: #151834; color: #FFFFFF; font-size: 16px; font-weight: 600; text-decoration: none; border-radius: 8px;">
-                        使い方をセットアップする →
-                      </a>
-                    </td>
-                  </tr>
-                </table>
-              </div>
+        <!-- 書き出し -->
+        <tr>
+          <td style="padding:20px 28px 0 28px;font-size:16px;line-height:1.8;color:#021710;">
+            <p style="margin:0 0 16px 0;">こんにちは、カイクンです。<br>BONOに登録してくれて、ありがとうございます。</p>
+            <p style="margin:0 0 16px 0;">BONOにはレッスンがたくさんあるので、入ったばかりの頃は何から手をつけるか迷う人が多いです。なので、最初に30分、デザイン相談の時間をとっています（メンバーなら無料です）。</p>
+            <p style="margin:0;">デザインの進め方やBONOの使い方を、今の状況に合わせて一緒に決めましょう。</p>
+          </td>
+        </tr>
 
-              <!-- やること（非リンク・完了画面のSTEPと同一） -->
-              <div style="margin-bottom: 32px;">
-                <p style="margin: 0 0 8px 0; font-size: 16px; font-weight: 700; color: #222222; line-height: 24px;">
-                  やること
-                </p>
-                <p style="margin: 0; font-size: 16px; color: #222222; line-height: 26px;">
-                  STEP 1-2　コミュニティ（Slack）に参加する<br>
-                  STEP 3-4　トレーニング計画を立てる<br>
-                  STEP 5-6　質問・相談を1回やってみる
-                </p>
-              </div>
+        <!-- デザイン相談（主ボタン） -->
+        <tr>
+          <td style="padding:24px 28px 0 28px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F2F3F0;border-radius:12px;">
+              <tr>
+                <td style="padding:20px 20px 0 20px;">
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td valign="middle" style="padding-right:12px;">
+                        <img src="${SITE_URL}/images/authors/kaikun.jpg" alt="カイクン" width="44" height="44" style="display:block;border:0;border-radius:22px;">
+                      </td>
+                      <td valign="middle" style="font-size:15px;line-height:1.5;color:#021710;">
+                        <strong style="font-size:16px;">デザイン相談</strong><br>
+                        <span style="color:#354540;">30分・オンライン・無料（追加料金なし）</span>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:16px 20px 0 20px;">
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                      <td align="center" bgcolor="#102720" style="border-radius:10px;">
+                        <a href="https://cal.com/takumikai/30min?from=welcome_mail" target="_blank" style="display:block;padding:16px 12px;font-size:16px;font-weight:bold;line-height:1.4;color:#FFFFFF;text-decoration:none;border-radius:10px;">デザイン相談を予約する</a>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:12px 20px 20px 20px;font-size:13px;line-height:1.7;color:#354540;">
+                  都合のいい日がなければ、このメールに返信して候補日を送ってください。調整します。
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
 
-              <p style="margin: 0 0 24px 0; font-size: 14px; color: #717171; line-height: 20px; text-align: left; font-weight: 400;">
-                ボタンが開けない場合は、マイページからプラン登録状況をご確認ください。
-              </p>`;
+        <!-- 区切り -->
+        <tr>
+          <td style="padding:32px 28px 0 28px;"><div style="border-top:1px solid #E9EAE6;font-size:0;line-height:0;">&nbsp;</div></td>
+        </tr>
+
+        <!-- 転職ロードマップ -->
+        <tr>
+          <td style="padding:28px 28px 0 28px;">
+            <p style="margin:0 0 8px 0;font-size:16px;font-weight:bold;line-height:1.6;color:#021710;">学ぶ順番は「転職ロードマップ」にまとめています</p>
+            <p style="margin:0 0 16px 0;font-size:15px;line-height:1.8;color:#354540;">UI/UXデザインの基礎を、何からどの順番で身につけていくかの全体像です。転職を考えていない人も、学習の順番としてそのまま使えます。</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="border:1.5px solid #102720;border-radius:10px;">
+                  <a href="${SITE_URL}/roadmap/uiux-career-change?from=welcome_mail" target="_blank" style="display:block;padding:13px 22px;font-size:15px;font-weight:bold;line-height:1.4;color:#102720;text-decoration:none;">転職ロードマップを見る　→</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- BONOのはじめかた -->
+        <tr>
+          <td style="padding:32px 28px 0 28px;">
+            <p style="margin:0 0 8px 0;font-size:16px;font-weight:bold;line-height:1.6;color:#021710;">BONOの使い方は「BONOのはじめかた」へ</p>
+            <p style="margin:0 0 16px 0;font-size:15px;line-height:1.8;color:#354540;">コミュニティへの入り方や、質問のしかたを短い記事にまとめています。</p>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+              <tr>
+                <td style="border:1.5px solid #102720;border-radius:10px;">
+                  <a href="${SITE_URL}/lessons/bono-onboarding?from=welcome_mail" target="_blank" style="display:block;padding:13px 22px;font-size:15px;font-weight:bold;line-height:1.4;color:#102720;text-decoration:none;">BONOのはじめかたを見る　→</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- 結び -->
+        <tr>
+          <td style="padding:36px 28px 32px 28px;font-size:16px;line-height:1.8;color:#021710;">
+            <p style="margin:0;">これからよろしくお願いします！<br>カイクン</p>
+          </td>
+        </tr>
+      </table>
+
+      <!-- フッター -->
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
+        <tr>
+          <td style="padding:20px 28px;font-size:12px;line-height:1.7;color:#677470;">
+            このメールは、BONOメンバーシップに登録した方にお送りしています。<br>
+            <a href="${SITE_URL}/?from=welcome_mail" target="_blank" style="color:#677470;">bo-no.design</a>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>`;
+
+  const text = `こんにちは、カイクンです。
+BONOに登録してくれて、ありがとうございます。
+
+BONOにはレッスンがたくさんあるので、入ったばかりの頃は何から手をつけるか迷う人が多いです。なので、最初に30分、デザイン相談の時間をとっています（メンバーなら無料です）。
+
+デザインの進め方やBONOの使い方を、今の状況に合わせて一緒に決めましょう。
+
+■ デザイン相談
+30分・オンライン・無料（追加料金なし）
+デザイン相談を予約する:
+https://cal.com/takumikai/30min?from=welcome_mail
+
+都合のいい日がなければ、このメールに返信して候補日を送ってください。調整します。
+
+----------------------------------------
+
+■ 学ぶ順番は「転職ロードマップ」にまとめています
+UI/UXデザインの基礎を、何からどの順番で身につけていくかの全体像です。転職を考えていない人も、学習の順番としてそのまま使えます。
+転職ロードマップを見る:
+${SITE_URL}/roadmap/uiux-career-change?from=welcome_mail
+
+■ BONOの使い方は「BONOのはじめかた」へ
+コミュニティへの入り方や、質問のしかたを短い記事にまとめています。
+BONOのはじめかたを見る:
+${SITE_URL}/lessons/bono-onboarding?from=welcome_mail
+
+これからよろしくお願いします！
+カイクン
+
+--
+このメールは、BONOメンバーシップに登録した方にお送りしています。
+${SITE_URL}/?from=welcome_mail
+`;
 
   return {
-    subject: 'BONOへようこそ！メンバーシップ登録が完了しました',
-    html: baseTemplate(content),
+    subject: 'BONOへようこそ！最初に30分、デザイン相談で話しませんか',
+    html,
+    text,
   };
 }
 

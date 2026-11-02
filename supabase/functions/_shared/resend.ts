@@ -9,6 +9,10 @@ interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
+  /** プレーンテキスト版（任意）。HTMLを表示しないメーラー向け */
+  text?: string;
+  /** 返信先（任意）。Resend API の `reply_to`。未指定なら送信元（noreply）に返る */
+  replyTo?: string;
 }
 
 interface SendEmailResult {
@@ -45,6 +49,8 @@ export async function sendEmail(params: SendEmailParams): Promise<SendEmailResul
         to: [params.to],
         subject: params.subject,
         html: params.html,
+        ...(params.text ? { text: params.text } : {}),
+        ...(params.replyTo ? { reply_to: params.replyTo } : {}),
       }),
     });
 

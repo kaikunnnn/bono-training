@@ -820,10 +820,14 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
     if (customerEmail) {
       console.log(`📧 [LIVE環境] ウェルカムメール送信: ${customerEmail}`);
       const welcomeEmail = generateWelcomeEmail();
+      // 本文で「このメールに返信して候補日を送ってください」と案内しているため、返信先をオーナーにする
+      const welcomeReplyTo = Deno.env.get("WELCOME_REPLY_TO") || "takumi.kai.skywalker@gmail.com";
       await sendEmailSafe({
         to: customerEmail,
         subject: welcomeEmail.subject,
         html: welcomeEmail.html,
+        text: welcomeEmail.text,
+        replyTo: welcomeReplyTo,
       });
     } else {
       console.warn(`⚠️ [LIVE環境] 顧客メールアドレスがないためウェルカムメールをスキップ`);
