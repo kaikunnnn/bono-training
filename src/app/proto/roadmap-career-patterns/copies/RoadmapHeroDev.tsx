@@ -1,0 +1,272 @@
+"use client";
+
+/**
+ * 【試作コピー #282 パターンD】src/components/roadmap/detail/RoadmapHero.tsx のコピー。
+ * 変更点:
+ * - 料金枠（料金＋「メンバーになってはじめる」）をヒーローから外す（流れの直後の PricingMiniBlock へ移す）
+ * - 主ボタンを「カリキュラムを見る」（#curriculum）にする
+ * - 料金を隠すと信頼を落とす（NN/g Trustworthiness）ため、一文の下に小さく「料金 5,800円〜/月」だけ残す
+ * - 加入済みの出し分け（isSubscribed）と、使わなくなった枠線ボタン（SecondaryCTAButton）は外した
+ * 本番の部品は変えていない。
+ *
+ * ロードマップ詳細ページ - ヒーローセクション
+ *
+ * Figma: PRD🏠_Roadmap_2026 node-id 35-12022
+ */
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { motion } from "framer-motion";
+import { BackButton } from "@/components/common/BackButton";
+import type { GradientPreset } from "@/types/sanity-roadmap";
+import { getGradientStyle } from "@/types/sanity-roadmap";
+import { formatTitleWithLineBreaks, stripLineBreakMarker } from "@/utils/textFormat";
+import { parseDuration } from "@/components/roadmap/card/durationUtils";
+
+// SVGマスクパス
+const MASK_DESKTOP = "/shapes/roadmap-hero-shape-flexible.svg"; // 振幅2.1%
+const MASK_MOBILE = "/shapes/roadmap-hero-mobile.svg"; // 振幅0.5% + 角丸強め
+const MOBILE_BREAKPOINT = 640;
+
+interface RoadmapHeroProps {
+  /** ロードマップタイトル */
+  title: string;
+  /**
+   * h1 に出す見出し（省略時は title）。SEO 文言をページ単位で上書きするときだけ渡す（#236）。
+   * パンくず・画像altは従来どおり title を使う。
+   */
+  heading?: string;
+  /** 短縮タイトル（バッジ表示用） */
+  shortTitle?: string;
+  /** キャッチコピー */
+  tagline?: string;
+  /** ステップ数 */
+  stepCount: number;
+  /** 目安期間（例: "1-2"） */
+  estimatedDuration: string;
+  /** グラデーションプリセット */
+  gradientPreset?: GradientPreset;
+  /** ヒーロー用画像URL（優先） */
+  heroImageUrl?: string;
+  /** サムネイル画像URL（フォールバック） */
+  thumbnailUrl?: string;
+}
+
+/** ページ内へスムーズに移動（reduced-motion では瞬時に移動） */
+const scrollToHash = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  if (!href.startsWith("#")) return;
+  e.preventDefault();
+  const target = document.querySelector(href);
+  if (!target) return;
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  target.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+};
+
+/** 試作D: 元の PrimaryCTAButton と同じ見た目で、行き先をページ内（カリキュラム）にしたもの */
+const PrimaryCTAButton: React.FC<{
+  href: string;
+  children: React.ReactNode;
+}> = ({
+  href,
+  children,
+}) => (
+  <a
+    href={href}
+    onClick={(e) => scrollToHash(e, href)}
+    className="w-full sm:w-[260px] flex items-center justify-center h-12 bg-white border border-white/90 rounded-[14px] text-[14px] font-bold text-cta-primary tracking-[0.35px] shadow-[0_4px_8px_rgba(0,0,0,0.25)] hover:bg-gray-50 transition-colors"
+  >
+    {children}
+  </a>
+);
+
+export default function RoadmapHeroDev({
+  title,
+  heading,
+  shortTitle,
+  tagline,
+  stepCount,
+  estimatedDuration,
+  gradientPreset,
+  heroImageUrl,
+}: RoadmapHeroProps) {
+  const gradientStyle = getGradientStyle(gradientPreset);
+  const duration = parseDuration(estimatedDuration);
+
+  // モバイル判定（リサイズ対応 + 初回マウント時にも確認）
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // マスクスタイル（モバイルとデスクトップで切り替え）
+  const maskSvg = isMobile ? MASK_MOBILE : MASK_DESKTOP;
+  const maskStyle: React.CSSProperties = {
+    WebkitMaskImage: `url('${maskSvg}')`,
+    maskImage: `url('${maskSvg}')`,
+    WebkitMaskSize: '100% 100%',
+    maskSize: '100% 100%',
+    WebkitMaskRepeat: 'no-repeat',
+    maskRepeat: 'no-repeat',
+  };
+
+  return (
+    // モバイルでは左右の余白を少しだけ（px-1）、上も0にして高さを稼ぐ
+    // タブレット以上では従来どおり pt-4 px-4
+    <section className="relative pt-0 px-1 sm:pt-4 sm:px-4">
+      {/* 背景エリア - 有機的な形状（SVGマスク）、コンテンツに合わせて高さ可変 */}
+      <motion.div
+        className="relative"
+        style={{
+          filter: "drop-shadow(0px 12px 24px rgba(0,0,0,0.2))",
+        }}
+        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <div
+          className="relative overflow-hidden"
+          style={{ ...gradientStyle, ...maskStyle }}
+        >
+        {/* 背景画像 */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url('/images/roadmap/hero-bg.png')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 1.0,
+          }}
+          aria-hidden="true"
+        />
+
+        {/* ノイズオーバーレイ */}
+        <div
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: `url('/textures/noise.svg')`,
+            backgroundRepeat: 'repeat',
+            opacity: 1,
+            mixBlendMode: 'overlay',
+          }}
+          aria-hidden="true"
+        />
+
+        {/* ナビゲーション */}
+        <div className="relative flex items-center justify-between px-8 pt-10 pb-5">
+          <div className="flex items-center gap-8">
+            {/* 戻るボタン（共通コンポーネント） */}
+            <BackButton href="/roadmap" />
+
+            {/* パンくずリスト */}
+            <nav className="text-[12px] font-bold text-white/60">
+              <Link
+                href="/roadmap"
+                className="hover:text-white/80 transition-colors"
+              >
+                ロードマップ
+              </Link>
+              <span className="mx-2">/</span>
+              <span className="text-white/80">{stripLineBreakMarker(title)}</span>
+            </nav>
+          </div>
+        </div>
+
+        {/* タイトル周り（ゆっくりふわっと表示） */}
+        <motion.div
+          className="relative flex flex-col items-center gap-6 px-8 pt-4 pb-8"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1], delay: 0.25 }}
+        >
+          {/* バッジ */}
+          <div className="border border-white rounded-full px-4 py-1.5">
+            <span className="text-[13px] text-white">{shortTitle || 'ロードマップ'}</span>
+          </div>
+
+          {/* タイトル（|マーカーで改行） */}
+          <h1 className="text-[32px] md:text-[40px] font-bold text-white text-center leading-[1.6]">
+            {formatTitleWithLineBreaks(heading ?? title)}
+          </h1>
+
+          {/* サブタイトル（tagline） */}
+          {tagline && (
+            <p className="text-[16px] md:text-[18px] text-white/70 text-center leading-[1.6] max-w-[573px]">
+              {tagline}
+            </p>
+          )}
+
+          {/* 試作D: 料金は消さず、一文の下に小さく残す */}
+          <p className="text-[12px] text-white/70 -mt-3">
+            料金 5,800円〜/月
+          </p>
+
+          {/* Stats */}
+          <div className="flex items-center">
+            {/* ステップ数 */}
+            <div className="flex flex-col items-center gap-0.5 px-8 border-r border-white/25">
+              <span className="text-[12px] font-bold text-white/70">
+                ステップ
+              </span>
+              <div className="flex items-end gap-1 text-white">
+                <span className="text-[20px] font-bold font-['Inter',sans-serif] leading-none">
+                  {stepCount}
+                </span>
+                <span className="text-[13px] leading-[1.5]">つ</span>
+              </div>
+            </div>
+
+            {/* 目安期間 */}
+            <div className="flex flex-col items-center gap-0.5 px-8">
+              <span className="text-[12px] font-bold text-white/70">目安</span>
+              <div className="flex items-end gap-1 text-white">
+                {duration.prefix && (
+                  <span className="text-[13px] leading-[1.5]">{duration.prefix}</span>
+                )}
+                <span className="text-[20px] font-bold font-['Inter',sans-serif] leading-none">
+                  {duration.value}
+                </span>
+                {duration.unit && (
+                  <span className="text-[13px] leading-[1.5]">{duration.unit}</span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* CVエリア（試作D: 料金枠を外し、主ボタンは「カリキュラムを見る」） */}
+          <div className="w-full max-w-[538px] flex justify-center">
+            <PrimaryCTAButton href="#curriculum">
+              カリキュラムを見る
+            </PrimaryCTAButton>
+          </div>
+        </motion.div>
+
+        {/* 下部画像セクション - heroImageが設定されている場合のみ表示 */}
+        {heroImageUrl && (
+          <motion.div
+            className="relative mx-auto max-w-[1200px] aspect-[5/1] max-h-[240px] overflow-hidden"
+            initial={{ opacity: 0, y: 30, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          >
+            <Image
+              src={heroImageUrl}
+              alt={stripLineBreakMarker(title)}
+              fill
+              priority
+              sizes="(min-width: 1200px) 1200px, 100vw"
+              className="object-cover object-center opacity-90"
+            />
+          </motion.div>
+        )}
+        </div>
+      </motion.div>
+    </section>
+  );
+}
