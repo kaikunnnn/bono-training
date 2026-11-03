@@ -63,6 +63,13 @@
       "cookie": "none",
       "expectStatus": 308,
       "expectLocation": "/lessons/cursor-ui-ai-design"
+    },
+    {
+      "id": "guide-duplicate-rdm-howtostart-roadmap",
+      "path": "/contents/rdm-howtostart-roadmap",
+      "cookie": "none",
+      "expectStatus": 308,
+      "expectLocation": "/guide/rdm-howtostart-roadmap"
     }
   ],
   "region": {
