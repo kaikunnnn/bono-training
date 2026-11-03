@@ -1,5 +1,5 @@
 /**
- * /dev/roadmap-career-patterns のパターン定義（#282）
+ * /proto/roadmap-career-patterns のパターン定義（#282）
  * 試作バーと本文の出し分けが同じ定義を参照する。
  */
 

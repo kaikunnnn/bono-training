@@ -18,7 +18,7 @@ export default function PrototypeBar({ current }: { current: PatternKey }) {
         <span className="shrink-0 rounded-[4px] bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold text-zinc-900">
           試作 #282
         </span>
-        <span className="truncate text-[11px] text-zinc-400">/dev/roadmap-career-patterns（本番には出ません）</span>
+        <span className="truncate text-[11px] text-zinc-400">/proto/roadmap-career-patterns（試作・検索には出しません）</span>
       </div>
 
       {/* パターン切り替え（スマホは横スクロール） */}
@@ -29,7 +29,7 @@ export default function PrototypeBar({ current }: { current: PatternKey }) {
             return (
               <li key={p.key}>
                 <Link
-                  href={{ pathname: "/dev/roadmap-career-patterns", query: { p: p.key } }}
+                  href={{ pathname: "/proto/roadmap-career-patterns", query: { p: p.key } }}
                   aria-current={active ? "page" : undefined}
                   className={
                     active
