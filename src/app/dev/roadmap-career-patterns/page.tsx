@@ -1,5 +1,5 @@
 /**
- * /proto/roadmap-career-patterns — 転職ロードマップのスマホ離脱を減らす UI改善パターンの試作（#282）
+ * /dev/roadmap-career-patterns — 転職ロードマップのスマホ離脱を減らす UI改善パターンの試作（#282）
  *
  * 本番 /roadmap/uiux-career-change と同じ Sanity データ・同じ並びを再現し、?p= でパターンを差し込む／差し替える。
  * - ?p=now（既定）: 本番と同じ
@@ -43,7 +43,7 @@ const SLUG = "uiux-career-change";
 const HERO_END_SENTINEL_ID = "hero-end-sentinel";
 
 export const metadata: Metadata = {
-  title: "転職ロードマップ 離脱対策の試作 (/proto/roadmap-career-patterns)",
+  title: "転職ロードマップ 離脱対策の試作 (/dev/roadmap-career-patterns)",
   robots: { index: false, follow: false },
 };
 
@@ -53,14 +53,14 @@ async function loadCareerStories(): Promise<CareerStoryView[]> {
       try {
         const story = await getStoryBySlug(def.slug);
         if (!story) {
-          console.warn(`[proto/roadmap-career-patterns] story が見つかりません: ${def.slug}`);
+          console.warn(`[dev/roadmap-career-patterns] story が見つかりません: ${def.slug}`);
           return null;
         }
         const photoUrl =
           def.photoSource === "profile" ? story.person?.profileImageUrl ?? null : story.heroImageUrl ?? null;
         return { ...def, photoUrl };
       } catch (e) {
-        console.warn(`[proto/roadmap-career-patterns] story の取得に失敗: ${def.slug}`, e);
+        console.warn(`[dev/roadmap-career-patterns] story の取得に失敗: ${def.slug}`, e);
         return null;
       }
     })
@@ -114,14 +114,14 @@ export default async function RoadmapCareerPatternsPage({
       answer: `ステップ1「${step1.title}」、ステップ2「${step2.title}」から始めます。`,
     });
   } else {
-    console.warn("[proto/roadmap-career-patterns] steps[0]/[1] が無いため「何から」の質問を出しません");
+    console.warn("[dev/roadmap-career-patterns] steps[0]/[1] が無いため「何から」の質問を出しません");
   }
   const workingAnswer = roadmap.changingLandscape?.items?.find((it) => it.description?.includes("働きながら"))
     ?.description;
   if (workingAnswer) {
     faqItems.push({ question: "働きながらでも進められる？", answer: workingAnswer });
   } else {
-    console.warn("[proto/roadmap-career-patterns] 「働きながら」の文が Sanity に見つからないため質問を出しません");
+    console.warn("[dev/roadmap-career-patterns] 「働きながら」の文が Sanity に見つからないため質問を出しません");
   }
   faqItems.push({
     question: "デザインの経験があると早く進められる？",
