@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
           source: "/docs/:slug",
           destination: "/docs/:slug.html",
         },
+        // /labs/xxx → public/labs/xxx/index.html（UI基礎ラボの見本ページ。動画の題材のUIなど）
+        // afterFiles なので、画像など実在する静的ファイルはそのまま返る。
+        {
+          source: "/labs/:path*",
+          destination: "/labs/:path*/index.html",
+        },
       ],
       // サイト移行: Next.js 側のページ・静的ファイル・動的ルートの
       // いずれにもマッチしなかった場合のみ発動するフォールバック。
