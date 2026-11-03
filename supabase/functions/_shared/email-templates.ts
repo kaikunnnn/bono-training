@@ -27,7 +27,7 @@ const LOGO_BASE64 = encodeBase64(BONO_LOGO_SVG);
  *    メールのリンクが自動追従する（貼り替え漏れを防ぐ仕組み）。
  * 設定: npx supabase secrets set SITE_URL=https://<new-domain> --project-ref fryogvfhymnpiqwssmuu
  */
-const SITE_URL = (Deno.env.get("SITE_URL") || "https://bono-training.vercel.app").replace(/\/$/, "");
+const SITE_URL = (Deno.env.get("SITE_URL") || "https://www.bo-no.design").replace(/\/$/, "");
 
 // プラン名の日本語マッピング
 export function getPlanDisplayName(planType: string, duration: number): string {
