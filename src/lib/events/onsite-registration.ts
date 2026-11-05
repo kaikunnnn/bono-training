@@ -19,6 +19,10 @@ export const ONSITE_REGISTRATION_EVENTS: readonly string[] = [
   "design-hours-2026-10-17",
   "design-hours-2026-10-28",
   "design-hours-2026-10-31",
+  "design-hours-2026-11-07",
+  "design-hours-2026-11-11",
+  "design-hours-2026-11-14",
+  "design-hours-2026-11-25",
 ];
 
 export function isOnsiteRegistrationEvent(slug: string): boolean {
