@@ -32,7 +32,7 @@ export function CareerSection({ image1, image2, surface }: CareerSectionProps) {
           <PromoCard
             title="UIUX転職ロードマップ"
             description="6-8ヶ月で未経験からUIUXの基礎を習得"
-            href="/roadmap"
+            href="/roadmap/uiux-career-change"
             rounded="16px"
             image={image1}
             tracking={
