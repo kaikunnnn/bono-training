@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { getSupabaseSecretKey } from "../_shared/supabase-keys.ts";
 import { createStripeClient } from "../_shared/stripe-helpers.ts";
 
 const corsHeaders = {
@@ -29,7 +29,7 @@ interface CachedPrice {
   cached_at: string;
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // CORS対応
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -40,7 +40,7 @@ serve(async (req) => {
 
     // Supabaseクライアント作成
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabaseServiceKey = getSupabaseSecretKey();
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // Step 1: キャッシュをチェック

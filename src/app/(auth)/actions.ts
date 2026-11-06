@@ -229,7 +229,9 @@ export async function checkMigratedUser(
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${supabaseAnonKey}`,
+          // 新しい公開鍵は JWT ではないため Authorization には入れず apikey で送る。
+          // check-migrated-user は verify_jwt = false（supabase/config.toml）なのでこの形で通る。
+          apikey: supabaseAnonKey,
         },
         body: JSON.stringify({ email }),
       }

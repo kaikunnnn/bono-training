@@ -1,4 +1,3 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { WebflowClient } from "./webflow-client.ts";
 import { transformToLesson } from "./transformer.ts";
@@ -9,7 +8,7 @@ function logDebug(message: string, data?: any) {
   console.log(`[WEBFLOW-SERIES] ${message}`, data ? JSON.stringify(data) : '');
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }

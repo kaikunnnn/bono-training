@@ -4,6 +4,7 @@
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getSupabaseSecretKey } from "../_shared/supabase-keys.ts";
 import { createStripeClient, getWebhookSecret } from "../_shared/stripe-helpers.ts";
 import Stripe from "https://esm.sh/stripe@17.7.0";
 import { sendEmailSafe } from "../_shared/resend.ts";
@@ -142,9 +143,8 @@ Deno.serve(async (req) => {
 
     // Supabaseクライアントの初期化
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseServiceKey = getSupabaseSecretKey();
     console.log(`🔍 [DEBUG] SUPABASE_URL: ${supabaseUrl}`);
-    console.log(`🔍 [DEBUG] SUPABASE_SERVICE_ROLE_KEY (first 20 chars): ${supabaseServiceKey.substring(0, 20)}...`);
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // ========================================
