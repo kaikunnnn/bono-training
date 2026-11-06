@@ -1,7 +1,7 @@
 
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { parse as parseYaml } from "https://deno.land/std@0.168.0/encoding/yaml.ts";
+import { getSupabaseSecretKey } from "../_shared/supabase-keys.ts";
+import { parse as parseYaml } from "jsr:@std/yaml@1";
 
 // CORSヘッダーの設定
 const corsHeaders = {
@@ -119,7 +119,7 @@ function validateTrainingFrontmatter(frontmatter: any, fileName: string): boolea
 }
 
 // メインハンドラー
-serve(async (req) => {
+Deno.serve(async (req) => {
   // CORS プリフライトリクエストの処理
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -131,7 +131,7 @@ serve(async (req) => {
     // Supabase クライアントを初期化
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      getSupabaseSecretKey()
     );
     
     if (!supabaseAdmin) {

@@ -1,5 +1,6 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getSupabaseSecretKey, getSupabasePublishableKey } from "../_shared/supabase-keys.ts";
 import Stripe from "https://esm.sh/stripe@14.21.0";
 
 /**
@@ -22,13 +23,11 @@ export const corsHeaders = {
  */
 export function createSupabaseClients() {
   const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
-  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  const supabaseAnonKey = getSupabasePublishableKey();
+  const supabaseServiceKey = getSupabaseSecretKey();
 
   // 🔍 DEBUG: 環境変数の実際の値を確認
   console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_URL: ${supabaseUrl}`);
-  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_ANON_KEY (first 20): ${supabaseAnonKey.substring(0, 20)}...`);
-  console.log(`🔍 [CHECK-SUBSCRIPTION DEBUG] SUPABASE_SERVICE_ROLE_KEY (first 20): ${supabaseServiceKey.substring(0, 20)}...`);
 
   return {
     supabaseClient: createClient(supabaseUrl, supabaseAnonKey),
@@ -48,9 +47,7 @@ export function createStripeClient(): Stripe | null {
 
   logDebug("環境変数チェック", {
     hasTestKey: !!testKey,
-    hasLiveKey: !!liveKey,
-    testKeyPrefix: testKey?.substring(0, 10),
-    liveKeyPrefix: liveKey?.substring(0, 10)
+    hasLiveKey: !!liveKey
   });
 
   // Test keyが存在する場合はTest環境として動作
