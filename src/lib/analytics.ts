@@ -385,3 +385,17 @@ export const trackPostFlowDiscard = (step: string) => {
     step,
   });
 };
+
+/**
+ * エラー画面（error.tsx）が表示されたことを記録する。
+ * digest はサーバーログとの照合用。message は個人情報が混ざり得るので送らない。
+ */
+export const trackErrorScreen = (area: string, error: unknown) => {
+  const digest =
+    error instanceof Error ? (error as Error & { digest?: string }).digest : undefined;
+  trackEvent('error_screen', {
+    error_area: area,
+    error_digest: digest ?? 'none',
+    page_path: window.location.pathname,
+  });
+};
