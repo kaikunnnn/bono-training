@@ -128,7 +128,11 @@ export default async function GuideDetailPage({ params }: PageProps) {
         {hasPremiumAccess ? (
           guide.content && guide.content.length > 0 && (
             <div className="px-4 pb-16">
-              <GuideContent content={guide.content} className="max-w-[720px]" />
+              <GuideContent
+                content={guide.content}
+                className="max-w-[720px]"
+                showToc={guide.slug === "rdm-howtostart-roadmap"}
+              />
 
               {/* シェアセクション */}
               <div className="mt-12 px-4">
