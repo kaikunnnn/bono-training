@@ -128,7 +128,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
         {hasPremiumAccess ? (
           guide.content && guide.content.length > 0 && (
             <div className="px-4 pb-16">
-              <GuideContent content={guide.content} />
+              <GuideContent content={guide.content} className="max-w-[800px]" />
 
               {/* シェアセクション */}
               <div className="mt-12 px-4">
@@ -138,7 +138,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
           )
         ) : (
           <div className="px-4 pb-16">
-            <div className="max-w-[648px] mx-auto py-12 text-center">
+            <div className="max-w-[800px] mx-auto py-12 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-amber-600" />
               </div>
