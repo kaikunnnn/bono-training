@@ -48,6 +48,19 @@ const getImageSize = (value?: {
   return { width: Number(match[1]), height: Number(match[2]) };
 };
 
+// 本文の最大幅（648px）の2倍。高精細な画面でも文字がにじまない大きさ
+const IMAGE_WIDTH = 1296;
+
+/**
+ * Sanity の画像URLに、幅と形式の指定を足して軽くする（fit=max で元より大きくしない）
+ * GIF と SVG は変換すると動きや形が変わるのでそのまま返す
+ */
+const optimizeImageUrl = (url: string): string => {
+  if (/\.(gif|svg)(\?|$)/i.test(url)) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}w=${IMAGE_WIDTH}&fit=max&auto=format&q=80`;
+};
+
 // 段落の共通スタイル
 const pStyle = "text-[18px] font-medium leading-[200%] tracking-[0.03em] text-text-secondary mb-6";
 const liStyle = "text-[18px] leading-[200%] tracking-[0.03em] text-text-secondary mb-2";
@@ -145,9 +158,11 @@ const portableTextComponents: PortableTextComponents = {
   types: {
     // 画像
     image: ({ value }) => {
-      const url =
-        value?.asset?.url ||
-        (value?.asset?._ref ? urlFor(value).width(648).url() : null);
+      const url = value?.asset?.url
+        ? optimizeImageUrl(value.asset.url)
+        : value?.asset?._ref
+        ? urlFor(value).width(IMAGE_WIDTH).fit("max").auto("format").quality(80).url()
+        : null;
       if (!url) return null;
       // 縦長の画像は16:9の枠に収めると文字が読めなくなるので、本来の比率で出す
       const size = getImageSize(value);
@@ -155,10 +170,7 @@ const portableTextComponents: PortableTextComponents = {
         return (
           <figure className="my-8 w-full">
             <Image
-              src={
-                value?.asset?.url ||
-                urlFor(value).width(1296).url()
-              }
+              src={url}
               alt={value.alt || ""}
               width={size.width}
               height={size.height}
