@@ -7,6 +7,7 @@
  * ヒーローの直後に配置して、ロードマップ全体の流れを提示
  */
 
+import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import type { SanityRoadmapStep } from "@/types/sanity-roadmap";
 import DottedDivider from "@/components/common/DottedDivider";
@@ -16,9 +17,11 @@ interface RoadmapPathwayProps {
   description: string;
   /** ステップ配列 */
   steps: SanityRoadmapStep[];
+  /** 説明文の下に出す解説記事へのリンク（転職ロードマップのみ） */
+  guideLink?: { href: string; label: string };
 }
 
-export default function RoadmapPathway({ description, steps }: RoadmapPathwayProps) {
+export default function RoadmapPathway({ description, steps, guideLink }: RoadmapPathwayProps) {
   if (!steps || steps.length === 0) {
     return null;
   }
@@ -46,6 +49,16 @@ export default function RoadmapPathway({ description, steps }: RoadmapPathwayPro
           <p className="text-[20px] text-[rgba(41,53,37,0.8)] leading-[27px] max-w-3xl">
             {description}
           </p>
+          {guideLink && (
+            <p className="mt-3 text-[16px] leading-[24px]">
+              <Link
+                href={guideLink.href}
+                className="text-text-link hover:text-text-link-hover underline underline-offset-2 transition-colors"
+              >
+                {guideLink.label}
+              </Link>
+            </p>
+          )}
         </div>
 
         {/* 白いカード */}
