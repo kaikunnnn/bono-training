@@ -92,7 +92,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
         </div>
 
         {/* メディア: 動画 > サムネ > プレースホルダー */}
-        <div className="w-full max-w-[800px]">
+        <div className="w-full max-w-[720px]">
           <div className="w-full aspect-video rounded-3xl overflow-hidden bg-muted">
             {(() => {
               const videoInfo = guide.videoUrl ? getVideoInfo(guide.videoUrl) : null;
@@ -112,7 +112,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
                   <GuideCardImage
                     src={guide.thumbnailUrl}
                     alt={guide.title}
-                    sizes="(min-width: 768px) 800px, calc(100vw - 32px)"
+                    sizes="(min-width: 768px) 720px, calc(100vw - 32px)"
                     preload
                   />
                 );
