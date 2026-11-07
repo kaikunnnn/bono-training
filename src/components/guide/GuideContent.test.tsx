@@ -74,6 +74,75 @@ describe("GuideContent の画像", () => {
     );
   });
 
+  it("リンクカードは白背景で、画像があれば出す", () => {
+    const { container } = render(
+      <GuideContent
+        content={
+          [
+            {
+              _type: "linkCard",
+              _key: "c",
+              title: "転職ロードマップ",
+              url: "https://www.bo-no.design/roadmap/uiux-career-change",
+              imageUrl: "https://cdn.test/ogp.webp?w=480",
+            },
+          ] as unknown as PortableTextBlock[]
+        }
+      />
+    );
+    expect(container.querySelector("a")?.className).toContain("bg-surface");
+    expect(container.querySelector("a img")?.getAttribute("src")).toBe(
+      "https://cdn.test/ogp.webp?w=480"
+    );
+  });
+
+  it("目次のリンク先は本文の見出しのIDと一致する", () => {
+    const heading = (style: string, text: string) => ({
+      _type: "block",
+      _key: text,
+      style,
+      markDefs: [],
+      children: [{ _type: "span", _key: `${text}s`, text, marks: [] }],
+    });
+    const { container } = render(
+      <GuideContent
+        showToc
+        content={
+          [
+            {
+              _type: "block",
+              _key: "p",
+              style: "normal",
+              markDefs: [],
+              children: [{ _type: "span", _key: "ps", text: "あいさつ", marks: [] }],
+            },
+            heading("h2", "UI/UXデザイナーを目指そう！"),
+            heading("h3", "小見出し"),
+            heading("h2", "ステップ1 ツールを習得"),
+          ] as unknown as PortableTextBlock[]
+        }
+      />
+    );
+    const links = [...container.querySelectorAll("nav a")];
+    const ids = [...container.querySelectorAll("h2")].map((h) => h.id);
+    expect(links.map((a) => a.getAttribute("href"))).toEqual(
+      ids.map((id) => `#${id}`)
+    );
+    expect(ids).toHaveLength(2);
+    // あいさつの後、最初の見出しの前に目次が出る
+    const nav = container.querySelector("nav") as Element;
+    expect(
+      container.querySelector("p")?.compareDocumentPosition(nav)
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+
+  it("showToc がなければ目次は出ない", () => {
+    const { container } = render(
+      <GuideContent content={imageBlock("image-abc-1920x1080-png")} />
+    );
+    expect(container.querySelector("nav")).toBeNull();
+  });
+
   it("サイズが読めない画像も今までどおり出す", () => {
     const { container } = render(
       <GuideContent content={imageBlock("image-abc")} />

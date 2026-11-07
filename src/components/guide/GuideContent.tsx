@@ -8,6 +8,8 @@ import { urlFor } from "@/lib/sanity";
 interface GuideContentProps {
   content: PortableTextBlock[];
   className?: string;
+  /** 最初の h2 の前に目次を出す（h2 だけを並べる） */
+  showToc?: boolean;
 }
 
 /**
@@ -34,6 +36,26 @@ const generateHeadingId = (
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^\w\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf-]/g, "")}`;
+};
+
+/**
+ * 目次を作る。見出しのIDは本文の描画と同じ順番（h2〜h4 の通し番号）で作る
+ */
+const buildToc = (
+  content: PortableTextBlock[]
+): Array<{ id: string; text: string }> => {
+  let index = 0;
+  const items: Array<{ id: string; text: string }> = [];
+  for (const block of content) {
+    const style = block.style;
+    if (style !== "h2" && style !== "h3" && style !== "h4") continue;
+    const text = ((block.children ?? []) as Array<{ text?: string }>)
+      .map((child) => child.text ?? "")
+      .join("");
+    const id = generateHeadingId(text, index++);
+    if (style === "h2") items.push({ id, text });
+  }
+  return items;
 };
 
 /**
@@ -304,7 +326,7 @@ const portableTextComponents: PortableTextComponents = {
           href={value.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="my-6 block rounded-lg border border-border-light overflow-hidden hover:border-text-link hover:shadow-md transition-all duration-200 no-underline"
+          className="my-6 block rounded-lg border border-border-light bg-surface overflow-hidden hover:border-text-link hover:shadow-md transition-all duration-200 no-underline"
         >
           <div className="flex flex-col md:flex-row">
             <div className="flex-1 p-4 min-w-0">
@@ -339,8 +361,38 @@ const portableTextComponents: PortableTextComponents = {
  * ガイドコンテンツ（Portable Text）レンダラー
  * article の RichTextSection と同等の書式変換機能を持つ
  */
-export default function GuideContent({ content, className }: GuideContentProps) {
+export default function GuideContent({ content, className, showToc }: GuideContentProps) {
   headingIndex = 0;
+  const toc = showToc ? buildToc(content) : [];
+  const firstH2 = content.findIndex((block) => block.style === "h2");
+  if (toc.length > 0 && firstH2 >= 0) {
+    return (
+      <div
+        className={cn(
+          "w-full max-w-[648px] mx-auto font-noto-sans-jp",
+          className
+        )}
+      >
+        <PortableText value={content.slice(0, firstH2)} components={portableTextComponents} />
+        <nav aria-label="目次" className="my-8 rounded-lg border border-border-light bg-surface p-6">
+          <p className="mb-3 text-[16px] font-bold text-text-primary">目次</p>
+          <ol className="list-decimal space-y-2 text-[16px] leading-[160%]" style={{ paddingLeft: "21.5px" }}>
+            {toc.map((item) => (
+              <li key={item.id} className="text-text-secondary">
+                <a
+                  href={`#${item.id}`}
+                  className="text-text-link hover:text-text-link-hover underline underline-offset-2 transition-colors"
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+        <PortableText value={content.slice(firstH2)} components={portableTextComponents} />
+      </div>
+    );
+  }
   return (
     <div
       className={cn(
