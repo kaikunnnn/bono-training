@@ -7,18 +7,65 @@
  */
 
 import Link from "next/link";
-import { HYPOTHESES, PATTERNS, type PatternKey } from "./patterns";
+import { HYPOTHESES, PATTERNS, type GuideView, type PatternKey } from "./patterns";
 
-export default function PrototypeBar({ current }: { current: PatternKey }) {
+const PATHNAME = "/dev/roadmap-career-patterns";
+const ACTIVE_CHIP =
+  "inline-flex h-8 min-w-8 items-center justify-center rounded-[6px] bg-zinc-100 px-2.5 text-[12px] font-bold text-zinc-900";
+const CHIP =
+  "inline-flex h-8 min-w-8 items-center justify-center rounded-[6px] border border-zinc-600 px-2.5 text-[12px] text-zinc-300 hover:bg-zinc-800";
+
+/** 見え方・AIのステップの切り替え（現在の URL の値を引き継ぐ） */
+function ToggleGroup({
+  label,
+  options,
+}: {
+  label: string;
+  options: { key: string; text: string; active: boolean; query: Record<string, string> }[];
+}) {
+  return (
+    <div className="flex items-center gap-1.5">
+      <span className="shrink-0 text-[11px] text-zinc-400">{label}</span>
+      <ul className="flex gap-1.5">
+        {options.map((o) => (
+          <li key={o.key}>
+            <Link
+              href={{ pathname: PATHNAME, query: o.query }}
+              aria-current={o.active ? "true" : undefined}
+              className={o.active ? ACTIVE_CHIP : CHIP}
+            >
+              {o.text}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+export default function PrototypeBar({
+  current,
+  view,
+  aiOn,
+  aiParam,
+}: {
+  current: PatternKey;
+  view: GuideView;
+  aiOn: boolean;
+  /** URL に明示された ai の値（パターンを切り替えても引き継ぐ） */
+  aiParam?: string;
+}) {
   const def = PATTERNS.find((p) => p.key === current) ?? PATTERNS[0];
+  const isGuide = current === "guide";
+  const baseQuery: Record<string, string> = { p: current, ...(isGuide ? { view } : {}) };
 
   return (
     <div className="border-b-2 border-dashed border-zinc-500 bg-zinc-900 font-mono text-zinc-100">
       <div className="flex items-center gap-2 px-3 pt-2">
         <span className="shrink-0 rounded-[4px] bg-zinc-100 px-1.5 py-0.5 text-[10px] font-bold text-zinc-900">
-          試作 #282
+          試作 #282・#295
         </span>
-        <span className="truncate text-[11px] text-zinc-400">/dev/roadmap-career-patterns（試作・ローカルのみ）</span>
+        <span className="truncate text-[11px] text-zinc-400">/dev/roadmap-career-patterns（試作・本番には出ない）</span>
       </div>
 
       {/* パターン切り替え（スマホは横スクロール） */}
@@ -29,13 +76,17 @@ export default function PrototypeBar({ current }: { current: PatternKey }) {
             return (
               <li key={p.key}>
                 <Link
-                  href={{ pathname: "/dev/roadmap-career-patterns", query: { p: p.key } }}
+                  // 現状は本番と同じ並びに戻すので ai を引き継がない
+                  href={{
+                    pathname: PATHNAME,
+                    query: {
+                      p: p.key,
+                      ...(p.key === "guide" ? { view } : {}),
+                      ...(aiParam && p.key !== "now" ? { ai: aiParam } : {}),
+                    },
+                  }}
                   aria-current={active ? "page" : undefined}
-                  className={
-                    active
-                      ? "inline-flex h-8 min-w-8 items-center justify-center rounded-[6px] bg-zinc-100 px-2.5 text-[12px] font-bold text-zinc-900"
-                      : "inline-flex h-8 min-w-8 items-center justify-center rounded-[6px] border border-zinc-600 px-2.5 text-[12px] text-zinc-300 hover:bg-zinc-800"
-                  }
+                  className={active ? ACTIVE_CHIP : CHIP}
                 >
                   {p.label}
                 </Link>
@@ -45,12 +96,41 @@ export default function PrototypeBar({ current }: { current: PatternKey }) {
         </ul>
       </nav>
 
-      {/* 選択中のパターン: 何を変えたか＋効く仮説 */}
+      {/* 見え方（guide のみ）・AIのステップ */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1.5 px-3 pb-2">
+        {isGuide && (
+          <ToggleGroup
+            label="見え方"
+            options={[
+              { key: "guest", text: "未ログイン", active: view === "guest", query: { ...baseQuery, view: "guest", ...(aiParam ? { ai: aiParam } : {}) } },
+              { key: "member", text: "ログイン中", active: view === "member", query: { ...baseQuery, view: "member", ...(aiParam ? { ai: aiParam } : {}) } },
+            ]}
+          />
+        )}
+        <ToggleGroup
+          label="AIのステップ"
+          options={[
+            { key: "on", text: "あり", active: aiOn, query: { ...baseQuery, ai: "1" } },
+            { key: "off", text: "なし", active: !aiOn, query: { ...baseQuery, ai: "0" } },
+          ]}
+        />
+      </div>
+
+      {/* 選択中のパターン: 何を変えたか＋効く仮説（#295 は案の番号と狙い） */}
       <div className="flex flex-col gap-1.5 px-3 pb-2.5">
         <p className="text-[12px] leading-[18px] text-zinc-200">
-          <span className="text-zinc-400">{def.label}：</span>
+          <span className="text-zinc-400">
+            {def.label}
+            {def.proposal ? `（${def.proposal}）` : ""}：
+          </span>
           {def.change}
         </p>
+        {def.aim && (
+          <p className="text-[12px] leading-[18px] text-zinc-300">
+            <span className="text-zinc-400">狙い：</span>
+            {def.aim}
+          </p>
+        )}
         {def.hypotheses.length > 0 && (
           <ul className="flex flex-wrap gap-1">
             {def.hypotheses.map((h) => (

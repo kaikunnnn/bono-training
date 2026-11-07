@@ -8,7 +8,7 @@ import { Check } from "lucide-react";
 
 const ITEMS = ["UIの基礎", "情報設計", "UXデザイン", "ポートフォリオ"] as const;
 
-export default function WhatYouLearn() {
+export default function WhatYouLearn({ stepCount = 6 }: { stepCount?: number }) {
   return (
     <section id="what-you-learn" className="px-4 pt-4 md:px-8">
       <div className="mx-auto max-w-[538px] rounded-[20px] border border-border-light bg-white p-5">
@@ -25,7 +25,7 @@ export default function WhatYouLearn() {
           ))}
         </ol>
         <p className="mt-3 text-[14px] leading-[22px] text-text-secondary">
-          UIの基礎→情報設計→UXデザイン→ポートフォリオの順に、6つのステップで進みます。期間の目安は約1年。
+          UIの基礎→情報設計→UXデザイン→ポートフォリオの順に、{stepCount}つのステップで進みます。期間の目安は約1年。
         </p>
       </div>
     </section>

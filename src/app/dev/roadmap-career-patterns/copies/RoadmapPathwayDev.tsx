@@ -1,0 +1,146 @@
+"use client";
+
+/**
+ * 【試作コピー #295 パターンJ】src/components/roadmap/detail/RoadmapPathway.tsx のコピー。
+ * 変更点:
+ * - 各ステップの下に「最初の1本」カード（FirstOneCard）を足す。カードはボタンの外に置く（ボタンの中にリンクを入れない）
+ * - 解決できなかったステップにはカードを出さない（今の見た目のまま）
+ * 本番の部品は変えていない。
+ *
+ * ロードマップの道筋セクション
+ *
+ * 白いカード内にステップリスト、ステップ間にドット区切り線を配置
+ * ヒーローの直後に配置して、ロードマップ全体の流れを提示
+ */
+
+import Link from "next/link";
+import { ChevronDown } from "lucide-react";
+import type { SanityRoadmapStep } from "@/types/sanity-roadmap";
+import DottedDivider from "@/components/common/DottedDivider";
+import FirstOneCard from "../blocks/FirstOneCard";
+import type { FirstOneView } from "../guide-utils";
+
+interface RoadmapPathwayProps {
+  /** ロードマップの説明文（description） */
+  description: string;
+  /** ステップ配列 */
+  steps: SanityRoadmapStep[];
+  /** 説明文の下に出す解説記事へのリンク（転職ロードマップのみ） */
+  guideLink?: { href: string; label: string };
+  /** ステップの _key → 最初の1本 */
+  firstOnes: Record<string, FirstOneView>;
+  /** 無料の本数を出すか（未ログインの見え方だけ） */
+  showFreeCount: boolean;
+}
+
+export default function RoadmapPathwayDev({ description, steps, guideLink, firstOnes, showFreeCount }: RoadmapPathwayProps) {
+  if (!steps || steps.length === 0) {
+    return null;
+  }
+
+  const scrollToStep = (stepNumber: number) => {
+    const element = document.getElementById(`curriculum-step-${stepNumber}`);
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  return (
+    <section className="py-12 md:py-8 px-4 md:px-8">
+      <div className="max-w-[1100px] mx-auto">
+        {/* ヘッダー */}
+        <div className="mb-9">
+          <div className="inline-flex items-center justify-center border border-text-secondary rounded-full px-[8px] py-[2px] mb-4">
+            <span className="text-[12px] font-bold text-text-secondary uppercase">
+              道のり
+            </span>
+          </div>
+          <h2 className="text-[24px] font-extrabold text-text-secondary leading-[36px] mb-4">
+            ロードマップの流れ
+          </h2>
+          <p className="text-[20px] text-[rgba(41,53,37,0.8)] leading-[27px] max-w-3xl">
+            {description}
+          </p>
+          {guideLink && (
+            <p className="mt-3 text-[16px] leading-[24px]">
+              <Link
+                href={guideLink.href}
+                className="text-text-link hover:text-text-link-hover underline underline-offset-2 transition-colors"
+              >
+                {guideLink.label}
+              </Link>
+            </p>
+          )}
+        </div>
+
+        {/* 白いカード */}
+        <div className="bg-white rounded-[20px] border border-border-light p-2">
+          <nav aria-label="ステップナビゲーション">
+            {steps.map((step, index) => {
+              const stepNumber = (index + 1).toString().padStart(2, "0");
+              const isLast = index === steps.length - 1;
+              const firstOne = firstOnes[step._key];
+
+              return (
+                <div key={step._key}>
+                  {/* ステップアイテム */}
+                  <button
+                    type="button"
+                    onClick={() => scrollToStep(index + 1)}
+                    aria-label={`ステップ${index + 1}「${step.title}」へ移動`}
+                    className="flex items-center gap-4 w-full text-left group p-5 rounded-xl hover:bg-gray-50 transition-colors duration-200 cursor-pointer"
+                  >
+                    {/* ステップ番号バッジ */}
+                    <div className="flex-shrink-0 w-[50px] h-[43px] bg-white rounded-xl shadow-[0_1px_5px_rgba(0,0,0,0.08)] overflow-hidden">
+                      {/* 薄いグレーヘッダー（ホバー時グラデーション） */}
+                      <div className="bg-gray-100 group-hover:bg-gradient-to-r group-hover:from-[#b2b3d9] group-hover:via-[#e2ccd1] group-hover:to-[#f1e8dc] px-1.5 py-1.5 rounded-t-xl transition-colors">
+                        <p className="text-[6px] font-bold text-text-primary text-center leading-[9px]">
+                          ステップ
+                        </p>
+                      </div>
+                      {/* 番号 */}
+                      <div className="flex items-center justify-center h-[26px]">
+                        <p className="text-[14px] font-bold text-text-primary text-center font-['Unbounded',sans-serif] leading-[18px]">
+                          {stepNumber}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* テキスト */}
+                    <div className="flex-1 min-w-0">
+                      {/* タイトル */}
+                      <h3 className="text-[16px] font-bold text-text-primary leading-[24px] group-hover:text-gray-700 transition-colors">
+                        {step.title}
+                      </h3>
+                    </div>
+
+                    {/* 下矢印アイコン */}
+                    <div className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-muted-custom">
+                      <div className="transition-transform duration-500 group-hover:rotate-[360deg]">
+                        <ChevronDown size={16} color="#9ca3af" />
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* 試作J: 最初の1本 */}
+                  {firstOne && (
+                    <div className="px-3 pb-4 md:pl-[86px] md:pr-5">
+                      <FirstOneCard item={firstOne} showFreeCount={showFreeCount} />
+                    </div>
+                  )}
+
+                  {/* ステップ間のドット区切り線 */}
+                  {!isLast && (
+                    <div className="px-5">
+                      <DottedDivider />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </nav>
+        </div>
+      </div>
+    </section>
+  );
+}

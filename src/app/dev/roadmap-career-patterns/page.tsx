@@ -5,9 +5,12 @@
  * - ?p=now（既定）: 本番と同じ
  * - ?p=A〜I: 1パターンずつ
  * - ?p=all: A〜I を全部入れた版（ヒーローはD版、目次はG版、変化はC版）
+ * - ?p=J / K / L: 「次の一歩のガイド」の案を1つずつ（#295）
+ * - ?p=guide: J＋K＋L。&view=guest（既定）は J＋L、&view=member は J＋K
+ * - &ai=1: AI のステップを「UIの見た目」の次に足す。guide は既定であり、&ai=0 で外す
  *
- * 本番の共有部品（src/components/roadmap/**）は変えない。中身を変える C・D・G は ./copies にコピーして変えている。
- * ログイン中でも未会員の見え方を出すため getSubscriptionStatus は呼ばず、isSubscribed={false} 固定。
+ * 本番の共有部品（src/components/roadmap/**）は変えない。中身を変える C・D・G・J・L は ./copies にコピーして変えている。
+ * 実際のログイン状態は読まず（getSubscriptionStatus は呼ばない）、K を出すときだけ isSubscribed={true}、それ以外は false 固定。
  * Sanity は読むだけ。/dev は proxy と dev layout で本番から隠れている。
  */
 
@@ -25,7 +28,12 @@ import DottedDivider from "@/components/common/DottedDivider";
 import type { GradientPreset } from "@/styles/gradients";
 import { getRoadmapSeoOverride } from "@/lib/roadmap-seo";
 import PrototypeBar from "./PrototypeBar";
-import { includesPattern, normalizePattern } from "./patterns";
+import { includesPattern, normalizePattern, normalizeView, resolveAiStep } from "./patterns";
+import { loadGuideData } from "./guide-data";
+import { MEMBER_EXAMPLE, withAiStep } from "./guide-utils";
+import RoadmapHeroFreeStartDev from "./copies/RoadmapHeroFreeStartDev";
+import RoadmapPathwayDev from "./copies/RoadmapPathwayDev";
+import MemberProgressCard from "./blocks/MemberProgressCard";
 import { CAREER_STORIES, type CareerStoryView } from "./career-stories";
 import ChangingLandscapeDev from "./copies/ChangingLandscapeDev";
 import HeroStoryCard from "./blocks/HeroStoryCard";
@@ -81,21 +89,34 @@ function Divider() {
 export default async function RoadmapCareerPatternsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ p?: string | string[] }>;
+  searchParams: Promise<{ p?: string | string[]; view?: string | string[]; ai?: string | string[] }>;
 }) {
-  const { p } = await searchParams;
+  const { p, view: viewParam, ai } = await searchParams;
   const current = normalizePattern(p);
-  const has = (k: Parameters<typeof includesPattern>[1]) => includesPattern(current, k);
+  const view = normalizeView(viewParam);
+  const aiOn = resolveAiStep(current, ai);
+  const aiParam = Array.isArray(ai) ? ai[0] : ai;
+  const has = (k: Parameters<typeof includesPattern>[1]) => includesPattern(current, k, view);
+  const needsGuideData = aiOn || has("J") || has("K") || has("L");
 
-  const [roadmap, stories] = await Promise.all([getRoadmapBySlug(SLUG), loadCareerStories()]);
+  const [roadmap, stories, guideData] = await Promise.all([
+    getRoadmapBySlug(SLUG),
+    loadCareerStories(),
+    needsGuideData ? loadGuideData() : null,
+  ]);
   if (!roadmap) notFound();
 
+  // AI のステップは試作内のデータで差し込むだけ（番号・アンカー・ステップ数は配列の位置から決まる）
+  const steps = aiOn && guideData ? withAiStep(roadmap.steps ?? [], guideData.aiLessons) : roadmap.steps;
+
   const gradientPreset = (roadmap.gradientPreset || "career-change") as GradientPreset;
-  const stepCount = roadmap.steps?.length || 0;
+  const stepCount = steps?.length || 0;
   const estimatedDuration = roadmap.estimatedDuration || "1-2";
   const hasChangingLandscape = !!roadmap.changingLandscape?.items?.length;
   const hasInterestingPerspectives = !!roadmap.interestingPerspectives?.items?.length;
-  const hasCurriculum = !!roadmap.steps?.length;
+  const hasCurriculum = !!steps?.length;
+  // 本番 src/app/roadmap/[slug]/page.tsx と同じ解説記事リンク
+  const guideLink = { href: "/guide/rdm-howtostart-roadmap", label: "なぜこの順番なのか、詳しくはこちら" };
 
   const sectionNavItems: SectionNavItem[] = [];
   if (hasChangingLandscape) sectionNavItems.push({ id: "changing-landscape", label: "ロードマップで変わる景色" });
@@ -143,9 +164,23 @@ export default async function RoadmapCareerPatternsPage({
     // 本番のカリキュラム（#curriculum）には scroll-margin が無く、ページ内移動でスマホの固定ヘッダーに隠れるため、
     // 試作パターンでは外側から scroll-margin を足す（部品は変えない）。現状(now)は本番どおり
     <div className={current === "now" ? undefined : "[&_#curriculum]:scroll-mt-20"}>
-      <PrototypeBar current={current} />
+      <PrototypeBar current={current} view={view} aiOn={aiOn} aiParam={aiParam} />
 
-      {has("D") ? (
+      {has("L") ? (
+        <RoadmapHeroFreeStartDev
+          title={roadmap.title}
+          heading={getRoadmapSeoOverride(SLUG)?.heading}
+          shortTitle={roadmap.shortTitle}
+          tagline={roadmap.tagline || roadmap.description}
+          stepCount={stepCount}
+          estimatedDuration={estimatedDuration}
+          gradientPreset={gradientPreset}
+          heroImageUrl={roadmap.heroImageUrl}
+          thumbnailUrl={roadmap.thumbnailUrl}
+          freeStart={guideData?.freeStart ?? null}
+          figmaArticles={guideData?.figmaArticles ?? null}
+        />
+      ) : has("D") ? (
         <RoadmapHeroDev
           title={roadmap.title}
           heading={getRoadmapSeoOverride(SLUG)?.heading}
@@ -168,12 +203,22 @@ export default async function RoadmapCareerPatternsPage({
           gradientPreset={gradientPreset}
           heroImageUrl={roadmap.heroImageUrl}
           thumbnailUrl={roadmap.thumbnailUrl}
-          isSubscribed={false}
+          isSubscribed={has("K")}
         />
       )}
       {has("F") && <div id={HERO_END_SENTINEL_ID} aria-hidden="true" className="h-px" />}
 
-      {has("E") && <WhatYouLearn />}
+      {has("K") && hasCurriculum && (
+        <MemberProgressCard
+          steps={steps!}
+          currentStepKey={MEMBER_EXAMPLE.currentStepKey}
+          lesson={guideData?.memberLesson ?? null}
+          completedArticles={MEMBER_EXAMPLE.completedArticles}
+          criteria={MEMBER_EXAMPLE.nextStepCriteria}
+        />
+      )}
+
+      {has("E") && <WhatYouLearn stepCount={stepCount} />}
       {has("A") && heroStory && <HeroStoryCard story={heroStory} />}
       {has("H") && <OperatorCard />}
 
@@ -183,7 +228,17 @@ export default async function RoadmapCareerPatternsPage({
 
       {hasCurriculum && (
         <div id="pathway" className="scroll-mt-20">
-          <RoadmapPathway description={roadmap.description} steps={roadmap.steps!} />
+          {has("J") ? (
+            <RoadmapPathwayDev
+              description={roadmap.description}
+              steps={steps!}
+              guideLink={guideLink}
+              firstOnes={guideData?.firstOnes ?? {}}
+              showFreeCount={!has("K")}
+            />
+          ) : (
+            <RoadmapPathway description={roadmap.description} steps={steps!} guideLink={guideLink} />
+          )}
         </div>
       )}
 
@@ -216,7 +271,7 @@ export default async function RoadmapCareerPatternsPage({
         </>
       )}
 
-      {hasCurriculum && <CurriculumSection steps={roadmap.steps!} />}
+      {hasCurriculum && <CurriculumSection steps={steps!} />}
 
       <ClearBlock roadmapTitle={roadmap.title} roadmapSlug={SLUG} />
 
