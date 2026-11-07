@@ -70,8 +70,8 @@ const getImageSize = (value?: {
   return { width: Number(match[1]), height: Number(match[2]) };
 };
 
-// 本文の最大幅（648px）の2倍。高精細な画面でも文字がにじまない大きさ
-const IMAGE_WIDTH = 1296;
+// 記事ページの最大幅（720px）の2倍。高精細な画面でも文字がにじまない大きさ
+const IMAGE_WIDTH = 1440;
 
 /**
  * Sanity の画像URLに、幅と形式の指定を足して軽くする（fit=max で元より大きくしない）

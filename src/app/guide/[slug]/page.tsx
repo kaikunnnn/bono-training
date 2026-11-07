@@ -130,6 +130,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
             <div className="px-4 pb-16">
               <GuideContent
                 content={guide.content}
+                className="max-w-[720px]"
                 showToc={guide.slug === "rdm-howtostart-roadmap"}
               />
 
@@ -141,7 +142,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
           )
         ) : (
           <div className="px-4 pb-16">
-            <div className="max-w-[648px] mx-auto py-12 text-center">
+            <div className="max-w-[720px] mx-auto py-12 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-amber-600" />
               </div>
