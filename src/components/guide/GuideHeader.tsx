@@ -57,7 +57,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
 
       {/* メインヘッダー：左揃え */}
       <div className="flex flex-col items-center gap-8 px-4 pt-8 pb-0">
-        <div className="flex flex-col items-start gap-5 w-full max-w-[800px]">
+        <div className="flex flex-col items-start gap-5 w-full max-w-[720px]">
           {/* カテゴリ */}
           <p className="text-xs font-medium text-text-secondary">
             {categoryInfo?.label ?? guide.category}
