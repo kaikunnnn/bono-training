@@ -36,6 +36,18 @@ const generateHeadingId = (
     .replace(/[^\w\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf-]/g, "")}`;
 };
 
+/**
+ * Sanity の画像参照・URLに含まれる「幅x高さ」を読む（例: image-abc-1920x2742-png）
+ */
+const getImageSize = (value?: {
+  asset?: { _ref?: string; url?: string };
+}): { width: number; height: number } | null => {
+  const source = value?.asset?._ref || value?.asset?.url;
+  const match = source?.match(/-(\d+)x(\d+)(?:-|\.)/);
+  if (!match) return null;
+  return { width: Number(match[1]), height: Number(match[2]) };
+};
+
 // 段落の共通スタイル
 const pStyle = "text-[18px] font-medium leading-[200%] tracking-[0.03em] text-text-secondary mb-6";
 const liStyle = "text-[18px] leading-[200%] tracking-[0.03em] text-text-secondary mb-2";
@@ -137,6 +149,30 @@ const portableTextComponents: PortableTextComponents = {
         value?.asset?.url ||
         (value?.asset?._ref ? urlFor(value).width(648).url() : null);
       if (!url) return null;
+      // 縦長の画像は16:9の枠に収めると文字が読めなくなるので、本来の比率で出す
+      const size = getImageSize(value);
+      if (size && size.height > size.width) {
+        return (
+          <figure className="my-8 w-full">
+            <Image
+              src={
+                value?.asset?.url ||
+                urlFor(value).width(1296).url()
+              }
+              alt={value.alt || ""}
+              width={size.width}
+              height={size.height}
+              className="w-full h-auto rounded-lg"
+              unoptimized
+            />
+            {value.caption && (
+              <figcaption className="mt-2 text-sm text-text-muted text-center italic">
+                {value.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
       return (
         <figure className="my-8 w-full">
           <div className="relative w-full aspect-video">
