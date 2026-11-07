@@ -5,7 +5,13 @@ import GuideContent from "./GuideContent";
 
 vi.mock("@/lib/sanity", () => ({
   urlFor: () => ({
-    width: (w: number) => ({ url: () => `https://cdn.test/image.png?w=${w}` }),
+    width: (w: number) => ({
+      fit: () => ({
+        auto: () => ({
+          quality: () => ({ url: () => `https://cdn.test/image.png?w=${w}` }),
+        }),
+      }),
+    }),
   }),
 }));
 
@@ -37,7 +43,34 @@ describe("GuideContent の画像", () => {
     );
     expect(container.querySelector(".aspect-video")).not.toBeNull();
     expect(container.querySelector("img")?.getAttribute("src")).toContain(
-      "w=648"
+      "w=1296"
+    );
+  });
+
+  const urlBlock = (url: string) =>
+    [
+      { _type: "image", _key: "a", alt: "図", asset: { _id: "x", url } },
+    ] as unknown as PortableTextBlock[];
+
+  it("URLの画像は幅と形式を指定して軽くする", () => {
+    const { container } = render(
+      <GuideContent
+        content={urlBlock("https://cdn.test/abc-1920x2742.png")}
+      />
+    );
+    const img = container.querySelector("img");
+    expect(img?.getAttribute("src")).toBe(
+      "https://cdn.test/abc-1920x2742.png?w=1296&fit=max&auto=format&q=80"
+    );
+    expect(img?.getAttribute("height")).toBe("2742");
+  });
+
+  it("GIFは動きを保つためそのまま出す", () => {
+    const { container } = render(
+      <GuideContent content={urlBlock("https://cdn.test/abc-800x600.gif")} />
+    );
+    expect(container.querySelector("img")?.getAttribute("src")).toBe(
+      "https://cdn.test/abc-800x600.gif"
     );
   });
 
