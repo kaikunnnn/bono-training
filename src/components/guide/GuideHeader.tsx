@@ -57,7 +57,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
 
       {/* メインヘッダー：左揃え */}
       <div className="flex flex-col items-center gap-8 px-4 pt-8 pb-0">
-        <div className="flex flex-col items-start gap-5 w-full max-w-[648px]">
+        <div className="flex flex-col items-start gap-5 w-full max-w-[720px]">
           {/* カテゴリ */}
           <p className="text-xs font-medium text-text-secondary">
             {categoryInfo?.label ?? guide.category}
@@ -92,7 +92,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
         </div>
 
         {/* メディア: 動画 > サムネ > プレースホルダー */}
-        <div className="w-full max-w-[648px]">
+        <div className="w-full max-w-[720px]">
           <div className="w-full aspect-video rounded-3xl overflow-hidden bg-muted">
             {(() => {
               const videoInfo = guide.videoUrl ? getVideoInfo(guide.videoUrl) : null;
@@ -112,7 +112,7 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
                   <GuideCardImage
                     src={guide.thumbnailUrl}
                     alt={guide.title}
-                    sizes="(min-width: 768px) 648px, calc(100vw - 32px)"
+                    sizes="(min-width: 768px) 720px, calc(100vw - 32px)"
                     preload
                   />
                 );

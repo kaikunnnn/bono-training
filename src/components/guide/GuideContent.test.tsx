@@ -43,7 +43,7 @@ describe("GuideContent の画像", () => {
     );
     expect(container.querySelector(".aspect-video")).not.toBeNull();
     expect(container.querySelector("img")?.getAttribute("src")).toContain(
-      "w=1296"
+      "w=1440"
     );
   });
 
@@ -60,7 +60,7 @@ describe("GuideContent の画像", () => {
     );
     const img = container.querySelector("img");
     expect(img?.getAttribute("src")).toBe(
-      "https://cdn.test/abc-1920x2742.png?w=1296&fit=max&auto=format&q=80"
+      "https://cdn.test/abc-1920x2742.png?w=1440&fit=max&auto=format&q=80"
     );
     expect(img?.getAttribute("height")).toBe("2742");
   });
