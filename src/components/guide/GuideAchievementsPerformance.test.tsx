@@ -123,7 +123,8 @@ describe("guide and achievements list performance", () => {
     expect(guideImage.getAttribute("data-preload")).toBe("true");
     expect(guideImage.getAttribute("data-loading")).toBeNull();
     expect(guideImage.getAttribute("data-sizes")).toContain("31vw");
-    expect(guideImage.getAttribute("data-unoptimized")).not.toBe("true");
+    // #259(2026-10-14): Vercel 画像最適化の402回避のため、読みものカードは Sanity CDN 直読み（unoptimized）
+    expect(guideImage.getAttribute("data-unoptimized")).toBe("true");
 
     const storyImage = screen.getByRole("img", { name: story.title });
     expect(storyImage.getAttribute("data-preload")).toBe("false");
