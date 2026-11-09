@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // #277 Phase 3 B 試作: Cache Components（PPR）を有効にする
+  cacheComponents: true,
   transpilePackages: ["iconsax-react"],
   experimental: {
     optimizePackageImports: ["iconsax-react", "lucide-react"],
