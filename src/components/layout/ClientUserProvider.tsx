@@ -64,8 +64,11 @@ export function ClientUserProvider({ children }: { children: React.ReactNode }) 
     signatureRef.current = signature;
 
     if (!signature) {
-      requestRef.current += 1;
-      setMember(ANONYMOUS);
+      // 通信はしない。他の取得結果と同じく非同期で反映する（effect 内の同期 setState を避ける）
+      const requestId = ++requestRef.current;
+      void Promise.resolve().then(() => {
+        if (requestId === requestRef.current) setMember(ANONYMOUS);
+      });
       return;
     }
 
