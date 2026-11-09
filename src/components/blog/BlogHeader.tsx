@@ -10,7 +10,7 @@
 "use client";
 
 import React from 'react';
-import Link from 'next/link';
+import { IntentPrefetchLink } from '@/components/common/IntentPrefetchLink';
 import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 
@@ -47,7 +47,7 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
     >
       <div className="w-full mx-auto flex items-center justify-between">
         {/* 左側: タイトル + 区切り + サブタイトル */}
-        <Link href="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
+        <IntentPrefetchLink href="/blog" className="flex items-center gap-2 hover:opacity-80 transition-opacity w-fit">
           <span className="relative group">
             <h1
               className="text-[15px] font-semibold tracking-[-1px] text-gray-900"
@@ -72,16 +72,16 @@ export const BlogHeader: React.FC<BlogHeaderProps> = ({ className = '' }) => {
             <Image src={BONO_LOGO} alt="BONO" width={48} height={14} />
             <span className="text-xs text-gray-600 font-semibold leading-3">ブログ</span>
           </div>
-        </Link>
+        </IntentPrefetchLink>
 
         {/* 右側: BONOトップへのリンク */}
-        <Link
+        <IntentPrefetchLink
           href="/"
           className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
         >
           <span>BONOへ</span>
           <ArrowUpRight size={14} />
-        </Link>
+        </IntentPrefetchLink>
       </div>
     </header>
   );

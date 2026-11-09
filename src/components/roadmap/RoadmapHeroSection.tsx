@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -89,14 +89,14 @@ export default function RoadmapHeroSection({
             </p>
             {/* CTA */}
             <div className="flex items-center gap-6">
-              <Link
+              <IntentPrefetchLink
                 href={ctaHref}
                 className="inline-flex items-center gap-3 bg-cta-primary hover:bg-cta-primary-hover text-white font-semibold text-[15px] px-8 py-4 rounded-full hover:-translate-y-0.5 will-change-transform"
                 style={{ transition: 'transform 0.2s ease, background-color 0.2s ease' }}
               >
                 {ctaText}
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </IntentPrefetchLink>
               <span className="text-[13px] text-text-disabled">{priceText}</span>
             </div>
           </div>

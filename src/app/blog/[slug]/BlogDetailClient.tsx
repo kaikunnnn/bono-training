@@ -7,7 +7,7 @@
  */
 
 import React, { type ReactNode } from 'react';
-import Link from 'next/link';
+import { IntentPrefetchLink } from '@/components/common/IntentPrefetchLink';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { Copy } from 'lucide-react';
@@ -261,7 +261,7 @@ export default function BlogDetailClient({
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {latestPosts.map((relatedPost) => (
-                  <Link
+                  <IntentPrefetchLink
                     key={relatedPost.id}
                     href={`/blog/${relatedPost.slug}`}
                     className="group block bg-white/80 backdrop-blur-sm rounded-xl p-6 border border-gray-100 hover:border-gray-200 hover:shadow-lg transition-all duration-300"
@@ -280,7 +280,7 @@ export default function BlogDetailClient({
                         </p>
                       </div>
                     </div>
-                  </Link>
+                  </IntentPrefetchLink>
                 ))}
               </div>
             </div>

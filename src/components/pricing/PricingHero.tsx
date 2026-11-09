@@ -9,7 +9,7 @@
  * 下境界（border-b）は撤去。フォントサイズは見た目、見出しレベルは文書構造で決める。
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 export function PricingHero() {
   return (
@@ -23,12 +23,12 @@ export function PricingHero() {
       </h1>
 
       {/* 支払いに関する質問（FAQページ・muted・下線） */}
-      <Link
+      <IntentPrefetchLink
         href="/how-to/faq"
         className="mt-3 inline-block text-sm text-text-link underline underline-offset-4 hover:text-text-link-hover"
       >
         支払いに関する質問はこちら
-      </Link>
+      </IntentPrefetchLink>
     </section>
   );
 }
