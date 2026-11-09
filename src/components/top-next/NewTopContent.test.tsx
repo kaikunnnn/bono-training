@@ -187,7 +187,8 @@ describe("top-page streaming contract", () => {
       href: "/contents/test",
       variant: "updates",
     });
-    expect(updates.type).not.toBe(IntentPrefetchLink);
+    // #277: /updates の一覧も1画面で数十件を先読みしていたため、操作したときだけに揃えた
+    expect(updates.type).toBe(IntentPrefetchLink);
   });
 
   it.each(["top", "root"] as const)("passes the click-tracking surface to every linked section (%s)", (surface) => {

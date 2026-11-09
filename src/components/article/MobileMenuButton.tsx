@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Logo from "@/components/common/Logo";
 import { Button } from "@/components/ui/button";
 import { PanelLeft, PanelRight } from "lucide-react";
@@ -25,9 +25,9 @@ const MobileMenuButton = ({ isOpen, onClick, showLogoWhenClosed = false }: Mobil
   if (showLogo) {
     return (
       <div className="flex w-fit items-center gap-3 pl-4 pr-2 py-2 bg-white border border-gray-200 rounded-[20px] shadow-sm">
-        <Link href="/" aria-label="トップへ" className="flex items-center">
+        <IntentPrefetchLink href="/" aria-label="トップへ" className="flex items-center">
           <Logo className="w-[67.51px] h-5" />
-        </Link>
+        </IntentPrefetchLink>
         <div className="ml-auto flex items-center gap-1.5">
           <Button
             type="button"

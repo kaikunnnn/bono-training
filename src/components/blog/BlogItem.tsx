@@ -9,7 +9,7 @@
  */
 
 import React from 'react';
-import Link from 'next/link';
+import { IntentPrefetchLink } from '@/components/common/IntentPrefetchLink';
 import { BlogPost } from '@/types/blog';
 import { BLOG_COLORS, BLOG_FONTS, BLOG_SPACING } from '@/styles/design-tokens';
 import { DEFAULT_EMOJI, removeEmojiFromText } from '@/utils/blog/emojiUtils';
@@ -80,7 +80,7 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
   };
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/blog/${post.slug}`}
       className={`block no-underline blog-card-hover ${className}`}
       style={{
@@ -260,7 +260,7 @@ export const BlogItem: React.FC<BlogItemProps> = ({ post, className = '' }) => {
           }
         }
       `}</style>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 
@@ -285,7 +285,7 @@ export const BlogItemCompact: React.FC<BlogItemProps> = ({ post, className = '' 
   };
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/blog/${post.slug}`}
       className={`block no-underline blog-card-hover ${className}`}
       style={{
@@ -317,7 +317,7 @@ export const BlogItemCompact: React.FC<BlogItemProps> = ({ post, className = '' 
           </time>
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 

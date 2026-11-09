@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { useSearchParams } from "next/navigation";
 import { GUIDE_CATEGORIES } from "@/lib/guideCategories";
 import { Briefcase, BookOpen, TrendingUp, Wrench, Compass } from "lucide-react";
@@ -27,7 +27,7 @@ export function GuideCategoryFilter({
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Link
+      <IntentPrefetchLink
         href="/guide"
         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
           !currentCategory
@@ -36,11 +36,11 @@ export function GuideCategoryFilter({
         }`}
       >
         すべて ({totalCount})
-      </Link>
+      </IntentPrefetchLink>
       {GUIDE_CATEGORIES.map((cat) => {
         const Icon = categoryIcons[cat.id] || BookOpen;
         return (
-          <Link
+          <IntentPrefetchLink
             key={cat.id}
             href={`/guide?category=${cat.id}`}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
@@ -51,7 +51,7 @@ export function GuideCategoryFilter({
           >
             <Icon className="w-4 h-4" />
             {cat.label} ({categoryCounts[cat.id] || 0})
-          </Link>
+          </IntentPrefetchLink>
         );
       })}
     </div>

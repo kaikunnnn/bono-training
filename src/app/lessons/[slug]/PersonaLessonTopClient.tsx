@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { Book1, Briefcase, Lock1, Magicpen, Unlock } from "iconsax-react";
 import { ArrowRight, FileText, Minus, Play, Plus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -136,9 +136,9 @@ function CurriculumArticle({
       {pending ? (
         <span className={`${s.articleLink} ${s.pendingArticle}`}>{content}</span>
       ) : (
-        <Link data-intro-action="article_open" data-intro-component={`article:${article._id}`} data-intro-article={article._id} data-intro-access={article.isLocked ? "locked" : "open"} data-intro-destination={`${CONTENT_BASE_PATH}/${article.slug.current}`} className={s.articleLink} href={`${CONTENT_BASE_PATH}/${article.slug.current}`}>
+        <IntentPrefetchLink data-intro-action="article_open" data-intro-component={`article:${article._id}`} data-intro-article={article._id} data-intro-access={article.isLocked ? "locked" : "open"} data-intro-destination={`${CONTENT_BASE_PATH}/${article.slug.current}`} className={s.articleLink} href={`${CONTENT_BASE_PATH}/${article.slug.current}`}>
           {content}
-        </Link>
+        </IntentPrefetchLink>
       )}
     </li>
   );
@@ -306,10 +306,10 @@ export default function PersonaLessonTopClient({
     <div className={s.page}>
       <div className={s.shell}>
         <nav className={s.breadcrumb} aria-label="パンくずリスト">
-          <Link data-intro-action="navigation" data-intro-component="back_to_lessons" href="/lessons" className={s.backLink} aria-label="レッスン一覧へ戻る">
+          <IntentPrefetchLink data-intro-action="navigation" data-intro-component="back_to_lessons" href="/lessons" className={s.backLink} aria-label="レッスン一覧へ戻る">
             <Image src={asset("back.svg")} alt="" width={20} height={20} />
-          </Link>
-          <Link data-intro-action="navigation" data-intro-component="back_to_lessons" href="/lessons">レッスン</Link>
+          </IntentPrefetchLink>
+          <IntentPrefetchLink data-intro-action="navigation" data-intro-component="back_to_lessons" href="/lessons">レッスン</IntentPrefetchLink>
           <span aria-hidden="true">/</span>
           <span aria-current="page">{lesson.title}</span>
         </nav>
@@ -328,10 +328,10 @@ export default function PersonaLessonTopClient({
               <div className={s.heroActions}>
                 {startHref ? (
                   <Button asChild variant="persona-gradient" size="persona-cta">
-                    <Link data-intro-action="article_open" data-intro-component="hero_start" data-intro-article={firstArticle?._id} data-intro-access={firstArticle?.isLocked ? "locked" : "open"} data-intro-destination={startHref} href={startHref}>
+                    <IntentPrefetchLink data-intro-action="article_open" data-intro-component="hero_start" data-intro-article={firstArticle?._id} data-intro-access={firstArticle?.isLocked ? "locked" : "open"} data-intro-destination={startHref} href={startHref}>
                       トレーニングをはじめる
                       <Image src={asset("start.svg")} alt="" width={18} height={18} />
-                    </Link>
+                    </IntentPrefetchLink>
                   </Button>
                 ) : (
                   <span className={s.startUnavailable}>公開をお待ちください</span>

@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BackButton } from "@/components/common/BackButton";
@@ -58,13 +58,13 @@ const PrimaryCTAButton: React.FC<{
   children,
   onClick,
 }) => (
-  <Link
+  <IntentPrefetchLink
     href={href}
     onClick={onClick}
     className="w-full sm:flex-1 flex items-center justify-center h-12 bg-white border border-white/90 rounded-[14px] text-[14px] font-bold text-cta-primary tracking-[0.35px] shadow-[0_4px_8px_rgba(0,0,0,0.25)] hover:bg-gray-50 transition-colors"
   >
     {children}
-  </Link>
+  </IntentPrefetchLink>
 );
 
 const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
@@ -183,12 +183,12 @@ export default function RoadmapHero({
 
             {/* パンくずリスト */}
             <nav className="text-[12px] font-bold text-white/60">
-              <Link
+              <IntentPrefetchLink
                 href="/roadmap"
                 className="hover:text-white/80 transition-colors"
               >
                 ロードマップ
-              </Link>
+              </IntentPrefetchLink>
               <span className="mx-2">/</span>
               <span className="text-white/80">{stripLineBreakMarker(title)}</span>
             </nav>

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { Feedback } from "@/types/sanity";
@@ -70,7 +70,7 @@ export function FeedbackCard({ feedback }: FeedbackCardProps) {
 
   return (
     <motion.div variants={fadeInUp} className="h-full">
-      <Link
+      <IntentPrefetchLink
         href={`/feedbacks/${feedback.slug.current}`}
         className="group block h-full bg-white rounded-[24px] border border-border/50 overflow-hidden"
         onMouseEnter={() => setIsHovered(true)}
@@ -138,7 +138,7 @@ export function FeedbackCard({ feedback }: FeedbackCardProps) {
             {publishedDate && <span>{publishedDate}</span>}
           </div>
         </div>
-      </Link>
+      </IntentPrefetchLink>
     </motion.div>
   );
 }
