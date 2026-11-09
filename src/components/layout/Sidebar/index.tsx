@@ -27,6 +27,10 @@ const OLD_BONO_URL = "https://legacy.bo-no.design";
 export function Sidebar({ className, user, notificationSlot, boardDotSlot }: SidebarProps) {
   const pathname = usePathname();
 
+  // #277 Phase 3 A1 試作: user === undefined は「ブラウザで会員情報を取得中」。
+  // マイページは出さず、ログイン/設定の行は見えない形で場所だけ取る（下の「その他」がずれないように）
+  const isAuthPending = user === undefined;
+
   const isActive = (href: string) =>
     pathname === href || pathname?.startsWith(href + "/");
 
@@ -156,7 +160,17 @@ export function Sidebar({ className, user, notificationSlot, boardDotSlot }: Sid
         >
           トレーニング
         </SidebarMenuItem>
-        {!user && (
+        {isAuthPending && (
+          <div className="invisible w-full" aria-hidden="true">
+            <SidebarMenuItem
+              href="/login"
+              icon={<MenuIcons.login size={ICON_SIZE} color="#2F3037" variant="Outline" />}
+            >
+              ログイン
+            </SidebarMenuItem>
+          </div>
+        )}
+        {user === null && (
           <SidebarMenuItem
             href="/login"
             icon={<MenuIcons.login size={ICON_SIZE} color="#2F3037" variant="Outline" />}
