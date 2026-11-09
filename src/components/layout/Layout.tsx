@@ -14,26 +14,34 @@ import { WelcomeToast } from "@/components/auth/WelcomeToast";
 import { SignUpTracker } from "@/components/analytics/SignUpTracker";
 import { AnnouncementBar } from "./AnnouncementBar";
 import { Menu } from "lucide-react";
+import { MemberGate } from "./MemberPromiseProvider";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { BoardNewDot } from "@/components/questions/BoardNewDot";
+import { StaleSessionCleaner } from "@/components/auth/StaleSessionCleaner";
+import { MemberStatusRecorder } from "@/components/analytics/MemberStatusRecorder";
+import { SiteVisitRecorder } from "@/components/analytics/SiteVisitRecorder";
+import type { LayoutMemberState } from "@/lib/services/layout-member-state";
 
 interface LayoutProps {
   children: React.ReactNode;
   className?: string;
-  user?: {
-    id: string;
-    email: string;
-  } | null;
-  /**
-   * 通知ベル（#160 S3）。未読件数取得を内包した Server Component を Suspense で
-   * ラップした要素を親（Server: UserProviderLayout）から受け取り、そのまま描画する。
-   * 未ログイン時や未対応時は undefined/null。
-   */
-  notificationSlot?: React.ReactNode;
-  /**
-   * 掲示板の新着ドット（掲示板の新着ドット）。hasUnseenBoard を内包した Server Component を
-   * Suspense でラップした要素。デスクトップのサイドバーにのみ渡す（通知ベルの現状に倣う）。
-   */
-  boardDotSlot?: React.ReactNode;
 }
+
+// #277 Phase 3 B 試作: 会員依存の部品（Suspense の中で会員情報が確定してから描画する）
+const bellFor = (m: LayoutMemberState) =>
+  m.user ? <NotificationBell key={m.user.id} userId={m.user.id} initialUnreadCount={m.unreadCount} /> : null;
+const dotFor = (m: LayoutMemberState) => (m.user && m.boardUnseen ? <BoardNewDot /> : null);
+const memberEffects = (
+  <MemberGate fallback={null}>
+    {(m) => (
+      <>
+        {!m.user && m.invalidSession && <StaleSessionCleaner />}
+        {m.memberStatus && <MemberStatusRecorder status={m.memberStatus} />}
+        {m.user && <SiteVisitRecorder userId={m.user.id} />}
+      </>
+    )}
+  </MemberGate>
+);
 
 /**
  * レイアウトコンポーネント
@@ -45,7 +53,7 @@ interface LayoutProps {
  * - /blog/*: BlogHeader/Footer を使用
  * - /feedback-apply/submit: フォーム専用ページ
  */
-export function Layout({ children, className, user, notificationSlot, boardDotSlot }: LayoutProps) {
+export function Layout({ children, className }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGradientVisible, setIsGradientVisible] = useState(false);
@@ -84,6 +92,7 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
   if (shouldSkipGlobalLayout) {
     return (
       <>
+        {memberEffects}
         {children}
         <Toaster />
         <Suspense fallback={null}>
@@ -127,7 +136,9 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
           isTop6 && "border-r border-black/10"
         )}
       >
-        <Sidebar user={user} notificationSlot={notificationSlot} boardDotSlot={boardDotSlot} />
+        <MemberGate fallback={<Sidebar user={undefined} />}>
+          {(m) => <Sidebar user={m.user} notificationSlot={bellFor(m)} boardDotSlot={dotFor(m)} />}
+        </MemberGate>
       </aside>
 
       {/* モバイル・タブレット用ヘッダーバー（1024px未満） */}
@@ -166,7 +177,9 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
                 // 黒い半透明オーバーレイを出さない（透明のまま外側タップで閉じる挙動は維持）
                 overlayClassName="bg-transparent"
               >
-                <Sidebar user={user} />
+                <MemberGate fallback={<Sidebar user={undefined} />}>
+                  {(m) => <Sidebar user={m.user} />}
+                </MemberGate>
               </SheetContent>
             </Sheet>
           </div>
@@ -177,9 +190,9 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
           </IntentPrefetchLink>
 
           {/* 通知ベル（右寄せ・#160 S3）。ログイン時のみ notificationSlot が渡る */}
-          {notificationSlot && (
-            <div className="absolute right-4">{notificationSlot}</div>
-          )}
+          <MemberGate fallback={null}>
+            {(m) => (m.user ? <div className="absolute right-4">{bellFor(m)}</div> : null)}
+          </MemberGate>
         </div>
       </div>
 
@@ -189,6 +202,7 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
           {/* お知らせバー: main の先頭に置く。タブレット以下は pt-14 により固定ヘッダーの真下、
               PC はサイドバー右のメインブロック最上部（全幅）になる */}
           {showAnnouncement && <AnnouncementBar />}
+          {memberEffects}
           {children}
         </main>
         <Footer />
