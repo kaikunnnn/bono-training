@@ -28,6 +28,8 @@ export type LayoutMemberState = {
 };
 
 export async function getLayoutMemberState(): Promise<LayoutMemberState> {
+  // 試作の計測用: 1リクエストごとにこの関数（＝サーバーの処理）が動くかを数える
+  if (process.env.PROTO_LOG_MEMBER) console.log("[proto277] getLayoutMemberState");
   let auth: Awaited<ReturnType<typeof getCachedAuth>>;
   try {
     auth = await getCachedAuth();
