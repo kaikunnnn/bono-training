@@ -7,37 +7,18 @@
 
 ## 📌 最重要ルール
 
-### 1. タスク管理の徹底
+### 1. タスク管理
 
-**ルール**: すべてのタスクは `.claude/docs/subscription/TASK-TRACKER.md` に集約する
+**ルール**: タスクは rebono で管理する（2026-06 に Linear と TASK-TRACKER.md の運用はやめた）
+
+- オーナーと一緒に見るタスク: rebono の GitHub Issues（テーマ別の Projects ボード）
+- 方針・調査・進捗の記録: `~/Documents/01_BONO事業/01_Docs/rebono/issues/` の MD
+- `.claude/docs/subscription/TASK-TRACKER.md` は過去の記録。新しい作業では更新しない
 
 **やること**:
-- ✅ 作業開始時: TASK-TRACKER.mdを読んで現状把握
-- ✅ 作業中: 新しい問題を発見したら即座にCritical Issuesセクションに追記
-- ✅ 作業終了時: 完了したタスクを「完了履歴」に移動し、進捗を更新
-
-**やってはいけないこと**:
-- ❌ タスクを別のドキュメントに分散させる
-- ❌ 問題を見つけても記録せずに進む
-- ❌ TASK-TRACKER.mdを数日間更新しない
-
-**例（良い例）**:
-```markdown
-## 🚨 現在のCritical Issues
-
-### Issue 3: 新たに発見された問題 🔴
-- **発見日**: 2025-11-28
-- **優先度**: 🔴 CRITICAL
-- **ステータス**: ⏳ 未対応
-- **影響**: ...
-- **次のアクション**: ...
-```
-
-**例（悪い例）**:
-```
-# コメントやログに書くだけ
-console.log('なんかエラーあるけど後で見る');  // ❌ 記録されない
-```
+- 作業開始時: 該当する issue を読んで現状を把握する。該当 issue が見つからなければ、オーナーにどの issue の作業か確認する
+- 作業中: 新しい問題を見つけたら、該当 issue の MD に追記する（コンソールやコメントに書くだけで終わらせない）
+- 作業終了時: issue の MD に進捗と結果を書く
 
 ---
 
@@ -46,7 +27,7 @@ console.log('なんかエラーあるけど後で見る');  // ❌ 記録され�
 **ルール**: コードを書く前に、必ず関連ドキュメントを確認する
 
 **確認すべきドキュメント（優先順）**:
-1. **TASK-TRACKER.md** - 今何をすべきか
+1. **該当issue（rebono）** - 今何をすべきか
 2. **README.md** - どこに何の情報があるか
 3. **specifications/system-specification.md** - システムの仕様
 4. **guides/common-errors.md** - 過去の失敗例
@@ -54,7 +35,7 @@ console.log('なんかエラーあるけど後で見る');  // ❌ 記録され�
 **やること**:
 ```bash
 # 実装前の確認フロー
-1. TASK-TRACKER.mdを開く
+1. 該当issue（rebono）を開く
 2. 該当タスクの「関連ドキュメント」を確認
 3. 関連ドキュメントを読む
 4. 理解してから実装開始
@@ -72,7 +53,7 @@ console.log('なんかエラーあるけど後で見る');  // ❌ 記録され�
 **ルール**: エラーや問題を発見したら、必ず以下を実施する
 
 **必須アクション（3分以内）**:
-1. **TASK-TRACKER.mdのCritical Issuesセクションに追記**
+1. **該当issueのMDに追記**
 2. **優先度を判定**（🔴 CRITICAL / 🟡 MEDIUM / 🟢 LOW）
 3. **影響範囲を記載**
 4. **次のアクションを明記**
@@ -117,14 +98,14 @@ console.log('なんかエラーあるけど後で見る');  // ❌ 記録され�
 - [ ] TypeScriptのコンパイルエラーがない
 - [ ] テストが通る（該当する場合）
 - [ ] ドキュメントを更新した
-- [ ] TASK-TRACKER.mdの該当タスクを「完了」に更新
+- [ ] 該当issueのMDに完了と結果を記録
 - [ ] Git commitメッセージが明確
 - [ ] Edge Functionをデプロイした（該当する場合）
 
 **やってはいけないこと**:
 - ❌ 動作確認せずにcommit
 - ❌ ドキュメント更新を忘れる
-- ❌ TASK-TRACKER.mdの更新を忘れる
+- ❌ 該当issue（rebono）の更新を忘れる
 
 ---
 
@@ -424,7 +405,7 @@ import { TickCircle } from 'iconsax-react';
 
 4. **TODOを残さない**
    - ドキュメント内に`TODO`や`TBD`を残してはいけない
-   - 未完成の場合は、TASK-TRACKER.mdに「ドキュメント完成タスク」を追加
+   - 未完成の場合は、該当issue（rebono）に「ドキュメント完成タスク」を追加
 
 ---
 
@@ -483,7 +464,7 @@ import { TickCircle } from 'iconsax-react';
 
 **記録場所**:
 - `testing/testing-log.md` - テスト結果の詳細
-- `TASK-TRACKER.md` - タスク完了の証跡
+- 該当issue（rebono） - タスク完了の証跡
 
 **記録内容**:
 ```markdown
@@ -517,7 +498,7 @@ import { TickCircle } from 'iconsax-react';
 - [ ] TypeScriptコンパイルエラーなし
 - [ ] テスト実施済み
 - [ ] ドキュメント更新済み
-- [ ] TASK-TRACKER.md更新済み
+- [ ] 該当issue（rebono）更新済み
 - [ ] Git commitメッセージが明確
 - [ ] 環境変数の設定を確認（test/live）
 
@@ -543,7 +524,7 @@ npx supabase functions logs [function-name] --project-ref fryogvfhymnpiqwssmuu
 # 5. 動作確認
 # → ブラウザで実際に操作して確認
 
-# 6. TASK-TRACKER.mdを更新
+# 6. 該当issue（rebono）を更新
 # → 「デプロイ完了」を記録
 ```
 
@@ -694,7 +675,7 @@ SELECT DISTINCT environment FROM user_subscriptions;
 - [次に何をするか]
 
 **関連ドキュメント**:
-- TASK-TRACKER.md
+- 該当issue（rebono）
 ```
 
 ---
@@ -780,7 +761,7 @@ SELECT DISTINCT environment FROM user_subscriptions;
 
 ## 🔗 関連ドキュメント
 
-- **TASK-TRACKER.md** - タスク管理の実際の運用
+- **該当issue（rebono）** - タスク管理の実際の運用
 - **README.md** - ドキュメント索引
 - **guides/common-errors.md** - 過去の失敗例
 - **deployment-checklist.md** - デプロイ時のチェック項目
