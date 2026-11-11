@@ -138,6 +138,70 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
         plain:
           "できます。マイページ＞アカウントの「サブスクリプションを管理」からStripeのカスタマーポータルを開き、「請求履歴」から領収書（請求書）をダウンロードできます。",
       },
+      {
+        q: "質問の返信はどれくらいで来ますか？送ってはいけない時間帯はありますか？",
+        a: (
+          <div className="space-y-3">
+            <p>
+              いつ送っても大丈夫です！土日・祝日はお休みで、返信はだいたい3日以内です。
+            </p>
+            <p>
+              質問の窓口は
+              <Link
+                href="/questions"
+                className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+              >
+                掲示板
+              </Link>
+              です。
+            </p>
+          </div>
+        ),
+        plain:
+          "いつ送っても大丈夫です。土日・祝日はお休みで、返信はだいたい3日以内です。質問の窓口は掲示板（https://www.bo-no.design/questions）です。",
+      },
+      {
+        q: "学んだことをnoteやSNSで発信してもいいですか？",
+        a: (
+          <div className="space-y-3">
+            <p>
+              スクショも含めて、全部見せてOKです！NGは次の2つだけです。
+            </p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>動画をダウンロードして、他の人に配ること</li>
+              <li>動画を全部文字起こしすること</li>
+            </ul>
+            <p>「BONOで学んでいる」と書くかどうかは自由です。</p>
+          </div>
+        ),
+        plain:
+          "スクショも含めて、全部見せてOKです。NGは「動画をダウンロードして他の人に配ること」「動画を全部文字起こしすること」の2つだけです。「BONOで学んでいる」と書くかどうかは自由です。",
+      },
+      {
+        q: "UIトレースの「20画面」は、縦長の画面も1画面と数えますか？",
+        a: (
+          <div className="space-y-3">
+            <p>
+              はい。縦長の画面も、基本は全体をトレースして1画面と数えてください。
+            </p>
+            <p>
+              トレースの目的は「サービスの構造を理解しながら、Figmaの使い方を覚えること」です。なので、重要だと思うブロックに絞ってトレースするのもOKです。
+            </p>
+            <p>
+              進め方は
+              <Link
+                href="/guide/rdm-howtostart-roadmap"
+                className="text-foreground underline underline-offset-4 hover:text-muted-foreground"
+              >
+                転職ロードマップの記事
+              </Link>
+              のステップ1にまとめています。
+            </p>
+          </div>
+        ),
+        plain:
+          "はい。縦長の画面も、基本は全体をトレースして1画面と数えてください。トレースの目的は「サービスの構造を理解しながら、Figmaの使い方を覚えること」なので、重要だと思うブロックに絞ってトレースするのもOKです。",
+      },
     ],
   },
   {
