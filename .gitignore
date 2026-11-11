@@ -47,3 +47,6 @@ next-env.d.ts
 supabase/functions/.env
 supabase/functions/.env.local
 .env.local.production
+
+# issue-fleet スキルの実行ログ
+issue-fleet-logs
