@@ -122,6 +122,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title,
     description,
+    // 作業資料（#307）は URL を知っている人だけが見るページ。検索に出さない
+    robots: lesson.isDoc ? { index: false, follow: false } : undefined,
     openGraph: {
       ...OG_DEFAULTS,
       title,

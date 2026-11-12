@@ -285,9 +285,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     // Google は同一サイト内の正規化に noindex を使わず rel=canonical を推奨）
     // https://developers.google.com/search/docs/crawling-indexing/consolidate-duplicate-urls
     // 作成中の仮ページ（#276 placeholderArticles）も noindex
-    robots:
-      (article.isPremium && !indexablePremium && !storyCanonical) ||
-      isPlaceholderArticleSlug(slug)
+    // 作業資料（#307）は URL を知っている人だけが見るページ。リンクもたどらせない
+    robots: article.isDoc
+      ? { index: false, follow: false }
+      : (article.isPremium && !indexablePremium && !storyCanonical) ||
+          isPlaceholderArticleSlug(slug)
         ? { index: false, follow: true }
         : undefined,
     openGraph: {
