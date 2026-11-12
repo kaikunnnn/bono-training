@@ -46,7 +46,7 @@ const SOURCE_ROOT = "/Users/kaitakumi/Documents/01_BONO事業/01_Docs/rebono/作
 
 const folderArg = process.argv.slice(2).find((a) => !a.startsWith("--"));
 if (!folderArg) {
-  throw new Error("資料フォルダを指定してください（例: rebono/作業資料/302-course-policy）");
+  throw new Error("資料フォルダを指定してください（例: rebono/作業資料/<フォルダ>）");
 }
 const SOURCE_DIR = resolve(folderArg);
 if (relative(SOURCE_ROOT, SOURCE_DIR).startsWith("..") || SOURCE_DIR === SOURCE_ROOT) {
@@ -375,8 +375,16 @@ function assertTarget() {
   }
 }
 
+/** このスクリプトが作る _id の形だけ: doc-<key> / doc-<key>-qNN / doc-<key>-qNN-NN */
+function isOwnId(id: string, base: string) {
+  if (id === base) return true;
+  if (!id.startsWith(`${base}-`)) return false;
+  return /^q\d{2}(-\d{2})?$/.test(id.slice(base.length + 1));
+}
+
 function assertDocId(id: string, base: string) {
-  if (id !== base && !id.startsWith(`${base}-`)) {
+  // 前方一致だけだと key "302" の資料が "302-course-policy" の資料まで消せてしまうので、形で絞る
+  if (!isOwnId(id, base)) {
     throw new Error(`資料用の印（${base}）が付いていない _id には書きません: ${id}`);
   }
   if (!id.startsWith(DOC_ID_PREFIX)) throw new Error(`doc- で始まらない _id には書きません: ${id}`);
@@ -458,7 +466,7 @@ async function main() {
     `*[_id == $base || string::startsWith(_id, $prefix) || _id == $draftBase || string::startsWith(_id, $draftPrefix)]{_id, _type, title}`,
     { base, prefix: `${base}-`, draftBase: `drafts.${base}`, draftPrefix: `drafts.${base}-` },
   );
-  const stale = existing.filter((d) => !ids.has(d._id) && (d._id === base || d._id.startsWith(`${base}-`)));
+  const stale = existing.filter((d) => !d._id.startsWith("drafts.") && !ids.has(d._id) && isOwnId(d._id, base));
   const drafts = existing.filter((d) => d._id.startsWith("drafts."));
   console.log(`\n既存: ${existing.length - drafts.length} 件 / 元から消えた分: ${stale.length} 件 / Studioの下書き: ${drafts.length} 件`);
   for (const d of stale) console.log(`  ${PRUNE ? "削除予定" : "残す（--prune で削除）"}: ${d._type} ${d._id} ${d.title ?? ""}`);
