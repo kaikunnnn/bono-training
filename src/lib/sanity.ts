@@ -1,4 +1,5 @@
 import { createClient } from "@sanity/client";
+import { IS_DOC_PROJECTION, NOT_DOC_FILTER } from "@/lib/doc-content-utils";
 import imageUrlBuilder from "@sanity/image-url";
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
@@ -172,7 +173,8 @@ export const getLessonMetadata = unstable_cache(
         seoTitle,
         description,
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
-        "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url)
+        "iconImageUrl": coalesce(iconImageUrl, iconImage.asset->url),
+        ${IS_DOC_PROJECTION}
       }
     `;
 
@@ -187,7 +189,7 @@ export const getLessonMetadata = unstable_cache(
  */
 export const getAllLessonSlugs = unstable_cache(
   async (): Promise<string[]> => {
-    const query = `*[_type == "lesson"].slug.current`;
+    const query = `*[_type == "lesson" && ${NOT_DOC_FILTER}].slug.current`;
     return getClient().fetch<string[]>(query);
   },
   ["sanity:lessons:slugs"],
@@ -200,7 +202,7 @@ export const getAllLessonSlugs = unstable_cache(
 export const getAllLessons = unstable_cache(
   async (): Promise<Lesson[]> => {
     const query = `
-      *[_type == "lesson"] | order(lessonNumber asc) {
+      *[_type == "lesson" && ${NOT_DOC_FILTER}] | order(lessonNumber asc) {
         _id,
         _type,
         _createdAt,
@@ -236,7 +238,7 @@ export const getLatestLessons = unstable_cache(
     Array<Lesson & { _createdAt?: string; latestArticlePublishedAt?: string }>
   > => {
     const query = `
-      *[_type == "lesson" && isHidden != true] {
+      *[_type == "lesson" && isHidden != true && ${NOT_DOC_FILTER}] {
         _id,
         _type,
         _createdAt,
@@ -271,7 +273,7 @@ export interface LessonWithArticleIds extends Lesson {
 export const getAllLessonsWithArticleIds = unstable_cache(
   async (): Promise<LessonWithArticleIds[]> => {
     const query = `
-      *[_type == "lesson"] | order(lessonNumber asc) {
+      *[_type == "lesson" && ${NOT_DOC_FILTER}] | order(lessonNumber asc) {
         _id,
         _type,
         title,
@@ -504,6 +506,8 @@ export const getArticleWithContext = cache(unstable_cache(
  */
 export interface ArticleMetadata {
   title: string;
+  /** 作業資料（#307 / _id が doc- 始まり）。noindex にする */
+  isDoc?: boolean;
   excerpt?: string;
   thumbnailUrl?: string;
   lessonTitle?: string;
@@ -521,6 +525,7 @@ export const getArticleMetadata = unstable_cache(
         title,
         excerpt,
         isPremium,
+        ${IS_DOC_PROJECTION},
         "thumbnailUrl": coalesce(thumbnailUrl, thumbnail.asset->url),
         "lessonTitle": *[_type == "quest" && ^._id in articles[]._ref][0].lesson->title,
         "leadBlocks": content[_type == "block" && (!defined(style) || style == "normal") && !defined(listItem)][0...${ARTICLE_DESCRIPTION_LEAD_BLOCKS}]{
@@ -563,7 +568,7 @@ export interface ArticleListItem {
 export const getAllArticles = unstable_cache(
   async (): Promise<ArticleListItem[]> => {
     const query = `
-      *[_type == "article"] | order(publishedAt desc) {
+      *[_type == "article" && ${NOT_DOC_FILTER}] | order(publishedAt desc) {
         _id,
         title,
         slug,
@@ -593,7 +598,7 @@ export const getAllArticles = unstable_cache(
 export const getLatestArticles = unstable_cache(
   async (limit: number): Promise<ArticleListItem[]> => {
     const query = `
-      *[_type == "article" && defined(publishedAt) && defined(slug.current)]
+      *[_type == "article" && defined(publishedAt) && defined(slug.current) && ${NOT_DOC_FILTER}]
         | order(publishedAt desc) [0...$limit] {
         _id,
         title,

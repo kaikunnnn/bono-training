@@ -341,6 +341,8 @@ export interface LessonMetadata {
   description?: string;
   thumbnailUrl?: string;
   iconImageUrl?: string;
+  /** 作業資料（#307 / _id が doc- 始まり）。noindex にする */
+  isDoc?: boolean;
 }
 
 // ============================================================

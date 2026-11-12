@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { client } from "@/lib/sanity";
+import { NOT_DOC_FILTER } from "@/lib/doc-content-utils";
 
 // Edge ではなく Node.js 環境で実行（Groq SDK の streaming に必要）
 export const runtime = "nodejs";
@@ -34,7 +35,7 @@ async function fetchContext() {
   // - guides: 最新 20、description は省略してタイトル + カテゴリのみ
   // - roadmaps: 最新 15、description は短めに
   const [lessons, guides, roadmaps] = await Promise.all([
-    sanity.fetch(`*[_type == "lesson"] | order(_createdAt desc)[0...20] {
+    sanity.fetch(`*[_type == "lesson" && ${NOT_DOC_FILTER}] | order(_createdAt desc)[0...20] {
       title,
       "slug": slug.current,
       description,
