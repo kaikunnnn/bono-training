@@ -7,6 +7,7 @@
  */
 export const GUIDE_CONTENT_DUPLICATE_SLUGS = new Set([
   "portfolio-01",
+  // rdm-howtostart-roadmap は canonical が効かなかったため next.config.ts で /guide へ 308 済み（279-E）
   "rdm-howtostart-roadmap",
   "beginner-to-uiux-designer-examples",
   "become-uiux-designer-beginner-guide",

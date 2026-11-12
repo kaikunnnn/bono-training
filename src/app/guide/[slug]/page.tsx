@@ -175,6 +175,8 @@ export default async function GuideDetailPage({ params }: PageProps) {
                       }
                     : undefined
                 }
+                className="max-w-[720px]"
+                showToc={guide.slug === "rdm-howtostart-roadmap"}
               />
 
               {/* #280 記事の最後の BONO 紹介（シェアより上・オーナー指定） */}
@@ -183,7 +185,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
                   heading={guidePromoHeading(promoRoadmap)}
                   roadmap={promoRoadmap}
                   tracking={promoTracking}
-                  className="mx-auto mt-16 w-full max-w-[648px]"
+                  className="mx-auto mt-16 w-full max-w-[720px]"
                 />
               )}
 
@@ -195,7 +197,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
           )
         ) : (
           <div className="px-4 pb-16">
-            <div className="max-w-[648px] mx-auto py-12 text-center">
+            <div className="max-w-[720px] mx-auto py-12 text-center">
               <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-amber-100 flex items-center justify-center">
                 <Lock className="w-8 h-8 text-amber-600" />
               </div>

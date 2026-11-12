@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { headers } from "next/headers";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import { User } from "lucide-react";
 import UsedRoadmapCard from "@/components/story/UsedRoadmapCard";
@@ -159,13 +159,13 @@ export default async function StoryDetailPage({ params }: PageProps) {
         <div className="max-w-[700px] mx-auto">
           {/* パンくず（メタ風） */}
           <nav className="pt-12 pb-6 text-[11px] tracking-[1.2px] uppercase text-[#677470] font-noto-sans-jp">
-            <Link href="/achievements" className="hover:underline">
+            <IntentPrefetchLink href="/achievements" className="hover:underline">
               みんなの成果
-            </Link>
+            </IntentPrefetchLink>
             <span className="mx-2">/</span>
-            <Link href="/stories" className="hover:underline">
+            <IntentPrefetchLink href="/stories" className="hover:underline">
               ストーリー
-            </Link>
+            </IntentPrefetchLink>
             <span className="mx-2">/</span>
             <span className="text-text-primary">{story.person.name}</span>
           </nav>
@@ -346,14 +346,14 @@ export default async function StoryDetailPage({ params }: PageProps) {
                     Share this story
                   </p>
                   <div className="flex gap-3 text-[12px] font-noto-sans-jp">
-                    <Link
+                    <IntentPrefetchLink
                       href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(story.title)}&url=${encodeURIComponent(`https://bono.training/stories/${slug}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-text-primary hover:underline underline-offset-4"
                     >
                       Xでシェア
-                    </Link>
+                    </IntentPrefetchLink>
                   </div>
                 </div>
               </>

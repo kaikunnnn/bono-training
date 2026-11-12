@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ダメなUIを4段階で直す — 配色の基本を1画面で試す（草稿）</title>
+<meta name="description" content="配色のミスを14個入れたタスク管理アプリの1画面を、配色の記事の章（役割・量・意味・数値）に沿って4段階で直します。変えた場所を1か所ずつ、直す前と直した後の拡大で並べて解説します。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  :root {
+    color-scheme: light;
+    /* 外側の余白（最低16px＋セーフエリア）。D-1 の例外: カスタムプロパティ定義 */
+    --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+    --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--color-accent); }
+
+  /* 外側の余白: 最低16px＋セーフエリア */
+  .wrap {
+    max-width: calc(var(--measure) + var(--space-96));
+    margin: 0 auto;
+    padding-left: var(--gutter-l);
+    padding-right: var(--gutter-r);
+  }
+  @media (min-width: 1024px) { .wrap { padding-left: var(--space-48); padding-right: var(--space-48); } }
+
+  /* --- ヒーロー（静的グラデのみ） --- */
+  .hero {
+    background: linear-gradient(135deg, var(--grad-1), var(--grad-3) 45%, var(--grad-2) 72%, var(--grad-4));
+    color: var(--color-on-grad);
+    border-radius: 0 0 var(--radius-l) var(--radius-l);
+  }
+  .hero__inner { max-width: calc(var(--measure) + var(--space-96)); margin: 0 auto; padding-block: var(--space-64) var(--space-48); padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+  @media (min-width: 1024px) { .hero__inner { padding-block: var(--space-96) var(--space-64); padding-left: var(--space-48); padding-right: var(--space-48); } }
+  .hero .eyebrow { font-size: var(--text-small); font-weight: 700; letter-spacing: 0.1em; margin: 0 0 var(--space-16); }
+  .hero .eyebrow a { color: var(--color-on-grad); text-decoration: none; }
+  .hero .draft { display: inline-block; font-size: var(--text-caption); font-weight: 700; border: 1px solid var(--color-on-grad); border-radius: var(--radius-l); padding: var(--space-2) var(--space-10); margin: 0 0 var(--space-12); }
+  .hero h1 { font-size: 30px; font-weight: 900; line-height: var(--leading-heading); margin: 0 0 var(--space-16); }
+  @media (min-width: 768px) { .hero h1 { font-size: 44px; } }
+  .hero h1 small { display: block; font-size: 0.5em; font-weight: 700; margin: var(--space-8) 0 0; }
+  .hero p.lede { font-size: 17px; font-weight: 500; max-width: 36rem; margin: 0 0 var(--space-16); }
+  .hero .meta { font-size: var(--text-small); margin: 0; }
+
+  /* --- 本文 --- */
+  main { padding-block: var(--space-48) var(--space-40); }
+  .prose > p, .intro p { max-width: var(--measure); margin: 0 0 var(--space-16); line-height: var(--leading-body); }
+  .intro h2 { font-size: 22px; line-height: var(--leading-heading); margin: var(--space-32) 0 var(--space-12); }
+  .intro ul { max-width: var(--measure); margin: 0 0 var(--space-16); padding: 0 0 0 var(--space-20); }
+  .intro li { margin: 0 0 var(--space-6); line-height: var(--leading-body); }
+
+  /* --- 凡例 --- */
+  .legend { display: flex; flex-wrap: wrap; gap: var(--space-12); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-16) var(--space-20); margin: var(--space-24) 0 0; }
+  .legend .li { display: flex; align-items: flex-start; gap: var(--space-8); flex: 1 1 220px; min-width: 0; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 4px; flex: none; margin: var(--space-4) 0 0; }
+  .legend .sw.f { background: var(--color-fact); }
+  .legend .sw.i { background: var(--color-interp); }
+  .legend .lt { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); }
+  .legend .lt b { color: var(--color-ink); }
+
+  /* --- 目次 --- */
+  .toc { background: var(--color-surface-2); border-radius: var(--radius-m); padding: var(--space-20); margin: var(--space-32) 0 0; }
+  .toc > p { font-size: 15px; font-weight: 700; color: var(--color-ink-3); margin: 0 0 var(--space-12); }
+  .toc .tg { font-size: var(--text-caption); font-weight: 700; color: var(--color-ink-3); margin: var(--space-12) 0 var(--space-4); }
+  .toc ol { list-style: none; display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+  .toc a { display: flex; gap: var(--space-10); text-decoration: none; color: var(--color-ink); font-size: var(--text-small); line-height: var(--leading-small); }
+  .toc a span { color: var(--color-accent); font-weight: 700; min-width: 22px; }
+  .toc a:hover { color: var(--color-accent); }
+
+  /* --- グループ見出し（A〜G） --- */
+  .group { margin: var(--space-64) 0 0; padding: var(--space-20) 0 0; border-top: 3px solid var(--color-accent); }
+  .group__no { font-size: var(--text-small); font-weight: 900; color: var(--color-accent); letter-spacing: 0.1em; margin: 0 0 var(--space-4); }
+  .group h2 { font-size: 26px; line-height: var(--leading-heading); margin: 0 0 var(--space-8); }
+  .group__lead { color: var(--color-ink-2); font-size: var(--text-small); line-height: var(--leading-small); margin: 0; max-width: var(--measure); }
+
+  /* --- 項目 --- */
+  .item { padding: var(--space-48) 0 0; scroll-margin-top: var(--space-24); }
+  .item__no { font-size: var(--text-small); font-weight: 700; color: var(--color-accent); letter-spacing: 0.08em; margin: 0 0 var(--space-6); }
+  .item h3 { font-size: 22px; font-weight: 700; line-height: var(--leading-heading); margin: 0 0 var(--space-12); }
+  @media (min-width: 768px) { .item h3 { font-size: 25px; } }
+  .step { font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink-3); margin: var(--space-24) 0 var(--space-6); }
+
+  .howto { background: var(--color-surface-2); border: 1px solid var(--color-border); border-left: 4px solid var(--color-accent); border-radius: var(--radius-m); padding: var(--space-16) var(--space-20); margin: var(--space-12) 0 var(--space-8); max-width: var(--measure); }
+  .howto::before { content: "① やること"; display: block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; color: var(--color-accent); margin: 0 0 var(--space-6); }
+  .howto p { margin: 0; font-weight: 700; line-height: var(--leading-body); color: var(--color-ink); }
+  .howto p + p { margin: var(--space-8) 0 0; font-weight: 500; font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); }
+
+  .agree { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); margin: 0 0 var(--space-8); max-width: var(--measure); }
+  .agree b { color: var(--color-ink); }
+
+  .claim { display: block; border-radius: var(--radius-s); padding: var(--space-16) var(--space-20); margin: var(--space-12) 0; border-left: 4px solid; line-height: var(--leading-body); max-width: var(--measure); }
+  .claim::before { display: block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; margin: 0 0 var(--space-6); }
+  span[data-type="fact"] { background: var(--color-fact-bg); border-color: var(--color-fact); color: var(--color-ink); }
+  span[data-type="fact"]::before { content: "事実 — 一次ソースの記述（言い換え）"; color: var(--color-fact); }
+  span[data-type="interpretation"] { background: var(--color-interp-bg); border-color: var(--color-interp); color: var(--color-ink); }
+  span[data-type="interpretation"]::before { content: "解釈 — 実務での使い方"; color: var(--color-interp); }
+  .claim .para { display: block; margin: var(--space-8) 0 0; }
+
+  .cites { display: flex; flex-wrap: wrap; gap: var(--space-6); margin: var(--space-12) 0 0; }
+  a.cite { display: inline-flex; align-items: center; gap: var(--space-4); font-size: var(--text-caption); font-weight: 500; text-decoration: none; color: var(--color-ink-2); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-l); padding: var(--space-2) var(--space-10); line-height: var(--leading-small); max-width: 100%; overflow-wrap: anywhere; }
+  a.cite:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+  .caution { border: 1px solid var(--color-interp); border-radius: var(--radius-s); background: var(--color-surface); padding: var(--space-12) var(--space-16); margin: var(--space-12) 0; font-size: var(--text-small); line-height: var(--leading-small); max-width: var(--measure); }
+  .caution b { color: var(--color-interp); margin: 0 var(--space-6) 0 0; }
+  .counter { border: 2px dashed var(--color-interp); background: var(--color-interp-bg); border-radius: var(--radius-m); padding: var(--space-16) var(--space-20); margin: var(--space-12) 0; max-width: var(--measure); }
+  .counter .tag { display: inline-block; font-size: var(--text-caption); font-weight: 700; color: var(--color-interp); letter-spacing: 0.06em; margin: 0 0 var(--space-6); }
+  .counter p { margin: 0; line-height: var(--leading-body); font-size: var(--text-small); }
+
+  /* --- ビフォー／アフター図（差し替え単位: figure.ba[data-point]） --- */
+  figure.ba { margin: var(--space-8) 0 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-12); box-shadow: var(--shadow-card); }
+  .ba__panels { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-12); }
+  @media (min-width: 640px) { .ba__panels { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .ba--single .ba__panels { grid-template-columns: minmax(0, 1fr); }
+  .ba__panel { background: var(--color-surface-2); border-radius: var(--radius-s); padding: var(--space-10); min-width: 0; }
+  .ba__label { font-size: var(--text-caption); font-weight: 900; letter-spacing: 0.1em; margin: 0 0 var(--space-8); }
+  .ba__panel[data-state="before"] .ba__label { color: var(--color-interp); }
+  .ba__panel[data-state="after"] .ba__label { color: var(--color-fact); }
+  .ba__panel[data-state="diagram"] .ba__label { color: var(--color-ink-3); }
+  figure.ba figcaption { margin: var(--space-12) 0 0; font-size: var(--text-small); color: var(--color-ink-3); line-height: var(--leading-small); }
+
+  /* --- 図の中のモック部品 --- */
+  .mock { background: var(--swatch-base-white); border: 1px solid var(--color-border); border-radius: var(--radius-s); padding: var(--space-12); color: var(--swatch-base-ink); font-size: 13px; line-height: var(--leading-small); overflow-wrap: anywhere; }
+  .m-h { font-size: 15px; font-weight: 700; line-height: var(--leading-heading); margin: 0 0 var(--space-6); }
+  .m-p { font-size: 13px; margin: 0 0 var(--space-8); line-height: var(--leading-small); }
+  .m-row { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+  .m-btn { display: inline-block; font-size: 13px; font-weight: 700; padding: var(--space-6) var(--space-12); border-radius: 6px; border: 1.5px solid transparent; line-height: 1.4; }
+  .m-btn--ghost { background: var(--swatch-base-white); border-color: var(--swatch-base-content3); color: var(--swatch-base-ink); }
+  .m-btn--text { background: transparent; color: var(--swatch-base-accent); padding-left: var(--space-4); padding-right: var(--space-4); }
+  .m-tag { display: inline-block; font-size: 12px; font-weight: 700; padding: var(--space-2) var(--space-10); border-radius: 999px; line-height: 1.5; }
+  .m-label { font-size: 12px; font-weight: 700; margin: 0 0 var(--space-4); }
+  .m-input { border: 2px solid; border-radius: 6px; padding: var(--space-8) var(--space-10); font-size: 13px; background: var(--swatch-base-white); color: var(--swatch-base-content3); }
+  .m-rule { height: 1px; margin: var(--space-10) 0; }
+  .m-bar { display: inline-block; width: 4px; height: 1em; border-radius: 2px; vertical-align: -0.12em; margin: 0 var(--space-6) 0 0; }
+  .m-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .m-sw { display: inline-block; width: 26px; height: 26px; border-radius: 6px; flex: none; border: 1px solid var(--color-border); }
+  .m-sw--empty { background: repeating-linear-gradient(45deg, var(--color-surface), var(--color-surface) 4px, var(--color-surface-2) 4px, var(--color-surface-2) 8px); }
+  .m-li { display: flex; align-items: center; gap: var(--space-8); font-size: 13px; padding: var(--space-6) 0; border-bottom: 1px solid var(--swatch-base-gray100); }
+  .m-li:last-child { border-bottom: 0; }
+  .m-tabs { display: flex; flex-wrap: wrap; gap: var(--space-4); border-bottom: 1px solid var(--swatch-base-gray200); }
+  .m-tab { font-size: 13px; padding: var(--space-6) var(--space-10); border-bottom: 3px solid transparent; }
+  .m-tab small { display: block; font-size: 10px; color: var(--swatch-base-content3); font-weight: 500; }
+  .m-link { color: var(--swatch-base-accent); text-decoration: none; }
+  .m-split { display: grid; grid-template-columns: minmax(0, 6.5em) minmax(0, 1fr); gap: var(--space-10); }
+  .m-nav { display: flex; flex-direction: column; gap: var(--space-2); border-right: 1px solid var(--swatch-base-gray100); padding: 0 var(--space-8) 0 0; }
+  .m-nav span { display: block; font-size: 12px; padding: var(--space-4) var(--space-6); border-radius: 4px; border-left: 3px solid transparent; }
+  .u-ul { text-decoration: underline; text-underline-offset: 2px; }
+  .u-b { font-weight: 700; }
+  .m-card { border-radius: 8px; padding: var(--space-10); margin: var(--space-8) 0 0; }
+  .m-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
+  .m-code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; background: var(--swatch-base-gray50); color: var(--swatch-base-ink); padding: var(--space-8); border-radius: 6px; white-space: pre-wrap; word-break: break-all; margin: 0; line-height: var(--leading-small); }
+  .m-note { font-size: 11px; color: var(--color-ink-3); margin: var(--space-8) 0 0; line-height: var(--leading-small); }
+  .mock .m-note { color: var(--swatch-base-content3); }
+  .m-ramp { display: flex; height: 30px; border-radius: 6px; overflow: hidden; border: 1px solid var(--color-border); }
+  .m-ramp span { flex: 1; }
+  .m-bracket { display: flex; gap: var(--space-4); font-size: 11px; margin: var(--space-6) 0 0; }
+  .m-bracket span { border-top: 2px solid var(--color-accent); padding: var(--space-2) 0 0; text-align: center; color: var(--color-ink-2); }
+  .m-stack { display: flex; height: 26px; border-radius: 6px; overflow: hidden; font-size: 11px; font-weight: 700; }
+  .m-stack span { display: flex; align-items: center; justify-content: center; }
+  .ratio { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ok { color: var(--color-fact); font-weight: 700; }
+  .ng { color: var(--color-interp); font-weight: 700; }
+  .mock .ok { color: var(--swatch-base-positive); }
+  .mock .ng { color: var(--swatch-base-error); }
+
+  /* --- 見本色ユーティリティ（tokens.css の --swatch-* を参照。生の色値は書かない） --- */
+  .fg-base-ink { color: var(--swatch-base-ink); } .bg-base-ink { background: var(--swatch-base-ink); } .bd-base-ink { border-color: var(--swatch-base-ink); }
+  .fg-base-content2 { color: var(--swatch-base-content2); } .bg-base-content2 { background: var(--swatch-base-content2); } .bd-base-content2 { border-color: var(--swatch-base-content2); }
+  .fg-base-content3 { color: var(--swatch-base-content3); } .bg-base-content3 { background: var(--swatch-base-content3); } .bd-base-content3 { border-color: var(--swatch-base-content3); }
+  .fg-base-disabled { color: var(--swatch-base-disabled); } .bg-base-disabled { background: var(--swatch-base-disabled); } .bd-base-disabled { border-color: var(--swatch-base-disabled); }
+  .fg-base-gray500 { color: var(--swatch-base-gray500); } .bg-base-gray500 { background: var(--swatch-base-gray500); } .bd-base-gray500 { border-color: var(--swatch-base-gray500); }
+  .fg-base-gray300 { color: var(--swatch-base-gray300); } .bg-base-gray300 { background: var(--swatch-base-gray300); } .bd-base-gray300 { border-color: var(--swatch-base-gray300); }
+  .fg-base-gray200 { color: var(--swatch-base-gray200); } .bg-base-gray200 { background: var(--swatch-base-gray200); } .bd-base-gray200 { border-color: var(--swatch-base-gray200); }
+  .fg-base-gray100 { color: var(--swatch-base-gray100); } .bg-base-gray100 { background: var(--swatch-base-gray100); } .bd-base-gray100 { border-color: var(--swatch-base-gray100); }
+  .fg-base-gray50 { color: var(--swatch-base-gray50); } .bg-base-gray50 { background: var(--swatch-base-gray50); } .bd-base-gray50 { border-color: var(--swatch-base-gray50); }
+  .fg-base-white { color: var(--swatch-base-white); } .bg-base-white { background: var(--swatch-base-white); } .bd-base-white { border-color: var(--swatch-base-white); }
+  .fg-base-accent { color: var(--swatch-base-accent); } .bg-base-accent { background: var(--swatch-base-accent); } .bd-base-accent { border-color: var(--swatch-base-accent); }
+  .fg-base-positive { color: var(--swatch-base-positive); } .bg-base-positive { background: var(--swatch-base-positive); } .bd-base-positive { border-color: var(--swatch-base-positive); }
+  .fg-base-warning { color: var(--swatch-base-warning); } .bg-base-warning { background: var(--swatch-base-warning); } .bd-base-warning { border-color: var(--swatch-base-warning); }
+  .fg-base-error { color: var(--swatch-base-error); } .bg-base-error { background: var(--swatch-base-error); } .bd-base-error { border-color: var(--swatch-base-error); }
+  .fg-base-error-bg { color: var(--swatch-base-error-bg); } .bg-base-error-bg { background: var(--swatch-base-error-bg); } .bd-base-error-bg { border-color: var(--swatch-base-error-bg); }
+  .fg-govuk-ink { color: var(--swatch-govuk-ink); } .bg-govuk-ink { background: var(--swatch-govuk-ink); } .bd-govuk-ink { border-color: var(--swatch-govuk-ink); }
+  .fg-govuk-link { color: var(--swatch-govuk-link); } .bg-govuk-link { background: var(--swatch-govuk-link); } .bd-govuk-link { border-color: var(--swatch-govuk-link); }
+  .fg-govuk-brand { color: var(--swatch-govuk-brand); } .bg-govuk-brand { background: var(--swatch-govuk-brand); } .bd-govuk-brand { border-color: var(--swatch-govuk-brand); }
+  .fg-carbon-text { color: var(--swatch-carbon-text); } .bg-carbon-text { background: var(--swatch-carbon-text); } .bd-carbon-text { border-color: var(--swatch-carbon-text); }
+  .fg-carbon-text2 { color: var(--swatch-carbon-text2); } .bg-carbon-text2 { background: var(--swatch-carbon-text2); } .bd-carbon-text2 { border-color: var(--swatch-carbon-text2); }
+  .fg-carbon-link { color: var(--swatch-carbon-link); } .bg-carbon-link { background: var(--swatch-carbon-link); } .bd-carbon-link { border-color: var(--swatch-carbon-link); }
+  .fg-carbon-yellow { color: var(--swatch-carbon-yellow); } .bg-carbon-yellow { background: var(--swatch-carbon-yellow); } .bd-carbon-yellow { border-color: var(--swatch-carbon-yellow); }
+  .fg-carbon-orange { color: var(--swatch-carbon-orange); } .bg-carbon-orange { background: var(--swatch-carbon-orange); } .bd-carbon-orange { border-color: var(--swatch-carbon-orange); }
+  .fg-carbon-red { color: var(--swatch-carbon-red); } .bg-carbon-red { background: var(--swatch-carbon-red); } .bd-carbon-red { border-color: var(--swatch-carbon-red); }
+  .fg-carbon-green { color: var(--swatch-carbon-green); } .bg-carbon-green { background: var(--swatch-carbon-green); } .bd-carbon-green { border-color: var(--swatch-carbon-green); }
+  .fg-carbon-info { color: var(--swatch-carbon-info); } .bg-carbon-info { background: var(--swatch-carbon-info); } .bd-carbon-info { border-color: var(--swatch-carbon-info); }
+  .fg-carbon-purple { color: var(--swatch-carbon-purple); } .bg-carbon-purple { background: var(--swatch-carbon-purple); } .bd-carbon-purple { border-color: var(--swatch-carbon-purple); }
+  .fg-govuk-border { color: var(--swatch-govuk-border); } .bg-govuk-border { background: var(--swatch-govuk-border); } .bd-govuk-border { border-color: var(--swatch-govuk-border); }
+  .fg-govuk-focus { color: var(--swatch-govuk-focus); } .bg-govuk-focus { background: var(--swatch-govuk-focus); } .bd-govuk-focus { border-color: var(--swatch-govuk-focus); }
+  .fg-g183-link { color: var(--swatch-g183-link); } .bg-g183-link { background: var(--swatch-g183-link); } .bd-g183-link { border-color: var(--swatch-g183-link); }
+  .fg-primer-attention { color: var(--swatch-primer-attention); } .bg-primer-attention { background: var(--swatch-primer-attention); } .bd-primer-attention { border-color: var(--swatch-primer-attention); }
+  .fg-primer-severe { color: var(--swatch-primer-severe); } .bg-primer-severe { background: var(--swatch-primer-severe); } .bd-primer-severe { border-color: var(--swatch-primer-severe); }
+  .fg-primer-danger { color: var(--swatch-primer-danger); } .bg-primer-danger { background: var(--swatch-primer-danger); } .bd-primer-danger { border-color: var(--swatch-primer-danger); }
+  .fg-primer-done { color: var(--swatch-primer-done); } .bg-primer-done { background: var(--swatch-primer-done); } .bd-primer-done { border-color: var(--swatch-primer-done); }
+  .fg-primer-btn { color: var(--swatch-primer-btn); } .bg-primer-btn { background: var(--swatch-primer-btn); } .bd-primer-btn { border-color: var(--swatch-primer-btn); }
+  .fg-primer-btn-hover { color: var(--swatch-primer-btn-hover); } .bg-primer-btn-hover { background: var(--swatch-primer-btn-hover); } .bd-primer-btn-hover { border-color: var(--swatch-primer-btn-hover); }
+  .fg-primer-btn-active { color: var(--swatch-primer-btn-active); } .bg-primer-btn-active { background: var(--swatch-primer-btn-active); } .bd-primer-btn-active { border-color: var(--swatch-primer-btn-active); }
+  .fg-fluent-brand { color: var(--swatch-fluent-brand); } .bg-fluent-brand { background: var(--swatch-fluent-brand); } .bd-fluent-brand { border-color: var(--swatch-fluent-brand); }
+  .fg-fluent-text { color: var(--swatch-fluent-text); } .bg-fluent-text { background: var(--swatch-fluent-text); } .bd-fluent-text { border-color: var(--swatch-fluent-text); }
+  .fg-fluent-disabled-fg { color: var(--swatch-fluent-disabled-fg); } .bg-fluent-disabled-fg { background: var(--swatch-fluent-disabled-fg); } .bd-fluent-disabled-fg { border-color: var(--swatch-fluent-disabled-fg); }
+  .fg-fluent-disabled-bg { color: var(--swatch-fluent-disabled-bg); } .bg-fluent-disabled-bg { background: var(--swatch-fluent-disabled-bg); } .bd-fluent-disabled-bg { border-color: var(--swatch-fluent-disabled-bg); }
+  .fg-fluent-dark-bg1 { color: var(--swatch-fluent-dark-bg1); } .bg-fluent-dark-bg1 { background: var(--swatch-fluent-dark-bg1); } .bd-fluent-dark-bg1 { border-color: var(--swatch-fluent-dark-bg1); }
+  .fg-fluent-dark-bg2 { color: var(--swatch-fluent-dark-bg2); } .bg-fluent-dark-bg2 { background: var(--swatch-fluent-dark-bg2); } .bd-fluent-dark-bg2 { border-color: var(--swatch-fluent-dark-bg2); }
+  .fg-fluent-dark-bg3 { color: var(--swatch-fluent-dark-bg3); } .bg-fluent-dark-bg3 { background: var(--swatch-fluent-dark-bg3); } .bd-fluent-dark-bg3 { border-color: var(--swatch-fluent-dark-bg3); }
+  .fg-fluent-dark-brand { color: var(--swatch-fluent-dark-brand); } .bg-fluent-dark-brand { background: var(--swatch-fluent-dark-brand); } .bd-fluent-dark-brand { border-color: var(--swatch-fluent-dark-brand); }
+  .fg-polaris-brand { color: var(--swatch-polaris-brand); } .bg-polaris-brand { background: var(--swatch-polaris-brand); } .bd-polaris-brand { border-color: var(--swatch-polaris-brand); }
+  .m-tab small.fg-govuk-ink { color: var(--swatch-govuk-ink); }
+  .mock .m-note.fg-base-white { color: var(--swatch-base-white); }
+  /* --- 出典一覧 / まとめ --- */
+  .sources { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-24) var(--space-20); margin: var(--space-64) 0 0; }
+  .sources h2 { font-size: 22px; line-height: var(--leading-heading); margin: 0 0 var(--space-12); }
+  .sources ol { margin: 0; padding: 0 0 0 var(--space-20); }
+  .sources li { margin: 0 0 var(--space-10); font-size: var(--text-small); line-height: var(--leading-small); overflow-wrap: anywhere; }
+  .sources li small { display: block; color: var(--color-ink-3); }
+  .sources p { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); margin: var(--space-12) 0 0; }
+
+  footer { padding-block: var(--space-48) var(--space-64); }
+  footer p { font-size: var(--text-caption); color: var(--color-ink-3); border-top: 1px solid var(--color-border); padding: var(--space-16) 0 0; margin: 0; line-height: var(--leading-small); }
+
+  /* --- ブログ調の本文（v2） --- */
+  .item .body > p { max-width: var(--measure); margin: 0 0 var(--space-16); line-height: var(--leading-body); }
+  .point { background: var(--color-surface-2); border-left: 4px solid var(--color-accent); border-radius: var(--radius-s); padding: var(--space-16) var(--space-20); margin: var(--space-8) 0 var(--space-24); max-width: var(--measure); }
+  .point::before { content: "ここだけ覚える"; display: block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; color: var(--color-accent); margin: 0 0 var(--space-6); }
+  .point p { margin: 0; font-weight: 700; line-height: var(--leading-body); }
+  .srcline { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-6); margin: var(--space-16) 0 0; font-size: var(--text-caption); color: var(--color-ink-3); max-width: var(--measure); }
+  details.method { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-12) var(--space-20); margin: var(--space-24) 0 0; max-width: var(--measure); }
+  details.method summary { cursor: pointer; font-weight: 700; font-size: var(--text-small); color: var(--color-ink-2); }
+  details.method ul { margin: var(--space-12) 0 0; padding: 0 0 0 var(--space-20); }
+  details.method li { font-size: var(--text-small); line-height: var(--leading-small); margin: 0 0 var(--space-6); color: var(--color-ink-2); }
+
+  /* --- 配色の直し方（color-fix.html）に固有 --- */
+  .item .body > ul, .closing ul { max-width: var(--measure); margin: 0 0 var(--space-16); padding: 0 0 0 var(--space-20); }
+  .item .body li, .closing li { margin: 0 0 var(--space-6); line-height: var(--leading-body); }
+  .closing > p:not(.group__no) { max-width: var(--measure); margin: 0 0 var(--space-16); line-height: var(--leading-body); }
+  .item .body > figure.ba { margin: var(--space-8) 0 var(--space-24); }
+  figure.ba--wide { margin: var(--space-24) 0 0; }
+  .closing figure.ba { margin: var(--space-24) 0 var(--space-24); }
+  .intro figure.ba { margin: var(--space-8) 0 var(--space-24); }
+  /* 全体の比較は、広い画面では本文の幅からはみ出して大きく見せる（画面幅−96px、最大1200px） */
+  @media (min-width: 1024px) {
+    figure.ba--wide, .closing figure.ba { position: relative; left: 50%; width: min(calc(100vw - var(--space-96)), 1200px); transform: translateX(-50%); }
+  }
+  img.shot { display: block; width: 100%; height: auto; border-radius: var(--radius-s); border: 1px solid var(--color-border); background: var(--color-surface); }
+  img.zoom { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: var(--radius-s); border: 1px solid var(--color-border); background: var(--color-surface); }
+  .ba__panel[data-state="before"] .ba__label small, .ba__panel[data-state="after"] .ba__label small { font-weight: 700; letter-spacing: 0; color: var(--color-ink-3); }
+  .xref { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); margin: var(--space-12) 0 0; max-width: var(--measure); }
+  .intro ul.steps a { text-decoration: none; }
+  .intro ul.steps a:hover { text-decoration: underline; }
+  /* --- 変えた場所ごとの拡大（v3） --- */
+  .item h4 { font-size: 18px; font-weight: 700; line-height: var(--leading-heading); margin: var(--space-32) 0 var(--space-8); max-width: var(--measure); }
+  .item .body > figure.ba--spot { margin: var(--space-8) 0 var(--space-12); padding: var(--space-10); }
+  .ba--spot .ba__panels { gap: var(--space-10); align-items: start; }
+  .ba--spot.ba--rows .ba__panels { grid-template-columns: minmax(0, 1fr); }
+  .ba--spot .ba__panel { padding: var(--space-8); }
+  .ba--spot .ba__label { letter-spacing: 0.04em; margin: 0 0 var(--space-6); }
+  img.spot { display: block; max-width: 100%; height: auto; margin: 0 auto; border-radius: var(--radius-s); border: 1px solid var(--color-border); background: var(--color-surface); }
+  /* 広い画面では、拡大を本文の幅より少し広く見せる（最大880px） */
+  @media (min-width: 1024px) {
+    .item .body > figure.ba--spot { position: relative; left: 50%; width: min(calc(100vw - var(--space-96)), 880px); transform: translateX(-50%); }
+  }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <div class="hero__inner">
+      <p class="eyebrow"><a href="index.html">← UIデザインの基礎知識</a></p>
+      <p class="draft">草稿・オーナー確認用</p>
+      <h1>ダメなUIを4段階で直す<small>配色の基本を1画面で試す</small></h1>
+      <p class="lede">配色のミスを14個入れたタスク管理アプリの1画面を、配色の記事の章に沿って4段階で直します。</p>
+      <p class="meta">読了目安 約20分／変えた場所ごとに直す前と直した後の拡大つき</p>
+    </div>
+  </header>
+
+  <main class="wrap prose">
+    <div class="intro">
+      <p>タスク管理アプリの1画面を用意しました。左にプロジェクトのメニュー、右側にタスクの一覧と、行を押すと開く詳細があります。この画面には、配色のよくあるミスを14個入れています。どれも「わざと壊した」ほど派手なものではなく、急いで作るとつい入ってしまう程度のものです。</p>
+      <figure class="ba ba--single" data-point="intro">
+        <div class="ba__panels">
+          <div class="ba__panel" data-state="before">
+            <p class="ba__label">ダメUI</p>
+            <img class="shot" data-img="full-before" alt="ダメUIの全体。赤いメンテナンスのお知らせ帯、青く塗りつぶされたサイドバーの選択中、青いボタンが3つ並ぶ見出し、淡い色の状態の札とタグが並ぶタスク一覧、右に詳細のパネル">
+          </div>
+        </div>
+        <figcaption>直す前の画面（ダメUI）。一覧の1行目を押して、右に詳細を開いた状態。</figcaption>
+      </figure>
+      <p>この記事では、この画面を4段階で直していきます。1つの段階は、配色の記事の1つの章に当たります。</p>
+      <ul class="steps">
+        <li><a href="#s1">段階1　A 色は役割で決める</a></li>
+        <li><a href="#s2">段階2　B 色の量を絞る</a></li>
+        <li><a href="#s3">段階3　D 意味を持つ色</a></li>
+        <li><a href="#s4">段階4　C 数値で確かめる</a></li>
+      </ul>
+      <p>記事の章の順（A・B・C・D）と比べると、最後の2つが入れ替わっています。数値で確かめるのを最後に1回だけにしたかったからです。先に数値を合わせてから状態の色を作り直すと、同じ文字の濃さを2回直すことになります。色を決めきってから、最後にまとめて計算で確かめる順にしました。</p>
+      <p>直すのは色だけです。ボタンや行の大きさと位置は、どの段階でも変えていません。各段階で変わる場所も、1か所につき1回だけにしています。前の段階と見比べれば、その章の基本で何が変わったのかだけが見える作りです。</p>
+      <p>各項目では、変えた場所を1か所ずつ取り上げ、左に直す前、右に直した後の拡大を並べています。拡大の中の紫の枠は、変えた場所の目印です（画面の一部ではありません）。</p>
+    </div>
+
+    <!-- ================= 段階1 ================= -->
+    <div class="group" id="s1">
+      <p class="group__no">段階1　章A（項目1・2・4）</p>
+      <h2>色は役割で決める</h2>
+      <p class="group__lead">最初に決めるのは「何色にするか」ではなく「その色に何をさせるか」です。押せる所、今いる場所、通知の数のように、色の役割を先に決めてから色を当てはめます。</p>
+    </div>
+    <section class="item" id="p01" data-item="1">
+      <p class="item__no">01</p>
+      <h3>青は「押せる所」の色にする（項目1）</h3>
+      <div class="body">
+        <p>ダメUIでは、同じ青がいろいろな所に使われていました。押せるボタンとリンクだけでなく、押せないロゴ、プロジェクトの印、選択中のタブ、進み具合のバーまで青です。これでは、青い物を見ても押せるのかどうかが分かりません。</p>
+        <p>Apple のガイドラインは、同じ色で別々の意味を表さないよう求めていて、ブランド色で押せる物を示しているなら、押せない文字に同じ色を使うと混乱する、という例を挙げています（CL-01）。NN/g も、押せない文字をリンクと同じ色にしないよう書いています（CL-02・CL-03）。</p>
+        <p>この段階では、「招待」と「タスクを削除」はまだ前の青のままです。この2つは段階2でボタンとしての強さを直すので、ここで色を変えると、同じボタンの色を2回変えることになります。変えた場所は、次の6か所です。</p>
+        <h4>ロゴ</h4>
+        <figure class="ba ba--spot" data-point="s01-logo">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s01-logo-before" alt="ダメUIのロゴ。チェックの印の四角が、押せるボタンと同じ明るい青で塗られている">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s01-logo-step1" alt="段階1のロゴ。チェックの印の四角が、濃い文字色（ほぼ黒）で塗られている">
+            </div>
+          </div>
+        </figure>
+        <p>ロゴの印が、押せるボタンと同じ青（#3B6CF6）で塗られていました。ロゴは押して何かが起きる場所ではないので、青を外して濃い文字色（#1f2328）にしました。青を見たら押せる、という覚え方を崩さないためです。</p>
+        <h4>新規タスクのボタン</h4>
+        <figure class="ba ba--spot" data-point="s01-new">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s01-new-before" alt="ダメUIの見出しの右。「招待」と「新規タスク」が、どちらも明るい青の塗りに白い文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s01-new-step1" alt="段階1。「新規タスク」が少し濃い青の塗りに白い文字になった。「招待」は明るい青のまま">
+            </div>
+          </div>
+        </figure>
+        <p>押せる青を #3B6CF6 から #1552E0 に決め直しました。白い文字との比率は4.50:1から6.33:1になり、余裕ができています。この青を、この画面の「押せる」の色として1つに決めます。</p>
+        <h4>文中のリンク</h4>
+        <figure class="ba ba--spot" data-point="s01-link">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s01-link-before" alt="ダメUIの詳細の文「書き方に迷ったら記入ルールはこちらを見てください」。リンクは明るい青の文字で、下線はない">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s01-link-step1" alt="段階1。リンク「記入ルールはこちら」が、ボタンと同じ濃い青の文字になった。下線はまだない">
+            </div>
+          </div>
+        </figure>
+        <p>リンクの色も、ボタンと同じ #1552E0 にそろえました。前の青はカードの地に対して4.32:1で、本文の基準の4.5:1に届いていませんでした。直したあとは6.07:1です。下線は段階4で足します。</p>
+        <h4>選択中のタブ</h4>
+        <figure class="ba ba--spot" data-point="s01-tab">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s01-tab-before" alt="ダメUIの表の上のタブ。選択中の「すべて 12」が青い文字と青い下線、ほかの2つは薄いグレー">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s01-tab-step1" alt="段階1。選択中の「すべて 12」が、濃い文字色の太字と濃い下線になった">
+            </div>
+          </div>
+        </figure>
+        <p>選ばれているタブの文字と下線が青でした。タブは押せますが、「今選ばれている」ことを示す印は、押すための色とは役割が違います。濃い文字色と太字、下線で示すように変えました（15.14:1）。</p>
+        <h4>進み具合のバー</h4>
+        <figure class="ba ba--spot ba--rows" data-point="s01-bar">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s01-bar-before" alt="ダメUIの「25%」の下の進み具合のバー。塗りは青、残りの溝は白で、カードの地とほとんど区別がつかない">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s01-bar-step1" alt="段階1のバー。塗りは濃い文字色、残りの溝は淡いグレーで、バーの右端まで見える">
+            </div>
+          </div>
+        </figure>
+        <p>バーの塗りが青で、残りの部分（溝）は白でした。バーは押せないので青を外し、濃い文字色で塗りました。溝はカードの地とほとんど同じ白（1.04:1）で、どこまでが100%か分からなかったので、淡いニュートラル（#e6eaef）を敷いています。</p>
+        <h4>プロジェクトの印</h4>
+        <figure class="ba ba--spot" data-point="s01-pj">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s01-pj-before" alt="ダメUI。上は見出し「新サイト公開」の前の印で青。下はサイドバーの選択中の行で、青い塗りの中の印は白">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s01-pj-step1" alt="段階1。見出しの前の印と、サイドバーの「新サイト公開」の印が、どちらもピンク">
+            </div>
+          </div>
+        </figure>
+        <p>今のプロジェクトの印も、押せる青でした。押せない印なので、押せる青とは別の、見分けのための色（ピンク #bf3989）にしました。サイドバーと見出しの両方に同じ色の印があるので、どのプロジェクトを見ているかが色でもつながります。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/color" data-ledger="CL-01">CL-01 · Apple HIG</a> <a class="cite" href="https://www.nngroup.com/articles/color-enhance-design/" data-ledger="CL-02">CL-02 · NN/g</a> <a class="cite" href="https://www.nngroup.com/articles/clickable-elements/" data-ledger="CL-03">CL-03 · NN/g</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p01">配色の記事の項目1</a></p>
+    </section>
+    <section class="item" id="p02" data-item="2">
+      <p class="item__no">02</p>
+      <h3>選択中のナビは、ボタンと張り合わせない（項目2）</h3>
+      <div class="body">
+        <p>サイドバーで今いる場所の示し方は、会社によって考え方が分かれます。Apple と Fluent は、今いる場所もブランド色で示す例を出しています（CL-21・CL-95）。一方で Material 3・Atlassian・Spectrum は、選択中を主ボタンと別の色にしています（CL-96・CL-64・CL-99・CL-97）。Spectrum は「ナビの選択中が、主な操作のボタンと注目を取り合っている」図を悪い例に挙げています（CL-97・CL-98）。この画面では Spectrum に近い形を選びました。ブランド色を使う場合でも、大きく塗りつぶさず、文字の色や細い線にとどめるのがおすすめです。</p>
+        <h4>サイドバーの選択中</h4>
+        <figure class="ba ba--spot" data-point="s02-nav">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s02-nav-before" alt="ダメUIのサイドバー。「プロジェクト」の下の3つのうち、選択中の「新サイト公開」が青で大きく塗りつぶされ、白い文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s02-nav-step1" alt="段階1。選択中の「新サイト公開」は淡いグレーの塗りに、左の濃い線と太字の濃い文字">
+            </div>
+          </div>
+        </figure>
+        <p>「新サイト公開」が青で大きく塗りつぶされ、白い文字が乗っていました。右上の「新規タスク」と同じ見た目なので、ボタンのように見え、2つが同じ強さで目に入ります。淡いニュートラルの塗り（#e6eaef）に、濃い左線と太字を足す形にしました。文字との比率は13.07:1、左線と地は14.22:1です。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/branding" data-ledger="CL-21">CL-21 · Apple HIG</a> <a class="cite" href="https://fluent2.microsoft.design/color" data-ledger="CL-95">CL-95 · Fluent 2</a> <a class="cite" href="https://m3.material.io/styles/color/roles" data-ledger="CL-96">CL-96 · Material 3</a> <a class="cite" href="https://atlassian.design/foundations/color" data-ledger="CL-64">CL-64 · Atlassian</a> <a class="cite" href="https://atlassian.design/components/tokens/all-tokens" data-ledger="CL-99">CL-99 · Atlassian</a> <a class="cite" href="https://spectrum.adobe.com/foundations/behavior/states" data-ledger="CL-97">CL-97 · Spectrum</a> <a class="cite" href="https://spectrum.adobe.com/foundations/attention-hierarchy" data-ledger="CL-98">CL-98 · Spectrum</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p02">配色の記事の項目2</a></p>
+    </section>
+    <section class="item" id="p04" data-item="4">
+      <p class="item__no">04</p>
+      <h3>通知の数は、塗りと文字の組で決める（項目4）</h3>
+      <div class="body">
+        <p>ダメUIの通知の数字は、本文の基準の4.5:1に届いていませんでした。直した後は赤の組にしています。赤はエラーと削除の色ですが、通知の数字のバッジは、多くのアプリが赤にしている慣習に合わせた例外にしています。慣習に合わせるか、ブランドの色にするかも、会社によって分かれる所です。Apple のガイドラインは、未読のバッジをアクセント色の使い道に挙げています（CL-21）。</p>
+        <h4>通知のバッジ</h4>
+        <figure class="ba ba--spot" data-point="s04-badge">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（ダメUI）</p>
+              <img class="spot" data-img="s04-badge-before" alt="ダメUIのロゴの横のベル。右上の通知の数「3」が、橙の塗りに白い数字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階1）</p>
+              <img class="spot" data-img="s04-badge-step1" alt="段階1。通知の数「3」が、赤の塗りに白い数字">
+            </div>
+          </div>
+        </figure>
+        <p>橙の塗り（#F37509）に白い数字で、比率は2.85:1でした。塗りの色だけを先に決めると起きるミスです。赤の塗り（#cf222e）と白の組に変え、5.36:1にしました。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/branding" data-ledger="CL-21">CL-21 · Apple HIG</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p04">配色の記事の項目4</a></p>
+    </section>
+
+    <!-- ================= 段階2 ================= -->
+    <div class="group" id="s2">
+      <p class="group__no">段階2　章B（項目5・6・7・18）</p>
+      <h2>色の量を絞る</h2>
+      <p class="group__lead">次は、色を出す場所を減らします。色は足すほど目立つのではなく、出す場所を絞るほど、見せたい物が目立ちます。</p>
+    </div>
+    <section class="item" id="p05" data-item="5">
+      <p class="item__no">05</p>
+      <h3>画面の大半はニュートラルで組む（項目5）</h3>
+      <div class="body">
+        <p>「画面はグレーで組む」と覚えると、少し言い過ぎになります。Google の Material 3 は、背景用のグレーの段階を、ブランドの色と同じ色相のまま彩度だけをごく低くして作っています（CL-102）。実際に Gmail の背景は #F8FAFD で、うっすら青いグレーです。</p>
+        <p>色みの強さ（CIELAB の彩度）で比べると、Primer の淡い地は1.2で、ダメUIの地は Gmail の約4倍あります。ブランドの色みを少し混ぜるのはよく、ダメなのは、見て分かるほど色みが強く、押せる青と同じ系統に見えることだと考えています。</p>
+        <p>Carbon・Atlassian・Polaris などは、画面の大半をニュートラルで組み、色は操作と意味に取っておく、と書いています（CL-16・CL-17・CL-19・CL-20）。</p>
+        <h4>アプリの地</h4>
+        <figure class="ba ba--spot" data-point="s05-app">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s05-app-step1" alt="段階1のサイドバーとカードの間。アプリの地が、はっきり青みのある淡い色">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s05-app-step2" alt="段階2。アプリの地が、ほとんど色みのない淡いグレー">
+            </div>
+          </div>
+        </figure>
+        <p>地が #EEF3FF で、見て分かるほど青みがありました（CIELAB の彩度6.4）。Primer の青みのあるニュートラル（#eff2f5、彩度1.9）に替えました。Gmail の地（1.7）と同じくらいの色みです。</p>
+        <h4>カードの地</h4>
+        <figure class="ba ba--spot" data-point="s05-card">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s05-card-step1" alt="段階1のタスクのカードの左上の角。カードは純粋なグレーに近い白で、周りの青みのある地と色みが違う">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s05-card-step2" alt="段階2。カードは地と同じ系統のごく淡いグレーで、色みがそろっている">
+            </div>
+          </div>
+        </figure>
+        <p>カードは #FAFAFA の純粋なグレーでした。地と同じ系統のニュートラル（#f6f8fa、Primer の bgColor-muted）にそろえています。地とカードで色みがばらばらだと、少しくすんだ印象になります。</p>
+        <h4>アバター</h4>
+        <figure class="ba ba--spot" data-point="s05-av">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s05-av-step1" alt="段階1の左下のアカウント欄。アバターの丸「佐」が淡い青の地に青い文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s05-av-step2" alt="段階2。アバターの丸「佐」が淡いグレーの地にグレーの文字">
+            </div>
+          </div>
+        </figure>
+        <p>アバターの丸が淡い青に青い文字でした。押せない物なので、ニュートラル（#e6eaef）にグレーの文字（#59636e、5.06:1）にしました。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://github.com/material-foundation/material-color-utilities/blob/main/typescript/palettes/core_palette.ts" data-ledger="CL-102">CL-102 · Material 3</a> <a class="cite" href="https://carbondesignsystem.com/elements/color/overview/" data-ledger="CL-16">CL-16 · Carbon</a> <a class="cite" href="https://atlassian.design/foundations/color" data-ledger="CL-17">CL-17 · Atlassian</a> <a class="cite" href="https://github.com/Shopify/polaris-react-archive/blob/main/polaris.shopify.com/content/design/colors/index.mdx" data-ledger="CL-19">CL-19 · Polaris</a> <a class="cite" href="https://fluent2.microsoft.design/color" data-ledger="CL-20">CL-20 · Fluent 2</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p05">配色の記事の項目5</a></p>
+    </section>
+    <section class="item" id="p06" data-item="6">
+      <p class="item__no">06</p>
+      <h3>目立つ色のボタンは1画面に1つ（項目6）</h3>
+      <div class="body">
+        <p>ダメUIでは、「招待」「新規タスク」「タスクを削除」の3つが同じ青の塗りでした。どれがこの画面の主役なのか分かりません。詳細を開いたときは、「変更を保存」も青の塗りになるので、直した後も多くて2つです。</p>
+        <h4>招待のボタン</h4>
+        <figure class="ba ba--spot" data-point="s06-invite">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s06-invite-step1" alt="段階1の見出しの右。「招待」は明るい青の塗り、「新規タスク」は濃い青の塗りで、どちらも青いボタン">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s06-invite-step2" alt="段階2。「招待」は白地にグレーの枠と濃い文字、青の塗りは「新規タスク」だけ">
+            </div>
+          </div>
+        </figure>
+        <p>「招待」も青の塗りで、「新規タスク」と並んでいました。どちらが主役なのか分かりません。「招待」を白地に枠のボタン（文字 #1f2328、15.80:1）にして、青の塗りを「新規タスク」だけにしました。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/buttons" data-ledger="CL-23">CL-23 · Apple HIG</a> <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/color" data-ledger="CL-26">CL-26 · Apple HIG</a> <a class="cite" href="https://spectrum.adobe.com/foundations/attention-hierarchy" data-ledger="CL-24">CL-24 · Spectrum</a> <a class="cite" href="https://github.com/Shopify/polaris-react-archive/blob/main/polaris.shopify.com/content/design/colors/palettes-and-roles.mdx" data-ledger="CL-25">CL-25 · Polaris</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p06">配色の記事の項目6</a></p>
+    </section>
+    <section class="item" id="p07" data-item="7">
+      <p class="item__no">07</p>
+      <h3>削除は赤くする（項目7）</h3>
+      <div class="body">
+        <p>ダメUIでは、「タスクを削除」と、確認の画面の「削除する」が、いつもの青い主ボタンでした。取り消せない操作が、ふだんの「保存」と同じ見た目になっています。直した後は、最初の入口は控えめに、最後の確認ははっきりと、という強さの分け方にしました。</p>
+        <h4>詳細の「タスクを削除」</h4>
+        <figure class="ba ba--spot" data-point="s07-del">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s07-del-step1" alt="段階1の詳細の下のボタン。「タスクを削除」が明るい青の塗りに白い文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s07-del-step2" alt="段階2。「タスクを削除」が白地に赤い文字とグレーの枠">
+            </div>
+          </div>
+        </figure>
+        <p>青の塗りで、ふだんの主ボタンと同じ見た目でした。白地に赤い文字（#d1242f、5.24:1）と枠のボタンにしています。最初の入口なので、塗りつぶさず控えめにしました。</p>
+        <h4>確認の「削除する」</h4>
+        <figure class="ba ba--spot ba--rows" data-point="s07-modal">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s07-modal-step1" alt="段階1の確認の画面「タスクを削除しますか？」。右下の「削除する」が明るい青の塗りに白い文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s07-modal-step2" alt="段階2の確認の画面。「削除する」が赤の塗りに白い文字">
+            </div>
+          </div>
+        </figure>
+        <p>確認の画面の「削除する」も青の塗りでした。ここは取り消せない操作の最後の確認なので、赤の塗り（#cf222e）に白い文字（5.36:1）にしました。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/buttons" data-ledger="CL-23">CL-23 · Apple HIG</a> <a class="cite" href="https://design-system.service.gov.uk/components/button/" data-ledger="CL-27">CL-27 · GOV.UK</a> <a class="cite" href="https://spectrum.adobe.com/web/rsp/components/button" data-ledger="CL-24">CL-24 · Spectrum</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p07">配色の記事の項目7</a></p>
+    </section>
+    <section class="item" id="p18" data-item="18">
+      <p class="item__no">18</p>
+      <h3>押せるボタンをグレーにしない（項目18）</h3>
+      <div class="body">
+        <p>ダメUIの「変更を保存」と確認の「キャンセル」は、グレーの塗りに薄いグレーの文字で、押せない状態のボタンと見分けがつきませんでした。この項目は、配色の記事では章E「操作の状態」に入っていますが、ボタンの強さの話なので、この段階で直しています。</p>
+        <h4>変更を保存</h4>
+        <figure class="ba ba--spot" data-point="s18-save">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s18-save-step1" alt="段階1の詳細の下のボタン。「変更を保存」がグレーの塗りに薄いグレーの文字で、押せないボタンのように見える">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s18-save-step2" alt="段階2。「変更を保存」が濃い青の塗りに白い文字">
+            </div>
+          </div>
+        </figure>
+        <p>グレーの塗りに薄いグレーの文字（2.15:1）で、押せないように見えました。詳細での主な操作なので、青の塗りにしています（6.33:1）。</p>
+        <h4>複製と、確認の「キャンセル」</h4>
+        <figure class="ba ba--spot" data-point="s18-dup">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階1）</p>
+              <img class="spot" data-img="s18-dup-step1" alt="段階1。上は詳細の「複製」で、白地にごく薄い枠。下は確認の画面の「キャンセル」で、グレーの塗りに薄いグレーの文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階2）</p>
+              <img class="spot" data-img="s18-dup-step2" alt="段階2。「複製」も「キャンセル」も、白地にグレーの枠と濃い文字">
+            </div>
+          </div>
+        </figure>
+        <p>「キャンセル」もグレーの塗りに薄い文字でした。控えめな操作は、グレーで塗らずに白地に枠のボタンにします（15.80:1）。グレーの塗りは、本当に押せない状態のボタンに取っておきます。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://www.nngroup.com/articles/color-enhance-design/" data-ledger="CL-66">CL-66 · NN/g</a> <a class="cite" href="https://carbondesignsystem.com/elements/color/overview/" data-ledger="CL-67">CL-67 · Carbon</a> <a class="cite" href="https://github.com/Shopify/polaris-react-archive/blob/main/polaris.shopify.com/content/design/colors/color-tokens.mdx" data-ledger="CL-65">CL-65 · Polaris</a> <a class="cite" href="https://m3.material.io/foundations/interaction/states/applying-states" data-ledger="CL-69">CL-69 · Material 3</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p18">配色の記事の項目18</a></p>
+    </section>
+
+    <!-- ================= 段階3 ================= -->
+    <div class="group" id="s3">
+      <p class="group__no">段階3　章D（項目11・12・13・14）</p>
+      <h2>意味を持つ色</h2>
+      <p class="group__lead">ここからは、エラー・成功・注意のように、意味を伝える色を整えます。</p>
+    </div>
+    <section class="item" id="p11" data-item="11">
+      <p class="item__no">11</p>
+      <h3>状態の色は借りてくる（項目11）</h3>
+      <div class="body">
+        <p>段階3では、状態の札の色を、Primer の組から次のように借りました（CL-100）。</p>
+        <ul>
+          <li>未着手: グレー</li>
+          <li>進行中: 情報の青</li>
+          <li>レビュー待ち: 黄</li>
+          <li>差し戻し: 橙</li>
+          <li>完了: 緑</li>
+        </ul>
+        <p>進行中の青は淡い札なので、塗りの青いボタンとは別の物に見えます。自分で色を選ぶと、明るさの調整に時間がかかり、画面ごとにばらつきます。デザインシステムの組をそのまま使えば、組み合わせの比率も最初から確かめられています。</p>
+        <h4>状態の札</h4>
+        <figure class="ba ba--spot" data-point="s11-status">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s11-status-step2" alt="段階2の表の左の列の状態の札。進行中、レビュー待ち、差し戻し、未着手、進行中、完了が、淡い地に明るい文字で読みにくい。差し戻しは赤">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s11-status-step3" alt="段階3の状態の札。淡い地に濃い文字になり読みやすい。差し戻しは橙、完了は緑、進行中は青">
+            </div>
+          </div>
+        </figure>
+        <p>淡い地に明るい文字で、どれも4.5:1に届いていませんでした（レビュー待ち1.79:1、完了2.07:1、差し戻し3.08:1、進行中3.77:1）。Primer の「淡い地と濃い文字の組」をそのまま借りています。直したあとは、どれも4.5:1以上です（4.52〜5.06:1）。</p>
+        <h4>先週との比較のチップ</h4>
+        <figure class="ba ba--spot" data-point="s11-chip">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s11-chip-step2" alt="段階2の「25%」の横のチップ「▲1件」。明るい緑の三角と文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s11-chip-step3" alt="段階3。「▲1件」が濃い緑">
+            </div>
+          </div>
+        </figure>
+        <p>緑の文字が明るく、白い地との差が小さめでした。状態の札と同じ緑（#1a7f37、5.08:1）にそろえました。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://primer.style/foundations/primitives/color" data-ledger="CL-100">CL-100 · Primer</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p11">配色の記事の項目11</a></p>
+    </section>
+    <section class="item" id="p12" data-item="12">
+      <p class="item__no">12</p>
+      <h3>注意には強さの段階がある（項目12）</h3>
+      <div class="body">
+        <p>ダメUIでは、画面の一番上のメンテナンスのお知らせと、詳細の入力エラーが、同じ赤い見た目でした。知らせておけばよい情報と、すぐ直してほしいエラーが同じ強さに見えます。状態の札の「差し戻し」も、エラーの赤ではなく一段強い注意の橙にしています。</p>
+        <h4>メンテナンスのお知らせ</h4>
+        <figure class="ba ba--spot ba--rows" data-point="s12-notice">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s12-notice-step2" alt="段階2の画面の一番上のお知らせ帯「10月25日（土）2:00〜4:00 にメンテナンスを行います。」。淡い赤の地に赤い文字と赤いアイコン、下に赤い線">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s12-notice-step3" alt="段階3のお知らせ帯。淡い黄色の地に濃い文字で、注意のアイコンだけ黄土色">
+            </div>
+          </div>
+        </figure>
+        <p>帯が赤い文字と赤い線で、入力エラーと同じ見た目でした。知っておけばよい情報なので、黄色の地にふつうの文字（14.66:1）にして、アイコンだけ黄土色にしました。</p>
+        <h4>入力エラー</h4>
+        <figure class="ba ba--spot" data-point="s12-err">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s12-err-step2" alt="段階2の詳細の入力エラー「期限が過ぎています。今日以降の日付を入れてください。」。淡い赤の地に赤い文字と赤い枠">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s12-err-step3" alt="段階3の入力エラー。淡い赤の地に、少し濃い赤の文字。赤のまま残している">
+            </div>
+          </div>
+        </figure>
+        <p>こちらはすぐ直してほしいエラーなので、赤のまま残しています。Primer の赤の組（#d1242f／#ffebe9、4.57:1）にしました。</p>
+        <h4>期限切れの日付</h4>
+        <figure class="ba ba--spot" data-point="s12-late">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s12-late-step2" alt="段階2の表の期限の列。期限切れの「10/14」が赤い文字だけ">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s12-late-step3" alt="段階3の「10/14」。赤い文字のまま、右に丸に「!」のアイコンが付いた">
+            </div>
+          </div>
+        </figure>
+        <p>期限切れの日付も赤のまま残しました（4.93:1）。赤はエラーと期限切れにだけ使う、と決めているからです。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://carbondesignsystem.com/elements/color/tokens/" data-ledger="CL-41">CL-41 · Carbon</a> <a class="cite" href="https://carbondesignsystem.com/patterns/status-indicator-pattern/" data-ledger="CL-42">CL-42 · Carbon</a> <a class="cite" href="https://spectrum.adobe.com/web/rsp/components/in-line-alert" data-ledger="CL-44">CL-44 · Spectrum</a> <a class="cite" href="https://github.com/Shopify/polaris-react-archive/blob/main/polaris.shopify.com/content/design/colors/palettes-and-roles.mdx" data-ledger="CL-48">CL-48 · Polaris</a> <a class="cite" href="https://atlassian.design/foundations/color" data-ledger="CL-50">CL-50 · Atlassian</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p12">配色の記事の項目12</a></p>
+    </section>
+    <section class="item" id="p13" data-item="13">
+      <p class="item__no">13</p>
+      <h3>状態の色を飾りに使わない（項目13）</h3>
+      <div class="body">
+        <p>ダメUIでは、タグや印に、成功・注意・エラーと同じ色が使われていました。これでは、緑を見たときに「完了」なのか「デザイン」なのかが分かりません。</p>
+        <p>印を全部グレーにする案もありましたが、それでは印を置く意味がなくなります。大事なのは色をなくすことではなく、意味のある色と重ならない色を選ぶことです。</p>
+        <h4>タグ</h4>
+        <figure class="ba ba--spot" data-point="s13-tags">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s13-tags-step2" alt="段階2の表のタグの列。「デザイン」が淡い緑の地に緑の文字、「開発」が淡い青に青、「企画」が淡い黄に黄の文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s13-tags-step3" alt="段階3のタグ。どれも地を塗らず、グレーの枠にグレーの文字">
+            </div>
+          </div>
+        </figure>
+        <p>「デザイン」が成功の緑、「企画」が注意の黄で塗られていました。タグは種類を分けるだけで、良い・悪いの意味はありません。地を塗らない枠だけの札（文字 #59636e、5.74:1）にしました。</p>
+        <h4>NEW の印</h4>
+        <figure class="ba ba--spot" data-point="s13-new">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s13-new-step2" alt="段階2のタスク名「お問い合わせフォームの送信テスト」の横の「NEW」。淡い赤の地に赤い文字">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s13-new-step3" alt="段階3の「NEW」。地を塗らず、グレーの枠にグレーの文字">
+            </div>
+          </div>
+        </figure>
+        <p>エラーと同じ赤でした。タグと同じ枠だけの札にしています。</p>
+        <h4>サイドバーのほかのプロジェクトの印</h4>
+        <figure class="ba ba--spot" data-point="s13-pj">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s13-pj-step2" alt="段階2のサイドバー。「採用ページ改善」の印が緑、「11月キャンペーン」の印が黄">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s13-pj-step3" alt="段階3。「採用ページ改善」の印が青緑、「11月キャンペーン」の印がオリーブ">
+            </div>
+          </div>
+        </figure>
+        <p>緑と黄で、状態の色と同じでした。印は見分けるための色なので、色は残しています。状態の色・押せる青・紫を避けて、青緑（#1b7c83）とオリーブ（#7a6f1c）にしました。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://fluent2.microsoft.design/color" data-ledger="CL-43">CL-43 · Fluent 2</a> <a class="cite" href="https://github.com/Shopify/polaris-react-archive/blob/main/polaris.shopify.com/content/design/colors/index.mdx" data-ledger="CL-06">CL-06 · Polaris</a> <a class="cite" href="https://atlassian.design/foundations/color" data-ledger="CL-05">CL-05 · Atlassian</a> <a class="cite" href="https://spectrum.adobe.com/web/rsp/components/status-light" data-ledger="CL-04">CL-04 · Spectrum</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p13">配色の記事の項目13</a></p>
+    </section>
+    <section class="item" id="p14" data-item="14">
+      <p class="item__no">14</p>
+      <h3>色だけで伝えない（項目14）</h3>
+      <div class="body">
+        <p>ダメUIでは、優先度は色の点だけ、必須の項目はラベルの赤だけ、期限切れは日付の赤だけでした。色の区別がつきにくい人や、白黒で印刷したときには伝わりません。</p>
+        <p>優先度の付け方は、Linear に合わせています（CL-101）。タスク管理のアプリは、優先度に色を付けるのが普通です。ただ、Jira や Asana のように全段階に色を付ける製品と、Linear のように一番上だけに付ける製品に分かれています。</p>
+        <h4>優先度</h4>
+        <figure class="ba ba--spot" data-point="s14-pri">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s14-pri-step2" alt="段階2の表の優先度の列。上から赤、赤、黄、黄、緑、緑の点だけが並ぶ">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s14-pri-step3" alt="段階3の優先度。棒の数のアイコンに「高・高・中・中・低・低」の文字。「高」の棒だけ橙で、ほかはグレー">
+            </div>
+          </div>
+        </figure>
+        <p>赤・黄・緑の点だけで、色の区別がつきにくい人には伝わりませんでした。棒の数で段階が分かるアイコンと、「高・中・低」の文字にしています。色を付けるのは「高」の橙だけです（Linear と同じ付け方）。</p>
+        <h4>必須の項目</h4>
+        <figure class="ba ba--spot" data-point="s14-req">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s14-req-step2" alt="段階2の詳細。「タイトル」と「担当者」のラベルが赤い文字だけで、「期限」は濃いグレー">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s14-req-step3" alt="段階3。「タイトル」と「担当者」のラベルは濃いグレーになり、横に小さく「必須」の文字">
+            </div>
+          </div>
+        </figure>
+        <p>必須の項目は、ラベルを赤くしているだけでした。ラベルを濃いグレーに戻し、「必須」の文字を足しました。</p>
+        <h4>期限切れ</h4>
+        <figure class="ba ba--spot" data-point="s14-late">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階2）</p>
+              <img class="spot" data-img="s12-late-step2" alt="段階2の表の期限の列。期限切れの「10/14」が赤い文字だけ">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階3）</p>
+              <img class="spot" data-img="s12-late-step3" alt="段階3の「10/14」。右に丸に「!」のアイコンが付いた">
+            </div>
+          </div>
+        </figure>
+        <p>期限切れは日付の赤だけでした。日付の右に「!」のアイコンを足しています。読み上げでは「期限切れ」と読まれます。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://linear.app/docs/project-priority" data-ledger="CL-101">CL-101 · Linear ほか</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p14">配色の記事の項目14</a></p>
+    </section>
+
+    <!-- ================= 段階4 ================= -->
+    <div class="group" id="s4">
+      <p class="group__no">段階4　章C（項目8・9・10）＝アフター</p>
+      <h2>数値で確かめる</h2>
+      <p class="group__lead">最後に、見やすさを感覚ではなく数字で確かめます。</p>
+    </div>
+    <section class="item" id="p08" data-item="8">
+      <p class="item__no">08</p>
+      <h3>本文は背景と4.5:1以上（項目8）</h3>
+      <div class="body">
+        <p>段階3まで直しても、サブの文字は薄いグレーのままでした。WCAG は、本文の文字を背景と4.5:1以上にするよう求めています（F-01・CL-28）。直した後の色は、アプリの地に対しても5.44:1あります。</p>
+        <h4>説明文とサブの文字</h4>
+        <figure class="ba ba--spot" data-point="s08-sub">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階3）</p>
+              <img class="spot" data-img="s08-sub-step3" alt="段階3。上からカードの説明文「11月10日の公開に向けたタスクです。」、タスク名の下の補足「デザイン確定版をもとに書き出し」、詳細の「最終更新 10月19日 14:20」。どれも薄いグレーで読みにくい">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階4）</p>
+              <img class="spot" data-img="s08-sub-step4" alt="段階4。同じ3か所の文字が濃いグレーになり読みやすい">
+            </div>
+          </div>
+        </figure>
+        <p>薄いグレー（#A1A1AA）で、カードの地に対して2.46:1でした。Primer のサブ文字の色（#59636e）にして、5.74:1にしています。</p>
+        <h4>選ばれていないタブ</h4>
+        <figure class="ba ba--spot" data-point="s08-tabs">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階3）</p>
+              <img class="spot" data-img="s08-tabs-step3" alt="段階3の表の上のタブ。選ばれていない「自分の担当 4」「期限切れ 1」が薄いグレー">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階4）</p>
+              <img class="spot" data-img="s08-tabs-step4" alt="段階4。「自分の担当 4」「期限切れ 1」が濃いグレー。選択中の「すべて 12」は太字と下線のまま">
+            </div>
+          </div>
+        </figure>
+        <p>選ばれていないタブも同じ薄いグレーでした。同じ色に直しています。選ばれているタブとの違いは、太字と下線で残っています。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" data-ledger="F-01">F-01 · WCAG 2.2</a> <a class="cite" href="https://fluent2.microsoft.design/accessibility" data-ledger="CL-28">CL-28 · Fluent 2</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p08">配色の記事の項目8</a></p>
+    </section>
+    <section class="item" id="p09" data-item="9">
+      <p class="item__no">09</p>
+      <h3>入力欄の枠やアイコンも3:1以上（項目9）</h3>
+      <div class="body">
+        <p>WCAG は、入力欄の枠のように「見えないと操作できない物」を隣の色と3:1以上にするよう求めています（F-03・CL-33）。区切り線のような飾りの線は、薄いままでかまいません。</p>
+        <h4>入力欄の枠</h4>
+        <figure class="ba ba--spot" data-point="s09-inp">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階3）</p>
+              <img class="spot" data-img="s09-inp-step3" alt="段階3の詳細の入力欄（タイトル・担当者・期限）。枠がほとんど見えず、白い欄が地に溶けている">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階4）</p>
+              <img class="spot" data-img="s09-inp-step4" alt="段階4。3つの入力欄の枠がグレーの線ではっきり見える">
+            </div>
+          </div>
+        </figure>
+        <p>枠が #EBEBEB で、白に対して1.19:1でした。どこに入力するのか、ほとんど見えません。#818b98 にして3.45:1にしました。</p>
+        <h4>検索欄とアイコン</h4>
+        <figure class="ba ba--spot" data-point="s09-search">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階3）</p>
+              <img class="spot" data-img="s09-search-step3" alt="段階3のサイドバーの検索欄。虫めがねのアイコンと枠がとても薄い">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階4）</p>
+              <img class="spot" data-img="s09-search-step4" alt="段階4。虫めがねのアイコンが濃いグレーになり、枠もグレーの線で見える">
+            </div>
+          </div>
+        </figure>
+        <p>虫めがねのアイコンが #CFCFD4 で1.55:1でした。#59636e（6.11:1）にしています。</p>
+        <h4>アカウントの「…」</h4>
+        <figure class="ba ba--spot" data-point="s09-acct">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階3）</p>
+              <img class="spot" data-img="s09-acct-step3" alt="段階3の左下のアカウント欄。右端の「…」が薄いグレー">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階4）</p>
+              <img class="spot" data-img="s09-acct-step4" alt="段階4。「…」が濃いグレー">
+            </div>
+          </div>
+        </figure>
+        <p>押すとメニューが開くボタンですが、薄いグレーでした。アイコンも同じ色に濃くしました。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html" data-ledger="F-03">F-03 · WCAG 2.2</a> <a class="cite" href="https://m3.material.io/styles/color/roles" data-ledger="CL-33">CL-33 · Material 3</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p09">配色の記事の項目9</a></p>
+    </section>
+    <section class="item" id="p10" data-item="10">
+      <p class="item__no">10</p>
+      <h3>文中のリンクには下線（項目10）</h3>
+      <div class="body">
+        <p>WCAG の技法は、下線のない文中リンクには周りの文字と3:1以上の差を求め、下線を消して色の違いだけにするのを失敗例に挙げています（CL-37・CL-38）。</p>
+        <h4>記入ルールのリンク</h4>
+        <figure class="ba ba--spot" data-point="s10-link">
+          <div class="ba__panels">
+            <div class="ba__panel" data-state="before">
+              <p class="ba__label">直す前（段階3）</p>
+              <img class="spot" data-img="s10-link-step3" alt="段階3の詳細の文「書き方に迷ったら記入ルールはこちらを見てください」。リンクは青い文字だけで下線がない。周りの文字は薄いグレー">
+            </div>
+            <div class="ba__panel" data-state="after">
+              <p class="ba__label">直した後（段階4）</p>
+              <img class="spot" data-img="s10-link-step4" alt="段階4。リンク「記入ルールはこちら」に下線が付き、周りの文字も濃いグレー">
+            </div>
+          </div>
+        </figure>
+        <p>色だけでリンクだと示していました。下線を引いています。色は段階1でそろえた青です（5.95:1）。</p>
+      </div>
+      <p class="srcline">出典 <a class="cite" href="https://www.w3.org/WAI/WCAG22/Techniques/general/G183" data-ledger="CL-37">CL-37 · WCAG G183</a> <a class="cite" href="https://www.w3.org/WAI/WCAG22/Techniques/failures/F73" data-ledger="CL-38">CL-38 · WCAG F73</a></p>
+      <p class="xref">基本の説明は<a href="color-points.html#p10">配色の記事の項目10</a></p>
+    </section>
+
+    <!-- ================= まとめ ================= -->
+    <div class="group closing" id="matome">
+      <p class="group__no">まとめ</p>
+      <h2>ダメUIとアフター</h2>
+      <figure class="ba" data-point="matome">
+        <div class="ba__panels">
+          <div class="ba__panel" data-state="before">
+            <p class="ba__label">ビフォー <small>ダメUI</small></p>
+            <img class="shot" data-img="full-before" alt="ダメUIの全体">
+          </div>
+          <div class="ba__panel" data-state="after">
+            <p class="ba__label">アフター <small>段階4</small></p>
+            <img class="shot" data-img="full-step4" alt="4段階すべてを直したアフターの全体">
+          </div>
+        </div>
+        <figcaption>ダメUIとアフター。ボタンや行の位置は同じで、変えたのは色だけ。</figcaption>
+      </figure>
+      <p>14個のミスを、配色の記事の4つの章に沿って直しました。振り返ると、段階ごとに見ている物が違います。</p>
+      <ul>
+        <li>段階1: 色の役割</li>
+        <li>段階2: 色の量</li>
+        <li>段階3: 意味のある色</li>
+        <li>段階4: 数値</li>
+      </ul>
+      <p>どの段階でも、ボタンや行の位置は動かしていません。それでも、画面の印象は段階ごとにはっきり変わります。</p>
+      <p>この記事で何度か書いたように、選択中の色、背景の色み、優先度や通知の色は、会社によって正解が分かれています。1つの正解を探すより、「この色は何の役割か」「意味のある色と重なっていないか」「数値で足りているか」の順に確かめていくのがおすすめです。</p>
+      <p>なお、この画面は配色のほかにも、ナビの階層、絞り込みのタブの位置、見出しの右のボタンの数などを直しています。これらは配色の話ではないので、どの段階にも同じ形で入れ、この記事では扱っていません。</p>
+    </div>
+  </main>
+
+  <footer class="wrap">
+    <p>草稿（2026-10-28）。画面は bad-ui/color-bad-ui.html の各版（1280×800、詳細を開いた状態）。コントラスト比と彩度は bad-ui/contrast.py で計算。出典の原文とURLは docs/10-ledger/colors.md の台帳に記録しています。</p>
+  </footer>
+</body>
+</html>

@@ -9,10 +9,12 @@ interface GuideContentProps {
   content: PortableTextBlock[];
   className?: string;
   /**
-   * 本文の index 番目のブロックの手前に差し込む要素（#280 冒頭カード）。
-   * 同じラッパーの中で本文を2つに分けて描画する（見出しIDの連番は途切れない）。
+   * 本文の index 番目のブロックの手前に差し込む要素（#280 本文中ブロック）。
+   * 同じラッパーの中で本文を分けて描画する（見出しIDの連番は途切れない）。
    */
   insertBefore?: { index: number; node: React.ReactNode };
+  /** 最初の h2 の前に目次を出す（h2 だけを並べる） */
+  showToc?: boolean;
 }
 
 /**
@@ -39,6 +41,51 @@ const generateHeadingId = (
     .toLowerCase()
     .replace(/\s+/g, "-")
     .replace(/[^\w\u3040-\u309f\u30a0-\u30ff\u4e00-\u9faf-]/g, "")}`;
+};
+
+/**
+ * 目次を作る。見出しのIDは本文の描画と同じ順番（h2〜h4 の通し番号）で作る
+ */
+const buildToc = (
+  content: PortableTextBlock[]
+): Array<{ id: string; text: string }> => {
+  let index = 0;
+  const items: Array<{ id: string; text: string }> = [];
+  for (const block of content) {
+    const style = block.style;
+    if (style !== "h2" && style !== "h3" && style !== "h4") continue;
+    const text = ((block.children ?? []) as Array<{ text?: string }>)
+      .map((child) => child.text ?? "")
+      .join("");
+    const id = generateHeadingId(text, index++);
+    if (style === "h2") items.push({ id, text });
+  }
+  return items;
+};
+
+/**
+ * Sanity の画像参照・URLに含まれる「幅x高さ」を読む（例: image-abc-1920x2742-png）
+ */
+const getImageSize = (value?: {
+  asset?: { _ref?: string; url?: string };
+}): { width: number; height: number } | null => {
+  const source = value?.asset?._ref || value?.asset?.url;
+  const match = source?.match(/-(\d+)x(\d+)(?:-|\.)/);
+  if (!match) return null;
+  return { width: Number(match[1]), height: Number(match[2]) };
+};
+
+// 記事ページの最大幅（720px）の2倍。高精細な画面でも文字がにじまない大きさ
+const IMAGE_WIDTH = 1440;
+
+/**
+ * Sanity の画像URLに、幅と形式の指定を足して軽くする（fit=max で元より大きくしない）
+ * GIF と SVG は変換すると動きや形が変わるのでそのまま返す
+ */
+const optimizeImageUrl = (url: string): string => {
+  if (/\.(gif|svg)(\?|$)/i.test(url)) return url;
+  const separator = url.includes("?") ? "&" : "?";
+  return `${url}${separator}w=${IMAGE_WIDTH}&fit=max&auto=format&q=80`;
 };
 
 // 段落の共通スタイル
@@ -138,10 +185,33 @@ const portableTextComponents: PortableTextComponents = {
   types: {
     // 画像
     image: ({ value }) => {
-      const url =
-        value?.asset?.url ||
-        (value?.asset?._ref ? urlFor(value).width(648).url() : null);
+      const url = value?.asset?.url
+        ? optimizeImageUrl(value.asset.url)
+        : value?.asset?._ref
+        ? urlFor(value).width(IMAGE_WIDTH).fit("max").auto("format").quality(80).url()
+        : null;
       if (!url) return null;
+      // 縦長の画像は16:9の枠に収めると文字が読めなくなるので、本来の比率で出す
+      const size = getImageSize(value);
+      if (size && size.height > size.width) {
+        return (
+          <figure className="my-8 w-full">
+            <Image
+              src={url}
+              alt={value.alt || ""}
+              width={size.width}
+              height={size.height}
+              className="w-full h-auto rounded-lg"
+              unoptimized
+            />
+            {value.caption && (
+              <figcaption className="mt-2 text-sm text-text-muted text-center italic">
+                {value.caption}
+              </figcaption>
+            )}
+          </figure>
+        );
+      }
       return (
         <figure className="my-8 w-full">
           <div className="relative w-full aspect-video">
@@ -261,7 +331,7 @@ const portableTextComponents: PortableTextComponents = {
           href={value.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="my-6 block rounded-lg border border-border-light overflow-hidden hover:border-text-link hover:shadow-md transition-all duration-200 no-underline"
+          className="my-6 block rounded-lg border border-border-light bg-surface overflow-hidden hover:border-text-link hover:shadow-md transition-all duration-200 no-underline"
         >
           <div className="flex flex-col md:flex-row">
             <div className="flex-1 p-4 min-w-0">
@@ -296,12 +366,51 @@ const portableTextComponents: PortableTextComponents = {
  * ガイドコンテンツ（Portable Text）レンダラー
  * article の RichTextSection と同等の書式変換機能を持つ
  */
-export default function GuideContent({ content, className, insertBefore }: GuideContentProps) {
+export default function GuideContent({ content, className, insertBefore, showToc }: GuideContentProps) {
   headingIndex = 0;
-  const splitAt =
-    insertBefore && insertBefore.index > 0 && insertBefore.index < content.length
-      ? insertBefore.index
-      : null;
+  const toc = showToc ? buildToc(content) : [];
+  const firstH2 = content.findIndex((block) => block.style === "h2");
+
+  // 本文を分けて間に差し込むもの（目次・#280 本文中ブロック）を位置順に並べる
+  const inserts: { index: number; node: React.ReactNode }[] = [];
+  if (toc.length > 0 && firstH2 >= 0) {
+    inserts.push({
+      index: firstH2,
+      node: (
+        <nav key="toc" aria-label="目次" className="my-8 rounded-lg border border-border-light bg-surface p-6">
+          <p className="mb-3 text-[16px] font-bold text-text-primary">目次</p>
+          <ol className="list-decimal space-y-2 text-[16px] leading-[160%]" style={{ paddingLeft: "21.5px" }}>
+            {toc.map((item) => (
+              <li key={item.id} className="text-text-secondary">
+                <a
+                  href={`#${item.id}`}
+                  className="text-text-link hover:text-text-link-hover underline underline-offset-2 transition-colors"
+                >
+                  {item.text}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      ),
+    });
+  }
+  if (insertBefore && insertBefore.index > 0 && insertBefore.index < content.length) {
+    inserts.push({ index: insertBefore.index, node: <React.Fragment key="insert">{insertBefore.node}</React.Fragment> });
+  }
+  inserts.sort((x, y) => x.index - y.index);
+
+  const parts: React.ReactNode[] = [];
+  let from = 0;
+  inserts.forEach((ins, i) => {
+    if (ins.index > from) {
+      parts.push(<PortableText key={`pt-${i}`} value={content.slice(from, ins.index)} components={portableTextComponents} />);
+    }
+    parts.push(ins.node);
+    from = Math.max(from, ins.index);
+  });
+  parts.push(<PortableText key="pt-last" value={content.slice(from)} components={portableTextComponents} />);
+
   return (
     <div
       className={cn(
@@ -309,15 +418,7 @@ export default function GuideContent({ content, className, insertBefore }: Guide
         className
       )}
     >
-      {splitAt === null ? (
-        <PortableText value={content} components={portableTextComponents} />
-      ) : (
-        <>
-          <PortableText value={content.slice(0, splitAt)} components={portableTextComponents} />
-          {insertBefore?.node}
-          <PortableText value={content.slice(splitAt)} components={portableTextComponents} />
-        </>
-      )}
+      {parts}
     </div>
   );
 }

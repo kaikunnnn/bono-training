@@ -1,7 +1,7 @@
 "use client";
 
 import { Lock, LogIn, UserPlus } from "lucide-react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { Button } from "@/components/ui/button";
 import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
 
@@ -70,10 +70,10 @@ export default function PremiumVideoLock({
                 size="large"
                 className="flex-1 font-noto-sans-jp text-base"
               >
-                <Link href={loginHref}>
+                <IntentPrefetchLink href={loginHref}>
                   <LogIn className="mr-2 h-4 w-4" />
                   ログインする
-                </Link>
+                </IntentPrefetchLink>
               </Button>
               <Button
                 asChild

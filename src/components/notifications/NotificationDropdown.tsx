@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { Loader2, Inbox, Megaphone } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -65,9 +65,9 @@ export function NotificationDropdown({
           </p>
         </div>
         <Button variant="secondary" size="sm" asChild>
-          <Link href="/questions" onClick={onNavigate}>
+          <IntentPrefetchLink href="/questions" onClick={onNavigate}>
             掲示板を見てみる
-          </Link>
+          </IntentPrefetchLink>
         </Button>
       </div>
     );
@@ -85,7 +85,7 @@ export function NotificationDropdown({
         const isExternal = /^https?:\/\//.test(item.linkUrl);
         return (
           <li key={item.id}>
-            <Link
+            <IntentPrefetchLink
               href={item.linkUrl}
               onClick={onNavigate}
               {...(isExternal
@@ -130,7 +130,7 @@ export function NotificationDropdown({
                   className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-destructive"
                 />
               )}
-            </Link>
+            </IntentPrefetchLink>
           </li>
         );
       })}
