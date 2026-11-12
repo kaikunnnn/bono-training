@@ -18,7 +18,6 @@ import { Button } from "@/components/ui/button";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import {
   getSlackCommunityInviteUrl,
-  SLACK_QUESTIONS_URL,
   SLACK_SELF_INTRO_URL,
   SLACK_ANNOUNCEMENTS_URL,
 } from "@/lib/external-links";
@@ -125,7 +124,7 @@ export default async function CommunityGuidePage() {
           </h1>
           <div className="mt-5 max-w-[640px] space-y-2 leading-relaxed text-text-secondary">
             <p>
-              BONOのSlackコミュニティは、質問・相談・イベントなど「学習を進めること以外」の中心地です。
+              BONOのSlackコミュニティは、イベントの連絡やメンバー同士の交流など「学習を進めること以外」の中心地です。質問・相談はサイトの「みんなの掲示板」で受け付けています。
             </p>
             <p>
               コミュニティ参加は専用リンクが必要です。上の「参加する」ボタンから進めましょう（参加は自動ではありません）。
@@ -167,23 +166,17 @@ export default async function CommunityGuidePage() {
                 </p>
               </div>
 
-              <HowToSubheading>質問チャンネルを使おう</HowToSubheading>
+              <HowToSubheading>質問は掲示板へ</HowToSubheading>
               <div className={bodyCls}>
                 <p>
-                  「質問／相談」チャンネルは、疑問が集まる場所です。学習や制作で「あれ、これで合ってる？」「調べたけどわからない」が出たら、遠慮なく投稿しましょう。
+                  質問・相談は、このサイトの「みんなの掲示板」で受け付けています。学習や制作で「あれ、これで合ってる？」「調べたけどわからない」が出たら、遠慮なく投稿しましょう。
                 </p>
                 <p>
                   「前に似た話があったかも…」は気にしなくてOK。ただし、まずは一度自分で調べてみてから聞くのがおすすめです。
                 </p>
                 <p>
-                  <a href={SLACK_QUESTIONS_URL} target="_blank" rel="noopener noreferrer" className={linkCls}>
-                    → Slack「質問／相談」チャンネルを開く
-                  </a>
-                </p>
-                <p>
-                  また、このサイトの「みんなの掲示板」でも質問できます。
                   <IntentPrefetchLink href="/questions" className={linkCls}>
-                    みんなの掲示板を開く →
+                    → みんなの掲示板を開く
                   </IntentPrefetchLink>
                 </p>
               </div>
