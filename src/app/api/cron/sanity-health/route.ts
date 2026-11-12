@@ -87,7 +87,12 @@ export async function GET(request: NextRequest) {
   let detail = "";
 
   try {
-    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    // データセット非公開化（#308）後はトークンなしだと空の結果が 200 で返るため、トークンを付ける
+    const readToken = process.env.SANITY_READ_TOKEN;
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(15_000),
+      headers: readToken ? { Authorization: `Bearer ${readToken}` } : undefined,
+    });
     if (res.status === 402) {
       status = "quota_exceeded";
       detail = await res.text().catch(() => "402 Payment Required");
