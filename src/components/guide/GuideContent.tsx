@@ -8,6 +8,11 @@ import { urlFor } from "@/lib/sanity";
 interface GuideContentProps {
   content: PortableTextBlock[];
   className?: string;
+  /**
+   * 本文の index 番目のブロックの手前に差し込む要素（#280 冒頭カード）。
+   * 同じラッパーの中で本文を2つに分けて描画する（見出しIDの連番は途切れない）。
+   */
+  insertBefore?: { index: number; node: React.ReactNode };
 }
 
 /**
@@ -291,8 +296,12 @@ const portableTextComponents: PortableTextComponents = {
  * ガイドコンテンツ（Portable Text）レンダラー
  * article の RichTextSection と同等の書式変換機能を持つ
  */
-export default function GuideContent({ content, className }: GuideContentProps) {
+export default function GuideContent({ content, className, insertBefore }: GuideContentProps) {
   headingIndex = 0;
+  const splitAt =
+    insertBefore && insertBefore.index > 0 && insertBefore.index < content.length
+      ? insertBefore.index
+      : null;
   return (
     <div
       className={cn(
@@ -300,7 +309,15 @@ export default function GuideContent({ content, className }: GuideContentProps) 
         className
       )}
     >
-      <PortableText value={content} components={portableTextComponents} />
+      {splitAt === null ? (
+        <PortableText value={content} components={portableTextComponents} />
+      ) : (
+        <>
+          <PortableText value={content.slice(0, splitAt)} components={portableTextComponents} />
+          {insertBefore?.node}
+          <PortableText value={content.slice(splitAt)} components={portableTextComponents} />
+        </>
+      )}
     </div>
   );
 }

@@ -16,6 +16,7 @@ import { getGradientStyle } from "@/types/sanity-roadmap";
 import { formatTitleWithLineBreaks, stripLineBreakMarker } from "@/utils/textFormat";
 import { withPricingFrom } from "@/lib/activity-utils";
 import { trackPricingCtaClick } from "@/lib/activity-client";
+import { splitDuration } from "@/lib/roadmap-duration";
 
 // SVGマスクパス
 const MASK_DESKTOP = "/shapes/roadmap-hero-shape-flexible.svg"; // 振幅2.1%
@@ -107,6 +108,9 @@ export default function RoadmapHero({
   isSubscribed = false,
 }: RoadmapHeroProps) {
   const gradientStyle = getGradientStyle(gradientPreset);
+
+  // 目安期間（「約1年」のように単位入りなら「ヶ月」を足さない）
+  const duration = splitDuration(estimatedDuration);
 
   // モバイル判定（リサイズ対応 + 初回マウント時にも確認）
   const [isMobile, setIsMobile] = useState(false);
@@ -237,9 +241,11 @@ export default function RoadmapHero({
               <span className="text-[12px] font-bold text-white/70">目安</span>
               <div className="flex items-end gap-1 text-white">
                 <span className="text-[20px] font-bold font-['Inter',sans-serif] leading-none">
-                  {estimatedDuration}
+                  {duration.value}
                 </span>
-                <span className="text-[13px] leading-[1.5]">ヶ月</span>
+                {duration.unit && (
+                  <span className="text-[13px] leading-[1.5]">{duration.unit}</span>
+                )}
               </div>
             </div>
           </div>

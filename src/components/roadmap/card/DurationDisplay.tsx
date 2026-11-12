@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '@/lib/utils';
 import type { TextVariant } from './types';
+import { splitDuration } from '@/lib/roadmap-duration';
 
 interface DurationDisplayProps {
   duration: string;
@@ -26,9 +27,16 @@ export const DurationDisplay: React.FC<DurationDisplayProps> = ({ duration, vari
     >
       目安
     </span>
-    <div className="flex items-center gap-[5px]">
-      <span className="text-base font-bold leading-none">{duration}</span>
-      <span className="text-[13px] font-normal leading-[1.5]">ヶ月</span>
-    </div>
+    <DurationValue duration={duration} />
   </div>
 );
+
+function DurationValue({ duration }: { duration: string }) {
+  const { value, unit } = splitDuration(duration);
+  return (
+    <div className="flex items-center gap-[5px]">
+      <span className="text-base font-bold leading-none">{value}</span>
+      {unit && <span className="text-[13px] font-normal leading-[1.5]">{unit}</span>}
+    </div>
+  );
+}
