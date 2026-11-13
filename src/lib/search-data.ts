@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient } from "@sanity/client";
+import { NOT_DOC_FILTER } from "@/lib/doc-content-utils";
 import { unstable_cache } from "next/cache";
 import type {
   ArticleSearchResult,
@@ -64,7 +65,7 @@ function getSanityClient() {
 }
 
 async function fetchLessonsForSearch(): Promise<SanityLessonForSearch[]> {
-  const query = `*[_type == "lesson"] | order(_createdAt desc) {
+  const query = `*[_type == "lesson" && ${NOT_DOC_FILTER}] | order(_createdAt desc) {
     _id,
     title,
     slug,
@@ -89,7 +90,7 @@ async function fetchLessonsForSearch(): Promise<SanityLessonForSearch[]> {
 }
 
 async function fetchArticlesForSearch(): Promise<SanityArticleForSearch[]> {
-  const query = `*[_type == "lesson"] {
+  const query = `*[_type == "lesson" && ${NOT_DOC_FILTER}] {
     "lessonTitle": title,
     "lessonSlug": slug.current,
     "articles": quests[]->articles[]-> {

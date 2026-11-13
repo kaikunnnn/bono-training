@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import type { Guide } from "@/types/guide";
 import { getCategoryInfo } from "@/lib/guideCategories";
@@ -36,15 +36,15 @@ export default function GuideHeader({ guide }: GuideHeaderProps) {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/guide">ガイド</Link>
+                <IntentPrefetchLink href="/guide">ガイド</IntentPrefetchLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href={`/guide?category=${guide.category}`}>
+                <IntentPrefetchLink href={`/guide?category=${guide.category}`}>
                   {categoryInfo?.label ?? guide.category}
-                </Link>
+                </IntentPrefetchLink>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

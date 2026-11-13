@@ -1,7 +1,7 @@
-import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import type { HomeClickTracking } from "@/lib/activity-utils";
 
 /**
@@ -112,10 +112,10 @@ export function PromoCard({
   );
 
   return tracking ? (
-    <HomeClickLink {...linkProps} tracking={tracking}>
+    <HomeClickLink {...linkProps} tracking={tracking} intentPrefetch>
       {content}
     </HomeClickLink>
   ) : (
-    <Link {...linkProps}>{content}</Link>
+    <IntentPrefetchLink {...linkProps}>{content}</IntentPrefetchLink>
   );
 }

@@ -7,7 +7,7 @@
  */
 
 import { useState, useCallback } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import confetti from "canvas-confetti";
 import { Trophy, Pencil, MessageSquareText, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -157,7 +157,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                 // 転職ロードマップ専用のアクション
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[800px] mx-auto">
                   {/* ポートフォリオ作成 */}
-                  <Link
+                  <IntentPrefetchLink
                     href="/lessons/portfolio"
                     className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#52674e]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-[border-color,box-shadow] group block"
                   >
@@ -178,7 +178,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         </span>
                       </div>
                     </div>
-                  </Link>
+                  </IntentPrefetchLink>
 
                   {/* 転職ガイド */}
                   <a
@@ -237,7 +237,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                   </div>
 
                   {/* フィードバックを受ける */}
-                  <Link
+                  <IntentPrefetchLink
                     href="/feedback-apply"
                     className="bg-white rounded-2xl border border-[#e2e8e0] p-6 hover:border-[#667eea]/30 hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-[border-color,box-shadow] group block"
                   >
@@ -259,7 +259,7 @@ export default function ClearBlock({ roadmapTitle, roadmapSlug }: ClearBlockProp
                         </span>
                       </div>
                     </div>
-                  </Link>
+                  </IntentPrefetchLink>
                 </div>
               )}
             </div>

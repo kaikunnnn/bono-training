@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -165,9 +165,9 @@ export default function SignupPage() {
       {/* ログインへの導線 */}
       <p className="text-center mt-6 text-sm text-muted-foreground font-noto-sans-jp">
         すでにアカウントをお持ちの方は{" "}
-        <Link href={loginHref} className="text-primary hover:underline">
+        <IntentPrefetchLink href={loginHref} className="text-primary hover:underline">
           ログイン
-        </Link>
+        </IntentPrefetchLink>
       </p>
     </div>
   );

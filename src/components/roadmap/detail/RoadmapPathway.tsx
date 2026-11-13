@@ -7,7 +7,7 @@
  * ヒーローの直後に配置して、ロードマップ全体の流れを提示
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { ChevronDown } from "lucide-react";
 import type { SanityRoadmapStep } from "@/types/sanity-roadmap";
 import DottedDivider from "@/components/common/DottedDivider";
@@ -51,12 +51,12 @@ export default function RoadmapPathway({ description, steps, guideLink }: Roadma
           </p>
           {guideLink && (
             <p className="mt-3 text-[16px] leading-[24px]">
-              <Link
+              <IntentPrefetchLink
                 href={guideLink.href}
                 className="text-text-link hover:text-text-link-hover underline underline-offset-2 transition-colors"
               >
                 {guideLink.label}
-              </Link>
+              </IntentPrefetchLink>
             </p>
           )}
         </div>
