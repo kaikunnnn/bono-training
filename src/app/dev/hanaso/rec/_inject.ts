@@ -18,9 +18,10 @@ import { join } from "node:path";
 
 export type RecKind = "before" | "after";
 
-const HTML_PATHS: Record<RecKind, string> = {
-  before: "src/content/materials/ai-research-ui/hanaso-signup.html",
-  after: "src/content/materials/ai-research-ui/hanaso-signup-after.html",
+// フォルダは固定の文字列で書く（変数で組み立てると Turbopack がプロジェクト全体を本番に含めてしまう）
+const HTML_FILES: Record<RecKind, string> = {
+  before: "hanaso-signup.html",
+  after: "hanaso-signup-after.html",
 };
 
 /** 元HTMLの中で置き換える箇所（ビフォー・アフターで同じ文字列） */
@@ -126,7 +127,10 @@ function recScript(kind: RecKind) {
 }
 
 export async function buildRecHtml(kind: RecKind): Promise<string> {
-  let html = await readFile(join(process.cwd(), HTML_PATHS[kind]), "utf8");
+  let html = await readFile(
+    join(process.cwd(), "src/content/materials/ai-research-ui", HTML_FILES[kind]),
+    "utf8"
+  );
   for (const p of PATCHES) {
     if (!html.includes(p.find)) {
       throw new Error(`[rec] ${kind}: 差し込みの目印が見つかりません: ${p.find.trim()}`);
