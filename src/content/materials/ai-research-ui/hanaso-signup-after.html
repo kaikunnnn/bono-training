@@ -1,0 +1,1075 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ハナソ 新規登録プロト（アフター）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: 画面中央に iPhone（393×812）を1台。下に「いまの画面」と操作だけを置く */
+:root {
+  /* ページ（スマホの外側） */
+  --page-bg: #eceef2;
+  --page-fg: #2a2e38;
+  --page-muted: #6b7180;
+  --page-line: #d6d9e0;
+  --page-btn: #ffffff;
+  /* アプリ（iOSライトモードで固定） */
+  --app-bg: #f7f8fb;
+  --app-ink: #111318;
+  --app-ink-2: #5d6270;
+  --app-ink-3: #9aa0ac;
+  --app-field: rgba(118, 118, 128, 0.12);
+  --app-sep: rgba(60, 60, 67, 0.16);
+  --brand: #1f6f78;
+  --brand-2: #f2b84b;
+  --brand-3: #e8735a;
+  --ok: #2f9e5b;
+  --err: #c8372d;
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+  --font-page: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --page-bg: #15171c; --page-fg: #e6e8ee; --page-muted: #9298a6; --page-line: #2c3039; --page-btn: #22252d; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --page-bg: #15171c; --page-fg: #e6e8ee; --page-muted: #9298a6; --page-line: #2c3039; --page-btn: #22252d; color-scheme: dark; }
+
+html, body { height: 100%; }
+body { margin: 0; }
+body {
+  background: var(--page-bg); color: var(--page-fg); font-family: var(--font-page);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px; box-sizing: border-box; overflow: hidden;
+}
+.stage { position: relative; flex: none; }
+.phone {
+  position: absolute; left: 0; top: 0; width: 393px; height: 812px; transform-origin: 0 0;
+  border-radius: 56px; background: #0b0c0f; padding: 0; box-shadow: 0 0 0 10px #1b1d22, 0 0 0 11px #3a3d45, 0 30px 60px rgba(0,0,0,.25);
+}
+.screen-wrap { position: absolute; inset: 0; border-radius: 56px; overflow: hidden; background: var(--app-bg); font-family: var(--font-ui); color: var(--app-ink); -webkit-font-smoothing: antialiased; }
+
+/* ステータスバー・ダイナミックアイランド・ホームインジケータ */
+.island { position: absolute; top: 11px; left: 50%; width: 126px; height: 37px; margin-left: -63px; background: #000; border-radius: 20px; z-index: 50; }
+.status { position: absolute; top: 0; left: 0; right: 0; height: 54px; z-index: 40; display: flex; align-items: center; justify-content: space-between; padding: 6px 34px 0 46px; font-weight: 600; font-size: 17px; pointer-events: none; }
+.status svg { display: block; }
+.status .right { display: flex; gap: 6px; align-items: center; }
+.home-ind { position: absolute; bottom: 8px; left: 50%; width: 139px; height: 5px; margin-left: -69.5px; border-radius: 3px; background: #000; z-index: 50; pointer-events: none; }
+.on-dark .status { color: #fff; } .on-dark .status svg * { fill: #fff; stroke: #fff; }
+
+/* 画面 */
+.screen { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 54px 0 0; background: var(--app-bg); transition: transform .38s cubic-bezier(.32,.72,0,1), opacity .38s; }
+.screen.hidden-right { transform: translateX(100%); pointer-events: none; visibility: hidden; transition: transform .38s cubic-bezier(.32,.72,0,1), opacity .38s, visibility 0s .38s; }
+.screen.hidden-left { transform: translateX(-28%); opacity: 0; pointer-events: none; visibility: hidden; transition: transform .38s cubic-bezier(.32,.72,0,1), opacity .38s, visibility 0s .38s; }
+.screen.fade { transition: opacity .5s; }
+@media (prefers-reduced-motion: reduce) { .screen, .screen.hidden-left, .screen.hidden-right { transition: none !important; } .spin, .pop { animation: none !important; } }
+
+/* Liquid Glass */
+.glass {
+  position: relative; isolation: isolate;
+  background: linear-gradient(180deg, rgba(255,255,255,.55), rgba(255,255,255,.28));
+  -webkit-backdrop-filter: blur(16px) saturate(190%); backdrop-filter: blur(16px) saturate(190%);
+  border: .5px solid rgba(255,255,255,.75);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), inset 0 -1px 1.5px rgba(0,0,0,.06), 0 6px 20px rgba(17,19,24,.12), 0 1px 3px rgba(17,19,24,.08);
+}
+.glass-tint {
+  position: relative; color: #fff;
+  background: linear-gradient(180deg, rgba(53,140,150,.92), rgba(31,111,120,.95));
+  -webkit-backdrop-filter: blur(12px) saturate(180%); backdrop-filter: blur(12px) saturate(180%);
+  border: .5px solid rgba(255,255,255,.35);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -2px 4px rgba(0,0,0,.12), 0 8px 22px rgba(31,111,120,.35);
+}
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 3px solid rgba(31,111,120,.45); outline-offset: 2px; }
+.circle-btn { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+.capsule { height: 52px; border-radius: 26px; font-size: 17px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform .12s; }
+.capsule:active, .circle-btn:active, .chip:active { transform: scale(.97); }
+.capsule.sub { height: 44px; font-size: 15px; color: var(--app-ink-2); }
+
+.nav { height: 52px; display: flex; align-items: center; padding: 0 16px; flex: none; }
+.body { flex: 1; padding: 12px 24px 10px; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+.body::-webkit-scrollbar { display: none; }
+.foot { padding: 12px 24px 42px; flex: none; display: flex; flex-direction: column; gap: 12px; }
+h1.t { font-size: 28px; line-height: 1.25; font-weight: 700; margin: 0 0 8px; letter-spacing: -.01em; }
+p.s { font-size: 15px; line-height: 1.55; color: var(--app-ink-2); margin: 0 0 24px; }
+.field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; position: relative; }
+.field label, .field .lbl { font-size: 13px; color: var(--app-ink-2); font-weight: 600; padding-left: 4px; display: flex; align-items: center; gap: 6px; }
+.field input { height: 50px; border-radius: 14px; border: 0; background: var(--app-field); padding: 0 16px; font: inherit; font-size: 17px; color: var(--app-ink); width: 100%; box-sizing: border-box; }
+.hint { font-size: 13px; line-height: 1.5; color: var(--app-ink-2); padding-left: 4px; margin: 0; }
+.hint.ok { color: var(--ok); }
+.link { color: var(--brand); font-weight: 600; font-size: 15px; }
+.small { font-size: 12px; line-height: 1.6; color: var(--app-ink-3); text-align: center; margin: 0; }
+.small a { color: var(--brand); font-weight: 600; text-decoration: underline; text-underline-offset: 2px; }
+.vh { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* 必須・任意の札 */
+.req, .opt { font-size: 11px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 6px; }
+.req { color: var(--brand); background: rgba(31,111,120,.1); }
+.opt { color: var(--app-ink-2); background: var(--app-field); }
+
+/* エラー（欄の下に文字で出す。色だけに頼らない） */
+.err-msg { font-size: 13px; line-height: 1.5; color: var(--err); font-weight: 600; padding-left: 4px; margin: 0; display: flex; gap: 6px; align-items: flex-start; }
+.err-msg svg { flex: none; margin-top: 2px; }
+.err-msg[hidden] { display: none; }
+.field input.is-err, .dd-btn.is-err { box-shadow: inset 0 0 0 2px var(--err); }
+.field input:focus { outline: none; box-shadow: inset 0 0 0 2px var(--brand); }
+.field input.is-err:focus { box-shadow: inset 0 0 0 2px var(--err); }
+
+/* 進み具合（Carbon Progress indicator。登録後の一直線の5ステップ） */
+.prog { list-style: none; margin: 0; padding: 6px 24px 4px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; flex: none; }
+.prog li { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.prog .pbar { height: 4px; border-radius: 2px; background: var(--app-field); }
+.prog .plb { font-size: 10.5px; line-height: 1.2; color: var(--app-ink-3); font-weight: 500; white-space: nowrap; letter-spacing: -.02em; }
+.prog li.done .pbar, .prog li.cur .pbar { background: var(--brand); }
+.prog li.done .plb { color: var(--app-ink-2); }
+.prog li.cur .plb { color: var(--brand); font-weight: 700; }
+
+/* 1. ようこそ */
+.welcome { background: radial-gradient(120% 70% at 85% 10%, #ffe1a3 0%, rgba(255,225,163,0) 55%), radial-gradient(100% 60% at 0% 40%, #b9e3e0 0%, rgba(185,227,224,0) 60%), radial-gradient(90% 60% at 100% 85%, #ffc4b3 0%, rgba(255,196,179,0) 60%), #f7f8fb; }
+.bubbles { position: relative; height: 150px; margin-top: 8px; }
+.bub { position: absolute; padding: 10px 14px; border-radius: 20px; font-size: 15px; font-weight: 600; }
+.bub small { display: block; font-size: 11px; font-weight: 500; color: var(--app-ink-2); margin-top: 2px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 30px; letter-spacing: .02em; }
+.logo i { width: 40px; height: 40px; border-radius: 12px; background: var(--brand); display: grid; place-items: center; }
+.welcome .body { padding-top: 0; overflow: hidden; }
+.welcome h1.t { font-size: 30px; margin-top: 14px; }
+.welcome .lead { font-size: 15px; line-height: 1.6; color: var(--app-ink-2); margin: 0; }
+.welcome .foot { gap: 10px; padding-bottom: 38px; }
+.sso-a { background: #000; color: #fff; }
+.sso-g { background: #fff; color: #1f1f1f; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.signin { display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 44px; font-size: 14px; color: var(--app-ink-2); }
+.signin button { min-height: 44px; padding: 0 6px; color: var(--brand); font-weight: 700; font-size: 14px; }
+
+/* 2. パスワード（表示・非表示） */
+.pw { position: relative; }
+.pw input { padding-right: 56px; }
+.pw-toggle { position: absolute; right: 3px; top: 3px; width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--app-ink-2); }
+
+/* 2-2. メール確認 */
+.mail-ico { width: 72px; height: 72px; border-radius: 22px; display: grid; place-items: center; margin: 4px 0 18px; }
+.addr { font-weight: 700; color: var(--app-ink); word-break: break-all; }
+.note { font-size: 13px; line-height: 1.6; color: var(--app-ink-2); background: var(--app-field); border-radius: 14px; padding: 12px 14px; margin: 0 0 16px; }
+.row-btns { display: flex; flex-direction: column; gap: 4px; margin-top: 4px; }
+.text-btn { min-height: 44px; display: inline-flex; align-items: center; gap: 8px; padding: 0 4px; color: var(--brand); font-weight: 700; font-size: 15px; text-align: left; }
+.status-line { font-size: 13px; color: var(--ok); font-weight: 600; min-height: 20px; margin: 4px 0 0 4px; }
+
+/* 3. 言語：検索付きドロップダウン */
+.dd-btn { height: 50px; border-radius: 14px; background: var(--app-field); padding: 0 14px 0 16px; font-size: 17px; width: 100%; display: flex; align-items: center; justify-content: space-between; text-align: left; color: var(--app-ink); }
+.dd-btn .ph { color: var(--app-ink-3); }
+.dd-btn svg { flex: none; color: var(--app-ink-2); transition: transform .15s; }
+.dd-btn[aria-expanded="true"] { box-shadow: inset 0 0 0 2px var(--brand); }
+.dd-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.dd-panel { position: absolute; left: 0; right: 0; top: calc(100% + 6px); z-index: 20; background: #fff; border-radius: 16px; padding: 8px; box-shadow: 0 0 0 .5px rgba(0,0,0,.08), 0 12px 32px rgba(17,19,24,.18); }
+.dd-panel[hidden] { display: none; }
+.dd-search { height: 44px !important; border-radius: 12px !important; font-size: 16px !important; margin-bottom: 6px; }
+.dd-list { list-style: none; margin: 0; padding: 0; max-height: 242px; overflow-y: auto; position: relative; }
+.dd-list li { height: 44px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px; border-radius: 10px; font-size: 16px; cursor: pointer; }
+.dd-list li.active { background: var(--app-field); }
+.dd-list li[aria-selected="true"] { color: var(--brand); font-weight: 700; }
+.dd-list li.dd-empty { color: var(--app-ink-3); cursor: default; }
+
+/* 4. 生年月日 */
+.date { display: flex; gap: 12px; }
+.date .field { margin-bottom: 0; }
+.date .d input, .date .m input { width: 72px; }
+.date .y input { width: 104px; }
+.date-group { margin-bottom: 18px; display: flex; flex-direction: column; gap: 8px; }
+.date-group legend { font-size: 13px; color: var(--app-ink-2); font-weight: 600; padding: 0 0 0 4px; display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+
+/* 18歳未満 */
+.stop { align-items: stretch; }
+.stop .body { display: flex; flex-direction: column; justify-content: center; }
+.stop-ico { width: 72px; height: 72px; border-radius: 22px; display: grid; place-items: center; margin-bottom: 20px; }
+
+/* プロフィール写真 */
+.photo-row { display: flex; gap: 16px; align-items: center; margin: 4px 0 10px; }
+.avatar-box { position: relative; width: 104px; height: 104px; flex: none; }
+.avatar { width: 104px; height: 104px; border-radius: 50%; background: var(--app-field); display: grid; place-items: center; position: relative; overflow: visible; }
+.avatar.set { background: radial-gradient(circle at 35% 30%, #ffd88a, #f2a65a 45%, #e8735a); }
+.avatar.set.v1 { background: radial-gradient(circle at 35% 30%, #b9e3e0, #5fb3b3 45%, #1f6f78); }
+.avatar.set.v2 { background: radial-gradient(circle at 35% 30%, #e3d4ff, #a98ae0 45%, #6e57b8); }
+.avatar .face { width: 100%; height: 100%; border-radius: 50%; display: grid; place-items: center; font-size: 42px; font-weight: 700; color: #fff; }
+.avatar-x { position: absolute; right: -10px; top: -10px; }
+.avatar-x[hidden] { display: none; }
+.photo-side { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.photo-side .lbl { font-size: 13px; color: var(--app-ink-2); font-weight: 600; display: flex; align-items: center; gap: 6px; padding-left: 4px; }
+
+/* 興味・目的：選べるタグ */
+.chips { display: flex; flex-wrap: wrap; gap: 10px; }
+.chip { height: 44px; padding: 0 16px; border-radius: 22px; background: var(--app-field); font-size: 15px; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; transition: background .15s, color .15s, transform .12s; }
+.chip.on { background: var(--brand); color: #fff; font-weight: 700; }
+.chip.on::before { content: ""; width: 14px; height: 14px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5' fill='none' stroke='%23000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat; }
+.chips.is-err { padding: 8px; margin: -8px; border-radius: 18px; box-shadow: inset 0 0 0 2px var(--err); }
+.q-head { font-size: 13px; color: var(--app-ink-2); font-weight: 600; padding-left: 4px; display: flex; align-items: center; gap: 6px; margin: 0 0 10px; }
+
+/* 7. 準備中 */
+.ready { background: linear-gradient(160deg, #1f6f78, #164f57); color: #fff; align-items: center; justify-content: center; text-align: center; }
+.ready .ring { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; margin-bottom: 24px; }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.pop { animation: pop .35s cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes pop { from { transform: scale(.6); opacity: 0; } }
+
+/* 8. タイムライン */
+.tl { padding-top: 0; background: #fff; }
+.tl-scroll { position: absolute; inset: 0; overflow-y: auto; padding: 54px 0 120px; scrollbar-width: none; }
+.tl-scroll::-webkit-scrollbar { display: none; }
+.tl-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 4px 20px; }
+.tl-head h2 { font-size: 34px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
+.seg { margin: 10px 16px 6px; height: 40px; border-radius: 20px; display: flex; padding: 3px; gap: 3px; background: var(--app-field); }
+.seg button { flex: 1; border-radius: 17px; font-size: 14px; font-weight: 600; color: var(--app-ink-2); }
+.seg button.on { background: #fff; color: var(--app-ink); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.post { display: flex; gap: 12px; padding: 14px 18px; border-bottom: .5px solid var(--app-sep); }
+.post .av { width: 42px; height: 42px; border-radius: 50%; flex: none; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 16px; }
+.post .meta { font-size: 14px; color: var(--app-ink-3); }
+.post .meta b { color: var(--app-ink); font-weight: 600; margin-right: 4px; }
+.post p { margin: 4px 0 8px; font-size: 15px; line-height: 1.55; }
+.post .tag { display: inline-block; font-size: 12px; color: var(--brand); background: rgba(31,111,120,.1); padding: 2px 8px; border-radius: 10px; }
+.post .acts { display: flex; gap: 28px; margin-top: 10px; color: var(--app-ink-3); font-size: 13px; align-items: center; }
+.post .acts span { display: inline-flex; align-items: center; gap: 5px; }
+.tl-photo { height: 150px; border-radius: 16px; margin-top: 4px; background: linear-gradient(135deg, #b9e3e0, #f2d7a6 60%, #f4b6a3); }
+.tabbar { position: absolute; left: 16px; right: 84px; bottom: 26px; height: 62px; border-radius: 31px; display: flex; align-items: center; justify-content: space-around; padding: 0 6px; z-index: 30; }
+.tabbar .tab { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; font-weight: 600; color: var(--app-ink); width: 64px; height: 52px; justify-content: center; border-radius: 26px; }
+.tabbar .tab.on { color: var(--brand); background: rgba(255,255,255,.55); box-shadow: inset 0 0 0 .5px rgba(255,255,255,.8); }
+.fab { position: absolute; right: 16px; bottom: 26px; width: 62px; height: 62px; border-radius: 50%; z-index: 30; display: grid; place-items: center; }
+.toast { position: absolute; left: 16px; right: 16px; top: 64px; z-index: 35; border-radius: 22px; padding: 12px 16px; display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; transition: transform .45s cubic-bezier(.32,.72,0,1), opacity .45s; }
+.toast.gone { transform: translateY(-140%); opacity: 0; }
+
+/* ページ側の操作 */
+.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; font-size: 14px; }
+.bar .now { min-width: 0; font-weight: 600; }
+.bar .now span { color: var(--page-muted); font-weight: 500; margin-right: 6px; font-variant-numeric: tabular-nums; }
+.bar button { height: 34px; padding: 0 14px; border-radius: 17px; background: var(--page-btn); color: var(--page-fg); box-shadow: inset 0 0 0 1px var(--page-line); font-size: 13px; font-weight: 600; font-family: var(--font-page); }
+.spec { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); width: min(380px, calc(100vw - 32px)); max-height: 72vh; overflow-y: auto; background: var(--page-btn); color: var(--page-fg); border-radius: 16px; box-shadow: inset 0 0 0 1px var(--page-line), 0 12px 32px rgba(0,0,0,.18); padding: 18px 20px; font-size: 13px; line-height: 1.7; z-index: 100; box-sizing: border-box; }
+.spec h2 { font-size: 15px; margin: 0 0 4px; }
+.spec h3 { font-size: 14px; margin: 18px 0 4px; padding-top: 12px; border-top: 1px solid var(--page-line); }
+.spec .legend { color: var(--page-muted); margin: 0 0 4px; }
+.spec dt { font-weight: 700; margin-top: 10px; }
+.spec dd { margin: 2px 0 0; color: var(--page-muted); }
+.spec .mk { display: inline-block; font-size: 11px; font-weight: 700; line-height: 1; padding: 3px 6px; border-radius: 6px; margin-right: 4px; box-shadow: inset 0 0 0 1px var(--page-line); color: var(--page-fg); vertical-align: 1px; }
+.bar button:disabled { opacity: .4; cursor: default; }
+</style>
+</head>
+<body>
+<div class="stage" id="stage">
+  <div class="phone" id="phone">
+    <div class="screen-wrap" id="wrap">
+      <div class="island"></div>
+      <div class="status">
+        <span>9:41</span>
+        <span class="right">
+          <svg width="19" height="12" viewBox="0 0 19 12"><rect x="0" y="8" width="3" height="4" rx="1" fill="#000"/><rect x="5" y="5.5" width="3" height="6.5" rx="1" fill="#000"/><rect x="10" y="3" width="3" height="9" rx="1" fill="#000"/><rect x="15" y="0" width="3" height="12" rx="1" fill="#000"/></svg>
+          <svg width="17" height="12" viewBox="0 0 17 12"><path d="M8.5 2.3c2.4 0 4.6.9 6.2 2.5l1.2-1.2C14 1.6 11.4.5 8.5.5S3 1.6 1.1 3.6l1.2 1.2C3.9 3.2 6.1 2.3 8.5 2.3zm0 3.5c1.4 0 2.7.5 3.7 1.4l1.2-1.2c-1.3-1.2-3-2-4.9-2s-3.6.8-4.9 2l1.2 1.2c1-.9 2.3-1.4 3.7-1.4zm0 3.5c-.6 0-1.1.2-1.5.6L8.5 11.5 10 9.9c-.4-.4-.9-.6-1.5-.6z" fill="#000"/></svg>
+          <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.8" fill="none" stroke="#000" stroke-opacity=".4"/><rect x="2" y="2" width="20" height="9" rx="2.5" fill="#000"/><path d="M25 4.5v4c.8-.3 1.3-1.1 1.3-2s-.5-1.7-1.3-2z" fill="#000" fill-opacity=".4"/></svg>
+        </span>
+      </div>
+
+      <!-- 1. 登録方法を選ぶ -->
+      <section class="screen welcome" data-id="start" data-step="1" data-name="登録方法を選ぶ">
+        <div class="body">
+          <div class="bubbles" aria-hidden="true">
+            <div class="bub glass" style="left:6px;top:4px">Hello! 👋<small>はじめまして</small></div>
+            <div class="bub glass" style="right:4px;top:30px">こんにちは<small>Hi there</small></div>
+            <div class="bub glass" style="left:40px;top:84px">你好！<small>よろしくね</small></div>
+            <div class="bub glass" style="right:30px;top:100px">안녕하세요<small>Nice to meet you</small></div>
+          </div>
+          <div class="logo"><i><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4h0A1.5 1.5 0 0 1 4 14.5z" fill="#fff"/><circle cx="9" cy="9.5" r="1.3" fill="#1f6f78"/><circle cx="12" cy="9.5" r="1.3" fill="#1f6f78"/><circle cx="15" cy="9.5" r="1.3" fill="#1f6f78"/></svg></i>ハナソ</div>
+          <h1 class="t">世界の友だちと、<br>話そう。</h1>
+          <p class="lead">アカウントを作ると、あなたの学びたい言語を話す人とつながり、メッセージで練習できます。</p>
+        </div>
+        <div class="foot">
+          <button class="capsule sso-a" data-sso="apple"><svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true"><path fill="#fff" d="M16.37 12.6c-.02-2.3 1.88-3.4 1.96-3.46-1.07-1.56-2.73-1.78-3.32-1.8-1.41-.14-2.76.83-3.47.83-.72 0-1.82-.81-3-.79-1.54.02-2.96.9-3.76 2.28-1.6 2.78-.41 6.9 1.15 9.16.76 1.1 1.67 2.34 2.86 2.3 1.15-.05 1.58-.74 2.97-.74 1.38 0 1.77.74 2.98.72 1.23-.02 2.01-1.12 2.76-2.23.87-1.28 1.23-2.52 1.25-2.58-.03-.01-2.4-.92-2.42-3.65zM14.1 5.86c.63-.77 1.06-1.83.94-2.89-.91.04-2.01.61-2.66 1.37-.58.67-1.09 1.75-.96 2.79 1.02.08 2.05-.52 2.68-1.27z"/></svg>Appleで続ける</button>
+          <button class="capsule sso-g" data-sso="google"><svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Googleで続ける</button>
+          <button class="capsule glass" data-go="account">メールで始める</button>
+          <div class="signin">すでにアカウントをお持ちの方<button type="button" id="b-signin">ログイン</button></div>
+          <p class="small">続けると、<a href="#" data-dummy>利用規約</a>と<a href="#" data-dummy>プライバシーポリシー</a>に同意したものとみなされます</p>
+        </div>
+      </section>
+
+      <!-- 2. メール・パスワード -->
+      <section class="screen hidden-right" data-id="account" data-step="2" data-name="メール・パスワード">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="body">
+          <h1 class="t">メールで登録</h1>
+          <p class="s">ログインに使うメールアドレスとパスワードを決めてください。</p>
+          <form id="form-account" novalidate onsubmit="return false">
+            <div class="field">
+              <label for="f-mail">メールアドレス</label>
+              <input id="f-mail" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" aria-describedby="e-mail">
+              <p class="err-msg" id="e-mail" hidden></p>
+            </div>
+            <div class="field">
+              <label for="f-pass">パスワード</label>
+              <div class="pw">
+                <input id="f-pass" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" aria-describedby="h-pass">
+                <button type="button" class="pw-toggle" id="pw-toggle" aria-label="パスワードを表示する" aria-pressed="false"></button>
+              </div>
+              <p class="hint" id="h-pass">15文字以上。大文字や記号は入れなくてもかまいません</p>
+              <p class="err-msg" id="e-pass" hidden></p>
+            </div>
+          </form>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" id="next-account">確認メールを送る</button></div>
+      </section>
+
+      <!-- 2-2. メール確認 -->
+      <section class="screen hidden-right" data-id="verify" data-step="3" data-name="メールの確認">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="body">
+          <div class="mail-ico glass-tint" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2.5" fill="none" stroke="#fff" stroke-width="1.8"/><path d="M4 7l8 6 8-6" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h1 class="t">メールを確認してください</h1>
+          <p class="s" style="margin-bottom:16px"><span class="addr" id="v-addr">name@example.com</span> に確認メールを送りました。メールの中のリンクを押してください。リンクは24時間有効です。</p>
+          <p class="note">メールが届かないときは、迷惑メールフォルダーも見てください。確認はあとでもできます。</p>
+          <div class="row-btns">
+            <button class="text-btn" id="b-resend"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>メールを再送する</button>
+            <button class="text-btn" id="b-change"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>メールアドレスを変更する</button>
+          </div>
+          <p class="status-line" id="v-status" role="status" aria-live="polite"></p>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" data-go="lang">あとで確認して先へ</button></div>
+      </section>
+
+      <!-- 3. 言語 -->
+      <section class="screen hidden-right" data-id="lang" data-step="4" data-name="言語" data-progress="1">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="prog-slot"></div>
+        <div class="body">
+          <h1 class="t">話す言語と、学びたい言語</h1>
+          <p class="s">あなたの学びたい言語を話す人を、話し相手として紹介するのに使います。</p>
+          <div class="field dd" data-dd="native" data-default="ja">
+            <span class="lbl" id="l-native">母語<span class="req">必須</span></span>
+            <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="l-native dd-native-v" aria-describedby="e-native"><span id="dd-native-v"></span><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div class="dd-panel" hidden>
+              <input class="dd-search" type="text" role="combobox" aria-label="母語を検索" aria-expanded="true" aria-autocomplete="list" aria-controls="dd-native-list" placeholder="言語名で検索" autocomplete="off" spellcheck="false">
+              <ul class="dd-list" role="listbox" id="dd-native-list" aria-label="母語"></ul>
+            </div>
+            <p class="err-msg" id="e-native" hidden></p>
+          </div>
+          <div class="field dd" data-dd="learn">
+            <span class="lbl" id="l-learn">学びたい言語<span class="req">必須</span></span>
+            <button type="button" class="dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="l-learn dd-learn-v" aria-describedby="e-learn"><span id="dd-learn-v"></span><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <div class="dd-panel" hidden>
+              <input class="dd-search" type="text" role="combobox" aria-label="学びたい言語を検索" aria-expanded="true" aria-autocomplete="list" aria-controls="dd-learn-list" placeholder="言語名で検索" autocomplete="off" spellcheck="false">
+              <ul class="dd-list" role="listbox" id="dd-learn-list" aria-label="学びたい言語"></ul>
+            </div>
+            <p class="err-msg" id="e-learn" hidden></p>
+          </div>
+          <p class="hint">あとから設定で変えられます</p>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" id="next-lang">次へ</button></div>
+      </section>
+
+      <!-- 目的 -->
+      <section class="screen hidden-right" data-id="purpose" data-step="5" data-name="目的" data-progress="2">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="prog-slot"></div>
+        <div class="body">
+          <h1 class="t">何のために学びますか？</h1>
+          <p class="s">同じ目的の人と話しやすくなるよう、相手の紹介に使います。</p>
+          <p class="q-head" id="l-purpose">目的<span class="req">必須</span><span style="font-weight:500">いくつでも選べます</span></p>
+          <div class="chips" id="purpose-chips" role="group" aria-labelledby="l-purpose" aria-describedby="e-purpose">
+            <button class="chip" aria-pressed="false">試験対策</button><button class="chip" aria-pressed="false">留学</button><button class="chip" aria-pressed="false">仕事</button>
+            <button class="chip" aria-pressed="false">旅行</button><button class="chip" aria-pressed="false">友だちづくり</button><button class="chip" aria-pressed="false">異文化交流</button>
+          </div>
+          <p class="err-msg" id="e-purpose" hidden style="margin-top:14px"></p>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" id="next-purpose">次へ</button></div>
+      </section>
+
+      <!-- 4. 生年月日 -->
+      <section class="screen hidden-right" data-id="birth" data-step="6" data-name="生年月日" data-progress="3">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="prog-slot"></div>
+        <div class="body">
+          <h1 class="t">生年月日を教えてください</h1>
+          <p class="s">年齢に合った安全な使い方にするために使います。ほかの人には表示しません。</p>
+          <fieldset class="date-group" id="date-group" aria-describedby="h-birth e-birth">
+            <legend>生年月日<span class="req">必須</span></legend>
+            <p class="hint" id="h-birth">例：27 3 2001</p>
+            <p class="err-msg" id="e-birth" hidden></p>
+            <div class="date">
+              <div class="field d"><label for="f-bd">日</label><input id="f-bd" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="bday-day"></div>
+              <div class="field m"><label for="f-bm">月</label><input id="f-bm" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="bday-month"></div>
+              <div class="field y"><label for="f-by">年</label><input id="f-by" type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="bday-year"></div>
+            </div>
+          </fieldset>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" id="next-birth">次へ</button></div>
+      </section>
+
+      <!-- 最低年齢未満 -->
+      <section class="screen stop hidden-right" data-id="underage" data-step="6" data-name="登録できない（18歳未満）">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="body">
+          <div class="stop-ico glass" aria-hidden="true"><svg width="34" height="34" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="#5d6270" stroke-width="1.8"/><path d="M12 7.5v5.5" stroke="#5d6270" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16.3" r="1.2" fill="#5d6270"/></svg></div>
+          <h1 class="t">いまはハナソに登録できません</h1>
+          <p class="s">ハナソは18歳以上の方が使えるサービスです。入力した生年月日は保存していません。</p>
+        </div>
+        <div class="foot"><button class="capsule glass" id="b-underage-top">最初の画面に戻る</button></div>
+      </section>
+
+      <!-- 5. プロフィール -->
+      <section class="screen hidden-right" data-id="profile" data-step="7" data-name="プロフィール" data-progress="4">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="prog-slot"></div>
+        <div class="body">
+          <h1 class="t">プロフィールを作ろう</h1>
+          <p class="s" style="margin-bottom:20px">どちらもあとから変更できます。</p>
+          <div class="field">
+            <label for="f-nick">ニックネーム<span class="req">必須</span></label>
+            <input id="f-nick" type="text" autocomplete="nickname" aria-describedby="h-nick">
+            <p class="hint" id="h-nick">相手に表示される名前です。本名でなくてかまいません（20文字まで）</p>
+            <p class="err-msg" id="e-nick" hidden></p>
+          </div>
+          <div class="photo-row">
+            <div class="avatar-box">
+              <button class="avatar" id="avatar" aria-label="写真を選ぶ">
+                <span class="face" id="face"></span>
+              </button>
+              <button class="avatar-x circle-btn glass" id="avatar-x" aria-label="写真を消す" hidden><svg width="14" height="14" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" stroke="#111318" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+            </div>
+            <div class="photo-side">
+              <span class="lbl">プロフィール写真<span class="opt">任意</span></span>
+              <button class="text-btn" id="b-pick">写真を選ぶ</button>
+              <p class="hint" style="font-size:12px">JPEGかPNG、10MBまで</p>
+            </div>
+          </div>
+          <p class="hint" id="h-photo">写真は、ハナソを使っている人があなたのプロフィールを開いたときに表示されます。消すまで表示され、いつでも変更・削除できます。</p>
+        </div>
+        <div class="foot"><button class="capsule glass-tint" id="next-profile">次へ</button></div>
+      </section>
+
+      <!-- 6. 興味 -->
+      <section class="screen hidden-right" data-id="interest" data-step="8" data-name="興味のあること" data-progress="5">
+        <div class="nav"><button class="circle-btn glass" data-back aria-label="戻る"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#111318" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
+        <div class="prog-slot"></div>
+        <div class="body">
+          <h1 class="t">興味のあることは？</h1>
+          <p class="s">選ぶと、同じ話題が好きな人を話し相手として紹介しやすくなります。選ばなくても使えます。</p>
+          <p class="q-head" id="l-interest">興味のあること<span class="opt">任意</span></p>
+          <div class="chips" id="chips" role="group" aria-labelledby="l-interest">
+            <button class="chip" aria-pressed="false">映画</button><button class="chip" aria-pressed="false">音楽</button><button class="chip" aria-pressed="false">旅行</button><button class="chip" aria-pressed="false">ゲーム</button>
+            <button class="chip" aria-pressed="false">料理</button><button class="chip" aria-pressed="false">アニメ</button><button class="chip" aria-pressed="false">スポーツ</button><button class="chip" aria-pressed="false">ファッション</button>
+            <button class="chip" aria-pressed="false">読書</button><button class="chip" aria-pressed="false">カフェ</button><button class="chip" aria-pressed="false">写真</button><button class="chip" aria-pressed="false">ペット</button>
+            <button class="chip" aria-pressed="false">アート</button><button class="chip" aria-pressed="false">テクノロジー</button><button class="chip" aria-pressed="false">K-POP</button>
+          </div>
+        </div>
+        <div class="foot">
+          <button class="capsule glass-tint" data-go="ready">始める</button>
+          <button class="capsule sub" data-go="ready">あとで</button>
+        </div>
+      </section>
+
+      <!-- 準備中 → スタート -->
+      <section class="screen ready fade hidden-right" data-id="ready" data-step="9" data-name="スタート" id="ready">
+        <div class="ring glass" id="ring"></div>
+        <h1 class="t" id="ready-t" style="color:#fff">準備しています…</h1>
+        <p class="s" id="ready-s" style="color:rgba(255,255,255,.75);margin:0">おすすめの投稿を集めています</p>
+      </section>
+
+      <!-- 7. ホーム（タイムライン） -->
+      <section class="screen tl fade hidden-right" data-id="home" data-step="9" data-name="ホーム（タイムライン）">
+        <div class="tl-scroll">
+          <div class="tl-head">
+            <h2>ホーム</h2>
+            <button class="circle-btn glass" aria-label="通知"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M6 10a6 6 0 0 1 12 0v4l1.6 2.6c.3.5 0 1.1-.6 1.1H5c-.6 0-.9-.6-.6-1.1L6 14z" fill="none" stroke="#111318" stroke-width="1.8" stroke-linejoin="round"/><path d="M10 20.2a2.2 2.2 0 0 0 4 0" fill="none" stroke="#111318" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+          </div>
+          <div class="seg"><button class="on">おすすめ</button><button>フォロー中</button></div>
+          <div id="posts"></div>
+        </div>
+        <div class="toast glass gone" id="toast"><svg width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#2f9e5b"/><path d="M7.5 12.5l3 3 6-6.5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="toast-t">登録が完了しました。ようこそ！</span></div>
+        <nav class="tabbar glass" aria-label="タブ">
+          <button class="tab on"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M3.5 10.5L12 4l8.5 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-4v-6h-6v6H5A1.5 1.5 0 0 1 3.5 19z" fill="currentColor"/></svg>ホーム</button>
+          <button class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 16l4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>さがす</button>
+          <button class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>トーク</button>
+          <button class="tab"><svg width="24" height="24" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c.8-3.6 3.8-5.7 7.5-5.7s6.7 2.1 7.5 5.7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>マイページ</button>
+        </nav>
+        <button class="fab glass-tint" aria-label="投稿する"><svg width="24" height="24" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg></button>
+      </section>
+
+      <div class="home-ind"></div>
+    </div>
+  </div>
+</div>
+
+<div class="bar">
+  <div class="now" id="now"></div>
+  <button id="b-back">戻る</button>
+  <button id="b-reset">最初から</button>
+  <button id="b-spec" aria-expanded="false" aria-controls="spec">仕様メモ</button>
+</div>
+<aside class="spec" id="spec" hidden>
+  <h2>仕様メモ（アフター版）</h2>
+  <p class="legend">リサーチ4本（言語交換SNSリサーチ／必須対応リサーチ／UI やさしい版／デザインシステム編）を渡してAIが作り直した版です。印はリサーチと同じ：<b>★必須</b>＝規約・法令の原文が必須／<b>規格</b>＝WCAG・NIST／<b>推奨</b>＝公式の指針／<b>提案</b>＝原文になく、AIが決めた</p>
+
+  <h3>AIが決めたこと＋根拠</h3>
+  <dl>
+    <dt>ログイン方法：Apple・Google・メールの3つ</dt>
+    <dd><span class="mk">★必須</span>iOSでGoogleログインを置くなら、Appleのログインも同じ画面に置く（必須対応 画面1／Apple 4.8）。<span class="mk">推奨</span>Appleのボタンは他より小さくせず、スクロールなしで見える位置に。黒・「Appleで続ける」（デザインシステム編 Appleでログイン）。<span class="mk">推奨</span>ボタンの文言に方法の名前を入れる（UI やさしい版 画面1）</dd>
+
+    <dt>最初の画面の説明・ログインの入口・規約</dt>
+    <dd><span class="mk">推奨</span>アカウントを作る理由と得られることを1〜2行。「すでにアカウントをお持ちの方」でログインと登録の違いを見せる（UI やさしい版 画面1）。<span class="mk">★必須</span>プライバシーポリシーへのリンクを分かりやすい場所に（必須対応 B-1／Apple 5.1.1(i)）。押せるリンクの形にした（見本なので押しても移動しない）。同意の文はビフォーのまま</dd>
+
+    <dt>AppleとGoogleで来た人は、メール・パスワードとメール確認を飛ばす</dt>
+    <dd><span class="mk">推奨</span>AppleやGoogleで来た人にパスワードを求めない（必須対応 画面1-4／HIG）。Appleはメール確認も飛ばせるとHIGに記載。Googleは未確認だが、ビフォーどおり飛ばす（下の「手を出さなかった所」）</dd>
+
+    <dt>入力欄：ラベルは欄の上、placeholderなし、自動入力</dt>
+    <dd><span class="mk">推奨</span>ラベルは欄の外の上。placeholderをラベル代わりにしない（デザインシステム編 テキスト入力／GOV.UK・Carbon）。<span class="mk">規格</span>autocomplete（email・new-password・nickname・bday-day/month/year）を付ける（WCAG 1.3.5）。メール欄はメール用キーボード（HIG）</dd>
+
+    <dt>エラーの出し方</dt>
+    <dd><span class="mk">規格</span>欄の下に文字で出し、色だけで示さない（WCAG 3.3.1）。枠は2pxの赤（Carbon）。<span class="mk">推奨</span>欄を離れたときに確かめ、入力中は出さない（HIG・Material）。空欄のエラーは「次へ」を押したときだけ出す（触っただけで赤くしない。提案）。入力した内容は消さない。原因ごとに文を分け、GOV.UKの型を日本語にした（必須対応 A-3・A-5）。読み上げでは「エラー：」を先に読む（GOV.UK）。<span class="mk">提案</span>スマホでは画面上部のまとめの代わりに、最初のエラー欄へフォーカスを移す（デザインシステム編 エラー表示）</dd>
+
+    <dt>「次へ」は押せるままにする</dt>
+    <dd>出典が食い違う点（必須対応 A-9：HIGは押せなくする、旧Materialは押せる）。<span class="mk">提案</span>押せる方を選んだ。押せないボタンは、何が足りないかを伝えられない。押したら欄の下に理由が文字で出るほうが、WCAG 3.3.1（文字で示す）と合う</dd>
+
+    <dt>パスワード：15文字以上</dt>
+    <dd>出典が食い違う点（GOV.UK 8文字／NIST 15文字）。NISTの8文字は「多要素認証の一部として使う場合だけ」で、パスワードだけで認証するなら15文字以上（必須対応 画面1 パスワード-1）。ハナソには2段階認証がないので、<span class="mk">規格</span>NISTの15文字を採った。<span class="mk">規格</span>大文字・記号の条件は付けない、表示・非表示の切り替え、貼り付けと自動入力を止めない（NIST）。補助文字は句点なしの短い1文（GOV.UK）</dd>
+
+    <dt>メール確認：確認前でも先へ進める</dt>
+    <dd>ビフォーの仕様（非ブロック型）を維持。GOV.UKはブロック型・非ブロック型のどちらも説明している。<span class="mk">推奨</span>送り先アドレス、「リンクを押してください」、再送、アドレス変更、迷惑メールの案内（UI やさしい版 画面2-2）。<span class="mk">★必須</span>リンクに有効期限を付ける。数字は原文になく、<span class="mk">提案</span>24時間にした（あとで確認して先へ進める作りなので、ログイン用コードの10分では切れやすい）</dd>
+
+    <dt>言語：検索付きドロップダウンで1つずつ</dt>
+    <dd><span class="mk">推奨</span>長いリストは絞り込み、6番目からスクロール、選択肢に装飾アイコンを入れない（Carbon Dropdown）。Base Web も検索が初期値。<span class="mk">推奨</span>必須であることをはっきり伝える（HIG）。<span class="mk">提案</span>母語は端末の言語＝日本語を初期値に、学びたい言語は未選択（UI やさしい版 画面3）。並びは50音順（GOV.UKの「アルファベット順」を日本語に置き換えた提案）。ひらがな・カタカナ・英語名でも探せる</dd>
+
+    <dt>目的：選べるタグで複数・必須</dt>
+    <dd>選択肢は業種リサーチの「使う目的」（試験対策、留学、仕事、旅行、友だちづくり、異文化交流）。<span class="mk">推奨</span>押すと選択、もう一度で解除、選んだものとの違いをはっきり（Carbon Tag）。<span class="mk">提案</span>必須にした：業種リサーチの「最初に聞くのは4つ（母語・学びたい言語・レベル・目的）」に入っているため</dd>
+
+    <dt>生年月日：日・月・年の3つの数字欄</dt>
+    <dd><span class="mk">推奨</span>GOV.UK Date input。<span class="mk">提案</span>数字キーボード（HIGの考え方のあてはめ）。<span class="mk">★必須</span>聞く理由を1行と必須の表示（GDPR 13条・HIG）。<span class="mk">推奨</span>「何歳以上か」を先に見せず中立に聞く（COPPA FAQ D.7）。エラー文はGOV.UKの型を日本語に（空・一部が空・年が4桁でない・実在しない日付・未来の日付）</dd>
+
+    <dt>18歳未満：登録を断る画面</dt>
+    <dd><span class="mk">★必須</span>最低年齢未満の人の動きを決める（必須対応 生年月日-1・3）。COPPAは一般向けサービスが利用を断ることも認めているので、断る方を選んだ（提案）。18歳はHelloTalkの分け方を参考にした仮の数字。入力した生年月日は保存しない（COPPA H.6 の「削除する」に合わせた）。打ち間違いを直せるよう、戻るは残した</dd>
+
+    <dt>プロフィール：ニックネームと写真（任意）</dt>
+    <dd>名前の例を本名にしない。ニックネームとアバターで参加できるSlowlyの例（業種リサーチ）。<span class="mk">★必須</span>写真を必須にするには「中核機能」の理由が要るので任意のまま（Apple 5.1.1(v)）。<span class="mk">★必須</span>写真を誰に・いつまで見せるかを画面で示す（GDPR 13条）。<span class="mk">推奨</span>形式とサイズの制限を先に伝える、×で消して選び直せる（Carbon File uploader）。形式・サイズの数字は提案</dd>
+
+    <dt>興味：任意・あとで・使い道</dt>
+    <dd><span class="mk">推奨</span>「任意」と書き、答えるとマッチングがどう良くなるかを書く。「あとで」で飛ばせる（UI やさしい版 画面5）。<span class="mk">★必須</span>使い道（相手の紹介に使う）を集めるときに示す（GDPR 13条）</dd>
+
+    <dt>進み具合の表示</dt>
+    <dd><span class="mk">推奨</span>一直線の手順で3ステップ以上なら使える（Carbon Progress indicator）。<span class="mk">提案</span>どの登録方法でも同じ長さになる「言語→目的→生年月日→プロフィール→興味」の5つだけに出す（メールの人だけ増えるステップを入れると、合計が途中で変わるため）。各ステップへは押して戻れない（Carbonの初期状態）</dd>
+
+    <dt>押せる範囲</dt>
+    <dd><span class="mk">推奨</span>ボタンは44×44pt以上（HIG Buttons）。タグ・テキストのボタン・パスワードの目・写真の×も44以上にした</dd>
+  </dl>
+
+  <h3>手を出さなかった所（リサーチが足りない）</h3>
+  <dl>
+    <dt>最初の画面（相手の候補＋1タップのあいさつ）</dt>
+    <dd>業種リサーチは中身を示すが、UIリサーチに画面の部品・並べ方がない → ビフォーのタイムラインのまま</dd>
+    <dt>レベルの選択</dt>
+    <dd>段階と説明（CEFRなど）が未確認で、選択肢を作れない → 入れない</dd>
+    <dt>母語の複数選択・同じ言語の重複</dt>
+    <dd>出典なし → 1つずつ選ぶ形だけ</dd>
+    <dt>利用ルール（言語学習が目的）への同意画面</dt>
+    <dd>必要なのは確定だが、文面と見せ方（チェックボックスか表示か）が未確認 → 入れない。ビフォーのみなし同意の文のまま</dd>
+    <dt>アイコンの切り抜き</dt>
+    <dd>アバター専用の規定がない → 入れない（消す・選び直すだけ）</dd>
+    <dt>「すでに登録済みのメール」のエラー</dt>
+    <dd>原文を読めていない → 入れない</dd>
+    <dt>Googleで来た人のメール確認</dt>
+    <dd>要るかどうかが未確認 → ビフォーどおり飛ばす</dd>
+    <dt>日本の法令での最低年齢</dt>
+    <dd>日本の法令は未調査 → 18歳は仮</dd>
+    <dt>生年月日のピッカーとの比較</dt>
+    <dd>未調査 → GOV.UKの3つの欄で作った</dd>
+  </dl>
+</aside>
+
+<script>
+(function () {
+  var screens = Array.prototype.slice.call(document.querySelectorAll(".screen"));
+  var wrap = document.getElementById("wrap");
+  var history = [0];
+  var timers = [];
+  var TOTAL = screens.reduce(function (m, s) { return Math.max(m, Number(s.dataset.step)); }, 0);
+  function idx(id) { for (var i = 0; i < screens.length; i++) if (screens[i].dataset.id === id) return i; return -1; }
+  function $(id) { return document.getElementById(id); }
+
+  // 画面の外側に転がらないようにする（フォーカス移動で screen-wrap がスクロールするのを防ぐ）
+  wrap.addEventListener("scroll", function () { wrap.scrollTop = 0; wrap.scrollLeft = 0; });
+
+  var POSTS = [
+    { c: "#e8735a", i: "ゆ", n: "ゆうた", h: "@yuta_m", t: "2分", p: "週末に観た映画がめちゃくちゃよかった。最近のおすすめあったら教えてください！", g: "映画" },
+    { c: "#4a7fd4", i: "E", n: "Emma", h: "@emma.lnd", t: "8分", p: "Just got back from Kyoto. The food was amazing! Where should I go next time?", g: "旅行", photo: true },
+    { c: "#b8913a", i: "李", n: "李明", h: "@liming88", t: "15分", p: "今天第一次做了日式咖喱，比想象的简单！", g: "料理" },
+    { c: "#1f6f78", i: "さ", n: "さき", h: "@saki_0412", t: "21分", p: "駅前に新しいカフェができてた。チーズケーキが絶品でした", g: "料理" },
+    { c: "#8a5cc2", i: "M", n: "Marco", h: "@marco_rossi", t: "34分", p: "Qualcuno ha visto il nuovo film di Miyazaki? Senza spoiler per favore!", g: "映画" },
+    { c: "#d4568a", i: "け", n: "けんた", h: "@kenta_travel", t: "1時間", p: "来月はじめての海外ひとり旅。荷物ってどれくらい持っていけばいいんだろう", g: "旅行" },
+    { c: "#3a9d7a", i: "J", n: "Jisoo", h: "@jisoo_k", t: "1時間", p: "오늘 저녁은 비빔밥! 다들 뭐 먹어요?", g: "料理" }
+  ];
+  var ICON = {
+    heart: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    reply: '<svg width="17" height="17" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4A1.5 1.5 0 0 1 4 14.5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+    err: '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="currentColor"/><path d="M12 7v6" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="16.6" r="1.4" fill="#fff"/></svg>',
+    eye: '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>',
+    eyeOff: '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M4 4l16 16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+    person: '<svg width="52" height="52" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="4" fill="#9aa0ac"/><path d="M4 20c.8-3.8 4-6 8-6s7.2 2.2 8 6" fill="#9aa0ac"/></svg>',
+    spin: '<svg class="spin" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="16" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="4"/><path d="M20 4a16 16 0 0 1 16 16" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"/></svg>',
+    check: '<svg class="pop" width="44" height="44" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+    tick: '<svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+  };
+  $("posts").innerHTML = POSTS.map(function (x, k) {
+    return '<article class="post"><div class="av" style="background:' + x.c + '">' + x.i + '</div><div style="min-width:0;flex:1">' +
+      '<div class="meta"><b>' + x.n + '</b>' + x.h + ' · ' + x.t + '</div><p>' + x.p + '</p>' +
+      (x.photo ? '<div class="tl-photo"></div>' : '') +
+      '<span class="tag">#' + x.g + '</span>' +
+      '<div class="acts"><span>' + ICON.heart + (12 + k * 7) + '</span><span>' + ICON.reply + (2 + k) + '</span></div></div></article>';
+  }).join("");
+
+  // 進み具合（言語→目的→生年月日→プロフィール→興味。どの登録方法でも同じ5つ）
+  var STEPS = ["言語", "目的", "生年月日", "プロフィール", "興味"];
+  screens.forEach(function (s) {
+    var slot = s.querySelector(".prog-slot");
+    if (!slot) return;
+    var cur = Number(s.dataset.progress);
+    var ol = document.createElement("ol");
+    ol.className = "prog";
+    ol.setAttribute("aria-label", "登録の進み具合 " + STEPS.length + "ステップ中" + cur + "ステップ目");
+    ol.innerHTML = STEPS.map(function (name, i) {
+      var n = i + 1, cls = n < cur ? "done" : n === cur ? "cur" : "";
+      var sr = n < cur ? "（完了）" : n === cur ? "（いまここ）" : "";
+      return '<li class="' + cls + '"' + (n === cur ? ' aria-current="step"' : '') + '><span class="pbar"></span><span class="plb">' + name + '<span class="vh">' + sr + '</span></span></li>';
+    }).join("");
+    slot.replaceWith(ol);
+  });
+
+  function stepLabel(i) {
+    var s = screens[i];
+    return '<span>' + s.dataset.step + ' / ' + TOTAL + '</span>' + s.dataset.name;
+  }
+  function clearTimers() { timers.forEach(clearTimeout); timers = []; }
+
+  function show(next, back) {
+    var cur = history[history.length - 1];
+    if (next === cur) return;
+    closeAllDD();
+    screens.forEach(function (s, i) {
+      s.classList.remove("hidden-left", "hidden-right");
+      if (i === next) return;
+      if (i === cur) s.classList.add(back ? "hidden-right" : "hidden-left");
+      else s.classList.add(i < next ? "hidden-left" : "hidden-right");
+    });
+    if (back) history.pop(); else history.push(next);
+    wrap.classList.toggle("on-dark", screens[next].id === "ready");
+    $("now").innerHTML = stepLabel(next);
+    $("b-back").disabled = history.length < 2 || screens[next].id === "ready";
+    if (screens[next].id === "ready") startReady();
+    if (next === screens.length - 1) startHome();
+  }
+  function go(id) { show(idx(id)); }
+
+  function nickname() { return $("f-nick").value.trim(); }
+  function startReady() {
+    clearTimers();
+    var ring = $("ring");
+    ring.innerHTML = ICON.spin;
+    $("ready-t").textContent = "準備しています…";
+    var nm = nickname();
+    $("ready-s").textContent = nm ? nm + "さんにおすすめの投稿を集めています" : "おすすめの投稿を集めています";
+    timers.push(setTimeout(function () {
+      ring.innerHTML = ICON.check;
+      $("ready-t").textContent = "さあ、はじめよう！";
+      $("ready-s").textContent = "ハナソへようこそ";
+    }, 1400));
+    timers.push(setTimeout(function () { show(screens.length - 1); }, 2500));
+  }
+  function startHome() {
+    var nm = nickname();
+    $("toast-t").textContent = nm ? "登録が完了しました。ようこそ、" + nm + "さん！" : "登録が完了しました。ようこそ！";
+    var toast = $("toast");
+    toast.classList.add("gone");
+    document.querySelector(".tl-scroll").scrollTop = 0;
+    timers.push(setTimeout(function () { toast.classList.remove("gone"); }, 350));
+    timers.push(setTimeout(function () { toast.classList.add("gone"); }, 3600));
+  }
+
+  document.querySelectorAll("[data-go]").forEach(function (b) {
+    b.addEventListener("click", function () { go(b.dataset.go); });
+  });
+  document.querySelectorAll("[data-back]").forEach(function (b) {
+    b.addEventListener("click", function () { goBack(); });
+  });
+  function goBack() {
+    if (history.length < 2) return;
+    clearTimers();
+    show(history[history.length - 2], true);
+  }
+  // Apple・Google：認証が終わったものとして、メール・パスワードとメール確認を飛ばす
+  document.querySelectorAll("[data-sso]").forEach(function (b) {
+    b.addEventListener("click", function () { go("lang"); });
+  });
+  // 押しても動かない見本のリンク・ボタン
+  document.querySelectorAll("a[data-dummy]").forEach(function (a) {
+    a.addEventListener("click", function (e) { e.preventDefault(); });
+  });
+
+  // ---------- エラー表示（欄の下に文字。枠を赤く。入力は消さない） ----------
+  function setError(errId, msg, targets, hintId) {
+    var el = $(errId);
+    targets = targets || [];
+    if (msg) {
+      el.innerHTML = ICON.err + '<span><span class="vh">エラー：</span>' + msg + '</span>';
+      el.hidden = false;
+    } else {
+      el.textContent = "";
+      el.hidden = true;
+    }
+    if (hintId) $(hintId).hidden = !!msg; // 補助文字はエラーの間だけエラー文に入れ替える（Carbon）
+    targets.forEach(function (t) {
+      t.classList.toggle("is-err", !!msg);
+      if (msg) t.setAttribute("aria-invalid", "true"); else t.removeAttribute("aria-invalid");
+      if (t.tagName === "INPUT" && t.id !== "f-bd" && t.id !== "f-bm" && t.id !== "f-by") {
+        t.setAttribute("aria-describedby", msg ? errId : (hintId || errId));
+      }
+    });
+  }
+  function focusFirst(list) {
+    for (var i = 0; i < list.length; i++) if (list[i]) { list[i].focus(); return; }
+  }
+
+  // 1つの欄の決まり：空なら null を返さず、空のメッセージを返す。blur では空のときは出さない
+  var FIELDS = {
+    "f-mail": { err: "e-mail", check: function (v) {
+      if (!v.trim()) return "メールアドレスを入力してください";
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return "name@example.com のような形式で入力してください";
+      return null;
+    } },
+    "f-pass": { err: "e-pass", hint: "h-pass", check: function (v) {
+      if (!v) return "パスワードを入力してください";
+      if (Array.from(v).length < 15) return "パスワードは15文字以上で入力してください";
+      return null;
+    } },
+    "f-nick": { err: "e-nick", hint: "h-nick", check: function (v) {
+      if (!v.trim()) return "ニックネームを入力してください";
+      if (Array.from(v.trim()).length > 20) return "ニックネームは20文字以内で入力してください";
+      return null;
+    } }
+  };
+  function validateField(id) {
+    var f = FIELDS[id], input = $(id);
+    var msg = f.check(input.value);
+    setError(f.err, msg, [input], f.hint);
+    return msg ? input : null;
+  }
+  Object.keys(FIELDS).forEach(function (id) {
+    var input = $(id);
+    // 欄を離れたときに確かめる（空のときは「次へ」を押すまで出さない）
+    input.addEventListener("blur", function () { if (input.value) validateField(id); });
+    // 入力中はエラーを新しく出さない。直ったらすぐ消す
+    input.addEventListener("input", function () {
+      if (input.classList.contains("is-err") && !FIELDS[id].check(input.value)) setError(FIELDS[id].err, null, [input], FIELDS[id].hint);
+    });
+  });
+
+  // ---------- 画面2：メール・パスワード ----------
+  var pwInput = $("f-pass"), pwToggle = $("pw-toggle");
+  pwToggle.innerHTML = ICON.eye;
+  pwToggle.addEventListener("click", function () {
+    var showPw = pwInput.type === "password";
+    pwInput.type = showPw ? "text" : "password";
+    pwToggle.innerHTML = showPw ? ICON.eyeOff : ICON.eye;
+    pwToggle.setAttribute("aria-pressed", String(showPw));
+    pwToggle.setAttribute("aria-label", showPw ? "パスワードを隠す" : "パスワードを表示する");
+  });
+  $("next-account").addEventListener("click", function () {
+    var bad = [validateField("f-mail"), validateField("f-pass")];
+    if (bad[0] || bad[1]) { focusFirst(bad); return; }
+    $("v-addr").textContent = $("f-mail").value.trim();
+    $("v-status").textContent = "";
+    resendCount = 0;
+    go("verify");
+  });
+
+  // ---------- 画面2-2：メール確認 ----------
+  var resendCount = 0;
+  $("b-resend").addEventListener("click", function () {
+    resendCount++;
+    $("v-status").textContent = $("f-mail").value.trim() + " に再送しました" + (resendCount > 1 ? "（" + resendCount + "回目）" : "");
+  });
+  $("b-change").addEventListener("click", function () {
+    goBack();
+    var mail = $("f-mail");
+    mail.focus({ preventScroll: true });
+    mail.select();
+  });
+
+  // ---------- 画面3：言語（検索付きドロップダウン） ----------
+  var LANGS = [
+    { id: "ar", ja: "アラビア語", kana: "あらびあご", en: "arabic العربية" },
+    { id: "it", ja: "イタリア語", kana: "いたりあご", en: "italian italiano" },
+    { id: "id", ja: "インドネシア語", kana: "いんどねしあご", en: "indonesian bahasa" },
+    { id: "en", ja: "英語", kana: "えいご", en: "english" },
+    { id: "nl", ja: "オランダ語", kana: "おらんだご", en: "dutch nederlands" },
+    { id: "ko", ja: "韓国語", kana: "かんこくご", en: "korean 한국어" },
+    { id: "sv", ja: "スウェーデン語", kana: "すうぇーでんご", en: "swedish svenska" },
+    { id: "es", ja: "スペイン語", kana: "すぺいんご", en: "spanish español" },
+    { id: "th", ja: "タイ語", kana: "たいご", en: "thai ไทย" },
+    { id: "tl", ja: "タガログ語", kana: "たがろぐご", en: "tagalog filipino" },
+    { id: "zh-hans", ja: "中国語（簡体字）", kana: "ちゅうごくご かんたいじ", en: "chinese simplified 中文 简体" },
+    { id: "zh-hant", ja: "中国語（繁体字）", kana: "ちゅうごくご はんたいじ", en: "chinese traditional 中文 繁體" },
+    { id: "de", ja: "ドイツ語", kana: "どいつご", en: "german deutsch" },
+    { id: "tr", ja: "トルコ語", kana: "とるこご", en: "turkish türkçe" },
+    { id: "ja", ja: "日本語", kana: "にほんご", en: "japanese" },
+    { id: "hi", ja: "ヒンディー語", kana: "ひんでぃーご", en: "hindi हिन्दी" },
+    { id: "fr", ja: "フランス語", kana: "ふらんすご", en: "french français" },
+    { id: "vi", ja: "ベトナム語", kana: "べとなむご", en: "vietnamese tiếng việt" },
+    { id: "pl", ja: "ポーランド語", kana: "ぽーらんどご", en: "polish polski" },
+    { id: "pt", ja: "ポルトガル語", kana: "ぽるとがるご", en: "portuguese português" },
+    { id: "ru", ja: "ロシア語", kana: "ろしあご", en: "russian русский" }
+  ];
+  function toHira(s) { return s.replace(/[ァ-ヶ]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0x60); }); }
+  function langById(id) { for (var i = 0; i < LANGS.length; i++) if (LANGS[i].id === id) return LANGS[i]; return null; }
+
+  var DD = {};
+  document.querySelectorAll(".dd").forEach(function (root) {
+    var key = root.dataset.dd;
+    var btn = root.querySelector(".dd-btn"), panel = root.querySelector(".dd-panel");
+    var search = root.querySelector(".dd-search"), list = root.querySelector(".dd-list");
+    var valEl = $("dd-" + key + "-v");
+    var state = { value: null, items: [], active: 0 };
+
+    function paintValue() {
+      var l = langById(state.value);
+      valEl.innerHTML = l ? l.ja : '<span class="ph">選んでください</span>';
+    }
+    function render(q) {
+      var nq = toHira(q.trim().toLowerCase());
+      state.items = LANGS.filter(function (l) {
+        if (!nq) return true;
+        return toHira(l.ja.toLowerCase()).indexOf(nq) >= 0 || l.kana.indexOf(nq) >= 0 || l.en.indexOf(nq) >= 0;
+      });
+      if (state.active >= state.items.length) state.active = 0;
+      if (!state.items.length) {
+        list.innerHTML = '<li class="dd-empty" role="presentation">見つかりません。別の書き方で探してください</li>';
+        search.removeAttribute("aria-activedescendant");
+        return;
+      }
+      list.innerHTML = state.items.map(function (l, i) {
+        var sel = l.id === state.value;
+        return '<li role="option" id="opt-' + key + '-' + l.id + '" data-id="' + l.id + '" aria-selected="' + sel + '"' + (i === state.active ? ' class="active"' : '') + '><span>' + l.ja + '</span>' + (sel ? ICON.tick : '') + '</li>';
+      }).join("");
+      search.setAttribute("aria-activedescendant", "opt-" + key + "-" + state.items[state.active].id);
+    }
+    function moveActive(d) {
+      if (!state.items.length) return;
+      state.active = (state.active + d + state.items.length) % state.items.length;
+      render(search.value);
+      keepActiveVisible();
+    }
+    // scrollIntoView は iframe の外のページまで動かすので、リストだけを手で動かす
+    function keepActiveVisible() {
+      var a = list.querySelector(".active");
+      if (!a) return;
+      if (a.offsetTop < list.scrollTop) list.scrollTop = a.offsetTop;
+      else if (a.offsetTop + a.offsetHeight > list.scrollTop + list.clientHeight) list.scrollTop = a.offsetTop + a.offsetHeight - list.clientHeight;
+    }
+    function open() {
+      closeAllDD(key);
+      panel.hidden = false;
+      btn.setAttribute("aria-expanded", "true");
+      search.value = "";
+      var at = LANGS.map(function (l) { return l.id; }).indexOf(state.value);
+      state.active = at >= 0 ? at : 0;
+      render("");
+      list.scrollTop = 0;
+      keepActiveVisible();
+      // 開いたリストが画面の下で切れるときは、本文をいちばん下まで送って全体を見せる
+      var body = root.closest(".body");
+      if (body && body.scrollHeight > body.clientHeight) body.scrollTop = body.scrollHeight - body.clientHeight;
+      search.focus({ preventScroll: true });
+    }
+    function close(focusBtn) {
+      if (panel.hidden) return;
+      panel.hidden = true;
+      btn.setAttribute("aria-expanded", "false");
+      if (focusBtn) btn.focus({ preventScroll: true });
+    }
+    function select(id) {
+      state.value = id;
+      paintValue();
+      close(true);
+      if (btn.classList.contains("is-err")) validateDD(key);
+    }
+    btn.addEventListener("click", function () { panel.hidden ? open() : close(true); });
+    search.addEventListener("input", function () { state.active = 0; render(search.value); });
+    search.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { e.preventDefault(); moveActive(1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); moveActive(-1); }
+      else if (e.key === "Enter") { e.preventDefault(); if (state.items[state.active]) select(state.items[state.active].id); }
+      else if (e.key === "Escape") { e.preventDefault(); close(true); }
+      else if (e.key === "Tab") { close(false); }
+    });
+    list.addEventListener("click", function (e) {
+      var li = e.target.closest("li[data-id]");
+      if (li) select(li.dataset.id);
+    });
+    DD[key] = {
+      root: root, btn: btn, close: close,
+      get: function () { return state.value; },
+      reset: function () { state.value = root.dataset.default || null; paintValue(); close(false); }
+    };
+    DD[key].reset();
+  });
+  function closeAllDD(except) { Object.keys(DD).forEach(function (k) { if (k !== except) DD[k].close(false); }); }
+  document.addEventListener("pointerdown", function (e) {
+    Object.keys(DD).forEach(function (k) { if (!DD[k].root.contains(e.target)) DD[k].close(false); });
+  });
+  var DD_MSG = { native: "母語を選んでください", learn: "学びたい言語を選んでください" };
+  function validateDD(key) {
+    var msg = DD[key].get() ? null : DD_MSG[key];
+    setError("e-" + key, msg, [DD[key].btn]);
+    return msg ? DD[key].btn : null;
+  }
+  $("next-lang").addEventListener("click", function () {
+    var bad = [validateDD("native"), validateDD("learn")];
+    if (bad[0] || bad[1]) { focusFirst(bad); return; }
+    go("purpose");
+  });
+
+  // ---------- 目的・興味：選べるタグ ----------
+  document.querySelectorAll(".chip").forEach(function (c) {
+    c.addEventListener("click", function () {
+      var on = c.classList.toggle("on");
+      c.setAttribute("aria-pressed", String(on));
+      if (c.parentNode.id === "purpose-chips" && on) setError("e-purpose", null, [c.parentNode]);
+    });
+  });
+  $("next-purpose").addEventListener("click", function () {
+    var box = $("purpose-chips");
+    if (!box.querySelector(".chip.on")) {
+      setError("e-purpose", "目的を1つ以上選んでください", [box]);
+      box.querySelector(".chip").focus();
+      return;
+    }
+    go("birth");
+  });
+
+  // ---------- 画面4：生年月日（日・月・年） ----------
+  var bd = $("f-bd"), bm = $("f-bm"), by = $("f-by"), dateGroup = $("date-group");
+  var MIN_AGE = 18; // 仮。日本の法令は未調査
+  function checkDate() {
+    var d = bd.value.trim(), m = bm.value.trim(), y = by.value.trim();
+    if (!d && !m && !y) return { msg: "生年月日を入力してください", fields: [bd, bm, by] };
+    var missing = [], mf = [];
+    if (!d) { missing.push("日"); mf.push(bd); }
+    if (!m) { missing.push("月"); mf.push(bm); }
+    if (!y) { missing.push("年"); mf.push(by); }
+    if (missing.length) return { msg: "生年月日には" + missing.join("と") + "を入れてください", fields: mf };
+    if (!/^\d+$/.test(d) || !/^\d+$/.test(m) || !/^\d+$/.test(y)) return { msg: "生年月日は数字で入力してください", fields: [bd, bm, by] };
+    if (y.length !== 4) return { msg: "年は4桁で入力してください", fields: [by] };
+    var dn = Number(d), mn = Number(m), yn = Number(y);
+    if (mn < 1 || mn > 12) return { msg: "実在する日付を入力してください", fields: [bm] };
+    var date = new Date(yn, mn - 1, dn);
+    if (dn < 1 || date.getFullYear() !== yn || date.getMonth() !== mn - 1 || date.getDate() !== dn) return { msg: "実在する日付を入力してください", fields: [bd] };
+    var today = new Date(); today.setHours(0, 0, 0, 0);
+    if (date >= today) return { msg: "生年月日は今日より前の日付にしてください", fields: [bd, bm, by] };
+    return { msg: null, fields: [], date: date };
+  }
+  function showDate(r) {
+    [bd, bm, by].forEach(function (i) { i.classList.remove("is-err"); i.removeAttribute("aria-invalid"); });
+    setError("e-birth", r.msg, r.fields);
+  }
+  function ageOn(date) {
+    var t = new Date(), a = t.getFullYear() - date.getFullYear();
+    if (t.getMonth() < date.getMonth() || (t.getMonth() === date.getMonth() && t.getDate() < date.getDate())) a--;
+    return a;
+  }
+  // 3つの欄のまとまりを離れたときに確かめる（欄の間を移るだけでは出さない）
+  dateGroup.addEventListener("focusout", function () {
+    setTimeout(function () {
+      if (dateGroup.contains(document.activeElement)) return;
+      if (bd.value || bm.value || by.value) showDate(checkDate());
+    }, 0);
+  });
+  [bd, bm, by].forEach(function (i) {
+    i.addEventListener("input", function () { if (!$("e-birth").hidden && !checkDate().msg) showDate(checkDate()); });
+  });
+  $("next-birth").addEventListener("click", function () {
+    var r = checkDate();
+    showDate(r);
+    if (r.msg) { focusFirst(r.fields); return; }
+    go(ageOn(r.date) < MIN_AGE ? "underage" : "profile");
+  });
+  $("b-underage-top").addEventListener("click", resetAll);
+
+  // ---------- プロフィール：写真（任意。消す・選び直す） ----------
+  var avatar = $("avatar"), face = $("face"), avatarX = $("avatar-x"), bPick = $("b-pick");
+  var picked = false, variant = -1;
+  function paintAvatar() {
+    avatar.classList.toggle("set", picked);
+    avatar.classList.remove("v1", "v2");
+    if (picked && variant > 0) avatar.classList.add("v" + variant);
+    if (picked) { var nm = nickname(); face.textContent = nm ? Array.from(nm)[0] : "?"; }
+    else face.innerHTML = ICON.person;
+    avatarX.hidden = !picked;
+    bPick.textContent = picked ? "別の写真を選ぶ" : "写真を選ぶ";
+    avatar.setAttribute("aria-label", picked ? "別の写真を選ぶ（いまは写真あり）" : "写真を選ぶ");
+  }
+  function pick() { picked = true; variant = (variant + 1) % 3; paintAvatar(); }
+  avatar.addEventListener("click", pick);
+  bPick.addEventListener("click", pick);
+  avatarX.addEventListener("click", function () { picked = false; paintAvatar(); bPick.focus(); });
+  $("f-nick").addEventListener("input", function () { if (picked) paintAvatar(); });
+  $("next-profile").addEventListener("click", function () {
+    var bad = validateField("f-nick");
+    if (bad) { bad.focus(); return; }
+    go("interest");
+  });
+
+  document.querySelectorAll(".seg button").forEach(function (b, i, all) {
+    b.addEventListener("click", function () { all.forEach(function (x) { x.classList.toggle("on", x === b); }); });
+  });
+  $("b-signin").addEventListener("click", function () {});
+
+  var spec = $("spec"), bSpec = $("b-spec");
+  bSpec.addEventListener("click", function () {
+    spec.hidden = !spec.hidden;
+    bSpec.setAttribute("aria-expanded", String(!spec.hidden));
+  });
+  $("b-back").addEventListener("click", goBack);
+
+  function resetAll() {
+    clearTimers();
+    history = [0];
+    picked = false; variant = -1; paintAvatar();
+    document.querySelectorAll("#wrap input").forEach(function (i) { i.value = ""; });
+    pwInput.type = "password"; pwToggle.innerHTML = ICON.eye; pwToggle.setAttribute("aria-pressed", "false"); pwToggle.setAttribute("aria-label", "パスワードを表示する");
+    document.querySelectorAll(".chip.on").forEach(function (c) { c.classList.remove("on"); c.setAttribute("aria-pressed", "false"); });
+    Object.keys(DD).forEach(function (k) { DD[k].reset(); });
+    Object.keys(FIELDS).forEach(function (id) { setError(FIELDS[id].err, null, [$(id)], FIELDS[id].hint); });
+    setError("e-native", null, [DD.native.btn]);
+    setError("e-learn", null, [DD.learn.btn]);
+    setError("e-purpose", null, [$("purpose-chips")]);
+    showDate({ msg: null, fields: [] });
+    $("v-status").textContent = ""; resendCount = 0;
+    screens.forEach(function (s, i) { s.classList.remove("hidden-left", "hidden-right"); if (i > 0) s.classList.add("hidden-right"); });
+    wrap.classList.remove("on-dark");
+    $("now").innerHTML = stepLabel(0);
+    $("b-back").disabled = true;
+  }
+  $("b-reset").addEventListener("click", resetAll);
+  paintAvatar();
+  $("now").innerHTML = stepLabel(0);
+  $("b-back").disabled = true;
+
+  // 画面に収まるよう縮小（393×812 の比率は保つ）
+  var stage = $("stage"), phone = $("phone");
+  function fit() {
+    var pad = 22;
+    var w = window.innerWidth - 32 - pad * 2, h = window.innerHeight - 32 - 60 - pad * 2;
+    var s = Math.min(1, w / 393, h / 812);
+    phone.style.transform = "translate(" + pad * s + "px," + pad * s + "px) scale(" + s + ")";
+    stage.style.width = (393 + pad * 2) * s + "px";
+    stage.style.height = (812 + pad * 2) * s + "px";
+  }
+  window.addEventListener("resize", fit);
+  fit();
+})();
+</script>
+
+</body>
+</html>
