@@ -119,3 +119,41 @@ describe("proxy: legacy Webflow paths with no new page return 410 (#276)", () =>
     expect(res.status).not.toBe(410);
   });
 });
+
+describe("proxy: /dev is blocked on production hosts (#296 hanaso-compare)", () => {
+  it.each([
+    "/dev/hanaso-compare",
+    "/dev/hanaso-compare/before.html",
+    "/dev/hanaso-compare/after.html",
+    "/dev/hanaso-compare/changes",
+    "/dev/hanaso-compare/shots/after-01.png",
+    "/dev/hanaso",
+    "/dev/hanaso/before-issues",
+    "/dev/hanaso/rec/before.html",
+    "/dev/hanaso/slides.html",
+    "/dev/hanaso/slides-v2.html",
+    "/dev/hanaso/script-v2",
+  ])(
+    "%s on www.bo-no.design → rewrite to /404",
+    (path) => {
+      const res = proxy(request(path));
+      expect(res.headers.get("x-middleware-rewrite")).toMatch(/\/404$/);
+    }
+  );
+
+  it.each([
+    "/dev/hanaso-compare/after.html",
+    "/dev/hanaso-compare/changes",
+    "/dev/hanaso-compare/shots/after-01.png",
+    "/dev/hanaso",
+    "/dev/hanaso/before-issues",
+    "/dev/hanaso/rec/before.html",
+    "/dev/hanaso/slides.html",
+    "/dev/hanaso/slides-v2.html",
+    "/dev/hanaso/script-v2",
+  ])("lets localhost through: %s", (path) => {
+    const res = proxy(new NextRequest(`http://localhost:3000${path}`));
+    expect(res.headers.get("x-middleware-rewrite")).toBeNull();
+    expect(res.headers.get("x-middleware-next")).toBe("1");
+  });
+});
