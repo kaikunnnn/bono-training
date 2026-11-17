@@ -7,6 +7,10 @@ import { PageTitleSection } from "@/components/common/PageTitleSection";
 import StoryCardItem from "@/components/story/StoryCardItem";
 import OutputBannerCardItem from "@/components/output/OutputBannerCardItem";
 import { getStoriesList, getOutputsList } from "@/lib/sanity";
+import { getSubscriptionStatus } from "@/lib/subscription";
+import { RoadmapBand } from "@/components/guide-promo/RoadmapBand";
+import { CAREER_ROADMAP_SLUG, resolvePromo } from "@/lib/guide-roadmap-map";
+import { getPromoRoadmaps } from "@/lib/guide-promo-data";
 
 export const revalidate = 3600;
 
@@ -30,10 +34,19 @@ export const metadata: Metadata = {
 
 export default async function AchievementsPage() {
   // ストーリーは最新6件（3列 × 2段）、アウトプットは最新6件
-  const [stories, outputs] = await Promise.all([
+  // getSubscriptionStatus は cache() 済みで LayoutWrapper も同じリクエストで呼ぶため、追加の問い合わせにはならない
+  const [stories, outputs, subscription, promoRoadmaps] = await Promise.all([
     getStoriesList(6),
     getOutputsList(6),
+    getSubscriptionStatus(),
+    getPromoRoadmaps(),
   ]);
+  // #280 ページ下の帯（課金中でない人だけ）
+  const promoRoadmap = resolvePromo({
+    roadmapSlug: CAREER_ROADMAP_SLUG,
+    hasMemberAccess: subscription.hasMemberAccess,
+    roadmaps: promoRoadmaps,
+  });
 
   return (
     <div className="min-h-screen">
@@ -123,6 +136,18 @@ export default async function AchievementsPage() {
             </>
           )}
         </section>
+
+        {/* #280 この人たちと同じロードマップから始める（帯全体がロードマップへのリンク） */}
+        {promoRoadmap && (
+          <>
+            <DottedDivider className="my-12" />
+            <RoadmapBand
+              roadmap={promoRoadmap}
+              tracking={{ pageType: "achievements" }}
+              className="mb-12"
+            />
+          </>
+        )}
       </div>
     </div>
   );

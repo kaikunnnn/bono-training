@@ -21,6 +21,16 @@ import { getCategoryInfo } from "@/lib/guideCategories";
 import { guideSeoDescription } from "@/lib/seo/guideDescriptions";
 import { getGuideSeoOverride } from "@/lib/guide-seo";
 import { PricingCtaLink } from "@/components/analytics/PricingCtaLink";
+import { RoadmapEndBlock } from "@/components/guide-promo/RoadmapEndBlock";
+import { RoadmapInlineBlock } from "@/components/guide-promo/RoadmapInlineBlock";
+import { findInsertIndexAfterKey } from "@/lib/guide-inline-position";
+import {
+  GUIDE_INLINE_BLOCKS,
+  getGuideRoadmapSlug,
+  guidePromoHeading,
+  resolvePromo,
+} from "@/lib/guide-roadmap-map";
+import { getPromoRoadmaps } from "@/lib/guide-promo-data";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -82,14 +92,34 @@ export default async function GuideDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const [subscription, relatedAll] = await Promise.all([
+  // #280 紹介ブロックのロードマップ（出さない指定のガイドは取得しない）
+  const promoRoadmapSlug = getGuideRoadmapSlug(slug);
+  const [subscription, relatedAll, promoRoadmaps] = await Promise.all([
     getSubscriptionStatus(),
     getGuidesByCategoryFromSanity(guide.category),
+    promoRoadmapSlug ? getPromoRoadmaps() : Promise.resolve([]),
   ]);
   const hasPremiumAccess = !guide.isPremium || subscription.hasMemberAccess;
   const relatedGuides = relatedAll
     .filter((g) => g.slug !== slug)
     .slice(0, 4);
+
+  // #280 課金中でない人だけ・本文が見えているときだけ（会員限定のロック画面には出さない）
+  const promoRoadmap = hasPremiumAccess
+    ? resolvePromo({
+        roadmapSlug: promoRoadmapSlug,
+        hasMemberAccess: subscription.hasMemberAccess,
+        roadmaps: promoRoadmaps,
+      })
+    : null;
+  const promoTracking = { pageType: "guide" as const, pageSlug: slug };
+
+  // #280 本文中ブロック: 学ぶ順番の話をしている記事だけ、決めた段落のすぐ後ろに出す
+  const inlineBlock = promoRoadmap ? GUIDE_INLINE_BLOCKS[slug] : undefined;
+  const inlineIndex = inlineBlock ? findInsertIndexAfterKey(guide.content, inlineBlock.afterKey) : null;
+  if (inlineBlock && inlineIndex === null) {
+    console.error("[guide-promo] inline block anchor not found", { slug, afterKey: inlineBlock.afterKey });
+  }
 
   return (
     <>
@@ -130,9 +160,34 @@ export default async function GuideDetailPage({ params }: PageProps) {
             <div className="px-4 pb-16">
               <GuideContent
                 content={guide.content}
+                insertBefore={
+                  promoRoadmap && inlineBlock && inlineIndex !== null
+                    ? {
+                        index: inlineIndex,
+                        node: (
+                          <RoadmapInlineBlock
+                            block={inlineBlock}
+                            roadmap={promoRoadmap}
+                            tracking={promoTracking}
+                            className="my-12"
+                          />
+                        ),
+                      }
+                    : undefined
+                }
                 className="max-w-[720px]"
                 showToc={guide.slug === "rdm-howtostart-roadmap"}
               />
+
+              {/* #280 記事の最後の BONO 紹介（シェアより上・オーナー指定） */}
+              {promoRoadmap && (
+                <RoadmapEndBlock
+                  heading={guidePromoHeading(promoRoadmap)}
+                  roadmap={promoRoadmap}
+                  tracking={promoTracking}
+                  className="mx-auto mt-16 w-full max-w-[720px]"
+                />
+              )}
 
               {/* シェアセクション */}
               <div className="mt-12 px-4">

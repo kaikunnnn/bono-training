@@ -8,6 +8,11 @@ import { urlFor } from "@/lib/sanity";
 interface GuideContentProps {
   content: PortableTextBlock[];
   className?: string;
+  /**
+   * 本文の index 番目のブロックの手前に差し込む要素（#280 本文中ブロック）。
+   * 同じラッパーの中で本文を分けて描画する（見出しIDの連番は途切れない）。
+   */
+  insertBefore?: { index: number; node: React.ReactNode };
   /** 最初の h2 の前に目次を出す（h2 だけを並べる） */
   showToc?: boolean;
 }
@@ -361,20 +366,18 @@ const portableTextComponents: PortableTextComponents = {
  * ガイドコンテンツ（Portable Text）レンダラー
  * article の RichTextSection と同等の書式変換機能を持つ
  */
-export default function GuideContent({ content, className, showToc }: GuideContentProps) {
+export default function GuideContent({ content, className, insertBefore, showToc }: GuideContentProps) {
   headingIndex = 0;
   const toc = showToc ? buildToc(content) : [];
   const firstH2 = content.findIndex((block) => block.style === "h2");
+
+  // 本文を分けて間に差し込むもの（目次・#280 本文中ブロック）を位置順に並べる
+  const inserts: { index: number; node: React.ReactNode }[] = [];
   if (toc.length > 0 && firstH2 >= 0) {
-    return (
-      <div
-        className={cn(
-          "w-full max-w-[648px] mx-auto font-noto-sans-jp",
-          className
-        )}
-      >
-        <PortableText value={content.slice(0, firstH2)} components={portableTextComponents} />
-        <nav aria-label="目次" className="my-8 rounded-lg border border-border-light bg-surface p-6">
+    inserts.push({
+      index: firstH2,
+      node: (
+        <nav key="toc" aria-label="目次" className="my-8 rounded-lg border border-border-light bg-surface p-6">
           <p className="mb-3 text-[16px] font-bold text-text-primary">目次</p>
           <ol className="list-decimal space-y-2 text-[16px] leading-[160%]" style={{ paddingLeft: "21.5px" }}>
             {toc.map((item) => (
@@ -389,10 +392,25 @@ export default function GuideContent({ content, className, showToc }: GuideConte
             ))}
           </ol>
         </nav>
-        <PortableText value={content.slice(firstH2)} components={portableTextComponents} />
-      </div>
-    );
+      ),
+    });
   }
+  if (insertBefore && insertBefore.index > 0 && insertBefore.index < content.length) {
+    inserts.push({ index: insertBefore.index, node: <React.Fragment key="insert">{insertBefore.node}</React.Fragment> });
+  }
+  inserts.sort((x, y) => x.index - y.index);
+
+  const parts: React.ReactNode[] = [];
+  let from = 0;
+  inserts.forEach((ins, i) => {
+    if (ins.index > from) {
+      parts.push(<PortableText key={`pt-${i}`} value={content.slice(from, ins.index)} components={portableTextComponents} />);
+    }
+    parts.push(ins.node);
+    from = Math.max(from, ins.index);
+  });
+  parts.push(<PortableText key="pt-last" value={content.slice(from)} components={portableTextComponents} />);
+
   return (
     <div
       className={cn(
@@ -400,7 +418,7 @@ export default function GuideContent({ content, className, showToc }: GuideConte
         className
       )}
     >
-      <PortableText value={content} components={portableTextComponents} />
+      {parts}
     </div>
   );
 }
