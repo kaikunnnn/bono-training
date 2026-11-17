@@ -1,0 +1,4448 @@
+[
+{
+"_key": "c041a4d10d38",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "ed45f0453e5d",
+"_type": "span",
+"text": "こんにちは、カイクンです。🙋\nUI/UXデザイナー13年目、BONOでこれまで約60人の転職を導いてきました。この記事では、AI時代に未経験からUI/UXデザイナーへ転職するためのロードマップを紹介します。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ac196f627221",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "ec18f80faa3d",
+"_type": "span",
+"text": "デジタルプロダクトを自ら作るUI/UXデザイナーを目指そう！",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "4753a03a5f64",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "0b1511d00738",
+"_type": "span",
+"text": "UI/UXデザイナーは、Webサービスやソフトウェアを設計する仕事です。見た目やUIを作るだけではありません。ユーザーやビジネスから考えはじめて、課題を解決するデジタル体験や仕組みを設計します。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "b101df96d3bb",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "88b2bd4c4421",
+"_type": "span",
+"text": "未経験からでも1年で、転職できるスキルを身につける。そのために何をどの順番でやるのかを、具体的に解説します💡",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "68e18a21e0f2",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "9fd84cf0a35c",
+"_type": "span",
+"text": "何から勉強すればいいか迷っている人や、AIがあるのに今からデザインを学ぶ意味があるのか気になっている人に、読んでほしい記事です。また、現場でつくるだけのデザイナーになっている人にも、身につけるスキルの参考になれば幸いです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "83604a486ae9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a9a7c683fa0d",
+"_type": "span",
+"text": "この記事で全体像と考え方をつかんだら、実際のレッスンは転職ロードマップから順番に進められます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "caa87ae6076c",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/uiux-career-change",
+"title": "未経験からUI/UXデザイナーになる 転職ロードマップ",
+"description": "ステップごとのレッスンを、順番どおりに進められるページです。"
+},
+{
+"_key": "85f2337a098e",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "5517e6208334",
+"_type": "span",
+"text": "このロードマップで目指すUI/UXデザイナー像",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "f6824834907a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e3971008b0a3",
+"_type": "span",
+"text": "目指すのは、ユーザー価値を生み出すデジタルプロダクトを、デザインとAIでつくるデザイナーです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "81116c2b9316",
+"_type": "image",
+"file": "goal.png",
+"alt": "目指すUI/UXデザイナー像。ユーザー価値を生み出すデジタルプロダクトをデザインとAIでつくるデザイナー。できることは、ユーザーから課題と価値を定義、AIとデザインでUI体験を定義、コードで操作できるデジタル体験に。"
+},
+{
+"_key": "5ce07995cd83",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a073f5a4e79a",
+"_type": "span",
+"text": "ユーザーから課題と価値を定義し、AIとデザインでUI体験を考え、コードで操作できる形にする。1年後には、これを一通りできる状態を目指します。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6ed7467d095a",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "e1be324a464e",
+"_type": "span",
+"text": "採用で見せるアウトプット",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ae493ea26387",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c7e31f8279fd",
+"_type": "span",
+"text": "採用で見せるのは、次のアウトプットです。これらの制作を目標にしましょう。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "0d5440f257f1",
+"_type": "image",
+"file": "outputs.png",
+"alt": "採用で見せるアウトプットのイメージ。メインは、ユーザー課題を解決する操作できるサービスと、自分が欲しいサービス。サブは、UI機能のデザイン2つと、1画面のデザイン10個以上。"
+},
+{
+"_key": "97b28a17240e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "5a3b085d7fbb",
+"_type": "span",
+"text": "メイン：ユーザー課題を解決する操作できるサービスと、自分が欲しいサービス",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "dd8ebe376cca",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "cc122aa95bd2",
+"_type": "span",
+"text": "サブ：UI機能のデザインを2つ、1画面のデザインを10個以上",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "ecaa95972a1f",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "f28447b3af8d",
+"_type": "span",
+"text": "未経験からどのレベルを目指すか",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6eb369afe959",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "69d966b44f64",
+"_type": "span",
+"text": "「まだまだだけど、筋はいいね」と言われるくらいが目標です。完璧でなくても、大きな方向性はずれていない状態です。ビジネスの価値につながるかといった視点は必要ですが、まだ十分でなくて大丈夫です。ただ、UIの最終的な形や体験については、あまり指摘されない状態を目指します。AI時代に「そこも分からないのか」となると厳しいからです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "10920f1001e9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "fd637e30a173",
+"_type": "span",
+"text": "ここからは、この状態を目指すために身につけるスキルと、習得の流れを解説していきます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "764dda6937a9",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "02c579f21c66",
+"_type": "span",
+"text": "AI時代にUI/UXデザイナーとして必要なスキル",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ae9abf16fc3d",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "eb509622fc36",
+"_type": "span",
+"text": "AIでUIが生成できるようになり、頼まれたUIを作るだけでは、デザイナーの価値を出しにくくなっています。過去に作ったものからルールを組んで生成できるので、デザインが分かる人がゼロから作らなくてもいい場面が増えています。よくある使いやすさなら、人が慣れている仕組みを使うのが定石で、ここはAIが得意です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "2fc1edd05b5e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e545facb8cd4",
+"_type": "span",
+"text": "それでも、デザインスキルは必要です。AIが作ったものが、使う人や目的に合っているかを判断して形にするのは、人の仕事だからです。AI時代の将来性については、",
+"marks": []
+},
+{
+"_key": "830e8d3a9a36",
+"_type": "span",
+"text": "AIでUIデザインは不要になる？UIUXデザイナーの将来性と学ぶべきスキル",
+"marks": [
+"9d5bbf44ade1"
+]
+},
+{
+"_key": "d06913edab78",
+"_type": "span",
+"text": "にまとめています。",
+"marks": []
+}
+],
+"markDefs": [
+{
+"_key": "9d5bbf44ade1",
+"_type": "link",
+"href": "https://www.bo-no.design/guide/ai-uiuxdesign-future"
+}
+]
+},
+{
+"_key": "1a25f8310d8b",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "cf750559e9c9",
+"_type": "span",
+"text": "たとえば「出張申請の画面を作ってほしい」と頼まれたとします。整った画面なら、AIがすぐに出してくれます。ただ、それが実際に使う人に合っているとは限りません。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "8afc22cb5ea6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "74d7969441cf",
+"_type": "span",
+"text": "AIにUI制作の作業を任せられる時代に、UI/UXデザイナーに必要なのは、「良いデジタルプロダクト」の状態を考え、それを実現する具体的な形までを設計するスキルです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "a9f48df31e20",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7bdee888452f",
+"_type": "span",
+"text": "ユーザーを軸に課題を発見し、その解決アイデアを考えて検討し、細部の形まで定義する。この流れを実行できるスキルです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5e8df6f008bc",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "729bb89745a6",
+"_type": "span",
+"text": "この流れでデジタルプロダクトをデザインできることを、UI/UXデザイナー転職ロードマップではゴールと定義します。この進め方を「デザイン制作の流れ」と呼びます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "472d4c26ffc3",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "666ac3aa0cc6",
+"_type": "span",
+"text": "身につけるスキル：顧客価値をつくるデザイン制作の流れ",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "d79e24c95e2d",
+"_type": "image",
+"file": "flow.png",
+"alt": "身につけるデザイン制作の流れ。ユーザー定義の顧客リサーチ、課題と解決策。解決策のUI体験の検討、情報設計。UIクオリティのUIの磨き込み、コードで触れる形。"
+},
+{
+"_key": "68b2343044d8",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "ffefeeb2917b",
+"_type": "span",
+"text": "顧客リサーチ：課題やなりたい状態を定義する",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "number",
+"level": 1
+},
+{
+"_key": "264e2ea17b7f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "aa4c07439fde",
+"_type": "span",
+"text": "課題と解決策：何をやると解決するのか、アイデアを論理的に出す",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "number",
+"level": 1
+},
+{
+"_key": "2829789c6653",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "940496fb05b6",
+"_type": "span",
+"text": "UI体験の検討：最初から決めずに、パターンを出して模索する",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "number",
+"level": 1
+},
+{
+"_key": "26c34e01b4ac",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "38462f7a932f",
+"_type": "span",
+"text": "情報設計：必要な画面と、そのつながりを整理する",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "number",
+"level": 1
+},
+{
+"_key": "dd03b76b3339",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "21a53c312f44",
+"_type": "span",
+"text": "UIの磨き込み：AIで作った動く試作をベースに、Figmaとコードで使い勝手の質を上げる",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "number",
+"level": 1
+},
+{
+"_key": "4c7776f6bb7f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "db37d213442f",
+"_type": "span",
+"text": "コードで触れる形：全部を実装しなくても、誰でも動きを体験できる形にする",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "number",
+"level": 1
+},
+{
+"_key": "6c8d52cf0169",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "3a9529be4b0f",
+"_type": "span",
+"text": "デザイナーに求められること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "fe4304c8b5e8",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "325446a67188",
+"_type": "span",
+"text": "この流れを進めるうえで、デザイナーに求められるのは次の2つです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "4de08d9b2f37",
+"_type": "block",
+"style": "h4",
+"children": [
+{
+"_key": "2a92ee6abdbe",
+"_type": "span",
+"text": "1. 使う人から課題を発見し、解決を設計する",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "19cc6b0ad5c3",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c78a836d7f71",
+"_type": "span",
+"text": "利用シーンから心情や状況を理解して課題を見つけ、それを解決する体験や、画面の情報・優先度・見せ方を設計します。出張申請なら、移動中にスマホで申請する営業の人が何に困っているかを見つけて、最初に何を見せるかを考えます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "95ef7e2d9a68",
+"_type": "block",
+"style": "h4",
+"children": [
+{
+"_key": "e27ce3d4787c",
+"_type": "span",
+"text": "2. 細部まで見届けて、最適な形を設計する",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "a20551a3ff70",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "db58a9b8fe15",
+"_type": "span",
+"text": "必要なものを与えたり並べたりすれば、ほとんどの課題は解決するのでしょうか？ そうはなりません。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "b41245adf43b",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a70fa94a3ba0",
+"_type": "span",
+"text": "使う人の状況や操作体験、情報の優先度、ビジュアルでの伝え方まで含めて、相手のことを考えた最適な解決の形、伝える情報の取捨選択、体験の流れを設計します。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6994d01d2ec9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "95ca0a37bdd4",
+"_type": "span",
+"text": "これができるのは、人が最終的に見て、知覚して、操作する細部まで見届けられるからです。細部を見届けているからこそ、湧いてくるアイデアや、下せる判断があります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5ada9f4debe4",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "0d33314bbe5e",
+"_type": "span",
+"text": "サイクルで改善し質を上げるUI/UXデザイン制作の進め方",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "9e24a5a28132",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "4d36144a76b5",
+"_type": "span",
+"text": "また、デザイン制作では、リサーチしてアイデアを広く検討し、気づきを増やしたり検証したりしながら進めるのが一般的です。そのため、改善のサイクルを回しながら質を上げていく制作方法を身につける必要があります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "2a266e05f7e8",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "39ab16acf05b",
+"_type": "span",
+"text": "これをBONOでは「質を上げるサイクル」と呼び、身につけるべき基本のデザイン制作スキルと位置づけています。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "0ca8fa05c2bf",
+"_type": "image",
+"file": "cycle.png",
+"alt": "サイクルで検証して質を上げる図。リサーチ、アイデア、プロトタイプ、チェックを繰り返す。"
+},
+{
+"_key": "1c86d031959c",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "5358ca7ab2c2",
+"_type": "span",
+"text": "デザイン制作の流れのどこでも、リサーチ → アイデア → プロトタイプ → チェックを回して質を上げます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "8e10e58c0fe7",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "677206db7383",
+"_type": "span",
+"text": "転職のために身につけるUI/UXデザインのスキル",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "c92096db8852",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "6726ad288fc9",
+"_type": "span",
+"text": "次のスキルを身につけることで、紹介したデザイン制作の流れを実現できます。すべてを満遍なく身につけるのがベストですが、経験が浅いうちは難しいです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "f937157a3cb6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b0e194c45edb",
+"_type": "span",
+"text": "ただ、ビジュアル制作、UI制作、AIまわりのスキルは、自己鍛錬で量と経験を積めます。そのため、デザイン職の「土台」として固めるべきスキルです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "15d71ec80abe",
+"_type": "image",
+"file": "skills.png",
+"alt": "身につけるもの5つのスキル。ビジュアルの基礎、UIの基礎、AIとの協業、目的をUI体験に変換、ユーザー価値と課題解決。"
+},
+{
+"_key": "28c15494d115",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "049015ceb6aa",
+"_type": "span",
+"text": "ビジュアルの基礎：情報を負荷なく認識できる見た目を作る",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "a527f16860fe",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "2660a3be3119",
+"_type": "span",
+"text": "UIの基礎：基本のUIパターンを使い、目的に合った構造を作る",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "0ee28450798e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "89af792f2dd8",
+"_type": "span",
+"text": "AIとの協業：デザイン制作の流れの中でAIを使う",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "d59d169a672a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "68b5b0a06421",
+"_type": "span",
+"text": "目的をUI体験に変換：利用シーンと目的から、必要な情報と優先度を整理し、情報設計をする",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "c7971d786adc",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "23219503ee56",
+"_type": "span",
+"text": "ユーザー価値と課題解決：価値や課題を考え、ユーザーを理解する",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "c745a4040b1d",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "6b6a5bf13833",
+"_type": "span",
+"text": "プロダクトをつくるデザイナーとは",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "3562fc3b736b",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "78a13d624a6b",
+"_type": "span",
+"text": "最初に紹介した「デジタルプロダクトをつくるデザイナー」は、具体的には次のことをする人です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "77af0ae21e6a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "9817dcabc02f",
+"_type": "span",
+"text": "UIだけでなく、ユーザーの課題を解決するデジタル製品をつくる",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "339972d7d092",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "11af448292b7",
+"_type": "span",
+"text": "デザインデータで終わらず、コードで動く触れる体験まで作る",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "b933da62e902",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c6b12d110784",
+"_type": "span",
+"text": "可能なら、サービスをリリースして、少しのユーザーにでも使ってもらう",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "f09db149e2a3",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b598f347feac",
+"_type": "span",
+"text": "テクノロジーへの興味も必要です。たとえば農業に関わるなら、テクノロジーで何ができるかを提案できるようになります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "7f2784b56a60",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "56b720ddaba9",
+"_type": "span",
+"text": "なぜそのデザイナーが必要か",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "d542d9954e9f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "277dc5c0468a",
+"_type": "span",
+"text": "デザイナーの価値は、ユーザーにとって価値の高いプロダクトをつくることにあるからです。ユーザー目線で価値を上げる提案は、ビジネスサイドだけでは考えるのが難しく、AIが出てくる前からデザイナーの役割でした。作業をAIに任せられるようになった今、この役割の重みが増しています。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "4f02ea7f1152",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "f89efff9a4ae",
+"_type": "span",
+"text": "サービスを使うのがどういう人で、どんな価値を届けるのかをデザインする。それが「サービスを良くする」ことにつながります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "d62a8f6db41a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "869aa76ca136",
+"_type": "span",
+"text": "その判断には、作った経験が要ります。だからこのロードマップでは、自分の手で形を作るところから始めます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "e7337d5568d4",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "1c139b68c598",
+"_type": "span",
+"text": "ロードマップの全体と1年の計画",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "1caa2e3c0b75",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "74bb39e2088f",
+"_type": "span",
+"text": "4つのフェーズと6つのステップ",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "74e69e367701",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "d147a86f1444",
+"_type": "span",
+"text": "ロードマップは6つのステップでできていて、大きく4つのフェーズに分かれます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "f474604b7eff",
+"_type": "image",
+"file": "plan.png",
+"alt": "全体と1年の計画。フェーズ1にステップ1と2、フェーズ2にステップ3、フェーズ3にステップ4と5、フェーズ4にステップ6が入る。"
+},
+{
+"_key": "41c537912454",
+"_type": "block",
+"style": "h4",
+"children": [
+{
+"_key": "cee6cf5334b5",
+"_type": "span",
+"text": "【フェーズ1】「UI見た目の基礎」を習得しよう（ステップ1・2）",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6c5b68c1ab26",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c8cd3afc5cf7",
+"_type": "span",
+"text": "余白や文字、色を整えて、1画面を作れるようになります。ここではAIを使いません。ユーザーの話はフェーズ3でやります。まず形を作る力をつけるためです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "8fdbecb384b6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c75b4bf70635",
+"_type": "span",
+"text": "ステップ1 デザインツールを習得しよう（約1ヶ月）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "35fc203bff73",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e37437a36fee",
+"_type": "span",
+"text": "ステップ2 UI見た目の基礎をマスターしよう（約1.5ヶ月）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "1ab814d0c8f0",
+"_type": "block",
+"style": "h4",
+"children": [
+{
+"_key": "9f149a498093",
+"_type": "span",
+"text": "【フェーズ2】AIとデザインで協業しよう（ステップ3）",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "23393f6dcee3",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c4e9b56f4994",
+"_type": "span",
+"text": "ボタンを押したときの動きや、エラーのときの画面まで、AIを使ってコードで作れるようになります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "87b0793403c0",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e8f0098ca2ba",
+"_type": "span",
+"text": "ステップ3 AIデザインワークフローを習得（約1.5ヶ月）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "b367b1cfed66",
+"_type": "block",
+"style": "h4",
+"children": [
+{
+"_key": "14ecad04ec68",
+"_type": "span",
+"text": "【フェーズ3】課題解決のUIデザインを始めよう（ステップ4・5）",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "7d83ef48570f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "03f8cc8b89b7",
+"_type": "span",
+"text": "ユーザーの課題と目的から考えて、情報設計をして、機能やサービスを作れるようになります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "140e36349399",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e45bca680872",
+"_type": "span",
+"text": "ステップ4 目的とユーザーからデザインする基礎の習得（約3ヶ月）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "f94e1fe9d990",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "f90d64f50844",
+"_type": "span",
+"text": "ステップ5 インタビューで課題発見を習得（約2ヶ月）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "69393551bfe6",
+"_type": "block",
+"style": "h4",
+"children": [
+{
+"_key": "2b3e1bccdacf",
+"_type": "span",
+"text": "【フェーズ4】デザインの仕事を獲得しよう（ステップ6）",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "823fd420bda1",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "0a6208b2b7f1",
+"_type": "span",
+"text": "自分が欲しいサービスを作り、ここまでの作品と合わせてポートフォリオにまとめて、応募します。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5600ff19d344",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "81e4a8dfaf26",
+"_type": "span",
+"text": "ステップ6 ポートフォリオ制作と転職活動（ポートフォリオに約2ヶ月、そのあと応募）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "f48e4edfe725",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "bc95f6c57811",
+"_type": "span",
+"text": "各ステップの期間を足すと、応募を始めるまでで約11ヶ月です。そこから応募に進むので、全体で約1年になります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "3c513f973b4e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a8db962e0033",
+"_type": "span",
+"text": "時間は、週15時間が最低ラインです。仕事がある日は1日1時間、土日は5時間ずつくらい。グラフィックなどデザインの経験がある人は、土台作りの2ヶ月くらいを短くできます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "0bb94af971ea",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "5c2daaa68da9",
+"_type": "span",
+"text": "この計画に沿ったレッスンは、転職ロードマップにまとめています。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "dbb492519892",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/uiux-career-change",
+"title": "未経験からUI/UXデザイナーになる 転職ロードマップ",
+"description": "レッスンを順番に進めるページです。ステップごとに、やることがまとまっています。"
+},
+{
+"_key": "5236a83d920d",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "ff1f3e177fd2",
+"_type": "span",
+"text": "デザイン制作の流れとステップの対応",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "23f200c4d802",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "9357b42fb729",
+"_type": "span",
+"text": "仕事では顧客リサーチから始めますが、学ぶときは逆の順番で進みます。形を作れないうちに課題を考えても、それがどんな画面になるのか想像できないからです。まず見た目を作れるようになり（フェーズ1）、次に動くUIを作り（フェーズ2）、最後に目的から機能を組み立てて、顧客リサーチから通します（フェーズ3）。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "21f6e9750094",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "75de946c8150",
+"_type": "span",
+"text": "各ステップでは、デザイン制作の流れを1つずつ身につけていきます。ここでやるのは基礎の体得です。そのためステップごとにアウトプットを作りますが、そのままでは強いポートフォリオにはなりません。最後に、載せるものをブラッシュアップする必要があります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "e912beceeae3",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "40945bf4c471",
+"_type": "span",
+"text": "全部のステップで続けること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "134e4cdc4c43",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "1f831188cb93",
+"_type": "span",
+"text": "作ったものは外に出してください。完璧なものでなくていいです。noteの「スキ」やフィードバックなど、誰かに見せて反応をもらうことに慣れておいてほしいです。途中の作品が残っていくと、その軌跡があとでポートフォリオの強い材料になります。経験が浅い人ほど、採用側は自分で勉強して成長できるかを見ます。最初は微妙でも、最後に良くなっている過程が見えるだけで大きな価値になります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "4691b01915c5",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "abb04a7c29d4",
+"_type": "span",
+"text": "あとは、テクノロジーのニュースを毎日読んでください。会社員が新聞を読むような感覚で大丈夫です。新しいサービスを知ったら、ちゃんと触ってみる。これも続けてほしい習慣です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "e6747741f8ce",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7523bf559bfe",
+"_type": "span",
+"text": "作るものの題材は、BONOのお題から選ぶものと、自分でユーザーを決めるもの、両方やります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "c687abee686d",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "32e5770b6a00",
+"_type": "span",
+"text": "ステップ1 デザインツールを習得しよう",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "d6d290c23528",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a9e250660010",
+"_type": "span",
+"text": "ここから【フェーズ1】「UI見た目の基礎」を習得します。Figmaを覚えながら、トレースで自分で形を作っていきます。形をよく見ながら作ることで目が鍛えられますし、サービスがどういうものかも分かってきます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "74d7dc5f0685",
+"_type": "image",
+"file": "step1.png",
+"alt": "ステップ1の概要。デザインツールを習得しよう。"
+},
+{
+"_key": "68c56747e413",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/ui-design-beginner",
+"title": "Figmaからデザインをはじめるロードマップ",
+"description": "このステップのレッスンを、順番どおりに進められます。"
+},
+{
+"_key": "a1c76d5ef5da",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "8c64ed6eda8d",
+"_type": "span",
+"text": "目指す状態",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "a325d449d409",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "91c9115da021",
+"_type": "span",
+"text": "Figmaの操作に慣れて、トレースでUIの形を自分で作れる状態です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ab84dc784d06",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "fb7866e1af94",
+"_type": "span",
+"text": "期間",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "f41228e79f04",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "ea55f9fd89e6",
+"_type": "span",
+"text": "約1ヶ月",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5d1f8cea93ec",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "c79fd4f89f0f",
+"_type": "span",
+"text": "やること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "d44cff57ce5e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a17bd95401ad",
+"_type": "span",
+"text": "Figma：デザインツールの基礎を身につける",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "4fd34a57ebe4",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e4341b4fcd49",
+"_type": "span",
+"text": "トレースをして、Figmaの操作に慣れる",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "85eea5fdc622",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "1888e7a89d11",
+"_type": "span",
+"text": "サービスを2つ分解して、デジタルサービスの表現や画面体験を把握する",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "fba3235594cb",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "ed74dd5a695b",
+"_type": "span",
+"text": "分解の過程で、最低20画面をトレースします。2つで足りなければ、3つにしてください。知るところから使うところまでを見ていきます。たとえばメルカリなら、こんな順番です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "053b4b27c5db",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "caba6f66536b",
+"_type": "span",
+"text": "LP・App Storeの画像 → 登録 → 出品（メインの機能） → 出品したものの表示",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "abf4a582fecf",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "6bf4ac1e6c7b",
+"_type": "span",
+"text": "身につけること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "1267e8408eb3",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "97e21cc1f573",
+"_type": "span",
+"text": "Figmaの操作（オートレイアウトで組める）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "247b0343b8e0",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a905d9372465",
+"_type": "span",
+"text": "トレースを通して、UIをデザインツールで描く方法（見本の画面をほぼ同じ見た目に再現できる）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "c3599e4da77e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "6996ab220de7",
+"_type": "span",
+"text": "サービスの作られ方（主な流れを、画面のつながりで説明できる）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "0912fe766b3c",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "9e2d916374ac",
+"_type": "span",
+"text": "出すアウトプット",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "57d29bc4f460",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "298c7ed1b833",
+"_type": "span",
+"text": "トレースしたFigmaファイル：サービス2〜3つで、最低20画面",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "f90e5068a635",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c6ccb6747182",
+"_type": "span",
+"text": "外に出すもの：トレースした流れと、気づいたこと1つ",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "d83ffbceeceb",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "52d5e8fd3dca",
+"_type": "span",
+"text": "BONOのレッスンで身につける",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "58a8bac43676",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "2c30f68e9572",
+"_type": "span",
+"text": "Figmaの使い方入門",
+"marks": [
+"ba8d7371f552"
+]
+}
+],
+"markDefs": [
+{
+"_key": "ba8d7371f552",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/figmabeginner"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "bfa4176a34ae",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7d4df8947285",
+"_type": "span",
+"text": "Figmaの使い方初級",
+"marks": [
+"7aaccd15a8df"
+]
+}
+],
+"markDefs": [
+{
+"_key": "7aaccd15a8df",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/figma-elementary"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "4137be8fc800",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7dbe220da633",
+"_type": "span",
+"text": "はじめてのUIデザイン",
+"marks": [
+"66fab9494a24"
+]
+}
+],
+"markDefs": [
+{
+"_key": "66fab9494a24",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/uidesignbeginner"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "52261d2cb536",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "232ed3d3dc41",
+"_type": "span",
+"text": "UIトレース入門",
+"marks": [
+"555540e62106"
+]
+}
+],
+"markDefs": [
+{
+"_key": "555540e62106",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/uitrace"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "9f8759d35ad4",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "f72e5a736f8a",
+"_type": "span",
+"text": "ステップ2 UI見た目の基礎をマスターしよう",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "2d053bbc0c74",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "2bb1971f019a",
+"_type": "span",
+"text": "UIがどういう構成になっているのか、色や形をどう選ぶべきなのか。まずはビジュアル面から、1画面単位でUIの作り方を学びます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "14bce11f8d09",
+"_type": "image",
+"file": "step2.png",
+"alt": "ステップ2の概要。UI見た目の基礎をマスターしよう。"
+},
+{
+"_key": "9d891e2a2586",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/ui-visual",
+"title": "UIデザイン見た目のきほん習得ロードマップ",
+"description": "このステップのレッスンを、順番どおりに進められます。"
+},
+{
+"_key": "8fd11cd1b337",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "ca6d602814fc",
+"_type": "span",
+"text": "目指す状態",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "7237f2517691",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "fcc81eef7361",
+"_type": "span",
+"text": "見た目のルールとデザインの進め方の基本を身につけ、1画面のUIをゼロから作れる状態です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "b0466ef5f549",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "8ca5014b04f9",
+"_type": "span",
+"text": "期間",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "44d272a481be",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "f8f8fb9801a6",
+"_type": "span",
+"text": "約1.5ヶ月",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "2f293f5e6915",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "c618dd4960b5",
+"_type": "span",
+"text": "やること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5c1edf378360",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c72868e38c91",
+"_type": "span",
+"text": "UIの見た目の基本を学ぶ",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "e8f13c1d8b30",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b2e1b249edd3",
+"_type": "span",
+"text": "1画面のUIをゼロから作る",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "d6416b6cb0b0",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c9c4a6dc0eef",
+"_type": "span",
+"text": "作るたびに、質を上げるサイクルを1周回します。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "e43118431d18",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "01427d52e320",
+"_type": "span",
+"text": "リサーチ → アイデア → プロトタイプ → チェック",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "00cadcb9fe06",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "9b7413b35d6f",
+"_type": "span",
+"text": "デザインが初めての人は、バナーとスライド、LPかWebページも作るのがおすすめです",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "a93e291c76f9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "27846175e114",
+"_type": "span",
+"text": "自分の手で「どこをどう変えたら、どれくらい印象が変わるのか」を体感しておくためです。このステップが2週間ほど長くなります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6d1c8736ec4f",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "5664851603c5",
+"_type": "span",
+"text": "身につけること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "01964bdeb04f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "8c1d16694a9c",
+"_type": "span",
+"text": "UIの構成と、色や形の選び方",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "d7c550f738b1",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "9f805d6ba14a",
+"_type": "span",
+"text": "余白・文字・色・階層を、理由を持って決める",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "3027df5183d9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "1a8be8530c0b",
+"_type": "span",
+"text": "自分のデザインを批評して直す",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "a57e9c9c95ec",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "11177fa1892b",
+"_type": "span",
+"text": "出すアウトプット",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "376d3df08724",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "04025b816d39",
+"_type": "span",
+"text": "1画面のUI：最低10画面。そのままポートフォリオに載せるものではなく、基礎を最低限身につけるための量です",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "e2a4fbb36493",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "fc960e09fb92",
+"_type": "span",
+"text": "デザインが初めての人（おすすめ）：バナーとスライドを合わせて10個くらい、レスポンシブのLPかWebページを1枚",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "fc43845b058e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "058e9de9f107",
+"_type": "span",
+"text": "外に出すもの：作った画面1枚ずつと、その狙い・直したところ",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "372c6c071013",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "8f3f6835a5cb",
+"_type": "span",
+"text": "BONOのレッスンで身につける",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "7068b65c9153",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "33118d5f4a9c",
+"_type": "span",
+"text": "ゼロからはじめるUIビジュアル",
+"marks": [
+"9f94ba4d062b"
+]
+}
+],
+"markDefs": [
+{
+"_key": "9f94ba4d062b",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/tutorial-uivisual"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "6d2117670416",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7a89ac39fc6c",
+"_type": "span",
+"text": "UIが上手くなる人の“デザインサイクル” 入門編β",
+"marks": [
+"f62f33367c94"
+]
+}
+],
+"markDefs": [
+{
+"_key": "f62f33367c94",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ui-design-flow-lv1"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "57a6b424968c",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7d16c98e3a83",
+"_type": "span",
+"text": "センスを盗む技術",
+"marks": [
+"5a963ad86b79"
+]
+}
+],
+"markDefs": [
+{
+"_key": "5a963ad86b79",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/steel-design-sense"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "333b47dbd0c9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "02d7496ca2ca",
+"_type": "span",
+"text": "「3構造」ではじめるUIデザイン入門",
+"marks": [
+"0fe0c9d02ef1"
+]
+}
+],
+"markDefs": [
+{
+"_key": "0fe0c9d02ef1",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/three-structures-ui-design"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "e11b0df2bffd",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "1b4823f7b6db",
+"_type": "span",
+"text": "UIタイポグラフィ入門",
+"marks": [
+"e4ae0e297d37"
+]
+}
+],
+"markDefs": [
+{
+"_key": "e4ae0e297d37",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ui-typography"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "64bbc6afc9c9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "0aec873697f9",
+"_type": "span",
+"text": "UIビジュアル基礎",
+"marks": [
+"c92f02017e0d"
+]
+}
+],
+"markDefs": [
+{
+"_key": "c92f02017e0d",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/uivisual"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "4d03dcbf8702",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "324a7e23093b",
+"_type": "span",
+"text": "DailyUI 音声SNS",
+"marks": [
+"db02e396f8a1"
+]
+}
+],
+"markDefs": [
+{
+"_key": "db02e396f8a1",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/dailyui-part01"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "886934f42748",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "94b0ae917782",
+"_type": "span",
+"text": "バナーデザイン入門",
+"marks": [
+"e7fafe14b234"
+]
+},
+{
+"_key": "d492a1740e51",
+"_type": "span",
+"text": "（デザインが初めての人に）",
+"marks": []
+}
+],
+"markDefs": [
+{
+"_key": "e7fafe14b234",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/bannerbeginner"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "77969301f493",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "552a9575f302",
+"_type": "span",
+"text": "ステップ3 AIデザインワークフローを習得",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "448711667907",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "74a22e1fe8f3",
+"_type": "span",
+"text": "ここから【フェーズ2】AIとデザインで協業します。見た目の基本が身についたら、AIを使ったUIづくりに進みます。Figmaに加えて、コードで動く画面を作り、自分で触って確かめます。コードでもサクッと作れるので、ぜひやってみてください。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "70583d4c8b71",
+"_type": "image",
+"file": "step3.png",
+"alt": "ステップ3の概要。AIデザインワークフローを習得。コーディングAIの習得、AI×デザイン制作フローを経て、UI体験をコードで制作する。"
+},
+{
+"_key": "35124b304cc1",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "dfedad50c59b",
+"_type": "span",
+"text": "このステップは、転職ロードマップのページにはまだ入っていません。今は、下の「BONOのレッスンで身につける」のレッスンから進めてください。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "8a9cb5668033",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "e437e69d40b9",
+"_type": "span",
+"text": "目指す状態",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "1cdaa6951782",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "55bda686286e",
+"_type": "span",
+"text": "コードで細かな操作まで再現し、UIの体験を検証して改善できる状態です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ab8e9b4f1e5d",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "b23f869ca3e5",
+"_type": "span",
+"text": "期間",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ba3d3c2d958a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "0c659c2c0ccb",
+"_type": "span",
+"text": "約1.5ヶ月",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "20be7c690888",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "4820c1b2ba41",
+"_type": "span",
+"text": "やること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "98c14d451b6c",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "d423aa47d3c4",
+"_type": "span",
+"text": "AIで1画面を作るところから始める",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "9ccf3e05b283",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "78a066f7f7dc",
+"_type": "span",
+"text": "出品フローのような基本の機能を、手で触れる形で作る",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "100d194d6188",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "dd8187c642b3",
+"_type": "span",
+"text": "質を上げるサイクルをAIと一緒に回す",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "e5d8a479451f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "f948e1c98c2d",
+"_type": "span",
+"text": "リサーチ → アイデア → プロトタイプ → チェック",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "115decf392e9",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "831e63a91d37",
+"_type": "span",
+"text": "身につけること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "dc1db43ad9b6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "5f481295e0b4",
+"_type": "span",
+"text": "Claude Codeなど、コーディングAIの使い方",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "98c4a1a1dede",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c6b8d95897dd",
+"_type": "span",
+"text": "Figmaとコードを行き来する方法",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "f47d6c319380",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "4b8d2a2b1159",
+"_type": "span",
+"text": "リサーチとプロトタイピングを中心にした、AI時代の制作フロー",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "f28a5aa2f473",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b7dadfb591ab",
+"_type": "span",
+"text": "操作できる画面体験を、コードで作る方法",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "44b9e0c1217b",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "7eae76d746a1",
+"_type": "span",
+"text": "出すアウトプット",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "9ad679a8edf6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "a7d64a14fc8c",
+"_type": "span",
+"text": "操作できる画面体験を、AIを使ってコードで作ったもの：サービスの1機能",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "17558b7353c6",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "716da3c680e1",
+"_type": "span",
+"text": "BONOのレッスンで身につける",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "1d472a3b17c3",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "54b902a559c4",
+"_type": "span",
+"text": "AIでUIスタイリング入門",
+"marks": [
+"7af87fd920ec"
+]
+}
+],
+"markDefs": [
+{
+"_key": "7af87fd920ec",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ai-ui-styling-beginner"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "0bf0d627c04b",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "4ef94c1107ab",
+"_type": "span",
+"text": "AI×UIリサーチ&プロトタイプ 入門編",
+"marks": [
+"817ae7d4fd0f"
+]
+}
+],
+"markDefs": [
+{
+"_key": "817ae7d4fd0f",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/aiui_beginner"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "4840b4a2c4ad",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "01335086ea7b",
+"_type": "span",
+"text": "デザイナーのためのCursor入門",
+"marks": [
+"57fce93b1908"
+]
+}
+],
+"markDefs": [
+{
+"_key": "57fce93b1908",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/cursor-ui-ai-design"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "66ef810cbfa6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "71378938e0ee",
+"_type": "span",
+"text": "デザイナーのためのClaude Code入門",
+"marks": [
+"5b3208073c76"
+]
+}
+],
+"markDefs": [
+{
+"_key": "5b3208073c76",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/claudecode-ui-ai-design"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "8896f31875b6",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "e31e04fab44d",
+"_type": "span",
+"text": "ステップ4 目的とユーザーからデザインする基礎の習得",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "9744e25da9de",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "d552e3e55658",
+"_type": "span",
+"text": "ここから【フェーズ3】課題解決のUIデザインを始めます。「UIの体験をどうやって作るのか」の話に入ります。目的に対してどういう形であるべきかを考えて、そのクオリティを上げていきます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "7aec0296f0cd",
+"_type": "image",
+"file": "step4.png",
+"alt": "ステップ4の概要。目的とユーザーからデザインする基礎の習得。"
+},
+{
+"_key": "80a19124be9c",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/information-architecture",
+"title": "情報設計でユーザー中心のUI設計をはじめるロードマップ",
+"description": "このステップのレッスンを、順番どおりに進められます。"
+},
+{
+"_key": "f05eecf02b08",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "9c72b427e51d",
+"_type": "span",
+"text": "目指す状態",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "a56bfc7a865a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "d74a511797e0",
+"_type": "span",
+"text": "目的と利用シーンから必要な情報を整理し、ユーザーに合ったUI体験を設計できる状態です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "d2a8007aaba9",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "ec3e4d83e6ae",
+"_type": "span",
+"text": "期間",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "60191c1db7cc",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "ec570f8f4625",
+"_type": "span",
+"text": "約3ヶ月",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "384ef9052412",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "3cc4b3d154ca",
+"_type": "span",
+"text": "やること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "87da92ad4ea4",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e2eca2d8e32a",
+"_type": "span",
+"text": "機能の基本的な作り方を知る",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "5aa4415fb22a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b3a32ed84f41",
+"_type": "span",
+"text": "たとえば出張申請のフローを作るとき、何を整理して画面の構造に落とし込むのか。検索のふつうの動き、作成・編集・表示・削除のつながり、ナビゲーションの構造、エラーの出し方を押さえます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "776fd7975eb9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b59eab62ef36",
+"_type": "span",
+"text": "目的からUIのアイデアを出し、体験の流れを考える（情報設計）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "b58532652dcc",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "2e9dacf83274",
+"_type": "span",
+"text": "目的 → UIのアイデア → 体験の流れ → 形にして質を上げる",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "cc926f30897f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "953bf7da64fc",
+"_type": "span",
+"text": "目的が決まった機能や、サービスの主な画面を作る。ここではAIを使って大丈夫です",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "2d3d8a2ba1d9",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "237cf21b3092",
+"_type": "span",
+"text": "身につけること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "120f382ac09c",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b88c1887b9d1",
+"_type": "span",
+"text": "機能の基本的な作り方と、情報設計",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "a32c0cffd70e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "fe2e9dd53ccd",
+"_type": "span",
+"text": "目的から、必要な画面とつながりを洗い出して形にする",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "dc81752de068",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "8b76d7986c48",
+"_type": "span",
+"text": "最低限の機能だけでなく、ユーザーを踏まえた工夫を入れる",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "8a1a15e9c1e2",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "0d79b97a6658",
+"_type": "span",
+"text": "出すアウトプット",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "254e1b8f1908",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "d1bb5d77480e",
+"_type": "span",
+"text": "目的が決まった機能や主な画面：最低2つ。あとでブラッシュアップして、ポートフォリオに入れてもかまいません",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "3fe14fea296e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "73d423289f7e",
+"_type": "span",
+"text": "外に出すもの：それぞれの「目的 → 形 → 直したところ」",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "4e9fb541730c",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "c46ee517269c",
+"_type": "span",
+"text": "BONOのレッスンで身につける",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "2efa0aff2c1e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "f85514b35538",
+"_type": "span",
+"text": "ゼロからはじめるUI情報設計",
+"marks": [
+"2c87851e2ed2"
+]
+}
+],
+"markDefs": [
+{
+"_key": "2c87851e2ed2",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ui-architect-beginner"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "aa324816583d",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7aaed55b9884",
+"_type": "span",
+"text": "使いやすいUIの秘密",
+"marks": [
+"0fec2e8624f5"
+]
+}
+],
+"markDefs": [
+{
+"_key": "0fec2e8624f5",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ui-layout-basic"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "5dec540e233e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "9799aa26e9ed",
+"_type": "span",
+"text": "ナビゲーションUIの基本",
+"marks": [
+"61e8e57977d4"
+]
+}
+],
+"markDefs": [
+{
+"_key": "61e8e57977d4",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/navigation-basics"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "b5eee677d4f4",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c9440222851a",
+"_type": "span",
+"text": "OOUI コンテンツ中心のUI設計",
+"marks": [
+"7d53d5a5c4a1"
+]
+}
+],
+"markDefs": [
+{
+"_key": "7d53d5a5c4a1",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ooui"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "2910af792f49",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "790b7db6629a",
+"_type": "span",
+"text": "出張申請ソフトをデザインしよう",
+"marks": [
+"226e380ab6f0"
+]
+}
+],
+"markDefs": [
+{
+"_key": "226e380ab6f0",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/uiflowchallenge-businesstripsoftwear"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "12bafd3cb77f",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "b3f61db6eac4",
+"_type": "span",
+"text": "ステップ5 インタビューで課題発見を習得",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "510f401a2545",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "1973d6da80ad",
+"_type": "span",
+"text": "スキル習得の最後は、自分でインタビューしてユーザーの課題を定義し、解決策を決めたうえで、体験やサービスを作るところまでを、まず1回やり切ります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "7ea601a34abf",
+"_type": "image",
+"file": "step5.png",
+"alt": "ステップ5の概要。インタビューで課題発見を習得。"
+},
+{
+"_key": "893f9bf5e159",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/ux-design-basic",
+"title": "UXデザインで顧客の課題解決をはじめるロードマップ",
+"description": "このステップのレッスンを、順番どおりに進められます。"
+},
+{
+"_key": "36b170411fd4",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "e4b8c2ea6de9",
+"_type": "span",
+"text": "目指す状態",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6edcd3543395",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "3e7e496f286f",
+"_type": "span",
+"text": "1人に深く聞くインタビューで課題を見つけ、それを解決するサービスをデザインできる状態です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5ab5dfa92b59",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "b1c7e86fcdd0",
+"_type": "span",
+"text": "期間",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6ede7f5aef8e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "af9a962e8b94",
+"_type": "span",
+"text": "約2ヶ月",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "52c80ef5498f",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "4f2054e9d230",
+"_type": "span",
+"text": "やること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "38cbfe111341",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "872cd352115e",
+"_type": "span",
+"text": "インタビューをして、課題と解決策を決める",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "b015e1103e56",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "09b9375cd4c6",
+"_type": "span",
+"text": "AIで案出しと試作をして、動く形をベースにFigmaとコードで磨き込み、触れる形まで作る",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "1d25f6f1d6f2",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "19268afc07c4",
+"_type": "span",
+"text": "AIで案出し・試作 → Figmaとコードで磨き込む → コードで触れる形",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "46cf241c07e6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "24f38ed88425",
+"_type": "span",
+"text": "触れる形でユーザーテストをして、ブラッシュアップする",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "eea750bf9191",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "3d63bbb7db95",
+"_type": "span",
+"text": "身につけること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "523cc968f184",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "89198089ddf1",
+"_type": "span",
+"text": "インタビューからテストまでを、一通り進める方法",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "989ef5578ac5",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "e2dc806d8bcc",
+"_type": "span",
+"text": "課題から解決策、形までを、筋を通して説明する",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "14e808f0d4a2",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "796924ae871d",
+"_type": "span",
+"text": "試作を見せて、フィードバックやアイデアを引き出し、直す",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "a03fea462d98",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "f678e0723bac",
+"_type": "span",
+"text": "出すアウトプット",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "784b6e968df4",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "885f30e186ca",
+"_type": "span",
+"text": "サービスを丸ごと作ったもの：1つ。ポートフォリオに載せるものとして作ります。ステップ6でブラッシュアップします",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "9edec842e6f4",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "8ee1153a82e3",
+"_type": "span",
+"text": "外に出すもの：途中の進め方と、テストの結果",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "dd19245280c8",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "0ee114ba0cc2",
+"_type": "span",
+"text": "BONOのレッスンで身につける",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "984767bfdf23",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "392c13398089",
+"_type": "span",
+"text": "UXデザインってなに？",
+"marks": [
+"85e41d70ca01"
+]
+}
+],
+"markDefs": [
+{
+"_key": "85e41d70ca01",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ux-beginner-2"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "3c79800e9203",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "ba8739161f27",
+"_type": "span",
+"text": "顧客体験デザインの基本",
+"marks": [
+"2de1b9367dab"
+]
+}
+],
+"markDefs": [
+{
+"_key": "2de1b9367dab",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/uxdezaintohahe-ka-copy"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "2c0bb4452830",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c0426661d9f0",
+"_type": "span",
+"text": "はじめてのUXデザイン",
+"marks": [
+"0f18b35cb318"
+]
+}
+],
+"markDefs": [
+{
+"_key": "0f18b35cb318",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/ux-biginner"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "a6a2e104790a",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "3173540b4021",
+"_type": "span",
+"text": "ゼロからはじめるユーザーインタビュー",
+"marks": [
+"318b54388ca1"
+]
+}
+],
+"markDefs": [
+{
+"_key": "318b54388ca1",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/zerokara-userinterview"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "fb1326969065",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7351c8f8d37b",
+"_type": "span",
+"text": "ゼロからサービスをデザインしよう",
+"marks": [
+"ee4983f5ba03"
+]
+}
+],
+"markDefs": [
+{
+"_key": "ee4983f5ba03",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/designyourownservice"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "583956e5d52d",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "fc117f245b3b",
+"_type": "span",
+"text": "ステップ6 ポートフォリオ制作と転職活動",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "cf7ae4eacba9",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b400e37733d1",
+"_type": "span",
+"text": "ここから【フェーズ4】デザインの仕事を獲得します。自分が欲しいサービスを作り、ここまでの作品と合わせてポートフォリオにまとめて、応募に進みます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ce2dfd94ec0d",
+"_type": "image",
+"file": "step6.png",
+"alt": "ステップ6の概要。ポートフォリオ制作と転職活動。"
+},
+{
+"_key": "4804852b12c7",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/uiux-career-change#curriculum-step-6",
+"title": "転職ロードマップ：転職に向けて動き出そう",
+"description": "ポートフォリオと転職活動の準備を、ここから進められます。"
+},
+{
+"_key": "b3dcb1595d05",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "617c470d63c8",
+"_type": "span",
+"text": "目指す状態",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "a779440e0988",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c563bd1bc521",
+"_type": "span",
+"text": "メインのサービス2つとサブのデザインをポートフォリオにまとめて、内定を目指して応募できる状態です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "4b50c9f27720",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "49e7b23f82f9",
+"_type": "span",
+"text": "期間",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "238a7ff2d1c7",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "714c630f62ea",
+"_type": "span",
+"text": "ポートフォリオに約2ヶ月。そのあと応募に進みます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "9734aab98d08",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "8157a52268ae",
+"_type": "span",
+"text": "やること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5642a15a60b8",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "daefa9b1ef38",
+"_type": "span",
+"text": "ポートフォリオをまとめる（約2ヶ月）",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "5f1b2cb0f079",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "4d5efb46fac5",
+"_type": "span",
+"text": "自分が欲しいサービスは、ここで作ります。ユーザーの課題からだけでなく、自分の興味のあるテーマや課題、「こういう方が良くない？」から発想して形にするのは、自分の興味を伸ばすうえでも大事な、デザインの基本のマインドです。ここまでに作ったものもそのまま載せず、ブラッシュアップします。いつまででも質を上げられてしまうので、自分で締め切りを決めて仕上げましょう。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "bb98c3b9740f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "00cc8c81b9c7",
+"_type": "span",
+"text": "30〜50社を視野に応募する",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "6cc33bf626f2",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "5a54ae8e3365",
+"_type": "span",
+"text": "未経験を受け入れる会社は、多くはありません。入りたい会社や、自分の経験や興味と相性が良さそうな会社を調べて、期限を決めて応募を始めます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "87960a1bb258",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "06ffb64b0adc",
+"_type": "span",
+"text": "身につけること",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "0922aede2c59",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "d9ef0d0bcb20",
+"_type": "span",
+"text": "課題解決の考え方が見える形で、作ったものをまとめる",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "6d0b9e45768b",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "55e514b6b863",
+"_type": "span",
+"text": "選考で、何を作るべきか、どの優先度でいくべきかを提案できることを示す",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "37ce55ada905",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "6c81e06d8453",
+"_type": "span",
+"text": "出すアウトプット",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "10cd52d843e4",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "648120b9181e",
+"_type": "span",
+"text": "メイン：ユーザー課題を解決する操作できるサービスと、自分が欲しいサービス",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "17fdecb1a486",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "f38a04f9346c",
+"_type": "span",
+"text": "サブ：UI機能のデザインを2つ、1画面のデザインを10個以上",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "50a0aa9b7596",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "1e7714aa8c65",
+"_type": "span",
+"text": "BONOのレッスンで身につける",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "4dce714910b8",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7be468ef6e81",
+"_type": "span",
+"text": "ポートフォリオの作り方",
+"marks": [
+"f92eb40c4598"
+]
+}
+],
+"markDefs": [
+{
+"_key": "f92eb40c4598",
+"_type": "link",
+"href": "https://www.bo-no.design/lessons/portfolio"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "4ba2b77193f3",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b38491b27be5",
+"_type": "span",
+"text": "転職した人のインタビュー",
+"marks": [
+"7b3e17011e93"
+]
+}
+],
+"markDefs": [
+{
+"_key": "7b3e17011e93",
+"_type": "link",
+"href": "https://www.bo-no.design/stories"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "d9cbcb2ac7eb",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "b4906b53a00b",
+"_type": "span",
+"text": "UI/UXデザイナー転職を成功させる！“会社の調べ方”ガイド",
+"marks": [
+"8add3ae966e4"
+]
+}
+],
+"markDefs": [
+{
+"_key": "8add3ae966e4",
+"_type": "link",
+"href": "https://www.bo-no.design/guide/how-to-find-jobs-for-beginner-designers"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "85feecd3882f",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "bdcad771f52f",
+"_type": "span",
+"text": "UI/UXデザイナー転職 面接質問集",
+"marks": [
+"491ff8be6c10"
+]
+}
+],
+"markDefs": [
+{
+"_key": "491ff8be6c10",
+"_type": "link",
+"href": "https://www.bo-no.design/guide/uiux-interview-tips-and-checkpoints"
+}
+],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "d4b333107a6b",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "9b6d4987dfd9",
+"_type": "span",
+"text": "AIとデザインについて",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "96757df53c2e",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "dba2ec4539d0",
+"_type": "span",
+"text": "AIは、デザインの全部を任せるものではなく、流れの中で使う場所を決めて協業するものです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "0c5017192633",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "0113c73002a5",
+"_type": "span",
+"text": "最初の2つのステップでAIを使わない理由",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "e6890c0f072c",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "fc7a95f6cc86",
+"_type": "span",
+"text": "目を鍛えるためです。先にAIを触ると、「もうこれでいいじゃん」となって終わってしまいます。自分で作ったことがないと、見た目がどう構成されているのかが分からず、AIのアウトプットを判断することも、適切に指示を出すこともできません。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ac231d366175",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "038a30906af6",
+"_type": "span",
+"text": "デザイン制作の流れのどこでAIと協業するか",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "96ade70d80e1",
+"_type": "image",
+"file": "ai.png",
+"alt": "AIと協業するデザインワークフロー。下調べと仮説出し、プロトタイプ制作、コードで動く体験の3か所でAIを使う。"
+},
+{
+"_key": "c753cfbe7204",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "d8b4afebf671",
+"_type": "span",
+"text": "AIを使う場所は、大きく3つです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "787d441eaaec",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "43ead26e372a",
+"_type": "span",
+"text": "下調べ・仮説出し：下調べのリサーチ、インタビューの質問の壁打ち、聞いた話の整理、解決のアイデアを広げる壁打ち",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "fd84154146fd",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "40383281639d",
+"_type": "span",
+"text": "プロトタイプ制作：参考になるUIのリサーチ、パターン出し、ざっくりした試作、抜けている画面の洗い出し",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "9bdaa74a0b7b",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "97f1a3bc35dd",
+"_type": "span",
+"text": "コードで動く体験：コードで動く形を作る、細部の案出し、批評の壁打ち、テストで出た直しの反映",
+"marks": []
+}
+],
+"markDefs": [],
+"listItem": "bullet",
+"level": 1
+},
+{
+"_key": "00f7a75e90f6",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "2a4f8811676c",
+"_type": "span",
+"text": "AIは案と試作を速くします。話を聞くことと、決めることは人がやります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "1846043c21b7",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "6089ae2d1b13",
+"_type": "span",
+"text": "選考で見られるのはAIより「課題に対して提案できるか」",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "580a1bbca150",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "dba78af10d70",
+"_type": "span",
+"text": "選考では、AIが使えること以上に、課題に対して提案できるかを見られている印象です。選考課題が終わった人に話を聞くと、そこを課題に出している会社が多いと感じます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "896e636c6d48",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "ad7667c33758",
+"_type": "span",
+"text": "AIを使えることも大事ですが、メインではないと思います。課題解決やサービスに対して、デザインで貢献できる基礎があるかどうかがとても重要です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "a55acca8bee3",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "94c71383b642",
+"_type": "span",
+"text": "よくある質問",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "ae39c8d8963d",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "12154119c9d9",
+"_type": "span",
+"text": "未経験でも転職できますか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "48f53f4bd96d",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "c68410f77611",
+"_type": "span",
+"text": "できます。BONOからは、これまでに約60人がUI/UXデザイナーに転職しています。ただ、未経験を受け入れる会社は多くはありませんし、AIでハードルは日々上がっています。実際の例は、",
+"marks": []
+},
+{
+"_key": "6b112f11b5d8",
+"_type": "span",
+"text": "未経験からUI/UXデザイナーに転職した4つの事例",
+"marks": [
+"7fefc3a6a75f"
+]
+},
+{
+"_key": "5b3eb23f72b9",
+"_type": "span",
+"text": "にまとめています。",
+"marks": []
+}
+],
+"markDefs": [
+{
+"_key": "7fefc3a6a75f",
+"_type": "link",
+"href": "https://www.bo-no.design/guide/beginner-to-uiux-designer-examples"
+}
+]
+},
+{
+"_key": "708b25188f1d",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "bfbee192d367",
+"_type": "span",
+"text": "つくるだけではなく、考えて整理・提案して、「なぜそのアウトプットが良いのか」を考えられるようにならなくてはなりません。なので、それなりの時間的な投資が必要です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6cfd59b35cb5",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "dc6b8a289bff",
+"_type": "span",
+"text": "何から勉強すればいいですか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "6ef22d466e7d",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "43093c8b6717",
+"_type": "span",
+"text": "Figmaで、サービスを分解しながらUIをトレースして形にするところから始めてください。未経験の人ほど、これまでに作ってきた量が足りません。なので、作る量が必要です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "e881a61726ca",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "7faecd492f95",
+"_type": "span",
+"text": "つくることに慣れてきて、ようやく「どういう形であるべきか？」を検討できる余裕が出てきます。ただつくるのでもいいですが、どういう仕組みなのか？などはすでに確立されているものがあるので、それを知りながら作っていく方が上達は早いでしょう。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "db4cc21220f9",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "cbc65d094cf2",
+"_type": "span",
+"text": "働きながらでも進められますか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "053d7cdf8650",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "0a89925acc99",
+"_type": "span",
+"text": "進められます。週15時間が最低ラインです。ただ、時間は投資できるほど良いです。片手間で誰でもなれる可能性は低いかもしれません。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "1f7a1465d5cb",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "bc993954a510",
+"_type": "span",
+"text": "まずはデザインを好きになることが大切だと思います。時間を忘れるほど楽しかったり、悔しくてモヤモヤするからできるまでやってみたりする。そんな状態が大切だと、デザイナー人生を振り返って個人的に思います。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "cdfbf69c7756",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "e4947674cec4",
+"_type": "span",
+"text": "デザインの経験があれば、早く終わりますか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "65f064c83207",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "f3ac5f610c32",
+"_type": "span",
+"text": "はい、土台作りの2ヶ月くらいは短くなります。グラフィックなどの経験がある人は、Figmaに慣れる部分と、見た目の練習の回数が減るからです。それ以外は、経験があっても飛ばせません。UIデザインは、見た目だけ作ればいいわけではないからです。ステップ1〜5は約9ヶ月が約7ヶ月になり、このあとにステップ6（ポートフォリオ制作と転職活動）が続きます。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "aa3db977e59e",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "6167f23fa061",
+"_type": "span",
+"text": "AIで作れるなら、デザインを学ぶ必要はありますか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "353149b416eb",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "63c5b6f1f27f",
+"_type": "span",
+"text": "あります。AIが作ったものが合っているかを判断するのは人です。また、AIに指示するのも人です。それっぽいものをパッと出せるかもしれませんが、それが自分の作っている目的に合っているかの判断や、目的に合わせて出力させるには、デザインの知識と経験が必要だと考えています。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "5c174ed7f281",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "8105dbe72d4b",
+"_type": "span",
+"text": "ポートフォリオはいつから作ればいいですか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "208e50ccdd9b",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "45f5971e9bac",
+"_type": "span",
+"text": "ロードマップを進めながらアウトプットは出していきますが、基本的には、必要なデザイン制作の流れを習得してデザインしたアウトプットが、勝負できるものになります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "f01dcf18ff2c",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "85ccaa34512f",
+"_type": "span",
+"text": "なので、ポートフォリオ制作は最後のフェーズぐらいまで考えなくて良いです。まとめるのはステップ6ですが、ステップ5のサービスは最初からポートフォリオに載せるつもりで作ります。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "a925b4cc49d8",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "8f4f618308a1",
+"_type": "span",
+"text": "実際どれぐらいのレベルのポートフォリオがあるのかは、気になったらAIなどで検索してチェックしておきましょう。世の中のデザイナーのレベルをインプットすることは、日頃からやるのがおすすめです。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "980e4ff0a0ed",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "1c1c8c1df909",
+"_type": "span",
+"text": "Figmaはどこまで使えればいいですか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "01b139994544",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "fe2ace4dc734",
+"_type": "span",
+"text": "まずは見本の画面をほぼ同じ見た目に再現できて、オートレイアウトで組めるところまでです（ステップ1）。そのあと、細かい部分を自分で詰められるようにしていきます。AIの時代でも、Figmaは変わらず必要です。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "cfdc6200bb9f",
+"_type": "block",
+"style": "h3",
+"children": [
+{
+"_key": "405c151c7344",
+"_type": "span",
+"text": "何社くらい応募すればいいですか？",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "be1acd3b9d68",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "fab0665efe86",
+"_type": "span",
+"text": "30〜50社が目安です。未経験を受け入れる会社は多くないので、数を当たりながら、入りたい会社を調べて応募しましょう。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "45c9aefc0527",
+"_type": "block",
+"style": "h2",
+"children": [
+{
+"_key": "b2d3c76ec244",
+"_type": "span",
+"text": "転職ロードマップをはじめる",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "303f0ba690ca",
+"_type": "block",
+"style": "normal",
+"children": [
+{
+"_key": "6418a4432502",
+"_type": "span",
+"text": "全体像がつかめたら、あとは手を動かすだけです。転職ロードマップから進めてみてください。",
+"marks": []
+}
+],
+"markDefs": []
+},
+{
+"_key": "c58f7a5a78c5",
+"_type": "linkCard",
+"url": "https://www.bo-no.design/roadmap/uiux-career-change",
+"title": "未経験からUI/UXデザイナーになる 転職ロードマップ",
+"description": "レッスンを順番に進めるページです。ステップごとに、やることがまとまっています。"
+}
+]
