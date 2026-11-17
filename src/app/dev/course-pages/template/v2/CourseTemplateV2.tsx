@@ -28,7 +28,7 @@ import CourseHeroCards from "../hero/CourseHeroCards";
 import CourseHeroCentered from "../hero/CourseHeroCentered";
 import CourseHeroSplit from "../hero/CourseHeroSplit";
 import type { CourseHeroProps } from "../hero/parts";
-import { KariProvider } from "../kari";
+import { KariProvider, type PreviewSegment } from "../kari";
 import { computeProgress } from "../progress";
 import { numberSteps, pad2 } from "../shared";
 import CourseHeroV2 from "./CourseHeroV2";
@@ -55,6 +55,8 @@ export default function CourseTemplateV2({
   hero = "v2",
   heroHrefs,
   startedHref,
+  nextCourseHref,
+  switches,
 }: {
   course: Course;
   lessons: LessonMap;
@@ -70,6 +72,10 @@ export default function CourseTemplateV2({
   heroHrefs?: Record<HeroVariant, string>;
   /** started=0 のとき「このコースを始める」の行き先（?started=1。ほかのクエリを残したもの） */
   startedHref?: string;
+  /** 「修了したら次は」の次のコースの行き先（省略時は v2 のページ） */
+  nextCourseHref?: string;
+  /** 渡したときは、下の確認用バーの「進捗」の代わりにこの切り替えを出す（v3: 名前・状態・ヒーロー） */
+  switches?: PreviewSegment[];
 }) {
   const v2 = course.v2!;
   // 書き直した「得られる変化」で描く（Figma 原文は course.change に残っている）
@@ -93,7 +99,7 @@ export default function CourseTemplateV2({
   const FigmaHero = hero === "v2" ? null : FIGMA_HEROES[hero];
 
   return (
-    <KariProvider preview={{ progress: Boolean(progressMock) }}>
+    <KariProvider preview={switches ? undefined : { progress: Boolean(progressMock) }} segments={switches}>
       <div className="min-h-screen w-full bg-[var(--bg-base)] font-noto-sans-jp text-text-primary">
         {heroHrefs ? (
           <HeroSwitch
@@ -141,7 +147,7 @@ export default function CourseTemplateV2({
           <CourseChange course={shown} />
           <CourseFlow course={shown} statuses={progress?.steps.map((st) => st.status)} />
           <CourseCurriculumSyllabus course={shown} lessons={lessons} progress={progress} size="lg" v2 />
-          <CourseNext v2={v2} nextCourse={nextCourse} />
+          <CourseNext v2={v2} nextCourse={nextCourse} nextHref={nextCourseHref} />
           <CourseOutput course={shown} />
           <CourseAudience course={shown} />
           <CourseAuthor course={shown} />

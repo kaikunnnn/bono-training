@@ -18,6 +18,17 @@ const KariContext = createContext(false);
 
 export type CurriculumVariant = "syllabus" | "syllabus-large" | "list";
 
+/** 確認用の切り替え（URL のクエリ1つを書き換える）。v3 の name / state / hero など */
+export interface PreviewSegment {
+  label: string;
+  /** 書き換えるクエリ名 */
+  param: string;
+  value: string;
+  /** この値のときはクエリを消す（既定の見え方） */
+  defaultValue: string;
+  options: { value: string; label: string }[];
+}
+
 export interface PreviewState {
   progress: boolean;
   /** 渡したときだけカリキュラムの版の切り替えを出す */
@@ -61,10 +72,13 @@ function Segmented<V extends string>({
 export function KariProvider({
   children,
   preview,
+  segments,
 }: {
   children: React.ReactNode;
   /** 渡したときだけ、見せ方と進捗の切り替えを出す */
   preview?: PreviewState;
+  /** 渡したときだけ、追加の切り替えを出す（v3） */
+  segments?: PreviewSegment[];
 }) {
   const [show, setShow] = useState(false);
   const router = useRouter();
@@ -116,6 +130,15 @@ export function KariProvider({
               />
             </>
           ) : null}
+          {segments?.map((seg) => (
+            <Segmented
+              key={seg.param}
+              label={seg.label}
+              value={seg.value}
+              options={seg.options}
+              onChange={(v) => setParam(seg.param, v === seg.defaultValue ? null : v)}
+            />
+          ))}
           <label className="flex cursor-pointer items-center gap-2">
             <span>「仮」タグ</span>
             <input

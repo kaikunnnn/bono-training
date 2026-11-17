@@ -80,6 +80,13 @@ export function HeroTitle({
           <wbr />
           コース
         </>
+      ) : main.includes("のための") ? (
+        // #300 名前b「非デザイナーのための〜」: keep-all だと折り返せずはみ出すので「のための」の後ろで折る
+        <>
+          {main.slice(0, main.indexOf("のための") + 4)}
+          <wbr />
+          {main.slice(main.indexOf("のための") + 4)}
+        </>
       ) : (
         main
       )}

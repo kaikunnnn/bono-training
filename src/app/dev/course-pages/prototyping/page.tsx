@@ -53,6 +53,15 @@ export default async function PrototypingHubPage() {
         </p>
 
         <div className="mt-10 flex flex-col gap-6">
+          {/* #300 個別ロードマップ4本をコースに置き換えた版 */}
+          <Link href="/dev/course-pages/v3" className={CARD}>
+            <CardHead
+              kicker="#300 · v3"
+              title="ロードマップ4本をコースにした版"
+              lead="Figma入門・UIビジュアル・情報設計・UXの4コース。一覧とコースページで、名前の2案と未課金／課金後を切り替えて見られます。"
+            />
+          </Link>
+
           {/* 1. 一覧 */}
           <Link href="/dev/course-pages" className={CARD}>
             <CardHead

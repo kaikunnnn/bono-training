@@ -15,9 +15,18 @@ import { SectionHead, splitTitle } from "../shared";
 const CARD =
   "group flex h-full flex-col rounded-[20px] border border-border-light bg-surface p-5 shadow-[var(--shadow-xs)] transition-[border-color,box-shadow] hover:border-border-default hover:shadow-[var(--shadow-md)]";
 
-export default function CourseNext({ v2, nextCourse }: { v2: CourseV2; nextCourse: Course | null }) {
+export default function CourseNext({
+  v2,
+  nextCourse,
+  nextHref: nextHrefProp,
+}: {
+  v2: CourseV2;
+  nextCourse: Course | null;
+  /** 次のコースの行き先（省略時は v2 のコースページ。v3 は v3 のページを渡す） */
+  nextHref?: string;
+}) {
   const next = nextCourse ? splitTitle(nextCourse.title.text) : null;
-  const nextHref = nextCourse ? `/dev/course-pages/v2/${nextCourse.slug}` : null;
+  const nextHref = nextCourse ? (nextHrefProp ?? `/dev/course-pages/v2/${nextCourse.slug}`) : null;
   const { path, position } = v2.roadmap;
 
   return (
