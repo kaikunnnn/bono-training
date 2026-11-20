@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getSupabaseSecretKey } from "../_shared/supabase-keys.ts";
 import {
   createStripeClient,
   type StripeEnvironment,
@@ -70,7 +71,7 @@ Deno.serve(async (req) => {
 
     // Supabaseクライアントの作成（サービスロールキーを使用してRLSをバイパス）
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseServiceKey = getSupabaseSecretKey();
     const supabaseClient = createClient(supabaseUrl, supabaseServiceKey);
 
     // 認証ヘッダーから現在のユーザーを取得

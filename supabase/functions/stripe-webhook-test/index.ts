@@ -3,8 +3,8 @@
  * テスト環境のStripe Webhookイベントを処理します
  */
 
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getSupabaseSecretKey } from "../_shared/supabase-keys.ts";
 import { createStripeClient, getWebhookSecret } from "../_shared/stripe-helpers.ts";
 import { getPlanInfo } from "../_shared/plan-utils.ts";
 
@@ -22,7 +22,7 @@ function determineMembershipAccess(planType: string): boolean {
   return planType === "standard" || planType === "feedback";
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // CORSプリフライトリクエストの処理
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -65,7 +65,7 @@ serve(async (req) => {
 
     // Supabaseクライアントの初期化
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseServiceKey = getSupabaseSecretKey();
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log(`🧪 [TEST環境] 処理中のイベント: ${event.type}`);

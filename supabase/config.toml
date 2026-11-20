@@ -43,6 +43,11 @@ content_path = "./supabase/templates/recovery.html"
 
 [functions]
 # Edge Functions設定
+#
+# verify_jwt は本番の現在の設定値（2026-11-06 list_edge_functions で確認）をそのまま書いている。
+# ここに書かない関数は再デプロイで true に変わるので、関数を増やしたら必ず追記する。
+# 本番にあってリポに無い関数（get-mdx-content / get-task-content / get-training-meta /
+# debug-storage）は実体が無いのでここには書かない。
 
 # Stripe Webhook用の設定 - JWT検証を無効化
 # Stripeは Authorization ヘッダーを送信しないため、JWT検証を無効にする必要がある
@@ -57,3 +62,45 @@ verify_jwt = false
 # 未認証リクエストでの Stripe API 叩き（DoS）を入口で弾く。
 [functions.link-stripe-subscription]
 verify_jwt = true
+
+[functions.check-migrated-user]
+verify_jwt = false
+
+[functions.check-subscription]
+verify_jwt = true
+
+[functions.clear-migrated-flag]
+verify_jwt = true
+
+[functions.create-checkout]
+verify_jwt = false
+
+[functions.create-customer-portal]
+verify_jwt = true
+
+[functions.fetch-ogp]
+verify_jwt = true
+
+[functions.get-content]
+verify_jwt = true
+
+[functions.get-plan-prices]
+verify_jwt = true
+
+[functions.get-training-content]
+verify_jwt = true
+
+[functions.get-training-detail]
+verify_jwt = true
+
+[functions.get-training-list]
+verify_jwt = true
+
+[functions.preview-subscription-change]
+verify_jwt = true
+
+[functions.update-subscription]
+verify_jwt = true
+
+[functions.webflow-series]
+verify_jwt = false

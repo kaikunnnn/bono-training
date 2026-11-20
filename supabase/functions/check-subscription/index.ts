@@ -1,9 +1,8 @@
 
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders, logDebug } from "./utils.ts";
 import { createUnauthenticatedResponse, handleAuthenticatedRequest } from "./handlers.ts";
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // CORSプリフライトリクエストの処理
   if (req.method === "OPTIONS") {
     logDebug("OPTIONS リクエスト受信");
