@@ -14,25 +14,13 @@ import { WelcomeToast } from "@/components/auth/WelcomeToast";
 import { SignUpTracker } from "@/components/analytics/SignUpTracker";
 import { AnnouncementBar } from "./AnnouncementBar";
 import { Menu } from "lucide-react";
+import { useLayoutMember } from "./ClientUserProvider";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { BoardNewDot } from "@/components/questions/BoardNewDot";
 
 interface LayoutProps {
   children: React.ReactNode;
   className?: string;
-  user?: {
-    id: string;
-    email: string;
-  } | null;
-  /**
-   * 通知ベル（#160 S3）。未読件数取得を内包した Server Component を Suspense で
-   * ラップした要素を親（Server: UserProviderLayout）から受け取り、そのまま描画する。
-   * 未ログイン時や未対応時は undefined/null。
-   */
-  notificationSlot?: React.ReactNode;
-  /**
-   * 掲示板の新着ドット（掲示板の新着ドット）。hasUnseenBoard を内包した Server Component を
-   * Suspense でラップした要素。デスクトップのサイドバーにのみ渡す（通知ベルの現状に倣う）。
-   */
-  boardDotSlot?: React.ReactNode;
 }
 
 /**
@@ -45,7 +33,15 @@ interface LayoutProps {
  * - /blog/*: BlogHeader/Footer を使用
  * - /feedback-apply/submit: フォーム専用ページ
  */
-export function Layout({ children, className, user, notificationSlot, boardDotSlot }: LayoutProps) {
+export function Layout({ children, className }: LayoutProps) {
+  // #277 Phase 3 A1 試作: 会員情報はブラウザ側で取る（ClientUserProvider）。
+  // 取得中は user が undefined（サイドバーはマイページ/ログイン/設定を出さずに場所だけ取る）
+  const member = useLayoutMember();
+  const user = member.user;
+  const notificationSlot = user ? (
+    <NotificationBell key={user.id} userId={user.id} initialUnreadCount={member.unreadCount} />
+  ) : null;
+  const boardDotSlot = user && member.boardUnseen ? <BoardNewDot /> : null;
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isGradientVisible, setIsGradientVisible] = useState(false);
