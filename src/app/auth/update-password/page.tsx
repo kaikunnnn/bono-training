@@ -10,6 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Check, Lock, AlertCircle } from "lucide-react";
 import { createBrowserClient } from "@supabase/ssr";
 import { translateAuthError } from "@/lib/auth-error-messages";
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH_LABEL,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordLongEnough,
+} from "@/lib/auth-password";
 
 export default function UpdatePasswordPage() {
   const router = useRouter();
@@ -45,8 +51,8 @@ export default function UpdatePasswordPage() {
       return;
     }
 
-    if (password.length < 8) {
-      setError("パスワードは8文字以上で入力してください");
+    if (!isPasswordLongEnough(password)) {
+      setError(PASSWORD_TOO_SHORT_MESSAGE);
       setIsSubmitting(false);
       return;
     }
@@ -161,9 +167,9 @@ export default function UpdatePasswordPage() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="8文字以上"
+                placeholder={PASSWORD_MIN_LENGTH_LABEL}
                 required
-                minLength={8}
+                minLength={PASSWORD_MIN_LENGTH}
               />
             </div>
 
@@ -175,7 +181,7 @@ export default function UpdatePasswordPage() {
                 type="password"
                 placeholder="パスワードを再入力"
                 required
-                minLength={8}
+                minLength={PASSWORD_MIN_LENGTH}
               />
             </div>
 
