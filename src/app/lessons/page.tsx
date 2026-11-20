@@ -1,12 +1,12 @@
 import { Metadata } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { getAllLessons } from "@/lib/sanity";
 // TODO: LessonCardに進捗表示を追加する際に使用
 // import { getMultipleLessonProgress } from "@/lib/services/progress";
 import PageHeader from "@/components/common/PageHeader";
 
-// ISR: 1時間キャッシュ
-export const revalidate = 3600;
+// #277 Phase 3 B 試作: cacheComponents では `revalidate` が使えないため、"use cache" + cacheLife に置き換え
 import SectionHeading from "@/components/common/SectionHeading";
 import DottedDivider from "@/components/common/DottedDivider";
 import CategoryNav, { type CategoryNavItem } from "@/components/common/CategoryNav";
@@ -33,6 +33,9 @@ export const metadata: Metadata = {
 };
 
 export default async function LessonsPage() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("lesson");
   const lessons = await getAllLessons();
 
   // セクション・サブセクションごとにグルーピング（main の groupedLessons に対応）
