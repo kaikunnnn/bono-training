@@ -11,6 +11,10 @@ const AUTH_ERROR_MAP: Record<string, string> = {
     "パスワードは6文字以上にしてください",
   "Password should be at least 6 characters.":
     "パスワードは6文字以上にしてください",
+  "Password should be at least 12 characters":
+    "パスワードは12文字以上にしてください",
+  "Password should be at least 12 characters.":
+    "パスワードは12文字以上にしてください",
   "Password should be at least 8 characters":
     "パスワードは8文字以上にしてください",
   "Password should be at least 8 characters.":

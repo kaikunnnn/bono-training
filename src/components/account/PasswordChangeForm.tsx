@@ -17,6 +17,11 @@ import { Loader2, Check } from "lucide-react";
 import { SettingsCard } from "@/components/common/SettingsPageLayout";
 import { createClient } from "@/lib/supabase/client";
 import { translateAuthError } from "@/lib/auth-error-messages";
+import {
+  PASSWORD_MIN_LENGTH_LABEL,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordLongEnough,
+} from "@/lib/auth-password";
 
 export function PasswordChangeForm() {
   const [isOpen, setIsOpen] = useState(false);
@@ -47,8 +52,8 @@ export function PasswordChangeForm() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      setError("パスワードは8文字以上で入力してください");
+    if (!isPasswordLongEnough(newPassword)) {
+      setError(PASSWORD_TOO_SHORT_MESSAGE);
       setIsSubmitting(false);
       return;
     }
@@ -150,10 +155,10 @@ export function PasswordChangeForm() {
                   id="newPassword"
                   name="newPassword"
                   type="password"
-                  placeholder="8文字以上"
+                  placeholder={PASSWORD_MIN_LENGTH_LABEL}
                 />
                 <p className="text-xs text-muted-foreground">
-                  パスワードは8文字以上で設定してください
+                  パスワードは{PASSWORD_MIN_LENGTH_LABEL}で設定してください
                 </p>
               </div>
 

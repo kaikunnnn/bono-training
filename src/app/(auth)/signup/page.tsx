@@ -11,6 +11,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TabGroup } from "@/components/ui/tab-group";
 import { Mail, Lock, UserPlus, AlertCircle } from "lucide-react";
 import { RegistrationFlowGuide } from "@/components/auth/RegistrationFlowGuide";
+import { PasswordRequirements } from "@/components/auth/PasswordRequirements";
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH_LABEL,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordLongEnough,
+} from "@/lib/auth-password";
 import { signUp } from "../actions";
 import { createClient } from "@/lib/supabase/client";
 
@@ -45,6 +52,17 @@ export default function SignupPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Supabase に送る前に文字数を確かめる（#321）
+    if (!isPasswordLongEnough(password)) {
+      setError(PASSWORD_TOO_SHORT_MESSAGE);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("パスワードが一致しません");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -119,13 +137,18 @@ export default function SignupPage() {
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="8文字以上"
+                    placeholder={PASSWORD_MIN_LENGTH_LABEL}
                     className="pl-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={8}
+                    minLength={PASSWORD_MIN_LENGTH}
+                    autoComplete="new-password"
+                    aria-describedby="signup-password-requirements"
                   />
+                </div>
+                <div id="signup-password-requirements">
+                  <PasswordRequirements password={password} confirmPassword={confirmPassword} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -140,7 +163,8 @@ export default function SignupPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    minLength={8}
+                    minLength={PASSWORD_MIN_LENGTH}
+                    autoComplete="new-password"
                   />
                 </div>
               </div>

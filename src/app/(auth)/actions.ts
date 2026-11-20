@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { translateAuthError } from "@/lib/auth-error-messages";
 import { reportAuthError } from "@/lib/monitoring";
 import { withSignUpMarker } from "@/lib/auth-markers";
+import { PASSWORD_TOO_SHORT_MESSAGE, isPasswordLongEnough } from "@/lib/auth-password";
 
 export interface AuthResult {
   error?: string;
@@ -96,8 +97,8 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     return { error: "パスワードが一致しません" };
   }
 
-  if (password.length < 8) {
-    return { error: "パスワードは8文字以上で入力してください" };
+  if (!isPasswordLongEnough(password)) {
+    return { error: PASSWORD_TOO_SHORT_MESSAGE };
   }
 
   try {
