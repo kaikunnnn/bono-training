@@ -59,6 +59,9 @@ function getSanityClient() {
       apiVersion:
         process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
       useCdn: true,
+      // データセット非公開化（#308）。下書きを出さないため published に固定
+      token: process.env.SANITY_READ_TOKEN,
+      perspective: "published",
     });
   }
   return sanityClient;
