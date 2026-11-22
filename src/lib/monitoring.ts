@@ -3,6 +3,8 @@ import "server-only";
 export type AuthEventType =
   | "login_failed"
   | "signup_failed"
+  // 登録ボタンを押したが、サーバーとの通信そのものが失敗した（ブラウザ側で検知）
+  | "signup_request_failed"
   | "password_reset_failed"
   | "otp_verification_failed"
   | "callback_failed"

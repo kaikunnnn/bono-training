@@ -18,6 +18,11 @@ import {
   PASSWORD_TOO_SHORT_MESSAGE,
   isPasswordLongEnough,
 } from "@/lib/auth-password";
+import {
+  SIGNUP_REQUEST_FAILED_MESSAGE,
+  isNextInternalError,
+  reportSignupRequestFailed,
+} from "@/lib/auth-client-error";
 import { signUp } from "../actions";
 import { createClient } from "@/lib/supabase/client";
 
@@ -80,6 +85,13 @@ export default function SignupPage() {
         setError(result.error);
       }
       // 成功時は signUp 内で redirect される
+    } catch (err) {
+      // redirect 等の Next.js 内部の制御はそのまま流す
+      if (isNextInternalError(err)) throw err;
+      // サーバーとの通信そのものが失敗した（通信切れ・デプロイ直後の食い違い等）。
+      // 以前はボタンが戻るだけで何も表示されず、記録も残らなかった（#321 S5）
+      setError(SIGNUP_REQUEST_FAILED_MESSAGE);
+      reportSignupRequestFailed(err, email);
     } finally {
       setIsSubmitting(false);
     }
