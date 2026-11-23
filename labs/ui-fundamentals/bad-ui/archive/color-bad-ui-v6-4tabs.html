@@ -1,0 +1,848 @@
+<title>配色のダメUI</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* 枠（このページ自体）は静かなグレー。中の画面だけが「ダメな配色」の見本 */
+:root{
+  --bg:#F3F3F1; --surface:#FFFFFF; --fg:#1F2120; --muted:#5B5F5C; --line:#D9DAD6; --ink:#1F2120; --on-ink:#FFFFFF;
+  --font:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+
+  /* ダメUIの見本色（テーマで変えない・意図的に悪い） */
+  --m-white:#FFFFFF; --m-text:#2B2B2B; --m-gray:#A3A3A3; --m-gray-l:#B5B5B5; --m-line:#E8E8E8; --m-line-l:#EEEEEE;
+  --m-icon:#D4D4D4; --m-btn-gray:#E5E5E5; --m-btn-gray-l:#EDEDED;
+  --m-blue1:#2F6BFF; --m-blue2:#3B82F6; --m-blue3:#4D8EFF; --m-blue4:#1E63E9; --m-blue5:#5B9BFF;
+  --m-tint-blue:#EAF2FF; --m-tint-blue2:#F4F8FF; --m-tint-blue3:#DBEAFE;
+  --m-red:#FF3B30; --m-tint-red:#FFECEB; --m-green:#22C55E; --m-green2:#34C759; --m-tint-green:#E9F9EE; --m-tint-green2:#DCFCE7;
+  --m-orange:#FF9500; --m-tint-orange:#FFF1DC; --m-yellow:#FFC400; --m-yellow2:#FFD60A;
+  --m-brand:#FF7A00; --m-brand-l:#FF9F43; --m-tint-brand:#FFF3E6; --m-pink:#FF5C8A; --m-tint-pink:#FFEAF0; --m-cyan:#00B8D9; --m-tint-cyan:#E3F8FC;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1B1C1B;--surface:#252725;--fg:#ECEDEA;--muted:#A9ACA7;--line:#3A3D3A;--ink:#ECEDEA;--on-ink:#1B1C1B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1B1C1B;--surface:#252725;--fg:#ECEDEA;--muted:#A9ACA7;--line:#3A3D3A;--ink:#ECEDEA;--on-ink:#1B1C1B;color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.7}
+.wrap{max-width:1680px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-size:28px;line-height:1.3;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--muted);max-width:68ch}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--muted);padding:6px 14px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--on-ink)}
+.tabs button:focus-visible,.toggle input:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.toggle{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted);cursor:pointer}
+.stage{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:24px}
+.key{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 24px}
+.key h2{font-size:18px;margin:0 0 12px}
+.key ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+.key li{max-width:80ch}
+.key .no{font-weight:700}
+.key small{color:var(--muted);font-variant-numeric:tabular-nums}
+.key p{margin:12px 0 0;color:var(--muted);font-size:14px}
+
+/* 答えのピン（既定は非表示。Figmaに取り込むときも出さない） */
+.pin{display:none}
+.show-pins .pin{display:inline-flex;position:absolute;z-index:5;width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font:700 12px/22px var(--font);justify-content:center;box-shadow:0 0 0 2px #fff}
+.rel{position:relative}
+[hidden]{display:none!important}
+.view{display:flex;flex-direction:column;gap:16px}
+
+/* ===== SaaS（タスク管理） ===== */
+.saas{width:1280px;height:800px;display:grid;grid-template-columns:220px 1fr 380px;grid-template-rows:60px 1fr;font-family:var(--font);color:var(--m-text);background:var(--m-white);border:1px solid var(--m-line);font-size:14px;line-height:1.6}
+.s-top{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:0 20px;background:var(--m-tint-blue2);border-bottom:1px solid var(--m-line)}
+.s-logo{font-weight:700;font-size:18px;display:flex;align-items:center;gap:6px;width:184px}
+.s-logo i{width:10px;height:10px;border-radius:50%;background:var(--m-red);display:inline-block}
+.s-search{flex:0 1 360px;display:flex;align-items:center;gap:8px;height:36px;border:1px solid var(--m-line);border-radius:8px;padding:0 12px;background:var(--m-white);color:var(--m-gray)}
+.s-search svg{flex:none}
+.s-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:36px;padding:0 16px;border-radius:8px;border:0;font:500 14px var(--font);color:var(--m-white);white-space:nowrap}
+.b-orange{background:var(--m-orange)} .b-green{background:var(--m-green)} .b-blue1{background:var(--m-blue1)} .b-blue3{background:var(--m-blue3)} .b-blue2{background:var(--m-blue2)}
+.b-gray{background:var(--m-btn-gray);color:var(--m-gray)}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--m-tint-blue3);color:var(--m-blue2);display:flex;align-items:center;justify-content:center;font-weight:700}
+.s-side{background:var(--m-tint-blue);padding:16px 12px;display:flex;flex-direction:column;gap:4px}
+.s-nav{display:flex;align-items:center;gap:10px;height:40px;padding:0 12px;border-radius:8px;color:var(--m-text)}
+.s-nav svg{color:var(--m-blue5)}
+.s-nav.on{background:var(--m-blue1);color:var(--m-white)} .s-nav.on svg{color:var(--m-white)}
+.s-side h3{font-size:12px;color:var(--m-gray);margin:16px 12px 4px;font-weight:500}
+.s-proj{display:flex;align-items:center;gap:8px;padding:6px 12px;color:var(--m-text)}
+.s-proj i{width:8px;height:8px;border-radius:2px;display:inline-block}
+.s-main{padding:20px 24px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.notice{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;border-radius:8px;background:var(--m-tint-red);border:1px solid var(--m-red);color:var(--m-red);font-size:13px}
+.notice svg{flex:none;margin-top:2px}
+.s-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px}
+.s-head h1{font-size:22px;margin:0;color:var(--m-text)}
+.s-head p{margin:4px 0 0;color:var(--m-gray);font-size:13px}
+.s-filter{display:flex;gap:20px;border-bottom:1px solid var(--m-line);font-size:13px;color:var(--m-gray)}
+.s-filter span{padding:6px 0}
+.s-filter .on{color:var(--m-blue2);border-bottom:2px solid var(--m-blue2);font-weight:500}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+.t th{text-align:left;font-weight:500;color:var(--m-gray);padding:8px 10px;border-bottom:1px solid var(--m-line)}
+.t td{padding:11px 10px;border-bottom:1px solid var(--m-line);vertical-align:middle}
+.t tr.sel td{background:var(--m-tint-blue2)}
+.t .name{font-weight:500}
+.t .new{white-space:nowrap}
+.t th,.t td{white-space:nowrap}
+.t td:first-child{white-space:normal}
+.t .sub{color:var(--m-gray);font-size:12px}
+.tag{display:inline-block;padding:1px 8px;border-radius:4px;font-size:12px}
+.tg-design{background:var(--m-tint-green2);color:var(--m-green)} .tg-dev{background:var(--m-tint-blue3);color:var(--m-blue2)} .tg-plan{background:var(--m-tint-orange);color:var(--m-orange)}
+.new{display:inline-block;margin-left:6px;padding:0 6px;border-radius:4px;background:var(--m-red);color:var(--m-white);font-size:10px;font-weight:700;vertical-align:2px}
+.late{color:var(--m-red)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%}
+.d-high{background:var(--m-red)} .d-mid{background:var(--m-orange)} .d-low{background:var(--m-green)}
+.st{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:500;color:var(--m-white)}
+.st-doing{background:var(--m-blue2)} .st-review{background:var(--m-yellow)} .st-done{background:var(--m-green)} .st-back{background:var(--m-red)} .st-todo{background:var(--m-btn-gray);color:var(--m-gray)}
+.s-panel{background:var(--m-tint-blue2);border-left:1px solid var(--m-line);padding:20px;display:flex;flex-direction:column;gap:14px}
+.s-panel h2{margin:0;font-size:16px}
+.field{display:flex;flex-direction:column;gap:4px;font-size:13px}
+.field label{font-weight:500}
+.req{color:var(--m-red)}
+.inp{height:36px;border:1px solid var(--m-line);border-radius:6px;background:var(--m-white);padding:0 10px;display:flex;align-items:center;color:var(--m-text)}
+.inp.area{height:84px;align-items:flex-start;padding-top:8px;color:var(--m-gray)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.help{margin:0;font-size:12px;color:var(--m-gray)}
+.lnk{color:var(--m-blue4);text-decoration:none}
+.s-btns{display:flex;gap:8px;margin-top:auto}
+
+/* 控えめ版：同じ間違いを、淡い色と1種類の青でやる */
+.mild{--m-text:#1F2937;--m-gray:#9CA3AF;--m-line:#E5E7EB;--m-btn-gray:#F3F4F6;--m-blue1:#3B82F6;--m-blue2:#3B82F6;--m-blue3:#3B82F6;--m-blue4:#3B82F6;--m-blue5:#9CA3AF;--m-tint-blue:#F3F7FF;--m-tint-blue2:#FFFFFF;--m-tint-blue3:#DBEAFE;--m-red:#EF4444;--m-tint-red:#FEF2F2;--m-green:#22C55E;--m-tint-green2:#DCFCE7;--m-orange:#F59E0B;--m-tint-orange:#FEF3C7;--m2-icon:#D1D5DB;--m2-yellow:#EAB308;--m2-tint-yellow:#FEF9C3;--m2-tint-red:#FEE2E2;--m2-row:#F9FAFB}
+:root{--m2-icon:#D1D5DB}
+.mild .s-logo i{background:var(--m-blue1)}
+.mild .new{background:var(--m2-tint-red);color:var(--m-red)}
+.mild .st-doing{background:var(--m-tint-blue3);color:var(--m-blue2)}
+.mild .st-review{background:var(--m2-tint-yellow);color:var(--m2-yellow)}
+.mild .st-done{background:var(--m-tint-green2);color:var(--m-green)}
+.mild .st-back{background:var(--m2-tint-red);color:var(--m-red)}
+.mild .st-todo{background:var(--m-btn-gray);color:var(--m-gray)}
+.mild .t tr.sel td{background:var(--m2-row)}
+.mild .s-panel{background:var(--m-white)}
+.b-out{background:var(--m-white);color:var(--m-text);border:1px solid var(--m-line)}
+
+/* 控えめ版のプロトタイプ（行クリックで詳細・削除モーダル） */
+.mild[data-proto]{grid-template-columns:220px 1fr}
+.mild[data-proto].open{grid-template-columns:220px 1fr 380px}
+.mild .t tbody tr{cursor:pointer}
+.mild .t tbody tr:focus-visible td{outline:2px solid var(--m-blue1);outline-offset:-2px}
+.mild .t tr.sel td{background:var(--m2-row)}
+.p-headrow{display:flex;justify-content:space-between;align-items:center}
+.x{border:0;background:transparent;color:var(--m-gray);width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+input.inp,textarea.inp{font:inherit;font-size:14px;color:var(--m-text);width:100%;box-sizing:border-box;outline:none}
+textarea.inp{resize:none;line-height:1.6}
+.mild textarea.inp.area{color:var(--m-text)}
+button.btn{cursor:pointer}
+.scrim{position:absolute;inset:0;z-index:10;background:rgba(17,24,39,.45);display:flex;align-items:center;justify-content:center}
+.dlg{width:420px;background:var(--m-white);border-radius:12px;padding:24px;display:flex;flex-direction:column;gap:12px;box-shadow:0 20px 40px rgba(0,0,0,.2);outline:none}
+.dlg h2{margin:0;font-size:18px}
+.dlg p{margin:0;color:var(--m-gray);font-size:14px}
+.dlg-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:11;background:var(--m-text);color:var(--m-white);padding:10px 16px;border-radius:8px;font-size:13px;display:flex;gap:12px;align-items:center}
+.toast button{font:inherit;border:0;background:transparent;color:var(--m-tint-blue3);cursor:pointer;padding:0}
+
+/* ===== SaaS（margin風）: 参考デザインの形・余白をまね、配色だけ間違える ===== */
+:root{--g-out:#E6E7EC;--g-app:#EEF3FF;--g-card:#FAFAFA;--g-white:#FFFFFF;--g-ink:#111113;--g-ink2:#4C4C4C;--g-sub:#A1A1AA;--g-line:#EBEBEB;--g-line2:#EEEEEE;--g-btn:#EBEBEB;--g-icon:#CFCFD4;
+  --g-blue:#3B6CF6;--g-blue-t:#E3EBFF;--g-red:#EF4444;--g-red-t:#FEE2E2;--g-red-t2:#FEF2F2;--g-green:#22C55E;--g-green-t:#DCFCE7;--g-amber:#F59E0B;--g-amber-t:#FEF3C7;--g-yellow:#EAB308;--g-yellow-t:#FEF9C3;--g-orange:#F37509;
+  --g-font:"Inter","Noto Sans JP","Hiragino Sans",system-ui,sans-serif}
+.mg-out{background:var(--g-out);padding:32px;width:max-content;border-radius:16px}
+.mg{width:1280px;height:800px;border-radius:28px;background:var(--g-app);display:grid;grid-template-columns:200px 1fr;column-gap:24px;padding:0 24px 24px 14px;box-sizing:border-box;font-family:var(--g-font);color:var(--g-ink);font-size:14px;line-height:1.45;letter-spacing:-.005em;position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(20,20,40,.10)}
+.mg button{font:inherit;color:inherit;cursor:pointer}
+/* サイドバー */
+.g-side{display:flex;flex-direction:column;padding-top:20px}
+.g-logo{display:flex;align-items:center;gap:10px;height:30px;padding:0 6px;margin-bottom:16px}
+.g-logo .mk{width:26px;height:26px;border-radius:7px;background:var(--g-blue);display:flex;align-items:center;justify-content:center;color:var(--g-white)}
+.g-logo b{font-size:17px;font-weight:500;letter-spacing:-.02em;flex:1}
+.g-round{width:28px;height:28px;border-radius:50%;border:1px solid var(--g-line);background:transparent;display:flex;align-items:center;justify-content:center;color:var(--g-ink2)}
+.g-search{height:34px;border-radius:9px;font-size:13px;background:var(--g-white);border:1px solid var(--g-line);display:flex;align-items:center;gap:8px;padding:0 6px 0 10px;color:var(--g-sub);margin-bottom:16px}
+.g-search .ph{flex:1}
+.kbd{font-size:12px;color:var(--g-ink2);background:#EFEFF1;border-radius:6px;padding:2px 6px}
+.g-nav{display:flex;flex-direction:column;gap:2px}
+.g-item{height:36px;border-radius:9px;display:flex;align-items:center;gap:10px;padding:0 10px;font-size:14px;color:var(--g-ink)}
+.g-item svg{flex:none;width:18px;height:18px;color:var(--g-ink2)}
+.g-item.on{background:var(--g-blue);color:var(--g-white)} .g-item.on svg{color:var(--g-white)}
+.g-group{font-size:12px;color:var(--g-sub);padding:0 10px;margin:16px 0 6px}
+.g-proj .g-item i{width:10px;height:10px;border-radius:3px;margin:0 5px}
+.g-bottom{margin-top:auto;display:flex;flex-direction:column;gap:2px}
+.g-badge{margin-left:auto;width:18px;height:18px;border-radius:50%;background:var(--g-orange);color:var(--g-white);font-size:11px;display:flex;align-items:center;justify-content:center}
+.g-user{border-top:1px solid var(--g-line);margin-top:10px;padding:12px 6px 0;display:flex;align-items:center;gap:10px}
+.g-user .av{width:32px;height:32px;font-size:13px;border-radius:50%;background:var(--g-blue-t);color:var(--g-blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.g-user .nm{flex:1;min-width:0;font-size:13.5px;font-weight:500;line-height:1.3}
+.g-user .nm small{display:block;font-size:12px;font-weight:400;color:var(--g-sub)}
+/* メイン */
+.g-main{display:flex;flex-direction:column;min-width:0;padding-top:20px}
+.g-top{display:flex;align-items:center;gap:8px;height:40px;margin-bottom:16px}
+.g-top h1{font-size:28px;font-weight:500;letter-spacing:-.03em;margin:0;flex:1;line-height:1}
+.g-btn{height:34px;border-radius:10px;border:0;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;background:var(--g-btn);color:var(--g-ink);white-space:nowrap}
+.g-btn.blue{background:var(--g-blue);color:var(--g-white)}
+.g-btn.mute{color:var(--g-sub)}
+.g-seg{display:flex;background:var(--g-btn);border-radius:10px;height:34px;padding:0}
+.g-seg span{display:flex;align-items:center;padding:0 11px;border-radius:10px;color:var(--g-sub);font-size:13.5px;white-space:nowrap}
+.g-seg .on{background:var(--g-white);color:var(--g-ink);box-shadow:0 1px 3px rgba(0,0,0,.10),0 0 0 1px rgba(0,0,0,.03)}
+.g-notice{display:flex;align-items:center;gap:8px;border-radius:12px;background:var(--g-red-t2);border:1px solid var(--g-red);color:var(--g-red);padding:9px 14px;font-size:13px;margin-bottom:14px}
+.g-notice svg{flex:none}
+.g-cols{flex:1;min-height:0;display:grid;grid-template-columns:1fr;gap:14px}
+.mg.open .g-cols{grid-template-columns:1fr 320px}
+.g-card{background:var(--g-card);border:1px solid var(--g-line2);border-radius:20px;padding:20px;display:flex;flex-direction:column;min-width:0;min-height:0}
+.g-ch{display:flex;align-items:flex-start;gap:12px}
+.g-ch .tt{flex:1;min-width:0}
+.g-ch h2{font-size:17px;font-weight:500;letter-spacing:-.015em;margin:0;line-height:1.3}
+.g-ch p{margin:3px 0 0;font-size:13px;color:var(--g-sub)}
+.g-kebab{width:32px;height:32px;border-radius:50%;border:1px solid var(--g-line);background:var(--g-white);display:flex;align-items:center;justify-content:center;flex:none;color:var(--g-ink)}
+.g-big{display:flex;align-items:flex-end;gap:10px;margin:14px 0 10px}
+.g-big b{font-size:48px;font-weight:400;letter-spacing:-.045em;line-height:.9}
+.g-big .g-chip{display:inline-flex;align-items:center;gap:5px;background:var(--g-white);border-radius:999px;padding:3px 9px;font-size:12.5px;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.g-para{margin:0 0 12px;font-size:13.5px;color:var(--g-ink2);max-width:540px}
+.g-big .vs{font-size:12.5px;color:var(--g-sub);padding-bottom:4px}
+.g-bar{position:relative;height:12px;border-radius:6px;background:var(--g-white);margin-bottom:6px;max-width:540px}
+.g-bar .fill{position:absolute;left:0;top:0;bottom:0;width:25%;border-radius:6px;background:repeating-linear-gradient(-45deg,var(--g-blue) 0 2px,transparent 2px 5px)}
+.g-bar .mark{position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;background:var(--g-ink)}
+.g-barlbl{display:flex;justify-content:space-between;max-width:540px;font-size:12px;color:var(--g-sub);margin-bottom:12px}
+.g-barlbl span:last-child{margin-right:calc(50% - 40px)}
+.g-list{border-top:1px solid var(--g-line2);overflow:hidden}
+.g-row{display:grid;grid-template-columns:minmax(0,1fr) 84px 88px 56px 44px 96px;align-items:center;gap:10px;min-height:50px;border-bottom:1px solid var(--g-line2);padding:0 8px;cursor:pointer;border-radius:0}
+.mg.open .g-row{grid-template-columns:minmax(0,1fr) 78px 52px 40px 92px}
+.mg.open .g-row .who{display:none}
+.g-row.head{min-height:34px;cursor:default;font-size:12px;color:var(--g-sub)}
+.g-row.sel{background:var(--g-white)}
+.g-row:focus-visible{outline:2px solid var(--g-blue);outline-offset:-2px}
+.g-row .nm{font-size:13.5px;font-weight:500;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-row .sb{font-size:12px;color:var(--g-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-row .who{display:flex;align-items:center;gap:6px;font-size:13px}
+.g-row .who i{width:22px;height:22px;border-radius:50%;background:#E7E7EA;font-style:normal;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--g-ink2)}
+.g-row .due{font-size:13.5px;font-variant-numeric:tabular-nums}
+.g-row .late{color:var(--g-red)}
+.g-new{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--g-red-t);color:var(--g-red);font-size:10.5px;font-weight:600;vertical-align:2px}
+.g-tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500}
+.tg-d{background:var(--g-green-t);color:var(--g-green)} .tg-v{background:var(--g-blue-t);color:var(--g-blue)} .tg-p{background:var(--g-amber-t);color:var(--g-amber)}
+.g-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.gd-h{background:var(--g-red)} .gd-m{background:var(--g-amber)} .gd-l{background:var(--g-green)}
+.g-st{white-space:nowrap;display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;justify-self:start}
+.gs-doing{background:var(--g-blue-t);color:var(--g-blue)} .gs-review{background:var(--g-yellow-t);color:var(--g-yellow)} .gs-done{background:var(--g-green-t);color:var(--g-green)} .gs-back{background:var(--g-red-t);color:var(--g-red)} .gs-todo{background:#EFEFF1;color:var(--g-sub)}
+/* 詳細カード */
+.g-detail{gap:12px;overflow:hidden}
+.g-f{display:flex;flex-direction:column;gap:5px;font-size:13px}
+.g-f label{font-weight:500;color:var(--g-ink2)}
+.g-f label.req{color:var(--g-red)}
+.g-inp{height:36px;border-radius:10px;border:1px solid var(--g-line);background:var(--g-white);padding:0 12px;font:inherit;font-size:13.5px;color:var(--g-ink);width:100%;box-sizing:border-box;outline:none}
+textarea.g-inp{height:76px;padding:8px 12px;resize:none;line-height:1.55}
+.g-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g-err{display:flex;gap:6px;border-radius:12px;background:var(--g-red-t2);border:1px solid var(--g-red);color:var(--g-red);padding:8px 10px;font-size:12.5px;line-height:1.5}
+.g-err svg{flex:none;margin-top:2px}
+.g-help{margin:0;font-size:12.5px;color:var(--g-sub)}
+.g-lnk{color:var(--g-blue);text-decoration:none}
+.g-acts{margin-top:auto;display:flex;gap:6px}
+.g-acts .g-btn.mute{background:var(--g-btn)}
+.g-acts .g-btn.out{background:var(--g-white);border:1px solid var(--g-line)}
+/* モーダル・トースト */
+.g-scrim{position:absolute;inset:0;z-index:10;background:rgba(17,17,19,.40);display:flex;align-items:center;justify-content:center;border-radius:28px}
+.g-dlg{width:400px;background:var(--g-card);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px;box-shadow:0 24px 60px rgba(0,0,0,.22);outline:none}
+.g-dlg h2{margin:0;font-size:17px;font-weight:500;letter-spacing:-.015em}
+.g-dlg p{margin:0;font-size:13.5px;color:var(--g-sub);line-height:1.6}
+.g-dlg .g-acts{justify-content:flex-end;margin-top:10px}
+.g-toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:11;background:var(--g-ink);color:var(--g-white);padding:10px 16px;border-radius:999px;font-size:13px;display:flex;gap:14px;align-items:center;white-space:nowrap}
+.g-toast button{border:0;background:transparent;color:#9DB8FF;padding:0}
+
+/* ===== スマホ（iOSアプリ・美容院予約） ===== */
+:root{--m-ios-bg:#F2F2F7;--m-ios-sep:#E5E5EA;--m-ios-label2:#8E8E93;--m-ios-frame:#111111;--m-ios-chev:#C7C7CC}
+.phones{display:flex;gap:28px;width:max-content}
+.cap{font-size:13px;color:var(--muted);margin:0 0 8px}
+.ios{width:393px;height:852px;border-radius:55px;border:10px solid var(--m-ios-frame);background:var(--m-ios-bg);overflow:hidden;display:flex;flex-direction:column;position:relative;font-family:-apple-system,"SF Pro Text","Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;color:var(--m-text);font-size:17px;line-height:1.35;letter-spacing:-.01em;box-sizing:content-box}
+.island{position:absolute;top:11px;left:50%;transform:translateX(-50%);width:124px;height:36px;border-radius:20px;background:var(--m-ios-frame);z-index:3}
+.homebar{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:var(--m-ios-frame);z-index:3}
+.navwrap{background:var(--m-brand-l);color:var(--m-white);flex:none}
+.sbar{height:54px;display:flex;align-items:center;justify-content:space-between;padding:6px 30px 0 44px;font-weight:600;font-size:17px}
+.sbar .ic{display:flex;gap:6px;align-items:center}
+.navbar{height:44px;display:flex;align-items:center;padding:0 8px;font-size:17px}
+.navbar .bk{display:flex;align-items:center;gap:2px}
+.ltitle{font-size:34px;font-weight:700;letter-spacing:.01em;padding:0 16px 10px;line-height:1.2}
+.lsub{font-size:15px;padding:0 16px 12px;margin-top:-6px}
+.ios-body{flex:1;overflow:hidden;padding:12px 16px 0;display:flex;flex-direction:column;gap:12px}
+.seg{display:flex;gap:8px;overflow:hidden}
+.chip{padding:6px 14px;border-radius:999px;font-size:15px;color:var(--m-white);font-weight:600;white-space:nowrap}
+.c-cut{background:var(--m-brand)} .c-color{background:var(--m-pink)} .c-perm{background:var(--m-green2)} .c-tr{background:var(--m-cyan)}
+.shead{font-size:13px;color:var(--m-ios-label2);padding:0 16px;margin-bottom:-6px;text-transform:uppercase}
+.cell{border-radius:12px;padding:12px 14px 12px 16px;display:flex;align-items:center;gap:10px;border:2px solid transparent}
+.cell .tx{flex:1;min-width:0}
+.cell h3{margin:0;font-size:17px;font-weight:600}
+.cell .meta{font-size:13px;color:var(--m-gray-l)}
+.cell .price{font-size:17px;color:var(--m-gray-l)}
+.chev{color:var(--m-ios-chev);flex:none}
+.mn-cut{background:var(--m-tint-brand)} .mn-color{background:var(--m-tint-pink)} .mn-perm{background:var(--m-tint-green)} .mn-tr{background:var(--m-tint-cyan)}
+.cell.sel{border-color:var(--m-brand)}
+.pop{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:5px;background:var(--m-red);color:var(--m-white);font-size:11px;font-weight:700;vertical-align:2px}
+.dock{flex:none;padding:10px 16px 30px;display:flex;flex-direction:column;gap:10px}
+.capsule{height:52px;border-radius:26px;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:17px}
+.cta-brand{background:var(--m-brand);color:var(--m-white)} .cta-gray{background:var(--m-btn-gray-l);color:var(--m-gray-l)}
+.cta-yellow{background:var(--m-yellow2);color:var(--m-white)} .cta-line{background:var(--m-green2);color:var(--m-white)}
+.tabbar{display:flex;justify-content:space-between;align-items:center;height:62px;padding:0 6px;border-radius:31px;background:rgba(255,255,255,.92);box-shadow:0 4px 20px rgba(0,0,0,.10);border:1px solid var(--m-ios-sep)}
+.tabbar span{flex:1;height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:10px;font-weight:600;color:var(--m-ios-label2);border-radius:26px}
+.tabbar .on{background:var(--m-brand);color:var(--m-white)}
+.week{background:var(--m-white);border-radius:12px;padding:8px 6px;display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:13px}
+.day{padding:6px 0;border-radius:12px;display:flex;flex-direction:column;gap:2px}
+.day b{font-size:19px;font-weight:600}
+.day.sel{background:var(--m-brand);color:var(--m-white)}
+.day.few{color:var(--m-brand)} .day.off{color:var(--m-gray-l)}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.slot{height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600}
+.sl-ok{background:var(--m-tint-green);border:1px solid var(--m-green2);color:var(--m-green2)}
+.sl-ng{background:var(--m-tint-red);border:1px solid var(--m-red);color:var(--m-red)}
+.sl-sel{background:var(--m-brand);color:var(--m-white)}
+.pnote{display:flex;gap:8px;padding:10px 12px;border-radius:12px;background:var(--m-tint-red);border:1px solid var(--m-red);color:var(--m-red);font-size:13px;line-height:1.45}
+.pnote svg{flex:none;margin-top:1px}
+.group{background:var(--m-white);border-radius:12px;overflow:hidden}
+.group .r{display:flex;justify-content:space-between;gap:8px;padding:11px 16px;font-size:16px;border-bottom:.5px solid var(--m-ios-sep)}
+.group .r:last-child{border-bottom:0}
+.group .k{color:var(--m-gray-l)}
+.badge-y{display:inline-block;padding:2px 10px;border-radius:999px;background:var(--m-yellow2);color:var(--m-white);font-size:13px;font-weight:700}
+.ffield{display:flex;flex-direction:column;gap:4px;font-size:13px;padding:0 4px}
+.ffield label{font-weight:600}
+.req{color:var(--m-red)}
+.tf{height:44px;border:1px solid var(--m-line-l);border-radius:10px;background:var(--m-white);padding:0 12px;display:flex;align-items:center;font-size:17px}
+.tf.ph{color:var(--m-gray-l)}
+.foot{font-size:13px;color:var(--m-ios-label2);margin:0;padding:0 4px}
+.lnk-o{color:var(--m-brand);text-decoration:none}
+.btn4{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn4 .capsule{height:48px;font-size:16px}
+</style>
+
+<div class="wrap" id="app">
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <h1>配色のダメUI</h1>
+    <p class="lead">配色の記事（23項目）のうち、画面で見せられる項目を「ありがちなミス」として入れた見本です。紫・ホバー・フォーカス・ダークモード・hexの項目は入れていません。答えはピンと下の一覧で確認できます。</p>
+  </header>
+
+  <div class="bar">
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-saas" aria-selected="true" data-view="saas">SaaS（強め）</button>
+      <button role="tab" id="tab-saas2" aria-selected="false" data-view="saas2">SaaS（控えめ）</button>
+      <button role="tab" id="tab-saas3" aria-selected="false" data-view="saas3">SaaS（margin風）</button>
+      <button role="tab" id="tab-mobile" aria-selected="false" data-view="mobile">iOSアプリ（美容院予約・3画面）</button>
+    </div>
+    <label class="toggle"><input type="checkbox" id="pins"> 答えのピンを表示</label>
+  </div>
+
+  <!-- ================= SaaS ================= -->
+  <section id="view-saas" class="view">
+    <div class="stage">
+      <div class="saas rel" id="saas-screen">
+        <div class="s-top rel">
+          <div class="s-logo rel"><i></i>Tasknote<span class="pin" style="left:-10px;top:-6px">1</span></div>
+          <div class="s-search rel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D4D4D4" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            タスクやメンバーを検索<span class="pin" style="right:-8px;top:-8px">9</span>
+          </div>
+          <div class="s-actions rel">
+            <span class="btn b-orange">インポート</span>
+            <span class="btn b-green">エクスポート</span>
+            <span class="btn b-blue3">メンバーを招待</span>
+            <span class="avatar">佐</span>
+            <span class="pin" style="left:-12px;top:-8px">6</span>
+            <span class="pin" style="left:30px;top:26px">13</span>
+          </div>
+        </div>
+
+        <nav class="s-side rel">
+          <span class="pin" style="right:6px;top:6px">5</span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>ホーム</span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>マイタスク</span>
+          <span class="s-nav on rel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg>プロジェクト<span class="pin" style="right:-6px;top:-8px">2</span></span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>カレンダー</span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>レポート</span>
+          <h3>プロジェクト</h3>
+          <span class="s-proj"><i style="background:var(--m-blue1)"></i>新サイト公開</span>
+          <span class="s-proj"><i style="background:var(--m-green)"></i>採用ページ改善</span>
+          <span class="s-proj"><i style="background:var(--m-orange)"></i>11月キャンペーン</span>
+        </nav>
+
+        <main class="s-main">
+          <div class="notice rel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>
+            <span>10月25日（土）2:00〜4:00 にメンテナンスを行います。この時間はログインできません。</span>
+            <span class="pin" style="right:-8px;top:-8px">12</span>
+          </div>
+          <div class="s-head">
+            <div>
+              <h1>新サイト公開</h1>
+              <p class="rel">11月10日の公開に向けたタスクです。期限が近いものから確認してください。<span class="pin" style="right:-26px;top:-6px">8</span></p>
+            </div>
+            <span class="btn b-blue1 rel">＋ 新規タスク<span class="pin" style="right:-8px;top:-10px">2</span></span>
+          </div>
+          <div class="s-filter"><span class="on">すべて 12</span><span>自分の担当 4</span><span>期限切れ 1</span><span>完了 3</span></div>
+          <div class="rel">
+            <span class="pin" style="left:520px;top:-12px">1</span>
+            <span class="pin" style="left:648px;top:-12px">14</span>
+            <span class="pin" style="left:760px;top:-12px">11</span>
+            <span class="pin" style="left:150px;top:-12px">13</span>
+            <table class="t">
+              <thead><tr><th style="width:46%">タスク</th><th>タグ</th><th>担当</th><th>期限</th><th>優先度</th><th>ステータス</th></tr></thead>
+              <tbody>
+                <tr class="sel"><td><div class="name">トップページのヒーロー画像を差し替える</div><div class="sub">デザイン確定版をもとに書き出し</div></td><td><span class="tag tg-design">デザイン</span></td><td>佐藤</td><td class="late">10/14</td><td><span class="dot d-high"></span></td><td><span class="st st-doing">進行中</span></td></tr>
+                <tr><td><div class="name">お問い合わせフォームの送信テスト<span class="new">NEW</span></div><div class="sub">本番環境で3パターン確認</div></td><td><span class="tag tg-dev">開発</span></td><td>田中</td><td>10/22</td><td><span class="dot d-high"></span></td><td><span class="st st-review">レビュー待ち</span></td></tr>
+                <tr><td><div class="name">会社概要ページの文言修正</div><div class="sub">役員の肩書きを最新版に</div></td><td><span class="tag tg-plan">企画</span></td><td>鈴木</td><td>10/24</td><td><span class="dot d-mid"></span></td><td><span class="st st-back">差し戻し</span></td></tr>
+                <tr><td><div class="name">OGP画像を5ページ分つくる</div><div class="sub">サイズは1200×630</div></td><td><span class="tag tg-design">デザイン</span></td><td>佐藤</td><td>10/28</td><td><span class="dot d-mid"></span></td><td><span class="st st-todo">未着手</span></td></tr>
+                <tr><td><div class="name">ページ速度の計測と改善</div><div class="sub">LCP 2.5秒以内を目標</div></td><td><span class="tag tg-dev">開発</span></td><td>田中</td><td>10/31</td><td><span class="dot d-low"></span></td><td><span class="st st-doing">進行中</span></td></tr>
+                <tr><td><div class="name">公開告知のメール文面</div><div class="sub">既存顧客向け</div></td><td><span class="tag tg-plan">企画</span></td><td>鈴木</td><td>10/12</td><td><span class="dot d-low"></span></td><td><span class="st st-done">完了</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+
+        <aside class="s-panel rel">
+          <h2>タスクの詳細</h2>
+          <div class="field rel"><label class="req">タイトル</label><div class="inp">トップページのヒーロー画像を差し替える</div><span class="pin" style="left:-14px;top:-4px">14</span></div>
+          <div class="row2">
+            <div class="field"><label class="req">担当者</label><div class="inp">佐藤 美咲</div></div>
+            <div class="field rel"><label>期限</label><div class="inp">2026/10/14</div><span class="pin" style="right:-8px;top:14px">9</span></div>
+          </div>
+          <div class="notice rel" style="padding:8px 12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>
+            <span>期限が過ぎています。今日以降の日付を入れてください。</span>
+            <span class="pin" style="right:-8px;top:-8px">12</span>
+          </div>
+          <div class="field"><label>メモ</label><div class="inp area">確定版の画像は共有フォルダの「hero_final」に入っています。</div></div>
+          <p class="help rel">書き方に迷ったら <span class="lnk">記入ルールはこちら</span> を見てください。<span class="pin" style="right:-8px;top:-10px">10</span></p>
+          <div class="s-btns rel">
+            <span class="btn b-gray">変更を保存</span>
+            <span class="btn b-blue1">タスクを削除</span>
+            <span class="btn b-blue2">複製</span>
+            <span class="pin" style="left:-8px;top:-12px">18</span>
+            <span class="pin" style="left:120px;top:-12px">7</span>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <div class="key">
+      <h2>答え合わせ（SaaS・強め）</h2>
+      <ol>
+        <li><span class="no">項目1　1つの色に、1つの意味だけを持たせる</span><br>同じ青が「選択中のナビ」「新規タスクボタン」「進行中バッジ」「開発タグ」「リンク」に使われています。赤もロゴの飾り・NEW・期限切れ・差し戻しを兼ねています。</li>
+        <li><span class="no">項目2　主色は「押せる所」と「今いる場所」。張り合わせない</span><br>サイドナビの「プロジェクト」（選択中）と「＋ 新規タスク」が同じ青の塗りで、どちらが主役か分かりません。</li>
+        <li><span class="no">項目4　塗りの色と文字の色はペアで決める</span><br>黄色の「レビュー待ち」に白文字。<small>1.60:1</small></li>
+        <li><span class="no">項目5　画面の大半はグレーで組む</span><br>ヘッダー・サイドバー・右パネルが全部うっすら青く、色が「意味」を持てなくなっています。</li>
+        <li><span class="no">項目6　目立つ色のボタンは1画面に1つ</span><br>インポート（橙）・エクスポート（緑）・メンバーを招待（青）・新規タスク（青）・削除・複製と、塗りのボタンが6つあります。</li>
+        <li><span class="no">項目7　削除は赤く。主ボタンの見た目にしない</span><br>「タスクを削除」が新規タスクと同じ青の塗りです。</li>
+        <li><span class="no">項目8　本文は背景と4.5:1以上</span><br>説明文・サブテキスト・表の見出しが薄いグレー。<small>#A3A3A3／白 2.52:1</small></li>
+        <li><span class="no">項目9　入力欄の枠やアイコンは3:1以上</span><br>入力欄の枠 <small>#E8E8E8／白 1.23:1</small>、検索アイコン <small>#D4D4D4／白 1.48:1</small></li>
+        <li><span class="no">項目10　文中のリンクには下線</span><br>「記入ルールはこちら」が色だけで、下線がありません。</li>
+        <li><span class="no">項目11　状態の色は借りてくる。背景は淡く、文字と枠は濃く</span><br>ステータスが原色の塗りに白文字。<small>完了 #22C55E 2.28:1／進行中 #3B82F6 3.68:1／差し戻し #FF3B30 3.55:1</small></li>
+        <li><span class="no">項目12　「注意」には強さの段階がある</span><br>ただのメンテナンスのお知らせと、入力エラーが同じ赤い見た目です。</li>
+        <li><span class="no">項目13　状態の色を飾りに使わない</span><br>「デザイン」タグが成功の緑、「企画」タグとインポートが警告の橙、エクスポートが成功の緑。</li>
+        <li><span class="no">項目14　色だけで伝えない</span><br>優先度が色の点だけ。必須項目がラベルの赤だけで「必須」「*」がありません。</li>
+        <li><span class="no">項目18　押せるボタンをグレーにしない</span><br>押せる「変更を保存」がグレーで、押せないように見えます。<small>#A3A3A3／#E5E5E5 2.00:1</small></li>
+        <li><span class="no">項目3・21（おまけ）　役割とスケール</span><br>青が5種類（#2F6BFF・#3B82F6・#4D8EFF・#1E63E9・#5B9BFF）。役割を決めずに足していった結果です。</li>
+      </ol>
+      <p>コントラスト比は bad-ui/contrast.py で計算した値です。</p>
+    </div>
+  </section>
+
+  <!-- ================= SaaS（控えめ） ================= -->
+  <section id="view-saas2" class="view" hidden>
+    <div class="stage">
+      <div class="saas mild rel" id="saas-screen-mild" data-proto>
+        <div class="s-top rel">
+          <div class="s-logo rel"><i></i>Tasknote<span class="pin" style="left:-10px;top:-6px">1</span></div>
+          <div class="s-search rel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--m2-icon)" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+            タスクやメンバーを検索<span class="pin" style="right:-8px;top:-8px">9</span>
+          </div>
+          <div class="s-actions rel">
+            <span class="btn b-out">インポート</span>
+            <span class="btn b-out">エクスポート</span>
+            <span class="btn b-blue1">メンバーを招待</span>
+            <span class="avatar">佐</span>
+            <span class="pin" style="left:-12px;top:-8px">6</span>
+                      </div>
+        </div>
+
+        <nav class="s-side rel">
+          <span class="pin" style="right:6px;top:6px">5</span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>ホーム</span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>マイタスク</span>
+          <span class="s-nav on rel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h12"/></svg>プロジェクト<span class="pin" style="right:-6px;top:-8px">2</span></span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>カレンダー</span>
+          <span class="s-nav"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>レポート</span>
+          <h3>プロジェクト</h3>
+          <span class="s-proj"><i style="background:var(--m-blue1)"></i>新サイト公開</span>
+          <span class="s-proj"><i style="background:var(--m-green)"></i>採用ページ改善</span>
+          <span class="s-proj"><i style="background:var(--m-orange)"></i>11月キャンペーン</span>
+        </nav>
+
+        <main class="s-main">
+          <div class="notice rel">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>
+            <span>10月25日（土）2:00〜4:00 にメンテナンスを行います。この時間はログインできません。</span>
+            <span class="pin" style="right:-8px;top:-8px">12</span>
+          </div>
+          <div class="s-head">
+            <div>
+              <h1>新サイト公開</h1>
+              <p class="rel">11月10日の公開に向けたタスクです。期限が近いものから確認してください。<span class="pin" style="right:-26px;top:-6px">8</span></p>
+            </div>
+            <span class="btn b-blue1 rel">＋ 新規タスク<span class="pin" style="right:-8px;top:-10px">2</span></span>
+          </div>
+          <div class="s-filter"><span class="on">すべて 12</span><span>自分の担当 4</span><span>期限切れ 1</span><span>完了 3</span></div>
+          <div class="rel">
+            <span class="pin" style="left:520px;top:-12px">1</span>
+            <span class="pin" style="left:648px;top:-12px">14</span>
+            <span class="pin" style="left:760px;top:-12px">11</span>
+            <span class="pin" style="left:150px;top:-12px">13</span>
+            <table class="t">
+              <thead><tr><th style="width:46%">タスク</th><th>タグ</th><th>担当</th><th>期限</th><th>優先度</th><th>ステータス</th></tr></thead>
+              <tbody>
+                <tr data-i="0" tabindex="0"><td><div class="name">トップページのヒーロー画像を差し替える</div><div class="sub">デザイン確定版をもとに書き出し</div></td><td><span class="tag tg-design">デザイン</span></td><td>佐藤</td><td class="late">10/14</td><td><span class="dot d-high"></span></td><td><span class="st st-doing">進行中</span></td></tr>
+                <tr data-i="1" tabindex="0"><td><div class="name">お問い合わせフォームの送信テスト<span class="new">NEW</span></div><div class="sub">本番環境で3パターン確認</div></td><td><span class="tag tg-dev">開発</span></td><td>田中</td><td>10/22</td><td><span class="dot d-high"></span></td><td><span class="st st-review">レビュー待ち</span></td></tr>
+                <tr data-i="2" tabindex="0"><td><div class="name">会社概要ページの文言修正</div><div class="sub">役員の肩書きを最新版に</div></td><td><span class="tag tg-plan">企画</span></td><td>鈴木</td><td>10/24</td><td><span class="dot d-mid"></span></td><td><span class="st st-back">差し戻し</span></td></tr>
+                <tr data-i="3" tabindex="0"><td><div class="name">OGP画像を5ページ分つくる</div><div class="sub">サイズは1200×630</div></td><td><span class="tag tg-design">デザイン</span></td><td>佐藤</td><td>10/28</td><td><span class="dot d-mid"></span></td><td><span class="st st-todo">未着手</span></td></tr>
+                <tr data-i="4" tabindex="0"><td><div class="name">ページ速度の計測と改善</div><div class="sub">LCP 2.5秒以内を目標</div></td><td><span class="tag tg-dev">開発</span></td><td>田中</td><td>10/31</td><td><span class="dot d-low"></span></td><td><span class="st st-doing">進行中</span></td></tr>
+                <tr data-i="5" tabindex="0"><td><div class="name">公開告知のメール文面</div><div class="sub">既存顧客向け</div></td><td><span class="tag tg-plan">企画</span></td><td>鈴木</td><td>10/12</td><td><span class="dot d-low"></span></td><td><span class="st st-done">完了</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+
+        <aside class="s-panel rel" id="mild-panel" hidden aria-label="タスクの詳細">
+          <div class="p-headrow"><h2>タスクの詳細</h2><button type="button" class="x" id="mild-close" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+          <div class="field rel"><label class="req" for="mf-title">タイトル</label><input class="inp" id="mf-title"><span class="pin" style="left:-14px;top:-4px">14</span></div>
+          <div class="row2">
+            <div class="field"><label class="req" for="mf-who">担当者</label><input class="inp" id="mf-who"></div>
+            <div class="field rel"><label for="mf-due">期限</label><input class="inp" id="mf-due"><span class="pin" style="right:-8px;top:14px">9</span></div>
+          </div>
+          <div class="notice rel" id="mf-err" style="padding:8px 12px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg>
+            <span>期限が過ぎています。今日以降の日付を入れてください。</span>
+            <span class="pin" style="right:-8px;top:-8px">12</span>
+          </div>
+          <div class="field"><label for="mf-memo">メモ</label><textarea class="inp area" id="mf-memo"></textarea></div>
+          <p class="help rel">書き方に迷ったら <span class="lnk">記入ルールはこちら</span> を見てください。<span class="pin" style="right:-8px;top:-10px">10</span></p>
+          <div class="s-btns rel">
+            <button type="button" class="btn b-gray" id="mf-save">変更を保存</button>
+            <button type="button" class="btn b-blue1" id="mf-del">タスクを削除</button>
+            <button type="button" class="btn b-out" id="mf-dup">複製</button>
+            <span class="pin" style="left:-8px;top:-12px">18</span>
+            <span class="pin" style="left:120px;top:-12px">7</span>
+          </div>
+        </aside>
+        <div class="scrim" id="mild-modal" hidden>
+          <div class="dlg rel" role="dialog" aria-modal="true" aria-labelledby="dlg-t" tabindex="-1">
+            <h2 id="dlg-t">タスクを削除しますか？</h2>
+            <p id="dlg-b"></p>
+            <div class="dlg-btns rel">
+              <button type="button" class="btn b-gray" id="dlg-cancel">キャンセル</button>
+              <button type="button" class="btn b-blue1" id="dlg-ok">削除する</button>
+              <span class="pin" style="left:-8px;top:-12px">18</span>
+              <span class="pin" style="left:96px;top:-12px">7</span>
+            </div>
+          </div>
+        </div>
+        <div class="toast" id="mild-toast" hidden></div>
+      </div>
+    </div>
+
+    <div class="key">
+      <h2>答え合わせ（SaaS・控えめ）</h2>
+      <ol>
+        <li><span class="no">項目1　1つの色に、1つの意味だけを持たせる</span><br>同じ青が、ロゴ・選択中のナビ・押せるボタン・進行中バッジ・開発タグ・リンクに使われています。赤も期限切れ・NEW・差し戻し・ただのお知らせを兼ねています。</li>
+        <li><span class="no">項目2　主色は「押せる所」と「今いる場所」。張り合わせない</span><br>サイドナビの「プロジェクト」（選択中）と「＋ 新規タスク」が同じ青の塗りです。</li>
+        <li><span class="no">項目4　塗りの色と文字の色はペアで決める</span><br>「レビュー待ち」が淡い黄色に黄色の文字。<small>#EAB308／#FEF9C3 1.79:1</small></li>
+        <li><span class="no">項目5　画面の大半はグレーで組む</span><br>ほぼ白とグレーで組めていますが、サイドバーだけうっすら青く、選択中の青が埋もれ気味です（軽め）。</li>
+        <li><span class="no">項目6　目立つ色のボタンは1画面に1つ（多くても2つ）</span><br>塗りのボタンが「メンバーを招待」「新規タスク」「タスクを削除」の3つ。</li>
+        <li><span class="no">項目7　削除は赤く。主ボタンの見た目にしない</span><br>「タスクを削除」が主ボタンと同じ青の塗りです。</li>
+        <li><span class="no">項目8　本文は背景と4.5:1以上</span><br>説明文・サブテキスト・表の見出しがよく使われる薄いグレー。<small>#9CA3AF／白 2.54:1</small></li>
+        <li><span class="no">項目9　入力欄の枠やアイコンは3:1以上</span><br>入力欄の枠 <small>#E5E7EB／白 1.24:1</small>、検索アイコン <small>#D1D5DB／白 1.47:1</small></li>
+        <li><span class="no">項目10　文中のリンクには下線</span><br>「記入ルールはこちら」が色だけです。</li>
+        <li><span class="no">項目11　状態の色は借りてくる。背景は淡く、文字と枠は濃く</span><br>淡い背景までは合っていますが、文字が淡い背景と同じ系統の明るい色のまま。<small>完了 2.07:1／進行中 3.01:1／差し戻し 3.08:1</small></li>
+        <li><span class="no">項目12　「注意」には強さの段階がある</span><br>メンテナンスのお知らせと入力エラーが同じ赤い見た目です。</li>
+        <li><span class="no">項目13　状態の色を飾りに使わない</span><br>「デザイン」タグが成功の緑、「企画」タグが警告の橙、「NEW」がエラーの赤。</li>
+        <li><span class="no">項目14　色だけで伝えない</span><br>優先度が色の点だけ。必須項目がラベルの赤だけです。</li>
+        <li><span class="no">項目18　押せるボタンをグレーにしない</span><br>押せる「変更を保存」が淡いグレーで、押せないように見えます。<small>#9CA3AF／#F3F4F6 2.31:1</small></li>
+      </ol>
+      <p>プロトタイプとして動きます。表の行を押すと右に詳細が開き、「タスクを削除」で確認のモーダルが出ます。モーダルの「キャンセル」もグレー（項目18）、「削除する」も青い主ボタン（項目7）です。</p>
+      <p>強め版との違い: 原色の塗りをやめて淡い色にし、青を1種類にまとめ、ヘッダーと右パネルを白にしました。直す箇所の数は同じで、見つけにくさを上げています。コントラスト比は bad-ui/contrast.py で計算した値です。</p>
+    </div>
+  </section>
+
+  <!-- ================= SaaS（margin風） ================= -->
+  <section id="view-saas3" class="view" hidden>
+    <div class="stage">
+      <div class="mg-out">
+      <div class="mg" id="saas-screen-mg">
+        <aside class="g-side">
+          <div class="g-logo rel"><span class="mk"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12a8 8 0 1 1-4.5-7.2"/></svg></span><b>Tasknote</b><span class="g-round"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></span><span class="pin" style="left:-6px;top:-8px">1</span></div>
+          <div class="g-search rel"><span style="color:var(--g-icon);display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span><span class="ph">検索</span><span class="kbd">⌘K</span><span class="pin" style="left:-8px;top:-10px">9</span></div>
+          <nav class="g-nav rel">
+            <span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>ホーム</span><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>マイタスク</span><span class="g-item on"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>プロジェクト</span><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>カレンダー</span><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg>レポート</span>
+            <span class="pin" style="right:-6px;top:84px">2</span>
+          </nav>
+          <div class="g-group">プロジェクト</div>
+          <div class="g-nav g-proj"><span class="g-item"><i style="background:var(--g-blue)"></i>新サイト公開</span><span class="g-item"><i style="background:var(--g-green)"></i>採用ページ改善</span><span class="g-item"><i style="background:var(--g-amber)"></i>11月キャンペーン</span></div>
+          <div class="g-bottom">
+            <span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>通知<span class="g-badge">3</span></span><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>設定</span><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2.2-2.4 3.7M12 17h.01"/></svg>ヘルプ</span>
+            <div class="g-user"><span class="av">佐</span><span class="nm">佐藤 美咲<small>ディレクター</small></span><span style="color:var(--g-sub);display:flex"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></span></div>
+          </div>
+        </aside>
+        <main class="g-main">
+          <div class="g-top rel">
+            <h1>新サイト公開</h1>
+            <div class="g-seg"><span class="on">すべて 12</span><span>自分の担当 4</span><span>期限切れ 1</span></div>
+            <button type="button" class="g-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>インポート</button>
+            <button type="button" class="g-btn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>エクスポート</button>
+            <button type="button" class="g-btn blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11h6M20 8v6"/></svg>メンバーを招待</button>
+            <button type="button" class="g-btn blue"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>新規タスク</button>
+            <span class="pin" style="right:150px;top:-6px">6</span><span class="pin" style="right:-6px;top:-6px">2</span>
+          </div>
+          <div class="g-notice rel"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg><span>10月25日（土）2:00〜4:00 にメンテナンスを行います。この時間はログインできません。</span><span class="pin" style="right:-8px;top:-8px">12</span></div>
+          <div class="g-cols">
+            <section class="g-card">
+              <div class="g-ch"><div class="tt"><h2>タスク</h2><p class="rel">11月10日の公開に向けたタスクです。期限が近いものから確認してください。<span class="pin" style="left:-14px;top:-4px">8</span></p></div><button type="button" class="g-kebab" aria-label="その他"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button></div>
+              <div class="g-big"><b>25%</b><span class="g-chip"><i style="font-style:normal;color:var(--g-green)">▲</i><em style="font-style:normal">1件</em></span><span class="vs">先週より</span></div>
+              <p class="g-para">12件中3件が完了。今週の目標まで、あと3件です。</p>
+              <div class="g-bar"><div class="fill"></div><div class="mark"></div></div>
+              <div class="g-barlbl"><span>0%</span><span>今週の目標 50%</span></div>
+              <div class="g-list rel">
+                <div class="g-row head"><span>タスク</span><span>タグ</span><span class="who">担当</span><span>期限</span><span>優先度</span><span>ステータス</span></div>
+                <div class="g-row" data-i="0" tabindex="0" role="button"><div style="min-width:0"><div class="nm">トップページのヒーロー画像を差し替える</div><div class="sb">デザイン確定版をもとに書き出し</div></div><div><span class="g-tag tg-d">デザイン</span></div><div class="who"><i>佐</i>佐藤</div><span class="due late">10/14</span><div><span class="g-dot gd-h"></span></div><div><span class="g-st gs-doing">進行中</span></div></div><div class="g-row" data-i="1" tabindex="0" role="button"><div style="min-width:0"><div class="nm">お問い合わせフォームの送信テスト<span class="g-new">NEW</span></div><div class="sb">本番環境で3パターン確認</div></div><div><span class="g-tag tg-v">開発</span></div><div class="who"><i>田</i>田中</div><span class="due">10/22</span><div><span class="g-dot gd-h"></span></div><div><span class="g-st gs-review">レビュー待ち</span></div></div><div class="g-row" data-i="2" tabindex="0" role="button"><div style="min-width:0"><div class="nm">会社概要ページの文言修正</div><div class="sb">役員の肩書きを最新版に</div></div><div><span class="g-tag tg-p">企画</span></div><div class="who"><i>鈴</i>鈴木</div><span class="due">10/24</span><div><span class="g-dot gd-m"></span></div><div><span class="g-st gs-back">差し戻し</span></div></div><div class="g-row" data-i="3" tabindex="0" role="button"><div style="min-width:0"><div class="nm">OGP画像を5ページ分つくる</div><div class="sb">サイズは1200×630</div></div><div><span class="g-tag tg-d">デザイン</span></div><div class="who"><i>佐</i>佐藤</div><span class="due">10/28</span><div><span class="g-dot gd-m"></span></div><div><span class="g-st gs-todo">未着手</span></div></div><div class="g-row" data-i="4" tabindex="0" role="button"><div style="min-width:0"><div class="nm">ページ速度の計測と改善</div><div class="sb">LCP 2.5秒以内を目標</div></div><div><span class="g-tag tg-v">開発</span></div><div class="who"><i>田</i>田中</div><span class="due">10/31</span><div><span class="g-dot gd-l"></span></div><div><span class="g-st gs-doing">進行中</span></div></div><div class="g-row" data-i="5" tabindex="0" role="button"><div style="min-width:0"><div class="nm">公開告知のメール文面</div><div class="sb">既存顧客向け</div></div><div><span class="g-tag tg-p">企画</span></div><div class="who"><i>鈴</i>鈴木</div><span class="due">10/12</span><div><span class="g-dot gd-l"></span></div><div><span class="g-st gs-done">完了</span></div></div>
+                <span class="pin" style="left:260px;top:6px">13</span><span class="pin" style="right:150px;top:6px">14</span><span class="pin" style="right:90px;top:6px">11</span><span class="pin" style="right:36px;top:110px">4</span><span class="pin" style="right:300px;top:60px">1</span>
+              </div>
+            </section>
+            <section class="g-card g-detail rel" id="mg-panel" hidden aria-label="タスクの詳細">
+              <div class="g-ch"><div class="tt"><h2>タスクの詳細</h2><p>最終更新 10月19日 14:20</p></div><button type="button" class="g-kebab" id="mg-close" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+              <div class="g-f rel"><label class="req" for="mg-title">タイトル</label><input class="g-inp" id="mg-title"><span class="pin" style="left:-14px;top:-4px">14</span></div>
+              <div class="g-2"><div class="g-f"><label class="req" for="mg-who">担当者</label><input class="g-inp" id="mg-who"></div><div class="g-f rel"><label for="mg-due">期限</label><input class="g-inp" id="mg-due"><span class="pin" style="right:-8px;top:18px">9</span></div></div>
+              <div class="g-err rel" id="mg-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg><span>期限が過ぎています。今日以降の日付を入れてください。</span><span class="pin" style="right:-8px;top:-8px">12</span></div>
+              <div class="g-f"><label for="mg-memo">メモ</label><textarea class="g-inp" id="mg-memo"></textarea></div>
+              <p class="g-help rel">書き方に迷ったら <span class="g-lnk">記入ルールはこちら</span> を見てください。<span class="pin" style="right:-8px;top:-10px">10</span></p>
+              <div class="g-acts rel">
+                <button type="button" class="g-btn mute" id="mg-save">変更を保存</button>
+                <button type="button" class="g-btn blue" id="mg-del">タスクを削除</button>
+                <button type="button" class="g-btn out" id="mg-dup">複製</button>
+                <span class="pin" style="left:-8px;top:-12px">18</span><span class="pin" style="left:130px;top:-12px">7</span>
+              </div>
+            </section>
+          </div>
+        </main>
+        <div class="g-scrim" id="mg-modal" hidden>
+          <div class="g-dlg" role="dialog" aria-modal="true" aria-labelledby="mg-dt" tabindex="-1">
+            <h2 id="mg-dt">タスクを削除しますか？</h2>
+            <p id="mg-db"></p>
+            <div class="g-acts rel"><button type="button" class="g-btn mute" id="mg-cancel">キャンセル</button><button type="button" class="g-btn blue" id="mg-ok">削除する</button><span class="pin" style="left:-8px;top:-12px">18</span><span class="pin" style="left:110px;top:-12px">7</span></div>
+          </div>
+        </div>
+        <div class="g-toast" id="mg-toast" hidden></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="key">
+      <h2>答え合わせ（SaaS・margin風）</h2>
+      <ol>
+        <li><span class="no">項目1　1つの色に、1つの意味だけを持たせる</span><br>同じ青が、ロゴ・選択中のナビ・押せるボタン・進行中・開発タグ・進み具合のバー・リンクに使われています。赤も期限切れ・NEW・差し戻し・ただのお知らせを兼ねています。</li>
+        <li><span class="no">項目2　主色は「押せる所」と「今いる場所」。張り合わせない</span><br>選択中のナビ「プロジェクト」と「新規タスク」「メンバーを招待」が同じ青の塗りです。参考デザインは選択中を黒で塗り、青と分けています。</li>
+        <li><span class="no">項目4　塗りの色と文字の色はペアで決める</span><br>「レビュー待ち」が淡い黄色に黄色の文字。<small>#EAB308／#FEF9C3 1.79:1</small></li>
+        <li><span class="no">項目5　画面の大半はグレーで組む</span><br>アプリの地がうっすら青（#EEF3FF）。参考デザインはここがグレー（#F2F2F2）です。</li>
+        <li><span class="no">項目6　目立つ色のボタンは1画面に1つ（多くても2つ）</span><br>青の塗りが「メンバーを招待」「新規タスク」「タスクを削除」の3つ。</li>
+        <li><span class="no">項目7　削除は赤く。主ボタンの見た目にしない</span><br>「タスクを削除」とモーダルの「削除する」が青の主ボタンです。</li>
+        <li><span class="no">項目8　本文は背景と4.5:1以上</span><br>サブ文字・説明文が薄いグレー。<small>#A1A1AA／#FAFAFA 2.46:1</small></li>
+        <li><span class="no">項目9　入力欄の枠やアイコンは3:1以上</span><br>入力欄の枠 <small>#EBEBEB／白 1.19:1</small>、検索アイコン <small>#CFCFD4／白 1.55:1</small></li>
+        <li><span class="no">項目10　文中のリンクには下線</span><br>「記入ルールはこちら」が色だけです。</li>
+        <li><span class="no">項目11　状態の色は借りてくる。背景は淡く、文字と枠は濃く</span><br>淡い背景に明るい文字のまま。<small>完了 2.07:1／進行中 3.77:1／差し戻し 3.08:1</small></li>
+        <li><span class="no">項目12　「注意」には強さの段階がある</span><br>メンテナンスのお知らせと入力エラーが同じ赤い見た目です。</li>
+        <li><span class="no">項目13　状態の色を飾りに使わない</span><br>「デザイン」タグが成功の緑、「企画」タグが警告の黄、「NEW」がエラーの赤。</li>
+        <li><span class="no">項目14　色だけで伝えない</span><br>優先度が色の点だけ。必須項目がラベルの赤だけです。</li>
+        <li><span class="no">項目18　押せるボタンをグレーにしない</span><br>「変更を保存」とモーダルの「キャンセル」が、押せないように見えるグレーの文字。<small>#A1A1AA／#EBEBEB 2.15:1</small></li>
+      </ol>
+      <p>参考デザインの形と余白をまねた版です。行を押すと右に詳細が開き、「タスクを削除」で確認のモーダルが出ます。参考デザインの分析は bad-ui/reference-margin-analysis.md にあります。</p>
+    </div>
+  </section>
+
+  <!-- ================= iOSアプリ ================= -->
+  <section id="view-mobile" class="view" hidden>
+    <div class="stage">
+      <div class="phones">
+        <div>
+          <p class="cap">1. メニューを選ぶ</p>
+          <div class="ios" id="phone-1"><div class="island"></div>
+            <div class="navwrap rel"><div class="sbar"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5c2.3 0 4.4.9 6 2.4l1.2-1.3C13.3 1.7 10.8.7 8 .7S2.7 1.7.8 3.6L2 4.9c1.6-1.5 3.7-2.4 6-2.4zm0 3.6c1.3 0 2.5.5 3.4 1.3l1.2-1.3C11.4 5 9.8 4.3 8 4.3S4.6 5 3.4 6.1l1.2 1.3C5.5 6.6 6.7 6.1 8 6.1zm0 3.5c.5 0 1 .2 1.3.5L8 11.5 6.7 10.1c.3-.3.8-.5 1.3-.5z"/></svg><svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.5-1.1 1.5-2s-.7-1.7-1.5-2z" fill="currentColor" opacity=".5"/></svg></span></div><div class="navbar"><span class="bk"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>サロンLumo</span></div><div class="ltitle">メニュー</div><div class="lsub">表参道店</div><span class="pin" style="right:20px;top:110px">5</span></div>
+            <div class="ios-body">
+              <div class="seg rel"><span class="chip c-cut">カット</span><span class="chip c-color">カラー</span><span class="chip c-perm">パーマ</span><span class="chip c-tr">トリートメント</span><span class="pin" style="right:0;top:-8px">1</span></div>
+              <div class="cell mn-cut sel rel"><div class="tx"><h3>カット＋シャンプー<span class="pop">人気No.1</span></h3><div class="meta">約60分・スタイリスト指名可</div></div><span class="price">¥6,600</span><svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l6 6-6 6"/></svg><span class="pin" style="left:-8px;top:-10px">14</span><span class="pin" style="left:178px;top:-10px">13</span></div>
+              <div class="cell mn-color rel"><div class="tx"><h3>カット＋カラー</h3><div class="meta">約120分・白髪染め対応</div></div><span class="price">¥12,100</span><svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l6 6-6 6"/></svg><span class="pin" style="right:20px;top:-8px">8</span></div>
+              <div class="cell mn-perm"><div class="tx"><h3>デジタルパーマ</h3><div class="meta">約150分・カット込み</div></div><span class="price">¥15,400</span><svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l6 6-6 6"/></svg></div>
+              <div class="cell mn-tr"><div class="tx"><h3>髪質改善トリートメント</h3><div class="meta">約45分</div></div><span class="price">¥5,500</span><svg class="chev" width="8" height="14" viewBox="0 0 8 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 1l6 6-6 6"/></svg></div>
+            </div>
+            <div class="dock rel"><div class="capsule cta-brand">次へ（1件選択中）</div><div class="tabbar"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg>ホーム</span><span class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>予約</span><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v6h18v-6a2 2 0 0 0 0-4V6H3z"/></svg>クーポン</span><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>マイページ</span></div><span class="pin" style="right:10px;top:0">2</span></div>
+            <div class="homebar"></div>
+          </div>
+        </div>
+        <div>
+          <p class="cap">2. 日時を選ぶ</p>
+          <div class="ios" id="phone-2"><div class="island"></div>
+            <div class="navwrap rel"><div class="sbar"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5c2.3 0 4.4.9 6 2.4l1.2-1.3C13.3 1.7 10.8.7 8 .7S2.7 1.7.8 3.6L2 4.9c1.6-1.5 3.7-2.4 6-2.4zm0 3.6c1.3 0 2.5.5 3.4 1.3l1.2-1.3C11.4 5 9.8 4.3 8 4.3S4.6 5 3.4 6.1l1.2 1.3C5.5 6.6 6.7 6.1 8 6.1zm0 3.5c.5 0 1 .2 1.3.5L8 11.5 6.7 10.1c.3-.3.8-.5 1.3-.5z"/></svg><svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.5-1.1 1.5-2s-.7-1.7-1.5-2z" fill="currentColor" opacity=".5"/></svg></span></div><div class="navbar"><span class="bk"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>メニュー</span></div><div class="ltitle">日時を選ぶ</div><div class="lsub">カット＋シャンプー（約60分）</div></div>
+            <div class="ios-body">
+              <div class="week rel">
+                <div class="day off">月<b>20</b></div><div class="day sel">火<b>21</b></div><div class="day">水<b>22</b></div><div class="day few">木<b>23</b></div><div class="day">金<b>24</b></div><div class="day few">土<b>25</b></div><div class="day few">日<b>26</b></div>
+                <span class="pin" style="left:50px;top:-10px">1</span>
+              </div>
+              <div class="slots rel">
+                <div class="slot sl-ok">10:00</div><div class="slot sl-ng">10:30</div><div class="slot sl-ng">11:00</div><div class="slot sl-ok">11:30</div>
+                <div class="slot sl-ok">13:00</div><div class="slot sl-sel">13:30</div><div class="slot sl-ng">14:00</div><div class="slot sl-ok">14:30</div>
+                <div class="slot sl-ng">15:00</div><div class="slot sl-ok">15:30</div><div class="slot sl-ok">16:00</div><div class="slot sl-ng">16:30</div>
+                <span class="pin" style="right:-8px;top:-10px">14</span>
+              </div>
+              <div class="pnote rel"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg><span>当日のキャンセルは、メニュー料金の100%をいただきます。</span><span class="pin" style="right:-8px;top:-8px">12</span></div>
+              <div class="pnote"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg><span>平日のご予約でポイント2倍。10月31日まで。</span></div>
+            </div>
+            <div class="dock rel"><div class="capsule cta-gray">次へ　10月21日（火）13:30</div><div class="tabbar"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg>ホーム</span><span class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>予約</span><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v6h18v-6a2 2 0 0 0 0-4V6H3z"/></svg>クーポン</span><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>マイページ</span></div><span class="pin" style="right:10px;top:0">18</span></div>
+            <div class="homebar"></div>
+          </div>
+        </div>
+        <div>
+          <p class="cap">3. 内容を確認する</p>
+          <div class="ios" id="phone-3"><div class="island"></div>
+            <div class="navwrap rel"><div class="sbar"><span>9:41</span><span class="ic"><svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg><svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 2.5c2.3 0 4.4.9 6 2.4l1.2-1.3C13.3 1.7 10.8.7 8 .7S2.7 1.7.8 3.6L2 4.9c1.6-1.5 3.7-2.4 6-2.4zm0 3.6c1.3 0 2.5.5 3.4 1.3l1.2-1.3C11.4 5 9.8 4.3 8 4.3S4.6 5 3.4 6.1l1.2 1.3C5.5 6.6 6.7 6.1 8 6.1zm0 3.5c.5 0 1 .2 1.3.5L8 11.5 6.7 10.1c.3-.3.8-.5 1.3-.5z"/></svg><svg width="27" height="13" viewBox="0 0 27 13" fill="none"><rect x=".5" y=".5" width="23" height="12" rx="3.5" stroke="currentColor" opacity=".5"/><rect x="2" y="2" width="18" height="9" rx="2" fill="currentColor"/><path d="M25 4.5v4c.8-.3 1.5-1.1 1.5-2s-.7-1.7-1.5-2z" fill="currentColor" opacity=".5"/></svg></span></div><div class="navbar"><span class="bk"><svg width="12" height="20" viewBox="0 0 12 20" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2L2 10l8 8"/></svg>日時</span></div><div class="ltitle">内容の確認</div></div>
+            <div class="ios-body" style="gap:10px">
+              <div class="shead rel">予約内容　<span class="badge-y">仮予約</span><span class="pin" style="left:130px;top:-8px">4</span><span class="pin" style="left:156px;top:-8px">11</span></div>
+              <div class="group">
+                <div class="r"><span class="k">メニュー</span><span>カット＋シャンプー</span></div>
+                <div class="r"><span class="k">日時</span><span>10月21日（火）13:30〜</span></div>
+                <div class="r"><span class="k">料金</span><span>¥6,600</span></div>
+              </div>
+              <div class="ffield rel"><label class="req">お名前</label><div class="tf">山本 さくら</div><span class="pin" style="left:56px;top:-4px">14</span></div>
+              <div class="ffield rel"><label class="req">電話番号</label><div class="tf">090-1234-5678</div><span class="pin" style="right:-6px;top:26px">9</span></div>
+              <div class="ffield"><label>ご要望</label><div class="tf ph">前髪は短めにしたいです</div></div>
+              <p class="foot rel">ご予約の前に <span class="lnk-o">キャンセルポリシー</span> を必ずご確認ください。<span class="pin" style="right:0;top:-10px">10</span></p>
+            </div>
+            <div class="dock rel">
+              <div class="btn4 rel">
+                <span class="capsule cta-brand">予約を確定する</span>
+                <span class="capsule cta-brand">予約を取り消す</span>
+                <span class="capsule cta-yellow">クーポンを使う</span>
+                <span class="capsule cta-line">LINEで送る</span>
+                <span class="pin" style="left:186px;top:-10px">7</span>
+                <span class="pin" style="left:-8px;top:46px">6</span>
+                <span class="pin" style="left:160px;top:46px">4</span>
+              </div>
+              <div class="tabbar"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-8 9 8v10h-6v-6H9v6H3z"/></svg>ホーム</span><span class="on"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>予約</span><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 8a2 2 0 0 0 0 4v6h18v-6a2 2 0 0 0 0-4V6H3z"/></svg>クーポン</span><span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>マイページ</span></div>
+            </div>
+            <div class="homebar"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="key">
+      <h2>答え合わせ（iOSアプリ）</h2>
+      <ol>
+        <li><span class="no">項目1　1つの色に、1つの意味だけを持たせる</span><br>オレンジが「選んだ日」と「残りわずかの日」の両方に使われています。ブランド色・選択中・リンクも全部オレンジ。メニューの種類ごとに色を変えているので、色が増えるだけで意味がありません。</li>
+        <li><span class="no">項目2　主色は「押せる所」と「今いる場所」。張り合わせない</span><br>タブバーの「予約」（今いる場所）がオレンジの塗りのカプセルで、すぐ上の「次へ」ボタンと同じ見た目です。</li>
+        <li><span class="no">項目4　塗りの色と文字の色はペアで決める</span><br>黄色の「仮予約」「クーポンを使う」に白文字。<small>#FFD60A 1.41:1</small>　ヘッダーのオレンジのナビゲーションバーに白い大きなタイトル。<small>#FF9F43 2.04:1</small></li>
+        <li><span class="no">項目5　画面の大半はグレーで組む</span><br>ナビゲーションバーが全面オレンジ、メニューのセルが4色の淡い背景。iOSの標準どおりグレーの背景に白いセルなら、色は要るところだけに残せます。</li>
+        <li><span class="no">項目6　目立つ色のボタンは1画面に1つ</span><br>確認画面に塗りのボタンが4つあります。</li>
+        <li><span class="no">項目7　取り消せない操作は赤く。主ボタンの見た目にしない</span><br>「予約を取り消す」が「予約を確定する」と同じ見た目です。</li>
+        <li><span class="no">項目8　本文は背景と4.5:1以上</span><br>料金・所要時間が薄いグレー。<small>#B5B5B5／白 2.05:1</small></li>
+        <li><span class="no">項目9　入力欄の枠は3:1以上</span><br>入力欄の枠 <small>#EEEEEE／白 1.16:1</small></li>
+        <li><span class="no">項目10　文中のリンクには下線</span><br>「キャンセルポリシー」が色だけです。</li>
+        <li><span class="no">項目11　状態の色は借りてくる</span><br>「仮予約」バッジが原色の塗りに白文字で、状態の色として決まった型がありません。</li>
+        <li><span class="no">項目12　「注意」には強さの段階がある</span><br>キャンセル料の注意と、ポイント2倍の宣伝が同じ赤い警告の見た目です。</li>
+        <li><span class="no">項目13　状態の色を飾りに使わない</span><br>「人気No.1」がエラーの赤。パーマのチップが成功の緑。</li>
+        <li><span class="no">項目14　色だけで伝えない</span><br>空き枠と満席が緑と赤の色だけで、「○」「満席」などの文字がありません。<small>緑と赤の差 1.60:1</small>　選んだメニューは枠の色だけで、iOSで普通に付くチェックマークがありません。必須項目もラベルの赤だけです。</li>
+        <li><span class="no">項目18　押せるボタンをグレーにしない</span><br>時間を選んだあとも「次へ」がグレーのままで、押せないように見えます。<small>#B5B5B5／#EDEDED 1.75:1</small></li>
+      </ol>
+      <p>コントラスト比は bad-ui/contrast.py で計算した値です。</p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll('[data-view]');
+  function show(v){
+    tabs.forEach(function(t){t.setAttribute('aria-selected',String(t.dataset.view===v));});
+    ['saas','saas2','saas3','mobile'].forEach(function(id){document.getElementById('view-'+id).hidden=v!==id;});
+  }
+  tabs.forEach(function(t){t.addEventListener('click',function(){show(t.dataset.view); try{history.replaceState(null,'','#'+t.dataset.view);}catch(e){}});});
+  var h=location.hash.slice(1); if(h==='mobile'||h==='saas2'||h==='saas3') show(h);
+  document.getElementById('pins').addEventListener('change',function(e){document.getElementById('app').classList.toggle('show-pins',e.target.checked);});
+})();
+
+// 控えめ版のプロトタイプ
+(function(){
+  var root=document.getElementById('saas-screen-mild'); if(!root) return;
+  var tasks=[
+    {t:'トップページのヒーロー画像を差し替える',w:'佐藤 美咲',d:'2026/10/14',m:'確定版の画像は共有フォルダの「hero_final」に入っています。',late:true},
+    {t:'お問い合わせフォームの送信テスト',w:'田中 翔',d:'2026/10/22',m:'本番環境で、個人・法人・添付ありの3パターンを送って確認する。'},
+    {t:'会社概要ページの文言修正',w:'鈴木 葵',d:'2026/10/24',m:'役員の肩書きを10月1日付の最新版にそろえる。'},
+    {t:'OGP画像を5ページ分つくる',w:'佐藤 美咲',d:'2026/10/28',m:'サイズは1200×630。トップ・会社概要・採用・お問い合わせ・ニュース。'},
+    {t:'ページ速度の計測と改善',w:'田中 翔',d:'2026/10/31',m:'LCP 2.5秒以内が目標。画像の遅延読み込みから試す。'},
+    {t:'公開告知のメール文面',w:'鈴木 葵',d:'2026/10/12',m:'既存顧客向け。公開日の朝9時に配信予約済み。'}
+  ];
+  var panel=document.getElementById('mild-panel'), modal=document.getElementById('mild-modal'), toast=document.getElementById('mild-toast');
+  var f={t:document.getElementById('mf-title'),w:document.getElementById('mf-who'),d:document.getElementById('mf-due'),m:document.getElementById('mf-memo')};
+  var cur=null, lastRow=null, timer=null;
+  function rows(){return root.querySelectorAll('tbody tr[data-i]');}
+  function open(i,row){
+    cur=i; lastRow=row; var k=tasks[i];
+    f.t.value=k.t; f.w.value=k.w; f.d.value=k.d; f.m.value=k.m;
+    document.getElementById('mf-err').hidden=!k.late;
+    rows().forEach(function(r){r.classList.toggle('sel',r===row);});
+    panel.hidden=false; root.classList.add('open');
+  }
+  function close(){panel.hidden=true; root.classList.remove('open'); rows().forEach(function(r){r.classList.remove('sel');}); if(lastRow) lastRow.focus(); cur=null;}
+  function say(msg,undo){
+    toast.innerHTML=''; var sp=document.createElement('span'); sp.textContent=msg; toast.appendChild(sp);
+    if(undo){var b=document.createElement('button'); b.type='button'; b.textContent='元に戻す'; b.onclick=undo; toast.appendChild(b);}
+    toast.hidden=false; clearTimeout(timer); timer=setTimeout(function(){toast.hidden=true;},5000);
+  }
+  root.querySelector('tbody').addEventListener('click',function(e){var r=e.target.closest('tr[data-i]'); if(r) open(+r.dataset.i,r);});
+  root.querySelector('tbody').addEventListener('keydown',function(e){var r=e.target.closest('tr[data-i]'); if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault(); open(+r.dataset.i,r);}});
+  document.getElementById('mild-close').onclick=close;
+  document.getElementById('mf-save').onclick=function(){
+    tasks[cur].t=f.t.value; tasks[cur].w=f.w.value; tasks[cur].d=f.d.value; tasks[cur].m=f.m.value;
+    var n=lastRow.querySelector('.name'); if(n&&n.firstChild) n.firstChild.nodeValue=f.t.value;
+    say('変更を保存しました');
+  };
+  document.getElementById('mf-dup').onclick=function(){say('「'+tasks[cur].t+'」を複製しました');};
+  document.getElementById('mf-del').onclick=function(){
+    document.getElementById('dlg-b').textContent='「'+tasks[cur].t+'」を削除します。この操作は取り消せません。';
+    modal.hidden=false; modal.querySelector('.dlg').focus();
+  };
+  function closeModal(){modal.hidden=true; document.getElementById('mf-del').focus();}
+  document.getElementById('dlg-cancel').onclick=closeModal;
+  modal.addEventListener('click',function(e){if(e.target===modal) closeModal();});
+  document.getElementById('dlg-ok').onclick=function(){
+    var row=lastRow, name=tasks[cur].t, next=row.nextElementSibling;
+    modal.hidden=true; row.hidden=true; panel.hidden=true; root.classList.remove('open'); row.classList.remove('sel'); cur=null;
+    say('「'+name+'」を削除しました',function(){row.hidden=false; toast.hidden=true;});
+  };
+  root.addEventListener('keydown',function(e){if(e.key!=='Escape') return; if(!modal.hidden) closeModal(); else if(!panel.hidden) close();});
+})();
+
+// margin風のプロトタイプ
+(function(){
+  var root=document.getElementById('saas-screen-mg'); if(!root) return;
+  var tasks=[
+    {t:'トップページのヒーロー画像を差し替える',w:'佐藤 美咲',d:'2026/10/14',m:'確定版の画像は共有フォルダの「hero_final」に入っています。',late:true},
+    {t:'お問い合わせフォームの送信テスト',w:'田中 翔',d:'2026/10/22',m:'本番環境で、個人・法人・添付ありの3パターンを送って確認する。'},
+    {t:'会社概要ページの文言修正',w:'鈴木 葵',d:'2026/10/24',m:'役員の肩書きを10月1日付の最新版にそろえる。'},
+    {t:'OGP画像を5ページ分つくる',w:'佐藤 美咲',d:'2026/10/28',m:'サイズは1200×630。トップ・会社概要・採用・お問い合わせ・ニュース。'},
+    {t:'ページ速度の計測と改善',w:'田中 翔',d:'2026/10/31',m:'LCP 2.5秒以内が目標。画像の遅延読み込みから試す。'},
+    {t:'公開告知のメール文面',w:'鈴木 葵',d:'2026/10/12',m:'既存顧客向け。公開日の朝9時に配信予約済み。'}
+  ];
+  function $(id){return document.getElementById(id);}
+  var panel=$('mg-panel'), modal=$('mg-modal'), toast=$('mg-toast');
+  var f={t:$('mg-title'),w:$('mg-who'),d:$('mg-due'),m:$('mg-memo')};
+  var cur=null,lastRow=null,timer=null;
+  function rows(){return root.querySelectorAll('.g-row[data-i]');}
+  function open(i,row){cur=i;lastRow=row;var k=tasks[i];f.t.value=k.t;f.w.value=k.w;f.d.value=k.d;f.m.value=k.m;$('mg-err').hidden=!k.late;rows().forEach(function(r){r.classList.toggle('sel',r===row);});panel.hidden=false;root.classList.add('open');}
+  function close(){panel.hidden=true;root.classList.remove('open');rows().forEach(function(r){r.classList.remove('sel');});if(lastRow)lastRow.focus();cur=null;}
+  function say(msg,undo){toast.innerHTML='';var sp=document.createElement('span');sp.textContent=msg;toast.appendChild(sp);if(undo){var b=document.createElement('button');b.type='button';b.textContent='元に戻す';b.onclick=undo;toast.appendChild(b);}toast.hidden=false;clearTimeout(timer);timer=setTimeout(function(){toast.hidden=true;},5000);}
+  var list=root.querySelector('.g-list');
+  list.addEventListener('click',function(e){var r=e.target.closest('.g-row[data-i]');if(r)open(+r.dataset.i,r);});
+  list.addEventListener('keydown',function(e){var r=e.target.closest('.g-row[data-i]');if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault();open(+r.dataset.i,r);}});
+  $('mg-close').onclick=close;
+  $('mg-save').onclick=function(){var k=tasks[cur];k.t=f.t.value;k.w=f.w.value;k.d=f.d.value;k.m=f.m.value;var n=lastRow.querySelector('.nm');if(n&&n.firstChild)n.firstChild.nodeValue=f.t.value;say('変更を保存しました');};
+  $('mg-dup').onclick=function(){say('「'+tasks[cur].t+'」を複製しました');};
+  $('mg-del').onclick=function(){$('mg-db').textContent='「'+tasks[cur].t+'」を削除します。この操作は取り消せません。';modal.hidden=false;modal.querySelector('.g-dlg').focus();};
+  function closeModal(){modal.hidden=true;$('mg-del').focus();}
+  $('mg-cancel').onclick=closeModal;
+  modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+  $('mg-ok').onclick=function(){var row=lastRow,name=tasks[cur].t;modal.hidden=true;row.hidden=true;panel.hidden=true;root.classList.remove('open');row.classList.remove('sel');cur=null;say('「'+name+'」を削除しました',function(){row.hidden=false;toast.hidden=true;});};
+  root.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(!modal.hidden)closeModal();else if(!panel.hidden)close();});
+})();
+</script>

@@ -1,7 +1,7 @@
-import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import type { HomeClickTracking } from "@/lib/activity-utils";
 
 /**
@@ -128,6 +128,7 @@ export default function AchievementCard({
         {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         className={cn("group block", className)}
         tracking={tracking}
+        intentPrefetch
       >
         {body}
       </HomeClickLink>
@@ -148,8 +149,8 @@ export default function AchievementCard({
   }
 
   return (
-    <Link href={href} className={cn("group block", className)}>
+    <IntentPrefetchLink href={href} className={cn("group block", className)}>
       {body}
-    </Link>
+    </IntentPrefetchLink>
   );
 }

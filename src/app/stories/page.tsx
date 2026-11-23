@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import PageHeader from "@/components/common/PageHeader";
 import StoryCardItem from "@/components/story/StoryCardItem";
 import { getStoriesList } from "@/lib/sanity";
@@ -40,12 +40,12 @@ export default async function StoriesPage() {
         />
 
         <div className="mb-6">
-          <Link
+          <IntentPrefetchLink
             href="/achievements"
             className="inline-flex items-center gap-1 text-sm text-text-primary/60 hover:underline font-noto-sans-jp"
           >
             ← みんなの成果 に戻る
-          </Link>
+          </IntentPrefetchLink>
         </div>
 
         {/* タグフィルタ（叩き：MVP では絞り込みロジック未実装、UI のみ） */}
@@ -82,7 +82,7 @@ export default async function StoriesPage() {
 
         {/* 回遊CTA: /outputs へ */}
         <div className="mt-16 pt-12 border-t border-gray-200/60">
-          <Link
+          <IntentPrefetchLink
             href="/outputs"
             className="group block bg-surface rounded-[24px] border border-gray-200/60 shadow-sm p-6 sm:p-8 hover:shadow-md hover:border-gray-300 transition-all max-w-2xl mx-auto"
           >
@@ -95,7 +95,7 @@ export default async function StoriesPage() {
             <p className="text-sm text-text-primary/70 font-noto-sans-jp mt-2">
               15分FBを受けた記事の一覧。「こういう使い方もできるんだ」が分かる。
             </p>
-          </Link>
+          </IntentPrefetchLink>
         </div>
       </div>
     </div>

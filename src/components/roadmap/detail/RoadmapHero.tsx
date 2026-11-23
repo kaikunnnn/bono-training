@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { BackButton } from "@/components/common/BackButton";
@@ -16,6 +16,7 @@ import { getGradientStyle } from "@/types/sanity-roadmap";
 import { formatTitleWithLineBreaks, stripLineBreakMarker } from "@/utils/textFormat";
 import { withPricingFrom } from "@/lib/activity-utils";
 import { trackPricingCtaClick } from "@/lib/activity-client";
+import { parseDuration } from "@/components/roadmap/card/durationUtils";
 
 // SVGマスクパス
 const MASK_DESKTOP = "/shapes/roadmap-hero-shape-flexible.svg"; // 振幅2.1%
@@ -57,13 +58,13 @@ const PrimaryCTAButton: React.FC<{
   children,
   onClick,
 }) => (
-  <Link
+  <IntentPrefetchLink
     href={href}
     onClick={onClick}
     className="w-full sm:flex-1 flex items-center justify-center h-12 bg-white border border-white/90 rounded-[14px] text-[14px] font-bold text-cta-primary tracking-[0.35px] shadow-[0_4px_8px_rgba(0,0,0,0.25)] hover:bg-gray-50 transition-colors"
   >
     {children}
-  </Link>
+  </IntentPrefetchLink>
 );
 
 const SecondaryCTAButton: React.FC<{ href: string; children: React.ReactNode }> = ({
@@ -107,6 +108,7 @@ export default function RoadmapHero({
   isSubscribed = false,
 }: RoadmapHeroProps) {
   const gradientStyle = getGradientStyle(gradientPreset);
+  const duration = parseDuration(estimatedDuration);
 
   // モバイル判定（リサイズ対応 + 初回マウント時にも確認）
   const [isMobile, setIsMobile] = useState(false);
@@ -181,12 +183,12 @@ export default function RoadmapHero({
 
             {/* パンくずリスト */}
             <nav className="text-[12px] font-bold text-white/60">
-              <Link
+              <IntentPrefetchLink
                 href="/roadmap"
                 className="hover:text-white/80 transition-colors"
               >
                 ロードマップ
-              </Link>
+              </IntentPrefetchLink>
               <span className="mx-2">/</span>
               <span className="text-white/80">{stripLineBreakMarker(title)}</span>
             </nav>
@@ -236,10 +238,15 @@ export default function RoadmapHero({
             <div className="flex flex-col items-center gap-0.5 px-8">
               <span className="text-[12px] font-bold text-white/70">目安</span>
               <div className="flex items-end gap-1 text-white">
+                {duration.prefix && (
+                  <span className="text-[13px] leading-[1.5]">{duration.prefix}</span>
+                )}
                 <span className="text-[20px] font-bold font-['Inter',sans-serif] leading-none">
-                  {estimatedDuration}
+                  {duration.value}
                 </span>
-                <span className="text-[13px] leading-[1.5]">ヶ月</span>
+                {duration.unit && (
+                  <span className="text-[13px] leading-[1.5]">{duration.unit}</span>
+                )}
               </div>
             </div>
           </div>

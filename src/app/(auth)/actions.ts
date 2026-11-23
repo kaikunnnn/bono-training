@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { translateAuthError } from "@/lib/auth-error-messages";
 import { reportAuthError } from "@/lib/monitoring";
 import { withSignUpMarker } from "@/lib/auth-markers";
+import { PASSWORD_TOO_SHORT_MESSAGE, isPasswordLongEnough } from "@/lib/auth-password";
 
 export interface AuthResult {
   error?: string;
@@ -41,11 +42,15 @@ function sanitizeRedirect(value: string | null): string {
 function translateConnectionError(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err);
 
-  if (msg.includes("fetch failed") || msg.includes("ECONNREFUSED")) {
-    return "サーバーに接続できません。開発環境の場合は Supabase が起動しているか確認してください（npx supabase start）";
+  // 開発者向けのヒントは開発環境だけで出す（本番の利用者に見せない）
+  if (process.env.NODE_ENV !== "production") {
+    if (msg.includes("fetch failed") || msg.includes("ECONNREFUSED")) {
+      return "サーバーに接続できません。開発環境の場合は Supabase が起動しているか確認してください（npx supabase start）";
+    }
+    return `接続エラーが発生しました: ${msg}`;
   }
 
-  return `接続エラーが発生しました: ${msg}`;
+  return "通信がうまくいきませんでした。時間をおいて、もう一度お試しください。";
 }
 
 export async function signIn(formData: FormData): Promise<AuthResult> {
@@ -96,8 +101,8 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
     return { error: "パスワードが一致しません" };
   }
 
-  if (password.length < 8) {
-    return { error: "パスワードは8文字以上で入力してください" };
+  if (!isPasswordLongEnough(password)) {
+    return { error: PASSWORD_TOO_SHORT_MESSAGE };
   }
 
   try {
@@ -121,6 +126,13 @@ export async function signUp(formData: FormData): Promise<AuthResult> {
       return { error: translateAuthError(error.message) };
     }
   } catch (err) {
+    // Supabase に届かなかった登録も数えられるように記録する（#321 S5）
+    await reportAuthError({
+      type: "signup_failed",
+      email,
+      message: `connection: ${err instanceof Error ? err.message : String(err)}`,
+      path: "/signup",
+    });
     return { error: translateConnectionError(err) };
   }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { Map } from "lucide-react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { CategoryTag } from "@/components/ui/CategoryTag";
 import { LessonProgressBar } from "@/components/ui/LessonProgressBar";
 import { Button } from "@/components/ui/button";
@@ -73,12 +73,12 @@ export function LessonTitleArea({
             <div className="font-noto-sans-jp text-[13px] font-medium flex items-center flex-wrap gap-x-1">
               {lesson.linkedRoadmaps.map((roadmap, index) => (
                 <span key={roadmap.slug} className="flex items-center gap-1">
-                  <Link
+                  <IntentPrefetchLink
                     href={`/roadmap/${roadmap.slug}`}
                     className="underline hover:text-text-primary/70 transition-colors"
                   >
                     {roadmap.shortTitle || roadmap.title}
-                  </Link>
+                  </IntentPrefetchLink>
                   {index < lesson.linkedRoadmaps!.length - 1 && <span>,</span>}
                 </span>
               ))}

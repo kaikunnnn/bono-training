@@ -7,7 +7,6 @@ import { buildOwnerReport, runSync } from "@/lib/slack-member-sync/process";
 import { isDueForRemoval } from "@/lib/slack-member-sync/classify";
 import { hashToken } from "@/lib/slack-member-sync/tokens";
 import { LINK_REQUEST_MESSAGE } from "@/lib/slack-member-sync/messages/link-request";
-import { REMOVAL_NOTICE_MESSAGE } from "@/lib/slack-member-sync/messages/removal-notice";
 import { OWNER_REPORT_MESSAGE } from "@/lib/slack-member-sync/messages/owner-report";
 import {
   APPROVED_MESSAGES,
@@ -151,9 +150,10 @@ describe("runSync: dry_run", () => {
 
     const cancel = store.states.get("U_CANCEL")!;
     expect(cancel.classification).toBe("remove_scheduled");
-    expect(cancel.removeAfter).toBeNull(); // 送っていないので外す日は決まらない
-    expect(cancel.dryRunResult).toBe("would_send:removal_notice:remove_after=2026-11-03");
-    expect(store.states.get("U_STRANGER")!.dryRunResult).toBe("would_send:link_request:deadline=2026-11-10");
+    // 解約の人には DM を送らない。外す日は今日（dry_run でも判定として決まる）
+    expect(cancel.removeAfter).toBe("2026-10-27");
+    expect(cancel.dryRunResult).toBe("would_remove:canceled:remove_after=2026-10-27");
+    expect(store.states.get("U_STRANGER")!.dryRunResult).toBe("would_send:link_request:deadline=2026-11-03");
     // dry_run ではつながりを書かず、「つなぐはず」だけ記録する
     expect(store.states.get("U_PAID")!.dryRunResult).toBe("keep:would_link");
     expect(store.links).toHaveLength(0);
@@ -168,10 +168,12 @@ describe("runSync: dry_run", () => {
     const { deps } = makeSyncDeps({
       store,
       slack,
-      messages: { linkRequest: LINK_REQUEST_MESSAGE, removalNotice: REMOVAL_NOTICE_MESSAGE, ownerReport: OWNER_REPORT_MESSAGE },
+      messages: { linkRequest: { ...LINK_REQUEST_MESSAGE, approved: false }, ownerReport: OWNER_REPORT_MESSAGE },
     });
     await runSync(deps);
-    expect(store.states.get("U_CANCEL")!.dryRunResult).toMatch(/^would_block:message_not_approved:removal_notice/);
+    expect(store.states.get("U_STRANGER")!.dryRunResult).toMatch(/^would_block:message_not_approved:link_request/);
+    // 解約の人は本文に関係なく外す予定だけ
+    expect(store.states.get("U_CANCEL")!.dryRunResult).toBe("would_remove:canceled:remove_after=2026-10-27");
   });
 
   it("判定が前と同じなら dry_run_at を変えず、行を書き直さない", async () => {
@@ -214,35 +216,51 @@ describe("runSync: つながり", () => {
 });
 
 describe("runSync: live", () => {
-  it("解約済みに外れるお知らせ、未接続につなぐお願いを1通ずつ。課金中には送らない", async () => {
+  it("未接続につなぐお願いを1通。解約済み・課金中には送らない。解約済みは同じ実行のオーナー報告に出る", async () => {
     seedTypical();
     const { deps } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
 
-    expect(r.dm.sent).toEqual({ removal_notice: 1, link_request: 1 });
+    expect(r.dm.sent).toEqual({ link_request: 1 });
     expect(slack.textsTo("U_PAID")).toHaveLength(0);
-    expect(slack.textsTo("U_CANCEL")).toEqual([
-      "5月1日で終了、11月3日に外れます <https://www.bo-no.design/subscription|登録>",
-    ]);
+    expect(slack.textsTo("U_CANCEL")).toHaveLength(0);
 
     const cancel = store.states.get("U_CANCEL")!;
-    expect(cancel.removeAfter).toBe("2026-11-03");
-    expect(cancel.removalNoticeDmAt).not.toBeNull();
-    expect(cancel.removalNoticeVersion).toBe(3);
+    expect(cancel).toMatchObject({ classification: "remove_scheduled", reason: "canceled", removeAfter: "2026-10-27" });
+    expect(cancel.removalNoticeDmAt).toBeNull();
     expect(cancel.needsReview).toBe(false);
+    expect(r.due).toBe(1);
+    expect(r.ownerReport).toBe("sent");
+    expect(slack.textsTo("U0OWNER")[0]).toContain("• <@U_CANCEL> 解約（外す日 10月27日）");
 
     const stranger = store.states.get("U_STRANGER")!;
-    expect(stranger.linkDeadline).toBe("2026-11-10");
+    expect(stranger.linkDeadline).toBe("2026-11-03");
     expect(stranger.linkRequestDmAt).not.toBeNull();
+    expect(stranger.linkRequestVersion).toBe(3);
     // DM のリンクの値はハッシュだけが保存されている
     const [text] = slack.textsTo("U_STRANGER");
     const raw = /\/slack\/link\?t=([A-Za-z0-9_-]+)\|/.exec(text)![1];
-    expect(text).toContain("期限 11月10日");
+    expect(text).toContain("期限 11月3日");
+    expect(text).toContain("<https://www.bo-no.design/subscription|登録>");
     expect(store.tokens).toHaveLength(1);
     expect(store.tokens[0]).toMatchObject({ tokenHash: hashToken(raw), slackUserId: "U_STRANGER", purpose: "link_request" });
     expect(store.tokens[0].tokenHash).not.toContain(raw);
-    // 期限 + 30日有効
-    expect(store.tokens[0].expiresAt.toISOString()).toBe("2026-12-10T01:30:00.000Z");
+    // 期限（7日）+ 30日有効
+    expect(store.tokens[0].expiresAt.toISOString()).toBe("2026-12-03T01:30:00.000Z");
+  });
+
+  it("承認済みの本番の文面で送れる（差し込み3つ・期限・登録ページ）", async () => {
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
+    const { deps } = makeSyncDeps({ store, slack, messages: { ...APPROVED_MESSAGES, linkRequest: LINK_REQUEST_MESSAGE } });
+    const r = await runSync(deps);
+    expect(r.dm.sent).toEqual({ link_request: 1 });
+    const [text] = slack.textsTo("U_X");
+    expect(text).toContain("こんにちは、BONOのカイクンです。");
+    expect(text).toMatch(/👉 <https:\/\/www\.bo-no\.design\/slack\/link\?t=[A-Za-z0-9_-]+\|BONOとつなぐ>/);
+    expect(text).toContain("11月3日までにつながらない場合は、Slackから自動的に外れます。");
+    expect(text).toContain("<https://www.bo-no.design/subscription|メンバー登録>");
+    expect(text).not.toContain("{{");
+    expect(store.states.get("U_X")!.linkRequestVersion).toBe(2);
   });
 
   it("2回目の実行では同じ DM を送らない", async () => {
@@ -252,125 +270,147 @@ describe("runSync: live", () => {
     nowRef.now = new Date("2026-10-28T01:30:00Z");
     const r = await runSync(deps);
     expect(r.dm.sent).toEqual({});
-    expect(slack.postCalls).toHaveLength(2);
+    expect(slack.textsTo("U_STRANGER")).toHaveLength(1);
+    expect(slack.textsTo("U_CANCEL")).toHaveLength(0);
   });
 
-  it("変わっていない行は書き直さない", async () => {
+  it("変わっていない行は書き直さない（解約済みの外す日も翌日以降に動かさない）", async () => {
     seedTypical();
-    const { deps } = makeSyncDeps({ store, slack });
+    const { deps, nowRef } = makeSyncDeps({ store, slack });
     await runSync(deps);
     const r = await runSync(deps);
     expect(r.statesWritten).toBe(0);
+    nowRef.now = new Date("2026-10-29T01:30:00Z");
+    const r2 = await runSync(deps);
+    expect(r2.statesWritten).toBe(0);
+    expect(store.states.get("U_CANCEL")!.removeAfter).toBe("2026-10-27");
   });
 
-  it("解約予約の人は、終わる日の翌日に外す（お知らせは予約が分かった日に1回）", async () => {
+  it("解約予約の人は、終わる日の翌日に外す（DM なし。その日のオーナー報告に出る）", async () => {
     slack.members = [memberWithEmail("U_RES", "res@example.com"), memberWithEmail("U_X", "x@example.com")];
     store.users = [{ userId: "user-res", email: "res@example.com", sub: RESERVED }];
     store.links = [];
-    const { deps } = makeSyncDeps({ store, slack });
-    await runSync(deps);
+    const { deps, nowRef } = makeSyncDeps({ store, slack });
+    const r = await runSync(deps);
     expect(store.states.get("U_RES")!.removeAfter).toBe("2026-11-21");
     expect(store.states.get("U_RES")!.reason).toBe("cancel_reserved");
+    expect(slack.textsTo("U_RES")).toHaveLength(0);
+    expect(r.dm.sent).toEqual({ link_request: 1 });
     // 解約予約中も課金中なので、自動でつなぐ
     expect(store.links.map((l) => l.slackUserId)).toContain("U_RES");
+
+    // 終わる日の翌日: 期間が終わって解約済みになり、オーナー報告に出る
+    store.users[0].sub = { ...RESERVED, isActive: false };
+    store.users.push({ userId: "user-x", email: "x@example.com", sub: PAID });
+    nowRef.now = new Date("2026-11-21T01:30:00Z");
+    const r2 = await runSync(deps);
+    expect(store.states.get("U_RES")!).toMatchObject({ reason: "canceled", removeAfter: "2026-11-21" });
+    expect(r2.due).toBe(1);
+    expect(slack.textsTo("U0OWNER").at(-1)).toContain("• <@U_RES> 解約（外す日 11月21日）");
+    expect(slack.textsTo("U_RES")).toHaveLength(0);
+  });
+
+  it("解約予約のあと終わる日の前に再課金したら keep に戻る（resubscribed）", async () => {
+    slack.members = [memberWithEmail("U_RES", "res@example.com")];
+    store.users = [{ userId: "user-res", email: "res@example.com", sub: RESERVED }];
+    const { deps, nowRef } = makeSyncDeps({ store, slack });
+    await runSync(deps);
+    store.users[0].sub = PAID;
+    nowRef.now = new Date("2026-11-10T01:30:00Z");
+    await runSync(deps);
+    expect(store.states.get("U_RES")!).toMatchObject({ classification: "keep", removeAfter: null, resolvedReason: "resubscribed" });
+    expect(slack.postCalls).toHaveLength(0);
   });
 
   it("本文が未承認なら live でも送らず、印を付けて OPS に知らせる。承認後の実行で送る", async () => {
     seedTypical();
     const unapproved = {
-      linkRequest: LINK_REQUEST_MESSAGE,
-      removalNotice: REMOVAL_NOTICE_MESSAGE,
+      linkRequest: { ...LINK_REQUEST_MESSAGE, approved: false },
       ownerReport: OWNER_REPORT_MESSAGE,
     };
     const { deps, alerts } = makeSyncDeps({ store, slack, messages: unapproved });
     const r = await runSync(deps);
     expect(slack.postCalls).toHaveLength(0);
-    expect(r.dm.blocked).toBe(2);
-    expect(store.states.get("U_CANCEL")!.needsReview).toBe(true);
-    expect(store.states.get("U_CANCEL")!.reviewReason).toBe("message_not_approved");
-    expect(alerts).toContainEqual({ message_not_approved: 2 });
+    expect(r.dm.blocked).toBe(1);
+    expect(store.states.get("U_STRANGER")!.needsReview).toBe(true);
+    expect(store.states.get("U_STRANGER")!.reviewReason).toBe("message_not_approved");
+    expect(alerts).toContainEqual({ message_not_approved: 1 });
     // 本文未承認の印は「確認が必要な人」には数えない
     expect(r.needsReview).toBe(0);
 
     deps.messages = APPROVED_MESSAGES;
     const r2 = await runSync(deps);
-    expect(r2.dm.sent).toEqual({ removal_notice: 1, link_request: 1 });
-    expect(store.states.get("U_CANCEL")!.needsReview).toBe(false);
+    expect(r2.dm.sent).toEqual({ link_request: 1 });
+    expect(store.states.get("U_STRANGER")!.needsReview).toBe(false);
   });
 
   it("投稿がタイムアウトしたら needs_review にし、次の実行でも送り直さない", async () => {
-    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com"), memberWithEmail("U_X", "x@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
     slack.postQueue.push({ kind: "timeout" });
     const { deps, alerts } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
     expect(r.dm.needsReview).toBe(1);
-    const s = store.states.get("U_CANCEL")!;
+    const s = store.states.get("U_X")!;
     expect(s.needsReview).toBe(true);
     expect(s.reviewReason).toBe("send_unknown:timeout");
-    expect(s.removeAfter).toBeNull();
+    expect(s.linkRequestDmAt).toBeNull();
     expect(alerts).toContainEqual(expect.objectContaining({ needs_review: 1 }));
 
-    const before = slack.textsTo("U_CANCEL").length;
+    const before = slack.textsTo("U_X").length;
     await runSync(deps);
-    expect(slack.textsTo("U_CANCEL")).toHaveLength(before);
+    expect(slack.textsTo("U_X")).toHaveLength(before);
   });
 
   it("Slack の内部エラーも送れたか分からない扱い", async () => {
-    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
     slack.postQueue.push({ kind: "slack_error", error: "internal_error" });
     const { deps } = makeSyncDeps({ store, slack });
     await runSync(deps);
-    expect(store.states.get("U_CANCEL")!.reviewReason).toBe("send_unknown:internal_error");
+    expect(store.states.get("U_X")!.reviewReason).toBe("send_unknown:internal_error");
   });
 
   it("記録の途中で落ちても sending の印が残り、送り直さない", async () => {
-    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
     store.failPatch = true;
     const { deps } = makeSyncDeps({ store, slack });
     await expect(runSync(deps)).rejects.toThrow();
-    expect(store.states.get("U_CANCEL")!.reviewReason).toBe("sending:removal_notice");
+    expect(store.states.get("U_X")!.reviewReason).toBe("sending:link_request");
     expect(store.lockedUntil).toBeNull();
     store.failPatch = false;
     await runSync(deps);
-    expect(slack.textsTo("U_CANCEL")).toHaveLength(1);
+    expect(slack.textsTo("U_X")).toHaveLength(1);
   });
 
   it("投稿の 429 は待ってから1回だけ送り直す", async () => {
-    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
     slack.postQueue.push({ kind: "rate_limited", retryAfterSec: 2 });
     const { deps, sleeps } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
     expect(sleeps).toContain(2000);
-    expect(r.dm.sent).toEqual({ removal_notice: 1 });
+    expect(r.dm.sent).toEqual({ link_request: 1 });
     expect(slack.postCalls).toHaveLength(2);
-    expect(store.states.get("U_CANCEL")!.needsReview).toBe(false);
+    expect(store.states.get("U_X")!.needsReview).toBe(false);
   });
 
   it("DM を開けない相手（user_not_found 等）は dm_failed で確認待ちにする", async () => {
-    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
     slack.openQueue.push({ kind: "slack_error", error: "cannot_dm_bot" });
     const { deps } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
     expect(r.dm.failed).toBe(1);
-    expect(store.states.get("U_CANCEL")!.reviewReason).toBe("dm_failed:cannot_dm_bot");
-    expect(slack.postCalls.filter((c) => c.channelId === "D-U_CANCEL")).toHaveLength(0);
+    expect(store.states.get("U_X")!.reviewReason).toBe("dm_failed:cannot_dm_bot");
+    expect(slack.postCalls.filter((c) => c.channelId === "D-U_X")).toHaveLength(0);
   });
 
   it("DM を開くのがタイムアウトしたら今回は見送り、次の実行で送る", async () => {
-    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
     slack.openQueue.push({ kind: "timeout" });
     const { deps } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
     expect(r.dm.deferred).toBe(1);
-    expect(store.states.get("U_CANCEL")!.needsReview).toBe(false);
+    expect(store.states.get("U_X")!.needsReview).toBe(false);
     await runSync(deps);
-    expect(slack.textsTo("U_CANCEL")).toHaveLength(1);
+    expect(slack.textsTo("U_X")).toHaveLength(1);
   });
 
   it("トークン・権限の問題が出たら、残りの DM を止める", async () => {
@@ -399,17 +439,8 @@ describe("runSync: live", () => {
     const r2 = await runSync(deps);
     expect(r2.dm.sent).toEqual({ link_request: 2 });
     // 期限はそれぞれ送った日から数える
-    expect(store.states.get("U_0")!.linkDeadline).toBe("2026-11-10");
-    expect(store.states.get("U_2")!.linkDeadline).toBe("2026-11-11");
-  });
-
-  it("外れるお知らせを先に送る", async () => {
-    slack.members = [memberWithEmail("U_X", "x@example.com"), memberWithEmail("U_CANCEL", "canceled@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
-    const { deps } = makeSyncDeps({ store, slack });
-    deps.limits = { ...deps.limits, maxDms: 1 };
-    await runSync(deps);
-    expect(slack.openCalls).toEqual(["U_CANCEL"]);
+    expect(store.states.get("U_0")!.linkDeadline).toBe("2026-11-03");
+    expect(store.states.get("U_2")!.linkDeadline).toBe("2026-11-04");
   });
 
   it("送っている途中で off にされたら、それ以降は送らない", async () => {
@@ -431,15 +462,12 @@ describe("runSync: test モード", () => {
     const r = await runSync(deps);
     expect(r.dm.sent).toEqual({ link_request: 1 });
     expect(slack.textsTo("U_CANCEL")).toHaveLength(0);
-    expect(store.states.get("U_CANCEL")!.dryRunResult).toBe(
-      "not_test_target:would_send:removal_notice:remove_after=2026-11-03",
-    );
-    expect(store.states.get("U_CANCEL")!.removalNoticeDmAt).toBeNull();
+    expect(store.states.get("U_CANCEL")!.dryRunResult).toBe("not_test_target:would_remove:canceled:remove_after=2026-10-27");
   });
 });
 
 describe("runSync: 外す前の再課金・つながり・外された確認", () => {
-  it("お知らせのあと再課金したら keep に戻り、外す予定が消える（DMなし）", async () => {
+  it("外す予定のあと再課金したら keep に戻り、外す予定が消える（DMなし）", async () => {
     seedTypical();
     const { deps, nowRef } = makeSyncDeps({ store, slack });
     await runSync(deps);
@@ -472,7 +500,7 @@ describe("runSync: 外す前の再課金・つながり・外された確認", (
     const { deps, nowRef } = makeSyncDeps({ store, slack });
     await runSync(deps);
     slack.members = slack.members.map((m) => (m.id === "U_CANCEL" ? { ...m, deleted: true } : m));
-    nowRef.now = new Date("2026-11-04T01:30:00Z");
+    nowRef.now = new Date("2026-10-29T01:30:00Z");
     const r = await runSync(deps);
     expect(store.states.get("U_CANCEL")!.classification).toBe("resolved");
     expect(store.states.get("U_CANCEL")!.resolvedReason).toBe("deactivated");
@@ -489,7 +517,12 @@ describe("オーナーへの報告", () => {
     ];
     store.users = [
       { userId: "user-cancel", email: "canceled@example.com", sub: CANCELED },
-      { userId: "user-later", email: "later@example.com", sub: CANCELED },
+      // 解約予約（11/1 まで課金中）→ 外す日は 11/2 で、今日の報告には出ない
+      {
+        userId: "user-later",
+        email: "later@example.com",
+        sub: { ...RESERVED, cancelAt: new Date("2026-11-01T00:00:00Z") },
+      },
     ];
     store.states.set(
       "U_CANCEL",
@@ -497,7 +530,6 @@ describe("オーナーへの報告", () => {
         slackUserId: "U_CANCEL",
         classification: "remove_scheduled",
         reason: "canceled",
-        removalNoticeDmAt: new Date("2026-10-20T01:00:00Z"),
         removeAfter: "2026-10-27",
       }),
     );
@@ -507,7 +539,7 @@ describe("オーナーへの報告", () => {
         slackUserId: "U_LINK",
         classification: "needs_link",
         reason: "not_linked",
-        linkRequestDmAt: new Date("2026-10-12T01:00:00Z"),
+        linkRequestDmAt: new Date("2026-10-19T01:00:00Z"),
         linkDeadline: "2026-10-26",
       }),
     );
@@ -517,7 +549,6 @@ describe("オーナーへの報告", () => {
         slackUserId: "U_LATER",
         classification: "remove_scheduled",
         reason: "canceled",
-        removalNoticeDmAt: new Date("2026-10-25T01:00:00Z"),
         removeAfter: "2026-11-01",
       }),
     );
@@ -565,6 +596,8 @@ describe("オーナーへの報告", () => {
 
   it("報告する人がいない日は送らない（auth.test も呼ばない）", async () => {
     seedTypical();
+    // 解約済みの人がいると、その日のうちに報告に出るので外す
+    slack.members = slack.members.filter((m) => m.id !== "U_CANCEL");
     const authTest = vi.spyOn(slack, "authTest");
     const { deps } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
@@ -653,19 +686,18 @@ describe("review の指摘への対応", () => {
   });
 
   it("確保できなかった DM は黙って見送らず、確認待ちにして報告に出す", async () => {
-    slack.members = [memberWithEmail("U_CANCEL", "canceled@example.com")];
-    store.users = [{ userId: "user-cancel", email: "canceled@example.com", sub: CANCELED }];
+    slack.members = [memberWithEmail("U_X", "x@example.com")];
     vi.spyOn(store, "claimDm").mockResolvedValue(false);
     const { deps } = makeSyncDeps({ store, slack });
     const r = await runSync(deps);
     expect(r.dm.needsReview).toBe(1);
-    expect(store.states.get("U_CANCEL")!).toMatchObject({ needsReview: true, reviewReason: "not_claimed:removal_notice" });
+    expect(store.states.get("U_X")!).toMatchObject({ needsReview: true, reviewReason: "not_claimed:link_request" });
     expect(r.needsReview).toBe(1);
     expect(r.ownerReport).toBe("sent");
-    expect(slack.textsTo("U0OWNER")[0]).toContain("<@U_CANCEL>");
+    expect(slack.textsTo("U0OWNER")[0]).toContain("<@U_X>");
   });
 
-  it("課金中→解約→再課金→未接続… と回が変わっても、外す日はいつも今の回の DM から7日以上あと", async () => {
+  it("課金中→未接続… と回が変わっても、link_expired の外す日はいつも今の回のつなぐお願いDMのあと", async () => {
     slack.members = [memberWithEmail("U_S", "s@example.com")];
     store.users = [{ userId: "user-s", email: "s@example.com", sub: null }];
     const { deps, nowRef } = makeSyncDeps({ store, slack });
@@ -678,28 +710,34 @@ describe("review の指摘への対応", () => {
     await runSync(deps);
     expect(store.states.get("U_S")!.classification).toBe("keep");
     expect(store.states.get("U_S")!.linkRequestDmAt).toBeNull();
-    // 期限（11/10）をずっと過ぎてから、課金の記録がなくなった（12/20）→ 期限切れではなく新しいつなぐお願い
+    // 期限（11/3）をずっと過ぎてから、課金の記録がなくなった（12/20）→ 期限切れではなく新しいつなぐお願い
     store.users[0].sub = null;
     store.links = [];
     nowRef.now = new Date("2026-12-20T01:30:00Z");
     await runSync(deps);
     const s = store.states.get("U_S")!;
     expect(s.classification).toBe("needs_link");
-    expect(s.linkDeadline).toBe("2027-01-03");
+    expect(s.linkDeadline).toBe("2026-12-27");
     expect(slack.textsTo("U_S")).toHaveLength(2);
     expect(isDueForRemoval(s, "2026-12-20")).toBe(false);
   });
 
-  it("猶予が min_notice_days より短くても、外す日は DM から min_notice_days 以上あと", async () => {
+  it("猶予7日: DM の7日後が期限、その翌日に link_expired（外す日 = 期限の翌日）でオーナー報告に出る", async () => {
     slack.members = [memberWithEmail("U_S", "s@example.com")];
-    store.settings = { ...store.settings!, linkGraceDays: 2, minNoticeDays: 7 };
     const { deps, nowRef } = makeSyncDeps({ store, slack });
-    await runSync(deps); // 10/27 につなぐお願い、期限 10/29
-    nowRef.now = new Date("2026-10-30T01:30:00Z");
+    await runSync(deps); // 10/27 につなぐお願い、期限 11/3
+    expect(store.states.get("U_S")!.linkDeadline).toBe("2026-11-03");
+    nowRef.now = new Date("2026-11-03T01:30:00Z");
     await runSync(deps);
+    expect(store.states.get("U_S")!.classification).toBe("needs_link");
+    nowRef.now = new Date("2026-11-04T01:30:00Z");
+    const r = await runSync(deps);
     const s = store.states.get("U_S")!;
     expect(s.reason).toBe("link_expired");
-    expect(s.removeAfter).toBe("2026-11-03");
+    expect(s.removeAfter).toBe("2026-11-04");
+    expect(r.due).toBe(1);
+    expect(slack.textsTo("U0OWNER").at(-1)).toContain("• <@U_S> 未接続（外す日 11月4日）");
+    expect(slack.textsTo("U_S")).toHaveLength(1);
   });
 });
 

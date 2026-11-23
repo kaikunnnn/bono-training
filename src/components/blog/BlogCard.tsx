@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { BlogPost } from "@/types/blog";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { categories } from "@/data/blog/categories";
 import { removeEmojiFromText } from "@/utils/blog/emojiUtils";
 
@@ -54,7 +54,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, variant = "default", i
   const categoryBgColor = categoryBgColors[post.category] || 'bg-gray-400';
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={`/blog/${post.slug}`}
       className="blog-card-hover"
       onMouseEnter={() => setIsHovered(true)}
@@ -113,7 +113,7 @@ export const BlogCard: React.FC<BlogCardProps> = ({ post, variant = "default", i
           </div>
         </div>
       </motion.li>
-    </Link>
+    </IntentPrefetchLink>
   );
 };
 

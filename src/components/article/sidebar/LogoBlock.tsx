@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import type { ReactNode } from "react";
 import Logo from "@/components/common/Logo";
 
@@ -35,9 +35,9 @@ const LogoBlock = ({ variant = "default", rightAction }: LogoBlockProps) => {
         alignItems: "flex-start",
       }}
     >
-      <Link href="/">
+      <IntentPrefetchLink href="/">
         <Logo className="w-[67.51px] h-5" />
-      </Link>
+      </IntentPrefetchLink>
       {rightAction && (
         <div style={{ position: "absolute", right: 0, top: "50%", transform: "translateY(-50%)" }}>
           {rightAction}

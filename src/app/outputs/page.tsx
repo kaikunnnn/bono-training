@@ -1,6 +1,6 @@
 import { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import PageHeader from "@/components/common/PageHeader";
 import OutputBannerCardItem from "@/components/output/OutputBannerCardItem";
 import { getOutputsList } from "@/lib/sanity";
@@ -38,12 +38,12 @@ export default async function OutputsPage() {
         />
 
         <div className="mb-6">
-          <Link
+          <IntentPrefetchLink
             href="/achievements"
             className="inline-flex items-center gap-1 text-sm text-text-primary/60 hover:underline font-noto-sans-jp"
           >
             ← みんなの成果 に戻る
-          </Link>
+          </IntentPrefetchLink>
         </div>
 
         {outputs.length === 0 ? (
@@ -64,7 +64,7 @@ export default async function OutputsPage() {
 
         {/* 回遊CTA: /stories へ */}
         <div className="mt-16 pt-12 border-t border-gray-200/60">
-          <Link
+          <IntentPrefetchLink
             href="/stories"
             className="group block bg-surface rounded-[24px] border border-gray-200/60 shadow-sm p-6 sm:p-8 hover:shadow-md hover:border-gray-300 transition-all max-w-2xl mx-auto"
           >
@@ -77,7 +77,7 @@ export default async function OutputsPage() {
             <p className="text-sm text-text-primary/70 font-noto-sans-jp mt-2">
               転職・独立など、BONOで動き出した人たちのストーリー集。
             </p>
-          </Link>
+          </IntentPrefetchLink>
         </div>
       </div>
     </div>

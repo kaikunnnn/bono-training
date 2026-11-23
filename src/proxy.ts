@@ -3,6 +3,7 @@ import {
   LEGACY_ONLY_CONTENT_SLUGS,
   GUIDE_REDIRECT_MAP,
 } from "@/lib/migration/legacy-only-content-slugs";
+import { isGoneLegacyPath } from "@/lib/migration/gone-legacy-paths";
 
 /**
  * 軽量化された proxy（Next.js 16 で middleware.ts から改名。役割は同じ）
@@ -131,6 +132,30 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
     );
 }
 
+/**
+ * 戻り先（redirectTo）を同じサイト内の pathname + search に解決する。
+ * 外のサイトへ飛ばせる値（https://evil.com, //evil.com, /\evil.com 等）や
+ * 制御文字入りの値は null を返す（呼び出し側で /mypage に倒す）。
+ * 考え方は src/app/(auth)/actions.ts の sanitizeRedirect と同じ。
+ */
+function resolveSameOriginRedirect(
+  value: string | null,
+  origin: string
+): { pathname: string; search: string } | null {
+  if (!value) return null;
+  if (/[\x00-\x1f\x7f]/.test(value)) return null;
+  if (!value.startsWith("/")) return null;
+  if (value.startsWith("//") || value.startsWith("/\\")) return null;
+  let dest: URL;
+  try {
+    dest = new URL(value, origin);
+  } catch {
+    return null;
+  }
+  if (dest.origin !== origin) return null;
+  return { pathname: dest.pathname, search: dest.search };
+}
+
 export function proxy(request: NextRequest) {
   const pathname = request.nextUrl.pathname;
 
@@ -147,6 +172,15 @@ export function proxy(request: NextRequest) {
       return NextResponse.rewrite(url);
     }
     return NextResponse.next();
+  }
+
+  // #276: 旧 Webflow のパスで、移す先も検索の流入も無いものは 410 Gone
+  // （next.config の redirects では 410 を返せないためここで返す）
+  if (isGoneLegacyPath(pathname)) {
+    return new NextResponse("Gone", {
+      status: 410,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
   }
 
   // サイト移行 #198: legacy 専用 226本の /contents/{slug} を救済（プロキシ）。
@@ -197,11 +231,17 @@ export function proxy(request: NextRequest) {
   const isAuthPage = AUTH_PAGE_PATHS.includes(pathname);
   const isReauth = request.nextUrl.searchParams.get("reauth") === "1";
   if (hasAuth && isAuthPage && !isReauth) {
-    const redirectTo =
-      request.nextUrl.searchParams.get("redirectTo") || "/mypage";
+    // redirectTo は「/subscription?intent_plan=…」のように ? 付きで来る。
+    // pathname にそのまま入れると ? が %3F にエスケープされて 404 になるため（#268-C）、
+    // URL として読み直してから pathname と search を分けて入れ直す。
+    const dest = resolveSameOriginRedirect(
+      request.nextUrl.searchParams.get("redirectTo"),
+      request.nextUrl.origin
+    );
     const url = request.nextUrl.clone();
-    url.pathname = redirectTo;
-    url.searchParams.delete("redirectTo");
+    url.pathname = dest?.pathname ?? "/mypage";
+    url.search = dest?.search ?? "";
+    url.hash = "";
     return NextResponse.redirect(url);
   }
 
@@ -232,5 +272,10 @@ export const config = {
     "/notes",
     "/community/feedback/:path*",
     "/community/feedback",
+    // #276 410 Gone（src/lib/migration/gone-legacy-paths.ts と同じパス）
+    "/content/communitykomiyunitei",
+    "/corse/rdmhuezu3-taitoru",
+    "/news/news-bar",
+    "/designtag/document",
   ],
 };

@@ -39,7 +39,7 @@ afterEach(() => vi.restoreAllMocks());
 
 describe("sitemap", () => {
   it("only includes legacy public articles handled by the production rewrite", () => {
-    expect(LEGACY_PUBLIC_ARTICLE_SLUGS.size).toBe(29);
+    expect(LEGACY_PUBLIC_ARTICLE_SLUGS.size).toBe(28);
     expect(
       [...LEGACY_PUBLIC_ARTICLE_SLUGS].every((slug) =>
         LEGACY_ONLY_CONTENT_SLUGS.has(slug),
@@ -125,6 +125,30 @@ describe("sitemap", () => {
     const paths = (await sitemap()).map(({ url }) => new URL(url).pathname);
     expect(paths).toContain("/contents/portfolio-02");
     expect(paths).not.toContain("/contents/some-other-premium");
+  });
+
+  it("excludes work-in-progress placeholder articles and the redirected wake URL (#276)", async () => {
+    vi.mocked(getAllArticles).mockResolvedValue([
+      { _id: "w1", title: "製作中", slug: { current: "sbd-step4-wip" }, isPremium: false },
+      { _id: "w2", title: "作成中", slug: { current: "ai-ui-styling-coming-soon" }, isPremium: false },
+      { _id: "a1", title: "Public", slug: { current: "public-article" }, isPremium: false },
+      { _id: "p3", title: "Returned (#276)", slug: { current: "goaldirect-2-1" }, isPremium: true },
+    ]);
+    vi.mocked(getAllGuidesFromSanity).mockResolvedValue([]);
+    vi.mocked(getAllLessonSlugs).mockResolvedValue([]);
+    vi.mocked(getAllFeedbackSlugs).mockResolvedValue([]);
+    vi.mocked(getAllBlogSlugs).mockResolvedValue([]);
+    vi.mocked(getAllRoadmapSlugs).mockResolvedValue([]);
+    vi.mocked(getAllEvents).mockResolvedValue([]);
+
+    const paths = (await sitemap()).map(({ url }) => new URL(url).pathname);
+    expect(paths).toContain("/contents/public-article");
+    expect(paths).toContain("/contents/goaldirect-2-1");
+    expect(paths).not.toContain("/contents/sbd-step4-wip");
+    expect(paths).not.toContain("/contents/ai-ui-styling-coming-soon");
+    // /contents/youhadouyatedezainani-wake は /stories/wake へ 308 なので載せない
+    expect(paths).not.toContain("/contents/youhadouyatedezainani-wake");
+    expect(paths).toContain("/stories/wake");
   });
 
   it("includes the events list and each event detail page", async () => {

@@ -139,7 +139,8 @@ export const SECTIONS: Section[] = [
         id: 'ai-design',
         label: 'AI関連',
         title: 'AI×デザイン',
-        lessonTitles: ['AI×UIリサーチ']
+        // 順序: Cursor入門 → Claude Code入門 → AI×UIリサーチ（旧「デザイナーのためのCursor入門」と区別するため副題で照合）
+        lessonTitles: ['触れる画面のAI×UIデザイン', '操作できるUI体験をAIでデザイン', 'AI×UIリサーチ']
       }
     ],
     categories: ['AI']

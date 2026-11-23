@@ -29,6 +29,12 @@ const nextConfig: NextConfig = {
           source: "/docs/:slug",
           destination: "/docs/:slug.html",
         },
+        // /labs/xxx → public/labs/xxx/index.html（UI基礎ラボの見本ページ。動画の題材のUIなど）
+        // afterFiles なので、画像など実在する静的ファイルはそのまま返る。
+        {
+          source: "/labs/:path*",
+          destination: "/labs/:path*/index.html",
+        },
       ],
       // サイト移行: Next.js 側のページ・静的ファイル・動的ルートの
       // いずれにもマッチしなかった場合のみ発動するフォールバック。
@@ -92,6 +98,9 @@ const nextConfig: NextConfig = {
         destination: "/how-to/feedback",
         permanent: true,
       },
+      // 旧「デザイナーのためのCursor入門」を新レッスンに統合（#260）。旧URLを308で恒久保護。
+      { source: "/lessons/cursor-for-designers", destination: "/lessons/cursor-ui-ai-design", permanent: true },
+      { source: "/contents/cursor-intro-for-designers", destination: "/lessons/cursor-ui-ai-design", permanent: true },
       // ── サイト移行 B-9: 旧サイト(Webflow)からの 301/308 リダイレクトマップ ──
       // 出典: rebono/issues/bono-training_URL移行/11_individual_301_map_2026-08-28.tsv
       // 3列目が 410 の行(80本)は next.config で 410 を返せないため実装しない
@@ -156,6 +165,26 @@ const nextConfig: NextConfig = {
       // （UIビジュアル基礎 6-3.シャドウの基本）にあるものは legacy プロキシではなく新記事へ308。
       // next.config の redirects は proxy より先に評価されるため、proxy の legacy rewrite より優先される。
       { source: "/contents/tips-siyadounoshi-ifang", destination: "/contents/uivisual-6-4", permanent: true },
+      // #276 タイトル重複: 旧サイトの体験談記事は同じ本文が /stories/wake にある（2026-11-01 本文照合済み）。
+      // 旧URLは legacy プロキシで canonical が無く、同じ title のページが2つ検索に出ていたので 308 でまとめる。
+      { source: "/contents/youhadouyatedezainani-wake", destination: "/stories/wake", permanent: true },
+      // 279-E / #280（2026-11-03 オーナー承認）: 解説記事「UIUXデザイナーへの始め方ロードマップ」は
+      // /guide に同じ本文があり canonical を /guide に向けていたが、Google が canonical を採用せず
+      // 検索の着地が /contents に集中していた（GA4: /contents 62人 vs /guide 7人）。308 で /guide にまとめる。
+      // この記事はレッスン wayofuiuxdesigner 内の1本なので、レッスンから開くと /guide に飛び、
+      // この1本だけ進捗・前後移動が使えなくなる（オーナー了承済み）。他の重複スラッグは canonical のまま。
+      { source: "/contents/rdm-howtostart-roadmap", destination: "/guide/rdm-howtostart-roadmap", permanent: true },
+      // #276（2026-11-01 オーナー回答）: 旧 Webflow の一覧・タグページのうち、同じ役割の新ページがあるもの。
+      // 無いもの（410）は src/lib/migration/gone-legacy-paths.ts（proxy）。
+      // 旧「新着コンテンツ一覧」（ページ送りのクエリ付きも同じ転送）→ 全記事の一覧
+      { source: "/content/newvideos", destination: "/articles", permanent: true },
+      // 旧「UXデザイン」カテゴリ一覧 → UXデザインのロードマップ
+      { source: "/content/uxdesign", destination: "/roadmap/ux-design-basic", permanent: true },
+      // 旧「面接」スキルタグ → 面接のポイントの記事
+      { source: "/designskill/jobinterview", destination: "/contents/uiux-interview-tips-and-checkpoints", permanent: true },
+      // rebono#22 と同じ考え方（タグ → 内容の近いレッスン）
+      // 「プロトタイピング - UIパターン検証」: 載っていた記事の多くが「ゼロからはじめるUI情報設計」
+      { source: "/designtag/uitest", destination: "/lessons/ui-architect-beginner", permanent: true },
     ];
   },
   // セキュリティヘッダ（段階導入）: CSP以外の安全ヘッダ＋「壊れない範囲のCSP」を全パスに enforce。

@@ -2,7 +2,7 @@ import "server-only";
 
 /**
  * 会員メール（#264）の永続化（Supabase / service_role）。
- * テーブル: supabase/migrations/20261029000000_create_member_mail.sql
+ * テーブル: supabase/migrations/20261123000000_create_member_mail.sql
  *
  * 原子性: claim / update は PostgREST の条件付き UPDATE ... RETURNING 1文で行う。
  * ★PATCH では or() を使わない（PostgREST は or() を更新後の行にも再適用し、確保できたのに空配列が返る。#238 で再現）。

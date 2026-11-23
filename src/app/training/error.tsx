@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { trackErrorScreen } from "@/lib/analytics";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +14,7 @@ export default function TrainingError({
 }) {
   useEffect(() => {
     console.error("Training error:", error);
+    trackErrorScreen("training", error);
   }, [error]);
 
   return (

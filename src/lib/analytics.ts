@@ -5,7 +5,7 @@ declare global {
   interface Window {
     gtag: (
       command: 'config' | 'event' | 'js' | 'set',
-      targetId: string | Date,
+      targetId: string | Date | Record<string, unknown>,
       config?: Record<string, unknown>
     ) => void;
     dataLayer: unknown[];
@@ -62,6 +62,21 @@ export const setUserProperties = (properties: Record<string, string | number | b
   window.gtag('set', 'user_properties', properties);
 };
 
+/**
+ * イベントパラメータの既定値を設定する（#266 S1: member_status_at_event 等）
+ *
+ * `gtag('set', {...})` で設定した値は、そのページで以降に送られる全イベントに付く。
+ * パラメータ値は100文字以内にすること。
+ * https://developers.google.com/tag-platform/gtagjs/reference
+ */
+export const setEventDefaults = (params: Record<string, string | number | boolean>) => {
+  if (!isGAEnabled()) {
+    return;
+  }
+
+  window.gtag('set', params);
+};
+
 // ===== 定義済みイベント =====
 
 /**
@@ -108,6 +123,25 @@ export const trackArticleComplete = (articleId: string, articleTitle: string) =>
   trackEvent('article_complete', {
     article_id: articleId,
     article_title: articleTitle,
+  });
+};
+
+/**
+ * 記事を読んだ（#262）。本文の70%まで届いた＋そのページに30秒以上（タブが裏の時間を除く）で1回
+ */
+export const trackArticleRead = (params: {
+  articleId: string;
+  articleTitle: string;
+  lessonId?: string;
+  percent: number;
+  seconds: number;
+}) => {
+  trackEvent('article_read', {
+    article_id: params.articleId,
+    article_title: params.articleTitle,
+    lesson_id: params.lessonId,
+    percent: params.percent,
+    engaged_seconds: params.seconds,
   });
 };
 
@@ -349,5 +383,19 @@ export const trackPostFlowSubmitSuccess = (categorySlug?: string) => {
 export const trackPostFlowDiscard = (step: string) => {
   trackEvent('post_flow_discard', {
     step,
+  });
+};
+
+/**
+ * エラー画面（error.tsx）が表示されたことを記録する。
+ * digest はサーバーログとの照合用。message は個人情報が混ざり得るので送らない。
+ */
+export const trackErrorScreen = (area: string, error: unknown) => {
+  const digest =
+    error instanceof Error ? (error as Error & { digest?: string }).digest : undefined;
+  trackEvent('error_screen', {
+    error_area: area,
+    error_digest: digest ?? 'none',
+    page_path: window.location.pathname,
   });
 };

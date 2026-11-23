@@ -4,7 +4,7 @@
  * 既存 roadmap への reference を解決した StoryRelatedRoadmap を受ける。
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import type { StoryRelatedRoadmap } from "@/types/sanity";
 
@@ -19,7 +19,7 @@ export default function UsedRoadmapCard({ roadmap, personName }: UsedRoadmapCard
       <p className="text-[11px] tracking-[1.68px] uppercase text-[#677470] mb-3 font-noto-sans-jp">
         Used Content
       </p>
-      <Link
+      <IntentPrefetchLink
         href={`/roadmap/${roadmap.slug.current}`}
         className="group block bg-white rounded-[12px] border border-[#e8e9e2] p-6 hover:border-text-primary/30 transition-colors"
       >
@@ -49,7 +49,7 @@ export default function UsedRoadmapCard({ roadmap, personName }: UsedRoadmapCard
             )}
           </div>
         </div>
-      </Link>
+      </IntentPrefetchLink>
     </div>
   );
 }

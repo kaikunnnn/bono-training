@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { Suspense } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -92,10 +92,10 @@ export default async function FeedbacksPage({ searchParams }: PageProps) {
             description="BONOメンバーへの実際のフィードバック事例を公開しています。あなたのデザインの参考にしてください。"
           />
           <Button asChild className="flex-shrink-0">
-            <Link href="/feedback-apply">
+            <IntentPrefetchLink href="/feedback-apply">
               <MessageSquarePlus className="w-4 h-4 mr-2" />
               フィードバックを依頼
-            </Link>
+            </IntentPrefetchLink>
           </Button>
         </div>
 

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { EventDateParts } from "@/lib/events/event-schedule";
@@ -109,7 +109,7 @@ export function EventListRow({
   upcoming,
 }: EventListRowProps) {
   return (
-    <Link
+    <IntentPrefetchLink
       href={href}
       className={cn(
         "group flex w-full items-center gap-3 rounded-[8px] border-b border-black/[0.1] px-1 text-left outline-none transition duration-200 hover:bg-black/[0.035] active:scale-[0.995] active:bg-black/[0.06] focus-visible:ring-2 focus-visible:ring-black/20 focus-visible:ring-offset-2 md:gap-4",
@@ -156,6 +156,6 @@ export function EventListRow({
           aria-hidden="true"
         />
       </span>
-    </Link>
+    </IntentPrefetchLink>
   );
 }

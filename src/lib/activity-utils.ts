@@ -1,7 +1,7 @@
 /**
  * 会員の活動ログ（member_activity_events / #213 A1）の純粋ユーティリティ。
  *
- * - event_type は DB の CHECK 制約と同じ種類のみ（勝手に増やさない。増やすときはマイグレーションと同時）
+ * - event_type は DB の CHECK 制約と同じ15種のみ（勝手に増やさない。増やすときはマイグレーションと同時）
  * - Server Action（src/lib/services/activity.ts）が入力の検証・整形に使う
  * - "use server" ファイルは async 関数しか export できないため、定数・型・純粋関数はここに置く
  */
@@ -18,6 +18,12 @@ export const ACTIVITY_EVENT_TYPES = [
   // #232: /top・マイページで押したもの / イベントページを開いた
   "home_click",
   "event_view",
+  // #262: 記事の動画（最初の再生 / 25・50・75% 到達 / 90%以上 or 終了）
+  "video_play",
+  "video_progress",
+  "video_complete",
+  // #262: 記事を読んだ（本文の70%まで届いた＋そのページに30秒以上。1ページ表示につき1回）
+  "article_read",
   // #264 §6-1: ?from=email_xxx の付いたURLを開いた（メール経由の来訪）
   "email_click",
 ] as const;

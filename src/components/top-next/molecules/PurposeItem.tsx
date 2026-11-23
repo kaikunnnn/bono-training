@@ -1,7 +1,7 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 import { PURPOSE_ICON_GRADIENT } from "@/styles/gradients";
 import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import type { HomeClickTracking } from "@/lib/activity-utils";
 
 /**
@@ -46,13 +46,13 @@ export function PurposeItem({ subLabel, label, icon, href, tracking }: PurposeIt
     <div className="py-1 lg:py-5">
       {/* 内側: ホバー背景の範囲。コンテンツにタイトに沿わせる */}
       {tracking ? (
-        <HomeClickLink href={href} className={className} tracking={tracking}>
+        <HomeClickLink href={href} className={className} tracking={tracking} intentPrefetch>
           {content}
         </HomeClickLink>
       ) : (
-        <Link href={href} className={className}>
+        <IntentPrefetchLink href={href} className={className}>
           {content}
-        </Link>
+        </IntentPrefetchLink>
       )}
     </div>
   );

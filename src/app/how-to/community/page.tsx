@@ -12,7 +12,7 @@
 
 import type { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { getSubscriptionStatus } from "@/lib/subscription";
@@ -182,9 +182,9 @@ export default async function CommunityGuidePage() {
                 </p>
                 <p>
                   また、このサイトの「みんなの掲示板」でも質問できます。
-                  <Link href="/questions" className={linkCls}>
+                  <IntentPrefetchLink href="/questions" className={linkCls}>
                     みんなの掲示板を開く →
-                  </Link>
+                  </IntentPrefetchLink>
                 </p>
               </div>
 
@@ -198,9 +198,9 @@ export default async function CommunityGuidePage() {
                 </p>
                 <p>
                   使い方・前提は「
-                  <Link href="/how-to/feedback" className={linkCls}>
+                  <IntentPrefetchLink href="/how-to/feedback" className={linkCls}>
                     フィードバックのやり方
-                  </Link>
+                  </IntentPrefetchLink>
                   」にまとめています。
                 </p>
               </div>

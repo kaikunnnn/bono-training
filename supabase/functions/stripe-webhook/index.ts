@@ -820,10 +820,14 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
     if (customerEmail) {
       console.log(`📧 [LIVE環境] ウェルカムメール送信: ${customerEmail}`);
       const welcomeEmail = generateWelcomeEmail();
+      // 本文で「このメールに返信して候補日を送ってください」と案内しているため、返信先をオーナーにする
+      const welcomeReplyTo = Deno.env.get("WELCOME_REPLY_TO") || "takumi.kai.skywalker@gmail.com";
       await sendEmailSafe({
         to: customerEmail,
         subject: welcomeEmail.subject,
         html: welcomeEmail.html,
+        text: welcomeEmail.text,
+        replyTo: welcomeReplyTo,
       });
     } else {
       console.warn(`⚠️ [LIVE環境] 顧客メールアドレスがないためウェルカムメールをスキップ`);
@@ -839,7 +843,7 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
       try {
         const ownerEmail =
           Deno.env.get("OWNER_NOTIFICATION_EMAIL") || "takumi.kai.skywalker@gmail.com";
-        const planLabel = getPlanDisplayName(planType);
+        const planLabel = getPlanDisplayName(planType, duration);
         const amountYen =
           typeof amount === "number" && amount > 0
             ? `¥${amount.toLocaleString("ja-JP")}`
@@ -847,14 +851,14 @@ async function handleCheckoutCompleted(stripe: any, supabase: any, session: any)
         const kind = replaceSubscriptionId ? "プラン変更" : "新規";
         await sendEmailSafe({
           to: ownerEmail,
-          subject: `【BONO課金通知】${kind}: ${planLabel}（${duration}ヶ月）`,
+          subject: `【BONO課金通知】${kind}: ${planLabel}`,
           html: `
             <div style="font-family: sans-serif; line-height: 1.8; color: #021710;">
               <h2 style="margin:0 0 12px;">${kind}の課金がありました 🎉</h2>
               <table style="border-collapse: collapse; font-size: 14px;">
                 <tr><td style="padding:4px 16px 4px 0; color:#677470;">メール</td><td>${customerEmail ?? "(不明)"}</td></tr>
                 <tr><td style="padding:4px 16px 4px 0; color:#677470;">種別</td><td>${kind}</td></tr>
-                <tr><td style="padding:4px 16px 4px 0; color:#677470;">プラン</td><td>${planLabel}（${duration}ヶ月）</td></tr>
+                <tr><td style="padding:4px 16px 4px 0; color:#677470;">プラン</td><td>${planLabel}</td></tr>
                 <tr><td style="padding:4px 16px 4px 0; color:#677470;">金額</td><td>${amountYen}</td></tr>
                 <tr><td style="padding:4px 16px 4px 0; color:#677470;">環境</td><td>${ENVIRONMENT}</td></tr>
                 <tr><td style="padding:4px 16px 4px 0; color:#677470;">サブスクID</td><td>${subscriptionId}</td></tr>

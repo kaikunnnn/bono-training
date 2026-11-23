@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { trackErrorScreen } from "@/lib/analytics";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Home, RotateCcw } from "lucide-react";
@@ -14,6 +15,7 @@ export default function ArticlesError({
 }) {
   useEffect(() => {
     console.error("Articles error:", error);
+    trackErrorScreen("articles", error);
   }, [error]);
 
   return (

@@ -3,6 +3,8 @@
 // 既存のshadcn/ui Cardをベースに、mainのテイストでスタイル統一
 
 import { ReactNode } from "react";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Card,
@@ -23,6 +25,26 @@ export function SettingsPageLayout({ children }: SettingsPageLayoutProps) {
     <div className="min-h-screen py-12">
       <div className="max-w-4xl mx-auto px-4">{children}</div>
     </div>
+  );
+}
+
+// ───── 戻るリンク ─────
+
+interface SettingsBackLinkProps {
+  href: string;
+  children: ReactNode;
+}
+
+/** 設定の詳細ページ（/account/notifications 等）の見出しの上に置く戻るリンク */
+export function SettingsBackLink({ href, children }: SettingsBackLinkProps) {
+  return (
+    <Link
+      href={href}
+      className="mb-4 inline-flex items-center gap-1 font-noto-sans-jp text-sm font-medium text-text-secondary hover:text-text-primary"
+    >
+      <ChevronLeft className="h-4 w-4" aria-hidden />
+      {children}
+    </Link>
   );
 }
 

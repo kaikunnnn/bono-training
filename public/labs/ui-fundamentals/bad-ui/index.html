@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>配色のダメUI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap">
+<style>
+/* 枠（このページ自体）は静かなグレー。中の画面だけが「ダメな配色」の見本 */
+:root{
+  --bg:#F3F3F1; --surface:#FFFFFF; --fg:#1F2120; --muted:#5B5F5C; --line:#D9DAD6; --ink:#1F2120; --on-ink:#FFFFFF;
+  --font:"Noto Sans JP","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#1B1C1B;--surface:#252725;--fg:#ECEDEA;--muted:#A9ACA7;--line:#3A3D3A;--ink:#ECEDEA;--on-ink:#1B1C1B;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1B1C1B;--surface:#252725;--fg:#ECEDEA;--muted:#A9ACA7;--line:#3A3D3A;--ink:#ECEDEA;--on-ink:#1B1C1B;color-scheme:dark}
+
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;line-height:1.7}
+.wrap{max-width:1680px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:24px}
+h1{font-size:28px;line-height:1.3;margin:0;text-wrap:balance}
+.lead{margin:0;color:var(--muted);max-width:68ch}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:4px}
+.tabs button{font:inherit;font-size:14px;border:0;background:transparent;color:var(--muted);padding:6px 14px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--on-ink)}
+.tabs button:focus-visible,.toggle input:focus-visible{outline:2px solid var(--fg);outline-offset:2px}
+.toggle{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--muted);cursor:pointer}
+.stage{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);padding:24px}
+.key{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:20px 24px}
+.key h2{font-size:18px;margin:0 0 12px}
+.key ol{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:8px}
+.key li{max-width:80ch}
+.key .no{font-weight:700}
+.key small{color:var(--muted);font-variant-numeric:tabular-nums}
+.key p{margin:12px 0 0;color:var(--muted);font-size:14px}
+
+/* 答えのピン（既定は非表示。Figmaに取り込むときも出さない） */
+.pin{display:none}
+.show-pins .pin{display:inline-flex;position:absolute;z-index:5;width:22px;height:22px;border-radius:50%;background:#111;color:#fff;font:700 12px/22px var(--font);justify-content:center;box-shadow:0 0 0 2px #fff}
+.show-pins .pin.done{display:none} /* その版で直したミスのピンは出さない */
+.rel{position:relative}
+[hidden]{display:none!important}
+.view{display:flex;flex-direction:column;gap:16px}
+
+/* ===== SaaS（margin風）: 参考デザインの形・余白をまね、配色だけ間違える ===== */
+:root{--g-out:#E6E7EC;--g-app:#EEF3FF;--g-card:#FAFAFA;--g-white:#FFFFFF;--g-ink:#111113;--g-ink2:#4C4C4C;--g-sub:#A1A1AA;--g-line:#EBEBEB;--g-line2:#EEEEEE;--g-btn:#EBEBEB;--g-icon:#CFCFD4;
+  --g-blue:#3B6CF6;--g-blue-t:#E3EBFF;--g-red:#EF4444;--g-red-t:#FEE2E2;--g-red-t2:#FEF2F2;--g-green:#22C55E;--g-green-t:#DCFCE7;--g-amber:#F59E0B;--g-amber-t:#FEF3C7;--g-yellow:#EAB308;--g-yellow-t:#FEF9C3;--g-orange:#F37509;
+  --g-font:"Inter","Noto Sans JP","Hiragino Sans",system-ui,sans-serif}
+.mg-out{background:var(--g-out);padding:32px;width:max-content;border-radius:16px}
+.mg{width:1280px;height:800px;border-radius:28px;background:var(--g-app);display:grid;grid-template-columns:200px 1fr;grid-template-rows:auto minmax(0,1fr);column-gap:24px;padding:0 24px 24px 14px;box-sizing:border-box;font-family:var(--g-font);color:var(--g-ink);font-size:14px;line-height:1.45;letter-spacing:-.005em;position:relative;overflow:hidden;box-shadow:0 30px 60px rgba(20,20,40,.10)}
+.mg button{font:inherit;color:inherit;cursor:pointer}
+/* サイドバー */
+.g-side{display:flex;flex-direction:column;padding-top:20px}
+.g-logo{display:flex;align-items:center;gap:10px;height:30px;padding:0 6px;margin-bottom:16px}
+.g-logo .mk{width:26px;height:26px;border-radius:7px;background:var(--g-blue);display:flex;align-items:center;justify-content:center;color:var(--g-white)}
+.g-logo b{font-size:17px;font-weight:500;letter-spacing:-.02em;flex:1;min-width:0}
+.g-logo .acts{display:flex;gap:4px;flex:none}
+.mg .g-round{width:28px;height:28px;border-radius:50%;border:1px solid var(--g-line);background:transparent;padding:0;display:flex;align-items:center;justify-content:center;color:var(--g-ink2);position:relative;flex:none} /* .mg button の color:inherit に負けないよう .mg を付ける */
+.g-search{height:34px;border-radius:9px;font-size:13px;background:var(--g-white);border:1px solid var(--g-line);display:flex;align-items:center;gap:8px;padding:0 6px 0 10px;color:var(--g-sub);margin-bottom:16px}
+.g-search .ph{flex:1}
+.kbd{font-size:12px;color:var(--g-ink2);background:#EFEFF1;border-radius:6px;padding:2px 6px}
+.g-nav{display:flex;flex-direction:column;gap:2px}
+.g-item{height:36px;border-radius:9px;display:flex;align-items:center;gap:10px;padding:0 10px;font-size:14px;color:var(--g-ink)}
+.g-item svg{flex:none;width:18px;height:18px;color:var(--g-ink2)}
+.g-item.on{background:var(--g-blue);color:var(--g-white)} .g-item.on svg{color:var(--g-white)}
+.mg a{color:inherit;text-decoration:none}
+/* 親子のナビ：親「プロジェクト」は開いた状態。今いるページ（新サイト公開）は子の側に印をつける */
+.g-item.in{font-weight:600} /* 親は「このグループの中にいる」を太字だけで示す（塗らない。どの版でも同じ） */
+.g-item.in>svg:first-child{color:var(--g-ink)}
+.g-item svg.chev{width:14px;height:14px;margin-left:auto;color:var(--g-sub)}
+.g-kid{height:34px;padding-left:38px} /* 子の印を親のラベルの頭にそろえる（10px＋アイコン18px＋間10px） */
+.g-kid i{flex:none;width:10px;height:10px;border-radius:3px}
+.mg:not([data-fix~="f2"]) .g-item.on i{background:var(--g-white)!important} /* ダメUIでは選択中の青い塗りと印が同じ青で消えるので、印を白で塗る（大きさは変えない） */
+.g-bottom{margin-top:auto;display:flex;flex-direction:column;gap:2px}
+.g-badge{position:absolute;top:-5px;right:-6px;min-width:16px;height:16px;box-sizing:border-box;padding:0 4px;border-radius:8px;background:var(--g-orange);color:var(--g-white);font-size:10.5px;font-weight:600;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px var(--g-app);pointer-events:none} /* 通知ボタンの右上に重ねる */
+.g-user{border-top:1px solid var(--g-line);margin-top:10px;padding:12px 6px 0;display:flex;align-items:center;gap:10px;position:relative}
+.g-user .av{width:32px;height:32px;font-size:13px;border-radius:50%;background:var(--g-blue-t);color:var(--g-blue);display:flex;align-items:center;justify-content:center;font-weight:600}
+.g-user .nm{flex:1;min-width:0;font-size:13.5px;font-weight:500;line-height:1.3}
+.g-user .nm small{display:block;font-size:12px;font-weight:400;color:var(--g-sub)}
+/* メイン */
+.g-main{display:flex;flex-direction:column;min-width:0;padding-top:20px}
+.g-crumb ol{list-style:none;margin:0 0 2px;padding:0;display:flex;gap:6px;font-size:13px;line-height:18px;color:var(--g-sub)}
+.g-crumb li{display:flex;gap:6px}
+.g-top{display:flex;align-items:center;gap:8px;height:40px;margin-bottom:16px}
+.g-top h1{font-size:28px;font-weight:500;letter-spacing:-.03em;margin:0;flex:1;line-height:1}
+.g-pjmark{flex:none;width:14px;height:14px;border-radius:4px;margin-right:2px} /* 見出しの前のプロジェクトの印（サイドバーの印と同じ色） */
+.g-top .g-kebab{width:36px;height:36px}
+.g-btn{height:34px;border-radius:10px;border:0;padding:0 12px;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;background:var(--g-btn);color:var(--g-ink);white-space:nowrap}
+.g-btn.blue{background:var(--g-blue);color:var(--g-white)}
+.g-btn.mute{color:var(--g-sub)}
+.g-seg{display:flex;background:var(--g-btn);border-radius:10px;height:34px;padding:0}
+.g-seg span{display:flex;align-items:center;padding:0 11px;border-radius:10px;color:var(--g-sub);font-size:13.5px;white-space:nowrap}
+.g-seg .on{background:var(--g-white);color:var(--g-ink);box-shadow:0 1px 3px rgba(0,0,0,.10),0 0 0 1px rgba(0,0,0,.03)}
+/* アプリ全体のお知らせ：画面のいちばん上に、サイドバーとメインをまたぐ帯で出す（.mg の左右の余白も含めて端まで） */
+.g-notice{grid-column:1/-1;margin:0 -24px 0 -14px;height:36px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 56px;font-size:13px;background:var(--g-red-t2);border-bottom:1px solid var(--g-red);color:var(--g-red);position:relative}
+.g-notice>svg{flex:none}
+.mg .g-notice .x{position:absolute;right:20px;top:6px;width:24px;height:24px;border:0;border-radius:6px;background:transparent;padding:0;display:flex;align-items:center;justify-content:center}
+.g-cols{flex:1;min-height:0;display:grid;grid-template-columns:1fr;gap:14px}
+.mg.open .g-cols{grid-template-columns:1fr 320px}
+.g-card{background:var(--g-card);border:1px solid var(--g-line2);border-radius:20px;padding:20px;display:flex;flex-direction:column;min-width:0;min-height:0}
+.g-ch{display:flex;align-items:flex-start;gap:12px}
+.g-ch .tt{flex:1;min-width:0}
+.g-ch h2{font-size:17px;font-weight:500;letter-spacing:-.015em;margin:0;line-height:1.3}
+.g-ch p{margin:3px 0 0;font-size:13px;color:var(--g-sub)}
+.g-kebab{width:32px;height:32px;border-radius:50%;border:1px solid var(--g-line);background:var(--g-white);display:flex;align-items:center;justify-content:center;flex:none;color:var(--g-ink)}
+.g-big{display:flex;align-items:flex-end;gap:10px;margin:14px 0 10px}
+.g-big b{font-size:32px;font-weight:400;letter-spacing:-.04em;line-height:1}
+.g-big .g-chip{display:inline-flex;align-items:center;gap:5px;background:var(--g-white);border-radius:999px;padding:3px 9px;font-size:12.5px;font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.g-para{margin:0 0 12px;font-size:13.5px;color:var(--g-ink2);max-width:540px}
+.g-big .vs{font-size:12.5px;color:var(--g-sub);padding-bottom:3px}
+.g-bar{position:relative;height:12px;border-radius:6px;background:var(--g-white);margin-bottom:6px;max-width:540px}
+.g-bar .fill{position:absolute;left:0;top:0;bottom:0;width:25%;border-radius:6px;background:var(--g-blue)} /* 斜線はやめて単色の塗り */
+.g-bar .mark{position:absolute;left:50%;top:-4px;bottom:-4px;width:2px;background:var(--g-ink)}
+.g-barlbl{display:flex;justify-content:space-between;max-width:540px;font-size:12px;color:var(--g-sub);margin-bottom:12px}
+.g-barlbl span:last-child{margin-right:calc(50% - 40px)}
+/* 絞り込みのタブ：表のすぐ上に、表とつながる下線のタブで置く（Polaris の一覧のビュー NV-204／Spectrum NV-148） */
+.g-tabs{display:flex;gap:20px;border-bottom:1px solid var(--g-line2)}
+.mg .g-tab{height:36px;margin-bottom:-1px;border:0;background:transparent;padding:0 2px;font-size:13.5px;font-weight:400;color:var(--g-sub);display:inline-flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 -2px 0 transparent;white-space:nowrap}
+.g-tab .rs{font-weight:600;height:0;visibility:hidden;overflow:hidden} /* 太字の幅を先に取っておく（選んでも幅が変わらない） */
+.mg .g-tab[aria-selected="true"]{color:var(--g-blue);font-weight:600;box-shadow:inset 0 -2px 0 var(--g-blue)}
+.mg .g-tab:focus-visible{outline:2px solid var(--g-blue);outline-offset:-2px;border-radius:4px}
+.g-row.flt-out{display:none}
+.g-list{overflow:hidden}
+.g-row{display:grid;grid-template-columns:96px 56px minmax(0,1fr) 84px 88px 68px;align-items:center;gap:10px;min-height:50px;border-bottom:1px solid var(--g-line2);padding:0 8px;cursor:pointer;border-radius:0}
+.mg.open .g-row{grid-template-columns:92px 52px minmax(0,1fr) 78px 64px}
+.mg.open .g-row .who{display:none}
+.g-row.head{min-height:34px;cursor:default;font-size:12px;color:var(--g-sub)}
+.g-row.sel{background:var(--g-white)}
+.g-row:focus-visible{outline:2px solid var(--g-blue);outline-offset:-2px}
+.g-row .nm{font-size:13.5px;font-weight:500;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.g-row .sb{font-size:12px;color:var(--g-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-row .who{display:flex;align-items:center;gap:6px;font-size:13px}
+.g-row .who i{width:22px;height:22px;border-radius:50%;background:#E7E7EA;font-style:normal;font-size:11px;display:flex;align-items:center;justify-content:center;color:var(--g-ink2)}
+.g-row .due{font-size:13.5px;font-variant-numeric:tabular-nums;white-space:nowrap;display:flex;align-items:center;gap:4px} /* 日付は左そろえ。期限切れのアイコンは日付の右 */
+.g-row .late{color:var(--g-red)}
+.g-new{display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;background:var(--g-red-t);color:var(--g-red);font-size:10.5px;font-weight:600;vertical-align:2px}
+.g-tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500}
+.tg-d{background:var(--g-green-t);color:var(--g-green)} .tg-v{background:var(--g-blue-t);color:var(--g-blue)} .tg-p{background:var(--g-amber-t);color:var(--g-amber)}
+.g-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.gd-h{background:var(--g-red)} .gd-m{background:var(--g-amber)} .gd-l{background:var(--g-green)}
+.g-st{white-space:nowrap;display:inline-flex;align-items:center;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:500;justify-self:start}
+.gs-doing{background:var(--g-blue-t);color:var(--g-blue)} .gs-review{background:var(--g-yellow-t);color:var(--g-yellow)} .gs-done{background:var(--g-green-t);color:var(--g-green)} .gs-back{background:var(--g-red-t);color:var(--g-red)} .gs-todo{background:#EFEFF1;color:var(--g-sub)}
+/* 小さなメニュー（「…」から開く） */
+.g-menu{position:absolute;z-index:8;min-width:172px;box-sizing:border-box;background:#FFFFFF;border-radius:12px;padding:6px;box-shadow:0 10px 28px rgba(17,17,19,.16),0 0 0 1px rgba(17,17,19,.06);display:flex;flex-direction:column;gap:2px}
+.mg .g-mi{height:34px;border:0;border-radius:8px;background:transparent;display:flex;align-items:center;gap:10px;padding:0 10px;font-size:13.5px;color:var(--g-ink);text-align:left;white-space:nowrap}
+.g-mi svg{flex:none;color:var(--g-ink2)}
+.mg .g-mi:hover{background:#F0F0F2}
+.mg .g-mi:focus-visible{background:#F0F0F2;outline:2px solid var(--g-ink);outline-offset:-2px}
+.g-menu hr{border:0;border-top:1px solid var(--g-line2);margin:4px 2px}
+#mg-more-menu{right:0;top:46px}
+#mg-acct-menu{left:0;right:0;bottom:calc(100% + 6px)}
+/* 詳細カード */
+.g-detail{gap:12px;overflow:hidden}
+.g-f{display:flex;flex-direction:column;gap:5px;font-size:13px}
+.g-f label{font-weight:500;color:var(--g-ink2)}
+.g-f label.req{color:var(--g-red)}
+.g-inp{height:36px;border-radius:10px;border:1px solid var(--g-line);background:var(--g-white);padding:0 12px;font:inherit;font-size:13.5px;color:var(--g-ink);width:100%;box-sizing:border-box;outline:none}
+textarea.g-inp{height:76px;padding:8px 12px;resize:none;line-height:1.55}
+.g-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.g-err{display:flex;gap:6px;border-radius:12px;background:var(--g-red-t2);border:1px solid var(--g-red);color:var(--g-red);padding:8px 10px;font-size:12.5px;line-height:1.5}
+.g-err svg{flex:none;margin-top:2px}
+.g-help{margin:0;font-size:12.5px;color:var(--g-sub)}
+.g-lnk{color:var(--g-blue);text-decoration:none}
+.g-acts{margin-top:auto;display:flex;gap:6px}
+.g-acts .g-btn.mute{background:var(--g-btn)}
+.g-acts .g-btn.out{background:var(--g-white);border:1px solid var(--g-line)}
+/* モーダル・トースト */
+.g-scrim{position:absolute;inset:0;z-index:10;background:rgba(17,17,19,.40);display:flex;align-items:center;justify-content:center;border-radius:28px}
+.g-dlg{width:400px;background:var(--g-card);border-radius:20px;padding:22px;display:flex;flex-direction:column;gap:10px;box-shadow:0 24px 60px rgba(0,0,0,.22);outline:none}
+.g-dlg h2{margin:0;font-size:17px;font-weight:500;letter-spacing:-.015em}
+.g-dlg p{margin:0;font-size:13.5px;color:var(--g-sub);line-height:1.6}
+.g-dlg .g-acts{justify-content:flex-end;margin-top:10px}
+.g-toast{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);z-index:11;background:var(--g-ink);color:var(--g-white);padding:10px 16px;border-radius:999px;font-size:13px;display:flex;gap:14px;align-items:center;white-space:nowrap}
+.g-toast button{border:0;background:transparent;color:#9DB8FF;padding:0}
+
+/* インラインstyleだった所をクラスに（直す版で上書きするため） */
+.pj-1{background:var(--g-blue)} .pj-2{background:var(--g-green)} .pj-3{background:var(--g-amber)}
+.g-sicon{color:var(--g-icon);display:flex}
+.mg .g-more{color:var(--g-sub);display:flex;align-items:center;justify-content:center;flex:none;width:28px;height:28px;margin-right:-6px;border:0;border-radius:50%;background:transparent;padding:0}
+.g-up,.g-upn{font-style:normal}
+.g-up{color:var(--g-green)}
+
+/* 直す版だけで出す小さな文字（ダメUIでは display:none。出しても行の高さ・列幅は変わらない） */
+.fx-mark{display:none}
+.g-pri{display:flex;align-items:center;gap:4px;height:18px} /* 優先度のセル。どの版でも同じ高さ */
+.fx-pri{font-size:12px;line-height:18px;color:var(--g-ink2)}
+.fx-req{margin-left:6px;font-size:11px;line-height:1;font-weight:400;color:var(--g-ink2)}
+.fx-late{width:14px;height:14px;color:#d1242f}
+.fx-late svg{display:block}
+
+/* ===== 直し（fix flags）=====
+   <div class="mg" data-fix="f1 f2 …"> の旗ごとに、その項目の色だけを上書きする。
+   配置（サイズ・余白・線の太さ）は変えない。枠線を足す所は box-shadow inset で描く。 */
+/* 色の出典：GitHub Primer の Primitives（台帳 CL-100）。濃い文字 #1f2328・サブ文字 #59636e・枠 #d1d9e0 */
+/* ---- 段階1 A 色は役割で決める（f1 f2 f4）---- */
+/* f1 押せる所の色を1つに決める：押せる青は #1552E0（新規タスク・文中のリンク）。押せない所（ロゴ・バー・選択中のタブ・プロジェクトの印）から青をやめる。
+   招待・削除の青い塗りは段階2（f6・f7）でまとめて替えるので、ここでは触らない（同じ部品の色を2回変えない） */
+.mg[data-fix~="f1"] #mg-new{background:#1552E0}
+.mg[data-fix~="f1"] .g-lnk{color:#1552E0} /* ボタンと文中のリンクで同じ青。下線は f10 */
+.mg[data-fix~="f1"] .g-logo .mk{background:#1f2328}
+.mg[data-fix~="f1"] .g-bar{background:#e6eaef} /* 残りの部分（溝）も見えるように */
+.mg[data-fix~="f1"] .g-bar .fill{background:#1f2328}
+.mg[data-fix~="f1"] .g-tab[aria-selected="true"]{color:#1f2328;box-shadow:inset 0 -2px 0 #1f2328} /* 選択中のタブは青ではなく濃い文字＋下線 */
+.mg[data-fix~="f1"] .g-tab:focus-visible{outline-color:#1552E0}
+.mg[data-fix~="f1"] .g-row:focus-visible{outline-color:#1552E0}
+.mg[data-fix~="f1"] .pj-1{background:#bf3989} /* 押せる青と同じだったプロジェクトの印。ほかの2つ（緑・黄）は f13 */
+/* f2 選択中のナビ：大きく塗りつぶさない。淡いグレーの塗り＋濃い左線＋太字（ボタンに見せない） */
+.mg[data-fix~="f2"] .g-item.on{position:relative;background:#e6eaef;color:#1f2328;font-weight:600}
+.mg[data-fix~="f2"] .g-item.on::before{content:"";position:absolute;left:0;top:7px;bottom:7px;width:3px;border-radius:0 2px 2px 0;background:#1f2328} /* 絶対配置なので項目の大きさは変わらない */
+.mg[data-fix~="f2"] .g-item.on svg{color:#1f2328;stroke-width:2.2}
+.mg[data-fix~="f2"] .g-item.on svg path{fill:currentColor} /* 選択中のアイコンは塗りの形に */
+/* f4 塗りと文字はペアで決める：通知の数字バッジ（橙＋白 2.85:1 → 赤＋白 5.36:1。赤の例外は項目1） */
+.mg[data-fix~="f4"] .g-badge{background:#cf222e;color:var(--g-white)}
+/* ---- 段階2 B 色の量を絞る（f5 f6 f7 f18）---- */
+/* f5 画面の大半はニュートラル（ほぼ無彩色）。地 #eff2f5・カード #f6f8fa（Primer bgColor-muted） */
+.mg[data-fix~="f5"]{--g-app:#eff2f5;--g-card:#f6f8fa} /* ほぼ無彩色のニュートラル（Primer）。色みはごく少し（CIELAB の彩度 1.9／1.2） */
+.mg[data-fix~="f5"] .g-user .av{background:#e6eaef;color:#59636e}
+/* f6 目立つ色のボタンは「新規タスク」だけ。ほかは白地に枠だけ（枠は inset で描き、大きさは変えない） */
+.mg[data-fix~="f6"] .g-top .g-btn:not(#mg-new){background:#FFFFFF;color:#1f2328;box-shadow:inset 0 0 0 1px #d1d9e0}
+/* f7 削除は赤（パネルは白地に赤い文字、確認は赤の塗り） */
+.mg[data-fix~="f7"] #mg-del{background:#FFFFFF;color:#d1242f;box-shadow:inset 0 0 0 1px #d1d9e0}
+.mg[data-fix~="f7"] #mg-ok{background:#cf222e;color:var(--g-white)}
+/* f18 押せるボタンをグレーで塗らない。控えめな操作は白地に枠だけ（記事ではグループE。ボタンの強さの話なので段階2） */
+.mg[data-fix~="f18"] #mg-save{background:#1552E0;color:var(--g-white)}
+.mg[data-fix~="f18"] #mg-cancel{background:#FFFFFF;color:#1f2328;box-shadow:inset 0 0 0 1px #d1d9e0}
+.mg[data-fix~="f18"] #mg-dup{background:#FFFFFF;border-color:#d1d9e0;color:#1f2328} /* 複製はダメUIでも1pxの枠を持っているので、枠の色だけ替える */
+/* ---- 段階3 D 意味を持つ色（f11 f12 f13 f14）---- */
+/* f11 状態の色は借りてくる：Primer の淡い地＋濃い文字の組 */
+.mg[data-fix~="f11"] .gs-todo{background:#e6eaef;color:#59636e}
+.mg[data-fix~="f11"] .gs-doing{background:#ddf4ff;color:#0969da}
+.mg[data-fix~="f11"] .gs-review{background:#fff8c5;color:#9a6700}
+.mg[data-fix~="f11"] .gs-back{background:#fff1e5;color:#bc4c00}
+.mg[data-fix~="f11"] .gs-done{background:#dafbe1;color:#1a7f37}
+.mg[data-fix~="f11"] .g-up,.mg[data-fix~="f11"] .g-upn{color:#1a7f37}
+/* f12 注意の強さを分ける：お知らせは黄（文字はふつうの色、アイコンだけ色）、エラーだけ赤 */
+.mg[data-fix~="f12"] .g-notice{background:#fff8c5;border-color:#d4a72c66;color:#1f2328}
+.mg[data-fix~="f12"] .g-notice>svg{color:#9a6700}
+.mg[data-fix~="f12"] .g-err{background:#ffebe9;border-color:#ff818266;color:#d1242f}
+.mg[data-fix~="f12"] .g-row .late{color:#d1242f}
+/* f13 状態の色を飾りに使わない（カテゴリのタグとNEWは枠だけのラベル。プロジェクトの印は状態の色・押せる青・紫を避けた Primer のピンク／青緑／オリーブ。ピンクは f1） */
+.mg[data-fix~="f13"] .g-tag{background:transparent;color:#59636e;box-shadow:inset 0 0 0 1px #d1d9e0}
+.mg[data-fix~="f13"] .g-new{background:transparent;color:#59636e;box-shadow:inset 0 0 0 1px #d1d9e0}
+.mg[data-fix~="f13"] .pj-2{background:#1b7c83}
+.mg[data-fix~="f13"] .pj-3{background:#7a6f1c}
+/* f14 色だけで伝えない（優先度に文字、必須に「必須」、期限切れの日付の右に「!」のアイコン）。
+   優先度は Linear に合わせ、棒の数で段階を示すアイコンに。色を付けるのは「高」だけ（Primer severe #bc4c00）、中・低はグレー（CL-101）。
+   点の箱（8px）はそのまま残し、アイコンは ::before で重ねて描くので配置は変わらない */
+.mg[data-fix~="f14"] .fx-pri,.mg[data-fix~="f14"] .fx-req{display:inline}
+.mg[data-fix~="f14"] .fx-late{display:inline-block}
+.mg[data-fix~="f14"] .g-f label.req{color:var(--g-ink2)}
+.mg[data-fix~="f14"] .g-dot{background:none;position:relative}
+.mg[data-fix~="f14"] .g-dot::before{content:"";position:absolute;left:50%;top:50%;width:11px;height:10px;transform:translate(-50%,-50%);--b1:#d0d7de;--b2:#d0d7de;--b3:#d0d7de;
+  background:linear-gradient(var(--b1),var(--b1)) 0 100%/3px 4px no-repeat,linear-gradient(var(--b2),var(--b2)) 4px 100%/3px 7px no-repeat,linear-gradient(var(--b3),var(--b3)) 8px 100%/3px 10px no-repeat}
+.mg[data-fix~="f14"] .gd-h::before{--b1:#bc4c00;--b2:#bc4c00;--b3:#bc4c00}
+.mg[data-fix~="f14"] .gd-m::before{--b1:#59636e;--b2:#59636e}
+.mg[data-fix~="f14"] .gd-l::before{--b1:#59636e}
+.mg[data-fix~="f14"] .fx-pri{margin-left:3px}
+/* ---- 段階4 C 数値で確かめる（f8 f9 f10）---- */
+/* f8 本文・サブ文字・選ばれていないタブは4.5:1以上（#59636e／カード #f6f8fa 5.74:1） */
+.mg[data-fix~="f8"]{--g-sub:#59636e}
+/* f9 入力欄の枠・意味のあるアイコンは3:1以上（飾りの区切り線 #EEEEEE はそのまま） */
+.mg[data-fix~="f9"]{--g-icon:#59636e}
+.mg[data-fix~="f9"] .g-inp,.mg[data-fix~="f9"] .g-search{border-color:#818b98}
+.mg[data-fix~="f9"] .g-more{color:#59636e}
+/* f10 文中のリンクは下線 */
+.mg[data-fix~="f10"] .g-lnk{text-decoration:underline;text-underline-offset:2px} /* 色は f1 */
+
+/* ===== 確認ページの部品 ===== */
+.bar-r{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.stage-link{font-size:14px;color:var(--fg);text-underline-offset:3px}
+.toggle.off{opacity:.45;pointer-events:none}
+.key-after ul{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px}
+.key-after li{max-width:80ch}
+.step-title{font-size:18px;line-height:1.4;margin:-8px 0 0;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.step-title small{font-size:13px;font-weight:400;color:var(--muted)}
+.key-step h3{font-size:15px;margin:18px 0 8px}
+.key-step h3:first-of-type{margin-top:0}
+.key .step-lead{margin:0 0 12px;color:var(--fg);font-size:15px}
+.key-step .left{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px;color:var(--muted);font-size:14px}
+
+/* ===== 撮影モード（#stage-<id>）：画面だけを窓いっぱいに ===== */
+html.stage-mode,html.stage-mode body{margin:0;height:100%;overflow:hidden;background:var(--g-out)}
+html.stage-mode .wrap{padding:0;max-width:none;display:block}
+html.stage-mode .wrap>header,html.stage-mode .bar,html.stage-mode .key{display:none!important}
+html.stage-mode .stage{position:fixed;inset:0;border:0;border-radius:0;padding:0;background:var(--g-out);overflow:hidden}
+html.stage-mode .mg-out{position:absolute;left:50%;top:50%;width:1280px;height:800px;padding:0;border-radius:0;background:none;transform-origin:center center}
+html.stage-mode .pin{display:none!important}
+.stage-sw{display:none}
+html.stage-mode .stage-sw{display:flex;position:fixed;z-index:50;right:12px;bottom:12px;gap:2px;padding:3px;border-radius:9px;background:rgba(255,255,255,.75);box-shadow:0 1px 4px rgba(0,0,0,.12);font:500 12px/1 var(--font);opacity:0;transition:opacity .25s}
+html.stage-mode .stage-sw.show{opacity:.85}
+html.stage-mode .stage-sw.center{right:auto;left:50%;transform:translateX(-50%)}
+.stage-sw button{font:inherit;border:0;background:transparent;color:#4C4C4C;padding:6px 10px;border-radius:6px;cursor:pointer}
+.stage-sw button[aria-pressed="true"]{background:#2B2B2D;color:#fff}
+@media (prefers-reduced-motion: reduce){html.stage-mode .stage-sw{transition:none}}
+</style>
+
+<div class="wrap" id="app">
+  <header style="display:flex;flex-direction:column;gap:8px">
+    <h1>配色のダメUI</h1>
+    <p class="lead">タスク管理アプリの画面に、配色のよくあるミスを14個入れた見本です。「ダメUI」から「4 アフター」まで、配色の記事の基本（A〜E）のまとまりごとに4つの段階で直していきます。文字のコントラストは最後にまとめて確かめるので、段階はA→B→D→Cの順です。どの部品も、色が変わるのは1つの段階だけです。どの版も配置はまったく同じで、色だけが違います。行を押すと詳細が開き、「タスクを削除」で確認の画面が出ます。表の上のタブ、見出しの右の「…」、アカウントの「…」も押せます。</p>
+  </header>
+
+  <div class="bar">
+    <div class="tabs" role="tablist">
+    </div>
+    <div class="bar-r">
+      <label class="toggle" id="pins-wrap"><input type="checkbox" id="pins"> 答えのピンを表示</label>
+      <a class="stage-link" id="stage-link" href="#stage-before">撮影用に大きく開く</a>
+    </div>
+  </div>
+
+  <h2 class="step-title" id="step-title" aria-live="polite"></h2>
+
+  <!-- ================= 画面（margin風） ================= -->
+  <section id="view-main" class="view">
+    <div class="stage">
+      <div class="mg-out">
+      <div class="mg" id="saas-screen-mg" data-fix="">
+        <div class="g-notice" id="mg-notice" role="status"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg><span>10月25日（土）2:00〜4:00 にメンテナンスを行います。この時間はログインできません。</span><button type="button" class="x" id="mg-notice-x" aria-label="お知らせを閉じる"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button><span class="pin" style="left:330px;top:7px">12</span></div>
+        <aside class="g-side">
+          <div class="g-logo rel"><span class="mk"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12a8 8 0 1 1-4.5-7.2"/></svg></span><b>Tasknote</b><span class="acts"><button type="button" class="g-round" id="mg-bell" aria-label="通知 3件"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span class="g-badge" aria-hidden="true">3</span></button><button type="button" class="g-round" aria-label="サイドバーを閉じる"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16"/></svg></button></span><span class="pin" style="left:-6px;top:-8px">1</span><span class="pin" style="right:64px;top:-12px">4</span></div>
+          <div class="g-search rel"><span class="g-sicon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></span><span class="ph">検索</span><span class="kbd">⌘K</span><span class="pin" style="left:-8px;top:-10px">9</span></div>
+          <nav class="g-nav rel" aria-label="メインメニュー">
+            <span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>ホーム</span><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9"/></svg>マイタスク</span><a class="g-item in" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>プロジェクト<svg class="chev" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></a><a class="g-item g-kid on" href="#" aria-current="page"><i class="pj-1"></i>新サイト公開</a><a class="g-item g-kid" href="#"><i class="pj-2"></i>採用ページ改善</a><a class="g-item g-kid" href="#"><i class="pj-3"></i>11月キャンペーン</a><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>カレンダー</span><span class="g-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg>レポート</span>
+            <span class="pin" style="right:-6px;top:120px">2</span><span class="pin" style="left:12px;top:156px">13</span>
+          </nav>
+          <div class="g-bottom">
+            <div class="g-user"><span class="av">佐</span><span class="nm">佐藤 美咲<small>ディレクター</small></span><button type="button" class="g-more" id="mg-acct" aria-label="アカウントのメニュー" aria-haspopup="menu" aria-expanded="false" aria-controls="mg-acct-menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button>
+              <div class="g-menu" id="mg-acct-menu" role="menu" aria-label="アカウント" hidden><button type="button" class="g-mi" role="menuitem" tabindex="-1" data-say="設定を開きます"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-2.7-1.1l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.1-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 2.7-1.1V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0 1.1 2.7H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg>設定</button><button type="button" class="g-mi" role="menuitem" tabindex="-1" data-say="ヘルプを開きます"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 4.9.8c0 1.7-2.4 2.2-2.4 3.7M12 17h.01"/></svg>ヘルプ</button><hr role="separator"><button type="button" class="g-mi" role="menuitem" tabindex="-1" data-say="ログアウトしました（見本）"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 17l5-5-5-5M15 12H4"/></svg>ログアウト</button></div>
+              <span class="pin" style="right:-8px;top:-8px">9</span>
+            </div>
+          </div>
+        </aside>
+        <main class="g-main">
+          <nav class="g-crumb" aria-label="パンくずリスト"><ol><li><a href="#">プロジェクト</a><span aria-hidden="true">›</span></li></ol></nav>
+          <div class="g-top rel">
+            <i class="g-pjmark pj-1" aria-hidden="true"></i><h1>新サイト公開</h1>
+            <button type="button" class="g-btn blue" id="mg-invite"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="4"/><path d="M2 21c0-4 3-6 7-6s7 2 7 6M17 11h6M20 8v6"/></svg>招待</button>
+            <button type="button" class="g-btn blue" id="mg-new"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>新規タスク</button>
+            <button type="button" class="g-kebab" id="mg-more" aria-label="その他の操作" aria-haspopup="menu" aria-expanded="false" aria-controls="mg-more-menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button>
+            <div class="g-menu" id="mg-more-menu" role="menu" aria-label="その他の操作" hidden><button type="button" class="g-mi" role="menuitem" tabindex="-1" data-say="インポートを始めます"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V9M7 14l5-5 5 5M5 4h14"/></svg>インポート</button><button type="button" class="g-mi" role="menuitem" tabindex="-1" data-say="エクスポートを始めます"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>エクスポート</button></div>
+            <span class="pin" style="right:240px;top:-10px">6</span><span class="pin" style="right:40px;top:-12px">2</span><span class="pin" style="left:-8px;top:-6px">1</span>
+          </div>
+          <div class="g-cols">
+            <section class="g-card">
+              <div class="g-ch"><div class="tt"><h2>タスク</h2><p class="rel">11月10日の公開に向けたタスクです。期限が近いものから確認してください。<span class="pin" style="left:-28px;top:-2px">8</span></p></div><button type="button" class="g-kebab" aria-label="その他"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="19" cy="12" r="1.2" fill="currentColor"/></svg></button></div>
+              <div class="g-big"><b>25%</b><span class="g-chip"><i class="g-up">▲</i><em class="g-upn">1件</em></span><span class="vs">先週より</span></div>
+              <p class="g-para">12件中3件が完了。今週の目標まで、あと3件です。</p>
+              <div class="g-bar rel"><div class="fill"></div><div class="mark"></div><span class="pin" style="left:60px;top:-5px">1</span></div>
+              <div class="g-barlbl"><span>0%</span><span>今週の目標 50%</span></div>
+              <div class="g-tabs rel" role="tablist" aria-label="タスクの絞り込み"><button type="button" class="g-tab" role="tab" id="mg-tab-all" data-f="all" aria-selected="true" aria-controls="mg-tabpanel" tabindex="0"><span>すべて 12</span><span class="rs" aria-hidden="true">すべて 12</span></button><button type="button" class="g-tab" role="tab" id="mg-tab-mine" data-f="mine" aria-selected="false" aria-controls="mg-tabpanel" tabindex="-1"><span>自分の担当 4</span><span class="rs" aria-hidden="true">自分の担当 4</span></button><button type="button" class="g-tab" role="tab" id="mg-tab-late" data-f="late" aria-selected="false" aria-controls="mg-tabpanel" tabindex="-1"><span>期限切れ 1</span><span class="rs" aria-hidden="true">期限切れ 1</span></button><span class="pin" style="left:-26px;top:7px">1</span><span class="pin" style="left:150px;top:-14px">8</span></div>
+              <div class="g-list rel" id="mg-tabpanel" role="tabpanel" aria-labelledby="mg-tab-all">
+                <div class="g-row head"><span>ステータス</span><span>優先度</span><span>タスク</span><span>タグ</span><span class="who">担当</span><span>期限</span></div>
+                <div class="g-row" data-i="0" tabindex="0" role="button"><div><span class="g-st gs-doing">進行中</span></div><div class="g-pri"><span class="g-dot gd-h"></span><span class="fx-mark fx-pri">高</span></div><div style="min-width:0"><div class="nm">トップページのヒーロー画像を差し替える</div><div class="sb">デザイン確定版をもとに書き出し</div></div><div><span class="g-tag tg-d">デザイン</span></div><div class="who"><i>佐</i>佐藤</div><span class="due late">10/14<span class="fx-mark fx-late" role="img" aria-label="期限切れ" title="期限切れ"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5"/><path d="M12 16.5h.01"/></svg></span></span></div><div class="g-row" data-i="1" tabindex="0" role="button"><div><span class="g-st gs-review">レビュー待ち</span></div><div class="g-pri"><span class="g-dot gd-h"></span><span class="fx-mark fx-pri">高</span></div><div style="min-width:0"><div class="nm">お問い合わせフォームの送信テスト<span class="g-new">NEW</span></div><div class="sb">本番環境で3パターン確認</div></div><div><span class="g-tag tg-v">開発</span></div><div class="who"><i>田</i>田中</div><span class="due">10/22</span></div><div class="g-row" data-i="2" tabindex="0" role="button"><div><span class="g-st gs-back">差し戻し</span></div><div class="g-pri"><span class="g-dot gd-m"></span><span class="fx-mark fx-pri">中</span></div><div style="min-width:0"><div class="nm">会社概要ページの文言修正</div><div class="sb">役員の肩書きを最新版に</div></div><div><span class="g-tag tg-p">企画</span></div><div class="who"><i>鈴</i>鈴木</div><span class="due">10/24</span></div><div class="g-row" data-i="3" tabindex="0" role="button"><div><span class="g-st gs-todo">未着手</span></div><div class="g-pri"><span class="g-dot gd-m"></span><span class="fx-mark fx-pri">中</span></div><div style="min-width:0"><div class="nm">OGP画像を5ページ分つくる</div><div class="sb">サイズは1200×630</div></div><div><span class="g-tag tg-d">デザイン</span></div><div class="who"><i>佐</i>佐藤</div><span class="due">10/28</span></div><div class="g-row" data-i="4" tabindex="0" role="button"><div><span class="g-st gs-doing">進行中</span></div><div class="g-pri"><span class="g-dot gd-l"></span><span class="fx-mark fx-pri">低</span></div><div style="min-width:0"><div class="nm">ページ速度の計測と改善</div><div class="sb">LCP 2.5秒以内を目標</div></div><div><span class="g-tag tg-v">開発</span></div><div class="who"><i>田</i>田中</div><span class="due">10/31</span></div><div class="g-row" data-i="5" tabindex="0" role="button"><div><span class="g-st gs-done">完了</span></div><div class="g-pri"><span class="g-dot gd-l"></span><span class="fx-mark fx-pri">低</span></div><div style="min-width:0"><div class="nm">公開告知のメール文面</div><div class="sb">既存顧客向け</div></div><div><span class="g-tag tg-p">企画</span></div><div class="who"><i>鈴</i>鈴木</div><span class="due">10/12</span></div>
+                <span class="pin" style="left:78px;top:44px">11</span><span class="pin" style="left:100px;top:84px">11</span><span class="pin" style="left:136px;top:44px">14</span><span class="pin" style="left:772px;top:26px">13</span><span class="pin" style="left:956px;top:44px">14</span><span class="pin" style="left:762px;top:96px">13</span>
+              </div>
+            </section>
+            <section class="g-card g-detail rel" id="mg-panel" hidden aria-label="タスクの詳細">
+              <div class="g-ch"><div class="tt"><h2>タスクの詳細</h2><p>最終更新 10月19日 14:20</p></div><button type="button" class="g-kebab" id="mg-close" aria-label="閉じる"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+              <div class="g-f rel"><label class="req" for="mg-title">タイトル<span class="fx-mark fx-req">必須</span></label><input class="g-inp" id="mg-title"><span class="pin" style="left:-26px;top:-4px">14</span></div>
+              <div class="g-2"><div class="g-f"><label class="req" for="mg-who">担当者<span class="fx-mark fx-req">必須</span></label><input class="g-inp" id="mg-who"></div><div class="g-f rel"><label for="mg-due">期限</label><input class="g-inp" id="mg-due"><span class="pin" style="right:-8px;top:18px">9</span></div></div>
+              <div class="g-err rel" id="mg-err"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l10 18H2L12 3z"/><path d="M12 10v5M12 18h.01"/></svg><span>期限が過ぎています。今日以降の日付を入れてください。</span><span class="pin" style="right:-8px;top:-8px">12</span></div>
+              <div class="g-f"><label for="mg-memo">メモ</label><textarea class="g-inp" id="mg-memo"></textarea></div>
+              <p class="g-help rel">書き方に迷ったら <span class="g-lnk">記入ルールはこちら</span> を見てください。<span class="pin" style="right:-8px;top:-10px">10</span></p>
+              <div class="g-acts rel">
+                <button type="button" class="g-btn mute" id="mg-save">変更を保存</button>
+                <button type="button" class="g-btn blue" id="mg-del">タスクを削除</button>
+                <button type="button" class="g-btn out" id="mg-dup">複製</button>
+                <span class="pin" style="left:-8px;top:-12px">18</span><span class="pin" style="left:130px;top:-12px">7</span>
+              </div>
+            </section>
+          </div>
+        </main>
+        <div class="g-scrim" id="mg-modal" hidden>
+          <div class="g-dlg" role="dialog" aria-modal="true" aria-labelledby="mg-dt" tabindex="-1">
+            <h2 id="mg-dt">タスクを削除しますか？</h2>
+            <p id="mg-db"></p>
+            <div class="g-acts rel"><button type="button" class="g-btn mute" id="mg-cancel">キャンセル</button><button type="button" class="g-btn blue" id="mg-ok">削除する</button><span class="pin" style="left:212px;top:-12px">18</span><span class="pin" style="left:312px;top:-12px">7</span></div>
+          </div>
+        </div>
+        <div class="g-toast" id="mg-toast" hidden></div>
+      </div>
+      </div>
+    </div>
+
+    <div class="key" id="key-before">
+      <h2>答え合わせ（ダメUI）</h2>
+      <ol>
+        <li data-item="1"><span class="no">項目1　1つの色に、1つの意味だけを持たせる</span><br>同じ青が、押せるボタン・リンクと、押せないロゴ・見出しとサイドバーの「新サイト公開」の印・選択中のタブ・進み具合のバーに使われていて、どれが押せるのか分かりません。<small>リンク #3B6CF6／#FAFAFA 4.32:1</small>　（選択中のナビの青は項目2、進行中と開発タグの青、赤の兼用は項目11〜13）</li>
+        <li data-item="2"><span class="no">項目2　主色は「押せる所」と「今いる場所」。張り合わせない</span><br>選択中のナビ「新サイト公開」と、見出しの右の「新規タスク」「招待」が同じ青の塗りです。参考デザインは選択中を黒で塗り、青と分けています。</li>
+        <li data-item="4"><span class="no">項目4　塗りの色と文字の色はペアで決める</span><br>通知の数字のバッジが、橙の塗りに白い文字。塗りの色だけを決めて、上に載る文字の色とセットで考えていません。<small>白／#F37509 2.85:1</small></li>
+        <li data-item="5"><span class="no">項目5　画面の大半はニュートラル（ほぼ無彩色）で組む</span><br>アプリの地がはっきり青い（#EEF3FF、CIELAB の彩度 6.4）。ブランドの色みをごく少し混ぜるのはよく、Material 3・Gmail（#F8FAFD 彩度 1.7）・Primer（#f6f8fa 彩度 1.2）もそうしています。ダメなのは、色みが見て分かるほど強く、押せる青と同じ系統に見えることです。</li>
+        <li data-item="6"><span class="no">項目6　目立つ色のボタンは1画面に1つ（多くても2つ）</span><br>青の塗りが「招待」「新規タスク」「タスクを削除」の3つ。</li>
+        <li data-item="7"><span class="no">項目7　削除は赤く。主ボタンの見た目にしない</span><br>「タスクを削除」とモーダルの「削除する」が青の主ボタンです。</li>
+        <li data-item="8"><span class="no">項目8　本文は背景と4.5:1以上</span><br>サブ文字・説明文・選ばれていないタブが薄いグレー。<small>#A1A1AA／#FAFAFA 2.46:1</small></li>
+        <li data-item="9"><span class="no">項目9　入力欄の枠やアイコンは3:1以上</span><br>入力欄の枠 <small>#EBEBEB／白 1.19:1</small>、検索アイコン <small>#CFCFD4／白 1.55:1</small>、アカウントの「…」も薄いグレーです。</li>
+        <li data-item="10"><span class="no">項目10　文中のリンクには下線</span><br>「記入ルールはこちら」が色だけです。</li>
+        <li data-item="11"><span class="no">項目11　状態の色は借りてくる。背景は淡く、文字と枠は濃く</span><br>淡い背景に明るい文字のまま。<small>レビュー待ち #EAB308／#FEF9C3 1.79:1／完了 2.07:1／進行中 3.77:1／差し戻し 3.08:1</small></li>
+        <li data-item="12"><span class="no">項目12　「注意」には強さの段階がある</span><br>画面のいちばん上のメンテナンスのお知らせ（帯）と、詳細の入力エラーが同じ赤い見た目です。</li>
+        <li data-item="13"><span class="no">項目13　状態の色を飾りに使わない</span><br>「デザイン」タグが成功の緑、「企画」タグが警告の黄、「NEW」がエラーの赤。サイドバーの「採用ページ改善」「11月キャンペーン」の印も緑と黄（状態の色）です。</li>
+        <li data-item="14"><span class="no">項目14　色だけで伝えない</span><br>優先度が色の点だけ。必須項目がラベルの赤だけ。期限切れが日付の赤だけです。</li>
+        <li data-item="18"><span class="no">項目18　押せるボタンをグレーにしない</span><br>「変更を保存」とモーダルの「キャンセル」が、押せないように見えるグレーの文字。<small>#A1A1AA／#EBEBEB 2.15:1</small></li>
+      </ol>
+      <p>参考デザインの形と余白をまねた版です。参考デザインの分析は bad-ui/reference-margin-analysis.md にあります。</p>
+    </div>
+    <div class="key key-after key-step" id="key-step" hidden>
+      <h2 id="key-step-h">この段階で直したこと</h2>
+      <p class="step-lead" id="key-step-lead"></p>
+      <ul id="key-step-done"></ul>
+      <h3 id="key-step-left-h">まだ残っているミス</h3>
+      <ul class="left" id="key-step-left"></ul>
+    </div>
+    <!-- 段階ごとの説明で、アフターの文をそのまま使うと画面と食い違う項目だけ、ここに段階用の文を置く（data-item と data-ver で選ぶ） -->
+    <div id="step-notes" hidden>
+      <ul>
+        <li data-item="1" data-ver="step1"><span class="no">項目1</span>　押せる青を #1552E0 の1色に決め、「新規タスク」と文中のリンクをこの青に。ロゴ・進み具合のバー・選択中のタブは青をやめて濃い文字色（#1f2328）に。バーには残りが見える淡いニュートラルの溝（#e6eaef）を足しました。見出しとサイドバーの「新サイト公開」の印も、押せる青をやめて Primer のピンク（#bf3989）に。「招待」「タスクを削除」「削除する」の青い塗りは、ボタンの数を絞る段階2で白地・赤に替えます（同じボタンの色を2回変えないため、ここではまだ前の青のままです）。<small>白／#1552E0 6.33:1、リンク #1552E0／#FAFAFA 6.07:1、選択中のタブ #1f2328／#FAFAFA 15.14:1、バー #1f2328／溝 #e6eaef 13.07:1</small></li>
+        <li data-item="2" data-ver="step1"><span class="no">項目2</span>　選択中のナビ「新サイト公開」は大きく塗りつぶさず、淡いニュートラルの塗り（#e6eaef）＋濃い左線＋太字＋塗りのアイコンに。ボタンと見分けがつきます。記事の項目2「太字や左の線を添える」、Spectrumに近い選択中の表し方です。<small>文字 #1f2328／#e6eaef 13.07:1、左線 #1f2328／#EEF3FF 14.22:1</small></li>
+      </ul>
+    </div>
+    <div class="key key-after" id="key-after" hidden>
+      <h2>直したところ（アフター）</h2>
+      <ul>
+        <li data-item="1"><span class="no">項目1</span>　押せる青を #1552E0 の1色に決め、「新規タスク」「変更を保存」と文中のリンクだけに使いました。ロゴ・進み具合のバー・選択中のタブは青をやめて濃い文字色（#1f2328）に。バーには残りが見える淡いニュートラルの溝（#e6eaef）を足しました。見出しとサイドバーの「新サイト公開」の印も、押せる青をやめて Primer のピンク（#bf3989）に。赤はエラー・期限切れ・削除に使い、通知の数字のバッジだけは慣習に合わせた例外です。<small>白／#1552E0 6.33:1、リンク #1552E0／#f6f8fa 5.95:1、選択中のタブ #1f2328／#f6f8fa 14.84:1、バー #1f2328／溝 #e6eaef 13.07:1</small></li>
+        <li data-item="2"><span class="no">項目2</span>　選択中のナビ「新サイト公開」は大きく塗りつぶさず、淡いニュートラルの塗り（#e6eaef）＋濃い左線＋太字＋塗りのアイコンに。ボタンと見分けがつきます。記事の項目2「太字や左の線を添える」、Spectrumに近い選択中の表し方です。<small>文字 #1f2328／#e6eaef 13.07:1、左線 #1f2328／#eff2f5 14.06:1</small></li>
+        <li data-item="4"><span class="no">項目4</span>　通知の数字のバッジは、塗りと文字をペアで決め直して赤の塗りに白い文字に（赤の例外は項目1）。<small>白／#cf222e 5.36:1</small></li>
+        <li data-item="5"><span class="no">項目5</span>　アプリの地を #eff2f5、カードを #f6f8fa（Primer の bgColor-muted）に。どちらも青みをごく少しだけ混ぜたニュートラルで、彩度は 1.9 と 1.2（CIELAB）。Gmail の地 #F8FAFD の 1.7 と同じくらいで、ダメUIの #EEF3FF（6.4）のように押せる青と同じ系統には見えません。アバターの丸もニュートラルに。<small>#59636e／#e6eaef 5.06:1</small></li>
+        <li data-item="6"><span class="no">項目6</span>　青の塗りは「新規タスク」だけ。「招待」は白地に枠だけ（記事の項目18「控えめな操作は白地に枠だけ」）。インポート・エクスポートは「…」のメニューに入れたので、ボタンとしては並びません。<small>#1f2328／白 15.80:1</small></li>
+        <li data-item="7"><span class="no">項目7</span>　「タスクを削除」は白地に赤い文字と枠（Primerの危険ボタン）、確認の「削除する」は赤の塗り。<small>#d1242f／白 5.24:1、白／#cf222e 5.36:1</small></li>
+        <li data-item="8"><span class="no">項目8</span>　サブ文字・説明文・選ばれていないタブをPrimerのサブ文字の色（#59636e）に。<small>#59636e／カード #f6f8fa 5.74:1、／地 #eff2f5 5.44:1、／白 6.11:1</small></li>
+        <li data-item="9"><span class="no">項目9</span>　入力欄の枠と検索アイコン、アカウントの「…」を濃く。<small>枠 #818b98／白 3.45:1、アイコン #59636e／白 6.11:1</small>　飾りの区切り線は薄いまま。</li>
+        <li data-item="10"><span class="no">項目10</span>　「記入ルールはこちら」に下線を引きました（色は段階1で押せる青にそろえています）。<small>#1552E0／#f6f8fa 5.95:1</small></li>
+        <li data-item="11"><span class="no">項目11</span>　状態の色はPrimerから借りた淡い地＋濃い文字の組（CL-100）。進行中は「情報＝青」の淡いチップで、塗りの青いボタンとは別物に見えます。差し戻しは赤（エラー）ではなく一段強い注意のオレンジ（項目12）。<small>未着手 #59636e／#e6eaef 5.06:1／進行中 #0969da／#ddf4ff 4.56:1／レビュー待ち #9a6700／#fff8c5 4.52:1／差し戻し #bc4c00／#fff1e5 4.55:1／完了 #1a7f37／#dafbe1 4.56:1</small>　「▲1件」も同じ緑に。<small>#1a7f37／白 5.08:1</small></li>
+        <li data-item="12"><span class="no">項目12</span>　画面上部のメンテナンスのお知らせは黄色の地にふつうの文字、アイコンだけ黄土色（Primerのお知らせ欄の形）。赤は入力エラーと期限切れの日付だけ。<small>お知らせ #1f2328／#fff8c5 14.66:1、アイコン #9a6700／#fff8c5 4.52:1、エラー #d1242f／#ffebe9 4.57:1、期限切れ #d1242f／#f6f8fa 4.93:1</small></li>
+        <li data-item="13"><span class="no">項目13</span>　デザイン・開発・企画のタグと「NEW」は、状態の色をやめて枠だけのラベル（PrimerのLabel）に。<small>#59636e／#f6f8fa 5.74:1</small>　「採用ページ改善」「11月キャンペーン」の印は見分けがつくよう色は残し、状態の色（赤・橙・黄・緑）・押せる青・紫を避けて、Primerの青緑（#1b7c83）・オリーブ（#7a6f1c）に（「新サイト公開」のピンクは項目1）。横に名前があるので、色だけには頼っていません。<small>地 #eff2f5 に対して 4.39:1／4.54:1（印は文字ではないので目安は3:1）</small></li>
+        <li data-item="14"><span class="no">項目14</span>　優先度の点に「高・中・低」、必須の項目に「必須」の文字を添え、期限切れの日付の右に「!」のアイコン（読み上げは「期限切れ」）を足しました。アイコンを右に置くので、日付の数字は行をまたいで左でそろいます。優先度の点は、棒の数で段階が分かるアイコンに替えました。色を付けるのは「高」だけで、Primer の重めの注意の橙（#bc4c00、カード #f6f8fa との比 4.73:1）です。中・低はグレーにしています。Linear と同じ付け方で（CL-101）、赤は期限切れとエラー専用に残しました（項目1・12）。ラベルの赤もやめて濃いグレーに。</li>
+        <li data-item="18"><span class="no">項目18</span>　「変更を保存」を青の塗りに。「複製」と確認の「キャンセル」は、グレーで塗らず白地に枠だけ。記事ではグループE「操作の状態」の項目ですが、ボタンの強さの話なので段階2で直しています。<small>白／#1552E0 6.33:1、#1f2328／白 15.80:1</small></li>
+      </ul>
+      <p>直したのは色だけで、ボタンや行の大きさ・位置はダメUIと同じです（「必須」「高・中・低」の文字、期限切れの「!」のアイコン、下線、選択中のナビの太字と左線だけ足しています）。途中の段階1〜3も、配置はダメUIと同じです。色の値はGitHub Primerの色（台帳 CL-100）から借りています。</p>
+    </div>
+    <div class="key" id="key-nav">
+      <h2>配色以外の修正</h2>
+      <p style="margin-top:0">次の形の直しは、ダメUIから段階4（アフター）まで、どの版にも同じ形で入れています（色の直しとは別）。</p>
+      <ul style="margin:8px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:6px">
+        <li><b>ナビの階層</b>　今いるページ「新サイト公開」は、サイドバーで親の「プロジェクト」の下に並べ、そこに選択中の印をつけています。親は太字だけで「このグループの中にいる」ことを示し、塗りません。見出しの上にはパンくずリスト。<small>出典：Fluent 2（選択の印は子に）、GOV.UK（今いるページと、その中にいるグループを分ける）、Primer（aria-current は1つだけ）、Jira（プロジェクトをサイドバーの中で開く）、Atlassian（パンくず→見出し→操作の順）、Polaris（親ページがあるページにはパンくず）</small></li>
+        <li><b>絞り込みのタブ</b>　「すべて・自分の担当・期限切れ」を見出しの横の切り替えから、表のすぐ上の下線のタブに移しました。表の中身を絞り込む部品なので、表とつなげて置きます。完了率とバーはプロジェクト全体の数字なので、タブより上に残しています。<small>出典：Polaris の一覧のビュー（NV-204）、Spectrum（セグメントは絞り込みに使わない NV-148）、Carbon（タブとコンテンツスイッチャーの違い NV-162）</small></li>
+        <li><b>見出しの右の操作</b>　ボタンは「招待」「新規タスク」と「…」だけに。インポート・エクスポートは「…」のメニューに入れました。<small>出典：Spectrum（目立たせる操作を絞る）、Carbon のオーバーフローメニュー（NV-48）</small></li>
+        <li><b>お知らせの位置</b>　メンテナンスのお知らせはプロジェクトではなくアプリ全体の話なので、見出しの下から画面のいちばん上の帯に移しました。</li>
+        <li><b>通知・設定・ヘルプ</b>　通知はロゴの横のベルのボタン（数字のバッジ付き）に。設定・ヘルプはアカウントの「…」のメニューに入れ、サイドバーの下はアカウントだけにしました。</li>
+        <li><b>表の列の順</b>　ステータス・優先度・タスク・タグ・担当・期限の順に。まず状態を見て、次に何のタスクかを読む流れにしています（オーナーの判断）。</li>
+        <li><b>優先度の表し方</b>　Linear と同じ、棒の数で段階が分かるアイコン（CL-101）。</li>
+        <li><b>その他</b>　完了率の数字を 48px から 32px に。進み具合のバーの斜線をやめて単色の塗りに。見出しの前にサイドバーと同じプロジェクトの印。期限切れのアイコンは日付の右に置きました。</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<div class="stage-sw" id="stage-sw" aria-label="版の切り替え"></div>
+
+<script>
+// margin風のプロトタイプ
+(function(){
+  var root=document.getElementById('saas-screen-mg'); if(!root) return;
+  var tasks=[
+    {t:'トップページのヒーロー画像を差し替える',w:'佐藤 美咲',d:'2026/10/14',m:'確定版の画像は共有フォルダの「hero_final」に入っています。',late:true},
+    {t:'お問い合わせフォームの送信テスト',w:'田中 翔',d:'2026/10/22',m:'本番環境で、個人・法人・添付ありの3パターンを送って確認する。'},
+    {t:'会社概要ページの文言修正',w:'鈴木 葵',d:'2026/10/24',m:'役員の肩書きを10月1日付の最新版にそろえる。'},
+    {t:'OGP画像を5ページ分つくる',w:'佐藤 美咲',d:'2026/10/28',m:'サイズは1200×630。トップ・会社概要・採用・お問い合わせ・ニュース。'},
+    {t:'ページ速度の計測と改善',w:'田中 翔',d:'2026/10/31',m:'LCP 2.5秒以内が目標。画像の遅延読み込みから試す。'},
+    {t:'公開告知のメール文面',w:'鈴木 葵',d:'2026/10/12',m:'既存顧客向け。公開日の朝9時に配信予約済み。'}
+  ];
+  function $(id){return document.getElementById(id);}
+  var panel=$('mg-panel'), modal=$('mg-modal'), toast=$('mg-toast');
+  var f={t:$('mg-title'),w:$('mg-who'),d:$('mg-due'),m:$('mg-memo')};
+  var cur=null,lastRow=null,timer=null;
+  function rows(){return root.querySelectorAll('.g-row[data-i]');}
+  function open(i,row){cur=i;lastRow=row;var k=tasks[i];f.t.value=k.t;f.w.value=k.w;f.d.value=k.d;f.m.value=k.m;$('mg-err').hidden=!k.late;rows().forEach(function(r){r.classList.toggle('sel',r===row);});panel.hidden=false;root.classList.add('open');}
+  function close(){panel.hidden=true;root.classList.remove('open');rows().forEach(function(r){r.classList.remove('sel');});if(lastRow)lastRow.focus();cur=null;}
+  function say(msg,undo){toast.innerHTML='';var sp=document.createElement('span');sp.textContent=msg;toast.appendChild(sp);if(undo){var b=document.createElement('button');b.type='button';b.textContent='元に戻す';b.onclick=undo;toast.appendChild(b);}toast.hidden=false;clearTimeout(timer);timer=setTimeout(function(){toast.hidden=true;},5000);}
+  root.addEventListener('click',function(e){var a=e.target.closest('a[href="#"]');if(a)e.preventDefault();}); // 見本のリンク。押しても版の切り替え（#）を動かさない
+  var list=root.querySelector('.g-list');
+  list.addEventListener('click',function(e){var r=e.target.closest('.g-row[data-i]');if(r)open(+r.dataset.i,r);});
+  list.addEventListener('keydown',function(e){var r=e.target.closest('.g-row[data-i]');if(r&&(e.key==='Enter'||e.key===' ')){e.preventDefault();open(+r.dataset.i,r);}});
+  $('mg-close').onclick=close;
+  $('mg-save').onclick=function(){var k=tasks[cur];k.t=f.t.value;k.w=f.w.value;k.d=f.d.value;k.m=f.m.value;var n=lastRow.querySelector('.nm');if(n&&n.firstChild)n.firstChild.nodeValue=f.t.value;say('変更を保存しました');};
+  $('mg-dup').onclick=function(){say('「'+tasks[cur].t+'」を複製しました');};
+  $('mg-del').onclick=function(){$('mg-db').textContent='「'+tasks[cur].t+'」を削除します。この操作は取り消せません。';modal.hidden=false;modal.querySelector('.g-dlg').focus();};
+  function closeModal(){modal.hidden=true;$('mg-del').focus();}
+  $('mg-cancel').onclick=closeModal;
+  modal.addEventListener('click',function(e){if(e.target===modal)closeModal();});
+  $('mg-ok').onclick=function(){var row=lastRow,name=tasks[cur].t;modal.hidden=true;row.hidden=true;panel.hidden=true;root.classList.remove('open');row.classList.remove('sel');cur=null;say('「'+name+'」を削除しました',function(){row.hidden=false;toast.hidden=true;});};
+  // 「…」から開く小さなメニュー（その他の操作・アカウント）。外を押す・Esc・Tab で閉じる
+  var openMenu=null;
+  function menuItems(m){return [].slice.call(m.querySelectorAll('[role="menuitem"]'));}
+  function hideMenu(focusBtn){if(!openMenu)return;var m=openMenu;m.menu.hidden=true;m.btn.setAttribute('aria-expanded','false');openMenu=null;if(focusBtn)m.btn.focus();}
+  function showMenu(btn,menu){hideMenu(false);menu.hidden=false;btn.setAttribute('aria-expanded','true');openMenu={btn:btn,menu:menu};menuItems(menu)[0].focus();}
+  [['mg-more','mg-more-menu'],['mg-acct','mg-acct-menu']].forEach(function(p){
+    var btn=$(p[0]),menu=$(p[1]);
+    btn.addEventListener('click',function(e){e.stopPropagation();if(openMenu&&openMenu.menu===menu)hideMenu(true);else showMenu(btn,menu);});
+    menu.addEventListener('click',function(e){var it=e.target.closest('[role="menuitem"]');if(!it)return;hideMenu(true);say(it.dataset.say);});
+    menu.addEventListener('keydown',function(e){var its=menuItems(menu),i=its.indexOf(document.activeElement);
+      if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();i=(i+(e.key==='ArrowDown'?1:-1)+its.length)%its.length;its[i].focus();}
+      else if(e.key==='Home'||e.key==='End'){e.preventDefault();its[e.key==='Home'?0:its.length-1].focus();}
+      else if(e.key==='Tab'){hideMenu(false);}});
+  });
+  document.addEventListener('click',function(e){if(openMenu&&!openMenu.menu.contains(e.target)&&!openMenu.btn.contains(e.target))hideMenu(false);});
+  // 絞り込みのタブ（自分の担当＝佐藤、期限切れ＝期限が過ぎた行）
+  var tabs=[].slice.call(root.querySelectorAll('.g-tab')), tabpanel=$('mg-tabpanel');
+  function pick(t,focus){tabs.forEach(function(x){var on=x===t;x.setAttribute('aria-selected',String(on));x.tabIndex=on?0:-1;});tabpanel.setAttribute('aria-labelledby',t.id);
+    var f=t.dataset.f;rows().forEach(function(r){var k=tasks[+r.dataset.i];r.classList.toggle('flt-out',f==='mine'?k.w.indexOf('佐藤')!==0:f==='late'?!k.late:false);});if(focus)t.focus();}
+  tabs.forEach(function(t,i){t.addEventListener('click',function(){pick(t);});t.addEventListener('keydown',function(e){if(e.key!=='ArrowRight'&&e.key!=='ArrowLeft')return;e.preventDefault();pick(tabs[(i+(e.key==='ArrowRight'?1:-1)+tabs.length)%tabs.length],true);});});
+  $('mg-notice-x').onclick=function(){$('mg-notice').hidden=true;};
+  $('mg-bell').onclick=function(){say('新しい通知が3件あります');};
+  root.addEventListener('keydown',function(e){if(e.key!=='Escape')return;if(openMenu){hideMenu(true);return;}if(!modal.hidden)closeModal();else if(!panel.hidden)close();});
+})();
+// 版（ダメUI→段階1〜4）。段階は配色の記事の基本のまとまり（A→B→D→C）。own はその段階で新しく直す旗。fix（画面に付ける旗）は前の段階の分を足し上げて作る。
+// 旗 fN は答え合わせの項目N。段階を足し替えるときは、この配列の own を書き替えるだけ
+const VERSIONS=[
+  {id:'before',tab:'ダメUI',title:'ダメUI',sub:'配色のミスが14個',own:[]},
+  {id:'step1',tab:'1 役割',title:'1 A 色は役割で決める',own:['f1','f2','f4'],
+   lead:'A 色は役割で決める：色を選ぶ前に、押せる所・今いる場所・通知などの役割ごとに1色を決める。'},
+  {id:'step2',tab:'2 量',title:'2 B 色の量を絞る',own:['f5','f6','f7','f18'],
+   lead:'B 色の量を絞る：画面の大半はニュートラルで組み、目立つ色の塗りは主ボタンと削除の確認だけにする。項目18（押せるボタンをグレーにしない）は記事ではE「操作の状態」の項目ですが、ボタンの強さの話なのでここで直します。'},
+  {id:'step3',tab:'3 意味',title:'3 D 意味を持つ色',own:['f11','f12','f13','f14'],
+   lead:'D 意味を持つ色：状態・注意・エラーの色は定番から借り、強さの段階を分け、飾りには使わず、色だけに頼らない。'},
+  {id:'step4',tab:'4 数値・アフター',title:'4 C 数値で確かめる',sub:'アフター（14個すべて直した版）',own:['f8','f9','f10'],
+   lead:'C 数値で確かめる：最後に、文字は背景と4.5:1以上、入力欄の枠や意味のあるアイコンは3:1以上かを計算で確かめる。文中のリンクには下線を引く。'}
+];
+(function(){var acc=[];VERSIONS.forEach(function(v){acc=acc.concat(v.own);v.fix=acc.slice();});})();
+// 古いリンク（#after・#stage-after）は段階4として開く
+const VERSION_ALIASES={after:'step4'};
+(function(){
+  var html=document.documentElement, app=document.getElementById('app');
+  var mg=document.getElementById('saas-screen-mg'), mgOut=mg.parentElement;
+  var tabs=document.querySelector('.tabs'), sw=document.getElementById('stage-sw');
+  var pins=document.getElementById('pins'), pinsWrap=document.getElementById('pins-wrap');
+  var stageLink=document.getElementById('stage-link');
+  var cur=VERSIONS[0].id, stage=false;
+  function byId(id){id=VERSION_ALIASES[id]||id;for(var i=0;i<VERSIONS.length;i++) if(VERSIONS[i].id===id) return VERSIONS[i]; return null;}
+  var stepTitle=document.getElementById('step-title');
+  var keyStep=document.getElementById('key-step'), stepDone=document.getElementById('key-step-done'), stepLeft=document.getElementById('key-step-left'), stepLeftH=document.getElementById('key-step-left-h');
+  var allPins=[].slice.call(mg.querySelectorAll('.pin'));
+  function num(f){return +f.slice(1);}
+  function afterLine(n,vid){
+    var li=document.querySelector('#step-notes li[data-item="'+n+'"][data-ver="'+vid+'"]')||document.querySelector('#key-after li[data-item="'+n+'"]');
+    var c=li.cloneNode(true); c.removeAttribute('data-ver'); return c;
+  }
+  function fillStep(v){
+    stepDone.innerHTML=''; stepLeft.innerHTML=''; document.getElementById('key-step-lead').textContent=v.lead||'';
+    v.own.forEach(function(f){stepDone.appendChild(afterLine(num(f),v.id));});
+    var left=[].slice.call(document.querySelectorAll('#key-before li[data-item]')).filter(function(li){return v.fix.indexOf('f'+li.dataset.item)<0;});
+    left.forEach(function(li){var x=document.createElement('li');x.textContent=li.querySelector('.no').textContent;stepLeft.appendChild(x);});
+    stepLeftH.hidden=stepLeft.hidden=!left.length;
+  }
+  function mkBtns(box,attr){
+    VERSIONS.forEach(function(v){var b=document.createElement('button');b.type='button';b.dataset.ver=v.id;b.textContent=v.tab;b.title=v.title;if(attr==='tab'){b.setAttribute('role','tab');}box.appendChild(b);
+      b.addEventListener('click',function(){go(v.id);});});
+  }
+  mkBtns(tabs,'tab'); mkBtns(sw,'sw');
+  function go(id){var h=(stage?'stage-':'')+id; try{history.replaceState(null,'','#'+h);}catch(e){} apply(id,stage);}
+  function apply(id,st){
+    var v=byId(id)||VERSIONS[0]; cur=v.id; stage=st;
+    mg.setAttribute('data-fix',v.fix.join(' '));
+    tabs.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-selected',String(b.dataset.ver===cur));});
+    sw.querySelectorAll('button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.ver===cur));});
+    var isBefore=cur===VERSIONS[0].id, isLast=cur===VERSIONS[VERSIONS.length-1].id;
+    // ピンは、その版でまだ直していないミスだけ出す
+    var leftPins=0;
+    allPins.forEach(function(p){var done=v.fix.indexOf('f'+p.textContent.trim())>=0;p.classList.toggle('done',done);if(!done)leftPins++;});
+    pinsWrap.classList.toggle('off',!leftPins); pins.disabled=!leftPins;
+    app.classList.toggle('show-pins',pins.checked&&!!leftPins&&!stage);
+    stepTitle.innerHTML=''; stepTitle.appendChild(document.createTextNode(isBefore?v.title:'段階'+v.title.replace(' ','　')));
+    if(v.sub){var sm=document.createElement('small');sm.textContent=v.sub;stepTitle.appendChild(sm);}
+    document.getElementById('key-before').hidden=!isBefore;
+    keyStep.hidden=isBefore; if(!isBefore) fillStep(v);
+    document.getElementById('key-step-h').textContent='この段階で直したこと（段階'+v.title.replace(' ','　')+'）';
+    document.getElementById('key-after').hidden=!isLast;
+    stageLink.href='#stage-'+cur;
+    html.classList.toggle('stage-mode',stage);
+    fit();
+  }
+  function fromHash(){
+    var h=location.hash.slice(1), st=false;
+    if(h.indexOf('stage-')===0){st=true;h=h.slice(6);} else if(h==='stage'){st=true;h='';}
+    var v=byId(h); apply(v?v.id:VERSIONS[0].id,st);
+  }
+  // 撮影モード：1280×800 を窓に収める（余白24px・中央）
+  function fit(){
+    if(!stage){mgOut.style.transform='';return;}
+    var W=window.innerWidth,H=window.innerHeight,m=24;
+    var sc=Math.min((W-2*m)/1280,(H-2*m)/800);
+    mgOut.style.transform='translate(-50%,-50%) scale('+sc+')';
+    // 左右の余白に切り替えが収まらないときは、下の中央に置く
+    sw.classList.toggle('center',(W-1280*sc)/2<sw.offsetWidth+24);
+  }
+  var idle=null;
+  function wake(){if(!stage)return;sw.classList.add('show');clearTimeout(idle);idle=setTimeout(function(){sw.classList.remove('show');},2000);}
+  window.addEventListener('mousemove',wake);
+  window.addEventListener('resize',fit);
+  window.addEventListener('hashchange',fromHash);
+  document.addEventListener('keydown',function(e){
+    if(!stage||e.altKey||e.ctrlKey||e.metaKey) return;
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+    var t=e.target; if(t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable)) return;
+    var i=VERSIONS.findIndex(function(v){return v.id===cur;});
+    i=(i+(e.key==='ArrowRight'?1:-1)+VERSIONS.length)%VERSIONS.length;
+    e.preventDefault(); go(VERSIONS[i].id); wake();
+  });
+  pins.addEventListener('change',function(){apply(cur,stage);});
+  window.setVersion=function(id,st){apply(id,!!st);};
+  fromHash();
+})();
+</script>

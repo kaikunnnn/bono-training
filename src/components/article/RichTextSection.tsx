@@ -11,6 +11,8 @@ import { CommunityJoinLink } from "@/components/analytics/CommunityJoinLink";
 // meta description（会員限定記事）と同じ「非会員に見える先頭ブロック数」を共有する
 import { PREMIUM_PREVIEW_BLOCK_COUNT } from "@/lib/seo/articleDescription";
 import { PAYWALLED_CONTENT_CLASS } from "@/lib/seo/indexablePremium";
+import { ArticleReadTracker } from "@/components/article/ArticleReadTracker";
+import type { ArticleReadTracking } from "@/lib/activity-client";
 
 /** Slack ワークスペースへの招待リンク（join.slack.com）か */
 function isSlackInviteUrl(href: string): boolean {
@@ -34,6 +36,11 @@ interface RichTextSectionProps {
   paywalledFrom?: number;
   /** 外側の白カード（bg-white / rounded / shadow / padding）を外す。デフォルト false */
   bare?: boolean;
+  /**
+   * #262「記事を読んだ」の計測。渡したときだけ本文を ArticleReadTracker（同じ div）で包む。
+   * 本文を全部見られる人（/contents/[slug] の hasAccess）だけに渡す
+   */
+  readTracking?: ArticleReadTracking;
 }
 
 /**
@@ -89,6 +96,7 @@ const RichTextSection = ({
   afterContent,
   paywalledFrom,
   bare = false,
+  readTracking,
 }: RichTextSectionProps) => {
   const textContainerClassName = "w-full max-w-[60ch] md:max-w-[66ch]";
 
@@ -520,27 +528,35 @@ const RichTextSection = ({
     ? "w-full text-text-primary flex flex-col justify-start items-start gap-1 relative"
     : "w-full px-6 py-6 bg-white text-text-primary rounded-[20px] shadow-xs flex flex-col justify-start items-start gap-1";
 
+  // 本文。#262 の計測をするときだけ、同じ class の Client Component（ArticleReadTracker）で包む（見た目は同じ）
+  const body =
+    typeof paywalledFrom === "number" &&
+    paywalledFrom < displayContent.length ? (
+      <>
+        <PortableText
+          value={displayContent.slice(0, paywalledFrom)}
+          components={components}
+        />
+        <div className={PAYWALLED_CONTENT_CLASS}>
+          <PortableText
+            value={displayContent.slice(paywalledFrom)}
+            components={components}
+          />
+        </div>
+      </>
+    ) : (
+      <PortableText value={displayContent} components={components} />
+    );
+
   return (
     <div className={wrapperClass}>
-      <div className="w-full">
-        {typeof paywalledFrom === "number" &&
-        paywalledFrom < displayContent.length ? (
-          <>
-            <PortableText
-              value={displayContent.slice(0, paywalledFrom)}
-              components={components}
-            />
-            <div className={PAYWALLED_CONTENT_CLASS}>
-              <PortableText
-                value={displayContent.slice(paywalledFrom)}
-                components={components}
-              />
-            </div>
-          </>
-        ) : (
-          <PortableText value={displayContent} components={components} />
-        )}
-      </div>
+      {readTracking ? (
+        <ArticleReadTracker tracking={readTracking} className="w-full">
+          {body}
+        </ArticleReadTracker>
+      ) : (
+        <div className="w-full">{body}</div>
+      )}
 
       {afterContent}
 

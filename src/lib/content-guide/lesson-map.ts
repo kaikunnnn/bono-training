@@ -50,7 +50,7 @@ const L = {
   uiTrace: { slug: "uitrace", title: "UIトレース入門", freeCount: 1, totalCount: 1 },
   designCycle: { slug: "ui-design-flow-lv1", title: "UIが上手くなる人の“デザインサイクル” ─ 入門編β", freeCount: 11, totalCount: 23 },
   uxBiginner: { slug: "ux-biginner", title: "はじめてのUXデザイン", freeCount: 4, totalCount: 13 },
-  cursor: { slug: "cursor-for-designers", title: "デザイナーのためのCursor入門", freeCount: 1, totalCount: 1 },
+  cursor: { slug: "cursor-ui-ai-design", title: "デザイナーのためのCursor入門 | 触れる画面のAI×UIデザイン", freeCount: 20, totalCount: 20 },
   aiuiBeginner: { slug: "aiui_beginner", title: "AI×UIリサーチ&プロトタイプ” ─ 入門編", freeCount: 7, totalCount: 7 },
   codeAndDesign: { slug: "codeanddesign", title: "実装とデザインの関係超入門", freeCount: 2, totalCount: 12 },
   uiLayoutBasic: { slug: "ui-layout-basic", title: "使いやすいUIの秘密", freeCount: 13, totalCount: 24 },

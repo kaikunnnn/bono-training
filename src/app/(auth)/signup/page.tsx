@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,21 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { TabGroup } from "@/components/ui/tab-group";
 import { Mail, Lock, UserPlus, AlertCircle } from "lucide-react";
 import { RegistrationFlowGuide } from "@/components/auth/RegistrationFlowGuide";
+import { PasswordRequirements } from "@/components/auth/PasswordRequirements";
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_MIN_LENGTH_LABEL,
+  PASSWORD_TOO_SHORT_MESSAGE,
+  isPasswordLongEnough,
+} from "@/lib/auth-password";
+import {
+  SIGNUP_REQUEST_FAILED_MESSAGE,
+  invalidFieldReason,
+  isNextInternalError,
+  reportSignupRequestFailed,
+  trackSignupError,
+  trackSignupStep,
+} from "@/lib/auth-client-error";
 import { signUp } from "../actions";
 import { createClient } from "@/lib/supabase/client";
 
@@ -20,6 +35,8 @@ export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
+  // プランを選んでから来た人か（GA4 で分けて見る。#320）
+  const hasPlan = !!redirectTo?.includes("intent_plan");
 
   const [activeTab, setActiveTab] = useState<TabId>("new");
   const [email, setEmail] = useState("");
@@ -45,6 +62,20 @@ export default function SignupPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    trackSignupStep("signup_submit", hasPlan);
+
+    // Supabase に送る前に文字数を確かめる（#321）
+    if (!isPasswordLongEnough(password)) {
+      setError(PASSWORD_TOO_SHORT_MESSAGE);
+      trackSignupError("password_too_short", hasPlan);
+      return;
+    }
+    if (password !== confirmPassword) {
+      setError("パスワードが一致しません");
+      trackSignupError("password_mismatch", hasPlan);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -60,8 +91,16 @@ export default function SignupPage() {
 
       if (result?.error) {
         setError(result.error);
+        trackSignupError("server", hasPlan);
       }
       // 成功時は signUp 内で redirect される
+    } catch (err) {
+      // redirect 等の Next.js 内部の制御はそのまま流す
+      if (isNextInternalError(err)) throw err;
+      // サーバーとの通信そのものが失敗した（通信切れ・デプロイ直後の食い違い等）。
+      // 以前はボタンが戻るだけで何も表示されず、記録も残らなかった（#321 S5）
+      setError(SIGNUP_REQUEST_FAILED_MESSAGE);
+      reportSignupRequestFailed(err, email, hasPlan);
     } finally {
       setIsSubmitting(false);
     }
@@ -89,7 +128,15 @@ export default function SignupPage() {
       {/* 新規登録タブ: メール/パスワードで直接登録 */}
       {activeTab === "new" && (
         <Card className="mt-4 rounded-3xl">
-          <form onSubmit={handleSignUp}>
+          <form
+            onSubmit={handleSignUp}
+            // ブラウザの入力チェック（メール形式・必須・最低文字数）で止まった欄を数える。
+            // ここで止まると onSubmit は呼ばれず、これまで記録が残らなかった（#320）
+            onInvalidCapture={(e) => {
+              const reason = invalidFieldReason((e.target as HTMLElement).id);
+              if (reason) trackSignupError(reason, hasPlan);
+            }}
+          >
             <CardContent className="pt-6 space-y-4">
               {error && (
                 <Alert variant="destructive">
@@ -119,13 +166,18 @@ export default function SignupPage() {
                   <Input
                     id="signup-password"
                     type="password"
-                    placeholder="8文字以上"
+                    placeholder={PASSWORD_MIN_LENGTH_LABEL}
                     className="pl-10"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={8}
+                    minLength={PASSWORD_MIN_LENGTH}
+                    autoComplete="new-password"
+                    aria-describedby="signup-password-requirements"
                   />
+                </div>
+                <div id="signup-password-requirements">
+                  <PasswordRequirements password={password} confirmPassword={confirmPassword} />
                 </div>
               </div>
               <div className="space-y-2">
@@ -140,13 +192,20 @@ export default function SignupPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    minLength={8}
+                    minLength={PASSWORD_MIN_LENGTH}
+                    autoComplete="new-password"
                   />
                 </div>
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" size="large" className="w-full font-noto-sans-jp" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                size="large"
+                className="w-full font-noto-sans-jp"
+                disabled={isSubmitting}
+                onClick={() => trackSignupStep("signup_click", hasPlan)}
+              >
                 <UserPlus className="mr-2 h-4 w-4" />
                 {isSubmitting ? "登録中..." : "アカウントを作成"}
               </Button>
@@ -165,9 +224,9 @@ export default function SignupPage() {
       {/* ログインへの導線 */}
       <p className="text-center mt-6 text-sm text-muted-foreground font-noto-sans-jp">
         すでにアカウントをお持ちの方は{" "}
-        <Link href={loginHref} className="text-primary hover:underline">
+        <IntentPrefetchLink href={loginHref} className="text-primary hover:underline">
           ログイン
-        </Link>
+        </IntentPrefetchLink>
       </p>
     </div>
   );

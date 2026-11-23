@@ -29,6 +29,15 @@ export const GUIDE_SEO_OVERRIDES: Record<string, GuideSeoOverride> = {
     title:
       "転職ロードマップの中身を解説｜フェーズごとに目指すレベルと習得すること | BONO",
   },
+  // #236 オーナー決定B（2026-10-09）/ #276: 役割を「年収と将来」に絞り、rdm-howtobeadesigner と
+  // 「未経験」「なるには」で取り合わないようにする。Sanity の description は空なので説明文も決める。
+  // h1（Sanity の title）と本文の見出しは Sanity 側（このファイルでは変えない）。
+  "become-uiux-designer-beginner-guide": {
+    title:
+      "UI/UXデザイナーの年収と将来性｜仕事の役割・年収の目安・キャリアの広げ方 | BONO",
+    description:
+      "UI/UXデザイナーの仕事の役割と、年収の目安・会社による違い・年収1000万円以上を目指す道やフリーランスという選択肢まで、これからのキャリアを考える材料をまとめました。",
+  },
 };
 
 export function getGuideSeoOverride(

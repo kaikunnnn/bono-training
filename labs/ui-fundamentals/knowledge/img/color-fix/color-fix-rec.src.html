@@ -1,0 +1,1547 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>撮影メモ：ダメなUIを4段階で直す</title>
+<meta name="description" content="記事「ダメなUIを4段階で直す」の動画を撮るときの手元メモ。変えた33か所ごとに、直す前とゴールの画像、Figmaで変える値、話すポイントを並べます。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  :root {
+    color-scheme: light;
+    /* 外側の余白（最低16px＋セーフエリア）。D-1 の例外: カスタムプロパティ定義 */
+    --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+    --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--color-accent); }
+
+  /* 外側の余白: 最低16px＋セーフエリア */
+  .wrap {
+    max-width: calc(var(--measure) + var(--space-96));
+    margin: 0 auto;
+    padding-left: var(--gutter-l);
+    padding-right: var(--gutter-r);
+  }
+  @media (min-width: 1024px) { .wrap { padding-left: var(--space-48); padding-right: var(--space-48); } }
+
+  /* --- ヒーロー（静的グラデのみ） --- */
+  .hero {
+    background: linear-gradient(135deg, var(--grad-1), var(--grad-3) 45%, var(--grad-2) 72%, var(--grad-4));
+    color: var(--color-on-grad);
+    border-radius: 0 0 var(--radius-l) var(--radius-l);
+  }
+  .hero__inner { max-width: calc(var(--measure) + var(--space-96)); margin: 0 auto; padding-block: var(--space-64) var(--space-48); padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+  @media (min-width: 1024px) { .hero__inner { padding-block: var(--space-96) var(--space-64); padding-left: var(--space-48); padding-right: var(--space-48); } }
+  .hero .eyebrow { font-size: var(--text-small); font-weight: 700; letter-spacing: 0.1em; margin: 0 0 var(--space-16); }
+  .hero .eyebrow a { color: var(--color-on-grad); text-decoration: none; }
+  .hero .draft { display: inline-block; font-size: var(--text-caption); font-weight: 700; border: 1px solid var(--color-on-grad); border-radius: var(--radius-l); padding: var(--space-2) var(--space-10); margin: 0 0 var(--space-12); }
+  .hero h1 { font-size: 30px; font-weight: 900; line-height: var(--leading-heading); margin: 0 0 var(--space-16); }
+  @media (min-width: 768px) { .hero h1 { font-size: 44px; } }
+  .hero h1 small { display: block; font-size: 0.5em; font-weight: 700; margin: var(--space-8) 0 0; }
+  .hero p.lede { font-size: 17px; font-weight: 500; max-width: 36rem; margin: 0 0 var(--space-16); }
+  .hero .meta { font-size: var(--text-small); margin: 0; }
+
+  /* --- 本文 --- */
+  main { padding-block: var(--space-48) var(--space-40); }
+  .prose > p, .intro p { max-width: var(--measure); margin: 0 0 var(--space-16); line-height: var(--leading-body); }
+  .intro h2 { font-size: 22px; line-height: var(--leading-heading); margin: var(--space-32) 0 var(--space-12); }
+  .intro ul { max-width: var(--measure); margin: 0 0 var(--space-16); padding: 0 0 0 var(--space-20); }
+  .intro li { margin: 0 0 var(--space-6); line-height: var(--leading-body); }
+
+  /* --- 凡例 --- */
+  .legend { display: flex; flex-wrap: wrap; gap: var(--space-12); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-16) var(--space-20); margin: var(--space-24) 0 0; }
+  .legend .li { display: flex; align-items: flex-start; gap: var(--space-8); flex: 1 1 220px; min-width: 0; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 4px; flex: none; margin: var(--space-4) 0 0; }
+  .legend .sw.f { background: var(--color-fact); }
+  .legend .sw.i { background: var(--color-interp); }
+  .legend .lt { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); }
+  .legend .lt b { color: var(--color-ink); }
+
+  /* --- 目次 --- */
+  .toc { background: var(--color-surface-2); border-radius: var(--radius-m); padding: var(--space-20); margin: var(--space-32) 0 0; }
+  .toc > p { font-size: 15px; font-weight: 700; color: var(--color-ink-3); margin: 0 0 var(--space-12); }
+  .toc .tg { font-size: var(--text-caption); font-weight: 700; color: var(--color-ink-3); margin: var(--space-12) 0 var(--space-4); }
+  .toc ol { list-style: none; display: grid; grid-template-columns: 1fr; gap: var(--space-4); }
+  .toc a { display: flex; gap: var(--space-10); text-decoration: none; color: var(--color-ink); font-size: var(--text-small); line-height: var(--leading-small); }
+  .toc a span { color: var(--color-accent); font-weight: 700; min-width: 22px; }
+  .toc a:hover { color: var(--color-accent); }
+
+  /* --- グループ見出し（A〜G） --- */
+  .group { margin: var(--space-64) 0 0; padding: var(--space-20) 0 0; border-top: 3px solid var(--color-accent); }
+  .group__no { font-size: var(--text-small); font-weight: 900; color: var(--color-accent); letter-spacing: 0.1em; margin: 0 0 var(--space-4); }
+  .group h2 { font-size: 26px; line-height: var(--leading-heading); margin: 0 0 var(--space-8); }
+  .group__lead { color: var(--color-ink-2); font-size: var(--text-small); line-height: var(--leading-small); margin: 0; max-width: var(--measure); }
+
+  /* --- 項目 --- */
+  .item { padding: var(--space-48) 0 0; scroll-margin-top: var(--space-24); }
+  .item__no { font-size: var(--text-small); font-weight: 700; color: var(--color-accent); letter-spacing: 0.08em; margin: 0 0 var(--space-6); }
+  .item h3 { font-size: 22px; font-weight: 700; line-height: var(--leading-heading); margin: 0 0 var(--space-12); }
+  @media (min-width: 768px) { .item h3 { font-size: 25px; } }
+  .step { font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; color: var(--color-ink-3); margin: var(--space-24) 0 var(--space-6); }
+
+  .howto { background: var(--color-surface-2); border: 1px solid var(--color-border); border-left: 4px solid var(--color-accent); border-radius: var(--radius-m); padding: var(--space-16) var(--space-20); margin: var(--space-12) 0 var(--space-8); max-width: var(--measure); }
+  .howto::before { content: "① やること"; display: block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; color: var(--color-accent); margin: 0 0 var(--space-6); }
+  .howto p { margin: 0; font-weight: 700; line-height: var(--leading-body); color: var(--color-ink); }
+  .howto p + p { margin: var(--space-8) 0 0; font-weight: 500; font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); }
+
+  .agree { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); margin: 0 0 var(--space-8); max-width: var(--measure); }
+  .agree b { color: var(--color-ink); }
+
+  .claim { display: block; border-radius: var(--radius-s); padding: var(--space-16) var(--space-20); margin: var(--space-12) 0; border-left: 4px solid; line-height: var(--leading-body); max-width: var(--measure); }
+  .claim::before { display: block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; margin: 0 0 var(--space-6); }
+  span[data-type="fact"] { background: var(--color-fact-bg); border-color: var(--color-fact); color: var(--color-ink); }
+  span[data-type="fact"]::before { content: "事実 — 一次ソースの記述（言い換え）"; color: var(--color-fact); }
+  span[data-type="interpretation"] { background: var(--color-interp-bg); border-color: var(--color-interp); color: var(--color-ink); }
+  span[data-type="interpretation"]::before { content: "解釈 — 実務での使い方"; color: var(--color-interp); }
+  .claim .para { display: block; margin: var(--space-8) 0 0; }
+
+  .cites { display: flex; flex-wrap: wrap; gap: var(--space-6); margin: var(--space-12) 0 0; }
+  a.cite { display: inline-flex; align-items: center; gap: var(--space-4); font-size: var(--text-caption); font-weight: 500; text-decoration: none; color: var(--color-ink-2); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-l); padding: var(--space-2) var(--space-10); line-height: var(--leading-small); max-width: 100%; overflow-wrap: anywhere; }
+  a.cite:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+  .caution { border: 1px solid var(--color-interp); border-radius: var(--radius-s); background: var(--color-surface); padding: var(--space-12) var(--space-16); margin: var(--space-12) 0; font-size: var(--text-small); line-height: var(--leading-small); max-width: var(--measure); }
+  .caution b { color: var(--color-interp); margin: 0 var(--space-6) 0 0; }
+  .counter { border: 2px dashed var(--color-interp); background: var(--color-interp-bg); border-radius: var(--radius-m); padding: var(--space-16) var(--space-20); margin: var(--space-12) 0; max-width: var(--measure); }
+  .counter .tag { display: inline-block; font-size: var(--text-caption); font-weight: 700; color: var(--color-interp); letter-spacing: 0.06em; margin: 0 0 var(--space-6); }
+  .counter p { margin: 0; line-height: var(--leading-body); font-size: var(--text-small); }
+
+  /* --- ビフォー／アフター図（差し替え単位: figure.ba[data-point]） --- */
+  figure.ba { margin: var(--space-8) 0 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-12); box-shadow: var(--shadow-card); }
+  .ba__panels { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-12); }
+  @media (min-width: 640px) { .ba__panels { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .ba--single .ba__panels { grid-template-columns: minmax(0, 1fr); }
+  .ba__panel { background: var(--color-surface-2); border-radius: var(--radius-s); padding: var(--space-10); min-width: 0; }
+  .ba__label { font-size: var(--text-caption); font-weight: 900; letter-spacing: 0.1em; margin: 0 0 var(--space-8); }
+  .ba__panel[data-state="before"] .ba__label { color: var(--color-interp); }
+  .ba__panel[data-state="after"] .ba__label { color: var(--color-fact); }
+  .ba__panel[data-state="diagram"] .ba__label { color: var(--color-ink-3); }
+  figure.ba figcaption { margin: var(--space-12) 0 0; font-size: var(--text-small); color: var(--color-ink-3); line-height: var(--leading-small); }
+
+  /* --- 図の中のモック部品 --- */
+  .mock { background: var(--swatch-base-white); border: 1px solid var(--color-border); border-radius: var(--radius-s); padding: var(--space-12); color: var(--swatch-base-ink); font-size: 13px; line-height: var(--leading-small); overflow-wrap: anywhere; }
+  .m-h { font-size: 15px; font-weight: 700; line-height: var(--leading-heading); margin: 0 0 var(--space-6); }
+  .m-p { font-size: 13px; margin: 0 0 var(--space-8); line-height: var(--leading-small); }
+  .m-row { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: center; }
+  .m-btn { display: inline-block; font-size: 13px; font-weight: 700; padding: var(--space-6) var(--space-12); border-radius: 6px; border: 1.5px solid transparent; line-height: 1.4; }
+  .m-btn--ghost { background: var(--swatch-base-white); border-color: var(--swatch-base-content3); color: var(--swatch-base-ink); }
+  .m-btn--text { background: transparent; color: var(--swatch-base-accent); padding-left: var(--space-4); padding-right: var(--space-4); }
+  .m-tag { display: inline-block; font-size: 12px; font-weight: 700; padding: var(--space-2) var(--space-10); border-radius: 999px; line-height: 1.5; }
+  .m-label { font-size: 12px; font-weight: 700; margin: 0 0 var(--space-4); }
+  .m-input { border: 2px solid; border-radius: 6px; padding: var(--space-8) var(--space-10); font-size: 13px; background: var(--swatch-base-white); color: var(--swatch-base-content3); }
+  .m-rule { height: 1px; margin: var(--space-10) 0; }
+  .m-bar { display: inline-block; width: 4px; height: 1em; border-radius: 2px; vertical-align: -0.12em; margin: 0 var(--space-6) 0 0; }
+  .m-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; flex: none; }
+  .m-sw { display: inline-block; width: 26px; height: 26px; border-radius: 6px; flex: none; border: 1px solid var(--color-border); }
+  .m-sw--empty { background: repeating-linear-gradient(45deg, var(--color-surface), var(--color-surface) 4px, var(--color-surface-2) 4px, var(--color-surface-2) 8px); }
+  .m-li { display: flex; align-items: center; gap: var(--space-8); font-size: 13px; padding: var(--space-6) 0; border-bottom: 1px solid var(--swatch-base-gray100); }
+  .m-li:last-child { border-bottom: 0; }
+  .m-tabs { display: flex; flex-wrap: wrap; gap: var(--space-4); border-bottom: 1px solid var(--swatch-base-gray200); }
+  .m-tab { font-size: 13px; padding: var(--space-6) var(--space-10); border-bottom: 3px solid transparent; }
+  .m-tab small { display: block; font-size: 10px; color: var(--swatch-base-content3); font-weight: 500; }
+  .m-link { color: var(--swatch-base-accent); text-decoration: none; }
+  .m-split { display: grid; grid-template-columns: minmax(0, 6.5em) minmax(0, 1fr); gap: var(--space-10); }
+  .m-nav { display: flex; flex-direction: column; gap: var(--space-2); border-right: 1px solid var(--swatch-base-gray100); padding: 0 var(--space-8) 0 0; }
+  .m-nav span { display: block; font-size: 12px; padding: var(--space-4) var(--space-6); border-radius: 4px; border-left: 3px solid transparent; }
+  .u-ul { text-decoration: underline; text-underline-offset: 2px; }
+  .u-b { font-weight: 700; }
+  .m-card { border-radius: 8px; padding: var(--space-10); margin: var(--space-8) 0 0; }
+  .m-shadow { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); }
+
+  /* ===== 撮影メモ（color-fix-rec）に固有。色は tokens.css の変数だけ ===== */
+  .rec-page { max-width: 1560px; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); font-size: 18px; line-height: 1.6; }
+  @media (min-width: 1024px) { .rec-page { padding-left: var(--space-40); padding-right: var(--space-40); font-size: 19px; } }
+  .rec-page img { display: block; max-width: 100%; height: auto; }
+  .rec-page a { overflow-wrap: anywhere; }
+  main.rec-page { padding-block: var(--space-24) var(--space-64); }
+
+  .rec-head { padding-block: var(--space-24) var(--space-20); border-bottom: 3px solid var(--color-ink); }
+  .rec-head__back { font-size: 16px; margin: 0 0 var(--space-8); }
+  .rec-head h1 { font-size: 28px; font-weight: 900; line-height: var(--leading-heading); }
+  @media (min-width: 768px) { .rec-head h1 { font-size: 36px; } }
+  .rec-head__lede { margin: var(--space-8) 0 0; color: var(--color-ink-2); }
+
+  /* 全体の流れ */
+  .rec-flow h2 { font-size: 26px; line-height: var(--leading-heading); margin: 0 0 var(--space-16); }
+  .rec-steps { list-style: none; display: grid; gap: var(--space-12); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 640px) { .rec-steps { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  @media (min-width: 1200px) { .rec-steps { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .rec-steps > li { background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-16); min-width: 0; }
+  .rec-steps__head { display: block; text-decoration: none; color: var(--color-ink); }
+  .rec-steps__head:hover .rec-steps__ch { color: var(--color-accent); }
+  .rec-steps__no { display: block; font-size: 15px; font-weight: 900; letter-spacing: 0.06em; color: var(--color-accent); }
+  .rec-steps__ch { display: block; font-size: 23px; font-weight: 900; line-height: var(--leading-heading); margin: var(--space-2) 0 var(--space-6); }
+  .rec-steps__lead { display: block; font-size: 18px; font-weight: 700; line-height: 1.5; }
+  .rec-steps__items { font-size: 15px; color: var(--color-ink-3); margin: var(--space-8) 0 0; }
+  .rec-steps__spots { list-style: none; display: flex; flex-wrap: wrap; gap: var(--space-6); margin: var(--space-10) 0 0; }
+  .rec-steps__spots a { display: inline-block; font-size: 15px; line-height: 1.4; padding: var(--space-2) var(--space-10); border: 1px solid var(--color-border); border-radius: var(--radius-l); background: var(--color-surface-2); color: var(--color-ink); text-decoration: none; }
+  .rec-steps__spots a:hover { border-color: var(--color-accent); color: var(--color-accent); }
+  .rec-steps__spots b { color: var(--color-ink-3); font-weight: 700; margin: 0 var(--space-4) 0 0; }
+  .rec-rules { margin: var(--space-20) 0 0; padding: 0 0 0 1.2em; font-size: 18px; }
+  .rec-rules li { margin: 0 0 var(--space-4); }
+
+  /* 画像の枠と札 */
+  .rec-pair { display: grid; gap: var(--space-16); margin: var(--space-24) 0 0; grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 900px) { .rec-pair { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } }
+  .rec-fig { background: var(--color-surface-2); border-radius: var(--radius-m); padding: var(--space-10); min-width: 0; max-width: 100%; }
+  .rec-fig img { border: 1px solid var(--color-border); border-radius: var(--radius-s); background: var(--color-surface); }
+  .rec-lbl { font-size: 15px; font-weight: 900; letter-spacing: 0.08em; line-height: 1.4; margin: 0 0 var(--space-6); }
+  .rec-lbl--now { color: var(--color-interp); }
+  .rec-lbl--goal { color: var(--color-fact); }
+
+  /* 段階の帯 */
+  .rec-stage { padding: var(--space-56) 0 0; }
+  .rec-band { background: var(--grad-1); color: var(--color-on-grad); border-radius: var(--radius-m); padding: var(--space-20) var(--space-24); }
+  .rec-band a { color: var(--color-on-grad); }
+  .rec-band__no { font-size: 17px; font-weight: 900; letter-spacing: 0.06em; margin: 0 0 var(--space-4); }
+  .rec-band h2 { font-size: 30px; font-weight: 900; line-height: var(--leading-heading); margin: 0 0 var(--space-8); }
+  @media (min-width: 768px) { .rec-band h2 { font-size: 36px; } }
+  .rec-band__lead { font-size: 21px; font-weight: 700; line-height: 1.5; margin: 0 0 var(--space-8); }
+  .rec-band__meta { font-size: 16px; margin: 0; }
+
+  /* カード */
+  .rec-card { margin: var(--space-24) 0 0; background: var(--color-surface); border: 2px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-16); }
+  @media (min-width: 768px) { .rec-card { padding: var(--space-20) var(--space-24); } }
+  .rec-card__head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-4) var(--space-12); margin: 0 0 var(--space-16); padding: 0 0 var(--space-12); border-bottom: 1px solid var(--color-border); }
+  .rec-card__no { font-size: 18px; font-weight: 900; color: var(--color-accent); font-variant-numeric: tabular-nums; }
+  .rec-card h3 { font-size: 26px; font-weight: 900; line-height: var(--leading-heading); }
+  .rec-card__item { font-size: 16px; color: var(--color-ink-2); }
+  .rec-card__item a { color: var(--color-ink-2); }
+  .rec-card__body { display: grid; gap: var(--space-20); grid-template-columns: minmax(0, 1fr); }
+  @media (min-width: 1024px) { .rec-card__body { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; } }
+  /* 狭い画面: 今（上）→ ゴール（下）。640px から横並び（今は小さく左、ゴールは大きく右）。横長の切り抜き（rows）は常に縦 */
+  .rec-imgs { display: flex; flex-direction: column; gap: var(--space-12); min-width: 0; }
+  @media (min-width: 640px) {
+    .rec-imgs { flex-direction: row; align-items: flex-start; }
+    .rec-fig--now { flex: 0 1 auto; max-width: 40%; }
+    .rec-fig--goal { flex: 0 1 auto; }
+    .rec-card--rows .rec-imgs { flex-direction: column; align-items: flex-start; }
+    .rec-card--rows .rec-fig--now { max-width: 100%; }
+  }
+  .rec-h { font-size: 15px; font-weight: 900; letter-spacing: 0.08em; color: var(--color-ink-3); margin: 0 0 var(--space-8); }
+  .rec-h small { font-size: 14px; font-weight: 500; letter-spacing: 0; margin: 0 0 0 var(--space-8); }
+
+  /* Figmaで変える値 */
+  .rec-vals { margin: 0 0 var(--space-20); border-top: 1px solid var(--color-border); }
+  .rec-val { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2) var(--space-12); padding: var(--space-6) 0; border-bottom: 1px solid var(--color-border); }
+  @media (min-width: 640px) { .rec-val { grid-template-columns: 9em minmax(0, 1fr); } }
+  .rec-val dt { font-size: 16px; font-weight: 700; color: var(--color-ink-2); line-height: 1.5; padding: var(--space-2) 0 0; }
+  .rec-val dd { line-height: 1.5; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+  .rec-val__was { color: var(--color-ink-2); }
+  .rec-val__to { color: var(--color-ink-3); margin: 0 var(--space-6); }
+  .rec-val__now { font-weight: 700; color: var(--color-ink); background: var(--color-fact-bg); border-radius: var(--radius-s); padding: 0 var(--space-6); box-decoration-break: clone; -webkit-box-decoration-break: clone; }
+
+  /* 話すポイント */
+  .rec-talk { list-style: none; display: grid; gap: var(--space-10); }
+  .rec-talk li { display: flex; gap: var(--space-10); align-items: flex-start; font-size: 20px; font-weight: 500; line-height: 1.5; }
+  .rec-talk__tag { flex: none; font-size: 14px; font-weight: 900; line-height: 1.5; padding: var(--space-2) var(--space-8); margin: var(--space-2) 0 0; border-radius: var(--radius-s); }
+  .rec-talk__tag--ng { background: var(--color-interp-bg); color: var(--color-interp); }
+  .rec-talk__tag--fix { background: var(--color-fact-bg); color: var(--color-fact); }
+  .rec-talk__tag--why { background: var(--color-surface-2); color: var(--color-ink-2); }
+  .rec-extra { margin: var(--space-16) 0 0; padding: var(--space-10) var(--space-14); border-left: 4px solid var(--color-accent); background: var(--color-surface-2); border-radius: 0 var(--radius-s) var(--radius-s) 0; font-size: 17px; line-height: 1.6; }
+  .rec-extra b { color: var(--color-accent); margin: 0 var(--space-8) 0 0; }
+
+  /* この段階のゴール */
+  .rec-stagegoal { margin: var(--space-32) 0 0; padding: var(--space-16); background: var(--color-fact-bg); border-radius: var(--radius-m); }
+  @media (min-width: 768px) { .rec-stagegoal { padding: var(--space-20) var(--space-24); } }
+  .rec-stagegoal h3 { font-size: 24px; font-weight: 900; line-height: var(--leading-heading); margin: 0 0 var(--space-4); }
+  .rec-stagegoal p { font-size: 17px; margin: 0 0 var(--space-12); }
+  .rec-stagegoal img { border: 1px solid var(--color-border); border-radius: var(--radius-s); margin: 0 auto; }
+  .rec-top { font-size: 16px; margin: var(--space-12) 0 0; }
+
+</style>
+</head>
+<body>
+  <!-- 生成物: knowledge/img/color-fix/rec.mjs → inline.mjs。ここを直接直さない -->
+  <header class="rec-page rec-head">
+    <p class="rec-head__back"><a href="color-fix.html">← 記事「ダメなUIを4段階で直す」</a></p>
+    <h1>撮影メモ：ダメなUIを4段階で直す</h1>
+    <p class="rec-head__lede">Figmaで直しながら話すための手元メモ。1か所ずつ、ゴールの画像・変える値・話すポイント。</p>
+  </header>
+
+  <main class="rec-page">
+    <section class="rec-flow" id="flow" aria-labelledby="flow-h">
+      <h2 id="flow-h">全体の流れ</h2>
+      <ol class="rec-steps">
+        <li>
+          <a class="rec-steps__head" href="#s1">
+            <span class="rec-steps__no">段階1　章A</span>
+            <span class="rec-steps__ch">役割：色は役割で決める</span>
+            <span class="rec-steps__lead">何色にするかの前に、その色に何をさせるかを決める</span>
+          </a>
+          <p class="rec-steps__items">項目1・2・4／8か所</p>
+          <ul class="rec-steps__spots">
+            <li><a href="#c01"><b>01</b>ロゴ</a></li>
+            <li><a href="#c02"><b>02</b>新規タスクのボタン</a></li>
+            <li><a href="#c03"><b>03</b>文中のリンク</a></li>
+            <li><a href="#c04"><b>04</b>選択中のタブ</a></li>
+            <li><a href="#c05"><b>05</b>進み具合のバー</a></li>
+            <li><a href="#c06"><b>06</b>プロジェクトの印</a></li>
+            <li><a href="#c07"><b>07</b>サイドバーの選択中</a></li>
+            <li><a href="#c08"><b>08</b>通知のバッジ</a></li>
+          </ul>
+        </li>
+        <li>
+          <a class="rec-steps__head" href="#s2">
+            <span class="rec-steps__no">段階2　章B</span>
+            <span class="rec-steps__ch">量：色の量を絞る</span>
+            <span class="rec-steps__lead">色は出す場所を絞るほど、見せたい物が目立つ</span>
+          </a>
+          <p class="rec-steps__items">項目5・6・7・18／8か所</p>
+          <ul class="rec-steps__spots">
+            <li><a href="#c09"><b>09</b>アプリの地</a></li>
+            <li><a href="#c10"><b>10</b>カードの地</a></li>
+            <li><a href="#c11"><b>11</b>アバター</a></li>
+            <li><a href="#c12"><b>12</b>招待のボタン</a></li>
+            <li><a href="#c13"><b>13</b>詳細の「タスクを削除」</a></li>
+            <li><a href="#c14"><b>14</b>確認の「削除する」</a></li>
+            <li><a href="#c15"><b>15</b>変更を保存</a></li>
+            <li><a href="#c16"><b>16</b>複製と、確認の「キャンセル」</a></li>
+          </ul>
+        </li>
+        <li>
+          <a class="rec-steps__head" href="#s3">
+            <span class="rec-steps__no">段階3　章D</span>
+            <span class="rec-steps__ch">意味：意味を持つ色</span>
+            <span class="rec-steps__lead">エラー・成功・注意のように、意味を伝える色を整える</span>
+          </a>
+          <p class="rec-steps__items">項目11・12・13・14／11か所</p>
+          <ul class="rec-steps__spots">
+            <li><a href="#c17"><b>17</b>状態の札</a></li>
+            <li><a href="#c18"><b>18</b>先週との比較のチップ</a></li>
+            <li><a href="#c19"><b>19</b>メンテナンスのお知らせ</a></li>
+            <li><a href="#c20"><b>20</b>入力エラー</a></li>
+            <li><a href="#c21"><b>21</b>期限切れの日付</a></li>
+            <li><a href="#c22"><b>22</b>タグ</a></li>
+            <li><a href="#c23"><b>23</b>NEW の印</a></li>
+            <li><a href="#c24"><b>24</b>サイドバーのほかのプロジェクトの印</a></li>
+            <li><a href="#c25"><b>25</b>優先度</a></li>
+            <li><a href="#c26"><b>26</b>必須の項目</a></li>
+            <li><a href="#c27"><b>27</b>期限切れ</a></li>
+          </ul>
+        </li>
+        <li>
+          <a class="rec-steps__head" href="#s4">
+            <span class="rec-steps__no">段階4　章C</span>
+            <span class="rec-steps__ch">数値：数値で確かめる</span>
+            <span class="rec-steps__lead">見やすさを、感覚ではなく数字で確かめる</span>
+          </a>
+          <p class="rec-steps__items">項目8・9・10／6か所</p>
+          <ul class="rec-steps__spots">
+            <li><a href="#c28"><b>28</b>説明文とサブの文字</a></li>
+            <li><a href="#c29"><b>29</b>選ばれていないタブ</a></li>
+            <li><a href="#c30"><b>30</b>入力欄の枠</a></li>
+            <li><a href="#c31"><b>31</b>検索欄とアイコン</a></li>
+            <li><a href="#c32"><b>32</b>アカウントの「…」</a></li>
+            <li><a href="#c33"><b>33</b>記入ルールのリンク</a></li>
+          </ul>
+        </li>
+      </ol>
+      <ul class="rec-rules">
+        <li>直すのは色だけ。ボタンや行の大きさと位置は変えない</li>
+        <li>1か所は1回だけ変える。前の段階と見比べれば、その章の差だけが見える</li>
+        <li>章の順はA・B・D・C。数値で確かめるのは最後に1回だけ</li>
+        <li>画像の紫の枠は変えた場所の目印（画面の一部ではない）</li>
+      </ul>
+      <div class="rec-pair">
+        <figure class="rec-fig">
+          <figcaption class="rec-lbl rec-lbl--now">今（ダメUI）</figcaption>
+          <img class="shot" data-img="full-before" alt="ダメUIの全体。赤いメンテナンスのお知らせ帯、青く塗りつぶされたサイドバーの選択中、青いボタンが3つ並ぶ見出し、淡い色の状態の札とタグが並ぶタスク一覧、右に詳細のパネル">
+        </figure>
+        <figure class="rec-fig">
+          <figcaption class="rec-lbl rec-lbl--goal">ゴール（4段階の後）</figcaption>
+          <img class="shot" data-img="full-step4" alt="4段階すべてを直したアフターの全体">
+        </figure>
+      </div>
+    </section>
+
+    <section class="rec-stage" id="s1" aria-labelledby="s1-h">
+      <div class="rec-band">
+        <p class="rec-band__no">段階1　章A　項目1・2・4</p>
+        <h2 id="s1-h">色は役割で決める</h2>
+        <p class="rec-band__lead">何色にするかの前に、その色に何をさせるかを決める</p>
+        <p class="rec-band__meta">スタートはダメUIの画面。8か所を直す　<a href="color-fix.html#s1">記事の段階1</a>　<a href="#flow">↑ 全体の流れ</a></p>
+      </div>
+
+      <article class="rec-card" id="c01">
+        <header class="rec-card__head">
+          <span class="rec-card__no">01</span>
+          <h3>ロゴ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p01">項目1</a>　青は「押せる所」の色にする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s01-logo-before" alt="ダメUIのロゴ。チェックの印の四角が、押せるボタンと同じ明るい青で塗られている">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s01-logo-step1" alt="段階1のロゴ。チェックの印の四角が、濃い文字色（ほぼ黒）で塗られている">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>ロゴの印の塗り</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>ロゴの印が、押せるボタンと同じ青</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>青を外して、濃い文字色で塗る</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>青＝押せる、の覚え方を崩さない（Apple・NN/g）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c02">
+        <header class="rec-card__head">
+          <span class="rec-card__no">02</span>
+          <h3>新規タスクのボタン</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p01">項目1</a>　青は「押せる所」の色にする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s01-new-before" alt="ダメUIの見出しの右。「招待」と「新規タスク」が、どちらも明るい青の塗りに白い文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s01-new-step1" alt="段階1。「新規タスク」が少し濃い青の塗りに白い文字になった。「招待」は明るい青のまま">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>塗り</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#1552E0</span></dd></div>
+                <div class="rec-val"><dt>白文字との比</dt><dd><span class="rec-val__was">4.50:1</span><span class="rec-val__to">→</span><span class="rec-val__now">6.33:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>白文字との比が4.50:1で、余裕がない</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>押せる青を #1552E0 の1色に決め直す</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>6.33:1で余裕ができる。これが「押せる」の色</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c03">
+        <header class="rec-card__head">
+          <span class="rec-card__no">03</span>
+          <h3>文中のリンク</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p01">項目1</a>　青は「押せる所」の色にする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s01-link-before" alt="ダメUIの詳細の文「書き方に迷ったら記入ルールはこちらを見てください」。リンクは明るい青の文字で、下線はない">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s01-link-step1" alt="段階1。リンク「記入ルールはこちら」が、ボタンと同じ濃い青の文字になった。下線はまだない">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#1552E0</span></dd></div>
+                <div class="rec-val"><dt>カードの地との比</dt><dd><span class="rec-val__was">4.32:1</span><span class="rec-val__to">→</span><span class="rec-val__now">6.07:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>カードの地に4.32:1で、本文の4.5:1に届かない</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>ボタンと同じ #1552E0 にそろえる</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>押せる青は1つにする。下線は段階4で足す</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c04">
+        <header class="rec-card__head">
+          <span class="rec-card__no">04</span>
+          <h3>選択中のタブ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p01">項目1</a>　青は「押せる所」の色にする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s01-tab-before" alt="ダメUIの表の上のタブ。選択中の「すべて 12」が青い文字と青い下線、ほかの2つは薄いグレー">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s01-tab-step1" alt="段階1。選択中の「すべて 12」が、濃い文字色の太字と濃い下線になった">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>文字と下線</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328＋太字</span></dd></div>
+                <div class="rec-val"><dt>カードの地との比</dt><dd><span class="rec-val__was">4.32:1</span><span class="rec-val__to">→</span><span class="rec-val__now">15.14:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>選ばれている印が、押せる青と同じ</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>濃い文字色・太字・下線で示す</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>「選ばれている」と「押せる」は役割が違う</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card rec-card--rows" id="c05">
+        <header class="rec-card__head">
+          <span class="rec-card__no">05</span>
+          <h3>進み具合のバー</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p01">項目1</a>　青は「押せる所」の色にする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s01-bar-before" alt="ダメUIの「25%」の下の進み具合のバー。塗りは青、残りの溝は白で、カードの地とほとんど区別がつかない">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s01-bar-step1" alt="段階1のバー。塗りは濃い文字色、残りの溝は淡いグレーで、バーの右端まで見える">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>バーの塗り</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328</span></dd></div>
+                <div class="rec-val"><dt>溝（残りの部分）</dt><dd><span class="rec-val__was">#FFFFFF</span><span class="rec-val__to">→</span><span class="rec-val__now">#e6eaef</span></dd></div>
+                <div class="rec-val"><dt>比</dt><dd><span class="rec-val__was">溝とカードの地 1.04:1</span><span class="rec-val__to">→</span><span class="rec-val__now">塗りと溝 13.07:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>バーが青で、溝はカードと同じ白で見えない</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>塗りは濃い文字色、溝は淡いニュートラル</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>押せないので青を外す。100%の端も見える</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c06">
+        <header class="rec-card__head">
+          <span class="rec-card__no">06</span>
+          <h3>プロジェクトの印</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p01">項目1</a>　青は「押せる所」の色にする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s01-pj-before" alt="ダメUI。上は見出し「新サイト公開」の前の印で青。下はサイドバーの選択中の行で、青い塗りの中の印は白">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s01-pj-step1" alt="段階1。見出しの前の印と、サイドバーの「新サイト公開」の印が、どちらもピンク">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>印（見出しとサイドバー）</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#bf3989（ピンク）</span></dd></div>
+                <div class="rec-val"><dt>地との比</dt><dd><span class="rec-val__now">4.54:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>今のプロジェクトの印も、押せる青</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>見分けのための色（ピンク）にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>押せない印に青を使わない。両方の印が色でつながる</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c07">
+        <header class="rec-card__head">
+          <span class="rec-card__no">07</span>
+          <h3>サイドバーの選択中</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p02">項目2</a>　選択中のナビは、ボタンと張り合わせない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s02-nav-before" alt="ダメUIのサイドバー。「プロジェクト」の下の3つのうち、選択中の「新サイト公開」が青で大きく塗りつぶされ、白い文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s02-nav-step1" alt="段階1。選択中の「新サイト公開」は淡いグレーの塗りに、左の濃い線と太字の濃い文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>塗り</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#e6eaef</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#FFFFFF</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328＋太字</span></dd></div>
+                <div class="rec-val"><dt>左線（幅3px）</dt><dd><span class="rec-val__was">なし</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328</span></dd></div>
+                <div class="rec-val"><dt>比</dt><dd><span class="rec-val__now">文字 13.07:1／左線と地 14.22:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>選択中が青の塗りで、ボタンと同じ見た目</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>淡いニュートラルの塗り＋濃い左線＋太字</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>主ボタンと注目を取り合わない（Spectrum）</span></li>
+            </ul>
+            <p class="rec-extra"><b>補足（言えたら）</b>Apple・Fluent は選択中もブランド色。Material 3・Atlassian・Spectrum は主ボタンと別の色</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c08">
+        <header class="rec-card__head">
+          <span class="rec-card__no">08</span>
+          <h3>通知のバッジ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p04">項目4</a>　通知の数は、塗りと文字の組で決める</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s04-badge-before" alt="ダメUIのロゴの横のベル。右上の通知の数「3」が、橙の塗りに白い数字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s04-badge-step1" alt="段階1。通知の数「3」が、赤の塗りに白い数字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>塗り</dt><dd><span class="rec-val__was">#F37509（橙）</span><span class="rec-val__to">→</span><span class="rec-val__now">#cf222e（赤）</span></dd></div>
+                <div class="rec-val"><dt>白い数字との比</dt><dd><span class="rec-val__was">2.85:1</span><span class="rec-val__to">→</span><span class="rec-val__now">5.36:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>橙の塗りに白い数字で、2.85:1しかない</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>赤の塗りと白い数字の組に変える</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>塗りだけ先に決めると起きるミス。組で決める</span></li>
+            </ul>
+            <p class="rec-extra"><b>補足（言えたら）</b>赤は慣習に合わせた例外。ブランド色にするかは会社で分かれる（Apple）</p>
+          </div>
+        </div>
+      </article>
+      <div class="rec-stagegoal">
+        <h3>この段階のゴール</h3>
+        <p>段階1を直し終えた画面（次は段階2）。</p>
+        <img class="shot" data-img="full-step1" alt="段階1まで直した画面の全体。押せる所だけが青になり、サイドバーの選択中は淡いグレーに濃い左線">
+      </div>
+    </section>
+
+    <section class="rec-stage" id="s2" aria-labelledby="s2-h">
+      <div class="rec-band">
+        <p class="rec-band__no">段階2　章B　項目5・6・7・18</p>
+        <h2 id="s2-h">色の量を絞る</h2>
+        <p class="rec-band__lead">色は出す場所を絞るほど、見せたい物が目立つ</p>
+        <p class="rec-band__meta">スタートは段階1の画面。8か所を直す　<a href="color-fix.html#s2">記事の段階2</a>　<a href="#flow">↑ 全体の流れ</a></p>
+      </div>
+
+      <article class="rec-card" id="c09">
+        <header class="rec-card__head">
+          <span class="rec-card__no">09</span>
+          <h3>アプリの地</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p05">項目5</a>　画面の大半はニュートラルで組む</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s05-app-step1" alt="段階1のサイドバーとカードの間。アプリの地が、はっきり青みのある淡い色">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s05-app-step2" alt="段階2。アプリの地が、ほとんど色みのない淡いグレー">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>アプリの地</dt><dd><span class="rec-val__was">#EEF3FF</span><span class="rec-val__to">→</span><span class="rec-val__now">#eff2f5</span></dd></div>
+                <div class="rec-val"><dt>色みの強さ（CIELAB の彩度）</dt><dd><span class="rec-val__was">6.4</span><span class="rec-val__to">→</span><span class="rec-val__now">1.9</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>地の青みが、見て分かるほど強い（彩度6.4）</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>Primer の青みのあるニュートラルに替える</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>画面の大半はニュートラル（Carbon・Atlassian ほか）</span></li>
+            </ul>
+            <p class="rec-extra"><b>補足（言えたら）</b>Material 3 の地はブランドの色相のまま彩度を下げる。Gmail の地 #F8FAFD は彩度1.7</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c10">
+        <header class="rec-card__head">
+          <span class="rec-card__no">10</span>
+          <h3>カードの地</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p05">項目5</a>　画面の大半はニュートラルで組む</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s05-card-step1" alt="段階1のタスクのカードの左上の角。カードは純粋なグレーに近い白で、周りの青みのある地と色みが違う">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s05-card-step2" alt="段階2。カードは地と同じ系統のごく淡いグレーで、色みがそろっている">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>カードの地</dt><dd><span class="rec-val__was">#FAFAFA</span><span class="rec-val__to">→</span><span class="rec-val__now">#f6f8fa</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>カードが純粋なグレーで、地と色みが違う</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>地と同じ系統のニュートラルにそろえる</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>色みがばらばらだと、くすんだ印象になる</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c11">
+        <header class="rec-card__head">
+          <span class="rec-card__no">11</span>
+          <h3>アバター</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p05">項目5</a>　画面の大半はニュートラルで組む</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s05-av-step1" alt="段階1の左下のアカウント欄。アバターの丸「佐」が淡い青の地に青い文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s05-av-step2" alt="段階2。アバターの丸「佐」が淡いグレーの地にグレーの文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>丸の地</dt><dd><span class="rec-val__was">#E3EBFF</span><span class="rec-val__to">→</span><span class="rec-val__now">#e6eaef</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e</span></dd></div>
+                <div class="rec-val"><dt>文字との比</dt><dd><span class="rec-val__now">5.06:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>アバターが、淡い青の地に青い文字</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>ニュートラルの地に、グレーの文字にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>押せない物なので、押せる青を使わない</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c12">
+        <header class="rec-card__head">
+          <span class="rec-card__no">12</span>
+          <h3>招待のボタン</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p06">項目6</a>　目立つ色のボタンは1画面に1つ</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s06-invite-step1" alt="段階1の見出しの右。「招待」は明るい青の塗り、「新規タスク」は濃い青の塗りで、どちらも青いボタン">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s06-invite-step2" alt="段階2。「招待」は白地にグレーの枠と濃い文字、青の塗りは「新規タスク」だけ">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>塗り</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#FFFFFF</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#FFFFFF</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328</span></dd></div>
+                <div class="rec-val"><dt>枠（1px）</dt><dd><span class="rec-val__was">なし</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1d9e0</span></dd></div>
+                <div class="rec-val"><dt>文字との比</dt><dd><span class="rec-val__now">15.80:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>「招待」も青の塗りで、主役が2つある</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>白地に枠のボタンにする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>目立つ色のボタンは1画面に1つ（Apple・Spectrum）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c13">
+        <header class="rec-card__head">
+          <span class="rec-card__no">13</span>
+          <h3>詳細の「タスクを削除」</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p07">項目7</a>　削除は赤くする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s07-del-step1" alt="段階1の詳細の下のボタン。「タスクを削除」が明るい青の塗りに白い文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s07-del-step2" alt="段階2。「タスクを削除」が白地に赤い文字とグレーの枠">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>塗り</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#FFFFFF</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#FFFFFF</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1242f（赤）</span></dd></div>
+                <div class="rec-val"><dt>枠（1px）</dt><dd><span class="rec-val__was">なし</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1d9e0</span></dd></div>
+                <div class="rec-val"><dt>文字との比</dt><dd><span class="rec-val__now">5.24:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>削除が、ふだんの主ボタンと同じ青</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>白地に赤い文字と枠のボタンにする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>最初の入口は控えめに（Apple・GOV.UK）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card rec-card--rows" id="c14">
+        <header class="rec-card__head">
+          <span class="rec-card__no">14</span>
+          <h3>確認の「削除する」</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p07">項目7</a>　削除は赤くする</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s07-modal-step1" alt="段階1の確認の画面「タスクを削除しますか？」。右下の「削除する」が明るい青の塗りに白い文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s07-modal-step2" alt="段階2の確認の画面。「削除する」が赤の塗りに白い文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>塗り</dt><dd><span class="rec-val__was">#3B6CF6</span><span class="rec-val__to">→</span><span class="rec-val__now">#cf222e（赤）</span></dd></div>
+                <div class="rec-val"><dt>白文字との比</dt><dd><span class="rec-val__now">5.36:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>取り消せない最後の確認も、青の塗り</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>赤の塗りに白い文字にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>最後の確認ははっきり示す（GOV.UK・Spectrum）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c15">
+        <header class="rec-card__head">
+          <span class="rec-card__no">15</span>
+          <h3>変更を保存</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p18">項目18</a>　押せるボタンをグレーにしない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s18-save-step1" alt="段階1の詳細の下のボタン。「変更を保存」がグレーの塗りに薄いグレーの文字で、押せないボタンのように見える">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s18-save-step2" alt="段階2。「変更を保存」が濃い青の塗りに白い文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>塗り</dt><dd><span class="rec-val__was">#EBEBEB</span><span class="rec-val__to">→</span><span class="rec-val__now">#1552E0</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#A1A1AA</span><span class="rec-val__to">→</span><span class="rec-val__now">#FFFFFF</span></dd></div>
+                <div class="rec-val"><dt>文字との比</dt><dd><span class="rec-val__was">2.15:1</span><span class="rec-val__to">→</span><span class="rec-val__now">6.33:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>グレーの塗りに薄い文字で、押せないように見える</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>主な操作なので、押せる青の塗りにする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>グレーは押せない状態の色（NN/g・Carbon）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c16">
+        <header class="rec-card__head">
+          <span class="rec-card__no">16</span>
+          <h3>複製と、確認の「キャンセル」</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p18">項目18</a>　押せるボタンをグレーにしない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s18-dup-step1" alt="段階1。上は詳細の「複製」で、白地にごく薄い枠。下は確認の画面の「キャンセル」で、グレーの塗りに薄いグレーの文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s18-dup-step2" alt="段階2。「複製」も「キャンセル」も、白地にグレーの枠と濃い文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>キャンセルの塗り</dt><dd><span class="rec-val__was">#EBEBEB</span><span class="rec-val__to">→</span><span class="rec-val__now">#FFFFFF</span></dd></div>
+                <div class="rec-val"><dt>キャンセルの文字</dt><dd><span class="rec-val__was">#A1A1AA</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328</span></dd></div>
+                <div class="rec-val"><dt>枠（1px）</dt><dd><span class="rec-val__was">複製 #EBEBEB／キャンセル なし</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1d9e0</span></dd></div>
+                <div class="rec-val"><dt>文字との比</dt><dd><span class="rec-val__now">15.80:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>キャンセルも、グレーの塗りに薄い文字</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>控えめな操作は、白地に枠のボタンにする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>グレーの塗りは、本当に押せない状態に取っておく</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+      <div class="rec-stagegoal">
+        <h3>この段階のゴール</h3>
+        <p>段階2を直し終えた画面（次は段階3）。</p>
+        <img class="shot" data-img="full-step2" alt="段階2まで直した画面の全体。地はほぼ無彩色になり、青い塗りのボタンは「新規タスク」と「変更を保存」だけ">
+      </div>
+    </section>
+
+    <section class="rec-stage" id="s3" aria-labelledby="s3-h">
+      <div class="rec-band">
+        <p class="rec-band__no">段階3　章D　項目11・12・13・14</p>
+        <h2 id="s3-h">意味を持つ色</h2>
+        <p class="rec-band__lead">エラー・成功・注意のように、意味を伝える色を整える</p>
+        <p class="rec-band__meta">スタートは段階2の画面。11か所を直す　<a href="color-fix.html#s3">記事の段階3</a>　<a href="#flow">↑ 全体の流れ</a></p>
+      </div>
+
+      <article class="rec-card" id="c17">
+        <header class="rec-card__head">
+          <span class="rec-card__no">17</span>
+          <h3>状態の札</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p11">項目11</a>　状態の色は借りてくる</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s11-status-step2" alt="段階2の表の左の列の状態の札。進行中、レビュー待ち、差し戻し、未着手、進行中、完了が、淡い地に明るい文字で読みにくい。差し戻しは赤">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s11-status-step3" alt="段階3の状態の札。淡い地に濃い文字になり読みやすい。差し戻しは橙、完了は緑、進行中は青">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値<small>（文字／地）</small></h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>進行中</dt><dd><span class="rec-val__was">#3B6CF6／#E3EBFF 3.77:1</span><span class="rec-val__to">→</span><span class="rec-val__now">#0969da／#ddf4ff 4.56:1</span></dd></div>
+                <div class="rec-val"><dt>レビュー待ち</dt><dd><span class="rec-val__was">#EAB308／#FEF9C3 1.79:1</span><span class="rec-val__to">→</span><span class="rec-val__now">#9a6700／#fff8c5 4.52:1</span></dd></div>
+                <div class="rec-val"><dt>差し戻し</dt><dd><span class="rec-val__was">#EF4444／#FEE2E2 3.08:1</span><span class="rec-val__to">→</span><span class="rec-val__now">#bc4c00／#fff1e5 4.55:1</span></dd></div>
+                <div class="rec-val"><dt>未着手</dt><dd><span class="rec-val__was">#A1A1AA／#EFEFF1</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e／#e6eaef 5.06:1</span></dd></div>
+                <div class="rec-val"><dt>完了</dt><dd><span class="rec-val__was">#22C55E／#DCFCE7 2.07:1</span><span class="rec-val__to">→</span><span class="rec-val__now">#1a7f37／#dafbe1 4.56:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>淡い地に明るい文字で、どれも4.5:1未満</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>Primer の「淡い地＋濃い文字」の組を借りる</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>比率が確かめ済みで、画面ごとにばらつかない（Primer）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c18">
+        <header class="rec-card__head">
+          <span class="rec-card__no">18</span>
+          <h3>先週との比較のチップ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p11">項目11</a>　状態の色は借りてくる</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s11-chip-step2" alt="段階2の「25%」の横のチップ「▲1件」。明るい緑の三角と文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s11-chip-step3" alt="段階3。「▲1件」が濃い緑">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>▲と「1件」の文字</dt><dd><span class="rec-val__was">#22C55E</span><span class="rec-val__to">→</span><span class="rec-val__now">#1a7f37</span></dd></div>
+                <div class="rec-val"><dt>白い地との比</dt><dd><span class="rec-val__now">5.08:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>▲1件の緑が明るく、白い地との差が小さい</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>状態の札の「完了」と同じ緑にそろえる</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>5.08:1で読める。借りた緑を使い回す</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card rec-card--rows" id="c19">
+        <header class="rec-card__head">
+          <span class="rec-card__no">19</span>
+          <h3>メンテナンスのお知らせ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p12">項目12</a>　注意には強さの段階がある</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s12-notice-step2" alt="段階2の画面の一番上のお知らせ帯「10月25日（土）2:00〜4:00 にメンテナンスを行います。」。淡い赤の地に赤い文字と赤いアイコン、下に赤い線">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s12-notice-step3" alt="段階3のお知らせ帯。淡い黄色の地に濃い文字で、注意のアイコンだけ黄土色">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>帯の地</dt><dd><span class="rec-val__was">#FEF2F2</span><span class="rec-val__to">→</span><span class="rec-val__now">#fff8c5（黄）</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#1f2328</span></dd></div>
+                <div class="rec-val"><dt>アイコン</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#9a6700（黄土色）</span></dd></div>
+                <div class="rec-val"><dt>下の線</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#d4a72c（不透明度40%）</span></dd></div>
+                <div class="rec-val"><dt>比</dt><dd><span class="rec-val__was">文字 3.44:1</span><span class="rec-val__to">→</span><span class="rec-val__now">文字 14.66:1／アイコン 4.52:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>お知らせが、入力エラーと同じ赤</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>黄色の地にふつうの文字、アイコンだけ黄土色</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>知っておけばよい情報は弱い注意（Carbon ほか）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c20">
+        <header class="rec-card__head">
+          <span class="rec-card__no">20</span>
+          <h3>入力エラー</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p12">項目12</a>　注意には強さの段階がある</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s12-err-step2" alt="段階2の詳細の入力エラー「期限が過ぎています。今日以降の日付を入れてください。」。淡い赤の地に赤い文字と赤い枠">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s12-err-step3" alt="段階3の入力エラー。淡い赤の地に、少し濃い赤の文字。赤のまま残している">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>地</dt><dd><span class="rec-val__was">#FEF2F2</span><span class="rec-val__to">→</span><span class="rec-val__now">#ffebe9</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1242f</span></dd></div>
+                <div class="rec-val"><dt>枠</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#ff8182（不透明度40%）</span></dd></div>
+                <div class="rec-val"><dt>文字との比</dt><dd><span class="rec-val__now">4.57:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>お知らせと同じ赤で、強さの差がなかった</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>赤のまま、Primer の赤の組にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>すぐ直してほしいエラーだけを赤にする</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c21">
+        <header class="rec-card__head">
+          <span class="rec-card__no">21</span>
+          <h3>期限切れの日付</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p12">項目12</a>　注意には強さの段階がある</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s12-late-step2" alt="段階2の表の期限の列。期限切れの「10/14」が赤い文字だけ">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s12-late-step3" alt="段階3の「10/14」。赤い文字のまま、右に丸に「!」のアイコンが付いた">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>日付の文字</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1242f</span></dd></div>
+                <div class="rec-val"><dt>カードの地との比</dt><dd><span class="rec-val__was">3.61:1</span><span class="rec-val__to">→</span><span class="rec-val__now">4.93:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>赤は残すが、明るい赤で地との比が3.61:1しかない</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>エラーと同じ赤 #d1242f にそろえる</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>赤はエラーと期限切れにだけ使う</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c22">
+        <header class="rec-card__head">
+          <span class="rec-card__no">22</span>
+          <h3>タグ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p13">項目13</a>　状態の色を飾りに使わない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s13-tags-step2" alt="段階2の表のタグの列。「デザイン」が淡い緑の地に緑の文字、「開発」が淡い青に青、「企画」が淡い黄に黄の文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s13-tags-step3" alt="段階3のタグ。どれも地を塗らず、グレーの枠にグレーの文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>地</dt><dd><span class="rec-val__was">緑 #DCFCE7・青 #E3EBFF・黄 #FEF3C7</span><span class="rec-val__to">→</span><span class="rec-val__now">塗らない</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#22C55E・#3B6CF6・#F59E0B</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e</span></dd></div>
+                <div class="rec-val"><dt>枠（1px）</dt><dd><span class="rec-val__was">なし</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1d9e0</span></dd></div>
+                <div class="rec-val"><dt>カードの地との比</dt><dd><span class="rec-val__now">5.74:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>「デザイン」が成功の緑、「企画」が注意の黄</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>地を塗らない、枠だけの札にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>タグに良い・悪いの意味はない（Fluent ほか）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c23">
+        <header class="rec-card__head">
+          <span class="rec-card__no">23</span>
+          <h3>NEW の印</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p13">項目13</a>　状態の色を飾りに使わない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s13-new-step2" alt="段階2のタスク名「お問い合わせフォームの送信テスト」の横の「NEW」。淡い赤の地に赤い文字">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s13-new-step3" alt="段階3の「NEW」。地を塗らず、グレーの枠にグレーの文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>地</dt><dd><span class="rec-val__was">#FEE2E2</span><span class="rec-val__to">→</span><span class="rec-val__now">塗らない</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e</span></dd></div>
+                <div class="rec-val"><dt>枠（1px）</dt><dd><span class="rec-val__was">なし</span><span class="rec-val__to">→</span><span class="rec-val__now">#d1d9e0</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>NEW が、エラーと同じ赤</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>タグと同じ、枠だけの札にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>エラーの赤を飾りに使わない</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c24">
+        <header class="rec-card__head">
+          <span class="rec-card__no">24</span>
+          <h3>サイドバーのほかのプロジェクトの印</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p13">項目13</a>　状態の色を飾りに使わない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s13-pj-step2" alt="段階2のサイドバー。「採用ページ改善」の印が緑、「11月キャンペーン」の印が黄">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s13-pj-step3" alt="段階3。「採用ページ改善」の印が青緑、「11月キャンペーン」の印がオリーブ">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>採用ページ改善</dt><dd><span class="rec-val__was">#22C55E（緑）</span><span class="rec-val__to">→</span><span class="rec-val__now">#1b7c83（青緑）</span></dd></div>
+                <div class="rec-val"><dt>11月キャンペーン</dt><dd><span class="rec-val__was">#F59E0B（黄）</span><span class="rec-val__to">→</span><span class="rec-val__now">#7a6f1c（オリーブ）</span></dd></div>
+                <div class="rec-val"><dt>地との比</dt><dd><span class="rec-val__now">4.39:1／4.54:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>印の緑と黄が、状態の色と同じ</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>色は残して、青緑とオリーブにする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>見分ける色は残す。意味のある色とは重ねない</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c25">
+        <header class="rec-card__head">
+          <span class="rec-card__no">25</span>
+          <h3>優先度</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p14">項目14</a>　色だけで伝えない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s14-pri-step2" alt="段階2の表の優先度の列。上から赤、赤、黄、黄、緑、緑の点だけが並ぶ">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s14-pri-step3" alt="段階3の優先度。棒の数のアイコンに「高・高・中・中・低・低」の文字。「高」の棒だけ橙で、ほかはグレー">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>示し方</dt><dd><span class="rec-val__was">色の点だけ</span><span class="rec-val__to">→</span><span class="rec-val__now">棒の数のアイコン＋「高・中・低」</span></dd></div>
+                <div class="rec-val"><dt>点・棒の色</dt><dd><span class="rec-val__was">高 #EF4444・中 #F59E0B・低 #22C55E</span><span class="rec-val__to">→</span><span class="rec-val__now">高 #bc4c00・中と低 #59636e・空き #d0d7de</span></dd></div>
+                <div class="rec-val"><dt>「高・中・低」の文字</dt><dd><span class="rec-val__now">#4C4C4C</span></dd></div>
+                <div class="rec-val"><dt>比</dt><dd><span class="rec-val__now">高の棒 4.73:1／中・低 5.74:1／文字 8.07:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>赤・黄・緑の点だけで、段階を伝えている</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>棒の数のアイコンと「高・中・低」の文字</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>色は「高」の橙だけ（Linear と同じ付け方）</span></li>
+            </ul>
+            <p class="rec-extra"><b>補足（言えたら）</b>Jira・Asana は全段階に色を付ける。Linear は一番上だけに付ける</p>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c26">
+        <header class="rec-card__head">
+          <span class="rec-card__no">26</span>
+          <h3>必須の項目</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p14">項目14</a>　色だけで伝えない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s14-req-step2" alt="段階2の詳細。「タイトル」と「担当者」のラベルが赤い文字だけで、「期限」は濃いグレー">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s14-req-step3" alt="段階3。「タイトル」と「担当者」のラベルは濃いグレーになり、横に小さく「必須」の文字">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>ラベルの文字</dt><dd><span class="rec-val__was">#EF4444</span><span class="rec-val__to">→</span><span class="rec-val__now">#4C4C4C</span></dd></div>
+                <div class="rec-val"><dt>足す文字</dt><dd><span class="rec-val__now">「必須」#4C4C4C</span></dd></div>
+                <div class="rec-val"><dt>比</dt><dd><span class="rec-val__now">8.07:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>必須を、ラベルの赤だけで示している</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>ラベルを濃いグレーに戻し「必須」を足す</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>色の区別がつきにくい人にも伝わる</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c27">
+        <header class="rec-card__head">
+          <span class="rec-card__no">27</span>
+          <h3>期限切れ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p14">項目14</a>　色だけで伝えない</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s12-late-step2" alt="段階2の表の期限の列。期限切れの「10/14」が赤い文字だけ">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s12-late-step3" alt="段階3の「10/14」。赤い文字のまま、右に丸に「!」のアイコンが付いた">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>足すアイコン</dt><dd><span class="rec-val__now">丸に「!」（14px・#d1242f）</span></dd></div>
+                <div class="rec-val"><dt>読み上げ</dt><dd><span class="rec-val__now">「期限切れ」</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>期限切れを、日付の赤だけで示している</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>日付の右に「!」のアイコンを足す</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>白黒の印刷でも、読み上げでも伝わる</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+      <div class="rec-stagegoal">
+        <h3>この段階のゴール</h3>
+        <p>段階3を直し終えた画面（次は段階4）。</p>
+        <img class="shot" data-img="full-step3" alt="段階3まで直した画面の全体。お知らせは黄色、状態の札は淡い地に濃い文字、タグは枠だけ、優先度に文字">
+      </div>
+    </section>
+
+    <section class="rec-stage" id="s4" aria-labelledby="s4-h">
+      <div class="rec-band">
+        <p class="rec-band__no">段階4　章C　項目8・9・10</p>
+        <h2 id="s4-h">数値で確かめる</h2>
+        <p class="rec-band__lead">見やすさを、感覚ではなく数字で確かめる</p>
+        <p class="rec-band__meta">スタートは段階3の画面。6か所を直す　<a href="color-fix.html#s4">記事の段階4</a>　<a href="#flow">↑ 全体の流れ</a></p>
+      </div>
+
+      <article class="rec-card" id="c28">
+        <header class="rec-card__head">
+          <span class="rec-card__no">28</span>
+          <h3>説明文とサブの文字</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p08">項目8</a>　本文は背景と4.5:1以上</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s08-sub-step3" alt="段階3。上からカードの説明文「11月10日の公開に向けたタスクです。」、タスク名の下の補足「デザイン確定版をもとに書き出し」、詳細の「最終更新 10月19日 14:20」。どれも薄いグレーで読みにくい">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s08-sub-step4" alt="段階4。同じ3か所の文字が濃いグレーになり読みやすい">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#A1A1AA</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e</span></dd></div>
+                <div class="rec-val"><dt>カードの地との比</dt><dd><span class="rec-val__was">2.46:1</span><span class="rec-val__to">→</span><span class="rec-val__now">5.74:1</span></dd></div>
+                <div class="rec-val"><dt>アプリの地との比</dt><dd><span class="rec-val__now">5.44:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>薄いグレーで、カードの地に2.46:1</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>Primer のサブ文字の色 #59636e にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>本文は背景と4.5:1以上（WCAG 2.2）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c29">
+        <header class="rec-card__head">
+          <span class="rec-card__no">29</span>
+          <h3>選ばれていないタブ</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p08">項目8</a>　本文は背景と4.5:1以上</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s08-tabs-step3" alt="段階3の表の上のタブ。選ばれていない「自分の担当 4」「期限切れ 1」が薄いグレー">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s08-tabs-step4" alt="段階4。「自分の担当 4」「期限切れ 1」が濃いグレー。選択中の「すべて 12」は太字と下線のまま">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__was">#A1A1AA</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e</span></dd></div>
+                <div class="rec-val"><dt>カードの地との比</dt><dd><span class="rec-val__was">2.46:1</span><span class="rec-val__to">→</span><span class="rec-val__now">5.74:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>選ばれていないタブも、同じ薄いグレー</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>サブの文字と同じ色に直す</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>選択中との違いは、太字と下線で残る</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c30">
+        <header class="rec-card__head">
+          <span class="rec-card__no">30</span>
+          <h3>入力欄の枠</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p09">項目9</a>　入力欄の枠やアイコンも3:1以上</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s09-inp-step3" alt="段階3の詳細の入力欄（タイトル・担当者・期限）。枠がほとんど見えず、白い欄が地に溶けている">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s09-inp-step4" alt="段階4。3つの入力欄の枠がグレーの線ではっきり見える">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>枠（1px）</dt><dd><span class="rec-val__was">#EBEBEB</span><span class="rec-val__to">→</span><span class="rec-val__now">#818b98</span></dd></div>
+                <div class="rec-val"><dt>白との比</dt><dd><span class="rec-val__was">1.19:1</span><span class="rec-val__to">→</span><span class="rec-val__now">3.45:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>枠が白に1.19:1で、ほとんど見えない</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>枠を #818b98 にして3.45:1にする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>操作に要る物は3:1以上（WCAG 2.2）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c31">
+        <header class="rec-card__head">
+          <span class="rec-card__no">31</span>
+          <h3>検索欄とアイコン</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p09">項目9</a>　入力欄の枠やアイコンも3:1以上</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s09-search-step3" alt="段階3のサイドバーの検索欄。虫めがねのアイコンと枠がとても薄い">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s09-search-step4" alt="段階4。虫めがねのアイコンが濃いグレーになり、枠もグレーの線で見える">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>虫めがね</dt><dd><span class="rec-val__was">#CFCFD4</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e</span></dd></div>
+                <div class="rec-val"><dt>白との比</dt><dd><span class="rec-val__was">1.55:1</span><span class="rec-val__to">→</span><span class="rec-val__now">6.11:1</span></dd></div>
+                <div class="rec-val"><dt>検索欄の枠</dt><dd><span class="rec-val__was">#EBEBEB</span><span class="rec-val__to">→</span><span class="rec-val__now">#818b98</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>虫めがねが、白に1.55:1しかない</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>アイコンを #59636e に、枠も濃くする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>意味のあるアイコンも3:1以上（WCAG 2.2）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c32">
+        <header class="rec-card__head">
+          <span class="rec-card__no">32</span>
+          <h3>アカウントの「…」</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p09">項目9</a>　入力欄の枠やアイコンも3:1以上</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s09-acct-step3" alt="段階3の左下のアカウント欄。右端の「…」が薄いグレー">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s09-acct-step4" alt="段階4。「…」が濃いグレー">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>「…」</dt><dd><span class="rec-val__was">#A1A1AA</span><span class="rec-val__to">→</span><span class="rec-val__now">#59636e</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>メニューが開くボタンなのに、薄いグレー</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>検索のアイコンと同じ色に濃くする</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>押せるアイコンも3:1以上（WCAG 2.2）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="rec-card" id="c33">
+        <header class="rec-card__head">
+          <span class="rec-card__no">33</span>
+          <h3>記入ルールのリンク</h3>
+          <span class="rec-card__item"><a href="color-fix.html#p10">項目10</a>　文中のリンクには下線</span>
+        </header>
+        <div class="rec-card__body">
+          <div class="rec-imgs">
+            <figure class="rec-fig rec-fig--now">
+              <figcaption class="rec-lbl rec-lbl--now">今（直す前）</figcaption>
+              <img class="zoom" data-img="s10-link-step3" alt="段階3の詳細の文「書き方に迷ったら記入ルールはこちらを見てください」。リンクは青い文字だけで下線がない。周りの文字は薄いグレー">
+            </figure>
+            <figure class="rec-fig rec-fig--goal">
+              <figcaption class="rec-lbl rec-lbl--goal">ゴール</figcaption>
+              <img class="spot" data-img="s10-link-step4" alt="段階4。リンク「記入ルールはこちら」に下線が付き、周りの文字も濃いグレー">
+            </figure>
+          </div>
+          <div class="rec-text">
+            <h4 class="rec-h">Figmaで変える値</h4>
+            <dl class="rec-vals">
+                <div class="rec-val"><dt>下線</dt><dd><span class="rec-val__was">なし</span><span class="rec-val__to">→</span><span class="rec-val__now">あり（文字から2px離す）</span></dd></div>
+                <div class="rec-val"><dt>文字</dt><dd><span class="rec-val__now">#1552E0（段階1のまま）</span></dd></div>
+                <div class="rec-val"><dt>カードの地との比</dt><dd><span class="rec-val__now">5.95:1</span></dd></div>
+            </dl>
+            <h4 class="rec-h">話すポイント</h4>
+            <ul class="rec-talk">
+              <li><span class="rec-talk__tag rec-talk__tag--ng">ダメ</span><span>色だけでリンクだと示している</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--fix">直す</span><span>下線を引く。色は段階1の青のまま</span></li>
+              <li><span class="rec-talk__tag rec-talk__tag--why">なぜ</span><span>色だけのリンクは失敗例（WCAG F73）</span></li>
+            </ul>
+          </div>
+        </div>
+      </article>
+      <div class="rec-stagegoal">
+        <h3>この段階のゴール</h3>
+        <p>段階4を直し終えた画面（アフター）。</p>
+        <img class="shot" data-img="full-step4" alt="4段階すべてを直したアフターの全体">
+      </div>
+    </section>
+  </main>
+</body>
+</html>

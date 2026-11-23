@@ -17,10 +17,17 @@ const img = { _type: "image" };
 const h = (level: 1 | 2 | 3 | 4) => ({ _type: "block", style: `h${level}` });
 
 describe("indexablePremium allowlist", () => {
-  it("has the 10 pilot articles without duplicates", () => {
+  it("has the 10 pilot + 18 (#276) articles without duplicates", () => {
     const slugs = INDEXABLE_PREMIUM_ARTICLES.map((a) => a.slug);
-    expect(slugs).toHaveLength(10);
-    expect(new Set(slugs).size).toBe(10);
+    expect(slugs).toHaveLength(28);
+    expect(new Set(slugs).size).toBe(28);
+    // 本文が薄い記事は戻さない（#276 オーナー回答 Q2）
+    expect(isIndexablePremiumSlug("ui-idea-11")).toBe(false);
+    expect(isIndexablePremiumSlug("materialdesign-rindoku-04")).toBe(false);
+    expect(isIndexablePremiumSlug("goaldirect-2-1")).toBe(true);
+    expect(isIndexablePremiumSlug("ux-beginner15")).toBe(true);
+    // genta は本文が薄いので対象外のまま（#236）
+    expect(isIndexablePremiumSlug("howareyoubecomethedesigner-genta")).toBe(false);
     expect(isIndexablePremiumSlug("portfolio-02")).toBe(true);
     expect(isIndexablePremiumSlug("material-design-tabui-01")).toBe(true);
   });

@@ -11,9 +11,10 @@ export interface SyncSettings {
   mode: SyncMode;
   /** test モードで DM を送ってよい Slack ユーザーID */
   testUserIds: string[];
-  /** 外れるお知らせDMを送ってから外す日までの最短日数（初回の大掃除で効く） */
-  minNoticeDays: number;
-  /** つなぐお願いDMを送ってから、つながらなければ外す候補にするまでの日数 */
+  /**
+   * つなぐお願いDMを送ってから、つながらなければ外す候補にするまでの日数（既定 7。2026-10-29 に 14 → 7）。
+   * ※ 設定行の min_notice_days 列は、外れるお知らせDMの廃止（2026-10-29）で使わなくなった（本番に列だけ残る）
+   */
   linkGraceDays: number;
   /** オーナーへの報告DMを最後に送った日（JST, YYYY-MM-DD）。同じ日に二度送らない */
   ownerReportSentOn: string | null;
@@ -42,8 +43,8 @@ export type ExcludedReason =
   | "admin";
 
 /**
- * - cancel_reserved: 課金中だが解約予約あり（期間の終わりの翌日に外す）
- * - canceled: 課金が終わっている
+ * - cancel_reserved: 課金中だが解約予約あり（期間の終わりの翌日に外す。DM なし）
+ * - canceled: 課金が終わっている（すぐ外す。DM なし）
  * - link_expired: つなぐお願いDMの期限までに、課金中のBONOアカウントとつながらなかった
  */
 export type ScheduledReason = "cancel_reserved" | "canceled" | "link_expired";
@@ -57,7 +58,8 @@ export type NeedsLinkReason = "not_linked" | "no_paid_record";
 /** - deactivated: Slack で外された（削除済み）を確認した / resubscribed・linked: 外す予定が取り消された */
 export type ResolvedReason = "deactivated" | "resubscribed" | "linked";
 
-export type DmType = "link_request" | "removal_notice";
+/** メンバーに送る DM の種類。外れるお知らせDM（removal_notice）は 2026-10-29 に廃止 */
+export type DmType = "link_request";
 
 export type LinkedVia = "email" | "dm_link" | "mypage";
 
@@ -106,13 +108,15 @@ export interface SyncState {
   classification: Classification;
   /** ExcludedReason / ScheduledReason / NeedsLinkReason / null */
   reason: string | null;
-  /** 外す日（JST の日付 YYYY-MM-DD）。外れるお知らせDMを送れた時点（link_expired は期限切れの時点）で決まる */
+  /** 外す日（JST の日付 YYYY-MM-DD）。解約は判定した時点、link_expired は期限切れの時点で決まる */
   removeAfter: string | null;
   /** つなぐお願いの期限（JST の日付。この日まではつながるのを待つ） */
   linkDeadline: string | null;
   linkRequestDmAt: Date | null;
   linkRequestVersion: number | null;
+  /** 外れるお知らせDMの廃止（2026-10-29）で使わなくなった列。本番に残っているので読み書きの型だけ残す */
   removalNoticeDmAt: Date | null;
+  /** 同上（未使用） */
   removalNoticeVersion: number | null;
   dryRunResult: string | null;
   dryRunAt: Date | null;

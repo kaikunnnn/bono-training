@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import { urlFor } from "@/lib/sanity";
 import type { SanityImage } from "@/types/sanity";
@@ -93,9 +93,9 @@ export function LessonDetailCard({
 
   if (href) {
     return (
-      <Link href={href} className="block hover:opacity-90 transition-opacity">
+      <IntentPrefetchLink href={href} className="block hover:opacity-90 transition-opacity">
         {content}
-      </Link>
+      </IntentPrefetchLink>
     );
   }
 

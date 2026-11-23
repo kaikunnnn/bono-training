@@ -1,6 +1,6 @@
 /**
  * 会員メール（#264 スライス1）の共通型・定数。純粋な型と定数だけ（どこからでも import 可）。
- * テーブル: supabase/migrations/20261029000000_create_member_mail.sql
+ * テーブル: supabase/migrations/20261123000000_create_member_mail.sql
  */
 
 /** off: 止める / count: 人数だけ出す / owner: オーナーだけに送る / all: 全員に送る */

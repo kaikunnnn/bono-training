@@ -1,3 +1,5 @@
+const EMOJI_CDN_BASE = 'https://emojicdn.elk.sh/';
+
 /**
  * BONO Blog - Emoji Utilities
  *
@@ -35,15 +37,17 @@ export const emojiToCodePoints = (emoji: string): string => {
 export const getFluentEmojiUrl = (emoji: string): string => {
   if (!emoji || emoji.trim() === '') {
     // デフォルト絵文字: 📝（メモ）
-    return 'https://emojicdn.elk.sh/📝';
+    return DEFAULT_FLUENT_EMOJI_URL;
   }
 
   // 絵文字の最初の文字のみを使用
   const firstEmoji = [...emoji.trim()][0];
 
   // Emoji CDN (elk.sh) を使用
-  // 注: URLエンコードは不要。ブラウザが自動的に処理します
-  return `https://emojicdn.elk.sh/${firstEmoji}`;
+  // 注: 必ずURLエンコードする。生の絵文字のままだと、Next.js が画像の preload を
+  // HTTP の Link ヘッダーに載せるときに「Invalid character in header content」になる。
+  // ブラウザが送るURLはエンコード後と同じなので、表示は変わらない
+  return `${EMOJI_CDN_BASE}${encodeURIComponent(firstEmoji)}`;
 };
 
 /**
@@ -53,13 +57,13 @@ export const getFluentEmojiUrl = (emoji: string): string => {
  */
 export const getFluentEmojiFallbackUrl = (emoji: string): string => {
   if (!emoji || emoji.trim() === '') {
-    return 'https://emojicdn.elk.sh/📝';
+    return DEFAULT_FLUENT_EMOJI_URL;
   }
 
   const firstEmoji = [...emoji.trim()][0];
 
   // elk.shは自動的に最適な絵文字画像を選択する
-  return `https://emojicdn.elk.sh/${firstEmoji}`;
+  return `${EMOJI_CDN_BASE}${encodeURIComponent(firstEmoji)}`;
 };
 
 /**
@@ -107,4 +111,4 @@ export const removeEmojiFromText = (text: string): string => {
  * 絵文字表示用のデフォルト値を取得
  */
 export const DEFAULT_EMOJI = '📝';
-export const DEFAULT_FLUENT_EMOJI_URL = 'https://emojicdn.elk.sh/📝';
+export const DEFAULT_FLUENT_EMOJI_URL = `${EMOJI_CDN_BASE}${encodeURIComponent(DEFAULT_EMOJI)}`;

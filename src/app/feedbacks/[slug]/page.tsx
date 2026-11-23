@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { getFeedback, getRelatedFeedbacks, getRecentFeedbacks } from "@/lib/sanity";
 import { getSubscriptionStatus } from "@/lib/subscription";
 
@@ -77,13 +77,13 @@ export default async function FeedbackDetailPage({ params }: PageProps) {
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         {/* 戻るリンク */}
-        <Link
+        <IntentPrefetchLink
           href="/feedbacks"
           className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 mb-6"
         >
           <ArrowLeft className="w-4 h-4 mr-1" />
           フィードバック一覧に戻る
-        </Link>
+        </IntentPrefetchLink>
 
         {/* ヘッダー */}
         <div className="mb-8">

@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { cn } from "@/lib/utils";
 import { Sidebar } from "./Sidebar";
 import { Footer } from "./Footer";
@@ -172,9 +172,9 @@ export function Layout({ children, className, user, notificationSlot, boardDotSl
           </div>
 
           {/* BONOロゴ（中央）: mainと同様、常に / にリンク（ログイン済みなら / が /mypage にリダイレクト） */}
-          <Link href="/" className="flex items-center">
+          <IntentPrefetchLink href="/" className="flex items-center">
             <Logo width={68} height={20} />
-          </Link>
+          </IntentPrefetchLink>
 
           {/* 通知ベル（右寄せ・#160 S3）。ログイン時のみ notificationSlot が渡る */}
           {notificationSlot && (

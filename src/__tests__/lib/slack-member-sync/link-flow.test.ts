@@ -6,6 +6,7 @@ vi.mock("server-only", () => ({}));
 import {
   canUseMypageCard,
   confirmLink,
+  getSlackLinkState,
   inspectLinkToken,
   MYPAGE_DAILY_LIMIT,
   requestMypageLink,
@@ -60,7 +61,15 @@ describe("DM のリンクでつなぐ（/slack/link）", () => {
     addToken(RAW);
     expect(await confirmLink(store, RAW, "user-paid")).toBe("linked");
     expect(store.links).toEqual([{ userId: "user-paid", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "dm_link" }]);
-    expect(await confirmLink(store, RAW, "user-paid")).toBe("used");
+    expect(await confirmLink(store, RAW, "user-paid")).toBe("already_linked");
+  });
+
+  it("つないだあとに同じリンクを開き直すと「すでにつながっています」。つないでいない人には「使用済み」", async () => {
+    addToken(RAW);
+    await confirmLink(store, RAW, "user-paid");
+    expect(await inspectLinkToken(store, RAW, "user-paid")).toBe("already_linked");
+    expect(await inspectLinkToken(store, RAW, "user-free")).toBe("used");
+    expect(await inspectLinkToken(store, RAW)).toBe("used");
   });
 
   it("マイページ由来のリンクは linked_via=mypage", async () => {
@@ -192,7 +201,7 @@ describe("マイページの「Slackとつなぐ」", () => {
 
   it("本文が未承認なら送らない（同じ結果）", async () => {
     slack.lookupResult = () => ({ kind: "ok", data: makeMember({ id: "U_SLACK" }) });
-    expect(await requestMypageLink(deps({ message: MYPAGE_CONFIRM_MESSAGE }), "user-paid", "a@example.com")).toBe("sent");
+    expect(await requestMypageLink(deps({ message: { ...MYPAGE_CONFIRM_MESSAGE, approved: false } }), "user-paid", "a@example.com")).toBe("sent");
     expect(slack.postCalls).toHaveLength(0);
     expect(store.tokens[0].slackUserId).toBeNull();
   });
@@ -245,5 +254,37 @@ describe("マイページのカードを見せる相手（canUseMypageCard）", 
     expect(canUseMypageCard({ ...base, mode: "dry_run", testBonoUserIds: ["u1"] }, "u1")).toBe(false);
     expect(canUseMypageCard({ ...base, mode: "off" }, "u1")).toBe(false);
     expect(canUseMypageCard(null, "u1")).toBe(false);
+  });
+});
+
+describe("アカウント情報の Slack カード・詳細ページの出し分け（getSlackLinkState）", () => {
+  beforeEach(() => {
+    store.settings = { ...store.settings!, mode: "live" };
+  });
+
+  it("課金中で未接続なら show", async () => {
+    expect(await getSlackLinkState(store, "user-paid")).toBe("show");
+  });
+
+  it("すでにつながっていれば linked", async () => {
+    store.links.push({ userId: "user-paid", teamId: TEAM_ID, slackUserId: "U_SLACK", linkedVia: "email" });
+    expect(await getSlackLinkState(store, "user-paid")).toBe("linked");
+  });
+
+  it("課金中でなければ not_paid。手で残す人は show", async () => {
+    expect(await getSlackLinkState(store, "user-free")).toBe("not_paid");
+    store.settings = { ...store.settings!, keepUserIds: ["user-free"] };
+    expect(await getSlackLinkState(store, "user-free")).toBe("show");
+  });
+
+  it("off / dry_run・test の対象外は hidden", async () => {
+    store.settings = { ...store.settings!, mode: "off" };
+    expect(await getSlackLinkState(store, "user-paid")).toBe("hidden");
+    store.settings = { ...store.settings!, mode: "dry_run" };
+    expect(await getSlackLinkState(store, "user-paid")).toBe("hidden");
+    store.settings = { ...store.settings!, mode: "test", testBonoUserIds: [] };
+    expect(await getSlackLinkState(store, "user-paid")).toBe("hidden");
+    store.settings = { ...store.settings!, mode: "test", testBonoUserIds: ["user-paid"] };
+    expect(await getSlackLinkState(store, "user-paid")).toBe("show");
   });
 });

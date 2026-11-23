@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIの配色で知るべき9個 — UIデザインの基礎知識</title>
+<meta name="description" content="コントラスト比4.5:1・非テキスト3:1・色だけに頼らない・グレースケール階層・アクセントの節度・トーナルパレットまで。UIの色を「数値と根拠」で語れるようになる9個を、一次ソースに紐づけて解説します。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--color-accent); }
+
+  .wrap { max-width: var(--measure); margin: 0 auto; padding: 0 var(--space-24); }
+  @media (min-width: 1024px) { .wrap { padding: 0 var(--space-48); } }
+
+  /* --- ヒーロー --- */
+  .hero {
+    position: relative; overflow: hidden;
+    background: linear-gradient(135deg, var(--grad-1), var(--grad-3) 45%, var(--grad-2) 72%, var(--grad-4));
+    color: var(--color-on-grad);
+    border-radius: 0 0 var(--radius-l) var(--radius-l);
+  }
+  .hero canvas.shader { position: absolute; inset: 0; width: 100%; height: 100%; display: block; opacity: 0.9; pointer-events: none; }
+  .hero__inner { position: relative; z-index: 1; max-width: var(--measure); margin: 0 auto; padding: var(--space-96) var(--space-24) var(--space-64); }
+  @media (min-width: 1024px) { .hero__inner { padding: var(--space-128) var(--space-48) var(--space-96); } }
+  .hero .eyebrow { font-size: var(--text-small); font-weight: 700; letter-spacing: 0.14em; opacity: 0.85; margin: 0 0 var(--space-16); }
+  .hero .eyebrow a { color: var(--color-on-grad); text-decoration: none; opacity: 0.9; }
+  .hero h1 { font-size: 38px; font-weight: 900; line-height: var(--leading-heading); margin: 0 0 var(--space-20); }
+  @media (min-width: 768px) { .hero h1 { font-size: 52px; } }
+  .hero p.lede { font-size: 18px; font-weight: 500; max-width: 34rem; margin: 0 0 var(--space-24); opacity: 0.95; }
+  .hero .meta { font-size: var(--text-small); opacity: 0.82; margin: 0; }
+
+  /* --- 本文プローズ --- */
+  main { padding: var(--space-56) 0 var(--space-40); }
+  .prose p { max-width: var(--measure); margin: 0 0 var(--space-16); line-height: var(--leading-body); }
+  .prose p.note { color: var(--color-ink-3); font-size: var(--text-small); line-height: var(--leading-small); }
+
+  /* --- 凡例 --- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: var(--space-12);
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius-m); padding: var(--space-20) var(--space-24);
+    margin: var(--space-24) 0 0;
+  }
+  .legend .li { display: flex; align-items: flex-start; gap: var(--space-8); flex: 1; min-width: 240px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 4px; flex: none; margin: var(--space-4) 0 0; }
+  .legend .sw.f { background: var(--color-fact); }
+  .legend .sw.i { background: var(--color-interp); }
+  .legend .lt { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); }
+  .legend .lt b { color: var(--color-ink); }
+
+  /* --- 目次 --- */
+  .toc { background: var(--color-surface-2); border-radius: var(--radius-m); padding: var(--space-24); margin: var(--space-32) 0 0; }
+  .toc h2 { font-size: 15px; color: var(--color-ink-3); letter-spacing: 0.06em; margin: 0 0 var(--space-12); }
+  .toc ol { list-style: none; counter-reset: t; display: grid; grid-template-columns: 1fr; gap: var(--space-8); }
+  @media (min-width: 680px) { .toc ol { grid-template-columns: 1fr 1fr; } }
+  .toc li { counter-increment: t; }
+  .toc a { display: flex; gap: var(--space-10); text-decoration: none; color: var(--color-ink); font-size: var(--text-small); line-height: var(--leading-small); }
+  .toc a::before { content: counter(t); color: var(--color-accent); font-weight: 700; min-width: 20px; }
+  .toc a:hover { color: var(--color-accent); }
+
+  /* --- 項目 --- */
+  .item { padding: var(--space-56) 0 0; scroll-margin-top: var(--space-24); }
+  .item__no { font-size: var(--text-small); font-weight: 700; color: var(--color-accent); letter-spacing: 0.08em; margin: 0 0 var(--space-8); }
+  .item h2 { font-size: 26px; font-weight: 700; line-height: var(--leading-heading); margin: 0 0 var(--space-16); }
+  @media (min-width: 768px) { .item h2 { font-size: 30px; } }
+
+  /* --- HOW TO（まず具体的にやること・初心者がそのまま真似できる初期値） --- */
+  .howto {
+    background: var(--color-surface-2);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-accent);
+    border-radius: var(--radius-m);
+    padding: var(--space-16) var(--space-20);
+    margin: var(--space-16) 0 var(--space-8);
+    box-shadow: var(--shadow-card);
+  }
+  .howto::before {
+    content: "まず、やること";
+    display: block;
+    font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em;
+    color: var(--color-accent); margin: 0 0 var(--space-6);
+  }
+  .howto p { margin: 0; font-weight: 700; line-height: var(--leading-body); color: var(--color-ink); }
+  .howto p + p { margin: var(--space-8) 0 0; font-weight: 500; font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); }
+
+  /* --- 事実/解釈ブロック（視覚的に分離） --- */
+  .claim { display: block; border-radius: var(--radius-s); padding: var(--space-16) var(--space-20); margin: var(--space-16) 0; border-left: 4px solid; line-height: var(--leading-body); }
+  .claim::before { display: block; font-size: var(--text-caption); font-weight: 700; letter-spacing: 0.08em; margin: 0 0 var(--space-6); }
+  span[data-type="fact"] { background: var(--color-fact-bg); border-color: var(--color-fact); color: var(--color-ink); }
+  span[data-type="fact"]::before { content: "事実 — 一次ソースの記述"; color: var(--color-fact); }
+  span[data-type="interpretation"] { background: var(--color-interp-bg); border-color: var(--color-interp); color: var(--color-ink); }
+  span[data-type="interpretation"]::before { content: "解釈 — 実務での使い方"; color: var(--color-interp); }
+
+  /* --- 出典チップ --- */
+  .cites { display: flex; flex-wrap: wrap; gap: var(--space-8); margin: var(--space-12) 0 0; }
+  a.cite {
+    display: inline-flex; align-items: center; gap: var(--space-6);
+    font-size: var(--text-caption); font-weight: 500; text-decoration: none;
+    color: var(--color-ink-2); background: var(--color-surface);
+    border: 1px solid var(--color-border); border-radius: var(--radius-l);
+    padding: var(--space-4) var(--space-12); line-height: var(--leading-small);
+  }
+  a.cite::before { content: "🔗"; font-size: 11px; }
+  a.cite:hover { border-color: var(--color-accent); color: var(--color-accent); }
+
+  /* --- 図解 --- */
+  figure.fig { margin: var(--space-24) 0 0; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-24); overflow-x: auto; box-shadow: var(--shadow-card); }
+  figure.fig svg { width: 100%; height: auto; display: block; max-width: 100%; }
+  figure.fig figcaption { margin: var(--space-16) 0 0; font-size: var(--text-small); color: var(--color-ink-3); line-height: var(--leading-small); }
+
+  /* --- セクション区切り --- */
+  .band { height: 3px; background: linear-gradient(90deg, var(--grad-2), var(--color-accent-2) 50%, var(--grad-4)); border-radius: var(--radius-s); opacity: 0.5; margin: var(--space-56) 0 0; }
+
+  /* --- カウンターexample枠 --- */
+  .counter { border: 2px dashed var(--color-interp); background: var(--color-interp-bg); border-radius: var(--radius-m); padding: var(--space-20) var(--space-24); margin: var(--space-20) 0 0; }
+  .counter .tag { display: inline-block; font-size: var(--text-caption); font-weight: 700; color: var(--color-interp); letter-spacing: 0.06em; margin: 0 0 var(--space-8); }
+  .counter p { margin: 0; line-height: var(--leading-body); }
+
+  /* --- まとめ / 次に読む --- */
+  .summary { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-32); margin: var(--space-56) 0 0; box-shadow: var(--shadow-card); }
+  .summary h2 { font-size: 22px; margin: 0 0 var(--space-16); line-height: var(--leading-heading); }
+  .summary ul { margin: 0; padding: 0 0 0 var(--space-20); }
+  .summary li { margin: 0 0 var(--space-8); line-height: var(--leading-body); }
+
+  /* --- 理解度クイズ --- */
+  .quiz { background: var(--color-surface-2); border-radius: var(--radius-m); padding: var(--space-32); margin: var(--space-40) 0 0; }
+  .quiz h2 { font-size: 22px; margin: 0 0 var(--space-8); line-height: var(--leading-heading); }
+  .quiz .quiz-lead { font-size: var(--text-small); color: var(--color-ink-3); line-height: var(--leading-small); margin: 0 0 var(--space-24); }
+  .quiz .q { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-24); margin: 0 0 var(--space-16); box-shadow: var(--shadow-card); }
+  .quiz .q:last-of-type { margin-bottom: 0; }
+  .quiz .q-text { font-weight: 700; margin: 0 0 var(--space-16); line-height: var(--leading-body); }
+  .quiz .opts { display: grid; grid-template-columns: 1fr; gap: var(--space-8); }
+  @media (min-width: 560px) { .quiz .opts { grid-template-columns: 1fr 1fr; } }
+  .quiz .opt {
+    font-family: inherit; font-size: var(--text-small); text-align: left;
+    background: var(--color-surface); color: var(--color-ink);
+    border: 1px solid var(--color-border); border-radius: var(--radius-s);
+    padding: var(--space-12) var(--space-16); cursor: pointer; line-height: var(--leading-small);
+    transition: border-color 0.12s ease, background 0.12s ease;
+  }
+  .quiz .opt:hover { border-color: var(--color-accent); }
+  .quiz .opt.correct { background: var(--color-fact-bg); border-color: var(--color-fact); color: var(--color-ink); font-weight: 700; }
+  .quiz .opt.correct::after { content: " ○ 正解"; color: var(--color-fact); font-weight: 700; }
+  .quiz .opt.wrong { background: var(--color-interp-bg); border-color: var(--color-interp); color: var(--color-ink); }
+  .quiz .opt.wrong::after { content: " ✕ 不正解"; color: var(--color-interp); font-weight: 700; }
+  .quiz .explain { margin: var(--space-16) 0 0; padding: var(--space-16) var(--space-20); background: var(--color-surface-2); border-left: 4px solid var(--color-accent); border-radius: var(--radius-s); }
+  .quiz .explain p { margin: 0 0 var(--space-8); line-height: var(--leading-body); font-size: var(--text-small); }
+  .quiz .explain p.why { color: var(--color-ink-2); font-size: var(--text-caption); line-height: var(--leading-small); }
+  .quiz .explain .jump { display: inline-block; margin: var(--space-8) 0 0; font-size: var(--text-caption); font-weight: 700; text-decoration: none; }
+  .quiz .explain .jump:hover { text-decoration: underline; }
+
+  .next { display: grid; grid-template-columns: 1fr; gap: var(--space-16); margin: var(--space-32) 0 0; }
+  @media (min-width: 680px) { .next { grid-template-columns: 1fr 1fr; } }
+  .next a { display: block; text-decoration: none; background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-m); padding: var(--space-24); color: var(--color-ink); }
+  .next a:hover { border-color: var(--color-accent); }
+  .next .k { font-size: var(--text-caption); color: var(--color-ink-3); letter-spacing: 0.06em; margin: 0 0 var(--space-6); }
+  .next .t { font-size: 17px; font-weight: 700; margin: 0 0 var(--space-6); }
+  .next .d { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); margin: 0; }
+
+  footer { padding: var(--space-48) 0 var(--space-96); }
+  footer p { font-size: var(--text-caption); color: var(--color-ink-3); border-top: 1px solid var(--color-border); padding: var(--space-20) 0 0; margin: 0; }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <canvas class="shader" aria-hidden="true"></canvas>
+    <div class="hero__inner">
+      <p class="eyebrow"><a href="index.html">← UIデザインの基礎知識</a></p>
+      <h1>UIの配色で<br>知るべき9個</h1>
+      <p class="lede">色は「センスで選ぶもの」ではありません。コントラスト比という物差しから、色だけに頼らない設計・無彩色の階層・アクセントの節度・パレットの作り方まで、UIの色を「数値と根拠」で語れるようになる9個を、一次ソースに紐づけて解説します。</p>
+      <p class="meta">読了目安 約10分（日本語の読速 約400〜600字/分を前提）／出典はすべて台帳ID付き</p>
+    </div>
+  </header>
+
+  <main class="wrap prose">
+    <p>この記事を読み終えるころには、世の中のUIの色が「読める／読めない」で見える目に変わります。感覚で選んでいた色を、「本文は背景と4.5:1以上」「押してほしい所にアクセント色を1色」「色だけで状態を伝えない」のように、根拠のある初期値で語れるようになります。</p>
+    <p>大事なのは、断定を鵜呑みにしないこと。「鮮やかで目立つ色ほど良い」「正解の配色がある」という思い込みには、実在DSの中に反例があります。だからこの記事も余白編と同じく、一次ソースが書くこと（事実）と、実務での使い方（解釈）を、色で分けて示します。</p>
+
+    <div class="legend" aria-label="事実と解釈の凡例">
+      <div class="li"><span class="sw f" aria-hidden="true"></span><span class="lt"><b>事実</b>＝WCAGやApple・Material・GOV.UK・Uber Base など一次ソースの記述を、原文に忠実に言い換えたもの。末尾に出典チップ（台帳ID＋URL）が付きます。</span></div>
+      <div class="li"><span class="sw i" aria-hidden="true"></span><span class="lt"><b>解釈</b>＝その事実を、初心者が実務でどう使えばよいかに落とした推奨。断定は避け「原則」「定番」で示します。</span></div>
+    </div>
+
+    <nav class="toc" aria-label="目次">
+      <h2>この記事の9個</h2>
+      <ol>
+        <li><a href="#item1">色は"意味"を持たせる道具</a></li>
+        <li><a href="#item2">コントラスト比という物差し</a></li>
+        <li><a href="#item3">非テキストのコントラスト</a></li>
+        <li><a href="#item4">色だけに頼らない</a></li>
+        <li><a href="#item5">無彩色で階層をつくる</a></li>
+        <li><a href="#item6">アクションに色を置く（1色に絞る）</a></li>
+        <li><a href="#item7">意味色（成功・警告・エラー）</a></li>
+        <li><a href="#item8">パレットの作り方（トーナル）</a></li>
+        <li><a href="#item9">「唯一の正解」ではない（反例）</a></li>
+      </ol>
+    </nav>
+
+    <!-- 1 -->
+    <section class="item" id="item1" data-item="1">
+      <p class="item__no">01</p>
+      <h2>色は"意味"を持たせる道具</h2>
+      <div class="howto">
+        <p>色を1色ずつ好みで選ばない。まず「この色は何の役割か——本文か、押してほしいアクションか、状態か」を決めてから色を割り当てる。</p>
+        <p>押してほしい所に置く"アクション色"も役割のひとつ。色は飾りでなく、意味とアクションの目印。</p>
+      </div>
+      <span class="claim" data-type="fact">Material 3 は色を「ロール（役割）」として定義します。primary（高強調）／secondary・tertiary（強調の階層）／surface（背景）／"on-"接頭辞の色（その親色の上に載る文字・アイコン用）を、UIの用途ごとに割り当て、トークンとして実装します。Uber Base も色をセマンティックなトークン（contentPrimary など）で一元管理しています。
+        <span class="cites">
+          <a class="cite" href="https://m3.material.io/styles/color/roles" data-ledger="S-17">S-17 · Material 3</a>
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/themes/light-theme/color-semantic-tokens.ts" data-ledger="Q-04">Q-04 · Uber Base</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">だから色は「飾り」ではなく「役割を運ぶ道具」です。まず「この色は何の役割か——本文か、アクセントか、状態か」を言えるようにするのが第一歩。1色ずつ好みで選ぶのをやめ、役割に色を割り当てる発想に切り替えましょう。</span>
+      <p>色は "paint-by-number（数字塗り絵）の番号のようなもの" だと M3 は言います——番号（役割）が先に決まり、色は後から入る。洗練された画面ほど、色は個別でなく体系的に決められています（洗練-05／Stripe A-03）。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 210" role="img" aria-label="装飾で多色を足した画面と、役割で色を割り当てた画面の比較">
+          <rect x="14" y="20" width="205" height="170" rx="10" style="fill:var(--swatch-base-white);stroke:var(--color-border)"/>
+          <text x="24" y="40" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-interp)">装飾で多色を足す</text>
+          <rect x="24" y="50" width="185" height="16" rx="3" style="fill:var(--swatch-base-error)"/>
+          <rect x="24" y="74" width="185" height="10" rx="3" style="fill:var(--swatch-base-positive)"/>
+          <rect x="24" y="90" width="150" height="10" rx="3" style="fill:var(--swatch-base-warning)"/>
+          <rect x="24" y="112" width="120" height="16" rx="3" style="fill:var(--swatch-base-accent)"/>
+          <rect x="24" y="150" width="90" height="26" rx="6" style="fill:var(--swatch-base-error)"/>
+          <rect x="126" y="150" width="83" height="26" rx="6" style="fill:var(--swatch-base-positive)"/>
+          <rect x="261" y="20" width="205" height="170" rx="10" style="fill:var(--swatch-base-white);stroke:var(--color-fact)" stroke-width="1.5"/>
+          <text x="271" y="40" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-fact)">役割で色を割り当てる</text>
+          <rect x="271" y="50" width="185" height="16" rx="3" style="fill:var(--swatch-base-ink)"/>
+          <rect x="271" y="74" width="185" height="10" rx="3" style="fill:var(--swatch-base-content2)"/>
+          <rect x="271" y="90" width="150" height="10" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <rect x="271" y="112" width="120" height="16" rx="3" style="fill:var(--swatch-base-content2)"/>
+          <rect x="271" y="150" width="120" height="26" rx="6" style="fill:var(--swatch-base-accent)"/>
+        </svg>
+        <figcaption>左は意味色（赤・緑・黄・青）を装飾として乱用し、どれが主役か読めない。右は本文＝黒〜グレー階層、押してほしい所だけアクセント1色。色に「役割」があると視線が迷わない。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 2 -->
+    <section class="item" id="item2" data-item="2">
+      <p class="item__no">02</p>
+      <h2>コントラスト比という物差し</h2>
+      <div class="howto">
+        <p>本文の文字色は、背景と4.5:1以上のコントラストにする。</p>
+        <p>大きな文字（18pt以上、または太字14pt以上）は3:1以上。おしゃれに見える薄いグレー文字は避ける。</p>
+      </div>
+      <span class="claim" data-type="fact">WCAG 2.2 の SC 1.4.3 は、通常テキストは背景と4.5:1以上、大きな文字（18pt以上、または太字14pt以上）は3:1以上を求めます。より広く読める強化基準 AAA（SC 1.4.6）は7:1／4.5:1です。計算値は丸めてはならず、原文いわく "4.499:1 would not meet the 4.5:1 threshold"（4.499は4.5を満たさない）とされています。
+        <span class="cites">
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" data-ledger="F-01">F-01 · WCAG 2.2</a>
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html" data-ledger="F-02">F-02 · WCAG 2.2</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">本文は4.5:1以上を初期値に。おしゃれに見える薄いグレー文字は、たいていこの線を割っています。余裕があれば7:1を狙う——「必須は4.5:1、上級は7:1」の2段構えで考えると、丸めの誘惑に負けずに済みます。</span>
+      <p>コントラスト比は、前景色と背景色の明るさの差を1つの数字にした物差しで、感覚の「見やすい／見にくい」を共有できる数値に翻訳します。下の図には、この記事自身の本文・リンクの実測比も載せました——教えている基準をページ自身も満たしているか、数字で確かめられます。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 210" role="img" aria-label="高コントラストと低コントラストの本文比較、およびこのページ自身の実測コントラスト比">
+          <rect x="14" y="20" width="215" height="80" rx="8" style="fill:var(--swatch-base-white)"/>
+          <text x="26" y="46" font-family="sans-serif" font-size="14" font-weight="700" style="fill:var(--swatch-base-ink)">読みやすい本文</text>
+          <text x="26" y="68" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-content2)">黒に近い文字 ／ 約 21:1</text>
+          <text x="26" y="90" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-fact)">4.5:1 を満たす ○</text>
+          <rect x="251" y="20" width="215" height="80" rx="8" style="fill:var(--swatch-base-white)"/>
+          <text x="263" y="46" font-family="sans-serif" font-size="14" font-weight="700" style="fill:var(--swatch-base-disabled)">薄すぎる本文</text>
+          <text x="263" y="68" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-disabled)">#A6A6A6 ／ 約 2.4:1</text>
+          <text x="263" y="90" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-interp)">4.5:1 未満 ✕</text>
+          <rect x="14" y="116" width="452" height="76" rx="8" style="fill:var(--color-surface-2)"/>
+          <text x="26" y="138" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-accent)">このページ自身の実測（チェック出力より）</text>
+          <text x="26" y="162" font-family="sans-serif" font-size="12" style="fill:var(--color-ink-2)">本文（ink）on 背景：約 16:1</text>
+          <text x="26" y="182" font-family="sans-serif" font-size="12" style="fill:var(--color-ink-2)">リンク（accent）on 背景：約 6.4:1 — どちらも4.5:1以上</text>
+        </svg>
+        <figcaption>左＝黒に近い本文は約21:1で快適。中＝#A6A6A6の薄い文字は約2.4:1で基準割れ（悪い例）。下＝このページ自身の本文・リンクの実測値。丸めず、そのままの数字で判断する。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 3 -->
+    <section class="item" id="item3" data-item="3">
+      <p class="item__no">03</p>
+      <h2>非テキストのコントラスト</h2>
+      <div class="howto">
+        <p>入力欄の枠・アイコン・状態表示は、隣り合う色と3:1以上のコントラストにする。</p>
+        <p>"見えている必要がある"線は3:1が対象。装飾だけの罫線は対象外なので、そこは自由に淡くしてよい。</p>
+      </div>
+      <span class="claim" data-type="fact">WCAG 2.2 の SC 1.4.11 は、UI部品の識別に必要な視覚情報（枠線・アイコン・状態表示）も、隣接する色と3:1以上のコントラストを求めます（非アクティブな部品は対象外）。Uber Base はボーダーを黒のアルファ階調（hsla(0,0%,0%,0.04〜0.24)）で段階的に持ち、階層を作っています。
+        <span class="cites">
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html" data-ledger="F-03">F-03 · WCAG 2.2</a>
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/themes/shared/borders.ts" data-ledger="Q-11">Q-11 · Uber Base</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">文字だけでなく「枠が見えるか」も色の設計対象です。薄すぎる入力欄の枠は、"ある"ように見えて機能していません。おしゃれに見せようと枠を淡くしすぎると、どこが入力欄なのか分からなくなる——この落とし穴は初心者がとくにハマりがちです。</span>
+      <p>ボタンの輪郭・アイコン・グラフの線など、情報を伝えるために"見えている必要がある"ものは3:1の対象。装飾だけの罫線は対象外なので、そこは自由に淡くできます。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 190" role="img" aria-label="薄すぎる枠の入力欄と、3:1以上の枠の入力欄の比較">
+          <text x="14" y="30" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-content2)">メールアドレス</text>
+          <rect x="14" y="42" width="215" height="46" rx="8" style="fill:var(--swatch-base-white);stroke:var(--swatch-base-gray200)"/>
+          <text x="28" y="70" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-content3)">you@example.com</text>
+          <text x="14" y="112" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-interp)">枠が薄すぎる（#DDDDDD・3:1未満）✕ 悪い例</text>
+          <text x="251" y="30" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-content2)">メールアドレス</text>
+          <rect x="251" y="42" width="215" height="46" rx="8" style="fill:var(--swatch-base-white);stroke:var(--swatch-base-content3)" stroke-width="1.5"/>
+          <text x="265" y="70" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-content3)">you@example.com</text>
+          <text x="251" y="112" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-fact)">枠が十分（3:1以上）○ 良い例</text>
+          <text x="14" y="150" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">同じ入力欄でも、枠のコントラストで「押せる／入力できる場所」の伝わり方が変わる。</text>
+          <text x="14" y="172" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">※ 悪い例の枠色は実在DSの見本値。数値は正しいが、これは基準を満たしていない。</text>
+        </svg>
+        <figcaption>枠線も色の設計対象。左の薄い枠は3:1未満で"見えていない"。右は枠を濃くして3:1以上に。文字の4.5:1とセットで持つ。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 4 -->
+    <section class="item" id="item4" data-item="4">
+      <p class="item__no">04</p>
+      <h2>色だけに頼らない</h2>
+      <div class="howto">
+        <p>エラーやリンクを「色だけ」で示さない。色＋アイコン＋文言で、手がかりを二重・三重にする。</p>
+        <p>白黒にしても意味が伝わるか、を基準にする。色は補強、文言が本体。</p>
+      </div>
+      <span class="claim" data-type="fact">WCAG 2.2 の SC 1.4.1（Use of Color）は「色を、情報・操作・状態・要素の区別を伝える"唯一の"視覚手段にしてはならない」と求めます。Apple HIG も "Avoid relying solely on color..." とし、テキストラベルやグリフ形状など色以外の手段でも同じ情報を伝えるよう促しています。
+        <span class="cites">
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html" data-ledger="F-13">F-13 · WCAG 2.2</a>
+          <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/color" data-ledger="F-14">F-14 · Apple HIG</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">エラーを赤"だけ"で示さないこと。赤＋アイコン（⚠）＋文言のように、手がかりを二重・三重にします。「色覚特性のある人にも、白黒印刷でも伝わるか」を基準にすると外しません。これはコントラスト比（項目2・3）とは別の、独立した達成基準です。</span>
+      <p>色の見え方には個人差があり、赤と緑の区別がつきにくい人もいます。色は情報を"補強"する道具であって、"唯一"の伝達手段にはしない——これを守るだけで、UIは多くの人に届くようになります。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 200" role="img" aria-label="色だけのエラー表示と、色プラスアイコンと文言のエラー表示、およびグレースケール化した見え方の比較">
+          <text x="14" y="28" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-interp)">色だけ ✕</text>
+          <rect x="14" y="38" width="215" height="42" rx="8" style="fill:var(--swatch-base-white);stroke:var(--swatch-base-error)" stroke-width="1.5"/>
+          <text x="28" y="64" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-error)">パスワード</text>
+          <text x="14" y="110" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">グレースケールにすると…</text>
+          <rect x="14" y="120" width="215" height="42" rx="8" style="fill:var(--swatch-base-white);stroke:var(--swatch-base-content2)" stroke-width="1.5"/>
+          <text x="28" y="146" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-content2)">パスワード（違いが消える）</text>
+          <text x="251" y="28" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-fact)">色＋アイコン＋文言 ○</text>
+          <rect x="251" y="38" width="215" height="42" rx="8" style="fill:var(--swatch-base-error-bg);stroke:var(--swatch-base-error)" stroke-width="1.5"/>
+          <text x="265" y="64" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-error)">⚠ パスワードが必要です</text>
+          <text x="251" y="110" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">グレースケールでも…</text>
+          <rect x="251" y="120" width="215" height="42" rx="8" style="fill:var(--swatch-base-gray50);stroke:var(--swatch-base-content2)" stroke-width="1.5"/>
+          <text x="265" y="146" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-content2)">⚠ パスワードが必要です</text>
+          <text x="14" y="188" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">色を情報から抜くと、左は"ただの枠"に戻る。右はアイコンと文言が残り、意味が伝わり続ける。</text>
+        </svg>
+        <figcaption>左＝赤"だけ"のエラーは、色を抜くと違いが消える。右＝⚠アイコンと文言を添えると、色が見えなくても伝わる。色は補強、文言が本体。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 5 -->
+    <section class="item" id="item5" data-item="5">
+      <p class="item__no">05</p>
+      <h2>無彩色で階層をつくる</h2>
+      <div class="howto">
+        <p>有彩色を足す前に、黒〜グレーの3段階（#000000 → #4B4B4B → #5E5E5E 相当）で見出し・本文・補足を分ける。</p>
+        <p>薄いグレー（#A6A6A6 相当）は、無効・プレースホルダ表示だけに使う。読ませる文字には使わない。</p>
+      </div>
+      <span class="claim" data-type="fact">Uber Base はグレースケールだけで文字の階層を作ります。本文・見出し＝#000000、補助テキスト＝#4B4B4B、キャプション＝#5E5E5E。プレースホルダ／無効（disabled）＝#A6A6A6 は背景白に対して4.5:1を満たしませんが、これは F-01 の「無効な部品は対象外」の例外に当たります。
+        <span class="cites">
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/tokens/color-primitive-tokens.ts" data-ledger="Q-04">Q-04 · Uber Base</a>
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" data-ledger="F-01">F-01 · WCAG 2.2</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">有彩色を使う前に、まず無彩色の濃淡だけで階層は作れます。濃さの差が、そのまま重要度の差になります。ただし #A6A6A6 のような薄いグレーは "無効表示" にだけ許される例外で、読ませたい文字には使わない——ここが色の落とし穴です（項目2の"薄いグレー文字"と地続き）。</span>
+      <p>まず濃淡でどこまでやれるか試し、そのあとで初めてアクセント（項目6）を1色足す——この順番だと画面が締まって見えます。「階層をつくる＝色を増やす」ではありません。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 190" role="img" aria-label="Uber Baseのグレースケール階層。content1からdisabledまでの濃淡見本">
+          <text x="14" y="28" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-ink)">見出し／本文</text>
+          <rect x="290" y="16" width="176" height="16" rx="3" style="fill:var(--swatch-base-ink)"/>
+          <text x="14" y="34" font-family="sans-serif" font-size="10" style="fill:var(--color-ink-3)"> </text>
+          <text x="14" y="62" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-content2)">補助テキスト</text>
+          <rect x="290" y="50" width="176" height="14" rx="3" style="fill:var(--swatch-base-content2)"/>
+          <text x="14" y="96" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-content3)">キャプション</text>
+          <rect x="290" y="84" width="176" height="12" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <text x="14" y="130" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-disabled)">無効／プレースホルダ</text>
+          <rect x="290" y="118" width="176" height="12" rx="3" style="fill:var(--swatch-base-disabled)"/>
+          <text x="14" y="150" font-family="sans-serif" font-size="10" style="fill:var(--color-ink-2)">#000000 → #4B4B4B → #5E5E5E で「重要度の階層」を作る。</text>
+          <text x="14" y="172" font-family="sans-serif" font-size="10" font-weight="700" style="fill:var(--color-interp)">#A6A6A6 は4.5:1未満＝"無効表示"だけの例外。読ませる文字には使わない。</text>
+        </svg>
+        <figcaption>Uber Base の content 階層：#000000 / #4B4B4B / #5E5E5E。濃さの差＝重要度の差。#A6A6A6 は無効表示専用の例外で、本文には使わない。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 6 -->
+    <section class="item" id="item6" data-item="6">
+      <p class="item__no">06</p>
+      <h2>アクションに色を置く — だから1色に絞る</h2>
+      <div class="howto">
+        <p>押してほしいボタン・リンクにだけアクセント色を1色置く。それ以外は無彩色でそろえる。</p>
+        <p>有彩色の第一の仕事は「ここを押す・ここが大事」を示すこと。目立たせたいからと、色数を増やさない。</p>
+      </div>
+      <span class="claim" data-type="fact">色を使うことは、UIの基本動作です。Apple HIG は肯定形で "If you apply color, reserve it for elements that truly benefit from emphasis, such as status indicators or primary actions."（色を使うなら、ステータス表示やプライマリアクションなど、強調が本当に効く要素のために取っておく）と述べ、Material 3 も primary ロールを "High-emphasis fills, texts, and icons"（高強調）と定義します。実際 Uber Base のアクセント blue600 ＝ #276EF1 は1色で、リンク・フォーカスに限定されます。実務の観察でも「画面内の有彩色をプライマリCTAの1色に制限し、他を均一にするから、単色のCTAが唯一の焦点として際立つ」とされます。
+        <span class="cites">
+          <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/color" data-ledger="F-14">F-14 · Apple HIG</a>
+          <a class="cite" href="https://m3.material.io/styles/color/roles" data-ledger="S-17">S-17 · Material 3</a>
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/themes/light-theme/color-semantic-tokens.ts" data-ledger="Q-05">Q-05 · Uber Base</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">だから有彩色の第一の仕事は「ここを押す・ここが大事」を示すこと。押してほしい所（CTA・リンク・状態）にアクセント1色を絞ると、視線が迷いません。逆に色数を増やすほど、どれも目立たなくなる——「目立たせたいから増やす」は逆効果です。この記事自身も、アクセントを1色（紫）に絞っています。</span>
+      <p>「色を絞る」と「色でアクションを示す」は同じことの表裏です。周りをグレースケールで静かにそろえるからこそ、たった1色のアクセントが「ここを押せる」と強く語ります（洗練-05／Stripe A-03）。原色をあちこちに置くと、どれが操作できる所か読めなくなります。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 200" role="img" aria-label="有彩色を多用した画面とアクセント1色に絞った画面の比較">
+          <rect x="14" y="20" width="205" height="170" rx="10" style="fill:var(--swatch-base-white);stroke:var(--color-border)"/>
+          <text x="24" y="40" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-interp)">アクセント多数 ✕</text>
+          <rect x="24" y="52" width="90" height="26" rx="6" style="fill:var(--swatch-base-error)"/>
+          <rect x="120" y="52" width="90" height="26" rx="6" style="fill:var(--swatch-base-positive)"/>
+          <rect x="24" y="86" width="90" height="26" rx="6" style="fill:var(--swatch-base-warning)"/>
+          <rect x="120" y="86" width="90" height="26" rx="6" style="fill:var(--swatch-base-accent)"/>
+          <rect x="24" y="120" width="185" height="10" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <rect x="24" y="136" width="150" height="10" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <rect x="24" y="160" width="120" height="22" rx="6" style="fill:var(--swatch-govuk-brand)"/>
+          <rect x="261" y="20" width="205" height="170" rx="10" style="fill:var(--swatch-base-white);stroke:var(--color-fact)" stroke-width="1.5"/>
+          <text x="271" y="40" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-fact)">アクセント1色 ○</text>
+          <rect x="271" y="52" width="185" height="12" rx="3" style="fill:var(--swatch-base-content2)"/>
+          <rect x="271" y="72" width="185" height="10" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <rect x="271" y="88" width="150" height="10" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <rect x="271" y="120" width="185" height="10" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <rect x="271" y="136" width="120" height="10" rx="3" style="fill:var(--swatch-base-content3)"/>
+          <rect x="271" y="158" width="120" height="26" rx="6" style="fill:var(--swatch-base-accent)"/>
+        </svg>
+        <figcaption>左は原色ボタンが並び、どれが主役か分からない。右はグレースケールで静かにそろえ、アクセント1色（#276EF1）のCTAだけが際立つ。※このページ自身の基調は紫1色。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 7 -->
+    <section class="item" id="item7" data-item="7">
+      <p class="item__no">07</p>
+      <h2>意味色（成功・警告・エラー）</h2>
+      <div class="howto">
+        <p>成功＝緑・警告＝黄・エラー＝赤を、自分で発明せず、実在DSの値から借りる。</p>
+        <p>淡い背景＋濃い枠・文字のセットで持ち、色だけにせず文言も添える。</p>
+      </div>
+      <span class="claim" data-type="fact">Uber Base の意味色は positive ＝ green600 #0E8345／warning ＝ yellow600 #9F6402／negative（error）＝ red600 #DE1135、エラーの淡い背景 ＝ #FFF0EE です。フォームのエラー時は、入力欄の枠と文字を赤（#DE1135）にし、背景を白に切り替える運用が定義されています。
+        <span class="cites">
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/tokens/color-primitive-tokens.ts" data-ledger="Q-05">Q-05 · Uber Base</a>
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/input/styled-components.ts" data-ledger="Q-07">Q-07 · Uber Base</a>
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/form-control/styled-components.ts" data-ledger="Q-08">Q-08 · Uber Base</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">成功＝緑・警告＝黄・エラー＝赤は、多くの人が共有する初期値です。自分で意味色を発明せず、実在DSの値を借りると外しません。ただし項目4のとおり、色だけでなく文言も添えること——意味色は"色の共通語"であって、単独で意味を背負わせる道具ではありません。</span>
+      <p>意味色のコツは「淡い背景＋濃い文字・枠」のセットで持つこと。Base のエラーも淡背景（#FFF0EE）に濃い赤（#DE1135）でコントラストを確保します。背景まで原色にすると文字が読めなくなります。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 200" role="img" aria-label="成功・警告・エラーの意味色見本と、エラー時の入力欄の状態変化">
+          <rect x="14" y="20" width="140" height="52" rx="8" style="fill:var(--swatch-base-white);stroke:var(--swatch-base-positive)" stroke-width="1.5"/>
+          <rect x="26" y="34" width="18" height="18" rx="4" style="fill:var(--swatch-base-positive)"/>
+          <text x="52" y="48" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--swatch-base-positive)">成功 #0E8345</text>
+          <rect x="170" y="20" width="140" height="52" rx="8" style="fill:var(--swatch-base-white);stroke:var(--swatch-base-warning)" stroke-width="1.5"/>
+          <rect x="182" y="34" width="18" height="18" rx="4" style="fill:var(--swatch-base-warning)"/>
+          <text x="208" y="48" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--swatch-base-warning)">警告 #9F6402</text>
+          <rect x="326" y="20" width="140" height="52" rx="8" style="fill:var(--swatch-base-white);stroke:var(--swatch-base-error)" stroke-width="1.5"/>
+          <rect x="338" y="34" width="18" height="18" rx="4" style="fill:var(--swatch-base-error)"/>
+          <text x="364" y="48" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--swatch-base-error)">エラー #DE1135</text>
+          <text x="14" y="104" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-content2)">パスワード（エラー時）</text>
+          <rect x="14" y="116" width="300" height="46" rx="8" style="fill:var(--swatch-base-error-bg);stroke:var(--swatch-base-error)" stroke-width="1.5"/>
+          <text x="28" y="144" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--swatch-base-error)">⚠ 8文字以上で入力してください</text>
+          <text x="14" y="186" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">エラーは 淡背景#FFF0EE ＋ 赤枠・赤文字#DE1135 ＋ アイコン ＋ 文言 をセットで。</text>
+        </svg>
+        <figcaption>Base の意味色トークン（緑・黄・赤）と、エラー入力欄の状態。淡い背景＋濃い枠・文字でコントラストを確保し、アイコンと文言も添える。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 8 -->
+    <section class="item" id="item8" data-item="8">
+      <p class="item__no">08</p>
+      <h2>パレットの作り方（トーナル）</h2>
+      <div class="howto">
+        <p>色を1つずつ当てず、明度のスケール（トーン0→100）を1本決めて、その中から役割ごとに取り出す。</p>
+        <p>暗いトーンは文字（on-色）、明るいトーンは背景（surface）に割り当てる。</p>
+      </div>
+      <span class="claim" data-type="fact">Material 3 は、1つの色相の明度（トーン）0〜100 からなる「トーナルパレット」を持ちます。公式トークンにも primary0〜primary100（0/10/20/…/90/95/99/100 の刻み）や neutral0〜neutral100 が定義され、この明度スケールから on-色・surface などの役割色を体系的に取り出します。Stripe も知覚均等な色空間で色システムを設計したと述べています。
+        <span class="cites">
+          <a class="cite" href="https://raw.githubusercontent.com/material-components/material-web/main/tokens/_md-ref-palette.scss" data-ledger="S-18">S-18 · Material 3</a>
+          <a class="cite" href="https://m3.material.io/styles/color/roles" data-ledger="S-17">S-17 · Material 3</a>
+        </span>
+      </span>
+      <span class="claim" data-type="interpretation">配色は「良い色を1つずつ当てる」より「明度のスケールを1本決めて、その中から役割ごとに取り出す」のが堅牢です。余白の8pxグリッドと同じ"スケール思考"が、色にもあります。恣意的に色を足すのではなく、決めたトーンの中から選ぶ——これが再現性のある配色の作り方です。</span>
+      <p>下の図は無彩色（neutral）のトーンランプの例です。暗いトーンを文字に、明るいトーンを背景に取り出す——色相が変わっても、1本のスケールを用意し役割ごとにトーンを割り当てる発想は同じです。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 190" role="img" aria-label="トーン0から100までの明度ランプと、そこから文字色と背景色を取り出す図">
+          <text x="14" y="26" font-family="sans-serif" font-size="11" font-weight="700" style="fill:var(--color-ink-2)">トーン 0（暗）→ 100（明）のランプ</text>
+          <rect x="14" y="36" width="45" height="34" style="fill:var(--swatch-base-ink)"/>
+          <rect x="59" y="36" width="45" height="34" style="fill:var(--swatch-base-content2)"/>
+          <rect x="104" y="36" width="45" height="34" style="fill:var(--swatch-base-content3)"/>
+          <rect x="149" y="36" width="45" height="34" style="fill:var(--swatch-base-gray500)"/>
+          <rect x="194" y="36" width="45" height="34" style="fill:var(--swatch-base-disabled)"/>
+          <rect x="239" y="36" width="45" height="34" style="fill:var(--swatch-base-gray300)"/>
+          <rect x="284" y="36" width="45" height="34" style="fill:var(--swatch-base-gray200)"/>
+          <rect x="329" y="36" width="45" height="34" style="fill:var(--swatch-base-gray100)"/>
+          <rect x="374" y="36" width="45" height="34" style="fill:var(--swatch-base-gray50)"/>
+          <rect x="419" y="36" width="47" height="34" style="fill:var(--swatch-base-white);stroke:var(--color-border)"/>
+          <text x="14" y="84" font-family="sans-serif" font-size="10" style="fill:var(--color-ink-3)">0</text>
+          <text x="446" y="84" font-family="sans-serif" font-size="10" style="fill:var(--color-ink-3)">100</text>
+          <path d="M36 92 L36 118" style="stroke:var(--color-accent)" stroke-width="1.5"/>
+          <text x="44" y="112" font-family="sans-serif" font-size="11" style="fill:var(--color-accent)">暗いトーン → 文字（on-surface）</text>
+          <path d="M442 92 L442 140" style="stroke:var(--color-accent)" stroke-width="1.5"/>
+          <text x="200" y="136" font-family="sans-serif" font-size="11" style="fill:var(--color-accent)">明るいトーン → 背景（surface）</text>
+          <rect x="14" y="150" width="200" height="30" rx="6" style="fill:var(--swatch-base-white);stroke:var(--color-border)"/>
+          <text x="26" y="170" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-ink)">暗い文字 × 明るい背景 ＝ 高コントラスト</text>
+        </svg>
+        <figcaption>1本の明度ランプ（トーン0→100）を用意し、暗いトーンを文字に、明るいトーンを背景に割り当てる。色相が変わっても発想は同じ。恣意的でなく"スケール"で色を持つ。</figcaption>
+      </figure>
+    </section>
+
+    <div class="band" aria-hidden="true"></div>
+
+    <!-- 9 -->
+    <section class="item" id="item9" data-item="9">
+      <p class="item__no">09</p>
+      <h2>「唯一の正解」ではない（反例と方針比較）</h2>
+      <div class="howto">
+        <p>配色を丸ごと真似る前に、役割と基準（コントラスト・意味）を先に決めて、その中から色を選ぶ。</p>
+        <p>「本文は純黒が正解」のような唯一解を探さない。実在DSでも方針は割れる、と知っておく。</p>
+      </div>
+      <span class="claim" data-type="fact">実在のデザインシステムでは、本文色の"純黒"すら割れています。Uber Base の本文色は #000000 ですが、GOV.UK の本文色は #0b0c0c（わずかに濃い灰）です。基調も、Base は白黒中心、GOV.UK はリンク #1a65a6・ブランド #1d70b8 の青中心と、方針が異なります。ただし GOV.UK も WCAG 2.2 の SC 1.4.3（コントラスト最小）AA 準拠を明記しています。
+        <span class="cites">
+          <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/tokens/color-primitive-tokens.ts" data-ledger="Q-04">Q-04 · Uber Base</a>
+          <a class="cite" href="https://design-system.service.gov.uk/styles/colour/" data-ledger="F-15">F-15 · GOV.UK</a>
+          <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" data-ledger="F-01">F-01 · WCAG 2.2</a>
+        </span>
+      </span>
+      <div class="counter" data-role="counterexample">
+        <span class="tag">反例</span>
+        <p>だから「鮮やかで目立つ色ほど良い」「唯一の正解の配色がある」は誤りです。本文＝純黒 #000 でさえ、Base（#000000）と GOV.UK（#0b0c0c）で割れています。本質は色そのものより「役割と基準（コントラスト・意味）を決め、その中で選ぶ」こと。サービスによって基調の方針は違っても、コントラスト（項目2）という物差しは共通して守られています。</p>
+      </div>
+      <span class="claim" data-type="interpretation">ここが、事実と解釈を分ける練習の総仕上げです。「純黒が正しい」「青が正しい」ではなく、"自分のパレットの役割と基準を決めて、その中の値を使う"こと。Base でも GOV.UK でも、決めて守れば品質は保てます。正解を1つ覚えるより、「なぜその色なのか」を観察できる目のほうが、長く役立ちます。</span>
+      <p>実在のDSを覗くと「文脈で正解が変わる」ことが分かります。次にUIを見たとき、「本文は純黒か少し灰か」「アクセントは何色に絞られているか」と観察してみてください。色を疑えるようになったら、配色の解像度はもう一段上がっています。</p>
+      <figure class="fig">
+        <svg viewBox="0 0 480 190" role="img" aria-label="Uber BaseとGOV.UKの本文色・リンク色の並置比較">
+          <text x="14" y="28" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--color-ink)">Uber Base（白黒中心）</text>
+          <rect x="14" y="40" width="36" height="36" rx="6" style="fill:var(--swatch-base-ink)"/>
+          <text x="60" y="56" font-family="sans-serif" font-size="12" style="fill:var(--swatch-base-ink)">本文 #000000（純黒）</text>
+          <text x="60" y="72" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">リンク＝アクセント青 #276EF1</text>
+          <rect x="410" y="40" width="36" height="36" rx="6" style="fill:var(--swatch-base-accent)"/>
+          <text x="14" y="112" font-family="sans-serif" font-size="12" font-weight="700" style="fill:var(--color-ink)">GOV.UK（青中心）</text>
+          <rect x="14" y="124" width="36" height="36" rx="6" style="fill:var(--swatch-govuk-ink)"/>
+          <text x="60" y="140" font-family="sans-serif" font-size="12" style="fill:var(--swatch-govuk-ink)">本文 #0b0c0c（濃い灰）</text>
+          <text x="60" y="156" font-family="sans-serif" font-size="11" style="fill:var(--color-ink-3)">リンク #1a65a6 ／ ブランド #1d70b8</text>
+          <rect x="384" y="124" width="36" height="36" rx="6" style="fill:var(--swatch-govuk-link)"/>
+          <rect x="426" y="124" width="36" height="36" rx="6" style="fill:var(--swatch-govuk-brand)"/>
+          <text x="14" y="184" font-family="sans-serif" font-size="10" style="fill:var(--color-interp)">同じ"本文色"でも #000000 と #0b0c0c で割れる。唯一の正解はない。</text>
+        </svg>
+        <figcaption>Base（本文#000000・白黒基調）と GOV.UK（本文#0b0c0c・青基調）の並置。方針は違うが、どちらもコントラスト基準は守る。色に「唯一の正解」はない。</figcaption>
+      </figure>
+    </section>
+
+    <div class="summary">
+      <h2>まとめ：色は根拠で語れる</h2>
+      <ul>
+        <li>色は"役割"を運ぶ道具。まず「この色は何の役割か」を言う（項目1）。</li>
+        <li>本文は背景と4.5:1以上、非テキストは3:1以上。丸めない（項目2・3）。</li>
+        <li>色だけで情報を伝えない。色＋アイコン＋文言で二重化（項目4）。</li>
+        <li>まず無彩色で階層を作り、有彩色はアクション（CTA・リンク）に1色だけ置く（項目5・6）。</li>
+        <li>成功＝緑・警告＝黄・エラー＝赤は借りてくる。淡背景＋濃い枠でセットに（項目7）。</li>
+        <li>色は"スケール"で持つ。基調に唯一の正解はないが、コントラストは共通で守る（項目8・9）。</li>
+      </ul>
+      <p class="note" style="margin-top: var(--space-16);">数値はすべて一次ソース（WCAG・Apple・Material・GOV.UK・Uber Base、および観察としての Stripe 公式記事）に紐づけて管理しています。</p>
+    </div>
+
+    <section class="quiz" id="quiz" aria-labelledby="quiz-h">
+      <h2 id="quiz-h">理解度チェック — 5問</h2>
+      <p class="quiz-lead">選択肢を選ぶと、正誤と解説が出ます。採点も保存もしません。何度でも選び直せます。（JavaScriptが無効な場合は、各項目のセクションを参照してください。）</p>
+      <noscript><p class="quiz-lead">※ JavaScriptが無効です。解説は各項目のセクション（項目1〜9）を参照してください。</p></noscript>
+
+      <div class="q" data-q="1">
+        <p class="q-text">Q1. WCAG（AA）が、通常サイズの本文テキストに求める最低コントラスト比は？</p>
+        <div class="opts" role="group" aria-label="Q1の選択肢">
+          <button class="opt" type="button" aria-pressed="false">3:1</button>
+          <button class="opt" type="button" aria-pressed="false" data-correct="1">4.5:1</button>
+          <button class="opt" type="button" aria-pressed="false">7:1</button>
+          <button class="opt" type="button" aria-pressed="false">2:1</button>
+        </div>
+        <div class="explain" hidden>
+          <p>正解は <b>4.5:1</b>。通常テキストは背景と4.5:1以上が最低ライン。3:1は「大きな文字」の基準、7:1はより広く読める強化基準（AAA）です。計算値は丸めません。</p>
+          <p class="why">3:1＝大きな文字（18pt/太字14pt）の基準／7:1＝AAA（強化）／2:1＝不足で不合格。</p>
+          <span class="cites">
+            <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" data-ledger="F-01">F-01 · WCAG 2.2</a>
+            <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-enhanced.html" data-ledger="F-02">F-02 · WCAG 2.2</a>
+          </span>
+          <a class="jump" href="#item2">→ 項目2「コントラスト比という物差し」へ</a>
+        </div>
+      </div>
+
+      <div class="q" data-q="2">
+        <p class="q-text">Q2. 入力エラーの伝え方として、より適切なのはどれ？</p>
+        <div class="opts" role="group" aria-label="Q2の選択肢">
+          <button class="opt" type="button" aria-pressed="false">枠の色を赤にするだけ</button>
+          <button class="opt" type="button" aria-pressed="false" data-correct="1">赤色＋アイコン＋文言で伝える</button>
+          <button class="opt" type="button" aria-pressed="false">背景を派手な色にする</button>
+          <button class="opt" type="button" aria-pressed="false">文字を太字にするだけ</button>
+        </div>
+        <div class="explain" hidden>
+          <p>正解は <b>赤色＋アイコン＋文言</b>。色は情報を伝える"唯一の"手段にしない、というのが WCAG 1.4.1 と Apple HIG の求めるところ。色覚特性のある人や白黒表示でも伝わるよう、色以外の手がかりを添えます。</p>
+          <p class="why">「赤だけ」は色を抜くと違いが消える／背景を派手にするとコントラストが崩れ本文が読めない／太字だけでは"エラー"の意味が伝わりにくい。</p>
+          <span class="cites">
+            <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/use-of-color.html" data-ledger="F-13">F-13 · WCAG 2.2</a>
+            <a class="cite" href="https://developer.apple.com/design/human-interface-guidelines/color" data-ledger="F-14">F-14 · Apple HIG</a>
+          </span>
+          <a class="jump" href="#item4">→ 項目4「色だけに頼らない」へ</a>
+        </div>
+      </div>
+
+      <div class="q" data-q="3">
+        <p class="q-text">Q3. 薄いグレー #A6A6A6（背景白に対し4.5:1未満）を使ってよいのは？</p>
+        <div class="opts" role="group" aria-label="Q3の選択肢">
+          <button class="opt" type="button" aria-pressed="false">上品なので本文に使ってよい</button>
+          <button class="opt" type="button" aria-pressed="false" data-correct="1">無効（disabled）表示など、対象外の例外にだけ</button>
+          <button class="opt" type="button" aria-pressed="false">見出しに最適</button>
+          <button class="opt" type="button" aria-pressed="false">どんな文字にも自由に使える</button>
+        </div>
+        <div class="explain" hidden>
+          <p>正解は <b>無効表示などの例外にだけ</b>。#A6A6A6 は白背景に対して約2.4:1で4.5:1を満たしません。WCAG は「無効な部品は対象外」とするので、無効・プレースホルダ表示にだけ許される例外です。読ませたい文字には使いません。</p>
+          <p class="why">本文・見出しに使うと基準割れ。読ませる文字は #5E5E5E より濃いトーンにします。</p>
+          <span class="cites">
+            <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/tokens/color-primitive-tokens.ts" data-ledger="Q-04">Q-04 · Uber Base</a>
+            <a class="cite" href="https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html" data-ledger="F-01">F-01 · WCAG 2.2</a>
+          </span>
+          <a class="jump" href="#item5">→ 項目5「無彩色で階層をつくる」へ</a>
+        </div>
+      </div>
+
+      <div class="q" data-q="4">
+        <p class="q-text">Q4. 有彩色（色みのある色）の使い方の初期値として、適切なのは？</p>
+        <div class="opts" role="group" aria-label="Q4の選択肢">
+          <button class="opt" type="button" aria-pressed="false">目立たせたいので色数を増やす</button>
+          <button class="opt" type="button" aria-pressed="false" data-correct="1">アクセントを1色に絞り、他は無彩色でそろえる</button>
+          <button class="opt" type="button" aria-pressed="false">画面ごとに好きな色を足す</button>
+          <button class="opt" type="button" aria-pressed="false">すべて原色にする</button>
+        </div>
+        <div class="explain" hidden>
+          <p>正解は <b>アクセントを1色に絞る</b>。Uber Base のアクセントは #276EF1 の1色。周囲を無彩色で静かにそろえるからこそ、1色のアクセントが唯一の焦点として際立ちます（洗練-05 の観察）。色数を増やすほど、どれも目立たなくなります。</p>
+          <p class="why">色を増やす・原色を多用すると焦点が分散。好きな色を都度足すと役割がぶつかります。</p>
+          <span class="cites">
+            <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/themes/light-theme/color-semantic-tokens.ts" data-ledger="Q-05">Q-05 · Uber Base</a>
+          </span>
+          <a class="jump" href="#item6">→ 項目6「アクションに色を置く — だから1色に絞る」へ</a>
+        </div>
+      </div>
+
+      <div class="q" data-q="5">
+        <p class="q-text">Q5. 「本文の色は純黒 #000000 が唯一の正解だ」——これは？</p>
+        <div class="opts" role="group" aria-label="Q5の選択肢">
+          <button class="opt" type="button" aria-pressed="false">正しい。本文は常に純黒がよい</button>
+          <button class="opt" type="button" aria-pressed="false" data-correct="1">誤り。GOV.UK は本文に #0b0c0c を使うなど、方針は割れる</button>
+          <button class="opt" type="button" aria-pressed="false">黒は使うべきでない</button>
+          <button class="opt" type="button" aria-pressed="false">濃ければ濃いほど常に良い</button>
+        </div>
+        <div class="explain" hidden>
+          <p>正解は <b>誤り</b>。Uber Base の本文は #000000、GOV.UK は #0b0c0c と、実在DSでも割れています。唯一の正解の配色はなく、本質は「役割と基準（コントラスト・意味）を決め、その中で選ぶ」こと。ただし、どちらもコントラスト基準は共通して守っています。</p>
+          <p class="why">「黒を使わない」「濃いほど良い」も極端。大事なのは基準を満たす範囲で文脈に合わせて選ぶこと。</p>
+          <span class="cites">
+            <a class="cite" href="https://raw.githubusercontent.com/uber/baseweb/main/src/tokens/color-primitive-tokens.ts" data-ledger="Q-04">Q-04 · Uber Base</a>
+            <a class="cite" href="https://design-system.service.gov.uk/styles/colour/" data-ledger="F-15">F-15 · GOV.UK</a>
+          </span>
+          <a class="jump" href="#item9">→ 項目9「『唯一の正解』ではない」へ</a>
+        </div>
+      </div>
+    </section>
+
+    <div class="next">
+      <a href="spacing.html">
+        <p class="k">前に読む · UIクラフト</p>
+        <p class="t">余白（スペーシング）を読む</p>
+        <p class="d">配色の前は「余白」。8pxグリッド・近接・行送り・レスポンシブ余白まで、同じように数値と一次ソースから学べます。</p>
+      </a>
+      <a href="../prototype/index.html">
+        <p class="k">実践 · フィールドワーク</p>
+        <p class="t">この知識で実物を1つ観察しよう</p>
+        <p class="d">身近なアプリを1つ開いて、「この本文は4.5:1ある？エラーは色だけ？アクセントは何色に絞られている？」と今日学んだ目で見てみましょう。</p>
+      </a>
+    </div>
+
+    <footer>
+      <p>© BONO — UIデザインの基礎知識「UIの配色で知るべき9個」。出典・数値はすべて台帳ID付きで一次ソースに紐づけています。GOV.UK の色値の引用は Open Government Licence v3.0 に基づきます。</p>
+    </footer>
+  </main>
+
+  <script>
+  /* 軽量Canvasシェーダー: spacing.html / index.html と同一方針。
+     reduced-motion / JS無効時は CSS静的グラデにフォールバック。本文背後には敷かない。 */
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    var canvas = document.querySelector("canvas.shader");
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext("2d");
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var blobs = [
+      { hue: 262, x: 0.2, y: 0.3, r: 0.55, sx: 0.017, sy: 0.013, p: 0 },
+      { hue: 291, x: 0.7, y: 0.4, r: 0.5,  sx: 0.013, sy: 0.019, p: 2 },
+      { hue: 232, x: 0.5, y: 0.75, r: 0.6, sx: 0.019, sy: 0.011, p: 4 }
+    ];
+    function resize() {
+      canvas.width = Math.max(1, canvas.offsetWidth) * dpr;
+      canvas.height = Math.max(1, canvas.offsetHeight) * dpr;
+    }
+    function draw(t) {
+      var w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter";
+      for (var i = 0; i < blobs.length; i++) {
+        var b = blobs[i];
+        var cx = (b.x + Math.sin(t * b.sx + b.p) * 0.16) * w;
+        var cy = (b.y + Math.cos(t * b.sy + b.p) * 0.16) * h;
+        var rad = b.r * Math.min(w, h);
+        var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        g.addColorStop(0, "hsla(" + b.hue + ",70%,45%,0.42)");
+        g.addColorStop(1, "hsla(" + b.hue + ",70%,25%,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
+    var start = null;
+    function loop(now) {
+      if (start === null) start = now;
+      draw((now - start) / 1000);
+      requestAnimationFrame(loop);
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    requestAnimationFrame(loop);
+  })();
+  </script>
+
+  <script>
+  /* 理解度クイズ: 依存ゼロ。選択で正誤＋解説を表示。採点・保存なし・選び直し自由。 */
+  (function () {
+    var questions = document.querySelectorAll(".quiz .q");
+    for (var i = 0; i < questions.length; i++) {
+      (function (q) {
+        var opts = q.querySelectorAll(".opt");
+        var explain = q.querySelector(".explain");
+        var right = q.querySelector(".opt[data-correct]");
+        for (var j = 0; j < opts.length; j++) {
+          opts[j].addEventListener("click", function (e) {
+            var btn = e.currentTarget;
+            for (var k = 0; k < opts.length; k++) {
+              opts[k].classList.remove("correct", "wrong");
+              opts[k].setAttribute("aria-pressed", "false");
+            }
+            var isCorrect = btn.hasAttribute("data-correct");
+            btn.classList.add(isCorrect ? "correct" : "wrong");
+            btn.setAttribute("aria-pressed", "true");
+            if (right) right.classList.add("correct");
+            if (explain) explain.hidden = false;
+          });
+        }
+      })(questions[i]);
+    }
+  })();
+  </script>
+</body>
+</html>

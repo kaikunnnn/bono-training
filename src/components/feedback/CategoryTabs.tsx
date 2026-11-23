@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { useSearchParams } from "next/navigation";
 import type { FeedbackCategory } from "@/types/sanity";
 
@@ -16,7 +16,7 @@ export function CategoryTabs({ categories, feedbackCounts, totalCount }: Categor
 
   return (
     <div className="flex flex-wrap gap-2">
-      <Link
+      <IntentPrefetchLink
         href="/feedbacks"
         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
           !currentCategory
@@ -25,9 +25,9 @@ export function CategoryTabs({ categories, feedbackCounts, totalCount }: Categor
         }`}
       >
         すべて ({totalCount})
-      </Link>
+      </IntentPrefetchLink>
       {categories.map((cat) => (
-        <Link
+        <IntentPrefetchLink
           key={cat._id}
           href={`/feedbacks?category=${cat.slug.current}`}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -37,7 +37,7 @@ export function CategoryTabs({ categories, feedbackCounts, totalCount }: Categor
           }`}
         >
           {cat.title} ({feedbackCounts[cat.slug.current] || 0})
-        </Link>
+        </IntentPrefetchLink>
       ))}
     </div>
   );

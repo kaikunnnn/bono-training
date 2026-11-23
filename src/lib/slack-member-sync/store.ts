@@ -79,8 +79,8 @@ function mapSettings(data: DbRow): SyncSettings {
     keepUserIds: strings(data.keep_user_ids),
     keepSlackUserIds: strings(data.keep_slack_user_ids),
     testBonoUserIds: strings(data.test_bono_user_ids),
-    minNoticeDays: Number(data.min_notice_days ?? 7),
-    linkGraceDays: Number(data.link_grace_days ?? 14),
+    // min_notice_days は使わない（外れるお知らせDMの廃止 2026-10-29。列は本番に残る）
+    linkGraceDays: Number(data.link_grace_days ?? 7),
     ownerReportSentOn: typeof data.owner_report_sent_on === "string" ? data.owner_report_sent_on : null,
   };
 }
@@ -146,7 +146,6 @@ function mapSubscription(row: DbRow): SubscriptionSummary {
 
 const DM_AT_COLUMN: Record<DmType, string> = {
   link_request: "link_request_dm_at",
-  removal_notice: "removal_notice_dm_at",
 };
 
 export function createSupabaseSyncStore(client: SupabaseClient): SyncStore & LinkStore {
@@ -154,7 +153,7 @@ export function createSupabaseSyncStore(client: SupabaseClient): SyncStore & Lin
     const { data, error } = await client
       .from(SETTINGS)
       .select(
-        "mode, test_user_ids, min_notice_days, link_grace_days, owner_report_sent_on, keep_user_ids, keep_slack_user_ids, test_bono_user_ids",
+        "mode, test_user_ids, link_grace_days, owner_report_sent_on, keep_user_ids, keep_slack_user_ids, test_bono_user_ids",
       )
       .eq("id", 1)
       .maybeSingle();

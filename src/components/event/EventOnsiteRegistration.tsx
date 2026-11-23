@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
 import { User } from "iconsax-react";
@@ -346,7 +346,7 @@ function GuestCard({
         <MembersOnlyMessage sub="参加するにはログインしてください" />
         <div className="flex flex-col items-center gap-1">
           <Button asChild size="large" className="w-full">
-            <Link href={loginHref}>ログインして参加する</Link>
+            <IntentPrefetchLink href={loginHref}>ログインして参加する</IntentPrefetchLink>
           </Button>
           <Button
             type="button"

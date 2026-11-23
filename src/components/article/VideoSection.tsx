@@ -1,9 +1,16 @@
 "use client";
 
+import { useMemo } from "react";
 import Image from "next/image";
 import { urlFor } from "@/lib/sanity";
 import PremiumVideoLock from "@/components/premium/PremiumVideoLock";
 import { CustomVimeoPlayer } from "@/components/video";
+import {
+  trackArticleVideoComplete,
+  trackArticleVideoPlay,
+  trackArticleVideoProgress,
+  type ArticleVideoTracking,
+} from "@/lib/activity-client";
 
 interface VideoSectionProps {
   videoUrl?: string | null | { url?: string; metadata?: unknown };
@@ -19,12 +26,11 @@ interface VideoSectionProps {
    * 既定は false
    */
   autoPlay?: boolean;
-  /** 再生開始時のコールバック（初回のみ発火） */
-  onPlay?: () => void;
-  /** 動画終了時のコールバック */
-  onEnded?: () => void;
-  /** 動画進捗コールバック（25%/50%/75%到達時） */
-  onProgress?: (percent: number) => void;
+  /**
+   * 記事の動画として GA4・活動ログに再生/進捗/完了を送る（#262）。
+   * Vimeo のカスタムプレーヤーのみ対応（YouTube の iframe は対象外）
+   */
+  tracking?: ArticleVideoTracking;
 }
 
 /**
@@ -49,10 +55,21 @@ const VideoSection = ({
   isLoggedIn = false,
   redirectTo,
   autoPlay = false,
-  onPlay,
-  onEnded,
-  onProgress,
+  tracking,
 }: VideoSectionProps) => {
+  const articleId = tracking?.articleId;
+  const lessonId = tracking?.lessonId;
+  const title = tracking?.title;
+  const videoCallbacks = useMemo(() => {
+    if (!articleId) return {};
+    const target: ArticleVideoTracking = { articleId, lessonId, title: title ?? "" };
+    return {
+      onPlay: () => trackArticleVideoPlay(target),
+      onProgress: (percent: number) => trackArticleVideoProgress(target, percent),
+      onComplete: () => trackArticleVideoComplete(target),
+    };
+  }, [articleId, lessonId, title]);
+
   // プレミアムコンテンツで未契約の場合、ロック表示
   if (isPremium && !hasAccess) {
     return <PremiumVideoLock isLoggedIn={isLoggedIn} redirectTo={redirectTo} />;
@@ -133,9 +150,9 @@ const VideoSection = ({
             vimeoId={videoInfo.id}
             autoPlay={autoPlay}
             muted={false}
-            onPlay={onPlay}
-            onEnded={onEnded}
-            onProgress={onProgress}
+            onPlay={videoCallbacks.onPlay}
+            onProgress={videoCallbacks.onProgress}
+            onComplete={videoCallbacks.onComplete}
           />
         </div>
       </div>

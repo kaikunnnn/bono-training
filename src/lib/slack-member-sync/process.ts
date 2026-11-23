@@ -9,7 +9,8 @@ import "server-only";
  * 3. メールのハッシュとつながりで BONO ユーザーと課金を引く（SQL 関数。全員のメールは読み出さない）
  * 4. 課金中のアカウントとメールが一致した人は自動でつなぐ（linked_via=email）
  * 5. 一人ずつ判定（classify.ts）し、変わった行だけ保存する
- * 6. モードに応じて DM を送る
+ *    解約予約・解約済みの人は DM なしで外す予定にする（解約済みは今日、解約予約は終わる日の翌日。2026-10-29）
+ * 6. モードに応じて つなぐお願いDM を送る
  *    - dry_run: DM を送らず、判定（dry_run_result）だけ記録する
  *    - test: test_user_ids の人だけに送る（ほかの人は dry_run と同じ記録）
  *    - live: 全員に送る
@@ -20,7 +21,7 @@ import "server-only";
  * - 送る直前に needs_review=true / review_reason=sending:<種類> を条件付き UPDATE で永続化してから投稿する
  *   → 投稿の結果が分からない（タイムアウト・5xx・内部エラー）ときはそのまま残し、自動で送り直さない
  * - 送信日時（*_dm_at）が入っている人には二度と送らない
- * - 1回の実行で送る DM の数と時間に上限を置く（初回の大掃除は数日に分けて送る。外す日は各自のお知らせ日から数える）
+ * - 1回の実行で送る DM の数と時間に上限を置く（初回の大掃除は数日に分けて送る。期限は各自のDMの日から数える）
  * - 返す結果は件数だけ（名前・メール・ID は出さない）
  */
 import { classifyMember, excludedReasonOf, isDueForRemoval, SOFT_REVIEW_REASON, type ClassifyResult } from "./classify";
@@ -78,7 +79,6 @@ const AMBIGUOUS_POST_ERRORS = new Set(["internal_error", "fatal_error", "service
 
 export interface SyncMessages {
   linkRequest: SyncMessage;
-  removalNotice: SyncMessage;
   ownerReport: SyncMessage;
 }
 
@@ -216,8 +216,9 @@ interface DmPlan {
 function dryRunText(r: ClassifyResult, blockReason: string | null, prefix = "", suffix = ""): string {
   const next = r.next!;
   let text: string;
-  if (r.dm === "removal_notice") {
-    text = `${blockReason ? `would_block:${blockReason}` : "would_send"}:removal_notice:remove_after=${r.removeAfterIfSentToday}`;
+  if (next.classification === "remove_scheduled" && (next.reason === "canceled" || next.reason === "cancel_reserved")) {
+    // 解約の人には DM を送らない（外す日だけ決まる）
+    text = `would_remove:${next.reason}:remove_after=${next.removeAfter}`;
   } else if (r.dm === "link_request") {
     text = `${blockReason ? `would_block:${blockReason}` : "would_send"}:link_request:deadline=${r.linkDeadlineIfSentToday}`;
   } else {
@@ -226,17 +227,11 @@ function dryRunText(r: ClassifyResult, blockReason: string | null, prefix = "", 
   return `${prefix}${text}${suffix}`;
 }
 
-/** 送る本文を作る（未承認などで送れないときは reason） */
+/** 送る本文を作る（未承認などで送れないときは reason）。DM はつなぐお願いだけ */
 function renderDm(deps: SyncDeps, plan: DmPlan, rawToken: string | null) {
-  if (plan.dm === "link_request") {
-    return renderSyncMessage(deps.messages.linkRequest, {
-      link: rawToken ? linkUrl(deps.siteUrl, rawToken) : "",
-      deadline: formatJpDate(plan.result.linkDeadlineIfSentToday ?? ""),
-    });
-  }
-  return renderSyncMessage(deps.messages.removalNotice, {
-    end_date: formatJpDate(plan.result.endDate ?? ""),
-    remove_date: formatJpDate(plan.result.removeAfterIfSentToday ?? ""),
+  return renderSyncMessage(deps.messages.linkRequest, {
+    link: rawToken ? linkUrl(deps.siteUrl, rawToken) : "",
+    deadline: formatJpDate(plan.result.linkDeadlineIfSentToday ?? ""),
     signup_url: `${deps.siteUrl}/subscription`,
   });
 }
@@ -263,7 +258,7 @@ async function sendOne(ctx: DmCtx, plan: DmPlan): Promise<{ outcome: SendOutcome
   const id = plan.member.id;
   const now = deps.now();
 
-  const rawToken = plan.dm === "link_request" ? deps.newToken() : null;
+  const rawToken = deps.newToken();
   const rendered = renderDm(deps, plan, rawToken);
   if (!rendered.ok) return { outcome: "aborted", code: rendered.reason };
 
@@ -283,16 +278,14 @@ async function sendOne(ctx: DmCtx, plan: DmPlan): Promise<{ outcome: SendOutcome
   }
 
   // 2) 使い捨てリンクのハッシュを保存（DM が送れなければ使われずに期限切れになるだけ）
-  if (rawToken) {
-    await deps.store.insertLinkToken({
-      tokenHash: hashToken(rawToken),
-      teamId: deps.teamId,
-      slackUserId: id,
-      purpose: "link_request",
-      expiresAt: new Date(now.getTime() + (ctx.settings.linkGraceDays + LINK_REQUEST_TOKEN_EXTRA_DAYS) * 86_400_000),
-      requestedByUserId: null,
-    });
-  }
+  await deps.store.insertLinkToken({
+    tokenHash: hashToken(rawToken),
+    teamId: deps.teamId,
+    slackUserId: id,
+    purpose: "link_request",
+    expiresAt: new Date(now.getTime() + (ctx.settings.linkGraceDays + LINK_REQUEST_TOKEN_EXTRA_DAYS) * 86_400_000),
+    requestedByUserId: null,
+  });
 
   // 3) 投稿直前の確保（sending の印を永続化）。確保できなければ送らない
   const claimed = await deps.store.claimDm(deps.teamId, id, plan.dm);
@@ -313,22 +306,13 @@ async function sendOne(ctx: DmCtx, plan: DmPlan): Promise<{ outcome: SendOutcome
   const posted = await deps.slack.postMessage(opened.data.channelId, rendered.text);
   if (posted.kind === "ok") {
     const sentAt = deps.now();
-    const values: Partial<SyncState> =
-      plan.dm === "link_request"
-        ? {
-            linkRequestDmAt: sentAt,
-            linkRequestVersion: rendered.version,
-            linkDeadline: plan.result.linkDeadlineIfSentToday,
-            needsReview: false,
-            reviewReason: null,
-          }
-        : {
-            removalNoticeDmAt: sentAt,
-            removalNoticeVersion: rendered.version,
-            removeAfter: plan.result.removeAfterIfSentToday,
-            needsReview: false,
-            reviewReason: null,
-          };
+    const values: Partial<SyncState> = {
+      linkRequestDmAt: sentAt,
+      linkRequestVersion: rendered.version,
+      linkDeadline: plan.result.linkDeadlineIfSentToday,
+      needsReview: false,
+      reviewReason: null,
+    };
     // ここで記録に失敗しても sending の印が残る（自動では送り直さない）
     await patch(ctx, id, values);
     return { outcome: "sent" };
@@ -420,6 +404,7 @@ async function sendDms(ctx: DmCtx, plans: DmPlan[]): Promise<void> {
   }
 }
 
+/** オーナー報告の理由（解約予約の人も、外す日＝終わる日の翌日に「解約」として出る） */
 const REASON_LABEL: Record<string, string> = {
   canceled: "解約",
   cancel_reserved: "解約",
@@ -700,8 +685,6 @@ async function runLocked(deps: SyncDeps, settings: SyncSettings, startedAt: Date
 
   // 6) DM（test / live）
   if (plans.length > 0) {
-    // 外れるお知らせ（外す日が決まる）を先に、つなぐお願いを後に
-    plans.sort((a, b) => (a.dm === b.dm ? 0 : a.dm === "removal_notice" ? -1 : 1));
     const ctx: DmCtx = {
       deps,
       settings,

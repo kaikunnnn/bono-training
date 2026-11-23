@@ -1,0 +1,41 @@
+{
+ "_about": "変えた場所ごとの切り抜き。座標は画面（1280×800, CSS px）。pair=[前の版, この版]。regions は上から縦に積む。src: base=詳細を開いた画面, modal=削除の確認を開いた画面。mark=紫の枠で囲む要素（画面座標）。rows=true は幅が広いので、前後を縦に並べる。same=同じ画像を使い回す",
+ "spots": [
+  {"id": "s01-logo", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [8, 46, 140, 96]}], "mark": [[20, 58, 46, 84]]},
+  {"id": "s01-new", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [1000, 68, 1226, 124]}], "mark": [[1094, 79, 1212, 113]]},
+  {"id": "s01-link", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [948, 524, 1244, 576]}], "mark": [[1060, 532, 1172, 550]]},
+  {"id": "s01-tab", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [250, 322, 530, 378]}], "mark": [[259, 332, 320, 368]]},
+  {"id": "s01-bar", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [250, 202, 808, 326]}], "mark": [[259, 285, 799, 297]], "rows": true},
+  {"id": "s01-pj", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [230, 78, 440, 114]}, {"src": "base", "r": [8, 262, 224, 308]}], "mark": [[238, 89, 252, 103], [52, 280, 62, 290]]},
+  {"id": "s02-nav", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [8, 226, 224, 380]}], "mark": [[14, 268, 214, 302]]},
+  {"id": "s04-badge", "pair": ["before", "step1"], "regions": [{"src": "base", "r": [110, 44, 222, 96]}], "mark": [[165, 53, 181, 69]]},
+
+  {"id": "s05-app", "pair": ["step1", "step2"], "regions": [{"src": "base", "r": [130, 146, 330, 250]}], "mark": []},
+  {"id": "s05-card", "pair": ["step1", "step2"], "regions": [{"src": "base", "r": [230, 124, 470, 250]}], "mark": []},
+  {"id": "s05-av", "pair": ["step1", "step2"], "regions": [{"src": "base", "r": [8, 722, 224, 784]}], "mark": [[20, 743, 52, 775]]},
+  {"id": "s06-invite", "pair": ["step1", "step2"], "regions": [{"src": "base", "r": [1000, 68, 1226, 124]}], "mark": [[1010, 79, 1086, 113]]},
+  {"id": "s07-del", "pair": ["step1", "step2"], "regions": [{"src": "base", "r": [948, 712, 1236, 764]}], "mark": [[1057, 721, 1165, 755]]},
+  {"id": "s07-modal", "pair": ["step1", "step2"], "regions": [{"src": "modal", "r": [412, 306, 868, 494]}], "mark": [[760, 432, 840, 466]], "rows": true},
+  {"id": "s18-save", "pair": ["step1", "step2"], "regions": [{"src": "base", "r": [948, 712, 1236, 764]}], "mark": [[957, 721, 1051, 755]]},
+  {"id": "s18-dup", "pair": ["step1", "step2"], "regions": [{"src": "base", "r": [1050, 712, 1236, 764]}, {"src": "modal", "r": [560, 420, 856, 478]}], "mark": [[1171, 721, 1225, 755], [660, 432, 754, 466]]},
+
+  {"id": "s11-status", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [256, 406, 364, 706]}], "mark": []},
+  {"id": "s11-chip", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [250, 202, 470, 252]}], "mark": [[335, 219, 388, 243]]},
+  {"id": "s12-notice", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [338, 0, 712, 40]}], "mark": [], "rows": true},
+  {"id": "s12-err", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [948, 344, 1244, 418]}], "mark": [[957, 353, 1235, 408]]},
+  {"id": "s12-late", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [812, 372, 906, 452]}], "mark": [[829, 418, 893, 438]]},
+  {"id": "s13-tags", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [732, 406, 816, 706]}], "mark": []},
+  {"id": "s13-new", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [424, 454, 700, 500]}], "mark": [[651, 463, 688, 477]]},
+  {"id": "s13-pj", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [8, 300, 224, 380]}], "mark": [[52, 316, 62, 326], [52, 352, 62, 362]]},
+  {"id": "s14-pri", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [356, 406, 406, 706]}], "mark": []},
+  {"id": "s14-req", "pair": ["step2", "step3"], "regions": [{"src": "base", "r": [948, 200, 1244, 348]}], "mark": [[955, 207, 1040, 230], [955, 279, 1028, 302]]},
+  {"id": "s14-late", "same": "s12-late"},
+
+  {"id": "s08-sub", "pair": ["step3", "step4"], "regions": [{"src": "base", "r": [250, 172, 476, 202]}, {"src": "base", "r": [424, 406, 650, 450]}, {"src": "base", "r": [948, 178, 1110, 201]}], "mark": []},
+  {"id": "s08-tabs", "pair": ["step3", "step4"], "regions": [{"src": "base", "r": [250, 322, 530, 378]}], "mark": [[340, 332, 424, 368], [444, 332, 511, 368]]},
+  {"id": "s09-inp", "pair": ["step3", "step4"], "regions": [{"src": "base", "r": [948, 200, 1244, 348]}], "mark": [[957, 233, 1235, 269], [957, 305, 1092, 341], [1100, 305, 1235, 341]]},
+  {"id": "s09-search", "pair": ["step3", "step4"], "regions": [{"src": "base", "r": [8, 94, 224, 146]}], "mark": [[14, 102, 214, 138]]},
+  {"id": "s09-acct", "pair": ["step3", "step4"], "regions": [{"src": "base", "r": [8, 722, 224, 784]}], "mark": [[186, 745, 214, 773]]},
+  {"id": "s10-link", "pair": ["step3", "step4"], "regions": [{"src": "base", "r": [948, 524, 1244, 576]}], "mark": [[1060, 532, 1172, 550]]}
+ ]
+}

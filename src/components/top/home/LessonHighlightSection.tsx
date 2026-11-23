@@ -1,9 +1,9 @@
-import Link from "next/link";
 import type { LessonWithArticleIds } from "@/lib/sanity";
 import { LessonCardRenderer } from "@/app/lessons/LessonCardRenderer";
 import { cn } from "@/lib/utils";
 import TopSectionHeading from "@/components/top2/TopSectionHeading";
 import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import type { HomeClickSurface } from "@/lib/activity-utils";
 
 /**
@@ -103,13 +103,14 @@ export default function LessonHighlightSection({
                 href={viewAllHref}
                 className={viewAllClassName}
                 tracking={{ surface, section: "lesson_highlight", itemType: "view_all" }}
+                intentPrefetch
               >
                 {viewAllLabel} →
               </HomeClickLink>
             ) : (
-              <Link href={viewAllHref} className={viewAllClassName}>
+              <IntentPrefetchLink href={viewAllHref} className={viewAllClassName}>
                 {viewAllLabel} →
-              </Link>
+              </IntentPrefetchLink>
             ))}
         </div>
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Play, Loader2 } from 'lucide-react';
 import { useVimeoPlayer } from './hooks/useVimeoPlayer';
 import { VideoControls } from './VideoControls';
+import { createVideoProgressTracker } from '@/lib/video-progress';
 
 interface CustomVimeoPlayerProps {
   vimeoId: string;
@@ -14,9 +15,9 @@ interface CustomVimeoPlayerProps {
   muted?: boolean;
   /** 再生開始時のコールバック（初回のみ発火） */
   onPlay?: () => void;
-  /** 動画終了時のコールバック */
-  onEnded?: () => void;
-  /** 動画進捗コールバック（25%/50%/75%到達時） */
+  /** 視聴完了のコールバック（90%以上到達 or 終了時に1回だけ） */
+  onComplete?: () => void;
+  /** 動画進捗コールバック（25%/50%/75%到達時に各1回） */
   onProgress?: (percent: number) => void;
 }
 
@@ -26,9 +27,23 @@ export function CustomVimeoPlayer({
   autoPlay = false,
   muted = false,
   onPlay,
-  onEnded,
+  onComplete,
   onProgress,
 }: CustomVimeoPlayerProps) {
+  // 再生・進捗・完了の「一度きり」判定（#262）。動画が変わったら数え直す
+  const progressTracker = useMemo(
+    () => createVideoProgressTracker(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [vimeoId],
+  );
+  const onCompleteRef = useRef(onComplete);
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
+  const handleEnded = useCallback(() => {
+    if (progressTracker.end()) onCompleteRef.current?.();
+  }, [progressTracker]);
+
   const {
     containerRef,
     state,
@@ -38,7 +53,7 @@ export function CustomVimeoPlayer({
     setPlaybackRate,
     enableTextTrack,
     disableTextTrack,
-  } = useVimeoPlayer(vimeoId, { autoPlay, muted });
+  } = useVimeoPlayer(vimeoId, { autoPlay, muted, onEnded: handleEnded });
 
   const [showControls, setShowControls] = useState(true);
   const [isScrubbing, setIsScrubbing] = useState(false);
@@ -47,8 +62,6 @@ export function CustomVimeoPlayer({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const playerWrapperRef = useRef<HTMLDivElement>(null);
-  const hasPlayedRef = useRef(false);
-  const hasEndedRef = useRef(false);
   const controlsVisible = !state.isPlaying || showControls || isScrubbing || isMenuOpen;
 
   useEffect(() => {
@@ -61,39 +74,23 @@ export function CustomVimeoPlayer({
     return () => observer.disconnect();
   }, []);
 
-  // GA4: 初回再生イベント
+  // 初回再生（GA4 / 活動ログ video_play）
   useEffect(() => {
-    if (state.isPlaying && !hasPlayedRef.current) {
-      hasPlayedRef.current = true;
+    if (state.isPlaying && progressTracker.play()) {
       onPlay?.();
     }
-  }, [state.isPlaying, onPlay]);
+  }, [state.isPlaying, onPlay, progressTracker]);
 
-  // GA4: 動画進捗イベント（25%/50%/75%到達時に発火）
-  const progressMilestonesRef = useRef<Set<number>>(new Set());
+  // 25/50/75% 到達と 90% 以上の完了。timeupdate ごとに走るが、
+  // 閾値を越えた瞬間以外はコールバックを呼ばない（追加の state 更新もしない）
   useEffect(() => {
-    if (state.duration > 0 && state.currentTime > 0 && onProgress) {
-      const percent = (state.currentTime / state.duration) * 100;
-      for (const milestone of [25, 50, 75]) {
-        if (percent >= milestone && !progressMilestonesRef.current.has(milestone)) {
-          progressMilestonesRef.current.add(milestone);
-          onProgress(milestone);
-        }
-      }
-    }
-  }, [state.currentTime, state.duration, onProgress]);
-
-  // GA4: 動画終了イベント（95%以上再生で発火）
-  useEffect(() => {
-    if (
-      state.duration > 0 &&
-      state.currentTime >= state.duration * 0.95 &&
-      !hasEndedRef.current
-    ) {
-      hasEndedRef.current = true;
-      onEnded?.();
-    }
-  }, [state.currentTime, state.duration, onEnded]);
+    const { milestones, completed } = progressTracker.update(
+      state.currentTime,
+      state.duration,
+    );
+    for (const milestone of milestones) onProgress?.(milestone);
+    if (completed) onCompleteRef.current?.();
+  }, [state.currentTime, state.duration, onProgress, progressTracker]);
 
   // タイマーをクリアする共通関数
   const clearControlsTimer = useCallback(() => {

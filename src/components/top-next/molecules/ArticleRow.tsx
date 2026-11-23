@@ -1,4 +1,3 @@
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -140,8 +139,8 @@ export function ArticleRow({
   }
 
   return (
-    <Link href={href} className={className}>
+    <IntentPrefetchLink href={href} className={className}>
       {content}
-    </Link>
+    </IntentPrefetchLink>
   );
 }

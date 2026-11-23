@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import SubscriptionInfo from "@/components/account/SubscriptionInfo";
 import { PasswordChangeForm } from "@/components/account/PasswordChangeForm";
 import { LogoutButton } from "@/components/account/LogoutButton";
+import { SlackLinkSettingsCard } from "@/components/account/SlackLinkSettingsCard";
+import { loadSlackLinkState } from "@/lib/slack-member-sync/slack-link-state";
 import {
   SettingsPageLayout,
   SettingsPageTitle,
@@ -27,7 +29,11 @@ export default async function AccountPage() {
     redirect("/login?reauth=1&redirectTo=/account");
   }
 
-  const subscription = await getSubscriptionStatus();
+  // Slack の判定は off / dry_run なら設定の1回で終わる。課金状況の取得と並べて待つ
+  const [subscription, slackState] = await Promise.all([
+    getSubscriptionStatus(),
+    loadSlackLinkState(user.id),
+  ]);
 
   return (
     <SettingsPageLayout>
@@ -71,6 +77,11 @@ export default async function AccountPage() {
           </Button>
         </div>
       </SettingsCard>
+
+      {/* Slack とのつながり（#263）。課金中で未接続ならつなぐ導線、つながっていればその旨。ほかは出さない */}
+      {(slackState === "show" || slackState === "linked") && (
+        <SlackLinkSettingsCard state={slackState} />
+      )}
 
       {/* サブスクリプション情報 */}
       <div className="mb-6">

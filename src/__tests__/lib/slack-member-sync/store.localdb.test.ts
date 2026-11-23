@@ -58,7 +58,7 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（#263）", () => {
 
   it("設定を読める（既定値）", async () => {
     const s = await store.getSettings();
-    expect(s).toMatchObject({ mode: "dry_run", minNoticeDays: 7, linkGraceDays: 14 });
+    expect(s).toMatchObject({ mode: "dry_run", linkGraceDays: 7 });
   });
 
   it("実行ロックは1つだけ取れ、期限切れなら取り直せる", async () => {
@@ -105,9 +105,9 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（#263）", () => {
 
   it("本文未承認の印だけなら確保できる", async () => {
     await store.upsertStates([
-      makeState({ slackUserId: "U_SOFT", classification: "remove_scheduled", needsReview: true, reviewReason: "message_not_approved" }),
+      makeState({ slackUserId: "U_SOFT", classification: "needs_link", needsReview: true, reviewReason: "message_not_approved" }),
     ]);
-    expect(await store.claimDm(TEAM_ID, "U_SOFT", "removal_notice")).toBe(true);
+    expect(await store.claimDm(TEAM_ID, "U_SOFT", "link_request")).toBe(true);
   });
 
   it("つながりは上書きしない", async () => {

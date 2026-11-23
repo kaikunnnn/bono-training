@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState, useEffect } from "react";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -381,9 +381,9 @@ function LoginForm() {
       {/* 新規登録への導線 */}
       <p className="text-center mt-6 text-sm text-muted-foreground font-noto-sans-jp">
         アカウントをお持ちでない方は{" "}
-        <Link href={redirectTo !== "/mypage" ? `/signup?redirectTo=${encodeURIComponent(redirectTo)}` : "/signup"} className="text-primary hover:underline">
+        <IntentPrefetchLink href={redirectTo !== "/mypage" ? `/signup?redirectTo=${encodeURIComponent(redirectTo)}` : "/signup"} className="text-primary hover:underline">
           新規登録
-        </Link>
+        </IntentPrefetchLink>
       </p>
     </div>
   );

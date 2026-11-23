@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { trackErrorScreen } from "@/lib/analytics";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { AlertCircle, Home, RotateCcw } from "lucide-react";
@@ -14,6 +15,7 @@ export default function LessonsError({
 }) {
   useEffect(() => {
     console.error("Lessons error:", error);
+    trackErrorScreen("lessons", error);
   }, [error]);
 
   return (

@@ -148,6 +148,14 @@ export default async function RoadmapDetailPage({
         <RoadmapPathway
           description={roadmap.description}
           steps={roadmap.steps!}
+          guideLink={
+            slug === "uiux-career-change"
+              ? {
+                  href: "/guide/rdm-howtostart-roadmap",
+                  label: "なぜこの順番なのか、詳しくはこちら",
+                }
+              : undefined
+          }
         />
       )}
 

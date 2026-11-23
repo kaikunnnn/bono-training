@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UIデザインの基礎知識 — 出典から学ぶ読み物ポータル</title>
+<meta name="description" content="一次ソース（WCAG・HIG・Material・GOV.UK・NN/g・実在デザインシステム）に紐づけて、UIデザインの基礎知識を一つずつ固めていく読み物シリーズ。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--color-accent); }
+
+  .wrap {
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: 0 var(--space-24);
+  }
+  @media (min-width: 1024px) {
+    .wrap { padding: 0 var(--space-48); }
+  }
+
+  /* --- ヒーロー（グラデ静的フォールバック + Canvasシェーダー） --- */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, var(--grad-1), var(--grad-3) 45%, var(--grad-2) 72%, var(--grad-4));
+    color: var(--color-on-grad);
+    border-radius: 0 0 var(--radius-l) var(--radius-l);
+  }
+  .hero canvas.shader {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+  .hero__inner {
+    position: relative;
+    z-index: 1;
+    max-width: 60rem;
+    margin: 0 auto;
+    padding: var(--space-96) var(--space-24) var(--space-64);
+  }
+  @media (min-width: 1024px) {
+    .hero__inner { padding: var(--space-128) var(--space-48) var(--space-96); }
+  }
+  .hero .eyebrow {
+    font-size: var(--text-small);
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    opacity: 0.85;
+    margin: 0 0 var(--space-16);
+  }
+  .hero h1 {
+    font-size: 40px;
+    font-weight: 900;
+    line-height: var(--leading-heading);
+    letter-spacing: 0.01em;
+    margin: 0 0 var(--space-20);
+  }
+  @media (min-width: 768px) { .hero h1 { font-size: 56px; } }
+  .hero p.lede {
+    font-size: 18px;
+    font-weight: 500;
+    max-width: 34rem;
+    margin: 0 0 var(--space-28);
+    opacity: 0.95;
+  }
+  .hero .meta {
+    font-size: var(--text-small);
+    opacity: 0.8;
+    margin: 0;
+  }
+
+  /* --- 導入 --- */
+  .intro { padding: var(--space-64) 0 var(--space-40); }
+  .intro p { max-width: var(--measure); color: var(--color-ink-2); margin: 0 0 var(--space-16); }
+  .intro .principle {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-accent);
+    border-radius: var(--radius-s);
+    padding: var(--space-20) var(--space-24);
+    margin: var(--space-24) 0 0;
+    max-width: var(--measure);
+    color: var(--color-ink-2);
+    font-size: var(--text-small);
+    line-height: var(--leading-small);
+  }
+
+  /* --- カテゴリ・セクション --- */
+  .section { padding: var(--space-40) 0; }
+  .section__head { margin: 0 0 var(--space-24); }
+  .section__head h2 {
+    font-size: 24px; font-weight: 700; line-height: var(--leading-heading);
+    margin: 0 0 var(--space-8);
+  }
+  .section__head p { color: var(--color-ink-3); font-size: var(--text-small); margin: 0; }
+  .divider {
+    height: 3px;
+    background: linear-gradient(90deg, var(--grad-2), var(--color-accent-2) 50%, var(--grad-4));
+    border-radius: var(--radius-s);
+    margin: 0;
+    opacity: 0.55;
+  }
+
+  /* --- カードグリッド --- */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: var(--space-16);
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+    padding: var(--space-24);
+    text-decoration: none;
+    color: var(--color-ink);
+    box-shadow: var(--shadow-card);
+    transition: transform 0.12s ease, border-color 0.15s ease;
+    min-height: 152px;
+  }
+  a.card:hover { transform: translateY(-3px); border-color: var(--color-accent); }
+  .card.is-soon { background: var(--color-surface-2); box-shadow: none; }
+  .card__top {
+    display: flex; align-items: center; gap: var(--space-8);
+    margin: 0 0 var(--space-12);
+  }
+  .card__icon { font-size: 22px; line-height: 1; }
+  .badge {
+    display: inline-block; font-size: var(--text-caption); font-weight: 700;
+    border-radius: var(--radius-s); padding: var(--space-2) var(--space-10);
+    letter-spacing: 0.04em;
+  }
+  .badge.pub { background: var(--color-fact-bg); color: var(--color-fact); }
+  .badge.soon { background: var(--color-interp-bg); color: var(--color-interp); }
+  .card h3 { font-size: 17px; font-weight: 700; margin: 0 0 var(--space-6); line-height: var(--leading-heading); }
+  .card p { font-size: var(--text-small); color: var(--color-ink-2); line-height: var(--leading-small); margin: 0; }
+  .card .src {
+    margin: var(--space-12) 0 0; font-size: var(--text-caption); color: var(--color-ink-3);
+    line-height: var(--leading-small);
+  }
+
+  /* --- プロトタイプ導線 --- */
+  .cross {
+    display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-16);
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-m);
+    padding: var(--space-24);
+    margin: var(--space-16) 0 0;
+    text-decoration: none; color: var(--color-ink);
+  }
+  .cross:hover { border-color: var(--color-accent); }
+  .cross .c-body { flex: 1; min-width: 220px; }
+  .cross .c-body strong { display: block; font-size: 16px; margin: 0 0 var(--space-4); }
+  .cross .c-body span { font-size: var(--text-small); color: var(--color-ink-3); }
+  .cross .c-go { font-weight: 700; color: var(--color-accent); font-size: var(--text-small); }
+
+  footer { padding: var(--space-48) 0 var(--space-96); }
+  footer p { font-size: var(--text-caption); color: var(--color-ink-3); border-top: 1px solid var(--color-border); padding: var(--space-20) 0 0; margin: 0; }
+</style>
+</head>
+<body>
+  <header class="hero">
+    <canvas class="shader" aria-hidden="true"></canvas>
+    <div class="hero__inner">
+      <p class="eyebrow">BONO · UIデザインの基礎知識</p>
+      <h1>UIデザインの<br>基礎知識</h1>
+      <p class="lede">「なんとなく」で終わらせない。WCAG・Apple・Google・GOV.UK・NN/g、そして実在するデザインシステムの一次ソースに一つずつ紐づけて、UIの基礎を確かな言葉にしていく読み物シリーズです。</p>
+      <p class="meta">読了目安 約10分／記事・出典はすべて台帳で管理・更新中</p>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="intro">
+      <p>このポータルは「学べば世界で戦える基礎」を目指した教材です。だから、まだ書けていないテーマも隠しません。準備中のカードには「これから何を根拠に書くか（参照予定の一次ソース）」を先に出しています。出典を先に決めてから書く——それ自体が、この場所の信頼性の証明になると考えています。</p>
+      <div class="principle">数値を発明した瞬間に品質は落ちる。だからこのサイトの余白も、色も、行間も、すべて公開されたスケール（Uber Base の実測値・Material の8dpグリッド）から「転写」しています。読み物の中身と、読み物自身の見た目を、同じ基準で揃えるのが方針です。</div>
+    </section>
+
+    <section class="section" id="craft">
+      <div class="section__head">
+        <h2>UIクラフト</h2>
+        <p>見た目の質を決める要素。余白・色・文字・階層など、画面の「質感」をつくる土台。</p>
+      </div>
+      <div class="divider" aria-hidden="true"></div>
+      <div class="grid" style="margin-top: var(--space-24);">
+
+        <a class="card" href="spacing.html">
+          <div class="card__top"><span class="card__icon">📐</span><span class="badge pub">公開中</span></div>
+          <h3>余白（スペーシング）</h3>
+          <p>8pxグリッド・近接・タッチターゲット・行送り・レスポンシブ余白まで、余白で知るべき9個。</p>
+          <p class="src">出典: F-04〜F-12 / Q-06〜Q-08 / S-02・S-07・S-12・S-16</p>
+        </a>
+
+        <a class="card" href="color.html">
+          <div class="card__top"><span class="card__icon">🎨</span><span class="badge pub">公開中</span></div>
+          <h3>配色（カラー）</h3>
+          <p>コントラスト比・色だけに頼らない・無彩色の階層・アクセントの節度・トーナルパレットまで、配色で知るべき9個。</p>
+          <p class="src">出典: F-01〜F-03 / F-13〜F-15 / Q-04・Q-05・Q-07・Q-08・Q-11 / S-17・S-18</p>
+        </a>
+
+        <div class="card is-soon">
+          <div class="card__top"><span class="card__icon">🔠</span><span class="badge soon">準備中</span></div>
+          <h3>タイポグラフィ</h3>
+          <p>タイプスケール・行送り・最小サイズ。文字を「読める形」に整える基準。</p>
+          <p class="src">参照予定: Apple HIG タイポグラフィ（F-07）／Material 3 タイプスケール（F-08）／Base（Q-01〜03）</p>
+        </div>
+
+        <div class="card is-soon">
+          <div class="card__top"><span class="card__icon">🏔️</span><span class="badge soon">準備中</span></div>
+          <h3>視覚階層</h3>
+          <p>見てほしい順に目を動かす。大きさ・色・コントラスト・余白で差をつける設計。</p>
+          <p class="src">参照予定: NN/g 視覚的階層（S-01）／Material 3 レイアウトの役割（S-12）</p>
+        </div>
+
+        <div class="card is-soon">
+          <div class="card__top"><span class="card__icon">🧱</span><span class="badge soon">準備中</span></div>
+          <h3>グリッド／レイアウト</h3>
+          <p>画面をどう分割し、どこに何を置くか。整列とリズムの基礎。</p>
+          <p class="src">参照予定: Android グリッドと単位（F-09）／Material マージン（F-10）／GOV.UK（F-12）</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section" id="pattern">
+      <div class="section__head">
+        <h2>UIパターン</h2>
+        <p>定番の部品。ボタン・フォーム・入力欄など、繰り返し出てくる「型」を正しく作る。</p>
+      </div>
+      <div class="divider" aria-hidden="true"></div>
+      <div class="grid" style="margin-top: var(--space-24);">
+
+        <div class="card is-soon">
+          <div class="card__top"><span class="card__icon">🔘</span><span class="badge soon">準備中</span></div>
+          <h3>ボタン</h3>
+          <p>塗り・角丸・高さ・押下状態。押せると分かり、押しやすい形の基準。</p>
+          <p class="src">参照予定: Uber Base Button 実トークン（Q-09）／タッチターゲット（F-04〜06）</p>
+        </div>
+
+        <div class="card is-soon">
+          <div class="card__top"><span class="card__icon">📝</span><span class="badge soon">準備中</span></div>
+          <h3>フォーム／入力欄</h3>
+          <p>ラベル・入力欄・エラー表示の間隔と状態設計。完了率を上げる作り。</p>
+          <p class="src">参照予定: Base Input・FormControl（Q-07・Q-08）／NN/g フォームの余白（S-16）</p>
+        </div>
+
+        <div class="card is-soon">
+          <div class="card__top"><span class="card__icon">☑️</span><span class="badge soon">準備中</span></div>
+          <h3>チェックボックス等</h3>
+          <p>選択状態・サイズ・タップ領域。小さな部品ほど基準が効く。</p>
+          <p class="src">参照予定: Uber Base Checkbox 実トークン（Q-10）／タッチターゲット（F-06）</p>
+        </div>
+
+        <div class="card is-soon">
+          <div class="card__top"><span class="card__icon">⚙️</span><span class="badge soon">準備中</span></div>
+          <h3>設定画面／リスト</h3>
+          <p>行の高さ・区切り・グルーピング。情報を並べて読ませる型。</p>
+          <p class="src">参照予定: 近接・共通領域（S-02・S-04）／設定パターン台帳</p>
+        </div>
+
+      </div>
+    </section>
+
+    <section class="section" id="prototype">
+      <div class="section__head">
+        <h2>手を動かす教材（既存）</h2>
+        <p>知識と並行して、実際に作って学ぶトレーニングも残しています。</p>
+      </div>
+      <a class="cross" href="../prototype/index.html">
+        <div class="c-body">
+          <strong>🧭 UI Trainer プロトタイプ</strong>
+          <span>ステップ型のDailyUIトレーニング。お題を通して「決めごと」を体で覚える演習版。</span>
+        </div>
+        <span class="c-go">開く →</span>
+      </a>
+    </section>
+
+    <footer>
+      <p>© BONO — UIデザインの基礎知識。出典・数値はすべて一次ソースに紐づけて管理しています。</p>
+    </footer>
+  </main>
+
+  <script>
+  /* 軽量Canvasシェーダー: ゆっくり動くグラデ。prefers-reduced-motion / JS無効時は
+     CSS静的グラデ（.hero背景）にフォールバックする。本文テキスト背後には敷かない。 */
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) return;
+    var canvas = document.querySelector("canvas.shader");
+    if (!canvas || !canvas.getContext) return;
+    var ctx = canvas.getContext("2d");
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var blobs = [
+      { hue: 262, x: 0.2, y: 0.3, r: 0.55, sx: 0.017, sy: 0.013, p: 0 },
+      { hue: 291, x: 0.7, y: 0.4, r: 0.5,  sx: 0.013, sy: 0.019, p: 2 },
+      { hue: 232, x: 0.5, y: 0.75, r: 0.6, sx: 0.019, sy: 0.011, p: 4 }
+    ];
+    function resize() {
+      canvas.width = Math.max(1, canvas.offsetWidth) * dpr;
+      canvas.height = Math.max(1, canvas.offsetHeight) * dpr;
+    }
+    function draw(t) {
+      var w = canvas.width, h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = "lighter";
+      for (var i = 0; i < blobs.length; i++) {
+        var b = blobs[i];
+        var cx = (b.x + Math.sin(t * b.sx + b.p) * 0.16) * w;
+        var cy = (b.y + Math.cos(t * b.sy + b.p) * 0.16) * h;
+        var rad = b.r * Math.min(w, h);
+        var g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+        g.addColorStop(0, "hsla(" + b.hue + ",70%,45%,0.42)");
+        g.addColorStop(1, "hsla(" + b.hue + ",70%,25%,0)");
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+    }
+    var start = null;
+    function loop(now) {
+      if (start === null) start = now;
+      draw((now - start) / 1000);
+      requestAnimationFrame(loop);
+    }
+    resize();
+    window.addEventListener("resize", resize);
+    requestAnimationFrame(loop);
+  })();
+  </script>
+</body>
+</html>

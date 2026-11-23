@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UI Trainer — パターン一覧</title>
+<style>
+  :root {
+    --ink: #1F1A14; --sec: #57504a; --ter: #7a7269;
+    --bg: #FAF7F2; --card: #FFFFFF; --border: rgba(60,40,20,0.14);
+    --green: #1F8A4C; --green-soft: #E8F4EC;
+    --blue: #2C63C8; --blue-soft: #EDF2FC;
+    --amber-soft: #FCF3E3; --amber: #9A6A1B;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: "Hiragino Kaku Gothic ProN", "Hiragino Sans", "Noto Sans JP", system-ui, sans-serif;
+    background: var(--bg); color: var(--ink); font-size: 15px; line-height: 1.8; }
+  .container { max-width: 860px; margin: 0 auto; padding: 48px 24px 120px; }
+  h1 { font-size: 28px; margin-bottom: 6px; }
+  .lead { color: var(--sec); font-size: 15px; margin-bottom: 36px; }
+  .phase { font-size: 13px; font-weight: 700; color: var(--ter); letter-spacing: .05em; margin: 32px 0 12px; }
+  a.pcard { display: flex; gap: 18px; align-items: baseline; background: var(--card);
+    border: 1px solid var(--border); border-radius: 14px; padding: 20px 26px; margin-bottom: 12px;
+    color: inherit; text-decoration: none; transition: transform .1s, border-color .15s; }
+  a.pcard:hover { transform: translateY(-2px); border-color: var(--green); }
+  .pnum { font-size: 15px; font-weight: 800; color: var(--green); min-width: 88px; }
+  .pbody { flex: 1; }
+  .ptitle { font-size: 16px; font-weight: 700; }
+  .pdesc { font-size: 13.5px; color: var(--sec); margin-top: 2px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 5px;
+    padding: 2px 9px; margin-left: 8px; vertical-align: middle; }
+  .badge.new { background: var(--green); color: #fff; }
+  .badge.reco { background: var(--amber-soft); color: var(--amber); }
+  .badge.old { background: var(--bg); color: var(--ter); border: 1px solid var(--border); }
+  .note { font-size: 12.5px; color: var(--ter); margin-top: 28px; border-top: 1px solid var(--border); padding-top: 16px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🧭 UI Trainer — プロトタイプ・パターン一覧</h1>
+  <p class="lead">改善ループの各世代をすべて残しています。番号が大きいほど新しく、直近ループの成果は<b>5A / 5B / 5C</b>(入口の動機設計・3変種)です。</p>
+
+  <div class="phase">第3ループ — 「やりたい!」の入口設計(3変種・中身は共通)</div>
+  <a class="pcard" href="pattern5a.html">
+    <span class="pnum">5A</span>
+    <span class="pbody"><span class="ptitle">ビフォー → アフター<span class="badge new">最新</span><span class="badge reco">有力</span></span>
+    <span class="pdesc">「よくある初心者の画面」vs「実物(Airbnb)」を入口で並置。“センスの差ではなく、決めごとの差”で不安を反転させる案。</span></span>
+  </a>
+  <a class="pcard" href="pattern5b.html">
+    <span class="pnum">5B</span>
+    <span class="pbody"><span class="ptitle">60分後のあなた<span class="badge new">最新</span></span>
+    <span class="pdesc">完成形をぼかして予告+身につくスキル+「ポートフォリオの1ページになる」。成果の見える化で誘う案。</span></span>
+  </a>
+  <a class="pcard" href="pattern5c.html">
+    <span class="pnum">5C</span>
+    <span class="pbody"><span class="ptitle">間違い探し<span class="badge new">最新</span><span class="badge reco">有力</span></span>
+    <span class="pdesc">「プロが直したい所が7つ。いくつ見えますか?」で引き込み、完了画面で再挑戦→“見える目”の成長を実感させる案。5Aとの統合が本命候補。</span></span>
+  </a>
+
+  <div class="phase">第2ループ — 6レンズ検査(文章計測・フロー・表現)</div>
+  <a class="pcard" href="pattern4.html">
+    <span class="pnum">4</span>
+    <span class="pbody"><span class="ptitle">6レンズ検査反映版</span>
+    <span class="pdesc">リロードしても続きから再開/引用は日本語訳が主・原文が従/長文の分割/「発展は飛ばしてOK」明示。</span></span>
+  </a>
+
+  <div class="phase">第1ループ — 初心者ペルソナ(ミナ)歩行テスト</div>
+  <a class="pcard" href="pattern3.html">
+    <span class="pnum">3</span>
+    <span class="pbody"><span class="ptitle">初心者テスト反映版</span>
+    <span class="pdesc">必読引用に日本語訳/単位メモ(44pt≒44px)/時間の正直化/フィールドワークの「入力しなくてOK」/観点の確かめ方。</span></span>
+  </a>
+
+  <div class="phase">初期パターン</div>
+  <a class="pcard" href="pattern2.html">
+    <span class="pnum">2</span>
+    <span class="pbody"><span class="ptitle">体験リデザイン版<span class="badge old">アーカイブ</span></span>
+    <span class="pdesc">ガイド「ナビ」導入/オリエンテーション/祝福画面/初心者向けの言葉に全面書き直し/GOV.UKライブ実例の埋め込み。</span></span>
+  </a>
+  <a class="pcard" href="pattern1.html">
+    <span class="pnum">1</span>
+    <span class="pbody"><span class="ptitle">最初のプロトタイプ(v0.4)<span class="badge old">アーカイブ</span></span>
+    <span class="pdesc">制作センター型+インプットカードの原型。お題01と02の2本入り。機能重視のUI。</span></span>
+  </a>
+
+  <div class="note">
+    各パターンは独立して動作し、進捗は別々に保存されます。設計の経緯と検査結果は <code>docs/30-prototype/</code>(06 体験方針 / 08 改善ループ / 09 入口設計)を参照。
+  </div>
+</div>
+</body>
+</html>

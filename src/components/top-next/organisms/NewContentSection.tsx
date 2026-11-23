@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { ArticleRow, type ArticleRowProps } from "@/components/top-next/molecules/ArticleRow";
 import { HomeClickLink } from "@/components/analytics/HomeClickLink";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import {
   classifyHomeHref,
   type HomeClickSurface,
@@ -45,13 +45,14 @@ export function NewContentSection({
                 href={viewAllHref}
                 className={viewAllClassName}
                 tracking={{ surface, section: "new_content", itemType: "view_all" }}
+                intentPrefetch
               >
                 一覧を見る →
               </HomeClickLink>
             ) : (
-              <Link href={viewAllHref} className={viewAllClassName}>
+              <IntentPrefetchLink href={viewAllHref} className={viewAllClassName}>
                 一覧を見る →
-              </Link>
+              </IntentPrefetchLink>
             ))}
         </div>
         <div className="grid grid-cols-1 gap-x-12 gap-y-0 sm:grid-cols-2">

@@ -33,7 +33,7 @@ export async function confirmSlackLink(
   const token = formData.get("t");
   try {
     const status = await confirmLink(store, typeof token === "string" ? token : null, user.id);
-    if (status === "linked") revalidatePath("/mypage");
+    if (status === "linked") revalidatePath("/account");
     return { status };
   } catch (error) {
     console.error("[slack-member-sync] link confirm failed:", error instanceof Error ? error.message : "unknown");
@@ -41,7 +41,7 @@ export async function confirmSlackLink(
   }
 }
 
-/** マイページの「Slackとつなぐ」 */
+/** アカウント情報の「Slackとつなぐ」（/account/slack） */
 export async function requestSlackLink(
   _prev: RequestSlackLinkResult,
   formData: FormData,

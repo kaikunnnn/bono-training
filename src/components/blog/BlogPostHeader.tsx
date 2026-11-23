@@ -2,7 +2,7 @@
 
 // src/components/blog/BlogPostHeader.tsx
 import { motion } from "framer-motion";
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { Badge } from "@/components/ui/badge";
 import { BlogPost } from "@/types/blog";
 import { getFluentEmojiUrl, DEFAULT_EMOJI, removeEmojiFromText } from "@/utils/blog/emojiUtils";
@@ -51,11 +51,11 @@ export const BlogPostHeader: React.FC<BlogPostHeaderProps> = ({ post }) => {
 
         {/* カテゴリ（Primary Tagのみ） */}
         <div className="flex items-center justify-center">
-          <Link href={`/blog/tag/${post.category}`}>
+          <IntentPrefetchLink href={`/blog/tag/${post.category}`}>
             <Badge className="text-sm px-4 py-2 rounded-full border font-medium transition-colors cursor-pointer bg-transparent text-gray-900 border-black/10 hover:bg-black/5 hover:text-gray-900">
               {post.category}
             </Badge>
-          </Link>
+          </IntentPrefetchLink>
         </div>
       </motion.div>
     </div>

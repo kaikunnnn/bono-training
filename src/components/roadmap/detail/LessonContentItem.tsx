@@ -4,7 +4,7 @@
  * Figma: PRD🏠_Roadmap_2026 node-id 1-8447
  */
 
-import Link from "next/link";
+import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import Image from "next/image";
 import { ChevronRight, BookOpen } from "lucide-react";
 import type { SanityReferenceContent } from "@/types/sanity-roadmap";
@@ -28,7 +28,7 @@ export default function LessonContentItem({
   const imageUrl = content.iconImageUrl || content.thumbnailUrl;
 
   return (
-    <Link
+    <IntentPrefetchLink
       href={lessonUrl}
       className="group flex items-center gap-6 p-6 bg-white rounded-2xl border-2 border-gray-200 hover:border-gray-400 shadow-[0_1px_24px_rgba(0,0,0,0.08)] hover:shadow-[0_4px_32px_rgba(0,0,0,0.12)] will-change-transform"
       style={{ transition: 'transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease' }}
@@ -78,6 +78,6 @@ export default function LessonContentItem({
           <ChevronRight className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-[transform,color] duration-200 group-hover:translate-x-0.5" />
         </div>
       </div>
-    </Link>
+    </IntentPrefetchLink>
   );
 }
