@@ -5,6 +5,7 @@ import { Layout } from "./Layout";
 import { UserProvider } from "./UserProvider";
 import { StaleSessionCleaner } from "@/components/auth/StaleSessionCleaner";
 import { SiteVisitRecorder } from "@/components/analytics/SiteVisitRecorder";
+import { EmailClickRecorder } from "@/components/analytics/EmailClickRecorder";
 import { MemberStatusRecorder } from "@/components/analytics/MemberStatusRecorder";
 import { getSubscriptionStatus } from "@/lib/subscription";
 import {
@@ -89,6 +90,8 @@ export async function LayoutWrapper({ children }: LayoutWrapperProps) {
       {memberStatus && <MemberStatusRecorder status={memberStatus} />}
       {/* 活動ログ site_visit（#213 A1）: ログイン中のみ・1人1日1回 */}
       {user && <SiteVisitRecorder userId={user.id} />}
+      {/* 活動ログ email_click（#264 §6-1）: メールのリンク（?from=email_xxx）から来た */}
+      {user && <EmailClickRecorder />}
       {children}
     </Layout>
   );
