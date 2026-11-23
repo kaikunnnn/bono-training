@@ -19,6 +19,11 @@ function createSanityClient(useCdn: boolean): ReturnType<typeof createClient> {
     dataset: process.env.NEXT_PUBLIC_SANITY_DATASET,
     apiVersion: process.env.NEXT_PUBLIC_SANITY_API_VERSION || "2024-01-01",
     useCdn,
+    // データセット非公開化（#308）: サーバーだけが読み取り専用トークンで読む。
+    // NEXT_PUBLIC ではないので、このファイルが urlFor 目的でブラウザに入っても値は空になる。
+    // トークンがあると下書きも読めてしまうため、公開済みだけに絞る（apiVersion 2024-01-01 の既定は raw）
+    token: process.env.SANITY_READ_TOKEN,
+    perspective: "published",
   });
 }
 
