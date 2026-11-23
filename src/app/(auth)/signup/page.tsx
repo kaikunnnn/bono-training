@@ -20,8 +20,11 @@ import {
 } from "@/lib/auth-password";
 import {
   SIGNUP_REQUEST_FAILED_MESSAGE,
+  invalidFieldReason,
   isNextInternalError,
   reportSignupRequestFailed,
+  trackSignupError,
+  trackSignupStep,
 } from "@/lib/auth-client-error";
 import { signUp } from "../actions";
 import { createClient } from "@/lib/supabase/client";
@@ -32,6 +35,8 @@ export default function SignupPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo");
+  // プランを選んでから来た人か（GA4 で分けて見る。#320）
+  const hasPlan = !!redirectTo?.includes("intent_plan");
 
   const [activeTab, setActiveTab] = useState<TabId>("new");
   const [email, setEmail] = useState("");
@@ -57,14 +62,17 @@ export default function SignupPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    trackSignupStep("signup_submit", hasPlan);
 
     // Supabase に送る前に文字数を確かめる（#321）
     if (!isPasswordLongEnough(password)) {
       setError(PASSWORD_TOO_SHORT_MESSAGE);
+      trackSignupError("password_too_short", hasPlan);
       return;
     }
     if (password !== confirmPassword) {
       setError("パスワードが一致しません");
+      trackSignupError("password_mismatch", hasPlan);
       return;
     }
 
@@ -83,6 +91,7 @@ export default function SignupPage() {
 
       if (result?.error) {
         setError(result.error);
+        trackSignupError("server", hasPlan);
       }
       // 成功時は signUp 内で redirect される
     } catch (err) {
@@ -91,7 +100,7 @@ export default function SignupPage() {
       // サーバーとの通信そのものが失敗した（通信切れ・デプロイ直後の食い違い等）。
       // 以前はボタンが戻るだけで何も表示されず、記録も残らなかった（#321 S5）
       setError(SIGNUP_REQUEST_FAILED_MESSAGE);
-      reportSignupRequestFailed(err, email);
+      reportSignupRequestFailed(err, email, hasPlan);
     } finally {
       setIsSubmitting(false);
     }
@@ -119,7 +128,15 @@ export default function SignupPage() {
       {/* 新規登録タブ: メール/パスワードで直接登録 */}
       {activeTab === "new" && (
         <Card className="mt-4 rounded-3xl">
-          <form onSubmit={handleSignUp}>
+          <form
+            onSubmit={handleSignUp}
+            // ブラウザの入力チェック（メール形式・必須・最低文字数）で止まった欄を数える。
+            // ここで止まると onSubmit は呼ばれず、これまで記録が残らなかった（#320）
+            onInvalidCapture={(e) => {
+              const reason = invalidFieldReason((e.target as HTMLElement).id);
+              if (reason) trackSignupError(reason, hasPlan);
+            }}
+          >
             <CardContent className="pt-6 space-y-4">
               {error && (
                 <Alert variant="destructive">
@@ -182,7 +199,13 @@ export default function SignupPage() {
               </div>
             </CardContent>
             <CardFooter>
-              <Button type="submit" size="large" className="w-full font-noto-sans-jp" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                size="large"
+                className="w-full font-noto-sans-jp"
+                disabled={isSubmitting}
+                onClick={() => trackSignupStep("signup_click", hasPlan)}
+              >
                 <UserPlus className="mr-2 h-4 w-4" />
                 {isSubmitting ? "登録中..." : "アカウントを作成"}
               </Button>
