@@ -52,6 +52,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   orientation = 'vertical',
   thumbnailStyle = 'default',
   basePath = '/roadmap/',
+  linkQuery = '',
   label = 'ロードマップ',
   className,
   imageLoading,
@@ -62,7 +63,7 @@ const RoadmapCardV2: React.FC<RoadmapCardV2Props> = ({
   const gradient = customGradient || GRADIENTS[gradientPreset] || GRADIENTS['career-change'];
   // 縦型: 下→上、横型: 左→右
   const gradientCSS = buildGradientCSS(gradient, orientation === 'horizontal' ? 'horizontal' : 'vertical');
-  const linkPath = `${basePath}${slug}`;
+  const linkPath = `${basePath}${slug}${linkQuery}`;
   const textVariant = variant === 'gradient' ? 'light' : 'dark';
   const isWaveStyle = thumbnailStyle === 'wave';
   // バッジに表示するテキスト（shortTitleがあればそれを優先）

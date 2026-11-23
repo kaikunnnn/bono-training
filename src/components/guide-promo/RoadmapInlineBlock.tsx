@@ -17,11 +17,14 @@ export function RoadmapInlineBlock({
   block,
   roadmap,
   tracking,
+  linkFrom,
   className,
 }: {
   block: GuideInlineBlock;
   roadmap: PromoRoadmap;
   tracking: Omit<PromoTracking, "placement" | "roadmapSlug">;
+  /** ロードマップへのリンクに付ける ?from=（rebono 279-E）。無ければ付けない */
+  linkFrom?: string;
   className?: string;
 }) {
   const gradient = GRADIENTS[roadmap.gradientPreset ?? "career-change"] ?? GRADIENTS["career-change"];
@@ -57,7 +60,9 @@ export function RoadmapInlineBlock({
               <span className="whitespace-nowrap">（{roadmap.stepCount}ステップ）</span>
             </p>
             <Button asChild size="sm" className="mt-2 w-full px-3 sm:w-auto sm:px-4">
-              <Link href={`/roadmap/${roadmap.slug}`}>
+              <Link
+                href={`/roadmap/${roadmap.slug}${linkFrom ? `?from=${encodeURIComponent(linkFrom)}` : ""}`}
+              >
                 ロードマップを見る
                 <ChevronRight className="hidden sm:block" />
               </Link>

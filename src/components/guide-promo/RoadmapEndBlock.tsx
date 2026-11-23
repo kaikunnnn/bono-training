@@ -15,11 +15,14 @@ export function RoadmapEndBlock({
   heading,
   roadmap,
   tracking,
+  linkFrom,
   className,
 }: {
   heading: string;
   roadmap: PromoRoadmap;
   tracking: Omit<PromoTracking, "placement" | "roadmapSlug">;
+  /** ロードマップのカードのリンクに付ける ?from=（rebono 279-E）。料金リンクは PricingCtaLink の from のまま */
+  linkFrom?: string;
   className?: string;
 }) {
   return (
@@ -42,6 +45,7 @@ export function RoadmapEndBlock({
           shortTitle={roadmap.shortTitle}
           gradientPreset={roadmap.gradientPreset}
           basePath="/roadmap/"
+          linkQuery={linkFrom ? `?from=${encodeURIComponent(linkFrom)}` : undefined}
           variant="gradient"
           orientation="vertical"
           thumbnailStyle="wave"

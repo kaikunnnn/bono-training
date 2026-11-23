@@ -25,9 +25,10 @@ export const GUIDE_SEO_OVERRIDES: Record<string, GuideSeoOverride> = {
   },
   // rebono#20: /roadmap/uiux-career-change と検索で競合しないよう、解説記事であることを title で分ける
   // （オーナー承認済み）。description は Sanity のまま。
+  // rebono 279-E: 2026-11-07 に公開し直した記事の h1 にそろえる（オーナー承認 2026-11-23）
   "rdm-howtostart-roadmap": {
     title:
-      "転職ロードマップの中身を解説｜フェーズごとに目指すレベルと習得すること | BONO",
+      "未経験からUI/UXデザイナーへ転職するロードマップ｜AI時代に1年で身につけるスキル | BONO",
   },
   // #236 オーナー決定B（2026-10-09）/ #276: 役割を「年収と将来」に絞り、rdm-howtobeadesigner と
   // 「未経験」「なるには」で取り合わないようにする。Sanity の description は空なので説明文も決める。
