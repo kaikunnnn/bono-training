@@ -18,11 +18,29 @@ describe("proxy: top page for signed-in members (#257 S2)", () => {
     expect(res.headers.get("location")).toBe("https://www.bo-no.design/mypage");
   });
 
-  it("carries only the welcome flag over to /mypage", () => {
+  it("carries only the welcome flag and the email mark over to /mypage", () => {
     const res = proxy(request("/?welcome=1&utm_source=x", AUTH_COOKIE));
     expect(res.headers.get("location")).toBe(
       "https://www.bo-no.design/mypage?welcome=1"
     );
+  });
+
+  it("keeps the email mark (?from=email_xxx) so email_click can be recorded (#327-B)", () => {
+    const res = proxy(request("/?from=email_weekly", AUTH_COOKIE));
+    expect(res.headers.get("location")).toBe(
+      "https://www.bo-no.design/mypage?from=email_weekly"
+    );
+    const both = proxy(
+      request("/?welcome=1&from=email_signup&utm_source=x", AUTH_COOKIE)
+    );
+    expect(both.headers.get("location")).toBe(
+      "https://www.bo-no.design/mypage?welcome=1&from=email_signup"
+    );
+  });
+
+  it("drops a from that is not an email mark", () => {
+    const res = proxy(request("/?from=twitter", AUTH_COOKIE));
+    expect(res.headers.get("location")).toBe("https://www.bo-no.design/mypage");
   });
 
   it("lets anonymous visitors see the top page", () => {
@@ -155,5 +173,20 @@ describe("proxy: /dev is blocked on production hosts (#296 hanaso-compare)", () 
     const res = proxy(new NextRequest(`http://localhost:3000${path}`));
     expect(res.headers.get("x-middleware-rewrite")).toBeNull();
     expect(res.headers.get("x-middleware-next")).toBe("1");
+  });
+});
+
+describe("proxy: anonymous visitors from an email link keep the mark through login (#327-B)", () => {
+  it("puts the email mark into redirectTo", () => {
+    const res = proxy(request("/mypage?from=email_comeback"));
+    const loc = new URL(res.headers.get("location")!);
+    expect(loc.pathname).toBe("/login");
+    expect(loc.searchParams.get("redirectTo")).toBe("/mypage?from=email_comeback");
+  });
+
+  it("keeps redirectTo as the bare path when there is no valid mark", () => {
+    const res = proxy(request("/mypage?from=evil&x=1"));
+    const loc = new URL(res.headers.get("location")!);
+    expect(loc.searchParams.get("redirectTo")).toBe("/mypage");
   });
 });

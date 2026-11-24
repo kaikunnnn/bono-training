@@ -4,6 +4,7 @@
  * - event_type は DB の CHECK 制約と同じ15種のみ（勝手に増やさない。増やすときはマイグレーションと同時）
  * - Server Action（src/lib/services/activity.ts）が入力の検証・整形に使う
  * - "use server" ファイルは async 関数しか export できないため、定数・型・純粋関数はここに置く
+ * - proxy.ts からも読まれる（top-redirect.ts 経由）。サーバー専用・重いモジュールを import しないこと
  */
 
 export const ACTIVITY_EVENT_TYPES = [

@@ -23,6 +23,20 @@
       "expectLocation": "/mypage?welcome=1"
     },
     {
+      "id": "root-authed-email-from",
+      "path": "/?from=email_weekly",
+      "cookie": "dummy",
+      "expectStatus": 307,
+      "expectLocation": "/mypage?from=email_weekly"
+    },
+    {
+      "id": "mypage-anon-email-from",
+      "path": "/mypage?from=email_comeback",
+      "cookie": "none",
+      "expectStatus": 307,
+      "expectLocation": "/login?from=email_comeback&redirectTo=%2Fmypage%3Ffrom%3Demail_comeback"
+    },
+    {
       "id": "mypage-anon",
       "path": "/mypage",
       "cookie": "none",

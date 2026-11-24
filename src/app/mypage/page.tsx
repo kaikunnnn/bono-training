@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { Metadata } from "next";
+import { withEmailFrom } from "@/lib/top-redirect";
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/lib/subscription";
 import { MyPageShell, type TabId } from "./MyPageShell";
@@ -25,11 +26,11 @@ function parseTab(value: string | string[] | undefined): TabId {
 export default async function MyPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string | string[] }>;
+  searchParams: Promise<{ tab?: string | string[]; from?: string | string[] }>;
 }) {
   const [user, params] = await Promise.all([getCurrentUser(), searchParams]);
   if (!user) {
-    redirect("/login?reauth=1&redirectTo=/mypage");
+    redirect(`/login?reauth=1&redirectTo=${encodeURIComponent(withEmailFrom("/mypage", params.from))}`);
   }
 
   const tab = parseTab(params.tab);
