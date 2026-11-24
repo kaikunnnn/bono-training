@@ -4,6 +4,7 @@ import {
   GUIDE_REDIRECT_MAP,
 } from "@/lib/migration/legacy-only-content-slugs";
 import { isGoneLegacyPath } from "@/lib/migration/gone-legacy-paths";
+import { buildMypageSearch } from "@/lib/top-redirect";
 
 /**
  * 軽量化された proxy（Next.js 16 で middleware.ts から改名。役割は同じ）
@@ -222,9 +223,11 @@ export function proxy(request: NextRequest) {
   if (hasAuth && pathname === "/") {
     const url = request.nextUrl.clone();
     url.pathname = "/mypage";
-    // signup直後の歓迎トースト用フラグだけ引き継ぐ（page.tsx と同じ挙動）
-    const welcome = request.nextUrl.searchParams.get("welcome");
-    url.search = welcome === "1" ? "?welcome=1" : "";
+    // 歓迎トースト用フラグとメールの印（?from=email_xxx）だけ引き継ぐ（page.tsx と同じ挙動）
+    url.search = buildMypageSearch({
+      welcome: request.nextUrl.searchParams.get("welcome"),
+      from: request.nextUrl.searchParams.get("from"),
+    });
     return NextResponse.redirect(url);
   }
 
