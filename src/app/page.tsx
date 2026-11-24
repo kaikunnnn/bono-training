@@ -3,6 +3,7 @@ import { HOME_DESCRIPTION, HOME_TITLE, OG_DEFAULTS } from "@/lib/seo-metadata";
 import { redirect } from "next/navigation";
 import { UserProvider } from "@/components/layout/UserProvider";
 import { NewTopContent } from "@/components/top-next/NewTopContent";
+import { buildMypageSearch } from "@/lib/top-redirect";
 
 // #236 キーワードSEO: 文言は lib/seo-metadata.ts（/top と共有）。
 // root layout の title.template（"%s | BONO"）を避けるため absolute を使う。
@@ -38,15 +39,15 @@ export const metadata: Metadata = {
 export default async function IndexPage({
   searchParams,
 }: {
-  searchParams: Promise<{ welcome?: string }>;
+  searchParams: Promise<{ welcome?: string; from?: string }>;
 }) {
   // UserProvider は React cache() でメモ化されており、LayoutWrapper と getUser を共有する
   const { user } = await UserProvider();
 
   if (user) {
-    // 通常signup直後の welcome フラグは /mypage まで引き継ぐ（着地ページで歓迎トースト）
-    const { welcome } = await searchParams;
-    redirect(welcome === "1" ? "/mypage?welcome=1" : "/mypage");
+    // welcome フラグ（歓迎トースト）とメールの印（email_click の記録）は /mypage まで引き継ぐ
+    const { welcome, from } = await searchParams;
+    redirect(`/mypage${buildMypageSearch({ welcome, from })}`);
   }
 
   return <NewTopContent isMember={false} surface="root" />;
