@@ -137,7 +137,7 @@ function hasSupabaseAuthCookie(request: NextRequest): boolean {
  * 戻り先（redirectTo）を同じサイト内の pathname + search に解決する。
  * 外のサイトへ飛ばせる値（https://evil.com, //evil.com, /\evil.com 等）や
  * 制御文字入りの値は null を返す（呼び出し側で /mypage に倒す）。
- * 考え方は src/app/(auth)/actions.ts の sanitizeRedirect と同じ。
+ * 考え方は src/lib/safe-redirect.ts の sanitizeRedirect と同じ（こちらは絶対URLの Location で返すので外には出ない）。
  */
 function resolveSameOriginRedirect(
   value: string | null,

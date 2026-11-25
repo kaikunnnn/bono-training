@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import { reportAuthError } from "@/lib/monitoring";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { sanitizeRedirect } from "@/lib/safe-redirect";
 
 /**
  * S3-B: 認証確定後、既存Stripe契約を link-stripe-subscription Edge Function で
@@ -38,7 +39,8 @@ async function linkExistingStripeSubscriptionBestEffort(
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/";
+  // next は URL から誰でも入れられる。`${origin}${next}` の連結で "@evil" 等がホストに化けないよう内部パスだけ通す
+  const next = sanitizeRedirect(searchParams.get("next"));
 
   if (code) {
     const supabase = await createClient();
