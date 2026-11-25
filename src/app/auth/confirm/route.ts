@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { reportAuthError } from "@/lib/monitoring";
+import { sanitizeRedirect } from "@/lib/safe-redirect";
 
 /**
  * PKCE対応のメール確認エンドポイント
@@ -12,7 +13,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
-  const next = searchParams.get("next") ?? "/";
+  // next は URL から誰でも入れられるので内部パスだけ通す（外のサイトへ飛ばせないように）
+  const next = sanitizeRedirect(searchParams.get("next"));
 
   if (!tokenHash || !type) {
     return NextResponse.redirect(
