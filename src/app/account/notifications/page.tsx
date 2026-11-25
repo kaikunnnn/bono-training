@@ -12,10 +12,13 @@ import {
 } from "@/components/common/SettingsPageLayout";
 import { NotificationPreferencesForm } from "@/components/account/NotificationPreferencesForm";
 import { PushNotificationToggle } from "@/components/account/PushNotificationToggle";
+import { MemberMailToggle } from "@/components/account/MemberMailToggle";
+import { getMailStore } from "@/lib/member-mail/runtime";
+import { isMemberMailEnabled } from "@/lib/member-mail/self-settings";
 
 export const metadata: Metadata = {
   title: "通知設定",
-  description: "コメントやリアクションの通知を種類ごとにオン/オフできます",
+  description: "コメントやリアクションの通知と、お知らせメールをオン/オフできます",
 };
 
 export default async function NotificationSettingsPage({
@@ -32,7 +35,10 @@ export default async function NotificationSettingsPage({
     );
   }
 
-  const preferences = await getNotificationPreferences();
+  const [preferences, mailEnabled] = await Promise.all([
+    getNotificationPreferences(),
+    readMemberMailEnabled(user.id),
+  ]);
 
   return (
     <SettingsPageLayout>
@@ -56,6 +62,27 @@ export default async function NotificationSettingsPage({
           <PushNotificationToggle />
         </div>
       </SettingsCard>
+
+      <SettingsCard title="メール">
+        <div className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            オフにすると、BONOからのお知らせメールが届かなくなります。お支払い・契約・ログインに関するメールは、この設定にかかわらず届きます。
+          </p>
+          <MemberMailToggle initialEnabled={mailEnabled} />
+        </div>
+      </SettingsCard>
     </SettingsPageLayout>
   );
+}
+
+/** お知らせメールを受け取っているか（#327-C）。読めなければ null（スイッチを切り替えられない表示にする） */
+async function readMemberMailEnabled(userId: string): Promise<boolean | null> {
+  const store = getMailStore();
+  if (!store) return null;
+  try {
+    return await isMemberMailEnabled(store, userId);
+  } catch (error) {
+    console.error("[member-mail] settings read failed:", error instanceof Error ? error.message : "unknown");
+    return null;
+  }
 }

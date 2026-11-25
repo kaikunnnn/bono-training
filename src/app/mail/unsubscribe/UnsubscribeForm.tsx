@@ -3,14 +3,14 @@
 /**
  * 会員メールの配信停止（#264 §5-8）。
  * 開いただけでは止めない。「受け取りをやめる」を押したときだけ止める（リンクを自動で開くセキュリティソフト対策）。
- * 止めたあとは、カテゴリごとに戻せる。
+ * 止めたあとは「受け取りを再開する」で戻せる。
+ * 会員に見せるのは「BONOからのお知らせメール」1項目だけ。内部のカテゴリは見せない（#327-C）。
  */
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
-import { CATEGORY_LABEL, MAIL_CATEGORIES, type MailCategory } from "@/lib/member-mail/types";
 import { restartMemberMail, stopMemberMail, type UnsubscribeActionState } from "./actions";
 
-export function UnsubscribeForm({ token, initiallyStopped }: { token: string; initiallyStopped: MailCategory[] }) {
+export function UnsubscribeForm({ token, initiallyStopped }: { token: string; initiallyStopped: boolean }) {
   const [stopState, stopAction, stopping] = useActionState<UnsubscribeActionState, FormData>(stopMemberMail, null);
   const [restartState, restartAction, restarting] = useActionState<UnsubscribeActionState, FormData>(
     restartMemberMail,
@@ -22,9 +22,8 @@ export function UnsubscribeForm({ token, initiallyStopped }: { token: string; in
     return <UnsubscribeMessage status={latest.status} />;
   }
 
-  const stopped: MailCategory[] =
-    latest && "stopped" in latest ? latest.stopped : stopState === null ? initiallyStopped : [];
-  const hasStopped = stopState !== null || initiallyStopped.length > 0;
+  const stopped: boolean = latest && "stopped" in latest ? latest.stopped : initiallyStopped;
+  const hasStopped = stopState !== null || initiallyStopped;
 
   if (!hasStopped) {
     return (
@@ -46,37 +45,29 @@ export function UnsubscribeForm({ token, initiallyStopped }: { token: string; in
 
   return (
     <div className="space-y-5">
-      <h1 className="font-heading text-2xl font-bold leading-tight text-text-primary">お知らせメールを止めました</h1>
+      <h1 className="font-heading text-2xl font-bold leading-tight text-text-primary">
+        {stopped ? "お知らせメールを止めました" : "お知らせメールの受け取りを再開しました"}
+      </h1>
       <p className="text-base leading-relaxed text-text-secondary">
-        {stopped.length > 0
-          ? "下のメールは、これから届きません。また受け取りたくなったら、種類ごとに戻せます。"
-          : "いまは、すべてのお知らせメールを受け取る設定です。"}
+        {stopped
+          ? "これから、BONOからのお知らせメールは届きません。また受け取りたくなったら、下のボタンで戻せます。"
+          : "これから、BONOからのお知らせメールが届きます。"}
       </p>
-      <h2 className="text-sm font-bold text-text-primary">メールの種類</h2>
       <ul className="space-y-3">
-        {MAIL_CATEGORIES.map((category) => {
-          const isStopped = stopped.includes(category);
-          return (
-            <li
-              key={category}
-              className="flex flex-col gap-3 rounded-xl border border-border-light p-4 sm:flex-row sm:items-center sm:justify-between"
-            >
-              <div>
-                <p className="text-sm leading-6 text-text-primary">{CATEGORY_LABEL[category]}</p>
-                <p className="text-xs leading-5 text-text-muted">{isStopped ? "止めています" : "受け取っています"}</p>
-              </div>
-              {isStopped && (
-                <form action={restartAction}>
-                  <input type="hidden" name="t" value={token} />
-                  <input type="hidden" name="category" value={category} />
-                  <Button type="submit" variant="outline" size="sm" disabled={restarting}>
-                    受け取りを再開する
-                  </Button>
-                </form>
-              )}
-            </li>
-          );
-        })}
+        <li className="flex flex-col gap-3 rounded-xl border border-border-light p-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm leading-6 text-text-primary">BONOからのお知らせメール</p>
+            <p className="text-xs leading-5 text-text-muted">{stopped ? "止めています" : "受け取っています"}</p>
+          </div>
+          {stopped && (
+            <form action={restartAction}>
+              <input type="hidden" name="t" value={token} />
+              <Button type="submit" variant="outline" size="sm" disabled={restarting}>
+                受け取りを再開する
+              </Button>
+            </form>
+          )}
+        </li>
       </ul>
       <p className="text-xs leading-5 text-text-muted">
         お支払い・契約・ログインに関するメールは、この設定にかかわらず届きます。

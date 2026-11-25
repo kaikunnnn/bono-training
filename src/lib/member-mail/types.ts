@@ -32,14 +32,6 @@ export const FROM_OF_KIND: Record<MailKind, string> = {
   winback: "email_winback",
 };
 
-/** 配信停止の画面で見せるカテゴリ名 */
-export const CATEGORY_LABEL: Record<MailCategory, string> = {
-  notice: "お知らせ（週1回のメルマガ・新しいコンテンツ・イベント）",
-  comeback: "しばらく来ていないときのご案内・相談のご案内",
-  signup: "登録した方へのご案内",
-  winback: "以前の会員の方へのお知らせ",
-};
-
 /**
  * 会員の「週1通まで」に数えるカテゴリ（264 §5-9: お知らせ系 ①②と相談案内を合わせて週1通）
  */
