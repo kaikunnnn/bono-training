@@ -2,7 +2,7 @@
 -- 327-D「はじめの案内」（入会2日後の朝）の文面を会員メールに登録する
 --
 -- ★本番への登録はオーナーの判断で行う（このファイルはマイグレーションではない。supabase db push では当たらない）
--- 前提: supabase/migrations/20261125000000_member_mail_standing_campaigns.sql を当てたあと
+-- 前提: supabase/migrations/20261125090715_member_mail_standing_campaigns.sql を当てたあと
 --
 -- このSQLがすること:
 --   - 文面を1行入れる（kind=signup / standing_key=onboarding_day2）。すでにあれば何もしない
