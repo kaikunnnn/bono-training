@@ -15,13 +15,17 @@
 --          FROM public.member_mail_campaigns WHERE standing_key = 'onboarding_day2';
 --   2. テスト用アカウントの頭を入れる（値はリポジトリに書かない）
 --        UPDATE public.member_mail_settings SET test_email_prefixes = '{...}' WHERE id = 1;
+--   ※ 効くスイッチは「全体（member_mail_settings.mode）」と「種類（member_mail_kind_settings の signup）」の弱いほう。
+--      全体を上げると weekly など他の種類にも効くので、他の種類のスイッチを先に確かめる
 --   3. 種類のスイッチを count（人数だけ）にし、有効にする時刻を入れる
 --        UPDATE public.member_mail_kind_settings SET mode = 'count' WHERE kind = 'signup';
 --        UPDATE public.member_mail_campaigns SET scheduled_at = now() WHERE standing_key = 'onboarding_day2';
 --      → 毎朝 8:00 JST に、その日の対象の人数が運用 Slack に出る（送らない）
---   4. オーナーだけに送って見た目を確かめる: mode = 'owner'（owner_user_ids の人に版ごとに1通）
---   5. 全員に送る: mode = 'all' にし、そのとき scheduled_at = now() に入れ直す
---      （「切り替えたあとに入会した人から」にするため。入れ直さないと 3. の時刻より後の入会者が対象になる）
+--      ※ now() だと2日後までは対象が0人。手で数えた人数と突き合わせたいときは、count のあいだだけ過去の日時を入れる
+--   4. オーナーだけに送って見た目を確かめる: mode = 'owner'（member_mail_settings.owner_user_ids の人に版ごとに1通）
+--      届いたメールの元のソースを開き、URL・ヘッダーに種類やカテゴリの名前が出ていないかも見る
+--   5. 全員に送る: mode = 'all' にし、そのとき必ず scheduled_at = now() に入れ直す
+--      （「切り替えたあとに入会した人から」にするため。入れ直さないと 3. の時刻より後に入会した2〜3日目の人に届く）
 --   止めるとき: kind_settings の signup を 'off'、または scheduled_at を NULL に戻す
 -- =============================================================================
 
