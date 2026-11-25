@@ -16,6 +16,8 @@ import "server-only";
  */
 import { randomUUID } from "node:crypto";
 import { siteUrl } from "@/lib/slack-member-sync/messages/common";
+import type { LessonIndex } from "./learned";
+import { loadLessonIndexFromSanity } from "./lesson-index-source";
 import { notifyMailOps } from "./ops-alert";
 import type { MailDeps } from "./process";
 import { createResendMailClient } from "./resend-client";
@@ -37,6 +39,17 @@ export function createMailDeps(store: SupabaseMailStore | null = getMailStore())
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.MEMBER_MAIL_FROM ?? "";
   const mail = apiKey && from ? createResendMailClient(apiKey, { sandboxTo: process.env.MEMBER_MAIL_SANDBOX_TO || null }) : null;
+  // 1回の実行の中では Sanity を1度だけ読む（失敗したら次の呼び出しで読み直す）
+  let lessonIndex: Promise<LessonIndex> | null = null;
+  const loadLessonIndex = () => {
+    if (!lessonIndex) {
+      lessonIndex = loadLessonIndexFromSanity().catch((error) => {
+        lessonIndex = null;
+        throw error;
+      });
+    }
+    return lessonIndex;
+  };
   return {
     store,
     mail,
@@ -47,5 +60,6 @@ export function createMailDeps(store: SupabaseMailStore | null = getMailStore())
     from,
     replyTo: process.env.MEMBER_MAIL_REPLY_TO || null,
     unsubscribeSecret,
+    loadLessonIndex,
   };
 }

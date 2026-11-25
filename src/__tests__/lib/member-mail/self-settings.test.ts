@@ -3,7 +3,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("server-only", () => ({}));
 import { MAIL_CATEGORIES } from "@/lib/member-mail/types";
-import { createUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
+import { createLegacyUnsubscribeTokenV1 } from "@/lib/member-mail/unsubscribe-token";
 import { MemStore, SECRET, uid } from "./helpers";
 
 const store = new MemStore();
@@ -102,7 +102,7 @@ describe("配信停止画面の「受け取りを再開する」（restartMember
   it("トークンだけで全カテゴリを戻し、返すのは止めているかどうかだけ", async () => {
     const { restartMemberMail } = await import("@/app/mail/unsubscribe/actions");
     await store.unsubscribe(uid(1), ALL, "link");
-    const t = createUnsubscribeToken(SECRET, uid(1), "comeback");
+    const t = createLegacyUnsubscribeTokenV1(SECRET, uid(1), "comeback");
     expect(await restartMemberMail(null, form(t))).toEqual({ status: "updated", stopped: false });
     expect(await store.listStoppedCategories(uid(1))).toEqual([]);
   });
@@ -110,7 +110,7 @@ describe("配信停止画面の「受け取りを再開する」（restartMember
   it("偽のトークンでは何も戻さない", async () => {
     const { restartMemberMail } = await import("@/app/mail/unsubscribe/actions");
     await store.unsubscribe(uid(1), ALL, "link");
-    const t = createUnsubscribeToken(`${SECRET}-other`, uid(1), "notice");
+    const t = createLegacyUnsubscribeTokenV1(`${SECRET}-other`, uid(1), "notice");
     expect(await restartMemberMail(null, form(t))).toEqual({ status: "invalid" });
     expect(await store.listStoppedCategories(uid(1))).toEqual(ALL);
   });
@@ -128,14 +128,14 @@ describe("配信停止画面の「受け取りを再開する」（restartMember
   it("一部だけ止まっている人も「受け取りをやめる」で全カテゴリを止められる", async () => {
     const { stopMemberMail } = await import("@/app/mail/unsubscribe/actions");
     await store.unsubscribe(uid(1), ["comeback"], "one_click");
-    const t = createUnsubscribeToken(SECRET, uid(1), "notice");
+    const t = createLegacyUnsubscribeTokenV1(SECRET, uid(1), "notice");
     expect(await stopMemberMail(null, form(t))).toEqual({ status: "stopped", stopped: true });
     expect(await store.listStoppedCategories(uid(1))).toEqual(ALL);
   });
 
   it("「受け取りをやめる」は全カテゴリを止め、止めているかどうかだけ返す", async () => {
     const { stopMemberMail } = await import("@/app/mail/unsubscribe/actions");
-    const t = createUnsubscribeToken(SECRET, uid(1), "notice");
+    const t = createLegacyUnsubscribeTokenV1(SECRET, uid(1), "notice");
     expect(await stopMemberMail(null, form(t))).toEqual({ status: "stopped", stopped: true });
     expect(await store.listStoppedCategories(uid(1))).toEqual(ALL);
   });

@@ -15,6 +15,7 @@ import type {
   MemberCandidate,
   NewDelivery,
   OutgoingMail,
+  ProgressEvent,
   SendResult,
   UnsubscribeMethod,
   UnsubscribeStore,
@@ -22,6 +23,7 @@ import type {
   WebhookStore,
 } from "@/lib/member-mail/types";
 import type { MailDeps } from "@/lib/member-mail/process";
+import { buildLessonIndex, type LessonIndex } from "@/lib/member-mail/learned";
 
 export const SECRET = "test-secret-0123456789abcdef0123456789";
 export const SITE = "https://www.bo-no.design";
@@ -56,6 +58,12 @@ export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
   webhookIds = new Set<string>();
   autoStopped: string | null = null;
   lockedUntil: Date | null = null;
+  /** 活動ログ（「学んだ」の判定用） */
+  progress: ProgressEvent[] = [];
+  /** member_mail_settings.test_email_prefixes（テストでは架空の頭だけを使う） */
+  testEmailPrefixes: string[] = [];
+  /** public.subscriptions（live）の行: 契約ID と start_timestamp。同じ契約に複数行あってもよい */
+  contracts: { subscriptionId: string; start: Date }[] = [];
   private seq = 0;
 
   async getSettings() {
@@ -82,14 +90,59 @@ export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
   }
   async listDueCampaigns(now: Date) {
     return [...this.campaigns.values()].filter(
-      (c) => c.scheduledAt && c.scheduledAt <= now && now.getTime() - c.scheduledAt.getTime() <= 7 * 86400000 && !c.enqueuedAt,
+      (c) =>
+        !c.standingKey &&
+        c.scheduledAt &&
+        c.scheduledAt <= now &&
+        now.getTime() - c.scheduledAt.getTime() <= 7 * 86400000 &&
+        !c.enqueuedAt,
     );
+  }
+  async listStandingCampaigns(now: Date) {
+    return [...this.campaigns.values()].filter((c) => c.standingKey && c.scheduledAt && c.scheduledAt <= now);
+  }
+  async getPaidMember(userId: string) {
+    return this.members.find((m) => m.userId === userId) ?? null;
+  }
+  private contractStart(id: string): Date | null {
+    const starts = this.contracts.filter((c) => c.subscriptionId === id).map((c) => c.start.getTime());
+    return starts.length > 0 ? new Date(Math.min(...starts)) : null;
+  }
+  async listContractStartsSince(since: Date) {
+    const out = new Map<string, Date>();
+    for (const c of this.contracts) {
+      const first = this.contractStart(c.subscriptionId)!;
+      if (first >= since) out.set(c.subscriptionId, first);
+    }
+    return out;
+  }
+  async getContractStart(id: string) {
+    return this.contractStart(id);
+  }
+  async countStandingMailsSince(since: Date, userIds: readonly string[]) {
+    const out = new Map<string, number>();
+    for (const d of this.deliveries) {
+      if (!userIds.includes(d.userId)) continue;
+      if (!this.campaigns.get(d.campaignId)?.standingKey) continue;
+      if (d.audience !== "all" || !["sending", "sent", "needs_review"].includes(d.status)) continue;
+      if (!d.sendingAt || d.sendingAt < since) continue;
+      out.set(d.userId, (out.get(d.userId) ?? 0) + 1);
+    }
+    return out;
+  }
+  async listProgressEvents(userIds: readonly string[], since: Date) {
+    return this.progress.filter((e) => userIds.includes(e.userId) && e.occurredAt >= since && e.articleId !== null);
+  }
+  async getTestEmailPrefixes() {
+    return [...this.testEmailPrefixes];
   }
   async markEnqueued(id: string, at: Date) {
     this.campaigns.get(id)!.enqueuedAt = at;
   }
-  async saveCount(id: string, count: CountSummary) {
+  async saveCount(id: string, count: CountSummary, at?: Date) {
     this.counts.set(id, count);
+    const c = this.campaigns.get(id);
+    if (c && at) c.lastCountedAt = at;
   }
   async listPaidMembers() {
     return [...this.members];
@@ -171,8 +224,9 @@ export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
     }
     return n;
   }
-  async listDueDeliveryIds(now: Date, limit: number) {
+  async listDueDeliveryIds(now: Date, limit: number, campaignIds?: readonly string[]) {
     return this.deliveries
+      .filter((d) => !campaignIds || campaignIds.includes(d.campaignId))
       .filter(
         (d) =>
           (d.status === "queued" && d.nextAttemptAt <= now) ||
@@ -278,6 +332,7 @@ export function approvedCampaign(over: Partial<Campaign> = {}): Campaign {
     approvedVersion: 1,
     scheduledAt: new Date(0),
     enqueuedAt: null,
+    standingKey: null,
     ...over,
   };
 }
@@ -289,11 +344,29 @@ export function member(n: number, over: Partial<MemberCandidate> = {}): MemberCa
     duration: 1,
     cancelAtPeriodEnd: false,
     createdAt: new Date("2026-01-01T00:00:00Z"),
+    stripeSubscriptionId: `sub_test_${n}`,
     ...over,
   };
 }
 
-export function makeDeps(store: MemStore, mail: FakeMail | null, alerts: unknown[] = []): MailDeps {
+/** テスト用のレッスン（学習用1つ＋はじめかた）。ID は架空 */
+export const LEARNING_LESSON = "lesson-learning-1";
+export const LEARNING_ARTICLE = "article-learning-1";
+export const ONBOARDING_LESSON = "mf6C7BORqP3p9w1l7txBZ6"; // 本物の「はじめかた」の _id（学習用でない扱いを確かめるため）
+export const ONBOARDING_ARTICLE = "article-onboarding-1";
+export function testLessonIndex(): LessonIndex {
+  return buildLessonIndex([
+    { lessonId: LEARNING_LESSON, articleIds: [LEARNING_ARTICLE] },
+    { lessonId: ONBOARDING_LESSON, articleIds: [ONBOARDING_ARTICLE] },
+  ]);
+}
+
+export function makeDeps(
+  store: MemStore,
+  mail: FakeMail | null,
+  alerts: unknown[] = [],
+  over: Partial<MailDeps> = {},
+): MailDeps {
   let t = 0;
   return {
     store,
@@ -307,5 +380,7 @@ export function makeDeps(store: MemStore, mail: FakeMail | null, alerts: unknown
     from: "カイくん <test@mail.example.invalid>",
     replyTo: "owner@example.invalid",
     unsubscribeSecret: SECRET,
+    loadLessonIndex: async () => testLessonIndex(),
+    ...over,
   };
 }

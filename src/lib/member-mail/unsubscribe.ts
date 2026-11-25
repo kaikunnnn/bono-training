@@ -12,9 +12,12 @@ import {
 } from "./types";
 import { verifyUnsubscribeToken } from "./unsubscribe-token";
 
-/** 止めるカテゴリ（UNSUBSCRIBE_SCOPE が all ならお知らせ系の全カテゴリ） */
-export function categoriesToStop(category: MailCategory): readonly MailCategory[] {
-  return UNSUBSCRIBE_SCOPE === "all" ? MAIL_CATEGORIES : [category];
+/**
+ * 止めるカテゴリ（UNSUBSCRIBE_SCOPE が all ならお知らせ系の全カテゴリ）。
+ * 新しいトークン（v2）はカテゴリを持たないので、カテゴリが無いときも全カテゴリを止める。
+ */
+export function categoriesToStop(category: MailCategory | null): readonly MailCategory[] {
+  return UNSUBSCRIBE_SCOPE === "all" || category === null ? MAIL_CATEGORIES : [category];
 }
 
 export type UnsubscribeOutcome = "stopped" | "invalid_token";
@@ -29,6 +32,6 @@ export async function unsubscribeByToken(
   const verified = verifyUnsubscribeToken(secret, token);
   if (!verified) return "invalid_token";
   await store.unsubscribe(verified.userId, categoriesToStop(verified.category), method, now);
-  console.log("[member-mail] unsubscribed", { method, category: verified.category });
+  console.log("[member-mail] unsubscribed", { method, category: verified.category ?? "all" });
   return "stopped";
 }

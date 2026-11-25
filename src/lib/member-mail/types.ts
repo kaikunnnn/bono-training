@@ -23,14 +23,47 @@ export const CATEGORY_OF_KIND: Record<MailKind, MailCategory> = {
   winback: "winback",
 };
 
-/** リンクに付ける印（264 §5-10 `?from=email_xxx`） */
+/**
+ * リンクに付ける印（264 §5-10 `?from=email_xxx`）。
+ *
+ * 会員の様子を見て送り分けていることは、会員に見える URL に出さない（オーナー決定・327-D）。
+ * そのため週1回のメルマガ以外は、中身を推測しにくい中立な名前にする（意味はこの表でだけ分かる）。
+ * - 記録側（parseEmailFrom・活動ログの email_click）は `email_` + 英小文字1〜30字しか通さない。数字・記号は使えない
+ * - 一度メールに載せた印は変えない（古いメールのリンクの記録が分からなくなるため）。新しく足すときは未使用の名前にする
+ *
+ * 対応表（分析で読み替えるときの正）:
+ *   email_weekly … 週1回のメルマガ（weekly）
+ *   email_px     … comeback（しばらく来ていない人へ）
+ *   email_pw     … renewal（3ヶ月プランの相談案内）
+ *   email_pv     … signup（常設の文面ではない signup の回）
+ *   email_pu     … winback（以前の会員へ）
+ *   email_pt     … はじめの案内（常設の文面 onboarding_day2・327-D）
+ * 以前の名前（email_comeback / email_renewal / email_signup / email_winback）は、この変更より前に送ったメールにだけ残る。
+ */
 export const FROM_OF_KIND: Record<MailKind, string> = {
   weekly: "email_weekly",
-  comeback: "email_comeback",
-  renewal: "email_renewal",
-  signup: "email_signup",
-  winback: "email_winback",
+  comeback: "email_px",
+  renewal: "email_pw",
+  signup: "email_pv",
+  winback: "email_pu",
 };
+
+/**
+ * 常設の文面（327-D〜）。毎日、条件に合った人だけを送信の記録に足す。
+ * member_mail_campaigns.standing_key に入れる値。1つの key に文面は1つだけ（DB の一意インデックス）。
+ * 327-E（リマインダー）・327-F（相談の案内）はここに1つずつ足す。
+ */
+export const STANDING_KEYS = ["onboarding_day2"] as const;
+export type StandingKey = (typeof STANDING_KEYS)[number];
+
+/** 常設の文面のリンクの印（FROM_OF_KIND より優先。D・E・F で押した記録を分けるため） */
+export const FROM_OF_STANDING: Record<StandingKey, string> = {
+  onboarding_day2: "email_pt",
+};
+
+export function isStandingKey(value: unknown): value is StandingKey {
+  return typeof value === "string" && (STANDING_KEYS as readonly string[]).includes(value);
+}
 
 /**
  * 会員の「週1通まで」に数えるカテゴリ（264 §5-9: お知らせ系 ①②と相談案内を合わせて週1通）
@@ -74,8 +107,16 @@ export interface Campaign {
   body: string;
   contentVersion: number;
   approvedVersion: number | null;
+  /**
+   * 1回分の文面（weekly など）: 送り始めてよい時刻。
+   * 常設の文面: 仕組みを有効にした時刻。この時刻より後に入会した人だけが対象（過去の入会者にさかのぼらない）。NULL なら何もしない
+   */
   scheduledAt: Date | null;
   enqueuedAt: Date | null;
+  /** 常設の文面の種類（327-D）。null / 未設定なら1回分の文面 */
+  standingKey?: StandingKey | null;
+  /** 人数だけ出した最後の時刻（常設の文面で、1日に何度も数えて Slack に出さないため） */
+  lastCountedAt?: Date | null;
 }
 
 /** 対象を選ぶときの候補（課金の状態の表から。名前・アドレスは持たない） */
@@ -84,8 +125,28 @@ export interface MemberCandidate {
   planType: string | null;
   duration: number | null;
   cancelAtPeriodEnd: boolean;
-  /** user_subscriptions.created_at（在籍月数の目安） */
+  /**
+   * user_subscriptions.created_at（在籍月数の目安だけに使う）。
+   * ★入会日には使わない。アカウントを作った時点でトリガー（on_auth_user_created_subscription）が行を作るため、
+   *   課金よりずっと前の日付になることがある（327-D レビュー。本番で 10月以降の新規24人中11人が30日以上前）
+   */
   createdAt: Date | null;
+  /** 今の Stripe 契約の ID（user_subscriptions.stripe_subscription_id）。常設の文面の入会日を引くのに使う */
+  stripeSubscriptionId?: string | null;
+}
+
+/**
+ * 「学んだ」を判定するための活動ログ1行（member_activity_events）。
+ * rebono/99_analytics/health_check の engagement.py（#262・#274）と同じ列を読む。
+ */
+export interface ProgressEvent {
+  userId: string;
+  eventType: string;
+  articleId: string | null;
+  lessonId: string | null;
+  occurredAt: Date;
+  /** meta->>'percent'（文字のまま。数値に読めない値は「学んだ」に入れない） */
+  percent: string | null;
 }
 
 export interface DeliveryRow {
@@ -162,9 +223,35 @@ export interface MailStore {
   /** since 以降に送った（送信中・要確認を含む）通数 */
   countSentSince(since: Date): Promise<number>;
 
+  // ----- 常設の文面（327-D） -----
+  /** standing_key があり、scheduled_at（有効にした時刻）<= now の文面 */
+  listStandingCampaigns(now: Date): Promise<Campaign[]>;
+  /** 課金中の会員1人（送る直前の確認用）。いなければ null */
+  getPaidMember(userId: string): Promise<MemberCandidate | null>;
+  /**
+   * 常設の文面の「入会日」= 今の Stripe 契約の最初の課金日。
+   * public.subscriptions（environment='live'）の、その stripe_subscription_id の min(start_timestamp)。
+   * start_timestamp は stripe-webhook が契約を初めて記録したとき（checkout.session.completed / subscription.created）の
+   * current_period_start で、更新・プラン変更（同じ契約ID）では書き換わらない。行が無い（決済が終わっていない）契約は入らない。
+   * since 以降に始まった契約だけを、契約ID → 最初の課金日 で返す（min は since より前の行も含めて取る）
+   */
+  listContractStartsSince(since: Date): Promise<Map<string, Date>>;
+  /** 契約1つの最初の課金日（送る直前の確認用）。行が無ければ null */
+  getContractStart(stripeSubscriptionId: string): Promise<Date | null>;
+  /**
+   * since 以降に、常設の文面（standing_key あり）を本番で送った（送信中・要確認を含む）通数を人ごとに。
+   * 14日で最大3通の上限に使う
+   */
+  countStandingMailsSince(since: Date, userIds: readonly string[]): Promise<Map<string, number>>;
+  /** 「学んだ」の判定に使う活動ログ（userIds の、since 以降の進めた系の行だけ） */
+  listProgressEvents(userIds: readonly string[], since: Date): Promise<ProgressEvent[]>;
+  /** テスト用アカウントとして外すメールアドレスの頭（member_mail_settings.test_email_prefixes） */
+  getTestEmailPrefixes(): Promise<string[]>;
+
   /** 一意制約つき INSERT（既にあれば何もしない）。新しく入った件数を返す */
   insertDeliveries(rows: NewDelivery[]): Promise<number>;
-  listDueDeliveryIds(now: Date, limit: number): Promise<string[]>;
+  /** campaignIds を渡すと、その文面の行だけ（毎日の実行で常設の文面だけ送るため） */
+  listDueDeliveryIds(now: Date, limit: number, campaignIds?: readonly string[]): Promise<string[]>;
   /** 条件付き UPDATE ... RETURNING で1行を確保する。確保できなければ null */
   claim(id: string, now: Date, lockedUntil: Date, token: string): Promise<DeliveryRow | null>;
   /** claim_token と status が一致するときだけ更新する */

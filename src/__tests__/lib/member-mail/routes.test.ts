@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("server-only", () => ({}));
 import { Webhook } from "standardwebhooks";
 import { NextRequest } from "next/server";
-import { createUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
+import { createLegacyUnsubscribeTokenV1 } from "@/lib/member-mail/unsubscribe-token";
 import { handleResendEvent, sanitizeLinkPath } from "@/lib/member-mail/webhook";
 import { verifyResendWebhook } from "@/lib/member-mail/webhook-verify";
 import { MemStore, SECRET, uid } from "./helpers";
@@ -37,7 +37,7 @@ beforeEach(() => {
 describe("POST /api/mail/unsubscribe（ワンクリック）", () => {
   it("ログインなしの POST ですぐ止まる（お知らせ系の全カテゴリ）", async () => {
     const { POST } = await import("@/app/api/mail/unsubscribe/route");
-    const t = createUnsubscribeToken(SECRET, uid(1), "notice");
+    const t = createLegacyUnsubscribeTokenV1(SECRET, uid(1), "notice");
     const req = new NextRequest(`https://www.bo-no.design/api/mail/unsubscribe?t=${encodeURIComponent(t)}`, {
       method: "POST",
       headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -51,7 +51,7 @@ describe("POST /api/mail/unsubscribe（ワンクリック）", () => {
 
   it("偽のトークンは 400 で何も止めない", async () => {
     const { POST } = await import("@/app/api/mail/unsubscribe/route");
-    const t = createUnsubscribeToken(`${SECRET}-other`, uid(1), "notice");
+    const t = createLegacyUnsubscribeTokenV1(`${SECRET}-other`, uid(1), "notice");
     const res = await POST(
       new NextRequest(`https://www.bo-no.design/api/mail/unsubscribe?t=${encodeURIComponent(t)}`, { method: "POST" }),
     );
