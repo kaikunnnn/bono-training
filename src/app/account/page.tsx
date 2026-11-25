@@ -1,6 +1,7 @@
 // src/app/account/page.tsx — mainのスタイルに準拠
 import { Metadata } from "next";
 import Link from "next/link";
+import { withEmailFrom } from "@/lib/top-redirect";
 import { redirect } from "next/navigation";
 import { UserRound, Bell } from "lucide-react";
 import { getCurrentUser, getSubscriptionStatus } from "@/lib/subscription";
@@ -22,11 +23,16 @@ export const metadata: Metadata = {
   description: "アカウント情報とサブスクリプション管理",
 };
 
-export default async function AccountPage() {
-  const user = await getCurrentUser();
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string | string[] }>;
+}) {
+  const [user, { from }] = await Promise.all([getCurrentUser(), searchParams]);
 
   if (!user) {
-    redirect("/login?reauth=1&redirectTo=/account");
+    // メールの印は戻り先に付けて、ログイン後に email_click を残す
+    redirect(`/login?reauth=1&redirectTo=${encodeURIComponent(withEmailFrom("/account", from))}`);
   }
 
   // Slack の判定は off / dry_run なら設定の1回で終わる。課金状況の取得と並べて待つ

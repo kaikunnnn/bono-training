@@ -4,7 +4,7 @@ import {
   GUIDE_REDIRECT_MAP,
 } from "@/lib/migration/legacy-only-content-slugs";
 import { isGoneLegacyPath } from "@/lib/migration/gone-legacy-paths";
-import { buildMypageSearch } from "@/lib/top-redirect";
+import { buildMypageSearch, withEmailFrom } from "@/lib/top-redirect";
 
 /**
  * 軽量化された proxy（Next.js 16 で middleware.ts から改名。役割は同じ）
@@ -198,7 +198,11 @@ export function proxy(request: NextRequest) {
   if (!hasAuth && isProtectedRoute) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    url.searchParams.set("redirectTo", pathname);
+    // メールの印（?from=email_xxx）は戻り先に付け、ログイン後の着地で email_click を残す
+    url.searchParams.set(
+      "redirectTo",
+      withEmailFrom(pathname, request.nextUrl.searchParams.get("from"))
+    );
     return NextResponse.redirect(url);
   }
 

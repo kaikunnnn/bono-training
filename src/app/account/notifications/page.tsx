@@ -1,6 +1,7 @@
 // src/app/account/notifications/page.tsx — 通知種別ごとのオン/オフ設定ページ
 import { Metadata } from "next";
 import { redirect } from "next/navigation";
+import { withEmailFrom } from "@/lib/top-redirect";
 import { getCurrentUser } from "@/lib/subscription";
 import { getNotificationPreferences } from "@/lib/services/notification-preferences";
 import {
@@ -17,11 +18,18 @@ export const metadata: Metadata = {
   description: "コメントやリアクションの通知を種類ごとにオン/オフできます",
 };
 
-export default async function NotificationSettingsPage() {
-  const user = await getCurrentUser();
+export default async function NotificationSettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ from?: string | string[] }>;
+}) {
+  const [user, { from }] = await Promise.all([getCurrentUser(), searchParams]);
 
   if (!user) {
-    redirect("/login?reauth=1&redirectTo=/account/notifications");
+    // メールの印は戻り先に付けて、ログイン後に email_click を残す（メールから設定画面へ来る想定・#327-C）
+    redirect(
+      `/login?reauth=1&redirectTo=${encodeURIComponent(withEmailFrom("/account/notifications", from))}`
+    );
   }
 
   const preferences = await getNotificationPreferences();

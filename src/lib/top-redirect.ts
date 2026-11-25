@@ -20,3 +20,15 @@ export function buildMypageSearch(params: {
   const s = out.toString();
   return s ? `?${s}` : "";
 }
+
+/**
+ * ログイン画面へ回すときの戻り先（redirectTo）に、メールの印だけを付け足す。
+ * ログインが切れていた会員・未ログインの人がメールのリンクを押した場合でも、
+ * ログイン後の着地ページで email_click が記録されるようにする（#327-B レビュー指摘）。
+ * 印以外のクエリは付けない（戻り先の挙動を変えないため）。
+ */
+export function withEmailFrom(path: string, from: string | string[] | null | undefined): string {
+  const valid = parseEmailFrom(typeof from === "string" ? from : null);
+  if (!valid) return path;
+  return `${path}${path.includes("?") ? "&" : "?"}from=${valid}`;
+}
