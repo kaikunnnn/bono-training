@@ -14,6 +14,11 @@ describe("sanitizeRedirect（戻り先は内部パスだけ）", () => {
     expect(sanitizeRedirect("/guide/x#section")).toBe("/guide/x#section");
     expect(sanitizeRedirect("/events/design-hours-1")).toBe("/events/design-hours-1");
   });
+  it("日本語や空白は URL の形（%エンコード）にして返す（開く先は同じ）", () => {
+    expect(sanitizeRedirect("/search?q=UI デザイン")).toBe(
+      "/search?q=UI%20%E3%83%87%E3%82%B6%E3%82%A4%E3%83%B3"
+    );
+  });
   it("空なら /", () => {
     expect(sanitizeRedirect(null)).toBe("/");
     expect(sanitizeRedirect("")).toBe("/");
