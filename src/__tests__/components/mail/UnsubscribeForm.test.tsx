@@ -30,7 +30,7 @@ describe("配信停止の画面（UnsubscribeForm）", () => {
     for (const label of HIDDEN_LABELS) expect(container.textContent).not.toContain(label);
   });
 
-  it("まだ止めていないときは「受け取りをやめる」だけ", () => {
+  it("まだ止めていない・一部だけ止まっているとき（initiallyStopped=false）は「受け取りをやめる」だけ", () => {
     const { container } = render(<UnsubscribeForm token="tok" initiallyStopped={false} />);
     expect(screen.getByRole("button", { name: "受け取りをやめる" })).toBeInTheDocument();
     expect(screen.queryByRole("listitem")).toBeNull();

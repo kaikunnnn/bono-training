@@ -7,7 +7,7 @@
  */
 import type { Metadata } from "next";
 import { getMailStore, getUnsubscribeSecret } from "@/lib/member-mail/runtime";
-import { isMemberMailEnabled } from "@/lib/member-mail/self-settings";
+import { isMemberMailFullyStopped } from "@/lib/member-mail/self-settings";
 import { verifyUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
 import { UnsubscribeForm, UnsubscribeMessage } from "./UnsubscribeForm";
 
@@ -54,7 +54,7 @@ export default async function MailUnsubscribePage({
 
   let stopped = false;
   try {
-    stopped = !(await isMemberMailEnabled(store, verified.userId));
+    stopped = await isMemberMailFullyStopped(store, verified.userId);
   } catch (error) {
     console.error("[member-mail] unsubscribe page read failed:", error instanceof Error ? error.message : "unknown");
     return (

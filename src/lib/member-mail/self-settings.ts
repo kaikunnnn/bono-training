@@ -26,6 +26,16 @@ export async function isMemberMailEnabled(store: UnsubscribeStore, userId: strin
   return stopped.length === 0;
 }
 
+/**
+ * 全カテゴリが止まっているか（配信停止の画面用）。
+ * 1つでも受け取っているカテゴリがあれば false。画面は「受け取りをやめる」を出し、全部を止められるようにする
+ * （一部だけ止まっている人が、メール本文のリンクから止められなくならないように）。
+ */
+export async function isMemberMailFullyStopped(store: UnsubscribeStore, userId: string): Promise<boolean> {
+  const stopped = new Set(await store.listStoppedCategories(userId));
+  return MAIL_CATEGORIES.every((c) => stopped.has(c));
+}
+
 /** 全カテゴリを戻す */
 export async function resubscribeAllMemberMail(store: UnsubscribeStore, userId: string, at: Date): Promise<void> {
   for (const category of MAIL_CATEGORIES) {

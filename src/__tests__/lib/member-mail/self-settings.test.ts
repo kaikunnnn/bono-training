@@ -45,17 +45,29 @@ describe("通知設定のメールのオン・オフ（updateMemberMailSetting�
     expect(await store.listStoppedCategories(uid(1))).toEqual([]);
   });
 
-  it("ログイン中の本人しか書き換えない（他人の id を渡しても無視する）", async () => {
+  it("書き込みはすべて getCurrentUser の本人の id で行い、他人の記録は変わらない", async () => {
     const { updateMemberMailSetting } = await import("@/app/account/notifications/mail-actions");
     await store.unsubscribe(uid(2), ALL, "one_click");
-    // 引数に他人の id を足しても、使うのはログイン中の本人（uid(1)）
-    const call = updateMemberMailSetting as unknown as (enabled: boolean, other: unknown) => Promise<unknown>;
-    await call(true, { userId: uid(2) });
-    expect(await store.listStoppedCategories(uid(2))).toEqual(ALL);
+    const unsub = vi.spyOn(store, "unsubscribe");
+    const resub = vi.spyOn(store, "resubscribe");
+    try {
+      currentUser = { id: uid(1) };
+      await updateMemberMailSetting(false);
+      await updateMemberMailSetting(true);
+      expect(unsub).toHaveBeenCalled();
+      expect(resub).toHaveBeenCalled();
+      for (const [userId] of [...unsub.mock.calls, ...resub.mock.calls]) expect(userId).toBe(uid(1));
 
-    await call(false, uid(3));
-    expect(await store.listStoppedCategories(uid(3))).toEqual([]);
-    expect(await store.listStoppedCategories(uid(1))).toEqual(ALL);
+      // ログイン中の人が変われば、書き込む先もその人に変わる（引数では決まらない）
+      unsub.mockClear();
+      currentUser = { id: uid(3) };
+      await updateMemberMailSetting(false);
+      expect(unsub.mock.calls.map(([userId]) => userId)).toEqual([uid(3)]);
+    } finally {
+      unsub.mockRestore();
+      resub.mockRestore();
+    }
+    expect(await store.listStoppedCategories(uid(2))).toEqual(ALL);
   });
 
   it("ログインしていなければ何も書き換えない", async () => {
@@ -100,6 +112,24 @@ describe("配信停止画面の「受け取りを再開する」（restartMember
     await store.unsubscribe(uid(1), ALL, "link");
     const t = createUnsubscribeToken(`${SECRET}-other`, uid(1), "notice");
     expect(await restartMemberMail(null, form(t))).toEqual({ status: "invalid" });
+    expect(await store.listStoppedCategories(uid(1))).toEqual(ALL);
+  });
+
+  it("一部だけ止まっている人は「止めている」扱いにしない（全部止めると止めている）", async () => {
+    const { isMemberMailFullyStopped, isMemberMailEnabled } = await import("@/lib/member-mail/self-settings");
+    await store.unsubscribe(uid(1), ["comeback"], "link");
+    expect(await isMemberMailFullyStopped(store, uid(1))).toBe(false);
+    // 設定画面のスイッチは、1つでも止まっていればオフのまま
+    expect(await isMemberMailEnabled(store, uid(1))).toBe(false);
+    await store.unsubscribe(uid(1), ALL, "link");
+    expect(await isMemberMailFullyStopped(store, uid(1))).toBe(true);
+  });
+
+  it("一部だけ止まっている人も「受け取りをやめる」で全カテゴリを止められる", async () => {
+    const { stopMemberMail } = await import("@/app/mail/unsubscribe/actions");
+    await store.unsubscribe(uid(1), ["comeback"], "one_click");
+    const t = createUnsubscribeToken(SECRET, uid(1), "notice");
+    expect(await stopMemberMail(null, form(t))).toEqual({ status: "stopped", stopped: true });
     expect(await store.listStoppedCategories(uid(1))).toEqual(ALL);
   });
 

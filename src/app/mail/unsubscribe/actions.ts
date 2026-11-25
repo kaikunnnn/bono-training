@@ -11,11 +11,12 @@
 // ---------------------------------------------------------------------------
 
 import { getMailStore, getUnsubscribeSecret } from "@/lib/member-mail/runtime";
-import { isMemberMailEnabled, resubscribeAllMemberMail } from "@/lib/member-mail/self-settings";
+import { isMemberMailFullyStopped, resubscribeAllMemberMail } from "@/lib/member-mail/self-settings";
 import { unsubscribeByToken } from "@/lib/member-mail/unsubscribe";
 import { verifyUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
 
 export type UnsubscribeActionState =
+  /** stopped: 全カテゴリが止まっているか（1つでも受け取っていれば false） */
   | { status: "stopped" | "updated"; stopped: boolean }
   | { status: "invalid" | "unavailable" }
   | null;
@@ -30,7 +31,7 @@ export async function stopMemberMail(_prev: UnsubscribeActionState, formData: Fo
     const outcome = await unsubscribeByToken(store, secret, token, "link", new Date());
     if (outcome === "invalid_token") return { status: "invalid" };
     const verified = verifyUnsubscribeToken(secret, token)!;
-    return { status: "stopped", stopped: !(await isMemberMailEnabled(store, verified.userId)) };
+    return { status: "stopped", stopped: await isMemberMailFullyStopped(store, verified.userId) };
   } catch (error) {
     console.error("[member-mail] unsubscribe failed:", error instanceof Error ? error.message : "unknown");
     return { status: "unavailable" };
@@ -47,7 +48,7 @@ export async function restartMemberMail(_prev: UnsubscribeActionState, formData:
   try {
     await resubscribeAllMemberMail(store, verified.userId, new Date());
     console.log("[member-mail] resubscribed", { scope: "all" });
-    return { status: "updated", stopped: !(await isMemberMailEnabled(store, verified.userId)) };
+    return { status: "updated", stopped: await isMemberMailFullyStopped(store, verified.userId) };
   } catch (error) {
     console.error("[member-mail] resubscribe failed:", error instanceof Error ? error.message : "unknown");
     return { status: "unavailable" };

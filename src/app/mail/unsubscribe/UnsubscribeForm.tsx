@@ -5,11 +5,13 @@
  * 開いただけでは止めない。「受け取りをやめる」を押したときだけ止める（リンクを自動で開くセキュリティソフト対策）。
  * 止めたあとは「受け取りを再開する」で戻せる。
  * 会員に見せるのは「BONOからのお知らせメール」1項目だけ。内部のカテゴリは見せない（#327-C）。
+ * 「止めています」は全カテゴリが止まっているときだけ。1つでも受け取っていれば「受け取りをやめる」を出す。
  */
 import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { restartMemberMail, stopMemberMail, type UnsubscribeActionState } from "./actions";
 
+/** initiallyStopped: 全カテゴリが止まっているか（一部だけ止まっているときは false） */
 export function UnsubscribeForm({ token, initiallyStopped }: { token: string; initiallyStopped: boolean }) {
   const [stopState, stopAction, stopping] = useActionState<UnsubscribeActionState, FormData>(stopMemberMail, null);
   const [restartState, restartAction, restarting] = useActionState<UnsubscribeActionState, FormData>(
