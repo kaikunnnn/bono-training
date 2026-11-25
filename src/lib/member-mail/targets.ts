@@ -146,17 +146,26 @@ export const STANDING_TARGETS: Record<StandingKey, StandingTargetDefinition> = {
   onboarding_day2: ONBOARDING_DAY2_TARGET,
 };
 
-/** 入会日（user_subscriptions.created_at）と有効にした時刻から、今日が送る日か */
+/**
+ * 入会日（今の Stripe 契約の最初の課金日）と有効にした時刻から、今日が送る日か。
+ * 入会日は store.listContractStartsSince / getContractStart の説明のとおり。
+ * アカウントの古さは見ない（新規＝Stripe の新規課金の全員。出戻りで新しく契約した人も入る＝オーナー決定）
+ */
 export function isStandingDue(
   def: StandingTargetDefinition,
-  createdAt: Date | null,
+  joinedAt: Date | null,
   activatedAt: Date | null,
   now: Date,
 ): boolean {
-  if (!createdAt || !activatedAt) return false;
-  if (createdAt.getTime() < activatedAt.getTime()) return false; // 有効にする前の入会者にはさかのぼらない
-  const days = jstDaysBetween(createdAt, now);
+  if (!joinedAt || !activatedAt) return false;
+  if (joinedAt.getTime() < activatedAt.getTime()) return false; // 有効にする前の入会者にはさかのぼらない
+  const days = jstDaysBetween(joinedAt, now);
   return days >= def.sendOnDay && days <= def.sendOnDay + def.catchUpDays;
+}
+
+/** 入会日を探す範囲（送る日＋取りこぼしの日＋1日のゆとり） */
+function joinLookbackStart(def: StandingTargetDefinition, now: Date): Date {
+  return new Date(jstDayStart(now).getTime() - (def.sendOnDay + def.catchUpDays + 1) * 24 * 60 * 60 * 1000);
 }
 
 /** メールアドレスがテスト用アカウントの頭で始まるか（大文字・小文字を区別しない） */
@@ -165,9 +174,9 @@ export function isTestAccountEmail(email: string, prefixes: readonly string[]): 
   return prefixes.some((p) => p.trim().length > 0 && lower.startsWith(p.trim().toLowerCase()));
 }
 
-/** 「学んだ」の数え始め: 入会日の日本時間0時（分析側の since＝課金日と同じ日単位） */
-export function learningSince(createdAt: Date): Date {
-  return jstDayStart(createdAt);
+/** 「学んだ」の数え始め: 入会日（最初の課金日）の日本時間0時（分析側の since＝課金日と同じ日単位） */
+export function learningSince(joinedAt: Date): Date {
+  return jstDayStart(joinedAt);
 }
 
 export interface StandingSelectionInput {
@@ -183,13 +192,22 @@ export interface StandingSelectionInput {
 export async function selectStandingTargets(input: StandingSelectionInput): Promise<TargetSelection> {
   const { store, def, campaign, lessonIndex, testEmailPrefixes, now } = input;
   const category = CATEGORY_OF_KIND[def.kind];
-  const members = await store.listPaidMembers();
-  const due = members.filter((m) => isStandingDue(def, m.createdAt, campaign.scheduledAt ?? null, now));
+  const [members, starts] = await Promise.all([
+    store.listPaidMembers(),
+    store.listContractStartsSince(joinLookbackStart(def, now)),
+  ]);
+  // 決済が終わっていない（subscriptions に行が無い）契約は starts に入らないので対象外
+  const joinedAt = new Map<string, Date>();
+  for (const m of members) {
+    const at = m.stripeSubscriptionId ? starts.get(m.stripeSubscriptionId) : undefined;
+    if (at && isStandingDue(def, at, campaign.scheduledAt ?? null, now)) joinedAt.set(m.userId, at);
+  }
+  const due = members.filter((m) => joinedAt.has(m.userId));
   const empty: TargetSelection = { included: [], excluded: {}, candidates: 0 };
   if (due.length === 0) return empty;
 
   const ids = due.map((m) => m.userId);
-  const sinceByUser = new Map(due.map((m) => [m.userId, learningSince(m.createdAt!)] as const));
+  const sinceByUser = new Map(due.map((m) => [m.userId, learningSince(joinedAt.get(m.userId)!)] as const));
   const earliest = new Date(Math.min(...[...sinceByUser.values()].map((d) => d.getTime())));
   const capSince = new Date(now.getTime() - STANDING_CAP_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const [unsubscribed, suppressed, events, capCounts] = await Promise.all([
@@ -236,8 +254,10 @@ export async function standingIneligibleReason(input: {
   const { store, def, campaign, userId, lessonIndex, now } = input;
   const member = await store.getPaidMember(userId);
   if (!member) return "not_eligible";
-  if (!isStandingDue(def, member.createdAt, campaign.scheduledAt ?? null, now)) return "not_due";
-  const since = learningSince(member.createdAt!);
+  const joinedAt = member.stripeSubscriptionId ? await store.getContractStart(member.stripeSubscriptionId) : null;
+  if (!joinedAt) return "not_eligible"; // 決済の記録が無い
+  if (!isStandingDue(def, joinedAt, campaign.scheduledAt ?? null, now)) return "not_due";
+  const since = learningSince(joinedAt);
   const events = await store.listProgressEvents([userId], since);
   if (learnedUserIds(events, lessonIndex, new Map([[userId, since]])).has(userId)) return "learned";
   const capSince = new Date(now.getTime() - STANDING_CAP_WINDOW_DAYS * 24 * 60 * 60 * 1000);

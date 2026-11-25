@@ -126,11 +126,13 @@ export interface MemberCandidate {
   duration: number | null;
   cancelAtPeriodEnd: boolean;
   /**
-   * user_subscriptions.created_at（在籍月数の目安・常設の文面の「入会日」）。
-   * 行は1人1行（user_id + environment で upsert）で、どの処理も created_at を書き換えない。
-   * そのためプラン変更・解約後の再入会でも最初に行ができた日のまま（再入会の人は「新しく入会した人」に入らない）
+   * user_subscriptions.created_at（在籍月数の目安だけに使う）。
+   * ★入会日には使わない。アカウントを作った時点でトリガー（on_auth_user_created_subscription）が行を作るため、
+   *   課金よりずっと前の日付になることがある（327-D レビュー。本番で 10月以降の新規24人中11人が30日以上前）
    */
   createdAt: Date | null;
+  /** 今の Stripe 契約の ID（user_subscriptions.stripe_subscription_id）。常設の文面の入会日を引くのに使う */
+  stripeSubscriptionId?: string | null;
 }
 
 /**
@@ -226,6 +228,16 @@ export interface MailStore {
   listStandingCampaigns(now: Date): Promise<Campaign[]>;
   /** 課金中の会員1人（送る直前の確認用）。いなければ null */
   getPaidMember(userId: string): Promise<MemberCandidate | null>;
+  /**
+   * 常設の文面の「入会日」= 今の Stripe 契約の最初の課金日。
+   * public.subscriptions（environment='live'）の、その stripe_subscription_id の min(start_timestamp)。
+   * start_timestamp は stripe-webhook が契約を初めて記録したとき（checkout.session.completed / subscription.created）の
+   * current_period_start で、更新・プラン変更（同じ契約ID）では書き換わらない。行が無い（決済が終わっていない）契約は入らない。
+   * since 以降に始まった契約だけを、契約ID → 最初の課金日 で返す（min は since より前の行も含めて取る）
+   */
+  listContractStartsSince(since: Date): Promise<Map<string, Date>>;
+  /** 契約1つの最初の課金日（送る直前の確認用）。行が無ければ null */
+  getContractStart(stripeSubscriptionId: string): Promise<Date | null>;
   /**
    * since 以降に、常設の文面（standing_key あり）を本番で送った（送信中・要確認を含む）通数を人ごとに。
    * 14日で最大3通の上限に使う

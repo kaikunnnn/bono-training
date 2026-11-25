@@ -20,12 +20,27 @@ const ARTICLE_LINKS_QUERY = `*[_type=="article" && !(_id in path("drafts.**")) &
   "lessonId": quest->lesson._ref
 }`;
 
-export async function loadLessonIndexFromSanity(): Promise<LessonIndex> {
+/** Sanity の読み込みの時間切れ。cron は60秒で切られるので、待ち続けて送る時間を食わないようにする */
+export const LESSON_INDEX_TIMEOUT_MS = 8_000;
+
+/** 時間内に終わらなければ例外にする（呼び出し側は「送らない」に倒す） */
+export function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => reject(new Error("lesson index timeout")), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+export async function loadLessonIndexFromSanity(timeoutMs: number = LESSON_INDEX_TIMEOUT_MS): Promise<LessonIndex> {
   const sanity = getSanityClient();
-  const [lessons, links] = await Promise.all([
-    sanity.fetch<LessonSource[] | null>(LESSONS_QUERY),
-    sanity.fetch<ArticleLessonLink[] | null>(ARTICLE_LINKS_QUERY),
-  ]);
+  const [lessons, links] = await withTimeout(
+    Promise.all([
+      sanity.fetch<LessonSource[] | null>(LESSONS_QUERY),
+      sanity.fetch<ArticleLessonLink[] | null>(ARTICLE_LINKS_QUERY),
+    ]),
+    timeoutMs,
+  );
   if (!Array.isArray(lessons) || lessons.length === 0) throw new Error("lesson index empty");
   const index = buildLessonIndex(
     lessons.map((l) => ({ lessonId: l.lessonId, articleIds: Array.isArray(l.articleIds) ? l.articleIds : [] })),

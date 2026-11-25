@@ -62,6 +62,8 @@ export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
   progress: ProgressEvent[] = [];
   /** member_mail_settings.test_email_prefixes（テストでは架空の頭だけを使う） */
   testEmailPrefixes: string[] = [];
+  /** public.subscriptions（live）の行: 契約ID と start_timestamp。同じ契約に複数行あってもよい */
+  contracts: { subscriptionId: string; start: Date }[] = [];
   private seq = 0;
 
   async getSettings() {
@@ -101,6 +103,21 @@ export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
   }
   async getPaidMember(userId: string) {
     return this.members.find((m) => m.userId === userId) ?? null;
+  }
+  private contractStart(id: string): Date | null {
+    const starts = this.contracts.filter((c) => c.subscriptionId === id).map((c) => c.start.getTime());
+    return starts.length > 0 ? new Date(Math.min(...starts)) : null;
+  }
+  async listContractStartsSince(since: Date) {
+    const out = new Map<string, Date>();
+    for (const c of this.contracts) {
+      const first = this.contractStart(c.subscriptionId)!;
+      if (first >= since) out.set(c.subscriptionId, first);
+    }
+    return out;
+  }
+  async getContractStart(id: string) {
+    return this.contractStart(id);
   }
   async countStandingMailsSince(since: Date, userIds: readonly string[]) {
     const out = new Map<string, number>();
@@ -327,6 +344,7 @@ export function member(n: number, over: Partial<MemberCandidate> = {}): MemberCa
     duration: 1,
     cancelAtPeriodEnd: false,
     createdAt: new Date("2026-01-01T00:00:00Z"),
+    stripeSubscriptionId: `sub_test_${n}`,
     ...over,
   };
 }

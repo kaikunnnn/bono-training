@@ -71,7 +71,10 @@ function standingCampaign(over: Partial<Campaign> = {}): Campaign {
   });
 }
 
-/** 入会日時（JST）ごとに会員を入れる */
+/**
+ * 最初の課金日時（JST）ごとに会員を入れる。
+ * アカウント（user_subscriptions.created_at）は本番のトリガーと同じく、課金よりずっと前に作られた形にする
+ */
 function seedStanding(joins: Record<number, string>) {
   const store = new MemStore();
   store.kindModes.signup = "all";
@@ -80,7 +83,8 @@ function seedStanding(joins: Record<number, string>) {
   store.campaigns.set(campaign.id, campaign);
   for (const [n, at] of Object.entries(joins)) {
     const i = Number(n);
-    store.members.push(member(i, { createdAt: jst(at) }));
+    store.members.push(member(i, { createdAt: new Date("2025-06-01T00:00:00Z") }));
+    store.contracts.push({ subscriptionId: `sub_test_${i}`, start: jst(at) });
     store.emails.set(uid(i), `member${i}@example.invalid`);
   }
   return { store, campaign };
@@ -176,6 +180,68 @@ describe("送る日: 入会の2日後の朝にだけ1通", () => {
     const { results } = await morningRun(store, mail, jst("2026-11-25T06:00:00"));
     expect(results[0]).toEqual({ outcome: "outside_window" });
     expect(store.deliveries).toHaveLength(0);
+  });
+});
+
+describe("入会日 = 今の Stripe 契約の最初の課金日（アカウントの古さで分けない）", () => {
+  it("ずっと前にアカウントを作り、あとから課金した人にも届く（課金日から数える）", async () => {
+    const { store } = seedStanding({ 1: "2026-11-23T10:00:00" });
+    store.members[0].createdAt = new Date("2024-03-01T00:00:00Z");
+    const mail = new FakeMail();
+    await morningRun(store, mail, jstMorning("2026-11-25"));
+    expect(mail.sent.map((m) => m.to)).toEqual(["member1@example.invalid"]);
+  });
+
+  it("登録の数日後に課金した人は、登録日ではなく課金日の2日後に届く", async () => {
+    const { store } = seedStanding({ 1: "2026-11-23T10:00:00" });
+    store.members[0].createdAt = jst("2026-11-20T13:00:00"); // 有効にした後に登録 → 2日後の 11/22 には届かない
+    const mail = new FakeMail();
+    await morningRun(store, mail, jstMorning("2026-11-22"));
+    expect(mail.sent).toHaveLength(0);
+    await morningRun(store, mail, jstMorning("2026-11-25"));
+    expect(mail.sent).toHaveLength(1);
+  });
+
+  it("出戻りで新しい Stripe 契約を結んだ人にも届く（前の契約の日付は見ない）", async () => {
+    const { store } = seedStanding({ 1: "2026-11-23T10:00:00" });
+    store.contracts.push({ subscriptionId: "sub_old_1", start: new Date("2025-02-01T00:00:00Z") });
+    const mail = new FakeMail();
+    await morningRun(store, mail, jstMorning("2026-11-25"));
+    expect(mail.sent).toHaveLength(1);
+  });
+
+  it("同じ契約の古い行がある（プラン変更・更新）人は新規に入らない", async () => {
+    const { store } = seedStanding({ 1: "2026-11-23T10:00:00" });
+    store.contracts.push({ subscriptionId: "sub_test_1", start: new Date("2026-05-01T00:00:00Z") });
+    const mail = new FakeMail();
+    await morningRun(store, mail, jstMorning("2026-11-25"));
+    expect(mail.sent).toHaveLength(0);
+  });
+
+  it("決済が終わっていない（subscriptions に行が無い）人には届かない。送る直前に行が無くても送らない", async () => {
+    const { store, campaign } = seedStanding({ 1: "2026-11-23T10:00:00" });
+    const now = jstMorning("2026-11-25");
+    const mail = new FakeMail();
+    await prepareCampaign(depsAt(store, mail, now), campaign);
+    expect(store.deliveries).toHaveLength(1);
+    store.contracts = [];
+    await runSendBatch(depsAt(store, mail, now));
+    expect(mail.sent).toHaveLength(0);
+    expect(store.deliveries[0]).toMatchObject({ status: "skipped", reason: "not_eligible" });
+    const fresh = seedStanding({});
+    fresh.store.members.push(member(5));
+    fresh.store.emails.set(uid(5), "member5@example.invalid");
+    await morningRun(fresh.store, mail, now);
+    expect(fresh.store.deliveries).toHaveLength(0);
+  });
+
+  it("「学んだ」は課金日から数える（課金前の無料記事の学習は数えない）", async () => {
+    const { store } = seedStanding({ 1: "2026-11-23T10:00:00" });
+    store.members[0].createdAt = jst("2026-11-10T10:00:00");
+    store.progress.push(learnedEvent(uid(1), jst("2026-11-15T10:00:00")));
+    const mail = new FakeMail();
+    await morningRun(store, mail, jstMorning("2026-11-25"));
+    expect(mail.sent).toHaveLength(1);
   });
 });
 
@@ -548,7 +614,10 @@ describe("リンクの印（?from=）", () => {
     const r = renderMail(standingCampaign(), { siteUrl: SITE, unsubscribeUrl: `${SITE}/u` });
     expect(r.html).toContain("https://www.bo-no.design/how-to/community?from=email_pt");
     expect(r.html).toContain('href="https://cal.com/takumikai/30min"');
-    expect(r.text).toContain("ご登録いただいた方");
+    // 常設の文面は課金した会員に送るので、末尾の一文は「会員の方」（signup の種類の「ご登録いただいた方」にしない）
+    expect(r.text).toContain("このメールは、BONOの会員の方にお送りしています。");
+    expect(r.text).not.toContain("ご登録いただいた方");
+    expect(r.html).toContain("このメールは、BONOの会員の方にお送りしています。");
   });
 });
 

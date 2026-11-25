@@ -92,6 +92,7 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
     await admin.from("member_mail_settings").update({ test_email_prefixes: [] }).eq("id", 1);
     for (const id of userIds) {
       await admin.from("member_activity_events").delete().eq("user_id", id);
+      await admin.from("subscriptions").delete().eq("user_id", id);
       await admin.from("user_subscriptions").delete().eq("user_id", id);
       await admin.auth.admin.deleteUser(id);
     }
@@ -272,6 +273,32 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
     expect(await store.getTestEmailPrefixes()).toEqual([]);
     await admin.from("member_mail_settings").update({ test_email_prefixes: ["qa-fixture"] }).eq("id", 1);
     expect(await store.getTestEmailPrefixes()).toEqual(["qa-fixture"]);
+
+    // 入会日 = 今の契約の最初の課金日（subscriptions の min(start_timestamp)・live だけ）
+    const day = 86400_000;
+    const subRows = [
+      { stripe_subscription_id: `sub_localdb_new_${RUN}`, start: now.getTime() - 2 * day, environment: "live" },
+      { stripe_subscription_id: `sub_localdb_new_${RUN}`, start: now.getTime() - 1 * day, environment: "live" },
+      { stripe_subscription_id: `sub_localdb_old_${RUN}`, start: now.getTime() - 1 * day, environment: "live" },
+      { stripe_subscription_id: `sub_localdb_old_${RUN}`, start: now.getTime() - 90 * day, environment: "live" },
+      { stripe_subscription_id: `sub_localdb_test_${RUN}`, start: now.getTime() - 1 * day, environment: "test" },
+    ].map((r) => ({
+      user_id: userIds[0],
+      stripe_subscription_id: r.stripe_subscription_id,
+      start_timestamp: new Date(r.start).toISOString(),
+      end_timestamp: new Date(r.start + 30 * day).toISOString(),
+      environment: r.environment,
+    }));
+    const subIns = await admin.from("subscriptions").insert(subRows);
+    if (subIns.error) throw subIns.error;
+    const starts = await store.listContractStartsSince(new Date(now.getTime() - 5 * day));
+    expect(starts.get(`sub_localdb_new_${RUN}`)?.getTime()).toBe(now.getTime() - 2 * day);
+    expect(starts.has(`sub_localdb_old_${RUN}`)).toBe(false);
+    expect(starts.has(`sub_localdb_test_${RUN}`)).toBe(false);
+    expect((await store.getContractStart(`sub_localdb_old_${RUN}`))?.getTime()).toBe(now.getTime() - 90 * day);
+    expect(await store.getContractStart(`sub_localdb_none_${RUN}`)).toBeNull();
+    const paid = await store.getPaidMember(userIds[0]);
+    expect(paid?.stripeSubscriptionId).toBe(`sub_localdb_${RUN}_0`);
 
     // 送る行の絞り込み（常設の文面だけを送る実行）
     await admin.from("member_mail_deliveries").insert({

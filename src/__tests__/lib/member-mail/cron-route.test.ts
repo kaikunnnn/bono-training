@@ -42,8 +42,10 @@ beforeEach(() => {
       scheduledAt: new Date("2026-11-20T00:00:00+09:00"),
     }),
   );
-  store.members.push(member(1, { createdAt: new Date("2026-11-23T10:00:00+09:00") }));
+  store.members.push(member(1));
+  store.contracts.push({ subscriptionId: "sub_test_1", start: new Date("2026-11-23T10:00:00+09:00") });
   store.members.push(member(2));
+  store.contracts.push({ subscriptionId: "sub_test_2", start: new Date("2026-01-01T10:00:00+09:00") });
   store.emails.set(uid(1), "member1@example.invalid");
   store.emails.set(uid(2), "member2@example.invalid");
 });
@@ -69,6 +71,20 @@ describe("GET /api/cron/member-mail", () => {
     expect(res.status).toBe(200);
     expect(store.campaigns.get("w-1")!.enqueuedAt).not.toBeNull();
     expect(mail.sent.map((m) => m.subject).sort()).toEqual([ONBOARDING_DAY2_COPY.subject, "今週のデザインレター", "今週のデザインレター"].sort());
+  });
+
+  it("月・火の回では、weekly の行が多くても常設の文面の行を先に送る", async () => {
+    store.settings.dailyLimit = 3;
+    for (let i = 10; i < 20; i++) {
+      store.members.push(member(i));
+      store.emails.set(uid(i), `member${i}@example.invalid`);
+    }
+    const { GET } = await import("@/app/api/cron/member-mail/route");
+    const res = await GET(request("?run=8"));
+    expect(res.status).toBe(200);
+    expect(mail.sent).toHaveLength(3);
+    expect(mail.sent[0].subject).toBe(ONBOARDING_DAY2_COPY.subject);
+    expect(mail.sent.filter((m) => m.subject === ONBOARDING_DAY2_COPY.subject)).toHaveLength(1);
   });
 
   it("CRON_SECRET が無いと何もしない", async () => {

@@ -41,6 +41,7 @@ const DELIVERIES = "member_mail_deliveries";
 const UNSUBSCRIBES = "member_mail_unsubscribes";
 const SUPPRESSIONS = "member_mail_suppressions";
 const ACTIVITY = "member_activity_events";
+const SUBSCRIPTIONS = "subscriptions";
 /** 送った（送信中・要確認を含む）とみなす状態 */
 const MAILED_STATUSES = ["sending", "sent", "needs_review"];
 /** in() に渡す user_id の数（URL の長さを抑える） */
@@ -97,6 +98,7 @@ function mapMember(r: DbRow): MemberCandidate {
     duration: r.duration === null || r.duration === undefined ? null : Number(r.duration),
     cancelAtPeriodEnd: Boolean(r.cancel_at_period_end),
     createdAt: toDate(r.created_at),
+    stripeSubscriptionId: typeof r.stripe_subscription_id === "string" ? r.stripe_subscription_id : null,
   };
 }
 
@@ -137,7 +139,7 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
   function paidMemberQuery(userId?: string) {
     let q = client
       .from("user_subscriptions")
-      .select("user_id, plan_type, duration, cancel_at_period_end, created_at")
+      .select("user_id, plan_type, duration, cancel_at_period_end, created_at, stripe_subscription_id")
       .eq("environment", "live")
       .eq("is_active", true)
       .not("stripe_subscription_id", "is", null)
@@ -275,6 +277,54 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
       const { data, error } = await paidMemberQuery(userId).limit(1);
       if (error) fail("paid member read", error);
       return data && data.length > 0 ? mapMember(data[0] as DbRow) : null;
+    },
+
+    async listContractStartsSince(since) {
+      // 1. since 以降に始まった行がある契約を拾う
+      const recent = new Set<string>();
+      for (let from = 0; ; from += PAGE) {
+        const { data, error } = await client
+          .from(SUBSCRIPTIONS)
+          .select("stripe_subscription_id")
+          .eq("environment", "live")
+          .gte("start_timestamp", since.toISOString())
+          .order("id")
+          .range(from, from + PAGE - 1);
+        if (error) fail("contract starts", error);
+        for (const r of data ?? []) if (typeof r.stripe_subscription_id === "string") recent.add(r.stripe_subscription_id);
+        if (!data || data.length < PAGE) break;
+      }
+      // 2. その契約の最初の課金日（since より前の行があればそちら）
+      const out = new Map<string, Date>();
+      for (const ids of chunks([...recent], ID_CHUNK)) {
+        const { data, error } = await client
+          .from(SUBSCRIPTIONS)
+          .select("stripe_subscription_id, start_timestamp")
+          .eq("environment", "live")
+          .in("stripe_subscription_id", ids);
+        if (error) fail("contract starts", error);
+        for (const r of data ?? []) {
+          const id = r.stripe_subscription_id as string;
+          const at = toDate(r.start_timestamp);
+          if (!at) continue;
+          const cur = out.get(id);
+          if (!cur || at < cur) out.set(id, at);
+        }
+      }
+      for (const [id, at] of out) if (at < since) out.delete(id);
+      return out;
+    },
+
+    async getContractStart(stripeSubscriptionId) {
+      const { data, error } = await client
+        .from(SUBSCRIPTIONS)
+        .select("start_timestamp")
+        .eq("environment", "live")
+        .eq("stripe_subscription_id", stripeSubscriptionId)
+        .order("start_timestamp", { ascending: true })
+        .limit(1);
+      if (error) fail("contract start", error);
+      return data && data.length > 0 ? toDate(data[0].start_timestamp) : null;
     },
 
     async countStandingMailsSince(since, userIds) {

@@ -27,6 +27,8 @@ const EMAIL_COLORS = {
 /** 法定表示の送り主名（/tokushoho の事業者名と合わせる。264 §5-12） */
 export const SENDER_LEGAL_NAME = "カイクン（BONO）";
 
+const MEMBER_AUDIENCE_LINE = "このメールは、BONOの会員の方にお送りしています。";
+
 /** 誰に送っているかの一文（相手に合った言葉にする。264 §8-2） */
 const AUDIENCE_LINE: Record<MailKind, string> = {
   weekly: "このメールは、BONOの会員の方にお送りしています。",
@@ -135,11 +137,19 @@ export interface FooterLinks {
   tokushohoUrl: string;
 }
 
-/** 法定表示（テキスト版） */
-export function renderFooterText(kind: MailKind, links: FooterLinks): string {
+/**
+ * 誰に送っているかの一文。常設の文面（入会後の案内）は課金した会員に送るので「会員の方」にそろえる
+ * （signup の種類の一文「ご登録いただいた方」は、登録だけの人向けの回のため）
+ */
+export function audienceLineOf(campaign: Pick<Campaign, "kind" | "standingKey">): string {
+  return isStandingKey(campaign.standingKey) ? MEMBER_AUDIENCE_LINE : AUDIENCE_LINE[campaign.kind];
+}
+
+/** 法定表示（テキスト版）。audienceLine を渡さなければ種類の一文 */
+export function renderFooterText(kind: MailKind, links: FooterLinks, audienceLine: string = AUDIENCE_LINE[kind]): string {
   return [
     "――――――――",
-    AUDIENCE_LINE[kind],
+    audienceLine,
     `送り主：${SENDER_LEGAL_NAME}`,
     "このメールの受け取りをやめる場合は、こちらから手続きできます。",
     links.unsubscribeUrl,
@@ -148,15 +158,15 @@ export function renderFooterText(kind: MailKind, links: FooterLinks): string {
   ].join("\n");
 }
 
-/** 法定表示（HTML 版） */
-export function renderFooterHtml(kind: MailKind, links: FooterLinks): string {
+/** 法定表示（HTML 版）。audienceLine を渡さなければ種類の一文 */
+export function renderFooterHtml(kind: MailKind, links: FooterLinks, audienceLine: string = AUDIENCE_LINE[kind]): string {
   const p = (inner: string) =>
     `<p style="margin:0 0 8px;font-size:12px;line-height:1.7;color:${EMAIL_COLORS.textMuted};">${inner}</p>`;
   const a = (href: string, label: string) =>
     `<a href="${escapeHtml(href)}" style="color:${EMAIL_COLORS.textMuted};text-decoration:underline;">${escapeHtml(label)}</a>`;
   return [
     `<hr style="border:none;border-top:1px solid ${EMAIL_COLORS.borderLight};margin:32px 0 16px;">`,
-    p(escapeHtml(AUDIENCE_LINE[kind])),
+    p(escapeHtml(audienceLine)),
     p(`送り主：${escapeHtml(SENDER_LEGAL_NAME)}`),
     p(`このメールの受け取りをやめる場合は、${a(links.unsubscribeUrl, "こちらから配信停止")}の手続きができます。`),
     p(`住所・お問い合わせ先は、${a(links.tokushohoUrl, "特定商取引法に基づく表記")}のページに載せています。`),
@@ -218,7 +228,7 @@ ${preheader}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:${EMAIL_COLORS.bgSurface};border-radius:16px;">
 <tr><td style="padding:32px 24px;font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',Meiryo,sans-serif;">
 ${bodyHtml}
-${renderFooterHtml(campaign.kind, links)}
+${renderFooterHtml(campaign.kind, links, audienceLineOf(campaign))}
 </td></tr>
 </table>
 </td></tr>
@@ -233,7 +243,7 @@ ${renderFooterHtml(campaign.kind, links)}
       return b.lines.map((l) => inlineText(l, from, opts.siteUrl)).join("\n");
     })
     .join("\n\n");
-  const text = `${bodyText}\n\n${renderFooterText(campaign.kind, links)}\n`;
+  const text = `${bodyText}\n\n${renderFooterText(campaign.kind, links, audienceLineOf(campaign))}\n`;
 
   return { subject: campaign.subject.trim(), html, text };
 }
