@@ -28,6 +28,7 @@ import {
 } from "@/lib/auth-client-error";
 import { signUp } from "../actions";
 import { createClient } from "@/lib/supabase/client";
+import { sanitizeRedirect } from "@/lib/safe-redirect";
 
 type TabId = "new" | "bono-member";
 
@@ -53,7 +54,9 @@ export default function SignupPage() {
         data: { user },
       } = await supabase.auth.getUser();
       if (user) {
-        router.replace(redirectTo || "/");
+        // redirectTo は URL から誰でも入れられる。外のサイトへ飛ばされないよう内部パスだけ通す
+        // （proxy は reauth=1 付きだとここまで素通しするため、ページ側でも確かめる）
+        router.replace(sanitizeRedirect(redirectTo));
       }
     };
     checkUser();
