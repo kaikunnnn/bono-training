@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 vi.mock("server-only", () => ({}));
 import { effectiveMode, prepareCampaign, processDelivery, runSendBatch } from "@/lib/member-mail/process";
 import { unsubscribeByToken } from "@/lib/member-mail/unsubscribe";
-import { createUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
+import { createLegacyUnsubscribeTokenV1 } from "@/lib/member-mail/unsubscribe-token";
 import { approvedCampaign, FakeMail, makeDeps, member, MemStore, SECRET, uid } from "./helpers";
 
 function seed(n = 3) {
@@ -58,7 +58,7 @@ describe("人数だけ出す", () => {
     store.members.push(member(4, { cancelAtPeriodEnd: true, duration: 3 }));
     store.emails.set(uid(4), "member4@example.invalid");
     store.settings.mode = "count";
-    await unsubscribeByToken(store, SECRET, createUnsubscribeToken(SECRET, uid(1), "notice"), "link", new Date());
+    await unsubscribeByToken(store, SECRET, createLegacyUnsubscribeTokenV1(SECRET, uid(1), "notice"), "link", new Date());
     const alerts: unknown[] = [];
     const mail = new FakeMail();
     const result = await prepareCampaign(makeDeps(store, mail, alerts), campaign);
@@ -161,8 +161,9 @@ describe("二重送信の防止", () => {
     const sent = mail.sent[0];
     expect(sent.idempotencyKey).toBe(`member-mail/${store.deliveries[0].id}`);
     expect(sent.headers["List-Unsubscribe-Post"]).toBe("List-Unsubscribe=One-Click");
-    expect(sent.headers["List-Unsubscribe"]).toMatch(/^<https:\/\/www\.bo-no\.design\/api\/mail\/unsubscribe\?t=v1\./);
-    expect(sent.text).toContain("/mail/unsubscribe?t=v1.");
+    // 配信停止のトークンは v2（カテゴリを含まない。327-D で v1 から変更）
+    expect(sent.headers["List-Unsubscribe"]).toMatch(/^<https:\/\/www\.bo-no\.design\/api\/mail\/unsubscribe\?t=v2\.[^.]+\.[^.>]+>$/);
+    expect(sent.text).toContain("/mail/unsubscribe?t=v2.");
     expect(sent.text).toContain("送り主：カイクン（BONO）");
     expect(sent.text).toContain("https://www.bo-no.design/tokushoho");
     expect(sent.html).toContain("from=email_weekly");
@@ -199,10 +200,10 @@ describe("配信停止・届かない・週の上限・契約", () => {
     const { store, campaign } = seed(3);
     const mail = new FakeMail();
     const deps = makeDeps(store, mail);
-    await unsubscribeByToken(store, SECRET, createUnsubscribeToken(SECRET, uid(1), "notice"), "one_click", new Date());
+    await unsubscribeByToken(store, SECRET, createLegacyUnsubscribeTokenV1(SECRET, uid(1), "notice"), "one_click", new Date());
     await prepareCampaign(deps, campaign);
     expect(store.deliveries.map((d) => d.userId)).toEqual([uid(2), uid(3)]);
-    await unsubscribeByToken(store, SECRET, createUnsubscribeToken(SECRET, uid(2), "comeback"), "link", new Date());
+    await unsubscribeByToken(store, SECRET, createLegacyUnsubscribeTokenV1(SECRET, uid(2), "comeback"), "link", new Date());
     await runSendBatch(deps);
     expect(mail.sent.map((m) => m.to)).toEqual(["member3@example.invalid"]);
     expect(store.deliveries.find((d) => d.userId === uid(2))).toMatchObject({ status: "skipped", reason: "unsubscribed" });

@@ -12,7 +12,7 @@
  * ★メールの HTML では CSS 変数（デザイントークン）が使えない（多くのメールソフトが非対応）。
  *   色は .claude/design-system/colors_and_type.css のトークンの値をここに写して使う（EMAIL_COLORS）。
  */
-import { FROM_OF_KIND, type Campaign, type MailKind } from "./types";
+import { FROM_OF_KIND, FROM_OF_STANDING, isStandingKey, type Campaign, type MailKind } from "./types";
 
 /** colors_and_type.css の値の写し（メール用） */
 const EMAIL_COLORS = {
@@ -169,9 +169,14 @@ export interface RenderedMail {
   text: string;
 }
 
+/** リンクに付ける印（常設の文面はその文面ごとの印。どちらも中身を推測しにくい名前。types.ts の対応表） */
+export function fromMarkerOf(campaign: Pick<Campaign, "kind" | "standingKey">): string {
+  return isStandingKey(campaign.standingKey) ? FROM_OF_STANDING[campaign.standingKey] : FROM_OF_KIND[campaign.kind];
+}
+
 /** 1通分を組み立てる（差し込むのは配信停止のURLだけ。名前などは入れない） */
 export function renderMail(campaign: Campaign, opts: { siteUrl: string; unsubscribeUrl: string }): RenderedMail {
-  const from = FROM_OF_KIND[campaign.kind];
+  const from = fromMarkerOf(campaign);
   const links: FooterLinks = {
     unsubscribeUrl: opts.unsubscribeUrl,
     tokushohoUrl: `${opts.siteUrl}/tokushoho`,

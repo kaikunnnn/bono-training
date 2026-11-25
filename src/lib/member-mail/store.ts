@@ -9,7 +9,9 @@ import "server-only";
  * メールアドレスは getEmailAddress で送る直前にだけ読み、どこにも書かない。
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { PROGRESS_KINDS } from "./learned";
 import {
+  isStandingKey,
   MAIL_CATEGORIES,
   MAIL_KINDS,
   MAIL_MODES,
@@ -25,6 +27,7 @@ import {
   type MailStore,
   type MemberCandidate,
   type NewDelivery,
+  type ProgressEvent,
   type UnsubscribeMethod,
   type UnsubscribeStore,
   type WebhookApplyResult,
@@ -37,6 +40,11 @@ const CAMPAIGNS = "member_mail_campaigns";
 const DELIVERIES = "member_mail_deliveries";
 const UNSUBSCRIBES = "member_mail_unsubscribes";
 const SUPPRESSIONS = "member_mail_suppressions";
+const ACTIVITY = "member_activity_events";
+/** 送った（送信中・要確認を含む）とみなす状態 */
+const MAILED_STATUSES = ["sending", "sent", "needs_review"];
+/** in() に渡す user_id の数（URL の長さを抑える） */
+const ID_CHUNK = 100;
 const UNIQUE_VIOLATION = "23505";
 const PAGE = 1000;
 /** 送り始めの時刻からこの期間だけ、対象の書き出しを試みる */
@@ -70,6 +78,25 @@ function mapCampaign(row: DbRow): Campaign {
     approvedVersion: row.approved_version === null || row.approved_version === undefined ? null : Number(row.approved_version),
     scheduledAt: toDate(row.scheduled_at),
     enqueuedAt: toDate(row.enqueued_at),
+    // 列が無い（マイグレーション前）・値が知らないものなら1回分の文面として扱う
+    standingKey: isStandingKey(row.standing_key) ? row.standing_key : null,
+    lastCountedAt: toDate(row.last_counted_at),
+  };
+}
+
+function chunks<T>(items: readonly T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < items.length; i += size) out.push(items.slice(i, i + size));
+  return out;
+}
+
+function mapMember(r: DbRow): MemberCandidate {
+  return {
+    userId: r.user_id as string,
+    planType: (r.plan_type as string | null) ?? null,
+    duration: r.duration === null || r.duration === undefined ? null : Number(r.duration),
+    cancelAtPeriodEnd: Boolean(r.cancel_at_period_end),
+    createdAt: toDate(r.created_at),
   };
 }
 
@@ -194,7 +221,21 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
         .order("scheduled_at", { ascending: true })
         .limit(20);
       if (error) fail("campaign list", error);
-      return (data ?? []).map((r) => mapCampaign(r as DbRow));
+      // 常設の文面（standing_key あり）は listStandingCampaigns で別に扱う。
+      // 列名で絞ると、マイグレーション前に動いたとき weekly まで止まるので、読んだあとに外す
+      return (data ?? []).map((r) => mapCampaign(r as DbRow)).filter((c) => !c.standingKey);
+    },
+
+    async listStandingCampaigns(now) {
+      const { data, error } = await client
+        .from(CAMPAIGNS)
+        .select("*")
+        .not("standing_key", "is", null)
+        .lte("scheduled_at", now.toISOString())
+        .order("scheduled_at", { ascending: true })
+        .limit(20);
+      if (error) fail("standing campaign list", error);
+      return (data ?? []).map((r) => mapCampaign(r as DbRow)).filter((c) => c.standingKey);
     },
 
     async markEnqueued(campaignId, at) {
@@ -218,15 +259,7 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
           .order("user_id", { ascending: true })
           .range(from, from + PAGE - 1);
         if (error) fail("paid members", error);
-        for (const r of data ?? []) {
-          out.push({
-            userId: r.user_id as string,
-            planType: (r.plan_type as string | null) ?? null,
-            duration: r.duration === null || r.duration === undefined ? null : Number(r.duration),
-            cancelAtPeriodEnd: Boolean(r.cancel_at_period_end),
-            createdAt: toDate(r.created_at),
-          });
-        }
+        for (const r of data ?? []) out.push(mapMember(r as DbRow));
         if (!data || data.length < PAGE) break;
       }
       return out;
@@ -236,6 +269,80 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
       const { data, error } = await paidMemberQuery(userId).limit(1);
       if (error) fail("paid member check", error);
       return Boolean(data && data.length > 0);
+    },
+
+    async getPaidMember(userId) {
+      const { data, error } = await paidMemberQuery(userId).limit(1);
+      if (error) fail("paid member read", error);
+      return data && data.length > 0 ? mapMember(data[0] as DbRow) : null;
+    },
+
+    async countStandingMailsSince(since, userIds) {
+      // 常設の文面（standing_key あり）の本番の送信だけを数える。文面の表を内部結合して standing_key で絞る
+      const counts = new Map<string, number>();
+      for (const ids of chunks(userIds, ID_CHUNK)) {
+        for (let from = 0; ; from += PAGE) {
+          const { data, error } = await client
+            .from(DELIVERIES)
+            .select("user_id, member_mail_campaigns!inner(standing_key)")
+            .in("user_id", ids)
+            .eq("audience", "all")
+            .in("status", MAILED_STATUSES)
+            .gte("sending_at", since.toISOString())
+            .not("member_mail_campaigns.standing_key", "is", null)
+            .order("id")
+            .range(from, from + PAGE - 1);
+          if (error) fail("standing cap count", error);
+          for (const r of data ?? []) {
+            const id = r.user_id as string;
+            counts.set(id, (counts.get(id) ?? 0) + 1);
+          }
+          if (!data || data.length < PAGE) break;
+        }
+      }
+      return counts;
+    },
+
+    async listProgressEvents(userIds, since) {
+      const out: ProgressEvent[] = [];
+      for (const ids of chunks(userIds, ID_CHUNK)) {
+        for (let from = 0; ; from += PAGE) {
+          const { data, error } = await client
+            .from(ACTIVITY)
+            .select("id, user_id, event_type, article_id, lesson_id, occurred_at, percent:meta->>percent")
+            .in("user_id", ids)
+            .in("event_type", PROGRESS_KINDS as unknown as string[])
+            .not("article_id", "is", null)
+            .gte("occurred_at", since.toISOString())
+            .order("id")
+            .range(from, from + PAGE - 1);
+          if (error) fail("progress events", error);
+          for (const r of data ?? []) {
+            const occurredAt = toDate(r.occurred_at);
+            if (!occurredAt) continue;
+            out.push({
+              userId: r.user_id as string,
+              eventType: r.event_type as string,
+              articleId: (r.article_id as string | null) ?? null,
+              lessonId: (r.lesson_id as string | null) ?? null,
+              occurredAt,
+              percent: r.percent === null || r.percent === undefined ? null : String(r.percent),
+            });
+          }
+          if (!data || data.length < PAGE) break;
+        }
+      }
+      return out;
+    },
+
+    async getTestEmailPrefixes() {
+      // getSettings と分けて読む（列が無い＝マイグレーション前でも weekly の処理を止めないため）
+      const { data, error } = await client.from(SETTINGS).select("test_email_prefixes").eq("id", 1).maybeSingle();
+      if (error) fail("test prefixes read", error);
+      const raw = (data as DbRow | null)?.test_email_prefixes;
+      return Array.isArray(raw)
+        ? raw.filter((v): v is string => typeof v === "string" && v.trim().length > 0)
+        : [];
     },
 
     async listUnsubscribedUserIds(category) {
@@ -353,25 +460,27 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
       return inserted;
     },
 
-    async listDueDeliveryIds(now, limit) {
+    async listDueDeliveryIds(now, limit, campaignIds) {
       if (limit <= 0) return [];
+      if (campaignIds && campaignIds.length === 0) return [];
       const nowIso = now.toISOString();
-      const queued = await client
+      let queuedQuery = client
         .from(DELIVERIES)
         .select("id")
         .eq("status", "queued")
-        .lte("next_attempt_at", nowIso)
-        .order("next_attempt_at", { ascending: true })
-        .limit(limit);
+        .lte("next_attempt_at", nowIso);
+      if (campaignIds) queuedQuery = queuedQuery.in("campaign_id", campaignIds as string[]);
+      const queued = await queuedQuery.order("next_attempt_at", { ascending: true }).limit(limit);
       if (queued.error) fail("due list", queued.error);
       const ids = (queued.data ?? []).map((r) => r.id as string);
       if (ids.length >= limit) return ids;
-      const expired = await client
+      let expiredQuery = client
         .from(DELIVERIES)
         .select("id")
         .eq("status", "processing")
-        .lt("locked_until", nowIso)
-        .limit(limit - ids.length);
+        .lt("locked_until", nowIso);
+      if (campaignIds) expiredQuery = expiredQuery.in("campaign_id", campaignIds as string[]);
+      const expired = await expiredQuery.limit(limit - ids.length);
       if (expired.error) fail("due list", expired.error);
       return ids.concat((expired.data ?? []).map((r) => r.id as string));
     },

@@ -2,18 +2,18 @@
 import { describe, it, expect } from "vitest";
 import { getCampaignBlockReason, renderMail, withFromParam } from "@/lib/member-mail/content";
 import { jstWeekStart, isWithinSendWindow } from "@/lib/member-mail/dates";
-import { createUnsubscribeToken, verifyUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
+import { createLegacyUnsubscribeTokenV1, verifyUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
 import { approvedCampaign, SECRET, SITE, uid } from "./helpers";
 
 describe("配信停止トークン（署名つき）", () => {
   it("作ったトークンは検証でき、誰の・どのカテゴリかが分かる", () => {
-    const t = createUnsubscribeToken(SECRET, uid(1), "notice");
+    const t = createLegacyUnsubscribeTokenV1(SECRET, uid(1), "notice");
     expect(verifyUnsubscribeToken(SECRET, t)).toEqual({ userId: uid(1), category: "notice" });
     expect(t).not.toContain("@");
   });
 
   it("書き換え・別の鍵・壊れた形は通らない", () => {
-    const t = createUnsubscribeToken(SECRET, uid(1), "notice");
+    const t = createLegacyUnsubscribeTokenV1(SECRET, uid(1), "notice");
     const swapped = t.replace(uid(1), uid(2));
     expect(verifyUnsubscribeToken(SECRET, swapped)).toBeNull();
     expect(verifyUnsubscribeToken(SECRET, t.replace(".notice.", ".comeback."))).toBeNull();

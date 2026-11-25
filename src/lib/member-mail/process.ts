@@ -18,10 +18,20 @@
  */
 import { getCampaignBlockReason, renderMail, unsubscribeHeaders } from "./content";
 import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
+import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
-import { selectTargets, summarize, TARGETS } from "./targets";
+import {
+  isTestAccountEmail,
+  selectStandingTargets,
+  selectTargets,
+  standingIneligibleReason,
+  STANDING_TARGETS,
+  summarize,
+  TARGETS,
+} from "./targets";
 import {
   CATEGORY_OF_KIND,
+  isStandingKey,
   MAIL_MODES,
   WEEKLY_CAP_CATEGORIES,
   type Campaign,
@@ -54,6 +64,11 @@ export interface MailDeps {
   from: string;
   replyTo: string | null;
   unsubscribeSecret: string;
+  /**
+   * 「学んだ」の判定に使うレッスンと記事のつながり（Sanity）。常設の文面だけが使う。
+   * 読めなければ例外を投げる（常設の文面は書き出さず・送らない）
+   */
+  loadLessonIndex: () => Promise<LessonIndex>;
 }
 
 /** 全体と種類ごとのスイッチのうち、弱いほう（off < count < owner < all） */
@@ -82,9 +97,14 @@ export type PrepareResult =
   | { outcome: "counted"; count: CountSummary }
   | { outcome: "blocked"; reason: string }
   | { outcome: "enqueued"; audience: "owner" | "all"; inserted: number; count?: CountSummary }
-  | { outcome: "already_enqueued" };
+  | { outcome: "already_enqueued" }
+  /** 常設の文面: 送ってよい時間の外 / 今日はもう人数を出した */
+  | { outcome: "outside_window" }
+  | { outcome: "already_counted" };
 
 export async function prepareCampaign(deps: MailDeps, campaign: Campaign): Promise<PrepareResult> {
+  // 常設の文面は別の流れ（毎日、条件に合った人だけ足す）
+  if (campaign.standingKey) return prepareStandingCampaign(deps, campaign);
   const { store } = deps;
   const now = deps.now();
   const settings = await store.getSettings();
@@ -162,6 +182,113 @@ export async function prepareCampaign(deps: MailDeps, campaign: Campaign): Promi
   return { outcome: "enqueued", audience: "all", inserted, count };
 }
 
+/**
+ * 常設の文面（327-D〜）の対象を選んで送信の記録に足す。毎日の朝の実行から呼ぶ。
+ *   count（人数だけ）→ その日の対象の人数を記録して運用 Slack に出す（1日1回）
+ *   owner（オーナーだけ）→ オーナーの行を版ごとに1回だけ書く（見た目の確認用。対象の条件は見ない）
+ *   all（全員）→ その日に条件に合った人の行を足す（1人1回は一意制約で守る）
+ * 「学んだ」の判定に使う Sanity が読めなければ、書き出さない（送らない側に倒す）。
+ */
+export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign): Promise<PrepareResult> {
+  const { store } = deps;
+  const now = deps.now();
+  const settings = await store.getSettings();
+  if (!settings) return { outcome: "off" };
+  const mode = effectiveMode(settings.mode, await store.getKindMode(campaign.kind));
+  if (mode === "off") return { outcome: "off" };
+  if (!isStandingKey(campaign.standingKey)) return { outcome: "unsupported_kind" };
+  const def = STANDING_TARGETS[campaign.standingKey];
+  if (def.kind !== campaign.kind) return { outcome: "unsupported_kind" };
+  // 朝の送ってよい時間の中でだけ選ぶ（夜中に選んで翌朝に送る、を起こさない）
+  if (!isWithinSendWindow(now, settings.sendHourStart, settings.sendHourEnd)) return { outcome: "outside_window" };
+  const blockReason = getCampaignBlockReason(campaign);
+  const category = CATEGORY_OF_KIND[campaign.kind];
+
+  if (mode === "owner") {
+    if (blockReason) return blockStanding(deps, campaign, blockReason);
+    const rows: NewDelivery[] = settings.ownerUserIds.map((userId) => ({
+      campaignId: campaign.id,
+      userId,
+      kind: campaign.kind,
+      category,
+      audience: "owner",
+      contentVersion: campaign.contentVersion,
+    }));
+    const inserted = rows.length > 0 ? await store.insertDeliveries(rows) : 0;
+    logEvent("enqueued_owner", { campaignId: campaign.id, inserted });
+    return { outcome: "enqueued", audience: "owner", inserted };
+  }
+
+  if (mode === "count" && campaign.lastCountedAt && campaign.lastCountedAt >= jstDayStart(now)) {
+    return { outcome: "already_counted" };
+  }
+  if (mode === "all" && blockReason) return blockStanding(deps, campaign, blockReason);
+
+  const testEmailPrefixes = await store.getTestEmailPrefixes();
+  // 本番の送信は、テスト用アカウントの設定が空なら始めない（入れ忘れでテスト用アカウントに届かないように）
+  if (mode === "all" && testEmailPrefixes.length === 0) {
+    return blockStanding(deps, campaign, "test_email_prefixes_unset");
+  }
+  let lessonIndex: LessonIndex;
+  try {
+    lessonIndex = await deps.loadLessonIndex();
+  } catch (error) {
+    console.error("[member-mail] lesson index failed:", error instanceof Error ? error.message : "unknown");
+    return blockStanding(deps, campaign, "lesson_index_unavailable");
+  }
+  const selection = await selectStandingTargets({
+    store,
+    def,
+    campaign,
+    lessonIndex,
+    testEmailPrefixes,
+    now,
+  });
+  const count = summarize(campaign.kind, mode, blockReason === null, selection, now);
+  await store.saveCount(campaign.id, count, now);
+
+  if (mode === "count") {
+    await deps.notifyOps({
+      title: `人数だけ出しました（${campaign.label}）`,
+      counts: {
+        candidates: count.candidates,
+        will_send: count.willSend,
+        ...prefixKeys("excluded_", count.excluded),
+      },
+      note: [
+        blockReason ? `文面はまだ送れない状態です（${blockReason}）。` : "文面は承認済みです。",
+        testEmailPrefixes.length === 0 ? "テスト用アカウントの設定（test_email_prefixes）が空なので、全員に送る前に入れてください。" : "",
+      ].join(""),
+    });
+    logEvent("counted", { campaignId: campaign.id, willSend: count.willSend });
+    return { outcome: "counted", count };
+  }
+
+  const rows: NewDelivery[] = selection.included.map((c) => ({
+    campaignId: campaign.id,
+    userId: c.userId,
+    kind: campaign.kind,
+    category,
+    audience: "all",
+    contentVersion: campaign.contentVersion,
+  }));
+  const inserted = rows.length > 0 ? await store.insertDeliveries(rows) : 0;
+  if (inserted > 0) {
+    await deps.notifyOps({
+      title: `今日の対象を送る準備をしました（${campaign.label}）`,
+      counts: { queued: inserted, ...prefixKeys("excluded_", count.excluded) },
+    });
+  }
+  logEvent("enqueued_standing", { campaignId: campaign.id, inserted });
+  return { outcome: "enqueued", audience: "all", inserted, count };
+}
+
+async function blockStanding(deps: MailDeps, campaign: Campaign, reason: string): Promise<PrepareResult> {
+  await deps.notifyOps({ title: `送る準備を止めました（${campaign.label}）`, counts: { [reason]: 1 } });
+  logEvent("prepare_blocked", { campaignId: campaign.id, reason });
+  return { outcome: "blocked", reason };
+}
+
 function prefixKeys(prefix: string, obj: Record<string, number>): Record<string, number> {
   return Object.fromEntries(Object.entries(obj).map(([k, v]) => [`${prefix}${k}`, v]));
 }
@@ -237,7 +364,28 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   if (await store.isUnsubscribed(row.userId, row.category)) {
     return finish(ctx, { status: "skipped", reason: "unsubscribed" }, "skipped");
   }
-  if (row.audience === "all") {
+  const standing = campaign.standingKey ? campaign.standingKey : null;
+  if (standing && row.audience === "all") {
+    // 常設の文面: 送る日・学んだか・14日の上限・契約を、送る直前にもう一度見る
+    if (!isStandingKey(standing)) return finish(ctx, { status: "failed", reason: "unsupported_kind" }, "failed");
+    let lessonIndex: LessonIndex;
+    try {
+      lessonIndex = await deps.loadLessonIndex();
+    } catch (error) {
+      console.error("[member-mail] lesson index failed:", error instanceof Error ? error.message : "unknown");
+      // 判定できないときは送らない。あとで送る日の範囲を過ぎれば not_due で終わる
+      return backToQueue(ctx, "lesson_index_unavailable", "paused", new Date(deps.now().getTime() + THROTTLE_RETRY_MS));
+    }
+    const reason = await standingIneligibleReason({
+      store,
+      def: STANDING_TARGETS[standing],
+      campaign,
+      userId: row.userId,
+      lessonIndex,
+      now: deps.now(),
+    });
+    if (reason) return finish(ctx, { status: "skipped", reason }, "skipped");
+  } else if (row.audience === "all") {
     const def = TARGETS[row.kind];
     if (!def) return finish(ctx, { status: "failed", reason: "unsupported_kind" }, "failed");
     if (!(await def.stillEligible(store, row.userId))) {
@@ -256,8 +404,12 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   // アドレスは送る直前にだけ読む（記録・ログに残さない）
   const to = await store.getEmailAddress(row.userId);
   if (!to) return finish(ctx, { status: "skipped", reason: "no_email" }, "skipped");
+  if (standing && row.audience === "all" && isTestAccountEmail(to, await store.getTestEmailPrefixes())) {
+    return finish(ctx, { status: "skipped", reason: "test_account" }, "skipped");
+  }
 
-  const tokenValue = createUnsubscribeToken(deps.unsubscribeSecret, row.userId, row.category);
+  // 配信停止のトークンにカテゴリを入れない（会員に見える URL に送り分けの区別を出さない）
+  const tokenValue = createUnsubscribeToken(deps.unsubscribeSecret, row.userId);
   const rendered = renderMail(campaign, {
     siteUrl: deps.siteUrl,
     unsubscribeUrl: unsubscribePageUrl(deps.siteUrl, tokenValue),
@@ -357,7 +509,7 @@ export interface BatchResult {
 /** 送信の記録から1回分（数十人まで）送る。cron と手動の両方から呼ぶ */
 export async function runSendBatch(
   deps: MailDeps,
-  options: { limit?: number; timeBudgetMs?: number } = {},
+  options: { limit?: number; timeBudgetMs?: number; campaignIds?: readonly string[] } = {},
 ): Promise<BatchResult> {
   const { store } = deps;
   // 1回の上限は1日の上限（既定80）まで。実際に止めるのは時間の予算（関数の実行時間上限 60秒に収める）
@@ -389,7 +541,7 @@ export async function runSendBatch(
     let remaining = settings.dailyLimit - (await store.countSentSince(jstDayStart(startedAt)));
     if (remaining <= 0) return { skippedReason: "daily_limit", staleSending, processed, outcomes };
 
-    const ids = await store.listDueDeliveryIds(startedAt, Math.min(limit, remaining));
+    const ids = await store.listDueDeliveryIds(startedAt, Math.min(limit, remaining), options.campaignIds);
     for (const id of ids) {
       if (remaining <= 0) break;
       if (deps.now().getTime() - startedAt.getTime() > timeBudgetMs) break;

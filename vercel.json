@@ -32,6 +32,10 @@
     {
       "path": "/api/cron/member-mail?run=10",
       "schedule": "0 1 * * 1,2"
+    },
+    {
+      "path": "/api/cron/member-mail?run=daily&only=standing",
+      "schedule": "0 23 * * 2-6"
     }
   ]
 }

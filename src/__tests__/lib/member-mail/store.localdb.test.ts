@@ -10,9 +10,9 @@ import { randomUUID } from "crypto";
 import { createSupabaseMailStore } from "@/lib/member-mail/store";
 import { prepareCampaign, runSendBatch, type MailDeps } from "@/lib/member-mail/process";
 import { unsubscribeByToken } from "@/lib/member-mail/unsubscribe";
-import { createUnsubscribeToken } from "@/lib/member-mail/unsubscribe-token";
+import { createLegacyUnsubscribeTokenV1 } from "@/lib/member-mail/unsubscribe-token";
 import { handleResendEvent } from "@/lib/member-mail/webhook";
-import { FakeMail, SECRET, SITE } from "./helpers";
+import { FakeMail, SECRET, SITE, testLessonIndex } from "./helpers";
 
 const URL = process.env.MEMBER_MAIL_LOCAL_DB_URL ?? "http://127.0.0.1:54321";
 const SERVICE = process.env.MEMBER_MAIL_LOCAL_DB_SERVICE_KEY ?? "";
@@ -23,6 +23,7 @@ const store = createSupabaseMailStore(admin);
 const RUN = randomUUID().slice(0, 8);
 const userIds: string[] = [];
 let campaignId = "";
+let standingId = "";
 
 function deps(mail: FakeMail, alerts: unknown[] = []): MailDeps {
   return {
@@ -38,6 +39,7 @@ function deps(mail: FakeMail, alerts: unknown[] = []): MailDeps {
     from: "カイくん <test@mail.example.invalid>",
     replyTo: null,
     unsubscribeSecret: SECRET,
+    loadLessonIndex: async () => testLessonIndex(),
   };
 }
 
@@ -83,7 +85,13 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
       await admin.from("member_mail_deliveries").delete().eq("campaign_id", campaignId);
       await admin.from("member_mail_campaigns").delete().eq("id", campaignId);
     }
+    if (standingId) {
+      await admin.from("member_mail_deliveries").delete().eq("campaign_id", standingId);
+      await admin.from("member_mail_campaigns").delete().eq("id", standingId);
+    }
+    await admin.from("member_mail_settings").update({ test_email_prefixes: [] }).eq("id", 1);
     for (const id of userIds) {
+      await admin.from("member_activity_events").delete().eq("user_id", id);
       await admin.from("user_subscriptions").delete().eq("user_id", id);
       await admin.auth.admin.deleteUser(id);
     }
@@ -149,7 +157,7 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
     expect(mail.sent.map((m) => m.to)).toEqual([`mm-${RUN}-3@example.invalid`]);
 
     // ユーザー1がワンクリックで止める
-    await unsubscribeByToken(store, SECRET, createUnsubscribeToken(SECRET, userIds[0], "notice"), "one_click", new Date());
+    await unsubscribeByToken(store, SECRET, createLegacyUnsubscribeTokenV1(SECRET, userIds[0], "notice"), "one_click", new Date());
 
     // 全員に送る
     await admin.from("member_mail_settings").update({ mode: "all" }).eq("id", 1);
@@ -208,5 +216,75 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
     // 送信記録にメールアドレスの列は無い
     const sample = await admin.from("member_mail_deliveries").select("*").eq("id", row.data!.id).single();
     expect(JSON.stringify(sample.data)).not.toContain("@");
+  });
+  it("常設の文面（327-D）: 一覧・14日の通数・活動ログ・テスト用の頭・送る行の絞り込み", async () => {
+    const now = new Date();
+    const { data, error } = await admin
+      .from("member_mail_campaigns")
+      .insert({
+        kind: "signup",
+        label: `localdb-standing-${RUN}`,
+        subject: "件名",
+        body: "本文",
+        standing_key: "onboarding_day2",
+        scheduled_at: new Date(now.getTime() - 60_000).toISOString(),
+      })
+      .select("id")
+      .single();
+    if (error) throw error;
+    standingId = data.id;
+
+    // 常設の文面は listStandingCampaigns だけに出て、listDueCampaigns には出ない
+    expect((await store.listStandingCampaigns(now)).map((c) => c.id)).toContain(standingId);
+    expect((await store.listDueCampaigns(now)).map((c) => c.id)).not.toContain(standingId);
+    // 同じ standing_key の文面は2つ作れない
+    const dup = await admin
+      .from("member_mail_campaigns")
+      .insert({ kind: "signup", label: `localdb-standing-dup-${RUN}`, standing_key: "onboarding_day2" });
+    expect(dup.error?.code).toBe("23505");
+
+    // 14日の通数: 常設の文面の送信だけを数える（weekly の送信は数えない）
+    await admin.from("member_mail_deliveries").insert({
+      campaign_id: standingId,
+      user_id: userIds[1],
+      kind: "signup",
+      category: "signup",
+      audience: "all",
+      content_version: 1,
+      status: "sent",
+      sending_at: now.toISOString(),
+    });
+    const counts = await store.countStandingMailsSince(new Date(now.getTime() - 14 * 86400_000), userIds);
+    expect(counts.get(userIds[1])).toBe(1);
+    expect(counts.get(userIds[0]) ?? 0).toBe(0);
+
+    // 活動ログ: 進めた系だけ・%は文字のまま
+    const ins = await admin.from("member_activity_events").insert([
+      { user_id: userIds[0], event_type: "video_progress", article_id: "a-localdb", lesson_id: "l-localdb", meta: { percent: 80 } },
+      { user_id: userIds[0], event_type: "article_view", article_id: "a-localdb", lesson_id: "l-localdb", meta: {} },
+    ]);
+    if (ins.error) throw ins.error;
+    const events = await store.listProgressEvents([userIds[0]], new Date(now.getTime() - 60_000));
+    expect(events).toHaveLength(1);
+    expect(events[0]).toMatchObject({ eventType: "video_progress", articleId: "a-localdb", percent: "80" });
+
+    // テスト用の頭
+    expect(await store.getTestEmailPrefixes()).toEqual([]);
+    await admin.from("member_mail_settings").update({ test_email_prefixes: ["qa-fixture"] }).eq("id", 1);
+    expect(await store.getTestEmailPrefixes()).toEqual(["qa-fixture"]);
+
+    // 送る行の絞り込み（常設の文面だけを送る実行）
+    await admin.from("member_mail_deliveries").insert({
+      campaign_id: standingId,
+      user_id: userIds[0],
+      kind: "signup",
+      category: "signup",
+      audience: "all",
+      content_version: 1,
+    });
+    const ids = await store.listDueDeliveryIds(new Date(Date.now() + 1000), 100, [standingId]);
+    const rows = await admin.from("member_mail_deliveries").select("campaign_id").in("id", ids);
+    expect((rows.data ?? []).every((r) => r.campaign_id === standingId)).toBe(true);
+    expect(ids.length).toBeGreaterThan(0);
   });
 });

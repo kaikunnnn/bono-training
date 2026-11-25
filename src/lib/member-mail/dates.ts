@@ -20,6 +20,14 @@ export function jstWeekStart(now: Date): Date {
   return new Date(dayStart.getTime() - sinceMonday * DAY_MS);
 }
 
+/**
+ * from の日（日本時間）から now の日（日本時間）まで何日たったか。同じ日なら0、翌日なら1。
+ * 例: 11/23 23:50 JST に入会 → 11/25 8:00 JST は 2（「入会の2日後の朝」）
+ */
+export function jstDaysBetween(from: Date, now: Date): number {
+  return Math.round((jstDayStart(now).getTime() - jstDayStart(from).getTime()) / DAY_MS);
+}
+
 /** 日本時間の時（0〜23） */
 export function jstHour(now: Date): number {
   return new Date(now.getTime() + JST_OFFSET_MS).getUTCHours();

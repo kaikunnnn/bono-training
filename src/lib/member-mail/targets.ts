@@ -5,16 +5,19 @@
  * スライス1で作るのは週1回のメルマガ（weekly）だけ。②③④は TARGETS に1つ足し、除外条件を並べるだけで作れる形にしている。
  *   例（スライス3以降）: 解約予約中を除く → excludeCancelScheduled を並べる / 連絡済み(#254) → 新しい Exclusion を足す
  */
-import { jstWeekStart, tenureBucket } from "./dates";
+import { jstDayStart, jstDaysBetween, jstWeekStart, tenureBucket } from "./dates";
+import { learnedUserIds, type LessonIndex } from "./learned";
 import {
   CATEGORY_OF_KIND,
   WEEKLY_CAP_CATEGORIES,
+  type Campaign,
   type CountSummary,
   type MailCategory,
   type MailKind,
   type MailMode,
   type MailStore,
   type MemberCandidate,
+  type StandingKey,
 } from "./types";
 
 export interface ExclusionContext {
@@ -24,6 +27,12 @@ export interface ExclusionContext {
   /** 今週（日本時間の月曜から）すでに会員向けのお知らせ系を受け取った人 */
   mailedThisWeek: Set<string>;
   now: Date;
+  /** 常設の文面だけ: テスト用アカウント */
+  testAccounts?: Set<string>;
+  /** 常設の文面だけ: 入会してから「学んだ」人 */
+  learned?: Set<string>;
+  /** 常設の文面だけ: 14日で常設の文面をもう上限まで受け取った人 */
+  standingCapped?: Set<string>;
 }
 
 export interface Exclusion {
@@ -76,6 +85,166 @@ export const WEEKLY_TARGET: TargetDefinition = {
 export const TARGETS: Partial<Record<MailKind, TargetDefinition>> = {
   weekly: WEEKLY_TARGET,
 };
+
+// =============================================================================
+// 常設の文面（327-D〜）: 毎日、条件に合った人だけを送信の記録に足す
+// =============================================================================
+//
+// 1回分の文面（weekly）との違い:
+// - 対象の書き出しを1回で終わらせない（enqueued_at を使わない）。毎日、その日に条件に合った人だけを足す
+// - 1人に1回だけは、送信の記録の一意制約（campaign_id, user_id WHERE audience='all'）と、
+//   1つの standing_key に文面が1つだけ（DB の一意インデックス）で守る
+// - campaign.scheduledAt は「仕組みを有効にした時刻」。それより後に入会した人だけが対象（過去の入会者にさかのぼらない）
+// - 327-E・327-F は STANDING_TARGETS に1つ足し、入会からの日数と除外条件を並べる
+
+/** 入会から何日でも、常設の文面は合わせて14日で最大3通まで（327 の決まりごと） */
+export const STANDING_CAP_WINDOW_DAYS = 14;
+export const STANDING_CAP_MAX = 3;
+
+export const excludeTestAccount: Exclusion = {
+  reason: "test_account",
+  excludes: (c, ctx) => Boolean(ctx.testAccounts?.has(c.userId)),
+};
+
+/** 入会してから「学んだ」人（learned.ts。分析側 #274 と同じ数え方） */
+export const excludeLearned: Exclusion = {
+  reason: "learned",
+  excludes: (c, ctx) => Boolean(ctx.learned?.has(c.userId)),
+};
+
+export const excludeStandingCap: Exclusion = {
+  reason: "standing_cap",
+  excludes: (c, ctx) => Boolean(ctx.standingCapped?.has(c.userId)),
+};
+
+export interface StandingTargetDefinition {
+  key: StandingKey;
+  kind: MailKind;
+  /** 入会日（日本時間）から何日後の朝に送るか。入会日が0 */
+  sendOnDay: number;
+  /**
+   * 送る日を取りこぼしたとき（その日の実行が失敗したなど）に、何日あとまで送ってよいか。
+   * 0 ならその日だけ。送る直前にもこの範囲を見直す（スイッチを止めて戻した行が何週間もあとに届かないように）
+   */
+  catchUpDays: number;
+  exclusions: readonly Exclusion[];
+}
+
+/**
+ * 327-D はじめの案内: 入会の2日後の朝（日本時間）に、入会してからまだ「学んだ」がない人へ1回だけ。
+ * 2日後の朝の実行が失敗したときだけ、3日後の朝に送る（それより後は送らない）。
+ */
+export const ONBOARDING_DAY2_TARGET: StandingTargetDefinition = {
+  key: "onboarding_day2",
+  kind: "signup",
+  sendOnDay: 2,
+  catchUpDays: 1,
+  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeLearned, excludeStandingCap],
+};
+
+export const STANDING_TARGETS: Record<StandingKey, StandingTargetDefinition> = {
+  onboarding_day2: ONBOARDING_DAY2_TARGET,
+};
+
+/** 入会日（user_subscriptions.created_at）と有効にした時刻から、今日が送る日か */
+export function isStandingDue(
+  def: StandingTargetDefinition,
+  createdAt: Date | null,
+  activatedAt: Date | null,
+  now: Date,
+): boolean {
+  if (!createdAt || !activatedAt) return false;
+  if (createdAt.getTime() < activatedAt.getTime()) return false; // 有効にする前の入会者にはさかのぼらない
+  const days = jstDaysBetween(createdAt, now);
+  return days >= def.sendOnDay && days <= def.sendOnDay + def.catchUpDays;
+}
+
+/** メールアドレスがテスト用アカウントの頭で始まるか（大文字・小文字を区別しない） */
+export function isTestAccountEmail(email: string, prefixes: readonly string[]): boolean {
+  const lower = email.trim().toLowerCase();
+  return prefixes.some((p) => p.trim().length > 0 && lower.startsWith(p.trim().toLowerCase()));
+}
+
+/** 「学んだ」の数え始め: 入会日の日本時間0時（分析側の since＝課金日と同じ日単位） */
+export function learningSince(createdAt: Date): Date {
+  return jstDayStart(createdAt);
+}
+
+export interface StandingSelectionInput {
+  store: MailStore;
+  def: StandingTargetDefinition;
+  campaign: Campaign;
+  lessonIndex: LessonIndex;
+  testEmailPrefixes: readonly string[];
+  now: Date;
+}
+
+/** 常設の文面の対象を選ぶ（今日が送る日の人だけを候補にし、除外条件を当てる） */
+export async function selectStandingTargets(input: StandingSelectionInput): Promise<TargetSelection> {
+  const { store, def, campaign, lessonIndex, testEmailPrefixes, now } = input;
+  const category = CATEGORY_OF_KIND[def.kind];
+  const members = await store.listPaidMembers();
+  const due = members.filter((m) => isStandingDue(def, m.createdAt, campaign.scheduledAt ?? null, now));
+  const empty: TargetSelection = { included: [], excluded: {}, candidates: 0 };
+  if (due.length === 0) return empty;
+
+  const ids = due.map((m) => m.userId);
+  const sinceByUser = new Map(due.map((m) => [m.userId, learningSince(m.createdAt!)] as const));
+  const earliest = new Date(Math.min(...[...sinceByUser.values()].map((d) => d.getTime())));
+  const capSince = new Date(now.getTime() - STANDING_CAP_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const [unsubscribed, suppressed, events, capCounts] = await Promise.all([
+    store.listUnsubscribedUserIds(category),
+    store.listSuppressedUserIds(),
+    store.listProgressEvents(ids, earliest),
+    store.countStandingMailsSince(capSince, ids),
+  ]);
+
+  // テスト用アカウント: アドレスは判定にだけ使い、どこにも残さない
+  const testAccounts = new Set<string>();
+  if (testEmailPrefixes.length > 0) {
+    for (const m of due) {
+      const email = await store.getEmailAddress(m.userId);
+      if (email && isTestAccountEmail(email, testEmailPrefixes)) testAccounts.add(m.userId);
+    }
+  }
+  const standingCapped = new Set([...capCounts].filter(([, n]) => n >= STANDING_CAP_MAX).map(([id]) => id));
+
+  return applyExclusions(due, def.exclusions, {
+    category,
+    unsubscribed,
+    suppressed,
+    mailedThisWeek: new Set(),
+    now,
+    testAccounts,
+    learned: learnedUserIds(events, lessonIndex, sinceByUser),
+    standingCapped,
+  });
+}
+
+/**
+ * 送る直前の見直し（常設の文面・本番の送信）。送ってよければ null、だめなら理由。
+ * 配信停止・届かないは送る処理が共通で見る。テスト用アカウントはアドレスを読んだあとに送る処理が見る。
+ */
+export async function standingIneligibleReason(input: {
+  store: MailStore;
+  def: StandingTargetDefinition;
+  campaign: Campaign;
+  userId: string;
+  lessonIndex: LessonIndex;
+  now: Date;
+}): Promise<string | null> {
+  const { store, def, campaign, userId, lessonIndex, now } = input;
+  const member = await store.getPaidMember(userId);
+  if (!member) return "not_eligible";
+  if (!isStandingDue(def, member.createdAt, campaign.scheduledAt ?? null, now)) return "not_due";
+  const since = learningSince(member.createdAt!);
+  const events = await store.listProgressEvents([userId], since);
+  if (learnedUserIds(events, lessonIndex, new Map([[userId, since]])).has(userId)) return "learned";
+  const capSince = new Date(now.getTime() - STANDING_CAP_WINDOW_DAYS * 24 * 60 * 60 * 1000);
+  const counts = await store.countStandingMailsSince(capSince, [userId]);
+  if ((counts.get(userId) ?? 0) >= STANDING_CAP_MAX) return "standing_cap";
+  return null;
+}
 
 export interface TargetSelection {
   included: MemberCandidate[];
