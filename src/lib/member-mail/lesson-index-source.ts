@@ -27,8 +27,11 @@ export async function loadLessonIndexFromSanity(): Promise<LessonIndex> {
     sanity.fetch<ArticleLessonLink[] | null>(ARTICLE_LINKS_QUERY),
   ]);
   if (!Array.isArray(lessons) || lessons.length === 0) throw new Error("lesson index empty");
-  return buildLessonIndex(
+  const index = buildLessonIndex(
     lessons.map((l) => ({ lessonId: l.lessonId, articleIds: Array.isArray(l.articleIds) ? l.articleIds : [] })),
     Array.isArray(links) ? links : [],
   );
+  // 学習用の記事が1本も無い索引では、誰も「学んだ」にならず、学んだ人にも送ってしまう。読めなかった扱いにする
+  if (index.learningOwners.size === 0) throw new Error("lesson index has no learning articles");
+  return index;
 }
