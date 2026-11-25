@@ -73,7 +73,7 @@ export default async function AccountPage({
       <SettingsCard title="通知">
         <div className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            コメントやリアクションの通知を、種類ごとにオン/オフできます。
+            コメントやリアクションの通知と、BONOからのお知らせメールを、オン/オフできます。
           </p>
           <Button asChild variant="outline">
             <Link href="/account/notifications">
