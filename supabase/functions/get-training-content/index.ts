@@ -1,11 +1,12 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { getSupabaseSecretKey } from '../_shared/supabase-keys.ts'
 import { corsHeaders } from '../_shared/cors.ts'
 
 console.log('get-training-content Edge Function starting...')
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+const supabaseServiceKey = getSupabaseSecretKey()
 
 /**
  * 強化されたFront-matterを解析（より柔軟な正規表現とYAML解析）

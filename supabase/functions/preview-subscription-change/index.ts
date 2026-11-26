@@ -3,8 +3,8 @@
  * Purpose: プラン変更時の日割り計算をプレビュー
  */
 
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { getSupabaseSecretKey } from "../_shared/supabase-keys.ts";
 import Stripe from "https://esm.sh/stripe@17.7.0";
 
 const corsHeaders = {
@@ -15,7 +15,7 @@ const corsHeaders = {
 // 環境変数から環境を取得（デフォルトはtest）
 const ENVIRONMENT = (Deno.env.get('STRIPE_MODE') || 'test') as 'test' | 'live';
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   // CORSプリフライトリクエストの処理
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -48,7 +48,7 @@ serve(async (req) => {
     }
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const supabaseServiceKey = getSupabaseSecretKey();
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     const token = authHeader.replace("Bearer ", "");
