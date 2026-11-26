@@ -23,6 +23,10 @@ export const ONSITE_REGISTRATION_EVENTS: readonly string[] = [
   "design-hours-2026-11-11",
   "design-hours-2026-11-14",
   "design-hours-2026-11-25",
+  "design-hours-2026-12-02",
+  "design-hours-2026-12-09",
+  "design-hours-2026-12-16",
+  "design-hours-2026-12-23",
   "suki-100-2026-11",
 ];
 
