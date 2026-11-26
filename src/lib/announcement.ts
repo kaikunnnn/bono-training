@@ -20,13 +20,13 @@ export interface Announcement {
   endsAt: string;
 }
 
-/** 現在表示するお知らせ。Design Hours 10/28（水）20:00〜22:00（水曜いっぱい＝10/28 23:59:59 JST まで表示） */
+/** 現在表示するお知らせ。Design Hours 12/2（水）20:00〜22:00（水曜いっぱい＝12/2 23:59:59 JST まで表示） */
 export const CURRENT_ANNOUNCEMENT: Announcement | null = {
-  id: "design-hours-2026-10-28",
+  id: "design-hours-2026-12-02",
   label: "募集中",
-  text: "1人よりみんなで。水曜20時・作業会やります🙋",
-  href: "/events/design-hours-2026-10-28",
-  endsAt: "2026-10-28T15:00:00.000Z",
+  text: "12月も毎週水曜20時、みんなで作業会やります🙋",
+  href: "/events/design-hours-2026-12-02",
+  endsAt: "2026-12-02T15:00:00.000Z",
 };
 
 /** 閉じた状態が変わったことを同じタブ内に知らせるイベント名 */
