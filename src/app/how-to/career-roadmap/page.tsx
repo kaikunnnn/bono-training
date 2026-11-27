@@ -37,6 +37,13 @@ type ReadingLink = {
   description: string;
 };
 
+// リンク先の種類はURLの先頭で決める（/roadmap・/guide・/contents）
+function pageTypeLabel(href: string): string {
+  if (href.startsWith("/roadmap/")) return "ロードマップ";
+  if (href.startsWith("/guide/")) return "ガイド";
+  return "記事";
+}
+
 type Step = {
   heading: string;
   links: ReadingLink[];
@@ -140,6 +147,9 @@ export default function CareerRoadmapGuidePage() {
                     className="group flex items-start gap-4 rounded-2xl border border-border bg-white p-6 shadow-[0px_1px_1px_0px_rgba(0,0,0,0.08),0px_0px_3px_0px_rgba(0,0,0,0.04)] transition-shadow hover:border-border-strong hover:shadow-md"
                   >
                     <div className="flex-1">
+                      <span className="mb-2 inline-block rounded-full border border-border-strong bg-muted px-2.5 py-0.5 text-xs font-bold text-foreground">
+                        {pageTypeLabel(link.href)}
+                      </span>
                       <h3 className="font-rounded-mplus text-lg font-bold text-foreground">
                         {link.title}
                       </h3>
