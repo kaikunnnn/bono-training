@@ -168,8 +168,8 @@ describe("Cal.com の署名（X-Cal-Signature-256 = 本文の HMAC-SHA256 の16�
     const missing = await POST(calRequest(body, null));
     expect(missing.status).toBe(401);
     expect(routeStore.current.consultBookings.size).toBe(0);
-    // 署名が合わないことは運用 Slack に件数だけ出す
-    expect(opsAlerts.map((a) => a.counts)).toEqual([{ calcom_invalid_signature: 1 }, { calcom_invalid_signature: 1 }]);
+    // 64桁の16進の署名が合わないときだけ運用 Slack に件数だけ出す（署名なしは通知しない）
+    expect(opsAlerts.map((a) => a.counts)).toEqual([{ calcom_invalid_signature: 1 }]);
     opsAlerts.length = 0;
 
     for (let i = 0; i < 2; i++) {
@@ -243,6 +243,28 @@ describe("route: 記録の失敗・読めない中身は運用 Slack に出す�
     const res = await POST(calRequest(body, sign(JSON.stringify(body))));
     expect(await res.json()).toMatchObject({ outcome: "ignored" });
     expect(opsAlerts).toEqual([]);
+  });
+});
+
+describe("route: 公開 URL への雑な POST では通知しない", () => {
+  it("署名なし・形の違う署名（no-secret-provided・短い・16進でない）は 401 でログだけ。64桁の16進が合わないときだけ通知する", async () => {
+    routeStore.current = new MemStore();
+    process.env.CALCOM_WEBHOOK_SECRET = CAL_SECRET;
+    const { POST } = await import("@/app/api/webhooks/calcom/route");
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const body = calBody("BOOKING_CREATED");
+    for (const sig of [null, "no-secret-provided", "abc123", "z".repeat(64), "0".repeat(63)]) {
+      const res = await POST(calRequest(body, sig));
+      expect(res.status).toBe(401);
+    }
+    expect(opsAlerts).toEqual([]);
+    expect(warnSpy).toHaveBeenCalledTimes(5);
+    expect(JSON.stringify(warnSpy.mock.calls)).not.toContain("example.invalid");
+
+    const wrong = await POST(calRequest(body, "a".repeat(64)));
+    expect(wrong.status).toBe(401);
+    expect(opsAlerts.map((a) => a.counts)).toEqual([{ calcom_invalid_signature: 1 }]);
+    expect(routeStore.current.consultBookings.size).toBe(0);
   });
 });
 

@@ -44,7 +44,14 @@ export async function POST(request: NextRequest) {
   }
 
   const rawBody = await request.text();
-  if (!verifyCalcomSignature(rawBody, request.headers.get(CALCOM_SIGNATURE_HEADER), secret)) {
+  const signature = request.headers.get(CALCOM_SIGNATURE_HEADER);
+  if (!verifyCalcomSignature(rawBody, signature, secret)) {
+    // URL は公開なので、署名の無い・形の違う POST では通知しない（ログだけ）。
+    // 64桁の16進の署名が付いているのに合わない＝Cal.com からの可能性が高い（鍵の食い違い）ときだけ通知する
+    if (!/^[0-9a-f]{64}$/i.test((signature ?? "").trim())) {
+      console.warn("[member-mail] calcom webhook rejected", { reason: signature ? "malformed_signature" : "no_signature" });
+      return NextResponse.json({ error: "invalid_signature" }, { status: 401 });
+    }
     await alert({
       title: "Cal.com の webhook の署名が合いませんでした（30分相談の予約が記録されていない可能性があります）",
       counts: { calcom_invalid_signature: 1 },
