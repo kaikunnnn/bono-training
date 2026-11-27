@@ -21,6 +21,7 @@ import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
 import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
 import {
+  isStandingDue,
   isTestAccountEmail,
   selectStandingTargets,
   selectTargets,
@@ -74,6 +75,35 @@ export interface MailDeps {
 /** 全体と種類ごとのスイッチのうち、弱いほう（off < count < owner < all） */
 export function effectiveMode(global: MailMode, kind: MailMode): MailMode {
   return MAIL_MODES.indexOf(global) <= MAIL_MODES.indexOf(kind) ? global : kind;
+}
+
+/**
+ * 常設の文面だけ: 文面ごとのスイッチ（standing_mode）。未設定（マイグレーション前）なら count（全員には送らない）。
+ * 1回分の文面（weekly など）は値があっても見ない（all）。文面が見つからなければ止める（off）
+ */
+export function campaignModeOf(campaign: Campaign | null): MailMode {
+  if (!campaign) return "off";
+  return campaign.standingKey ? (campaign.standingMode ?? "count") : "all";
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * 文面ごとのスイッチ（standing_mode）が下がったために送れない常設の文面の行。
+ * - 会員の行で、送る日の範囲をもう過ぎていれば、送らずに終える（not_due。あとで上げ直しても古い行が届かない）
+ * - それ以外は翌日（日本時間の0時）まで待たせる（毎回の実行で拾い直して paused を出し続けない）
+ */
+async function holdForCampaignMode(ctx: Ctx, campaign: Campaign, reason: string): Promise<DeliveryOutcome> {
+  const { deps, row } = ctx;
+  const now = deps.now();
+  if (row.audience === "all" && isStandingKey(campaign.standingKey)) {
+    const member = await deps.store.getPaidMember(row.userId);
+    const joinedAt = member?.stripeSubscriptionId ? await deps.store.getContractStart(member.stripeSubscriptionId) : null;
+    if (!isStandingDue(STANDING_TARGETS[campaign.standingKey], joinedAt, campaign.scheduledAt ?? null, now)) {
+      return finish(ctx, { status: "skipped", reason: "not_due" }, "skipped");
+    }
+  }
+  return backToQueue(ctx, reason, "paused", new Date(jstDayStart(now).getTime() + DAY_MS));
 }
 
 async function currentMode(store: MailStore, kind: MailKind): Promise<MailMode> {
@@ -194,7 +224,11 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   const now = deps.now();
   const settings = await store.getSettings();
   if (!settings) return { outcome: "off" };
-  const mode = effectiveMode(settings.mode, await store.getKindMode(campaign.kind));
+  // 全体・種類（signup）・この文面のスイッチのいちばん弱いもの（327-E/F: 文面ごとに count → owner → all と上げられる）
+  const mode = effectiveMode(
+    effectiveMode(settings.mode, await store.getKindMode(campaign.kind)),
+    campaignModeOf(campaign),
+  );
   if (mode === "off") return { outcome: "off" };
   if (!isStandingKey(campaign.standingKey)) return { outcome: "unsupported_kind" };
   const def = STANDING_TARGETS[campaign.standingKey];
@@ -349,6 +383,11 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   // 文面と承認（承認の印がない文面は、どのモードでも送らない）
   const campaign = await store.getCampaign(row.campaignId);
   if (!campaign) return finish(ctx, { status: "failed", reason: "campaign_missing" }, "failed");
+  // 常設の文面は、文面ごとのスイッチも同じ決まりで見る
+  const campaignMode = effectiveMode(mode, campaignModeOf(campaign));
+  if (campaignMode === "off" || campaignMode === "count" || (row.audience === "all" && campaignMode !== "all")) {
+    return holdForCampaignMode(ctx, campaign, `mode_${campaignMode}`);
+  }
   const blockReason = getCampaignBlockReason(campaign);
   if (blockReason) {
     await deps.notifyOps({ title: "文面が承認されていないため送信を止めました", counts: { [blockReason]: 1 } });
@@ -416,7 +455,10 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   });
 
   // 送る直前にもう一度スイッチを見る（直前に止められたら送らない）
-  const latest = await currentMode(store, row.kind);
+  const latest = effectiveMode(
+    await currentMode(store, row.kind),
+    campaign.standingKey ? campaignModeOf(await store.getCampaign(row.campaignId)) : "all",
+  );
   if (latest === "off" || latest === "count" || (row.audience === "all" && latest !== "all")) {
     return backToQueue(ctx, "mode_changed", "paused");
   }

@@ -39,6 +39,7 @@ beforeEach(() => {
       preheader: ONBOARDING_DAY2_COPY.preheader,
       body: ONBOARDING_DAY2_COPY.body,
       standingKey: "onboarding_day2",
+      standingMode: "all", // 文面ごとのスイッチ（#327-E/F）も全員に上げた状態
       scheduledAt: new Date("2026-11-20T00:00:00+09:00"),
     }),
   );
