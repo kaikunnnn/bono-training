@@ -38,6 +38,8 @@ export const CATEGORY_OF_KIND: Record<MailKind, MailCategory> = {
  *   email_pv     … signup（常設の文面ではない signup の回）
  *   email_pu     … winback（以前の会員へ）
  *   email_pt     … はじめの案内（常設の文面 onboarding_day2・327-D）
+ *   email_ps     … 続きをデザインしよう（常設の文面 onboarding_day5・327-E）
+ *   email_pr     … 30分相談の案内（常設の文面 onboarding_day9・327-F）
  * 以前の名前（email_comeback / email_renewal / email_signup / email_winback）は、この変更より前に送ったメールにだけ残る。
  */
 export const FROM_OF_KIND: Record<MailKind, string> = {
@@ -51,14 +53,18 @@ export const FROM_OF_KIND: Record<MailKind, string> = {
 /**
  * 常設の文面（327-D〜）。毎日、条件に合った人だけを送信の記録に足す。
  * member_mail_campaigns.standing_key に入れる値。1つの key に文面は1つだけ（DB の一意インデックス）。
- * 327-E（リマインダー）・327-F（相談の案内）はここに1つずつ足す。
+ *   onboarding_day2 … 327-D はじめの案内（入会2日後の朝）
+ *   onboarding_day5 … 327-E 続きをデザインしよう（入会5日後の朝）
+ *   onboarding_day9 … 327-F 30分相談の案内（入会9日後の朝）
  */
-export const STANDING_KEYS = ["onboarding_day2"] as const;
+export const STANDING_KEYS = ["onboarding_day2", "onboarding_day5", "onboarding_day9"] as const;
 export type StandingKey = (typeof STANDING_KEYS)[number];
 
 /** 常設の文面のリンクの印（FROM_OF_KIND より優先。D・E・F で押した記録を分けるため） */
 export const FROM_OF_STANDING: Record<StandingKey, string> = {
   onboarding_day2: "email_pt",
+  onboarding_day5: "email_ps",
+  onboarding_day9: "email_pr",
 };
 
 export function isStandingKey(value: unknown): value is StandingKey {

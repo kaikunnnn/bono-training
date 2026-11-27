@@ -6,9 +6,10 @@
  *   例（スライス3以降）: 解約予約中を除く → excludeCancelScheduled を並べる / 連絡済み(#254) → 新しい Exclusion を足す
  */
 import { jstDayStart, jstDaysBetween, jstWeekStart, tenureBucket } from "./dates";
-import { learnedUserIds, type LessonIndex } from "./learned";
+import { isLearningEvent, type LessonIndex } from "./learned";
 import {
   CATEGORY_OF_KIND,
+  type ProgressEvent,
   WEEKLY_CAP_CATEGORIES,
   type Campaign,
   type CountSummary,
@@ -29,8 +30,8 @@ export interface ExclusionContext {
   now: Date;
   /** 常設の文面だけ: テスト用アカウント */
   testAccounts?: Set<string>;
-  /** 常設の文面だけ: 入会してから「学んだ」人 */
-  learned?: Set<string>;
+  /** 常設の文面だけ: 学習の決まり（StandingTargetDefinition.learning）で外す人と、その理由 */
+  learningReasons?: Map<string, string>;
   /** 常設の文面だけ: 14日で常設の文面をもう上限まで受け取った人 */
   standingCapped?: Set<string>;
 }
@@ -39,6 +40,8 @@ export interface Exclusion {
   /** 送信の記録・人数に残す理由（英小文字。個人情報を入れない） */
   reason: string;
   excludes(candidate: MemberCandidate, ctx: ExclusionContext): boolean;
+  /** 人によって理由が変わる除外だけ（例: 学習の決まり）。無ければ reason */
+  reasonOf?(candidate: MemberCandidate, ctx: ExclusionContext): string;
 }
 
 export const excludeSuppressed: Exclusion = {
@@ -95,7 +98,9 @@ export const TARGETS: Partial<Record<MailKind, TargetDefinition>> = {
 // - 1人に1回だけは、送信の記録の一意制約（campaign_id, user_id WHERE audience='all'）と、
 //   1つの standing_key に文面が1つだけ（DB の一意インデックス）で守る
 // - campaign.scheduledAt は「仕組みを有効にした時刻」。それより後に入会した人だけが対象（過去の入会者にさかのぼらない）
-// - 327-E・327-F は STANDING_TARGETS に1つ足し、入会からの日数と除外条件を並べる
+// - 文面ごとに「入会からの日数」「除外条件」「学習の決まり（learning）」を持つ。
+//   新しい文面は STANDING_TARGETS に1つ足すだけで、選ぶ処理・送る直前の見直しは共通のまま
+// - 常設の文面どうしは、日本時間の日付で2日以上あける（送る日の範囲で守る。テスト: standing-ef.test.ts）
 
 /** 入会から何日でも、常設の文面は合わせて14日で最大3通まで（327 の決まりごと） */
 export const STANDING_CAP_WINDOW_DAYS = 14;
@@ -106,16 +111,109 @@ export const excludeTestAccount: Exclusion = {
   excludes: (c, ctx) => Boolean(ctx.testAccounts?.has(c.userId)),
 };
 
-/** 入会してから「学んだ」人（learned.ts。分析側 #274 と同じ数え方） */
-export const excludeLearned: Exclusion = {
+/**
+ * 学習の決まり（StandingTargetDefinition.learning）に当たった人。理由は決まりごとに違う
+ * （例: learned＝学んだので外す / not_learned＝まだ学んでいないので外す / learned_recently＝最近学んだので外す）
+ */
+export const excludeByLearning: Exclusion = {
   reason: "learned",
-  excludes: (c, ctx) => Boolean(ctx.learned?.has(c.userId)),
+  excludes: (c, ctx) => Boolean(ctx.learningReasons?.has(c.userId)),
+  reasonOf: (c, ctx) => ctx.learningReasons?.get(c.userId) ?? "learned",
 };
+
+/** 以前の名前（327-D）。中身は excludeByLearning と同じ */
+export const excludeLearned = excludeByLearning;
 
 export const excludeStandingCap: Exclusion = {
   reason: "standing_cap",
   excludes: (c, ctx) => Boolean(ctx.standingCapped?.has(c.userId)),
 };
+
+// ----- 学習の決まり（「学んだ」の数え方は learned.ts。分析側 #274 と同じ） -----
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * 学習の決まりの1つ。「since(入会日, 今) 以降に学んだか」で外すかを決める。
+ * - excludeWhen: "learned" … その期間に学んでいたら外す / "not_learned" … その期間に学んでいなければ外す
+ * - 決まりは上から順に見て、最初に当たった理由で外す
+ * 「学んだ」の数え始めは、どの決まりでも入会日（日本時間0時）より前にはしない（課金前の無料の学習は数えない）
+ */
+export interface LearningCheck {
+  reason: string;
+  excludeWhen: "learned" | "not_learned";
+  since(joinedAt: Date, now: Date): Date;
+}
+
+export interface LearningRule {
+  checks: readonly LearningCheck[];
+}
+
+/** 327-D: 入会してから学んだ人は外す */
+export const LEARNING_RULE_NOT_YET_LEARNED: LearningRule = {
+  checks: [{ reason: "learned", excludeWhen: "learned", since: (joinedAt) => learningSince(joinedAt) }],
+};
+
+/** 327-E のリマインダー: 最近学んだかを見る日数（今日を含まず、日本時間の0時から） */
+export const REMINDER_QUIET_DAYS = 3;
+/**
+ * 327-E: 入会してから1回は学んだ人だけ。ただし直近 REMINDER_QUIET_DAYS 日（日本時間の「今日の0時 − 3日」から今まで）に
+ * 学んでいたら外す（まだ学んでいない人は 2日後・9日後の案内のほうで扱う）
+ */
+export const LEARNING_RULE_LEARNED_THEN_QUIET: LearningRule = {
+  checks: [
+    { reason: "not_learned", excludeWhen: "not_learned", since: (joinedAt) => learningSince(joinedAt) },
+    {
+      reason: "learned_recently",
+      excludeWhen: "learned",
+      since: (_joinedAt, now) => new Date(jstDayStart(now).getTime() - REMINDER_QUIET_DAYS * DAY_MS),
+    },
+  ],
+};
+
+/** 327-F の相談の案内: 入会日から何日目の0時（日本時間）以降の学習を見るか */
+export const CONSULT_QUIET_FROM_DAY = 7;
+/** 327-F: 入会7日目の0時（日本時間）から今までに学んだ人は外す。最初の1週間に学んだかは見ない */
+export const LEARNING_RULE_QUIET_SINCE_DAY7: LearningRule = {
+  checks: [
+    {
+      reason: "learned",
+      excludeWhen: "learned",
+      since: (joinedAt) => new Date(jstDayStart(joinedAt).getTime() + CONSULT_QUIET_FROM_DAY * DAY_MS),
+    },
+  ],
+};
+
+/** 学習の決まりが読む学習の記録の数え始め（どの決まりの since より前、かつ入会日の0時より前にしない） */
+export function learningEventsSince(rule: LearningRule, joinedAt: Date, now: Date): Date {
+  const floor = learningSince(joinedAt).getTime();
+  const times = rule.checks.map((c) => Math.max(floor, c.since(joinedAt, now).getTime()));
+  return new Date(Math.min(...times));
+}
+
+/**
+ * 1人分の学習の記録から、学習の決まりで外す理由を返す（外さないなら null）。純粋関数。
+ * events はその人の行だけでなくてもよい（userId で絞る）。
+ */
+export function learningExclusionReason(
+  rule: LearningRule,
+  userId: string,
+  events: readonly ProgressEvent[],
+  lessonIndex: LessonIndex,
+  joinedAt: Date,
+  now: Date,
+): string | null {
+  const floor = learningSince(joinedAt).getTime();
+  const learnedAt = events
+    .filter((e) => e.userId === userId && e.occurredAt.getTime() >= floor && isLearningEvent(e, lessonIndex))
+    .map((e) => e.occurredAt.getTime());
+  for (const check of rule.checks) {
+    const since = Math.max(floor, check.since(joinedAt, now).getTime());
+    const learned = learnedAt.some((t) => t >= since);
+    if (check.excludeWhen === "learned" ? learned : !learned) return check.reason;
+  }
+  return null;
+}
 
 export interface StandingTargetDefinition {
   key: StandingKey;
@@ -123,11 +221,14 @@ export interface StandingTargetDefinition {
   /** 入会日（日本時間）から何日後の朝に送るか。入会日が0 */
   sendOnDay: number;
   /**
-   * 送る日を取りこぼしたとき（その日の実行が失敗したなど）に、何日あとまで送ってよいか。
-   * 0 ならその日だけ。送る直前にもこの範囲を見直す（スイッチを止めて戻した行が何週間もあとに届かないように）
+   * sendOnDay から何日あとまで送ってよいか。0 ならその日だけ。
+   * 範囲の中の毎朝、その日に条件に合った人を選ぶ（取りこぼしの救済だけでなく、その朝に条件に合った人も入る）。
+   * 送る直前にもこの範囲を見直す（スイッチを止めて戻した行が何週間もあとに届かないように）
    */
   catchUpDays: number;
   exclusions: readonly Exclusion[];
+  /** 学習の決まり（exclusions の excludeByLearning が使う。送る直前の見直しも同じ決まりを見る） */
+  learning: LearningRule;
 }
 
 /**
@@ -139,12 +240,45 @@ export const ONBOARDING_DAY2_TARGET: StandingTargetDefinition = {
   kind: "signup",
   sendOnDay: 2,
   catchUpDays: 1,
-  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeLearned, excludeStandingCap],
+  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeByLearning, excludeStandingCap],
+  learning: LEARNING_RULE_NOT_YET_LEARNED,
+};
+
+/**
+ * 327-E 「続きをデザインしよう」のリマインダー: 入会の5日後の朝（日本時間）。6日後の朝まで。
+ * 入会してから1回は学んだが、日本時間の「今日の0時の3日前」から今までに学んでいない人へ1回だけ。
+ * おすすめの記事は出さない。まだ学んでいない人は外す（2日後・9日後の案内で扱う）
+ */
+export const ONBOARDING_DAY5_TARGET: StandingTargetDefinition = {
+  key: "onboarding_day5",
+  kind: "signup",
+  sendOnDay: 5,
+  catchUpDays: 1,
+  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeByLearning, excludeStandingCap],
+  learning: LEARNING_RULE_LEARNED_THEN_QUIET,
+};
+
+/**
+ * 327-F 30分相談の案内: 入会の9日後の朝（日本時間）。11日後の朝まで。
+ * 入会7日目の0時（日本時間）から今までに学んでいない人へ1回だけ（最初の1週間に学んだかは見ない）
+ */
+export const ONBOARDING_DAY9_TARGET: StandingTargetDefinition = {
+  key: "onboarding_day9",
+  kind: "signup",
+  sendOnDay: 9,
+  catchUpDays: 2,
+  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeByLearning, excludeStandingCap],
+  learning: LEARNING_RULE_QUIET_SINCE_DAY7,
 };
 
 export const STANDING_TARGETS: Record<StandingKey, StandingTargetDefinition> = {
   onboarding_day2: ONBOARDING_DAY2_TARGET,
+  onboarding_day5: ONBOARDING_DAY5_TARGET,
+  onboarding_day9: ONBOARDING_DAY9_TARGET,
 };
+
+/** 常設の文面どうしの間を、日本時間の日付で何日以上あけるか（送る日の範囲で守る。テストで確かめる） */
+export const STANDING_MIN_GAP_DAYS = 2;
 
 /**
  * 入会日（今の Stripe 契約の最初の課金日）と有効にした時刻から、今日が送る日か。
@@ -207,8 +341,9 @@ export async function selectStandingTargets(input: StandingSelectionInput): Prom
   if (due.length === 0) return empty;
 
   const ids = due.map((m) => m.userId);
-  const sinceByUser = new Map(due.map((m) => [m.userId, learningSince(joinedAt.get(m.userId)!)] as const));
-  const earliest = new Date(Math.min(...[...sinceByUser.values()].map((d) => d.getTime())));
+  const earliest = new Date(
+    Math.min(...due.map((m) => learningEventsSince(def.learning, joinedAt.get(m.userId)!, now).getTime())),
+  );
   const capSince = new Date(now.getTime() - STANDING_CAP_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const [unsubscribed, suppressed, events, capCounts] = await Promise.all([
     store.listUnsubscribedUserIds(category),
@@ -226,6 +361,11 @@ export async function selectStandingTargets(input: StandingSelectionInput): Prom
     }
   }
   const standingCapped = new Set([...capCounts].filter(([, n]) => n >= STANDING_CAP_MAX).map(([id]) => id));
+  const learningReasons = new Map<string, string>();
+  for (const m of due) {
+    const reason = learningExclusionReason(def.learning, m.userId, events, lessonIndex, joinedAt.get(m.userId)!, now);
+    if (reason) learningReasons.set(m.userId, reason);
+  }
 
   return applyExclusions(due, def.exclusions, {
     category,
@@ -234,7 +374,7 @@ export async function selectStandingTargets(input: StandingSelectionInput): Prom
     mailedThisWeek: new Set(),
     now,
     testAccounts,
-    learned: learnedUserIds(events, lessonIndex, sinceByUser),
+    learningReasons,
     standingCapped,
   });
 }
@@ -257,9 +397,10 @@ export async function standingIneligibleReason(input: {
   const joinedAt = member.stripeSubscriptionId ? await store.getContractStart(member.stripeSubscriptionId) : null;
   if (!joinedAt) return "not_eligible"; // 決済の記録が無い
   if (!isStandingDue(def, joinedAt, campaign.scheduledAt ?? null, now)) return "not_due";
-  const since = learningSince(joinedAt);
-  const events = await store.listProgressEvents([userId], since);
-  if (learnedUserIds(events, lessonIndex, new Map([[userId, since]])).has(userId)) return "learned";
+  // 選ぶときと同じ学習の決まりで見直す（例: 書き出したあとに学んだ / 327-E で最近学んだ）
+  const events = await store.listProgressEvents([userId], learningEventsSince(def.learning, joinedAt, now));
+  const learningReason = learningExclusionReason(def.learning, userId, events, lessonIndex, joinedAt, now);
+  if (learningReason) return learningReason;
   const capSince = new Date(now.getTime() - STANDING_CAP_WINDOW_DAYS * 24 * 60 * 60 * 1000);
   const counts = await store.countStandingMailsSince(capSince, [userId]);
   if ((counts.get(userId) ?? 0) >= STANDING_CAP_MAX) return "standing_cap";
@@ -286,7 +427,8 @@ export function applyExclusions(
     seen.add(c.userId);
     const hit = exclusions.find((e) => e.excludes(c, ctx));
     if (hit) {
-      excluded[hit.reason] = (excluded[hit.reason] ?? 0) + 1;
+      const reason = hit.reasonOf ? hit.reasonOf(c, ctx) : hit.reason;
+      excluded[reason] = (excluded[reason] ?? 0) + 1;
     } else {
       included.push(c);
     }
