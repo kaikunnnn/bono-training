@@ -54,6 +54,7 @@ const PAGE = 1000;
 const DUE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 type DbRow = Record<string, unknown>;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function toDate(value: unknown): Date | null {
   if (typeof value !== "string" || value.length === 0) return null;
@@ -409,14 +410,17 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
 
     async listConsultBookedUserIds(userIds) {
       // 突き合わせ（user_id かアカウントのアドレス）は DB 関数の中で行う。アプリには user_id だけが返る
-      // テーブル: supabase/migrations/20261127120000_member_mail_consult_bookings.sql
+      // テーブル: supabase/migrations/20261127160000_member_mail_consult_bookings.sql
       const ids = new Set<string>();
       for (const part of chunks(userIds, ID_CHUNK)) {
         const { data, error } = await client.rpc("member_mail_consult_booked_user_ids", { p_user_ids: part });
         if (error) fail("consult bookings read", error);
-        for (const r of (data ?? []) as unknown[]) {
-          const id = typeof r === "string" ? r : (r as DbRow)?.member_mail_consult_booked_user_ids;
-          if (typeof id === "string") ids.add(id);
+        // PostgREST は RETURNS SETOF uuid を uuid の文字列の配列で返す（ローカル DB で確認）。
+        // 形が違えば黙って「予約なし」にせず失敗させる（呼ぶ側が送らない側に倒す）
+        if (!Array.isArray(data)) fail("consult bookings read", { code: "unexpected_shape" });
+        for (const r of data as unknown[]) {
+          if (typeof r !== "string" || !UUID_RE.test(r)) fail("consult bookings read", { code: "unexpected_row" });
+          ids.add(r);
         }
       }
       return ids;
@@ -668,7 +672,9 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
         p_start_time: input.startTime ? input.startTime.toISOString() : null,
       });
       if (error) fail("consult booking record", error);
-      return (data === "cancelled" ? "cancelled" : "booked") as ConsultBookingStatus;
+      // 関数は記録後の status（text）を返す。それ以外なら記録できたか分からないので失敗にする（route が 500 を返す）
+      if (data !== "booked" && data !== "cancelled") fail("consult booking record", { code: "unexpected_result" });
+      return data as ConsultBookingStatus;
     },
 
     // ----- webhook -----

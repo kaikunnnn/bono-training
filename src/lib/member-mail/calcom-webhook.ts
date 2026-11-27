@@ -1,7 +1,7 @@
 /**
  * Cal.com の webhook（30分相談の予約・取り消し・日時の変更）の署名検証と処理（#327-F）。
  * 受け口は src/app/api/webhooks/calcom/route.ts。記録は member_mail_consult_bookings
- * （supabase/migrations/20261127120000_member_mail_consult_bookings.sql）。
+ * （supabase/migrations/20261127160000_member_mail_consult_bookings.sql）。
  *
  * 出典（Cal.com 公式。2026-11-27 に確認）:
  * - https://cal.com/help/webhooks
@@ -12,8 +12,13 @@
  *   - BOOKING_RESCHEDULED: payload.uid は新しい予約の uid、payload.rescheduleUid が元の予約の uid
  *   - BOOKING_CANCELLED: payload.status = "CANCELLED"（uid は取り消した予約）
  *   - 署名は本文の生のバイト列に対して計算される（独自ヘッダーがあっても同じ）
+ *   - このページは値の書き方（16進か base64 か）を書いていない
  * - https://cal.com/docs/features/workflow-webhooks
- *   - X-Cal-Signature-256 は「An HMAC-SHA256 hex digest of the request body」。secret が無いと値は `no-secret-provided`
+ *   - 「Send webhook」の手順（workflow）のページ。X-Cal-Signature-256 は「An HMAC-SHA256 hex digest of the request body」、
+ *     secret が無いと値は `no-secret-provided`、とある
+ *   ★16進であることと `no-secret-provided` は、このページ（workflow の webhook）の記述で、
+ *     ふつうの webhook（Settings → Developer → Webhooks）でも同じかは公式に書かれていない。
+ *     本番で webhook を作ったあとの試しの予約で確かめる（合わなければ 401 になり、運用 Slack に calcom_invalid_signature が出る）
  *
  * 守ること:
  * - アドレスはログに出さない（出すのは種類と結果だけ）。保存するのは DB の表の中だけ

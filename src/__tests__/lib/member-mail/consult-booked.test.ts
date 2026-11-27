@@ -32,6 +32,12 @@ const routeStore = { current: new MemStore() };
 vi.mock("@/lib/member-mail/runtime", () => ({
   getMailStore: () => routeStore.current,
 }));
+const opsAlerts: { title: string; counts: Record<string, number>; note?: string }[] = [];
+vi.mock("@/lib/member-mail/ops-alert", () => ({
+  notifyMailOps: async (a: { title: string; counts: Record<string, number>; note?: string }) => {
+    opsAlerts.push(a);
+  },
+}));
 
 const CAL_SECRET = "calcom-test-secret-0123456789";
 const TEST_PREFIX = "qa-fixture";
@@ -118,12 +124,13 @@ function calRequest(body: unknown, signature: string | null) {
 let logSpy: ReturnType<typeof vi.spyOn>;
 let errSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
+  opsAlerts.length = 0;
   logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 });
 afterEach(() => {
   // どのテストでも、ログにアドレス（大文字・小文字どちらも）を出さない
-  const all = JSON.stringify([...logSpy.mock.calls, ...errSpy.mock.calls]).toLowerCase();
+  const all = JSON.stringify([...logSpy.mock.calls, ...errSpy.mock.calls, opsAlerts]).toLowerCase();
   expect(all).not.toContain("example.invalid");
   vi.restoreAllMocks();
   delete process.env.CALCOM_WEBHOOK_SECRET;
@@ -161,6 +168,9 @@ describe("Cal.com の署名（X-Cal-Signature-256 = 本文の HMAC-SHA256 の16�
     const missing = await POST(calRequest(body, null));
     expect(missing.status).toBe(401);
     expect(routeStore.current.consultBookings.size).toBe(0);
+    // 署名が合わないことは運用 Slack に件数だけ出す
+    expect(opsAlerts.map((a) => a.counts)).toEqual([{ calcom_invalid_signature: 1 }, { calcom_invalid_signature: 1 }]);
+    opsAlerts.length = 0;
 
     for (let i = 0; i < 2; i++) {
       const res = await POST(calRequest(body, sign(JSON.stringify(body))));
@@ -168,6 +178,7 @@ describe("Cal.com の署名（X-Cal-Signature-256 = 本文の HMAC-SHA256 の16�
       expect(await res.json()).toMatchObject({ ok: true, outcome: "booked" });
     }
     expect(routeStore.current.consultBookings.size).toBe(1);
+    expect(opsAlerts).toEqual([]); // 正しく記録できたときは通知しない
     expect(routeStore.current.consultBookings.get("bk-1")).toMatchObject({
       attendeeEmail: "member1@example.invalid",
       status: "booked",
@@ -194,6 +205,94 @@ describe("Cal.com の署名（X-Cal-Signature-256 = 本文の HMAC-SHA256 の16�
       expect(await r.json()).toMatchObject({ outcome: "ignored" });
     }
     expect(routeStore.current.consultBookings.size).toBe(0);
+  });
+});
+
+describe("route: 記録の失敗・読めない中身は運用 Slack に出す（アドレスは出さない）", () => {
+  it("記録に失敗したら 500 を返し、種類と件数だけ通知する", async () => {
+    const store = new MemStore();
+    store.recordConsultBooking = async () => {
+      throw new Error("consult booking record failed: 42P01");
+    };
+    routeStore.current = store;
+    process.env.CALCOM_WEBHOOK_SECRET = CAL_SECRET;
+    const { POST } = await import("@/app/api/webhooks/calcom/route");
+    const body = calBody("BOOKING_CREATED");
+    const res = await POST(calRequest(body, sign(JSON.stringify(body))));
+    expect(res.status).toBe(500);
+    expect(opsAlerts.map((a) => a.counts)).toEqual([{ calcom_failed_booking_created: 1 }]);
+  });
+
+  it("uid か予約した人のアドレスが無い中身は 200 で記録せず、種類と件数だけ通知する", async () => {
+    routeStore.current = new MemStore();
+    process.env.CALCOM_WEBHOOK_SECRET = CAL_SECRET;
+    const { POST } = await import("@/app/api/webhooks/calcom/route");
+    const body = calBody("BOOKING_CANCELLED", { attendees: [{ name: "メールなし" }] });
+    const res = await POST(calRequest(body, sign(JSON.stringify(body))));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ outcome: "invalid" });
+    expect(routeStore.current.consultBookings.size).toBe(0);
+    expect(opsAlerts.map((a) => a.counts)).toEqual([{ calcom_invalid_booking_cancelled: 1 }]);
+  });
+
+  it("知らない種類の名前を通知・ログにそのまま出さない", async () => {
+    routeStore.current = new MemStore();
+    process.env.CALCOM_WEBHOOK_SECRET = CAL_SECRET;
+    const { POST } = await import("@/app/api/webhooks/calcom/route");
+    const body = calBody("member1@example.invalid");
+    const res = await POST(calRequest(body, sign(JSON.stringify(body))));
+    expect(await res.json()).toMatchObject({ outcome: "ignored" });
+    expect(opsAlerts).toEqual([]);
+  });
+});
+
+describe("日時の変更の端のケース", () => {
+  it("rescheduleUid が無い: 新しい予約だけ booked で記録し、ほかの行は作らない", async () => {
+    const store = new MemStore();
+    expect(await handleCalcomEvent({ store, matcher: MATCHER }, calBody("BOOKING_RESCHEDULED", { uid: "bk-new" }))).toBe("rescheduled");
+    expect([...store.consultBookings.entries()].map(([k, v]) => [k, v.status])).toEqual([["bk-new", "booked"]]);
+  });
+
+  it("rescheduleUid が uid と同じ: 取り消しにしない（booked のまま）", async () => {
+    const store = new MemStore();
+    await handleCalcomEvent({ store, matcher: MATCHER }, calBody("BOOKING_RESCHEDULED", { uid: "bk-same", rescheduleUid: "bk-same" }));
+    expect([...store.consultBookings.entries()].map(([k, v]) => [k, v.status])).toEqual([["bk-same", "booked"]]);
+  });
+});
+
+describe("Cal.com の webhook の鍵が無いときは count より上げない", () => {
+  for (const key of CONSULT_BOOKED_EXCLUDED_KEYS) {
+    for (const mode of ["owner", "all"] as const) {
+      it(`${key}: ${mode} では書き出さずに止めて知らせる`, async () => {
+        const { store, campaign: c } = seed(key);
+        store.campaigns.get(c.id)!.standingMode = mode;
+        store.settings.ownerUserIds = [uid(1)];
+        const alerts: { counts?: Record<string, number> }[] = [];
+        const deps = makeDeps(store, new FakeMail(), alerts, {
+          now: () => morningOf(SEND_DAY[key]),
+          consultWebhookConfigured: false,
+        });
+        expect(await prepareCampaign(deps, store.campaigns.get(c.id)!)).toEqual({
+          outcome: "blocked",
+          reason: "calcom_webhook_secret_unset",
+        });
+        expect(store.deliveries).toHaveLength(0);
+        expect(alerts[0].counts).toEqual({ calcom_webhook_secret_unset: 1 });
+      });
+    }
+
+    it(`${key}: 人数だけ出す（count）は鍵が無くても動く`, async () => {
+      const { store, campaign: c } = seed(key);
+      store.campaigns.get(c.id)!.standingMode = "count";
+      const deps = makeDeps(store, new FakeMail(), [], { now: () => morningOf(SEND_DAY[key]), consultWebhookConfigured: false });
+      expect(await prepareCampaign(deps, store.campaigns.get(c.id)!)).toMatchObject({ outcome: "counted" });
+    });
+  }
+
+  it("onboarding_day5 は鍵が無くても今までどおり書き出す", async () => {
+    const { store, campaign: c } = seed("onboarding_day5", { learnedOnDay1: true });
+    const deps = makeDeps(store, new FakeMail(), [], { now: () => morningOf(5), consultWebhookConfigured: false });
+    expect(await prepareCampaign(deps, c)).toMatchObject({ outcome: "enqueued", inserted: 2 });
   });
 });
 

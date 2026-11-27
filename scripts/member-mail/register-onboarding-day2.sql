@@ -4,7 +4,7 @@
 -- ★本番への登録はオーナーの判断で行う（このファイルはマイグレーションではない。supabase db push では当たらない）
 -- 前提: supabase/migrations/20261125090715_member_mail_standing_campaigns.sql を当てたあと
 --       20261127010837_member_mail_standing_mode.sql を当てたあと（文面ごとのスイッチ standing_mode）
---       20261127120000_member_mail_consult_bookings.sql を当てたあと（30分相談を予約した人を外す。当てる前は書き出さない・送らない）
+--       20261127160000_member_mail_consult_bookings.sql を当てたあと（30分相談を予約した人を外す。当てる前は書き出さない・送らない）
 --
 -- このSQLがすること:
 --   - 文面を1行入れる（kind=signup / standing_key=onboarding_day2）。すでにあれば何もしない
@@ -34,6 +34,10 @@
 --      ★合格条件（必須）: 同じ日の対象（最初の課金日がその日の2〜3日前の人）を手で数え、
 --        candidates・will_send・excluded_learned（学んだので外した人） が手で数えた人数と合うこと。
 --        対象がいるのに excluded_learned がずっと0なら「学んだ」の判定が効いていない疑いがあるので、all に上げない
+--   ★4. に進む前に（必須・327-F）: 30分相談を予約した人を外す準備を終える。
+--      - 20261127160000_member_mail_consult_bookings.sql を当て、Vercel に CALCOM_WEBHOOK_SECRET を入れ、
+--        Cal.com の webhook を登録して試しの予約で行が入ることを確かめる（鍵が無いと count より上では書き出さない）
+--      - scripts/member-mail/import-calcom-bookings.sql で webhook を作る前の予約を入れる
 --   4. オーナーだけに送って見た目を確かめる
 --      全体・signup がまだ all でなければ、上限として一度だけ all にする（このときほかの常設の文面の standing_mode が
 --      off / count のままであることを先に確かめる。全体を上げると weekly など他の種類にも効くので、他の種類のスイッチも先に確かめる）:

@@ -1,7 +1,10 @@
 -- =============================================================================
--- 30分相談（Cal.com）の「webhook を作る前の予約」を、あとから手で入れる（#327-F・任意）
+-- 30分相談（Cal.com）の「webhook を作る前の予約」を、あとから手で入れる（#327-F・必須）
 --
--- ★これはマイグレーションではない（supabase db push では当たらない）。実行するかはオーナーが決める。
+-- ★必須: はじめの案内（onboarding_day2）・30分相談の案内（onboarding_day9）の standing_mode を
+--   count より上（owner / all）に上げる前に、必ずこれで過去の予約を入れる（入れないと、もう予約した人にも誘いが届く）。
+--   入れる予約が1件も無いと確かめた場合も、「確かめる」の結果（rows_to_import = 0）を残してから上げる。
+-- ★これはマイグレーションではない（supabase db push では当たらない）。実行するのはオーナー。
 -- ★AI・自動の処理からは実行しない。会員のアドレスをこのファイルに書いてコミットしない（貼るのは SQL エディタの上だけ）。
 --
 -- なぜ要るか:
@@ -10,7 +13,7 @@
 --   はじめの案内（onboarding_day2）・30分相談の案内（onboarding_day9）が届いてしまう。
 --
 -- 前提:
---   supabase/migrations/20261127120000_member_mail_consult_bookings.sql を当てたあと
+--   supabase/migrations/20261127160000_member_mail_consult_bookings.sql を当てたあと
 --   （member_mail_record_consult_booking 関数がある。service_role の権限で動く SQL エディタから実行する）
 --
 -- 手順:

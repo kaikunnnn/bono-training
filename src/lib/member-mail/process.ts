@@ -24,6 +24,7 @@ import type { NotifyMailOps } from "./ops-alert";
 import { slackCountLines, type SlackDmDeps } from "./slack-dm";
 import {
   ConsultBookingsUnavailableError,
+  excludesConsultBooked,
   isStandingDue,
   isTestAccountEmail,
   selectStandingTargets,
@@ -75,6 +76,12 @@ export interface MailDeps {
   loadLessonIndex: () => Promise<LessonIndex>;
   /** 常設の文面の Slack DM（#327-H）。送るのは route の最後の runSlackDmBatch。ここでは人数の行だけに使う */
   slackDm?: SlackDmDeps | null;
+  /**
+   * Cal.com の webhook の鍵（CALCOM_WEBHOOK_SECRET）が入っているか（327-F）。
+   * 入っていないと相談の予約が記録されないので、予約した人を外す文面（CONSULT_BOOKED_EXCLUDED_KEYS）は
+   * 人数だけ出す（count）より上では書き出さない
+   */
+  consultWebhookConfigured: boolean;
 }
 
 /** 全体と種類ごとのスイッチのうち、弱いほう（off < count < owner < all） */
@@ -240,6 +247,10 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   if (def.kind !== campaign.kind) return { outcome: "unsupported_kind" };
   // 朝の送ってよい時間の中でだけ選ぶ（夜中に選んで翌朝に送る、を起こさない）
   if (!isWithinSendWindow(now, settings.sendHourStart, settings.sendHourEnd)) return { outcome: "outside_window" };
+  // 相談の予約で外す文面は、Cal.com の webhook の鍵が無いまま count より上げない（予約が記録されず、予約した人にも誘いが届くため）
+  if (mode !== "count" && excludesConsultBooked(def.key) && !deps.consultWebhookConfigured) {
+    return blockStanding(deps, campaign, "calcom_webhook_secret_unset");
+  }
   const blockReason = getCampaignBlockReason(campaign);
   const category = CATEGORY_OF_KIND[campaign.kind];
 

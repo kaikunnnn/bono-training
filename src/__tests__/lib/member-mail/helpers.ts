@@ -427,6 +427,7 @@ export function makeDeps(
     replyTo: "owner@example.invalid",
     unsubscribeSecret: SECRET,
     loadLessonIndex: async () => testLessonIndex(),
+    consultWebhookConfigured: true,
     ...over,
   };
 }

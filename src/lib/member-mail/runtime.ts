@@ -98,5 +98,6 @@ export function createMailDeps(store: SupabaseMailStore | null = getMailStore())
     unsubscribeSecret,
     loadLessonIndex,
     slackDm: createSlackDmDeps(),
+    consultWebhookConfigured: (process.env.CALCOM_WEBHOOK_SECRET ?? "").length > 0,
   };
 }

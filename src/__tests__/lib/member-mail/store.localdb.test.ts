@@ -40,6 +40,7 @@ function deps(mail: FakeMail, alerts: unknown[] = []): MailDeps {
     replyTo: null,
     unsubscribeSecret: SECRET,
     loadLessonIndex: async () => testLessonIndex(),
+    consultWebhookConfigured: true,
   };
 }
 
