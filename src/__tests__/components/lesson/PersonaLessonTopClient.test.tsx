@@ -193,7 +193,8 @@ describe("PersonaLessonTopClient", () => {
 
   it("resolves the dedicated top only for configured slugs", () => {
     expect(getLessonTopContent(PERSONA_LESSON_SLUG)?.introVersion).toBe("persona-v1");
-    expect(getLessonTopContent("ai-research-ui-design")?.introVersion).toBe("ai-research-v1");
+    // AIリサーチ入門は通常のレッスンページで出す（11/27）
+    expect(getLessonTopContent("ai-research-ui-design")).toBeUndefined();
     expect(getLessonTopContent("other-lesson")).toBeUndefined();
     expect(getLessonTopContent("toString")).toBeUndefined();
   });

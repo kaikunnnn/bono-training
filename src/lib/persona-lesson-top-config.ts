@@ -412,7 +412,8 @@ export const aiResearchLessonTopContent = {
 /** 専用トップを持つレッスンの slug → 文言・画像 */
 export const lessonTopContents: Readonly<Record<string, LessonTopContent>> = {
   [PERSONA_LESSON_SLUG]: personaLessonTopContent,
-  [AI_RESEARCH_LESSON_SLUG]: aiResearchLessonTopContent,
+  // AIリサーチ入門は通常のレッスンページ（LessonDetailClient）で出す（2026-11-27 オーナー指定）。
+  // 専用トップの文言 aiResearchLessonTopContent は /dev の試作用に残す
 };
 
 export function getLessonTopContent(slug: string): LessonTopContent | undefined {
