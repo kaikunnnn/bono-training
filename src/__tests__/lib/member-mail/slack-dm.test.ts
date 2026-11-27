@@ -41,6 +41,9 @@ function standingCampaign(over: Partial<Campaign> = {}): Campaign {
     body: ONBOARDING_DAY2_COPY.body,
     standingKey: "onboarding_day2",
     scheduledAt: ACTIVATED,
+    // PR #342 の文面ごとのスイッチ（standing_mode。未設定は count）を入れた後も、このテストではメールを全員に送る。
+    // この枝の Campaign 型にはまだ無いので型を外して渡す（#342 が先に入れば普通に書ける）
+    ...({ standingMode: "all" } as unknown as Partial<Campaign>),
     ...over,
   });
 }
