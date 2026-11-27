@@ -38,7 +38,7 @@ const AUDIENCE_LINE: Record<MailKind, string> = {
   winback: "このメールは、以前BONOをご利用いただいた方にお送りしています。",
 };
 
-const LINK_RE = /\[([^\]\n]+)\]\(([^)\s]+)\)/g;
+export const LINK_RE = /\[([^\]\n]+)\]\(([^)\s]+)\)/g;
 
 /** 送れない理由。null なら送ってよい（承認・空・仮の文字・https 以外のURL） */
 export function getCampaignBlockReason(campaign: Campaign): string | null {
@@ -95,12 +95,12 @@ export function withFromParam(href: string, from: string, siteUrl: string): stri
   return url.toString();
 }
 
-interface Block {
+export interface Block {
   type: "p" | "h" | "ul";
   lines: string[];
 }
 
-function parseBlocks(body: string): Block[] {
+export function parseBlocks(body: string): Block[] {
   const blocks: Block[] = [];
   for (const chunk of body.replace(/\r\n?/g, "\n").split(/\n{2,}/)) {
     const lines = chunk.split("\n").map((l) => l.trimEnd()).filter((l) => l.trim().length > 0);

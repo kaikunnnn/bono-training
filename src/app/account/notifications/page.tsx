@@ -13,8 +13,10 @@ import {
 import { NotificationPreferencesForm } from "@/components/account/NotificationPreferencesForm";
 import { PushNotificationToggle } from "@/components/account/PushNotificationToggle";
 import { MemberMailToggle } from "@/components/account/MemberMailToggle";
-import { getMailStore } from "@/lib/member-mail/runtime";
+import { SlackDmToggle } from "@/components/account/SlackDmToggle";
+import { getMailStore, getSlackDmStore, getSlackTeamId } from "@/lib/member-mail/runtime";
 import { isMemberMailEnabled } from "@/lib/member-mail/self-settings";
+import { loadSlackDmSetting } from "@/lib/member-mail/slack-dm";
 
 export const metadata: Metadata = {
   title: "通知設定",
@@ -35,9 +37,10 @@ export default async function NotificationSettingsPage({
     );
   }
 
-  const [preferences, mailEnabled] = await Promise.all([
+  const [preferences, mailEnabled, slackDmEnabled] = await Promise.all([
     getNotificationPreferences(),
     readMemberMailEnabled(user.id),
+    readSlackDmEnabled(user.id),
   ]);
 
   return (
@@ -67,10 +70,26 @@ export default async function NotificationSettingsPage({
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             オフにすると、BONOからのお知らせメールが届かなくなります。お支払い・契約・ログインに関するメールは、この設定にかかわらず届きます。
+            {slackDmEnabled !== null && "SlackのDMでのお知らせも、あわせて止まります。"}
           </p>
           <MemberMailToggle initialEnabled={mailEnabled} />
         </div>
       </SettingsCard>
+
+      {slackDmEnabled !== null && (
+        <SettingsCard title="Slack">
+          <div className="space-y-4">
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <p>
+                BONOからのお知らせを、メールと同じ内容でSlackのDMでもお送りします。オフにすると、このお知らせのDMだけが止まります。
+              </p>
+              <p>上の「BONOからのお知らせメール」をオフにしているときは、SlackのDMでのお知らせも届きません。</p>
+              <p>Slackのチャンネルに投稿があったときの通知は、Slackのアプリの設定で変えられます（この設定では変わりません）。</p>
+            </div>
+            <SlackDmToggle initialEnabled={slackDmEnabled} />
+          </div>
+        </SettingsCard>
+      )}
     </SettingsPageLayout>
   );
 }
@@ -85,4 +104,14 @@ async function readMemberMailEnabled(userId: string): Promise<boolean | null> {
     console.error("[member-mail] settings read failed:", error instanceof Error ? error.message : "unknown");
     return null;
   }
+}
+
+/**
+ * Slack の DM で受け取るか（#327-H）。カードを出さないときは null
+ * （BONO のワークスペースでつながっていない、まだ DM が届きうる人でない、読めない。条件は loadSlackDmSetting）
+ */
+async function readSlackDmEnabled(userId: string): Promise<boolean | null> {
+  const store = getSlackDmStore();
+  if (!store) return null;
+  return loadSlackDmSetting(store, getSlackTeamId(), userId);
 }

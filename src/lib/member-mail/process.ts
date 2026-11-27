@@ -20,6 +20,7 @@ import { getCampaignBlockReason, renderMail, unsubscribeHeaders } from "./conten
 import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
 import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
+import { slackCountLines, type SlackDmDeps } from "./slack-dm";
 import {
   isStandingDue,
   isTestAccountEmail,
@@ -70,6 +71,8 @@ export interface MailDeps {
    * 読めなければ例外を投げる（常設の文面は書き出さず・送らない）
    */
   loadLessonIndex: () => Promise<LessonIndex>;
+  /** 常設の文面の Slack DM（#327-H）。送るのは route の最後の runSlackDmBatch。ここでは人数の行だけに使う */
+  slackDm?: SlackDmDeps | null;
 }
 
 /** 全体と種類ごとのスイッチのうち、弱いほう（off < count < owner < all） */
@@ -281,6 +284,14 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   const count = summarize(campaign.kind, mode, blockReason === null, selection, now);
   await store.saveCount(campaign.id, count, now);
 
+  // Slack の DM のスイッチが off でなければ、Slack の人数も足す（#327-H）
+  const slackLines = await slackCountLines(
+    deps,
+    campaign.standingKey,
+    selection.included.map((c) => c.userId),
+    settings.ownerUserIds,
+  );
+
   if (mode === "count") {
     await deps.notifyOps({
       title: `人数だけ出しました（${campaign.label}）`,
@@ -288,6 +299,7 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
         candidates: count.candidates,
         will_send: count.willSend,
         ...prefixKeys("excluded_", count.excluded),
+        ...slackLines,
       },
       note: [
         blockReason ? `文面はまだ送れない状態です（${blockReason}）。` : "文面は承認済みです。",
@@ -310,7 +322,7 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   if (inserted > 0) {
     await deps.notifyOps({
       title: `今日の対象を送る準備をしました（${campaign.label}）`,
-      counts: { queued: inserted, ...prefixKeys("excluded_", count.excluded) },
+      counts: { queued: inserted, ...prefixKeys("excluded_", count.excluded), ...slackLines },
     });
   }
   logEvent("enqueued_standing", { campaignId: campaign.id, inserted });

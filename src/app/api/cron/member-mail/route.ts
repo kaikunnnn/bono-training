@@ -16,11 +16,13 @@
 //    （人数だけ → 人数を記録して運用 Slack へ / オーナーだけ・全員 → 送信の記録に書く）
 // 2. 常設の文面ごとに、今日が送る日の人を選ぶ（1つめと別に失敗を受け止め、weekly を巻き込まない）
 // 3. 送信の記録から1回分（数十人・1日の上限・8〜21時）を送る
+// 4. メールを送り終えたら、残りの時間で、送れた常設の文面の分の Slack DM を送る（#327-H。残りが15秒未満なら次の回へ）
 // 返す JSON は件数だけ（個人情報なし）。
 
 import { NextRequest, NextResponse } from "next/server";
 import { prepareCampaign, runSendBatch, type MailDeps, type PrepareResult } from "@/lib/member-mail/process";
 import { createMailDeps } from "@/lib/member-mail/runtime";
+import { runSlackDmBatch } from "@/lib/member-mail/slack-dm";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -67,7 +69,9 @@ export async function GET(request: NextRequest) {
       }
       batch = await runSendBatch(deps, { timeBudgetMs: SEND_BUDGET_MS - (Date.now() - startedAt) });
     }
-    return NextResponse.json({ prepared, standingBatch, batch });
+    // Slack の DM はメールの送信が終わってから（メールの時間・上限を使わない）。失敗してもメールの結果は返す
+    const slackDm = await runSlackDmBatch(deps, { timeBudgetMs: SEND_BUDGET_MS - (Date.now() - startedAt) });
+    return NextResponse.json({ prepared, standingBatch, batch, slackDm });
   } catch (error) {
     console.error("[member-mail] cron failed:", error instanceof Error ? error.message : "unknown");
     return NextResponse.json({ error: "member_mail_failed" }, { status: 500 });
