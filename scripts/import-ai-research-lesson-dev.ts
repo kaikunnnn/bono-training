@@ -433,6 +433,7 @@ function buildDocs() {
         ...(UNLISTED.has(extra.number) ? {} : { publishedAt: PUBLISHED_AT }),
         content,
         _source: extra.file.split("/").slice(-2).join("/"),
+        ...(THUMBS[extra.number] ? { _thumb: join(PUBLIC_DIR, THUMBS[extra.number]) } : {}),
       });
     }
 
