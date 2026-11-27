@@ -31,7 +31,9 @@ const ID_PREFIX = "air-";
 // 公開後は番号を詰め直しても _id と slug を変えない（進捗・ブックマーク・外部リンクが別記事を指すため）
 const SLUG_PREFIX = "ai-research-";
 // 中身が未完成の記事は publishedAt を付けない（新着・更新一覧に出さない。11/27 オーナー決定）
-const UNLISTED = new Set(["01-2", "04-1", "04-2"]); // 01-3 は 11/27 に本文を完成
+const UNLISTED = new Set(["04-1", "04-2"]); // 01-3 は 11/27 に本文を完成。01-2 は 11/27 に動画と紹介文がそろい一覧に出した
+// 一覧に出した日が PUBLISHED_AT と違う記事（11/27 オーナー決定「更新一覧に出す」。patch-ai-research-01-2-publish.ts で本番に入れた値と同じ）
+const PUBLISHED_AT_OVERRIDE: Record<string, string> = { "01-2": "2026-11-27T03:00:00.000Z" };
 // --only=01-3 のように記事番号を渡すと、その記事だけを書き込む（本番で1本だけ直すとき）
 const ONLY = process.argv.find((a) => a.startsWith("--only="))?.slice("--only=".length).split(",") ?? null;
 const OVERWRITE = process.argv.includes("--overwrite");
@@ -303,6 +305,15 @@ const DRAFT_MAP: Record<string, string[]> = {
 // 下書きMDの video_url より優先する動画（YouTubeに出した回）
 const VIDEO_OVERRIDE: Record<string, string> = {
   "01-1": "https://www.youtube.com/watch?v=zZ-v_K-R0Z4", // 11/27 18:30 公開予約
+  "01-2": "https://vimeo.com/1250492804", // BONO版（締めがYouTube版と違う）。11/27 patch-ai-research-01-2-video.ts で本番に付けた
+};
+// 下書きMDがない記事の本文（無いと「準備中」1行になる）。patch-ai-research-01-2-intro.ts で本番に入れたものと同じ文
+const BODY_OVERRIDE: Record<string, string[]> = {
+  "01-2": [
+    "AIが作った語学交換SNS「ハナソ」の新規登録フロー。見た目はきれいなのに、エラー表示も、言語を選ぶ画面もありません。",
+    "この動画では、足りなかったのが「業種」と「UIの基本」の知識だったことと、それをAIでリサーチして直すとUIがどう変わるかを、ビフォーとアフターで見ていきます。",
+    "調べ方の細かいコツは、このあとのクエスト02から一つずつやっていきます。",
+  ],
 };
 const CHALLENGE_DRAFTS = ["3-1", "3-3"];
 
@@ -384,7 +395,9 @@ function buildDocs() {
           content = content.concat(part);
           sources.push(file.slice(SOURCE_DIR.length + 1));
         });
-        if (!content.length) content = [block(PLACEHOLDER_TEXT)];
+        // 下書きMDがない記事でも VIDEO_OVERRIDE・BODY_OVERRIDE を使う（無いと流し直しで本番の動画・本文が消える）
+        if (!videoUrl && VIDEO_OVERRIDE[row.number]) videoUrl = VIDEO_OVERRIDE[row.number];
+        if (!content.length) content = BODY_OVERRIDE[row.number]?.map((t) => block(t)) ?? [block(PLACEHOLDER_TEXT)];
 
         const id = `${ID_PREFIX}article-${row.number}`;
         articleIds.push(id);
@@ -402,7 +415,7 @@ function buildDocs() {
           ...(excerpt ? { excerpt } : {}),
           ...(videoUrl ? { videoUrl } : {}),
           author: "bono",
-          ...(UNLISTED.has(row.number) ? {} : { publishedAt: PUBLISHED_AT }),
+          ...(UNLISTED.has(row.number) ? {} : { publishedAt: PUBLISHED_AT_OVERRIDE[row.number] ?? PUBLISHED_AT }),
           content,
           _source: sources.join(" + ") || "(placeholder)",
           ...(thumbPath ? { _thumb: join(PUBLIC_DIR, thumbPath) } : {}),

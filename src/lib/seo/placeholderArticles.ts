@@ -13,8 +13,7 @@ export const PLACEHOLDER_ARTICLE_SLUGS: ReadonlySet<string> = new Set([
   "sbd-step4-wip",
   // 「作成中」本文約80字（2026-11-01 確認）
   "ai-ui-styling-coming-soon",
-  // AIリサーチ入門: 本文がまだ無い・製作中（2026-11-27 公開時）
-  "ai-research-01-2",
+  // AIリサーチ入門: 本文がまだ無い・製作中（2026-11-27 公開時）。01-2 は同日に動画と紹介文を入れて検索に出した（#318）
   "ai-research-04-1",
   "ai-research-04-2",
 ]);
