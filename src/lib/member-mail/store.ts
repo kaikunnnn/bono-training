@@ -86,9 +86,13 @@ function mapCampaign(row: DbRow): Campaign {
   };
 }
 
-/** 列が無い（マイグレーション前）なら undefined（文面では絞らない）。知らない値なら止める側（off）に倒す */
-function mapStandingMode(value: unknown): MailMode | undefined {
-  return value === undefined ? undefined : toMode(value);
+/**
+ * 常設の文面ごとのスイッチ（standing_mode）。
+ * 列が無い（マイグレーション前）・NULL なら count（人数だけ。全員には送らない＝列の既定と同じ）。知らない値なら off に倒す
+ */
+export function mapStandingMode(value: unknown): MailMode {
+  if (value === undefined || value === null) return "count";
+  return toMode(value);
 }
 
 function chunks<T>(items: readonly T[], size: number): T[][] {

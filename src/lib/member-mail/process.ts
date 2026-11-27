@@ -21,6 +21,7 @@ import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
 import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
 import {
+  isStandingDue,
   isTestAccountEmail,
   selectStandingTargets,
   selectTargets,
@@ -77,12 +78,32 @@ export function effectiveMode(global: MailMode, kind: MailMode): MailMode {
 }
 
 /**
- * 常設の文面だけ: 文面ごとのスイッチ（standing_mode）。1回分の文面・未設定（マイグレーション前）なら絞らない（all）。
- * 文面が見つからなければ止める（off）
+ * 常設の文面だけ: 文面ごとのスイッチ（standing_mode）。未設定（マイグレーション前）なら count（全員には送らない）。
+ * 1回分の文面（weekly など）は値があっても見ない（all）。文面が見つからなければ止める（off）
  */
 export function campaignModeOf(campaign: Campaign | null): MailMode {
   if (!campaign) return "off";
-  return campaign.standingKey ? (campaign.standingMode ?? "all") : "all";
+  return campaign.standingKey ? (campaign.standingMode ?? "count") : "all";
+}
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * 文面ごとのスイッチ（standing_mode）が下がったために送れない常設の文面の行。
+ * - 会員の行で、送る日の範囲をもう過ぎていれば、送らずに終える（not_due。あとで上げ直しても古い行が届かない）
+ * - それ以外は翌日（日本時間の0時）まで待たせる（毎回の実行で拾い直して paused を出し続けない）
+ */
+async function holdForCampaignMode(ctx: Ctx, campaign: Campaign, reason: string): Promise<DeliveryOutcome> {
+  const { deps, row } = ctx;
+  const now = deps.now();
+  if (row.audience === "all" && isStandingKey(campaign.standingKey)) {
+    const member = await deps.store.getPaidMember(row.userId);
+    const joinedAt = member?.stripeSubscriptionId ? await deps.store.getContractStart(member.stripeSubscriptionId) : null;
+    if (!isStandingDue(STANDING_TARGETS[campaign.standingKey], joinedAt, campaign.scheduledAt ?? null, now)) {
+      return finish(ctx, { status: "skipped", reason: "not_due" }, "skipped");
+    }
+  }
+  return backToQueue(ctx, reason, "paused", new Date(jstDayStart(now).getTime() + DAY_MS));
 }
 
 async function currentMode(store: MailStore, kind: MailKind): Promise<MailMode> {
@@ -364,8 +385,9 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   if (!campaign) return finish(ctx, { status: "failed", reason: "campaign_missing" }, "failed");
   // 常設の文面は、文面ごとのスイッチも同じ決まりで見る
   const campaignMode = effectiveMode(mode, campaignModeOf(campaign));
-  if (campaignMode === "off" || campaignMode === "count") return backToQueue(ctx, `mode_${campaignMode}`, "paused");
-  if (row.audience === "all" && campaignMode !== "all") return backToQueue(ctx, `mode_${campaignMode}`, "paused");
+  if (campaignMode === "off" || campaignMode === "count" || (row.audience === "all" && campaignMode !== "all")) {
+    return holdForCampaignMode(ctx, campaign, `mode_${campaignMode}`);
+  }
   const blockReason = getCampaignBlockReason(campaign);
   if (blockReason) {
     await deps.notifyOps({ title: "文面が承認されていないため送信を止めました", counts: { [blockReason]: 1 } });

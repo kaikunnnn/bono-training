@@ -125,7 +125,7 @@ export interface Campaign {
   lastCountedAt?: Date | null;
   /**
    * 常設の文面だけ: 文面ごとのスイッチ（member_mail_campaigns.standing_mode）。
-   * 効くのは「全体・種類・この文面」のいちばん弱いもの。未設定（列が無い＝マイグレーション前）なら文面では絞らない。
+   * 効くのは「全体・種類・この文面」のいちばん弱いもの。未設定（列が無い＝マイグレーション前）なら count として扱う。
    * 1回分の文面（standing_key なし）では見ない
    */
   standingMode?: MailMode | null;

@@ -3,6 +3,7 @@
 --
 -- ★本番への登録はオーナーの判断で行う（このファイルはマイグレーションではない。supabase db push では当たらない）
 -- 前提: supabase/migrations/20261125090715_member_mail_standing_campaigns.sql を当てたあと
+--       20261127090000_member_mail_standing_mode.sql を当てたあと（文面ごとのスイッチ standing_mode）
 --
 -- このSQLがすること:
 --   - 文面を1行入れる（kind=signup / standing_key=onboarding_day2）。すでにあれば何もしない
@@ -10,15 +11,12 @@
 --   - 承認はしない（入れた時点では未承認。トリガーが承認を外す）
 --
 -- このあとの手順（本番に出すとき。1つずつ・前の段の合格条件を満たしてから次へ）:
---   ★文面ごとのスイッチ（20261127090000_member_mail_standing_mode.sql で追加）:
---     効くのは「全体・種類（signup）・文面の行の standing_mode」のいちばん弱いもの。種類のスイッチは 327-D・E・F をまとめて止める非常停止。
---     - マイグレーションの前に入れた行は standing_mode = 'all'（今までどおり、下の手順の種類のスイッチで動く）
---     - マイグレーションのあとに入れた行は standing_mode = 'count'。下の各段で、種類のスイッチと一緒に
---         UPDATE public.member_mail_campaigns SET standing_mode = '<その段のモード>' WHERE standing_key = 'onboarding_day2';
---       も行う。327-E・F がすでに signup = all で動いているなら、種類のスイッチは触らず standing_mode だけを上げ下げする
---       （手順は register-onboarding-day5.sql と同じ形）
---   ※ 効くスイッチは「全体（member_mail_settings.mode）」と「種類（member_mail_kind_settings の signup）」の弱いほう。
---      全体を上げると weekly など他の種類にも効くので、他の種類のスイッチを先に確かめる
+--   ★スイッチ: 効くのは「全体（member_mail_settings.mode）・種類（member_mail_kind_settings の signup）・
+--     文面の行の standing_mode（off / count / owner / all）」のいちばん弱いもの。
+--     - 文面ごとに上げ下げするのは standing_mode。全体と signup は「上限」で、4. で一度 all にしたら、ふだんは触らない
+--     - 327-D・E・F は種類（signup）が同じ。signup を off にすると3つともまとめて止まる（非常停止）
+--     - 行は入れた時点で standing_mode = 'count'（20261127090000_member_mail_standing_mode.sql の既定。マイグレーション前からある行も count）
+--     - standing_mode を下げると、書き出し済みの行は送る直前に止まり、翌日まで待つ。送る日の範囲を過ぎた行は送らずに終わる
 --   ※ 入会日は「今の Stripe 契約の最初の課金日」（public.subscriptions の min(start_timestamp)）。
 --      user_subscriptions.created_at（アカウントを作った日）ではない
 --
@@ -27,28 +25,35 @@
 --          FROM public.member_mail_campaigns WHERE standing_key = 'onboarding_day2';
 --   2. テスト用アカウントの頭を入れる（値はリポジトリに書かない）
 --        UPDATE public.member_mail_settings SET test_email_prefixes = '{...}' WHERE id = 1;
---   3. 人数だけ出す（送らない）。scheduled_at は過去にして、今日の対象がいる状態で数える
---        UPDATE public.member_mail_kind_settings SET mode = 'count' WHERE kind = 'signup';
---        UPDATE public.member_mail_campaigns SET scheduled_at = now() - interval '30 days' WHERE standing_key = 'onboarding_day2';
+--   3. 人数だけ出す（送らない）。全体・signup が count 以上であること（off だと何も出ない）。
+--      scheduled_at は過去にして、今日の対象がいる状態で数える
+--        UPDATE public.member_mail_campaigns SET standing_mode = 'count', scheduled_at = now() - interval '30 days'
+--          WHERE standing_key = 'onboarding_day2';
 --      → 毎朝 8:00 JST に、その日の対象の人数が運用 Slack に出る（last_count にも残る）
 --      ★合格条件（必須）: 同じ日の対象（最初の課金日がその日の2〜3日前の人）を手で数え、
---        candidates・will_send・excluded_learned が手で数えた人数と合うこと。
---        とくに excluded_learned（学んだので外した人）が手の数と合うこと。
+--        candidates・will_send・excluded_learned（学んだので外した人） が手で数えた人数と合うこと。
 --        対象がいるのに excluded_learned がずっと0なら「学んだ」の判定が効いていない疑いがあるので、all に上げない
 --   4. オーナーだけに送って見た目を確かめる
---        UPDATE public.member_mail_kind_settings SET mode = 'owner' WHERE kind = 'signup';
+--      全体・signup がまだ all でなければ、上限として一度だけ all にする（このときほかの常設の文面の standing_mode が
+--      off / count のままであることを先に確かめる。全体を上げると weekly など他の種類にも効くので、他の種類のスイッチも先に確かめる）:
+--        UPDATE public.member_mail_settings SET mode = 'all' WHERE id = 1;
+--        UPDATE public.member_mail_kind_settings SET mode = 'all' WHERE kind = 'signup';
+--      そのうえでこの文面だけを owner にする:
+--        UPDATE public.member_mail_campaigns SET standing_mode = 'owner' WHERE standing_key = 'onboarding_day2';
 --      → member_mail_settings.owner_user_ids の人に、版ごとに1通
 --      ★必ず見ること: 届いたメールの元のソース（ヘッダー全体）を開き、Resend のタグ（kind=signup など）や
 --        種類・カテゴリの名前（signup / comeback / onboarding など）がヘッダー・URL に出ていないこと。出ていたら all に上げない
---   5. 全員に送る。scheduled_at を先に書き、スイッチと1つのトランザクションでまとめる
+--   5. 全員に送る。scheduled_at の入れ直しと standing_mode = 'all' を1つのトランザクションでまとめる
 --      （scheduled_at を入れ直さずに all にすると、3. の過去の時刻より後に課金した2〜3日目の人に届く）
 --        BEGIN;
---        UPDATE public.member_mail_campaigns SET scheduled_at = now() WHERE standing_key = 'onboarding_day2';
---        UPDATE public.member_mail_kind_settings SET mode = 'all' WHERE kind = 'signup';
+--        UPDATE public.member_mail_campaigns SET scheduled_at = now(), standing_mode = 'all'
+--          WHERE standing_key = 'onboarding_day2';
 --        COMMIT;
---   止めるとき（種類のスイッチを先に止める。送る直前にもスイッチを見るので、すぐ止まる）:
+--   止めるとき:
+--        -- この文面だけ止める（書き出し済みの行も送る直前に止まる）
+--        UPDATE public.member_mail_campaigns SET standing_mode = 'off' WHERE standing_key = 'onboarding_day2';
+--        -- 327-D・E・F をまとめてすぐ止める（非常停止。signup の種類のメールが全部止まる）
 --        UPDATE public.member_mail_kind_settings SET mode = 'off' WHERE kind = 'signup';
---        -- 必要なら続けて: UPDATE public.member_mail_campaigns SET scheduled_at = NULL WHERE standing_key = 'onboarding_day2';
 -- =============================================================================
 
 INSERT INTO public.member_mail_campaigns (kind, label, subject, preheader, body, standing_key, scheduled_at)

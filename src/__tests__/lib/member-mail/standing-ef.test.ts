@@ -22,6 +22,7 @@ import {
   type StandingTargetDefinition,
 } from "@/lib/member-mail/targets";
 import { FROM_OF_STANDING, STANDING_KEYS, type Campaign, type ProgressEvent, type StandingKey } from "@/lib/member-mail/types";
+import { mapStandingMode } from "@/lib/member-mail/store";
 import { createUnsubscribeToken, oneClickUrl, unsubscribePageUrl } from "@/lib/member-mail/unsubscribe-token";
 import {
   approvedCampaign,
@@ -72,6 +73,8 @@ function standingCampaign(key: StandingKey, over: Partial<Campaign> = {}): Campa
     body: copy.body,
     standingKey: key,
     scheduledAt: ACTIVATED,
+    // 文面ごとのスイッチは全員に上げた状態（スイッチ自体の動きは「文面ごとのスイッチ」の describe で見る）
+    standingMode: "all",
     ...over,
   });
 }
@@ -489,14 +492,38 @@ describe("327-E・327-F の文面", () => {
     expect(FROM_OF_STANDING.onboarding_day5).toBe("email_ps");
   });
 
-  it("327-F: 相談のリンクが先、コミュニティがあと。イベントは出さない。BONO のリンクにだけ印 email_pr", () => {
+  it("327-F: リンクは相談だけ。コミュニティ（327-D で案内済み）・イベントは出さない", () => {
     const body = ONBOARDING_DAY9_COPY.body;
     const links = [...body.matchAll(/\]\((https:\/\/[^)]+)\)/g)].map((m) => m[1]);
-    expect(links).toEqual(["https://cal.com/takumikai/30min", "https://www.bo-no.design/how-to/community"]);
-    expect(body).not.toContain("/events");
+    expect(links).toEqual(["https://cal.com/takumikai/30min"]);
+    for (const word of ["/events", "community", "コミュニティ", "Slack"]) expect(body, word).not.toContain(word);
     const r = renderMail(standingCampaign("onboarding_day9"), { siteUrl: SITE, unsubscribeUrl: `${SITE}/u` });
-    expect(r.html).toContain("https://www.bo-no.design/how-to/community?from=email_pr");
     expect(r.html).toContain('href="https://cal.com/takumikai/30min"');
+  });
+
+  it("327-F は 327-D と別の手紙として読める（相談の例・見出し・段落が重ならない）", () => {
+    const items = (body: string) => body.split("\n").filter((l) => l.startsWith("- ") || l.startsWith("## "));
+    const day2 = new Set(items(ONBOARDING_DAY2_COPY.body));
+    for (const line of items(ONBOARDING_DAY9_COPY.body)) expect(day2.has(line), line).toBe(false);
+    // 予約のリンクの行だけは同じでよい
+    const paras = (body: string) =>
+      body.split("\n\n").filter((p) => p.length > 20 && !p.startsWith("BONO") && !p.startsWith("["));
+    const day2Paras = new Set(paras(ONBOARDING_DAY2_COPY.body));
+    for (const para of paras(ONBOARDING_DAY9_COPY.body)) expect(day2Paras.has(para), para).toBe(false);
+  });
+
+  it("登録用 SQL の手順: 文面ごとのスイッチで上げ下げし、327-E・F は 4. と 5. の前に 327-D の行を確かめる", () => {
+    for (const d of ["day2", "day5", "day9"]) {
+      const sql = readFileSync(path.resolve(__dirname, "../../../../scripts/member-mail", `register-onboarding-${d}.sql`), "utf8");
+      expect(sql, d).toContain("SET standing_mode = 'owner' WHERE standing_key = 'onboarding_");
+      expect(sql, d).toMatch(/BEGIN;\n--\s+UPDATE public\.member_mail_campaigns SET scheduled_at = now\(\), standing_mode = 'all'/);
+      expect(sql, d).toContain("UPDATE public.member_mail_kind_settings SET mode = 'off' WHERE kind = 'signup';");
+      expect(sql, d).toContain("3つともまとめて止まる");
+      expect(sql, d).not.toContain("の弱いほう");
+      if (d !== "day2") {
+        expect(sql, d).toMatch(/SELECT standing_mode, scheduled_at[\s\S]*WHERE standing_key = 'onboarding_day2'/);
+      }
+    }
   });
 
   it("327-F は 327-D と件名・プレヘッダーが違う（両方受け取る人がいる）", () => {
@@ -565,11 +592,87 @@ describe("文面ごとのスイッチ（standing_mode）", () => {
       store.campaigns.get("s-onboarding_day5")!.standingMode = lowered;
       await runSendBatch(deps);
       expect(to(mail), lowered).toEqual([`member1@example.invalid|${ONBOARDING_DAY2_COPY.subject}`]);
+      // 翌日（日本時間の0時）まで待たせる（毎回の実行で拾い直さない）
       expect(
         store.deliveries.find((d) => d.campaignId === "s-onboarding_day5"),
         lowered,
-      ).toMatchObject({ status: "queued", reason: `mode_${lowered}` });
+      ).toMatchObject({ status: "queued", reason: `mode_${lowered}`, nextAttemptAt: jst("2026-11-26T00:00:00") });
+      // 同じ日にもう一度実行しても拾わない
+      const claimed = vi.spyOn(store, "claim");
+      await runSendBatch(deps);
+      expect(claimed).not.toHaveBeenCalled();
     }
+  });
+
+  it("文面のスイッチで待たせた行は、送る日の範囲（5〜6日目）を過ぎたら送らずに終える（上げ直しても届かない）", async () => {
+    const store = seedLive("all");
+    const mail = new FakeMail();
+    // 6日目の朝（327-E の最後の日）に書き出し、下げる
+    const day6 = jstMorning("2026-11-26");
+    store.contracts.find((c) => c.subscriptionId === "sub_test_2")!.start = jst("2026-11-20T10:00:00");
+    for (const c of await store.listStandingCampaigns(day6)) await prepareCampaign(depsAt(store, mail, day6), c);
+    store.campaigns.get("s-onboarding_day5")!.standingMode = "count";
+    await runSendBatch(depsAt(store, mail, day6));
+    expect(store.deliveries.find((d) => d.campaignId === "s-onboarding_day5")).toMatchObject({ status: "queued" });
+    // 7日目: まだ下げたまま → 範囲の外なので終える
+    const day7 = jstMorning("2026-11-27");
+    await runSendBatch(depsAt(store, mail, day7));
+    expect(store.deliveries.find((d) => d.campaignId === "s-onboarding_day5")).toMatchObject({
+      status: "skipped",
+      reason: "not_due",
+    });
+    store.campaigns.get("s-onboarding_day5")!.standingMode = "all";
+    await runSendBatch(depsAt(store, mail, jstMorning("2026-11-28")));
+    expect(mail.sent.filter((m) => m.subject === ONBOARDING_DAY5_COPY.subject)).toHaveLength(0);
+  });
+
+  it("最初の見直しのあと、送る直前に文面のスイッチが下がったら送らない（mode_changed）", async () => {
+    const store = seedLive("all");
+    const mail = new FakeMail();
+    const deps = depsAt(store, mail, NOW);
+    for (const c of await store.listStandingCampaigns(NOW)) await prepareCampaign(deps, c);
+    // アドレスを読む（最初の見直しのあと・送る直前の見直しの前）ときに下げる
+    const original = store.getEmailAddress.bind(store);
+    vi.spyOn(store, "getEmailAddress").mockImplementation(async (userId: string) => {
+      if (userId === uid(2)) store.campaigns.get("s-onboarding_day5")!.standingMode = "count";
+      return original(userId);
+    });
+    await runSendBatch(deps);
+    expect(to(mail)).toEqual([`member1@example.invalid|${ONBOARDING_DAY2_COPY.subject}`]);
+    expect(store.deliveries.find((d) => d.campaignId === "s-onboarding_day5")).toMatchObject({
+      status: "queued",
+      reason: "mode_changed",
+    });
+  });
+
+  it("オーナー確認の行は、文面を count / off に下げたら送らない", async () => {
+    for (const lowered of ["count", "off"] as const) {
+      const store = seedLive("owner");
+      const mail = new FakeMail();
+      const deps = depsAt(store, mail, NOW);
+      for (const c of await store.listStandingCampaigns(NOW)) await prepareCampaign(deps, c);
+      expect(store.deliveries.find((d) => d.audience === "owner"), lowered).toBeDefined();
+      store.campaigns.get("s-onboarding_day5")!.standingMode = lowered;
+      await runSendBatch(deps);
+      expect(to(mail), lowered).toEqual([`member1@example.invalid|${ONBOARDING_DAY2_COPY.subject}`]);
+      expect(store.deliveries.find((d) => d.audience === "owner"), lowered).toMatchObject({
+        status: "queued",
+        reason: `mode_${lowered}`,
+      });
+    }
+  });
+
+  it("週1回のメルマガは standing_mode に値があっても見ない（送る）", async () => {
+    const store = new MemStore();
+    store.members.push(member(1));
+    store.emails.set(uid(1), "member1@example.invalid");
+    const weekly = approvedCampaign({ standingMode: "off" });
+    store.campaigns.set(weekly.id, weekly);
+    const mail = new FakeMail();
+    const deps = makeDeps(store, mail);
+    expect(await prepareCampaign(deps, weekly)).toMatchObject({ outcome: "enqueued", audience: "all", inserted: 1 });
+    await runSendBatch(deps);
+    expect(mail.sent).toHaveLength(1);
   });
 
   it("種類のスイッチ（signup）は非常停止として、文面が all でも全部止める", async () => {
@@ -590,21 +693,40 @@ describe("文面ごとのスイッチ（standing_mode）", () => {
     expect(mail.sent).toHaveLength(0);
   });
 
-  it("未設定（列が無い＝マイグレーション前）の常設の文面は文面では絞らない。1回分の文面は値があっても見ない", () => {
-    expect(campaignModeOf(standingCampaign("onboarding_day2"))).toBe("all");
+  it("未設定（列が無い＝マイグレーション前）の常設の文面は count。1回分の文面は値があっても見ない", () => {
+    expect(campaignModeOf(standingCampaign("onboarding_day2", { standingMode: undefined }))).toBe("count");
+    expect(campaignModeOf(standingCampaign("onboarding_day2", { standingMode: null }))).toBe("count");
     expect(campaignModeOf(standingCampaign("onboarding_day5", { standingMode: "count" }))).toBe("count");
     expect(campaignModeOf(approvedCampaign({ standingMode: "off" }))).toBe("all");
     expect(campaignModeOf(null)).toBe("off");
   });
 
-  it("マイグレーション: 足すだけ。既存の行は all、新しい行は count から。値は4つだけ", () => {
+  it("DB の値の読み方: 列が無い・NULL は count、知らない値は off、4つの値はそのまま", () => {
+    expect(mapStandingMode(undefined)).toBe("count");
+    expect(mapStandingMode(null)).toBe("count");
+    expect(mapStandingMode("ALL")).toBe("off");
+    expect(mapStandingMode("paused")).toBe("off");
+    expect(mapStandingMode(1)).toBe("off");
+    for (const m of ["off", "count", "owner", "all"] as const) expect(mapStandingMode(m)).toBe(m);
+  });
+
+  it("マイグレーション前（文面のスイッチが未設定）に種類を all にしても、常設の文面は全員に送らない", async () => {
+    const store = seedLive(undefined);
+    store.campaigns.get("s-onboarding_day2")!.standingMode = undefined;
+    const mail = new FakeMail();
+    const results = await morningRun(store, mail, NOW);
+    expect(results.map((r) => r.outcome)).toEqual(["counted", "counted"]);
+    expect(mail.sent).toHaveLength(0);
+  });
+
+  it("マイグレーション: 足すだけ。既存の行も新しい行も count。値は4つだけ", () => {
     const sql = readFileSync(
       path.resolve(__dirname, "../../../../supabase/migrations/20261127090000_member_mail_standing_mode.sql"),
       "utf8",
     ).replace(/^--.*$/gm, "");
-    expect(sql).toMatch(/ADD COLUMN IF NOT EXISTS standing_mode text NOT NULL DEFAULT 'all'/);
+    expect(sql).toMatch(/ADD COLUMN IF NOT EXISTS standing_mode text NOT NULL DEFAULT 'count'/);
     expect(sql).toMatch(/CHECK \(standing_mode IN \('off', 'count', 'owner', 'all'\)\)/);
-    expect(sql).toMatch(/ALTER COLUMN standing_mode SET DEFAULT 'count'/);
+    expect(sql).not.toMatch(/SET DEFAULT|'all'\s*;/);
     expect(sql).not.toMatch(/\b(DROP|DELETE|UPDATE)\b/);
   });
 });

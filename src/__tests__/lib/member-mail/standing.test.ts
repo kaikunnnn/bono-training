@@ -67,6 +67,8 @@ function standingCampaign(over: Partial<Campaign> = {}): Campaign {
     body: ONBOARDING_DAY2_COPY.body,
     standingKey: "onboarding_day2",
     scheduledAt: ACTIVATED,
+    // 文面ごとのスイッチ（#327-E/F）は全員に上げた状態。このファイルは全体・種類のスイッチの動きを見る
+    standingMode: "all",
     ...over,
   });
 }
