@@ -31,7 +31,9 @@ const ID_PREFIX = "air-";
 // 公開後は番号を詰め直しても _id と slug を変えない（進捗・ブックマーク・外部リンクが別記事を指すため）
 const SLUG_PREFIX = "ai-research-";
 // 中身が未完成の記事は publishedAt を付けない（新着・更新一覧に出さない。11/27 オーナー決定）
-const UNLISTED = new Set(["01-2", "01-3", "04-1", "04-2"]);
+const UNLISTED = new Set(["01-2", "04-1", "04-2"]); // 01-3 は 11/27 に本文を完成
+// --only=01-3 のように記事番号を渡すと、その記事だけを書き込む（本番で1本だけ直すとき）
+const ONLY = process.argv.find((a) => a.startsWith("--only="))?.slice("--only=".length).split(",") ?? null;
 const OVERWRITE = process.argv.includes("--overwrite");
 const SOURCE_DIR = "/Users/kaitakumi/Documents/01_BONO事業/01_Docs/rebono/AIリサーチではじめるUIデザイン";
 const PUBLIC_DIR = resolve(__dirname, "..", "public");
@@ -309,7 +311,7 @@ const EXTRA_ARTICLES = [
   {
     section: 0,
     number: "01-3",
-    title: "このレッスンの進め方（仮）",
+    title: "お題：言語交換SNS「ハナソ」の新規登録を、AIリサーチでブラッシュアップしよう", // 11/27 v3
     type: "intro",
     file: "/Users/kaitakumi/Documents/01_BONO事業/01_Docs/rebono/issues/319_assets/01-3_このレッスンの進め方_文章案.md",
   },
@@ -478,7 +480,11 @@ const LESSON_ICON = join(PUBLIC_DIR, "images/lesson-ai-research/lesson-icon.jpg"
 
 async function main() {
   const { articles, quests, lesson, stats } = buildDocs();
-  const docs: Doc[] = [...articles, ...quests, lesson];
+  const all: Doc[] = [...articles, ...quests, lesson];
+  const docs: Doc[] = ONLY
+    ? all.filter((d) => ONLY.some((n) => d._id === `${ID_PREFIX}article-${n}`))
+    : all;
+  if (ONLY && docs.length !== ONLY.length) throw new Error(`--only の記事が見つかりません: ${ONLY.join(",")}`);
 
   for (const doc of docs) {
     if (!doc._id.startsWith(ID_PREFIX)) throw new Error(`_id に ${ID_PREFIX} が付いていません: ${doc._id}`);
@@ -532,15 +538,17 @@ async function main() {
 
   assertDevelopment();
   for (const doc of articles) {
-    if (!doc._thumb) continue;
+    if (!doc._thumb || !docs.includes(doc)) continue;
     const asset = await client.assets.upload("image", createReadStream(doc._thumb), {
       filename: doc._thumb.split("/").pop(),
     });
     doc.thumbnail = { _type: "image", asset: { _type: "reference", _ref: asset._id } };
   }
   console.log("アップロード: 記事サムネイル");
-  const icon = await client.assets.upload("image", createReadStream(LESSON_ICON), { filename: "lesson-icon.jpg" });
-  lesson.iconImage = { _type: "image", asset: { _type: "reference", _ref: icon._id } };
+  if (docs.includes(lesson)) {
+    const icon = await client.assets.upload("image", createReadStream(LESSON_ICON), { filename: "lesson-icon.jpg" });
+    lesson.iconImage = { _type: "image", asset: { _type: "reference", _ref: icon._id } };
+  }
   console.log("アップロード: レッスンのアイコン");
   // lesson ↔ quest が相互参照のため、1トランザクションでまとめて作成する
   const tx = client.transaction();
