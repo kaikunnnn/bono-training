@@ -721,7 +721,7 @@ describe("文面ごとのスイッチ（standing_mode）", () => {
 
   it("マイグレーション: 足すだけ。既存の行も新しい行も count。値は4つだけ", () => {
     const sql = readFileSync(
-      path.resolve(__dirname, "../../../../supabase/migrations/20261127090000_member_mail_standing_mode.sql"),
+      path.resolve(__dirname, "../../../../supabase/migrations/20261127010837_member_mail_standing_mode.sql"),
       "utf8",
     ).replace(/^--.*$/gm, "");
     expect(sql).toMatch(/ADD COLUMN IF NOT EXISTS standing_mode text NOT NULL DEFAULT 'count'/);

@@ -3,7 +3,7 @@
 --
 -- ★本番への登録はオーナーの判断で行う（このファイルはマイグレーションではない。supabase db push では当たらない）
 -- 前提: supabase/migrations/20261125090715_member_mail_standing_campaigns.sql を当てたあと
---       20261127090000_member_mail_standing_mode.sql を当てたあと（文面ごとのスイッチ standing_mode）
+--       20261127010837_member_mail_standing_mode.sql を当てたあと（文面ごとのスイッチ standing_mode）
 --
 -- このSQLがすること:
 --   - 文面を1行入れる（kind=signup / standing_key=onboarding_day2）。すでにあれば何もしない
@@ -15,7 +15,7 @@
 --     文面の行の standing_mode（off / count / owner / all）」のいちばん弱いもの。
 --     - 文面ごとに上げ下げするのは standing_mode。全体と signup は「上限」で、4. で一度 all にしたら、ふだんは触らない
 --     - 327-D・E・F は種類（signup）が同じ。signup を off にすると3つともまとめて止まる（非常停止）
---     - 行は入れた時点で standing_mode = 'count'（20261127090000_member_mail_standing_mode.sql の既定。マイグレーション前からある行も count）
+--     - 行は入れた時点で standing_mode = 'count'（20261127010837_member_mail_standing_mode.sql の既定。マイグレーション前からある行も count）
 --     - standing_mode を下げると、書き出し済みの行は送る直前に止まり、翌日まで待つ。送る日の範囲を過ぎた行は送らずに終わる
 --   ※ 入会日は「今の Stripe 契約の最初の課金日」（public.subscriptions の min(start_timestamp)）。
 --      user_subscriptions.created_at（アカウントを作った日）ではない
