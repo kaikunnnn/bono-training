@@ -10,6 +10,13 @@
 --   - 承認はしない（入れた時点では未承認。トリガーが承認を外す）
 --
 -- このあとの手順（本番に出すとき。1つずつ・前の段の合格条件を満たしてから次へ）:
+--   ★文面ごとのスイッチ（20261127090000_member_mail_standing_mode.sql で追加）:
+--     効くのは「全体・種類（signup）・文面の行の standing_mode」のいちばん弱いもの。種類のスイッチは 327-D・E・F をまとめて止める非常停止。
+--     - マイグレーションの前に入れた行は standing_mode = 'all'（今までどおり、下の手順の種類のスイッチで動く）
+--     - マイグレーションのあとに入れた行は standing_mode = 'count'。下の各段で、種類のスイッチと一緒に
+--         UPDATE public.member_mail_campaigns SET standing_mode = '<その段のモード>' WHERE standing_key = 'onboarding_day2';
+--       も行う。327-E・F がすでに signup = all で動いているなら、種類のスイッチは触らず standing_mode だけを上げ下げする
+--       （手順は register-onboarding-day5.sql と同じ形）
 --   ※ 効くスイッチは「全体（member_mail_settings.mode）」と「種類（member_mail_kind_settings の signup）」の弱いほう。
 --      全体を上げると weekly など他の種類にも効くので、他の種類のスイッチを先に確かめる
 --   ※ 入会日は「今の Stripe 契約の最初の課金日」（public.subscriptions の min(start_timestamp)）。

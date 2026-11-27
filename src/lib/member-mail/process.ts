@@ -76,6 +76,15 @@ export function effectiveMode(global: MailMode, kind: MailMode): MailMode {
   return MAIL_MODES.indexOf(global) <= MAIL_MODES.indexOf(kind) ? global : kind;
 }
 
+/**
+ * 常設の文面だけ: 文面ごとのスイッチ（standing_mode）。1回分の文面・未設定（マイグレーション前）なら絞らない（all）。
+ * 文面が見つからなければ止める（off）
+ */
+export function campaignModeOf(campaign: Campaign | null): MailMode {
+  if (!campaign) return "off";
+  return campaign.standingKey ? (campaign.standingMode ?? "all") : "all";
+}
+
 async function currentMode(store: MailStore, kind: MailKind): Promise<MailMode> {
   const settings = await store.getSettings();
   if (!settings) return "off";
@@ -194,7 +203,11 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   const now = deps.now();
   const settings = await store.getSettings();
   if (!settings) return { outcome: "off" };
-  const mode = effectiveMode(settings.mode, await store.getKindMode(campaign.kind));
+  // 全体・種類（signup）・この文面のスイッチのいちばん弱いもの（327-E/F: 文面ごとに count → owner → all と上げられる）
+  const mode = effectiveMode(
+    effectiveMode(settings.mode, await store.getKindMode(campaign.kind)),
+    campaignModeOf(campaign),
+  );
   if (mode === "off") return { outcome: "off" };
   if (!isStandingKey(campaign.standingKey)) return { outcome: "unsupported_kind" };
   const def = STANDING_TARGETS[campaign.standingKey];
@@ -349,6 +362,10 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   // 文面と承認（承認の印がない文面は、どのモードでも送らない）
   const campaign = await store.getCampaign(row.campaignId);
   if (!campaign) return finish(ctx, { status: "failed", reason: "campaign_missing" }, "failed");
+  // 常設の文面は、文面ごとのスイッチも同じ決まりで見る
+  const campaignMode = effectiveMode(mode, campaignModeOf(campaign));
+  if (campaignMode === "off" || campaignMode === "count") return backToQueue(ctx, `mode_${campaignMode}`, "paused");
+  if (row.audience === "all" && campaignMode !== "all") return backToQueue(ctx, `mode_${campaignMode}`, "paused");
   const blockReason = getCampaignBlockReason(campaign);
   if (blockReason) {
     await deps.notifyOps({ title: "文面が承認されていないため送信を止めました", counts: { [blockReason]: 1 } });
@@ -416,7 +433,10 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   });
 
   // 送る直前にもう一度スイッチを見る（直前に止められたら送らない）
-  const latest = await currentMode(store, row.kind);
+  const latest = effectiveMode(
+    await currentMode(store, row.kind),
+    campaign.standingKey ? campaignModeOf(await store.getCampaign(row.campaignId)) : "all",
+  );
   if (latest === "off" || latest === "count" || (row.audience === "all" && latest !== "all")) {
     return backToQueue(ctx, "mode_changed", "paused");
   }

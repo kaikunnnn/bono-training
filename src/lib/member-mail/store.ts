@@ -82,7 +82,13 @@ function mapCampaign(row: DbRow): Campaign {
     // 列が無い（マイグレーション前）・値が知らないものなら1回分の文面として扱う
     standingKey: isStandingKey(row.standing_key) ? row.standing_key : null,
     lastCountedAt: toDate(row.last_counted_at),
+    standingMode: mapStandingMode(row.standing_mode),
   };
+}
+
+/** 列が無い（マイグレーション前）なら undefined（文面では絞らない）。知らない値なら止める側（off）に倒す */
+function mapStandingMode(value: unknown): MailMode | undefined {
+  return value === undefined ? undefined : toMode(value);
 }
 
 function chunks<T>(items: readonly T[], size: number): T[][] {
