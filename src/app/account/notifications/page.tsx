@@ -70,6 +70,7 @@ export default async function NotificationSettingsPage({
         <div className="space-y-4">
           <p className="text-sm text-muted-foreground">
             オフにすると、BONOからのお知らせメールが届かなくなります。お支払い・契約・ログインに関するメールは、この設定にかかわらず届きます。
+            {slackDmEnabled !== null && "SlackのDMでのお知らせも、あわせて止まります。"}
           </p>
           <MemberMailToggle initialEnabled={mailEnabled} />
         </div>
@@ -78,9 +79,13 @@ export default async function NotificationSettingsPage({
       {slackDmEnabled !== null && (
         <SettingsCard title="Slack">
           <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              メールでお送りしているBONOからのお知らせを、SlackのDMでも受け取るかどうかの設定です。オフにすると、このお知らせのDMだけが届かなくなります（メールは上の設定のまま届きます）。Slackへの参加やアカウントのつなぎ方についてのご連絡は、この設定にかかわらず届きます。
-            </p>
+            <div className="space-y-1 text-sm text-muted-foreground">
+              <p>
+                BONOからのお知らせを、メールと同じ内容でSlackのDMでもお送りします。オフにすると、このお知らせのDMだけが止まります。
+              </p>
+              <p>上の「BONOからのお知らせメール」をオフにしているときは、SlackのDMでのお知らせも届きません。</p>
+              <p>Slackのチャンネルに投稿があったときの通知は、Slackのアプリの設定で変えられます（この設定では変わりません）。</p>
+            </div>
             <SlackDmToggle initialEnabled={slackDmEnabled} />
           </div>
         </SettingsCard>

@@ -20,6 +20,8 @@ const DELIVERIES = "member_mail_deliveries";
 const LINKS = "slack_member_links";
 /** in() に渡す ID の数（URL の長さを抑える） */
 const ID_CHUNK = 100;
+/** 1回に読む候補（1日分の送れたメール）の上限。1日の送信の上限（daily_limit 既定80）より十分大きく */
+const CANDIDATE_CAP = 1000;
 
 type DbRow = Record<string, unknown>;
 
@@ -82,6 +84,15 @@ export function createSupabaseSlackDmStore(client: SupabaseClient): SlackDmStore
       return MAIL_MODES.includes(value as MailMode) ? (value as MailMode) : "off";
     },
 
+    async getSlackDmRaisedAt() {
+      const { data, error } = await client.from(SETTINGS).select("slack_dm_raised_at").eq("id", 1).maybeSingle();
+      if (error) fail("slack dm raised read", error);
+      const value = (data as { slack_dm_raised_at?: unknown } | null)?.slack_dm_raised_at;
+      if (typeof value !== "string") return null;
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    },
+
     async getSlackLink(userId) {
       const { data, error } = await client
         .from(LINKS)
@@ -137,17 +148,17 @@ export function createSupabaseSlackDmStore(client: SupabaseClient): SlackDmStore
       return false;
     },
 
-    async listSlackDmCandidates(campaignIds, sentSince, limit) {
+    async listSlackDmCandidates(campaignIds, range) {
       if (campaignIds.length === 0) return [];
-      // 送れたメールを古い順に多めに読み、DM の記録があるもの（deferred 以外）を外す
-      const { data, error } = await client
+      // 送れたメールを送った順に読み、DM の記録があるもの（deferred 以外）を外す。1日分なので上限は大きめ
+      let q = client
         .from(DELIVERIES)
         .select("id, campaign_id, user_id, audience, content_version")
         .in("campaign_id", campaignIds as string[])
         .eq("status", "sent")
-        .gte("sent_at", sentSince.toISOString())
-        .order("sent_at", { ascending: true })
-        .limit(Math.max(limit * 4, 200));
+        .gte("sent_at", range.since.toISOString());
+      if (range.until) q = q.lt("sent_at", range.until.toISOString());
+      const { data, error } = await q.order("sent_at", { ascending: true }).limit(CANDIDATE_CAP);
       if (error) fail("slack dm candidates", error);
       const rows = (data ?? []) as DbRow[];
       const done = new Set<string>();
@@ -166,7 +177,6 @@ export function createSupabaseSlackDmStore(client: SupabaseClient): SlackDmStore
           audience: r.audience as Audience,
           contentVersion: Number(r.content_version),
         });
-        if (out.length >= limit) break;
       }
       return out;
     },

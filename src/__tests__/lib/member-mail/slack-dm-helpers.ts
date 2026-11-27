@@ -27,7 +27,13 @@ export interface MemDm {
 
 export class MemSlackDmStore implements SlackDmStore {
   mode: MailMode = "off";
-  modeError = false;
+  /** スイッチを上げた時刻（本物はトリガーが入れる）。既定はテストの日付より前 */
+  raisedAt: Date | null = new Date("2026-11-01T00:00:00Z");
+  /** スイッチが読めない。既定はマイグレーション前（列が無い: 42703） */
+  modeError: false | string = false;
+  /** 表が無い（マイグレーション前）として、新しい表の読み書きで例外を投げる */
+  tablesMissing = false;
+  calls: Record<string, number> = {};
   links = new Map<string, SlackDmLink>();
   prefs = new Map<string, boolean>();
   dms: MemDm[] = [];
@@ -36,17 +42,29 @@ export class MemSlackDmStore implements SlackDmStore {
   private seq = 0;
   constructor(private mail: MemStore) {}
 
+  private count(name: string) {
+    this.calls[name] = (this.calls[name] ?? 0) + 1;
+  }
+  private missing(what: string) {
+    if (this.tablesMissing) throw new Error(`${what} failed: PGRST205`);
+  }
   async getSlackDmMode() {
-    if (this.modeError) throw new Error("slack dm mode read failed: 42703");
+    if (this.modeError) throw new Error(`slack dm mode read failed: ${this.modeError}`);
     return this.mode;
   }
+  async getSlackDmRaisedAt() {
+    return this.raisedAt;
+  }
   async getSlackLink(userId: string) {
+    this.count("getSlackLink");
     return this.links.get(userId) ?? null;
   }
   async listSlackLinkedUserIds(userIds: readonly string[], teamId: string | null) {
     return new Set(userIds.filter((u) => this.links.has(u) && (!teamId || this.links.get(u)!.teamId === teamId)));
   }
   async getSlackDmPreference(userId: string) {
+    this.count("getSlackDmPreference");
+    this.missing("slack dm preference read");
     return this.prefs.has(userId) ? { enabled: this.prefs.get(userId)!, hasRow: true } : { enabled: true, hasRow: false };
   }
   async listSlackDmDisabledUserIds(userIds: readonly string[]) {
@@ -58,10 +76,12 @@ export class MemSlackDmStore implements SlackDmStore {
   async hasReceivedSlackDm(userId: string) {
     return [...this.dms, ...this.previews].some((d) => d.row.userId === userId && d.status === "sent");
   }
-  async listSlackDmCandidates(campaignIds: readonly string[], sentSince: Date, limit: number) {
+  async listSlackDmCandidates(campaignIds: readonly string[], range: { since: Date; until?: Date }) {
     const out: SlackDmCandidate[] = [];
-    for (const d of this.mail.deliveries) {
-      if (!campaignIds.includes(d.campaignId) || d.status !== "sent" || !d.sentAt || d.sentAt < sentSince) continue;
+    const sorted = [...this.mail.deliveries].sort((a, b) => (a.sentAt?.getTime() ?? 0) - (b.sentAt?.getTime() ?? 0));
+    for (const d of sorted) {
+      if (!campaignIds.includes(d.campaignId) || d.status !== "sent" || !d.sentAt || d.sentAt < range.since) continue;
+      if (range.until && d.sentAt >= range.until) continue;
       const dm = this.dms.find((x) => x.key === d.id);
       if (dm && dm.status !== "deferred") continue;
       out.push({
@@ -71,7 +91,6 @@ export class MemSlackDmStore implements SlackDmStore {
         audience: d.audience,
         contentVersion: d.contentVersion,
       });
-      if (out.length >= limit) break;
     }
     return out;
   }
@@ -103,6 +122,7 @@ export class MemSlackDmStore implements SlackDmStore {
     this.finishIn(this.dms, id, patch);
   }
   async markStaleSlackDms(olderThan: Date) {
+    this.count("markStaleSlackDms");
     let n = 0;
     for (const d of this.dms) {
       if (d.status === "sending" && d.updatedAt < olderThan) {

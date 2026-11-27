@@ -11,6 +11,8 @@
 --        count … 運用 Slack の人数のお知らせに Slack の人数（slack_candidates / slack_will_send）を足すだけ
 --        owner … owner_user_ids の人にだけ DM / all … 対象の人全員に DM
 --        DM はメールを送れた（status=sent）人にだけ、毎朝の実行の最後にまとめて送る。
+--        送るのは「同じ日（日本時間）、かつスイッチを off / count から上げた時刻（slack_dm_raised_at）より後」に送れたメールの分だけ。
+--        slack_dm_raised_at はトリガーが入れる（手で書いても元に戻る）。
 --        どの常設の文面を DM でも送るかはアプリの定数（SLACK_DM_STANDING_KEYS。今は onboarding_day2 だけ）。
 --   2. member_mail_slack_dm_preferences
 --        会員本人の「Slack の DM で受け取る」のオン・オフ（通知設定の画面から）。行が無ければオン。
@@ -35,6 +37,39 @@ ALTER TABLE public.member_mail_settings
 
 COMMENT ON COLUMN public.member_mail_settings.slack_dm_mode IS
   '常設の文面を Slack の DM でも送るスイッチ（#327-H）。off / count（人数だけ）/ owner（オーナーだけ）/ all（全員）。メールを送れた人にだけ DM する';
+
+-- スイッチを off / count から owner / all に上げた最後の時刻（トリガーが入れる。手で書かない）。
+-- DM を送るのは、この時刻より後で、かつ同じ日（日本時間）に送れたメールの分だけ（上げたときに昔の分をまとめて送らない）
+ALTER TABLE public.member_mail_settings
+  ADD COLUMN IF NOT EXISTS slack_dm_raised_at timestamptz;
+
+COMMENT ON COLUMN public.member_mail_settings.slack_dm_raised_at IS
+  'slack_dm_mode を off / count から owner / all に上げた最後の時刻（#327-H。トリガーが入れる）。これより前に送ったメールの分は DM しない';
+
+CREATE OR REPLACE FUNCTION public.member_mail_settings_slack_dm_raised()
+RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+BEGIN
+  IF NEW.slack_dm_mode IN ('owner', 'all')
+     AND (TG_OP = 'INSERT' OR OLD.slack_dm_mode IS DISTINCT FROM NEW.slack_dm_mode)
+     AND (TG_OP = 'INSERT' OR OLD.slack_dm_mode IN ('off', 'count')) THEN
+    NEW.slack_dm_raised_at := pg_catalog.now();
+  ELSIF TG_OP = 'UPDATE' THEN
+    -- 手では書き換えさせない
+    NEW.slack_dm_raised_at := OLD.slack_dm_raised_at;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_member_mail_settings_slack_dm_raised ON public.member_mail_settings;
+CREATE TRIGGER trg_member_mail_settings_slack_dm_raised
+  BEFORE INSERT OR UPDATE ON public.member_mail_settings
+  FOR EACH ROW EXECUTE FUNCTION public.member_mail_settings_slack_dm_raised();
+
+REVOKE ALL ON FUNCTION public.member_mail_settings_slack_dm_raised() FROM PUBLIC, anon, authenticated;
 
 -- 2. 会員本人の Slack の DM のオン・オフ（行が無ければオン）
 CREATE TABLE IF NOT EXISTS public.member_mail_slack_dm_preferences (

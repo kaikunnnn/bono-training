@@ -181,15 +181,32 @@ describe("スイッチの既定は off・DM で送る文面は onboarding_day2 �
     expect(await slackCountLines({ slackDm }, "onboarding_day2", [uid(1)], [])).toMatchObject({ slack_candidates: 1 });
   });
 
-  it("スイッチが読めない（マイグレーション前）ときは off 扱いで、メールは送れる", async () => {
+  it("マイグレーション前（列が無い）: メールは送れ、DM の処理は見回りも通知もログも出さずに終わる", async () => {
     const { store, slackStore, slack, slackDm } = seed(1);
-    slackStore.modeError = true;
+    slackStore.modeError = "42703";
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     expect(await readSlackDmMode(slackStore)).toBe("off");
     const mail = new FakeMail();
-    const { dm } = await morningRun(store, mail, slackDm);
+    const alerts: Alert[] = [];
+    const { dm } = await morningRun(store, mail, slackDm, { alerts });
     expect(mail.sent).toHaveLength(1);
-    expect(dm.skippedReason).toBe("mode_off");
+    expect(dm.skippedReason).toBe("mode_unreadable");
+    expect(slackStore.calls.markStaleSlackDms).toBeUndefined();
     expect(slack.infoCalls).toHaveLength(0);
+    expect(alerts.filter((a) => a.title.includes("Slack"))).toHaveLength(0);
+    expect(warn).not.toHaveBeenCalled();
+    expect(errSpy).not.toHaveBeenCalled();
+  });
+
+  it("スイッチが別の理由で読めないときは warn だけ出して、同じく静かに終わる", async () => {
+    const { store, slackStore, slackDm } = seed(1);
+    slackStore.modeError = "500";
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const alerts: Alert[] = [];
+    const { dm } = await morningRun(store, new FakeMail(), slackDm, { alerts });
+    expect(dm.skippedReason).toBe("mode_unreadable");
+    expect(warn).toHaveBeenCalledTimes(2); // 人数の行（prepare）と DM の処理で1回ずつ
+    expect(alerts.filter((a) => a.title.includes("Slack"))).toHaveLength(0);
   });
 
   it("Slack の依存が無い（slackDm 未設定）ときはメールだけ", async () => {
@@ -252,8 +269,8 @@ describe("誰に送るか", () => {
     expect(slack.infoCalls).toEqual(["U-1"]);
     expect(slack.opened).toHaveLength(0);
     expect(slackStore.dms).toHaveLength(0);
-    const summary = alerts.find((a) => a.title.startsWith("Slack の DM の結果"));
-    expect(Object.keys(summary!.counts).some((k) => k.startsWith("skipped_"))).toBe(true);
+    // 外れただけの実行では運用 Slack に出さない
+    expect(alerts.filter((a) => a.title.startsWith("Slack の DM"))).toHaveLength(0);
   });
 
   it("off: 誰にも送らない", async () => {
@@ -417,14 +434,62 @@ describe("送る時機: メールを送り終えてから、残りの時間で",
     expect(slack.posted).toHaveLength(3);
   });
 
-  it("36時間より前に送ったメールの分は、あとからスイッチを入れても送らない", async () => {
+  it("前の日に送ったメールの分は送らず、数だけ通知に出す（きのうの分だけ）", async () => {
     const { store, slack, slackStore, slackDm } = seed(1, { slackMode: "off" });
     await morningRun(store, new FakeMail(), slackDm);
     slackStore.mode = "all";
-    const later = new Date(MORNING.getTime() + 37 * 3600_000);
-    const deps = makeDeps(store, new FakeMail(), [], { now: () => later, slackDm });
-    await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
+    slackStore.raisedAt = new Date(MORNING.getTime() - 3600_000);
+    const alerts: Alert[] = [];
+    const nextMorning = jst("2026-11-26T08:00:00");
+    const deps = makeDeps(store, new FakeMail(), alerts, { now: () => nextMorning, slackDm });
+    const dm = await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
     expect(slack.infoCalls).toHaveLength(0);
+    expect(dm.counts.expired_previous_day).toBe(1);
+    expect(alerts.find((a) => a.title.includes("Slack の DM"))?.title).toContain("確認が必要");
+    // おととい以前の分は数えない
+    const later = makeDeps(store, new FakeMail(), [], { now: () => jst("2026-11-27T08:00:00"), slackDm });
+    expect((await runSlackDmBatch(later, { timeBudgetMs: BUDGET })).counts.expired_previous_day).toBeUndefined();
+  });
+
+  it("前の日の分でも、スイッチを上げる前に送ったメールの分は数えない", async () => {
+    const { store, slackStore, slackDm } = seed(1, { slackMode: "off" });
+    await morningRun(store, new FakeMail(), slackDm);
+    slackStore.mode = "all";
+    slackStore.raisedAt = jst("2026-11-25T20:00:00");
+    const deps = makeDeps(store, new FakeMail(), [], { now: () => jst("2026-11-26T08:00:00"), slackDm });
+    expect((await runSlackDmBatch(deps, { timeBudgetMs: BUDGET })).counts).toEqual({});
+  });
+
+  it("同じ日でも、スイッチを上げた時刻より前に送ったメールの分は送らない。上げた時刻ちょうど以降は送る", async () => {
+    const { store, slack, slackStore, slackDm } = seed(2, { slackMode: "off" });
+    // 1人目は 8:00、2人目は 8:30 にメールを送った形にする
+    await morningRun(store, new FakeMail(), slackDm);
+    store.deliveries[0].sentAt = jst("2026-11-25T08:00:00");
+    store.deliveries[1].sentAt = jst("2026-11-25T08:30:00");
+    slackStore.mode = "all";
+    slackStore.raisedAt = jst("2026-11-25T08:30:00");
+    const deps = makeDeps(store, new FakeMail(), [], { now: () => jst("2026-11-25T09:00:00"), slackDm });
+    await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
+    expect(slack.opened).toEqual(["U-2"]);
+  });
+
+  it("日本時間の0時ちょうどに送ったメールは「今日」に入る", async () => {
+    const { store, slack, slackDm } = seed(1);
+    await morningRun(store, new FakeMail(), slackDm, { budget: 0 });
+    store.deliveries[0].sentAt = jst("2026-11-25T00:00:00");
+    const deps = makeDeps(store, new FakeMail(), [], { now: () => MORNING, slackDm });
+    await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
+    expect(slack.posted).toHaveLength(1);
+  });
+
+  it("スイッチを上げた時刻が分からなければ送らず、知らせる", async () => {
+    const { store, slack, slackStore, slackDm } = seed(1);
+    slackStore.raisedAt = null;
+    const alerts: Alert[] = [];
+    const { dm } = await morningRun(store, new FakeMail(), slackDm, { alerts });
+    expect(dm.skippedReason).toBe("not_raised");
+    expect(slack.infoCalls).toHaveLength(0);
+    expect(alerts.find((a) => a.title.includes("Slack の DM"))?.counts.raised_at_missing).toBe(1);
   });
 
   it("失敗は1人ごとではなく、実行の最後に1つの通知にまとめる", async () => {
@@ -534,15 +599,21 @@ describe("二重に送らない・止まった行", () => {
     expect(alerts.find((a) => a.title.includes("Slack の DM"))?.counts.stale_sending).toBe(1);
   });
 
-  it("スイッチが off でも、止まった sending は needs_review にする", async () => {
+  it("スイッチが off のときは見回りもせず、通知も出さない。count 以上なら見回る", async () => {
     const { slackStore, slackDm, store } = seed(0, { slackMode: "off" });
     await slackStore.claimSlackDm(
       { deliveryId: "d-x", campaignId: "s-1", userId: uid(1), audience: "all", contentVersion: 1, teamId: TEAM, slackUserId: "U-1" },
       new Date(MORNING.getTime() - 20 * 60_000),
     );
-    const deps = makeDeps(store, new FakeMail(), [], { now: () => MORNING, slackDm });
+    const alerts: Alert[] = [];
+    const deps = makeDeps(store, new FakeMail(), alerts, { now: () => MORNING, slackDm });
     const dm = await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
-    expect(dm.staleSending).toBe(1);
+    expect(dm.skippedReason).toBe("mode_off");
+    expect(dm.staleSending).toBe(0);
+    expect(slackStore.dms[0].status).toBe("sending");
+    expect(alerts).toHaveLength(0);
+    slackStore.mode = "count";
+    expect((await runSlackDmBatch(deps, { timeBudgetMs: BUDGET })).staleSending).toBe(1);
   });
 });
 
@@ -682,5 +753,141 @@ describe("通知設定の画面に Slack のカードを出すか（loadSlackDmS
       throw new Error("x");
     };
     expect(await loadSlackDmSetting(store, TEAM, uid(1))).toBeNull();
+  });
+});
+
+// =============================================================================
+describe("メールのスイッチに合わせる", () => {
+  async function emailsSent(n: number) {
+    const s = seed(n);
+    const deps = makeDeps(s.store, new FakeMail(), [], { now: () => MORNING, slackDm: s.slackDm });
+    for (const c of await s.store.listStandingCampaigns(MORNING)) await prepareCampaign(deps, c);
+    await runSendBatch(deps);
+    expect(s.store.deliveries.every((d) => d.status === "sent")).toBe(true);
+    return { ...s, deps };
+  }
+
+  it("メールを送ったあとに種類（signup）のスイッチを下げたら、まだの DM も送らない（通知も出さない）", async () => {
+    const { store, slack, deps } = await emailsSent(2);
+    store.kindModes.signup = "owner";
+    const alerts: Alert[] = [];
+    const dm = await runSlackDmBatch(
+      { ...deps, notifyOps: async (a) => void alerts.push(a) },
+      { timeBudgetMs: BUDGET },
+    );
+    expect(slack.infoCalls).toHaveLength(0);
+    expect(dm.counts.skipped_email_mode).toBe(2);
+    expect(alerts).toHaveLength(0);
+  });
+
+  it("全体のスイッチを owner に下げたら会員の行は送らない", async () => {
+    const { store, slack, deps } = await emailsSent(1);
+    store.settings.mode = "owner";
+    await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
+    expect(slack.infoCalls).toHaveLength(0);
+  });
+
+  it.each([
+    ["count", "count"],
+    ["owner", "owner"],
+    ["null（#342 のマイグレーション前）", null],
+  ])("文面ごとのスイッチ（standing_mode）が %s なら会員の行は送らない", async (_label, value) => {
+    const { store, campaign, slack, deps } = await emailsSent(1);
+    store.campaigns.set(campaign.id, {
+      ...store.campaigns.get(campaign.id)!,
+      ...({ standingMode: value } as unknown as Partial<Campaign>),
+    });
+    await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
+    expect(slack.infoCalls).toHaveLength(0);
+  });
+
+  it("standing_mode の項目が無い文面（#342 が入る前）は、全体と種類のスイッチだけを見る", async () => {
+    const { store, campaign, slack, deps } = await emailsSent(1);
+    const current = { ...store.campaigns.get(campaign.id)! } as Campaign & { standingMode?: unknown };
+    delete current.standingMode;
+    store.campaigns.set(campaign.id, current);
+    await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
+    expect(slack.posted).toHaveLength(1);
+  });
+});
+
+// =============================================================================
+describe("外れた人で通知や後ろの人を邪魔しない", () => {
+  it("つながっていない・オフの人は、まとめて外す（1人ずつ記録を読みに行かない）", async () => {
+    const { store, slackStore, slack, slackDm } = seed(3, { linked: [1, 2] });
+    slackStore.prefs.set(uid(2), false);
+    await morningRun(store, new FakeMail(), slackDm);
+    expect(slack.infoCalls).toEqual(["U-1"]);
+    // 送る直前の確認（1人目だけ）。外れた2人の分は読まない
+    expect(slackStore.calls.getSlackLink).toBe(1);
+    expect(slackStore.calls.getSlackDmPreference).toBe(1);
+  });
+
+  it("外れただけの実行では通知しない", async () => {
+    const { store, slackDm } = seed(2, { linked: [] });
+    const alerts: Alert[] = [];
+    await morningRun(store, new FakeMail(), slackDm, { alerts });
+    expect(alerts.filter((a) => a.title.includes("Slack の DM"))).toHaveLength(0);
+  });
+
+  it("users.info の失敗は「確認が必要」として通知する", async () => {
+    const { store, slack, slackDm } = seed(1);
+    slack.nextInfo.push({ kind: "slack_error", error: "user_not_found" });
+    const alerts: Alert[] = [];
+    await morningRun(store, new FakeMail(), slackDm, { alerts });
+    const a = alerts.find((x) => x.title.includes("Slack の DM"));
+    expect(a?.title).toContain("確認が必要");
+    expect(a?.counts.skipped_users_info_user_not_found).toBe(1);
+  });
+
+  it("Slack のアカウントの状態で外れた人は上限に数えず、後ろの人に送る", async () => {
+    const { store, slack, slackDm } = seed(3);
+    slack.info.set("U-1", slackUser("U-1", { deleted: true }));
+    slack.info.set("U-2", slackUser("U-2", { isRestricted: true }));
+    const deps = makeDeps(store, new FakeMail(), [], { now: () => MORNING, slackDm });
+    for (const c of await store.listStandingCampaigns(MORNING)) await prepareCampaign(deps, c);
+    await runSendBatch(deps);
+    const dm = await runSlackDmBatch(deps, { timeBudgetMs: BUDGET, limit: 1 });
+    expect(slack.opened).toEqual(["U-3"]);
+    expect(dm.processed).toBe(1);
+  });
+
+  it("上限まで送ったら、残りの数を出して次の実行で送る", async () => {
+    const { store, slack, slackDm } = seed(3);
+    const deps = makeDeps(store, new FakeMail(), [], { now: () => MORNING, slackDm });
+    for (const c of await store.listStandingCampaigns(MORNING)) await prepareCampaign(deps, c);
+    await runSendBatch(deps);
+    const dm = await runSlackDmBatch(deps, { timeBudgetMs: BUDGET, limit: 2 });
+    expect(slack.posted).toHaveLength(2);
+    expect(dm.counts.left_for_next_run).toBe(1);
+    await runSlackDmBatch(deps, { timeBudgetMs: BUDGET, limit: 2 });
+    expect(slack.posted).toHaveLength(3);
+  });
+
+  it("時間が足りないときは、送れなかった数を通知に出す", async () => {
+    const { store, slackDm } = seed(2);
+    const alerts: Alert[] = [];
+    const { dm } = await morningRun(store, new FakeMail(), slackDm, { alerts, budget: 10_000 });
+    expect(dm.skippedReason).toBe("no_time");
+    expect(alerts.find((a) => a.title.includes("Slack の DM"))?.counts.left_for_next_run).toBe(2);
+  });
+});
+
+describe("通知設定の画面: マイグレーション前", () => {
+  it("スイッチが読めなければ、エラーを出さずにカードを出さない", async () => {
+    const store = new MemSlackDmStore(new MemStore());
+    store.modeError = "42703";
+    store.links.set(uid(1), { teamId: TEAM, slackUserId: "U-1" });
+    expect(await loadSlackDmSetting(store, TEAM, uid(1))).toBeNull();
+    expect(errSpy).not.toHaveBeenCalled();
+  });
+
+  it("新しい表が無ければ、エラーを出さずにカードを出さない", async () => {
+    const store = new MemSlackDmStore(new MemStore());
+    store.mode = "all";
+    store.tablesMissing = true;
+    store.links.set(uid(1), { teamId: TEAM, slackUserId: "U-1" });
+    expect(await loadSlackDmSetting(store, TEAM, uid(1))).toBeNull();
+    expect(errSpy).not.toHaveBeenCalled();
   });
 });

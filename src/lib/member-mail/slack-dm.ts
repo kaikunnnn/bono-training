@@ -2,14 +2,18 @@
  * 常設の文面（はじめの案内）を、メールに加えて Slack の DM でも送る（#327-H）。
  *
  * 送る時機: 毎朝の実行で、メールを送り終えたあとに runSlackDmBatch でまとめて送る（メールの1通ごとには送らない）。
- *   候補は「最近（SLACK_DM_SENT_WINDOW_MS 以内）にメールを送れた（status=sent）常設の文面の送信記録」のうち、
- *   DM の記録がまだ無い・または deferred（次の実行で送ってよい）のもの。
- *   残り時間が SLACK_DM_MIN_REMAINING_MS より少なければ始めない（残りは次の実行で拾う）。
+ *   候補は「今日（日本時間）、かつ Slack のスイッチを off / count から上げた時刻（slack_dm_raised_at）より後に
+ *   メールを送れた（status=sent）常設の文面の送信記録」のうち、DM の記録がまだ無い・または deferred（次の実行で送ってよい）のもの。
+ *   前の日の分は送らない（数だけ通知に出す）。スイッチを入れたときに、昔の分をまとめて送らないため。
+ *   残り時間が SLACK_DM_MIN_REMAINING_MS より少なければ始めない（残りは同じ日の次の実行で拾う。件数は通知に出す）。
+ *   スイッチが読めない（マイグレーション前）・off のときは、何もせず静かに終える（通知もしない）。
  *
  * 送る条件（すべて満たすときだけ。1つでも欠けたら DM は送らない。メールには何も影響させない）:
  *   1. SLACK_DM_STANDING_KEYS の常設の文面（今は onboarding_day2 だけ。週1回のメルマガなどは送らない）
  *   2. その人へのメールを送れた（status=sent）。メールの版と今の文面の版が同じ
- *   3. Slack の DM のスイッチ（member_mail_settings.slack_dm_mode）が owner なら owner_user_ids の人、all なら全員
+ *   3. メールのスイッチ（全体・種類・文面ごとの standing_mode）が今もその行を送ってよい状態
+ *      （会員の行は all、オーナー確認の行は owner 以上）。メールを下げれば、まだ送っていない DM も止まる
+ *   3'. Slack の DM のスイッチ（member_mail_settings.slack_dm_mode）が owner なら owner_user_ids の人、all なら全員
  *      （off / count は送らない。count は運用 Slack に人数を出すだけ）
  *   4. slack_member_links でつながっていて、team_id が BONO のワークスペース（SLACK_WELCOME_TEAM_ID）
  *   5. 本人の「Slack の DM で受け取る」がオン（行が無ければオン）
@@ -28,10 +32,10 @@
  * - https://docs.slack.dev/apis/web-api/rate-limits/
  */
 import { getCampaignBlockReason } from "./content";
-import { isWithinSendWindow } from "./dates";
+import { isWithinSendWindow, jstDayStart } from "./dates";
 import type { NotifyMailOps } from "./ops-alert";
 import { renderSlackDm } from "./slack-mrkdwn";
-import type { Audience, MailMode, MailStore, StandingKey } from "./types";
+import { MAIL_MODES, type Audience, type MailMode, type MailStore, type StandingKey } from "./types";
 import { judgeEligibility } from "@/lib/slack-welcome/eligibility";
 import type { SlackCallResult, SlackUserSummary } from "@/lib/slack-welcome/slack-api";
 
@@ -47,11 +51,9 @@ export function isSlackDmStandingKey(key: unknown): key is StandingKey {
 
 /** 1通（users.info・conversations.open・chat.postMessage の3回、各5秒まで）に要る残り時間。これより少なければ始めない */
 export const SLACK_DM_MIN_REMAINING_MS = 15_000;
-/** メールを送ってからこの時間までに DM を送れなければ、もう送らない（スイッチを入れたときに昔の分をまとめて送らない） */
-export const SLACK_DM_SENT_WINDOW_MS = 36 * 60 * 60 * 1000;
 /** これより古い sending は「送れたか分からない」として needs_review にする（メールと同じ10分） */
 export const SLACK_DM_STALE_SENDING_MS = 10 * 60 * 1000;
-/** 1回の実行で拾う候補の数 */
+/** 1回の実行で Slack に送る（確保する）数の上限。送らずに外れた人はこの数に入れない */
 export const SLACK_DM_BATCH_LIMIT = 50;
 
 export interface SlackDmLink {
@@ -95,6 +97,8 @@ export interface SlackDmPatch {
 export interface SlackDmStore {
   /** member_mail_settings.slack_dm_mode（読めなければ例外。呼び出し側で off 扱い） */
   getSlackDmMode(): Promise<MailMode>;
+  /** member_mail_settings.slack_dm_raised_at（off / count から owner / all に上げた最後の時刻。トリガーが入れる） */
+  getSlackDmRaisedAt(): Promise<Date | null>;
   getSlackLink(userId: string): Promise<SlackDmLink | null>;
   /** userIds のうち、つながっている人（teamId を渡すとそのワークスペースだけ） */
   listSlackLinkedUserIds(userIds: readonly string[], teamId: string | null): Promise<Set<string>>;
@@ -106,10 +110,13 @@ export interface SlackDmStore {
   /** この人に DM（会員の DM か、オーナー確認の DM）を送れたことがあるか */
   hasReceivedSlackDm(userId: string): Promise<boolean>;
   /**
-   * campaignIds の送信記録のうち、sentSince 以降に送れた（status=sent）もので、
-   * DM の記録が無い・または deferred のもの（古い順に limit 件まで）
+   * campaignIds の送信記録のうち、since 以降（until があれば until より前）に送れた（status=sent）もので、
+   * DM の記録が無い・または deferred のもの（メールを送った順。1日分なので上限は store の中で大きめに持つ）
    */
-  listSlackDmCandidates(campaignIds: readonly string[], sentSince: Date, limit: number): Promise<SlackDmCandidate[]>;
+  listSlackDmCandidates(
+    campaignIds: readonly string[],
+    range: { since: Date; until?: Date },
+  ): Promise<SlackDmCandidate[]>;
   /**
    * Slack を呼ぶ直前に確保する。記録が無ければ sending で入れ、deferred なら sending に戻す。
    * 確保できたら行ID、もう送った・送っている（deferred 以外の行がある）なら null
@@ -140,7 +147,7 @@ export interface SlackDmDeps {
 
 /** MailDeps のうち、ここで使うもの（process.ts と循環しないよう型だけで受ける） */
 export interface SlackDmContext {
-  store: Pick<MailStore, "getSettings" | "getCampaign" | "listStandingCampaigns">;
+  store: Pick<MailStore, "getSettings" | "getKindMode" | "getCampaign" | "listStandingCampaigns">;
   slackDm?: SlackDmDeps | null;
   notifyOps: NotifyMailOps;
   now: () => Date;
@@ -170,14 +177,52 @@ function codeOf(result: Failure): string {
   }
 }
 
-/** スイッチを読む。読めなければ（マイグレーション前など）off 扱い。送らない側に倒すだけなので warn */
-export async function readSlackDmMode(store: SlackDmStore): Promise<MailMode> {
+/**
+ * 表・列が無い（マイグレーション前）ときの PostgREST / Postgres のエラーコード。
+ * store は「... failed: <code>」の形で投げる
+ */
+const MISSING_SCHEMA_CODES = ["42P01", "42703", "PGRST204", "PGRST205"];
+
+export function isMissingSchemaError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : "";
+  return MISSING_SCHEMA_CODES.some((code) => message.endsWith(`: ${code}`));
+}
+
+/** スイッチを読む。読めなければ null（マイグレーション前なら何も出さない。それ以外は warn だけ） */
+export async function tryReadSlackDmMode(store: SlackDmStore): Promise<MailMode | null> {
   try {
     return await store.getSlackDmMode();
   } catch (error) {
-    console.warn("[member-mail] slack dm mode read failed:", error instanceof Error ? error.message : "unknown");
-    return "off";
+    if (!isMissingSchemaError(error)) {
+      console.warn("[member-mail] slack dm mode read failed:", error instanceof Error ? error.message : "unknown");
+    }
+    return null;
   }
+}
+
+/** スイッチを読む。読めなければ off 扱い（送らない側に倒す） */
+export async function readSlackDmMode(store: SlackDmStore): Promise<MailMode> {
+  return (await tryReadSlackDmMode(store)) ?? "off";
+}
+
+/** off < count < owner < all のうち弱いほう（process.ts の effectiveMode と同じ。循環 import を避けて写す） */
+function weaker(a: MailMode, b: MailMode): MailMode {
+  return MAIL_MODES.indexOf(a) <= MAIL_MODES.indexOf(b) ? a : b;
+}
+
+/**
+ * PR #342 の文面ごとのスイッチ（campaign.standingMode）。#342 が入っていない枝では項目が無い（undefined）ので見ない（all）。
+ * 値が null（#342 のマイグレーション前）なら #342 と同じく count として扱う
+ */
+export function standingModeOf(campaign: object): MailMode {
+  const value = (campaign as { standingMode?: unknown }).standingMode;
+  if (value === undefined) return "all";
+  return MAIL_MODES.includes(value as MailMode) ? (value as MailMode) : "count";
+}
+
+/** メールのスイッチ（全体・種類・文面ごと）が、今もこの行の宛先に送ってよい状態か */
+function emailStillAllows(emailMode: MailMode, audience: Audience): boolean {
+  return audience === "all" ? emailMode === "all" : emailMode === "owner" || emailMode === "all";
 }
 
 // =============================================================================
@@ -303,11 +348,21 @@ function resultKey(result: SendOneResult): string {
 // =============================================================================
 
 export interface SlackDmBatchResult {
-  skippedReason?: "not_configured" | "mode_off" | "mode_count" | "mail_off" | "outside_window" | "no_time";
+  skippedReason?:
+    | "not_configured"
+    | "mode_unreadable"
+    | "mode_off"
+    | "mode_count"
+    | "mail_off"
+    | "outside_window"
+    | "not_raised"
+    | "no_time";
   staleSending: number;
   processed: number;
   counts: Record<string, number>;
 }
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export async function runSlackDmBatch(
   ctx: SlackDmContext,
@@ -320,13 +375,17 @@ export async function runSlackDmBatch(
   if (!sd) return { ...result, skippedReason: "not_configured" };
   const remaining = () => options.timeBudgetMs - (ctx.now().getTime() - startedAt.getTime());
 
+  // スイッチを最初に読む。読めない（マイグレーション前）・off なら、見回りも通知もせず静かに終える
+  const mode = await tryReadSlackDmMode(sd.store);
+  if (mode === null) return { ...result, skippedReason: "mode_unreadable" };
+  if (mode === "off") return { ...result, skippedReason: "mode_off" };
+
   try {
-    // 止まっていた sending は、スイッチに関係なく先に needs_review にする（自動で送り直さない）
+    // 止まっていた sending を needs_review にする（自動で送り直さない）
     result.staleSending = await sd.store.markStaleSlackDms(new Date(startedAt.getTime() - SLACK_DM_STALE_SENDING_MS));
     if (result.staleSending > 0) counts.stale_sending = result.staleSending;
 
-    const mode = await readSlackDmMode(sd.store);
-    if (mode === "off" || mode === "count") return await summarize(ctx, { ...result, skippedReason: `mode_${mode}` });
+    if (mode === "count") return await summarize(ctx, { ...result, skippedReason: "mode_count" });
     const settings = await ctx.store.getSettings();
     if (!settings || settings.mode === "off") return await summarize(ctx, { ...result, skippedReason: "mail_off" });
     if (!isWithinSendWindow(startedAt, settings.sendHourStart, settings.sendHourEnd)) {
@@ -336,40 +395,77 @@ export async function runSlackDmBatch(
       counts.not_configured = 1;
       return await summarize(ctx, { ...result, skippedReason: "not_configured" });
     }
-    if (remaining() < SLACK_DM_MIN_REMAINING_MS) {
-      return await summarize(ctx, { ...result, skippedReason: "no_time" });
+    const raisedAt = await sd.store.getSlackDmRaisedAt();
+    if (!raisedAt) {
+      // スイッチを上げた時刻が分からない（トリガーを通らずに入った等）。どこから送ってよいか分からないので送らない
+      counts.raised_at_missing = 1;
+      return await summarize(ctx, { ...result, skippedReason: "not_raised" });
     }
 
     const campaigns = (await ctx.store.listStandingCampaigns(startedAt)).filter((c) => isSlackDmStandingKey(c.standingKey));
     if (campaigns.length === 0) return await summarize(ctx, result);
     const byId = new Map(campaigns.map((c) => [c.id, c]));
-    const texts = new Map<string, string>();
-    const candidates = await sd.store.listSlackDmCandidates(
-      campaigns.map((c) => c.id),
-      new Date(startedAt.getTime() - SLACK_DM_SENT_WINDOW_MS),
-      options.limit ?? SLACK_DM_BATCH_LIMIT,
-    );
+    const ids = campaigns.map((c) => c.id);
 
-    for (const candidate of candidates) {
-      if (remaining() < SLACK_DM_MIN_REMAINING_MS) {
-        // 残りは次の実行で拾う（記録を作っていないので、そのまま候補に残る）
-        counts.left_for_next_run = (counts.left_for_next_run ?? 0) + 1;
-        continue;
+    // メールのスイッチ（全体・種類・文面ごと）。文面ごとに1回だけ読む
+    const emailModes = new Map<string, MailMode>();
+    for (const c of campaigns) {
+      emailModes.set(c.id, weaker(weaker(settings.mode, await ctx.store.getKindMode(c.kind)), standingModeOf(c)));
+    }
+
+    /** 送る前に、まとめて外せる人を外す（つながり・本人のオン・オフ・スイッチ・文面の版）。外した人は通知に出さない */
+    const filter = async (list: SlackDmCandidate[], tallyInto: Record<string, number> | null) => {
+      const userIds = [...new Set(list.map((c) => c.userId))];
+      const linked = userIds.length > 0 ? await sd.store.listSlackLinkedUserIds(userIds, sd.teamId) : new Set<string>();
+      const disabled = linked.size > 0 ? await sd.store.listSlackDmDisabledUserIds([...linked]) : new Set<string>();
+      const out: SlackDmCandidate[] = [];
+      for (const c of list) {
+        const campaign = byId.get(c.campaignId);
+        let reason: string | null = null;
+        if (!campaign) reason = "skipped_campaign";
+        else if (!emailStillAllows(emailModes.get(c.campaignId) ?? "off", c.audience)) reason = "skipped_email_mode";
+        else if (mode === "owner" && !settings.ownerUserIds.includes(c.userId)) reason = "skipped_not_owner";
+        else if (campaign.contentVersion !== c.contentVersion || getCampaignBlockReason(campaign)) {
+          reason = "skipped_content_changed";
+        } else if (!linked.has(c.userId)) reason = "skipped_not_linked";
+        else if (disabled.has(c.userId)) reason = "skipped_disabled";
+        if (reason) {
+          if (tallyInto) tally(tallyInto, reason);
+        } else out.push(c);
       }
-      if (mode === "owner" && !settings.ownerUserIds.includes(candidate.userId)) continue;
-      const campaign = byId.get(candidate.campaignId);
-      if (!campaign) continue;
-      // メールで送った版と今の文面が違う・送れない文面になった → DM は送らない
-      if (campaign.contentVersion !== candidate.contentVersion || getCampaignBlockReason(campaign)) {
-        tally(counts, "skipped_content_changed");
-        continue;
+      return out;
+    };
+
+    // 前の日に送れずに終わった分（送らない。数だけ出す）。きのう1日分だけを見る
+    const dayStart = jstDayStart(startedAt);
+    const expiredFrom = new Date(Math.max(raisedAt.getTime(), dayStart.getTime() - DAY_MS));
+    if (expiredFrom < dayStart) {
+      const expired = await filter(await sd.store.listSlackDmCandidates(ids, { since: expiredFrom, until: dayStart }), null);
+      if (expired.length > 0) counts.expired_previous_day = expired.length;
+    }
+
+    // 今日、スイッチを上げたあとに送れたメールの分だけ
+    const since = new Date(Math.max(raisedAt.getTime(), dayStart.getTime()));
+    const candidates = await filter(await sd.store.listSlackDmCandidates(ids, { since }), counts);
+    if (candidates.length > 0 && remaining() < SLACK_DM_MIN_REMAINING_MS) {
+      // 時間が足りない。記録を作っていないので、同じ日の次の実行でそのまま拾う
+      counts.left_for_next_run = candidates.length;
+      return await summarize(ctx, { ...result, skippedReason: "no_time" });
+    }
+
+    const limit = options.limit ?? SLACK_DM_BATCH_LIMIT;
+    const texts = new Map<string, string>();
+    for (const [i, candidate] of candidates.entries()) {
+      if (result.processed >= limit || remaining() < SLACK_DM_MIN_REMAINING_MS) {
+        counts.left_for_next_run = candidates.length - i;
+        break;
       }
+      const campaign = byId.get(candidate.campaignId)!;
       let text = texts.get(campaign.id);
       if (!text) {
         text = renderSlackDm(campaign, { siteUrl: ctx.siteUrl });
         texts.set(campaign.id, text);
       }
-      result.processed += 1;
       let sent: SendOneResult;
       try {
         sent = await sendOne({
@@ -386,13 +482,20 @@ export async function runSlackDmBatch(
         // 記録の失敗など。sending の行が残っていれば次の回で needs_review になる（送り直さない）
         console.error("[member-mail] slack dm error:", error instanceof Error ? error.message : "unknown");
         tally(counts, "error");
+        result.processed += 1;
         continue;
       }
       tally(counts, resultKey(sent));
-      if (sent.kind !== "skipped") logSlack(sent.kind, { deliveryId: candidate.deliveryId });
+      // 送らずに外れた人（Slack のアカウントの状態など）は上限に数えない（後ろの人が締め出されないように）
+      if (sent.kind !== "skipped") {
+        result.processed += 1;
+        logSlack(sent.kind, { deliveryId: candidate.deliveryId });
+      }
       if (sent.kind === "rate_limited") {
         // 速さの上限。この回の DM はここで止め、残りは次の実行で
         counts.stopped_ratelimited = 1;
+        const left = candidates.length - i - 1;
+        if (left > 0) counts.left_for_next_run = left;
         break;
       }
     }
@@ -403,16 +506,28 @@ export async function runSlackDmBatch(
   return summarize(ctx, result);
 }
 
-/** 1回の実行の結果を、運用 Slack に1つだけ出す（送ろうとした・確認が要るものがあったときだけ） */
+/** 通知を出すほどではない数（送らずに外れた人）。これだけの実行では通知しない */
+function isQuietKey(key: string): boolean {
+  return key.startsWith("skipped_") && !key.startsWith("skipped_users_info_");
+}
+
+/** 確認が要る数 */
+function isProblemKey(key: string): boolean {
+  return /^(failed|needs_review|stale_sending|error|stopped|not_configured|deferred|skipped_users_info_|left_for_next_run|expired|raised_at_missing)/.test(
+    key,
+  );
+}
+
+/** 1回の実行の結果を、運用 Slack に1つだけ出す（送った・確認が要るものがあったときだけ。外れただけの実行では出さない） */
 async function summarize(ctx: SlackDmContext, result: SlackDmBatchResult): Promise<SlackDmBatchResult> {
   const keys = Object.keys(result.counts);
-  if (keys.length === 0) return result;
-  const problems = keys.some((k) => /^(failed|needs_review|stale_sending|error|stopped|not_configured|deferred)/.test(k));
+  if (keys.every(isQuietKey)) return result;
+  const problems = keys.some(isProblemKey);
   await ctx.notifyOps({
     title: problems ? "Slack の DM の結果（確認が必要なものがあります）" : "Slack の DM の結果",
     counts: result.counts,
     note: problems
-      ? "メールの送信には影響していません。member_mail_slack_dms を確認してください（needs_review は自動では送り直しません）。"
+      ? "メールの送信には影響していません。member_mail_slack_dms を確認してください（needs_review は自動では送り直しません。left_for_next_run は同じ日の次の実行で送ります。expired_previous_day は前の日に送れずに終わった数です）。"
       : undefined,
   });
   return result;
@@ -520,16 +635,21 @@ export async function loadSlackDmSetting(
   userId: string,
 ): Promise<boolean | null> {
   if (!teamId) return null;
+  // 先にスイッチを読む。読めない（マイグレーション前）なら、エラーを出さずにカードを出さない
+  const mode = await tryReadSlackDmMode(store);
+  if (mode === null) return null;
   try {
     const link = await store.getSlackLink(userId);
     if (!link || link.teamId !== teamId) return null;
     const pref = await store.getSlackDmPreference(userId);
     if (pref.hasRow) return pref.enabled;
     if (await store.hasReceivedSlackDm(userId)) return pref.enabled;
-    if ((await readSlackDmMode(store)) === "all") return pref.enabled;
+    if (mode === "all") return pref.enabled;
     return null;
   } catch (error) {
-    console.error("[member-mail] slack dm setting read failed:", error instanceof Error ? error.message : "unknown");
+    if (!isMissingSchemaError(error)) {
+      console.error("[member-mail] slack dm setting read failed:", error instanceof Error ? error.message : "unknown");
+    }
     return null;
   }
 }

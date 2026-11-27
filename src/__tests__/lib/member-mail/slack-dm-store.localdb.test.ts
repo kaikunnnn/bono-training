@@ -73,21 +73,37 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（Slack DM）", () => {
     slackUserId: "U0LOCAL",
   });
 
-  it("スイッチの既定は off", async () => {
+  it("スイッチの既定は off。off / count から上げたときだけ、上げた時刻が入る（手では書き換えられない）", async () => {
+    expect(await store.getSlackDmMode()).toBe("off");
+    const before = await store.getSlackDmRaisedAt();
+    await admin.from("member_mail_settings").update({ slack_dm_mode: "count" }).eq("id", 1);
+    expect(await store.getSlackDmRaisedAt()).toEqual(before);
+    await admin.from("member_mail_settings").update({ slack_dm_mode: "owner" }).eq("id", 1);
+    const raised = await store.getSlackDmRaisedAt();
+    expect(raised).not.toBeNull();
+    await admin.from("member_mail_settings").update({ slack_dm_mode: "all" }).eq("id", 1);
+    expect(await store.getSlackDmRaisedAt()).toEqual(raised);
+    await admin.from("member_mail_settings").update({ slack_dm_raised_at: "2000-01-01T00:00:00Z" }).eq("id", 1);
+    expect(await store.getSlackDmRaisedAt()).toEqual(raised);
+    await admin.from("member_mail_settings").update({ slack_dm_mode: "off" }).eq("id", 1);
     expect(await store.getSlackDmMode()).toBe("off");
   });
 
+  it("前の日の範囲（until）では今日の分を返さない", async () => {
+    expect(await store.listSlackDmCandidates([campaignId], { since: new Date(0), until: new Date(Date.now() - 3600_000) })).toEqual([]);
+  });
+
   it("候補に出て、確保は1回だけ（2回目は ignoreDuplicates で null）", async () => {
-    const before = await store.listSlackDmCandidates([campaignId], new Date(Date.now() - 3600_000), 10);
+    const before = await store.listSlackDmCandidates([campaignId], { since: new Date(Date.now() - 3600_000) });
     expect(before.map((c) => c.deliveryId)).toEqual([deliveryId]);
     const id = await store.claimSlackDm(row(), new Date());
     expect(id).toBeTruthy();
     expect(await store.claimSlackDm(row(), new Date())).toBeNull();
-    expect(await store.listSlackDmCandidates([campaignId], new Date(Date.now() - 3600_000), 10)).toEqual([]);
+    expect(await store.listSlackDmCandidates([campaignId], { since: new Date(Date.now() - 3600_000) })).toEqual([]);
 
     // deferred は取り直せる（もう一度は取れない）
     await store.finishSlackDm(id!, { status: "deferred", reason: "ratelimited" });
-    expect((await store.listSlackDmCandidates([campaignId], new Date(Date.now() - 3600_000), 10)).length).toBe(1);
+    expect((await store.listSlackDmCandidates([campaignId], { since: new Date(Date.now() - 3600_000) })).length).toBe(1);
     const again = await store.claimSlackDm(row(), new Date());
     expect(again).toBe(id);
     expect(await store.claimSlackDm(row(), new Date())).toBeNull();
