@@ -3,7 +3,12 @@ import { cleanup, fireEvent, render, screen, within } from "@testing-library/rea
 import PersonaLessonTopClient, {
   type PersonaLessonTopLesson,
 } from "@/app/lessons/[slug]/PersonaLessonTopClient";
-import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
+import {
+  PERSONA_LESSON_SLUG,
+  aiResearchLessonTopContent,
+  getLessonTopContent,
+  personaLessonTopContent,
+} from "@/lib/persona-lesson-top-config";
 
 vi.mock("next/image", () => ({
   default: ({ alt, src }: { alt: string; src: string | { src: string } }) => (
@@ -67,7 +72,7 @@ afterEach(cleanup);
 describe("PersonaLessonTopClient", () => {
   it("starts from the first published article and keeps every production link under /contents", () => {
     const { container } = render(
-      <PersonaLessonTopClient lesson={lesson} hasFullAccess={false} />
+      <PersonaLessonTopClient lesson={lesson} hasFullAccess={false} content={personaLessonTopContent} />
     );
 
     expect(
@@ -82,7 +87,7 @@ describe("PersonaLessonTopClient", () => {
   });
 
   it("opens only the first quest initially and uses plus/minus controls", () => {
-    render(<PersonaLessonTopClient lesson={lesson} hasFullAccess={false} />);
+    render(<PersonaLessonTopClient lesson={lesson} hasFullAccess={false} content={personaLessonTopContent} />);
 
     const firstToggle = screen.getByRole("button", { name: /準備する/ });
     const secondToggle = screen.getByRole("button", { name: /利用シーンを考える/ });
@@ -100,7 +105,7 @@ describe("PersonaLessonTopClient", () => {
   });
 
   it("shows media, duration, free, and locked states for a visitor", () => {
-    render(<PersonaLessonTopClient lesson={lesson} hasFullAccess={false} />);
+    render(<PersonaLessonTopClient lesson={lesson} hasFullAccess={false} content={personaLessonTopContent} />);
 
     expect(screen.getByText("無料")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /利用シーンを考える/ }));
@@ -126,7 +131,7 @@ describe("PersonaLessonTopClient", () => {
         articles: quest.articles.map((article) => ({ ...article, isLocked: false })),
       })),
     };
-    render(<PersonaLessonTopClient lesson={memberLesson} hasFullAccess />);
+    render(<PersonaLessonTopClient lesson={memberLesson} hasFullAccess content={personaLessonTopContent} />);
 
     expect(screen.queryByText("無料")).toBeNull();
     fireEvent.click(screen.getByRole("button", { name: /利用シーンを考える/ }));
@@ -134,7 +139,7 @@ describe("PersonaLessonTopClient", () => {
   });
 
   it("shows the five overview slides with direct thumbnail controls", () => {
-    render(<PersonaLessonTopClient lesson={lesson} hasFullAccess={false} />);
+    render(<PersonaLessonTopClient lesson={lesson} hasFullAccess={false} content={personaLessonTopContent} />);
 
     const carousel = screen.getByRole("group", { name: "トレーニングの進め方" });
     expect(
@@ -160,7 +165,7 @@ describe("PersonaLessonTopClient", () => {
 
   it("has one h1 and a continuous h1-h3 heading hierarchy", () => {
     const { container } = render(
-      <PersonaLessonTopClient lesson={lesson} hasFullAccess={false} />
+      <PersonaLessonTopClient lesson={lesson} hasFullAccess={false} content={personaLessonTopContent} />
     );
     const levels = [...container.querySelectorAll("h1, h2, h3")].map(
       (heading) => Number(heading.tagName.slice(1))
@@ -168,6 +173,56 @@ describe("PersonaLessonTopClient", () => {
 
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(levels[0]).toBe(1);
+    expect(levels.every((level, index) => index === 0 || level <= levels[index - 1] + 1)).toBe(true);
+  });
+
+  it("keeps the persona copy that moved into the slug config", () => {
+    render(
+      <PersonaLessonTopClient lesson={lesson} hasFullAccess={false} content={personaLessonTopContent} />
+    );
+
+    expect(screen.getByText("FROM USER INSIGHT TO UI EXPERIENCE")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /コースを知る/ })).toHaveAttribute("href", "#overview");
+    expect(screen.getByRole("heading", { level: 2, name: "制作するもの" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { level: 2, name: "目指す状態" })).toBeInTheDocument();
+    expect(screen.getByText("お題の詳細は「準備」で説明します。")).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: "ペルソナ中心のUIデザインのコースアイコン" })
+    ).toHaveAttribute("src", "/images/lesson-persona-ui/persona-icon.webp");
+  });
+
+  it("resolves the dedicated top only for configured slugs", () => {
+    expect(getLessonTopContent(PERSONA_LESSON_SLUG)?.introVersion).toBe("persona-v1");
+    expect(getLessonTopContent("ai-research-ui-design")?.introVersion).toBe("ai-research-v1");
+    expect(getLessonTopContent("other-lesson")).toBeUndefined();
+    expect(getLessonTopContent("toString")).toBeUndefined();
+  });
+
+  it("renders the AI research lesson from its own config", () => {
+    const { container } = render(
+      <PersonaLessonTopClient
+        lesson={{ ...lesson, title: "AIリサーチではじめるUIデザイン" }}
+        hasFullAccess={false}
+        content={aiResearchLessonTopContent}
+      />
+    );
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 2, name: "最後に残るもの" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /レッスンを知る/ })).toBeInTheDocument();
+    expect(screen.queryByText("FROM USER INSIGHT TO UI EXPERIENCE")).toBeNull();
+    expect(
+      screen.getByRole("img", { name: "ハナソの新規登録。話す言語と学びたい言語を選ぶ画面" })
+    ).toHaveAttribute("src", "/images/lesson-ai-research/hanaso-icon.webp");
+
+    const carousel = screen.getByRole("group", { name: "トレーニングの進め方" });
+    expect(within(carousel).getAllByRole("button")).toHaveLength(3);
+    fireEvent.click(within(carousel).getByRole("button", { name: "3枚目のスライドを表示" }));
+    expect(within(carousel).getByRole("img", { name: /残業32\/45時間/ })).toBeInTheDocument();
+
+    const levels = [...container.querySelectorAll("h1, h2, h3")].map(
+      (heading) => Number(heading.tagName.slice(1))
+    );
     expect(levels.every((level, index) => index === 0 || level <= levels[index - 1] + 1)).toBe(true);
   });
 });

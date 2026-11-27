@@ -12,7 +12,7 @@ import { INTRO_VERSIONS } from "@/lib/analytics/lesson-intro";
 import type { SubscriptionState } from "@/types/subscription";
 import LessonDetailClient from "./LessonDetailClient";
 import PersonaLessonTopClient from "./PersonaLessonTopClient";
-import { PERSONA_LESSON_SLUG } from "@/lib/persona-lesson-top-config";
+import { getLessonTopContent } from "@/lib/persona-lesson-top-config";
 import {
   generateBreadcrumbJsonLd,
   generateCourseJsonLd,
@@ -151,7 +151,9 @@ export default async function LessonPage({ params }: PageProps) {
     notFound();
   }
 
-  if (slug === PERSONA_LESSON_SLUG) {
+  const lessonTopContent = getLessonTopContent(slug);
+
+  if (lessonTopContent) {
     // 専用ページは通常レッスンと表示構造が異なるため、このバッチでは
     // 従来どおりアクセス判定完了後に一体で描画する。
     const subscription = await lessonRequest.subscriptionPromise;
@@ -220,11 +222,12 @@ export default async function LessonPage({ params }: PageProps) {
             })
           )}
         />
-        <LessonIntroAnalytics lessonId={lesson._id} path={`/lessons/${slug}`} version={INTRO_VERSIONS.persona}>
+        <LessonIntroAnalytics lessonId={lesson._id} path={`/lessons/${slug}`} version={lessonTopContent.introVersion}>
           <LessonMemberMarker promise={lessonRequest.subscriptionPromise} />
           <PersonaLessonTopClient
             lesson={personaLesson}
             hasFullAccess={subscription.hasLearningAccess}
+            content={lessonTopContent}
           />
         </LessonIntroAnalytics>
       </>

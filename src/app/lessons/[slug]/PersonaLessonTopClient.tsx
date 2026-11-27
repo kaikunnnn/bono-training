@@ -6,7 +6,7 @@ import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
 import { Book1, Briefcase, Lock1, Magicpen, Unlock } from "iconsax-react";
 import { ArrowRight, FileText, Minus, Play, Plus, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { personaLessonTopContent } from "@/lib/persona-lesson-top-config";
+import type { LessonTopContent } from "@/lib/persona-lesson-top-config";
 import { formatVideoDuration } from "@/lib/utils";
 import s from "./persona-lesson-top.module.css";
 
@@ -61,15 +61,17 @@ function CurriculumArticle({
   article,
   index,
   hasFullAccess,
+  thumbnailFallback,
 }: {
   article: PersonaLessonTopArticle;
   index: number;
   hasFullAccess: boolean;
+  thumbnailFallback: LessonTopContent["thumbnailFallback"];
 }) {
   const pending = isPending(article);
   const video = isVideo(article);
   const duration = video ? formatVideoDuration(article.videoDuration) : null;
-  const thumbnail = article.thumbnailUrl || asset("overview-slide.png");
+  const thumbnail = article.thumbnailUrl || thumbnailFallback.src;
 
   const content = (
     <>
@@ -77,7 +79,7 @@ function CurriculumArticle({
       <span className={s.articleThumbnail}>
         <Image
           src={thumbnail}
-          alt={article.thumbnailUrl ? `${article.title}のサムネイル` : "ペルソナ中心UIデザインのコース画像"}
+          alt={article.thumbnailUrl ? `${article.title}のサムネイル` : thumbnailFallback.alt}
           fill
           sizes="(min-width: 800px) 116px, 96px"
           unoptimized={Boolean(article.thumbnailUrl)}
@@ -148,10 +150,12 @@ function CurriculumQuest({
   quest,
   index,
   hasFullAccess,
+  thumbnailFallback,
 }: {
   quest: PersonaLessonTopLesson["quests"][number];
   index: number;
   hasFullAccess: boolean;
+  thumbnailFallback: LessonTopContent["thumbnailFallback"];
 }) {
   const [open, setOpen] = useState(index === 0);
   const availableCount = quest.articles.filter((article) => !isPending(article)).length;
@@ -199,6 +203,7 @@ function CurriculumQuest({
               article={article}
               index={articleIndex}
               hasFullAccess={hasFullAccess}
+              thumbnailFallback={thumbnailFallback}
             />
           ))}
         </ul>
@@ -207,32 +212,13 @@ function CurriculumQuest({
   );
 }
 
-const overviewSlides = [
-  {
-    src: asset("slides/slide-01.jpg"),
-    alt: "課題と配慮からペルソナの理想体験をデザインするトレーニングの完成イメージ",
-  },
-  {
-    src: asset("slides/slide-02.jpg"),
-    alt: "課題を見つけ、理想体験をつくり、評価基準で確認する3ステップ",
-  },
-  {
-    src: asset("slides/slide-03.jpg"),
-    alt: "利用シーンからユーザーの課題と配慮を抽出するプロセス",
-  },
-  {
-    src: asset("slides/slide-04.jpg"),
-    alt: "ペルソナの課題と理想体験をUIデザインの指標にまとめる例",
-  },
-  {
-    src: asset("slides/slide-05.jpg"),
-    alt: "プロトタイプで分かったことをデザイン検討ドキュメントにまとめる例",
-  },
-] as const;
-
-function OverviewMedia() {
+function OverviewMedia({
+  slides,
+}: {
+  slides: LessonTopContent["overview"]["slides"];
+}) {
   const [active, setActive] = useState(0);
-  const currentSlide = overviewSlides[active];
+  const currentSlide = slides[active] ?? slides[0];
 
   return (
     <div
@@ -249,11 +235,15 @@ function OverviewMedia() {
           width={1920}
           height={1080}
           sizes="(min-width: 1000px) 888px, 100vw"
-          className={s.slideImage}
+          className={
+            currentSlide.fit === "contain"
+              ? `${s.slideImage} ${s.slideImageContain}`
+              : s.slideImage
+          }
         />
       </div>
       <div className={s.slideThumbnails} aria-label="表示するスライドを選ぶ">
-        {overviewSlides.map((slide, index) => (
+        {slides.map((slide, index) => (
           <Button
             key={slide.src}
             type="button"
@@ -289,11 +279,12 @@ const briefIcons = {
 export default function PersonaLessonTopClient({
   lesson,
   hasFullAccess,
+  content,
 }: {
   lesson: PersonaLessonTopLesson;
   hasFullAccess: boolean;
+  content: LessonTopContent;
 }) {
-  const content = personaLessonTopContent;
   const quests = lesson.quests.filter((quest) => quest.articles.length > 0);
   const firstArticle = quests
     .flatMap((quest) => quest.articles)
@@ -342,10 +333,10 @@ export default function PersonaLessonTopClient({
                 </a>
               </div>
             </div>
-            <div className={s.heroArch} aria-label="ペルソナ中心のUIデザイントレーニングのアイコン">
+            <div className={s.heroArch} aria-label={content.hero.iconLabel}>
               <Image
-                src={lesson.iconImageUrl || asset("persona-icon.webp")}
-                alt="ペルソナ中心のUIデザインのコースアイコン"
+                src={lesson.iconImageUrl || content.hero.iconFallbackSrc}
+                alt={content.hero.iconAlt}
                 width={224}
                 height={338}
                 unoptimized={Boolean(lesson.iconImageUrl)}
@@ -355,9 +346,9 @@ export default function PersonaLessonTopClient({
             </div>
           </div>
           <div className={s.heroFooter}>
-            <span>FROM USER INSIGHT TO UI EXPERIENCE</span>
+            <span>{content.hero.footerCaption}</span>
             <a data-intro-action="overview_jump" data-intro-component="hero_overview" href="#overview">
-              コースを知る
+              {content.hero.footerLinkLabel}
               <Image src={asset("down.svg")} alt="" width={14} height={14} />
             </a>
           </div>
@@ -378,7 +369,7 @@ export default function PersonaLessonTopClient({
                 <p key={paragraph}>{paragraph}</p>
               ))}
             </div>
-            <OverviewMedia />
+            <OverviewMedia slides={content.overview.slides} />
           </div>
         </section>
 
@@ -386,7 +377,7 @@ export default function PersonaLessonTopClient({
           <div className={s.sectionHeading}>
             <p className={s.kicker}>進める内容</p>
             <h2 data-intro-section="curriculum" id="persona-curriculum-title">カリキュラム</h2>
-            <p>実際のデザイン依頼に取り組みながら、ペルソナ中心のデザインフローを習得します。</p>
+            <p>{content.curriculum.description}</p>
           </div>
           <div className={s.questList}>
             {quests.map((quest, index) => (
@@ -395,6 +386,7 @@ export default function PersonaLessonTopClient({
                 quest={quest}
                 index={index}
                 hasFullAccess={hasFullAccess}
+                thumbnailFallback={content.thumbnailFallback}
               />
             ))}
           </div>
@@ -403,9 +395,9 @@ export default function PersonaLessonTopClient({
         <section className={s.section} aria-labelledby="persona-briefs-title">
           <div className={s.sectionHeading}>
             <p className={s.kicker}>アウトプット</p>
-            <h2 data-intro-section="briefs" id="persona-briefs-title">制作するもの</h2>
-            <p className={s.briefQuestion}>あなたなら、どんな体験をデザインする？</p>
-            <p>実際のデザイン依頼に取り組みながら、ペルソナ中心のデザインフローを習得します。題材は3つから選べます。</p>
+            <h2 data-intro-section="briefs" id="persona-briefs-title">{content.briefs.heading}</h2>
+            <p className={s.briefQuestion}>{content.briefs.question}</p>
+            <p>{content.briefs.description}</p>
           </div>
           <svg className={s.gradientDefinition} width="0" height="0" aria-hidden="true" focusable="false">
             <defs>
@@ -417,12 +409,12 @@ export default function PersonaLessonTopClient({
             </defs>
           </svg>
           <div className={s.briefGrid}>
-            {content.briefs.map((brief) => {
+            {content.briefs.items.map((brief) => {
               const BriefIcon = briefIcons[brief.icon];
               return (
                 <article key={brief.title} className={s.briefCard}>
                   <div className={s.briefMeta}>
-                    {"badge" in brief && brief.badge && <span className={s.briefBadge}>{brief.badge}</span>}
+                    {brief.badge && <span className={s.briefBadge}>{brief.badge}</span>}
                   </div>
                   <div className={s.briefSymbol} aria-hidden="true">
                     <BriefIcon size={52} color="url(#persona-brief-icon-gradient)" variant="Linear" />
@@ -433,16 +425,16 @@ export default function PersonaLessonTopClient({
               );
             })}
           </div>
-          <p className={s.briefNote}>お題の詳細は「準備」で説明します。</p>
+          <p className={s.briefNote}>{content.briefs.note}</p>
         </section>
 
         <section className={s.splitSection} aria-labelledby="persona-skills-title">
           <div className={s.splitHead}>
             <p className={s.kicker}>トレーニングで</p>
-            <h2 id="persona-skills-title">目指す状態</h2>
+            <h2 id="persona-skills-title">{content.skills.heading}</h2>
           </div>
           <ol className={s.splitList}>
-            {content.skills.map((item, index) => (
+            {content.skills.items.map((item, index) => (
               <li key={item.title} className={s.splitItem}>
                 <span className={s.splitNumber}>{pad(index + 1)}</span>
                 <div>

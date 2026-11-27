@@ -2,7 +2,7 @@ import { trackEvent } from "@/lib/analytics";
 import { isAnalyticsHost } from "./config";
 
 export type IntroMember = "guest" | "free" | "paid" | "unknown";
-export const INTRO_VERSIONS = { persona: "persona-v1", standard: "standard-v1" } as const;
+export const INTRO_VERSIONS = { persona: "persona-v1", aiResearch: "ai-research-v1", standard: "standard-v1" } as const;
 
 export interface IntroIdentity {
   lessonId: string;
