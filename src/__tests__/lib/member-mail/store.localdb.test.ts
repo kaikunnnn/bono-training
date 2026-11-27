@@ -40,6 +40,7 @@ function deps(mail: FakeMail, alerts: unknown[] = []): MailDeps {
     replyTo: null,
     unsubscribeSecret: SECRET,
     loadLessonIndex: async () => testLessonIndex(),
+    consultWebhookConfigured: true,
   };
 }
 
@@ -90,6 +91,7 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
       await admin.from("member_mail_campaigns").delete().eq("id", standingId);
     }
     await admin.from("member_mail_settings").update({ test_email_prefixes: [] }).eq("id", 1);
+    await admin.from("member_mail_consult_bookings").delete().like("booking_uid", `localdb-${RUN}-%`);
     for (const id of userIds) {
       await admin.from("member_activity_events").delete().eq("user_id", id);
       await admin.from("subscriptions").delete().eq("user_id", id);
@@ -313,5 +315,31 @@ describe.skipIf(!ENABLED)("ローカルDB実テーブル（会員メール）", 
     const rows = await admin.from("member_mail_deliveries").select("campaign_id").in("id", ids);
     expect((rows.data ?? []).every((r) => r.campaign_id === standingId)).toBe(true);
     expect(ids.length).toBeGreaterThan(0);
+  });
+
+  it("30分相談の予約（327-F）: 記録・取り消しが勝つ・user_id とアドレスで突き合わせ・anon からは使えない", async () => {
+    const bk = (n: number) => `localdb-${RUN}-${n}`;
+    // 会員1: アカウントのアドレス（大文字で届いても小文字で記録し、user_id が結びつく）
+    expect(
+      await store.recordConsultBooking({ bookingUid: bk(1), attendeeEmail: `MM-${RUN}-1@Example.invalid`, status: "booked", startTime: new Date() }),
+    ).toBe("booked");
+    const { data: row1 } = await admin.from("member_mail_consult_bookings").select("attendee_email, user_id, status").eq("booking_uid", bk(1)).single();
+    expect(row1).toMatchObject({ attendee_email: `mm-${RUN}-1@example.invalid`, user_id: userIds[0], status: "booked" });
+    // 同じ予約が2回届いても1行
+    await store.recordConsultBooking({ bookingUid: bk(1), attendeeEmail: `mm-${RUN}-1@example.invalid`, status: "booked", startTime: null });
+    const { count } = await admin.from("member_mail_consult_bookings").select("booking_uid", { count: "exact", head: true }).eq("booking_uid", bk(1));
+    expect(count).toBe(1);
+    // 会員2: 取り消しのあとに予約が届いても cancelled のまま
+    expect(await store.recordConsultBooking({ bookingUid: bk(2), attendeeEmail: `mm-${RUN}-2@example.invalid`, status: "cancelled", startTime: null })).toBe("cancelled");
+    expect(await store.recordConsultBooking({ bookingUid: bk(2), attendeeEmail: `mm-${RUN}-2@example.invalid`, status: "booked", startTime: null })).toBe("cancelled");
+    // 会員3: user_id が無い行（アドレスだけ）でも、読むときにアカウントのアドレスで突き合わせる
+    await admin.from("member_mail_consult_bookings").insert({ booking_uid: bk(3), attendee_email: `mm-${RUN}-3@example.invalid`, user_id: null, status: "booked" });
+    expect(await store.listConsultBookedUserIds(userIds)).toEqual(new Set([userIds[0], userIds[2]]));
+
+    const anon = createClient(URL, ANON, { auth: { persistSession: false } });
+    const read = await anon.from("member_mail_consult_bookings").select("booking_uid").limit(1);
+    expect(read.error !== null || (read.data ?? []).length === 0).toBe(true);
+    const rpc = await anon.rpc("member_mail_consult_booked_user_ids", { p_user_ids: userIds });
+    expect(rpc.error).not.toBeNull();
   });
 });

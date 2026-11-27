@@ -11,6 +11,9 @@ import "server-only";
  * - MEMBER_MAIL_REPLY_TO           … 返信先（オーナーに届くアドレス。任意）
  * - MEMBER_MAIL_SANDBOX_TO         … ローカル確認用。設定すると宛先をすべてこのアドレスに差し替える（本番では設定しない）
  * - RESEND_WEBHOOK_SECRET          … Resend の webhook の署名の鍵（whsec_...）
+ * - CALCOM_WEBHOOK_SECRET          … Cal.com の webhook の署名の鍵（30分相談の予約。src/app/api/webhooks/calcom）
+ * - CALCOM_CONSULT_EVENT_SLUG      … 30分相談の event type の slug（任意。未設定なら 30min）
+ * - CALCOM_CONSULT_EVENT_TYPE_ID   … 30分相談の event type の ID（任意。設定すると ID でも突き合わせる）
  * - NEXT_PUBLIC_SITE_URL           … リンクの元（未設定なら https://www.bo-no.design）
  * - SLACK_OPS_WEBHOOK_URL          … 運用 Slack（件数だけ）
  * - SLACK_WELCOME_BOT_TOKEN / SLACK_WELCOME_USER_TOKEN / SLACK_WELCOME_TEAM_ID
@@ -95,5 +98,6 @@ export function createMailDeps(store: SupabaseMailStore | null = getMailStore())
     unsubscribeSecret,
     loadLessonIndex,
     slackDm: createSlackDmDeps(),
+    consultWebhookConfigured: (process.env.CALCOM_WEBHOOK_SECRET ?? "").length > 0,
   };
 }

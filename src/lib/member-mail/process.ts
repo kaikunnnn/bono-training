@@ -15,6 +15,7 @@
  * - スイッチ・承認・配信停止・届かない・週の上限・契約は、送る1通ごとに読み直す（すぐ止まる）
  * - 承認の印がない文面は、どのモードでも送らない
  * - ログ・記録・通知にメールアドレスを出さない（行IDと理由コードだけ）
+ * - 30分相談を予約した人（327-F・targets.ts の CONSULT_BOOKED_EXCLUDED_KEYS の文面）は、選ぶときと送る直前の両方で外す
  */
 import { getCampaignBlockReason, renderMail, unsubscribeHeaders } from "./content";
 import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
@@ -22,6 +23,8 @@ import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
 import { slackCountLines, type SlackDmDeps } from "./slack-dm";
 import {
+  ConsultBookingsUnavailableError,
+  excludesConsultBooked,
   isStandingDue,
   isTestAccountEmail,
   selectStandingTargets,
@@ -73,6 +76,12 @@ export interface MailDeps {
   loadLessonIndex: () => Promise<LessonIndex>;
   /** 常設の文面の Slack DM（#327-H）。送るのは route の最後の runSlackDmBatch。ここでは人数の行だけに使う */
   slackDm?: SlackDmDeps | null;
+  /**
+   * Cal.com の webhook の鍵（CALCOM_WEBHOOK_SECRET）が入っているか（327-F）。
+   * 入っていないと相談の予約が記録されないので、予約した人を外す文面（CONSULT_BOOKED_EXCLUDED_KEYS）は
+   * 人数だけ出す（count）より上では書き出さない
+   */
+  consultWebhookConfigured: boolean;
 }
 
 /** 全体と種類ごとのスイッチのうち、弱いほう（off < count < owner < all） */
@@ -238,6 +247,10 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   if (def.kind !== campaign.kind) return { outcome: "unsupported_kind" };
   // 朝の送ってよい時間の中でだけ選ぶ（夜中に選んで翌朝に送る、を起こさない）
   if (!isWithinSendWindow(now, settings.sendHourStart, settings.sendHourEnd)) return { outcome: "outside_window" };
+  // 相談の予約で外す文面は、Cal.com の webhook の鍵が無いまま count より上げない（予約が記録されず、予約した人にも誘いが届くため）
+  if (mode !== "count" && excludesConsultBooked(def.key) && !deps.consultWebhookConfigured) {
+    return blockStanding(deps, campaign, "calcom_webhook_secret_unset");
+  }
   const blockReason = getCampaignBlockReason(campaign);
   const category = CATEGORY_OF_KIND[campaign.kind];
 
@@ -273,14 +286,24 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
     console.error("[member-mail] lesson index failed:", error instanceof Error ? error.message : "unknown");
     return blockStanding(deps, campaign, "lesson_index_unavailable");
   }
-  const selection = await selectStandingTargets({
-    store,
-    def,
-    campaign,
-    lessonIndex,
-    testEmailPrefixes,
-    now,
-  });
+  let selection: Awaited<ReturnType<typeof selectStandingTargets>>;
+  try {
+    selection = await selectStandingTargets({
+      store,
+      def,
+      campaign,
+      lessonIndex,
+      testEmailPrefixes,
+      now,
+    });
+  } catch (error) {
+    // 30分相談の予約が読めない（表が無い＝マイグレーション前など）。予約した人に誘いを送らないよう、書き出さない
+    if (error instanceof ConsultBookingsUnavailableError) {
+      console.error("[member-mail] consult bookings unavailable");
+      return blockStanding(deps, campaign, "consult_bookings_unavailable");
+    }
+    throw error;
+  }
   const count = summarize(campaign.kind, mode, blockReason === null, selection, now);
   await store.saveCount(campaign.id, count, now);
 
@@ -427,14 +450,22 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
       // 判定できないときは送らない。あとで送る日の範囲を過ぎれば not_due で終わる
       return backToQueue(ctx, "lesson_index_unavailable", "paused", new Date(deps.now().getTime() + THROTTLE_RETRY_MS));
     }
-    const reason = await standingIneligibleReason({
-      store,
-      def: STANDING_TARGETS[standing],
-      campaign,
-      userId: row.userId,
-      lessonIndex,
-      now: deps.now(),
-    });
+    let reason: string | null;
+    try {
+      reason = await standingIneligibleReason({
+        store,
+        def: STANDING_TARGETS[standing],
+        campaign,
+        userId: row.userId,
+        lessonIndex,
+        now: deps.now(),
+      });
+    } catch (error) {
+      if (!(error instanceof ConsultBookingsUnavailableError)) throw error;
+      // 相談の予約が読めないときは送らない。あとで送る日の範囲を過ぎれば not_due で終わる
+      console.error("[member-mail] consult bookings unavailable");
+      return backToQueue(ctx, "consult_bookings_unavailable", "paused", new Date(deps.now().getTime() + THROTTLE_RETRY_MS));
+    }
     if (reason) return finish(ctx, { status: "skipped", reason }, "skipped");
   } else if (row.audience === "all") {
     const def = TARGETS[row.kind];

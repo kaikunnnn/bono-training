@@ -2,6 +2,8 @@
 // fixture のアドレスは example.invalid のみ（実在のアドレス・名前は書かない）。
 import type {
   Campaign,
+  ConsultBookingStatus,
+  ConsultBookingStore,
   CountSummary,
   DeliveryPatch,
   DeliveryRow,
@@ -45,7 +47,7 @@ export interface MemDelivery extends DeliveryRow {
   clickCount: number;
 }
 
-export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
+export class MemStore implements MailStore, UnsubscribeStore, WebhookStore, ConsultBookingStore {
   settings: MailSettings = { mode: "all", ownerUserIds: [], dailyLimit: 80, sendHourStart: 0, sendHourEnd: 24 };
   kindModes: Record<string, MailMode> = { weekly: "all" };
   campaigns = new Map<string, Campaign>();
@@ -64,7 +66,51 @@ export class MemStore implements MailStore, UnsubscribeStore, WebhookStore {
   testEmailPrefixes: string[] = [];
   /** public.subscriptions（live）の行: 契約ID と start_timestamp。同じ契約に複数行あってもよい */
   contracts: { subscriptionId: string; start: Date }[] = [];
+  /** member_mail_consult_bookings（30分相談の予約。DB 関数と同じ決まり: uid ごとに1行・取り消しは戻さない） */
+  consultBookings = new Map<
+    string,
+    { attendeeEmail: string; userId: string | null; status: ConsultBookingStatus; startTime: Date | null }
+  >();
+  /** true にすると予約の記録が読めない（表が無い＝マイグレーション前）ふりをする */
+  consultBookingsUnavailable = false;
+  /** listConsultBookedUserIds が呼ばれた回数 */
+  consultBookingReads = 0;
   private seq = 0;
+
+  private userIdByEmail(email: string): string | null {
+    for (const [id, e] of this.emails) if (e.toLowerCase() === email) return id;
+    return null;
+  }
+  async recordConsultBooking(input: {
+    bookingUid: string;
+    attendeeEmail: string;
+    status: ConsultBookingStatus;
+    startTime: Date | null;
+  }): Promise<ConsultBookingStatus> {
+    const email = input.attendeeEmail.trim().toLowerCase();
+    const cur = this.consultBookings.get(input.bookingUid);
+    const status: ConsultBookingStatus =
+      cur?.status === "cancelled" || input.status === "cancelled" ? "cancelled" : "booked";
+    this.consultBookings.set(input.bookingUid, {
+      attendeeEmail: cur?.attendeeEmail ?? email,
+      userId: cur?.userId ?? this.userIdByEmail(email),
+      status,
+      startTime: cur?.startTime ?? input.startTime,
+    });
+    return status;
+  }
+  async listConsultBookedUserIds(userIds: readonly string[]) {
+    this.consultBookingReads += 1;
+    if (this.consultBookingsUnavailable) throw new Error("consult bookings read failed: 42P01");
+    const out = new Set<string>();
+    for (const id of userIds) {
+      const email = this.emails.get(id)?.toLowerCase() ?? null;
+      for (const b of this.consultBookings.values()) {
+        if (b.status === "booked" && (b.userId === id || (email !== null && b.attendeeEmail === email))) out.add(id);
+      }
+    }
+    return out;
+  }
 
   async getSettings() {
     return { ...this.settings };
@@ -381,6 +427,7 @@ export function makeDeps(
     replyTo: "owner@example.invalid",
     unsubscribeSecret: SECRET,
     loadLessonIndex: async () => testLessonIndex(),
+    consultWebhookConfigured: true,
     ...over,
   };
 }

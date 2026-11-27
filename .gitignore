@@ -50,3 +50,6 @@ supabase/functions/.env.local
 
 # issue-fleet スキルの実行ログ
 issue-fleet-logs
+
+# ローカルの Supabase CLI が作る一時ファイル（鍵を含むことがある）
+supabase/.temp/

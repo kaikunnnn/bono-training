@@ -34,6 +34,8 @@ export interface ExclusionContext {
   learningReasons?: Map<string, string>;
   /** 常設の文面だけ: 14日で常設の文面をもう上限まで受け取った人 */
   standingCapped?: Set<string>;
+  /** 常設の文面だけ（CONSULT_BOOKED_EXCLUDED_KEYS）: 30分相談を予約していて取り消していない人 */
+  consultBooked?: Set<string>;
 }
 
 export interface Exclusion {
@@ -128,6 +130,61 @@ export const excludeStandingCap: Exclusion = {
   reason: "standing_cap",
   excludes: (c, ctx) => Boolean(ctx.standingCapped?.has(c.userId)),
 };
+
+// ----- 30分相談（Cal.com）を予約した人（327-F） -----
+
+/**
+ * 30分相談を予約した人（取り消していない予約がある人）を外す常設の文面。
+ * どちらも冒頭で相談に誘う文面なので、もう予約した人には送らない。
+ * 327-E（onboarding_day5）は相談に触れないので入れない。
+ * ★外す文面を変えるときは、この並びだけを変える（除外条件の並び・選ぶとき・送る直前の見直しは、ここから決まる）
+ */
+export const CONSULT_BOOKED_EXCLUDED_KEYS: readonly StandingKey[] = ["onboarding_day2", "onboarding_day9"];
+
+export function excludesConsultBooked(key: StandingKey): boolean {
+  return CONSULT_BOOKED_EXCLUDED_KEYS.includes(key);
+}
+
+/** 予約の記録（member_mail_consult_bookings）は src/app/api/webhooks/calcom で書く。突き合わせは user_id かアカウントのアドレス */
+export const excludeConsultBooked: Exclusion = {
+  reason: "consult_booked",
+  excludes: (c, ctx) => Boolean(ctx.consultBooked?.has(c.userId)),
+};
+
+/** 予約の記録が読めない（表が無い＝マイグレーション前・DB の失敗）。送らない側に倒すための印 */
+export class ConsultBookingsUnavailableError extends Error {
+  constructor() {
+    super("consult_bookings_unavailable");
+    this.name = "ConsultBookingsUnavailableError";
+  }
+}
+
+/**
+ * 予約した人を読む。失敗は ConsultBookingsUnavailableError にそろえる。
+ * ログには store の失敗の文言（"... failed: <エラーコード>"。store.ts の fail が作る。アドレスを含まない）だけを出す
+ */
+export async function loadConsultBooked(store: MailStore, userIds: readonly string[]): Promise<Set<string>> {
+  if (userIds.length === 0) return new Set();
+  try {
+    return await store.listConsultBookedUserIds(userIds);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown";
+    console.error("[member-mail] consult bookings read failed:", /^[a-z ]+ failed: [A-Za-z0-9_]+$/.test(message) ? message : "unknown");
+    throw new ConsultBookingsUnavailableError();
+  }
+}
+
+/** 常設の文面の除外条件の並び。相談の予約で外す文面だけ、学習の決まりより前に excludeConsultBooked を入れる */
+function standingExclusions(key: StandingKey): readonly Exclusion[] {
+  return [
+    excludeSuppressed,
+    excludeUnsubscribed,
+    excludeTestAccount,
+    ...(excludesConsultBooked(key) ? [excludeConsultBooked] : []),
+    excludeByLearning,
+    excludeStandingCap,
+  ];
+}
 
 // ----- 学習の決まり（「学んだ」の数え方は learned.ts。分析側 #274 と同じ） -----
 
@@ -240,7 +297,7 @@ export const ONBOARDING_DAY2_TARGET: StandingTargetDefinition = {
   kind: "signup",
   sendOnDay: 2,
   catchUpDays: 1,
-  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeByLearning, excludeStandingCap],
+  exclusions: standingExclusions("onboarding_day2"),
   learning: LEARNING_RULE_NOT_YET_LEARNED,
 };
 
@@ -254,7 +311,7 @@ export const ONBOARDING_DAY5_TARGET: StandingTargetDefinition = {
   kind: "signup",
   sendOnDay: 5,
   catchUpDays: 1,
-  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeByLearning, excludeStandingCap],
+  exclusions: standingExclusions("onboarding_day5"),
   learning: LEARNING_RULE_LEARNED_THEN_QUIET,
 };
 
@@ -267,7 +324,7 @@ export const ONBOARDING_DAY9_TARGET: StandingTargetDefinition = {
   kind: "signup",
   sendOnDay: 9,
   catchUpDays: 2,
-  exclusions: [excludeSuppressed, excludeUnsubscribed, excludeTestAccount, excludeByLearning, excludeStandingCap],
+  exclusions: standingExclusions("onboarding_day9"),
   learning: LEARNING_RULE_QUIET_SINCE_DAY7,
 };
 
@@ -345,11 +402,13 @@ export async function selectStandingTargets(input: StandingSelectionInput): Prom
     Math.min(...due.map((m) => learningEventsSince(def.learning, joinedAt.get(m.userId)!, now).getTime())),
   );
   const capSince = new Date(now.getTime() - STANDING_CAP_WINDOW_DAYS * 24 * 60 * 60 * 1000);
-  const [unsubscribed, suppressed, events, capCounts] = await Promise.all([
+  const [unsubscribed, suppressed, events, capCounts, consultBooked] = await Promise.all([
     store.listUnsubscribedUserIds(category),
     store.listSuppressedUserIds(),
     store.listProgressEvents(ids, earliest),
     store.countStandingMailsSince(capSince, ids),
+    // 相談の予約で外す文面だけ読む（327-E は読まない）。読めなければ ConsultBookingsUnavailableError
+    excludesConsultBooked(def.key) ? loadConsultBooked(store, ids) : Promise.resolve(new Set<string>()),
   ]);
 
   // テスト用アカウント: アドレスは判定にだけ使い、どこにも残さない
@@ -376,12 +435,14 @@ export async function selectStandingTargets(input: StandingSelectionInput): Prom
     testAccounts,
     learningReasons,
     standingCapped,
+    consultBooked,
   });
 }
 
 /**
  * 送る直前の見直し（常設の文面・本番の送信）。送ってよければ null、だめなら理由。
  * 配信停止・届かないは送る処理が共通で見る。テスト用アカウントはアドレスを読んだあとに送る処理が見る。
+ * 相談の予約（CONSULT_BOOKED_EXCLUDED_KEYS の文面だけ）が読めなければ ConsultBookingsUnavailableError を投げる。
  */
 export async function standingIneligibleReason(input: {
   store: MailStore;
@@ -397,6 +458,8 @@ export async function standingIneligibleReason(input: {
   const joinedAt = member.stripeSubscriptionId ? await store.getContractStart(member.stripeSubscriptionId) : null;
   if (!joinedAt) return "not_eligible"; // 決済の記録が無い
   if (!isStandingDue(def, joinedAt, campaign.scheduledAt ?? null, now)) return "not_due";
+  // 書き出したあとに相談を予約した人には送らない（選ぶときと同じ突き合わせ）
+  if (excludesConsultBooked(def.key) && (await loadConsultBooked(store, [userId])).has(userId)) return "consult_booked";
   // 選ぶときと同じ学習の決まりで見直す（例: 書き出したあとに学んだ / 327-E で最近学んだ）
   const events = await store.listProgressEvents([userId], learningEventsSince(def.learning, joinedAt, now));
   const learningReason = learningExclusionReason(def.learning, userId, events, lessonIndex, joinedAt, now);
