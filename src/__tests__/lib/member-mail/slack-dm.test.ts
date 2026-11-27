@@ -41,9 +41,8 @@ function standingCampaign(over: Partial<Campaign> = {}): Campaign {
     body: ONBOARDING_DAY2_COPY.body,
     standingKey: "onboarding_day2",
     scheduledAt: ACTIVATED,
-    // PR #342 の文面ごとのスイッチ（standing_mode。未設定は count）を入れた後も、このテストではメールを全員に送る。
-    // この枝の Campaign 型にはまだ無いので型を外して渡す（#342 が先に入れば普通に書ける）
-    ...({ standingMode: "all" } as unknown as Partial<Campaign>),
+    // 文面ごとのスイッチ（standing_mode。未設定は count）。このテストではメールを全員に送る
+    standingMode: "all",
     ...over,
   });
 }
@@ -790,22 +789,16 @@ describe("メールのスイッチに合わせる", () => {
   it.each([
     ["count", "count"],
     ["owner", "owner"],
-    ["null（#342 のマイグレーション前）", null],
+    ["null（値が無い）", null],
   ])("文面ごとのスイッチ（standing_mode）が %s なら会員の行は送らない", async (_label, value) => {
     const { store, campaign, slack, deps } = await emailsSent(1);
-    store.campaigns.set(campaign.id, {
-      ...store.campaigns.get(campaign.id)!,
-      ...({ standingMode: value } as unknown as Partial<Campaign>),
-    });
+    store.campaigns.set(campaign.id, { ...store.campaigns.get(campaign.id)!, standingMode: value as MailMode | null });
     await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
     expect(slack.infoCalls).toHaveLength(0);
   });
 
-  it("standing_mode の項目が無い文面（#342 が入る前）は、全体と種類のスイッチだけを見る", async () => {
-    const { store, campaign, slack, deps } = await emailsSent(1);
-    const current = { ...store.campaigns.get(campaign.id)! } as Campaign & { standingMode?: unknown };
-    delete current.standingMode;
-    store.campaigns.set(campaign.id, current);
+  it("文面ごとのスイッチが all なら送る", async () => {
+    const { slack, deps } = await emailsSent(1);
     await runSlackDmBatch(deps, { timeBudgetMs: BUDGET });
     expect(slack.posted).toHaveLength(1);
   });

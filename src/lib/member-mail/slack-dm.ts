@@ -35,7 +35,7 @@ import { getCampaignBlockReason } from "./content";
 import { isWithinSendWindow, jstDayStart } from "./dates";
 import type { NotifyMailOps } from "./ops-alert";
 import { renderSlackDm } from "./slack-mrkdwn";
-import { MAIL_MODES, type Audience, type MailMode, type MailStore, type StandingKey } from "./types";
+import { MAIL_MODES, type Audience, type Campaign, type MailMode, type MailStore, type StandingKey } from "./types";
 import { judgeEligibility } from "@/lib/slack-welcome/eligibility";
 import type { SlackCallResult, SlackUserSummary } from "@/lib/slack-welcome/slack-api";
 
@@ -211,13 +211,11 @@ function weaker(a: MailMode, b: MailMode): MailMode {
 }
 
 /**
- * PR #342 の文面ごとのスイッチ（campaign.standingMode）。#342 が入っていない枝では項目が無い（undefined）ので見ない（all）。
- * 値が null（#342 のマイグレーション前）なら #342 と同じく count として扱う
+ * 常設の文面ごとのスイッチ（standing_mode・#327-E/F）。値が無ければ count（process.ts の campaignModeOf と同じ）。
+ * DM で送るのは常設の文面だけなので、1回分の文面の扱いはここでは要らない
  */
-export function standingModeOf(campaign: object): MailMode {
-  const value = (campaign as { standingMode?: unknown }).standingMode;
-  if (value === undefined) return "all";
-  return MAIL_MODES.includes(value as MailMode) ? (value as MailMode) : "count";
+export function standingModeOf(campaign: Campaign): MailMode {
+  return campaign.standingMode ?? "count";
 }
 
 /** メールのスイッチ（全体・種類・文面ごと）が、今もこの行の宛先に送ってよい状態か */
