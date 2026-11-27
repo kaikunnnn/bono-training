@@ -89,6 +89,10 @@
   white-space: nowrap;
 }
 
+.heroCopy h1.heroTitleWrap span {
+  white-space: normal;
+}
+
 .heroQuestion {
   margin: 0 0 var(--s-2);
   color: var(--text-secondary);

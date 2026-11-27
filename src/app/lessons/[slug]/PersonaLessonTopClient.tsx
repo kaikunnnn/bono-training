@@ -309,7 +309,7 @@ export default function PersonaLessonTopClient({
           <div className={s.heroGrid}>
             <div className={s.heroCopy}>
               <p className={s.heroEyebrow}>{content.hero.eyebrow}</p>
-              <h1 id="persona-lesson-title">
+              <h1 id="persona-lesson-title" className={content.hero.titleWrap ? s.heroTitleWrap : undefined}>
                 {content.hero.titleLines.map((line) => (
                   <span key={line}>{line}</span>
                 ))}
