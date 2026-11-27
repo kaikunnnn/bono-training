@@ -20,6 +20,7 @@ import { getCampaignBlockReason, renderMail, unsubscribeHeaders } from "./conten
 import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
 import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
+import { sendStandingSlackDm, slackCountLines, type SlackDmDeps } from "./slack-dm";
 import {
   isStandingDue,
   isTestAccountEmail,
@@ -70,6 +71,8 @@ export interface MailDeps {
    * 読めなければ例外を投げる（常設の文面は書き出さず・送らない）
    */
   loadLessonIndex: () => Promise<LessonIndex>;
+  /** 常設の文面を Slack の DM でも送る（#327-H）。無ければ DM は送らない */
+  slackDm?: SlackDmDeps | null;
 }
 
 /** 全体と種類ごとのスイッチのうち、弱いほう（off < count < owner < all） */
@@ -281,6 +284,13 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   const count = summarize(campaign.kind, mode, blockReason === null, selection, now);
   await store.saveCount(campaign.id, count, now);
 
+  // Slack の DM のスイッチが off でなければ、Slack の人数も足す（#327-H）
+  const slackLines = await slackCountLines(
+    deps,
+    selection.included.map((c) => c.userId),
+    settings.ownerUserIds,
+  );
+
   if (mode === "count") {
     await deps.notifyOps({
       title: `人数だけ出しました（${campaign.label}）`,
@@ -288,6 +298,7 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
         candidates: count.candidates,
         will_send: count.willSend,
         ...prefixKeys("excluded_", count.excluded),
+        ...slackLines,
       },
       note: [
         blockReason ? `文面はまだ送れない状態です（${blockReason}）。` : "文面は承認済みです。",
@@ -310,7 +321,7 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   if (inserted > 0) {
     await deps.notifyOps({
       title: `今日の対象を送る準備をしました（${campaign.label}）`,
-      counts: { queued: inserted, ...prefixKeys("excluded_", count.excluded) },
+      counts: { queued: inserted, ...prefixKeys("excluded_", count.excluded), ...slackLines },
     });
   }
   logEvent("enqueued_standing", { campaignId: campaign.id, inserted });
@@ -494,9 +505,13 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   });
 
   switch (result.kind) {
-    case "ok":
+    case "ok": {
       // ここで記録に失敗しても sending のまま残り、次の回で needs_review になる（送り直さない）
-      return finish(ctx, { status: "sent", resendEmailId: result.id, sentAt: deps.now() }, "sent");
+      const outcome = await finish(ctx, { status: "sent", resendEmailId: result.id, sentAt: deps.now() }, "sent");
+      // 常設の文面は、メールを送れた人に Slack の DM でも送る（#327-H）。失敗してもメールの結果は変えない
+      if (outcome === "sent") await sendStandingSlackDm(deps, row, campaign);
+      return outcome;
+    }
     case "throttled":
       // 送られていないことが確実。1日の上限を数え直せるよう sending_at を消して待ち行列へ戻す
       return finish(

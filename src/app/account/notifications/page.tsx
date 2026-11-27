@@ -13,8 +13,10 @@ import {
 import { NotificationPreferencesForm } from "@/components/account/NotificationPreferencesForm";
 import { PushNotificationToggle } from "@/components/account/PushNotificationToggle";
 import { MemberMailToggle } from "@/components/account/MemberMailToggle";
-import { getMailStore } from "@/lib/member-mail/runtime";
+import { SlackDmToggle } from "@/components/account/SlackDmToggle";
+import { getMailStore, getSlackDmStore } from "@/lib/member-mail/runtime";
 import { isMemberMailEnabled } from "@/lib/member-mail/self-settings";
+import { loadSlackDmSetting } from "@/lib/member-mail/slack-dm";
 
 export const metadata: Metadata = {
   title: "通知設定",
@@ -35,9 +37,10 @@ export default async function NotificationSettingsPage({
     );
   }
 
-  const [preferences, mailEnabled] = await Promise.all([
+  const [preferences, mailEnabled, slackDmEnabled] = await Promise.all([
     getNotificationPreferences(),
     readMemberMailEnabled(user.id),
+    readSlackDmEnabled(user.id),
   ]);
 
   return (
@@ -71,6 +74,17 @@ export default async function NotificationSettingsPage({
           <MemberMailToggle initialEnabled={mailEnabled} />
         </div>
       </SettingsCard>
+
+      {slackDmEnabled !== null && (
+        <SettingsCard title="Slack">
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              オフにすると、BONOからのお知らせがSlackのDMで届かなくなります。メールは上の設定のまま届きます。
+            </p>
+            <SlackDmToggle initialEnabled={slackDmEnabled} />
+          </div>
+        </SettingsCard>
+      )}
     </SettingsPageLayout>
   );
 }
@@ -85,4 +99,15 @@ async function readMemberMailEnabled(userId: string): Promise<boolean | null> {
     console.error("[member-mail] settings read failed:", error instanceof Error ? error.message : "unknown");
     return null;
   }
+}
+
+/**
+ * Slack の DM で受け取るか（#327-H）。カードを出さないときは null
+ * （DM のスイッチが off・count、owner でオーナー以外、Slack とつながっていない、読めない）
+ */
+async function readSlackDmEnabled(userId: string): Promise<boolean | null> {
+  const mailStore = getMailStore();
+  const store = getSlackDmStore();
+  if (!mailStore || !store) return null;
+  return loadSlackDmSetting(mailStore, store, userId);
 }
