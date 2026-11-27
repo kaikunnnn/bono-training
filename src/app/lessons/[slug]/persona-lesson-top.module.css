@@ -272,6 +272,11 @@
   object-fit: cover;
 }
 
+/* 16:9 ではないスライド（例: 勤怠アプリの画面）は切らずに全体を見せる */
+.slideImageContain {
+  object-fit: contain;
+}
+
 .slideThumbnails {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
