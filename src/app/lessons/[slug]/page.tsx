@@ -102,6 +102,11 @@ function LessonCurriculumFallback() {
   );
 }
 
+// レッスンごとのOGP専用画像（1200x630、public/assets/lessons/og/）
+const LESSON_OG_IMAGES: Record<string, string> = {
+  "ai-research-ui-design": "/assets/lessons/og/ai-research-ui-design.jpg",
+};
+
 // OGP用メタデータ生成
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -117,7 +122,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const title = `${lesson.seoTitle || lesson.title}`;
   const description = lesson.description || `${lesson.title}のレッスン内容を学習できます。`;
-  const imageUrl = lesson.thumbnailUrl || lesson.iconImageUrl;
+  // OGP専用画像があるレッスンはそれを使う（サムネは縦長の本の表紙なのでSNSで切れる）
+  const ogImageUrl = LESSON_OG_IMAGES[slug];
+  const imageUrl = ogImageUrl || lesson.thumbnailUrl || lesson.iconImageUrl;
 
   return {
     title,
