@@ -4,6 +4,7 @@
 -- ★本番への登録はオーナーの判断で行う（このファイルはマイグレーションではない。supabase db push では当たらない）
 -- 前提: supabase/migrations/20261125090715_member_mail_standing_campaigns.sql を当てたあと
 --       20261127010837_member_mail_standing_mode.sql を当てたあと（文面ごとのスイッチ standing_mode）
+--       20261127120000_member_mail_consult_bookings.sql を当てたあと（30分相談を予約した人を外す。当てる前は書き出さない・送らない）
 --
 -- このSQLがすること:
 --   - 文面を1行入れる（kind=signup / standing_key=onboarding_day2）。すでにあれば何もしない

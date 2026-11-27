@@ -409,7 +409,7 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
 
     async listConsultBookedUserIds(userIds) {
       // 突き合わせ（user_id かアカウントのアドレス）は DB 関数の中で行う。アプリには user_id だけが返る
-      // テーブル: supabase/migrations/20261128000000_member_mail_consult_bookings.sql
+      // テーブル: supabase/migrations/20261127120000_member_mail_consult_bookings.sql
       const ids = new Set<string>();
       for (const part of chunks(userIds, ID_CHUNK)) {
         const { data, error } = await client.rpc("member_mail_consult_booked_user_ids", { p_user_ids: part });

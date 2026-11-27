@@ -159,12 +159,17 @@ export class ConsultBookingsUnavailableError extends Error {
   }
 }
 
-/** 予約した人を読む。失敗は ConsultBookingsUnavailableError にそろえる（元の詳細はログに出さない＝個人情報を含みうるため） */
+/**
+ * 予約した人を読む。失敗は ConsultBookingsUnavailableError にそろえる。
+ * ログには store の失敗の文言（"... failed: <エラーコード>"。store.ts の fail が作る。アドレスを含まない）だけを出す
+ */
 export async function loadConsultBooked(store: MailStore, userIds: readonly string[]): Promise<Set<string>> {
   if (userIds.length === 0) return new Set();
   try {
     return await store.listConsultBookedUserIds(userIds);
-  } catch {
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown";
+    console.error("[member-mail] consult bookings read failed:", /^[a-z ]+ failed: [A-Za-z0-9_]+$/.test(message) ? message : "unknown");
     throw new ConsultBookingsUnavailableError();
   }
 }

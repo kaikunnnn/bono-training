@@ -1,9 +1,9 @@
 /**
  * Cal.com の webhook（30分相談の予約・取り消し・日時の変更）の署名検証と処理（#327-F）。
  * 受け口は src/app/api/webhooks/calcom/route.ts。記録は member_mail_consult_bookings
- * （supabase/migrations/20261128000000_member_mail_consult_bookings.sql）。
+ * （supabase/migrations/20261127120000_member_mail_consult_bookings.sql）。
  *
- * 出典（Cal.com 公式。2026-11-28 に確認）:
+ * 出典（Cal.com 公式。2026-11-27 に確認）:
  * - https://cal.com/help/webhooks
  *   - 「Verifying the authenticity of the received payload」: webhook の secret で HMAC（SHA256）を作り、
  *     受け取った本文で更新して、ヘッダー X-Cal-Signature-256 の値と比べる

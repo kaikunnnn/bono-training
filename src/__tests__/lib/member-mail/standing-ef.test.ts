@@ -622,7 +622,7 @@ describe("文面ごとのスイッチ（standing_mode）", () => {
       reason: "not_due",
     });
     store.campaigns.get("s-onboarding_day5")!.standingMode = "all";
-    await runSendBatch(depsAt(store, mail, jstMorning("2026-11-28")));
+    await runSendBatch(depsAt(store, mail, jstMorning("2026-11-27")));
     expect(mail.sent.filter((m) => m.subject === ONBOARDING_DAY5_COPY.subject)).toHaveLength(0);
   });
 

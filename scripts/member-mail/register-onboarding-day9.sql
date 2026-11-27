@@ -5,6 +5,7 @@
 -- 前提: supabase/migrations/20261125090715_member_mail_standing_campaigns.sql を当てたあと
 --       （standing_key の値は ^[a-z][a-z0-9_]{0,39}$ を満たす）
 --       20261127010837_member_mail_standing_mode.sql を当てたあと（文面ごとのスイッチ standing_mode）
+--       20261127120000_member_mail_consult_bookings.sql を当てたあと（30分相談を予約した人を外す。当てる前は書き出さない・送らない）
 --       アプリ側（STANDING_KEYS に onboarding_day9 がある版）を本番に出したあと
 --
 -- 対象（src/lib/member-mail/targets.ts の ONBOARDING_DAY9_TARGET が正）:
