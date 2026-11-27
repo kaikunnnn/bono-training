@@ -1,7 +1,7 @@
 /**
  * Cal.com の webhook（30分相談の予約・取り消し・日時の変更）の署名検証と処理（#327-F）。
  * 受け口は src/app/api/webhooks/calcom/route.ts。記録は member_mail_consult_bookings
- * （supabase/migrations/20261127160000_member_mail_consult_bookings.sql）。
+ * （supabase/migrations/20261127084404_member_mail_consult_bookings.sql）。
  *
  * 出典（Cal.com 公式。2026-11-27 に確認）:
  * - https://cal.com/help/webhooks

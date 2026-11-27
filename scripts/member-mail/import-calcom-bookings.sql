@@ -13,7 +13,7 @@
 --   はじめの案内（onboarding_day2）・30分相談の案内（onboarding_day9）が届いてしまう。
 --
 -- 前提:
---   supabase/migrations/20261127160000_member_mail_consult_bookings.sql を当てたあと
+--   supabase/migrations/20261127084404_member_mail_consult_bookings.sql を当てたあと
 --   （member_mail_record_consult_booking 関数がある。service_role の権限で動く SQL エディタから実行する）
 --
 -- 手順:
