@@ -75,6 +75,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ["/how-to/faq", "monthly", 0.6],
         ["/how-to/community", "monthly", 0.5],
         ["/how-to/feedback", "monthly", 0.6],
+        ["/how-to/career-roadmap", "monthly", 0.5],
         ["/stories", "weekly", 0.6],
         ["/questions", "daily", 0.6],
         ["/training", "weekly", 0.7],
