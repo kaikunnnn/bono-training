@@ -19,6 +19,8 @@ export interface LessonTopContent {
   hero: {
     eyebrow: string;
     titleLines: readonly string[];
+    /** 見出しの行が長いレッスンは折り返す（既定は1行ずつ折り返さない） */
+    titleWrap?: boolean;
     question: string;
     lead: string;
     caption: string;
@@ -367,6 +369,8 @@ export const aiResearchLessonTopContent = {
   hero: {
     ...aiResearchLessonTopContentBefore1121.hero,
     titleLines: ["デザイナーのためのAIリサーチ入門", "業種とUIの「ふつう」を知るだけで、デザインは変わる"],
+    // 2行目が長く、1行のままだと右のアイコンの下に隠れる（11/27 本番で確認）
+    titleWrap: true,
     question:
       "サービスとUIの「ふつう」を知っているか知らないかでデザインの質は変わってしまいます。AIでリサーチして、その内容を新規登録フローのデザインに生かしながら、AIでのリサーチ方法を習得しましょう。",
     lead: "このレッスンでは、AIを使って関わるサービスやデザインに関する一般的知識をインプットして、すぐさまデザインに活かすワークフローを身につけます。",
