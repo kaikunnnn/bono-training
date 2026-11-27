@@ -259,6 +259,12 @@ export interface MailStore {
   listProgressEvents(userIds: readonly string[], since: Date): Promise<ProgressEvent[]>;
   /** テスト用アカウントとして外すメールアドレスの頭（member_mail_settings.test_email_prefixes） */
   getTestEmailPrefixes(): Promise<string[]>;
+  /**
+   * 30分相談（Cal.com）を予約していて、取り消していない人（#327-F）。userIds のうち当てはまる user_id だけを返す。
+   * 突き合わせは予約の user_id か、アカウントのアドレス（小文字）で、DB の中で行う（アドレスはアプリに出さない）。
+   * 表が無い（マイグレーション前）・読めないときは例外を投げる（呼ぶ側が送らない側に倒す）
+   */
+  listConsultBookedUserIds(userIds: readonly string[]): Promise<Set<string>>;
 
   /** 一意制約つき INSERT（既にあれば何もしない）。新しく入った件数を返す */
   insertDeliveries(rows: NewDelivery[]): Promise<number>;
@@ -296,6 +302,24 @@ export interface WebhookStore {
     linkPath: string | null;
   }): Promise<WebhookApplyResult>;
   autoStop(reason: string, at: Date): Promise<void>;
+}
+
+/** 30分相談（Cal.com）の予約の状態（member_mail_consult_bookings.status） */
+export type ConsultBookingStatus = "booked" | "cancelled";
+
+/** Cal.com の webhook（src/app/api/webhooks/calcom）が使う永続化 */
+export interface ConsultBookingStore {
+  /**
+   * 予約1件を記録する（booking_uid ごとに1行。何度呼んでも同じ）。
+   * 一度 cancelled になった予約は booked に戻さない。返り値は記録後の状態
+   */
+  recordConsultBooking(input: {
+    bookingUid: string;
+    /** 予約した本人のアドレス（小文字にして渡す）。保存は DB の中だけ。ログに出さない */
+    attendeeEmail: string;
+    status: ConsultBookingStatus;
+    startTime: Date | null;
+  }): Promise<ConsultBookingStatus>;
 }
 
 /** 人数だけ出す結果。人数と区分だけで、名前・アドレス・user_id は入れない */

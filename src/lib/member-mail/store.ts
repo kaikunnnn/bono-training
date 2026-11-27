@@ -16,6 +16,8 @@ import {
   MAIL_KINDS,
   MAIL_MODES,
   type Campaign,
+  type ConsultBookingStatus,
+  type ConsultBookingStore,
   type CountSummary,
   type DeliveryPatch,
   type DeliveryRow,
@@ -143,7 +145,7 @@ function patchToDb(patch: DeliveryPatch): DbRow {
   return db;
 }
 
-export type SupabaseMailStore = MailStore & UnsubscribeStore & WebhookStore;
+export type SupabaseMailStore = MailStore & UnsubscribeStore & WebhookStore & ConsultBookingStore;
 
 export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailStore {
   function paidMemberQuery(userId?: string) {
@@ -405,6 +407,21 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
         : [];
     },
 
+    async listConsultBookedUserIds(userIds) {
+      // 突き合わせ（user_id かアカウントのアドレス）は DB 関数の中で行う。アプリには user_id だけが返る
+      // テーブル: supabase/migrations/20261128000000_member_mail_consult_bookings.sql
+      const ids = new Set<string>();
+      for (const part of chunks(userIds, ID_CHUNK)) {
+        const { data, error } = await client.rpc("member_mail_consult_booked_user_ids", { p_user_ids: part });
+        if (error) fail("consult bookings read", error);
+        for (const r of (data ?? []) as unknown[]) {
+          const id = typeof r === "string" ? r : (r as DbRow)?.member_mail_consult_booked_user_ids;
+          if (typeof id === "string") ids.add(id);
+        }
+      }
+      return ids;
+    },
+
     async listUnsubscribedUserIds(category) {
       const ids = new Set<string>();
       for (let from = 0; ; from += PAGE) {
@@ -640,6 +657,18 @@ export function createSupabaseMailStore(client: SupabaseClient): SupabaseMailSto
       return (data ?? [])
         .map((r) => r.category as MailCategory)
         .filter((c) => MAIL_CATEGORIES.includes(c));
+    },
+
+    // ----- 30分相談（Cal.com の webhook） -----
+    async recordConsultBooking(input) {
+      const { data, error } = await client.rpc("member_mail_record_consult_booking", {
+        p_booking_uid: input.bookingUid,
+        p_attendee_email: input.attendeeEmail.trim().toLowerCase(),
+        p_status: input.status,
+        p_start_time: input.startTime ? input.startTime.toISOString() : null,
+      });
+      if (error) fail("consult booking record", error);
+      return (data === "cancelled" ? "cancelled" : "booked") as ConsultBookingStatus;
     },
 
     // ----- webhook -----

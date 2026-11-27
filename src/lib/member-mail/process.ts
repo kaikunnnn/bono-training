@@ -15,6 +15,7 @@
  * - スイッチ・承認・配信停止・届かない・週の上限・契約は、送る1通ごとに読み直す（すぐ止まる）
  * - 承認の印がない文面は、どのモードでも送らない
  * - ログ・記録・通知にメールアドレスを出さない（行IDと理由コードだけ）
+ * - 30分相談を予約した人（327-F・targets.ts の CONSULT_BOOKED_EXCLUDED_KEYS の文面）は、選ぶときと送る直前の両方で外す
  */
 import { getCampaignBlockReason, renderMail, unsubscribeHeaders } from "./content";
 import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
@@ -22,6 +23,7 @@ import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
 import { slackCountLines, type SlackDmDeps } from "./slack-dm";
 import {
+  ConsultBookingsUnavailableError,
   isStandingDue,
   isTestAccountEmail,
   selectStandingTargets,
@@ -273,14 +275,24 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
     console.error("[member-mail] lesson index failed:", error instanceof Error ? error.message : "unknown");
     return blockStanding(deps, campaign, "lesson_index_unavailable");
   }
-  const selection = await selectStandingTargets({
-    store,
-    def,
-    campaign,
-    lessonIndex,
-    testEmailPrefixes,
-    now,
-  });
+  let selection: Awaited<ReturnType<typeof selectStandingTargets>>;
+  try {
+    selection = await selectStandingTargets({
+      store,
+      def,
+      campaign,
+      lessonIndex,
+      testEmailPrefixes,
+      now,
+    });
+  } catch (error) {
+    // 30分相談の予約が読めない（表が無い＝マイグレーション前など）。予約した人に誘いを送らないよう、書き出さない
+    if (error instanceof ConsultBookingsUnavailableError) {
+      console.error("[member-mail] consult bookings unavailable");
+      return blockStanding(deps, campaign, "consult_bookings_unavailable");
+    }
+    throw error;
+  }
   const count = summarize(campaign.kind, mode, blockReason === null, selection, now);
   await store.saveCount(campaign.id, count, now);
 
@@ -427,14 +439,22 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
       // 判定できないときは送らない。あとで送る日の範囲を過ぎれば not_due で終わる
       return backToQueue(ctx, "lesson_index_unavailable", "paused", new Date(deps.now().getTime() + THROTTLE_RETRY_MS));
     }
-    const reason = await standingIneligibleReason({
-      store,
-      def: STANDING_TARGETS[standing],
-      campaign,
-      userId: row.userId,
-      lessonIndex,
-      now: deps.now(),
-    });
+    let reason: string | null;
+    try {
+      reason = await standingIneligibleReason({
+        store,
+        def: STANDING_TARGETS[standing],
+        campaign,
+        userId: row.userId,
+        lessonIndex,
+        now: deps.now(),
+      });
+    } catch (error) {
+      if (!(error instanceof ConsultBookingsUnavailableError)) throw error;
+      // 相談の予約が読めないときは送らない。あとで送る日の範囲を過ぎれば not_due で終わる
+      console.error("[member-mail] consult bookings unavailable");
+      return backToQueue(ctx, "consult_bookings_unavailable", "paused", new Date(deps.now().getTime() + THROTTLE_RETRY_MS));
+    }
     if (reason) return finish(ctx, { status: "skipped", reason }, "skipped");
   } else if (row.audience === "all") {
     const def = TARGETS[row.kind];
