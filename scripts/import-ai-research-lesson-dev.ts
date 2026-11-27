@@ -311,7 +311,7 @@ const EXTRA_ARTICLES = [
   {
     section: 0,
     number: "01-3",
-    title: "お題：言語交換SNS「ハナソ」の新規登録を、AIリサーチでブラッシュアップしよう", // 11/27 v3
+    title: "このレッスンの進め方：AIリサーチから、新規登録のブラッシュアップまで", // 11/27 オーナー「お題ではなく進め方に」
     type: "intro",
     file: "/Users/kaitakumi/Documents/01_BONO事業/01_Docs/rebono/issues/319_assets/01-3_このレッスンの進め方_文章案.md",
   },
