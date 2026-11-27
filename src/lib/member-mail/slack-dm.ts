@@ -139,12 +139,15 @@ function postFailureStatus(result: Exclude<SlackCallResult<unknown>, { kind: "ok
   }
 }
 
-/** スイッチを読む。読めなければ（マイグレーション前など）off 扱い */
+/**
+ * スイッチを読む。読めなければ（マイグレーション前など）off 扱い。
+ * 送らない側に倒すだけで壊れないので warn にする（マイグレーション前の本番で、毎回エラーとして数えられないように）
+ */
 export async function readSlackDmMode(store: SlackDmStore): Promise<MailMode> {
   try {
     return await store.getSlackDmMode();
   } catch (error) {
-    console.error("[member-mail] slack dm mode read failed:", error instanceof Error ? error.message : "unknown");
+    console.warn("[member-mail] slack dm mode read failed:", error instanceof Error ? error.message : "unknown");
     return "off";
   }
 }

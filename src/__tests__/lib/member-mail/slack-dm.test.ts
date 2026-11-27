@@ -147,6 +147,7 @@ let errSpy: ReturnType<typeof vi.spyOn>;
 beforeEach(() => {
   logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
   errSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  vi.spyOn(console, "warn").mockImplementation(() => {});
 });
 afterEach(() => {
   // ログに本文・メールアドレスが出ていない
