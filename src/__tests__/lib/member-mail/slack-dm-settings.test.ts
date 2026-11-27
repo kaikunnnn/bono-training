@@ -8,8 +8,8 @@ import { uid } from "./helpers";
 const disabled = new Set<string>();
 let failWrite = false;
 const store = {
-  async isSlackDmEnabled(userId: string) {
-    return !disabled.has(userId);
+  async getSlackDmPreference(userId: string) {
+    return { enabled: !disabled.has(userId), hasRow: false };
   },
   async setSlackDmEnabled(userId: string, enabled: boolean) {
     if (failWrite) throw new Error("slack dm preference write failed: 42P01");
@@ -37,7 +37,7 @@ beforeEach(() => {
 describe("updateSlackDmSetting", () => {
   it("ログイン中の本人の設定だけを切り替える（既定はオン）", async () => {
     const { updateSlackDmSetting } = await import("@/app/account/notifications/slack-actions");
-    expect(await store.isSlackDmEnabled(uid(1))).toBe(true);
+    expect((await store.getSlackDmPreference(uid(1))).enabled).toBe(true);
     expect(await updateSlackDmSetting(false)).toEqual({ success: true, enabled: false });
     expect(disabled.has(uid(1))).toBe(true);
     expect(disabled.has(uid(2))).toBe(false);

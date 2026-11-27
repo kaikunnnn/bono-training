@@ -2,21 +2,26 @@ import "server-only";
 
 /**
  * 会員メールの Slack DM（#327-H）の永続化（Supabase / service_role）。
- * テーブル: supabase/migrations/20261127153000_member_mail_slack_dm.sql・slack_member_links（#263）
+ * テーブル: supabase/migrations/20261127153000_member_mail_slack_dm.sql・slack_member_links（#263）・member_mail_deliveries
  *
  * ★スイッチ（slack_dm_mode）は member_mail_settings の別のクエリで読む。
  *   メールの getSettings の select に足すと、マイグレーション前はメールの処理まで止まるため。
+ * ★PATCH では or() を使わない（PostgREST は or() を更新後の行にも再適用する。#238 で再現）。
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import type { SlackDmStore } from "./slack-dm";
-import { MAIL_MODES, type MailMode } from "./types";
+import type { SlackDmCandidate, SlackDmPatch, SlackDmStore } from "./slack-dm";
+import { MAIL_MODES, type Audience, type MailMode } from "./types";
 
 const SETTINGS = "member_mail_settings";
 const PREFERENCES = "member_mail_slack_dm_preferences";
 const DMS = "member_mail_slack_dms";
+const PREVIEWS = "member_mail_slack_dm_previews";
+const DELIVERIES = "member_mail_deliveries";
 const LINKS = "slack_member_links";
-/** in() に渡す user_id の数（URL の長さを抑える） */
+/** in() に渡す ID の数（URL の長さを抑える） */
 const ID_CHUNK = 100;
+
+type DbRow = Record<string, unknown>;
 
 function fail(what: string, error: { code?: string | null } | null): never {
   throw new Error(`${what} failed: ${error?.code ?? "unknown"}`);
@@ -28,7 +33,47 @@ function chunks<T>(items: readonly T[], size: number): T[][] {
   return out;
 }
 
+function patchToDb(patch: SlackDmPatch): DbRow {
+  const db: DbRow = { status: patch.status };
+  if (patch.reason !== undefined) db.reason = patch.reason;
+  if (patch.channelId !== undefined) db.slack_channel_id = patch.channelId;
+  if (patch.ts !== undefined) db.slack_ts = patch.ts;
+  if (patch.sentAt !== undefined) db.sent_at = patch.sentAt ? patch.sentAt.toISOString() : null;
+  return db;
+}
+
+function firstId(data: unknown): string | null {
+  if (!Array.isArray(data) || data.length === 0) return null;
+  const id = (data[0] as { id?: unknown }).id;
+  return typeof id === "string" ? id : null;
+}
+
 export function createSupabaseSlackDmStore(client: SupabaseClient): SlackDmStore {
+  /**
+   * 記録が無ければ sending で入れる（一意制約の衝突は何もしない）。
+   * 入らなかったら、deferred の行だけを sending に戻す（条件付き UPDATE ... RETURNING で1つの処理だけが取れる）
+   */
+  async function claim(table: string, conflict: string, row: DbRow, match: DbRow, at: Date): Promise<string | null> {
+    const inserted = await client
+      .from(table)
+      .upsert({ ...row, status: "sending" }, { onConflict: conflict, ignoreDuplicates: true })
+      .select("id");
+    if (inserted.error) fail(`${table} insert`, inserted.error);
+    const id = firstId(inserted.data);
+    if (id) return id;
+    let q = client.from(table).update({ status: "sending", reason: null, ...(table === DMS ? { sending_at: at.toISOString() } : {}) });
+    for (const [k, v] of Object.entries(match)) q = q.eq(k, v as string | number);
+    const retried = await q.eq("status", "deferred").select("id");
+    if (retried.error) fail(`${table} reclaim`, retried.error);
+    return firstId(retried.data);
+  }
+
+  async function finish(table: string, id: string, patch: SlackDmPatch) {
+    // sending の行だけを書き換える（終わった行を上書きしない）
+    const { error } = await client.from(table).update(patchToDb(patch)).eq("id", id).eq("status", "sending");
+    if (error) fail(`${table} update`, error);
+  }
+
   return {
     async getSlackDmMode() {
       const { data, error } = await client.from(SETTINGS).select("slack_dm_mode").eq("id", 1).maybeSingle();
@@ -60,10 +105,10 @@ export function createSupabaseSlackDmStore(client: SupabaseClient): SlackDmStore
       return out;
     },
 
-    async isSlackDmEnabled(userId) {
+    async getSlackDmPreference(userId) {
       const { data, error } = await client.from(PREFERENCES).select("enabled").eq("user_id", userId).maybeSingle();
       if (error) fail("slack dm preference read", error);
-      return data ? data.enabled !== false : true;
+      return data ? { enabled: data.enabled !== false, hasRow: true } : { enabled: true, hasRow: false };
     },
 
     async listSlackDmDisabledUserIds(userIds) {
@@ -83,39 +128,98 @@ export function createSupabaseSlackDmStore(client: SupabaseClient): SlackDmStore
       if (error) fail("slack dm preference write", error);
     },
 
-    async insertSlackDm(row, at) {
-      const { data, error } = await client
-        .from(DMS)
-        .upsert(
-          {
-            delivery_id: row.deliveryId,
-            campaign_id: row.campaignId,
-            user_id: row.userId,
-            audience: row.audience,
-            content_version: row.contentVersion,
-            team_id: row.teamId,
-            slack_user_id: row.slackUserId,
-            status: "sending",
-            sending_at: at.toISOString(),
-          },
-          { onConflict: "delivery_id", ignoreDuplicates: true },
-        )
-        .select("id");
-      if (error) fail("slack dm insert", error);
-      const id = data && data.length > 0 ? (data[0] as { id?: unknown }).id : null;
-      return typeof id === "string" ? id : null;
+    async hasReceivedSlackDm(userId) {
+      for (const table of [DMS, PREVIEWS]) {
+        const { data, error } = await client.from(table).select("id").eq("user_id", userId).eq("status", "sent").limit(1);
+        if (error) fail(`${table} received`, error);
+        if (data && data.length > 0) return true;
+      }
+      return false;
     },
 
-    async finishSlackDm(id, patch) {
-      const db: Record<string, unknown> = { status: patch.status };
-      if (patch.reason !== undefined) db.reason = patch.reason;
-      if (patch.channelId !== undefined) db.slack_channel_id = patch.channelId;
-      if (patch.ts !== undefined) db.slack_ts = patch.ts;
-      if (patch.sentAt !== undefined) db.sent_at = patch.sentAt ? patch.sentAt.toISOString() : null;
-      // sending の行だけを書き換える（終わった行を上書きしない）
-      const { error } = await client.from(DMS).update(db).eq("id", id).eq("status", "sending");
-      if (error) fail("slack dm update", error);
+    async listSlackDmCandidates(campaignIds, sentSince, limit) {
+      if (campaignIds.length === 0) return [];
+      // 送れたメールを古い順に多めに読み、DM の記録があるもの（deferred 以外）を外す
+      const { data, error } = await client
+        .from(DELIVERIES)
+        .select("id, campaign_id, user_id, audience, content_version")
+        .in("campaign_id", campaignIds as string[])
+        .eq("status", "sent")
+        .gte("sent_at", sentSince.toISOString())
+        .order("sent_at", { ascending: true })
+        .limit(Math.max(limit * 4, 200));
+      if (error) fail("slack dm candidates", error);
+      const rows = (data ?? []) as DbRow[];
+      const done = new Set<string>();
+      for (const ids of chunks(rows.map((r) => r.id as string), ID_CHUNK)) {
+        const dms = await client.from(DMS).select("delivery_id, status").in("delivery_id", ids);
+        if (dms.error) fail("slack dm candidates dms", dms.error);
+        for (const r of dms.data ?? []) if (r.status !== "deferred") done.add(r.delivery_id as string);
+      }
+      const out: SlackDmCandidate[] = [];
+      for (const r of rows) {
+        if (done.has(r.id as string)) continue;
+        out.push({
+          deliveryId: r.id as string,
+          campaignId: r.campaign_id as string,
+          userId: r.user_id as string,
+          audience: r.audience as Audience,
+          contentVersion: Number(r.content_version),
+        });
+        if (out.length >= limit) break;
+      }
+      return out;
     },
+
+    claimSlackDm(row, at) {
+      return claim(
+        DMS,
+        "delivery_id",
+        {
+          delivery_id: row.deliveryId,
+          campaign_id: row.campaignId,
+          user_id: row.userId,
+          audience: row.audience,
+          content_version: row.contentVersion,
+          team_id: row.teamId,
+          slack_user_id: row.slackUserId,
+          sending_at: at.toISOString(),
+        },
+        { delivery_id: row.deliveryId },
+        at,
+      );
+    },
+
+    finishSlackDm: (id, patch) => finish(DMS, id, patch),
+
+    async markStaleSlackDms(olderThan) {
+      const { data, error } = await client
+        .from(DMS)
+        .update({ status: "needs_review", reason: "stale_sending" })
+        .eq("status", "sending")
+        .lt("updated_at", olderThan.toISOString())
+        .select("id");
+      if (error) fail("slack dm stale sweep", error);
+      return data?.length ?? 0;
+    },
+
+    claimSlackPreview(row, at) {
+      return claim(
+        PREVIEWS,
+        "campaign_id,user_id,content_version",
+        {
+          campaign_id: row.campaignId,
+          user_id: row.userId,
+          content_version: row.contentVersion,
+          team_id: row.teamId,
+          slack_user_id: row.slackUserId,
+        },
+        { campaign_id: row.campaignId, user_id: row.userId, content_version: row.contentVersion },
+        at,
+      );
+    },
+
+    finishSlackPreview: (id, patch) => finish(PREVIEWS, id, patch),
   };
 }
 

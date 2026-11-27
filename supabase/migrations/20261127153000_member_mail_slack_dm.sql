@@ -1,5 +1,5 @@
 -- =============================================================================
--- 会員メール: 常設の文面（はじめの案内など）を Slack の DM でも送る（#327-H）
+-- 会員メール: 常設の文面（はじめの案内）を Slack の DM でも送る（#327-H）
 -- 作成日: 2026-11-27
 -- 関連: rebono/issues/327-H_SlackのDMでも送る.md / 327-C_通知の設定画面_メール・SlackもON・OFF.md
 --       土台: 20261123000000_create_member_mail.sql / 20261125090715_member_mail_standing_campaigns.sql
@@ -8,17 +8,21 @@
 -- 変えること（足すだけ。既存の行・既存の動き（メール）は変えない）:
 --   1. member_mail_settings.slack_dm_mode
 --        Slack の DM のスイッチ。メールと同じ off / count / owner / all。既定は off（入れても何も変わらない）。
---        count … 運用 Slack の人数のお知らせに Slack の人数（slack_candidates / slack_will_send）を足すだけ（DM は送らない）
---        owner … owner_user_ids の人にだけ DM
---        all   … 対象の人全員に DM
---        DM はメールを送れた人にだけ送る（メールのスイッチ・承認・配信停止・対象の条件をすべて通った人）。
+--        count … 運用 Slack の人数のお知らせに Slack の人数（slack_candidates / slack_will_send）を足すだけ
+--        owner … owner_user_ids の人にだけ DM / all … 対象の人全員に DM
+--        DM はメールを送れた（status=sent）人にだけ、毎朝の実行の最後にまとめて送る。
+--        どの常設の文面を DM でも送るかはアプリの定数（SLACK_DM_STANDING_KEYS。今は onboarding_day2 だけ）。
 --   2. member_mail_slack_dm_preferences
 --        会員本人の「Slack の DM で受け取る」のオン・オフ（通知設定の画面から）。行が無ければオン。
 --   3. member_mail_slack_dms
---        DM 1通1行の記録。delivery_id（メールの送信記録）に一意。
---        メールの記録は「本番は同じ人に同じ文面1回」「オーナー確認は版ごとに1回」なので、DM もそれに従う。
---        送る前に status=sending の行を入れ、入らなければ（もうある）送らない＝ cron の再実行でも二重に送らない。
---        送れたか分からない（タイムアウト等）ときは needs_review にして、自動で送り直さない。
+--        会員への DM 1通1行の記録。delivery_id（メールの送信記録）に一意＝同じメールに DM は1通まで。
+--        status: sending（Slack を呼ぶ直前に入れる）→ sent / failed（送られていないことが確実）/
+--                needs_review（送れたか分からない。自動で送り直さない）/
+--                deferred（速さの上限などで送っていない。次の実行で送り直してよい）
+--        10分より古い sending は needs_review にする（メールの markStaleSending と同じ）。
+--   4. member_mail_slack_dm_previews
+--        オーナーだけに送る確認用の DM の記録（会員の行とは別。スイッチに関係なく、手動の実行からだけ送る）。
+--        同じ文面の版・同じ人には1回だけ。
 --
 -- 保存しない: メッセージ本文・メールアドレス・名前。持つのは ID とエラーコードだけ。
 -- RLS: 全テーブル有効・ポリシーなし。anon / authenticated から権限も剥奪し、service_role からだけ読み書きする。
@@ -47,8 +51,7 @@ CREATE TRIGGER trg_member_mail_slack_dm_preferences_touch
   BEFORE UPDATE ON public.member_mail_slack_dm_preferences
   FOR EACH ROW EXECUTE FUNCTION public.touch_member_mail_updated_at();
 
--- 3. DM 1通1行の記録
--- status の流れ: sending（送る直前に入れる）→ sent / failed（送られていないことが確実）/ needs_review（分からない）
+-- 3. 会員への DM 1通1行の記録
 CREATE TABLE IF NOT EXISTS public.member_mail_slack_dms (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   delivery_id uuid NOT NULL UNIQUE REFERENCES public.member_mail_deliveries(id) ON DELETE CASCADE,
@@ -58,8 +61,8 @@ CREATE TABLE IF NOT EXISTS public.member_mail_slack_dms (
   content_version integer NOT NULL,
   team_id text NOT NULL,
   slack_user_id text NOT NULL,
-  status text NOT NULL DEFAULT 'sending' CHECK (status IN ('sending', 'sent', 'failed', 'needs_review')),
-  -- Slack のエラーコード（例: channel_not_found / timeout）。本文は入れない
+  status text NOT NULL DEFAULT 'sending' CHECK (status IN ('sending', 'sent', 'failed', 'needs_review', 'deferred')),
+  -- Slack のエラーコード（例: channel_not_found / timeout / ratelimited / stale_sending）。本文は入れない
   reason text,
   slack_channel_id text,
   slack_ts text,
@@ -69,8 +72,16 @@ CREATE TABLE IF NOT EXISTS public.member_mail_slack_dms (
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX IF NOT EXISTS idx_member_mail_slack_dms_campaign
-  ON public.member_mail_slack_dms (campaign_id, status);
+CREATE INDEX IF NOT EXISTS idx_member_mail_slack_dms_user_sent
+  ON public.member_mail_slack_dms (user_id)
+  WHERE status = 'sent';
+CREATE INDEX IF NOT EXISTS idx_member_mail_slack_dms_stale
+  ON public.member_mail_slack_dms (updated_at)
+  WHERE status = 'sending';
+-- DM を送る候補（送れたメール）を拾うため
+CREATE INDEX IF NOT EXISTS idx_member_mail_deliveries_sent_at
+  ON public.member_mail_deliveries (campaign_id, sent_at)
+  WHERE status = 'sent';
 
 COMMENT ON TABLE public.member_mail_slack_dms IS
   '会員メールの Slack DM（#327-H）の記録。メールの送信記録1行に DM は1通まで。本文は保存しない';
@@ -80,8 +91,36 @@ CREATE TRIGGER trg_member_mail_slack_dms_touch
   BEFORE UPDATE ON public.member_mail_slack_dms
   FOR EACH ROW EXECUTE FUNCTION public.touch_member_mail_updated_at();
 
+-- 4. オーナーだけに送る確認用の DM の記録（会員の行とは別）
+CREATE TABLE IF NOT EXISTS public.member_mail_slack_dm_previews (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  campaign_id uuid NOT NULL REFERENCES public.member_mail_campaigns(id) ON DELETE RESTRICT,
+  user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  content_version integer NOT NULL,
+  team_id text NOT NULL,
+  slack_user_id text NOT NULL,
+  status text NOT NULL DEFAULT 'sending' CHECK (status IN ('sending', 'sent', 'failed', 'needs_review', 'deferred')),
+  reason text,
+  slack_channel_id text,
+  slack_ts text,
+  sent_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (campaign_id, user_id, content_version)
+);
+
+COMMENT ON TABLE public.member_mail_slack_dm_previews IS
+  '会員メールの Slack DM（#327-H）をオーナーだけに送る確認用の記録。会員の行（member_mail_slack_dms）とは別';
+
+DROP TRIGGER IF EXISTS trg_member_mail_slack_dm_previews_touch ON public.member_mail_slack_dm_previews;
+CREATE TRIGGER trg_member_mail_slack_dm_previews_touch
+  BEFORE UPDATE ON public.member_mail_slack_dm_previews
+  FOR EACH ROW EXECUTE FUNCTION public.touch_member_mail_updated_at();
+
 -- RLS・権限（service_role のみ）
 ALTER TABLE public.member_mail_slack_dm_preferences ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.member_mail_slack_dms ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.member_mail_slack_dm_previews ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON public.member_mail_slack_dm_preferences FROM anon, authenticated;
 REVOKE ALL ON public.member_mail_slack_dms FROM anon, authenticated;
+REVOKE ALL ON public.member_mail_slack_dm_previews FROM anon, authenticated;

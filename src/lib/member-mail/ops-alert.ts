@@ -33,6 +33,8 @@ export const notifyMailOps: NotifyMailOps = async (alert) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ text }),
+      // 応答が無くても cron の実行時間（60秒）を食いつぶさないように
+      signal: AbortSignal.timeout(5_000),
     });
   } catch (error) {
     console.error("[member-mail] failed to send ops alert:", error instanceof Error ? error.message : "unknown");

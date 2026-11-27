@@ -37,6 +37,11 @@ export function getSlackDmStore(): SlackDmStore | null {
   return createSlackDmStoreFromEnv();
 }
 
+/** BONO の Slack ワークスペースID（SLACK_WELCOME_TEAM_ID）。トークン類が揃っていなければ null */
+export function getSlackTeamId(): string | null {
+  return loadSlackConfig()?.teamId ?? null;
+}
+
 /** 常設の文面の Slack DM の依存（#327-H）。記録が無ければ null。トークンが無ければ slack が null */
 export function createSlackDmDeps(): SlackDmDeps | null {
   const store = getSlackDmStore();

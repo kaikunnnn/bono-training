@@ -23,7 +23,7 @@ export async function updateSlackDmSetting(enabled: boolean): Promise<SlackDmSet
 
   try {
     await store.setSlackDmEnabled(user.id, enabled, new Date());
-    const now = await store.isSlackDmEnabled(user.id);
+    const now = (await store.getSlackDmPreference(user.id)).enabled;
     console.log("[member-mail] slack dm settings updated", { enabled: now, source: "account" });
     return { success: true, enabled: now };
   } catch (error) {

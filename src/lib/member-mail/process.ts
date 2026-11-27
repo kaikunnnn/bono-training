@@ -20,7 +20,7 @@ import { getCampaignBlockReason, renderMail, unsubscribeHeaders } from "./conten
 import { isWithinSendWindow, jstDayStart, jstWeekStart } from "./dates";
 import type { LessonIndex } from "./learned";
 import type { NotifyMailOps } from "./ops-alert";
-import { sendStandingSlackDm, slackCountLines, type SlackDmDeps } from "./slack-dm";
+import { slackCountLines, type SlackDmDeps } from "./slack-dm";
 import {
   isStandingDue,
   isTestAccountEmail,
@@ -71,7 +71,7 @@ export interface MailDeps {
    * 読めなければ例外を投げる（常設の文面は書き出さず・送らない）
    */
   loadLessonIndex: () => Promise<LessonIndex>;
-  /** 常設の文面を Slack の DM でも送る（#327-H）。無ければ DM は送らない */
+  /** 常設の文面の Slack DM（#327-H）。送るのは route の最後の runSlackDmBatch。ここでは人数の行だけに使う */
   slackDm?: SlackDmDeps | null;
 }
 
@@ -287,6 +287,7 @@ export async function prepareStandingCampaign(deps: MailDeps, campaign: Campaign
   // Slack の DM のスイッチが off でなければ、Slack の人数も足す（#327-H）
   const slackLines = await slackCountLines(
     deps,
+    campaign.standingKey,
     selection.included.map((c) => c.userId),
     settings.ownerUserIds,
   );
@@ -505,13 +506,9 @@ async function runDelivery(ctx: Ctx): Promise<DeliveryOutcome> {
   });
 
   switch (result.kind) {
-    case "ok": {
+    case "ok":
       // ここで記録に失敗しても sending のまま残り、次の回で needs_review になる（送り直さない）
-      const outcome = await finish(ctx, { status: "sent", resendEmailId: result.id, sentAt: deps.now() }, "sent");
-      // 常設の文面は、メールを送れた人に Slack の DM でも送る（#327-H）。失敗してもメールの結果は変えない
-      if (outcome === "sent") await sendStandingSlackDm(deps, row, campaign);
-      return outcome;
-    }
+      return finish(ctx, { status: "sent", resendEmailId: result.id, sentAt: deps.now() }, "sent");
     case "throttled":
       // 送られていないことが確実。1日の上限を数え直せるよう sending_at を消して待ち行列へ戻す
       return finish(

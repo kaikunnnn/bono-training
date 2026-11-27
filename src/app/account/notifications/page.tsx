@@ -14,7 +14,7 @@ import { NotificationPreferencesForm } from "@/components/account/NotificationPr
 import { PushNotificationToggle } from "@/components/account/PushNotificationToggle";
 import { MemberMailToggle } from "@/components/account/MemberMailToggle";
 import { SlackDmToggle } from "@/components/account/SlackDmToggle";
-import { getMailStore, getSlackDmStore } from "@/lib/member-mail/runtime";
+import { getMailStore, getSlackDmStore, getSlackTeamId } from "@/lib/member-mail/runtime";
 import { isMemberMailEnabled } from "@/lib/member-mail/self-settings";
 import { loadSlackDmSetting } from "@/lib/member-mail/slack-dm";
 
@@ -79,7 +79,7 @@ export default async function NotificationSettingsPage({
         <SettingsCard title="Slack">
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              オフにすると、BONOからのお知らせがSlackのDMで届かなくなります。メールは上の設定のまま届きます。
+              メールでお送りしているBONOからのお知らせを、SlackのDMでも受け取るかどうかの設定です。オフにすると、このお知らせのDMだけが届かなくなります（メールは上の設定のまま届きます）。Slackへの参加やアカウントのつなぎ方についてのご連絡は、この設定にかかわらず届きます。
             </p>
             <SlackDmToggle initialEnabled={slackDmEnabled} />
           </div>
@@ -103,11 +103,10 @@ async function readMemberMailEnabled(userId: string): Promise<boolean | null> {
 
 /**
  * Slack の DM で受け取るか（#327-H）。カードを出さないときは null
- * （DM のスイッチが off・count、owner でオーナー以外、Slack とつながっていない、読めない）
+ * （BONO のワークスペースでつながっていない、まだ DM が届きうる人でない、読めない。条件は loadSlackDmSetting）
  */
 async function readSlackDmEnabled(userId: string): Promise<boolean | null> {
-  const mailStore = getMailStore();
   const store = getSlackDmStore();
-  if (!mailStore || !store) return null;
-  return loadSlackDmSetting(mailStore, store, userId);
+  if (!store) return null;
+  return loadSlackDmSetting(store, getSlackTeamId(), userId);
 }
