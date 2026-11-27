@@ -50,7 +50,7 @@ export const ROWS: Row[] = [
  * 難しければ大事な所を話している場面）。出典の動画と秒数は rebono/issues/319 の進捗ログ。01-1は未編集のため無し
  */
 export const THUMBS: Record<string, string> = Object.fromEntries(
-  ["01-2", "02-1", "02-2", "02-3", "02-4", "03-1", "03-2", "03-3", "03-4"].map((n) => [
+  ["01-1", "01-2", "02-1", "02-2", "02-3", "02-4", "03-1", "03-2", "03-3", "03-4"].map((n) => [
     n,
     `/images/lesson-ai-research/thumbs/${n}.jpg`,
   ]),
