@@ -27,7 +27,12 @@ const PROJECT_ID = "cqszh4up";
 const PRODUCTION = process.argv.includes("--production");
 const DATASET = PRODUCTION ? "production" : "development";
 const ID_PREFIX = "air-";
-const SLUG_PREFIX = "air-";
+// 記事URL /contents/ai-research-01-1（11/27 オーナー決定。既存AIレッスンの claudecode-ui-0-1 と同じく中身がわかる形）
+// 公開後は番号を詰め直しても _id と slug を変えない（進捗・ブックマーク・外部リンクが別記事を指すため）
+const SLUG_PREFIX = "ai-research-";
+// 中身が未完成の記事は publishedAt を付けない（新着・更新一覧に出さない。11/27 オーナー決定）
+const UNLISTED = new Set(["01-2", "01-3", "04-1", "04-2"]);
+const OVERWRITE = process.argv.includes("--overwrite");
 const SOURCE_DIR = "/Users/kaitakumi/Documents/01_BONO事業/01_Docs/rebono/AIリサーチではじめるUIデザイン";
 const PUBLIC_DIR = resolve(__dirname, "..", "public");
 const PLACEHOLDER_TEXT = "（準備中：下書きはまだありません）";
@@ -395,7 +400,7 @@ function buildDocs() {
           ...(excerpt ? { excerpt } : {}),
           ...(videoUrl ? { videoUrl } : {}),
           author: "bono",
-          publishedAt: PUBLISHED_AT,
+          ...(UNLISTED.has(row.number) ? {} : { publishedAt: PUBLISHED_AT }),
           content,
           _source: sources.join(" + ") || "(placeholder)",
           ...(thumbPath ? { _thumb: join(PUBLIC_DIR, thumbPath) } : {}),
@@ -423,7 +428,7 @@ function buildDocs() {
         slug: { _type: "slug", current: `${SLUG_PREFIX}${extra.number}` },
         ...(excerpt ? { excerpt } : {}),
         author: "bono",
-        publishedAt: PUBLISHED_AT,
+        ...(UNLISTED.has(extra.number) ? {} : { publishedAt: PUBLISHED_AT }),
         content,
         _source: extra.file.split("/").slice(-2).join("/"),
       });
@@ -485,7 +490,7 @@ async function main() {
     const slug = (doc.slug as { current: string }).current;
     const extra =
       doc._type === "article"
-        ? ` premium=${doc.isPremium} type=${doc.articleType} video=${doc.videoUrl ? "あり" : "なし"} blocks=${(doc.content as unknown[]).length} src=${doc._source}`
+        ? ` premium=${doc.isPremium} listed=${doc.publishedAt ? "新着に出す" : "出さない"} type=${doc.articleType} video=${doc.videoUrl ? "あり" : "なし"} blocks=${(doc.content as unknown[]).length} src=${doc._source}`
         : doc._type === "quest"
           ? ` questNumber=${doc.questNumber} articles=${(doc.articles as unknown[]).length} goal=${doc.goal ?? ""}`
           : ` isHidden=${doc.isHidden} quests=${(doc.quests as unknown[]).length}`;
@@ -505,6 +510,10 @@ async function main() {
   const sameId = existing.filter((d) => ids.includes(d._id));
   console.log(`衝突チェック: 同じ _id の既存 ${sameId.length} 件 / 別 _id で slug が同じ・draft ${foreign.length} 件`);
   for (const d of existing) console.log(`  既存: ${d._type} ${d._id} slug=${d.slug}`);
+  // production では、同じ _id が既にあれば止める（Studio で直した内容を黙って巻き戻さないため。上書きは --overwrite を明示）
+  if (PRODUCTION && sameId.length > 0 && !OVERWRITE) {
+    throw new Error(`production に同じ _id が ${sameId.length} 件あります。上書きするなら --overwrite を付けてください。中止します`);
+  }
   if (foreign.length > 0) {
     throw new Error(`${ID_PREFIX} 以外のドキュメントと slug/draft が衝突しています。書き込みを中止します`);
   }
