@@ -9,7 +9,7 @@
 import type { Metadata } from "next";
 import { OG_DEFAULTS } from "@/lib/seo-metadata";
 import { IntentPrefetchLink } from "@/components/common/IntentPrefetchLink";
-import { ArrowRight, ClipboardCheck, HelpCircle, MessageSquareText, Users } from "lucide-react";
+import { ArrowRight, ClipboardCheck, HelpCircle, MessageSquareText, Route, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -38,6 +38,13 @@ type Guide = {
 };
 
 const GUIDES: Guide[] = [
+  {
+    href: "/how-to/career-roadmap",
+    title: "UIUXデザイナーを目指すなら、何から始めればいい？",
+    description:
+      "UIUXデザイナーへの転職を目指す人が、ロードマップと記事をどの順番で読めばいいかをまとめました。",
+    icon: Route,
+  },
   {
     href: "/how-to/community",
     title: "コミュニティの歩き方",
