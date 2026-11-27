@@ -2,7 +2,7 @@ import "server-only";
 
 /**
  * 会員メールの Slack DM（#327-H）の永続化（Supabase / service_role）。
- * テーブル: supabase/migrations/20261127153000_member_mail_slack_dm.sql・slack_member_links（#263）・member_mail_deliveries
+ * テーブル: supabase/migrations/20261127084322_member_mail_slack_dm.sql・slack_member_links（#263）・member_mail_deliveries
  *
  * ★スイッチ（slack_dm_mode）は member_mail_settings の別のクエリで読む。
  *   メールの getSettings の select に足すと、マイグレーション前はメールの処理まで止まるため。
