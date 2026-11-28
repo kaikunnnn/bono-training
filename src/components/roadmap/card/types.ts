@@ -27,6 +27,8 @@ export interface RoadmapCardV2Props {
   thumbnailStyle?: 'default' | 'wave';
   /** リンク先のベースパス */
   basePath?: string;
+  /** リンクの末尾に付けるクエリ（例: "?from=guide-rdm-promo-end"）。rebono 279-E */
+  linkQuery?: string;
   /** ラベルテキスト（shortTitleがない場合のフォールバック） */
   label?: string;
   /** 追加のクラス名 */

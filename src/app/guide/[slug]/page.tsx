@@ -31,6 +31,7 @@ import {
   resolvePromo,
 } from "@/lib/guide-roadmap-map";
 import { getPromoRoadmaps } from "@/lib/guide-promo-data";
+import { addGuideLinkFrom, guidePromoFrom } from "@/lib/guide-link-from";
 
 // ISR: 1時間キャッシュ
 export const revalidate = 3600;
@@ -159,7 +160,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
           guide.content && guide.content.length > 0 && (
             <div className="px-4 pb-16">
               <GuideContent
-                content={guide.content}
+                content={addGuideLinkFrom(guide.content, slug)}
                 insertBefore={
                   promoRoadmap && inlineBlock && inlineIndex !== null
                     ? {
@@ -169,6 +170,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
                             block={inlineBlock}
                             roadmap={promoRoadmap}
                             tracking={promoTracking}
+                            linkFrom={guidePromoFrom(slug, "inline")}
                             className="my-12"
                           />
                         ),
@@ -185,6 +187,7 @@ export default async function GuideDetailPage({ params }: PageProps) {
                   heading={guidePromoHeading(promoRoadmap)}
                   roadmap={promoRoadmap}
                   tracking={promoTracking}
+                  linkFrom={guidePromoFrom(slug, "end")}
                   className="mx-auto mt-16 w-full max-w-[720px]"
                 />
               )}

@@ -15,7 +15,7 @@ describe("getGuideSeoOverride", () => {
     const seo = getGuideSeoOverride("rdm-howtostart-roadmap");
     expect(seo).toEqual({
       title:
-        "転職ロードマップの中身を解説｜フェーズごとに目指すレベルと習得すること | BONO",
+        "未経験からUI/UXデザイナーへ転職するロードマップ｜AI時代に1年で身につけるスキル | BONO",
     });
     expect(seo?.description).toBeUndefined();
   });
